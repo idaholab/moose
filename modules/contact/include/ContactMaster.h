@@ -17,7 +17,8 @@ enum ContactModel
   CM_FRICTIONLESS,
   CM_GLUED,
   CM_COULOMB,
-  CM_COULOMB_MP // Coulomb contact enforced with a "model problem" strategy where slip is computed after the nonlinear solve is converged
+  CM_COULOMB_MP // Coulomb contact enforced with a "model problem" strategy where slip is computed
+                // after the nonlinear solve is converged
 };
 
 enum ContactFormulation
@@ -46,7 +47,6 @@ public:
   virtual void updateContactSet(bool beginning_of_step = false);
 
 protected:
-
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
 
@@ -82,7 +82,7 @@ protected:
 ContactModel contactModel(const std::string & the_name);
 ContactFormulation contactFormulation(const std::string & the_name);
 
-template<>
+template <>
 InputParameters validParams<ContactMaster>();
 
-#endif //CONTACTMASTER_H
+#endif // CONTACTMASTER_H

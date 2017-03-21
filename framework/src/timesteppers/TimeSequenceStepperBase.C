@@ -16,17 +16,18 @@
 #include "FEProblem.h"
 #include "Transient.h"
 
-template<>
-InputParameters validParams<TimeSequenceStepperBase>()
+template <>
+InputParameters
+validParams<TimeSequenceStepperBase>()
 {
   InputParameters params = validParams<TimeStepper>();
   return params;
 }
 
-TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & parameters) :
-    TimeStepper(parameters),
-    _current_step(declareRestartableData("current_step", (unsigned int) 0)),
-    _time_sequence(declareRestartableData<std::vector<Real> >("time_sequence"))
+TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & parameters)
+  : TimeStepper(parameters),
+    _current_step(declareRestartableData("current_step", (unsigned int)0)),
+    _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence"))
 {
 }
 
@@ -63,10 +64,12 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
     }
     else
     {
-      // in case of restart it should be allowed to modify _time_sequence if it follows the following rule:
+      // in case of restart it should be allowed to modify _time_sequence if it follows the
+      // following rule:
       // all times up to _current_step are identical
       // 1. start time cannot be modified
-      // 2. the entries in _time_sequence and times must be equal up to entry with index _current_step
+      // 2. the entries in _time_sequence and times must be equal up to entry with index
+      // _current_step
 
       if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_sequence[0]))
         mooseError("Timesequencestepper does not allow the start time to be modified.");
@@ -88,8 +91,10 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       {
         if (!MooseUtils::absoluteFuzzyEqual(times[j], saved_time_sequence[j]))
           mooseError("The timesequence provided in the restart file must be identical to "
-                     "the one in the old file up to entry number ", _current_step + 1, " = ",
-                      saved_time_sequence[_current_step]);
+                     "the one in the old file up to entry number ",
+                     _current_step + 1,
+                     " = ",
+                     saved_time_sequence[_current_step]);
 
         _time_sequence.push_back(saved_time_sequence[j]);
       }
@@ -141,6 +146,7 @@ TimeSequenceStepperBase::computeFailedDT()
   Real dt = 0.5 * computeDT();
   if (dt < _dt_min)
     dt = _dt_min;
-  _time_sequence.insert(_time_sequence.begin() + _current_step + 1, _time_sequence[_current_step] + dt);
+  _time_sequence.insert(_time_sequence.begin() + _current_step + 1,
+                        _time_sequence[_current_step] + dt);
   return computeDT();
 }

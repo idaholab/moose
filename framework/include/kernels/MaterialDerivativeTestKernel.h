@@ -21,13 +21,14 @@
 
 class MaterialDerivativeTestKernel;
 
-template<>
+template <>
 InputParameters validParams<MaterialDerivativeTestKernel>();
 
 /**
  * This kernel is used for testing derivatives of a material property.
  */
-class MaterialDerivativeTestKernel : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
+class MaterialDerivativeTestKernel
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   MaterialDerivativeTestKernel(const InputParameters & parameters);

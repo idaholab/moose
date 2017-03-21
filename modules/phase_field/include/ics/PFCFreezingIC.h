@@ -12,14 +12,15 @@
 // Forward Declarations
 class PFCFreezingIC;
 
-template<>
+template <>
 InputParameters validParams<PFCFreezingIC>();
 
 /**
  * PFCFreezingIC creates an intial density for a PFC model that has one area of a set
  * crystal structure (initialized using sinusoids) and all the rest with a random structure.
  * The random values will fall between 0 and 1.
- * \todo For the FCC this returns 0. This cannot be right, yet it satisfies the (probably bogus) test.
+ * \todo For the FCC this returns 0. This cannot be right, yet it satisfies the (probably bogus)
+ * test.
  */
 class PFCFreezingIC : public InitialCondition
 {
@@ -50,4 +51,4 @@ private:
   unsigned int _icdim;
 };
 
-#endif //PFCFREEZINGIC_H
+#endif // PFCFREEZINGIC_H

@@ -6,18 +6,22 @@
 /****************************************************************/
 #include "CoupledSusceptibilityTimeDerivative.h"
 
-template<>
-InputParameters validParams<CoupledSusceptibilityTimeDerivative>()
+template <>
+InputParameters
+validParams<CoupledSusceptibilityTimeDerivative>()
 {
   InputParameters params = validParams<CoupledTimeDerivative>();
-  params.addClassDescription("A modified coupled time derivative Kernel that multiply the time derivative of a coupled variable by a function of the variables");
-  params.addRequiredParam<MaterialPropertyName>("f_name", "Base name of the function F defined in a DerivativeParsedMaterial");
+  params.addClassDescription("A modified coupled time derivative Kernel that multiply the time "
+                             "derivative of a coupled variable by a function of the variables");
+  params.addRequiredParam<MaterialPropertyName>(
+      "f_name", "Base name of the function F defined in a DerivativeParsedMaterial");
   params.addCoupledVar("args", "Vector of arguments of the susceptibility");
   return params;
 }
 
-CoupledSusceptibilityTimeDerivative::CoupledSusceptibilityTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative> >(parameters),
+CoupledSusceptibilityTimeDerivative::CoupledSusceptibilityTimeDerivative(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>(parameters),
     _F(getMaterialProperty<Real>("f_name")),
     _dFdu(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _dFdarg(_coupled_moose_vars.size())
@@ -52,7 +56,8 @@ CoupledSusceptibilityTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   if (jvar == _v_var)
-    return CoupledTimeDerivative::computeQpOffDiagJacobian(jvar) * _F[_qp] + CoupledTimeDerivative::computeQpResidual() * _phi[_j][_qp] * (*_dFdarg[cvar])[_qp];
+    return CoupledTimeDerivative::computeQpOffDiagJacobian(jvar) * _F[_qp] +
+           CoupledTimeDerivative::computeQpResidual() * _phi[_j][_qp] * (*_dFdarg[cvar])[_qp];
 
   return CoupledTimeDerivative::computeQpResidual() * _phi[_j][_qp] * (*_dFdarg[cvar])[_qp];
 }

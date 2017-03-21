@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSMassWeakStagnationBC;
 
-template<>
+template <>
 InputParameters validParams<NSMassWeakStagnationBC>();
 
 /**

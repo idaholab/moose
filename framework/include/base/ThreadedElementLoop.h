@@ -34,7 +34,7 @@ static Threads::spin_mutex threaded_element_mutex;
 /**
  * Base class for assembly-like calculations.
  */
-template<typename RangeType>
+template <typename RangeType>
 class ThreadedElementLoop : public ThreadedElementLoopBase<RangeType>
 {
 public:
@@ -51,27 +51,25 @@ protected:
   FEProblemBase & _fe_problem;
 };
 
-
-template<typename RangeType>
-ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblemBase & fe_problem) :
-    ThreadedElementLoopBase<RangeType>(fe_problem.mesh()),
-    _fe_problem(fe_problem)
+template <typename RangeType>
+ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblemBase & fe_problem)
+  : ThreadedElementLoopBase<RangeType>(fe_problem.mesh()), _fe_problem(fe_problem)
 {
 }
 
-template<typename RangeType>
-ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x, Threads::split /*split*/) :
-    ThreadedElementLoopBase<RangeType>(x),
-    _fe_problem(x._fe_problem)
+template <typename RangeType>
+ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x,
+                                                    Threads::split /*split*/)
+  : ThreadedElementLoopBase<RangeType>(x), _fe_problem(x._fe_problem)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 ThreadedElementLoop<RangeType>::~ThreadedElementLoop()
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoop<RangeType>::caughtMooseException(MooseException & e)
 {
@@ -81,5 +79,4 @@ ThreadedElementLoop<RangeType>::caughtMooseException(MooseException & e)
   _fe_problem.setException(what);
 }
 
-
-#endif //THREADEDELEMENTLOOP_H
+#endif // THREADEDELEMENTLOOP_H

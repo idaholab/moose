@@ -12,7 +12,7 @@
 
 class PorousFlowIdealGas;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowIdealGas>();
 
 /**

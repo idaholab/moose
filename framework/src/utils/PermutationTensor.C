@@ -17,9 +17,9 @@
 int
 PermutationTensor::eps(unsigned int i, unsigned int j)
 {
-  if (i==0 && j==1)
+  if (i == 0 && j == 1)
     return 1;
-  else if (i==1 && j==0)
+  else if (i == 1 && j == 0)
     return -1;
   return 0;
 }
@@ -27,25 +27,25 @@ PermutationTensor::eps(unsigned int i, unsigned int j)
 int
 PermutationTensor::eps(unsigned int i, unsigned int j, unsigned int k)
 {
-  if (i==0 && j>0 && k>0)
-    return eps(j-1, k-1);
-  else if (j==0 && i>0 && k>0)
-    return -eps(i-1, k-1);
-  else if (k==0 && i>0 && j>0)
-    return eps(i-1, j-1);
+  if (i == 0 && j > 0 && k > 0)
+    return eps(j - 1, k - 1);
+  else if (j == 0 && i > 0 && k > 0)
+    return -eps(i - 1, k - 1);
+  else if (k == 0 && i > 0 && j > 0)
+    return eps(i - 1, j - 1);
   return 0;
 }
 
 int
 PermutationTensor::eps(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
 {
-  if (i==0 && j>0 && k>0 && l>0)
-    return eps(j-1, k-1, l-1);
-  else if (j==0 && i>0 && k>0 && l>0)
-    return -eps(i-1, k-1, l-1);
-  else if (k==0 && i>0 && j>0 && l>0)
-    return eps(i-1, j-1, l-1);
-  else if (l==0 && i>0 && j>0 && k>0)
-    return -eps(i-1, j-1, k-1);
+  if (i == 0 && j > 0 && k > 0 && l > 0)
+    return eps(j - 1, k - 1, l - 1);
+  else if (j == 0 && i > 0 && k > 0 && l > 0)
+    return -eps(i - 1, k - 1, l - 1);
+  else if (k == 0 && i > 0 && j > 0 && l > 0)
+    return eps(i - 1, j - 1, l - 1);
+  else if (l == 0 && i > 0 && j > 0 && k > 0)
+    return -eps(i - 1, j - 1, k - 1);
   return 0;
 }

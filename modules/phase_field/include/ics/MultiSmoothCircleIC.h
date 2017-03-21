@@ -12,7 +12,7 @@
 // Forward Declarations
 class MultiSmoothCircleIC;
 
-template<>
+template <>
 InputParameters validParams<MultiSmoothCircleIC>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   Point _range;
 };
 
-#endif //MULTISMOOTHCIRCLEIC_H
+#endif // MULTISMOOTHCIRCLEIC_H

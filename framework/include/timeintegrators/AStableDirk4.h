@@ -21,7 +21,7 @@
 class AStableDirk4;
 class LStableDirk4;
 
-template<>
+template <>
 InputParameters validParams<AStableDirk4>();
 
 /**
@@ -103,6 +103,5 @@ protected:
   // A pointer to the "bootstrapping" method to use if _safe_start==true.
   std::shared_ptr<LStableDirk4> _bootstrap_method;
 };
-
 
 #endif // ASTABLEDIRK4_H

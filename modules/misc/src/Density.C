@@ -10,8 +10,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<Density>()
+template <>
+InputParameters
+validParams<Density>()
 {
   InputParameters params = validParams<Material>();
 
@@ -25,24 +26,27 @@ InputParameters validParams<Density>()
   return params;
 }
 
-Density::Density( const InputParameters & parameters) :
-  Material(parameters),
+Density::Density(const InputParameters & parameters)
+  : Material(parameters),
 
-  _is_coupled( isCoupled("disp_x") || isCoupled("disp_r") ),
-  _is_RZ( isCoupled("disp_r") && isCoupled("disp_z") ),
-  _is_SphericalR( isCoupled("disp_r") && !isCoupled("disp_z") ),
-  _grad_disp_x( isCoupled("disp_x") ? coupledGradient("disp_x") :
-                ( isCoupled("disp_r") ? coupledGradient("disp_r") : _grad_zero ) ),
-  _grad_disp_y( isCoupled("disp_y") ? coupledGradient("disp_y") :
-                ( isCoupled("disp_z") ? coupledGradient("disp_z") : _grad_zero ) ),
-  _grad_disp_z( !_is_RZ && isCoupled("disp_z") ? coupledGradient("disp_z") : _grad_zero ),
-  _disp_r( _is_RZ || _is_SphericalR ? coupledValue("disp_r") : _zero ),
+    _is_coupled(isCoupled("disp_x") || isCoupled("disp_r")),
+    _is_RZ(isCoupled("disp_r") && isCoupled("disp_z")),
+    _is_SphericalR(isCoupled("disp_r") && !isCoupled("disp_z")),
+    _grad_disp_x(isCoupled("disp_x")
+                     ? coupledGradient("disp_x")
+                     : (isCoupled("disp_r") ? coupledGradient("disp_r") : _grad_zero)),
+    _grad_disp_y(isCoupled("disp_y")
+                     ? coupledGradient("disp_y")
+                     : (isCoupled("disp_z") ? coupledGradient("disp_z") : _grad_zero)),
+    _grad_disp_z(!_is_RZ && isCoupled("disp_z") ? coupledGradient("disp_z") : _grad_zero),
+    _disp_r(_is_RZ || _is_SphericalR ? coupledValue("disp_r") : _zero),
 
-  _orig_density(getParam<Real>("density")),
-  _density(declareProperty<Real>("density")),
-  _density_old(declarePropertyOld<Real>("density"))
+    _orig_density(getParam<Real>("density")),
+    _density(declareProperty<Real>("density")),
+    _density_old(declarePropertyOld<Real>("density"))
 
-{}
+{
+}
 
 void
 Density::initStatefulProperties(unsigned n_points)
@@ -69,26 +73,27 @@ Density::computeProperties()
       const Real Axy = _grad_disp_x[qp](1);
       const Real Axz = _grad_disp_x[qp](2);
       const Real Ayx = _grad_disp_y[qp](0);
-            Real Ayy = _grad_disp_y[qp](1) + 1;
+      Real Ayy = _grad_disp_y[qp](1) + 1;
       const Real Ayz = _grad_disp_y[qp](2);
       const Real Azx = _grad_disp_z[qp](0);
       const Real Azy = _grad_disp_z[qp](1);
-            Real Azz = _grad_disp_z[qp](2) + 1;
+      Real Azz = _grad_disp_z[qp](2) + 1;
       if (_is_RZ)
       {
-        if (_q_point[qp](0)!=0.0)
+        if (_q_point[qp](0) != 0.0)
         {
-          Azz = _disp_r[qp]/_q_point[qp](0) + 1;
+          Azz = _disp_r[qp] / _q_point[qp](0) + 1;
         }
       }
       else if (_is_SphericalR)
       {
-        if (_q_point[qp](0)!=0.0)
+        if (_q_point[qp](0) != 0.0)
         {
-          Ayy = Azz = _disp_r[qp]/_q_point[qp](0) + 1;
+          Ayy = Azz = _disp_r[qp] / _q_point[qp](0) + 1;
         }
       }
-      const Real detF = Axx*Ayy*Azz + Axy*Ayz*Azx + Axz*Ayx*Azy - Azx*Ayy*Axz - Azy*Ayz*Axx - Azz*Ayx*Axy;
+      const Real detF = Axx * Ayy * Azz + Axy * Ayz * Azx + Axz * Ayx * Azy - Azx * Ayy * Axz -
+                        Azy * Ayz * Axx - Azz * Ayx * Axy;
       d /= detF;
     }
     _density[qp] = d;

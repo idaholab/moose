@@ -14,18 +14,20 @@
 
 #include "MaterialEigenKernel.h"
 
-template<>
-InputParameters validParams<MaterialEigenKernel>()
+template <>
+InputParameters
+validParams<MaterialEigenKernel>()
 {
   InputParameters params = validParams<EigenKernel>();
   params.addParam<MaterialPropertyName>("mat", "Material property name (pseudo-stateful)");
   return params;
 }
 
-MaterialEigenKernel::MaterialEigenKernel(const InputParameters & parameters) :
-    EigenKernel(parameters),
+MaterialEigenKernel::MaterialEigenKernel(const InputParameters & parameters)
+  : EigenKernel(parameters),
     _propname(getParam<MaterialPropertyName>("mat")),
-    _mat(_is_implicit ? getMaterialPropertyByName<Real>(_propname) : getMaterialPropertyByName<Real>(_propname+"_old"))
+    _mat(_is_implicit ? getMaterialPropertyByName<Real>(_propname)
+                      : getMaterialPropertyByName<Real>(_propname + "_old"))
 {
 }
 

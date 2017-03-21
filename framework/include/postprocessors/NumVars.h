@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumVars;
 
-template<>
+template <>
 InputParameters validParams<NumVars>();
 
 class NumVars : public GeneralPostprocessor
@@ -38,4 +38,4 @@ protected:
   MooseEnum _system;
 };
 
-#endif //NUMVARS_H
+#endif // NUMVARS_H

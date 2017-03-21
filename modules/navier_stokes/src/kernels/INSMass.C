@@ -6,12 +6,15 @@
 /****************************************************************/
 #include "INSMass.h"
 
-template<>
-InputParameters validParams<INSMass>()
+template <>
+InputParameters
+validParams<INSMass>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.addClassDescription("This class computes the mass equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation.");
+  params.addClassDescription("This class computes the mass equation residual and Jacobian "
+                             "contributions for the incompressible Navier-Stokes momentum "
+                             "equation.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
@@ -21,10 +24,8 @@ InputParameters validParams<INSMass>()
   return params;
 }
 
-
-
-INSMass::INSMass(const InputParameters & parameters) :
-    Kernel(parameters),
+INSMass::INSMass(const InputParameters & parameters)
+  : Kernel(parameters),
 
     // Gradients
     _grad_u_vel(coupledGradient("u")),
@@ -39,7 +40,8 @@ INSMass::INSMass(const InputParameters & parameters) :
 {
 }
 
-Real INSMass::computeQpResidual()
+Real
+INSMass::computeQpResidual()
 {
   // (div u) * q
   // Note: we (arbitrarily) multilply this term by -1 so that it matches the -p(div v)
@@ -47,19 +49,15 @@ Real INSMass::computeQpResidual()
   return -(_grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2)) * _test[_i][_qp];
 }
 
-
-
-
-Real INSMass::computeQpJacobian()
+Real
+INSMass::computeQpJacobian()
 {
   // Derivative wrt to p is zero
   return 0;
 }
 
-
-
-
-Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSMass::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
     return -_grad_phi[_j][_qp](0) * _test[_i][_qp];

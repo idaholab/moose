@@ -21,7 +21,7 @@
 class Axisymmetric2D3DSolutionFunction;
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<Axisymmetric2D3DSolutionFunction>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<Axisymmetric2D3DSolutionFunction>();
 class Axisymmetric2D3DSolutionFunction : public Function
 {
 public:
-
   /**
    * Constructor
    * @param parameters The input parameters for the function
@@ -52,7 +51,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// Pointer to SolutionUserObject containing the solution of interest
   const SolutionUserObject * _solution_object_ptr;
 
@@ -92,4 +90,4 @@ protected:
   std::vector<unsigned int> _solution_object_var_indices;
 };
 
-#endif //AXISYMMETRIC2D3DSOLUTIONFUNCTION_H
+#endif // AXISYMMETRIC2D3DSOLUTIONFUNCTION_H

@@ -14,21 +14,23 @@
 
 #include "PostprocessorNeumannBC.h"
 
-template<>
-InputParameters validParams<PostprocessorNeumannBC>()
+template <>
+InputParameters
+validParams<PostprocessorNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addParam<PostprocessorName>("postprocessor", 0.0, "The postprocessor to use for value of the gradient on the boundary.");
+  params.addParam<PostprocessorName>(
+      "postprocessor", 0.0, "The postprocessor to use for value of the gradient on the boundary.");
   return params;
 }
 
-PostprocessorNeumannBC::PostprocessorNeumannBC(const InputParameters & parameters) :
-  IntegratedBC(parameters),
-  _value(getPostprocessorValue("postprocessor"))
-{}
+PostprocessorNeumannBC::PostprocessorNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _value(getPostprocessorValue("postprocessor"))
+{
+}
 
 Real
 PostprocessorNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*_value;
+  return -_test[_i][_qp] * _value;
 }

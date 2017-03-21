@@ -21,14 +21,13 @@
 // Forward declarations
 class MultiAppInterpolationTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppInterpolationTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppInterpolationTransfer :
-  public MultiAppTransfer
+class MultiAppInterpolationTransfer : public MultiAppTransfer
 {
 public:
   MultiAppInterpolationTransfer(const InputParameters & parameters);
@@ -46,7 +45,10 @@ protected:
    * @param nodes_end - iterator to the end of the node list
    * @return The Node closest to point p.
    */
-  Node * getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end);
+  Node * getNearestNode(const Point & p,
+                        Real & distance,
+                        const MeshBase::const_node_iterator & nodes_begin,
+                        const MeshBase::const_node_iterator & nodes_end);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;

@@ -17,12 +17,11 @@
 
 #include "IntegratedBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class DGMDDBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<DGMDDBC>();
 
 /**
@@ -37,7 +36,6 @@ InputParameters validParams<DGMDDBC>();
 class DGMDDBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -53,10 +51,10 @@ protected:
 private:
   Function & _func;
 
-  const MaterialProperty<Real> & _diff;               // diffusivity
+  const MaterialProperty<Real> & _diff; // diffusivity
 
   Real _epsilon;
   Real _sigma;
 };
 
-#endif //DGMDDBC_H
+#endif // DGMDDBC_H

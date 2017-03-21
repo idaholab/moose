@@ -19,7 +19,7 @@
 
 class LibmeshPartitioner;
 
-template<>
+template <>
 InputParameters validParams<LibmeshPartitioner>();
 
 class LibmeshPartitioner : public MoosePartitioner
@@ -29,8 +29,8 @@ public:
   virtual ~LibmeshPartitioner();
 
   virtual std::unique_ptr<Partitioner> clone() const;
-  virtual void partition(MeshBase &mesh, const unsigned int n);
-  virtual void partition(MeshBase &mesh);
+  virtual void partition(MeshBase & mesh, const unsigned int n);
+  virtual void partition(MeshBase & mesh);
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n);

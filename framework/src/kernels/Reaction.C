@@ -14,26 +14,24 @@
 
 #include "Reaction.h"
 
-template<>
-InputParameters validParams<Reaction>()
+template <>
+InputParameters
+validParams<Reaction>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-Reaction::Reaction(const InputParameters & parameters) :
-    Kernel(parameters)
-{}
+Reaction::Reaction(const InputParameters & parameters) : Kernel(parameters) {}
 
 Real
 Reaction::computeQpResidual()
 {
-  return _test[_i][_qp]*_u[_qp];
+  return _test[_i][_qp] * _u[_qp];
 }
 
 Real
 Reaction::computeQpJacobian()
 {
-  return _test[_i][_qp]*_phi[_j][_qp];
+  return _test[_i][_qp] * _phi[_j][_qp];
 }
-

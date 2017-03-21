@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "ScalarCoupledPostprocessor.h"
 
-template<>
-InputParameters validParams<ScalarCoupledPostprocessor>()
+template <>
+InputParameters
+validParams<ScalarCoupledPostprocessor>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
   params.addRequiredCoupledVar("variable", "Name of variable");
@@ -24,8 +25,8 @@ InputParameters validParams<ScalarCoupledPostprocessor>()
   return params;
 }
 
-ScalarCoupledPostprocessor::ScalarCoupledPostprocessor(const InputParameters & parameters) :
-    SideIntegralPostprocessor(parameters),
+ScalarCoupledPostprocessor::ScalarCoupledPostprocessor(const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters),
     _coupled_scalar(coupledScalarValue("coupled_scalar")),
     _u(coupledValue("variable"))
 {

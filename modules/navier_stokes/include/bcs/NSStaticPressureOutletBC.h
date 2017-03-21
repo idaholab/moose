@@ -11,7 +11,7 @@
 
 class NSStaticPressureOutletBC;
 
-template<>
+template <>
 InputParameters validParams<NSStaticPressureOutletBC>();
 
 /**
@@ -25,7 +25,6 @@ public:
   virtual ~NSStaticPressureOutletBC();
 
 protected:
-
 };
 
 #endif

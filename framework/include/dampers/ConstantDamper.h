@@ -18,10 +18,10 @@
 // Moose Includes
 #include "GeneralDamper.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConstantDamper;
 
-template<>
+template <>
 InputParameters validParams<ConstantDamper>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   Real _damping;
 };
 
-#endif //CONSTANTDAMPER_H
+#endif // CONSTANTDAMPER_H

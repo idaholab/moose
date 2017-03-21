@@ -21,7 +21,7 @@
 // Forward declerations
 class OutputObjectTest;
 
-template<>
+template <>
 InputParameters validParams<OutputObjectTest>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<OutputObjectTest>();
 class OutputObjectTest : public Console
 {
 public:
-
   /**
    * Class constructor
    * @param name
@@ -47,7 +46,6 @@ public:
 
 private:
   MooseEnum _type;
-
 };
 
-#endif //OUTPUTOBJECTTEST_H
+#endif // OUTPUTOBJECTTEST_H

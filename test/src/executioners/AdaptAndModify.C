@@ -15,20 +15,21 @@
 #include "AdaptAndModify.h"
 #include "TimeStepper.h"
 
-//Moose includes
+// Moose includes
 
-template<>
-InputParameters validParams<AdaptAndModify>()
+template <>
+InputParameters
+validParams<AdaptAndModify>()
 {
   InputParameters params = validParams<Transient>();
   params.addParam<unsigned int>("adapt_cycles", 1, "Number of adaptivity cycles to do.");
   return params;
 }
 
-AdaptAndModify::AdaptAndModify(const InputParameters & parameters) :
-    Transient(parameters),
-    _adapt_cycles(parameters.get<unsigned int>("adapt_cycles"))
-{}
+AdaptAndModify::AdaptAndModify(const InputParameters & parameters)
+  : Transient(parameters), _adapt_cycles(parameters.get<unsigned int>("adapt_cycles"))
+{
+}
 
 void
 AdaptAndModify::incrementStepOrReject()
@@ -61,7 +62,7 @@ AdaptAndModify::endStep(Real input_time)
   if (_last_solve_converged)
   {
     // Compute the Error Indicators and Markers
-    for (unsigned int i=0; i<_adapt_cycles; i++)
+    for (unsigned int i = 0; i < _adapt_cycles; i++)
     {
       // Compute the Error Indicators and Markers
       _problem.computeIndicators();
@@ -81,5 +82,4 @@ AdaptAndModify::endStep(Real input_time)
   }
 
   _problem.outputStep(EXEC_TIMESTEP_END);
-
 }

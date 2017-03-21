@@ -14,7 +14,7 @@ class ElasticEnergyMaterial;
 class RankTwoTensor;
 class RankFourTensor;
 
-template<>
+template <>
 InputParameters validParams<DerivativeFunctionMaterialBase>();
 
 /**
@@ -40,14 +40,14 @@ protected:
   ///@{ Elasticity tensor derivatives
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   std::vector<const MaterialProperty<RankFourTensor> *> _delasticity_tensor;
-  std::vector<std::vector<const MaterialProperty<RankFourTensor> *> > _d2elasticity_tensor;
+  std::vector<std::vector<const MaterialProperty<RankFourTensor> *>> _d2elasticity_tensor;
   ///@}
 
   ///@{ Strain and derivatives
   const MaterialProperty<RankTwoTensor> & _strain;
   std::vector<const MaterialProperty<RankTwoTensor> *> _dstrain;
-  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2strain;
+  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _d2strain;
   ///@}
 };
 
-#endif //ELASTICENERGYMATERIAL_H
+#endif // ELASTICENERGYMATERIAL_H

@@ -18,9 +18,9 @@ namespace SolidMechanics
 class NonlinearRZ : public Nonlinear
 {
 public:
-  NonlinearRZ( SolidModel & solid_model,
-               const std::string & name,
-               const InputParameters & parameters );
+  NonlinearRZ(SolidModel & solid_model,
+              const std::string & name,
+              const InputParameters & parameters);
 
   virtual ~NonlinearRZ();
 
@@ -32,21 +32,19 @@ public:
   const VariableValue & _disp_r_old;
 
 protected:
-
-  virtual void computeDeformationGradient( unsigned int qp, ColumnMajorMatrix & F);
-  virtual void fillMatrix( unsigned int qp,
-                           const VariableGradient & grad_r,
-                           const VariableGradient & grad_z,
-                           const VariableValue & u,
-                           ColumnMajorMatrix & A) const;
+  virtual void computeDeformationGradient(unsigned int qp, ColumnMajorMatrix & F);
+  virtual void fillMatrix(unsigned int qp,
+                          const VariableGradient & grad_r,
+                          const VariableGradient & grad_z,
+                          const VariableValue & u,
+                          ColumnMajorMatrix & A) const;
 
   virtual Real volumeRatioOld(unsigned qp) const;
 
-  virtual void computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat);
+  virtual void computeIncrementalDeformationGradient(std::vector<ColumnMajorMatrix> & Fhat);
   const bool _volumetric_locking_correction;
 };
 
 } // namespace solid_mechanics
-
 
 #endif

@@ -76,9 +76,13 @@ JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bo
 }
 
 void
-JsonSyntaxTree::addParameters(const std::string & parent, const std::string & path, bool is_type,
-                              const std::string & action, const std::string & task_name,
-                              bool is_action, InputParameters * params)
+JsonSyntaxTree::addParameters(const std::string & parent,
+                              const std::string & path,
+                              bool is_type,
+                              const std::string & action,
+                              const std::string & task_name,
+                              bool is_action,
+                              InputParameters * params)
 {
   moosecontrib::Json::Value all_params;
   if (action == "EmptyAction")

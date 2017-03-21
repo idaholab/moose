@@ -18,8 +18,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementLpNormAux>()
+template <>
+InputParameters
+validParams<ElementLpNormAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1", "The exponent used in the norm.");
@@ -27,10 +28,8 @@ InputParameters validParams<ElementLpNormAux>()
   return params;
 }
 
-ElementLpNormAux::ElementLpNormAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _p(getParam<Real>("p")),
-    _coupled_var(coupledValue("coupled_variable"))
+ElementLpNormAux::ElementLpNormAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _p(getParam<Real>("p")), _coupled_var(coupledValue("coupled_variable"))
 {
 }
 
@@ -51,7 +50,7 @@ ElementLpNormAux::compute()
     summed_value += _JxW[_qp] * _coord[_qp] * std::pow(std::abs(val), _p);
   }
 
-  _var.setNodalValue(std::pow(summed_value, 1./_p));
+  _var.setNodalValue(std::pow(summed_value, 1. / _p));
 }
 
 Real

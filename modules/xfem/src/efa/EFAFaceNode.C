@@ -10,23 +10,14 @@
 #include "EFANode.h"
 #include "EFAError.h"
 
-EFAFaceNode::EFAFaceNode(EFANode* node, double xi, double eta) :
-    _node(node),
-    _xi(xi),
-    _eta(eta)
+EFAFaceNode::EFAFaceNode(EFANode * node, double xi, double eta) : _node(node), _xi(xi), _eta(eta) {}
+
+EFAFaceNode::EFAFaceNode(const EFAFaceNode & other_face_node)
+  : _node(other_face_node._node), _xi(other_face_node._xi), _eta(other_face_node._eta)
 {
 }
 
-EFAFaceNode::EFAFaceNode(const EFAFaceNode & other_face_node):
-  _node(other_face_node._node),
-  _xi(other_face_node._xi),
-  _eta(other_face_node._eta)
-{
-}
-
-EFAFaceNode::~EFAFaceNode()
-{
-}
+EFAFaceNode::~EFAFaceNode() {}
 
 EFANode *
 EFAFaceNode::getNode()
@@ -49,7 +40,7 @@ EFAFaceNode::getParametricCoordinates(unsigned int i)
 }
 
 void
-EFAFaceNode::switchNode(EFANode* new_node, EFANode* old_node)
+EFAFaceNode::switchNode(EFANode * new_node, EFANode * old_node)
 {
   if (_node == old_node)
     _node = new_node;

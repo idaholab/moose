@@ -6,24 +6,32 @@
 /****************************************************************/
 #include "CoupledBEEquilibriumSub.h"
 
-template<>
-InputParameters validParams<CoupledBEEquilibriumSub>()
+template <>
+InputParameters
+validParams<CoupledBEEquilibriumSub>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "The weight of the equilibrium species");
-  params.addParam<Real>("log_k", 0.0, "The equilibrium constant of this equilibrium species in the dissociation reaction");
-  params.addParam<Real>("sto_u", 1.0, "The stoichiometric coefficient of the primary variable this kernel operates on");
-  params.addRequiredParam<std::vector<Real> >("sto_v", "The stoichiometric coefficients of coupled primary species");
+  params.addParam<Real>(
+      "log_k",
+      0.0,
+      "The equilibrium constant of this equilibrium species in the dissociation reaction");
+  params.addParam<Real>(
+      "sto_u",
+      1.0,
+      "The stoichiometric coefficient of the primary variable this kernel operates on");
+  params.addRequiredParam<std::vector<Real>>(
+      "sto_v", "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");
   return params;
 }
 
-CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & parameters) :
-    Kernel(parameters),
+CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & parameters)
+  : Kernel(parameters),
     _weight(getParam<Real>("weight")),
     _log_k(getParam<Real>("log_k")),
     _sto_u(getParam<Real>("sto_u")),
-    _sto_v(getParam<std::vector<Real> >("sto_v")),
+    _sto_v(getParam<std::vector<Real>>("sto_v")),
     _porosity(getMaterialProperty<Real>("porosity")),
     _u_old(valueOld())
 {
@@ -40,7 +48,8 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
   }
 }
 
-Real CoupledBEEquilibriumSub::computeQpResidual()
+Real
+CoupledBEEquilibriumSub::computeQpResidual()
 {
   Real _val_new = std::pow(10.0, _log_k) * std::pow(_u[_qp], _sto_u);
   Real _val_old = std::pow(10.0, _log_k) * std::pow(_u_old[_qp], _sto_u);
@@ -53,7 +62,8 @@ Real CoupledBEEquilibriumSub::computeQpResidual()
   return _porosity[_qp] * _weight * _test[_i][_qp] * (_val_new - _val_old) / _dt;
 }
 
-Real CoupledBEEquilibriumSub::computeQpJacobian()
+Real
+CoupledBEEquilibriumSub::computeQpJacobian()
 {
   Real _val_new = std::pow(10.0, _log_k) * _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _phi[_j][_qp];
   for (unsigned int i = 0; i < _v_vals.size(); ++i)
@@ -62,7 +72,8 @@ Real CoupledBEEquilibriumSub::computeQpJacobian()
   return _porosity[_qp] * _test[_i][_qp] * _weight * _val_new / _dt;
 }
 
-Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
+Real
+CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real _val_new = std::pow(10.0, _log_k) * std::pow(_u[_qp], _sto_u);
 

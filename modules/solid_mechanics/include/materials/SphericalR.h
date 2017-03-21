@@ -9,7 +9,7 @@
 
 #include "Element.h"
 
-//Forward Declarations
+// Forward Declarations
 class SymmElasticityTensor;
 
 namespace SolidMechanics
@@ -18,20 +18,18 @@ namespace SolidMechanics
 class SphericalR : public Element
 {
 public:
-  SphericalR(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);
+  SphericalR(SolidModel & solid_model,
+             const std::string & name,
+             const InputParameters & parameters);
   virtual ~SphericalR();
 
 protected:
+  virtual void computeStrain(const unsigned qp,
+                             const SymmTensor & total_strain_old,
+                             SymmTensor & total_strain_new,
+                             SymmTensor & strain_increment);
 
-  virtual void computeStrain( const unsigned qp,
-                              const SymmTensor & total_strain_old,
-                              SymmTensor & total_strain_new,
-                              SymmTensor & strain_increment );
-
-  virtual unsigned int getNumKnownCrackDirs() const
-  {
-    return 2;
-  }
+  virtual unsigned int getNumKnownCrackDirs() const { return 2; }
 
   const VariableValue & _disp_r;
 
@@ -39,7 +37,6 @@ protected:
 
   const VariableGradient & _grad_disp_r;
 };
-
 }
 
 #endif

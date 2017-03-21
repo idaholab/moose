@@ -11,19 +11,19 @@
 #include "GrainForceAndTorqueInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ComputeExternalGrainForceAndTorque;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<ComputeExternalGrainForceAndTorque>();
 
 /**
  * This class is here to get the force and torque acting on a grain
  */
-class ComputeExternalGrainForceAndTorque :
-    public DerivativeMaterialInterface<ShapeElementUserObject>,
-    public GrainForceAndTorqueInterface
+class ComputeExternalGrainForceAndTorque
+    : public DerivativeMaterialInterface<ShapeElementUserObject>,
+      public GrainForceAndTorqueInterface
 {
 public:
   ComputeExternalGrainForceAndTorque(const InputParameters & parameters);
@@ -37,7 +37,7 @@ public:
   virtual const std::vector<RealGradient> & getForceValues() const;
   virtual const std::vector<RealGradient> & getTorqueValues() const;
   virtual const std::vector<Real> & getForceCJacobians() const;
-  virtual const std::vector<std::vector<Real> > & getForceEtaJacobians() const;
+  virtual const std::vector<std::vector<Real>> & getForceEtaJacobians() const;
 
 protected:
   unsigned int _qp;
@@ -46,9 +46,9 @@ protected:
   unsigned int _c_var;
   /// material property that provides force density
   MaterialPropertyName _dF_name;
-  const MaterialProperty<std::vector<RealGradient> > & _dF;
+  const MaterialProperty<std::vector<RealGradient>> & _dF;
   /// material property that provides jacobian of force density with respect to c
-  const MaterialProperty<std::vector<RealGradient> > & _dFdc;
+  const MaterialProperty<std::vector<RealGradient>> & _dFdc;
   /// no. of order parameters
   const unsigned int _op_num;
   /// provide UserObject for calculating grain volumes and centers
@@ -58,7 +58,7 @@ protected:
 
   std::vector<unsigned int> _vals_var;
   std::vector<VariableName> _vals_name;
-  std::vector<const MaterialProperty<std::vector<RealGradient> > *> _dFdeta;
+  std::vector<const MaterialProperty<std::vector<RealGradient>> *> _dFdeta;
 
   ///@{ providing grain forces, torques and their jacobians w. r. t c
   std::vector<RealGradient> _force_values;
@@ -68,9 +68,9 @@ protected:
   std::vector<Real> _force_torque_store;
   /// vector storing jacobian of grain force and torque values
   std::vector<Real> _force_torque_c_jacobian_store;
-  std::vector<std::vector<Real> > _force_torque_eta_jacobian_store;
+  std::vector<std::vector<Real>> _force_torque_eta_jacobian_store;
 
   unsigned int _total_dofs;
 };
 
-#endif //COMPUTEEXTERNALGRAINFORCEANDTORQUE_H
+#endif // COMPUTEEXTERNALGRAINFORCEANDTORQUE_H

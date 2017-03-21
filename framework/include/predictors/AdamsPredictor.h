@@ -23,10 +23,11 @@ class AdamsPredictor;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<AdamsPredictor>();
 
 /**

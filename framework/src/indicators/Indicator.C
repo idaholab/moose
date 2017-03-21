@@ -23,15 +23,20 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-template<>
-InputParameters validParams<Indicator>()
+template <>
+InputParameters
+validParams<Indicator>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<OutputInterface>();
   params += validParams<MaterialPropertyInterface>();
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the "
+                                                     "displaced mesh for computation.  Note that "
+                                                     "in the case this is true but no "
+                                                     "displacements are provided in the Mesh block "
+                                                     "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.registerBase("Indicator");
@@ -39,9 +44,8 @@ InputParameters validParams<Indicator>()
   return params;
 }
 
-
-Indicator::Indicator(const InputParameters & parameters) :
-    MooseObject(parameters),
+Indicator::Indicator(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
     FunctionInterface(this),

@@ -17,10 +17,10 @@
 
 #include "TimeNodalKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class TimeDerivativeNodalKernel;
 
-template<>
+template <>
 InputParameters validParams<TimeDerivativeNodalKernel>();
 
 /**

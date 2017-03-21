@@ -20,7 +20,7 @@
 class FEProblemBase;
 class TransientInterface;
 
-template<>
+template <>
 InputParameters validParams<TransientInterface>();
 
 /**
@@ -41,7 +41,8 @@ protected:
 
   /**
    * If the object is using implicit or explicit form. This does NOT mean time scheme,
-   * but which values are going to be used in the object - either from current time or old time. Note that
+   * but which values are going to be used in the object - either from current time or old time.
+   * Note that
    * even explicit schemes have implicit form (it is the time derivative "kernel")
    */
   bool _is_implicit;

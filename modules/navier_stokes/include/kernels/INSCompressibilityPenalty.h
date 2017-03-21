@@ -13,7 +13,7 @@
 // Forward Declarations
 class INSCompressibilityPenalty;
 
-template<>
+template <>
 InputParameters validParams<INSCompressibilityPenalty>();
 
 /**
@@ -24,7 +24,7 @@ class INSCompressibilityPenalty : public Kernel
 public:
   INSCompressibilityPenalty(const InputParameters & parameters);
 
-  virtual ~INSCompressibilityPenalty(){}
+  virtual ~INSCompressibilityPenalty() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -32,7 +32,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // penalty value.
-  // smaller leads to more accurate solution, but the resulting system is also more difficult to solve
+  // smaller leads to more accurate solution, but the resulting system is also more difficult to
+  // solve
   Real _penalty;
 };
 

@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "HeatSource.h"
 
-template<>
-InputParameters validParams<HeatSource>()
+template <>
+InputParameters
+validParams<HeatSource>()
 {
   InputParameters params = validParams<BodyForce>();
 
@@ -17,7 +18,4 @@ InputParameters validParams<HeatSource>()
   return params;
 }
 
-HeatSource::HeatSource(const InputParameters & parameters) :
-    BodyForce(parameters)
-{
-}
+HeatSource::HeatSource(const InputParameters & parameters) : BodyForce(parameters) {}

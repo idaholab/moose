@@ -11,7 +11,7 @@
 
 class SimpleACInterface;
 
-template<>
+template <>
 InputParameters validParams<SimpleACInterface>();
 
 /**
@@ -32,4 +32,4 @@ protected:
   const MaterialProperty<Real> & _kappa;
 };
 
-#endif //SIMPLEACINTERFACE_H
+#endif // SIMPLEACINTERFACE_H

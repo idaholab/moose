@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "CHInterfaceAniso.h"
 
-template<>
-InputParameters validParams<CHInterfaceAniso>()
+template <>
+InputParameters
+validParams<CHInterfaceAniso>()
 {
   InputParameters params = CHInterfaceBase<RealTensorValue>::validParams();
-  params.addClassDescription("Gradient energy Cahn-Hilliard Kernel with a tensor (anisotropic) mobility");
+  params.addClassDescription(
+      "Gradient energy Cahn-Hilliard Kernel with a tensor (anisotropic) mobility");
   return params;
 }
 
-CHInterfaceAniso::CHInterfaceAniso(const InputParameters & parameters) :
-    CHInterfaceBase<RealTensorValue>(parameters)
+CHInterfaceAniso::CHInterfaceAniso(const InputParameters & parameters)
+  : CHInterfaceBase<RealTensorValue>(parameters)
 {
 }

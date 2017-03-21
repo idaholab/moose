@@ -6,15 +6,16 @@
 /****************************************************************/
 #include "CahnHilliard.h"
 
-template<>
-InputParameters validParams<CahnHilliard>()
+template <>
+InputParameters
+validParams<CahnHilliard>()
 {
   InputParameters params = CahnHilliardBase<Real>::validParams();
-  params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and a scalar (isotropic) mobility");
+  params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and "
+                             "a scalar (isotropic) mobility");
   return params;
 }
 
-CahnHilliard::CahnHilliard(const InputParameters & parameters) :
-    CahnHilliardBase<Real>(parameters)
+CahnHilliard::CahnHilliard(const InputParameters & parameters) : CahnHilliardBase<Real>(parameters)
 {
 }

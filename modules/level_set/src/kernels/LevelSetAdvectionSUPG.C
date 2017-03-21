@@ -7,17 +7,19 @@
 
 #include "LevelSetAdvectionSUPG.h"
 
-template<>
-InputParameters validParams<LevelSetAdvectionSUPG>()
+template <>
+InputParameters
+validParams<LevelSetAdvectionSUPG>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("SUPG stablization term for the advection portion of the level set equation.");
-  params += validParams<LevelSetVelocityInterface<> >();
+  params.addClassDescription(
+      "SUPG stablization term for the advection portion of the level set equation.");
+  params += validParams<LevelSetVelocityInterface<>>();
   return params;
 }
 
-LevelSetAdvectionSUPG::LevelSetAdvectionSUPG(const InputParameters & parameters) :
-    LevelSetVelocityInterface<Kernel>(parameters)
+LevelSetAdvectionSUPG::LevelSetAdvectionSUPG(const InputParameters & parameters)
+  : LevelSetVelocityInterface<Kernel>(parameters)
 {
 }
 

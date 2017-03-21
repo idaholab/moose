@@ -17,10 +17,10 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementSidePP;
 
-template<>
+template <>
 InputParameters validParams<ElementSidePP>();
 
 class ElementSidePP : public ElementIntegralPostprocessor
@@ -36,4 +36,4 @@ protected:
   const PostprocessorValue & _sidepp;
 };
 
-#endif //ElementSidePP_H
+#endif // ElementSidePP_H

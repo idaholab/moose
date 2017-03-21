@@ -15,7 +15,7 @@
 // Forward Declarations
 class PorousFlowSink;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowSink>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<PorousFlowSink>();
 class PorousFlowSink : public IntegratedBC
 {
 public:
-
   PorousFlowSink(const InputParameters & parameters);
 
 protected:
@@ -154,4 +153,4 @@ protected:
   virtual Real dmultiplier_dvar(unsigned int pvar) const;
 };
 
-#endif //POROUSFLOWSINK_H
+#endif // POROUSFLOWSINK_H

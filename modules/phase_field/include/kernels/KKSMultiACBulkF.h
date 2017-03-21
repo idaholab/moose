@@ -9,10 +9,10 @@
 
 #include "KKSMultiACBulkBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSMultiACBulkF;
 
-template<>
+template <>
 InputParameters validParams<KKSMultiACBulkF>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   const MaterialProperty<Real> & _prop_d2gi;
 };
 
-#endif //KKSMULTIACBULKF_H
+#endif // KKSMULTIACBULKF_H

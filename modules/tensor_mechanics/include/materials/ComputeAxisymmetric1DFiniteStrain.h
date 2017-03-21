@@ -47,4 +47,4 @@ protected:
   const VariableValue & _scalar_out_of_plane_strain_old;
 };
 
-#endif //COMPUTEAXISYMMETRIC1DFINITESTRAIN_H
+#endif // COMPUTEAXISYMMETRIC1DFINITESTRAIN_H

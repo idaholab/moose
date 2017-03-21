@@ -17,10 +17,10 @@
 
 #include "SideIntegralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class AreaPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<AreaPostprocessor>();
 
 /**
@@ -35,7 +35,6 @@ public:
 
 protected:
   virtual Real computeQpIntegral() override;
-
 };
 
 #endif

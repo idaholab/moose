@@ -15,8 +15,9 @@
 #include "ScalarVariable.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<ScalarVariable>()
+template <>
+InputParameters
+validParams<ScalarVariable>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "Name of the variable");
@@ -24,8 +25,8 @@ InputParameters validParams<ScalarVariable>()
   return params;
 }
 
-ScalarVariable::ScalarVariable(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+ScalarVariable::ScalarVariable(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _idx(getParam<unsigned int>("component"))
 {

@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMomentumTractionForm;
 
-template<>
+template <>
 InputParameters validParams<INSMomentumTractionForm>();
 
 /**
@@ -24,13 +24,12 @@ class INSMomentumTractionForm : public INSMomentumBase
 public:
   INSMomentumTractionForm(const InputParameters & parameters);
 
-  virtual ~INSMomentumTractionForm(){}
+  virtual ~INSMomentumTractionForm() {}
 
 protected:
   virtual Real computeQpResidualViscousPart() override;
   virtual Real computeQpJacobianViscousPart() override;
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) override;
 };
-
 
 #endif

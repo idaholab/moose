@@ -43,4 +43,4 @@ protected:
   const Real & _current_elem_volume;
 };
 
-#endif //COMPUTESTRAINBASE_H
+#endif // COMPUTESTRAINBASE_H

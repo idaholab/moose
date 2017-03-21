@@ -16,22 +16,28 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 
-template<>
-InputParameters validParams<FindValueOnLine>()
+template <>
+InputParameters
+validParams<FindValueOnLine>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addClassDescription("Find a specific target value along a sampling line. The variable values along the line should change monotonically. The target value is searched using a bisection algorithm.");
+  params.addClassDescription("Find a specific target value along a sampling line. The variable "
+                             "values along the line should change monotonically. The target value "
+                             "is searched using a bisection algorithm.");
   params.addParam<Point>("start_point", "Start point of the sampling line.");
   params.addParam<Point>("end_point", "End point of the sampling line.");
   params.addParam<Real>("target", "Target value to locate.");
   params.addParam<unsigned int>("depth", 36, "Maximum number of bisections to perform.");
-  params.addParam<Real>("tol", 1e-10, "Stop search if a value is found that is equal to the target with this tolerance applied.");
+  params.addParam<Real>(
+      "tol",
+      1e-10,
+      "Stop search if a value is found that is equal to the target with this tolerance applied.");
   params.addCoupledVar("v", "Variable to inspect");
   return params;
 }
 
-FindValueOnLine::FindValueOnLine(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+FindValueOnLine::FindValueOnLine(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     Coupleable(this, false),
     _start_point(getParam<Point>("start_point")),
     _end_point(getParam<Point>("end_point")),
@@ -70,9 +76,17 @@ FindValueOnLine::execute()
   bool left_to_right = left < right;
   // Initial bounds check
   if ((left_to_right && _target < left) || (!left_to_right && _target < right))
-    mooseError("Target value \"", _target, "\" is less than the minimum sampled value \"", std::min(left, right), "\"");
+    mooseError("Target value \"",
+               _target,
+               "\" is less than the minimum sampled value \"",
+               std::min(left, right),
+               "\"");
   if ((left_to_right && _target > right) || (!left_to_right && _target > left))
-    mooseError("Target value \"", _target, "\" is greater than the maximum sampled value \"", std::max(left, right), "\"");
+    mooseError("Target value \"",
+               _target,
+               "\" is greater than the maximum sampled value \"",
+               std::max(left, right),
+               "\"");
 
   bool found_it = false;
   Real value = 0;
@@ -93,8 +107,7 @@ FindValueOnLine::execute()
     }
 
     // bisect
-    if ((left_to_right && _target < value) ||
-        (!left_to_right && _target > value))
+    if ((left_to_right && _target < value) || (!left_to_right && _target > value))
       // to the left
       s_right = s;
     else
@@ -103,7 +116,12 @@ FindValueOnLine::execute()
   }
 
   if (!found_it)
-    mooseError("Target value \"", std::setprecision(10), _target, "\" not found on line within tolerance, last sample: ", value, ".");
+    mooseError("Target value \"",
+               std::setprecision(10),
+               _target,
+               "\" not found on line within tolerance, last sample: ",
+               value,
+               ".");
 
   _position = s * _length;
 }
@@ -119,7 +137,8 @@ FindValueOnLine::getValueAtPoint(const Point & p)
   if (!found_element)
   {
     // there is no element
-    mooseError("No element found at the current search point. Please make sure the sampling line stays inside the mesh completely.");
+    mooseError("No element found at the current search point. Please make sure the sampling line "
+               "stays inside the mesh completely.");
   }
 
   Real value = 0;

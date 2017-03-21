@@ -11,15 +11,17 @@
 
 /**
  * This kernel adds the contribution of stored energy associated with dislocations to grain growth
- * This allows us to simulate recrystallization.This kernel depends grain_index instead of op_index to take full advantage of Grain Tracker
- * So a grain_tracker UserObject must be used. If you want use OPs equal to grain_num, you can use the fake grain_tracker UserObject,e.g., FauxGrainTracker
+ * This allows us to simulate recrystallization.This kernel depends grain_index instead of op_index
+ * to take full advantage of Grain Tracker
+ * So a grain_tracker UserObject must be used. If you want use OPs equal to grain_num, you can use
+ * the fake grain_tracker UserObject,e.g., FauxGrainTracker
  */
 
-//Forward Declarations
+// Forward Declarations
 class ACSEDGPoly;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<ACSEDGPoly>();
 
 class ACSEDGPoly : public ACBulk<Real>
@@ -54,4 +56,4 @@ protected:
   unsigned int _op_index;
 };
 
-#endif //ACSEDGPOLY_H
+#endif // ACSEDGPOLY_H

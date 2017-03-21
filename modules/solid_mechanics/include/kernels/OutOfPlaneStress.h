@@ -10,18 +10,17 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class OutOfPlaneStress;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template<>
+template <>
 InputParameters validParams<OutOfPlaneStress>();
 
 class OutOfPlaneStress : public Kernel
 {
 public:
-
   OutOfPlaneStress(const InputParameters & parameters);
 
 protected:
@@ -44,4 +43,4 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _temp_var;
 };
-#endif //OUTOFPLANESTRESS_H
+#endif // OUTOFPLANESTRESS_H

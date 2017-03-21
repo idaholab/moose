@@ -21,7 +21,7 @@
 class NewtonMaterial;
 class Material;
 
-template<>
+template <>
 InputParameters validParams<NewtonMaterial>();
 
 /**

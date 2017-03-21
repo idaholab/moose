@@ -5,7 +5,7 @@
 
 class PorousFlowApp;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowApp>();
 
 class PorousFlowApp : public MooseApp

@@ -10,28 +10,28 @@
 
 #include "SlopeReconstructionOneD.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVSlopeReconstructionOneD;
 
-template<>
+template <>
 InputParameters validParams<CNSFVSlopeReconstructionOneD>();
 
 /**
- * A user object that performs piecewise linear slope reconstruction to get the slopes of cell average variables in 1-D
+ * A user object that performs piecewise linear slope reconstruction to get the slopes of cell
+ * average variables in 1-D
  *
- * Notes: nothing needs to be done in this class because slope limiter can be done all in the 1-D slope limiting class
+ * Notes: nothing needs to be done in this class because slope limiter can be done all in the 1-D
+ * slope limiting class
  */
 class CNSFVSlopeReconstructionOneD : public SlopeReconstructionOneD
 {
 public:
-
   CNSFVSlopeReconstructionOneD(const InputParameters & parameters);
 
   /// compute the slope of the cell
   virtual void reconstructElementSlope();
 
 protected:
-
 };
 
 #endif

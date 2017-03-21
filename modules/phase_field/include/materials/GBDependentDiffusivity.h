@@ -11,7 +11,7 @@
 
 class GBDependentDiffusivity;
 
-template<>
+template <>
 InputParameters validParams<GBDependentDiffusivity>();
 /**
  * GB dependent diffusivity Ref. Forest, MSMSE, 2015

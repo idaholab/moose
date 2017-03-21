@@ -14,7 +14,9 @@
 class XFEMElementPairLocator : public ElementPairLocator
 {
 public:
-  XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem, unsigned int interface_id, bool use_displaced_mesh = false);
+  XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem,
+                         unsigned int interface_id,
+                         bool use_displaced_mesh = false);
   virtual void reinit();
   virtual void update();
 

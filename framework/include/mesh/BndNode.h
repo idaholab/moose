@@ -20,11 +20,7 @@
 
 struct BndNode
 {
-  BndNode(Node * node, BoundaryID bnd_id) :
-      _node(node),
-      _bnd_id(bnd_id)
-  {
-  }
+  BndNode(Node * node, BoundaryID bnd_id) : _node(node), _bnd_id(bnd_id) {}
 
   /// pointer to the node
   Node * _node;

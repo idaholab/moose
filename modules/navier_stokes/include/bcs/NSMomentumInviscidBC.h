@@ -10,11 +10,10 @@
 #include "NSIntegratedBC.h"
 #include "NSPressureDerivs.h"
 
-
 // Forward Declarations
 class NSMomentumInviscidBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumInviscidBC>();
 
 /**
@@ -78,7 +77,8 @@ protected:
   // .) Fully unspecified (both (rho*u)(u.n) and p computed implicitly, is this valid?)
   // .) Specified pressure/unspecified (rho*u)(u.n)
   // .) Unspecified pressure/specified (rho*u)(u.n)
-  // .) Fully specified (both pressure and (rho*u)(u.n) given, this may not be physically meaningful?)
+  // .) Fully specified (both pressure and (rho*u)(u.n) given, this may not be physically
+  // meaningful?)
 
   // Depending on the passed-in value, will compute the residual for either a specified
   // pressure value or the residual at the current value of the pressure.

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PBOREHOLE_H
 #define Q2PBOREHOLE_H
 
@@ -14,10 +13,9 @@
 #include "RichardsDensity.h"
 #include "RichardsRelPerm.h"
 
-
 class Q2PBorehole;
 
-template<>
+template <>
 InputParameters validParams<Q2PBorehole>();
 
 /**
@@ -27,7 +25,6 @@ InputParameters validParams<Q2PBorehole>();
 class Q2PBorehole : public PeacemanBorehole
 {
 public:
-
   /**
    * Creates a new Q2PBorehole
    * This sets all the variables, but also
@@ -69,7 +66,6 @@ public:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 protected:
-
   /// fluid density
   const RichardsDensity & _density;
 
@@ -117,7 +113,6 @@ protected:
    * @param jvar differentiate the residual wrt this variable
    */
   Real jac(unsigned int jvar);
-
 };
 
-#endif //Q2PBOREHOLE_H
+#endif // Q2PBOREHOLE_H

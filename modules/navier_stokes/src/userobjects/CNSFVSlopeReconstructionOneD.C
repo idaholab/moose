@@ -7,11 +7,15 @@
 
 #include "CNSFVSlopeReconstructionOneD.h"
 
-template<>
-InputParameters validParams<CNSFVSlopeReconstructionOneD>()
+template <>
+InputParameters
+validParams<CNSFVSlopeReconstructionOneD>()
 {
   InputParameters params = validParams<SlopeReconstructionOneD>();
-  params.addClassDescription("A user object that performs piecewise linear slope reconstruction to get the slopes of cell average variables in 1-D, though nothing needs to be done in this class because slope limiter can be done all in the 1-D slope limiting class");
+  params.addClassDescription("A user object that performs piecewise linear slope reconstruction to "
+                             "get the slopes of cell average variables in 1-D, though nothing "
+                             "needs to be done in this class because slope limiter can be done all "
+                             "in the 1-D slope limiting class");
   return params;
 }
 

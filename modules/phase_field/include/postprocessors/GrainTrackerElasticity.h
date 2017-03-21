@@ -14,7 +14,7 @@
 class GrainTrackerElasticity;
 class EulerAngleProvider;
 
-template<>
+template <>
 InputParameters validParams<GrainTrackerElasticity>();
 
 /**

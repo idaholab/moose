@@ -51,7 +51,8 @@ d2EffectiveSaturation(Real p, Real alpha, Real m)
     Real inner = 1.0 + std::pow(-alpha * p, n);
     Real dinner_dp = -n * alpha * std::pow(-alpha * p, n - 1.0);
     Real d2inner_dp2 = n * (n - 1.0) * alpha * alpha * std::pow(-alpha * p, n - 2.0);
-    Real d2seff_dp2 = m * (m + 1.0) * std::pow(inner, -m - 2.0) * std::pow(dinner_dp, 2.0) - m * std::pow(inner, -m - 1.0) * d2inner_dp2;
+    Real d2seff_dp2 = m * (m + 1.0) * std::pow(inner, -m - 2.0) * std::pow(dinner_dp, 2.0) -
+                      m * std::pow(inner, -m - 1.0) * d2inner_dp2;
     return d2seff_dp2;
   }
 }
@@ -80,7 +81,7 @@ dCapillaryPressure(Real seff, Real m, Real p0, Real pc_max)
   Real pc = 0.0;
 
   if (seff <= 0.0 || seff >= 1.0)
-   return 0.0;
+    return 0.0;
   else
   {
     Real a = std::pow(seff, -1.0 / m) - 1.0;
@@ -101,7 +102,7 @@ d2CapillaryPressure(Real seff, Real m, Real p0, Real pc_max)
   Real d2pc = 0.0;
 
   if (seff <= 0.0 || seff >= 1.0)
-   return 0.0;
+    return 0.0;
   else
   {
     Real a = std::pow(seff, -1.0 / m) - 1.0;
@@ -110,7 +111,8 @@ d2CapillaryPressure(Real seff, Real m, Real p0, Real pc_max)
       pc = -p0 * std::pow(a, 1.0 - m);
       if (pc > pc_max)
       {
-        d2pc = std::pow(a, -1.0 - m) * std::pow(seff, -2.0 - 2.0 / m) - ((1.0 + m) / m) * std::pow(a, - m) * std::pow(seff, -1.0 / m - 2.0);
+        d2pc = std::pow(a, -1.0 - m) * std::pow(seff, -2.0 - 2.0 / m) -
+               ((1.0 + m) / m) * std::pow(a, -m) * std::pow(seff, -1.0 / m - 2.0);
         d2pc *= p0 * (1.0 - m) / m;
       }
     }
@@ -137,7 +139,7 @@ dRelativePermeability(Real seff, Real m)
 {
   // Guard against division by zero
   if (seff <= 0.0 || seff >= 1.0)
-   return 0.0;
+    return 0.0;
 
   const Real a = 1.0 - std::pow(seff, 1.0 / m);
   const Real da = -1.0 / m * std::pow(seff, 1.0 / m - 1.0);
@@ -152,7 +154,7 @@ d2RelativePermeability(Real seff, Real m)
 {
   // Guard against division by zero
   if (seff <= 0.0 || seff >= 1.0)
-   return 0.0;
+    return 0.0;
 
   const Real a = 1.0 - std::pow(seff, 1.0 / m);
   const Real da = -1.0 / m * std::pow(seff, 1.0 / m - 1.0);
@@ -161,6 +163,7 @@ d2RelativePermeability(Real seff, Real m)
   const Real db = -m * std::pow(a, m - 1.0) * da;
   const Real d2b = -m * (m - 1.0) * std::pow(a, m - 2.0) * da * da - m * std::pow(a, m - 1.0) * d2a;
 
-  return -0.25 * std::pow(seff, -1.5) * Utility::pow<2>(b) + 2.0 * std::pow(seff, - 0.5) * b * db + 2.0 * std::sqrt(seff) * db * db + 2.0 * std::sqrt(seff) * b * d2b;
+  return -0.25 * std::pow(seff, -1.5) * Utility::pow<2>(b) + 2.0 * std::pow(seff, -0.5) * b * db +
+         2.0 * std::sqrt(seff) * db * db + 2.0 * std::sqrt(seff) * b * d2b;
 }
 }

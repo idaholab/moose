@@ -19,7 +19,7 @@
 
 class ChangeOverTimestepPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ChangeOverTimestepPostprocessor>();
 
 /**

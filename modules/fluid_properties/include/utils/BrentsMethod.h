@@ -20,7 +20,7 @@ namespace BrentsMethod
  * @param[out] x1 reference one bound
  * @param[out] x2 reference to other bound
  */
-void bracket(std::function<Real (Real)> const & f, Real & x1, Real & x2);
+void bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2);
 
 /**
  * Finds the root of a function using Brent's method. Adapted from
@@ -31,7 +31,7 @@ void bracket(std::function<Real (Real)> const & f, Real & x1, Real & x2);
  * @param x2 other end of bracketing interval
  * @param tolerance root finding tolerance (default is 1e-12)
  */
-Real root(std::function<Real (Real)> const & f, Real x1, Real x2, Real tol = 1.0e-12);
+Real root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol = 1.0e-12);
 }
 
 #endif // BRENTSMETHOD_H

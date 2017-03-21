@@ -11,17 +11,17 @@
 #include "ElementIntegralPostprocessor.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaterialTensorIntegral;
 
-template<>
+template <>
 InputParameters validParams<MaterialTensorIntegral>();
 
 /**
  * This postprocessor computes an element integral of a
  * component of a material tensor as specified by the user-supplied indices.
  */
-class MaterialTensorIntegral: public ElementIntegralPostprocessor
+class MaterialTensorIntegral : public ElementIntegralPostprocessor
 {
 public:
   MaterialTensorIntegral(const InputParameters & parameters);
@@ -34,4 +34,4 @@ private:
   const unsigned int _i;
   const unsigned int _j;
 };
-#endif //MATERIALTENSORINTEGRAL_H
+#endif // MATERIALTENSORINTEGRAL_H

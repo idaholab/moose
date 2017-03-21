@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSChorinPressurePoisson;
 
-template<>
+template <>
 InputParameters validParams<INSChorinPressurePoisson>();
 
 /**
@@ -25,7 +25,7 @@ class INSChorinPressurePoisson : public Kernel
 public:
   INSChorinPressurePoisson(const InputParameters & parameters);
 
-  virtual ~INSChorinPressurePoisson(){}
+  virtual ~INSChorinPressurePoisson() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -45,6 +45,5 @@ protected:
   // Material properties
   Real _rho;
 };
-
 
 #endif // INSCHORINPRESSUREPOISSON_H

@@ -9,10 +9,10 @@
 
 #include "GrainRigidBodyMotionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class SingleGrainRigidBodyMotion;
 
-template<>
+template <>
 InputParameters validParams<SingleGrainRigidBodyMotion>();
 
 class SingleGrainRigidBodyMotion : public GrainRigidBodyMotionBase
@@ -35,4 +35,4 @@ protected:
   unsigned int _op_index;
 };
 
-#endif //SINGLEGRAINRIGIDBODYMOTION_H
+#endif // SINGLEGRAINRIGIDBODYMOTION_H

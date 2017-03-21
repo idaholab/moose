@@ -20,7 +20,7 @@
 // Forward Declaration
 class MassLumpedTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<MassLumpedTimeDerivative>();
 
 class MassLumpedTimeDerivative : public TimeKernel

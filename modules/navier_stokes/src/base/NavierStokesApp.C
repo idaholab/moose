@@ -146,15 +146,15 @@
 #include "CNSFVIdealGasTotalEnthalpyL2Error.h"
 #include "CNSFVTimeStepLimit.h"
 
-template<>
-InputParameters validParams<NavierStokesApp>()
+template <>
+InputParameters
+validParams<NavierStokesApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-NavierStokesApp::NavierStokesApp(InputParameters parameters) :
-    MooseApp(parameters)
+NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   FluidPropertiesApp::registerObjects(_factory);
@@ -165,12 +165,14 @@ NavierStokesApp::NavierStokesApp(InputParameters parameters) :
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }
 
-NavierStokesApp::~NavierStokesApp()
-{
-}
+NavierStokesApp::~NavierStokesApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void NavierStokesApp__registerApps() { NavierStokesApp::registerApps(); }
+extern "C" void
+NavierStokesApp__registerApps()
+{
+  NavierStokesApp::registerApps();
+}
 void
 NavierStokesApp::registerApps()
 {
@@ -178,7 +180,11 @@ NavierStokesApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void NavierStokesApp__registerObjects(Factory & factory) { NavierStokesApp::registerObjects(factory); }
+extern "C" void
+NavierStokesApp__registerObjects(Factory & factory)
+{
+  NavierStokesApp::registerObjects(factory);
+}
 void
 NavierStokesApp::registerObjects(Factory & factory)
 {
@@ -264,7 +270,8 @@ NavierStokesApp::registerObjects(Factory & factory)
   // BCs
   // Register the newly-named class with the old name for a while in
   // case anyone is using this in their app.
-  registerDeprecatedObjectName(INSMomentumNoBCBCTractionForm, "INSMomentumNoBCBC", "10/07/2017 12:00");
+  registerDeprecatedObjectName(
+      INSMomentumNoBCBCTractionForm, "INSMomentumNoBCBC", "10/07/2017 12:00");
   registerBoundaryCondition(INSMomentumNoBCBCTractionForm);
   registerBoundaryCondition(INSMomentumNoBCBCLaplaceForm);
   registerBoundaryCondition(INSTemperatureNoBCBC);
@@ -324,7 +331,11 @@ NavierStokesApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { NavierStokesApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  NavierStokesApp::associateSyntax(syntax, action_factory);
+}
 
 void
 NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
@@ -355,8 +366,8 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 
   // add BCs actions
   registerMooseObjectTask("add_navier_stokes_bcs", NSWeakStagnationInletBC, /*is_required=*/false);
-  appendMooseObjectTask  ("add_navier_stokes_bcs", NSNoPenetrationBC);
-  appendMooseObjectTask  ("add_navier_stokes_bcs", NSStaticPressureOutletBC);
+  appendMooseObjectTask("add_navier_stokes_bcs", NSNoPenetrationBC);
+  appendMooseObjectTask("add_navier_stokes_bcs", NSStaticPressureOutletBC);
   addTaskDependency("add_navier_stokes_bcs", "add_bc");
   registerAction(AddNavierStokesBCsAction, "add_navier_stokes_bcs");
 

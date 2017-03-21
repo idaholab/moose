@@ -7,8 +7,9 @@
 
 #include "MultiComponentFluidPropertiesMaterialPT.h"
 
-template<>
-InputParameters validParams<MultiComponentFluidPropertiesMaterialPT>()
+template <>
+InputParameters
+validParams<MultiComponentFluidPropertiesMaterialPT>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("pressure", "pressure (Pa)");
@@ -20,8 +21,9 @@ InputParameters validParams<MultiComponentFluidPropertiesMaterialPT>()
   return params;
 }
 
-MultiComponentFluidPropertiesMaterialPT::MultiComponentFluidPropertiesMaterialPT(const InputParameters & parameters) :
-    Material(parameters),
+MultiComponentFluidPropertiesMaterialPT::MultiComponentFluidPropertiesMaterialPT(
+    const InputParameters & parameters)
+  : Material(parameters),
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
     _xnacl(coupledValue("xnacl")),
@@ -35,9 +37,7 @@ MultiComponentFluidPropertiesMaterialPT::MultiComponentFluidPropertiesMaterialPT
 {
 }
 
-MultiComponentFluidPropertiesMaterialPT::~MultiComponentFluidPropertiesMaterialPT()
-{
-}
+MultiComponentFluidPropertiesMaterialPT::~MultiComponentFluidPropertiesMaterialPT() {}
 
 void
 MultiComponentFluidPropertiesMaterialPT::computeQpProperties()

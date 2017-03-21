@@ -12,7 +12,7 @@
 
 class VariableGradientMaterial;
 
-template<>
+template <>
 InputParameters validParams<VariableGradientMaterial>();
 
 /**
@@ -30,4 +30,4 @@ protected:
   MaterialProperty<Real> & _prop;
 };
 
-#endif //VARIABLEGRADIENTMATERIAL_H
+#endif // VARIABLEGRADIENTMATERIAL_H

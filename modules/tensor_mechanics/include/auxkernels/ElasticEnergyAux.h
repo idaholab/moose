@@ -10,10 +10,10 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-//Forward declarations
+// Forward declarations
 class ElasticEnergyAux;
 
-template<>
+template <>
 InputParameters validParams<ElasticEnergyAux>();
 
 class ElasticEnergyAux : public AuxKernel

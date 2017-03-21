@@ -10,24 +10,23 @@
 #include "IntegratedBC.h"
 #include "GapConductance.h"
 
-//Forward Declarations
+// Forward Declarations
 class GapHeatTransfer;
 
-template<>
+template <>
 InputParameters validParams<GapHeatTransfer>();
 
 class GapHeatTransfer : public IntegratedBC
 {
 public:
-
   GapHeatTransfer(const InputParameters & parameters);
 
-  virtual ~GapHeatTransfer(){}
+  virtual ~GapHeatTransfer() {}
 
 protected:
-/**
- * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
- */
+  /**
+   * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
+   */
 
   virtual void computeResidual();
   virtual Real computeQpResidual();
@@ -85,4 +84,4 @@ protected:
   Point _p2;
 };
 
-#endif //GAPHEATTRANSFER_H
+#endif // GAPHEATTRANSFER_H

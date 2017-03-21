@@ -12,7 +12,7 @@
 
 class TensorMechanicsPlasticDruckerPragerHyperbolic;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>();
 
 /**
@@ -23,7 +23,7 @@ InputParameters validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>();
  */
 class TensorMechanicsPlasticDruckerPragerHyperbolic : public TensorMechanicsPlasticDruckerPrager
 {
- public:
+public:
   TensorMechanicsPlasticDruckerPragerHyperbolic(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -32,7 +32,7 @@ class TensorMechanicsPlasticDruckerPragerHyperbolic : public TensorMechanicsPlas
 
   virtual bool useCustomCTO() const override;
 
- protected:
+protected:
   Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
   RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const override;
@@ -40,15 +40,26 @@ class TensorMechanicsPlasticDruckerPragerHyperbolic : public TensorMechanicsPlas
   /// Function that's used in dyieldFunction_dstress and flowPotential
   virtual RankTwoTensor df_dsig(const RankTwoTensor & stress, Real bbb) const override;
 
-  virtual bool returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
-                         Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                         std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+  virtual bool returnMap(const RankTwoTensor & trial_stress,
+                         Real intnl_old,
+                         const RankFourTensor & E_ijkl,
+                         Real ep_plastic_tolerance,
+                         RankTwoTensor & returned_stress,
+                         Real & returned_intnl,
+                         std::vector<Real> & dpm,
+                         RankTwoTensor & delta_dp,
+                         std::vector<Real> & yf,
                          bool & trial_stress_inadmissible) const override;
 
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
-                                                   const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const override;
+  virtual RankFourTensor
+  consistentTangentOperator(const RankTwoTensor & trial_stress,
+                            Real intnl_old,
+                            const RankTwoTensor & stress,
+                            Real intnl,
+                            const RankFourTensor & E_ijkl,
+                            const std::vector<Real> & cumulative_pm) const override;
 
- private:
+private:
   /// smoothing parameter for the cone's tip
   const Real _smoother2;
 

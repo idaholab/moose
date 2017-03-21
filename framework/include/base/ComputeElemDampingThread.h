@@ -24,9 +24,8 @@
 // Forward declarations
 class NonlinearSystemBase;
 class ElementDamper;
-template <typename T> class MooseObjectWarehouse;
-
-
+template <typename T>
+class MooseObjectWarehouse;
 
 class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -50,4 +49,4 @@ protected:
   const MooseObjectWarehouse<ElementDamper> & _element_dampers;
 };
 
-#endif //COMPUTEELEMDAMPINGTHREAD_H
+#endif // COMPUTEELEMDAMPINGTHREAD_H

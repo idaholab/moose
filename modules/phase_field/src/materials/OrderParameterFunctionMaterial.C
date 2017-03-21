@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "OrderParameterFunctionMaterial.h"
 
-template<>
-InputParameters validParams<OrderParameterFunctionMaterial>()
+template <>
+InputParameters
+validParams<OrderParameterFunctionMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addCoupledVar("eta", "Order parameter variable");
@@ -15,8 +16,8 @@ InputParameters validParams<OrderParameterFunctionMaterial>()
   return params;
 }
 
-OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _eta(coupledValue("eta")),
     _eta_var(coupled("eta")),
     _eta_name(getVar("eta", 0)->name()),
@@ -26,4 +27,3 @@ OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const InputParame
     _prop_d2f(declarePropertyDerivative<Real>(_function_name, _eta_name, _eta_name))
 {
 }
-

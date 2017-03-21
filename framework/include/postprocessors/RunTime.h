@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class RunTime;
 
-template<>
+template <>
 InputParameters validParams<RunTime>();
 
 class RunTime : public GeneralPostprocessor

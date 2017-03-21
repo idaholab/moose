@@ -7,8 +7,9 @@
 #include "INSCourant.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSCourant>()
+template <>
+InputParameters
+validParams<INSCourant>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -21,8 +22,8 @@ InputParameters validParams<INSCourant>()
   return params;
 }
 
-INSCourant::INSCourant(const InputParameters & parameters) :
-    AuxKernel(parameters),
+INSCourant::INSCourant(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _u_vel(coupledValue("u")),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)

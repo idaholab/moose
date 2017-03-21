@@ -13,7 +13,7 @@
 
 class AEFVMaterial;
 
-template<>
+template <>
 InputParameters validParams<AEFVMaterial>();
 
 /**
@@ -42,12 +42,10 @@ InputParameters validParams<AEFVMaterial>();
 class AEFVMaterial : public Material
 {
 public:
-
   AEFVMaterial(const InputParameters & parameters);
   virtual ~AEFVMaterial();
 
 protected:
-
   virtual void computeQpProperties();
 
   // cell-average variable

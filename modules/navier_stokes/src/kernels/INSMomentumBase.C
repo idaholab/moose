@@ -7,12 +7,16 @@
 
 #include "INSMomentumBase.h"
 
-template<>
-InputParameters validParams<INSMomentumBase>()
+template <>
+InputParameters
+validParams<INSMomentumBase>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.addClassDescription("This class computes the spatial part of the momentum equation residual and Jacobian for the incompressible Navier-Stokes momentum equation, calling a virtual function to get the viscous contribution.");
+  params.addClassDescription("This class computes the spatial part of the momentum equation "
+                             "residual and Jacobian for the incompressible Navier-Stokes momentum "
+                             "equation, calling a virtual function to get the viscous "
+                             "contribution.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
@@ -23,57 +27,57 @@ InputParameters validParams<INSMomentumBase>()
   params.addRequiredParam<Real>("mu", "dynamic viscosity");
   params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
-  params.addParam<bool>("integrate_p_by_parts", true, "Allows simulations to be run with pressure BC if set to false");
+  params.addRequiredParam<unsigned>(
+      "component",
+      "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
+  params.addParam<bool>("integrate_p_by_parts",
+                        true,
+                        "Allows simulations to be run with pressure BC if set to false");
 
   return params;
 }
 
+INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
+  : Kernel(parameters),
 
+    // Coupled variables
+    _u_vel(coupledValue("u")),
+    _v_vel(coupledValue("v")),
+    _w_vel(coupledValue("w")),
+    _p(coupledValue("p")),
 
-INSMomentumBase::INSMomentumBase(const InputParameters & parameters) :
-  Kernel(parameters),
+    // Gradients
+    _grad_u_vel(coupledGradient("u")),
+    _grad_v_vel(coupledGradient("v")),
+    _grad_w_vel(coupledGradient("w")),
+    _grad_p(coupledGradient("p")),
 
-  // Coupled variables
-  _u_vel(coupledValue("u")),
-  _v_vel(coupledValue("v")),
-  _w_vel(coupledValue("w")),
-  _p(coupledValue("p")),
+    // Variable numberings
+    _u_vel_var_number(coupled("u")),
+    _v_vel_var_number(coupled("v")),
+    _w_vel_var_number(coupled("w")),
+    _p_var_number(coupled("p")),
 
-  // Gradients
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(coupledGradient("v")),
-  _grad_w_vel(coupledGradient("w")),
-  _grad_p(coupledGradient("p")),
+    // Required parameters
+    _mu(getParam<Real>("mu")),
+    _rho(getParam<Real>("rho")),
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _component(getParam<unsigned>("component")),
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
 
-  // Variable numberings
-  _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(coupled("v")),
-  _w_vel_var_number(coupled("w")),
-  _p_var_number(coupled("p")),
-
-  // Required parameters
-  _mu(getParam<Real>("mu")),
-  _rho(getParam<Real>("rho")),
-  _gravity(getParam<RealVectorValue>("gravity")),
-  _component(getParam<unsigned>("component")),
-  _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
-
-  // Material properties
-  // _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity"))
+// Material properties
+// _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity"))
 {
 }
 
-
-
-Real INSMomentumBase::computeQpResidual()
+Real
+INSMomentumBase::computeQpResidual()
 {
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
-  Real convective_part = _rho *
-    (_u_vel[_qp]*_grad_u[_qp](0) +
-     _v_vel[_qp]*_grad_u[_qp](1) +
-     _w_vel[_qp]*_grad_u[_qp](2)) * _test[_i][_qp];
+  Real convective_part = _rho * (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
+                                 _w_vel[_qp] * _grad_u[_qp](2)) *
+                         _test[_i][_qp];
 
   // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
   Real pressure_part = 0.;
@@ -93,15 +97,14 @@ Real INSMomentumBase::computeQpResidual()
   return convective_part + pressure_part + viscous_part /*+ body_force_part*/;
 }
 
-
-
-
-Real INSMomentumBase::computeQpJacobian()
+Real
+INSMomentumBase::computeQpJacobian()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
-  Real convective_part = _rho * ((U*_grad_phi[_j][_qp]) + _phi[_j][_qp]*_grad_u[_qp](_component)) * _test[_i][_qp];
+  Real convective_part =
+      _rho * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) * _test[_i][_qp];
 
   // Call derived class to compute the viscous contribution.
   Real viscous_part = computeQpJacobianViscousPart();
@@ -109,10 +112,8 @@ Real INSMomentumBase::computeQpJacobian()
   return convective_part + viscous_part;
 }
 
-
-
-
-Real INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 {
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)

@@ -8,16 +8,19 @@
 #include "BimodalInverseSuperellipsoidsIC.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<BimodalInverseSuperellipsoidsIC>()
+template <>
+InputParameters
+validParams<BimodalInverseSuperellipsoidsIC>()
 {
   InputParameters params = validParams<BimodalSuperellipsoidsIC>();
-  params.addClassDescription("Bimodal size distribution of large particles (specified in input file, value invalue) and small particles (placed randomly inside the larger particles, value outvalue)");
+  params.addClassDescription("Bimodal size distribution of large particles (specified in input "
+                             "file, value invalue) and small particles (placed randomly inside the "
+                             "larger particles, value outvalue)");
   return params;
 }
 
-BimodalInverseSuperellipsoidsIC::BimodalInverseSuperellipsoidsIC(const InputParameters & parameters) :
-    BimodalSuperellipsoidsIC(parameters)
+BimodalInverseSuperellipsoidsIC::BimodalInverseSuperellipsoidsIC(const InputParameters & parameters)
+  : BimodalSuperellipsoidsIC(parameters)
 {
 }
 
@@ -25,7 +28,8 @@ void
 BimodalInverseSuperellipsoidsIC::initialSetup()
 {
   if (_size_variation_type == 2 && _size_variation > 0.0)
-    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalInverseSuperellipsoidsIC");
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in "
+               "BimodalInverseSuperellipsoidsIC");
 
   BimodalSuperellipsoidsIC::initialSetup();
 }
@@ -39,16 +43,18 @@ BimodalInverseSuperellipsoidsIC::value(const Point & p)
   // First loop over the specified superellipsoids
   for (unsigned int ellip = 0; ellip < _x_positions.size() && value != _invalue; ++ellip)
   {
-    val2 = computeSuperellipsoidValue(p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
-    if ( (val2 > value && _invalue > _outvalue) || (val2 < value && _outvalue > _invalue) )
+    val2 = computeSuperellipsoidValue(
+        p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
+    if ((val2 > value && _invalue > _outvalue) || (val2 < value && _outvalue > _invalue))
       value = val2;
   }
 
   // Then loop over the randomly positioned particles and set value inside them back to outvalue
   for (unsigned int ellip = _x_positions.size(); ellip < _x_positions.size() + _npart; ++ellip)
   {
-    val2 = computeSuperellipsoidInverseValue(p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
-    if ( (val2 < value && _invalue > _outvalue) || (val2 > value && _outvalue > _invalue) )
+    val2 = computeSuperellipsoidInverseValue(
+        p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
+    if ((val2 < value && _invalue > _outvalue) || (val2 > value && _outvalue > _invalue))
       value = val2;
   }
 
@@ -78,9 +84,9 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
       num_tries++;
 
       RealTensorValue ran;
-      ran(0,0) = _random.rand(_tid);
-      ran(1,1) = _random.rand(_tid);
-      ran(2,2) = _random.rand(_tid);
+      ran(0, 0) = _random.rand(_tid);
+      ran(1, 1) = _random.rand(_tid);
+      ran(2, 2) = _random.rand(_tid);
 
       _centers[i] = _bottom_left + ran * _range;
 
@@ -96,18 +102,18 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
         const Real dist = dist_vec.norm();
 
         // First calculate rmn1 = r1^(-n), replacing sin, cos functions with distances
-        Real rmn1 = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j])
-                   + std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j])
-                   + std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]));
+        Real rmn1 = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j]) +
+                     std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j]) +
+                     std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]));
         // Then calculate r1 from rmn1
-        const Real r1 = std::pow(rmn1, (-1.0/_ns[j]));
+        const Real r1 = std::pow(rmn1, (-1.0 / _ns[j]));
 
         // Now calculate the distance r2 from the center of the randomly placed
         // superellipsoid to its outside edge in the same manner
-        Real rmn2 = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i])
-                   + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
-                   + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
-        const Real r2 = std::pow(rmn2, (-1.0/_ns[i]));
+        Real rmn2 = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i]) +
+                     std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i]) +
+                     std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
+        const Real r2 = std::pow(rmn2, (-1.0 / _ns[i]));
 
         if (j < _x_positions.size())
         {
@@ -124,13 +130,15 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
       // accept the position of the new center
       goto accept;
 
-      // retry a new position until tries are exhausted
-      fail: continue;
+    // retry a new position until tries are exhausted
+    fail:
+      continue;
     }
 
     if (num_tries == _max_num_tries)
       mooseError("Too many tries in MultiSmoothCircleIC");
 
-    accept: continue;
+  accept:
+    continue;
   }
 }

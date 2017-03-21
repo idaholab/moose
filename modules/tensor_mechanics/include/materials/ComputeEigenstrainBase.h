@@ -49,4 +49,4 @@ protected:
   Real computeVolumetricStrainComponent(const Real volumetric_strain) const;
 };
 
-#endif //COMPUTEEIGENSTRAINBASE_H
+#endif // COMPUTEEIGENSTRAINBASE_H

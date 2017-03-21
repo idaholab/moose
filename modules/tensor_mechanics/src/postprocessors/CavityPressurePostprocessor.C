@@ -8,20 +8,22 @@
 
 #include "CavityPressureUserObject.h"
 
-template<>
-InputParameters validParams<CavityPressurePostprocessor>()
+template <>
+InputParameters
+validParams<CavityPressurePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<UserObjectName>("cavity_pressure_uo", "The CavityPressureUserObject that computes the initial moles");
+  params.addRequiredParam<UserObjectName>(
+      "cavity_pressure_uo", "The CavityPressureUserObject that computes the initial moles");
   params.addRequiredParam<std::string>("quantity", "The quantity to report");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 CavityPressurePostprocessor::CavityPressurePostprocessor(const InputParameters & params)
-  :GeneralPostprocessor(params),
-   _cpuo(getUserObject<CavityPressureUserObject>("cavity_pressure_uo")),
-   _quantity(getParam<std::string>("quantity"))
+  : GeneralPostprocessor(params),
+    _cpuo(getUserObject<CavityPressureUserObject>("cavity_pressure_uo")),
+    _quantity(getParam<std::string>("quantity"))
 {
 }
 

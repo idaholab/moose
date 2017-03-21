@@ -12,9 +12,8 @@
 // Forward Declarations
 class NSEnergyInviscidSpecifiedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>();
-
 
 /**
  * The inviscid energy BC term with specified normal flow.

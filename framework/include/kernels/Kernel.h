@@ -19,11 +19,10 @@
 
 class Kernel;
 
-template<>
+template <>
 InputParameters validParams<Kernel>();
 
-class Kernel :
-  public KernelBase
+class Kernel : public KernelBase
 {
 public:
   Kernel(const InputParameters & parameters);

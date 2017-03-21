@@ -28,7 +28,7 @@ namespace libMesh
 class ExodusII_IO;
 }
 
-template<>
+template <>
 InputParameters validParams<Exodus>();
 
 /**
@@ -37,7 +37,6 @@ InputParameters validParams<Exodus>();
 class Exodus : public AdvancedOutput<OversampleOutput>
 {
 public:
-
   /**
    * Class constructor
    */
@@ -80,7 +79,6 @@ public:
   virtual void sequence(bool state);
 
 protected:
-
   /**
    * Outputs nodal, nonlinear variables
    */
@@ -125,19 +123,21 @@ protected:
   /**
    * Flag for indicating the status of the ExodusII file that is being written. The ExodusII_IO
    * interface requires that the file be 'initialized' prior to writing any type of data. This
-   * initialization occurs when write_timestep() is called. However, write_timestep also writes nodal
-   * data, so in the case where no nodal data is output, it is necessary to call write_timestep() after
-   * calling set_output_variables with an empty input string. This flag allows for the various output
+   * initialization occurs when write_timestep() is called. However, write_timestep also writes
+   * nodal
+   * data, so in the case where no nodal data is output, it is necessary to call write_timestep()
+   * after
+   * calling set_output_variables with an empty input string. This flag allows for the various
+   * output
    * methods to check that the ExodusII file is in the proper state prior to writing data.
    * @see outputEmptyTimestep()
    */
   bool _exodus_initialized;
 
-
 private:
-
   /**
-   * A helper function for 'initializing' the ExodusII output file, see the comments for the _initialized
+   * A helper function for 'initializing' the ExodusII output file, see the comments for the
+   * _initialized
    * member variable.
    * @see _initialized
    */

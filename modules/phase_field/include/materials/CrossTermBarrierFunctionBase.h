@@ -13,7 +13,7 @@
 // Forward Declarations
 class CrossTermBarrierFunctionBase;
 
-template<>
+template <>
 InputParameters validParams<CrossTermBarrierFunctionBase>();
 
 /**
@@ -45,13 +45,13 @@ protected:
   ///@{ Barrier function and its derivatives
   MaterialProperty<Real> & _prop_g;
   std::vector<MaterialProperty<Real> *> _prop_dg;
-  std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2g;
+  std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2g;
   ///@}
 
   ///@{ Switching functions and their derivatives
   std::vector<const MaterialProperty<Real> *> _h;
-  std::vector<std::vector<const MaterialProperty<Real> *> > _dh;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _dh;
   ///@}
 };
 
-#endif //CROSSTERMBARRIERFUNCTIONBASE_H
+#endif // CROSSTERMBARRIERFUNCTIONBASE_H

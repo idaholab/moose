@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSPIECEWISELINEARSINKFLUX_H
 #define RICHARDSPIECEWISELINEARSINKFLUX_H
 
@@ -15,10 +14,10 @@
 
 class Function;
 
-//Forward Declarations
+// Forward Declarations
 class RichardsPiecewiseLinearSinkFlux;
 
-template<>
+template <>
 InputParameters validParams<RichardsPiecewiseLinearSinkFlux>();
 
 /**
@@ -30,8 +29,7 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>();
  * and if _use_mobility = true, this integrand is multiplied by density*knn/viscosity,
  *      where knn is n.permeability.n where n is the normal to the boundary
  */
-class RichardsPiecewiseLinearSinkFlux:
-  public SideIntegralVariablePostprocessor
+class RichardsPiecewiseLinearSinkFlux : public SideIntegralVariablePostprocessor
 {
 public:
   RichardsPiecewiseLinearSinkFlux(const InputParameters & parameters);
@@ -62,20 +60,19 @@ protected:
   unsigned int _pvar;
 
   /// porepressure values (only the _pvar component is used)
-  const MaterialProperty<std::vector<Real> > &_pp;
+  const MaterialProperty<std::vector<Real>> & _pp;
 
   /// fluid viscosity
-  const MaterialProperty<std::vector<Real> > &_viscosity;
+  const MaterialProperty<std::vector<Real>> & _viscosity;
 
   /// medium permeability
   const MaterialProperty<RealTensorValue> & _permeability;
 
   /// fluid relative permeability
-  const MaterialProperty<std::vector<Real> > &_rel_perm;
+  const MaterialProperty<std::vector<Real>> & _rel_perm;
 
   /// fluid density
-  const MaterialProperty<std::vector<Real> > &_density;
-
+  const MaterialProperty<std::vector<Real>> & _density;
 };
 
 #endif

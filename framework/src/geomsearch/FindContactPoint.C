@@ -27,26 +27,32 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/vector_value.h"
 
-
 namespace Moose
 {
 
 /**
- * Finds the closest point (called the contact point) on the master_elem on side "side" to the slave_point.
+ * Finds the closest point (called the contact point) on the master_elem on side "side" to the
+ * slave_point.
  *
  * @param p_info The penetration info object, contains master_elem, side, various other information
  * @param fe_elem FE object for the element
  * @param fe_side FE object for the side
  * @param fe_side_type The type of fe_side, needed for inverse_map routines
  * @param start_with_centroid if true, start inverse mapping procedure from element centroid
- * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a side
+ * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a
+ * side
  * @param slave_point The physical space coordinates of the slave node
- * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the element.
+ * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the
+ * element.
  */
 void
 findContactPoint(PenetrationInfo & p_info,
-                 FEBase * fe_elem, FEBase * fe_side, FEType & fe_side_type, const Point & slave_point,
-                 bool start_with_centroid, const Real tangential_tolerance,
+                 FEBase * fe_elem,
+                 FEBase * fe_side,
+                 FEType & fe_side_type,
+                 const Point & slave_point,
+                 bool start_with_centroid,
+                 const Real tangential_tolerance,
                  bool & contact_point_on_side)
 {
   const Elem * master_elem = p_info._elem;
@@ -69,7 +75,8 @@ findContactPoint(PenetrationInfo & p_info,
   {
     const Node * nearest_node = side->node_ptr(0);
     p_info._closest_point = *nearest_node;
-    p_info._closest_point_ref = master_elem->master_point(master_elem->get_node_index(nearest_node));
+    p_info._closest_point_ref =
+        master_elem->master_point(master_elem->get_node_index(nearest_node));
     std::vector<Point> elem_points = {p_info._closest_point_ref};
     fe_elem->reinit(master_elem, &elem_points);
 
@@ -92,7 +99,8 @@ findContactPoint(PenetrationInfo & p_info,
   Point ref_point;
 
   if (start_with_centroid)
-    ref_point = FEInterface::inverse_map(dim-1, fe_side_type, side, side->centroid(), TOLERANCE, false);
+    ref_point =
+        FEInterface::inverse_map(dim - 1, fe_side_type, side, side->centroid(), TOLERANCE, false);
   else
     ref_point = p_info._closest_point_ref;
 
@@ -102,34 +110,34 @@ findContactPoint(PenetrationInfo & p_info,
 
   Real update_size = std::numeric_limits<Real>::max();
 
-  //Least squares
-  for (unsigned int it = 0; it < 3 && update_size > TOLERANCE*1e3; ++it)
+  // Least squares
+  for (unsigned int it = 0; it < 3 && update_size > TOLERANCE * 1e3; ++it)
   {
-    DenseMatrix<Real> jac(dim-1, dim-1);
+    DenseMatrix<Real> jac(dim - 1, dim - 1);
 
-    jac(0,0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
+    jac(0, 0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
 
-    if (dim-1 == 2)
+    if (dim - 1 == 2)
     {
-      jac(1,0) = -(dxyz_dxi[0] * dxyz_deta[0]);
-      jac(0,1) = -(dxyz_deta[0] * dxyz_dxi[0]);
-      jac(1,1) = -(dxyz_deta[0] * dxyz_deta[0]);
+      jac(1, 0) = -(dxyz_dxi[0] * dxyz_deta[0]);
+      jac(0, 1) = -(dxyz_deta[0] * dxyz_dxi[0]);
+      jac(1, 1) = -(dxyz_deta[0] * dxyz_deta[0]);
     }
 
-    DenseVector<Real> rhs(dim-1);
+    DenseVector<Real> rhs(dim - 1);
 
-    rhs(0) = dxyz_dxi[0]*d;
+    rhs(0) = dxyz_dxi[0] * d;
 
-    if (dim-1 == 2)
-      rhs(1) = dxyz_deta[0]*d;
+    if (dim - 1 == 2)
+      rhs(1) = dxyz_deta[0] * d;
 
-    DenseVector<Real> update(dim-1);
+    DenseVector<Real> update(dim - 1);
 
     jac.lu_solve(rhs, update);
 
     ref_point(0) -= update(0);
 
-    if (dim-1 == 2)
+    if (dim - 1 == 2)
       ref_point(1) -= update(1);
 
     points[0] = ref_point;
@@ -141,39 +149,39 @@ findContactPoint(PenetrationInfo & p_info,
 
   update_size = std::numeric_limits<Real>::max();
 
-  unsigned nit=0;
+  unsigned nit = 0;
 
   // Newton Loop
-  for (; nit < 12 && update_size > TOLERANCE*TOLERANCE; nit++)
+  for (; nit < 12 && update_size > TOLERANCE * TOLERANCE; nit++)
   {
     d = slave_point - phys_point[0];
 
-    DenseMatrix<Real> jac(dim-1, dim-1);
+    DenseMatrix<Real> jac(dim - 1, dim - 1);
 
-    jac(0,0) = (d2xyz_dxi2[0]*d)-(dxyz_dxi[0] * dxyz_dxi[0]);
+    jac(0, 0) = (d2xyz_dxi2[0] * d) - (dxyz_dxi[0] * dxyz_dxi[0]);
 
-    if (dim-1 == 2)
+    if (dim - 1 == 2)
     {
-      jac(1,0) = (d2xyz_dxieta[0]*d)-(dxyz_dxi[0] * dxyz_deta[0]);
+      jac(1, 0) = (d2xyz_dxieta[0] * d) - (dxyz_dxi[0] * dxyz_deta[0]);
 
-      jac(0,1) = (d2xyz_detaxi[0]*d)-(dxyz_deta[0] * dxyz_dxi[0]);
-      jac(1,1) = (d2xyz_deta2[0]*d)-(dxyz_deta[0] * dxyz_deta[0]);
+      jac(0, 1) = (d2xyz_detaxi[0] * d) - (dxyz_deta[0] * dxyz_dxi[0]);
+      jac(1, 1) = (d2xyz_deta2[0] * d) - (dxyz_deta[0] * dxyz_deta[0]);
     }
 
-    DenseVector<Real> rhs(dim-1);
+    DenseVector<Real> rhs(dim - 1);
 
-    rhs(0) = -dxyz_dxi[0]*d;
+    rhs(0) = -dxyz_dxi[0] * d;
 
-    if (dim-1 == 2)
-      rhs(1) = -dxyz_deta[0]*d;
+    if (dim - 1 == 2)
+      rhs(1) = -dxyz_deta[0] * d;
 
-    DenseVector<Real> update(dim-1);
+    DenseVector<Real> update(dim - 1);
 
     jac.lu_solve(rhs, update);
 
     ref_point(0) += update(0);
 
-    if (dim-1 == 2)
+    if (dim - 1 == 2)
       ref_point(1) += update(1);
 
     points[0] = ref_point;
@@ -183,23 +191,23 @@ findContactPoint(PenetrationInfo & p_info,
     update_size = update.l2_norm();
   }
 
-/*
-  if (nit == 12 && update_size > TOLERANCE*TOLERANCE)
-    Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
-*/
+  /*
+    if (nit == 12 && update_size > TOLERANCE*TOLERANCE)
+      Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
+  */
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
   p_info._distance = d.norm();
 
-  if (dim-1 == 2)
+  if (dim - 1 == 2)
   {
     p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
     p_info._normal /= p_info._normal.norm();
   }
   else
   {
-    p_info._normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
+    p_info._normal = RealGradient(dxyz_dxi[0](1), -dxyz_dxi[0](0));
     if (std::fabs(p_info._normal.norm()) > 1e-15)
       p_info._normal /= p_info._normal.norm();
   }
@@ -215,8 +223,8 @@ findContactPoint(PenetrationInfo & p_info,
 
   if (!contact_point_on_side)
   {
-    p_info._closest_point_on_face_ref=ref_point;
-    restrictPointToFace(p_info._closest_point_on_face_ref,side,p_info._off_edge_nodes);
+    p_info._closest_point_on_face_ref = ref_point;
+    restrictPointToFace(p_info._closest_point_on_face_ref, side, p_info._off_edge_nodes);
 
     points[0] = p_info._closest_point_on_face_ref;
     fe_side->reinit(side, &points);
@@ -231,8 +239,8 @@ findContactPoint(PenetrationInfo & p_info,
     }
   }
 
-  const std::vector<std::vector<Real> > & phi = fe_side->get_phi();
-  const std::vector<std::vector<RealGradient> > & grad_phi = fe_side->get_dphi();
+  const std::vector<std::vector<Real>> & phi = fe_side->get_phi();
+  const std::vector<std::vector<RealGradient>> & grad_phi = fe_side->get_dphi();
 
   points[0] = p_info._closest_point_ref;
   fe_side->reinit(side, &points);
@@ -242,17 +250,15 @@ findContactPoint(PenetrationInfo & p_info,
   p_info._dxyzdxi = dxyz_dxi;
   p_info._dxyzdeta = dxyz_deta;
   p_info._d2xyzdxideta = d2xyz_dxieta;
-
 }
 
-void restrictPointToFace(Point& p,
-                         const Elem* side,
-                         std::vector<const Node *> & off_edge_nodes)
+void
+restrictPointToFace(Point & p, const Elem * side, std::vector<const Node *> & off_edge_nodes)
 {
   const ElemType t(side->type());
   off_edge_nodes.clear();
-  Real &xi   = p(0);
-  Real &eta  = p(1);
+  Real & xi = p(0);
+  Real & eta = p(1);
 
   switch (t)
   {
@@ -286,29 +292,25 @@ void restrictPointToFace(Point& p,
         eta = 0.0;
         off_edge_nodes.push_back(side->node_ptr(0));
       }
-      else if (xi > 0.0 && xi < 1.0
-               && eta < 0.0)
+      else if (xi > 0.0 && xi < 1.0 && eta < 0.0)
       {
         eta = 0.0;
         off_edge_nodes.push_back(side->node_ptr(0));
         off_edge_nodes.push_back(side->node_ptr(1));
       }
-      else if (eta > 0.0 && eta < 1.0
-               && xi < 0.0)
+      else if (eta > 0.0 && eta < 1.0 && xi < 0.0)
       {
         xi = 0.0;
         off_edge_nodes.push_back(side->node_ptr(2));
         off_edge_nodes.push_back(side->node_ptr(0));
       }
-      else if (xi >= 1.0
-               && (eta - xi) <= -1.0)
+      else if (xi >= 1.0 && (eta - xi) <= -1.0)
       {
         xi = 1.0;
         eta = 0.0;
         off_edge_nodes.push_back(side->node_ptr(1));
       }
-      else if (eta >= 1.0
-               && (eta - xi) >= 1.0)
+      else if (eta >= 1.0 && (eta - xi) >= 1.0)
       {
         xi = 0.0;
         eta = 1.0;
@@ -316,7 +318,7 @@ void restrictPointToFace(Point& p,
       }
       else if ((xi + eta) > 1.0)
       {
-        Real delta = (xi+eta-1.0)/2.0;
+        Real delta = (xi + eta - 1.0) / 2.0;
         xi -= delta;
         eta -= delta;
         off_edge_nodes.push_back(side->node_ptr(1));
@@ -394,5 +396,4 @@ void restrictPointToFace(Point& p,
   }
 }
 
-
-} //namespace Moose
+} // namespace Moose

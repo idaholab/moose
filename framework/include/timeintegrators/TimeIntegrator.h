@@ -27,10 +27,11 @@ class NonlinearSystemBase;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<TimeIntegrator>();
 
 /**
@@ -40,12 +41,11 @@ InputParameters validParams<TimeIntegrator>();
  * 1) computing u_dot vector (used for computing time derivatives in kernels) and its derivative
  * 2) combining the residual vectors into the final one
  *
- * Capability (1) is used by both NonlinearSystem and AuxiliarySystem, while (2) can be obviously used
+ * Capability (1) is used by both NonlinearSystem and AuxiliarySystem, while (2) can be obviously
+ * used
  * only by NonlinearSystem (AuxiliarySystem does not produce residual).
  */
-class TimeIntegrator :
-  public MooseObject,
-  public Restartable
+class TimeIntegrator : public MooseObject, public Restartable
 {
 public:
   TimeIntegrator(const InputParameters & parameters);
@@ -63,7 +63,7 @@ public:
    * the _Re_time and _Re_non_time vectors in a way that makes sense
    * for the particular TimeIntegration method.
    */
-  virtual void postStep(NumericVector<Number> & /*residual*/) { }
+  virtual void postStep(NumericVector<Number> & /*residual*/) {}
 
   /**
    * Callback to the TimeIntegrator called immediately after
@@ -78,7 +78,6 @@ public:
   virtual void computeTimeDerivatives() = 0;
 
 protected:
-
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
   NonlinearSystemBase & _nl;
@@ -88,7 +87,7 @@ protected:
   /// solution vector for \f$ {du^dot}\over{du} \f$
   Real & _du_dot_du;
   /// solution vectors
-  const NumericVector<Number> * & _solution;
+  const NumericVector<Number> *& _solution;
   const NumericVector<Number> & _solution_old;
   const NumericVector<Number> & _solution_older;
   //

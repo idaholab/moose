@@ -14,23 +14,26 @@
 
 #include "SideFluxIntegral.h"
 
-template<>
-InputParameters validParams<SideFluxIntegral>()
+template <>
+InputParameters
+validParams<SideFluxIntegral>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
-  params.addRequiredParam<std::string>("diffusivity", "The name of the diffusivity material property that will be used in the flux computation.");
+  params.addRequiredParam<std::string>(
+      "diffusivity",
+      "The name of the diffusivity material property that will be used in the flux computation.");
   return params;
 }
 
-SideFluxIntegral::SideFluxIntegral(const InputParameters & parameters) :
-    SideIntegralVariablePostprocessor(parameters),
+SideFluxIntegral::SideFluxIntegral(const InputParameters & parameters)
+  : SideIntegralVariablePostprocessor(parameters),
     _diffusivity(parameters.get<std::string>("diffusivity")),
     _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
-{}
+{
+}
 
 Real
 SideFluxIntegral::computeQpIntegral()
 {
-  return -_diffusion_coef[_qp]*_grad_u[_qp]*_normals[_qp];
+  return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
 }
-

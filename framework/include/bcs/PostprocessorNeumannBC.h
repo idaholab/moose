@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class PostprocessorNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorNeumannBC>();
 
 /**
@@ -36,7 +35,6 @@ public:
    */
   PostprocessorNeumannBC(const InputParameters & parameters);
 
-
 protected:
   virtual Real computeQpResidual() override;
 
@@ -44,5 +42,4 @@ protected:
   const PostprocessorValue & _value;
 };
 
-
-#endif //POSTPROCESSORNEUMANNBC_H
+#endif // POSTPROCESSORNEUMANNBC_H

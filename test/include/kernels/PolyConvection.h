@@ -18,7 +18,7 @@
 
 class PolyConvection;
 
-template<>
+template <>
 InputParameters validParams<PolyConvection>();
 
 class PolyConvection : public Kernel
@@ -35,7 +35,6 @@ protected:
   Real _x;
   Real _y;
   Real _z;
-
 };
 
-#endif //POLYCONVECTION_H_
+#endif // POLYCONVECTION_H_

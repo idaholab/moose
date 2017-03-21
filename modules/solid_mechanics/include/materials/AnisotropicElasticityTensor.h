@@ -75,9 +75,7 @@ public:
 
   void setMaterialConstantc44(const Real c44);
 
-
 protected:
-
   std::vector<Real> _euler_angle; // Stores Euler angeles
 
   Real _c11, _c12, _c44; // Material Constants
@@ -87,7 +85,6 @@ protected:
    */
 
   virtual void calculateEntries(unsigned int qp);
-
 };
 
-#endif //ANISOTROPICELASTICITYTENSOR_H
+#endif // ANISOTROPICELASTICITYTENSOR_H

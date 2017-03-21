@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledAllenCahn;
 
-template<>
+template <>
 InputParameters validParams<CoupledAllenCahn>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _d2FdVdarg;
 };
 
-#endif //COUPLEDALLENCAHN_H
+#endif // COUPLEDALLENCAHN_H

@@ -9,10 +9,10 @@
 
 #include "ACGrGrBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class ACGrGrMulti;
 
-template<>
+template <>
 InputParameters validParams<ACGrGrMulti>();
 
 /**
@@ -37,4 +37,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_gammas;
 };
 
-#endif //ACGRGRMULTI_H
+#endif // ACGRGRMULTI_H

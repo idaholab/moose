@@ -23,7 +23,7 @@
 /**
  * Base class for assembly-like calculations.
  */
-template<typename RangeType>
+template <typename RangeType>
 class ThreadedElementLoopBase
 {
 public:
@@ -33,7 +33,7 @@ public:
 
   virtual ~ThreadedElementLoopBase();
 
-  void operator() (const RangeType & range, bool bypass_threading=false);
+  void operator()(const RangeType & range, bool bypass_threading = false);
 
   /**
    * Called before the element range loop
@@ -50,14 +50,14 @@ public:
    *
    * @param elem - active element
    */
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem);
 
   /**
    * Called after the element assembly is done (including surface assembling)
    *
    * @param elem - active element
    */
-  virtual void postElement(const Elem *elem);
+  virtual void postElement(const Elem * elem);
 
   /**
    * Called when doing boundary assembling
@@ -66,7 +66,7 @@ public:
    * @param side - The side of the element in question.
    * @param bnd_id - ID of the boundary we are at
    */
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id);
 
   /**
    * Called when doing internal edge assembling
@@ -74,7 +74,7 @@ public:
    * @param elem - Element we are on
    * @param side - local side number of the element 'elem'
    */
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
+  virtual void onInternalSide(const Elem * elem, unsigned int side);
 
   /**
    * Called when doing interface assembling
@@ -83,7 +83,7 @@ public:
    * @param side - local side number of the element 'elem'
    * @param bnd_id - ID of the interface we are at
    */
-  virtual void onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id);
 
   /**
    * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
@@ -97,7 +97,7 @@ public:
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException &) {};
+  virtual void caughtMooseException(MooseException &){};
 
   /**
    * Whether or not the loop should continue.
@@ -117,27 +117,26 @@ protected:
   SubdomainID _old_subdomain;
 };
 
-
-template<typename RangeType>
-ThreadedElementLoopBase<RangeType>::ThreadedElementLoopBase(MooseMesh & mesh) :
-    _mesh(mesh)
+template <typename RangeType>
+ThreadedElementLoopBase<RangeType>::ThreadedElementLoopBase(MooseMesh & mesh) : _mesh(mesh)
 {
 }
 
-template<typename RangeType>
-ThreadedElementLoopBase<RangeType>::ThreadedElementLoopBase(ThreadedElementLoopBase & x, Threads::split /*split*/) :
-    _mesh(x._mesh)
+template <typename RangeType>
+ThreadedElementLoopBase<RangeType>::ThreadedElementLoopBase(ThreadedElementLoopBase & x,
+                                                            Threads::split /*split*/)
+  : _mesh(x._mesh)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 ThreadedElementLoopBase<RangeType>::~ThreadedElementLoopBase()
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
-ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool bypass_threading)
+ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool bypass_threading)
 {
   try
   {
@@ -148,12 +147,12 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool b
 
     _subdomain = std::numeric_limits<SubdomainID>::max();
     typename RangeType::const_iterator el = range.begin();
-    for (el = range.begin() ; el != range.end(); ++el)
+    for (el = range.begin(); el != range.end(); ++el)
     {
       if (!keepGoing())
         break;
 
-      const Elem* elem = *el;
+      const Elem * elem = *el;
       unsigned int cur_subdomain = elem->subdomain_id();
 
       _old_subdomain = _subdomain;
@@ -164,19 +163,23 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool b
 
       onElement(elem);
 
-      for (unsigned int side=0; side<elem->n_sides(); side++)
+      for (unsigned int side = 0; side < elem->n_sides(); side++)
       {
         std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
 
         if (boundary_ids.size() > 0)
-          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
+               it != boundary_ids.end();
+               ++it)
             onBoundary(elem, side, *it);
 
         if (elem->neighbor(side) != NULL)
         {
           onInternalSide(elem, side);
           if (boundary_ids.size() > 0)
-            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
+                 it != boundary_ids.end();
+                 ++it)
               onInterface(elem, side, *it);
         }
       } // sides
@@ -192,54 +195,56 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool b
   }
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::pre()
 {
-
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::post()
 {
-
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onElement(const Elem * /*elem*/)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::postElement(const Elem * /*elem*/)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
-ThreadedElementLoopBase<RangeType>::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
+ThreadedElementLoopBase<RangeType>::onBoundary(const Elem * /*elem*/,
+                                               unsigned int /*side*/,
+                                               BoundaryID /*bnd_id*/)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
-ThreadedElementLoopBase<RangeType>::onInterface(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
+ThreadedElementLoopBase<RangeType>::onInterface(const Elem * /*elem*/,
+                                                unsigned int /*side*/,
+                                                BoundaryID /*bnd_id*/)
 {
 }
 
-template<typename RangeType>
+template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::subdomainChanged()
 {
 }
 
-#endif //THREADEDELEMENTLOOPBASE_H
+#endif // THREADEDELEMENTLOOPBASE_H

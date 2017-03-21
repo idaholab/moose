@@ -21,12 +21,10 @@
 // Forward Declarations
 class ElementVariablePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementVariablePostprocessor>();
 
-class ElementVariablePostprocessor :
-  public ElementPostprocessor,
-  public MooseVariableInterface
+class ElementVariablePostprocessor : public ElementPostprocessor, public MooseVariableInterface
 {
 public:
   ElementVariablePostprocessor(const InputParameters & parameters);

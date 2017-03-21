@@ -9,10 +9,10 @@
 
 #include "DerivativeFunctionMaterialBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class MathFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<MathFreeEnergy>();
 
 /**
@@ -36,4 +36,4 @@ private:
   unsigned int _c_var;
 };
 
-#endif //MATHFREEENERGY_H
+#endif // MATHFREEENERGY_H

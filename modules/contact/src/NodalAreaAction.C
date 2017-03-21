@@ -14,8 +14,9 @@
 
 static unsigned int counter = 0;
 
-template<>
-InputParameters validParams<NodalAreaAction>()
+template <>
+InputParameters
+validParams<NodalAreaAction>()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
@@ -27,22 +28,18 @@ InputParameters validParams<NodalAreaAction>()
   return params;
 }
 
-NodalAreaAction::NodalAreaAction(const InputParameters & params) :
-  MooseObjectAction(params)
-{
-}
+NodalAreaAction::NodalAreaAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 NodalAreaAction::act()
 {
-  _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = {getParam<BoundaryName>("slave")};
-  _moose_object_pars.set<std::vector<VariableName> >("variable") = {"nodal_area_" + _name};
+  _moose_object_pars.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+  _moose_object_pars.set<std::vector<VariableName>>("variable") = {"nodal_area_" + _name};
 
   mooseAssert(_problem, "Problem pointer is NULL");
   _moose_object_pars.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
   _moose_object_pars.set<bool>("use_displaced_mesh") = true;
 
-  _problem->addUserObject("NodalArea",
-                          "nodal_area_object_" + Moose::stringify(counter++),
-                          _moose_object_pars);
+  _problem->addUserObject(
+      "NodalArea", "nodal_area_object_" + Moose::stringify(counter++), _moose_object_pars);
 }

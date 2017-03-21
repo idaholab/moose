@@ -9,11 +9,10 @@
 
 #include "NSMassBC.h"
 
-
 // Forward Declarations
 class NSMassUnspecifiedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSMassUnspecifiedNormalFlowBC>();
 
 /**

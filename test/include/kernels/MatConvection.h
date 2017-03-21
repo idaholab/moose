@@ -19,8 +19,7 @@
 // Forward Declaration
 class MatConvection;
 
-
-template<>
+template <>
 InputParameters validParams<MatConvection>();
 
 class MatConvection : public Kernel

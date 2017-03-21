@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "GeometricSearchData.h"
-//Moose includes
+// Moose includes
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
 #include "ElementPairLocator.h"
@@ -23,12 +23,10 @@
 
 static const unsigned int MORTAR_BASE_ID = 2e6;
 
-
-GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh) :
-    _subproblem(subproblem),
-    _mesh(mesh),
-    _first(true)
-{}
+GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh)
+  : _subproblem(subproblem), _mesh(mesh), _first(true)
+{
+}
 
 GeometricSearchData::~GeometricSearchData()
 {
@@ -151,19 +149,28 @@ GeometricSearchData::maxPatchPercentage()
 }
 
 PenetrationLocator &
-GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
+GeometricSearchData::getPenetrationLocator(const BoundaryName & master,
+                                           const BoundaryName & slave,
+                                           Order order)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+  unsigned int slave_id = _mesh.getBoundaryID(slave);
 
   _subproblem.addGhostedBoundary(master_id);
   _subproblem.addGhostedBoundary(slave_id);
 
-  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
+  PenetrationLocator * pl =
+      _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
   if (!pl)
   {
-    pl = new PenetrationLocator(_subproblem, *this, _mesh, master_id, slave_id, order, getNearestNodeLocator(master_id, slave_id));
+    pl = new PenetrationLocator(_subproblem,
+                                *this,
+                                _mesh,
+                                master_id,
+                                slave_id,
+                                order,
+                                getNearestNodeLocator(master_id, slave_id));
     _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)] = pl;
   }
 
@@ -171,10 +178,12 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const Bo
 }
 
 PenetrationLocator &
-GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order)
+GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master,
+                                                     const BoundaryName & slave,
+                                                     Order order)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+  unsigned int slave_id = _mesh.getBoundaryID(slave);
 
   _subproblem.addGhostedBoundary(master_id);
   _subproblem.addGhostedBoundary(slave_id);
@@ -186,11 +195,18 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
 
   _slave_to_qslave[slave_id] = qslave_id;
 
-  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)];
+  PenetrationLocator * pl =
+      _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)];
 
   if (!pl)
   {
-    pl = new PenetrationLocator(_subproblem, *this, _mesh, master_id, qslave_id, order, getQuadratureNearestNodeLocator(master_id, slave_id));
+    pl = new PenetrationLocator(_subproblem,
+                                *this,
+                                _mesh,
+                                master_id,
+                                qslave_id,
+                                order,
+                                getQuadratureNearestNodeLocator(master_id, slave_id));
     _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)] = pl;
   }
 
@@ -198,34 +214,45 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
 }
 
 PenetrationLocator &
-GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintType side_type, Order order)
+GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master,
+                                                 const BoundaryName & slave,
+                                                 Moose::ConstraintType side_type,
+                                                 Order order)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+  unsigned int slave_id = _mesh.getBoundaryID(slave);
 
   // Generate a new boundary id
   // TODO: Make this better!
   unsigned int mortar_boundary_id, boundary_id;
   switch (side_type)
   {
-  case Moose::Master:
-    boundary_id = master_id;
-    mortar_boundary_id = MORTAR_BASE_ID + slave_id;
-    _boundary_to_mortarboundary[slave_id] = mortar_boundary_id;
-    break;
+    case Moose::Master:
+      boundary_id = master_id;
+      mortar_boundary_id = MORTAR_BASE_ID + slave_id;
+      _boundary_to_mortarboundary[slave_id] = mortar_boundary_id;
+      break;
 
-  case Moose::Slave:
-    boundary_id = slave_id;
-    mortar_boundary_id = MORTAR_BASE_ID + master_id;
-    _boundary_to_mortarboundary[master_id] = mortar_boundary_id;
-    break;
+    case Moose::Slave:
+      boundary_id = slave_id;
+      mortar_boundary_id = MORTAR_BASE_ID + master_id;
+      _boundary_to_mortarboundary[master_id] = mortar_boundary_id;
+      break;
   }
 
-  PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)];
+  PenetrationLocator * pl =
+      _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)];
   if (!pl)
   {
-    pl = new PenetrationLocator(_subproblem, *this, _mesh, boundary_id, mortar_boundary_id, order, getMortarNearestNodeLocator(master_id, slave_id, side_type));
-    _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)] = pl;
+    pl = new PenetrationLocator(_subproblem,
+                                *this,
+                                _mesh,
+                                boundary_id,
+                                mortar_boundary_id,
+                                order,
+                                getMortarNearestNodeLocator(master_id, slave_id, side_type));
+    _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)] =
+        pl;
   }
 
   return *pl;
@@ -235,7 +262,7 @@ NearestNodeLocator &
 GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+  unsigned int slave_id = _mesh.getBoundaryID(slave);
 
   _subproblem.addGhostedBoundary(master_id);
   _subproblem.addGhostedBoundary(slave_id);
@@ -244,9 +271,11 @@ GeometricSearchData::getNearestNodeLocator(const BoundaryName & master, const Bo
 }
 
 NearestNodeLocator &
-GeometricSearchData::getNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id)
+GeometricSearchData::getNearestNodeLocator(const unsigned int master_id,
+                                           const unsigned int slave_id)
 {
-  NearestNodeLocator * nnl = _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
+  NearestNodeLocator * nnl =
+      _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
   _subproblem.addGhostedBoundary(master_id);
   _subproblem.addGhostedBoundary(slave_id);
@@ -261,10 +290,11 @@ GeometricSearchData::getNearestNodeLocator(const unsigned int master_id, const u
 }
 
 NearestNodeLocator &
-GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
+GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master,
+                                                     const BoundaryName & slave)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+  unsigned int slave_id = _mesh.getBoundaryID(slave);
 
   _subproblem.addGhostedBoundary(master_id);
   _subproblem.addGhostedBoundary(slave_id);
@@ -273,7 +303,8 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & master
 }
 
 NearestNodeLocator &
-GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id)
+GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_id,
+                                                     const unsigned int slave_id)
 {
   // TODO: Make this better!
   unsigned int base_id = 1e6;
@@ -309,7 +340,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
 
-        for (unsigned int qp=0; qp<points_face.size(); qp++)
+        for (unsigned int qp = 0; qp < points_face.size(); qp++)
           _mesh.addQuadratureNode(elem, side, qp, qslave_id, points_face[qp]);
       }
     }
@@ -317,32 +348,36 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 }
 
 NearestNodeLocator &
-GeometricSearchData::getMortarNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintType side_type)
+GeometricSearchData::getMortarNearestNodeLocator(const BoundaryName & master,
+                                                 const BoundaryName & slave,
+                                                 Moose::ConstraintType side_type)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
-  unsigned int slave_id  = _mesh.getBoundaryID(slave);
+  unsigned int slave_id = _mesh.getBoundaryID(slave);
 
   return getMortarNearestNodeLocator(master_id, slave_id, side_type);
 }
 
 NearestNodeLocator &
-GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id, Moose::ConstraintType side_type)
+GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id,
+                                                 const unsigned int slave_id,
+                                                 Moose::ConstraintType side_type)
 {
   unsigned int mortarboundary_id, boundary;
 
   switch (side_type)
   {
-  case Moose::Master:
-    boundary = master_id;
-    mortarboundary_id = MORTAR_BASE_ID + slave_id;
-    _boundary_to_mortarboundary[slave_id] = mortarboundary_id;
-    break;
+    case Moose::Master:
+      boundary = master_id;
+      mortarboundary_id = MORTAR_BASE_ID + slave_id;
+      _boundary_to_mortarboundary[slave_id] = mortarboundary_id;
+      break;
 
-  case Moose::Slave:
-    boundary = slave_id;
-    mortarboundary_id = MORTAR_BASE_ID + master_id;
-    _boundary_to_mortarboundary[master_id] = mortarboundary_id;
-    break;
+    case Moose::Slave:
+      boundary = slave_id;
+      mortarboundary_id = MORTAR_BASE_ID + master_id;
+      _boundary_to_mortarboundary[master_id] = mortarboundary_id;
+      break;
   }
 
   generateMortarNodes(master_id, slave_id, 1001);
@@ -351,16 +386,20 @@ GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id, c
 }
 
 void
-GeometricSearchData::addElementPairLocator(const unsigned int & interface_id, std::shared_ptr<ElementPairLocator> epl)
+GeometricSearchData::addElementPairLocator(const unsigned int & interface_id,
+                                           std::shared_ptr<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
 }
 
 void
-GeometricSearchData::generateMortarNodes(unsigned int master_id, unsigned int slave_id, unsigned int qslave_id)
+GeometricSearchData::generateMortarNodes(unsigned int master_id,
+                                         unsigned int slave_id,
+                                         unsigned int qslave_id)
 {
   // Have we already generated quadrature nodes for this boundary id?
-  if (_mortar_boundaries.find(std::pair<unsigned int, unsigned int>(master_id, slave_id)) != _mortar_boundaries.end())
+  if (_mortar_boundaries.find(std::pair<unsigned int, unsigned int>(master_id, slave_id)) !=
+      _mortar_boundaries.end())
     return;
 
   _mortar_boundaries.insert(std::pair<unsigned int, unsigned int>(master_id, slave_id));
@@ -376,7 +415,6 @@ GeometricSearchData::generateMortarNodes(unsigned int master_id, unsigned int sl
       _mesh.addQuadratureNode(elem, 0, qp, qslave_id, qpoints[qp]);
   }
 }
-
 
 void
 GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
@@ -397,7 +435,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
 
-        for (unsigned int qp=0; qp<points_face.size(); qp++)
+        for (unsigned int qp = 0; qp < points_face.size(); qp++)
           (*_mesh.getQuadratureNode(elem, side, qp)) = points_face[qp];
       }
     }
@@ -411,7 +449,6 @@ GeometricSearchData::reinitQuadratureNodes(unsigned int /*slave_id*/)
   for (const auto & it : _slave_to_qslave)
     generateQuadratureNodes(it.first, it.second);
 }
-
 
 void
 GeometricSearchData::updateMortarNodes()
@@ -438,7 +475,7 @@ GeometricSearchData::reinitMortarNodes()
   for (const auto & iface : ifaces)
   {
     unsigned int master_id = _mesh.getBoundaryID(iface->_master);
-    unsigned int slave_id  = _mesh.getBoundaryID(iface->_slave);
+    unsigned int slave_id = _mesh.getBoundaryID(iface->_slave);
     generateMortarNodes(master_id, slave_id, 0);
   }
 }

@@ -19,7 +19,7 @@
 
 class PointerLoadError;
 
-template<>
+template <>
 InputParameters validParams<PointerLoadError>();
 
 class TypeWithNoLoad
@@ -29,13 +29,12 @@ public:
 };
 
 /// Store but no Load!
-template<>
+template <>
 inline void
-dataStore(std::ostream & stream, TypeWithNoLoad * & v, void * context)
+dataStore(std::ostream & stream, TypeWithNoLoad *& v, void * context)
 {
   dataStore(stream, v->_i, context);
 }
-
 
 class PointerLoadError : public GeneralUserObject
 {
@@ -46,13 +45,12 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize() {};
+  virtual void initialize(){};
   virtual void execute();
-  virtual void finalize() {};
+  virtual void finalize(){};
 
 protected:
-  TypeWithNoLoad * & _pointer_data;
+  TypeWithNoLoad *& _pointer_data;
 };
-
 
 #endif /* POINTERLOADERROR_H */

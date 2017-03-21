@@ -13,7 +13,7 @@
 class SpecificEnthalpyAux;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<SpecificEnthalpyAux>();
 
 /**

@@ -14,8 +14,9 @@
 
 #include "DGConvection.h"
 
-template<>
-InputParameters validParams<DGConvection>()
+template <>
+InputParameters
+validParams<DGConvection>()
 {
   InputParameters params = validParams<DGKernel>();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
@@ -23,9 +24,8 @@ InputParameters validParams<DGConvection>()
   return params;
 }
 
-DGConvection::DGConvection(const InputParameters & parameters) :
-    DGKernel(parameters),
-    _velocity(getParam<RealVectorValue>("velocity"))
+DGConvection::DGConvection(const InputParameters & parameters)
+  : DGKernel(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 

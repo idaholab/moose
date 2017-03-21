@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "MTICSum.h"
 
-template<>
-InputParameters validParams<MTICSum>()
+template <>
+InputParameters
+validParams<MTICSum>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredCoupledVar("var1", "First variable");
@@ -23,16 +24,12 @@ InputParameters validParams<MTICSum>()
   return params;
 }
 
-MTICSum::MTICSum(const InputParameters & parameters) :
-    InitialCondition(parameters),
-    _var1(coupledValue("var1")),
-    _var2(coupledValue("var2"))
+MTICSum::MTICSum(const InputParameters & parameters)
+  : InitialCondition(parameters), _var1(coupledValue("var1")), _var2(coupledValue("var2"))
 {
 }
 
-MTICSum::~MTICSum()
-{
-}
+MTICSum::~MTICSum() {}
 
 Real
 MTICSum::value(const Point & /*p*/)

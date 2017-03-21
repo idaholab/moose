@@ -14,7 +14,8 @@ InputParameters
 validParams<NSMomentumInviscidFluxWithGradP>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addClassDescription("This class computes the inviscid flux with pressure gradient in the momentum equation.");
+  params.addClassDescription(
+      "This class computes the inviscid flux with pressure gradient in the momentum equation.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
@@ -150,5 +151,6 @@ NSMomentumInviscidFluxWithGradP::pressureQpJacobianHelper(unsigned var_number)
     hessian_sum += _pressure_derivs.get_hess(var_number, n) * (*_gradU[n])[_qp](_component);
 
   // Hit hessian_sum with phij, then add to dp/dU_m * dphij/dx_k, finally return the result
-  return _pressure_derivs.get_grad(var_number) * _grad_phi[_j][_qp](_component) + hessian_sum * _phi[_j][_qp];
+  return _pressure_derivs.get_grad(var_number) * _grad_phi[_j][_qp](_component) +
+         hessian_sum * _phi[_j][_qp];
 }

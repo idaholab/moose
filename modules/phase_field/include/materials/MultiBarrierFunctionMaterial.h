@@ -13,7 +13,7 @@
 // Forward Declarations
 class MultiBarrierFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<MultiBarrierFunctionMaterial>();
 
 /**
@@ -46,4 +46,4 @@ protected:
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };
 
-#endif //MULTIBARRIERFUNCTION_H
+#endif // MULTIBARRIERFUNCTION_H

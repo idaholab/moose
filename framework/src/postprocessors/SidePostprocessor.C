@@ -14,16 +14,16 @@
 
 #include "SidePostprocessor.h"
 
-template<>
-InputParameters validParams<SidePostprocessor>()
+template <>
+InputParameters
+validParams<SidePostprocessor>()
 {
   InputParameters params = validParams<SideUserObject>();
   params += validParams<Postprocessor>();
   return params;
 }
 
-SidePostprocessor::SidePostprocessor(const InputParameters & parameters) :
-    SideUserObject(parameters),
-    Postprocessor(parameters)
-{}
-
+SidePostprocessor::SidePostprocessor(const InputParameters & parameters)
+  : SideUserObject(parameters), Postprocessor(parameters)
+{
+}

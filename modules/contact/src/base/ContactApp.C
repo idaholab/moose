@@ -31,15 +31,15 @@
 #include "ContactSlipDamper.h"
 #include "ContactSplit.h"
 
-template<>
-InputParameters validParams<ContactApp>()
+template <>
+InputParameters
+validParams<ContactApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-ContactApp::ContactApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   ContactApp::registerObjects(_factory);
@@ -48,12 +48,14 @@ ContactApp::ContactApp(const InputParameters & parameters) :
   ContactApp::associateSyntax(_syntax, _action_factory);
 }
 
-ContactApp::~ContactApp()
-{
-}
+ContactApp::~ContactApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void ContactApp__registerApps() { ContactApp::registerApps(); }
+extern "C" void
+ContactApp__registerApps()
+{
+  ContactApp::registerApps();
+}
 void
 ContactApp::registerApps()
 {
@@ -61,7 +63,11 @@ ContactApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void ContactApp__registerObjects(Factory & factory) { ContactApp::registerObjects(factory); }
+extern "C" void
+ContactApp__registerObjects(Factory & factory)
+{
+  ContactApp::registerObjects(factory);
+}
 void
 ContactApp::registerObjects(Factory & factory)
 {
@@ -81,7 +87,11 @@ ContactApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ContactApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  ContactApp::associateSyntax(syntax, action_factory);
+}
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

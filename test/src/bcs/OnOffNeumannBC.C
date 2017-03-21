@@ -14,18 +14,16 @@
 
 #include "OnOffNeumannBC.h"
 
-template<>
-InputParameters validParams<OnOffNeumannBC>()
+template <>
+InputParameters
+validParams<OnOffNeumannBC>()
 {
   InputParameters params = validParams<NeumannBC>();
 
   return params;
 }
 
-OnOffNeumannBC::OnOffNeumannBC(const InputParameters & parameters) :
-    NeumannBC(parameters)
-{
-}
+OnOffNeumannBC::OnOffNeumannBC(const InputParameters & parameters) : NeumannBC(parameters) {}
 
 bool
 OnOffNeumannBC::shouldApply()

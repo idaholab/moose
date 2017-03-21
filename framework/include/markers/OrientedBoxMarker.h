@@ -22,7 +22,7 @@
 // Forward declarations
 class OrientedBoxMarker;
 
-template<>
+template <>
 InputParameters validParams<OrientedBoxMarker>();
 
 /**
@@ -32,9 +32,7 @@ InputParameters validParams<OrientedBoxMarker>();
  * and with the direction along the length direction specified.
  * Then elements are marked as inside or outside this box
  */
-class OrientedBoxMarker :
-  public Marker,
-  public OrientedBoxInterface
+class OrientedBoxMarker : public Marker, public OrientedBoxInterface
 {
 public:
   OrientedBoxMarker(const InputParameters & parameters);

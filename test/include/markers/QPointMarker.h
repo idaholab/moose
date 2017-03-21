@@ -22,7 +22,7 @@
 
 class QPointMarker;
 
-template<>
+template <>
 InputParameters validParams<QPointMarker>();
 
 /**

@@ -17,11 +17,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionGradAux;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionGradAux>();
 
 /**
@@ -43,7 +43,6 @@ protected:
 
   /// The dimension index: 0|1|2 for x|y|z
   unsigned int _dim_index;
-
 };
 
-#endif //FunctionGradAux_H
+#endif // FunctionGradAux_H

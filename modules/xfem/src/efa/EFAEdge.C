@@ -11,9 +11,7 @@
 #include "EFAError.h"
 #include "XFEMFuncs.h"
 
-EFAEdge::EFAEdge(EFANode * node1, EFANode * node2) :
-    _edge_node1(node1),
-    _edge_node2(node2)
+EFAEdge::EFAEdge(EFANode * node1, EFANode * node2) : _edge_node1(node1), _edge_node2(node2)
 {
   _embedded_nodes.clear();
   _intersection_x.clear();
@@ -31,18 +29,16 @@ EFAEdge::EFAEdge(const EFAEdge & other_edge)
 }
 
 EFAEdge::~EFAEdge() // do not delete edge node - they will be deleted
-{                  // in EFAelement's destructor
+{                   // in EFAelement's destructor
 }
 
 bool
 EFAEdge::equivalent(const EFAEdge & other) const
 {
   bool isEqual = false;
-  if (other._edge_node1 == _edge_node1 &&
-      other._edge_node2 == _edge_node2)
+  if (other._edge_node1 == _edge_node1 && other._edge_node2 == _edge_node2)
     isEqual = true;
-  else if (other._edge_node2 == _edge_node1 &&
-           other._edge_node1 == _edge_node2)
+  else if (other._edge_node2 == _edge_node1 && other._edge_node1 == _edge_node2)
     isEqual = true;
   return isEqual;
 }
@@ -60,8 +56,9 @@ EFAEdge::containsEdge(const EFAEdge & other) const
 }
 
 bool
-EFAEdge::getNodeMasters(EFANode* node, std::vector<EFANode*> &master_nodes,
-                        std::vector<double> &master_weights) const
+EFAEdge::getNodeMasters(EFANode * node,
+                        std::vector<EFANode *> & master_nodes,
+                        std::vector<double> & master_weights) const
 {
   master_nodes.clear();
   master_weights.clear();
@@ -80,7 +77,7 @@ EFAEdge::getNodeMasters(EFANode* node, std::vector<EFANode*> &master_nodes,
       {
         master_nodes.push_back(_edge_node1);
         master_nodes.push_back(_edge_node2);
-        master_weights.push_back(1.0-_intersection_x[i]);
+        master_weights.push_back(1.0 - _intersection_x[i]);
         master_weights.push_back(_intersection_x[i]);
         masters_found = true;
         break;
@@ -91,8 +88,8 @@ EFAEdge::getNodeMasters(EFANode* node, std::vector<EFANode*> &master_nodes,
 }
 
 // TODO: Saving because I don't want to throw it away, but it needs more work to be used.
-//bool
-//EFAEdge::operator < (const edge_t & other) const
+// bool
+// EFAEdge::operator < (const edge_t & other) const
 //{
 //  node_t * this_min_node;
 //  node_t * this_max_node;
@@ -283,7 +280,7 @@ EFAEdge::getEmbeddedNodeIndex(EFANode * node) const
 }
 
 unsigned int
-EFAEdge::getEmbeddedNodeIndex(double position, EFANode* from_node) const
+EFAEdge::getEmbeddedNodeIndex(double position, EFANode * from_node) const
 {
   bool have_index = false;
   unsigned int index;
@@ -333,11 +330,11 @@ EFAEdge::consistencyCheck()
   bool consistent = true;
   if ((_edge_node1->category() == EFANode::N_CATEGORY_PERMANENT ||
        _edge_node1->category() == EFANode::N_CATEGORY_TEMP) &&
-       _edge_node2->category() == EFANode::N_CATEGORY_LOCAL_INDEX)
+      _edge_node2->category() == EFANode::N_CATEGORY_LOCAL_INDEX)
     consistent = false;
   else if ((_edge_node2->category() == EFANode::N_CATEGORY_PERMANENT ||
             _edge_node2->category() == EFANode::N_CATEGORY_TEMP) &&
-            _edge_node1->category() == EFANode::N_CATEGORY_LOCAL_INDEX)
+           _edge_node1->category() == EFANode::N_CATEGORY_LOCAL_INDEX)
     consistent = false;
   if (!consistent)
     EFAError("In consistencyCheck nodes on edge are not consistent");
@@ -346,7 +343,7 @@ EFAEdge::consistencyCheck()
 }
 
 void
-EFAEdge::switchNode(EFANode *new_node, EFANode *old_node)
+EFAEdge::switchNode(EFANode * new_node, EFANode * old_node)
 {
   if (_edge_node1 == old_node)
     _edge_node1 = new_node;
@@ -360,11 +357,9 @@ EFAEdge::switchNode(EFANode *new_node, EFANode *old_node)
 }
 
 bool
-EFAEdge::containsNode(const EFANode *node) const
+EFAEdge::containsNode(const EFANode * node) const
 {
-  return _edge_node1 == node ||
-         _edge_node2 == node ||
-         isEmbeddedNode(node);
+  return _edge_node1 == node || _edge_node2 == node || isEmbeddedNode(node);
 }
 
 void

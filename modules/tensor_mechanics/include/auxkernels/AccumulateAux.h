@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class AccumulateAux;
 
-template<>
+template <>
 InputParameters validParams<AccumulateAux>();
 
 /**
@@ -30,4 +30,4 @@ protected:
   std::vector<const VariableValue *> _values;
 };
 
-#endif //ACCUMULATEAUX_H
+#endif // ACCUMULATEAUX_H

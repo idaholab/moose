@@ -13,7 +13,7 @@
 // Forward declarations
 class LevelSetMeshRefinementTransfer;
 
-template<>
+template <>
 InputParameters validParams<LevelSetMeshRefinementTransfer>();
 
 /**
@@ -26,7 +26,6 @@ public:
 
   virtual void initialSetup() override;
   virtual void execute() override;
-
 };
 
 #endif // LEVELSETMESHREFINEMENTTRANSFER_H

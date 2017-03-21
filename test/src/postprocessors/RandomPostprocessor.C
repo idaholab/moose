@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "RandomPostprocessor.h"
 
-template<>
-InputParameters validParams<RandomPostprocessor>()
+template <>
+InputParameters
+validParams<RandomPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
@@ -26,12 +27,12 @@ InputParameters validParams<RandomPostprocessor>()
   return params;
 }
 
-RandomPostprocessor::RandomPostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+RandomPostprocessor::RandomPostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _generator_id(getParam<unsigned int>("generator")),
     _random(declareRestartableData<MooseRandom>("random_pps"))
 {
-  _random.seed(_generator_id,getParam<unsigned int>("seed"));
+  _random.seed(_generator_id, getParam<unsigned int>("seed"));
 }
 
 Real
@@ -39,4 +40,3 @@ RandomPostprocessor::getValue()
 {
   return _random.rand(_generator_id);
 }
-

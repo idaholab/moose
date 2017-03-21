@@ -9,18 +9,17 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class StressDivergenceRZ;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template<>
+template <>
 InputParameters validParams<StressDivergenceRZ>();
 
 class StressDivergenceRZ : public Kernel
 {
 public:
-
   StressDivergenceRZ(const InputParameters & parameters);
 
 protected:
@@ -34,7 +33,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  Real calculateJacobian( unsigned int ivar, unsigned int jvar );
+  Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 
   const MaterialProperty<SymmTensor> & _stress;
   const MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
@@ -49,8 +48,8 @@ private:
   const unsigned int _rdisp_var;
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
-  std::vector<std::vector<Real> > _avg_grad_test;
-  std::vector<std::vector<Real> > _avg_grad_phi;
+  std::vector<std::vector<Real>> _avg_grad_test;
+  std::vector<std::vector<Real>> _avg_grad_phi;
   bool _volumetric_locking_correction;
 };
-#endif //STRESSDIVERGENCERZ_H
+#endif // STRESSDIVERGENCERZ_H

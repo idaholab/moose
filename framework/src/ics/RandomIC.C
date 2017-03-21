@@ -17,8 +17,9 @@
 
 #include "libmesh/point.h"
 
-template<>
-InputParameters validParams<RandomIC>()
+template <>
+InputParameters
+validParams<RandomIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
@@ -27,8 +28,8 @@ InputParameters validParams<RandomIC>()
   return params;
 }
 
-RandomIC::RandomIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+RandomIC::RandomIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min)
@@ -40,13 +41,13 @@ RandomIC::RandomIC(const InputParameters & parameters) :
 Real
 RandomIC::value(const Point & /*p*/)
 {
-  //Random number between 0 and 1
+  // Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
 
-  //Between 0 and range
+  // Between 0 and range
   rand_num *= _range;
 
-  //Between min and max
+  // Between min and max
   rand_num += _min;
 
   return rand_num;

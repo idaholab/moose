@@ -176,15 +176,15 @@
 
 #include "GeneralizedPlaneStrainUserObject.h"
 
-template<>
-InputParameters validParams<TensorMechanicsApp>()
+template <>
+InputParameters
+validParams<TensorMechanicsApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
@@ -193,12 +193,14 @@ TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) :
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
 }
 
-TensorMechanicsApp::~TensorMechanicsApp()
-{
-}
+TensorMechanicsApp::~TensorMechanicsApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void TensorMechanicsApp_registerApps() { TensorMechanicsApp::registerApps(); }
+extern "C" void
+TensorMechanicsApp_registerApps()
+{
+  TensorMechanicsApp::registerApps();
+}
 void
 TensorMechanicsApp::registerApps()
 {
@@ -206,7 +208,11 @@ TensorMechanicsApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void TensorMechanicsApp__registerObjects(Factory & factory) { TensorMechanicsApp::registerObjects(factory); }
+extern "C" void
+TensorMechanicsApp__registerObjects(Factory & factory)
+{
+  TensorMechanicsApp::registerObjects(factory);
+}
 void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {
@@ -271,7 +277,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeExtraStressConstant);
   registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
-  registerDeprecatedObjectName(ComputeThermalExpansionEigenstrain, "ComputeThermalExpansionEigenStrain", "12/19/2016 00:00");
+  registerDeprecatedObjectName(
+      ComputeThermalExpansionEigenstrain, "ComputeThermalExpansionEigenStrain", "12/19/2016 00:00");
   registerMaterial(ComputeThermalExpansionEigenstrain);
   registerMaterial(ComputeMeanThermalExpansionFunctionEigenstrain);
   registerMaterial(ComputeInstantaneousThermalExpansionFunctionEigenstrain);
@@ -366,7 +373,11 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { TensorMechanicsApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+}
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
@@ -382,7 +393,8 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
-  syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+  syntax.registerActionSyntax("GeneralizedPlaneStrainAction",
+                              "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
   syntax.registerActionSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
   syntax.registerActionSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 

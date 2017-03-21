@@ -6,24 +6,35 @@
 /****************************************************************/
 #include "KKSSplitCHCRes.h"
 
-template<>
-InputParameters validParams<KKSSplitCHCRes>()
+template <>
+InputParameters
+validParams<KKSSplitCHCRes>()
 {
   InputParameters params = validParams<SplitCHBase>();
-  params.addClassDescription("KKS model kernel for the split Bulk Cahn-Hilliard term. This operates on the chemical potential 'c' as the non-linear variable");
-  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
-  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
-  params.addRequiredCoupledVar("ca", "phase concentration corresponding to the non-linear variable of this kernel");
-  params.addRequiredCoupledVar("cb", "phase concentration corresponding to the non-linear variable of this kernel");
+  params.addClassDescription("KKS model kernel for the split Bulk Cahn-Hilliard term. This "
+                             "operates on the chemical potential 'c' as the non-linear variable");
+  params.addRequiredParam<MaterialPropertyName>(
+      "fa_name",
+      "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
+  params.addRequiredParam<MaterialPropertyName>(
+      "fb_name",
+      "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
+  params.addRequiredCoupledVar(
+      "ca", "phase concentration corresponding to the non-linear variable of this kernel");
+  params.addRequiredCoupledVar(
+      "cb", "phase concentration corresponding to the non-linear variable of this kernel");
   params.addCoupledVar("args_a", "Vector of additional arguments to Fa");
-  params.addParam<MaterialPropertyName>("h_name", "h", "Base name for the switching function h(eta)"); // TODO: everywhere else this is called just "h"
-  params.addRequiredCoupledVar("w", "Chemical potenial non-linear helper variable for the split solve");
+  params.addParam<MaterialPropertyName>(
+      "h_name", "h", "Base name for the switching function h(eta)"); // TODO: everywhere else this
+                                                                     // is called just "h"
+  params.addRequiredCoupledVar("w",
+                               "Chemical potenial non-linear helper variable for the split solve");
 
   return params;
 }
 
-KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase> >(parameters),
+KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase>>(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
@@ -43,7 +54,7 @@ KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable *cvar = this->_coupled_moose_vars[i];
+    MooseVariable * cvar = this->_coupled_moose_vars[i];
 
     // get the second derivative material property
     _d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());
@@ -68,7 +79,8 @@ KKSSplitCHCRes::computeQpResidual()
 
 /**
  * Note that per product and chain rules:
- * \f$ \frac{d}{du_j}\left(F(u)\nabla u\right) = \nabla u \frac {dF(u)}{du}\frac{du}{du_j} + F(u)\frac{d\nabla u}{du_j} \f$
+ * \f$ \frac{d}{du_j}\left(F(u)\nabla u\right) = \nabla u \frac {dF(u)}{du}\frac{du}{du_j} +
+ * F(u)\frac{d\nabla u}{du_j} \f$
  * which is:
  * \f$ \nabla u \frac {dF(u)}{du} \phi_j + F(u) \nabla \phi_j \f$
  */

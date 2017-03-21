@@ -13,7 +13,7 @@
 /**
  * Random Voronoi tesselation polycrystal action
  */
-class PolycrystalVoronoiICAction: public Action
+class PolycrystalVoronoiICAction : public Action
 {
 public:
   PolycrystalVoronoiICAction(const InputParameters & params);
@@ -26,7 +26,7 @@ private:
   const std::string _var_name_base;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalVoronoiICAction>();
 
-#endif //POLYCRYSTALVORONOIICACTION_H
+#endif // POLYCRYSTALVORONOIICACTION_H

@@ -5,16 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef DARCYFLUXCOMPONENT_H
 #define DARCYFLUXCOMPONENT_H
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class DarcyFluxComponent;
 
-template<>
+template <>
 InputParameters validParams<DarcyFluxComponent>();
 
 /**
@@ -32,7 +31,7 @@ InputParameters validParams<DarcyFluxComponent>();
  * result quoted above is multiplied by
  * (1/velocity_scaling)
  */
-class DarcyFluxComponent: public AuxKernel
+class DarcyFluxComponent : public AuxKernel
 {
 public:
   DarcyFluxComponent(const InputParameters & parameters);
@@ -53,11 +52,10 @@ protected:
   Real _poro_recip;
 
   /// Material permeability
-  const MaterialProperty<RealTensorValue> &_permeability;
+  const MaterialProperty<RealTensorValue> & _permeability;
 
   /// Desired component
   unsigned int _component;
-
 };
 
 #endif // DARCYFLUXCOMPONENT_H

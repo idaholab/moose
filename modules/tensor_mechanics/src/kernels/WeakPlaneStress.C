@@ -11,8 +11,9 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-template<>
-InputParameters validParams<WeakPlaneStress>()
+template <>
+InputParameters
+validParams<WeakPlaneStress>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Plane stress kernel to provide out-of-plane strain contribution");
@@ -26,8 +27,8 @@ InputParameters validParams<WeakPlaneStress>()
   return params;
 }
 
-WeakPlaneStress::WeakPlaneStress(const InputParameters & parameters) :
-    Kernel(parameters),
+WeakPlaneStress::WeakPlaneStress(const InputParameters & parameters)
+  : Kernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
@@ -44,7 +45,8 @@ WeakPlaneStress::computeQpResidual()
 Real
 WeakPlaneStress::computeQpJacobian()
 {
-  return _Jacobian_mult[_qp](_direction, _direction, _direction, _direction) * _test[_i][_qp] * _phi[_j][_qp];
+  return _Jacobian_mult[_qp](_direction, _direction, _direction, _direction) * _test[_i][_qp] *
+         _phi[_j][_qp];
 }
 
 Real

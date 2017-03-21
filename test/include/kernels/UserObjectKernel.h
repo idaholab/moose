@@ -20,7 +20,7 @@
 
 class UserObjectKernel;
 
-template<>
+template <>
 InputParameters validParams<UserObjectKernel>();
 
 /**

@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMomentumNoBCBCTractionForm;
 
-template<>
+template <>
 InputParameters validParams<INSMomentumNoBCBCTractionForm>();
 
 /**
@@ -24,13 +24,12 @@ class INSMomentumNoBCBCTractionForm : public INSMomentumNoBCBCBase
 public:
   INSMomentumNoBCBCTractionForm(const InputParameters & parameters);
 
-  virtual ~INSMomentumNoBCBCTractionForm(){}
+  virtual ~INSMomentumNoBCBCTractionForm() {}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-
 
 #endif

@@ -7,21 +7,22 @@
 
 #include "AEFVSlopeLimitingOneD.h"
 
-template<>
-InputParameters validParams<AEFVSlopeLimitingOneD>()
+template <>
+InputParameters
+validParams<AEFVSlopeLimitingOneD>()
 {
   InputParameters params = validParams<SlopeLimitingBase>();
-  params.addClassDescription("One-dimensional slope limiting to get the limited slope of cell average variable for the advection equation using a cell-centered finite volume method.");
+  params.addClassDescription("One-dimensional slope limiting to get the limited slope of cell "
+                             "average variable for the advection equation using a cell-centered "
+                             "finite volume method.");
   params.addRequiredCoupledVar("u", "constant monomial variable");
   MooseEnum scheme("none minmod mc superbee", "none");
   params.addParam<MooseEnum>("scheme", scheme, "TVD-type slope limiting scheme");
   return params;
 }
 
-AEFVSlopeLimitingOneD::AEFVSlopeLimitingOneD(const InputParameters & parameters) :
-    SlopeLimitingBase(parameters),
-    _u(getVar("u", 0)),
-    _scheme(getParam<MooseEnum>("scheme"))
+AEFVSlopeLimitingOneD::AEFVSlopeLimitingOneD(const InputParameters & parameters)
+  : SlopeLimitingBase(parameters), _u(getVar("u", 0)), _scheme(getParam<MooseEnum>("scheme"))
 {
 }
 
@@ -32,7 +33,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
   // e.g. = 1 (for the advection equation)
   unsigned int nvars = 1;
 
-  const Elem* elem = _current_elem;
+  const Elem * elem = _current_elem;
 
   // index of conserved variable
   unsigned int iv;
@@ -59,7 +60,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
   xc[0] = elem->centroid()(0);
 
   // array for the cell-average values in the current cell and its neighbors
-  std::vector <std::vector<Real> > ucell(nsten, std::vector<Real>(nvars, 0.));
+  std::vector<std::vector<Real>> ucell(nsten, std::vector<Real>(nvars, 0.));
 
   // central slope:
   //                  u_{i+1} - u {i-1}
@@ -77,7 +78,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
   //                  x_{i+1} - x_{i}
 
   // array to store the central and one-sided slopes, where the first should be central slope
-  std::vector <std::vector<Real> > sigma(nsten, std::vector<Real>(nvars, 0.));
+  std::vector<std::vector<Real>> sigma(nsten, std::vector<Real>(nvars, 0.));
 
   // get the cell-average variable in the central cell
   ucell[0][0] = _u->getElementalValue(elem);
@@ -95,7 +96,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
     // when the current element is an internal cell
     if (elem->neighbor(is) != NULL)
     {
-      const Elem* neig = elem->neighbor(is);
+      const Elem * neig = elem->neighbor(is);
       if (this->hasBlocks(neig->subdomain_id()))
       {
         xc[in] = neig->centroid()(0);

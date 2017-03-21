@@ -20,7 +20,7 @@
 class TimePeriodOld;
 class Problem;
 
-template<>
+template <>
 InputParameters validParams<Problem>();
 
 /**
@@ -51,7 +51,6 @@ public:
   virtual bool isSolveTerminationRequested() { return _termination_requested; };
 
 protected:
-
   /// True if the CLI option is found
   bool _cli_option_found;
 

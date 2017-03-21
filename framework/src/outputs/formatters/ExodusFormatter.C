@@ -26,11 +26,7 @@
 #include <sstream>
 #include <vector>
 
-
-ExodusFormatter::ExodusFormatter() :
-    InputFileFormatter(false)
-{
-}
+ExodusFormatter::ExodusFormatter() : InputFileFormatter(false) {}
 
 void
 ExodusFormatter::printInputFile(ActionWarehouse & wh)
@@ -46,8 +42,7 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
 
   if (wh.mooseApp().getSystemInfo() != NULL)
   {
-    _ss << "### Version Info ###\n"
-        << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
+    _ss << "### Version Info ###\n" << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
   }
 
   _ss << "### Input File ###" << std::endl;

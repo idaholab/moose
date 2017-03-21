@@ -13,10 +13,10 @@
 #include "SymmTensor.h"
 #include "LineSegment.h"
 
-//Forward Declarations
+// Forward Declarations
 class InteractionIntegralAuxFields;
 
-template<>
+template <>
 InputParameters validParams<InteractionIntegralAuxFields>();
 void addInteractionIntegralAuxFieldsParams(InputParameters & params);
 
@@ -62,7 +62,11 @@ protected:
     T
   };
 
-  void computeAuxFields(const SIF_MODE sif_mode, ColumnMajorMatrix & stress, ColumnMajorMatrix & disp, ColumnMajorMatrix & grad_disp, ColumnMajorMatrix & strain);
+  void computeAuxFields(const SIF_MODE sif_mode,
+                        ColumnMajorMatrix & stress,
+                        ColumnMajorMatrix & disp,
+                        ColumnMajorMatrix & grad_disp,
+                        ColumnMajorMatrix & strain);
   void computeTFields(ColumnMajorMatrix & stress, ColumnMajorMatrix & grad_disp);
 
 private:
@@ -75,7 +79,6 @@ private:
   Real _shear_modulus;
   Real _r;
   Real _theta;
-
 };
 
-#endif //INTERACTIONINTEGRALAUXFIELDS_H
+#endif // INTERACTIONINTEGRALAUXFIELDS_H

@@ -18,7 +18,7 @@
 
 class SteadyWithNull;
 
-template<>
+template <>
 InputParameters validParams<SteadyWithNull>();
 
 /**

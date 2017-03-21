@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWPIECEWISELINEARSINK_H
 #define POROUSFLOWPIECEWISELINEARSINK_H
 
@@ -15,7 +14,7 @@
 // Forward Declarations
 class PorousFlowPiecewiseLinearSink;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPiecewiseLinearSink>();
 
 /**
@@ -28,7 +27,6 @@ InputParameters validParams<PorousFlowPiecewiseLinearSink>();
 class PorousFlowPiecewiseLinearSink : public PorousFlowSinkPTDefiner
 {
 public:
-
   PorousFlowPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:
@@ -40,4 +38,4 @@ protected:
   virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
-#endif //POROUSFLOWPIECEWISELINEARSINK_H
+#endif // POROUSFLOWPIECEWISELINEARSINK_H

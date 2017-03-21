@@ -11,10 +11,10 @@
 #include "IntegratedBC.h"
 #include "BoundaryFluxBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class AEFVBC;
 
-template<>
+template <>
 InputParameters validParams<AEFVBC>();
 
 /**
@@ -43,12 +43,10 @@ InputParameters validParams<AEFVBC>();
 class AEFVBC : public IntegratedBC
 {
 public:
-
   AEFVBC(const InputParameters & parameters);
   virtual ~AEFVBC() {}
 
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
@@ -58,10 +56,10 @@ protected:
   // "1" denotes variable value from the host element
 
   /// piecewise constant variable values in host element
-  const VariableValue &  _uc1;
+  const VariableValue & _uc1;
 
   /// extrapolated variable values at side center
-  const MaterialProperty<Real> &  _u1;
+  const MaterialProperty<Real> & _u1;
 
   /// bounadry flux object
   const BoundaryFluxBase & _flux;

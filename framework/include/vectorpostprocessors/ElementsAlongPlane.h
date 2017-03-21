@@ -17,10 +17,10 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementsAlongPlane;
 
-template<>
+template <>
 InputParameters validParams<ElementsAlongPlane>();
 
 /**

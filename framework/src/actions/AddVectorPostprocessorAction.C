@@ -16,15 +16,16 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddVectorPostprocessorAction>()
+template <>
+InputParameters
+validParams<AddVectorPostprocessorAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddVectorPostprocessorAction::AddVectorPostprocessorAction(InputParameters params) :
-    MooseObjectAction(params)
+AddVectorPostprocessorAction::AddVectorPostprocessorAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

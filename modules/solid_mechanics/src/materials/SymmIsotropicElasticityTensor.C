@@ -18,7 +18,8 @@ SymmIsotropicElasticityTensor::SymmIsotropicElasticityTensor(const bool constant
     _E(0),
     _nu(0),
     _k(0)
-{}
+{
+}
 
 void
 SymmIsotropicElasticityTensor::setLambda(const Real lambda)
@@ -94,24 +95,25 @@ SymmIsotropicElasticityTensor::calculateLameCoefficients()
   else if (_lambda_set && _nu_set)
     _mu = (_lambda * (1.0 - 2.0 * _nu)) / (2.0 * _nu);
   else if (_lambda_set && _k_set)
-    _mu = ( 3.0 * (_k - _lambda) ) / 2.0;
+    _mu = (3.0 * (_k - _lambda)) / 2.0;
   else if (_lambda_set && _E_set)
-    _mu = ( (_E - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_E-3.0*_lambda)*(_E-3.0*_lambda) + 8.0*_lambda*_E ) / 4.0 );
+    _mu = ((_E - 3.0 * _lambda) / 4.0) +
+          (std::sqrt((_E - 3.0 * _lambda) * (_E - 3.0 * _lambda) + 8.0 * _lambda * _E) / 4.0);
   else if (_mu_set && _nu_set)
-    _lambda = ( 2.0 * _mu * _nu ) / (1.0 - 2.0*_nu);
+    _lambda = (2.0 * _mu * _nu) / (1.0 - 2.0 * _nu);
   else if (_mu_set && _k_set)
-    _lambda = ( 3.0 * _k - 2.0 * _mu ) / 3.0;
+    _lambda = (3.0 * _k - 2.0 * _mu) / 3.0;
   else if (_mu_set && _E_set)
-    _lambda = ((2.0*_mu - _E) * _mu) / (_E - 3.0*_mu);
+    _lambda = ((2.0 * _mu - _E) * _mu) / (_E - 3.0 * _mu);
   else if (_nu_set && _k_set)
   {
     _lambda = (3.0 * _k * _nu) / (1.0 + _nu);
-    _mu = (3.0 * _k * (1.0 - 2.0*_nu)) / (2.0 * (1.0 + _nu));
+    _mu = (3.0 * _k * (1.0 - 2.0 * _nu)) / (2.0 * (1.0 + _nu));
   }
   else if (_E_set && _nu_set) // Young's Modulus and Poisson's Ratio
   {
-    _lambda = (_nu * _E) / ( (1.0+_nu) * (1-2.0*_nu) );
-    _mu = _E / ( 2.0 * (1.0+_nu));
+    _lambda = (_nu * _E) / ((1.0 + _nu) * (1 - 2.0 * _nu));
+    _mu = _E / (2.0 * (1.0 + _nu));
   }
   else if (_E_set && _k_set)
   {
@@ -129,19 +131,19 @@ SymmIsotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 
   const Real C12(_lambda);
   const Real C44(_mu);
-  const Real C11(2*C44+C12);
+  const Real C11(2 * C44 + C12);
 
-  setEntries( C11, C12, C44 );
+  setEntries(C11, C12, C44);
 }
 
 void
-SymmIsotropicElasticityTensor::setEntries( Real C11, Real C12, Real C44 )
+SymmIsotropicElasticityTensor::setEntries(Real C11, Real C12, Real C44)
 {
-  _val[ 0] = _val[ 6] = _val[11] = C11;
-  _val[ 1] = _val[ 2] = _val[ 7] = C12;
+  _val[0] = _val[6] = _val[11] = C11;
+  _val[1] = _val[2] = _val[7] = C12;
   _val[15] = _val[18] = _val[20] = C44;
-  _val[ 3] = _val[ 4] = _val[ 5] = 0;
-  _val[ 8] = _val[ 9] = _val[10] = 0;
+  _val[3] = _val[4] = _val[5] = 0;
+  _val[8] = _val[9] = _val[10] = 0;
   _val[12] = _val[13] = _val[14] = 0;
   _val[16] = _val[17] = 0;
   _val[19] = 0;
@@ -156,67 +158,67 @@ SymmIsotropicElasticityTensor::stiffness(const unsigned int i,
   RealGradient b;
   if (0 == i && 0 == j)
   {
-    b(0) = _val[ 0]*phi(0);
-    b(1) = _val[15]*phi(1);
-    b(2) = _val[20]*phi(2);
+    b(0) = _val[0] * phi(0);
+    b(1) = _val[15] * phi(1);
+    b(2) = _val[20] * phi(2);
   }
   else if (1 == i && 1 == j)
   {
-    b(0) = _val[15]*phi(0);
-    b(1) = _val[ 6]*phi(1);
-    b(2) = _val[18]*phi(2);
+    b(0) = _val[15] * phi(0);
+    b(1) = _val[6] * phi(1);
+    b(2) = _val[18] * phi(2);
   }
   else if (2 == i && 2 == j)
   {
-    b(0) = _val[20]*phi(0);
-    b(1) = _val[18]*phi(1);
-    b(2) = _val[11]*phi(2);
+    b(0) = _val[20] * phi(0);
+    b(1) = _val[18] * phi(1);
+    b(2) = _val[11] * phi(2);
   }
   else if (0 == i && 1 == j)
   {
-    b(0) = _val[ 1]*phi(1);
-    b(1) = _val[15]*phi(0);
+    b(0) = _val[1] * phi(1);
+    b(1) = _val[15] * phi(0);
     b(2) = 0;
   }
   else if (1 == i && 0 == j)
   {
-    b(0) = _val[15]*phi(1);
-    b(1) = _val[ 1]*phi(0);
+    b(0) = _val[15] * phi(1);
+    b(1) = _val[1] * phi(0);
     b(2) = 0;
   }
   else if (1 == i && 2 == j)
   {
     b(0) = 0;
-    b(1) = _val[ 7]*phi(2);
-    b(2) = _val[18]*phi(1);
+    b(1) = _val[7] * phi(2);
+    b(2) = _val[18] * phi(1);
   }
   else if (2 == i && 1 == j)
   {
     b(0) = 0;
-    b(1) = _val[18]*phi(2);
-    b(2) = _val[ 7]*phi(1);
+    b(1) = _val[18] * phi(2);
+    b(2) = _val[7] * phi(1);
   }
   else if (0 == i && 2 == j)
   {
-    b(0) = _val[ 2]*phi(2);
+    b(0) = _val[2] * phi(2);
     b(1) = 0;
-    b(2) = _val[20]*phi(0);
+    b(2) = _val[20] * phi(0);
   }
   else if (2 == i && 0 == j)
   {
-    b(0) = _val[20]*phi(2);
+    b(0) = _val[20] * phi(2);
     b(1) = 0;
-    b(2) = _val[ 2]*phi(0);
+    b(2) = _val[2] * phi(0);
   }
   else
   {
-    mooseError( "Wrong index in stiffness calculation" );
+    mooseError("Wrong index in stiffness calculation");
   }
   return test * b;
 }
 
 void
-SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) const
+SymmIsotropicElasticityTensor::multiply(const SymmTensor & x, SymmTensor & b) const
 {
   const Real xx = x.xx();
   const Real yy = x.yy();
@@ -232,8 +234,8 @@ SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) 
   b.yz() = 2 * _val[18] * yz;
   b.zx() = 2 * _val[20] * zx;
 
-  b.xx() += 2 * (_val[3] * xy +  _val[4] * yz + _val[5] * zx);
-  b.yy() += 2 * (_val[8] * xy +  _val[9] * yz + _val[10] * zx);
+  b.xx() += 2 * (_val[3] * xy + _val[4] * yz + _val[5] * zx);
+  b.yy() += 2 * (_val[8] * xy + _val[9] * yz + _val[10] * zx);
   b.zz() += 2 * (_val[12] * xy + _val[13] * yz + _val[14] * zx);
   b.xy() += _val[3] * xx + _val[8] * yy + _val[12] * zz;
   b.yz() += _val[4] * xx + _val[9] * yy + _val[13] * zz;
@@ -245,45 +247,45 @@ SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) 
 void
 SymmIsotropicElasticityTensor::adjustForCracking(const RealVectorValue & crack_flags)
 {
-  const RealVectorValue & c( crack_flags );
+  const RealVectorValue & c(crack_flags);
   const Real c0(c(0));
-  const Real c0_coupled( c0 < 1 ? 0 : 1 );
+  const Real c0_coupled(c0 < 1 ? 0 : 1);
   const Real c1(c(1));
-  const Real c1_coupled( c1 < 1 ? 0 : 1 );
+  const Real c1_coupled(c1 < 1 ? 0 : 1);
   const Real c2(c(2));
-  const Real c2_coupled( c2 < 1 ? 0 : 1 );
+  const Real c2_coupled(c2 < 1 ? 0 : 1);
 
+  const Real c01(c0_coupled * c1_coupled);
+  const Real c02(c0_coupled * c2_coupled);
+  const Real c12(c1_coupled * c2_coupled);
+  const Real c012(c0_coupled * c12);
 
-  const Real c01( c0_coupled * c1_coupled );
-  const Real c02( c0_coupled * c2_coupled );
-  const Real c12( c1_coupled * c2_coupled );
-  const Real c012( c0_coupled * c12 );
-
-  const Real ym = _mu*(3*_lambda+2*_mu)/(_lambda+_mu);
+  const Real ym = _mu * (3 * _lambda + 2 * _mu) / (_lambda + _mu);
 
   // Assume Poisson's ratio goes to zero for the cracked direction.
 
-  _val[ 0] = (c0 < 1 ? c0*ym : _val[ 0]);
-  _val[ 1] *= c01;
-  _val[ 2] *= c02;
-  _val[ 3] *= c01;
-  _val[ 4] *= c012;
-  _val[ 5] *= c02;
+  _val[0] = (c0 < 1 ? c0 * ym : _val[0]);
+  _val[1] *= c01;
+  _val[2] *= c02;
+  _val[3] *= c01;
+  _val[4] *= c012;
+  _val[5] *= c02;
 
-  _val[ 6] = (c1 < 1 ? c1*ym : _val[ 6]);
-  _val[ 7] *= c12;
-  _val[ 8] *= c01;
-  _val[ 9] *= c12;
+  _val[6] = (c1 < 1 ? c1 * ym : _val[6]);
+  _val[7] *= c12;
+  _val[8] *= c01;
+  _val[9] *= c12;
   _val[10] *= c012;
 
-  _val[11] = (c2 < 1 ? c2*ym : _val[11]);
+  _val[11] = (c2 < 1 ? c2 * ym : _val[11]);
   _val[12] *= c012;
   _val[13] *= c12;
   _val[14] *= c02;
 }
 
 void
-SymmIsotropicElasticityTensor::adjustForCrackingWithShearRetention(const RealVectorValue & crack_flags)
+SymmIsotropicElasticityTensor::adjustForCrackingWithShearRetention(
+    const RealVectorValue & crack_flags)
 {
   const RealVectorValue & c = crack_flags;
   const Real c0 = c(0);

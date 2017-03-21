@@ -43,7 +43,7 @@ class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 
-template<>
+template <>
 InputParameters validParams<MooseApp>();
 
 /**
@@ -56,9 +56,7 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp :
-  public ConsoleStreamInterface,
-  public libMesh::ParallelObject
+class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -94,7 +92,7 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
   /**
    * Run the application
@@ -120,7 +118,7 @@ public:
   /**
    * Returns the input file name that was set with setInputFileName
    */
-  std::string getInputFileName(){ return _input_filename; }
+  std::string getInputFileName() { return _input_filename; }
 
   /**
    * Override the selection of the output file base name.
@@ -266,7 +264,8 @@ public:
    */
   bool getParallelMeshOnCommandLine() const
   {
-    mooseDeprecated("getParallelMeshOnCommandLine() is deprecated, call getDistributedMeshOnCommandLine() instead.");
+    mooseDeprecated("getParallelMeshOnCommandLine() is deprecated, call "
+                    "getDistributedMeshOnCommandLine() instead.");
     return getDistributedMeshOnCommandLine();
   }
 
@@ -296,18 +295,23 @@ public:
   void setRecoverFileBase(std::string recover_base) { _recover_base = recover_base; }
 
   /**
-   *  Whether or not this simulation should only run half its transient (useful for testing recovery)
+   *  Whether or not this simulation should only run half its transient (useful for testing
+   * recovery)
    */
   bool halfTransient() { return _half_transient; }
 
   /**
    * Store a map of outputter names and file numbers
-   * The MultiApp system requires this to get the file numbering to propagate down through the Multiapps.
+   * The MultiApp system requires this to get the file numbering to propagate down through the
+   * Multiapps.
    * @param numbers Map of outputter names and file numbers
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
    */
-  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers) { _output_file_numbers = numbers; }
+  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers)
+  {
+    _output_file_numbers = numbers;
+  }
 
   /**
    * Store a map of outputter names and file numbers
@@ -321,7 +325,7 @@ public:
   /**
    * Return true if the output position has been set
    */
-  bool hasOutputWarehouse(){ return _output_position_set; }
+  bool hasOutputWarehouse() { return _output_position_set; }
 
   /**
    * Get the OutputWarehouse objects
@@ -340,9 +344,14 @@ public:
    * attempts to load a dynamic library and register it when it is needed. Throws an error if
    * no suitable library is found that contains the app_name in question.
    */
-  void dynamicObjectRegistration(const std::string & app_name, Factory * factory, std::string library_path);
+  void dynamicObjectRegistration(const std::string & app_name,
+                                 Factory * factory,
+                                 std::string library_path);
   void dynamicAppRegistration(const std::string & app_name, std::string library_path);
-  void dynamicSyntaxAssociation(const std::string & app_name, Syntax * syntax, ActionFactory * action_factory, std::string library_path);
+  void dynamicSyntaxAssociation(const std::string & app_name,
+                                Syntax * syntax,
+                                ActionFactory * action_factory,
+                                std::string library_path);
   ///@}
 
   /**
@@ -376,7 +385,8 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  virtual void
+  registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   /**
    * Return reference to the restatable data object
@@ -400,7 +410,8 @@ public:
    * Restore a Backup.  This sets the App's state.
    *
    * @param backup The Backup holding the data for the app
-   * @param for_restart Whether this restoration is explicitly for the first restoration of restart data
+   * @param for_restart Whether this restoration is explicitly for the first restoration of restart
+   * data
    */
   void restore(std::shared_ptr<Backup> backup, bool for_restart = false);
 
@@ -429,7 +440,9 @@ public:
   /**
    * Add a mesh modifier that will act on the meshes in the system
    */
-  void addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters);
+  void addMeshModifier(const std::string & modifier_name,
+                       const std::string & name,
+                       InputParameters parameters);
 
   /**
    * Get a mesh modifer with its name
@@ -562,10 +575,14 @@ protected:
   std::shared_ptr<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
-  enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
+  enum UNUSED_CHECK
+  {
+    OFF,
+    WARN_UNUSED,
+    ERROR_UNUSED
+  } _enable_unused_check;
 
   Factory _factory;
-
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
@@ -599,7 +616,6 @@ protected:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
-
   /** Method for creating the minimum required actions for an application (no input file)
    *
    * Mimics the following input file:
@@ -633,13 +649,18 @@ private:
   std::set<std::string> _recoverable_data;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
-  enum RegistrationType { APPLICATION, OBJECT, SYNTAX };
+  enum RegistrationType
+  {
+    APPLICATION,
+    OBJECT,
+    SYNTAX
+  };
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
   unsigned int _multiapp_level;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
-  std::map<std::string, std::shared_ptr<MeshModifier> > _mesh_modifiers;
+  std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
 
   /// Cache for a Backup to use for restart / recovery
   std::shared_ptr<Backup> _cached_backup;

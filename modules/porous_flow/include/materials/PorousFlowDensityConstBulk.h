@@ -12,7 +12,7 @@
 
 class PorousFlowDensityConstBulk;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDensityConstBulk>();
 
 /**
@@ -62,4 +62,4 @@ protected:
   MaterialProperty<Real> & _ddensity_dt;
 };
 
-#endif //POROUSFLOWDENSITYCONSTBULK_H
+#endif // POROUSFLOWDENSITYCONSTBULK_H

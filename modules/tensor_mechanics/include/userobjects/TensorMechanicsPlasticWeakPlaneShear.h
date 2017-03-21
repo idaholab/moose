@@ -10,11 +10,9 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticWeakPlaneShear;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>();
 
 /**
@@ -23,14 +21,19 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>();
  */
 class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticWeakPlaneShear(const InputParameters & parameters);
 
-  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const override;
+  virtual void activeConstraints(const std::vector<Real> & f,
+                                 const RankTwoTensor & stress,
+                                 Real intnl,
+                                 const RankFourTensor & Eijkl,
+                                 std::vector<bool> & act,
+                                 RankTwoTensor & returned_stress) const override;
 
   virtual std::string modelName() const override;
 
- protected:
+protected:
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _cohesion;
 

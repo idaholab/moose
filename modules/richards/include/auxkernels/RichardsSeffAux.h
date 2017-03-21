@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSEFFAUX_H
 #define RICHARDSSEFFAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsSeff.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsSeffAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsSeffAux>();
 
 /**
  * Calculates effective saturation for a specified variable
  */
-class RichardsSeffAux: public AuxKernel
+class RichardsSeffAux : public AuxKernel
 {
 public:
   RichardsSeffAux(const InputParameters & parameters);

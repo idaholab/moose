@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class TimestepSize;
 
-template<>
+template <>
 InputParameters validParams<TimestepSize>();
 
 class TimestepSize : public GeneralPostprocessor

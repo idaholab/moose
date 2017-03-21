@@ -33,4 +33,4 @@ protected:
   std::vector<const VariableGradient *> _grad_wc;
 };
 
-#endif //COMPUTECOSSERATSMALLSTRAIN_H
+#endif // COMPUTECOSSERATSMALLSTRAIN_H

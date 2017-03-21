@@ -17,21 +17,23 @@
 
 #include "Action.h"
 
-
 class AddNodalNormalsAction;
 
-template<>
+template <>
 InputParameters validParams<AddNodalNormalsAction>();
 
 /**
  * Action to setup computation of nodal normals.
  *
  * The machinery behind the normal computation is the following:
- * - NodalNormalsPreprocessor is ran over the elements and gather the \f$ \int \d grad_phi \over \d {x|y|z} \d Omega \f$ into three separate vectors
+ * - NodalNormalsPreprocessor is ran over the elements and gather the \f$ \int \d grad_phi \over \d
+ * {x|y|z} \d Omega \f$ into three separate vectors
  *   (that live on AuxiliarySystem) - each for one component of the normal.
- * - NodalNormalsEvaluator is than ran over the boundary nodes and takes the above computed integrals and normalizes it.
+ * - NodalNormalsEvaluator is than ran over the boundary nodes and takes the above computed
+ * integrals and normalizes it.
  *
- * NOTE: the auxiliary system has to have at least one variable on it, so that the vectors for nx, ny and nz have non-zero length.
+ * NOTE: the auxiliary system has to have at least one variable on it, so that the vectors for nx,
+ * ny and nz have non-zero length.
  */
 class AddNodalNormalsAction : public Action
 {

@@ -5,28 +5,34 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "InteractionIntegralBenchmarkBC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<InteractionIntegralBenchmarkBC>()
+template <>
+InputParameters
+validParams<InteractionIntegralBenchmarkBC>()
 {
   MooseEnum disp_component("x=0 y=1 z=2");
   InputParameters params = validParams<PresetNodalBC>();
-  params.addRequiredParam<MooseEnum>("component", disp_component, "The component of the displacement to apply BC on.");
-  params.addRequiredParam<UserObjectName>("crack_front_definition", "The CrackFrontDefinition user object name");
-  params.addParam<unsigned int>("crack_front_point_index", 0, "The index of the point on the crack front.");
+  params.addRequiredParam<MooseEnum>(
+      "component", disp_component, "The component of the displacement to apply BC on.");
+  params.addRequiredParam<UserObjectName>("crack_front_definition",
+                                          "The CrackFrontDefinition user object name");
+  params.addParam<unsigned int>(
+      "crack_front_point_index", 0, "The index of the point on the crack front.");
   params.addRequiredParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addRequiredParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.addRequiredParam<FunctionName>("KI_function", "Function describing the Mode I stress intensity factor.");
-  params.addRequiredParam<FunctionName>("KII_function", "Function describing the Mode II stress intensity factor.");
-  params.addRequiredParam<FunctionName>("KIII_function", "Function describing the Mode III stress intensity factor.");
+  params.addRequiredParam<FunctionName>("KI_function",
+                                        "Function describing the Mode I stress intensity factor.");
+  params.addRequiredParam<FunctionName>("KII_function",
+                                        "Function describing the Mode II stress intensity factor.");
+  params.addRequiredParam<FunctionName>(
+      "KIII_function", "Function describing the Mode III stress intensity factor.");
   return params;
 }
 
-InteractionIntegralBenchmarkBC::InteractionIntegralBenchmarkBC(const InputParameters & parameters) :
-    PresetNodalBC(parameters),
+InteractionIntegralBenchmarkBC::InteractionIntegralBenchmarkBC(const InputParameters & parameters)
+  : PresetNodalBC(parameters),
     _component(getParam<MooseEnum>("component")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
@@ -59,9 +65,13 @@ InteractionIntegralBenchmarkBC::computeQpValue()
   Real disp(0.0);
 
   if (_component == 0)
-    disp = 1 / (2 * _mu) * std::sqrt(_r / (2 * libMesh::pi)) * (ki_val * ct2 * (_kappa - 1 + 2 * st2 * st2) + kii_val * st2 * (_kappa + 1 + 2 * ct2 * ct2));
+    disp = 1 / (2 * _mu) * std::sqrt(_r / (2 * libMesh::pi)) *
+           (ki_val * ct2 * (_kappa - 1 + 2 * st2 * st2) +
+            kii_val * st2 * (_kappa + 1 + 2 * ct2 * ct2));
   else if (_component == 1)
-    disp = 1 / (2 * _mu) * std::sqrt(_r / (2 * libMesh::pi)) * (ki_val * st2 * (_kappa + 1 - 2 * ct2 * ct2) - kii_val * ct2 * (_kappa - 1 - 2 * st2 * st2));
+    disp = 1 / (2 * _mu) * std::sqrt(_r / (2 * libMesh::pi)) *
+           (ki_val * st2 * (_kappa + 1 - 2 * ct2 * ct2) -
+            kii_val * ct2 * (_kappa - 1 - 2 * st2 * st2));
   else if (_component == 2)
     disp = 1 / _mu * std::sqrt(2 * _r / libMesh::pi) * kiii_val * st2;
 

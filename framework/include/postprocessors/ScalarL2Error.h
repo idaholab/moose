@@ -23,7 +23,7 @@ class Function;
 class ScalarL2Error;
 class MooseVariableScalar;
 
-template<>
+template <>
 InputParameters validParams<ScalarL2Error>();
 
 /**
@@ -48,4 +48,4 @@ protected:
   Function & _func;
 };
 
-#endif //SCALARL2ERROR_H
+#endif // SCALARL2ERROR_H

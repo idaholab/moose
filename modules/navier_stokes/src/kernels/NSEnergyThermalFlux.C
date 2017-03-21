@@ -14,7 +14,9 @@ InputParameters
 validParams<NSEnergyThermalFlux>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addClassDescription("This class is responsible for computing residuals and Jacobian terms for the k * grad(T) * grad(phi) term in the Navier-Stokes energy equation.");
+  params.addClassDescription("This class is responsible for computing residuals and Jacobian terms "
+                             "for the k * grad(T) * grad(phi) term in the Navier-Stokes energy "
+                             "equation.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }
@@ -76,8 +78,10 @@ NSEnergyThermalFlux::computeJacobianHelper_value(unsigned var_number)
     Real hess_term = 0.0;
     for (unsigned n = 0; n < 5; ++n)
     {
-      // hess_term += get_hess(m,n) * gradU[n](ell); // ideally... but you can't have a vector<VariableGradient&> :-(
-      hess_term += _temp_derivs.get_hess(var_number, n) * (*_gradU[n])[_qp](ell); // dereference pointer to get value
+      // hess_term += get_hess(m,n) * gradU[n](ell); // ideally... but you can't have a
+      // vector<VariableGradient&> :-(
+      hess_term += _temp_derivs.get_hess(var_number, n) *
+                   (*_gradU[n])[_qp](ell); // dereference pointer to get value
     }
 
     // Accumulate the second dot product term

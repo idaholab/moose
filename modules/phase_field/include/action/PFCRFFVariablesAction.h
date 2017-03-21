@@ -11,16 +11,16 @@
 #include "InputParameters.h"
 #include "Action.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCRFFVariablesAction;
 
-template<>
+template <>
 InputParameters validParams<PFCRFFVariablesAction>();
 
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */
-class PFCRFFVariablesAction: public Action
+class PFCRFFVariablesAction : public Action
 {
 public:
   PFCRFFVariablesAction(const InputParameters & params);
@@ -32,4 +32,4 @@ private:
   const std::string _L_name_base;
 };
 
-#endif //PFCRFFVARIABLESACTION_H
+#endif // PFCRFFVARIABLESACTION_H

@@ -14,7 +14,7 @@ class WeakPlaneStress;
 class RankFourTensor;
 class RankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<WeakPlaneStress>();
 
 class WeakPlaneStress : public Kernel
@@ -34,4 +34,4 @@ protected:
 
   const unsigned int _direction;
 };
-#endif //WEAKPLANESTRESS_H
+#endif // WEAKPLANESTRESS_H

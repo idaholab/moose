@@ -7,21 +7,20 @@
 
 #include "CNSFVEntropyProductionAux.h"
 
-template<>
-InputParameters validParams<CNSFVEntropyProductionAux>()
+template <>
+InputParameters
+validParams<CNSFVEntropyProductionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
   params.addClassDescription("An aux kernel for calculating entropy production.");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
-  params.addRequiredParam<Real>("infinity_density",
-  "Infinity density");
+  params.addRequiredParam<Real>("infinity_density", "Infinity density");
 
-  params.addRequiredParam<Real>("infinity_pressure",
-  "Infinity pressure");
+  params.addRequiredParam<Real>("infinity_pressure", "Infinity pressure");
 
   return params;
 }
@@ -39,7 +38,5 @@ CNSFVEntropyProductionAux::CNSFVEntropyProductionAux(const InputParameters & par
 Real
 CNSFVEntropyProductionAux::computeValue()
 {
-  return (_pres[_qp] / _inf_pres)
-            * std::pow(_inf_rho / _rho[_qp], _fp.gamma(0., 0.))
-            - 1.;
+  return (_pres[_qp] / _inf_pres) * std::pow(_inf_rho / _rho[_qp], _fp.gamma(0., 0.)) - 1.;
 }

@@ -11,7 +11,7 @@
 
 class RadialDisplacementCylinderAux;
 
-template<>
+template <>
 InputParameters validParams<RadialDisplacementCylinderAux>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   RealVectorValue _origin;
 };
 
-#endif //RADIALDISPLACEMENTCYLINDERAUX_H
+#endif // RADIALDISPLACEMENTCYLINDERAUX_H

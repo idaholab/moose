@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "MTICMult.h"
 
-template<>
-InputParameters validParams<MTICMult>()
+template <>
+InputParameters
+validParams<MTICMult>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredCoupledVar("var1", "Coupled variable");
@@ -23,16 +24,12 @@ InputParameters validParams<MTICMult>()
   return params;
 }
 
-MTICMult::MTICMult(const InputParameters & parameters) :
-    InitialCondition(parameters),
-    _var1(coupledValue("var1")),
-    _factor(getParam<Real>("factor"))
+MTICMult::MTICMult(const InputParameters & parameters)
+  : InitialCondition(parameters), _var1(coupledValue("var1")), _factor(getParam<Real>("factor"))
 {
 }
 
-MTICMult::~MTICMult()
-{
-}
+MTICMult::~MTICMult() {}
 
 Real
 MTICMult::value(const Point & /*p*/)

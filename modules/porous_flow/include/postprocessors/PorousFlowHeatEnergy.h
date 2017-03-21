@@ -14,13 +14,14 @@
 // Forward Declarations
 class PorousFlowHeatEnergy;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowHeatEnergy>();
 
 /**
- * Postprocessor produces the sum of heat energy of the porous skeleton and/or fluid components in a region
+ * Postprocessor produces the sum of heat energy of the porous skeleton and/or fluid components in a
+ * region
  */
-class PorousFlowHeatEnergy: public ElementIntegralPostprocessor
+class PorousFlowHeatEnergy : public ElementIntegralPostprocessor
 {
 public:
   PorousFlowHeatEnergy(const InputParameters & parameters);
@@ -63,4 +64,4 @@ protected:
   MooseVariable * const _var;
 };
 
-#endif //POROUSFLOWHEATENERGY_H
+#endif // POROUSFLOWHEATENERGY_H

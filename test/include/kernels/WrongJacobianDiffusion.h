@@ -17,10 +17,10 @@
 #include "Kernel.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class WrongJacobianDiffusion;
 
-template<>
+template <>
 InputParameters validParams<WrongJacobianDiffusion>();
 
 /**
@@ -56,4 +56,4 @@ private:
   Real _jfactor;
 };
 
-#endif //WRONGJACOBIANDIFFUSION_H
+#endif // WRONGJACOBIANDIFFUSION_H

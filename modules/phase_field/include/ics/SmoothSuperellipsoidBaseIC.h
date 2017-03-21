@@ -13,12 +13,14 @@
 // Forward Declarations
 class SmoothSuperellipsoidBaseIC;
 
-template<>
+template <>
 InputParameters validParams<SmoothSuperellipsoidBaseIC>();
 
 /**
- * SmoothSuperellipsoidBaseIC is the base class for all initial conditions that create superellipsoids.
- * A superellipsoid is described by \f$ \left|\frac{x}{a}\right|^n + \left|\frac{y}{b}\right|^n + \left|\frac{z}{c}\right|^n = 1\f$.
+ * SmoothSuperellipsoidBaseIC is the base class for all initial conditions that create
+ * superellipsoids.
+ * A superellipsoid is described by \f$ \left|\frac{x}{a}\right|^n + \left|\frac{y}{b}\right|^n +
+ * \left|\frac{z}{c}\right|^n = 1\f$.
  * Note that all children must resize _as, _bs, _cs, _ns, and _centers.
  */
 class SmoothSuperellipsoidBaseIC : public InitialCondition
@@ -32,9 +34,12 @@ public:
   virtual void initialSetup();
 
 protected:
-  virtual Real computeSuperellipsoidValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
-  virtual Real computeSuperellipsoidInverseValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
-  RealGradient computeSuperellipsoidGradient(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
+  virtual Real
+  computeSuperellipsoidValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
+  virtual Real computeSuperellipsoidInverseValue(
+      const Point & p, const Point & center, Real a, Real b, Real c, Real n);
+  RealGradient computeSuperellipsoidGradient(
+      const Point & p, const Point & center, Real a, Real b, Real c, Real n);
 
   virtual void computeSuperellipsoidSemiaxes() = 0;
   virtual void computeSuperellipsoidExponents() = 0;
@@ -59,4 +64,4 @@ protected:
   MooseRandom _random;
 };
 
-#endif //SMOOTHSUPERELLIPSOIDBASEIC_H
+#endif // SMOOTHSUPERELLIPSOIDBASEIC_H

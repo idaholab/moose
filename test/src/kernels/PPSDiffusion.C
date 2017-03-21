@@ -13,18 +13,18 @@
 /****************************************************************/
 #include "PPSDiffusion.h"
 
-template<>
-InputParameters validParams<PPSDiffusion>()
+template <>
+InputParameters
+validParams<PPSDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<PostprocessorName>("pps_name", "the name of the postprocessor we are going to use");
+  params.addRequiredParam<PostprocessorName>("pps_name",
+                                             "the name of the postprocessor we are going to use");
   return params;
 }
 
-
-PPSDiffusion::PPSDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _pps_value(getPostprocessorValue("pps_name"))
+PPSDiffusion::PPSDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _pps_value(getPostprocessorValue("pps_name"))
 {
 }
 

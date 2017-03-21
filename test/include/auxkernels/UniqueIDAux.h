@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class UniqueIDAux;
 
-template<>
+template <>
 InputParameters validParams<UniqueIDAux>();
 
 /**
@@ -31,7 +30,6 @@ InputParameters validParams<UniqueIDAux>();
 class UniqueIDAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -44,4 +42,4 @@ protected:
   virtual Real computeValue();
 };
 
-#endif //UNIQUEIDAUX_H
+#endif // UNIQUEIDAUX_H

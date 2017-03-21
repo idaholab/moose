@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "EulerAngleFileReader.h"
 
-template<>
-InputParameters validParams<EulerAngleFileReader>()
+template <>
+InputParameters
+validParams<EulerAngleFileReader>()
 {
   InputParameters params = validParams<EulerAngleProvider>();
   params.addClassDescription("Read Euler angle data from a file and provide it to other objects.");
@@ -15,9 +16,8 @@ InputParameters validParams<EulerAngleFileReader>()
   return params;
 }
 
-EulerAngleFileReader::EulerAngleFileReader(const InputParameters & params) :
-    EulerAngleProvider(params),
-    _file_name(getParam<FileName>("file_name"))
+EulerAngleFileReader::EulerAngleFileReader(const InputParameters & params)
+  : EulerAngleProvider(params), _file_name(getParam<FileName>("file_name"))
 {
   readFile();
 }

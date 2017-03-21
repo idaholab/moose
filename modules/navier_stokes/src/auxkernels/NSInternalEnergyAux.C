@@ -12,8 +12,9 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NSInternalEnergyAux>()
+template <>
+InputParameters
+validParams<NSInternalEnergyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -27,8 +28,8 @@ InputParameters validParams<NSInternalEnergyAux>()
   return params;
 }
 
-NSInternalEnergyAux::NSInternalEnergyAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+NSInternalEnergyAux::NSInternalEnergyAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _rho(coupledValue(NS::density)),
     _u_vel(coupledValue(NS::velocity_x)),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),

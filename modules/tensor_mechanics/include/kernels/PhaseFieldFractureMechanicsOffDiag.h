@@ -20,7 +20,7 @@
 class PhaseFieldFractureMechanicsOffDiag;
 class RankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<PhaseFieldFractureMechanicsOffDiag>();
 
 class PhaseFieldFractureMechanicsOffDiag : public DerivativeMaterialInterface<Kernel>
@@ -29,9 +29,9 @@ public:
   PhaseFieldFractureMechanicsOffDiag(const InputParameters & parameters);
 
 protected:
-  Real computeQpResidual() override {return 0.0; }
+  Real computeQpResidual() override { return 0.0; }
 
-  Real computeQpJacobian() override {return 0.0; }
+  Real computeQpJacobian() override { return 0.0; }
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
@@ -43,4 +43,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _d_stress_dc;
 };
 
-#endif //PHASEFIELDFRACTUREMECHANICSOFFDIAG_H
+#endif // PHASEFIELDFRACTUREMECHANICSOFFDIAG_H

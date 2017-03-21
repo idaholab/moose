@@ -27,7 +27,7 @@ protected:
   virtual Real funcValue();
 };
 
-template<>
+template <>
 InputParameters validParams<ForcingFn>();
 
 #endif /* FORCINGFN_H_ */

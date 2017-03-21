@@ -21,24 +21,33 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 
-template<>
-InputParameters validParams<StitchedMesh>()
+template <>
+InputParameters
+validParams<StitchedMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-  params.addRequiredParam<std::vector<MeshFileName>>("files", "The name of the mesh files to read.  These mesh files will be 'stitched' into the current mesh in this order.");
+  params.addRequiredParam<std::vector<MeshFileName>>(
+      "files", "The name of the mesh files to read.  These mesh files will be 'stitched' into the "
+               "current mesh in this order.");
 
-  params.addRequiredParam<std::vector<BoundaryName>>("stitch_boundaries", "Pairs of boundary names (one after the other) to stitch together for each step.");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "stitch_boundaries",
+      "Pairs of boundary names (one after the other) to stitch together for each step.");
 
-  params.addParam<bool>("clear_stitched_boundary_ids", true, "Whether or not to erase the boundary IDs after they've been used for stitching.");
+  params.addParam<bool>(
+      "clear_stitched_boundary_ids",
+      true,
+      "Whether or not to erase the boundary IDs after they've been used for stitching.");
 
-  params.addClassDescription("Reads in all of the given meshes and stitches them all together into one mesh.");
+  params.addClassDescription(
+      "Reads in all of the given meshes and stitches them all together into one mesh.");
 
   return params;
 }
 
-StitchedMesh::StitchedMesh(const InputParameters & parameters) :
-    MooseMesh(parameters),
-    _files(getParam<std::vector<MeshFileName> >("files")),
+StitchedMesh::StitchedMesh(const InputParameters & parameters)
+  : MooseMesh(parameters),
+    _files(getParam<std::vector<MeshFileName>>("files")),
     _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
     _stitch_boundaries(getParam<std::vector<BoundaryName>>("stitch_boundaries"))
 {
@@ -74,11 +83,11 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters) :
 
   // Make pairs out of the boundary names
   for (auto i = beginIndex(_stitch_boundaries); i < _stitch_boundaries.size(); i += 2)
-    _stitch_boundaries_pairs.emplace_back(_stitch_boundaries[i], _stitch_boundaries[i+1]);
+    _stitch_boundaries_pairs.emplace_back(_stitch_boundaries[i], _stitch_boundaries[i + 1]);
 }
 
-StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh) :
-    MooseMesh(other_mesh),
+StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh)
+  : MooseMesh(other_mesh),
     _files(other_mesh._files),
     _clear_stitched_boundary_ids(other_mesh._clear_stitched_boundary_ids),
     _stitch_boundaries(other_mesh._stitch_boundaries)
@@ -102,6 +111,7 @@ StitchedMesh::buildMesh()
     BoundaryID first = getBoundaryID(boundary_pair.first);
     BoundaryID second = getBoundaryID(boundary_pair.second);
 
-    _original_mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
+    _original_mesh->stitch_meshes(
+        *_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
 }

@@ -12,9 +12,8 @@
 // Forward Declarations
 class NSEnergyInviscidSpecifiedBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidSpecifiedBC>();
-
 
 /**
  * The inviscid energy BC term with specified pressure.

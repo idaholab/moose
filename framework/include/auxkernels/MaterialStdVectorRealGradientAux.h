@@ -21,7 +21,7 @@
 // Forward declarations
 class MaterialStdVectorRealGradientAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialStdVectorRealGradientAux>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   unsigned int _component;
 };
 
-#endif //MATERIALSTDVECTORREALGRADIENTAUX_H
+#endif // MATERIALSTDVECTORREALGRADIENTAUX_H

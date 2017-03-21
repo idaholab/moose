@@ -13,28 +13,23 @@
 namespace SolidMechanics
 {
 
-class PlaneStrain :
-  public Element,
-  public ScalarCoupleable
+class PlaneStrain : public Element, public ScalarCoupleable
 {
 public:
-  PlaneStrain(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);
+  PlaneStrain(SolidModel & solid_model,
+              const std::string & name,
+              const InputParameters & parameters);
   virtual ~PlaneStrain();
 
 protected:
+  virtual void computeStrain(const unsigned qp,
+                             const SymmTensor & total_strain_old,
+                             SymmTensor & total_strain_new,
+                             SymmTensor & strain_increment);
 
-  virtual void computeStrain( const unsigned qp,
-                              const SymmTensor & total_strain_old,
-                              SymmTensor & total_strain_new,
-                              SymmTensor & strain_increment );
+  virtual void computeDeformationGradient(unsigned int qp, ColumnMajorMatrix & F);
 
-  virtual void computeDeformationGradient( unsigned int qp,
-                                           ColumnMajorMatrix & F);
-
-  virtual unsigned int getNumKnownCrackDirs() const
-  {
-    return 1;
-  }
+  virtual unsigned int getNumKnownCrackDirs() const { return 1; }
 
   const bool _large_strain;
 
@@ -46,7 +41,6 @@ protected:
   const VariableValue & _scalar_strain_zz;
   const bool _volumetric_locking_correction;
 };
-
 }
 
-#endif //SOLIDMECHANICSMATERIALRZ_H
+#endif // SOLIDMECHANICSMATERIALRZ_H

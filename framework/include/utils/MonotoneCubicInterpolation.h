@@ -88,11 +88,16 @@ public:
   virtual unsigned int getSampleSize();
 
 protected:
-
   // Error check routines run during initialization
   virtual void errorCheck();
   Real sign(const Real & x) const;
-  enum MonotonicStatus {monotonic_increase, monotonic_decrease, monotonic_constant, monotonic_not};
+  enum MonotonicStatus
+  {
+    monotonic_increase,
+    monotonic_decrease,
+    monotonic_constant,
+    monotonic_not
+  };
   MonotonicStatus _monotonic_status;
   void checkMonotone();
 
@@ -119,16 +124,32 @@ protected:
   Real h4DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
 
   // Interpolating cubic polynomial and derivatives
-  virtual Real p(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                 const Real & dhi, const Real & dlo, const Real & x) const;
-  virtual Real pPrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                      const Real & dhi, const Real & dlo, const Real & x) const;
-  virtual Real pDoublePrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                            const Real & dhi, const Real & dlo, const Real & x) const;
+  virtual Real p(const Real & xhi,
+                 const Real & xlo,
+                 const Real & fhi,
+                 const Real & flo,
+                 const Real & dhi,
+                 const Real & dlo,
+                 const Real & x) const;
+  virtual Real pPrime(const Real & xhi,
+                      const Real & xlo,
+                      const Real & fhi,
+                      const Real & flo,
+                      const Real & dhi,
+                      const Real & dlo,
+                      const Real & x) const;
+  virtual Real pDoublePrime(const Real & xhi,
+                            const Real & xlo,
+                            const Real & fhi,
+                            const Real & flo,
+                            const Real & dhi,
+                            const Real & dlo,
+                            const Real & x) const;
 
   // Algorithm routines
   virtual void initialize_derivs();
-  virtual void modify_derivs(const Real & alpha, const Real & beta, const Real & delta, Real & yp_lo, Real & yp_hi);
+  virtual void modify_derivs(
+      const Real & alpha, const Real & beta, const Real & delta, Real & yp_lo, Real & yp_hi);
   virtual void solve();
   virtual void findInterval(const Real & x, unsigned int & klo, unsigned int & khi) const;
 

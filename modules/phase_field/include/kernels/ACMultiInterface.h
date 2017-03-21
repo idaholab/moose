@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ACMultiInterface;
 
-template<>
+template <>
 InputParameters validParams<ACMultiInterface>();
 
 /**
@@ -53,4 +53,4 @@ protected:
   const MaterialProperty<Real> & _L;
 };
 
-#endif //ACMULTIINTERFACE_H
+#endif // ACMULTIINTERFACE_H

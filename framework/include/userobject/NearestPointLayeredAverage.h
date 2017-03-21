@@ -23,7 +23,7 @@
 // Forward Declarations
 class NearestPointLayeredAverage;
 
-template<>
+template <>
 InputParameters validParams<NearestPointLayeredAverage>();
 
 /**

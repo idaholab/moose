@@ -9,16 +9,18 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ComputeAxisymmetricRZSmallStrain>()
+template <>
+InputParameters
+validParams<ComputeAxisymmetricRZSmallStrain>()
 {
   InputParameters params = validParams<Compute2DSmallStrain>();
   params.addClassDescription("Compute a small strain in an Axisymmetric geometry");
   return params;
 }
 
-ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters) :
-    Compute2DSmallStrain(parameters)
+ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(
+    const InputParameters & parameters)
+  : Compute2DSmallStrain(parameters)
 {
 }
 

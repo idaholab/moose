@@ -20,18 +20,15 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<KernelValue>()
+template <>
+InputParameters
+validParams<KernelValue>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-
-KernelValue::KernelValue(const InputParameters & parameters) :
-    Kernel(parameters)
-{
-}
+KernelValue::KernelValue(const InputParameters & parameters) : Kernel(parameters) {}
 
 void
 KernelValue::computeResidual()
@@ -81,7 +78,7 @@ KernelValue::computeJacobian()
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++) // target for auto vectorization
-      diag(i) = _local_ke(i,i);
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)

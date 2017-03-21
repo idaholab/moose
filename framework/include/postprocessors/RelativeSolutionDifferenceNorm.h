@@ -17,11 +17,11 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class RelativeSolutionDifferenceNorm;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<RelativeSolutionDifferenceNorm>();
 
 /**

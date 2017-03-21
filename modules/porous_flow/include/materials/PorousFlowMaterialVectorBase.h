@@ -13,7 +13,7 @@
 
 class PorousFlowMaterialVectorBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMaterialVectorBase>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   const unsigned int _num_var;
 };
 
-#endif //POROUSFLOWMATERIALVECTORBASE_H
+#endif // POROUSFLOWMATERIALVECTORBASE_H

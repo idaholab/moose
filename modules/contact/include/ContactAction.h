@@ -13,7 +13,7 @@
 
 class ContactAction;
 
-template<>
+template <>
 InputParameters validParams<ContactAction>();
 
 class ContactAction : public Action
@@ -37,6 +37,5 @@ private:
   const MooseEnum _order;
   const MooseEnum _system;
 };
-
 
 #endif // CONTACTACTION_H

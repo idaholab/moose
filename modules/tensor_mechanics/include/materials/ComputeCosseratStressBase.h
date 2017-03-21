@@ -34,4 +34,4 @@ protected:
   MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
 };
 
-#endif //COMPUTECOSSERATSTRESSBASE_H
+#endif // COMPUTECOSSERATSTRESSBASE_H

@@ -17,14 +17,15 @@
 
 #include "GeneralUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class GhostUserObject;
 
-template<>
+template <>
 InputParameters validParams<GhostUserObject>();
 
 /**
- * User object to calculate ghosted elements on a single processor or the union across all processors.
+ * User object to calculate ghosted elements on a single processor or the union across all
+ * processors.
  */
 class GhostUserObject : public GeneralUserObject
 {
@@ -42,4 +43,4 @@ protected:
   dof_id_type _rank;
 };
 
-#endif //GHOSTUSEROBJECT_H
+#endif // GHOSTUSEROBJECT_H

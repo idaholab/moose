@@ -11,7 +11,7 @@
 #include "GeneralPostprocessor.h"
 #include "StateSimRunner.h"
 
-//Forward Declarations
+// Forward Declarations
 class StateSimTester;
 
 // libMesh forward declarations
@@ -21,7 +21,7 @@ class System;
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<StateSimTester>();
 
 class StateSimTester : public GeneralPostprocessor
@@ -43,4 +43,4 @@ protected:
   const SystemEnum _test_val_enum;
 };
 
-#endif //STATESIMTESTER_H
+#endif // STATESIMTESTER_H

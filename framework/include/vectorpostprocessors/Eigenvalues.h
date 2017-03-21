@@ -18,10 +18,10 @@
 #include "GeneralVectorPostprocessor.h"
 #include "NonlinearEigenSystem.h"
 
-//Forward Declarations
+// Forward Declarations
 class Eigenvalues;
 
-template<>
+template <>
 InputParameters validParams<Eigenvalues>();
 
 class Eigenvalues : public GeneralVectorPostprocessor

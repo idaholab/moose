@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "MMSConvection.h"
 
-template<>
-InputParameters validParams<MMSConvection>()
+template <>
+InputParameters
+validParams<MMSConvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<Real>("x", "Component of velocity in the x direction");
@@ -23,24 +24,23 @@ InputParameters validParams<MMSConvection>()
   return params;
 }
 
-MMSConvection::MMSConvection(const InputParameters & parameters) :
-    Kernel(parameters),
-    _x(getParam<Real>("x")),
-    _y(getParam<Real>("y")),
-    _z(getParam<Real>("z"))
+MMSConvection::MMSConvection(const InputParameters & parameters)
+  : Kernel(parameters), _x(getParam<Real>("x")), _y(getParam<Real>("y")), _z(getParam<Real>("z"))
 {
-  velocity(0)=_x;
-  velocity(1)=_y;
-  velocity(2)=_z;
+  velocity(0) = _x;
+  velocity(1) = _y;
+  velocity(2) = _z;
 }
 
-Real MMSConvection::computeQpResidual()
+Real
+MMSConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(velocity*_grad_u[_qp]);
+  return _test[_i][_qp] * (velocity * _grad_u[_qp]);
 }
 
-Real MMSConvection::computeQpJacobian()
+Real
+MMSConvection::computeQpJacobian()
 {
-  //There is no Jacobian since we have no grad u.
+  // There is no Jacobian since we have no grad u.
   return 0;
 }

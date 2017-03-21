@@ -11,12 +11,12 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class StressDivergenceTensors;
 class RankTwoTensor;
 class RankFourTensor;
 
-template<>
+template <>
 InputParameters validParams<StressDivergenceTensors>();
 
 /**
@@ -67,13 +67,13 @@ protected:
   const unsigned int _temp_var;
 
   /// Gradient of test function averaged over the element. Used in volumetric locking correction calculation.
-  std::vector<std::vector<Real> > _avg_grad_test;
+  std::vector<std::vector<Real>> _avg_grad_test;
 
   /// Gradient of phi function averaged over the element. Used in volumetric locking correction calculation.
-  std::vector<std::vector<Real> > _avg_grad_phi;
+  std::vector<std::vector<Real>> _avg_grad_phi;
 
   /// Flag for volumetric locking correction
   bool _volumetric_locking_correction;
 };
 
-#endif //STRESSDIVERGENCETENSORS_H
+#endif // STRESSDIVERGENCETENSORS_H

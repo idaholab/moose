@@ -38,8 +38,7 @@ protected:
 
   /// Calls all of the user-specified radial recompute materials and iterates
   /// over the change in the effective radial return stress.
-  virtual void updateQpStress(RankTwoTensor & strain_increment,
-                             RankTwoTensor & stress_new);
+  virtual void updateQpStress(RankTwoTensor & strain_increment, RankTwoTensor & stress_new);
 
   ///@{Input parameters associated with the recompute iteration to return the stress state to the yield surface
   const unsigned int _max_its;
@@ -61,4 +60,4 @@ protected:
   std::vector<StressUpdateBase *> _models;
 };
 
-#endif //COMPUTERETURNMAPPINGSTRESS_H
+#endif // COMPUTERETURNMAPPINGSTRESS_H

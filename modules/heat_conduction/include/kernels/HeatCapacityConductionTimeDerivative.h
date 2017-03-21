@@ -15,7 +15,7 @@
 // Forward Declarations
 class HeatCapacityConductionTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<HeatCapacityConductionTimeDerivative>();
 
 /**
@@ -25,7 +25,8 @@ InputParameters validParams<HeatCapacityConductionTimeDerivative>();
  *   \f$ C_p * \frac{\partial T}{\partial t}, \f$
  * where \f$ C_p \f$ is material property for the "heat_capacity".
  */
-class HeatCapacityConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
+class HeatCapacityConductionTimeDerivative
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
   HeatCapacityConductionTimeDerivative(const InputParameters & parameters);
@@ -42,4 +43,4 @@ protected:
   ///@}
 };
 
-#endif //HEATCAPACITYCONDUCTIONTIMEDERIVATIVE_H
+#endif // HEATCAPACITYCONDUCTIONTIMEDERIVATIVE_H

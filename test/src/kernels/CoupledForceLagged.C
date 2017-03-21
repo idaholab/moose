@@ -14,18 +14,17 @@
 
 #include "CoupledForceLagged.h"
 
-template<>
-InputParameters validParams<CoupledForceLagged>()
+template <>
+InputParameters
+validParams<CoupledForceLagged>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   return params;
 }
 
-CoupledForceLagged::CoupledForceLagged(const InputParameters & parameters) :
-    Kernel(parameters),
-    _v_var(coupled("v")),
-    _v(coupledValuePreviousNL("v"))
+CoupledForceLagged::CoupledForceLagged(const InputParameters & parameters)
+  : Kernel(parameters), _v_var(coupled("v")), _v(coupledValuePreviousNL("v"))
 {
 }
 

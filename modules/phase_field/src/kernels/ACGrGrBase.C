@@ -6,17 +6,19 @@
 /****************************************************************/
 #include "ACGrGrBase.h"
 
-template<>
-InputParameters validParams<ACGrGrBase>()
+template <>
+InputParameters
+validParams<ACGrGrBase>()
 {
   InputParameters params = ACBulk<Real>::validParams();
-  params.addRequiredCoupledVar("v", "Array of coupled order paramter names for other order parameters");
+  params.addRequiredCoupledVar("v",
+                               "Array of coupled order paramter names for other order parameters");
   params.addCoupledVar("T", "temperature");
   return params;
 }
 
-ACGrGrBase::ACGrGrBase(const InputParameters & parameters) :
-    ACBulk<Real>(parameters),
+ACGrGrBase::ACGrGrBase(const InputParameters & parameters)
+  : ACBulk<Real>(parameters),
     _op_num(coupledComponents("v")),
     _vals(_op_num),
     _vals_var(_op_num),

@@ -19,10 +19,10 @@
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
 
-//Forward declarations
+// Forward declarations
 class MooseParsedFunction;
 
-template<>
+template <>
 InputParameters validParams<MooseParsedFunction>();
 
 /**
@@ -33,12 +33,9 @@ InputParameters validParams<MooseParsedFunction>();
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-class MooseParsedFunction :
-  public Function,
-  public MooseParsedFunctionBase
+class MooseParsedFunction : public Function, public MooseParsedFunctionBase
 {
 public:
-
   /**
    * Created from MooseSystem via the FunctionFactory.
    * @param parameters The input parameters
@@ -81,10 +78,9 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// The function defined by the user
   std::string _value;
 
   friend class ParsedFunctionTest;
 };
-#endif //MOOSEPARSEDFUNCTION_H
+#endif // MOOSEPARSEDFUNCTION_H

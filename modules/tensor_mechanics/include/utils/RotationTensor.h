@@ -28,7 +28,12 @@ class RotationTensor : public RealTensorValue
 {
 public:
   /// axis for single axis rotation constructor
-  enum Axis { XAXIS = 0, YAXIS, ZAXIS };
+  enum Axis
+  {
+    XAXIS = 0,
+    YAXIS,
+    ZAXIS
+  };
 
   /// single axis rotation (in degrees)
   RotationTensor(Axis axis, Real angle);
@@ -43,4 +48,4 @@ public:
   void update(const RealVectorValue & euler_angles);
 };
 
-#endif //ROTATIONTENSOR_H
+#endif // ROTATIONTENSOR_H

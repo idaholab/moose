@@ -62,4 +62,4 @@ protected:
   bool _finalize;
 };
 
-#endif //COMPUTEINDICATORTHREAD_H
+#endif // COMPUTEINDICATORTHREAD_H

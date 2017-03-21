@@ -13,13 +13,15 @@
 #include "MooseMesh.h"
 
 // Full specialization of the validParams function for this object
-template<>
-InputParameters validParams<NSImposedVelocityDirectionBC>()
+template <>
+InputParameters
+validParams<NSImposedVelocityDirectionBC>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NodalBC>();
 
-  params.addClassDescription("This class imposes a velocity direction component as a Dirichlet condition on the appropriate momentum equation.");
+  params.addClassDescription("This class imposes a velocity direction component as a Dirichlet "
+                             "condition on the appropriate momentum equation.");
   // Coupled variables
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
@@ -32,8 +34,8 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
   return params;
 }
 
-NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters) :
-    NodalBC(parameters),
+NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters)
+  : NodalBC(parameters),
     _rho(coupledValue(NS::density)),
     _u_vel(coupledValue(NS::velocity_x)),
     _v_vel(_mesh.dimension() == 2 ? coupledValue(NS::velocity_y) : _zero),
@@ -42,7 +44,8 @@ NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters
 {
 }
 
-Real NSImposedVelocityDirectionBC::computeQpResidual()
+Real
+NSImposedVelocityDirectionBC::computeQpResidual()
 {
   // The velocity vector
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);

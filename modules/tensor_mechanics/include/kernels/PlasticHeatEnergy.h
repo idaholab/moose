@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class PlasticHeatEnergy;
 
-template<>
+template <>
 InputParameters validParams<PlasticHeatEnergy>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   std::vector<unsigned int> _disp_var;
 };
 
-#endif //PLASTICHEATENERGY_H
+#endif // PLASTICHEATENERGY_H

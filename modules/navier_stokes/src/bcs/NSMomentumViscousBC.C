@@ -11,8 +11,10 @@ InputParameters
 validParams<NSMomentumViscousBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  params.addClassDescription("This class corresponds to the viscous part of the 'natural' boundary condition for the momentum equations.");
-  params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
+  params.addClassDescription("This class corresponds to the viscous part of the 'natural' boundary "
+                             "condition for the momentum equations.");
+  params.addRequiredParam<unsigned>(
+      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 

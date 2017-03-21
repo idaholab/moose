@@ -20,7 +20,7 @@
 // Forward Declarations
 class NodalSum;
 
-template<>
+template <>
 InputParameters validParams<NodalSum>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   Real _sum;
 };
 
-#endif //NODALSUM_H
+#endif // NODALSUM_H

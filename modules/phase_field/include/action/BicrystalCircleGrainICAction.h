@@ -13,7 +13,7 @@
 /**
  * Bicrystal with a circular grain and an embedding outer grain
  */
-class BicrystalCircleGrainICAction: public Action
+class BicrystalCircleGrainICAction : public Action
 {
 public:
   BicrystalCircleGrainICAction(const InputParameters & params);
@@ -31,7 +31,7 @@ private:
   const bool _3D_sphere;
 };
 
-template<>
+template <>
 InputParameters validParams<BicrystalCircleGrainICAction>();
 
-#endif //BICRYSTALCIRCLEGRAINICACTION_H
+#endif // BICRYSTALCIRCLEGRAINICACTION_H

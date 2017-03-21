@@ -10,33 +10,42 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<RigidBodyMultiKernelAction>()
+template <>
+InputParameters
+validParams<RigidBodyMultiKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Action for applying AllenCahn equations and SingleGrainRigidBodyMotion to grains");
+  params.addClassDescription(
+      "Action for applying AllenCahn equations and SingleGrainRigidBodyMotion to grains");
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
-  params.addParam<MaterialPropertyName>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define type of force density under consideration");
-  params.addParam<Real>("translation_constant", 500, "constant value characterizing grain translation");
+  params.addParam<MaterialPropertyName>(
+      "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
+  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
+                                            "type of force density under consideration");
+  params.addParam<Real>(
+      "translation_constant", 500, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
-  params.addRequiredParam<UserObjectName>("grain_force", "userobject for getting force and torque acting on grains");
-  params.addRequiredParam<UserObjectName>("grain_tracker_object", "The FeatureFloodCount UserObject to get values from.");
-  params.addRequiredParam<VectorPostprocessorName>("grain_volumes", "The feature volume VectorPostprocessorValue.");
+  params.addRequiredParam<UserObjectName>(
+      "grain_force", "userobject for getting force and torque acting on grains");
+  params.addRequiredParam<UserObjectName>("grain_tracker_object",
+                                          "The FeatureFloodCount UserObject to get values from.");
+  params.addRequiredParam<VectorPostprocessorName>("grain_volumes",
+                                                   "The feature volume VectorPostprocessorValue.");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   return params;
 }
 
-RigidBodyMultiKernelAction::RigidBodyMultiKernelAction(const InputParameters & params) :
-  Action(params),
-  _op_num(getParam<unsigned int>("op_num")),
-  _var_name_base(getParam<std::string>("var_name_base")),
-  _implicit(getParam<bool>("implicit"))
+RigidBodyMultiKernelAction::RigidBodyMultiKernelAction(const InputParameters & params)
+  : Action(params),
+    _op_num(getParam<unsigned int>("op_num")),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _implicit(getParam<bool>("implicit"))
 {
 }
 
@@ -67,7 +76,7 @@ RigidBodyMultiKernelAction::act()
         if (j != op)
           arg[ind++] = _var_name_base + Moose::stringify(j);
 
-        arg[ind++] = c;
+      arg[ind++] = c;
     }
     else
     {
@@ -108,7 +117,7 @@ RigidBodyMultiKernelAction::act()
     {
       InputParameters params = _factory.getValidParams("AllenCahn");
       params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<VariableName> >("args") = arg;
+      params.set<std::vector<VariableName>>("args") = arg;
       params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mob_name");
       params.set<MaterialPropertyName>("f_name") = getParam<MaterialPropertyName>("f_name");
       params.set<bool>("implicit") = _implicit;
@@ -125,16 +134,18 @@ RigidBodyMultiKernelAction::act()
     {
       InputParameters params = _factory.getValidParams("SingleGrainRigidBodyMotion");
       params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<VariableName> >("v") = v;
+      params.set<std::vector<VariableName>>("v") = v;
       params.set<unsigned int>("op_index") = op;
-      params.set<std::vector<VariableName> >("c") = {getParam<VariableName>("c")};
+      params.set<std::vector<VariableName>>("c") = {getParam<VariableName>("c")};
       if (isParamValid("base_name"))
         params.set<std::string>("base_name") = getParam<std::string>("base_name");
       params.set<Real>("translation_constant") = getParam<Real>("translation_constant");
       params.set<Real>("rotation_constant") = getParam<Real>("rotation_constant");
       params.set<UserObjectName>("grain_force") = getParam<UserObjectName>("grain_force");
-      params.set<UserObjectName>("grain_tracker_object") = getParam<UserObjectName>("grain_tracker_object");
-      params.set<VectorPostprocessorName>("grain_volumes") = getParam<VectorPostprocessorName>("grain_volumes");
+      params.set<UserObjectName>("grain_tracker_object") =
+          getParam<UserObjectName>("grain_tracker_object");
+      params.set<VectorPostprocessorName>("grain_volumes") =
+          getParam<VectorPostprocessorName>("grain_volumes");
 
       params.set<bool>("implicit") = _implicit;
       params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");

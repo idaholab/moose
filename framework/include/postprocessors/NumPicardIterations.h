@@ -22,7 +22,7 @@
 class NumPicardIterations;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<NumPicardIterations>();
 
 /**

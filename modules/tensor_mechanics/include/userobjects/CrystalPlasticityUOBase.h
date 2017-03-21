@@ -11,7 +11,7 @@
 
 class CrystalPlasticityUOBase;
 
-template<>
+template <>
 InputParameters validParams<CrystalPlasticityUOBase>();
 
 /**
@@ -19,13 +19,13 @@ InputParameters validParams<CrystalPlasticityUOBase>();
  */
 class CrystalPlasticityUOBase : public DiscreteElementUserObject
 {
- public:
+public:
   CrystalPlasticityUOBase(const InputParameters & parameters);
 
   /// Returns the size of variable
   virtual unsigned int variableSize() const;
 
- protected:
+protected:
   unsigned int _variable_size;
 };
 

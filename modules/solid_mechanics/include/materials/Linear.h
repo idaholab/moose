@@ -9,7 +9,7 @@
 
 #include "Element.h"
 
-//Forward Declarations
+// Forward Declarations
 class SymmElasticityTensor;
 
 namespace SolidMechanics
@@ -22,11 +22,10 @@ public:
   virtual ~Linear();
 
 protected:
-
-  virtual void computeStrain( const unsigned qp,
-                              const SymmTensor & total_strain_old,
-                              SymmTensor & total_strain_new,
-                              SymmTensor & strain_increment );
+  virtual void computeStrain(const unsigned qp,
+                             const SymmTensor & total_strain_old,
+                             SymmTensor & total_strain_new,
+                             SymmTensor & strain_increment);
 
   const bool _large_strain;
 
@@ -35,7 +34,6 @@ protected:
   const VariableGradient & _grad_disp_z;
   const bool _volumetric_locking_correction;
 };
-
 }
 
 #endif

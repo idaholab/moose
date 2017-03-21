@@ -48,4 +48,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
 };
 
-#endif //COMPUTEPLASTICHEATENERGY_H
+#endif // COMPUTEPLASTICHEATENERGY_H

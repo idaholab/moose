@@ -18,7 +18,7 @@
 
 class MMSImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<MMSImplicitEuler>();
 
 class MMSImplicitEuler : public TimeKernel
@@ -33,4 +33,4 @@ protected:
   const VariableValue & _u_old;
 };
 
-#endif //MMSIMPLICITEULER_H_
+#endif // MMSIMPLICITEULER_H_

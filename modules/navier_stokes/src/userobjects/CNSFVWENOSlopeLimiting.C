@@ -7,18 +7,18 @@
 
 #include "CNSFVWENOSlopeLimiting.h"
 
-template<>
-InputParameters validParams<CNSFVWENOSlopeLimiting>()
+template <>
+InputParameters
+validParams<CNSFVWENOSlopeLimiting>()
 {
   InputParameters params = validParams<SlopeLimitingBase>();
 
-  params.addClassDescription("A user object that performs WENO slope limiting to get the limited slopes of cell average variables in multi-dimensions.");
+  params.addClassDescription("A user object that performs WENO slope limiting to get the limited "
+                             "slopes of cell average variables in multi-dimensions.");
 
-  params.addParam<Real>("linear_weight", 1,
-  "Linear weight, default = 1");
+  params.addParam<Real>("linear_weight", 1, "Linear weight, default = 1");
 
-  params.addParam<Real>("decay_power", 1,
-  "Decay power, default = 1");
+  params.addParam<Real>("decay_power", 1, "Decay power, default = 1");
 
   return params;
 }
@@ -33,7 +33,7 @@ CNSFVWENOSlopeLimiting::CNSFVWENOSlopeLimiting(const InputParameters & parameter
 std::vector<RealGradient>
 CNSFVWENOSlopeLimiting::limitElementSlope() const
 {
-  const Elem* elem = _current_elem;
+  const Elem * elem = _current_elem;
 
   /// current element id
   dof_id_type _elementID = elem->id();
@@ -54,13 +54,13 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   Real eps = 1e-7;
 
   /// initialize oscillation indicator
-  std::vector <std::vector<Real> > osci(nside + 1, std::vector<Real>(nvars, 0.));
+  std::vector<std::vector<Real>> osci(nside + 1, std::vector<Real>(nvars, 0.));
 
   /// initialize weight coefficients
-  std::vector <std::vector<Real> > weig(nside + 1, std::vector<Real>(nvars, 0.));
+  std::vector<std::vector<Real>> weig(nside + 1, std::vector<Real>(nvars, 0.));
 
   /// initialize summed coefficients
-  std::vector <Real> summ(nvars, 0.);
+  std::vector<Real> summ(nvars, 0.);
 
   /// compute oscillation indicators, nonlinear weights and their summ for each stencil
 
@@ -68,7 +68,7 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
 
   for (unsigned int iv = 0; iv < nvars; iv++)
   {
-    osci[0][iv] = std::sqrt(rugrad[iv] *  rugrad[iv]);
+    osci[0][iv] = std::sqrt(rugrad[iv] * rugrad[iv]);
 
     weig[0][iv] = _lweig / std::pow(eps + osci[0][iv], _dpowe);
 

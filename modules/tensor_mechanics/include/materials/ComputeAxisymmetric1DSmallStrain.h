@@ -35,4 +35,4 @@ protected:
   const VariableValue & _out_of_plane_strain;
 };
 
-#endif //COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H
+#endif // COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H

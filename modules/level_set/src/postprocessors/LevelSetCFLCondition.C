@@ -7,17 +7,19 @@
 
 #include "LevelSetCFLCondition.h"
 
-template<>
-InputParameters validParams<LevelSetCFLCondition>()
+template <>
+InputParameters
+validParams<LevelSetCFLCondition>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addClassDescription("Compute the minimum timestep from the Courant-Friedrichs-Lewy (CFL) condition for the level-set equation.");
-  params += validParams<LevelSetVelocityInterface<> >();
+  params.addClassDescription("Compute the minimum timestep from the Courant-Friedrichs-Lewy (CFL) "
+                             "condition for the level-set equation.");
+  params += validParams<LevelSetVelocityInterface<>>();
   return params;
 }
 
-LevelSetCFLCondition::LevelSetCFLCondition(const InputParameters & parameters) :
-    LevelSetVelocityInterface<ElementPostprocessor>(parameters),
+LevelSetCFLCondition::LevelSetCFLCondition(const InputParameters & parameters)
+  : LevelSetVelocityInterface<ElementPostprocessor>(parameters),
     _cfl_timestep(std::numeric_limits<Real>::max())
 {
 }
@@ -44,7 +46,7 @@ LevelSetCFLCondition::finalize()
 void
 LevelSetCFLCondition::threadJoin(const UserObject & user_object)
 {
-  const LevelSetCFLCondition & cfl = static_cast<const LevelSetCFLCondition&>(user_object);
+  const LevelSetCFLCondition & cfl = static_cast<const LevelSetCFLCondition &>(user_object);
   _cfl_timestep = std::min(_cfl_timestep, cfl._cfl_timestep);
 }
 

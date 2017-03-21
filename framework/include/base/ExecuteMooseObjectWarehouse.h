@@ -22,14 +22,15 @@
 /**
  * A class for storing MooseObjects based on execution flag.
  *
- * Note: The global list of objects, those accessed via the "get" methods of this class, are not sorted when the
- *       sort method is called. This is because cyclic errors occur even when the execution flags differ.
+ * Note: The global list of objects, those accessed via the "get" methods of this class, are not
+ * sorted when the
+ *       sort method is called. This is because cyclic errors occur even when the execution flags
+ * differ.
  */
-template<typename T>
+template <typename T>
 class ExecuteMooseObjectWarehouse : public MooseObjectWarehouse<T>
 {
 public:
-
   using MooseObjectWarehouse<T>::checkThreadID;
   using MooseObjectWarehouse<T>::initialSetup;
   using MooseObjectWarehouse<T>::timestepSetup;
@@ -62,8 +63,14 @@ public:
   /**
    * Provide access to begin/end iterators of the underlying map of execution flags.
    */
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::const_iterator begin() const { return _execute_objects.begin(); }
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::const_iterator end() const { return _execute_objects.end(); }
+  typename std::map<ExecFlagType, MooseObjectWarehouse<T>>::const_iterator begin() const
+  {
+    return _execute_objects.begin();
+  }
+  typename std::map<ExecFlagType, MooseObjectWarehouse<T>>::const_iterator end() const
+  {
+    return _execute_objects.end();
+  }
   ///@}
 
   /**
@@ -88,60 +95,60 @@ public:
    */
   void sort(THREAD_ID tid = 0);
 
-
 protected:
-
   // Map of execute objects to storage containers for MooseObjects
-  std::map<ExecFlagType, MooseObjectWarehouse<T> > _execute_objects;
+  std::map<ExecFlagType, MooseObjectWarehouse<T>> _execute_objects;
 
   /// A helper method for extracting objects from the various storage containers
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::iterator
-  getStorageHelper(std::map<ExecFlagType, MooseObjectWarehouse<T> > & objects, ExecFlagType exec_flag) const;
+  typename std::map<ExecFlagType, MooseObjectWarehouse<T>>::iterator
+  getStorageHelper(std::map<ExecFlagType, MooseObjectWarehouse<T>> & objects,
+                   ExecFlagType exec_flag) const;
 };
 
-template<typename T>
-ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(bool threaded) :
-    MooseObjectWarehouse<T>(threaded)
+template <typename T>
+ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(bool threaded)
+  : MooseObjectWarehouse<T>(threaded)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
   for (const auto & exec_type : Moose::exec_types)
     _execute_objects.insert(std::make_pair(exec_type, MooseObjectWarehouse<T>(threaded)));
 }
 
-template<typename T>
+template <typename T>
 ExecuteMooseObjectWarehouse<T>::~ExecuteMooseObjectWarehouse()
 {
 }
 
-template<typename T>
-const MooseObjectWarehouse<T> &
-ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag) const
+template <typename T>
+const MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::
+operator[](ExecFlagType exec_flag) const
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
+    mooseError("Unable to locate the desired execute flag, the global list of execute parameters "
+               "is likely out-of-date.");
 
   return iter->second;
 }
 
-template<typename T>
-MooseObjectWarehouse<T> &
-ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag)
+template <typename T>
+MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag)
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
+    mooseError("Unable to locate the desired execute flag, the global list of execute parameters "
+               "is likely out-of-date.");
 
   return iter->second;
 }
 
-template<typename T>
+template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid/* = 0 */)
+ExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid /* = 0 */)
 {
   // Update all objects active list
   MooseObjectWarehouse<T>::updateActive(tid);
@@ -151,9 +158,9 @@ ExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid/* = 0 */)
     object_pair.second.updateActive(tid);
 }
 
-template<typename T>
+template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
+ExecuteMooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _execute_objects.find(EXEC_NONLINEAR);
@@ -161,9 +168,9 @@ ExecuteMooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
     iter->second.jacobianSetup(tid);
 }
 
-template<typename T>
+template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::residualSetup(THREAD_ID tid/* = 0*/) const
+ExecuteMooseObjectWarehouse<T>::residualSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _execute_objects.find(EXEC_LINEAR);
@@ -171,36 +178,36 @@ ExecuteMooseObjectWarehouse<T>::residualSetup(THREAD_ID tid/* = 0*/) const
     iter->second.residualSetup(tid);
 }
 
-template<typename T>
+template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid/* = 0*/) const
+ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   switch (exec_flag)
   {
-  case EXEC_INITIAL:
-    initialSetup(tid);
-    break;
-  case EXEC_TIMESTEP_BEGIN:
-    timestepSetup(tid);
-    break;
-  case EXEC_SUBDOMAIN:
-    subdomainSetup(tid);
-    break;
-  case EXEC_NONLINEAR:
-    jacobianSetup(tid);
-    break;
-  case EXEC_LINEAR:
-    residualSetup(tid);
-    break;
-  default:
-    break;
+    case EXEC_INITIAL:
+      initialSetup(tid);
+      break;
+    case EXEC_TIMESTEP_BEGIN:
+      timestepSetup(tid);
+      break;
+    case EXEC_SUBDOMAIN:
+      subdomainSetup(tid);
+      break;
+    case EXEC_NONLINEAR:
+      jacobianSetup(tid);
+      break;
+    case EXEC_LINEAR:
+      residualSetup(tid);
+      break;
+    default:
+      break;
   }
 }
 
-template<typename T>
+template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid/*=0*/)
+ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid /*=0*/)
 {
   // Update list of all objects
   MooseObjectWarehouse<T>::addObject(object, tid);
@@ -214,12 +221,15 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
       _execute_objects[*it].addObject(object, tid);
   }
   else
-    mooseError("The object being added (", object->name(), ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
+    mooseError("The object being added (", object->name(), ") must inherit from SetupInterface to "
+                                                           "be added to the "
+                                                           "ExecuteMooseObjectWarehouse "
+                                                           "container.");
 }
 
-template<typename T>
+template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid/* = 0*/)
+ExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid /* = 0*/)
 {
   // Sort execute object storage
   for (auto & object_pair : _execute_objects)

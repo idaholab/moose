@@ -20,10 +20,8 @@
 
 struct BndElement
 {
-  BndElement(Elem * elem, unsigned short int side, BoundaryID bnd_id) :
-      _elem(elem),
-      _side(side),
-      _bnd_id(bnd_id)
+  BndElement(Elem * elem, unsigned short int side, BoundaryID bnd_id)
+    : _elem(elem), _side(side), _bnd_id(bnd_id)
   {
   }
 

@@ -7,17 +7,15 @@
 
 #include "BCUserObject.h"
 
-template<>
-InputParameters validParams<BCUserObject>()
+template <>
+InputParameters
+validParams<BCUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   return params;
 }
 
-BCUserObject::BCUserObject(const InputParameters & parameters) :
-    GeneralUserObject(parameters)
-{
-}
+BCUserObject::BCUserObject(const InputParameters & parameters) : GeneralUserObject(parameters) {}
 
 void
 BCUserObject::initialize()

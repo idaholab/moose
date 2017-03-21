@@ -14,17 +14,18 @@
 
 #include "MaterialMultiPointSource.h"
 
-template<>
-InputParameters validParams<MaterialMultiPointSource>()
+template <>
+InputParameters
+validParams<MaterialMultiPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<std::vector<Point> >("points", "The x,y,z coordinates of the points");
+  params.addRequiredParam<std::vector<Point>>("points", "The x,y,z coordinates of the points");
   return params;
 }
 
-MaterialMultiPointSource::MaterialMultiPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
-    _points(getParam<std::vector<Point> >("points")),
+MaterialMultiPointSource::MaterialMultiPointSource(const InputParameters & parameters)
+  : DiracKernel(parameters),
+    _points(getParam<std::vector<Point>>("points")),
     _value(getMaterialProperty<Real>("matp"))
 {
 }

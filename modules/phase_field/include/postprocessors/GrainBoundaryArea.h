@@ -12,7 +12,7 @@
 
 class GrainBoundaryArea;
 
-template<>
+template <>
 InputParameters validParams<GrainBoundaryArea>();
 
 /**

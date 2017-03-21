@@ -11,10 +11,10 @@
 #include "PorousFlow2PhasePP.h"
 #include "PorousFlowVanGenuchten.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow2PhasePP_VG;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow2PhasePP_VG>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   const Real _m;
 };
 
-#endif //POROUSFLOW2PHASEPP_VG_H
+#endif // POROUSFLOW2PHASEPP_VG_H

@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "DifferencePostprocessor.h"
 
-template<>
-InputParameters validParams<DifferencePostprocessor>()
+template <>
+InputParameters
+validParams<DifferencePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<PostprocessorName>("value1", "First value");
@@ -23,8 +24,8 @@ InputParameters validParams<DifferencePostprocessor>()
   return params;
 }
 
-DifferencePostprocessor::DifferencePostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+DifferencePostprocessor::DifferencePostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _value1(getPostprocessorValue("value1")),
     _value2(getPostprocessorValue("value2"))
 {

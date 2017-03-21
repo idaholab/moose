@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSMomentumPressureWeakStagnationBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
 
 /**

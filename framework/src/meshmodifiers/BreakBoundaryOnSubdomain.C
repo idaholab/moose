@@ -17,17 +17,21 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 
-template<>
-InputParameters validParams<BreakBoundaryOnSubdomain>()
+template <>
+InputParameters
+validParams<BreakBoundaryOnSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params.addClassDescription("Break boundaries based on the subdomains to which their sides are attached. Naming convention for the new boundaries will be the old boundary name plus \"_to_\" plus the subdomain name");
-  params.addParam<std::vector<BoundaryName> >("boundaries", "Boundaries to be broken. Default means to break all boundaries");
+  params.addClassDescription("Break boundaries based on the subdomains to which their sides are "
+                             "attached. Naming convention for the new boundaries will be the old "
+                             "boundary name plus \"_to_\" plus the subdomain name");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundaries", "Boundaries to be broken. Default means to break all boundaries");
   return params;
 }
 
-BreakBoundaryOnSubdomain::BreakBoundaryOnSubdomain(const InputParameters & parameters) :
-    MeshModifier(parameters)
+BreakBoundaryOnSubdomain::BreakBoundaryOnSubdomain(const InputParameters & parameters)
+  : MeshModifier(parameters)
 {
 }
 
@@ -45,7 +49,7 @@ BreakBoundaryOnSubdomain::modify()
   std::set<BoundaryID> breaking_boundary_ids;
   if (isParamValid("boundaries"))
   {
-    auto & boundary_names = getParam<std::vector<BoundaryName> >("boundaries");
+    auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
     for (auto i = beginIndex(boundary_names); i < boundary_names.size(); ++i)
       breaking_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_names[i]));
   }
@@ -68,16 +72,19 @@ BreakBoundaryOnSubdomain::modify()
       auto side_boundary_ids = boundary_info.boundary_ids(elem, side);
       for (auto i = beginIndex(side_boundary_ids); i < side_boundary_ids.size(); ++i)
         if (breaking_boundary_ids.count(side_boundary_ids[i]) > 0)
-          new_boundary_name_set.emplace(boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" + subdomain_name);
+          new_boundary_name_set.emplace(boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" +
+                                        subdomain_name);
     }
   }
 
   // assign boundary IDs to the boundaries to be added
-  std::vector<BoundaryName> new_boundary_names(new_boundary_name_set.begin(), new_boundary_name_set.end());
+  std::vector<BoundaryName> new_boundary_names(new_boundary_name_set.begin(),
+                                               new_boundary_name_set.end());
   auto new_boundary_ids = _mesh_ptr->getBoundaryIDs(new_boundary_names, true);
 
   // assign boundary names to the new boundaries
-  mooseAssert(new_boundary_ids.size() == new_boundary_names.size(), "sizes of boundary names and boundary IDs mismatch");
+  mooseAssert(new_boundary_ids.size() == new_boundary_names.size(),
+              "sizes of boundary names and boundary IDs mismatch");
   for (auto i = beginIndex(new_boundary_ids); i < new_boundary_ids.size(); ++i)
   {
     boundary_info.sideset_name(new_boundary_ids[i]) = new_boundary_names[i];
@@ -99,7 +106,8 @@ BreakBoundaryOnSubdomain::modify()
       {
         if (breaking_boundary_ids.count(side_boundary_ids[i]) > 0)
         {
-          BoundaryName bname = boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" + subdomain_name;
+          BoundaryName bname =
+              boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" + subdomain_name;
           auto bid = boundary_info.get_id_by_name(bname);
           boundary_info.add_side(elem, side, bid);
         }

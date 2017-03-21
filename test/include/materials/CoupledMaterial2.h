@@ -18,7 +18,7 @@
 
 class CoupledMaterial2;
 
-template<>
+template <>
 InputParameters validParams<CoupledMaterial2>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   const MaterialProperty<Real> & _coupled_mat_prop2;
 };
 
-#endif //COUPLEDMATERIAL2_H
+#endif // COUPLEDMATERIAL2_H

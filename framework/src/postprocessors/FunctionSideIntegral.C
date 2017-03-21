@@ -15,21 +15,25 @@
 #include "FunctionSideIntegral.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<FunctionSideIntegral>()
+template <>
+InputParameters
+validParams<FunctionSideIntegral>()
 {
-InputParameters params = validParams<SideIntegralPostprocessor>();
-  params.addParam<FunctionName>("function", 1.0, "This postprocessor will return the integral of this function over the boundary");
+  InputParameters params = validParams<SideIntegralPostprocessor>();
+  params.addParam<FunctionName>(
+      "function",
+      1.0,
+      "This postprocessor will return the integral of this function over the boundary");
   return params;
 }
 
-FunctionSideIntegral::FunctionSideIntegral(const InputParameters & parameters) :
-    SideIntegralPostprocessor(parameters),
-    _func(getFunction("function"))
-{}
+FunctionSideIntegral::FunctionSideIntegral(const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters), _func(getFunction("function"))
+{
+}
 
 void
-FunctionSideIntegral::threadJoin(const UserObject &y)
+FunctionSideIntegral::threadJoin(const UserObject & y)
 {
   const FunctionSideIntegral & pps = static_cast<const FunctionSideIntegral &>(y);
   _integral_value += pps._integral_value;
@@ -40,4 +44,3 @@ FunctionSideIntegral::computeQpIntegral()
 {
   return _func.value(_t, _q_point[_qp]);
 }
-

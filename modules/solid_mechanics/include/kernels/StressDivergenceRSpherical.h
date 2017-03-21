@@ -9,16 +9,15 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class SymmElasticityTensor;
 class SymmTensor;
 
 class StressDivergenceRSpherical : public Kernel
 {
 public:
-
   StressDivergenceRSpherical(const InputParameters & parameters);
-    virtual ~StressDivergenceRSpherical() {}
+  virtual ~StressDivergenceRSpherical() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -37,7 +36,7 @@ private:
   const unsigned int _temp_var;
 };
 
-template<>
+template <>
 InputParameters validParams<StressDivergenceRSpherical>();
 
-#endif //STRESSDIVERGENCERSPHERICAL_H
+#endif // STRESSDIVERGENCERSPHERICAL_H

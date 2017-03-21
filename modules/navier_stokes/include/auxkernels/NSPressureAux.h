@@ -13,7 +13,7 @@
 class NSPressureAux;
 class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSPressureAux>();
 
 /**
@@ -36,4 +36,4 @@ protected:
   const IdealGasFluidProperties & _fp;
 };
 
-#endif //VELOCITYAUX_H
+#endif // VELOCITYAUX_H

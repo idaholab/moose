@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ScalarVariable;
 
-template<>
+template <>
 InputParameters validParams<ScalarVariable>();
 
 /**
@@ -39,7 +39,5 @@ protected:
   MooseVariableScalar & _var;
   unsigned int _idx;
 };
-
-
 
 #endif /* SCALARVARIABLE_H */

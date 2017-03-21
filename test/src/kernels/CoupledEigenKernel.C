@@ -13,17 +13,17 @@
 /****************************************************************/
 #include "CoupledEigenKernel.h"
 
-template<>
-InputParameters validParams<CoupledEigenKernel>()
+template <>
+InputParameters
+validParams<CoupledEigenKernel>()
 {
   InputParameters params = validParams<EigenKernel>();
   params.addRequiredCoupledVar("v", "Variable to be coupled in");
   return params;
 }
 
-CoupledEigenKernel::CoupledEigenKernel(const InputParameters & parameters) :
-    EigenKernel(parameters),
-    _v(coupledValue("v"))
+CoupledEigenKernel::CoupledEigenKernel(const InputParameters & parameters)
+  : EigenKernel(parameters), _v(coupledValue("v"))
 {
 }
 

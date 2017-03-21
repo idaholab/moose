@@ -31,7 +31,7 @@ protected:
   const Real _beta;
 };
 
-template<>
+template <>
 InputParameters validParams<PresetAcceleration>();
 
 #endif /* PRESETACCERELATION_H */

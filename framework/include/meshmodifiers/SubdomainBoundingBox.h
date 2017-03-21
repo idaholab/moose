@@ -24,7 +24,7 @@
 // Forward declerations
 class SubdomainBoundingBox;
 
-template<>
+template <>
 InputParameters validParams<SubdomainBoundingBox>();
 
 /**
@@ -33,7 +33,6 @@ InputParameters validParams<SubdomainBoundingBox>();
 class SubdomainBoundingBox : public MeshModifier
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
@@ -53,4 +52,4 @@ private:
   MeshTools::BoundingBox _bounding_box;
 };
 
-#endif //SUBDOMAINBOUDINGBOX_H
+#endif // SUBDOMAINBOUDINGBOX_H

@@ -16,14 +16,16 @@
 
 #include "InputParameters.h"
 
-template<>
-InputParameters validParams<BoundaryRestrictableRequired>()
+template <>
+InputParameters
+validParams<BoundaryRestrictableRequired>()
 {
   // Create instance of InputParameters
   InputParameters params = emptyInputParameters();
 
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
@@ -33,7 +35,8 @@ InputParameters validParams<BoundaryRestrictableRequired>()
   return params;
 }
 
-BoundaryRestrictableRequired::BoundaryRestrictableRequired(const InputParameters & parameters, bool nodal) :
-    BoundaryRestrictable(parameters, nodal)
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(const InputParameters & parameters,
+                                                           bool nodal)
+  : BoundaryRestrictable(parameters, nodal)
 {
 }

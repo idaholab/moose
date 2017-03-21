@@ -5,26 +5,23 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsSumQuantity.h"
 
-template<>
-InputParameters validParams<RichardsSumQuantity>()
+template <>
+InputParameters
+validParams<RichardsSumQuantity>()
 {
   InputParameters params = validParams<GeneralUserObject>();
 
   return params;
 }
 
-RichardsSumQuantity::RichardsSumQuantity(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
-    _total(0)
+RichardsSumQuantity::RichardsSumQuantity(const InputParameters & parameters)
+  : GeneralUserObject(parameters), _total(0)
 {
 }
 
-RichardsSumQuantity::~RichardsSumQuantity()
-{
-}
+RichardsSumQuantity::~RichardsSumQuantity() {}
 
 void
 RichardsSumQuantity::zero()
@@ -59,4 +56,3 @@ RichardsSumQuantity::getValue() const
 {
   return _total;
 }
-

@@ -49,8 +49,8 @@ protected:
    * @param block Json holding data for the block.
    * @param top Whether this is a top level block.
    */
-  void addBlock(const std::string & name, const moosecontrib::Json::Value & block,
-                bool top = false);
+  void
+  addBlock(const std::string & name, const moosecontrib::Json::Value & block, bool top = false);
 
   /**
    * Add a comment to the block. It will add the proper indentation and #.

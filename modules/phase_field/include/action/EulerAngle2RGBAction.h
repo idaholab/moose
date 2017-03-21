@@ -15,7 +15,7 @@
  * correct derivatives of the elastic free energy in a non-split Cahn-Hilliard
  * simulation are assembled.
  */
-class EulerAngle2RGBAction: public Action
+class EulerAngle2RGBAction : public Action
 {
 public:
   EulerAngle2RGBAction(const InputParameters & params);
@@ -26,7 +26,7 @@ private:
   const std::string _var_name_base;
 };
 
-template<>
+template <>
 InputParameters validParams<EulerAngle2RGBAction>();
 
-#endif //EULERANGLE2RGBACTION_H
+#endif // EULERANGLE2RGBACTION_H

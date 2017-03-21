@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class ScalarVarBC;
 
-template<>
+template <>
 InputParameters validParams<ScalarVarBC>();
 
 /**
@@ -36,7 +35,6 @@ public:
    */
   ScalarVarBC(const InputParameters & parameters);
 
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
@@ -45,5 +43,4 @@ protected:
   VariableValue & _alpha;
 };
 
-
-#endif //SCALARVARBC_H
+#endif // SCALARVARBC_H

@@ -12,7 +12,7 @@
 // Forward Declarations
 class CrossTermBarrierFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<CrossTermBarrierFunctionMaterial>();
 
 /**
@@ -28,4 +28,4 @@ protected:
   virtual void computeQpProperties();
 };
 
-#endif //CROSSTERMBARRIERFUNCTIONMATERIAL_H
+#endif // CROSSTERMBARRIERFUNCTIONMATERIAL_H

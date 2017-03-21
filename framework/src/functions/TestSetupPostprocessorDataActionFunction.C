@@ -14,20 +14,21 @@
 
 #include "TestSetupPostprocessorDataActionFunction.h"
 
-template<>
-InputParameters validParams<TestSetupPostprocessorDataActionFunction>()
+template <>
+InputParameters
+validParams<TestSetupPostprocessorDataActionFunction>()
 {
   InputParameters params = validParams<Function>();
   params.addRequiredParam<PostprocessorName>("postprocessor", "A postprocessor to test against");
   return params;
 }
 
-TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFunction(const InputParameters & parameters) :
-  Function(parameters)
+TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFunction(
+    const InputParameters & parameters)
+  : Function(parameters)
 {
   if (hasPostprocessor("postprocessor"))
     mooseError("TestSetupPostprocessorDataActionFunction pass");
   else
     mooseError("TestSetupPostprocessorDataActionFunction fail");
-
 }

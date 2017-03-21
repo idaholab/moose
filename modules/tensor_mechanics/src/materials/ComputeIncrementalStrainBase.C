@@ -8,15 +8,16 @@
 #include "ComputeIncrementalStrainBase.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ComputeIncrementalStrainBase>()
+template <>
+InputParameters
+validParams<ComputeIncrementalStrainBase>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
   return params;
 }
 
-ComputeIncrementalStrainBase::ComputeIncrementalStrainBase(const InputParameters & parameters) :
-    ComputeStrainBase(parameters),
+ComputeIncrementalStrainBase::ComputeIncrementalStrainBase(const InputParameters & parameters)
+  : ComputeStrainBase(parameters),
     _grad_disp_old(3),
     _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
@@ -33,7 +34,7 @@ ComputeIncrementalStrainBase::ComputeIncrementalStrainBase(const InputParameters
   for (unsigned int i = 0; i < 3; ++i)
   {
     if (_fe_problem.isTransient() && i < _ndisp)
-      _grad_disp_old[i] = &coupledGradientOld("displacements" ,i);
+      _grad_disp_old[i] = &coupledGradientOld("displacements", i);
     else
       _grad_disp_old[i] = &_grad_zero;
   }

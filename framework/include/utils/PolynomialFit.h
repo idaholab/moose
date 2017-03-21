@@ -31,14 +31,18 @@
 class PolynomialFit
 {
 public:
-
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
    * independent variable while the other should be of the dependent variable.  These values should
-   * correspond to one and other in the same position.  The third parameter is the requested polynomial
-   * order and the forth parameter tells the class whether or not it should truncate the order if there
+   * correspond to one and other in the same position.  The third parameter is the requested
+   * polynomial
+   * order and the forth parameter tells the class whether or not it should truncate the order if
+   * there
    * are not enough points for which to apply the polynomial fit.
    */
-  PolynomialFit(std::vector<Real> X, std::vector<Real> Y, unsigned int order, bool truncate_order = false);
+  PolynomialFit(std::vector<Real> X,
+                std::vector<Real> Y,
+                unsigned int order,
+                bool truncate_order = false);
 
   virtual ~PolynomialFit() = default;
 
@@ -59,20 +63,26 @@ public:
    * This function will dump GNUPLOT input files that can be run to show the data points and
    * function fits
    */
-  void dumpSampleFile(std::string base_name, std::string x_label="X", std::string y_label="Y", float xmin=0, float xmax=0, float ymin=0, float ymax=0);
+  void dumpSampleFile(std::string base_name,
+                      std::string x_label = "X",
+                      std::string y_label = "Y",
+                      float xmin = 0,
+                      float xmax = 0,
+                      float ymin = 0,
+                      float ymax = 0);
 
   /**
-   * This function returns the size of the array holding the points, i.e. the number of sample points
+   * This function returns the size of the array holding the points, i.e. the number of sample
+   * points
    */
   unsigned int getSampleSize();
 
   /**
    * Get a const reference to the coefficients of the least squares fit.
    */
-  const std::vector<Real>& getCoefficients();
+  const std::vector<Real> & getCoefficients();
 
 private:
-
   /**
    * This is a helper function that creates the matrix necessary for the Least Squares algorithm.
    */
@@ -93,4 +103,4 @@ private:
   static int _file_number;
 };
 
-#endif //POLYNOMIALFIT_H
+#endif // POLYNOMIALFIT_H

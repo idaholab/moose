@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWSUMQUANTITY_H
 #define POROUSFLOWSUMQUANTITY_H
 
@@ -13,7 +12,7 @@
 
 class PorousFlowSumQuantity;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowSumQuantity>();
 
 /**

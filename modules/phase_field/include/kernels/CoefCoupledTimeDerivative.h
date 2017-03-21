@@ -12,7 +12,7 @@
 // Forward Declaration
 class CoefCoupledTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<CoefCoupledTimeDerivative>();
 
 /**
@@ -31,4 +31,4 @@ protected:
   const Real _coef;
 };
 
-#endif //COEFCOUPLEDTIMEDERIVATIVE_H
+#endif // COEFCOUPLEDTIMEDERIVATIVE_H

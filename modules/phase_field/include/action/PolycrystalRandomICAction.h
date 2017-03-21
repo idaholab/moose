@@ -13,7 +13,7 @@
 /**
  * Automatically generates all variables to model a polycrystal with op_num orderparameters
  */
-class PolycrystalRandomICAction: public Action
+class PolycrystalRandomICAction : public Action
 {
 public:
   PolycrystalRandomICAction(const InputParameters & params);
@@ -26,7 +26,7 @@ private:
   const MooseEnum _random_type;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalRandomICAction>();
 
-#endif //POLYCRYSTALRANDOMICACTION_H
+#endif // POLYCRYSTALRANDOMICACTION_H

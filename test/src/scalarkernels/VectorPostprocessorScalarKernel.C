@@ -14,26 +14,27 @@
 
 #include "VectorPostprocessorScalarKernel.h"
 
-template<>
-InputParameters validParams<VectorPostprocessorScalarKernel>()
+template <>
+InputParameters
+validParams<VectorPostprocessorScalarKernel>()
 {
   InputParameters params = validParams<ODEKernel>();
 
-  params.addRequiredParam<VectorPostprocessorName>("vpp", "VectorPostprocessor to pull the values out of");
-  params.addRequiredParam<std::string>("vector", "The vector to use from the VectorPostprocessor.  This vector MUST be the same size as the scalar variable's ORDER.");
+  params.addRequiredParam<VectorPostprocessorName>("vpp",
+                                                   "VectorPostprocessor to pull the values out of");
+  params.addRequiredParam<std::string>("vector", "The vector to use from the VectorPostprocessor.  "
+                                                 "This vector MUST be the same size as the scalar "
+                                                 "variable's ORDER.");
 
   return params;
 }
 
-VectorPostprocessorScalarKernel::VectorPostprocessorScalarKernel(const InputParameters & parameters) :
-    ODEKernel(parameters),
-    _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector")))
+VectorPostprocessorScalarKernel::VectorPostprocessorScalarKernel(const InputParameters & parameters)
+  : ODEKernel(parameters), _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector")))
 {
 }
 
-VectorPostprocessorScalarKernel::~VectorPostprocessorScalarKernel()
-{
-}
+VectorPostprocessorScalarKernel::~VectorPostprocessorScalarKernel() {}
 
 Real
 VectorPostprocessorScalarKernel::computeQpResidual()

@@ -10,10 +10,10 @@
 
 #include "PorousFlowVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow2PhasePS;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow2PhasePS>();
 
 /**
@@ -106,4 +106,4 @@ protected:
   const Real _dseff_ds;
 };
 
-#endif //POROUSFLOW2PHASEPS_H
+#endif // POROUSFLOW2PHASEPS_H

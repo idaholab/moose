@@ -11,7 +11,7 @@
 
 class EulerAngleVariables2RGBAux;
 
-template<>
+template <>
 InputParameters validParams<EulerAngleVariables2RGBAux>();
 
 /**
@@ -47,4 +47,4 @@ private:
   const VariableValue & _sym;
 };
 
-#endif //EULERANGLEVARIABLES2RGBAUX_H
+#endif // EULERANGLEVARIABLES2RGBAUX_H

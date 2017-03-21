@@ -13,7 +13,7 @@
  * Action that sets up ACSEDGPoly Kernels that adds the stored energy contribution
  * to grain growth models. This allows such models to simulate recrystallization as well.
  */
-class PolycrystalStoredEnergyAction: public Action
+class PolycrystalStoredEnergyAction : public Action
 {
 public:
   PolycrystalStoredEnergyAction(const InputParameters & params);
@@ -31,7 +31,7 @@ protected:
   const unsigned int _deformed_grain_num;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalStoredEnergyAction>();
 
-#endif //POLYCRYSTALSTOREDENERGYACTION_H
+#endif // POLYCRYSTALSTOREDENERGYACTION_H

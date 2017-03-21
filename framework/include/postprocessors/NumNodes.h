@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumNodes;
 
-template<>
+template <>
 InputParameters validParams<NumNodes>();
 
 class NumNodes : public GeneralPostprocessor

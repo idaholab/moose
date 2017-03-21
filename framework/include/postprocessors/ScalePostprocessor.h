@@ -18,7 +18,7 @@
 
 class ScalePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ScalePostprocessor>();
 
 /**

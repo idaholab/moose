@@ -12,10 +12,10 @@
 #include "GrainForceAndTorqueInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class GrainAdvectionVelocity;
 
-template<>
+template <>
 InputParameters validParams<GrainAdvectionVelocity>();
 
 /**
@@ -54,7 +54,7 @@ private:
   std::string _base_name;
 
   /// Material storing advection velocities of grains
-  MaterialProperty<std::vector<RealGradient> > & _velocity_advection;
+  MaterialProperty<std::vector<RealGradient>> & _velocity_advection;
 };
 
-#endif //GRAINADVECTIONVELOCITY_H
+#endif // GRAINADVECTIONVELOCITY_H

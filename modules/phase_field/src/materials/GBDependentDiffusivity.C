@@ -6,16 +6,17 @@
 /****************************************************************/
 #include "GBDependentDiffusivity.h"
 
-template<>
-InputParameters validParams<GBDependentDiffusivity>()
+template <>
+InputParameters
+validParams<GBDependentDiffusivity>()
 {
   InputParameters params = validParams<GBDependentTensorBase>();
   params.addClassDescription("Compute diffusivity rank two tensor based on GB phase variable");
   return params;
 }
 
-GBDependentDiffusivity::GBDependentDiffusivity(const InputParameters & parameters) :
-    GBDependentTensorBase(parameters)
+GBDependentDiffusivity::GBDependentDiffusivity(const InputParameters & parameters)
+  : GBDependentTensorBase(parameters)
 {
 }
 
@@ -31,6 +32,7 @@ GBDependentDiffusivity::computeQpProperties()
   RankTwoTensor iden(RankTwoTensor::initIdentity);
   RankTwoTensor gb_tensor;
 
-  gb_tensor = (1.0 - _gb[_qp]) * _bulk_parameter * iden + _gb[_qp] * _gb_parameter * (iden - _gb_normal_tensor[_qp]);
+  gb_tensor = (1.0 - _gb[_qp]) * _bulk_parameter * iden +
+              _gb[_qp] * _gb_parameter * (iden - _gb_normal_tensor[_qp]);
   gb_tensor.fillRealTensor(_gb_dependent_tensor[_qp]);
 }

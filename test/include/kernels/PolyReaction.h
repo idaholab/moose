@@ -19,18 +19,16 @@
 
 class PolyReaction;
 
-template<>
+template <>
 InputParameters validParams<PolyReaction>();
 
 class PolyReaction : public Kernel
 {
 public:
-
   PolyReaction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
 };
-#endif //POLYREACTION_H
+#endif // POLYREACTION_H

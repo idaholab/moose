@@ -10,13 +10,13 @@
 
 #include "HHPFCRFFSplitKernelAction.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCRFFKernelAction;
 
-template<>
+template <>
 InputParameters validParams<PFCRFFKernelAction>();
 
-class PFCRFFKernelAction: public HHPFCRFFSplitKernelAction
+class PFCRFFKernelAction : public HHPFCRFFSplitKernelAction
 {
 public:
   PFCRFFKernelAction(const InputParameters & params);
@@ -24,4 +24,4 @@ public:
   virtual void act();
 };
 
-#endif //PFCRFFKERNELACTION_H
+#endif // PFCRFFKERNELACTION_H

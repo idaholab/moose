@@ -20,7 +20,7 @@
 // Forward Declarations
 class QpMaterial;
 
-template<>
+template <>
 InputParameters validParams<QpMaterial>();
 
 /**

@@ -13,7 +13,7 @@
 class StagnationTemperatureAux;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<StagnationTemperatureAux>();
 
 /**

@@ -14,17 +14,18 @@
 
 #include "SideAverageValue.h"
 
-template<>
-InputParameters validParams<SideAverageValue>()
+template <>
+InputParameters
+validParams<SideAverageValue>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
   return params;
 }
 
-SideAverageValue::SideAverageValue(const InputParameters & parameters) :
-    SideIntegralVariablePostprocessor(parameters),
-    _volume(0)
-{}
+SideAverageValue::SideAverageValue(const InputParameters & parameters)
+  : SideIntegralVariablePostprocessor(parameters), _volume(0)
+{
+}
 
 void
 SideAverageValue::initialize()

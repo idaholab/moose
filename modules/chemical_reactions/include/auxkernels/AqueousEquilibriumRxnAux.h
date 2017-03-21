@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class AqueousEquilibriumRxnAux;
 
-template<>
+template <>
 InputParameters validParams<AqueousEquilibriumRxnAux>();
 
 /**
@@ -36,7 +36,7 @@ protected:
   const std::vector<Real> _sto_v;
 
   /// Coupled primary species
-  std::vector<const VariableValue *>  _vals;
+  std::vector<const VariableValue *> _vals;
 };
 
-#endif //AQUEOUSEQUILIBRIUMRXNAUX_H
+#endif // AQUEOUSEQUILIBRIUMRXNAUX_H

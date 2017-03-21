@@ -11,12 +11,12 @@
 #include "EulerAngleProvider.h"
 #include "GrainTracker.h"
 
-//Forward Declarations
+// Forward Declarations
 class EulerAngleProvider2RGBAux;
 class GrainTracker;
 class EulerAngleProvider;
 
-template<>
+template <>
 InputParameters validParams<EulerAngleProvider2RGBAux>();
 
 /**
@@ -53,4 +53,4 @@ protected:
   const Point _no_grain_color;
 };
 
-#endif //EULERANGLEPROVIDER2RGBAUX_H
+#endif // EULERANGLEPROVIDER2RGBAUX_H

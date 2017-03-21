@@ -7,18 +7,18 @@
 
 #include "CNSFVFreeInflowBoundaryFlux.h"
 
-template<>
-InputParameters validParams<CNSFVFreeInflowBoundaryFlux>()
+template <>
+InputParameters
+validParams<CNSFVFreeInflowBoundaryFlux>()
 {
   InputParameters params = validParams<BoundaryFluxBase>();
 
   params.addClassDescription("A user object that computes the inflow boundary flux.");
 
-  params.addRequiredParam<UserObjectName>("bc_uo",
-  "Name for boundary condition user object");
+  params.addRequiredParam<UserObjectName>("bc_uo", "Name for boundary condition user object");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   return params;
 }
@@ -30,9 +30,7 @@ CNSFVFreeInflowBoundaryFlux::CNSFVFreeInflowBoundaryFlux(const InputParameters &
 {
 }
 
-CNSFVFreeInflowBoundaryFlux::~CNSFVFreeInflowBoundaryFlux()
-{
-}
+CNSFVFreeInflowBoundaryFlux::~CNSFVFreeInflowBoundaryFlux() {}
 
 void
 CNSFVFreeInflowBoundaryFlux::calcFlux(unsigned int iside,
@@ -55,7 +53,7 @@ CNSFVFreeInflowBoundaryFlux::calcFlux(unsigned int iside,
 
   U2 = _bc_uo.getGhostCellValue(iside, ielem, uvec1, dwave);
 
-  Real rho2  = U2[0];
+  Real rho2 = U2[0];
   Real rhou2 = U2[1];
   Real rhov2 = U2[2];
   Real rhow2 = U2[3];
@@ -71,10 +69,10 @@ CNSFVFreeInflowBoundaryFlux::calcFlux(unsigned int iside,
 
   Real vdon2 = uadv2 * nx + vadv2 * ny + wadv2 * nz;
 
-  flux[0] = vdon2 *  rho2;
-  flux[1] = vdon2 *  rho2 * uadv2 + pres2 * nx;
-  flux[2] = vdon2 *  rho2 * vadv2 + pres2 * ny;
-  flux[3] = vdon2 *  rho2 * wadv2 + pres2 * nz;
+  flux[0] = vdon2 * rho2;
+  flux[1] = vdon2 * rho2 * uadv2 + pres2 * nx;
+  flux[2] = vdon2 * rho2 * vadv2 + pres2 * ny;
+  flux[3] = vdon2 * rho2 * wadv2 + pres2 * nz;
   flux[4] = vdon2 * (rhoe2 + pres2);
 }
 

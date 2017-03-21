@@ -20,11 +20,11 @@
 
 #include <string>
 
-//Forward Declarations
+// Forward Declarations
 class FunctionIC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionIC>();
 
 /**
@@ -45,14 +45,14 @@ protected:
   /**
    * The value of the variable at a point.
    */
-  virtual Real value(const Point &p) override;
+  virtual Real value(const Point & p) override;
 
   /**
    * The value of the gradient at a point.
    */
-  virtual RealGradient gradient(const Point &p) override;
+  virtual RealGradient gradient(const Point & p) override;
 
   Function & _func;
 };
 
-#endif //FUNCTIONIC_H
+#endif // FUNCTIONIC_H

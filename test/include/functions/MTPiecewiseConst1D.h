@@ -19,7 +19,7 @@
 
 class MTPiecewiseConst1D;
 
-template<>
+template <>
 InputParameters validParams<MTPiecewiseConst1D>();
 
 class MTPiecewiseConst1D : public Function
@@ -30,4 +30,4 @@ public:
   virtual Real value(Real t, const Point & p);
 };
 
-#endif //MTPIECEWISECONST1D_H
+#endif // MTPIECEWISECONST1D_H

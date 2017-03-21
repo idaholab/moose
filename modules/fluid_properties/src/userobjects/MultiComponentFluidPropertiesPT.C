@@ -7,19 +7,17 @@
 
 #include "MultiComponentFluidPropertiesPT.h"
 
-template<>
-InputParameters validParams<MultiComponentFluidPropertiesPT>()
+template <>
+InputParameters
+validParams<MultiComponentFluidPropertiesPT>()
 {
   InputParameters params = validParams<FluidProperties>();
   return params;
 }
 
-MultiComponentFluidPropertiesPT::MultiComponentFluidPropertiesPT(const InputParameters & parameters) :
-    FluidProperties(parameters),
-    _T_c2k(273.15)
+MultiComponentFluidPropertiesPT::MultiComponentFluidPropertiesPT(const InputParameters & parameters)
+  : FluidProperties(parameters), _T_c2k(273.15)
 {
 }
 
-MultiComponentFluidPropertiesPT::~MultiComponentFluidPropertiesPT()
-{
-}
+MultiComponentFluidPropertiesPT::~MultiComponentFluidPropertiesPT() {}

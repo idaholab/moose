@@ -19,7 +19,7 @@
 
 class IndicatorMarker;
 
-template<>
+template <>
 InputParameters validParams<IndicatorMarker>();
 
 class IndicatorMarker : public Marker

@@ -81,12 +81,10 @@ std::string outputOutputInformation(MooseApp & app);
  */
 std::string outputSystemInformationHelper(const System & system);
 
-
 /**
  * Helper function function for stringstream formatting
  */
 void insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr);
-
 
 } // ConsoleUtils namespace
 

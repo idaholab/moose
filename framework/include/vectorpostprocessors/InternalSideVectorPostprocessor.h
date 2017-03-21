@@ -18,21 +18,20 @@
 #include "InternalSideUserObject.h"
 #include "VectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class InternalSideVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<InternalSideVectorPostprocessor>();
 
-class InternalSideVectorPostprocessor :
-  public InternalSideUserObject,
-  public VectorPostprocessor
+class InternalSideVectorPostprocessor : public InternalSideUserObject, public VectorPostprocessor
 {
 public:
   InternalSideVectorPostprocessor(const InputParameters & parameters);
 
   /**
-   * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
+   * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to
+   * do MPI communication!
    */
   virtual void finalize() override {}
 };

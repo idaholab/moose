@@ -21,8 +21,9 @@
 #include "MooseVariable.h"
 #include "MooseArray.h"
 
-template<>
-InputParameters validParams<SubProblem>()
+template <>
+InputParameters
+validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
   return params;
@@ -30,8 +31,8 @@ InputParameters validParams<SubProblem>()
 
 // SubProblem /////
 
-SubProblem::SubProblem(const InputParameters & parameters) :
-    Problem(parameters),
+SubProblem::SubProblem(const InputParameters & parameters)
+  : Problem(parameters),
     _factory(_app.getFactory()),
     _nonlocal_cm(),
     _requires_nonlocal_coupling(false),
@@ -43,12 +44,11 @@ SubProblem::SubProblem(const InputParameters & parameters) :
   _active_material_property_ids.resize(n_threads);
 }
 
-SubProblem::~SubProblem()
-{
-}
+SubProblem::~SubProblem() {}
 
 void
-SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
+SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
+                                             THREAD_ID tid)
 {
   if (!moose_vars.empty())
   {
@@ -215,13 +215,17 @@ SubProblem::storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName 
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(const std::string & requestor, SubdomainID block_id, const std::string & name)
+SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
+                                     SubdomainID block_id,
+                                     const std::string & name)
 {
   _map_block_material_props_check[block_id].insert(std::make_pair(requestor, name));
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(const std::string & requestor, BoundaryID boundary_id, const std::string & name)
+SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
+                                     BoundaryID boundary_id,
+                                     const std::string & name)
 {
   _map_boundary_material_props_check[boundary_id].insert(std::make_pair(requestor, name));
 }
@@ -229,13 +233,16 @@ SubProblem::storeDelayedCheckMatProp(const std::string & requestor, BoundaryID b
 void
 SubProblem::checkBlockMatProps()
 {
-  checkMatProps(_map_block_material_props, _map_block_material_props_check, _zero_block_material_props);
+  checkMatProps(
+      _map_block_material_props, _map_block_material_props_check, _zero_block_material_props);
 }
 
 void
 SubProblem::checkBoundaryMatProps()
 {
-  checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, _zero_boundary_material_props);
+  checkMatProps(_map_boundary_material_props,
+                _map_boundary_material_props_check,
+                _zero_boundary_material_props);
 }
 
 void
@@ -313,9 +320,9 @@ SubProblem::restrictionCheckName(BoundaryID check_id)
 
 template <typename T>
 void
-SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
-                          std::map<T, std::multimap<std::string, std::string> > & check_props,
-                          std::map<T, std::set<MaterialPropertyName> > & zero_props)
+SubProblem::checkMatProps(std::map<T, std::set<std::string>> & props,
+                          std::map<T, std::multimap<std::string, std::string>> & check_props,
+                          std::map<T, std::set<MaterialPropertyName>> & zero_props)
 {
   // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
   T any_id = mesh().getAnyID<T>();
@@ -341,15 +348,24 @@ SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
       // Loop through all the stored properties
       for (const auto & prop_it : check_it.second)
       {
-        // Produce an error if the material property is not defined on the current block/boundary and any block/boundary
+        // Produce an error if the material property is not defined on the current block/boundary
+        // and any block/boundary
         // and not is not a zero material property.
         if (props[id].count(prop_it.second) == 0 && props[any_id].count(prop_it.second) == 0 &&
-            zero_props[id].count(prop_it.second) == 0 && zero_props[any_id].count(prop_it.second) == 0)
+            zero_props[id].count(prop_it.second) == 0 &&
+            zero_props[any_id].count(prop_it.second) == 0)
         {
           std::string check_name = restrictionCheckName(id);
           if (check_name.empty())
             check_name = std::to_string(id);
-          mooseError("Material property '", prop_it.second, "', requested by '", prop_it.first, "' is not defined on ", restrictionTypeName<T>(), " ", check_name);
+          mooseError("Material property '",
+                     prop_it.second,
+                     "', requested by '",
+                     prop_it.first,
+                     "' is not defined on ",
+                     restrictionTypeName<T>(),
+                     " ",
+                     check_name);
         }
       }
     }

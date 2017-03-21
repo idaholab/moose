@@ -11,7 +11,7 @@
 
 class GeneralizedPlaneStrainAction;
 
-template<>
+template <>
 InputParameters validParams<GeneralizedPlaneStrainAction>();
 
 class GeneralizedPlaneStrainAction : public Action
@@ -25,4 +25,4 @@ protected:
   std::vector<NonlinearVariableName> _displacements;
   unsigned int _ndisp;
 };
-#endif //GENERALIZEDPLANESTRAINACTION_H
+#endif // GENERALIZEDPLANESTRAINACTION_H

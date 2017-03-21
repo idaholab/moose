@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class CoupledScalarAux;
 
-template<>
+template <>
 InputParameters validParams<CoupledScalarAux>();
 
 /**
@@ -46,4 +45,4 @@ protected:
   unsigned int _component;
 };
 
-#endif //COUPLEDSCALARAUX_H
+#endif // COUPLEDSCALARAUX_H

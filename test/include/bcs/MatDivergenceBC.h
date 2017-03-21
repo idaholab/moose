@@ -18,7 +18,7 @@
 
 class MatDivergenceBC;
 
-template<>
+template <>
 InputParameters validParams<MatDivergenceBC>();
 
 /**

@@ -8,8 +8,9 @@
 #include "FluidPropertiesMaterial.h"
 #include "SinglePhaseFluidProperties.h"
 
-template<>
-InputParameters validParams<FluidPropertiesMaterial>()
+template <>
+InputParameters
+validParams<FluidPropertiesMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("e", "Specific internal energy");
@@ -18,8 +19,8 @@ InputParameters validParams<FluidPropertiesMaterial>()
   return params;
 }
 
-FluidPropertiesMaterial::FluidPropertiesMaterial(const InputParameters & parameters) :
-    Material(parameters),
+FluidPropertiesMaterial::FluidPropertiesMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _e(coupledValue("e")),
     _v(coupledValue("v")),
 
@@ -35,9 +36,7 @@ FluidPropertiesMaterial::FluidPropertiesMaterial(const InputParameters & paramet
 {
 }
 
-FluidPropertiesMaterial::~FluidPropertiesMaterial()
-{
-}
+FluidPropertiesMaterial::~FluidPropertiesMaterial() {}
 
 void
 FluidPropertiesMaterial::computeQpProperties()

@@ -21,17 +21,19 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementDamper>()
+template <>
+InputParameters
+validParams<ElementDamper>()
 {
   InputParameters params = validParams<Damper>();
   params += validParams<MaterialPropertyInterface>();
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this damper operates on");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this damper operates on");
   return params;
 }
 
-ElementDamper::ElementDamper(const InputParameters & parameters) :
-    Damper(parameters),
+ElementDamper::ElementDamper(const InputParameters & parameters)
+  : Damper(parameters),
     MaterialPropertyInterface(this),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
@@ -56,7 +58,7 @@ ElementDamper::computeDamping()
   Real damping = 1.0;
   Real cur_damping = 1.0;
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     cur_damping = computeQpDamping();
     if (cur_damping < damping)

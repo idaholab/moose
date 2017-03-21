@@ -20,7 +20,7 @@
 class NodalNormalsEvaluator;
 class AuxiliarySystem;
 
-template<>
+template <>
 InputParameters validParams<NodalNormalsEvaluator>();
 
 /**
@@ -39,6 +39,5 @@ public:
 protected:
   AuxiliarySystem & _aux;
 };
-
 
 #endif /* NODALNORMALSEVALUATOR_H */

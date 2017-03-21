@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWPLOTQUANTITY_H
 #define POROUSFLOWPLOTQUANTITY_H
 
@@ -14,7 +13,7 @@
 class PorousFlowPlotQuantity;
 class PorousFlowSumQuantity;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPlotQuantity>();
 
 /**
@@ -36,6 +35,5 @@ protected:
   /// the PorousFlowSumQuantity userobject
   const PorousFlowSumQuantity & _total_mass;
 };
-
 
 #endif /* POROUSFLOWPLOTQUANTITY_H */

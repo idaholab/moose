@@ -15,20 +15,21 @@
 #ifndef NODEFACECONSTRAINT_H
 #define NODEFACECONSTRAINT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "Constraint.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodeFaceConstraint;
 
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class SparseMatrix;
+template <typename T>
+class SparseMatrix;
 }
 
-template<>
+template <>
 InputParameters validParams<NodeFaceConstraint>();
 
 /**
@@ -40,9 +41,8 @@ InputParameters validParams<NodeFaceConstraint>();
  *
  * This is common for contact algorithms and other constraints.
  */
-class NodeFaceConstraint :
-  public Constraint,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+class NodeFaceConstraint : public Constraint,
+                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodeFaceConstraint(const InputParameters & parameters);
@@ -94,7 +94,7 @@ public:
    * When this returns true the slave's Jacobian row as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
-  virtual bool overwriteSlaveJacobian(){return overwriteSlaveResidual();};
+  virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
 
   /**
    * The variable on the Master side of the domain.
@@ -112,59 +112,118 @@ protected:
   virtual Real computeQpSlaveValue() = 0;
 
   /**
-   * This is the virtual that derived classes should override for computing the residual on neighboring element.
+   * This is the virtual that derived classes should override for computing the residual on
+   * neighboring element.
    */
   virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
 
   /**
-   * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
+   * This is the virtual that derived classes should override for computing the Jacobian on
+   * neighboring element.
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/, unsigned int /*jvar*/) { return 0; }
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
+                                        unsigned int /*jvar*/)
+  {
+    return 0;
+  }
 
   /// coupling interface:
-  virtual const VariableValue & coupledSlaveValue(const std::string & var_name, unsigned int comp = 0) { return coupledValue(var_name, comp); }
-  virtual const VariableValue & coupledSlaveValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledValueOld(var_name, comp); }
-  virtual const VariableValue & coupledSlaveValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledValueOlder(var_name, comp); }
+  virtual const VariableValue & coupledSlaveValue(const std::string & var_name,
+                                                  unsigned int comp = 0)
+  {
+    return coupledValue(var_name, comp);
+  }
+  virtual const VariableValue & coupledSlaveValueOld(const std::string & var_name,
+                                                     unsigned int comp = 0)
+  {
+    return coupledValueOld(var_name, comp);
+  }
+  virtual const VariableValue & coupledSlaveValueOlder(const std::string & var_name,
+                                                       unsigned int comp = 0)
+  {
+    return coupledValueOlder(var_name, comp);
+  }
 
-  virtual const VariableGradient & coupledSlaveGradient(const std::string & var_name, unsigned int comp = 0){ return coupledGradient(var_name, comp); }
-  virtual const VariableGradient & coupledSlaveGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOld(var_name, comp); }
-  virtual const VariableGradient & coupledSlaveGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOlder(var_name, comp); }
+  virtual const VariableGradient & coupledSlaveGradient(const std::string & var_name,
+                                                        unsigned int comp = 0)
+  {
+    return coupledGradient(var_name, comp);
+  }
+  virtual const VariableGradient & coupledSlaveGradientOld(const std::string & var_name,
+                                                           unsigned int comp = 0)
+  {
+    return coupledGradientOld(var_name, comp);
+  }
+  virtual const VariableGradient & coupledSlaveGradientOlder(const std::string & var_name,
+                                                             unsigned int comp = 0)
+  {
+    return coupledGradientOlder(var_name, comp);
+  }
 
-  virtual const VariableSecond & coupledSlaveSecond(const std::string & var_name, unsigned int comp = 0){ return coupledSecond(var_name, comp); }
+  virtual const VariableSecond & coupledSlaveSecond(const std::string & var_name,
+                                                    unsigned int comp = 0)
+  {
+    return coupledSecond(var_name, comp);
+  }
 
+  virtual const VariableValue & coupledMasterValue(const std::string & var_name,
+                                                   unsigned int comp = 0)
+  {
+    return coupledNeighborValue(var_name, comp);
+  }
+  virtual const VariableValue & coupledMasterValueOld(const std::string & var_name,
+                                                      unsigned int comp = 0)
+  {
+    return coupledNeighborValueOld(var_name, comp);
+  }
+  virtual const VariableValue & coupledMasterValueOlder(const std::string & var_name,
+                                                        unsigned int comp = 0)
+  {
+    return coupledNeighborValueOlder(var_name, comp);
+  }
 
-  virtual const VariableValue & coupledMasterValue(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValue(var_name, comp); }
-  virtual const VariableValue & coupledMasterValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOld(var_name, comp); }
-  virtual const VariableValue & coupledMasterValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOlder(var_name, comp); }
+  virtual const VariableGradient & coupledMasterGradient(const std::string & var_name,
+                                                         unsigned int comp = 0)
+  {
+    return coupledNeighborGradient(var_name, comp);
+  }
+  virtual const VariableGradient & coupledMasterGradientOld(const std::string & var_name,
+                                                            unsigned int comp = 0)
+  {
+    return coupledNeighborGradientOld(var_name, comp);
+  }
+  virtual const VariableGradient & coupledMasterGradientOlder(const std::string & var_name,
+                                                              unsigned int comp = 0)
+  {
+    return coupledNeighborGradientOlder(var_name, comp);
+  }
 
-  virtual const VariableGradient & coupledMasterGradient(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradient(var_name, comp); }
-  virtual const VariableGradient & coupledMasterGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOld(var_name, comp); }
-  virtual const VariableGradient & coupledMasterGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOlder(var_name, comp); }
-
-  virtual const VariableSecond & coupledMasterSecond(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborSecond(var_name, comp); }
-
+  virtual const VariableSecond & coupledMasterSecond(const std::string & var_name,
+                                                     unsigned int comp = 0)
+  {
+    return coupledNeighborSecond(var_name, comp);
+  }
 
   /// Boundary ID for the slave surface
   unsigned int _slave;
   /// Boundary ID for the master surface
   unsigned int _master;
 
-  const MooseArray< Point > & _master_q_point;
-  QBase * & _master_qrule;
+  const MooseArray<Point> & _master_q_point;
+  QBase *& _master_qrule;
 
 public:
   PenetrationLocator & _penetration_locator;
 
 protected:
-
   /// current node being processed
-  const Node * & _current_node;
-  const Elem * & _current_master;
+  const Node *& _current_node;
+  const Elem *& _current_master;
 
   /// Value of the unknown variable this BC is action on
   const VariableValue & _u_slave;
@@ -197,7 +256,7 @@ protected:
   /// DOF map
   const DofMap & _dof_map;
 
-  const std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
+  const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
   /**
    * Whether or not the slave's residual should be overwritten.

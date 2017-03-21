@@ -18,30 +18,30 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<TimeDerivative>()
+template <>
+InputParameters
+validParams<TimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
   params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");
   return params;
 }
 
-TimeDerivative::TimeDerivative(const InputParameters & parameters) :
-    TimeKernel(parameters),
-    _lumping(getParam<bool>("lumping"))
+TimeDerivative::TimeDerivative(const InputParameters & parameters)
+  : TimeKernel(parameters), _lumping(getParam<bool>("lumping"))
 {
 }
 
 Real
 TimeDerivative::computeQpResidual()
 {
-  return _test[_i][_qp]*_u_dot[_qp];
+  return _test[_i][_qp] * _u_dot[_qp];
 }
 
 Real
 TimeDerivative::computeQpJacobian()
 {
-  return _test[_i][_qp]*_phi[_j][_qp]*_du_dot_du[_qp];
+  return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 }
 
 void
@@ -59,4 +59,3 @@ TimeDerivative::computeJacobian()
   else
     TimeKernel::computeJacobian();
 }
-

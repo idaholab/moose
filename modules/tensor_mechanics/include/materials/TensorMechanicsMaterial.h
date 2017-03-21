@@ -14,10 +14,10 @@
 #include "RankFourTensor.h"
 #include "RotationTensor.h"
 
-//Forward declaration
+// Forward declaration
 class TensorMechanicsMaterial;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsMaterial>();
 
 /**
@@ -75,4 +75,4 @@ protected:
   std::vector<Function *> _initial_stress;
 };
 
-#endif //TENSORMECHANICSMATERIAL_H
+#endif // TENSORMECHANICSMATERIAL_H

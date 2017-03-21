@@ -16,10 +16,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class ImplicitStateful;
 
-template<>
+template <>
 InputParameters validParams<ImplicitStateful>();
 
 /**
@@ -42,5 +42,4 @@ private:
   const MaterialProperty<Real> & _coupled_older;
 };
 
-#endif //STATEFULMATERIAL_H
-
+#endif // STATEFULMATERIAL_H

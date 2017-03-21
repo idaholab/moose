@@ -13,7 +13,7 @@
 class FluidPropertiesMaterial;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<FluidPropertiesMaterial>();
 
 /**

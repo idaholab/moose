@@ -20,13 +20,12 @@
 // Forward Declarations
 class NonlinearEigen;
 
-template<>
+template <>
 InputParameters validParams<NonlinearEigen>();
 
 class NonlinearEigen : public EigenExecutionerBase
 {
 public:
-
   NonlinearEigen(const InputParameters & parameters);
 
   virtual void init() override;
@@ -44,4 +43,4 @@ protected:
   bool _output_after_pi;
 };
 
-#endif //NONLINEAREIGEN_H
+#endif // NONLINEAREIGEN_H

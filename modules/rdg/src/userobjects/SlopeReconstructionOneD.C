@@ -7,14 +7,15 @@
 
 #include "SlopeReconstructionOneD.h"
 
-template<>
-InputParameters validParams<SlopeReconstructionOneD>()
+template <>
+InputParameters
+validParams<SlopeReconstructionOneD>()
 {
   InputParameters params = validParams<SlopeReconstructionBase>();
   return params;
 }
 
-SlopeReconstructionOneD::SlopeReconstructionOneD(const InputParameters & parameters) :
-    SlopeReconstructionBase(parameters)
+SlopeReconstructionOneD::SlopeReconstructionOneD(const InputParameters & parameters)
+  : SlopeReconstructionBase(parameters)
 {
 }

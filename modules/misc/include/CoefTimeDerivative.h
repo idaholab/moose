@@ -5,26 +5,24 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef COEFTIMEDERIVATIVE_H
 #define COEFTIMEDERIVATIVE_H
 
 #include "TimeDerivative.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoefTimeDerivative;
 
 /**
  * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
-template<>
+template <>
 InputParameters validParams<CoefTimeDerivative>();
 
 class CoefTimeDerivative : public TimeDerivative
 {
 public:
-
   CoefTimeDerivative(const InputParameters & parameters);
 
 protected:
@@ -37,4 +35,4 @@ protected:
    */
   Real _coef;
 };
-#endif //COEFTIMEDERIVATIVE_H
+#endif // COEFTIMEDERIVATIVE_H

@@ -62,4 +62,4 @@ protected:
   MaterialProperty<std::vector<RealGradient>> & _dvol_total_strain_qp_dvar;
 };
 
-#endif //POROUSFLOWVOLUMETRICSTRAIN_H
+#endif // POROUSFLOWVOLUMETRICSTRAIN_H

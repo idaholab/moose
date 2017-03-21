@@ -13,7 +13,7 @@
 
 class BrineFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<BrineFluidProperties>();
 
 /**
@@ -72,7 +72,13 @@ public:
    * @param[out] drho_dT derivative of density wrt temperature
    * @param[out] drho_dx derivative of density wrt NaCl mass fraction
    */
-  virtual void rho_dpTx(Real pressure, Real temperature, Real xnacl, Real & rho, Real & drho_dp, Real & drho_dT, Real & drho_dx) const override;
+  virtual void rho_dpTx(Real pressure,
+                        Real temperature,
+                        Real xnacl,
+                        Real & rho,
+                        Real & drho_dp,
+                        Real & drho_dT,
+                        Real & drho_dx) const override;
 
   /**
    * Viscosity of brine
@@ -99,8 +105,13 @@ public:
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    * @param[out] dmu_dx derivative of viscosity wrt NaCl mass fraction
    */
-  virtual void mu_drhoTx(Real water_density, Real temperature, Real xnacl, Real & mu, Real & dmu_drho, Real & dmu_dT, Real & dmu_dx) const override;
-
+  virtual void mu_drhoTx(Real water_density,
+                         Real temperature,
+                         Real xnacl,
+                         Real & mu,
+                         Real & dmu_drho,
+                         Real & dmu_dT,
+                         Real & dmu_dx) const override;
 
   /**
    * Enthalpy of brine
@@ -129,7 +140,13 @@ public:
    * @param[out] dh_dT derivative of enthalpy wrt temperature
    * @param[out] dh_dx derivative of enthalpy wrt NaCl mass fraction
    */
-  virtual void h_dpTx(Real pressure, Real temperature, Real xnacl, Real & h, Real & dh_dp, Real & dh_dT, Real & dh_dx) const override;
+  virtual void h_dpTx(Real pressure,
+                      Real temperature,
+                      Real xnacl,
+                      Real & h,
+                      Real & dh_dp,
+                      Real & dh_dT,
+                      Real & dh_dx) const override;
 
   /**
    * Isobaric heat capacity of brine
@@ -169,7 +186,13 @@ public:
    * @param[out] de_dT derivative of internal energy wrt temperature
    * @param[out] de_dx derivative of internal energy wrt NaCl mass fraction
    */
-  virtual void e_dpTx(Real pressure, Real temperature, Real xnacl, Real & e, Real & de_dp, Real & de_dT, Real & de_dx) const override;
+  virtual void e_dpTx(Real pressure,
+                      Real temperature,
+                      Real xnacl,
+                      Real & e,
+                      Real & de_dp,
+                      Real & de_dT,
+                      Real & de_dx) const override;
 
   /**
    * Thermal conductivity of brine

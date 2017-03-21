@@ -15,7 +15,7 @@
 // This only works with petsc-3.3 and above.
 #include "libmesh/petsc_macro.h"
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
 // Inside these guards we can use PETSC_VERSION_LT, which need not be
 // modified upon transition from dev to a release.
 
@@ -23,10 +23,10 @@
 
 // PETSc includes
 #include <petscerror.h>
-#if !PETSC_RELEASE_LESS_THAN(3,6,0)
-# include <petsc/private/dmimpl.h>
+#if !PETSC_RELEASE_LESS_THAN(3, 6, 0)
+#include <petsc/private/dmimpl.h>
 #else
-# include <petsc-private/dmimpl.h>
+#include <petsc-private/dmimpl.h>
 #endif
 
 // MOOSE includes
@@ -48,31 +48,31 @@
 
 struct DM_Moose
 {
-  NonlinearSystemBase * _nl; // nonlinear system context
+  NonlinearSystemBase * _nl;     // nonlinear system context
   std::set<std::string> * _vars; // variables
   std::map<std::string, unsigned int> * _var_ids;
   std::map<unsigned int, std::string> * _var_names;
-  bool _all_vars; // whether all system variables are included
+  bool _all_vars;                  // whether all system variables are included
   std::set<std::string> * _blocks; // mesh blocks
   std::map<std::string, subdomain_id_type> * _block_ids;
   std::map<unsigned int, std::string> * _block_names;
-  bool _all_blocks; // all blocks are included
+  bool _all_blocks;               // all blocks are included
   std::set<std::string> * _sides; // mesh surfaces (edges in 2D)
   std::map<BoundaryID, std::string> * _side_names;
   std::map<std::string, BoundaryID> * _side_ids;
   std::set<std::string> * _unsides; // excluded sides
   std::map<std::string, BoundaryID> * _unside_ids;
   std::map<BoundaryID, std::string> * _unside_names;
-  bool _nosides; // whether to include any sides
+  bool _nosides;   // whether to include any sides
   bool _nounsides; // whether to exclude any sides
-  typedef std::pair<std::string,std::string> ContactName;
-  typedef std::pair<BoundaryID,BoundaryID> ContactID;
+  typedef std::pair<std::string, std::string> ContactName;
+  typedef std::pair<BoundaryID, BoundaryID> ContactID;
   std::set<ContactName> * _contacts;
-  std::map<ContactID,ContactName> * _contact_names;
+  std::map<ContactID, ContactName> * _contact_names;
   std::set<ContactName> * _uncontacts;
-  std::map<ContactID,ContactName> * _uncontact_names;
-  std::map<ContactName,PetscBool> * _contact_displaced;
-  std::map<ContactName,PetscBool> * _uncontact_displaced;
+  std::map<ContactID, ContactName> * _uncontact_names;
+  std::map<ContactName, PetscBool> * _contact_displaced;
+  std::map<ContactName, PetscBool> * _uncontact_displaced;
   bool _nocontacts;
   bool _nouncontacts;
   bool _include_all_contact_nodes;
@@ -81,20 +81,22 @@ struct DM_Moose
   // the same split to appear in multiple spots (this might
   // break the current implementation of PCFieldSplit, though).
   std::multimap<std::string, unsigned int> * _splitlocs;
-  struct SplitInfo {
+  struct SplitInfo
+  {
     DM _dm;
     IS _rembedding; // relative embedding
   };
-  std::map<std::string, SplitInfo > * _splits;
+  std::map<std::string, SplitInfo> * _splits;
   IS _embedding;
   PetscBool _print_embedding;
 };
 
-
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetContacts"
 PetscErrorCode
-DMMooseGetContacts(DM dm, std::vector<std::pair<std::string, std::string> > & contact_names, std::vector<PetscBool> & displaced)
+DMMooseGetContacts(DM dm,
+                   std::vector<std::pair<std::string, std::string>> & contact_names,
+                   std::vector<PetscBool> & displaced)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -104,8 +106,12 @@ DMMooseGetContacts(DM dm, std::vector<std::pair<std::string, std::string> > & co
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject )dm)->type_name, DMMOOSE);
-  DM_Moose *dmm = (DM_Moose *)dm->data;
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_contact_names))
   {
     contact_names.push_back(it.second);
@@ -114,10 +120,12 @@ DMMooseGetContacts(DM dm, std::vector<std::pair<std::string, std::string> > & co
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetUnContacts"
 PetscErrorCode
-DMMooseGetUnContacts(DM dm, std::vector<std::pair<std::string,std::string> > & uncontact_names, std::vector<PetscBool> & displaced)
+DMMooseGetUnContacts(DM dm,
+                     std::vector<std::pair<std::string, std::string>> & uncontact_names,
+                     std::vector<PetscBool> & displaced)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -127,7 +135,11 @@ DMMooseGetUnContacts(DM dm, std::vector<std::pair<std::string,std::string> > & u
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_uncontact_names))
   {
@@ -137,7 +149,7 @@ DMMooseGetUnContacts(DM dm, std::vector<std::pair<std::string,std::string> > & u
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetSides"
 PetscErrorCode
 DMMooseGetSides(DM dm, std::vector<std::string> & side_names)
@@ -150,14 +162,18 @@ DMMooseGetSides(DM dm, std::vector<std::string> & side_names)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_side_ids))
     side_names.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetUnSides"
 PetscErrorCode
 DMMooseGetUnSides(DM dm, std::vector<std::string> & side_names)
@@ -170,14 +186,18 @@ DMMooseGetUnSides(DM dm, std::vector<std::string> & side_names)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_unside_ids))
     side_names.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetBlocks"
 PetscErrorCode
 DMMooseGetBlocks(DM dm, std::vector<std::string> & block_names)
@@ -190,14 +210,18 @@ DMMooseGetBlocks(DM dm, std::vector<std::string> & block_names)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)dm->data;
   for (const auto & it : *(dmm->_block_ids))
     block_names.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetVariables"
 PetscErrorCode
 DMMooseGetVariables(DM dm, std::vector<std::string> & var_names)
@@ -210,14 +234,18 @@ DMMooseGetVariables(DM dm, std::vector<std::string> & var_names)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   for (const auto & it : *(dmm->_var_ids))
     var_names.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetNonlinearSystem"
 PetscErrorCode
 DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
@@ -230,21 +258,27 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
-    SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONGSTATE, "Cannot reset the NonlinearSystem after DM has been set up.");
+    SETERRQ(((PetscObject)dm)->comm,
+            PETSC_ERR_ARG_WRONGSTATE,
+            "Cannot reset the NonlinearSystem after DM has been set up.");
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   dmm->_nl = &nl;
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetVariables"
 PetscErrorCode
 DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscBool ismoose;
 
   PetscFunctionBegin;
@@ -252,7 +286,11 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_vars)
@@ -261,13 +299,13 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetBlocks"
 PetscErrorCode
 DMMooseSetBlocks(DM dm, const std::set<std::string> & blocks)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscBool ismoose;
 
   PetscFunctionBegin;
@@ -275,7 +313,11 @@ DMMooseSetBlocks(DM dm, const std::set<std::string> & blocks)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_blocks)
@@ -284,13 +326,13 @@ DMMooseSetBlocks(DM dm, const std::set<std::string> & blocks)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetSides"
 PetscErrorCode
 DMMooseSetSides(DM dm, const std::set<std::string> & sides)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscBool ismoose;
 
   PetscFunctionBegin;
@@ -298,7 +340,11 @@ DMMooseSetSides(DM dm, const std::set<std::string> & sides)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_sides)
@@ -307,13 +353,13 @@ DMMooseSetSides(DM dm, const std::set<std::string> & sides)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetUnSides"
 PetscErrorCode
 DMMooseSetUnSides(DM dm, const std::set<std::string> & unsides)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscBool ismoose;
 
   PetscFunctionBegin;
@@ -321,7 +367,11 @@ DMMooseSetUnSides(DM dm, const std::set<std::string> & unsides)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_sides)
@@ -330,13 +380,15 @@ DMMooseSetUnSides(DM dm, const std::set<std::string> & unsides)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetContacts"
 PetscErrorCode
-DMMooseSetContacts(DM dm, const std::vector<std::pair<std::string,std::string> > & contacts, const std::vector<PetscBool> & displaced)
+DMMooseSetContacts(DM dm,
+                   const std::vector<std::pair<std::string, std::string>> & contacts,
+                   const std::vector<PetscBool> & displaced)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscBool ismoose;
 
   PetscFunctionBegin;
@@ -344,11 +396,19 @@ DMMooseSetContacts(DM dm, const std::vector<std::pair<std::string,std::string> >
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (contacts.size() != displaced.size())
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_SIZ, "Nonmatching sizes of the contact and displaced arrays: %D != %D", contacts.size(), displaced.size());
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_SIZ,
+             "Nonmatching sizes of the contact and displaced arrays: %D != %D",
+             contacts.size(),
+             displaced.size());
   if (dmm->_contacts)
     delete dmm->_contacts;
   dmm->_contact_displaced->clear();
@@ -361,13 +421,15 @@ DMMooseSetContacts(DM dm, const std::vector<std::pair<std::string,std::string> >
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetUnContacts"
 PetscErrorCode
-DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::string,std::string> > & uncontacts, const std::vector<PetscBool> & displaced)
+DMMooseSetUnContacts(DM dm,
+                     const std::vector<std::pair<std::string, std::string>> & uncontacts,
+                     const std::vector<PetscBool> & displaced)
 {
   PetscErrorCode ierr;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscBool ismoose;
 
   PetscFunctionBegin;
@@ -375,11 +437,19 @@ DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::string,std::string>
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   if (dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (uncontacts.size() != displaced.size())
-    SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_SIZ, "Nonmatching sizes of the uncontact and displaced arrays: %D != %D", uncontacts.size(), displaced.size());
+    SETERRQ2(PETSC_COMM_SELF,
+             PETSC_ERR_ARG_SIZ,
+             "Nonmatching sizes of the uncontact and displaced arrays: %D != %D",
+             uncontacts.size(),
+             displaced.size());
   if (dmm->_uncontacts)
     delete dmm->_uncontacts;
   dmm->_uncontact_displaced->clear();
@@ -392,11 +462,10 @@ DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::string,std::string>
   PetscFunctionReturn(0);
 }
 
-
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetNonlinearSystem"
 PetscErrorCode
-DMMooseGetNonlinearSystem(DM dm, NonlinearSystemBase * & nl)
+DMMooseGetNonlinearSystem(DM dm, NonlinearSystemBase *& nl)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -406,14 +475,17 @@ DMMooseGetNonlinearSystem(DM dm, NonlinearSystemBase * & nl)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   nl = dmm->_nl;
   PetscFunctionReturn(0);
 }
 
-
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseSetSplitNames"
 PetscErrorCode
 DMMooseSetSplitNames(DM dm, const std::vector<std::string> & split_names)
@@ -426,7 +498,11 @@ DMMooseSetSplitNames(DM dm, const std::vector<std::string> & split_names)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
 
   if (dmm->_splits)
@@ -460,7 +536,7 @@ DMMooseSetSplitNames(DM dm, const std::vector<std::string> & split_names)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetSplitNames"
 PetscErrorCode
 DMMooseGetSplitNames(DM dm, std::vector<std::string> & split_names)
@@ -473,7 +549,11 @@ DMMooseGetSplitNames(DM dm, std::vector<std::string> & split_names)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "Got DM oftype %s, not of type %s",
+             ((PetscObject)dm)->type_name,
+             DMMOOSE);
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   if (!dm->setupcalled)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
@@ -489,12 +569,12 @@ DMMooseGetSplitNames(DM dm, std::vector<std::string> & split_names)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseGetEmbedding_Private"
 static PetscErrorCode
 DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 {
-  DM_Moose * dmm=(DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
@@ -504,22 +584,29 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
   {
     // The rules interpreting the coexistence of blocks (un)sides/(un)contacts are these
     // [sides and contacts behave similarly, so 'sides' means 'sides/contacts']
-    // ['ANY' means 'not NONE' and covers 'ALL' as well, unless there is a specific 'ALL' clause, which overrides 'ANY'; 'NOT ALL' means not ALL and not NONE]
-    // [there are always some blocks, since by default 'ALL' is assumed, unless it is overridden by a specific list, which implies ANY]
+    // ['ANY' means 'not NONE' and covers 'ALL' as well, unless there is a specific 'ALL' clause,
+    // which overrides 'ANY'; 'NOT ALL' means not ALL and not NONE]
+    // [there are always some blocks, since by default 'ALL' is assumed, unless it is overridden by
+    // a specific list, which implies ANY]
     // In general,
-    // (1)  ALL blocks      and ANY sides are interpreted as the INTERSECTION of blocks and sides, equivalent to just the sides (since ALL blocks are assumed to be a cover).
+    // (1)  ALL blocks      and ANY sides are interpreted as the INTERSECTION of blocks and sides,
+    // equivalent to just the sides (since ALL blocks are assumed to be a cover).
     // (2)  NOT ALL blocks  and ANY or NO sides are interpreted as the UNION of blocks and sides.
     // (3a) ANY unsides and ANY blocks are interpreted as the DIFFERENCE of blocks and unsides.
     // (3b) ANY unsides and ANY sides are interpreted as the DIFFERENCE of sides and unsides.
     // (4)  NO  unsides means NO DIFFERENCE is needed.
-    // The result is easily computed by first computing the result of (1 & 2) followed by difference with the result of (3 & 4).
+    // The result is easily computed by first computing the result of (1 & 2) followed by difference
+    // with the result of (3 & 4).
     // To simply (1 & 2) observe the following:
-    // - The intersection is computed only if ALL blocks and ANY sides, and the result is the sides, so block dofs do not need to be computed.
-    // - Otherwise the union is computed, and initially consists of the blocks' dofs, to which the sides' dofs are added, if ANY.
+    // - The intersection is computed only if ALL blocks and ANY sides, and the result is the sides,
+    // so block dofs do not need to be computed.
+    // - Otherwise the union is computed, and initially consists of the blocks' dofs, to which the
+    // sides' dofs are added, if ANY.
     // - The result is called 'indices'
     // To satisfy (3 & 4) simply cmpute subtrahend set 'unindices' as all of the unsides' dofs:
     // Then take the set difference of 'indices' and 'unindices', putting the result in 'dindices'.
-    if (!dmm->_all_vars || !dmm->_all_blocks || !dmm->_nosides || !dmm->_nounsides || !dmm->_nocontacts || !dmm->_nouncontacts)
+    if (!dmm->_all_vars || !dmm->_all_blocks || !dmm->_nosides || !dmm->_nounsides ||
+        !dmm->_nocontacts || !dmm->_nouncontacts)
     {
       DofMap & dofmap = dmm->_nl->system().get_dof_map();
       std::set<dof_id_type> indices;
@@ -536,8 +623,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           for (const auto & bit : *(dmm->_block_ids))
           {
             subdomain_id_type b = bit.second;
-            MeshBase::const_element_iterator el = dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b);
-            MeshBase::const_element_iterator end_el = dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b);
+            MeshBase::const_element_iterator el =
+                dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b);
+            MeshBase::const_element_iterator end_el =
+                dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b);
             for (; el != end_el; ++el)
             {
               const Elem * elem = *el;
@@ -554,8 +643,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
             // Sometime, we own nodes but do not own the elements the nodes connected to
             {
-              MeshBase::const_node_iterator       node_it  = dmm->_nl->system().get_mesh().local_nodes_begin();
-              const MeshBase::const_node_iterator node_end = dmm->_nl->system().get_mesh().local_nodes_end();
+              MeshBase::const_node_iterator node_it =
+                  dmm->_nl->system().get_mesh().local_nodes_begin();
+              const MeshBase::const_node_iterator node_end =
+                  dmm->_nl->system().get_mesh().local_nodes_end();
               bool is_on_current_block = false;
               for (; node_it != node_end; ++node_it)
               {
@@ -588,7 +679,6 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                   indices.insert(index);
               }
             }
-
           }
         }
 
@@ -599,7 +689,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           // std::vector<dof_id_type> snodes;
           // std::vector<boundary_id_type> sides;
           // dmm->nl->system().get_mesh().get_boundary_info().build_node_list(snodes, sides);
-          // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
+          // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound
+          // from <algorithm>
           // for (dof_id_type i = 0; i < sides.size(); ++i) {
           //   boundary_id_type s = sides[i];
           //   if (!dmm->sidenames->count(s)) continue;
@@ -647,7 +738,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           // loop over contacts
           for (const auto & it : *(dmm->_contact_names))
           {
-            bc_id_set.insert(it.first.first); // master
+            bc_id_set.insert(it.first.first);  // master
             bc_id_set.insert(it.first.second); // slave
           }
           // loop over boundary elements
@@ -679,11 +770,13 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             PenetrationLocator * locator;
             if (displaced)
             {
-              std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
+              std::shared_ptr<DisplacedProblem> displaced_problem =
+                  dmm->_nl->_fe_problem.getDisplacedProblem();
               if (!displaced_problem)
               {
                 std::ostringstream err;
-                err << "Cannot use a displaced contact (" << it.second.first << "," << it.second.second << ") with an undisplaced problem";
+                err << "Cannot use a displaced contact (" << it.second.first << ","
+                    << it.second.second << ") with an undisplaced problem";
                 mooseError(err.str());
               }
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
@@ -694,7 +787,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             evindices.clear();
             // penetration locator
             auto lend = locator->_penetration_info.end();
-            for (auto lit  = locator->_penetration_info.begin(); lit!=lend; ++lit)
+            for (auto lit = locator->_penetration_info.begin(); lit != lend; ++lit)
             {
               const dof_id_type slave_node_num = lit->first;
               PenetrationInfo * pinfo = lit->second;
@@ -711,11 +804,13 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 evindices.clear();
 
                 auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
-                mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+                mooseAssert(node_to_elem_pair != node_to_elem_map.end(),
+                            "Missing entry in node to elem map");
                 for (const auto & elem_num : node_to_elem_pair->second)
                 {
                   Elem & slave_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
-                  // Get the degree of freedom indices for the given variable off the current element.
+                  // Get the degree of freedom indices for the given variable off the current
+                  // element.
                   evindices.clear();
                   dofmap.dof_indices(&slave_elem, evindices, v);
                   // might want to use variable_first/last_local_dof instead
@@ -727,17 +822,17 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 }
                 // indices for master element
                 evindices.clear();
-                const Elem * master_elem =  pinfo->_elem;
+                const Elem * master_elem = pinfo->_elem;
                 dofmap.dof_indices(master_elem, evindices, v);
                 for (const auto & edof : evindices)
                   if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
                     indices.insert(edof);
                   else
                     cached_indices.insert(edof);
-              }// if pinfo
-            }// for penetration
-          }// for contact names
-        }// if size of contact names
+              } // if pinfo
+            }   // for penetration
+          }     // for contact names
+        }       // if size of contact names
 
         if (dmm->_uncontact_names->size() && dmm->_include_all_contact_nodes)
         {
@@ -769,7 +864,6 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           }
         }
 
-
         // Iterate over the contacts excluded from this split.
         if (dmm->_uncontact_names->size() && !(dmm->_include_all_contact_nodes))
         {
@@ -780,11 +874,13 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             PenetrationLocator * locator;
             if (displaced)
             {
-              std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
+              std::shared_ptr<DisplacedProblem> displaced_problem =
+                  dmm->_nl->_fe_problem.getDisplacedProblem();
               if (!displaced_problem)
               {
                 std::ostringstream err;
-                err << "Cannot use a displaced uncontact (" << it.second.first << "," << it.second.second << ") with an undisplaced problem";
+                err << "Cannot use a displaced uncontact (" << it.second.first << ","
+                    << it.second.second << ") with an undisplaced problem";
                 mooseError(err.str());
               }
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
@@ -795,7 +891,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             evindices.clear();
             // penetration locator
             auto lend = locator->_penetration_info.end();
-            for (auto lit  = locator->_penetration_info.begin(); lit!=lend; ++lit)
+            for (auto lit = locator->_penetration_info.begin(); lit != lend; ++lit)
             {
               const dof_id_type slave_node_num = lit->first;
               PenetrationInfo * pinfo = lit->second;
@@ -811,7 +907,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
                 // indices for master element
                 evindices.clear();
-                const Elem * master_side =  pinfo->_side;
+                const Elem * master_side = pinfo->_side;
                 dofmap.dof_indices(master_side, evindices, v);
                 // indices of master sides
                 for (const auto & edof : evindices)
@@ -819,11 +915,11 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                     unindices.insert(edof);
                   else
                     cached_unindices.insert(edof);
-              }// if pinfo
-            }// for penetration
-          }// for uncontact names
-        }// if there exist uncontacts
-      }// variables
+              } // if pinfo
+            }   // for penetration
+          }     // for uncontact names
+        }       // if there exist uncontacts
+      }         // variables
 
       std::vector<dof_id_type> local_vec_indices(cached_indices.size());
       std::copy(cached_indices.begin(), cached_indices.end(), local_vec_indices.begin());
@@ -832,7 +928,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       // insert indices
       for (const auto & dof : local_vec_indices)
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-           indices.insert(dof);
+          indices.insert(dof);
 
       local_vec_indices.clear();
       local_vec_indices.resize(cached_unindices.size());
@@ -842,10 +938,14 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       // insert unindices
       for (const auto & dof : local_vec_indices)
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-           unindices.insert(dof);
+          unindices.insert(dof);
 
       std::set<dof_id_type> dindices;
-      std::set_difference(indices.begin(), indices.end(), unindices.begin(), unindices.end(), std::inserter(dindices, dindices.end()));
+      std::set_difference(indices.begin(),
+                          indices.end(),
+                          unindices.begin(),
+                          unindices.end(),
+                          std::inserter(dindices, dindices.end()));
       PetscInt * darray;
       ierr = PetscMalloc(sizeof(PetscInt) * dindices.size(), &darray);
       CHKERRQ(ierr);
@@ -855,12 +955,14 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
         darray[i] = dof;
         ++i;
       }
-      ierr = ISCreateGeneral(((PetscObject)dm)->comm, dindices.size(), darray, PETSC_OWN_POINTER, &dmm->_embedding);
+      ierr = ISCreateGeneral(
+          ((PetscObject)dm)->comm, dindices.size(), darray, PETSC_OWN_POINTER, &dmm->_embedding);
       CHKERRQ(ierr);
     }
     else
     {
-      // if (dmm->allblocks && dmm->allvars && dmm->nosides && dmm->nounsides && dmm->nocontacts && dmm->nouncontacts)
+      // if (dmm->allblocks && dmm->allvars && dmm->nosides && dmm->nounsides && dmm->nocontacts &&
+      // dmm->nouncontacts)
       // DMCreateGlobalVector is defined()
       Vec v;
       PetscInt low, high;
@@ -883,7 +985,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateFieldDecomposition_Moose"
 static PetscErrorCode
-DMCreateFieldDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS ** islist, DM ** dmlist)
+DMCreateFieldDecomposition_Moose(
+    DM dm, PetscInt * len, char *** namelist, IS ** islist, DM ** dmlist)
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
@@ -895,7 +998,7 @@ DMCreateFieldDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS **
   *len = dmm->_splitlocs->size();
   if (namelist)
   {
-    ierr = PetscMalloc(*len * sizeof(char*), namelist);
+    ierr = PetscMalloc(*len * sizeof(char *), namelist);
     CHKERRQ(ierr);
   }
   if (islist)
@@ -941,8 +1044,8 @@ DMCreateFieldDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS **
         CHKERRQ(ierr);
         if (dmm->_embedding)
         {
-          /* Create a relative embedding into the parent's index space. */
-#if PETSC_VERSION_LT(3,4,0)
+/* Create a relative embedding into the parent's index space. */
+#if PETSC_VERSION_LT(3, 4, 0)
           ierr = ISMapFactorRight(dembedding, dmm->_embedding, PETSC_TRUE, &lembedding);
           CHKERRQ(ierr);
 #else
@@ -968,23 +1071,28 @@ DMCreateFieldDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS **
           CHKERRQ(ierr);
           ierr = ISDestroy(&lembedding);
           CHKERRQ(ierr);
-          // We could get the index offset from a corresponding global vector, but subDMs don't yet have global vectors
+          // We could get the index offset from a corresponding global vector, but subDMs don't yet
+          // have global vectors
           ierr = ISGetLocalSize(dmm->_embedding, &len);
           CHKERRQ(ierr);
 
-          ierr = MPI_Scan(&len, &off, 1,
+          ierr = MPI_Scan(&len,
+                          &off,
+                          1,
 #ifdef PETSC_USE_64BIT_INDICES
                           MPI_LONG_LONG_INT,
 #else
                           MPI_INT,
 #endif
-                          MPI_SUM, ((PetscObject)dm)->comm);
+                          MPI_SUM,
+                          ((PetscObject)dm)->comm);
           CHKERRQ(ierr);
 
           off -= len;
           for (i = 0; i < llen; ++i)
             rindices[i] += off;
-          ierr = ISCreateGeneral(((PetscObject)dm)->comm, llen, rindices, PETSC_OWN_POINTER, &(dinfo._rembedding));
+          ierr = ISCreateGeneral(
+              ((PetscObject)dm)->comm, llen, rindices, PETSC_OWN_POINTER, &(dinfo._rembedding));
           CHKERRQ(ierr);
         }
         else
@@ -1009,12 +1117,14 @@ DMCreateFieldDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS **
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateDomainDecomposition_Moose"
 static PetscErrorCode
-DMCreateDomainDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS ** innerislist, IS ** outerislist, DM ** dmlist)
+DMCreateDomainDecomposition_Moose(
+    DM dm, PetscInt * len, char *** namelist, IS ** innerislist, IS ** outerislist, DM ** dmlist)
 {
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
-  /* Use DMCreateFieldDecomposition_Moose() to obtain everything but outerislist, which is currently PETSC_NULL. */
+  /* Use DMCreateFieldDecomposition_Moose() to obtain everything but outerislist, which is currently
+   * PETSC_NULL. */
   if (outerislist)
     *outerislist = PETSC_NULL; /* FIX: allow mesh-based overlap. */
   ierr = DMCreateFieldDecomposition_Moose(dm, len, namelist, innerislist, dmlist);
@@ -1022,19 +1132,17 @@ DMCreateDomainDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS *
   PetscFunctionReturn(0);
 }
 
-
-
-#if PETSC_VERSION_LT(3,4,0)
-#undef  __FUNCT__
+#if PETSC_VERSION_LT(3, 4, 0)
+#undef __FUNCT__
 #define __FUNCT__ "DMCreateFieldDecompositionDM_Moose"
 PetscErrorCode
-DMCreateFieldDecompositionDM_Moose(DM dm, const char*/*name*/,DM * ddm)
+DMCreateFieldDecompositionDM_Moose(DM dm, const char * /*name*/, DM * ddm)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   /* Return self. */
@@ -1047,16 +1155,16 @@ DMCreateFieldDecompositionDM_Moose(DM dm, const char*/*name*/,DM * ddm)
   PetscFunctionReturn(0);
 }
 
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMCreateDomainDecompositionDM_Moose"
 PetscErrorCode
-DMCreateDomainDecompositionDM_Moose(DM dm, const char*/*name*/,DM * ddm)
+DMCreateDomainDecompositionDM_Moose(DM dm, const char * /*name*/, DM * ddm)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   /* Return self. */
@@ -1070,7 +1178,6 @@ DMCreateDomainDecompositionDM_Moose(DM dm, const char*/*name*/,DM * ddm)
 }
 #endif
 
-
 #undef __FUNCT__
 #define __FUNCT__ "DMMooseFunction"
 static PetscErrorCode
@@ -1082,10 +1189,10 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   libmesh_assert(x);
   libmesh_assert(r);
 
-  NonlinearSystemBase* nl = NULL;
+  NonlinearSystemBase * nl = NULL;
   ierr = DMMooseGetNonlinearSystem(dm, nl);
   CHKERRQ(ierr);
-  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number>* >(nl->system().solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(nl->system().solution.get());
   PetscVector<Number> X_global(x, nl->comm()), R(r, nl->comm());
 
   // Use the system's update() to get a good local version of the
@@ -1100,7 +1207,8 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   // current_local_solution.  This is the solution vector that is
   // actually used in the computation of the residual below, and is
   // not locked by debug-enabled PETSc the way that "x" is.
-  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), nl->system().current_local_solution.get());
+  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(),
+                                                         nl->system().current_local_solution.get());
 
   // Zero the residual vector before assembling
   R.zero();
@@ -1110,23 +1218,30 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   if (nl->nonlinearSolver()->residual && nl->nonlinearSolver()->residual_object)
   {
     std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the Residual!" << std::endl;
+    err << "ERROR: cannot specifiy both a function and object to compute the Residual!"
+        << std::endl;
     mooseError(err.str());
   }
   if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
   {
     std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & Jacobian!" << std::endl;
+    err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & "
+           "Jacobian!"
+        << std::endl;
     mooseError(err.str());
   }
   if (nl->nonlinearSolver()->residual != NULL)
-    nl->nonlinearSolver()->residual(*(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->residual(
+        *(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->residual_object != NULL)
-    nl->nonlinearSolver()->residual_object->residual(*(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->residual_object->residual(
+        *(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->matvec != NULL)
-    nl->nonlinearSolver()->matvec(*(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->matvec(
+        *(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->residual_and_jacobian_object != NULL)
-    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(*(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(
+        *(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
   else
   {
     std::ostringstream err;
@@ -1137,7 +1252,7 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   PetscFunctionReturn(0);
 }
 
-#if !PETSC_VERSION_LT(3,4,0)
+#if !PETSC_VERSION_LT(3, 4, 0)
 #undef __FUNCT__
 #define __FUNCT__ "SNESFunction_DMMoose"
 static PetscErrorCode
@@ -1150,14 +1265,12 @@ SNESFunction_DMMoose(SNES, Vec x, Vec r, void * ctx)
   ierr = DMMooseFunction(dm, x, r);
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
-
 }
 #endif
 
-
 #undef __FUNCT__
 #define __FUNCT__ "DMMooseJacobian"
-#if PETSC_VERSION_LT(3,5,0)
+#if PETSC_VERSION_LT(3, 5, 0)
 static PetscErrorCode
 DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructure * msflag)
 #else
@@ -1169,11 +1282,12 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   NonlinearSystemBase * nl = NULL;
 
   PetscFunctionBegin;
-  ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
+  ierr = DMMooseGetNonlinearSystem(dm, nl);
+  CHKERRQ(ierr);
 
   PetscMatrix<Number> the_pc(pc, nl->comm());
   PetscMatrix<Number> Jac(jac, nl->comm());
-  PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>*>(nl->system().solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(nl->system().solution.get());
   PetscVector<Number> X_global(x, nl->comm());
 
   // Set the dof maps
@@ -1192,7 +1306,8 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   // current_local_solution.  This is the solution vector that is
   // actually used in the computation of the Jacobian below, and is
   // not locked by debug-enabled PETSc the way that "x" is.
-  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), nl->system().current_local_solution.get());
+  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(),
+                                                         nl->system().current_local_solution.get());
 
   // Zero out the preconditioner before computing the Jacobian.
   the_pc.zero();
@@ -1202,23 +1317,35 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   if (nl->nonlinearSolver()->jacobian && nl->nonlinearSolver()->jacobian_object)
   {
     std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the Jacobian!" << std::endl;
+    err << "ERROR: cannot specifiy both a function and object to compute the Jacobian!"
+        << std::endl;
     mooseError(err.str());
   }
   if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
   {
     std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & Jacobian!" << std::endl;
+    err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & "
+           "Jacobian!"
+        << std::endl;
     mooseError(err.str());
   }
   if (nl->nonlinearSolver()->jacobian != NULL)
-    nl->nonlinearSolver()->jacobian(*(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->jacobian(
+        *(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->jacobian_object != NULL)
-    nl->nonlinearSolver()->jacobian_object->jacobian(*(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->jacobian_object->jacobian(
+        *(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->matvec != NULL)
-    nl->nonlinearSolver()->matvec(*(nl->system().current_local_solution.get()), NULL, &the_pc, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->matvec(*(nl->system().current_local_solution.get()),
+                                  NULL,
+                                  &the_pc,
+                                  nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->residual_and_jacobian_object != NULL)
-    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(*(nl->system().current_local_solution.get()), NULL, &the_pc, nl->nonlinearSolver()->system());
+    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(
+        *(nl->system().current_local_solution.get()),
+        NULL,
+        &the_pc,
+        nl->nonlinearSolver()->system());
   else
   {
     std::ostringstream err;
@@ -1227,28 +1354,28 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   }
   the_pc.close();
   Jac.close();
-#if PETSC_VERSION_LT(3,5,0)
+#if PETSC_VERSION_LT(3, 5, 0)
   *msflag = SAME_NONZERO_PATTERN;
 #endif
   PetscFunctionReturn(0);
 }
 
-#if !PETSC_VERSION_LT(3,4,0)
-#undef  __FUNCT__
+#if !PETSC_VERSION_LT(3, 4, 0)
+#undef __FUNCT__
 #define __FUNCT__ "SNESJacobian_DMMoose"
-#if PETSC_VERSION_LT(3,5,0)
+#if PETSC_VERSION_LT(3, 5, 0)
 static PetscErrorCode
-SNESJacobian_DMMoose(SNES,Vec x,Mat * jac,Mat * pc, MatStructure * flag, void * ctx)
+SNESJacobian_DMMoose(SNES, Vec x, Mat * jac, Mat * pc, MatStructure * flag, void * ctx)
 #else
 static PetscErrorCode
-SNESJacobian_DMMoose(SNES,Vec x,Mat jac,Mat pc, void* ctx)
+SNESJacobian_DMMoose(SNES, Vec x, Mat jac, Mat pc, void * ctx)
 #endif
 {
   DM dm = (DM)ctx;
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
-#if PETSC_VERSION_LT(3,5,0)
+#if PETSC_VERSION_LT(3, 5, 0)
   ierr = DMMooseJacobian(dm, x, *jac, *pc, flag);
   CHKERRQ(ierr);
 #else
@@ -1274,7 +1401,7 @@ DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
   PetscVector<Number> XL(xl, nl->comm());
   PetscVector<Number> XU(xu, nl->comm());
 
-#if PETSC_VERSION_LESS_THAN(3,5,0) && PETSC_VERSION_RELEASE
+#if PETSC_VERSION_LESS_THAN(3, 5, 0) && PETSC_VERSION_RELEASE
   ierr = VecSet(xl, SNES_VI_NINF);
   CHKERRQ(ierr);
   ierr = VecSet(xu, SNES_VI_INF);
@@ -1290,10 +1417,10 @@ DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
   else if (nl->nonlinearSolver()->bounds_object != NULL)
     nl->nonlinearSolver()->bounds_object->bounds(XL, XU, nl->nonlinearSolver()->system());
   else
-    SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "No bounds calculation in this Moose object");
+    SETERRQ(
+        ((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "No bounds calculation in this Moose object");
   PetscFunctionReturn(0);
 }
-
 
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateGlobalVector_Moose"
@@ -1308,14 +1435,19 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "DM of type %s, not of type %s",
+             ((PetscObject)dm)->type,
+             DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
   NumericVector<Number> * nv = (dmm->_nl->system().solution).get();
-  PetscVector<Number> * pv = dynamic_cast<PetscVector<Number>*>(nv);
+  PetscVector<Number> * pv = dynamic_cast<PetscVector<Number> *>(nv);
   Vec v = pv->vec();
-  /* Unfortunately, currently this does not produce a ghosted vector, so nonlinear subproblem solves aren't going to be easily available.
+  /* Unfortunately, currently this does not produce a ghosted vector, so nonlinear subproblem solves
+   aren't going to be easily available.
    Should work fine for getting vectors out for linear subproblem solvers. */
   if (dmm->_embedding)
   {
@@ -1341,13 +1473,11 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
   ierr = PetscObjectCompose((PetscObject)*x, "DM", (PetscObject)dm);
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
-
 }
-
 
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateMatrix_Moose"
-#if PETSC_VERSION_LT(3,5,0)
+#if PETSC_VERSION_LT(3, 5, 0)
 static PetscErrorCode
 DMCreateMatrix_Moose(DM dm, const MatType type, Mat * A)
 #else
@@ -1358,7 +1488,7 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   PetscBool ismoose;
-#if !PETSC_RELEASE_LESS_THAN(3,5,0)
+#if !PETSC_RELEASE_LESS_THAN(3, 5, 0)
   MatType type;
 #endif
 
@@ -1366,28 +1496,33 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "DM of type %s, not of type %s",
+             ((PetscObject)dm)->type,
+             DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
-  // No PETSC_VERSION_GE macro prior to petsc-3.4
-#if !PETSC_VERSION_LT(3,5,0)
-  ierr = DMGetMatType(dm,&type);
+// No PETSC_VERSION_GE macro prior to petsc-3.4
+#if !PETSC_VERSION_LT(3, 5, 0)
+  ierr = DMGetMatType(dm, &type);
   CHKERRQ(ierr);
 #endif
   /*
-   The simplest thing for now: compute the sparsity_pattern using dof_map and init the matrix using that info.
+   The simplest thing for now: compute the sparsity_pattern using dof_map and init the matrix using
+   that info.
    TODO: compute sparsity restricted to this DM's blocks, variables and sides.
    Even fancier: compute the sparsity of the coupling of a contact slave to the contact master.
    In any event, here we are in control of the matrix type and structure.
    */
   DofMap & dof_map = dmm->_nl->system().get_dof_map();
-  PetscInt M,N,m,n;
+  PetscInt M, N, m, n;
   MPI_Comm comm;
   M = dof_map.n_dofs();
   N = M;
   m = static_cast<PetscInt>(dof_map.n_dofs_on_processor(dmm->_nl->system().processor_id()));
   n = m;
-  ierr = PetscObjectGetComm((PetscObject)dm,&comm);
+  ierr = PetscObjectGetComm((PetscObject)dm, &comm);
   CHKERRQ(ierr);
   ierr = MatCreate(comm, A);
   CHKERRQ(ierr);
@@ -1396,19 +1531,24 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
   ierr = MatSetType(*A, type);
   CHKERRQ(ierr);
   /* Set preallocation for the basic sparse matrix types (applies only if *A has the right type. */
-  /* For now we ignore blocksize issues, since BAIJ doesn't play well with field decomposition by variable. */
+  /* For now we ignore blocksize issues, since BAIJ doesn't play well with field decomposition by
+   * variable. */
   const std::vector<numeric_index_type> & n_nz = dof_map.get_n_nz();
   const std::vector<numeric_index_type> & n_oz = dof_map.get_n_oz();
-  ierr = MatSeqAIJSetPreallocation(*A, 0, (PetscInt*)(n_nz.empty() ? NULL : &n_nz[0]));
+  ierr = MatSeqAIJSetPreallocation(*A, 0, (PetscInt *)(n_nz.empty() ? NULL : &n_nz[0]));
   CHKERRQ(ierr);
-  ierr = MatMPIAIJSetPreallocation(*A, 0, (PetscInt*)(n_nz.empty() ? NULL : &n_nz[0]), 0, (PetscInt*)(n_oz.empty() ? NULL : &n_oz[0]));
+  ierr = MatMPIAIJSetPreallocation(*A,
+                                   0,
+                                   (PetscInt *)(n_nz.empty() ? NULL : &n_nz[0]),
+                                   0,
+                                   (PetscInt *)(n_oz.empty() ? NULL : &n_oz[0]));
   CHKERRQ(ierr);
-  /* TODO: set the prefix for *A and MatSetFromOptions(*A)? Might override the type and other settings made here. */
+  /* TODO: set the prefix for *A and MatSetFromOptions(*A)? Might override the type and other
+   * settings made here. */
   ierr = MatSetUp(*A);
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
-
 
 #undef __FUNCT__
 #define __FUNCT__ "DMView_Moose"
@@ -1417,8 +1557,8 @@ DMView_Moose(DM dm, PetscViewer viewer)
 {
   PetscErrorCode ierr;
   PetscBool isascii;
-  const char * name, *prefix;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  const char *name, *prefix;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
 
   PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)viewer, PETSCVIEWERASCII, &isascii);
@@ -1482,16 +1622,19 @@ DMView_Moose(DM dm, PetscViewer viewer)
       CHKERRQ(ierr);
       for (const auto & cit : *(dmm->_contact_names))
       {
-        ierr = PetscViewerASCIIPrintf(viewer, "(%s,%s,", cit.second.first.c_str(), cit.second.second.c_str());
+        ierr = PetscViewerASCIIPrintf(
+            viewer, "(%s,%s,", cit.second.first.c_str(), cit.second.second.c_str());
         CHKERRQ(ierr);
         if ((*dmm->_contact_displaced)[cit.second])
         {
-          ierr = PetscViewerASCIIPrintf(viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          ierr = PetscViewerASCIIPrintf(
+              viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
           CHKERRQ(ierr);
         }
         else
         {
-          ierr = PetscViewerASCIIPrintf(viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          ierr = PetscViewerASCIIPrintf(
+              viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
           CHKERRQ(ierr);
         }
       }
@@ -1505,16 +1648,19 @@ DMView_Moose(DM dm, PetscViewer viewer)
       CHKERRQ(ierr);
       for (const auto & cit : *(dmm->_uncontact_names))
       {
-        ierr = PetscViewerASCIIPrintf(viewer, "(%s,%s,", cit.second.first.c_str(), cit.second.second.c_str());
+        ierr = PetscViewerASCIIPrintf(
+            viewer, "(%s,%s,", cit.second.first.c_str(), cit.second.second.c_str());
         CHKERRQ(ierr);
         if ((*dmm->_uncontact_displaced)[cit.second])
         {
-          ierr = PetscViewerASCIIPrintf(viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          ierr = PetscViewerASCIIPrintf(
+              viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
           CHKERRQ(ierr);
         }
         else
         {
-          ierr = PetscViewerASCIIPrintf(viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          ierr = PetscViewerASCIIPrintf(
+              viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
           CHKERRQ(ierr);
         }
       }
@@ -1556,7 +1702,11 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject )dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject )dm)->type, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "DM of type %s, not of type %s",
+             ((PetscObject)dm)->type,
+             DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
@@ -1573,7 +1723,6 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
   PetscFunctionReturn(0);
 }
 
-
 #undef __FUNCT__
 #define __FUNCT__ "DMSetUp_Moose_Pre"
 static PetscErrorCode
@@ -1587,7 +1736,11 @@ DMSetUp_Moose_Pre(DM dm)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "DM of type %s, not of type %s",
+             ((PetscObject)dm)->type,
+             DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
@@ -1638,14 +1791,16 @@ DMSetUp_Moose_Pre(DM dm)
       try
       {
         if ((*dmm->_contact_displaced)[cpair])
-          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(
+              cpair.first, cpair.second);
         else
           dmm->_nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
       catch (...)
       {
         std::ostringstream err;
-        err << "Problem retrieving contact for PenetrationLocator with master " << cpair.first << " and slave " << cpair.second;
+        err << "Problem retrieving contact for PenetrationLocator with master " << cpair.first
+            << " and slave " << cpair.second;
         mooseError(err.str());
       }
       BoundaryID master_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
@@ -1664,14 +1819,16 @@ DMSetUp_Moose_Pre(DM dm)
       try
       {
         if ((*dmm->_uncontact_displaced)[cpair])
-          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(
+              cpair.first, cpair.second);
         else
           dmm->_nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
       catch (...)
       {
         std::ostringstream err;
-        err << "Problem retrieving uncontact for PenetrationLocator with master " << cpair.first << " and slave " << cpair.second;
+        err << "Problem retrieving uncontact for PenetrationLocator with master " << cpair.first
+            << " and slave " << cpair.second;
         mooseError(err.str());
       }
       BoundaryID master_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
@@ -1683,8 +1840,10 @@ DMSetUp_Moose_Pre(DM dm)
 
   dmm->_var_ids->clear();
   dmm->_var_names->clear();
-  // FIXME: would be nice to invert this nested loop structure so we could iterate over the potentially smaller dmm->vars,
-  // but checking against dofmap.variable would still require a linear search, hence, no win.  Would be nice to endow dofmap.variable
+  // FIXME: would be nice to invert this nested loop structure so we could iterate over the
+  // potentially smaller dmm->vars,
+  // but checking against dofmap.variable would still require a linear search, hence, no win.  Would
+  // be nice to endow dofmap.variable
   // with a fast search capability.
   for (unsigned int v = 0; v < dofmap.n_variables(); ++v)
   {
@@ -1726,17 +1885,21 @@ DMSetUp_Moose_Pre(DM dm)
     }
     if (dmm->_nosides)
     {
-      // If no sides have been specified, by default (null or empty dmm->blocks) all blocks are included in the split
+      // If no sides have been specified, by default (null or empty dmm->blocks) all blocks are
+      // included in the split
       // Thus, skip this block only if it is explicitly excluded from a nonempty dmm->blocks.
       if (dmm->_blocks && dmm->_blocks->size() && dmm->_blocks->find(bname) == dmm->_blocks->end())
         continue;
     }
     else
     {
-      // If sides have been specified, only the explicitly-specified blocks (those in dmm->blocks, if it's non-null) are in the split.
+      // If sides have been specified, only the explicitly-specified blocks (those in dmm->blocks,
+      // if it's non-null) are in the split.
       // Thus, include this block only if it is explicitly specified in a nonempty dmm->blocks.
-      // Equivalently, skip this block if dmm->blocks is dmm->blocks is null or empty or excludes this block.
-      if (!dmm->_blocks || !dmm->_blocks->size() || dmm->_blocks->find(bname) == dmm->_blocks->end())
+      // Equivalently, skip this block if dmm->blocks is dmm->blocks is null or empty or excludes
+      // this block.
+      if (!dmm->_blocks || !dmm->_blocks->size() ||
+          dmm->_blocks->find(bname) == dmm->_blocks->end())
         continue;
     }
     dmm->_block_ids->insert(std::make_pair(bname, bid));
@@ -1838,30 +2001,40 @@ DMSetUp_Moose(DM dm)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject )dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject )dm)->type, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "DM of type %s, not of type %s",
+             ((PetscObject)dm)->type,
+             DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   if (dmm->_print_embedding)
   {
-    const char * name, * prefix;
+    const char *name, *prefix;
     IS embedding;
 
     ierr = PetscObjectGetName((PetscObject)dm, &name);
     CHKERRQ(ierr);
     ierr = PetscObjectGetOptionsPrefix((PetscObject)dm, &prefix);
     CHKERRQ(ierr);
-    ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm), "DM Moose with name %s and prefix %s\n", name, prefix);
+    ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm),
+                                  "DM Moose with name %s and prefix %s\n",
+                                  name,
+                                  prefix);
     CHKERRQ(ierr);
-    if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides && dmm->_nocontacts && dmm->_nouncontacts)
+    if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides &&
+        dmm->_nocontacts && dmm->_nouncontacts)
     {
-      ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm), "\thas a trivial embedding\n");
+      ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm),
+                                    "\thas a trivial embedding\n");
       CHKERRQ(ierr);
     }
     else
     {
       ierr = DMMooseGetEmbedding_Private(dm, &embedding);
       CHKERRQ(ierr);
-      ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm), "\thas embedding defined by IS:\n");
+      ierr = PetscViewerASCIIPrintf(PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm),
+                                    "\thas embedding defined by IS:\n");
       CHKERRQ(ierr);
       ierr = ISView(embedding, PETSC_VIEWER_STDOUT_(((PetscObject)dm)->comm));
       CHKERRQ(ierr);
@@ -1870,19 +2043,21 @@ DMSetUp_Moose(DM dm)
     }
   }
   /*
-   Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have enough information for that.
+   Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have
+   enough information for that.
    */
-  if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides && dmm->_nocontacts && dmm->_nouncontacts)
+  if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides && dmm->_nocontacts &&
+      dmm->_nouncontacts)
   {
-#if PETSC_VERSION_LT(3,4,0)
+#if PETSC_VERSION_LT(3, 4, 0)
     ierr = DMSetFunction(dm, DMMooseFunction);
     CHKERRQ(ierr);
     ierr = DMSetJacobian(dm, DMMooseJacobian);
     CHKERRQ(ierr);
 #else
-    ierr = DMSNESSetFunction(dm, SNESFunction_DMMoose, (void*)dm);
+    ierr = DMSNESSetFunction(dm, SNESFunction_DMMoose, (void *)dm);
     CHKERRQ(ierr);
-    ierr = DMSNESSetJacobian(dm, SNESJacobian_DMMoose, (void*)dm);
+    ierr = DMSNESSetJacobian(dm, SNESJacobian_DMMoose, (void *)dm);
     CHKERRQ(ierr);
 #endif
     if (dmm->_nl->nonlinearSolver()->bounds || dmm->_nl->nonlinearSolver()->bounds_object)
@@ -1892,53 +2067,56 @@ DMSetUp_Moose(DM dm)
   else
   {
     /*
-     Fow now we don't implement even these, although a linear "Dirichlet" subproblem is well-defined.
-     Creating the submatrix, however, might require extracting the submatrix preallocation from an unassembled matrix.
+     Fow now we don't implement even these, although a linear "Dirichlet" subproblem is
+     well-defined.
+     Creating the submatrix, however, might require extracting the submatrix preallocation from an
+     unassembled matrix.
      */
     dm->ops->createglobalvector = 0;
     dm->ops->creatematrix = 0;
   }
   PetscFunctionReturn(0);
-
 }
-
 
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
-#if !PETSC_VERSION_LESS_THAN(3,7,0)
-PetscErrorCode
-DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
-#elif !PETSC_RELEASE_LESS_THAN(3,6,0)
-PetscErrorCode
-DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
+PetscErrorCode DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
+#elif !PETSC_RELEASE_LESS_THAN(3, 6, 0)
+PetscErrorCode DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #else
-PetscErrorCode
-DMSetFromOptions_Moose(DM dm) // < 3.6.0
+PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
 #endif
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
-  DM_Moose * dmm = (DM_Moose*)dm->data;
+  DM_Moose * dmm = (DM_Moose *)dm->data;
 
   PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_WRONG,
+             "DM of type %s, not of type %s",
+             ((PetscObject)dm)->type,
+             DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
-  ierr = PetscOptionsBegin(((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");
+  ierr = PetscOptionsBegin(
+      ((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");
   CHKERRQ(ierr);
   std::string opt, help;
   PetscInt maxvars = dmm->_nl->system().get_dof_map().n_variables();
   char ** vars;
   std::set<std::string> varset;
   PetscInt nvars = maxvars;
-  ierr = PetscMalloc(maxvars * sizeof(char*), &vars);
+  ierr = PetscMalloc(maxvars * sizeof(char *), &vars);
   CHKERRQ(ierr);
   opt = "-dm_moose_vars";
   help = "Variables in DMMoose";
-  ierr = PetscOptionsStringArray(opt.c_str(),help.c_str(), "DMMooseSetVars", vars, &nvars, PETSC_NULL);
+  ierr = PetscOptionsStringArray(
+      opt.c_str(), help.c_str(), "DMMooseSetVars", vars, &nvars, PETSC_NULL);
   CHKERRQ(ierr);
   for (PetscInt i = 0; i < nvars; ++i)
   {
@@ -1959,13 +2137,14 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   CHKERRQ(ierr);
   PetscInt maxblocks = meshblocks.size();
   char ** blocks;
-  ierr = PetscMalloc(maxblocks * sizeof(char*), &blocks);
+  ierr = PetscMalloc(maxblocks * sizeof(char *), &blocks);
   CHKERRQ(ierr);
   std::set<std::string> blockset;
   PetscInt nblocks = maxblocks;
   opt = "-dm_moose_blocks";
   help = "Blocks in DMMoose";
-  ierr = PetscOptionsStringArray(opt.c_str(), help.c_str(), "DMMooseSetBlocks", blocks, &nblocks, PETSC_NULL);
+  ierr = PetscOptionsStringArray(
+      opt.c_str(), help.c_str(), "DMMooseSetBlocks", blocks, &nblocks, PETSC_NULL);
   CHKERRQ(ierr);
   for (PetscInt i = 0; i < nblocks; ++i)
   {
@@ -1982,13 +2161,14 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   }
   PetscInt maxsides = dmm->_nl->system().get_mesh().get_boundary_info().get_boundary_ids().size();
   char ** sides;
-  ierr = PetscMalloc(maxsides * sizeof(char*), &sides);
+  ierr = PetscMalloc(maxsides * sizeof(char *), &sides);
   CHKERRQ(ierr);
   PetscInt nsides = maxsides;
   std::set<std::string> sideset;
   opt = "-dm_moose_sides";
   help = "Sides to include in DMMoose";
-  ierr = PetscOptionsStringArray(opt.c_str(), help.c_str(), "DMMooseSetSides", sides, &nsides, PETSC_NULL);
+  ierr = PetscOptionsStringArray(
+      opt.c_str(), help.c_str(), "DMMooseSetSides", sides, &nsides, PETSC_NULL);
   CHKERRQ(ierr);
   for (PetscInt i = 0; i < nsides; ++i)
   {
@@ -2004,7 +2184,8 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   opt = "-dm_moose_unsides";
   help = "Sides to exclude from DMMoose";
   nsides = maxsides;
-  ierr = PetscOptionsStringArray(opt.c_str(), help.c_str(), "DMMooseSetUnSides", sides, &nsides, PETSC_NULL);
+  ierr = PetscOptionsStringArray(
+      opt.c_str(), help.c_str(), "DMMooseSetUnSides", sides, &nsides, PETSC_NULL);
   CHKERRQ(ierr);
   sideset.clear();
   for (PetscInt i = 0; i < nsides; ++i)
@@ -2015,7 +2196,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   }
   if (sideset.size())
   {
-    ierr = DMMooseSetUnSides(dm,sideset);
+    ierr = DMMooseSetUnSides(dm, sideset);
     CHKERRQ(ierr);
   }
   ierr = PetscFree(sides);
@@ -2023,31 +2204,50 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   PetscInt maxcontacts = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators.size();
   std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
   if (displaced_problem)
-    maxcontacts = PetscMax(maxcontacts,(PetscInt)displaced_problem->geomSearchData()._penetration_locators.size());
+    maxcontacts = PetscMax(
+        maxcontacts, (PetscInt)displaced_problem->geomSearchData()._penetration_locators.size());
 
   std::vector<DM_Moose::ContactName> contacts;
   std::vector<PetscBool> contact_displaced;
   PetscInt ncontacts = 0;
   opt = "-dm_moose_ncontacts";
-  help = "Number of contacts to include in DMMoose.  For each <n> < dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <master>,<slave> pair defining the contact surfaces"
-      "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on the displaced mesh or not";
-  ierr = PetscOptionsInt(opt.c_str(),help.c_str(), "DMMooseSetContacts", ncontacts, &ncontacts, PETSC_NULL);
+  help = "Number of contacts to include in DMMoose.  For each <n> < "
+         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <master>,<slave> pair "
+         "defining the contact surfaces"
+         "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
+         "the displaced mesh or not";
+  ierr = PetscOptionsInt(
+      opt.c_str(), help.c_str(), "DMMooseSetContacts", ncontacts, &ncontacts, PETSC_NULL);
   CHKERRQ(ierr);
   if (ncontacts > maxcontacts)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Number of requested contacts %D exceeds the maximum number of contacts %D", ncontacts, maxcontacts);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_SIZ,
+             "Number of requested contacts %D exceeds the maximum number of contacts %D",
+             ncontacts,
+             maxcontacts);
   for (PetscInt i = 0; i < ncontacts; ++i)
   {
     {
       char * master_slave[2];
       PetscInt sz = 2;
-      std::ostringstream oopt,ohelp;
+      std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_contact_" << i;
       ohelp << "Master and slave for contact " << i;
-      ierr = PetscOptionsStringArray(oopt.str().c_str(), ohelp.str().c_str(), "DMMooseSetContacts", master_slave, &sz, PETSC_NULL);
+      ierr = PetscOptionsStringArray(oopt.str().c_str(),
+                                     ohelp.str().c_str(),
+                                     "DMMooseSetContacts",
+                                     master_slave,
+                                     &sz,
+                                     PETSC_NULL);
       CHKERRQ(ierr);
       if (sz != 2)
-        SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Expected 2 sideset IDs (master & slave) for contact %D, got %D instead", i, sz);
-      contacts.push_back(DM_Moose::ContactName(std::string(master_slave[0]),std::string(master_slave[1])));
+        SETERRQ2(((PetscObject)dm)->comm,
+                 PETSC_ERR_ARG_SIZ,
+                 "Expected 2 sideset IDs (master & slave) for contact %D, got %D instead",
+                 i,
+                 sz);
+      contacts.push_back(
+          DM_Moose::ContactName(std::string(master_slave[0]), std::string(master_slave[1])));
       ierr = PetscFree(master_slave[0]);
       CHKERRQ(ierr);
       ierr = PetscFree(master_slave[1]);
@@ -2055,10 +2255,15 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
     }
     {
       PetscBool displaced = PETSC_FALSE;
-      std::ostringstream oopt,ohelp;
+      std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_contact_" << i << "_displaced";
       ohelp << "Whether contact " << i << " is determined using displaced mesh or not";
-      ierr = PetscOptionsBool(oopt.str().c_str(), ohelp.str().c_str(), "DMMooseSetContacts", PETSC_FALSE, &displaced, PETSC_NULL);
+      ierr = PetscOptionsBool(oopt.str().c_str(),
+                              ohelp.str().c_str(),
+                              "DMMooseSetContacts",
+                              PETSC_FALSE,
+                              &displaced,
+                              PETSC_NULL);
       CHKERRQ(ierr);
       contact_displaced.push_back(displaced);
     }
@@ -2069,11 +2274,16 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
     CHKERRQ(ierr);
   }
   {
-    std::ostringstream oopt,ohelp;
+    std::ostringstream oopt, ohelp;
     PetscBool is_include_all_nodes;
     oopt << "-dm_moose_includeAllContactNodes";
     ohelp << "Whether to include all nodes on the contact surfaces into the subsolver";
-    ierr = PetscOptionsBool(oopt.str().c_str(), ohelp.str().c_str(), "", PETSC_FALSE, &is_include_all_nodes, PETSC_NULL);
+    ierr = PetscOptionsBool(oopt.str().c_str(),
+                            ohelp.str().c_str(),
+                            "",
+                            PETSC_FALSE,
+                            &is_include_all_nodes,
+                            PETSC_NULL);
     CHKERRQ(ierr);
     dmm->_include_all_contact_nodes = is_include_all_nodes;
   }
@@ -2081,24 +2291,43 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   std::vector<PetscBool> uncontact_displaced;
   PetscInt nuncontacts = 0;
   opt = "-dm_moose_nuncontacts";
-  help = "Number of contacts to exclude from DMMoose.  For each <n> < dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <master>,<slave> pair defining the contact surfaces"
-      "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on the displaced mesh or not";
-  ierr = PetscOptionsInt(opt.c_str(),help.c_str(), "DMMooseSetUnContacts", nuncontacts, &nuncontacts, PETSC_NULL);
+  help = "Number of contacts to exclude from DMMoose.  For each <n> < "
+         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <master>,<slave> pair "
+         "defining the contact surfaces"
+         "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
+         "the displaced mesh or not";
+  ierr = PetscOptionsInt(
+      opt.c_str(), help.c_str(), "DMMooseSetUnContacts", nuncontacts, &nuncontacts, PETSC_NULL);
   CHKERRQ(ierr);
   if (nuncontacts > maxcontacts)
-    SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Number of requested uncontacts %D exceeds the maximum number of contacts %D", nuncontacts, maxcontacts);
+    SETERRQ2(((PetscObject)dm)->comm,
+             PETSC_ERR_ARG_SIZ,
+             "Number of requested uncontacts %D exceeds the maximum number of contacts %D",
+             nuncontacts,
+             maxcontacts);
   for (PetscInt i = 0; i < nuncontacts; ++i)
   {
     {
       char * master_slave[2];
       PetscInt sz = 2;
-      std::ostringstream oopt,ohelp;
+      std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_uncontact_" << i;
       ohelp << "Master and slave for uncontact " << i;
-      ierr = PetscOptionsStringArray(oopt.str().c_str(), ohelp.str().c_str(), "DMMooseSetUnContacts", master_slave, &sz, PETSC_NULL);
+      ierr = PetscOptionsStringArray(oopt.str().c_str(),
+                                     ohelp.str().c_str(),
+                                     "DMMooseSetUnContacts",
+                                     master_slave,
+                                     &sz,
+                                     PETSC_NULL);
       CHKERRQ(ierr);
-      if (sz != 2) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Expected 2 sideset IDs (master & slave) for uncontact %D, got %D instead", i, sz);
-      uncontacts.push_back(DM_Moose::ContactName(std::string(master_slave[0]),std::string(master_slave[1])));
+      if (sz != 2)
+        SETERRQ2(((PetscObject)dm)->comm,
+                 PETSC_ERR_ARG_SIZ,
+                 "Expected 2 sideset IDs (master & slave) for uncontact %D, got %D instead",
+                 i,
+                 sz);
+      uncontacts.push_back(
+          DM_Moose::ContactName(std::string(master_slave[0]), std::string(master_slave[1])));
       ierr = PetscFree(master_slave[0]);
       CHKERRQ(ierr);
       ierr = PetscFree(master_slave[1]);
@@ -2106,10 +2335,15 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
     }
     {
       PetscBool displaced = PETSC_FALSE;
-      std::ostringstream oopt,ohelp;
+      std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_uncontact_" << i << "_displaced";
       ohelp << "Whether uncontact " << i << " is determined using displaced mesh or not";
-      ierr = PetscOptionsBool(oopt.str().c_str(),ohelp.str().c_str(), "DMMooseSetUnContact", PETSC_FALSE, &displaced, PETSC_NULL);
+      ierr = PetscOptionsBool(oopt.str().c_str(),
+                              ohelp.str().c_str(),
+                              "DMMooseSetUnContact",
+                              PETSC_FALSE,
+                              &displaced,
+                              PETSC_NULL);
       CHKERRQ(ierr);
       uncontact_displaced.push_back(displaced);
     }
@@ -2121,20 +2355,27 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   }
 
   PetscInt nsplits = 0;
-  /* Insert the usage of -dm_moose_fieldsplit_names into this help message, since the following if-clause might never fire, if -help is requested. */
-  const char* fdhelp = "Number of named fieldsplits defined by the DM.\n\
+  /* Insert the usage of -dm_moose_fieldsplit_names into this help message, since the following
+   * if-clause might never fire, if -help is requested. */
+  const char * fdhelp = "Number of named fieldsplits defined by the DM.\n\
                 \tNames of fieldsplits are defined by -dm_moose_fieldsplit_names <splitname1> <splitname2> ...\n\
                 \tEach split can be configured with its own variables, blocks and sides, as any DMMoose";
-  ierr = PetscOptionsInt("-dm_moose_nfieldsplits", fdhelp, "DMMooseSetSplitNames", nsplits, &nsplits, NULL);
+  ierr = PetscOptionsInt(
+      "-dm_moose_nfieldsplits", fdhelp, "DMMooseSetSplitNames", nsplits, &nsplits, NULL);
   CHKERRQ(ierr);
   if (nsplits)
   {
     PetscInt nnsplits = nsplits;
     std::vector<std::string> split_names;
     char ** splitnames;
-    ierr = PetscMalloc(nsplits * sizeof(char*), &splitnames);
+    ierr = PetscMalloc(nsplits * sizeof(char *), &splitnames);
     CHKERRQ(ierr);
-    ierr = PetscOptionsStringArray("-dm_moose_fieldsplit_names", "Names of fieldsplits defined by the DM", "DMMooseSetSplitNames", splitnames, &nnsplits, PETSC_NULL);
+    ierr = PetscOptionsStringArray("-dm_moose_fieldsplit_names",
+                                   "Names of fieldsplits defined by the DM",
+                                   "DMMooseSetSplitNames",
+                                   splitnames,
+                                   &nnsplits,
+                                   PETSC_NULL);
     CHKERRQ(ierr);
     if (!nnsplits)
     {
@@ -2146,7 +2387,11 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
       }
     }
     else if (nsplits != nnsplits)
-      SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Expected %D fieldsplit names, got %D instead", nsplits, nnsplits);
+      SETERRQ2(((PetscObject)dm)->comm,
+               PETSC_ERR_ARG_SIZ,
+               "Expected %D fieldsplit names, got %D instead",
+               nsplits,
+               nnsplits);
     else
     {
       for (PetscInt i = 0; i < nsplits; ++i)
@@ -2161,22 +2406,27 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
     ierr = DMMooseSetSplitNames(dm, split_names);
     CHKERRQ(ierr);
   }
-  ierr = PetscOptionsBool("-dm_moose_print_embedding", "Print IS embedding DM's dofs", "DMMoose", dmm->_print_embedding, &dmm->_print_embedding, PETSC_NULL);
+  ierr = PetscOptionsBool("-dm_moose_print_embedding",
+                          "Print IS embedding DM's dofs",
+                          "DMMoose",
+                          dmm->_print_embedding,
+                          &dmm->_print_embedding,
+                          PETSC_NULL);
   CHKERRQ(ierr);
   ierr = PetscOptionsEnd();
   CHKERRQ(ierr);
   ierr = DMSetUp_Moose_Pre(dm);
-  CHKERRQ(ierr); /* Need some preliminary set up because, strangely enough, DMView() is called in DMSetFromOptions(). */
+  CHKERRQ(ierr); /* Need some preliminary set up because, strangely enough, DMView() is called in
+                    DMSetFromOptions(). */
   PetscFunctionReturn(0);
 }
-
 
 #undef __FUNCT__
 #define __FUNCT__ "DMDestroy_Moose"
 static PetscErrorCode
 DMDestroy_Moose(DM dm)
 {
-  DM_Moose * dmm = (DM_Moose*)(dm->data);
+  DM_Moose * dmm = (DM_Moose *)(dm->data);
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
@@ -2222,9 +2472,7 @@ DMDestroy_Moose(DM dm)
   ierr = PetscFree(dm->data);
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
-
 }
-
 
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateMoose"
@@ -2241,7 +2489,6 @@ DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, DM * dm)
   ierr = DMMooseSetNonlinearSystem(*dm, nl);
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
-
 }
 
 EXTERN_C_BEGIN
@@ -2255,7 +2502,7 @@ DMCreate_Moose(DM dm)
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-#if PETSC_RELEASE_LESS_THAN(3,5,0)
+#if PETSC_RELEASE_LESS_THAN(3, 5, 0)
   ierr = PetscNewLog(dm, DM_Moose, &dmm);
   CHKERRQ(ierr);
 #else
@@ -2283,16 +2530,16 @@ DMCreate_Moose(DM dm)
 
   dm->ops->createglobalvector = DMCreateGlobalVector_Moose;
   dm->ops->createlocalvector = 0; // DMCreateLocalVector_Moose;
-  dm->ops->getcoloring = 0; // DMGetColoring_Moose;
+  dm->ops->getcoloring = 0;       // DMGetColoring_Moose;
   dm->ops->creatematrix = DMCreateMatrix_Moose;
   dm->ops->createinterpolation = 0; // DMCreateInterpolation_Moose;
 
-  dm->ops->refine = 0; // DMRefine_Moose;
-  dm->ops->coarsen = 0; // DMCoarsen_Moose;
-  dm->ops->getinjection = 0; // DMGetInjection_Moose;
+  dm->ops->refine = 0;        // DMRefine_Moose;
+  dm->ops->coarsen = 0;       // DMCoarsen_Moose;
+  dm->ops->getinjection = 0;  // DMGetInjection_Moose;
   dm->ops->getaggregates = 0; // DMGetAggregates_Moose;
 
-#if PETSC_VERSION_LT(3,4,0)
+#if PETSC_VERSION_LT(3, 4, 0)
   dm->ops->createfielddecompositiondm = DMCreateFieldDecompositionDM_Moose;
   dm->ops->createdomaindecompositiondm = DMCreateDomainDecompositionDM_Moose;
 #endif
@@ -2304,7 +2551,6 @@ DMCreate_Moose(DM dm)
   dm->ops->setfromoptions = DMSetFromOptions_Moose;
   dm->ops->setup = DMSetUp_Moose;
   PetscFunctionReturn(0);
-
 }
 EXTERN_C_END
 
@@ -2313,9 +2559,12 @@ EXTERN_C_END
 PetscErrorCode
 SNESUpdateDMMoose(SNES snes, PetscInt iteration)
 {
-  /* This is called any time the structure of the problem changes in a way that affects the Jacobian sparsity pattern.
-     For example, this may happen when NodeFaceConstraints change Jacobian's sparsity pattern based on newly-detected Penetration.
-     In that case certain preconditioners (e.g., PCASM) will not work, unless we tell them that the sparsity pattern has changed.
+  /* This is called any time the structure of the problem changes in a way that affects the Jacobian
+     sparsity pattern.
+     For example, this may happen when NodeFaceConstraints change Jacobian's sparsity pattern based
+     on newly-detected Penetration.
+     In that case certain preconditioners (e.g., PCASM) will not work, unless we tell them that the
+     sparsity pattern has changed.
      For now we are rebuilding the whole KSP, when necessary.
   */
   PetscErrorCode ierr;
@@ -2328,7 +2577,8 @@ SNESUpdateDMMoose(SNES snes, PetscInt iteration)
   PetscFunctionBegin;
   if (iteration)
   {
-    /* TODO: limit this only to situations when displaced (un)contact splits are present, as is DisplacedProblem(). */
+    /* TODO: limit this only to situations when displaced (un)contact splits are present, as is
+     * DisplacedProblem(). */
     ierr = SNESGetDM(snes, &dm);
     CHKERRQ(ierr);
     ierr = DMMooseReset(dm);
@@ -2358,8 +2608,7 @@ SNESUpdateDMMoose(SNES snes, PetscInt iteration)
   PetscFunctionReturn(0);
 }
 
-
-#undef  __FUNCT__
+#undef __FUNCT__
 #define __FUNCT__ "DMMooseRegisterAll"
 PetscErrorCode
 DMMooseRegisterAll()
@@ -2370,7 +2619,7 @@ DMMooseRegisterAll()
   PetscFunctionBegin;
   if (!DMMooseRegisterAllCalled)
   {
-#if PETSC_VERSION_LESS_THAN(3,4,0)
+#if PETSC_VERSION_LESS_THAN(3, 4, 0)
     ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);
     CHKERRQ(ierr);
 #else

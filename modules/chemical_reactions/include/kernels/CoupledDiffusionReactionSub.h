@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledDiffusionReactionSub;
 
-template<>
+template <>
 InputParameters validParams<CoupledDiffusionReactionSub>();
 
 /**
@@ -55,4 +55,4 @@ private:
   std::vector<const VariableGradient *> _grad_vals;
 };
 
-#endif //COUPLEDDIFFUSIONREACTIONSUB_H
+#endif // COUPLEDDIFFUSIONREACTIONSUB_H

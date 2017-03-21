@@ -8,42 +8,49 @@
 
 #include "SymmElasticityTensor.h"
 
-
-template<>
-InputParameters validParams<MacroElastic>()
+template <>
+InputParameters
+validParams<MacroElastic>()
 {
   InputParameters params = validParams<Elastic>();
-  params.addRequiredParam<PostprocessorName>("C1111", "The postprocessor associated with the C1111 value");
-  params.addRequiredParam<PostprocessorName>("C1122", "The postprocessor associated with the C1122 value");
-  params.addRequiredParam<PostprocessorName>("C1133", "The postprocessor associated with the C1133 value");
-  params.addRequiredParam<PostprocessorName>("C2222", "The postprocessor associated with the C2222 value");
-  params.addRequiredParam<PostprocessorName>("C2233", "The postprocessor associated with the C2233 value");
-  params.addRequiredParam<PostprocessorName>("C3333", "The postprocessor associated with the C3333 value");
-  params.addRequiredParam<PostprocessorName>("C1212", "The postprocessor associated with the C1212 value");
-  params.addRequiredParam<PostprocessorName>("C2323", "The postprocessor associated with the C2323 value");
-  params.addRequiredParam<PostprocessorName>("C3131", "The postprocessor associated with the C3131 value");
+  params.addRequiredParam<PostprocessorName>("C1111",
+                                             "The postprocessor associated with the C1111 value");
+  params.addRequiredParam<PostprocessorName>("C1122",
+                                             "The postprocessor associated with the C1122 value");
+  params.addRequiredParam<PostprocessorName>("C1133",
+                                             "The postprocessor associated with the C1133 value");
+  params.addRequiredParam<PostprocessorName>("C2222",
+                                             "The postprocessor associated with the C2222 value");
+  params.addRequiredParam<PostprocessorName>("C2233",
+                                             "The postprocessor associated with the C2233 value");
+  params.addRequiredParam<PostprocessorName>("C3333",
+                                             "The postprocessor associated with the C3333 value");
+  params.addRequiredParam<PostprocessorName>("C1212",
+                                             "The postprocessor associated with the C1212 value");
+  params.addRequiredParam<PostprocessorName>("C2323",
+                                             "The postprocessor associated with the C2323 value");
+  params.addRequiredParam<PostprocessorName>("C3131",
+                                             "The postprocessor associated with the C3131 value");
   return params;
 }
 
-MacroElastic::MacroElastic( const InputParameters & parameters)
-  :Elastic(parameters),
-   _C1111(getPostprocessorValue("C1111")),
-   _C1122(getPostprocessorValue("C1122")),
-   _C1133(getPostprocessorValue("C1133")),
-   _C2222(getPostprocessorValue("C2222")),
-   _C2233(getPostprocessorValue("C2233")),
-   _C3333(getPostprocessorValue("C3333")),
-   _C1212(getPostprocessorValue("C1212")),
-   _C2323(getPostprocessorValue("C2323")),
-   _C3131(getPostprocessorValue("C3131"))
+MacroElastic::MacroElastic(const InputParameters & parameters)
+  : Elastic(parameters),
+    _C1111(getPostprocessorValue("C1111")),
+    _C1122(getPostprocessorValue("C1122")),
+    _C1133(getPostprocessorValue("C1133")),
+    _C2222(getPostprocessorValue("C2222")),
+    _C2233(getPostprocessorValue("C2233")),
+    _C3333(getPostprocessorValue("C3333")),
+    _C1212(getPostprocessorValue("C1212")),
+    _C2323(getPostprocessorValue("C2323")),
+    _C3131(getPostprocessorValue("C3131"))
 {
 }
 
 ////////////////////////////////////////////////////////////////////////
 
-MacroElastic::~MacroElastic()
-{
-}
+MacroElastic::~MacroElastic() {}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +68,7 @@ MacroElastic::updateElasticityTensor(SymmElasticityTensor & tensor)
   v[7] = _C2323;
   v[8] = _C3131;
 
-  tensor.fillFromInputVector( v, false );
+  tensor.fillFromInputVector(v, false);
 
   return true;
 }
@@ -69,6 +76,5 @@ MacroElastic::updateElasticityTensor(SymmElasticityTensor & tensor)
 void
 MacroElastic::createElasticityTensor()
 {
-  elasticityTensor( new SymmElasticityTensor(false) );
+  elasticityTensor(new SymmElasticityTensor(false));
 }
-

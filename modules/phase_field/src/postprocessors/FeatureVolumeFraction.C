@@ -8,20 +8,25 @@
 #include "FeatureVolumeFraction.h"
 #include <cmath>
 
-template<>
-InputParameters validParams<FeatureVolumeFraction>()
+template <>
+InputParameters
+validParams<FeatureVolumeFraction>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum value_type("VOLUME_FRACTION AVRAMI", "VOLUME_FRACTION");
-  params.addParam<MooseEnum>("value_type", value_type, "The value to output (VOLUME_FRACTION or AVRAMI value)");
-  params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
-  params.addRequiredParam<VectorPostprocessorName>("feature_volumes", "The feature volume VectorPostprocessorValue.");
-  params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
+  params.addParam<MooseEnum>(
+      "value_type", value_type, "The value to output (VOLUME_FRACTION or AVRAMI value)");
+  params.addRequiredParam<PostprocessorName>("mesh_volume",
+                                             "Postprocessor from which to get mesh volume");
+  params.addRequiredParam<VectorPostprocessorName>("feature_volumes",
+                                                   "The feature volume VectorPostprocessorValue.");
+  params.addParam<Real>(
+      "equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
   return params;
 }
 
-FeatureVolumeFraction::FeatureVolumeFraction(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+FeatureVolumeFraction::FeatureVolumeFraction(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _value_type(getParam<MooseEnum>("value_type").getEnum<ValueType>()),
     _mesh_volume(getPostprocessorValue("mesh_volume")),
     _feature_volumes(getVectorPostprocessorValue("feature_volumes", "feature_volumes")),
@@ -40,7 +45,7 @@ FeatureVolumeFraction::execute()
 {
   Real volume = 0.0;
 
-  //sum the values in the vector to get total volume
+  // sum the values in the vector to get total volume
   for (const auto & feature_volume : _feature_volumes)
     volume += feature_volume;
 
@@ -67,5 +72,5 @@ FeatureVolumeFraction::getValue()
 Real
 FeatureVolumeFraction::calculateAvramiValue()
 {
-  return std::log(std::log(1.0 / (1.0 - (_volume_fraction/_equil_fraction))));
+  return std::log(std::log(1.0 / (1.0 - (_volume_fraction / _equil_fraction))));
 }

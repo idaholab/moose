@@ -9,10 +9,10 @@
 
 #include "KKSACBulkBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSACBulkF;
 
-template<>
+template <>
 InputParameters validParams<KKSACBulkF>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   const MaterialProperty<Real> & _prop_d2g;
 };
 
-#endif //KKSACBULKF_H
+#endif // KKSACBULKF_H

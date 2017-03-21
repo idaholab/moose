@@ -15,16 +15,14 @@
 #include "AddDGKernelAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddDGKernelAction>()
+template <>
+InputParameters
+validParams<AddDGKernelAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddDGKernelAction::AddDGKernelAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddDGKernelAction::AddDGKernelAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddDGKernelAction::act()

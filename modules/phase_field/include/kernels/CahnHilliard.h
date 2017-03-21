@@ -19,7 +19,7 @@ public:
   CahnHilliard(const InputParameters & parameters);
 };
 
-template<>
+template <>
 InputParameters validParams<CahnHilliard>();
 
 #endif // CAHNHILLIARD_H

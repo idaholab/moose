@@ -12,11 +12,12 @@
 // Forward Declarations
 class SpecifiedSmoothSuperellipsoidIC;
 
-template<>
+template <>
 InputParameters validParams<SpecifiedSmoothSuperellipsoidIC>();
 
 /**
- * SpecifiedSmoothSuperellipsoidIC creates multiple SmoothSuperellipsoids (number = size of x_positions) that are positioned in the
+ * SpecifiedSmoothSuperellipsoidIC creates multiple SmoothSuperellipsoids (number = size of
+ * x_positions) that are positioned in the
  * set locations with the set semiaxes a, b, c and exponents n
  */
 class SpecifiedSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
@@ -38,4 +39,4 @@ protected:
   std::vector<Real> _input_ns;
 };
 
-#endif //SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
+#endif // SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H

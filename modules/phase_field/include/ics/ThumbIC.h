@@ -12,7 +12,7 @@
 // Forward Declarations
 class ThumbIC;
 
-template<>
+template <>
 InputParameters validParams<ThumbIC>();
 
 /**
@@ -33,4 +33,4 @@ protected:
   const Real _outvalue;
 };
 
-#endif //THUMBIC_H
+#endif // THUMBIC_H

@@ -11,7 +11,7 @@
 
 class GapConductanceConstraint;
 
-template<>
+template <>
 InputParameters validParams<GapConductanceConstraint>();
 
 /**
@@ -80,16 +80,19 @@ protected:
   /**
    * Handles Jacobian contributions for *both* the LM equation *and* the primal equation.
    * The jac_type flag controls the type of contribution:
-   * Master/Master: LM equation Jacobian wrt to T^(1), phi(j) is primal basis, master side, test(i) is LM basis, master side.
-   * Master/Slave: LM equation Jacobian wrt T^(2), phi(j) is primal basis, slave side, test(i) is LM basis, slave side.
-   * Slave/Master: Primal equation Jacobian wrt lambda, phi(j) is the LM basis, test(i) is the primal basis, master side.
-   * Slave/Slave: Primal equation Jacobian wrt lambda, phi(j) is the LM basis, test(i) is the primal basis, slave side.
+   * Master/Master: LM equation Jacobian wrt to T^(1), phi(j) is primal basis, master side, test(i)
+   * is LM basis, master side.
+   * Master/Slave: LM equation Jacobian wrt T^(2), phi(j) is primal basis, slave side, test(i) is LM
+   * basis, slave side.
+   * Slave/Master: Primal equation Jacobian wrt lambda, phi(j) is the LM basis, test(i) is the
+   * primal basis, master side.
+   * Slave/Slave: Primal equation Jacobian wrt lambda, phi(j) is the LM basis, test(i) is the primal
+   * basis, slave side.
    */
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 
   /// Thermal conductivity of the gap medium (e.g. air).
   Real _k;
 };
-
 
 #endif // GAPCONDUCTANCECONSTRAINT_H

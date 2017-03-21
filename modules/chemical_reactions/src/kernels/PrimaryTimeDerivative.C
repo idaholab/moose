@@ -6,17 +6,18 @@
 /****************************************************************/
 #include "PrimaryTimeDerivative.h"
 
-template<>
-InputParameters validParams<PrimaryTimeDerivative>()
+template <>
+InputParameters
+validParams<PrimaryTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
   return params;
 }
 
-PrimaryTimeDerivative::PrimaryTimeDerivative(const InputParameters & parameters) :
-    TimeDerivative(parameters),
-    _porosity(getMaterialProperty<Real>("porosity"))
-{}
+PrimaryTimeDerivative::PrimaryTimeDerivative(const InputParameters & parameters)
+  : TimeDerivative(parameters), _porosity(getMaterialProperty<Real>("porosity"))
+{
+}
 
 Real
 PrimaryTimeDerivative::computeQpResidual()

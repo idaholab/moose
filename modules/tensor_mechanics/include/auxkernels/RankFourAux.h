@@ -18,7 +18,7 @@ class RankFourAux;
  * supplied indices.
  */
 
-template<>
+template <>
 InputParameters validParams<RankFourAux>();
 
 class RankFourAux : public AuxKernel
@@ -26,7 +26,7 @@ class RankFourAux : public AuxKernel
 public:
   RankFourAux(const InputParameters & parameters);
 
-  virtual ~ RankFourAux() {}
+  virtual ~RankFourAux() {}
 
 protected:
   virtual Real computeValue();
@@ -39,4 +39,4 @@ private:
   const unsigned int _l;
 };
 
-#endif //RANKFOURAUX_H
+#endif // RANKFOURAUX_H

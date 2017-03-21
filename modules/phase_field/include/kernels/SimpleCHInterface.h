@@ -11,7 +11,7 @@
 
 class SimpleCHInterface;
 
-template<>
+template <>
 InputParameters validParams<SimpleCHInterface>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   const MaterialProperty<Real> & _kappa_c;
 };
 
-#endif //SIMPLECHINTERFACE_H
+#endif // SIMPLECHINTERFACE_H

@@ -5,30 +5,29 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef MECHANICALCONTACTCONSTRAINT_H
 #define MECHANICALCONTACTCONSTRAINT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "NodeFaceConstraint.h"
 
 #include "ContactMaster.h"
 
-//Forward Declarations
+// Forward Declarations
 class MechanicalContactConstraint;
 
-template<>
+template <>
 InputParameters validParams<MechanicalContactConstraint>();
 
 /**
- * A MechanicalContactConstraint forces the value of a variable to be the same on both sides of an interface.
+ * A MechanicalContactConstraint forces the value of a variable to be the same on both sides of an
+ * interface.
  */
-class MechanicalContactConstraint :
-  public NodeFaceConstraint
+class MechanicalContactConstraint : public NodeFaceConstraint
 {
 public:
   MechanicalContactConstraint(const InputParameters & parameters);
-  virtual ~MechanicalContactConstraint(){}
+  virtual ~MechanicalContactConstraint() {}
 
   virtual void timestepSetup();
   virtual void jacobianSetup();
@@ -57,8 +56,7 @@ public:
    * @param type The type of coupling
    * @param jvar The index of the coupled variable
    */
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                        unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned int jvar);
 
   /**
    * Get the dof indices of the nodes connected to the slave node for a specific variable
@@ -74,9 +72,7 @@ public:
    * @param component The component index computed in this routine
    * @return bool indicating whether the coupled variable is one of the displacement variables
    */
-  bool getCoupledVarComponent(unsigned int var_num,
-                              unsigned int &component);
-
+  bool getCoupledVarComponent(unsigned int var_num, unsigned int & component);
 
   virtual bool addCouplingEntriesToJacobian() { return _master_slave_jacobian; }
 
@@ -84,7 +80,6 @@ public:
   void computeContactForce(PenetrationInfo * pinfo);
 
 protected:
-
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
 
@@ -102,7 +97,7 @@ protected:
   bool _update_contact_set;
 
   NumericVector<Number> & _residual_copy;
-//  std::map<Point, PenetrationInfo *> _point_to_info;
+  //  std::map<Point, PenetrationInfo *> _point_to_info;
 
   unsigned int _x_var;
   unsigned int _y_var;

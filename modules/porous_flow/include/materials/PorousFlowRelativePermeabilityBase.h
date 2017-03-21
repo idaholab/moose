@@ -12,7 +12,7 @@
 
 class PorousFlowRelativePermeabilityBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowRelativePermeabilityBase>();
 
 /**
@@ -71,4 +71,4 @@ protected:
   const Real _dseff_ds;
 };
 
-#endif //POROUSFLOWRELATIVEPERMEABILITYBASE_H
+#endif // POROUSFLOWRELATIVEPERMEABILITYBASE_H

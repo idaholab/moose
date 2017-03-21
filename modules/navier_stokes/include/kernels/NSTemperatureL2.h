@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSTemperatureL2;
 
-template<>
+template <>
 InputParameters validParams<NSTemperatureL2>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   const MaterialProperty<Real> & _c_v;
 };
 
-#endif //NSTEMPERATUREL2_H
+#endif // NSTEMPERATUREL2_H

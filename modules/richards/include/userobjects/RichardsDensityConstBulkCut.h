@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITYCONSTBULKCUT_H
 #define RICHARDSDENSITYCONSTBULKCUT_H
 
@@ -13,8 +12,7 @@
 
 class RichardsDensityConstBulkCut;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsDensityConstBulkCut>();
 
 /**
@@ -47,7 +45,6 @@ public:
   Real d2density(Real p) const;
 
 protected:
-
   /// density = _dens0*exp(p/_bulk), modified by cubic
   Real _dens0;
 
@@ -62,7 +59,6 @@ protected:
 
   /// (cut_limit-zero_point)^3
   Real _c3;
-
 };
 
 #endif // RICHARDSDENSITYCONSTBULKCUT_H

@@ -15,7 +15,7 @@
 // Forward Declarations
 class XFEMSingleVariableConstraint;
 
-template<>
+template <>
 InputParameters validParams<XFEMSingleVariableConstraint>();
 
 class XFEMSingleVariableConstraint : public ElemElemConstraint

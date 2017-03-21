@@ -9,10 +9,10 @@
 #ifndef ACGBPOLY_H
 #define ACGBPOLY_H
 
-//Forward Declarations
+// Forward Declarations
 class ACGBPoly;
 
-template<>
+template <>
 InputParameters validParams<ACGBPoly>();
 
 class ACGBPoly : public ACBulk<Real>
@@ -33,4 +33,4 @@ protected:
   Real _en_ratio;
 };
 
-#endif //ACGBPOLY_H
+#endif // ACGBPOLY_H

@@ -70,68 +70,95 @@ public:
   static MooseEnum getAvgDataFieldType();
 
   /// Access functor base class for EBSDPointData
-  struct EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData &) = 0;
-    virtual ~EBSDPointDataFunctor() {};
+  struct EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData &) = 0;
+    virtual ~EBSDPointDataFunctor(){};
   };
   /// Access functor base class for EBSDAvgData
-  struct EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData &) = 0;
-    virtual ~EBSDAvgDataFunctor() {};
+  struct EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData &) = 0;
+    virtual ~EBSDAvgDataFunctor(){};
   };
 
   // List of specialized access functors (one for each field in EBSDPointData)
-  struct EBSDPointDataPhi1 : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._phi1; };
+  struct EBSDPointDataPhi1 : EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData & d) { return d._phi1; };
   };
-  struct EBSDPointDataPhi : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._Phi; };
+  struct EBSDPointDataPhi : EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData & d) { return d._Phi; };
   };
-  struct EBSDPointDataPhi2 : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._phi2; };
+  struct EBSDPointDataPhi2 : EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData & d) { return d._phi2; };
   };
-  struct EBSDPointDataFeatureID : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._feature_id; };
+  struct EBSDPointDataFeatureID : EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData & d) { return d._feature_id; };
   };
-  struct EBSDPointDataPhase : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._phase; };
+  struct EBSDPointDataPhase : EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData & d) { return d._phase; };
   };
-  struct EBSDPointDataSymmetry : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._symmetry; };
+  struct EBSDPointDataSymmetry : EBSDPointDataFunctor
+  {
+    virtual Real operator()(const EBSDPointData & d) { return d._symmetry; };
   };
-  struct EBSDPointDataCustom : EBSDPointDataFunctor {
+  struct EBSDPointDataCustom : EBSDPointDataFunctor
+  {
     EBSDPointDataCustom(unsigned int index) : _index(index) {}
-    virtual Real operator () (const EBSDPointData & d) { mooseAssert(_index < d._custom.size(), "Requesting out of bounds index in EBSDPointDataCustom."); return d._custom[_index]; };
+    virtual Real operator()(const EBSDPointData & d)
+    {
+      mooseAssert(_index < d._custom.size(),
+                  "Requesting out of bounds index in EBSDPointDataCustom.");
+      return d._custom[_index];
+    };
     const unsigned int _index;
   };
 
   // List of specialized access functors (one for each field in EBSDAvgData)
-  struct EBSDAvgDataPhi1 : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._angles->phi1; };
+  struct EBSDAvgDataPhi1 : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._angles->phi1; };
   };
-  struct EBSDAvgDataPhi : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._angles->Phi; };
+  struct EBSDAvgDataPhi : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._angles->Phi; };
   };
-  struct EBSDAvgDataPhi2 : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._angles->phi2; };
+  struct EBSDAvgDataPhi2 : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._angles->phi2; };
   };
-  struct EBSDAvgDataPhase : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._phase; };
+  struct EBSDAvgDataPhase : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._phase; };
   };
-  struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._symmetry; };
+  struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._symmetry; };
   };
-  struct EBSDAvgDataLocalID : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._local_id; };
+  struct EBSDAvgDataLocalID : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._local_id; };
   };
-  struct EBSDAvgDataFeatureID : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._feature_id; };
+  struct EBSDAvgDataFeatureID : EBSDAvgDataFunctor
+  {
+    virtual Real operator()(const EBSDAvgData & a) { return a._feature_id; };
   };
-  struct EBSDAvgDataCustom : EBSDAvgDataFunctor {
+  struct EBSDAvgDataCustom : EBSDAvgDataFunctor
+  {
     EBSDAvgDataCustom(unsigned int index) : _index(index) {}
-    virtual Real operator () (const EBSDAvgData & a) { mooseAssert(_index < a._custom.size(), "Requesting out of bounds index in EBSDPointDataCustom."); return a._custom[_index]; };
+    virtual Real operator()(const EBSDAvgData & a)
+    {
+      mooseAssert(_index < a._custom.size(),
+                  "Requesting out of bounds index in EBSDPointDataCustom.");
+      return a._custom[_index];
+    };
     const unsigned int _index;
   };
 };
 
-#endif //EBSDACCESSFUNCTORS_H
+#endif // EBSDACCESSFUNCTORS_H

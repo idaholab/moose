@@ -6,22 +6,27 @@
 /****************************************************************/
 #include "TensorMechanicsHardeningPowerRule.h"
 
-template<>
-InputParameters validParams<TensorMechanicsHardeningPowerRule>()
+template <>
+InputParameters
+validParams<TensorMechanicsHardeningPowerRule>()
 {
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
   params.addRequiredParam<Real>("value_0", "The yield strength when internal variable = 0");
   params.addParam<Real>("epsilon0", 1.0, "The reference strain");
-  params.addParam<Real>("exponent", 0.0, "Let p = internal_parameter.  Then value = value_0 * (p / epsilon0 + 1)^{exponent})");
+  params.addParam<Real>(
+      "exponent",
+      0.0,
+      "Let p = internal_parameter.  Then value = value_0 * (p / epsilon0 + 1)^{exponent})");
   params.addClassDescription("Hardening defined by power rule");
   return params;
 }
 
-TensorMechanicsHardeningPowerRule::TensorMechanicsHardeningPowerRule(const InputParameters & parameters) :
-  TensorMechanicsHardeningModel(parameters),
-  _value_0(getParam<Real>("value_0")),
-  _epsilon0(getParam<Real>("epsilon0")),
-  _exponent(getParam<Real>("exponent"))
+TensorMechanicsHardeningPowerRule::TensorMechanicsHardeningPowerRule(
+    const InputParameters & parameters)
+  : TensorMechanicsHardeningModel(parameters),
+    _value_0(getParam<Real>("value_0")),
+    _epsilon0(getParam<Real>("epsilon0")),
+    _exponent(getParam<Real>("exponent"))
 {
 }
 

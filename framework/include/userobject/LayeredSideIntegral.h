@@ -22,7 +22,7 @@
 // Forward Declarations
 class LayeredSideIntegral;
 
-template<>
+template <>
 InputParameters validParams<LayeredSideIntegral>();
 
 /**

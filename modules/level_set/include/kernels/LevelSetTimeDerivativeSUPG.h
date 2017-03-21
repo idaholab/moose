@@ -15,7 +15,7 @@
 // Forward declarations
 class LevelSetTimeDerivativeSUPG;
 
-template<>
+template <>
 InputParameters validParams<LevelSetTimeDerivativeSUPG>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<LevelSetTimeDerivativeSUPG>();
 class LevelSetTimeDerivativeSUPG : public LevelSetVelocityInterface<TimeDerivative>
 {
 public:
-
   LevelSetTimeDerivativeSUPG(const InputParameters & parameters);
 
 protected:
@@ -32,4 +31,4 @@ protected:
   Real computeQpJacobian() override;
 };
 
-#endif //LEVELSETTIMEDERIVATIVESUPG_H
+#endif // LEVELSETTIMEDERIVATIVESUPG_H

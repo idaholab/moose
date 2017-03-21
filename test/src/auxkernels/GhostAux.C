@@ -15,22 +15,24 @@
 #include "GhostAux.h"
 #include "GhostUserObject.h"
 
-template<>
-InputParameters validParams<GhostAux>()
+template <>
+InputParameters
+validParams<GhostAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<UserObjectName>("ghost_user_object", "The GhostUserObject where this Aux pulls values from");
+  params.addParam<UserObjectName>("ghost_user_object",
+                                  "The GhostUserObject where this Aux pulls values from");
 
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   setup_options = "timestep_begin";
   params.set<MultiMooseEnum>("execute_on") = setup_options;
-  params.addClassDescription("Aux Kernel to display ghosted elements from a single processor or the union on all processors");
+  params.addClassDescription("Aux Kernel to display ghosted elements from a single processor or "
+                             "the union on all processors");
   return params;
 }
 
-GhostAux::GhostAux(const InputParameters & params) :
-    AuxKernel(params),
-    _ghost_uo(getUserObject<GhostUserObject>("ghost_user_object"))
+GhostAux::GhostAux(const InputParameters & params)
+  : AuxKernel(params), _ghost_uo(getUserObject<GhostUserObject>("ghost_user_object"))
 {
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");

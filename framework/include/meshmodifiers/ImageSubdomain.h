@@ -25,15 +25,13 @@
 // Forward declarations
 class ImageSubdomain;
 
-template<>
+template <>
 InputParameters validParams<ImageSubdomain>();
 
 /**
  * MeshModifier for defining a Subdomains based on Image data.
  */
-class ImageSubdomain :
-    public MeshModifier,
-    public ImageSampler
+class ImageSubdomain : public MeshModifier, public ImageSampler
 {
 public:
   /**

@@ -13,26 +13,28 @@
 /****************************************************************/
 #include "ConservativeAdvection.h"
 
-template<>
-InputParameters validParams<ConservativeAdvection>()
+template <>
+InputParameters
+validParams<ConservativeAdvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
   return params;
 }
 
-ConservativeAdvection::ConservativeAdvection(const InputParameters & parameters) :
-    Kernel(parameters),
-    _velocity(getParam<RealVectorValue>("velocity"))
+ConservativeAdvection::ConservativeAdvection(const InputParameters & parameters)
+  : Kernel(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 
-Real ConservativeAdvection::computeQpResidual()
+Real
+ConservativeAdvection::computeQpResidual()
 {
   return -_u[_qp] * (_velocity * _grad_test[_i][_qp]);
 }
 
-Real ConservativeAdvection::computeQpJacobian()
+Real
+ConservativeAdvection::computeQpJacobian()
 {
   return -_phi[_j][_qp] * (_velocity * _grad_test[_i][_qp]);
 }

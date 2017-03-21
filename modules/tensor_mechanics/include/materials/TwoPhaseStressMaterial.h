@@ -14,7 +14,7 @@ class TwoPhaseStressMaterial;
 class RankTwoTensor;
 class RankFourTensor;
 
-template<>
+template <>
 InputParameters validParams<TwoPhaseStressMaterial>();
 
 /**
@@ -48,4 +48,4 @@ protected:
   MaterialProperty<RankFourTensor> & _dstress_dstrain;
 };
 
-#endif //TWOPHASESTRESSMATERIAL_H
+#endif // TWOPHASESTRESSMATERIAL_H

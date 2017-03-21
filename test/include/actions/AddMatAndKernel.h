@@ -19,9 +19,8 @@
 
 class AddMatAndKernel;
 
-template<>
+template <>
 InputParameters validParams<AddMatAndKernel>();
-
 
 /// This class creates a material-kernel with the kernel depending on the
 /// material property.  This is meant to help diagnose/check for issues

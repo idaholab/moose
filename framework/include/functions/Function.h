@@ -36,22 +36,21 @@ namespace libMesh
 class Point;
 }
 
-template<>
+template <>
 InputParameters validParams<Function>();
 
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Function :
-  public MooseObject,
-  public SetupInterface,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public UserObjectInterface,
-  public Restartable,
-  public MeshChangedInterface,
-  public ScalarCoupleable
+class Function : public MooseObject,
+                 public SetupInterface,
+                 public TransientInterface,
+                 public PostprocessorInterface,
+                 public UserObjectInterface,
+                 public Restartable,
+                 public MeshChangedInterface,
+                 public ScalarCoupleable
 {
 public:
   /**
@@ -107,4 +106,4 @@ public:
   virtual Real average();
 };
 
-#endif //FUNCTION_H
+#endif // FUNCTION_H

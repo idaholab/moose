@@ -17,11 +17,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class SpatialUserObjectAux;
 class UserObject;
 
-template<>
+template <>
 InputParameters validParams<SpatialUserObjectAux>();
 
 /**

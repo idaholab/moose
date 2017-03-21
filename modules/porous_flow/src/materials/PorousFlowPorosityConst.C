@@ -7,8 +7,9 @@
 
 #include "PorousFlowPorosityConst.h"
 
-template<>
-InputParameters validParams<PorousFlowPorosityConst>()
+template <>
+InputParameters
+validParams<PorousFlowPorosityConst>()
 {
   InputParameters params = validParams<PorousFlowPorosityBase>();
   params.addRequiredCoupledVar("porosity", "The porosity (assumed constant for this material)");
@@ -16,9 +17,8 @@ InputParameters validParams<PorousFlowPorosityConst>()
   return params;
 }
 
-PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & parameters) :
-    PorousFlowPorosityBase(parameters),
-    _input_porosity(coupledValue("porosity"))
+PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & parameters)
+  : PorousFlowPorosityBase(parameters), _input_porosity(coupledValue("porosity"))
 {
 }
 

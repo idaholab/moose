@@ -10,10 +10,10 @@
 
 #include "KernelValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class HHPFCRFF;
 
-template<>
+template <>
 InputParameters validParams<HHPFCRFF>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   const unsigned int _coupled_var_var;
 };
 
-#endif //HHFPCRFF_H
+#endif // HHFPCRFF_H

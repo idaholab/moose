@@ -29,13 +29,12 @@ class GriddedData;
  */
 class PiecewiseMultilinear;
 
-template<>
+template <>
 InputParameters validParams<PiecewiseMultilinear>();
 
 class PiecewiseMultilinear : public Function
 {
 public:
-
   /**
    * Create new PiecewiseMultilinear object.
    * This calls GriddedData to do most of the work
@@ -51,7 +50,6 @@ public:
   virtual Real value(Real t, const Point & pt) override;
 
 private:
-
   /// object to provide function evaluations at points on the grid
   std::unique_ptr<GriddedData> _gridded_data;
   /// dimension of the grid
@@ -67,7 +65,7 @@ private:
   std::vector<int> _axes;
 
   /// the grid
-  std::vector<std::vector<Real> > _grid;
+  std::vector<std::vector<Real>> _grid;
 
   /**
    * This does the core work.  Given a point, pt, defined
@@ -87,7 +85,10 @@ private:
    * @param lower_x Upon return will contain lower_x specified above
    * @param upper_x Upon return will contain upper_x specified above
    */
-  void getNeighborIndices(std::vector<Real> in_arr, Real x, unsigned int & lower_x, unsigned int & upper_x);
+  void getNeighborIndices(std::vector<Real> in_arr,
+                          Real x,
+                          unsigned int & lower_x,
+                          unsigned int & upper_x);
 };
 
-#endif //PIECEWISEMULTILINEAR_H
+#endif // PIECEWISEMULTILINEAR_H

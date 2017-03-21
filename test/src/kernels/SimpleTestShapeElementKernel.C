@@ -14,16 +14,18 @@
 
 #include "SimpleTestShapeElementKernel.h"
 
-template<>
-InputParameters validParams<SimpleTestShapeElementKernel>()
+template <>
+InputParameters
+validParams<SimpleTestShapeElementKernel>()
 {
   InputParameters params = validParams<NonlocalKernel>();
-  params.addRequiredParam<UserObjectName>("user_object", "Name of a SimpleTestShapeElementUserObject");
+  params.addRequiredParam<UserObjectName>("user_object",
+                                          "Name of a SimpleTestShapeElementUserObject");
   return params;
 }
 
-SimpleTestShapeElementKernel::SimpleTestShapeElementKernel(const InputParameters & parameters) :
-    NonlocalKernel(parameters),
+SimpleTestShapeElementKernel::SimpleTestShapeElementKernel(const InputParameters & parameters)
+  : NonlocalKernel(parameters),
     _shp(getUserObject<SimpleTestShapeElementUserObject>("user_object")),
     _shp_integral(_shp.getIntegral()),
     _shp_jacobian(_shp.getJacobian()),

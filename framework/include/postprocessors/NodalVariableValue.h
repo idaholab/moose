@@ -26,7 +26,7 @@ namespace libMesh
 class Node;
 }
 
-template<>
+template <>
 InputParameters validParams<NodalVariableValue>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   const Real _scale_factor;
 };
 
-#endif //NODALVARIABLEVALUE_H
+#endif // NODALVARIABLEVALUE_H

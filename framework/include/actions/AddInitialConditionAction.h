@@ -19,9 +19,8 @@
 
 class AddInitialConditionAction;
 
-template<>
+template <>
 InputParameters validParams<AddInitialConditionAction>();
-
 
 class AddInitialConditionAction : public MooseObjectAction
 {

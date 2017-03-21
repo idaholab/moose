@@ -13,7 +13,7 @@
 
 class CNSFVFreeOutflowBCUserObject;
 
-template<>
+template <>
 InputParameters validParams<CNSFVFreeOutflowBCUserObject>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<CNSFVFreeOutflowBCUserObject>();
 class CNSFVFreeOutflowBCUserObject : public BCUserObject
 {
 public:
-
   CNSFVFreeOutflowBCUserObject(const InputParameters & parameters);
 
   virtual std::vector<Real> getGhostCellValue(unsigned int iside,
@@ -31,7 +30,6 @@ public:
                                               const RealVectorValue & dwave) const;
 
 protected:
-
   const SinglePhaseFluidProperties & _fp;
 };
 

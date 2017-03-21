@@ -7,22 +7,23 @@
 
 #include "CNSFVFreeOutflowBCUserObject.h"
 
-template<>
-InputParameters validParams<CNSFVFreeOutflowBCUserObject>()
+template <>
+InputParameters
+validParams<CNSFVFreeOutflowBCUserObject>()
 {
   InputParameters params = validParams<BCUserObject>();
 
-  params.addClassDescription("A user object that computes the ghost cell values based on the free outflow boundary condition.");
+  params.addClassDescription("A user object that computes the ghost cell values based on the free "
+                             "outflow boundary condition.");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   return params;
 }
 
 CNSFVFreeOutflowBCUserObject::CNSFVFreeOutflowBCUserObject(const InputParameters & parameters)
-  : BCUserObject(parameters),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
+  : BCUserObject(parameters), _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
 

@@ -26,4 +26,4 @@ protected:
   const MaterialProperty<RankFourTensor> & _elasticity_tensor_old;
 };
 
-#endif //COMPUTEVARIABLEELASTICCONSTANTSTRESS_H
+#endif // COMPUTEVARIABLEELASTICCONSTANTSTRESS_H

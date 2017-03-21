@@ -21,17 +21,18 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddPrimarySpeciesAction>()
+template <>
+InputParameters
+validParams<AddPrimarySpeciesAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("primary_species", "The list of primary variables to add");
+  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+      "primary_species", "The list of primary variables to add");
   return params;
 }
 
-AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params) :
-    Action(params),
-    _vars(getParam<std::vector<NonlinearVariableName> >("primary_species"))
+AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params)
+  : Action(params), _vars(getParam<std::vector<NonlinearVariableName>>("primary_species"))
 {
 }
 

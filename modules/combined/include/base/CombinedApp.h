@@ -11,7 +11,7 @@
 
 class CombinedApp;
 
-template<>
+template <>
 InputParameters validParams<CombinedApp>();
 
 class CombinedApp : public MooseApp

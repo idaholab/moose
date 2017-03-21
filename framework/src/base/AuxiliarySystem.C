@@ -34,8 +34,8 @@
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name) :
-    SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
+AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
+  : SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
     _current_solution(NULL),
@@ -48,10 +48,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
   _elem_vars.resize(libMesh::n_threads());
 }
 
-AuxiliarySystem::~AuxiliarySystem()
-{
-  delete &_serialized_solution;
-}
+AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }
 
 void
 AuxiliarySystem::init()
@@ -129,9 +126,11 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
   _elemental_aux_storage.updateActive(tid);
 }
 
-
 void
-AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
+AuxiliarySystem::addVariable(const std::string & var_name,
+                             const FEType & type,
+                             Real scale_factor,
+                             const std::set<SubdomainID> * const active_subdomains /* = NULL*/)
 {
   SystemBase::addVariable(var_name, type, scale_factor, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -148,20 +147,25 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
 }
 
 void
-AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
+AuxiliarySystem::addTimeIntegrator(const std::string & type,
+                                   const std::string & name,
+                                   InputParameters parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
   _time_integrator = _factory.create<TimeIntegrator>(type, name, parameters);
 }
 
 void
-AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+AuxiliarySystem::addKernel(const std::string & kernel_name,
+                           const std::string & name,
+                           InputParameters parameters)
 {
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<AuxKernel> kernel = _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
+    std::shared_ptr<AuxKernel> kernel =
+        _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
     if (kernel->isNodal())
       _nodal_aux_storage.addObject(kernel, tid);
     else
@@ -170,11 +174,14 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
 }
 
 void
-AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+AuxiliarySystem::addScalarKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<AuxScalarKernel> kernel = _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
+    std::shared_ptr<AuxScalarKernel> kernel =
+        _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
     _aux_scalar_storage.addObject(kernel, tid);
   }
 }
@@ -197,7 +204,10 @@ AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 }
 
 void
-AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
+AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
+                                unsigned int /*side*/,
+                                BoundaryID /*bnd_id*/,
+                                THREAD_ID tid)
 {
   for (const auto & it : _nodal_vars[tid])
   {
@@ -230,7 +240,8 @@ AuxiliarySystem::serializedSolution()
 void
 AuxiliarySystem::serializeSolution()
 {
-  if (_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
+  if (_need_serialized_solution &&
+      _sys.n_dofs() > 0) // libMesh does not like serializing of empty vectors
   {
     if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
     {
@@ -251,8 +262,10 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   // We need to compute time derivatives every time each kind of the variables is finished, because:
   //
-  //  a) the user might want to use the aux variable value somewhere, thus we need to provide the up-to-date value
-  //  b) time integration system works with the whole vectors of solutions, thus we cannot update only a part of the vector
+  //  a) the user might want to use the aux variable value somewhere, thus we need to provide the
+  //  up-to-date value
+  //  b) time integration system works with the whole vectors of solutions, thus we cannot update
+  //  only a part of the vector
   //
 
   if (_vars[0].scalars().size() > 0)
@@ -290,7 +303,8 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Elemental AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _elemental_aux_storage[type].getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
+        _elemental_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -300,7 +314,8 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Nodal AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage[type].getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
+        _nodal_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -318,7 +333,8 @@ AuxiliarySystem::getDependObjects()
 
   // Elemental AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _elemental_aux_storage.getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
+        _elemental_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -339,9 +355,10 @@ AuxiliarySystem::getDependObjects()
   return depend_objects;
 }
 
-
 NumericVector<Number> &
-AuxiliarySystem::addVector(const std::string & vector_name, const bool project, const ParallelType type)
+AuxiliarySystem::addVector(const std::string & vector_name,
+                           const bool project,
+                           const ParallelType type)
 {
   if (hasVector(vector_name))
     return getVector(vector_name);
@@ -371,7 +388,8 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
         _fe_problem.reinitScalars(tid);
 
         // Call compute() method on all active AuxScalarKernel objects
-        const std::vector<std::shared_ptr<AuxScalarKernel>> & objects = storage.getActiveObjects(tid);
+        const std::vector<std::shared_ptr<AuxScalarKernel>> & objects =
+            storage.getActiveObjects(tid);
         for (const auto & obj : objects)
           obj->compute();
 

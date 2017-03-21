@@ -19,9 +19,8 @@
 
 class AddUserObjectAction;
 
-template<>
+template <>
 InputParameters validParams<AddUserObjectAction>();
-
 
 class AddUserObjectAction : public MooseObjectAction
 {

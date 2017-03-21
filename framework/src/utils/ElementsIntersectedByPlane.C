@@ -26,7 +26,10 @@
 namespace Moose
 {
 
-void findElementsIntersectedByPlane(const Plane & plane, const MeshBase & mesh, std::vector<const Elem *> & intersected_elems)
+void
+findElementsIntersectedByPlane(const Plane & plane,
+                               const MeshBase & mesh,
+                               std::vector<const Elem *> & intersected_elems)
 {
   // Loop over all elements to find elements intersected by the plane
   MeshBase::const_element_iterator el = mesh.elements_begin();
@@ -55,7 +58,11 @@ void findElementsIntersectedByPlane(const Plane & plane, const MeshBase & mesh, 
   }
 }
 
-void elementsIntersectedByPlane(const Point & p0, const Point & normal, const MeshBase & mesh, std::vector<const Elem *> & intersected_elems)
+void
+elementsIntersectedByPlane(const Point & p0,
+                           const Point & normal,
+                           const MeshBase & mesh,
+                           std::vector<const Elem *> & intersected_elems)
 {
   // Make sure our list is clear
   intersected_elems.clear();
@@ -67,7 +74,12 @@ void elementsIntersectedByPlane(const Point & p0, const Point & normal, const Me
   findElementsIntersectedByPlane(plane, mesh, intersected_elems);
 }
 
-void elementsIntersectedByPlane(const Point & p0, const Point & p1, const Point & p2, const MeshBase & mesh, std::vector<const Elem *> & intersected_elems)
+void
+elementsIntersectedByPlane(const Point & p0,
+                           const Point & p1,
+                           const Point & p2,
+                           const MeshBase & mesh,
+                           std::vector<const Elem *> & intersected_elems)
 {
   // Make sure our list is clear
   intersected_elems.clear();

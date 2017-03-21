@@ -15,8 +15,9 @@
 #include "NodalL2Error.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<NodalL2Error>()
+template <>
+InputParameters
+validParams<NodalL2Error>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
@@ -24,9 +25,8 @@ InputParameters validParams<NodalL2Error>()
   return params;
 }
 
-NodalL2Error::NodalL2Error(const InputParameters & parameters) :
-    NodalVariablePostprocessor(parameters),
-    _func(getFunction("function"))
+NodalL2Error::NodalL2Error(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters), _func(getFunction("function"))
 {
 }
 

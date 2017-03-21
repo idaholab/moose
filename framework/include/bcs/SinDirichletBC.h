@@ -20,13 +20,12 @@
 // Forward Declarations
 class SinDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<SinDirichletBC>();
 
 class SinDirichletBC : public NodalBC
 {
 public:
-
   SinDirichletBC(const InputParameters & parameters);
 
 protected:

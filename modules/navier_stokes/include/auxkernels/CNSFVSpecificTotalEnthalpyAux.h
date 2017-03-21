@@ -12,7 +12,7 @@
 
 class CNSFVSpecificTotalEnthalpyAux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVSpecificTotalEnthalpyAux>();
 
 /**
@@ -21,12 +21,10 @@ InputParameters validParams<CNSFVSpecificTotalEnthalpyAux>();
 class CNSFVSpecificTotalEnthalpyAux : public AuxKernel
 {
 public:
-
   CNSFVSpecificTotalEnthalpyAux(const InputParameters & parameters);
   virtual ~CNSFVSpecificTotalEnthalpyAux() {}
 
 protected:
-
   virtual Real computeValue();
 
   const MaterialProperty<Real> & _enth;

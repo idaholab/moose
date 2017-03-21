@@ -11,7 +11,7 @@
 
 class TensorMechanicsPlasticIsotropicSD;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticIsotropicSD>();
 
 /**
@@ -47,28 +47,28 @@ protected:
   Real _a;
 
   /// derivative of phi with respect to J2, phi is b*I1 + (J2^{3/2} - c*J3)^{1/3}
-  Real  dphi_dj2(const Real j2, const Real j3)const;
+  Real dphi_dj2(const Real j2, const Real j3) const;
 
   /// derivative of phi with respect to J3
-  Real  dphi_dj3(const Real j2, const Real j3)const;
+  Real dphi_dj3(const Real j2, const Real j3) const;
 
   /// derivative of dphi_dJ2 with respect to J2
-  Real  dfj2_dj2(const Real j2, const Real j3)const;
+  Real dfj2_dj2(const Real j2, const Real j3) const;
 
   /// derivative of dphi_dJ2 with respect to J3
-  Real  dfj2_dj3(const Real j2, const Real j3)const;
+  Real dfj2_dj3(const Real j2, const Real j3) const;
 
   /// derivative of dphi_dJ3 with respect to J2
-  Real  dfj3_dj2(const Real j2, const Real j3)const;
+  Real dfj3_dj2(const Real j2, const Real j3) const;
 
   /// derivative of dphi_dJ3 with respect to J3
-  Real  dfj3_dj3(const Real j2, const Real j3)const;
+  Real dfj3_dj3(const Real j2, const Real j3) const;
 
   /// derivative of the trace with respect to sigma rank two tensor
-  RankTwoTensor dI_sigma()const;
+  RankTwoTensor dI_sigma() const;
 
   /// derivative of the second invariant with respect to the stress deviatoric tensor
-  RankTwoTensor dj2_dSkl(const RankTwoTensor & stress)const;
+  RankTwoTensor dj2_dSkl(const RankTwoTensor & stress) const;
 
   /// Yield_function = a[b*I1 + (J2^{3/2} - c*J3)^{1/3}] - yield_strength
   Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;

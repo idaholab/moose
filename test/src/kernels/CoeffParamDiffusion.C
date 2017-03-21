@@ -14,26 +14,23 @@
 
 #include "CoeffParamDiffusion.h"
 
-
-template<>
-InputParameters validParams<CoeffParamDiffusion>()
+template <>
+InputParameters
+validParams<CoeffParamDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
-  params.addRequiredParam<Real>("D","The diffusivity coefficient.");
+  params.addRequiredParam<Real>("D", "The diffusivity coefficient.");
   return params;
 }
 
-
-CoeffParamDiffusion::CoeffParamDiffusion(const InputParameters & parameters) :
-    Diffusion(parameters),
+CoeffParamDiffusion::CoeffParamDiffusion(const InputParameters & parameters)
+  : Diffusion(parameters),
 
     _D(getParam<Real>("D"))
 {
 }
 
-CoeffParamDiffusion::~CoeffParamDiffusion()
-{
-}
+CoeffParamDiffusion::~CoeffParamDiffusion() {}
 
 Real
 CoeffParamDiffusion::computeQpResidual()

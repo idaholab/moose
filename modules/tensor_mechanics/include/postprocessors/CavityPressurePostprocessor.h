@@ -14,10 +14,9 @@ class CavityPressureUserObject;
 class CavityPressurePostprocessor : public GeneralPostprocessor
 {
 public:
-
   CavityPressurePostprocessor(const InputParameters & parameters);
 
-  virtual ~CavityPressurePostprocessor(){}
+  virtual ~CavityPressurePostprocessor() {}
 
   virtual void initialize() {}
 
@@ -26,14 +25,12 @@ public:
   virtual PostprocessorValue getValue();
 
 protected:
-
   const CavityPressureUserObject & _cpuo;
 
   const std::string _quantity;
-
 };
 
-template<>
+template <>
 InputParameters validParams<CavityPressurePostprocessor>();
 
 #endif

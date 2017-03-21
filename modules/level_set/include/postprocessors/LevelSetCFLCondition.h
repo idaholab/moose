@@ -15,7 +15,7 @@
 // Forward declarations
 class LevelSetCFLCondition;
 
-template<>
+template <>
 InputParameters validParams<LevelSetCFLCondition>();
 
 /**
@@ -32,7 +32,6 @@ public:
   virtual PostprocessorValue getValue() override;
 
 private:
-
   /// The max velocity on an element, this is done simply to avoid creating temporary calls to execute.
   Real _max_velocity;
 

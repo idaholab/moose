@@ -13,7 +13,7 @@
 
 class CNSFVMachIC;
 
-template<>
+template <>
 InputParameters validParams<CNSFVMachIC>();
 
 /**

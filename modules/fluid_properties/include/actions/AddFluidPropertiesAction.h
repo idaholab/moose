@@ -12,7 +12,7 @@
 
 class AddFluidPropertiesAction;
 
-template<>
+template <>
 InputParameters validParams<AddFluidPropertiesAction>();
 
 class AddFluidPropertiesAction : public AddUserObjectAction

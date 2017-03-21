@@ -5,27 +5,24 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RobinBC.h"
 
-template<>
-InputParameters validParams<RobinBC>()
+template <>
+InputParameters
+validParams<RobinBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
   return params;
 }
 
-RobinBC::RobinBC(const InputParameters & parameters) :
-  IntegratedBC(parameters),
-  _value(parameters.get<Real>("value"))
+RobinBC::RobinBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _value(parameters.get<Real>("value"))
 {
 }
 
 Real
 RobinBC::computeQpResidual()
 {
-  return (_grad_u[_qp])(1)*_test[_i][_qp] + _u[_qp] - _value;
+  return (_grad_u[_qp])(1) * _test[_i][_qp] + _u[_qp] - _value;
 }
-
-

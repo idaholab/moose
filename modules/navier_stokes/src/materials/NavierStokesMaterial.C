@@ -19,12 +19,14 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<NavierStokesMaterial>()
+template <>
+InputParameters
+validParams<NavierStokesMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addClassDescription("This is the base class all materials should use if you are trying to use the Navier-Stokes Kernels.");
+  params.addClassDescription("This is the base class all materials should use if you are trying to "
+                             "use the Navier-Stokes Kernels.");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D
@@ -37,15 +39,14 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addCoupledVar(NS::momentum_y, "y-momentum"); // only required in >= 2D
   params.addCoupledVar(NS::momentum_z, "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar(NS::total_energy, "energy");
-  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "The name of the user object for fluid properties");
 
   return params;
 }
 
-
-
-NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
-    Material(parameters),
+NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _mesh_dimension(_mesh.dimension()),
     _grad_u(coupledGradient(NS::velocity_x)),
     _grad_v(_mesh_dimension >= 2 ? coupledGradient(NS::velocity_y) : _grad_zero),
@@ -59,13 +60,13 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     _dynamic_viscosity(declareProperty<Real>("dynamic_viscosity")),
 
     // The momentum components of the inviscid flux Jacobians.
-    _calA(declareProperty<std::vector<RealTensorValue> >("calA")),
+    _calA(declareProperty<std::vector<RealTensorValue>>("calA")),
 
     // "Velocity column" matrices
-    _calC(declareProperty<std::vector<RealTensorValue> >("calC")),
+    _calC(declareProperty<std::vector<RealTensorValue>>("calC")),
 
     // Energy equation inviscid flux matrices, "cal E_{kl}" in the notes.
-    _calE(declareProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
+    _calE(declareProperty<std::vector<std::vector<RealTensorValue>>>("calE")),
     _vel_grads({&_grad_u, &_grad_v, &_grad_w}),
 
     // Coupled solution values needed for computing SUPG stabilization terms
@@ -102,7 +103,7 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     _tauc(declareProperty<Real>("tauc")),
     _taum(declareProperty<Real>("taum")),
     _taue(declareProperty<Real>("taue")),
-    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals")),
+    _strong_residuals(declareProperty<std::vector<Real>>("strong_residuals")),
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }
@@ -116,8 +117,8 @@ NavierStokesMaterial::computeProperties()
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
   {
     /******* Viscous Stress Tensor *******/
-    //Technically... this _is_ the transpose (since we are loading these by rows)
-    //But it doesn't matter....
+    // Technically... this _is_ the transpose (since we are loading these by rows)
+    // But it doesn't matter....
     RealTensorValue grad_outer_u(_grad_u[qp], _grad_v[qp], _grad_w[qp]);
 
     grad_outer_u += grad_outer_u.transpose();
@@ -126,7 +127,7 @@ NavierStokesMaterial::computeProperties()
     for (unsigned int i = 0; i < 3; ++i)
       div_vel += (*_vel_grads[i])[qp](i);
 
-    //Add diagonal terms
+    // Add diagonal terms
     for (unsigned int i = 0; i < 3; ++i)
       grad_outer_u(i, i) -= 2.0 / 3.0 * div_vel;
 
@@ -134,7 +135,8 @@ NavierStokesMaterial::computeProperties()
 
     _viscous_stress_tensor[qp] = grad_outer_u;
 
-    // Tabulated values of thermal conductivity vs. Temperature for air (k increases slightly with T):
+    // Tabulated values of thermal conductivity vs. Temperature for air (k increases slightly with
+    // T):
     // T (K)    k (W/m-K)
     // 273      0.0243
     // 373      0.0314
@@ -154,13 +156,13 @@ NavierStokesMaterial::computeProperties()
 
     // .) Compute SUPG element length scale.
     computeHSUPG(qp);
-    //Moose::out << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
+    // Moose::out << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
 
     // .) Compute SUPG parameter values.  (Must call this after computeHSUPG())
     computeTau(qp);
-    //Moose::out << "_tauc[" << qp << "]=" << _tauc[qp] << ", ";
-    //Moose::out << "_taum[" << qp << "]=" << _taum[qp] << ", ";
-    //Moose::out << "_taue[" << qp << "]=" << _taue[qp] << std::endl;
+    // Moose::out << "_tauc[" << qp << "]=" << _tauc[qp] << ", ";
+    // Moose::out << "_taum[" << qp << "]=" << _taum[qp] << ", ";
+    // Moose::out << "_taue[" << qp << "]=" << _taue[qp] << std::endl;
 
     // .) Compute strong residual values.
     computeStrongResiduals(qp);
@@ -259,9 +261,8 @@ NavierStokesMaterial::computeHSUPG(unsigned int qp)
 void
 NavierStokesMaterial::computeTau(unsigned int qp)
 {
-  Real velmag = std::sqrt(_u_vel[qp] * _u_vel[qp] +
-                          _v_vel[qp] * _v_vel[qp] +
-                          _w_vel[qp] * _w_vel[qp]);
+  Real velmag =
+      std::sqrt(_u_vel[qp] * _u_vel[qp] + _v_vel[qp] * _v_vel[qp] + _w_vel[qp] * _w_vel[qp]);
 
   // Moose::out << "velmag=" << velmag << std::endl;
 
@@ -342,12 +343,13 @@ NavierStokesMaterial::computeTau(unsigned int qp)
   }
 
   // Debugging
-  //Moose::out << "_tauc[" << qp << "]=" << _tauc[qp] << std::endl;
-  //Moose::out << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
-  //Moose::out << "velmag[" << qp << "]=" << velmag << std::endl;
+  // Moose::out << "_tauc[" << qp << "]=" << _tauc[qp] << std::endl;
+  // Moose::out << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
+  // Moose::out << "velmag[" << qp << "]=" << velmag << std::endl;
 }
 
-void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
+void
+NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 {
   // Create storage at this qp for the strong residuals of all the equations.
   // In 2D, the value for the z-velocity equation will just be zero.
@@ -357,7 +359,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
   // the parent pointer of the SubProblem.  Don't need this if we are not
   // approximating time derivatives ourselves.
   // Real dt = _subproblem.parent()->dt();
-  //Moose::out << "dt=" << dt << std::endl;
+  // Moose::out << "dt=" << dt << std::endl;
 
   // Vector object for the velocity
   RealVectorValue vel(_u_vel[qp], _v_vel[qp], _w_vel[qp]);
@@ -370,12 +372,12 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
   Real velmag2 = vel.norm_sq();
 
   // Debugging: How large are the time derivative parts of the strong residuals?
-//  Moose::out << "drho_dt=" << _drho_dt
-//            << ", drhou_dt=" << _drhou_dt
-//            << ", drhov_dt=" << _drhov_dt
-//            << ", drhow_dt=" << _drhow_dt
-//            << ", drhoE_dt=" << _drhoE_dt
-//            << std::endl;
+  //  Moose::out << "drho_dt=" << _drho_dt
+  //            << ", drhou_dt=" << _drhou_dt
+  //            << ", drhov_dt=" << _drhov_dt
+  //            << ", drhow_dt=" << _drhow_dt
+  //            << ", drhoE_dt=" << _drhoE_dt
+  //            << std::endl;
 
   // Momentum divergence
   Real divU = _grad_rho_u[qp](0) + _grad_rho_v[qp](1) + _grad_rho_w[qp](2);
@@ -411,7 +413,8 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
   // 0.) _calA_0 = diag( (gam - 1)/2*|u|^2 ) - S
   _calA[qp][0].zero(); // zero this calA entry
-  _calA[qp][0](0, 0) = _calA[qp][0](1, 1) = _calA[qp][0](2, 2) = 0.5 * (_fp.gamma() - 1.0) * velmag2; // set diag. entries
+  _calA[qp][0](0, 0) = _calA[qp][0](1, 1) = _calA[qp][0](2, 2) =
+      0.5 * (_fp.gamma() - 1.0) * velmag2; // set diag. entries
   _calA[qp][0] -= calS;
 
   for (unsigned int m = 1; m <= 3; ++m)
@@ -421,7 +424,8 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // For m=1,2,3, calA_m = C_m + C_m^T + diag( (1.-gam)*u_m )
     _calA[qp][m].zero(); // zero this calA entry
-    _calA[qp][m](0, 0) = _calA[qp][m](1, 1) = _calA[qp][m](2, 2) = (1. - _fp.gamma()) * vel(m_local); // set diag. entries
+    _calA[qp][m](0, 0) = _calA[qp][m](1, 1) = _calA[qp][m](2, 2) =
+        (1. - _fp.gamma()) * vel(m_local);          // set diag. entries
     _calA[qp][m] += _calC[qp][m_local];             // Note: use m_local for indexing into _calC!
     _calA[qp][m] += _calC[qp][m_local].transpose(); // Note: use m_local for indexing into _calC!
   }
@@ -454,7 +458,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
       // E_{km} (momentum gradient terms)
       _calE[qp][k][m].zero();
-      _calE[qp][k][m](k, m_local) = _enthalpy[qp];          // H * D_{km}
+      _calE[qp][k][m](k, m_local) = _enthalpy[qp];                 // H * D_{km}
       _calE[qp][k][m] += (1. - _fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
 
@@ -466,24 +470,19 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
   // Compute the sum over ell of: A_ell grad(U_ell), store in DenseVector or Gradient object?
   // The gradient object might be more useful, since we are multiplying by VariableGradient
   // (which is a MooseArray of RealGradients) objects?
-  RealVectorValue mom_resid =
-    _calA[qp][0] * _grad_rho[qp] +
-    _calA[qp][1] * _grad_rho_u[qp] +
-    _calA[qp][2] * _grad_rho_v[qp] +
-    _calA[qp][3] * _grad_rho_w[qp] +
-    _calA[qp][4] * _grad_rho_E[qp];
+  RealVectorValue mom_resid = _calA[qp][0] * _grad_rho[qp] + _calA[qp][1] * _grad_rho_u[qp] +
+                              _calA[qp][2] * _grad_rho_v[qp] + _calA[qp][3] * _grad_rho_w[qp] +
+                              _calA[qp][4] * _grad_rho_E[qp];
 
   // No matrices/vectors for the energy residual strong form... just write it out like
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
   // section of the notes.
   Real energy_resid =
-    (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * (vel * _grad_rho[qp]) +
-    _enthalpy[qp] * divU +
-    (1. - _fp.gamma()) * (vel(0) * (vel * _grad_rho_u[qp]) +
-                          vel(1) * (vel * _grad_rho_v[qp]) +
-                          vel(2) * (vel * _grad_rho_w[qp])) +
-    _fp.gamma() * (vel * _grad_rho_E[qp])
-    ;
+      (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * (vel * _grad_rho[qp]) +
+      _enthalpy[qp] * divU +
+      (1. - _fp.gamma()) * (vel(0) * (vel * _grad_rho_u[qp]) + vel(1) * (vel * _grad_rho_v[qp]) +
+                            vel(2) * (vel * _grad_rho_w[qp])) +
+      _fp.gamma() * (vel * _grad_rho_E[qp]);
 
   // Now for the actual residual values...
 

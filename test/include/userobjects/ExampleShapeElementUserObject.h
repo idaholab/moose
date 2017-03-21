@@ -17,10 +17,10 @@
 
 #include "ShapeElementUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleShapeElementUserObject;
 
-template<>
+template <>
 InputParameters validParams<ExampleShapeElementUserObject>();
 
 /**
@@ -31,8 +31,7 @@ InputParameters validParams<ExampleShapeElementUserObject>();
  * These Jacobian terms can be utilized by a Kernel that uses the integral in the
  * calculation of its residual.
  */
-class ExampleShapeElementUserObject :
-  public ShapeElementUserObject
+class ExampleShapeElementUserObject : public ShapeElementUserObject
 {
 public:
   ExampleShapeElementUserObject(const InputParameters & parameters);

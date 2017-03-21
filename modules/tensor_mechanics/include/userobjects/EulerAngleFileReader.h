@@ -10,10 +10,10 @@
 #include "EulerAngleProvider.h"
 #include <vector>
 
-//Forward declaration
+// Forward declaration
 class EulerAngleFileReader;
 
-template<>
+template <>
 InputParameters validParams<EulerAngleFileReader>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   std::vector<EulerAngles> _angles;
 };
 
-#endif //EULERANGLEFILEREADER_H
+#endif // EULERANGLEFILEREADER_H

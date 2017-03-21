@@ -11,13 +11,12 @@
 
 class NewmarkVelAux;
 
-template<>
+template <>
 InputParameters validParams<NewmarkVelAux>();
 
 class NewmarkVelAux : public AuxKernel
 {
 public:
-
   /**
    * Calcualtes velocity using Newmark time integration scheme
    */
@@ -33,4 +32,4 @@ protected:
   Real _gamma;
 };
 
-#endif //NEWMARKVELAUX_H
+#endif // NEWMARKVELAUX_H

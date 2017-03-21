@@ -12,14 +12,12 @@ validParams<NSSUPGMass>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NSSUPGBase>();
-  params.addClassDescription("Compute residual and Jacobian terms form the SUPG terms in the mass equation.");
+  params.addClassDescription(
+      "Compute residual and Jacobian terms form the SUPG terms in the mass equation.");
   return params;
 }
 
-NSSUPGMass::NSSUPGMass(const InputParameters & parameters)
-  : NSSUPGBase(parameters)
-{
-}
+NSSUPGMass::NSSUPGMass(const InputParameters & parameters) : NSSUPGBase(parameters) {}
 
 Real
 NSSUPGMass::computeQpResidual()
@@ -30,9 +28,8 @@ NSSUPGMass::computeQpResidual()
   // Note that the momentum equation strong residuals are stored
   // in entries 1,2,3 of the "_strong_residuals" vector, regardless
   // of what dimension we're solving in.
-  RealVectorValue Ru(_strong_residuals[_qp][1],
-                     _strong_residuals[_qp][2],
-                     _strong_residuals[_qp][3]);
+  RealVectorValue Ru(
+      _strong_residuals[_qp][1], _strong_residuals[_qp][2], _strong_residuals[_qp][3]);
 
   // Separate variable just for printing purposes...
   Real result = _taum[_qp] * (Ru * _grad_test[_i][_qp]);
@@ -80,7 +77,8 @@ NSSUPGMass::computeJacobianHelper(unsigned var)
     }
 
     // Store result so we can print it before returning
-    Real result = _taum[_qp] * (time_part + _grad_test[_i][_qp] * (_calA[_qp][m] * _grad_phi[_j][_qp]));
+    Real result =
+        _taum[_qp] * (time_part + _grad_test[_i][_qp] * (_calA[_qp][m] * _grad_phi[_j][_qp]));
 
     return result;
   }

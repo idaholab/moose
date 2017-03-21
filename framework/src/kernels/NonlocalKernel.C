@@ -24,18 +24,19 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<NonlocalKernel>()
+template <>
+InputParameters
+validParams<NonlocalKernel>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-NonlocalKernel::NonlocalKernel(const InputParameters & parameters) :
-    Kernel(parameters)
+NonlocalKernel::NonlocalKernel(const InputParameters & parameters) : Kernel(parameters)
 {
   _mesh.errorIfDistributedMesh("NonlocalKernel");
-  mooseWarning("NonlocalKernel is a computationally expensive experimental capability used only for integral terms.");
+  mooseWarning("NonlocalKernel is a computationally expensive experimental capability used only "
+               "for integral terms.");
 }
 
 void
@@ -46,13 +47,14 @@ NonlocalKernel::computeJacobian()
   _local_ke.zero();
 
   precalculateJacobian();
-  for (_j = 0; _j < _phi.size(); _j++) // looping order for _i & _j are reversed for performance improvement
+  for (_j = 0; _j < _phi.size();
+       _j++) // looping order for _i & _j are reversed for performance improvement
   {
     getUserObjectJacobian(_var.number(), _var.dofIndices()[_j]);
     for (_i = 0; _i < _test.size(); _i++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
-    }
+  }
 
   ke += _local_ke;
 
@@ -60,8 +62,8 @@ NonlocalKernel::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
@@ -80,13 +82,14 @@ NonlocalKernel::computeOffDiagJacobian(unsigned int jvar)
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
     precalculateOffDiagJacobian(jvar);
-    for (_j = 0; _j < _phi.size(); _j++) // looping order for _i & _j are reversed for performance improvement
+    for (_j = 0; _j < _phi.size();
+         _j++) // looping order for _i & _j are reversed for performance improvement
     {
       getUserObjectJacobian(jvar, jv.dofIndices()[_j]);
       for (_i = 0; _i < _test.size(); _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-      }
+    }
   }
 }
 
@@ -101,7 +104,8 @@ NonlocalKernel::computeNonlocalJacobian()
   unsigned int n_total_dofs = var_alldofindices.size();
 
   precalculateJacobian();
-  for (_k = 0; _k < n_total_dofs; _k++) // looping order for _i & _k are reversed for performance improvement
+  for (_k = 0; _k < n_total_dofs;
+       _k++) // looping order for _i & _k are reversed for performance improvement
   {
     // eliminating the local components
     auto it = local_dofindices.find(var_alldofindices[_k]);
@@ -135,7 +139,8 @@ NonlocalKernel::computeNonlocalOffDiagJacobian(unsigned int jvar)
     unsigned int n_total_dofs = jv_alldofindices.size();
 
     precalculateOffDiagJacobian(jvar);
-    for (_k = 0; _k < n_total_dofs; _k++) // looping order for _i & _k are reversed for performance improvement
+    for (_k = 0; _k < n_total_dofs;
+         _k++) // looping order for _i & _k are reversed for performance improvement
     {
       // eliminating the local components
       auto it = local_dofindices.find(jv_alldofindices[_k]);
@@ -148,7 +153,8 @@ NonlocalKernel::computeNonlocalOffDiagJacobian(unsigned int jvar)
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-            keg(_i, _k) += _JxW[_qp] * _coord[_qp] * computeQpNonlocalOffDiagJacobian(jvar, jv_alldofindices[_k]);
+            keg(_i, _k) += _JxW[_qp] * _coord[_qp] *
+                           computeQpNonlocalOffDiagJacobian(jvar, jv_alldofindices[_k]);
       }
     }
   }

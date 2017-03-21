@@ -14,7 +14,7 @@
 // Forward declerations
 class LevelSetVolume;
 
-template<>
+template <>
 InputParameters validParams<LevelSetVolume>();
 
 /**
@@ -23,7 +23,6 @@ InputParameters validParams<LevelSetVolume>();
 class LevelSetVolume : public ElementVariablePostprocessor
 {
 public:
-
   LevelSetVolume(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -31,10 +30,9 @@ public:
   virtual void execute() override;
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
-  virtual void computeQpValue() override {};
+  virtual void computeQpValue() override{};
 
 protected:
-
   /// The accumulated volume to return as a PostprocessorValue
   Real _volume;
 
@@ -45,4 +43,4 @@ protected:
   const bool _inside;
 };
 
-#endif //LEVELSETVOLUME_H
+#endif // LEVELSETVOLUME_H

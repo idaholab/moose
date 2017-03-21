@@ -83,4 +83,4 @@ protected:
   std::vector<std::string> _generate_output;
 };
 
-#endif //TENSORMECHANICSACTION_H
+#endif // TENSORMECHANICSACTION_H

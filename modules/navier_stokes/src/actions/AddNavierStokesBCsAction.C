@@ -13,22 +13,23 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<AddNavierStokesBCsAction>()
+template <>
+InputParameters
+validParams<AddNavierStokesBCsAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  params.addClassDescription("This class allows us to have a section of the input file like the following which adds BC objects for each requested boundary condition.");
+  params.addClassDescription("This class allows us to have a section of the input file like the "
+                             "following which adds BC objects for each requested boundary "
+                             "condition.");
   return params;
 }
 
-AddNavierStokesBCsAction::AddNavierStokesBCsAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+AddNavierStokesBCsAction::AddNavierStokesBCsAction(InputParameters parameters)
+  : MooseObjectAction(parameters)
 {
 }
 
-AddNavierStokesBCsAction::~AddNavierStokesBCsAction()
-{
-}
+AddNavierStokesBCsAction::~AddNavierStokesBCsAction() {}
 
 void
 AddNavierStokesBCsAction::act()
@@ -59,8 +60,6 @@ AddNavierStokesBCsAction::act()
   }
 }
 
-
-
 void
 AddNavierStokesBCsAction::addNSMassWeakStagnationBC()
 {
@@ -78,8 +77,6 @@ AddNavierStokesBCsAction::addNSMassWeakStagnationBC()
   _problem->addBoundaryCondition(kernel_type, "weak_stagnation_mass_inflow", params);
 }
 
-
-
 void
 AddNavierStokesBCsAction::addNSEnergyWeakStagnationBC()
 {
@@ -91,14 +88,10 @@ AddNavierStokesBCsAction::addNSEnergyWeakStagnationBC()
   _problem->addBoundaryCondition(kernel_type, "weak_stagnation_energy_inflow", params);
 }
 
-
-
 void
 AddNavierStokesBCsAction::addNSMomentumWeakStagnationBC(unsigned int component)
 {
-  const static std::string momentums[3] = {NS::momentum_x,
-                                           NS::momentum_y,
-                                           NS::momentum_z};
+  const static std::string momentums[3] = {NS::momentum_x, NS::momentum_y, NS::momentum_z};
 
   // Convective part
   {
@@ -111,7 +104,10 @@ AddNavierStokesBCsAction::addNSMomentumWeakStagnationBC(unsigned int component)
     // Momentum Kernels also need the component.
     params.set<unsigned int>("component") = component;
 
-    _problem->addBoundaryCondition(kernel_type, std::string("weak_stagnation_") + momentums[component] + std::string("_convective_inflow"), params);
+    _problem->addBoundaryCondition(kernel_type,
+                                   std::string("weak_stagnation_") + momentums[component] +
+                                       std::string("_convective_inflow"),
+                                   params);
   }
 
   // Pressure part
@@ -125,18 +121,17 @@ AddNavierStokesBCsAction::addNSMomentumWeakStagnationBC(unsigned int component)
     // Momentum Kernels also need the component.
     params.set<unsigned int>("component") = component;
 
-    _problem->addBoundaryCondition(kernel_type, std::string("weak_stagnation_") + momentums[component] + std::string("_pressure_inflow"), params);
+    _problem->addBoundaryCondition(kernel_type,
+                                   std::string("weak_stagnation_") + momentums[component] +
+                                       std::string("_pressure_inflow"),
+                                   params);
   }
 }
-
-
 
 void
 AddNavierStokesBCsAction::addNoPenetrationBC(unsigned int component)
 {
-  const static std::string momentums[3] = {NS::momentum_x,
-                                           NS::momentum_y,
-                                           NS::momentum_z};
+  const static std::string momentums[3] = {NS::momentum_x, NS::momentum_y, NS::momentum_z};
   const std::string kernel_type = "NSPressureNeumannBC";
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = momentums[component];
@@ -147,10 +142,9 @@ AddNavierStokesBCsAction::addNoPenetrationBC(unsigned int component)
   params.set<unsigned int>("component") = component;
   params.set<CoupledName>(NS::pressure) = {NS::pressure};
 
-  _problem->addBoundaryCondition(kernel_type, momentums[component] + std::string("_no_penetration"), params);
+  _problem->addBoundaryCondition(
+      kernel_type, momentums[component] + std::string("_no_penetration"), params);
 }
-
-
 
 void
 AddNavierStokesBCsAction::addNSMassUnspecifiedNormalFlowBC()
@@ -163,14 +157,10 @@ AddNavierStokesBCsAction::addNSMassUnspecifiedNormalFlowBC()
   _problem->addBoundaryCondition(kernel_type, "mass_outflow", params);
 }
 
-
-
 void
 AddNavierStokesBCsAction::addNSMomentumInviscidSpecifiedPressureBC(unsigned int component)
 {
-  const static std::string momentums[3] = {NS::momentum_x,
-                                           NS::momentum_y,
-                                           NS::momentum_z};
+  const static std::string momentums[3] = {NS::momentum_x, NS::momentum_y, NS::momentum_z};
   const std::string kernel_type = "NSMomentumInviscidSpecifiedPressureBC";
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = momentums[component];
@@ -180,10 +170,9 @@ AddNavierStokesBCsAction::addNSMomentumInviscidSpecifiedPressureBC(unsigned int 
   // These BCs also need the component.
   params.set<unsigned int>("component") = component;
 
-  _problem->addBoundaryCondition(kernel_type, momentums[component] + std::string("_specified_pressure_outflow"), params);
+  _problem->addBoundaryCondition(
+      kernel_type, momentums[component] + std::string("_specified_pressure_outflow"), params);
 }
-
-
 
 void
 AddNavierStokesBCsAction::addNSEnergyInviscidSpecifiedPressureBC()
@@ -198,10 +187,8 @@ AddNavierStokesBCsAction::addNSEnergyInviscidSpecifiedPressureBC()
   _problem->addBoundaryCondition(kernel_type, "rhoE_specified_pressure_outflow", params);
 }
 
-
-
 void
-AddNavierStokesBCsAction::setCommonParams (InputParameters & params)
+AddNavierStokesBCsAction::setCommonParams(InputParameters & params)
 {
   // coupled variables
   params.set<CoupledName>(NS::density) = {NS::density};
@@ -212,10 +199,8 @@ AddNavierStokesBCsAction::setCommonParams (InputParameters & params)
   coupleMomentums(params);
 }
 
-
-
 void
-AddNavierStokesBCsAction::coupleVelocities (InputParameters & params)
+AddNavierStokesBCsAction::coupleVelocities(InputParameters & params)
 {
   params.set<CoupledName>(NS::velocity_x) = {NS::velocity_x};
 
@@ -226,10 +211,8 @@ AddNavierStokesBCsAction::coupleVelocities (InputParameters & params)
     params.set<CoupledName>(NS::velocity_z) = {NS::velocity_z};
 }
 
-
-
 void
-AddNavierStokesBCsAction::coupleMomentums (InputParameters & params)
+AddNavierStokesBCsAction::coupleMomentums(InputParameters & params)
 {
   params.set<CoupledName>(NS::momentum_x) = {NS::momentum_x};
 

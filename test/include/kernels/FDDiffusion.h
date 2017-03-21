@@ -19,9 +19,8 @@
 
 class FDDiffusion;
 
-template<>
+template <>
 InputParameters validParams<FDDiffusion>();
-
 
 class FDDiffusion : public FDKernel
 {
@@ -32,6 +31,5 @@ public:
 protected:
   virtual Real computeQpResidual();
 };
-
 
 #endif /* FDDIFFUSION_H */

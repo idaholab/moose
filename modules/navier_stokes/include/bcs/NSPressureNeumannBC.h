@@ -11,11 +11,10 @@
 #include "NSIntegratedBC.h"
 #include "NSPressureDerivs.h"
 
-
 // Forward Declarations
 class NSPressureNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<NSPressureNeumannBC>();
 
 /**
@@ -32,13 +31,11 @@ InputParameters validParams<NSPressureNeumannBC>();
 class NSPressureNeumannBC : public NSIntegratedBC
 {
 public:
-
   NSPressureNeumannBC(const InputParameters & parameters);
 
-  virtual ~NSPressureNeumannBC(){}
+  virtual ~NSPressureNeumannBC() {}
 
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
@@ -63,4 +60,4 @@ private:
   Real computeJacobianHelper(unsigned m);
 };
 
-#endif //PRESSURENEUMANNBC_H
+#endif // PRESSURENEUMANNBC_H

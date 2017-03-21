@@ -9,10 +9,10 @@
 
 #include "GBEvolutionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class GBEvolution;
 
-template<>
+template <>
 InputParameters validParams<GBEvolution>();
 
 /**
@@ -29,4 +29,4 @@ protected:
   Real _GBEnergy;
 };
 
-#endif //GBEVOLUTION_H
+#endif // GBEVOLUTION_H

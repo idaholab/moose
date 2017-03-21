@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSSplitMomentum;
 
-template<>
+template <>
 InputParameters validParams<INSSplitMomentum>();
 
 /**
@@ -30,7 +30,7 @@ class INSSplitMomentum : public Kernel
 public:
   INSSplitMomentum(const InputParameters & parameters);
 
-  virtual ~INSSplitMomentum(){}
+  virtual ~INSSplitMomentum() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -69,6 +69,5 @@ protected:
   // Parameters
   unsigned _component;
 };
-
 
 #endif // INSSPLITMOMENTUM_H

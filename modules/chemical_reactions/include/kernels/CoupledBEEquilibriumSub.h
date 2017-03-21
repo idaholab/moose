@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledBEEquilibriumSub;
 
-template<>
+template <>
 InputParameters validParams<CoupledBEEquilibriumSub>();
 
 /**
@@ -58,4 +58,4 @@ private:
   const VariableValue & _u_old;
 };
 
-#endif //COUPLEDBEEQUILIBRIUMSUB_H
+#endif // COUPLEDBEEQUILIBRIUMSUB_H

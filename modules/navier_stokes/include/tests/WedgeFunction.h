@@ -13,7 +13,7 @@
 
 class WedgeFunction;
 
-template<>
+template <>
 InputParameters validParams<WedgeFunction>();
 
 /**
@@ -26,8 +26,7 @@ InputParameters validParams<WedgeFunction>();
  * solution values to the actual velocities and pressure used in the
  * problem.
  */
-class WedgeFunction : public Function,
-                      protected FunctionInterface
+class WedgeFunction : public Function, protected FunctionInterface
 {
 public:
   WedgeFunction(const InputParameters & parameters);

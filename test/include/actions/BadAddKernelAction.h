@@ -19,7 +19,7 @@
 
 class BadAddKernelAction;
 
-template<>
+template <>
 InputParameters validParams<BadAddKernelAction>();
 
 /**

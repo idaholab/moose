@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSMultiPhaseConcentration;
 
-template<>
+template <>
 InputParameters validParams<KKSMultiPhaseConcentration>();
 
 /**
@@ -58,7 +58,7 @@ private:
   std::vector<unsigned int> _eta_vars;
 
   /// Derivative of the switching function \f$ \frac d{d\eta} h(\eta) \f$
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_dhjdetai;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dhjdetai;
 };
 
-#endif //KKSMULTIPHASECONCENTRATION_H
+#endif // KKSMULTIPHASECONCENTRATION_H

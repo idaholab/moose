@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMomentumLaplaceForm;
 
-template<>
+template <>
 InputParameters validParams<INSMomentumLaplaceForm>();
 
 /**
@@ -24,13 +24,12 @@ class INSMomentumLaplaceForm : public INSMomentumBase
 public:
   INSMomentumLaplaceForm(const InputParameters & parameters);
 
-  virtual ~INSMomentumLaplaceForm(){}
+  virtual ~INSMomentumLaplaceForm() {}
 
 protected:
   virtual Real computeQpResidualViscousPart() override;
   virtual Real computeQpJacobianViscousPart() override;
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) override;
 };
-
 
 #endif

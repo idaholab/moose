@@ -25,12 +25,12 @@ class MooseMesh;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 class MeshFunction;
 }
 
-
-template<>
+template <>
 InputParameters validParams<OversampleOutput>();
 
 /**
@@ -48,11 +48,9 @@ InputParameters validParams<OversampleOutput>();
  *
  * @see Exodus
  */
-class OversampleOutput :
-  public FileOutput
+class OversampleOutput : public FileOutput
 {
 public:
-
   /**
    * Class constructor
    *
@@ -76,7 +74,6 @@ public:
   virtual void meshChanged() override;
 
 protected:
-
   /**
    * Performs the update of the solution vector for the oversample/re-positioned mesh
    */
@@ -97,7 +94,6 @@ protected:
   bool _change_position;
 
 private:
-
   /**
    * Setups the output object to produce re-positioned and/or oversampled results.
    * This is accomplished by creating a new, finer mesh that the existing solution is projected
@@ -130,10 +126,12 @@ private:
   std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
 
   /// Oversample solution vector
-  /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the current system
-   * and variable before the MeshFunction is applied. This allows for the same MeshFunction object to be
+  /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the
+   * current system
+   * and variable before the MeshFunction is applied. This allows for the same MeshFunction object
+   * to be
    * re-used, unless the mesh has changed due to adaptivity */
-  std::unique_ptr<NumericVector<Number> > _serialized_solution;
+  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 };
 
 #endif // OVERSAMPLEOUTPUT_H

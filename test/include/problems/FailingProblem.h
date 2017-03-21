@@ -19,7 +19,7 @@
 
 class FailingProblem;
 
-template<>
+template <>
 InputParameters validParams<FailingProblem>();
 
 /**

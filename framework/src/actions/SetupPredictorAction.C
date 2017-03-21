@@ -19,16 +19,17 @@
 #include "Factory.h"
 #include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<SetupPredictorAction>()
+template <>
+InputParameters
+validParams<SetupPredictorAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupPredictorAction::SetupPredictorAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+SetupPredictorAction::SetupPredictorAction(InputParameters parameters)
+  : MooseObjectAction(parameters)
 {
 }
 
@@ -43,7 +44,8 @@ SetupPredictorAction::act()
 
     _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
-    std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
+    std::shared_ptr<Predictor> predictor =
+        _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
     _problem->getNonlinearSystemBase().setPredictor(predictor);
   }
 }

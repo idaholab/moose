@@ -12,21 +12,26 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
-template<>
-InputParameters validParams<NSInitialCondition>()
+template <>
+InputParameters
+validParams<NSInitialCondition>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addClassDescription("NSInitialCondition sets intial constant values for all variables.");
-  params.addRequiredParam<Real>("initial_pressure", "The initial pressure, assumed constant everywhere");
-  params.addRequiredParam<Real>("initial_temperature", "The initial temperature, assumed constant everywhere");
-  params.addRequiredParam<RealVectorValue>("initial_velocity", "The initial velocity, assumed constant everywhere");
-  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
+  params.addRequiredParam<Real>("initial_pressure",
+                                "The initial pressure, assumed constant everywhere");
+  params.addRequiredParam<Real>("initial_temperature",
+                                "The initial temperature, assumed constant everywhere");
+  params.addRequiredParam<RealVectorValue>("initial_velocity",
+                                           "The initial velocity, assumed constant everywhere");
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "The name of the user object for fluid properties");
 
   return params;
 }
 
-NSInitialCondition::NSInitialCondition(const InputParameters & parameters) :
-    InitialCondition(parameters),
+NSInitialCondition::NSInitialCondition(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
     _initial_velocity(getParam<RealVectorValue>("initial_velocity")),

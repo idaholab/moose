@@ -9,18 +9,22 @@
 #include "MooseMesh.h"
 
 template <>
-InputParameters validParams<InternalVolume>()
+InputParameters
+validParams<InternalVolume>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
-  params.addRangeCheckedParam<unsigned int>("component", 0, "component<3", "The component to use in the integration");
-  params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the internal volume calculation");
-  params.addParam<Real>("addition", 0, "An additional volume to be included in the internal volume calculation");
+  params.addRangeCheckedParam<unsigned int>(
+      "component", 0, "component<3", "The component to use in the integration");
+  params.addParam<Real>(
+      "scale_factor", 1, "A scale factor to be applied to the internal volume calculation");
+  params.addParam<Real>(
+      "addition", 0, "An additional volume to be included in the internal volume calculation");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-InternalVolume::InternalVolume(const InputParameters & parameters) :
-    SideIntegralPostprocessor(parameters),
+InternalVolume::InternalVolume(const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters),
     _component(getParam<unsigned int>("component")),
     _scale(getParam<Real>("scale_factor")),
     _addition(getParam<Real>("addition"))
@@ -61,17 +65,17 @@ InternalVolume::initialSetup()
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
   std::set<SubdomainID>::const_iterator iter = subdomains.begin();
   const std::set<SubdomainID>::const_iterator iter_end = subdomains.end();
-  for ( ; iter != iter_end; ++iter)
+  for (; iter != iter_end; ++iter)
   {
     const std::set<BoundaryID> & boundaries = _mesh.getSubdomainBoundaryIds(*iter);
     std::set<BoundaryID>::const_iterator bnd = boundaries.begin();
     const std::set<BoundaryID>::const_iterator bnd_end = boundaries.end();
-    for ( ; bnd != bnd_end; ++bnd )
+    for (; bnd != bnd_end; ++bnd)
     {
       const std::set<BoundaryID> & b = boundaryIDs();
       std::set<BoundaryID>::const_iterator bit = b.begin();
       const std::set<BoundaryID>::const_iterator bit_end = b.end();
-      for ( ; bit != bit_end; ++bit )
+      for (; bit != bit_end; ++bit)
         if (*bit == *bnd)
         {
           Moose::CoordinateSystemType coord_sys = _fe_problem.getCoordSystem(*iter);
@@ -79,7 +83,8 @@ InternalVolume::initialSetup()
             mooseError("With spherical coordinates, the component must be 0 in InternalVolume.");
 
           if (_component > 1 && coord_sys == Moose::COORD_RZ)
-            mooseError("With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.");
+            mooseError(
+                "With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.");
         }
     }
   }

@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityBase>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 };
 
-#endif //POROUSFLOWPOROSITYBASE_H
+#endif // POROUSFLOWPOROSITYBASE_H

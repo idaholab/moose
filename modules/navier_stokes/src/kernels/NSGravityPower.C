@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "NSGravityPower.h"
 
-template<>
-InputParameters validParams<NSGravityPower>()
+template <>
+InputParameters
+validParams<NSGravityPower>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("This class computes the momentum contributed by gravity.");
@@ -16,8 +17,8 @@ InputParameters validParams<NSGravityPower>()
   return params;
 }
 
-NSGravityPower::NSGravityPower(const InputParameters & parameters) :
-    Kernel(parameters),
+NSGravityPower::NSGravityPower(const InputParameters & parameters)
+  : Kernel(parameters),
     _momentum_var(coupled("momentum")),
     _momentum(coupledValue("momentum")),
     _acceleration(getParam<Real>("acceleration"))

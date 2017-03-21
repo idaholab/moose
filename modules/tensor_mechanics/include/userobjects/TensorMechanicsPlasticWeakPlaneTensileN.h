@@ -9,11 +9,9 @@
 
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 
-
 class TensorMechanicsPlasticWeakPlaneTensileN;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensileN>();
 
 /**
@@ -22,12 +20,12 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensileN>();
  */
 class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticWeakPlaneTensile
 {
- public:
+public:
   TensorMechanicsPlasticWeakPlaneTensileN(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
 
- protected:
+protected:
   Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
   RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const override;

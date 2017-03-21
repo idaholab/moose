@@ -20,14 +20,13 @@
 // Forward declarations
 class MultiAppPostprocessorTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppPostprocessorTransfer>();
 
 /**
  * Copies the value of a Postprocessor from the Master to a MultiApp.
  */
-class MultiAppPostprocessorTransfer :
-  public MultiAppTransfer
+class MultiAppPostprocessorTransfer : public MultiAppTransfer
 {
 public:
   MultiAppPostprocessorTransfer(const InputParameters & parameters);

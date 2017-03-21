@@ -19,7 +19,7 @@
 
 class OnOffNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<OnOffNeumannBC>();
 
 /**
@@ -33,7 +33,6 @@ public:
   virtual bool shouldApply();
 
 protected:
-
 };
 
 #endif /* ONOFFNEUMANNBC_H */

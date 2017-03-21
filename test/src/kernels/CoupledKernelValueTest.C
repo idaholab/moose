@@ -13,33 +13,27 @@
 /****************************************************************/
 #include "CoupledKernelValueTest.h"
 
-
-template<>
-InputParameters validParams<CoupledKernelValueTest>()
+template <>
+InputParameters
+validParams<CoupledKernelValueTest>()
 {
   InputParameters p = validParams<KernelValue>();
-  p.addRequiredCoupledVar("var2","Coupled Variable");
+  p.addRequiredCoupledVar("var2", "Coupled Variable");
   return p;
 }
 
-
-CoupledKernelValueTest::CoupledKernelValueTest(const InputParameters & parameters) :
-    KernelValue(parameters),
-    _var2(coupledValue("var2")),
-    _var2_num(coupled("var2"))
+CoupledKernelValueTest::CoupledKernelValueTest(const InputParameters & parameters)
+  : KernelValue(parameters), _var2(coupledValue("var2")), _var2_num(coupled("var2"))
 {
 }
 
-CoupledKernelValueTest::~CoupledKernelValueTest()
-{
-}
+CoupledKernelValueTest::~CoupledKernelValueTest() {}
 
 Real
 CoupledKernelValueTest::precomputeQpResidual()
 {
   return _var2[_qp];
 }
-
 
 Real
 CoupledKernelValueTest::precomputeQpJacobian()
@@ -52,7 +46,7 @@ CoupledKernelValueTest::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var2_num)
   {
-    return _phi[_j][_qp]*_test[_i][_qp];
+    return _phi[_j][_qp] * _test[_i][_qp];
   }
   else
   {

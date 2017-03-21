@@ -13,7 +13,7 @@
 // Forward Declarations
 class BoundaryFluxBase;
 
-template<>
+template <>
 InputParameters validParams<BoundaryFluxBase>();
 
 /**
@@ -95,10 +95,10 @@ protected:
   mutable dof_id_type _cached_elem_id;
 
   /// Threaded storage for fluxes
-  mutable std::vector<std::vector<Real> > _flux;
+  mutable std::vector<std::vector<Real>> _flux;
 
   /// Threaded storage for jacobians
-  mutable std::vector<DenseMatrix<Real> > _jac1;
+  mutable std::vector<DenseMatrix<Real>> _jac1;
 
 private:
   static Threads::spin_mutex _mutex;

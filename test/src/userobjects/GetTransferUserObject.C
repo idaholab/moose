@@ -16,15 +16,16 @@
 #include "libmesh/quadrature.h"
 #include "MultiAppTransfer.h"
 
-template<>
-InputParameters validParams<GetTransferUserObject>()
+template <>
+InputParameters
+validParams<GetTransferUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   return params;
 }
 
-GetTransferUserObject::GetTransferUserObject(const InputParameters & parameters) :
-    GeneralUserObject(parameters)
+GetTransferUserObject::GetTransferUserObject(const InputParameters & parameters)
+  : GeneralUserObject(parameters)
 {
 }
 
@@ -36,7 +37,8 @@ GetTransferUserObject::execute()
 void
 GetTransferUserObject::initialize()
 {
-  std::vector<std::shared_ptr<Transfer>> transfers = _fe_problem.getTransfers(EXEC_TIMESTEP_END, MultiAppTransfer::TO_MULTIAPP);
+  std::vector<std::shared_ptr<Transfer>> transfers =
+      _fe_problem.getTransfers(EXEC_TIMESTEP_END, MultiAppTransfer::TO_MULTIAPP);
   if (transfers.size() != 2)
     mooseError("Number of transfers in GetTransferUserObject incorrect");
   for (auto & t : transfers)

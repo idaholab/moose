@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PNEGATIVENODALMASSOLD
 #define Q2PNEGATIVENODALMASSOLD
 
@@ -16,7 +15,7 @@
 // Forward Declarations
 class Q2PNegativeNodalMassOld;
 
-template<>
+template <>
 InputParameters validParams<Q2PNegativeNodalMassOld>();
 
 /**
@@ -26,11 +25,9 @@ InputParameters validParams<Q2PNegativeNodalMassOld>();
 class Q2PNegativeNodalMassOld : public TimeKernel
 {
 public:
-
   Q2PNegativeNodalMassOld(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual();
 
   const RichardsDensity & _density;
@@ -45,4 +42,4 @@ protected:
   const MaterialProperty<Real> & _porosity_old;
 };
 
-#endif //Q2PNEGATIVENODALMASSOLD
+#endif // Q2PNEGATIVENODALMASSOLD

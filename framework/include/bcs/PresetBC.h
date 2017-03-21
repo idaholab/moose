@@ -19,7 +19,7 @@
 
 class PresetBC;
 
-template<>
+template <>
 InputParameters validParams<PresetBC>();
 
 /**

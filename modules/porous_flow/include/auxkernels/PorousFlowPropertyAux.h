@@ -13,7 +13,7 @@
 
 class PorousFlowPropertyAux;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPropertyAux>();
 
 /**
@@ -83,4 +83,4 @@ private:
   unsigned int _fluid_component;
 };
 
-#endif //POROUSFLOWPROPERTYAUX_H
+#endif // POROUSFLOWPROPERTYAUX_H

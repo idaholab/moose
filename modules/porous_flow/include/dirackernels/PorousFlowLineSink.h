@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWLINESINK_H
 #define POROUSFLOWLINESINK_H
 
@@ -16,7 +15,7 @@
 
 class PorousFlowLineSink;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowLineSink>();
 
 /**
@@ -42,7 +41,8 @@ protected:
   Real ptqp() const;
 
   /**
-   * If _p_or_t==0, then returns d(quadpoint porepressure)/d(PorousFlow variable), else returns d(quadpoint temperature)/d(PorousFlow variable)
+   * If _p_or_t==0, then returns d(quadpoint porepressure)/d(PorousFlow variable), else returns
+   * d(quadpoint temperature)/d(PorousFlow variable)
    * @param pvar The PorousFlow variable number
    */
   Real dptqp(unsigned pvar) const;
@@ -51,7 +51,10 @@ protected:
   virtual Real computeQpBaseOutflow(unsigned current_dirac_ptid) const = 0;
 
   /// Calculates the BaseOutflow as well as its derivative wrt jvar.  Derived classes should override this
-  virtual void computeQpBaseOutflowJacobian(unsigned jvar, unsigned current_dirac_ptid, Real & outflow, Real & outflowp) const = 0;
+  virtual void computeQpBaseOutflowJacobian(unsigned jvar,
+                                            unsigned current_dirac_ptid,
+                                            Real & outflow,
+                                            Real & outflowp) const = 0;
 
   /// PorousFlow UserObject
   const PorousFlowDictator & _dictator;
@@ -85,7 +88,7 @@ protected:
   const bool _has_internal_energy;
 
   /// whether the flux  is a function of pressure or temperature
-  const enum PorTchoice {pressure, temperature} _p_or_t;
+  const enum PorTchoice { pressure, temperature } _p_or_t;
 
   /// Whether the flux will be multiplied by the mass fraction
   const bool _use_mass_fraction;
@@ -157,4 +160,4 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dinternal_energy_dvar;
 };
 
-#endif //POROUSFLOWLINESINK_H
+#endif // POROUSFLOWLINESINK_H

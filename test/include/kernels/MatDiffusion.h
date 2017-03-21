@@ -20,9 +20,8 @@
 // Forward Declaration
 class MatDiffusion;
 
-template<>
+template <>
 InputParameters validParams<MatDiffusion>();
-
 
 class MatDiffusion : public Kernel
 {
@@ -38,4 +37,4 @@ protected:
   const MaterialProperty<Real> * _diff;
 };
 
-#endif //MATDIFFUSION_H
+#endif // MATDIFFUSION_H

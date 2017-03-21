@@ -15,19 +15,24 @@
 #include "RandomAux.h"
 #include "RandomElementalUserObject.h"
 
-template<>
-InputParameters validParams<RandomAux>()
+template <>
+InputParameters
+validParams<RandomAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<UserObjectName>("random_user_object", "The RandomElementalUserObject to optionally use");
-  params.addParam<bool>("generate_integers", false, "Tells this object to use ints instead of Reals");
+  params.addParam<UserObjectName>("random_user_object",
+                                  "The RandomElementalUserObject to optionally use");
+  params.addParam<bool>(
+      "generate_integers", false, "Tells this object to use ints instead of Reals");
 
   return params;
 }
 
-RandomAux::RandomAux(const InputParameters & params) :
-    AuxKernel(params),
-    _random_uo(params.isParamValid("random_user_object") ? &getUserObject<RandomElementalUserObject>("random_user_object") : NULL),
+RandomAux::RandomAux(const InputParameters & params)
+  : AuxKernel(params),
+    _random_uo(params.isParamValid("random_user_object")
+                   ? &getUserObject<RandomElementalUserObject>("random_user_object")
+                   : NULL),
     _generate_ints(getParam<bool>("generate_integers"))
 {
   /**
@@ -45,9 +50,7 @@ RandomAux::RandomAux(const InputParameters & params) :
   }
 }
 
-RandomAux::~RandomAux()
-{
-}
+RandomAux::~RandomAux() {}
 
 Real
 RandomAux::computeValue()

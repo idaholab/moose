@@ -22,4 +22,4 @@ public:
   virtual void act();
 };
 
-#endif //LEGACYTENSORMECHANICSACTION_H
+#endif // LEGACYTENSORMECHANICSACTION_H

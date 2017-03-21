@@ -24,4 +24,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
 };
 
-#endif //COMPUTELINEARELASTICSTRESS_H
+#endif // COMPUTELINEARELASTICSTRESS_H

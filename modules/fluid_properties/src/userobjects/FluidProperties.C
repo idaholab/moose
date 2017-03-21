@@ -7,8 +7,9 @@
 
 #include "FluidProperties.h"
 
-template<>
-InputParameters validParams<FluidProperties>()
+template <>
+InputParameters
+validParams<FluidProperties>()
 {
   InputParameters params = validParams<GeneralUserObject>();
 
@@ -16,14 +17,11 @@ InputParameters validParams<FluidProperties>()
   return params;
 }
 
-FluidProperties::FluidProperties(const InputParameters & parameters) :
-    GeneralUserObject(parameters)
+FluidProperties::FluidProperties(const InputParameters & parameters) : GeneralUserObject(parameters)
 {
 }
 
-FluidProperties::~FluidProperties()
-{
-}
+FluidProperties::~FluidProperties() {}
 
 void
 FluidProperties::execute()

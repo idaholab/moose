@@ -17,11 +17,11 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BodyForce;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<BodyForce>();
 
 /**

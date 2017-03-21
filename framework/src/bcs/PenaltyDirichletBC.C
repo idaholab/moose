@@ -14,8 +14,9 @@
 #include "PenaltyDirichletBC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<PenaltyDirichletBC>()
+template <>
+InputParameters
+validParams<PenaltyDirichletBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
@@ -24,20 +25,19 @@ InputParameters validParams<PenaltyDirichletBC>()
   return params;
 }
 
-PenaltyDirichletBC::PenaltyDirichletBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
-    _p(getParam<Real>("penalty")),
-    _v(getParam<Real>("value"))
-{}
+PenaltyDirichletBC::PenaltyDirichletBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _p(getParam<Real>("penalty")), _v(getParam<Real>("value"))
+{
+}
 
 Real
 PenaltyDirichletBC::computeQpResidual()
 {
-  return _p*_test[_i][_qp]*(-_v + _u[_qp]);
+  return _p * _test[_i][_qp] * (-_v + _u[_qp]);
 }
 
 Real
 PenaltyDirichletBC::computeQpJacobian()
 {
-  return _p*_phi[_j][_qp]*_test[_i][_qp];
+  return _p * _phi[_j][_qp] * _test[_i][_qp];
 }

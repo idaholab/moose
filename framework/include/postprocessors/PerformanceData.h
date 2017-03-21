@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class PerformanceData;
 
-template<>
+template <>
 InputParameters validParams<PerformanceData>();
 
 class PerformanceData : public GeneralPostprocessor

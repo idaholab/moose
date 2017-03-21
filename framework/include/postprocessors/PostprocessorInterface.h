@@ -107,4 +107,4 @@ private:
   FEProblemBase & _pi_feproblem;
 };
 
-#endif //POSTPROCESSORINTERFACE_H
+#endif // POSTPROCESSORINTERFACE_H

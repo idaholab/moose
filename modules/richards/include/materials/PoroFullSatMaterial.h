@@ -5,18 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROFULLSATMATERIAL_H
 #define POROFULLSATMATERIAL_H
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class PoroFullSatMaterial;
 
-template<>
+template <>
 InputParameters validParams<PoroFullSatMaterial>();
 
 /**
@@ -31,7 +29,6 @@ public:
   PoroFullSatMaterial(const InputParameters & parameters);
 
 protected:
-
   /// porosity at zero porepressure and volumetric strain
   Real _phi0;
 
@@ -90,4 +87,4 @@ protected:
   virtual void computeQpProperties();
 };
 
-#endif //POROFULLSATMATERIAL_H
+#endif // POROFULLSATMATERIAL_H

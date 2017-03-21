@@ -14,19 +14,23 @@
 
 #include "ConstantDT.h"
 
-template<>
-InputParameters validParams<ConstantDT>()
+template <>
+InputParameters
+validParams<ConstantDT>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addRequiredParam<Real>("dt", "Size of the time step");
-  params.addRangeCheckedParam<Real>("growth_factor", 2, "growth_factor>=1",
-    "Maximum ratio of new to previous timestep sizes following a step that required the time"
-    " step to be cut due to a failed solve.");
+  params.addRangeCheckedParam<Real>(
+      "growth_factor",
+      2,
+      "growth_factor>=1",
+      "Maximum ratio of new to previous timestep sizes following a step that required the time"
+      " step to be cut due to a failed solve.");
   return params;
 }
 
-ConstantDT::ConstantDT(const InputParameters & parameters) :
-    TimeStepper(parameters),
+ConstantDT::ConstantDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
     _constant_dt(getParam<Real>("dt")),
     _growth_factor(getParam<Real>("growth_factor"))
 {
@@ -43,4 +47,3 @@ ConstantDT::computeDT()
 {
   return std::min(_constant_dt, _growth_factor * getCurrentDT());
 }
-

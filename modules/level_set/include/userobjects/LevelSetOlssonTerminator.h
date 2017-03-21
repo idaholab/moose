@@ -10,11 +10,11 @@
 
 #include "GeneralUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class LevelSetOlssonTerminator;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<LevelSetOlssonTerminator>();
 
 /**
@@ -23,14 +23,12 @@ InputParameters validParams<LevelSetOlssonTerminator>();
 class LevelSetOlssonTerminator : public GeneralUserObject
 {
 public:
-
   LevelSetOlssonTerminator(const InputParameters & parameters);
   virtual void execute() override;
-   virtual void initialize() override {}
-   virtual void finalize() override {}
+  virtual void initialize() override {}
+  virtual void finalize() override {}
 
 protected:
-
   /// The difference of current and old solutions
   NumericVector<Number> & _solution_diff;
 
@@ -39,7 +37,6 @@ protected:
 
   /// The required minimum number of timesteps
   const int & _min_t_steps;
-
 };
 
-#endif //LEVELSETOLSSONTERMINATOR_H
+#endif // LEVELSETOLSSONTERMINATOR_H

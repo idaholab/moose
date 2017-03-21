@@ -10,10 +10,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class CHPFCRFF;
 
-template<>
+template <>
 InputParameters validParams<CHPFCRFF>();
 
 /**
@@ -48,4 +48,4 @@ private:
   const Real _c;
 };
 
-#endif //CHPFCRFF_H
+#endif // CHPFCRFF_H

@@ -18,10 +18,10 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class CachingPointSource;
 
-template<>
+template <>
 InputParameters validParams<CachingPointSource>();
 
 /**
@@ -37,4 +37,4 @@ public:
   virtual Real computeQpResidual();
 };
 
-#endif //CACHINGPOINTSOURCE_H
+#endif // CACHINGPOINTSOURCE_H

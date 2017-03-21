@@ -16,10 +16,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class DoNotCopyParametersKernel;
 
-template<>
+template <>
 InputParameters validParams<DoNotCopyParametersKernel>();
 
 class DoNotCopyParametersKernel : public Kernel
@@ -33,4 +33,4 @@ protected:
   virtual Real computeQpJacobian();
 };
 
-#endif //DONOTCOPYPARAMETESKERNEL_H
+#endif // DONOTCOPYPARAMETESKERNEL_H

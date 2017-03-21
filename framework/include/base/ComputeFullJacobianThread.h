@@ -54,4 +54,4 @@ protected:
   const KernelWarehouse & _kernels;
 };
 
-#endif //COMPUTEFULLJACOBIANTHREAD_H
+#endif // COMPUTEFULLJACOBIANTHREAD_H

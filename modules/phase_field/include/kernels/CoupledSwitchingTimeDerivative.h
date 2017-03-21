@@ -14,7 +14,7 @@
 // Forward Declaration
 class CoupledSwitchingTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<CoupledSwitchingTimeDerivative>();
 
 /**
@@ -27,8 +27,8 @@ InputParameters validParams<CoupledSwitchingTimeDerivative>();
  * and \f$ F_a, F_b,.. \f$ are functions for each phase. For the grand-potential
  * model susceptibility equation, \f$ F_a \f$ etc. are the phase densities.
  */
-class CoupledSwitchingTimeDerivative :
-  public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>
+class CoupledSwitchingTimeDerivative
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>
 {
 public:
   CoupledSwitchingTimeDerivative(const InputParameters & parameters);
@@ -59,7 +59,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_dFjdv;
 
   /// Derivatives of the functions (needed for off-diagonal Jacobians)
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_dFjdarg;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dFjdarg;
 
   /// switching function names
   std::vector<MaterialPropertyName> _hj_names;
@@ -71,7 +71,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_d2hjdetai2;
 
   /// Second derivatives of the switching functions (needed for off-diagonal Jacobians)
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_d2hjdetaidarg;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _prop_d2hjdetaidarg;
 };
 
-#endif //COUPLEDSWITCHINGTIMEDERIVATIVE_H
+#endif // COUPLEDSWITCHINGTIMEDERIVATIVE_H

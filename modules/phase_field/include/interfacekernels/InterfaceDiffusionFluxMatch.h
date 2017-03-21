@@ -11,7 +11,7 @@
 
 class InterfaceDiffusionFluxMatch;
 
-template<>
+template <>
 InputParameters validParams<InterfaceDiffusionFluxMatch>();
 
 /**

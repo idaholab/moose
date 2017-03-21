@@ -11,11 +11,14 @@
 #include "MultiApp.h"
 #include "Adaptivity.h"
 
-template<>
-InputParameters validParams<LevelSetMeshRefinementTransfer>()
+template <>
+InputParameters
+validParams<LevelSetMeshRefinementTransfer>()
 {
   InputParameters params = validParams<MultiAppCopyTransfer>();
-  params.addClassDescription("Transfers the mesh from the master application to the sub application for the purposes of level set reinitialization problems with mesh adaptivity.");
+  params.addClassDescription("Transfers the mesh from the master application to the sub "
+                             "application for the purposes of level set reinitialization problems "
+                             "with mesh adaptivity.");
   params.set<MooseEnum>("direction") = "TO_MULTIAPP";
   params.suppressParameter<MooseEnum>("direction");
 
@@ -26,8 +29,8 @@ InputParameters validParams<LevelSetMeshRefinementTransfer>()
   return params;
 }
 
-LevelSetMeshRefinementTransfer::LevelSetMeshRefinementTransfer(const InputParameters & parameters) :
-    MultiAppCopyTransfer(parameters)
+LevelSetMeshRefinementTransfer::LevelSetMeshRefinementTransfer(const InputParameters & parameters)
+  : MultiAppCopyTransfer(parameters)
 {
 }
 

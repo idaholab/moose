@@ -10,16 +10,15 @@
 #include "SecondDerivativeImplicitEuler.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class SolidMechImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<SolidMechImplicitEuler>();
 
 class SolidMechImplicitEuler : public SecondDerivativeImplicitEuler
 {
 public:
-
   SolidMechImplicitEuler(const InputParameters & parameters);
 
 protected:
@@ -34,4 +33,4 @@ private:
   const bool _artificial_scaling_set;
   const Real _artificial_scaling;
 };
-#endif //SOLIDMECHIMPLICITEULER_H
+#endif // SOLIDMECHIMPLICITEULER_H

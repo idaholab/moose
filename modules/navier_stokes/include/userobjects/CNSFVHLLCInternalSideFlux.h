@@ -14,7 +14,7 @@
 // Forward Declarations
 class CNSFVHLLCInternalSideFlux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVHLLCInternalSideFlux>();
 
 /**
@@ -29,7 +29,6 @@ InputParameters validParams<CNSFVHLLCInternalSideFlux>();
 class CNSFVHLLCInternalSideFlux : public InternalSideFluxBase
 {
 public:
-
   CNSFVHLLCInternalSideFlux(const InputParameters & parameters);
   virtual ~CNSFVHLLCInternalSideFlux();
 
@@ -51,7 +50,6 @@ public:
                             DenseMatrix<Real> & jac2) const;
 
 protected:
-
   const SinglePhaseFluidProperties & _fp;
 };
 

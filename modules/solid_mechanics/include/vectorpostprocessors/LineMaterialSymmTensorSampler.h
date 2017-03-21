@@ -5,17 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef LINEMATERIALTENSORSAMPLER_H
 #define LINEMATERIALTENSORSAMPLER_H
 
 #include "LineMaterialSamplerBase.h"
 #include "MaterialTensorCalculator.h"
 
-//Forward Declarations
+// Forward Declarations
 class LineMaterialSymmTensorSampler;
 
-template<>
+template <>
 InputParameters validParams<LineMaterialSymmTensorSampler>();
 
 /**
@@ -23,9 +22,8 @@ InputParameters validParams<LineMaterialSymmTensorSampler>();
  * in all elements that are intersected by a user-defined line.  It provides
  * access to the full set of options for reducing the SymmTensor to a scalar.
  */
-class LineMaterialSymmTensorSampler :
-  public LineMaterialSamplerBase<SymmTensor>,
-  public MaterialTensorCalculator
+class LineMaterialSymmTensorSampler : public LineMaterialSamplerBase<SymmTensor>,
+                                      public MaterialTensorCalculator
 {
 public:
   /**
@@ -45,7 +43,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(const SymmTensor &property, const Point & curr_point);
+  virtual Real getScalarFromProperty(const SymmTensor & property, const Point & curr_point);
 };
 
 #endif

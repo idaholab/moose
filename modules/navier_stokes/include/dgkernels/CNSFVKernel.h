@@ -13,7 +13,7 @@
 
 class CNSFVKernel;
 
-template<>
+template <>
 InputParameters validParams<CNSFVKernel>();
 
 /**
@@ -41,12 +41,10 @@ InputParameters validParams<CNSFVKernel>();
 class CNSFVKernel : public DGKernel
 {
 public:
-
   CNSFVKernel(const InputParameters & parameters);
   virtual ~CNSFVKernel();
 
 protected:
-
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
@@ -58,24 +56,24 @@ protected:
   // "2" denotes the "right" state
 
   // piecewise constant variable values in cells
-  const VariableValue &  _rhoc1;
+  const VariableValue & _rhoc1;
   const VariableValue & _rhouc1;
   const VariableValue & _rhovc1;
   const VariableValue & _rhowc1;
   const VariableValue & _rhoec1;
-  const VariableValue &  _rhoc2;
+  const VariableValue & _rhoc2;
   const VariableValue & _rhouc2;
   const VariableValue & _rhovc2;
   const VariableValue & _rhowc2;
   const VariableValue & _rhoec2;
 
   // extrapolated variable values at side center
-  const MaterialProperty<Real> &  _rho1;
+  const MaterialProperty<Real> & _rho1;
   const MaterialProperty<Real> & _rhou1;
   const MaterialProperty<Real> & _rhov1;
   const MaterialProperty<Real> & _rhow1;
   const MaterialProperty<Real> & _rhoe1;
-  const MaterialProperty<Real> &  _rho2;
+  const MaterialProperty<Real> & _rho2;
   const MaterialProperty<Real> & _rhou2;
   const MaterialProperty<Real> & _rhov2;
   const MaterialProperty<Real> & _rhow2;
@@ -84,7 +82,7 @@ protected:
   /// fluid properties object
   const InternalSideFluxBase & _flux;
 
-  unsigned int  _rho_var;
+  unsigned int _rho_var;
   unsigned int _rhou_var;
   unsigned int _rhov_var;
   unsigned int _rhow_var;

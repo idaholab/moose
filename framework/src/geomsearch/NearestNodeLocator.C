@@ -26,7 +26,8 @@
 #include "libmesh/plane.h"
 #include "libmesh/mesh_tools.h"
 
-std::string _boundaryFuser(BoundaryID boundary1, BoundaryID boundary2)
+std::string
+_boundaryFuser(BoundaryID boundary1, BoundaryID boundary2)
 {
   std::stringstream ss;
 
@@ -35,9 +36,11 @@ std::string _boundaryFuser(BoundaryID boundary1, BoundaryID boundary2)
   return ss.str();
 }
 
-
-NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2) :
-    Restartable(_boundaryFuser(boundary1, boundary2), "NearestNodeLocator", subproblem, 0),
+NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
+                                       MooseMesh & mesh,
+                                       BoundaryID boundary1,
+                                       BoundaryID boundary2)
+  : Restartable(_boundaryFuser(boundary1, boundary2), "NearestNodeLocator", subproblem, 0),
     _subproblem(subproblem),
     _mesh(mesh),
     _slave_node_range(NULL),
@@ -51,17 +54,16 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
   std::set<BoundaryID>::const_iterator sit;
   sit=bids.find(_boundary1);
   if (sit == bids.end())
-    mooseError("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2, ", but boundary ", _boundary1, " does not exist");
+    mooseError("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2,
+  ", but boundary ", _boundary1, " does not exist");
   sit=bids.find(_boundary2);
   if (sit == bids.end())
-    mooseError("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2, ", but boundary ", _boundary2, " does not exist");
+    mooseError("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2,
+  ", but boundary ", _boundary2, " does not exist");
   */
 }
 
-NearestNodeLocator::~NearestNodeLocator()
-{
-  delete _slave_node_range;
-}
+NearestNodeLocator::~NearestNodeLocator() { delete _slave_node_range; }
 
 void
 NearestNodeLocator::findNodes()
@@ -74,7 +76,7 @@ NearestNodeLocator::findNodes()
    */
   if (_first)
   {
-    _first=false;
+    _first = false;
 
     // Trial slave nodes are all the nodes on the slave side
     // We only keep the ones that are either on this processor or are likely
@@ -82,7 +84,6 @@ NearestNodeLocator::findNodes()
     // are in the "neighborhood" of the slave node
     std::vector<dof_id_type> trial_slave_nodes;
     std::vector<dof_id_type> trial_master_nodes;
-
 
     // Build a bounding box.  No reason to consider nodes outside of our inflated BB
     MeshTools::BoundingBox * my_inflated_box = NULL;
@@ -92,7 +93,8 @@ NearestNodeLocator::findNodes()
     // This means there was a user specified inflation... so we can build a BB
     if (inflation.size() > 0)
     {
-      MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(_mesh, _mesh.processor_id());
+      MeshTools::BoundingBox my_box =
+          MeshTools::processor_bounding_box(_mesh, _mesh.processor_id());
 
       Real distance_x = 0;
       Real distance_y = 0;
@@ -106,12 +108,12 @@ NearestNodeLocator::findNodes()
       if (inflation.size() > 2)
         distance_z = inflation[2];
 
-      my_inflated_box = new MeshTools::BoundingBox(Point(my_box.first(0)-distance_x,
-                                                         my_box.first(1)-distance_y,
-                                                         my_box.first(2)-distance_z),
-                                                   Point(my_box.second(0)+distance_x,
-                                                         my_box.second(1)+distance_y,
-                                                         my_box.second(2)+distance_z));
+      my_inflated_box = new MeshTools::BoundingBox(Point(my_box.first(0) - distance_x,
+                                                         my_box.first(1) - distance_y,
+                                                         my_box.first(2) - distance_z),
+                                                   Point(my_box.second(0) + distance_x,
+                                                         my_box.second(1) + distance_y,
+                                                         my_box.second(2) + distance_z));
     }
 
     // Data structures to hold the Nodal Boundary conditions
@@ -134,7 +136,8 @@ NearestNodeLocator::findNodes()
     // don't need the BB anymore
     delete my_inflated_box;
 
-    const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map =
+        _mesh.nodeToElemMap();
 
     NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 
@@ -188,7 +191,6 @@ NearestNodeLocator::distance(dof_id_type node_id)
   return _nearest_node_info[node_id]._distance;
 }
 
-
 const Node *
 NearestNodeLocator::nearestNode(dof_id_type node_id)
 {
@@ -196,7 +198,7 @@ NearestNodeLocator::nearestNode(dof_id_type node_id)
 }
 
 //===================================================================
-NearestNodeLocator::NearestNodeInfo::NearestNodeInfo() :
-    _nearest_node(NULL),
-    _distance(std::numeric_limits<Real>::max())
-{}
+NearestNodeLocator::NearestNodeInfo::NearestNodeInfo()
+  : _nearest_node(NULL), _distance(std::numeric_limits<Real>::max())
+{
+}

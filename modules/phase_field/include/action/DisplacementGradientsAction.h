@@ -15,7 +15,7 @@
  * correct derivatives of the elastic free energy in a non-split Cahn-Hilliard
  * simulation are assembled.
  */
-class DisplacementGradientsAction: public Action
+class DisplacementGradientsAction : public Action
 {
 public:
   DisplacementGradientsAction(const InputParameters & params);
@@ -27,7 +27,7 @@ private:
   std::vector<VariableName> _displacement_gradients;
 };
 
-template<>
+template <>
 InputParameters validParams<DisplacementGradientsAction>();
 
-#endif //DISPLACEMENTGRADIENTSACTION_H
+#endif // DISPLACEMENTGRADIENTSACTION_H

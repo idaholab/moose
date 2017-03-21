@@ -12,7 +12,7 @@
 // Forward declarations
 class PLC_LSH;
 
-template<>
+template <>
 InputParameters validParams<PLC_LSH>();
 
 /**
@@ -24,10 +24,9 @@ InputParameters validParams<PLC_LSH>();
 class PLC_LSH : public SolidModel
 {
 public:
-  PLC_LSH( const InputParameters & parameters);
+  PLC_LSH(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
 
   Real _coefficient;
@@ -62,13 +61,12 @@ protected:
 
   void computeCreep(const SymmTensor & strain_increment,
                     SymmTensor & creep_strain_increment,
-                    SymmTensor & stress_new );
-  void computeLSH( const SymmTensor & strain_increment,
-                   SymmTensor & plastic_strain_increment,
-                   SymmTensor & stress_new );
+                    SymmTensor & stress_new);
+  void computeLSH(const SymmTensor & strain_increment,
+                  SymmTensor & plastic_strain_increment,
+                  SymmTensor & stress_new);
 
 private:
-
 };
 
-#endif //PLC_LSHMATERIAL_H
+#endif // PLC_LSHMATERIAL_H

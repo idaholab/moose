@@ -14,10 +14,7 @@
 
 #include "ArbitraryQuadrature.h"
 
-
-ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) :
-    QBase(d,o)
-{}
+ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) : QBase(d, o) {}
 
 QuadratureType
 ArbitraryQuadrature::type() const
@@ -33,24 +30,21 @@ ArbitraryQuadrature::setPoints(const std::vector<Point> & points)
 }
 
 void
-ArbitraryQuadrature::init_1D(const ElemType _type,
-                             unsigned int p_level)
+ArbitraryQuadrature::init_1D(const ElemType _type, unsigned int p_level)
 {
   this->_type = _type;
   this->_p_level = p_level;
 }
 
 void
-ArbitraryQuadrature::init_2D(const ElemType _type,
-                             unsigned int p_level)
+ArbitraryQuadrature::init_2D(const ElemType _type, unsigned int p_level)
 {
   this->_type = _type;
   this->_p_level = p_level;
 }
 
 void
-ArbitraryQuadrature::init_3D(const ElemType _type,
-                             unsigned int p_level)
+ArbitraryQuadrature::init_3D(const ElemType _type, unsigned int p_level)
 {
   this->_type = _type;
   this->_p_level = p_level;

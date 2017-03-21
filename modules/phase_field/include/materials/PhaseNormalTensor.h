@@ -13,7 +13,7 @@
 
 class PhaseNormalTensor;
 
-template<>
+template <>
 InputParameters validParams<PhaseNormalTensor>();
 
 /**

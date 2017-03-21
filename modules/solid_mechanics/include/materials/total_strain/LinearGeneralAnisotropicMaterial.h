@@ -21,10 +21,10 @@
  * cubic, etc as needed.
  */
 
-//Forward declaration
+// Forward declaration
 class LinearGeneralAnisotropicMaterial;
 
-template<>
+template <>
 InputParameters validParams<LinearGeneralAnisotropicMaterial>();
 
 class LinearGeneralAnisotropicMaterial : public SolidMechanicsMaterial
@@ -41,7 +41,6 @@ protected:
 
   virtual void computeQpStress();
 
-
 private:
   Real _euler_angle_1;
   Real _euler_angle_2;
@@ -53,8 +52,8 @@ private:
   // bool to indicate if using 9 stiffness values or all 21
   bool _all_21;
 
-  //Individual material information
+  // Individual material information
   SymmAnisotropicElasticityTensor _Cijkl_matrix;
 };
 
-#endif //LINEARGENERALANISOTROPICMATERIAL_H
+#endif // LINEARGENERALANISOTROPICMATERIAL_H

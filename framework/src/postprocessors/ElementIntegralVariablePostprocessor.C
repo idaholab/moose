@@ -14,16 +14,18 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-template<>
-InputParameters validParams<ElementIntegralVariablePostprocessor>()
+template <>
+InputParameters
+validParams<ElementIntegralVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
-ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters),
+ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(
+    const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters),
     MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),

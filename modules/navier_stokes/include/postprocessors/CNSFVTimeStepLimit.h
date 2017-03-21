@@ -12,7 +12,7 @@
 
 class CNSFVTimeStepLimit;
 
-template<>
+template <>
 InputParameters validParams<CNSFVTimeStepLimit>();
 
 /**
@@ -21,7 +21,6 @@ InputParameters validParams<CNSFVTimeStepLimit>();
 class CNSFVTimeStepLimit : public ElementPostprocessor
 {
 public:
-
   CNSFVTimeStepLimit(const InputParameters & parameters);
   virtual ~CNSFVTimeStepLimit();
 
@@ -34,7 +33,6 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
 protected:
-
   unsigned int _dim;
 
   /// the value of dt

@@ -17,10 +17,10 @@
 #include "Kernel.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class Advection0;
 
-template<>
+template <>
 InputParameters validParams<Advection0>();
 
 class Advection0 : public Kernel
@@ -37,4 +37,4 @@ private:
   Real _Au, _Bu, _Cu, _Av, _Bv, _Cv;
 };
 
-#endif //ADVECTION0_H
+#endif // ADVECTION0_H

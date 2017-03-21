@@ -21,35 +21,45 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 
-template<>
-InputParameters validParams<PatternedMesh>()
+template <>
+InputParameters
+validParams<PatternedMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-  params.addRequiredParam<std::vector<MeshFileName> >("files", "The name of the mesh files to read.  They are automatically assigned ids starting with zero.");
+  params.addRequiredParam<std::vector<MeshFileName>>("files", "The name of the mesh files to read. "
+                                                              " They are automatically assigned "
+                                                              "ids starting with zero.");
 
-  params.addRangeCheckedParam<Real>("x_width", 0, "x_width>=0", "The tile width in the x direction");
-  params.addRangeCheckedParam<Real>("y_width", 0, "y_width>=0", "The tile width in the y direction");
-  params.addRangeCheckedParam<Real>("z_width", 0, "z_width>=0", "The tile width in the z direction");
+  params.addRangeCheckedParam<Real>(
+      "x_width", 0, "x_width>=0", "The tile width in the x direction");
+  params.addRangeCheckedParam<Real>(
+      "y_width", 0, "y_width>=0", "The tile width in the y direction");
+  params.addRangeCheckedParam<Real>(
+      "z_width", 0, "z_width>=0", "The tile width in the z direction");
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
-  params.addParam<BoundaryName>("right_boundary", "right_boundary", "name of the right (x) boundary");
+  params.addParam<BoundaryName>(
+      "right_boundary", "right_boundary", "name of the right (x) boundary");
 
   // y boundary names
   params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
-  params.addParam<BoundaryName>("bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
+  params.addParam<BoundaryName>(
+      "bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
 
-  params.addRequiredParam<std::vector<std::vector<unsigned int> > >("pattern", "A double-indexed array starting with the upper-left corner");
+  params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
+      "pattern", "A double-indexed array starting with the upper-left corner");
 
-  params.addClassDescription("Creates a 2D mesh from a specified set of unique 'tiles' meshes and a two-dimensional pattern.");
+  params.addClassDescription("Creates a 2D mesh from a specified set of unique 'tiles' meshes and "
+                             "a two-dimensional pattern.");
 
   return params;
 }
 
-PatternedMesh::PatternedMesh(const InputParameters & parameters) :
-    MooseMesh(parameters),
-    _files(getParam<std::vector<MeshFileName> >("files")),
-    _pattern(getParam<std::vector<std::vector<unsigned int> > >("pattern")),
+PatternedMesh::PatternedMesh(const InputParameters & parameters)
+  : MooseMesh(parameters),
+    _files(getParam<std::vector<MeshFileName>>("files")),
+    _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _x_width(getParam<Real>("x_width")),
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
@@ -78,8 +88,8 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
     _row_meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
 }
 
-PatternedMesh::PatternedMesh(const PatternedMesh & other_mesh) :
-    MooseMesh(other_mesh),
+PatternedMesh::PatternedMesh(const PatternedMesh & other_mesh)
+  : MooseMesh(other_mesh),
     _files(other_mesh._files),
     _pattern(other_mesh._pattern),
     _x_width(other_mesh._x_width),
@@ -88,9 +98,7 @@ PatternedMesh::PatternedMesh(const PatternedMesh & other_mesh) :
 {
 }
 
-PatternedMesh::~PatternedMesh()
-{
-}
+PatternedMesh::~PatternedMesh() {}
 
 MooseMesh &
 PatternedMesh::clone() const
@@ -107,7 +115,7 @@ PatternedMesh::buildMesh()
   // First row is the original mesh
   row_meshes.push_back(_original_mesh);
   // Copy the remaining raw pointers into the local vector
-  for (const auto & row_mesh: _row_meshes)
+  for (const auto & row_mesh : _row_meshes)
     row_meshes.push_back(row_mesh.get());
 
   BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
@@ -119,9 +127,7 @@ PatternedMesh::buildMesh()
   for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)
     for (auto j = beginIndex(_pattern[i]); j < _pattern[i].size(); ++j)
     {
-      Real
-        deltax = j * _x_width,
-        deltay = i * _y_width;
+      Real deltax = j * _x_width, deltay = i * _y_width;
 
       // If this is the first cell of the row initialize the row mesh
       if (j == 0)
@@ -138,7 +144,11 @@ PatternedMesh::buildMesh()
       // Move the mesh into the right spot.  -i because we are starting at the top
       MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
-      row_meshes[i]->stitch_meshes(dynamic_cast<ReplicatedMesh &>(cell_mesh), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+      row_meshes[i]->stitch_meshes(dynamic_cast<ReplicatedMesh &>(cell_mesh),
+                                   right,
+                                   left,
+                                   TOLERANCE,
+                                   /*clear_stitched_boundary_ids=*/true);
 
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
@@ -147,5 +157,6 @@ PatternedMesh::buildMesh()
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
   for (auto i = beginIndex(_pattern, 1); i < _pattern.size(); i++)
-    row_meshes[0]->stitch_meshes(*row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    row_meshes[0]->stitch_meshes(
+        *row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 }

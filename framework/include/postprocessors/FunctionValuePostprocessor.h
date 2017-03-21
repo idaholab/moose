@@ -19,7 +19,7 @@
 class FunctionValuePostprocessor;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionValuePostprocessor>();
 
 /**

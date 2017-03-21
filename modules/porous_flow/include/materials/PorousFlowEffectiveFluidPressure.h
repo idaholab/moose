@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowEffectiveFluidPressure;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowEffectiveFluidPressure>();
 
 /**
@@ -56,4 +56,4 @@ protected:
   MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
-#endif //POROUSFLOWEFFECTIVEFLUIDPRESSURE_H
+#endif // POROUSFLOWEFFECTIVEFLUIDPRESSURE_H

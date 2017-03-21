@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITYPRIMEAUX_H
 #define RICHARDSDENSITYPRIMEAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsDensity.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsDensityPrimeAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsDensityPrimeAux>();
 
 /**
  * Derivative of fluid density wrt porepressure
  */
-class RichardsDensityPrimeAux: public AuxKernel
+class RichardsDensityPrimeAux : public AuxKernel
 {
 public:
   RichardsDensityPrimeAux(const InputParameters & parameters);

@@ -14,7 +14,7 @@
 class NSInitialCondition;
 class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSInitialCondition>();
 
 /**

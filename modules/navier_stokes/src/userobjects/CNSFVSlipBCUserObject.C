@@ -7,22 +7,23 @@
 
 #include "CNSFVSlipBCUserObject.h"
 
-template<>
-InputParameters validParams<CNSFVSlipBCUserObject>()
+template <>
+InputParameters
+validParams<CNSFVSlipBCUserObject>()
 {
   InputParameters params = validParams<BCUserObject>();
 
-  params.addClassDescription("A user object that computes the ghost cell values based on the slip wall boundary condition.");
+  params.addClassDescription("A user object that computes the ghost cell values based on the slip "
+                             "wall boundary condition.");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   return params;
 }
 
 CNSFVSlipBCUserObject::CNSFVSlipBCUserObject(const InputParameters & parameters)
-  : BCUserObject(parameters),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
+  : BCUserObject(parameters), _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
 
@@ -34,7 +35,7 @@ CNSFVSlipBCUserObject::getGhostCellValue(unsigned int /*iside*/,
 {
   /// pass the inputs to local
 
-  Real rho1  = uvec1[0];
+  Real rho1 = uvec1[0];
   Real rhou1 = uvec1[1];
   Real rhov1 = uvec1[2];
   Real rhow1 = uvec1[3];

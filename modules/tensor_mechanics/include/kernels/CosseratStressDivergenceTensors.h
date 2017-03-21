@@ -9,10 +9,10 @@
 
 #include "StressDivergenceTensors.h"
 
-//Forward Declarations
+// Forward Declarations
 class CosseratStressDivergenceTensors;
 
-template<>
+template <>
 InputParameters validParams<CosseratStressDivergenceTensors>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   std::vector<unsigned int> _wc_var;
 };
 
-#endif //COSSERATSTRESSDIVERGENCETENSORS_H
+#endif // COSSERATSTRESSDIVERGENCETENSORS_H

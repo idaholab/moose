@@ -16,10 +16,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class MatCoefDiffusion;
 
-template<>
+template <>
 InputParameters validParams<MatCoefDiffusion>();
 
 /**
@@ -37,4 +37,4 @@ protected:
   const MaterialProperty<Real> * _coef;
 };
 
-#endif //MATCOEFDIFFUSION_H
+#endif // MATCOEFDIFFUSION_H

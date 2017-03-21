@@ -19,9 +19,8 @@
 
 class OneDEqualValueConstraintBC;
 
-template<>
+template <>
 InputParameters validParams<OneDEqualValueConstraintBC>();
-
 
 /**
  * This is the \f$ \int \lambda dg\f$ term from the mortar method.

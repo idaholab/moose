@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "QpMaterial.h"
 
-template<>
-InputParameters validParams<QpMaterial>()
+template <>
+InputParameters
+validParams<QpMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<std::string>("property_name",
@@ -22,8 +23,8 @@ InputParameters validParams<QpMaterial>()
   return params;
 }
 
-QpMaterial::QpMaterial(const InputParameters & parameters) :
-    Material(parameters),
+QpMaterial::QpMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _prop_name(getParam<std::string>("property_name")),
     _mat_prop(declareProperty<Real>(_prop_name))
 {

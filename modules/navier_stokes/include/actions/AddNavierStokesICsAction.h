@@ -11,7 +11,7 @@
 
 class AddNavierStokesICsAction;
 
-template<>
+template <>
 InputParameters validParams<AddNavierStokesICsAction>();
 
 /**
@@ -38,7 +38,7 @@ public:
 
 protected:
   // Helper function that actually adds the ICs.
-  void addICs (std::vector<std::string> & names);
+  void addICs(std::vector<std::string> & names);
 
   Real _initial_pressure;
   Real _initial_temperature;

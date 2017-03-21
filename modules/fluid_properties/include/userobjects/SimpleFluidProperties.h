@@ -12,7 +12,7 @@
 
 class SimpleFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<SimpleFluidProperties>();
 
 /**
@@ -60,28 +60,39 @@ public:
   virtual Real rho(Real pressure, Real temperature) const override;
 
   /// Density from pressure and temperature and its derivatives wrt pressure and temperature
-  virtual void rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_dpT(
+      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   /// Internal energy from pressure and temperature (J/kg)
   virtual Real e(Real pressure, Real temperature) const override;
 
   /// Internal energy and its derivatives wrt pressure and temperature
-  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
+  virtual void
+  e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /// Density and internal energy from pressure and temperature and derivatives wrt pressure and temperature
-  virtual void rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const override;
+  virtual void rho_e_dpT(Real pressure,
+                         Real temperature,
+                         Real & rho,
+                         Real & drho_dp,
+                         Real & drho_dT,
+                         Real & e,
+                         Real & de_dp,
+                         Real & de_dT) const override;
 
   /// Dynamic viscosity (Pa s)
   virtual Real mu(Real density, Real temperature) const override;
 
   /// Dynamic viscosity and its derivatives wrt density and temperature
-  virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void mu_drhoT(
+      Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /// Specific enthalpy (J/kg)
   virtual Real h(Real p, Real T) const override;
 
   /// Specific enthalpy and its derivatives
-  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
+  virtual void
+  h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   /// Henry's law constant for dissolution in water
   virtual Real henryConstant(Real temperature) const override;

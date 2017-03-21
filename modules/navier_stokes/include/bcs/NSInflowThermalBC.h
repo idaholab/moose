@@ -14,7 +14,7 @@
 class NSInflowThermalBC;
 class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSInflowThermalBC>();
 
 /**
@@ -46,4 +46,4 @@ protected:
   const IdealGasFluidProperties & _fp;
 };
 
-#endif //NSTHERMALINFLOWBC_H
+#endif // NSTHERMALINFLOWBC_H

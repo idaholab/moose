@@ -10,14 +10,14 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<AddSlaveFluxVectorAction>()
+template <>
+InputParameters
+validParams<AddSlaveFluxVectorAction>()
 {
   return validParams<Action>();
 }
 
-AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const InputParameters & params) :
-    Action(params)
+AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const InputParameters & params) : Action(params)
 {
 }
 

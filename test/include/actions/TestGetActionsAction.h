@@ -19,7 +19,7 @@
 
 class TestGetActionsAction;
 
-template<>
+template <>
 InputParameters validParams<TestGetActionsAction>();
 
 /**

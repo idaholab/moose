@@ -19,11 +19,10 @@
 
 class SideSetsFromNormals;
 
-template<>
+template <>
 InputParameters validParams<SideSetsFromNormals>();
 
-class SideSetsFromNormals :
-  public AddSideSetsBase
+class SideSetsFromNormals : public AddSideSetsBase
 {
 public:
   SideSetsFromNormals(const InputParameters & parameters);

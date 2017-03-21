@@ -18,7 +18,7 @@
 
 class DriftDiffusionFluxAux;
 
-template<>
+template <>
 InputParameters validParams<DriftDiffusionFluxAux>();
 
 class DriftDiffusionFluxAux : public AuxKernel
@@ -37,4 +37,4 @@ private:
   const int _component;
 };
 
-#endif //DRIFTDIFFUSIONFLUXAUX_H
+#endif // DRIFTDIFFUSIONFLUXAUX_H

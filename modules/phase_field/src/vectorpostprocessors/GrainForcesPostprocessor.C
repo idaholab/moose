@@ -13,7 +13,8 @@ validParams<GrainForcesPostprocessor>()
 {
   InputParameters params = validParams<VectorPostprocessor>();
   params.addClassDescription("Outputs the values from GrainForcesPostprocessor");
-  params.addParam<UserObjectName>("grain_force", "Specify userobject that gives center of mass and volume of grains");
+  params.addParam<UserObjectName>(
+      "grain_force", "Specify userobject that gives center of mass and volume of grains");
   return params;
 }
 
@@ -32,7 +33,8 @@ GrainForcesPostprocessor::initialize()
 {
   _grain_num = _grain_forces.size();
 
-  // for each grain a force and a torque vector with 3 components each are serialized into the output vector
+  // for each grain a force and a torque vector with 3 components each are serialized into the
+  // output vector
   _grain_force_torque_vector.resize(_grain_num * 2 * 3);
 }
 

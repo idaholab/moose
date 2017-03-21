@@ -16,15 +16,17 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DerivativeMaterialInterfaceTestProvider>()
+template <>
+InputParameters
+validParams<DerivativeMaterialInterfaceTestProvider>()
 {
   InputParameters params = validParams<Material>();
   return params;
 }
 
-DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _prop1(declarePropertyDerivative<Real>("prop", "a")),
     _prop2(declarePropertyDerivative<Real>("prop", "b")),
     _prop3(declarePropertyDerivative<Real>("prop", "b", "a")),

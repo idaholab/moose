@@ -12,7 +12,7 @@
 
 class ComputeMeanThermalExpansionFunctionEigenstrain;
 
-template<>
+template <>
 InputParameters validParams<ComputeMeanThermalExpansionFunctionEigenstrain>();
 
 /**

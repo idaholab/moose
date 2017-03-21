@@ -38,25 +38,28 @@
 // class static initialization
 const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;
 
-template<>
-InputParameters validParams<AddLotsOfAuxVariablesAction>()
+template <>
+InputParameters
+validParams<AddLotsOfAuxVariablesAction>()
 {
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<unsigned int>("number", "The number of variables to add");
-  params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable");
-  params.addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
+  params.addParam<MooseEnum>(
+      "family", families, "Specifies the family of FE shape functions to use for this variable");
+  params.addParam<MooseEnum>(
+      "order", orders, "Specifies the order of the FE shape function to use for this variable");
+  params.addParam<Real>(
+      "initial_condition", 0.0, "Specifies the initial condition for this variable");
+  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
 
   return params;
 }
 
-
-AddLotsOfAuxVariablesAction::AddLotsOfAuxVariablesAction(const InputParameters & parameters) :
-    Action(parameters)
+AddLotsOfAuxVariablesAction::AddLotsOfAuxVariablesAction(const InputParameters & parameters)
+  : Action(parameters)
 {
 }
 
@@ -72,14 +75,15 @@ AddLotsOfAuxVariablesAction::act()
                    Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
 
     std::set<SubdomainID> blocks;
-    std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
-    for (std::vector<SubdomainName>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+    std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName>>("block");
+    for (std::vector<SubdomainName>::iterator it = block_param.begin(); it != block_param.end();
+         ++it)
     {
       SubdomainID blk_id = _problem->mesh().getSubdomainID(*it);
       blocks.insert(blk_id);
     }
 
-    bool scalar_var = false;                              // true if adding scalar variable
+    bool scalar_var = false; // true if adding scalar variable
 
     if (fe_type.family == SCALAR)
     {

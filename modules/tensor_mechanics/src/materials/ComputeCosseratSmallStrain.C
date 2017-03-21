@@ -10,8 +10,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ComputeCosseratSmallStrain>()
+template <>
+InputParameters
+validParams<ComputeCosseratSmallStrain>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
   params.addClassDescription("Compute small Cosserat strains");
@@ -19,15 +20,16 @@ InputParameters validParams<ComputeCosseratSmallStrain>()
   return params;
 }
 
-ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & parameters) :
-    ComputeStrainBase(parameters),
+ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & parameters)
+  : ComputeStrainBase(parameters),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _nrots(coupledComponents("Cosserat_rotations")),
     _wc(_nrots),
     _grad_wc(_nrots)
 {
   if (_nrots != 3)
-    mooseError("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
+    mooseError("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional "
+               "simulations so 3 Cosserat rotation variables are needed");
   for (unsigned i = 0; i < _nrots; ++i)
   {
     _wc[i] = &coupledValue("Cosserat_rotations", i);

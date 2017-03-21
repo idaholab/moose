@@ -15,17 +15,18 @@
 #include "PostprocessorFunction.h"
 #include "MooseTypes.h"
 
-template<>
-InputParameters validParams<PostprocessorFunction>()
+template <>
+InputParameters
+validParams<PostprocessorFunction>()
 {
   InputParameters params = validParams<Function>();
-  params.addRequiredParam<PostprocessorName>("pp", "The name of the postprocessor you are trying to get.");
+  params.addRequiredParam<PostprocessorName>(
+      "pp", "The name of the postprocessor you are trying to get.");
   return params;
 }
 
-PostprocessorFunction::PostprocessorFunction(const InputParameters & parameters) :
-    Function(parameters),
-    _pp(getPostprocessorValue("pp"))
+PostprocessorFunction::PostprocessorFunction(const InputParameters & parameters)
+  : Function(parameters), _pp(getPostprocessorValue("pp"))
 {
 }
 

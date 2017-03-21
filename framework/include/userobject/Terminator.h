@@ -17,10 +17,10 @@
 #include "GeneralUserObject.h"
 #include "libmesh/fparser.hh"
 
-//Forward Declarations
+// Forward Declarations
 class Terminator;
 
-template<>
+template <>
 InputParameters validParams<Terminator>();
 
 /**
@@ -72,4 +72,4 @@ protected:
   Real * _params;
 };
 
-#endif //TERMINATOR_H
+#endif // TERMINATOR_H

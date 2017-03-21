@@ -28,17 +28,17 @@ namespace Moose
 {
 namespace SlepcSupport
 {
-  /**
-   * @return InputParameters object containing the SLEPC related parameters
-   *
-   * The output of this function should be added to the the parameters object of the overarching class
-   * @see EigenProblem
-   */
-  InputParameters getSlepcValidParams();
-  InputParameters getSlepcEigenProblemValidParams();
-  void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params);
-  void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params);
-  void slepcSetOptions(FEProblemBase & problem);
+/**
+ * @return InputParameters object containing the SLEPC related parameters
+ *
+ * The output of this function should be added to the the parameters object of the overarching class
+ * @see EigenProblem
+ */
+InputParameters getSlepcValidParams();
+InputParameters getSlepcEigenProblemValidParams();
+void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params);
+void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params);
+void slepcSetOptions(FEProblemBase & problem);
 } // namespace SlepcSupport
 } // namespace moose
 

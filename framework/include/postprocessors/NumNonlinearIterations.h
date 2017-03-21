@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumNonlinearIterations;
 
-template<>
+template <>
 InputParameters validParams<NumNonlinearIterations>();
 
 /**

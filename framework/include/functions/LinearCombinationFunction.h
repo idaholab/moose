@@ -20,7 +20,7 @@
 
 class LinearCombinationFunction;
 
-template<>
+template <>
 InputParameters validParams<LinearCombinationFunction>();
 
 /**
@@ -34,11 +34,9 @@ public:
   virtual Real value(Real t, const Point & pt) override;
 
 private:
-
   std::vector<Real> _w;
 
   std::vector<Function *> _f;
-
 };
 
-#endif //LINEARCOMBINATIONFUNCTION_H
+#endif // LINEARCOMBINATIONFUNCTION_H

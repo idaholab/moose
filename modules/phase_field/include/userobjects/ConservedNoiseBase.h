@@ -11,10 +11,10 @@
 
 #include <unordered_map>
 
-//Forward Declarations
+// Forward Declarations
 class ConservedNoiseBase;
 
-template<>
+template <>
 InputParameters validParams<ConservedNoiseBase>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   std::unordered_map<dof_id_type, std::vector<Real>> _random_data;
 };
 
-#endif //CONSERVEDNOISEBASE_H
+#endif // CONSERVEDNOISEBASE_H

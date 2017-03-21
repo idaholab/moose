@@ -18,7 +18,7 @@
 
 class PotentialAdvection;
 
-template<>
+template <>
 InputParameters validParams<PotentialAdvection>();
 
 class PotentialAdvection : public Kernel
@@ -39,4 +39,4 @@ private:
   const VariableGradient & _grad_potential;
 };
 
-#endif //POTENTIALADVECTION_H
+#endif // POTENTIALADVECTION_H

@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BndsCalcAux;
 
-template<>
+template <>
 InputParameters validParams<BndsCalcAux>();
 
 /**
@@ -30,4 +30,4 @@ protected:
   std::vector<const VariableValue *> _vals;
 };
 
-#endif //BNDSCALCAUX_H
+#endif // BNDSCALCAUX_H

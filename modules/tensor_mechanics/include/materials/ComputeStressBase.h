@@ -46,4 +46,4 @@ protected:
   const bool _store_stress_old;
 };
 
-#endif //COMPUTESTRESSBASE_H
+#endif // COMPUTESTRESSBASE_H

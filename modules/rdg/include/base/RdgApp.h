@@ -12,7 +12,7 @@
 
 class RdgApp;
 
-template<>
+template <>
 InputParameters validParams<RdgApp>();
 
 class RdgApp : public MooseApp

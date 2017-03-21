@@ -21,7 +21,7 @@
 // Forward declerations
 class AssignElementSubdomainID;
 
-template<>
+template <>
 InputParameters validParams<AssignElementSubdomainID>();
 
 /**
@@ -40,4 +40,4 @@ protected:
   virtual void modify() override;
 };
 
-#endif //ASSIGNELEMENTSUBDOMAINID_H
+#endif // ASSIGNELEMENTSUBDOMAINID_H

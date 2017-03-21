@@ -4,10 +4,10 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElectricalConductivity;
 
-template<>
+template <>
 InputParameters validParams<ElectricalConductivity>();
 
 /**
@@ -34,4 +34,4 @@ private:
   MaterialProperty<Real> & _delectric_conductivity_dT;
 };
 
-#endif //ELECTRICALCONDUCTIVITY_H
+#endif // ELECTRICALCONDUCTIVITY_H

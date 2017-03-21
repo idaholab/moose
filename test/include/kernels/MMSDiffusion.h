@@ -18,9 +18,8 @@
 
 class MMSDiffusion;
 
-template<>
+template <>
 InputParameters validParams<MMSDiffusion>();
-
 
 class MMSDiffusion : public Kernel
 {
@@ -34,4 +33,4 @@ protected:
   unsigned int _mesh_dimension;
 };
 
-#endif //MMSDIFFUSION_H
+#endif // MMSDIFFUSION_H

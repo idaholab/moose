@@ -37,8 +37,7 @@ class FEProblem;
 /**
  * Storage for action instances.
  */
-class ActionWarehouse :
-  public ConsoleStreamInterface
+class ActionWarehouse : public ConsoleStreamInterface
 {
 public:
   ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory);
@@ -108,13 +107,13 @@ public:
   template <class T>
   const T & getAction(const std::string & name)
   {
-    T* p = NULL;
+    T * p = NULL;
     for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
       auto act = _all_ptrs[i].get();
       if (act->name() == name)
       {
-        p = dynamic_cast<T*>(act);
+        p = dynamic_cast<T *>(act);
         if (p)
           break;
       }
@@ -132,16 +131,16 @@ public:
   {
     // we need to create the map first to ensure that all actions in the map are unique
     // and the actions are sorted by their names
-    std::map<std::string, const T*> actions;
+    std::map<std::string, const T *> actions;
     for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
       auto act = _all_ptrs[i].get();
-      T* p = dynamic_cast<T*>(act);
+      T * p = dynamic_cast<T *>(act);
       if (p)
-        actions.insert(std::pair<std::string, const T*>(act->name(), p));
+        actions.insert(std::pair<std::string, const T *>(act->name(), p));
     }
     // construct the vector from the map entries
-    std::vector<const T*> action_vector;
+    std::vector<const T *> action_vector;
     for (auto & pair : actions)
       action_vector.push_back(pair.second);
     return action_vector;
@@ -185,7 +184,7 @@ public:
   std::shared_ptr<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
   std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
-  std::shared_ptr<FEProblem>  problem();
+  std::shared_ptr<FEProblem> problem();
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
@@ -197,9 +196,9 @@ protected:
    *
    * @param task The name of the task to find and build Actions for.
    */
-  void buildBuildableActions(const std::string &task);
+  void buildBuildableActions(const std::string & task);
 
-  std::vector<std::shared_ptr<Action> > _all_ptrs;
+  std::vector<std::shared_ptr<Action>> _all_ptrs;
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;
@@ -208,9 +207,9 @@ protected:
   /// The Factory that builds Actions
   ActionFactory & _action_factory;
   /// Pointers to the actual parsed input file blocks
-  std::map<std::string, std::list<Action *> > _action_blocks;
+  std::map<std::string, std::list<Action *>> _action_blocks;
   /// Action blocks that have been requested
-  std::map<std::string, std::vector<Action *> > _requested_action_blocks;
+  std::map<std::string, std::vector<Action *>> _requested_action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   /// Use to store the current list of unsatisfied dependencies

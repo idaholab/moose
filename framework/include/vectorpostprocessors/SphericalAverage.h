@@ -19,7 +19,7 @@
 
 class SphericalAverage;
 
-template<>
+template <>
 InputParameters validParams<SphericalAverage>();
 
 /**
@@ -71,4 +71,4 @@ protected:
   std::vector<VectorPostprocessorValue *> _average;
 };
 
-#endif //SPHERICALAVERAGE_H
+#endif // SPHERICALAVERAGE_H

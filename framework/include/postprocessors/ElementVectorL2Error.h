@@ -19,14 +19,13 @@
 
 class Function;
 
-//Forward Declarations
+// Forward Declarations
 class ElementVectorL2Error;
 
-template<>
+template <>
 InputParameters validParams<ElementVectorL2Error>();
 
-class ElementVectorL2Error :
-  public ElementIntegralPostprocessor
+class ElementVectorL2Error : public ElementIntegralPostprocessor
 {
 public:
   ElementVectorL2Error(const InputParameters & parameters);
@@ -45,4 +44,4 @@ protected:
   const VariableValue & _w; // FE solution in z
 };
 
-#endif //ELEMENTVECTORL2ERROR_H
+#endif // ELEMENTVECTORL2ERROR_H

@@ -19,7 +19,7 @@
 
 class TimeSequenceStepperBase;
 
-template<>
+template <>
 InputParameters validParams<TimeSequenceStepperBase>();
 
 /**
@@ -48,4 +48,4 @@ protected:
   std::vector<Real> & _time_sequence;
 };
 
-#endif //TIMESEQUENCESTEPPERBASE_H
+#endif // TIMESEQUENCESTEPPERBASE_H

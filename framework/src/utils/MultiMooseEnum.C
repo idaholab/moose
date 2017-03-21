@@ -24,14 +24,16 @@
 #include <string>
 #include <iostream>
 
-MultiMooseEnum::MultiMooseEnum(std::string names, std::string default_names, bool allow_out_of_range) :
-    MooseEnumBase(names, allow_out_of_range)
+MultiMooseEnum::MultiMooseEnum(std::string names,
+                               std::string default_names,
+                               bool allow_out_of_range)
+  : MooseEnumBase(names, allow_out_of_range)
 {
   *this = default_names;
 }
 
-MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum) :
-    MooseEnumBase(other_enum),
+MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
+  : MooseEnumBase(other_enum),
     _current_ids(other_enum._current_ids),
     _current_names(other_enum._current_names),
     _current_names_preserved(other_enum._current_names_preserved)
@@ -47,14 +49,9 @@ MultiMooseEnum::withNamesFrom(const MooseEnumBase & other_enum)
 /**
  * Private constuctor for use by libmesh::Parameters
  */
-MultiMooseEnum::MultiMooseEnum()
-{
-}
+MultiMooseEnum::MultiMooseEnum() {}
 
-MultiMooseEnum::MultiMooseEnum(const MooseEnumBase & other_enum) :
-    MooseEnumBase(other_enum)
-{
-}
+MultiMooseEnum::MultiMooseEnum(const MooseEnumBase & other_enum) : MooseEnumBase(other_enum) {}
 
 bool
 MultiMooseEnum::operator==(const MultiMooseEnum & value) const
@@ -171,10 +168,12 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
   assign(names.begin(), names.end(), true);
 }
 
-const std::string &
-MultiMooseEnum::operator[](unsigned int i) const
+const std::string & MultiMooseEnum::operator[](unsigned int i) const
 {
-  mooseAssert(i < _current_names_preserved.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names_preserved.size() << ")");
+  mooseAssert(i < _current_names_preserved.size(),
+              "Access out of bounds in MultiMooseEnum (i: " << i << " size: "
+                                                            << _current_names_preserved.size()
+                                                            << ")");
 
   return _current_names_preserved[i];
 }
@@ -182,12 +181,14 @@ MultiMooseEnum::operator[](unsigned int i) const
 unsigned int
 MultiMooseEnum::get(unsigned int i) const
 {
-  mooseAssert(i < _current_ids.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_ids.size() << ")");
+  mooseAssert(i < _current_ids.size(),
+              "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_ids.size()
+                                                            << ")");
 
   return _current_ids[i];
 }
 
-template<typename InputIterator>
+template <typename InputIterator>
 MultiMooseEnum &
 MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
 {
@@ -206,8 +207,12 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
 
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
-      if (_out_of_range_index == 0)     // Are out of range values allowed?
-        mooseError("Invalid option \"", upper, "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"", _raw_names, "\".");
+      if (_out_of_range_index == 0) // Are out of range values allowed?
+        mooseError("Invalid option \"",
+                   upper,
+                   "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"",
+                   _raw_names,
+                   "\".");
       else
       {
         // Allow values assigned outside of the enumeration range
@@ -225,7 +230,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
   return *this;
 }
 
-template<typename InputIterator>
+template <typename InputIterator>
 void
 MultiMooseEnum::remove(InputIterator first, InputIterator last)
 {
@@ -257,7 +262,8 @@ MultiMooseEnum::clear()
 unsigned int
 MultiMooseEnum::size() const
 {
-  mooseAssert(_current_ids.size() == _current_names_preserved.size(), "Internal inconsistency between id and name vectors in MultiMooseEnum");
+  mooseAssert(_current_ids.size() == _current_names_preserved.size(),
+              "Internal inconsistency between id and name vectors in MultiMooseEnum");
   return _current_ids.size();
 }
 
@@ -278,6 +284,8 @@ MultiMooseEnum::checkDeprecated() const
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  std::copy(obj._current_names.begin(), obj._current_names.end(), infix_ostream_iterator<std::string>(out, " "));
+  std::copy(obj._current_names.begin(),
+            obj._current_names.end(),
+            infix_ostream_iterator<std::string>(out, " "));
   return out;
 }

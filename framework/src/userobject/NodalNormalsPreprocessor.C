@@ -25,25 +25,29 @@
 
 Threads::spin_mutex nodal_normals_preprocessor_mutex;
 
-template<>
-InputParameters validParams<NodalNormalsPreprocessor>()
+template <>
+InputParameters
+validParams<NodalNormalsPreprocessor>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params += validParams<BoundaryRestrictable>();
-  params.addParam<BoundaryName>("corner_boundary", "Node set ID which contains the nodes that are in 'corners'.");
+  params.addParam<BoundaryName>("corner_boundary",
+                                "Node set ID which contains the nodes that are in 'corners'.");
   params.addPrivateParam<FEFamily>("fe_family", LAGRANGE);
   params.addPrivateParam<Order>("fe_order", FIRST);
 
   return params;
 }
 
-NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters) :
-    ElementUserObject(parameters),
+NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters)
+  : ElementUserObject(parameters),
     BoundaryRestrictable(parameters, true), // true for applying to nodesets
     _aux(_fe_problem.getAuxiliarySystem()),
     _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
     _has_corners(isParamValid("corner_boundary")),
-    _corner_boundary_id(_has_corners ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary")) : static_cast<BoundaryID>(-1)),
+    _corner_boundary_id(_has_corners
+                            ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary"))
+                            : static_cast<BoundaryID>(-1)),
     _grad_phi(_assembly.feGradPhi(_fe_type))
 {
 }
@@ -83,16 +87,20 @@ NodalNormalsPreprocessor::execute()
       // Perform the calculation, the node must be:
       //    (1) On a boundary to which the object is restricted
       //    (2) Not on a corner of the boundary
-      if (hasBoundary(node_boundary_ids, ANY)
-          && (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
+      if (hasBoundary(node_boundary_ids, ANY) &&
+          (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
       {
         // Perform the caluation of the normal
-        if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
+        if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) >
+            0)
         {
           // but it is not a corner node, they will be treated differently later on
-          dof_id_type dof_x = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
-          dof_id_type dof_y = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
-          dof_id_type dof_z = node->dof_number(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+          dof_id_type dof_x = node->dof_number(
+              _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
+          dof_id_type dof_y = node->dof_number(
+              _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
+          dof_id_type dof_z = node->dof_number(
+              _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
 
           for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
           {

@@ -10,7 +10,8 @@
 #include "ComputeIncrementalStrainBase.h"
 
 /**
- * ComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small strains.
+ * ComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small
+ * strains.
  */
 class ComputeIncrementalSmallStrain : public ComputeIncrementalStrainBase
 {
@@ -25,4 +26,4 @@ protected:
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 };
 
-#endif //COMPUTEINCREMENTALSMALLSTRAIN_H
+#endif // COMPUTEINCREMENTALSMALLSTRAIN_H

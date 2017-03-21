@@ -14,7 +14,7 @@
 // Forward Declarations
 class PorousFlowDesorpedMassVolumetricExpansion;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDesorpedMassVolumetricExpansion>();
 
 /**
@@ -63,4 +63,4 @@ protected:
   Real computeQpJac(unsigned int jvar) const;
 };
 
-#endif //POROUSFLOWDESORPEDMASSVOLUMETRICEXPANSION_H
+#endif // POROUSFLOWDESORPEDMASSVOLUMETRICEXPANSION_H

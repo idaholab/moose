@@ -13,7 +13,7 @@
 
 class CHSplitFlux;
 
-template<>
+template <>
 InputParameters validParams<CHSplitFlux>();
 
 /**

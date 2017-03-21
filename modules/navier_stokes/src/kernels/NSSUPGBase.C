@@ -12,8 +12,9 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NSSUPGBase>()
+template <>
+InputParameters
+validParams<NSSUPGBase>()
 {
   InputParameters params = validParams<NSKernel>();
   params.addClassDescription("This class acts as a base class for stabilization kernels.");
@@ -22,8 +23,8 @@ InputParameters validParams<NSSUPGBase>()
   return params;
 }
 
-NSSUPGBase::NSSUPGBase(const InputParameters & parameters) :
-    NSKernel(parameters),
+NSSUPGBase::NSSUPGBase(const InputParameters & parameters)
+  : NSKernel(parameters),
 
     // Material properties
     _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
@@ -35,16 +36,16 @@ NSSUPGBase::NSSUPGBase(const InputParameters & parameters) :
     _tauc(getMaterialProperty<Real>("tauc")),
     _taum(getMaterialProperty<Real>("taum")),
     _taue(getMaterialProperty<Real>("taue")),
-    _strong_residuals(getMaterialProperty<std::vector<Real> >("strong_residuals")),
+    _strong_residuals(getMaterialProperty<std::vector<Real>>("strong_residuals")),
 
     // Momentum equation inviscid flux matrices
-    _calA(getMaterialProperty<std::vector<RealTensorValue> >("calA")),
+    _calA(getMaterialProperty<std::vector<RealTensorValue>>("calA")),
 
     // "velocity column" matrices
-    _calC(getMaterialProperty<std::vector<RealTensorValue> >("calC")),
+    _calC(getMaterialProperty<std::vector<RealTensorValue>>("calC")),
 
     // energy inviscid flux matrices
-    _calE(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
+    _calE(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>("calE")),
 
     // Old coupled variable values
     // _rho_old(coupledValueOld(NS::density)),

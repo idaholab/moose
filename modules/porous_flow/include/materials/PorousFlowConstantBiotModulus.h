@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowConstantBiotModulus;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowConstantBiotModulus>();
 
 /**
@@ -54,4 +54,4 @@ protected:
   const MaterialProperty<Real> & _biot_modulus_old;
 };
 
-#endif //POROUSFLOWCONSTANTBIOTMODULUS_H
+#endif // POROUSFLOWCONSTANTBIOTMODULUS_H

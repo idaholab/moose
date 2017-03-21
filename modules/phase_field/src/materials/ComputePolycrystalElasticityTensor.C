@@ -8,20 +8,25 @@
 #include "ComputePolycrystalElasticityTensor.h"
 #include "RotationTensor.h"
 
-template<>
-InputParameters validParams<ComputePolycrystalElasticityTensor>()
+template <>
+InputParameters
+validParams<ComputePolycrystalElasticityTensor>()
 {
   InputParameters params = validParams<ComputeElasticityTensorBase>();
-  params.addClassDescription("Compute an evolving elasticity tensor coupled to a grain growth phase field model.");
-  params.addRequiredParam<UserObjectName>("grain_tracker", "Name of GrainTracker user object that provides RankFourTensors");
+  params.addClassDescription(
+      "Compute an evolving elasticity tensor coupled to a grain growth phase field model.");
+  params.addRequiredParam<UserObjectName>(
+      "grain_tracker", "Name of GrainTracker user object that provides RankFourTensors");
   params.addParam<Real>("length_scale", 1.0e-9, "Lengthscale of the problem, in meters");
   params.addParam<Real>("pressure_scale", 1.0e6, "Pressure scale of the problem, in pa");
-  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
+  params.addRequiredCoupledVarWithAutoBuild(
+      "v", "var_name_base", "op_num", "Array of coupled variables");
   return params;
 }
 
-ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const InputParameters & parameters) :
-    ComputeElasticityTensorBase(parameters),
+ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(
+    const InputParameters & parameters)
+  : ComputeElasticityTensorBase(parameters),
     _length_scale(getParam<Real>("length_scale")),
     _pressure_scale(getParam<Real>("pressure_scale")),
     _grain_tracker(getUserObject<GrainDataTracker<RankFourTensor>>("grain_tracker")),
@@ -37,7 +42,8 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const Inp
     _vals[op_index] = &coupledValue("v", op_index);
 
     // declare elasticity tensor derivative properties
-    _D_elastic_tensor[op_index] = &declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, getVar("v", op_index)->name());
+    _D_elastic_tensor[op_index] = &declarePropertyDerivative<RankFourTensor>(
+        _elasticity_tensor_name, getVar("v", op_index)->name());
   }
 }
 

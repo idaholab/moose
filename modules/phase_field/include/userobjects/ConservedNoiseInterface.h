@@ -9,7 +9,7 @@
 
 #include "ElementUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConservedNoiseInterface;
 
 /**
@@ -39,4 +39,4 @@ protected:
   unsigned int _qp;
 };
 
-#endif //CONSERVEDNOISEINTERFACE_H
+#endif // CONSERVEDNOISEINTERFACE_H

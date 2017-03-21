@@ -6,27 +6,30 @@
 /****************************************************************/
 #include "ThermoDiffusion.h"
 
-template<>
-InputParameters validParams< ThermoDiffusion >()
+template <>
+InputParameters
+validParams<ThermoDiffusion>()
 {
-  InputParameters params = validParams< Kernel >();
-  params.addRequiredCoupledVar( "temp", "Coupled temperature" );
-  params.addParam< Real >( "gas_constant", 8.3144621, "Gas constant" );
-  params.addParam< std::string >( "heat_of_transport", "heat_of_transport", "Property name for the heat of transport.");
-  params.addParam< std::string >( "mass_diffusivity", "mass_diffusivity", "Property name for the diffusivity.");
+  InputParameters params = validParams<Kernel>();
+  params.addRequiredCoupledVar("temp", "Coupled temperature");
+  params.addParam<Real>("gas_constant", 8.3144621, "Gas constant");
+  params.addParam<std::string>(
+      "heat_of_transport", "heat_of_transport", "Property name for the heat of transport.");
+  params.addParam<std::string>(
+      "mass_diffusivity", "mass_diffusivity", "Property name for the diffusivity.");
 
-  params.addClassDescription( "Kernel for thermo-diffusion (Soret effect, thermophoresis, etc.)" );
+  params.addClassDescription("Kernel for thermo-diffusion (Soret effect, thermophoresis, etc.)");
   return params;
 }
 
-ThermoDiffusion::ThermoDiffusion( const InputParameters & parameters) :
-    Kernel(parameters),
-    _temperature( coupledValue( "temp" ) ),
-    _grad_temperature( coupledGradient( "temp" ) ),
-    _mass_diffusivity( getMaterialProperty< Real >( getParam< std::string >( "mass_diffusivity" ) ) ),
-    _heat_of_transport( getMaterialProperty< Real >( getParam< std::string >( "heat_of_transport" ) ) ),
-    _gas_constant( getParam< Real >( "gas_constant" ) ),
-    _temperature_index( coupled( "temp" ) )
+ThermoDiffusion::ThermoDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
+    _temperature(coupledValue("temp")),
+    _grad_temperature(coupledGradient("temp")),
+    _mass_diffusivity(getMaterialProperty<Real>(getParam<std::string>("mass_diffusivity"))),
+    _heat_of_transport(getMaterialProperty<Real>(getParam<std::string>("heat_of_transport"))),
+    _gas_constant(getParam<Real>("gas_constant")),
+    _temperature_index(coupled("temp"))
 {
 }
 
@@ -41,7 +44,7 @@ ThermoDiffusion::thermoDiffusionVelocity() const
   //   v = D Qstar grad(T) / ( R T^2 )
   //
   Real coeff = _mass_diffusivity[_qp] * _heat_of_transport[_qp] /
-    ( _gas_constant * _temperature[_qp] * _temperature[_qp] );
+               (_gas_constant * _temperature[_qp] * _temperature[_qp]);
   return coeff * _grad_temperature[_qp];
 }
 
@@ -58,15 +61,14 @@ ThermoDiffusion::computeQpJacobian()
 }
 
 Real
-ThermoDiffusion::computeQpOffDiagJacobian( unsigned int jvar )
+ThermoDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if ( jvar == _temperature_index )
+  if (jvar == _temperature_index)
   {
     Real coeff = _mass_diffusivity[_qp] * _heat_of_transport[_qp] /
-      ( _gas_constant * _temperature[_qp] * _temperature[_qp] );
-    return coeff * _grad_test[_i][_qp] * _u[_qp] * ( _grad_phi[_j][_qp] -
-      2 * _phi[_j][_qp] * _grad_temperature[_qp] / _temperature[_qp] );
+                 (_gas_constant * _temperature[_qp] * _temperature[_qp]);
+    return coeff * _grad_test[_i][_qp] * _u[_qp] *
+           (_grad_phi[_j][_qp] - 2 * _phi[_j][_qp] * _grad_temperature[_qp] / _temperature[_qp]);
   }
   return 0;
 }
-

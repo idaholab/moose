@@ -21,8 +21,7 @@ namespace SolidMechanics
 class Element;
 }
 
-
-template<>
+template <>
 InputParameters validParams<SolidModel>();
 
 /**
@@ -31,16 +30,16 @@ InputParameters validParams<SolidModel>();
 class SolidModel : public DerivativeMaterialInterface<Material>
 {
 public:
-  SolidModel( const InputParameters & parameters);
+  SolidModel(const InputParameters & parameters);
   virtual ~SolidModel();
 
-  virtual void initStatefulProperties( unsigned n_points );
+  virtual void initStatefulProperties(unsigned n_points);
 
   virtual void applyThermalStrain();
   virtual void applyVolumetricStrain();
 
-  static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
-                                     SymmTensor & result );
+  static void
+  rotateSymmetricTensor(const ColumnMajorMatrix & R, const SymmTensor & T, SymmTensor & result);
 
   enum CRACKING_RELEASE
   {
@@ -50,18 +49,9 @@ public:
     CR_UNKNOWN
   };
 
-  QBase * qrule()
-  {
-    return _qrule;
-  }
-  const Point & q_point( unsigned i ) const
-  {
-    return _q_point[i];
-  }
-  Real JxW( unsigned i ) const
-  {
-    return _JxW[i];
-  }
+  QBase * qrule() { return _qrule; }
+  const Point & q_point(unsigned i) const { return _q_point[i]; }
+  Real JxW(unsigned i) const { return _JxW[i]; }
 
 protected:
   Moose::CoordinateSystemType _coord_type;
@@ -109,10 +99,11 @@ protected:
   bool _mean_alpha_function;
   Real _ref_temp;
 
-  std::map<SubdomainID, std::vector<MooseSharedPointer<VolumetricModel> > > _volumetric_models;
+  std::map<SubdomainID, std::vector<MooseSharedPointer<VolumetricModel>>> _volumetric_models;
   std::set<std::string> _dep_matl_props;
 
   MaterialProperty<SymmTensor> & _stress;
+
 private:
   MaterialProperty<SymmTensor> & _stress_old_prop;
 
@@ -155,13 +146,13 @@ protected:
   const bool _compute_InteractionIntegral;
   bool _store_stress_older;
 
-  //These are used in calculation of the J integral
+  // These are used in calculation of the J integral
   MaterialProperty<Real> * _SED;
   MaterialProperty<Real> * _SED_old;
   MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
 
-  //This is used in calculation of the J Integral and Interaction Integral
+  // This is used in calculation of the J Integral and Interaction Integral
   MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
 
   virtual void initQpStatefulProperties();
@@ -203,7 +194,7 @@ protected:
   // Compute quantity used in thermal term of J Integral
   virtual void computeThermalJvec();
 
-  //Compute current thermal expansion coefficient, used in J Integral and Interaction Integral
+  // Compute current thermal expansion coefficient, used in J Integral and Interaction Integral
   virtual void computeCurrentInstantaneousThermalExpansionCoefficient();
 
   /*
@@ -212,43 +203,31 @@ protected:
    */
   virtual void crackingStressRotation();
 
-  virtual Real computeCrackFactor( int i, Real & sigma, Real & flagVal );
+  virtual Real computeCrackFactor(int i, Real & sigma, Real & flagVal);
 
   /// Rotate stress to current configuration
   virtual void finalizeStress();
 
-
   virtual void computePreconditioning();
 
-  void applyCracksToTensor( SymmTensor & tensor, const RealVectorValue & sigma );
+  void applyCracksToTensor(SymmTensor & tensor, const RealVectorValue & sigma);
 
-  void
-  elasticityTensor( SymmElasticityTensor * e );
+  void elasticityTensor(SymmElasticityTensor * e);
 
-  SymmElasticityTensor *
-  elasticityTensor() const
-  {
-    return _local_elasticity_tensor;
-  }
+  SymmElasticityTensor * elasticityTensor() const { return _local_elasticity_tensor; }
 
-  const SolidMechanics::Element * element() const
-  {
-    return _element;
-  }
+  const SolidMechanics::Element * element() const { return _element; }
 
-  int delta(int i, int j) const
-  {
-    return i == j;
-  }
+  int delta(int i, int j) const { return i == j; }
 
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & createProperty(const std::string & prop_name)
   {
     std::string name(prop_name + _appended_property_name);
     return declareProperty<T>(name);
   }
 
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
   {
     std::string name(prop_name + _appended_property_name);
@@ -261,9 +240,9 @@ protected:
 
   std::vector<SubdomainID> _block_id;
 
-  std::map<SubdomainID, MooseSharedPointer<ConstitutiveModel> > _constitutive_model;
+  std::map<SubdomainID, MooseSharedPointer<ConstitutiveModel>> _constitutive_model;
   // This set keeps track of the dynamic memory allocated in this object
-  std::set<MooseSharedPointer<ConstitutiveModel> > _models_to_free;
+  std::set<MooseSharedPointer<ConstitutiveModel>> _models_to_free;
   bool _constitutive_active;
 
   /// Compute the stress (sigma += deltaSigma)
@@ -276,19 +255,14 @@ protected:
   bool & _step_one;
   ///@}
 
-
 private:
-
-  void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
+  void computeCrackStrainAndOrientation(ColumnMajorMatrix & principal_strain);
 
   SolidMechanics::Element * createElement();
 
   SolidMechanics::Element * _element;
 
   SymmElasticityTensor * _local_elasticity_tensor;
-
 };
-
-
 
 #endif

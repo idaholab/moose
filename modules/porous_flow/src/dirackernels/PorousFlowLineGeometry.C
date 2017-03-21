@@ -8,19 +8,36 @@
 #include "PorousFlowLineGeometry.h"
 #include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<PorousFlowLineGeometry>()
+template <>
+InputParameters
+validParams<PorousFlowLineGeometry>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<std::string>("point_file", "The file containing the coordinates of the points and their weightings that approximate the line sink.  The physical meaning of the weightings depend on the scenario, eg, they may be borehole radii.  Each line in the file must contain a space-separated weight and coordinate, viz r x y z.  For boreholes, the last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  If your file contains just one point, you must also specify the line_length and line_direction parameters.  Note that you will get segementation faults if your points do not lie within your mesh!");
-  params.addRangeCheckedParam<Real>("line_length", 0.0, "line_length>=0", "Line length.  Note this is only used if there is only one point in the point_file.");
-  params.addParam<RealVectorValue>("line_direction", RealVectorValue(0.0, 0.0, 1.0), "Line direction.  Note this is only used if there is only one point in the point_file.");
-  params.addClassDescription("Approximates a polyline sink in the mesh using a number of Dirac point sinks with given weightings that are read from a file");
+  params.addRequiredParam<std::string>(
+      "point_file",
+      "The file containing the coordinates of the points and their weightings that approximate the "
+      "line sink.  The physical meaning of the weightings depend on the scenario, eg, they may be "
+      "borehole radii.  Each line in the file must contain a space-separated weight and "
+      "coordinate, viz r x y z.  For boreholes, the last point in the file is defined as the "
+      "borehole bottom, where the borehole pressure is bottom_pressure.  If your file contains "
+      "just one point, you must also specify the line_length and line_direction parameters.  Note "
+      "that you will get segementation faults if your points do not lie within your mesh!");
+  params.addRangeCheckedParam<Real>(
+      "line_length",
+      0.0,
+      "line_length>=0",
+      "Line length.  Note this is only used if there is only one point in the point_file.");
+  params.addParam<RealVectorValue>(
+      "line_direction",
+      RealVectorValue(0.0, 0.0, 1.0),
+      "Line direction.  Note this is only used if there is only one point in the point_file.");
+  params.addClassDescription("Approximates a polyline sink in the mesh using a number of Dirac "
+                             "point sinks with given weightings that are read from a file");
   return params;
 }
 
-PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameters) :
-    DiracKernel(parameters),
+PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameters)
+  : DiracKernel(parameters),
     _line_length(getParam<Real>("line_length")),
     _line_direction(getParam<RealVectorValue>("line_direction")),
     _point_file(getParam<std::string>("point_file"))
@@ -60,11 +77,19 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
 
   // construct the line-segment lengths between each point
   _half_seg_len.resize(std::max(num_pts - 1, 1));
-  for (unsigned int i = 0 ; i + 1 < _xs.size(); ++i)
+  for (unsigned int i = 0; i + 1 < _xs.size(); ++i)
   {
-    _half_seg_len[i] = 0.5 * std::sqrt(Utility::pow<2>(_xs[i+1] - _xs[i]) + Utility::pow<2>(_ys[i+1] - _ys[i]) + Utility::pow<2>(_zs[i+1] - _zs[i]));
+    _half_seg_len[i] = 0.5 * std::sqrt(Utility::pow<2>(_xs[i + 1] - _xs[i]) +
+                                       Utility::pow<2>(_ys[i + 1] - _ys[i]) +
+                                       Utility::pow<2>(_zs[i + 1] - _zs[i]));
     if (_half_seg_len[i] == 0)
-      mooseError("PorousFlowLineGeometry: zero-segment length detected at (x,y,z) = ", _xs[i], " ", _ys[i], " ", _zs[i], "\n");
+      mooseError("PorousFlowLineGeometry: zero-segment length detected at (x,y,z) = ",
+                 _xs[i],
+                 " ",
+                 _ys[i],
+                 " ",
+                 _zs[i],
+                 "\n");
   }
   if (num_pts == 1)
     _half_seg_len[0] = _line_length;
@@ -77,11 +102,11 @@ PorousFlowLineGeometry::parseNextLineReals(std::ifstream & ifs, std::vector<Real
   std::string line;
   myvec.clear();
   bool gotline(false);
-  if (getline(ifs,line))
+  if (getline(ifs, line))
   {
     gotline = true;
 
-    //Harvest floats separated by whitespace
+    // Harvest floats separated by whitespace
     std::istringstream iss(line);
     Real f;
     while (iss >> f)

@@ -20,7 +20,7 @@
 // Forward Declaration
 class TimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<TimeDerivative>();
 
 class TimeDerivative : public TimeKernel
@@ -37,4 +37,4 @@ protected:
   bool _lumping;
 };
 
-#endif //TIMEDERIVATIVE_H
+#endif // TIMEDERIVATIVE_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PRELPERMPOWERGAS_H
 #define Q2PRELPERMPOWERGAS_H
 
@@ -13,8 +12,7 @@
 
 class Q2PRelPermPowerGas;
 
-
-template<>
+template <>
 InputParameters validParams<Q2PRelPermPowerGas>();
 
 /**
@@ -47,13 +45,11 @@ public:
   Real d2relperm(Real seff) const;
 
 protected:
-
   /// immobile saturation
   Real _simm;
 
   /// exponent
   Real _n;
-
 };
 
 #endif // Q2PRELPERMPOWERGAS_H

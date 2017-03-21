@@ -16,8 +16,9 @@
 #include "Function.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<FunctionGradAux>()
+template <>
+InputParameters
+validParams<FunctionGradAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   MooseEnum dim_indices("x=0 y=1 z=2", "x");
@@ -26,8 +27,8 @@ InputParameters validParams<FunctionGradAux>()
   return params;
 }
 
-FunctionGradAux::FunctionGradAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+FunctionGradAux::FunctionGradAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _func(getFunction("function")),
     _dim_index(getParam<MooseEnum>("dimension_index"))
 {
@@ -35,9 +36,7 @@ FunctionGradAux::FunctionGradAux(const InputParameters & parameters) :
     mooseError("dimension_index > mesh dimension");
 }
 
-FunctionGradAux::~FunctionGradAux()
-{
-}
+FunctionGradAux::~FunctionGradAux() {}
 
 Real
 FunctionGradAux::computeValue()

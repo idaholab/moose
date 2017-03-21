@@ -15,17 +15,15 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 
-template<>
-InputParameters validParams<SteadyWithNull>()
+template <>
+InputParameters
+validParams<SteadyWithNull>()
 {
   InputParameters params = validParams<Steady>();
   return params;
 }
 
-SteadyWithNull::SteadyWithNull(const InputParameters & parameters) :
-    Steady(parameters)
-{
-}
+SteadyWithNull::SteadyWithNull(const InputParameters & parameters) : Steady(parameters) {}
 
 void
 SteadyWithNull::init()
@@ -36,7 +34,8 @@ SteadyWithNull::init()
   *to_vector1 = *from_vector;
   if (_problem.subspaceDim("TransposeNullSpace") > 0)
   {
-    NumericVector<Number> * to_vector2 = &_problem.getNonlinearSystemBase().getVector("TransposeNullSpace_0");
+    NumericVector<Number> * to_vector2 =
+        &_problem.getNonlinearSystemBase().getVector("TransposeNullSpace_0");
     *to_vector2 = *from_vector;
   }
   _problem.getNonlinearSystemBase().update();

@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledBEKinetic;
 
-template<>
+template <>
 InputParameters validParams<CoupledBEKinetic>();
 
 /**
@@ -41,4 +41,4 @@ private:
   std::vector<const VariableValue *> _vals_old;
 };
 
-#endif //COUPLEDBEKINETIC_H
+#endif // COUPLEDBEKINETIC_H

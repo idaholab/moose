@@ -17,10 +17,10 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class VariableInnerProduct;
 
-template<>
+template <>
 InputParameters validParams<VariableInnerProduct>();
 
 class VariableInnerProduct : public ElementIntegralVariablePostprocessor
@@ -35,4 +35,4 @@ protected:
   const VariableValue & _v;
 };
 
-#endif //VariableInnerProduct_H
+#endif // VariableInnerProduct_H

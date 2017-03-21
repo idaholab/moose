@@ -19,7 +19,7 @@
 #include "MaterialProperty.h"
 #include "MaterialPropertyStorage.h"
 
-//libMesh
+// libMesh
 #include "libmesh/elem.h"
 
 #include <vector>
@@ -58,19 +58,19 @@ public:
    * functions multiple times with the same property name is okay and
    * will result in a single identical reference returned every time.
    */
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name);
 
   /**
    * Declare the Real valued property prop_name.
    */
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
 
   /**
    * Declare the Real valued property named prop_name.
    */
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
 
   /// copy material properties from one element to another
@@ -136,10 +136,12 @@ public:
    *
    * @return An unsigned int corresponding to the property ID of the passed in prop_name
    */
-  unsigned int getPropertyId(const std::string & prop_name) const { return _storage.getPropertyId(prop_name); }
+  unsigned int getPropertyId(const std::string & prop_name) const
+  {
+    return _storage.getPropertyId(prop_name);
+  }
 
 protected:
-
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
 
@@ -158,32 +160,34 @@ protected:
    * stateful old and older properties.  Newly added elements are set to
    * default-constructed material properties.
    */
-  template<typename T>
+  template <typename T>
   void resizeProps(unsigned int size);
 
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
 
 private:
-  template<typename T>
-  MaterialProperty<T> & declareHelper(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id);
+  template <typename T>
+  MaterialProperty<T> &
+  declareHelper(MaterialProperties & props, const std::string & prop_name, unsigned int prop_id);
 };
 
 template <typename T>
 inline bool
-MaterialData::haveProperty (const std::string & prop_name) const
+MaterialData::haveProperty(const std::string & prop_name) const
 {
   if (!_storage.hasProperty(prop_name))
     return false;
 
   unsigned int prop_id = getPropertyId(prop_name);
   if (prop_id >= _props.size())
-    return false;           // the property id exists, but the property was not created in this instance of the material type
+    return false; // the property id exists, but the property was not created in this instance of
+                  // the material type
 
-  return dynamic_cast<const MaterialProperty<T>*>(_props[prop_id]) != nullptr;
+  return dynamic_cast<const MaterialProperty<T> *>(_props[prop_id]) != nullptr;
 }
 
-template<typename T>
+template <typename T>
 void
 MaterialData::resizeProps(unsigned int size)
 {
@@ -203,14 +207,14 @@ MaterialData::resizeProps(unsigned int size)
     _props_older[size] = new MaterialProperty<T>;
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 MaterialData::declareProperty(const std::string & prop_name)
 {
   return declareHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
@@ -218,7 +222,7 @@ MaterialData::declarePropertyOld(const std::string & prop_name)
   return getPropertyOld<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
@@ -226,36 +230,38 @@ MaterialData::declarePropertyOlder(const std::string & prop_name)
   return getPropertyOlder<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
-MaterialData::declareHelper(MaterialProperties& props, const std::string & libmesh_dbg_var(prop_name), unsigned int prop_id)
+MaterialData::declareHelper(MaterialProperties & props,
+                            const std::string & libmesh_dbg_var(prop_name),
+                            unsigned int prop_id)
 {
   resizeProps<T>(prop_id);
-  auto prop = dynamic_cast<MaterialProperty<T>*>(props[prop_id]);
+  auto prop = dynamic_cast<MaterialProperty<T> *>(props[prop_id]);
   mooseAssert(prop != nullptr, "Internal error in declaring material property: " + prop_name);
   return *prop;
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 MaterialData::getProperty(const std::string & name)
 {
   auto prop_id = getPropertyId(name);
   resizeProps<T>(prop_id);
-  auto prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
+  auto prop = dynamic_cast<MaterialProperty<T> *>(_props[prop_id]);
   if (!prop)
     mooseError("Material has no property named: " + name);
   return *prop;
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 MaterialData::getPropertyOld(const std::string & name)
 {
   return declareHelper<T>(_props_old, name, _storage.addPropertyOld(name));
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 MaterialData::getPropertyOlder(const std::string & name)
 {

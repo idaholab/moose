@@ -18,20 +18,14 @@
 // Just for testing...
 #include "Diffusion.h"
 
-Factory::Factory(MooseApp & app) :
-    _app(app)
-{
-}
+Factory::Factory(MooseApp & app) : _app(app) {}
 
-Factory::~Factory()
-{
-}
+Factory::~Factory() {}
 
 InputParameters
 Factory::getValidParams(const std::string & obj_name)
 {
-  std::map<std::string, paramsPtr>::iterator
-    it = _name_to_params_pointer.find(obj_name);
+  std::map<std::string, paramsPtr>::iterator it = _name_to_params_pointer.find(obj_name);
 
   // Check if the object is registered
   if (it == _name_to_params_pointer.end())
@@ -49,7 +43,11 @@ Factory::getValidParams(const std::string & obj_name)
 }
 
 MooseObjectPtr
-Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */, bool print_deprecated /* =true */)
+Factory::create(const std::string & obj_name,
+                const std::string & name,
+                InputParameters parameters,
+                THREAD_ID tid /* =0 */,
+                bool print_deprecated /* =true */)
 {
   if (print_deprecated)
     mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
@@ -65,7 +63,8 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   deprecatedMessage(obj_name);
 
   // Create the actual parameters object that the object will reference
-  InputParameters & params = _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
+  InputParameters & params =
+      _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
 
   // Check to make sure that all required parameters are supplied
   params.checkParams(name);
@@ -85,7 +84,8 @@ Factory::restrictRegisterableObjects(const std::vector<std::string> & names)
   _registerable_objects.insert(names.begin(), names.end());
 }
 
-time_t Factory::parseTime(const std::string t_str)
+time_t
+Factory::parseTime(const std::string t_str)
 {
   // The string must be a certain length to be valid
   if (t_str.size() != 16)
@@ -96,20 +96,20 @@ time_t Factory::parseTime(const std::string t_str)
   struct tm * t_end_info;
   time(&t_end);
   t_end_info = localtime(&t_end);
-  t_end_info->tm_mon  = std::atoi(t_str.substr(0,2).c_str())-1;
-  t_end_info->tm_mday = std::atoi(t_str.substr(3,2).c_str());
-  t_end_info->tm_year = std::atoi(t_str.substr(6,4).c_str())-1900;
-  t_end_info->tm_hour = std::atoi(t_str.substr(11,2).c_str())+1;
-  t_end_info->tm_min  = std::atoi(t_str.substr(14,2).c_str());
-  t_end_info->tm_sec  = 0;
+  t_end_info->tm_mon = std::atoi(t_str.substr(0, 2).c_str()) - 1;
+  t_end_info->tm_mday = std::atoi(t_str.substr(3, 2).c_str());
+  t_end_info->tm_year = std::atoi(t_str.substr(6, 4).c_str()) - 1900;
+  t_end_info->tm_hour = std::atoi(t_str.substr(11, 2).c_str()) + 1;
+  t_end_info->tm_min = std::atoi(t_str.substr(14, 2).c_str());
+  t_end_info->tm_sec = 0;
   t_end = mktime(t_end_info);
   return t_end;
 }
 
-void Factory::deprecatedMessage(const std::string obj_name)
+void
+Factory::deprecatedMessage(const std::string obj_name)
 {
-  std::map<std::string, time_t>::iterator
-    time_it = _deprecated_time.find(obj_name);
+  std::map<std::string, time_t>::iterator time_it = _deprecated_time.find(obj_name);
 
   // If the object is not deprecated return
   if (time_it == _deprecated_time.end())
@@ -125,8 +125,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
   // Message storage
   std::ostringstream msg;
 
-  std::map<std::string, std::string>::iterator
-    name_it = _deprecated_name.find(obj_name);
+  std::map<std::string, std::string>::iterator name_it = _deprecated_name.find(obj_name);
 
   // Expired object
   if (now > t_end)
@@ -151,7 +150,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
 
     // Append replacement object, if it exsits
     if (name_it != _deprecated_name.end())
-      msg << "Replaced " << obj_name << " with " <<  name_it->second;
+      msg << "Replaced " << obj_name << " with " << name_it->second;
 
     // Produce the error message
     mooseDeprecated(msg.str());
@@ -165,7 +164,8 @@ Factory::reportUnregisteredError(const std::string & obj_name) const
   std::set<std::string> paths = _app.getLoadedLibraryPaths();
 
   oss << "A '" + obj_name + "' is not a registered object.\n"
-      << "\nWe loaded objects from the following libraries and still couldn't find your object:\n\t";
+      << "\nWe loaded objects from the following libraries and still couldn't find your "
+         "object:\n\t";
   std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
   if (paths.empty())
     oss << "(NONE)\n";

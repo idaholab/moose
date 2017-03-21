@@ -19,7 +19,8 @@
 
 class ConstantFunction;
 
-template<> InputParameters validParams<ConstantFunction>();
+template <>
+InputParameters validParams<ConstantFunction>();
 
 /**
  * Class that represents constant function

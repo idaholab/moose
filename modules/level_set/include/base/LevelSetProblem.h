@@ -9,7 +9,7 @@
 
 class LevelSetProblem;
 
-template<>
+template <>
 InputParameters validParams<LevelSetProblem>();
 
 /**

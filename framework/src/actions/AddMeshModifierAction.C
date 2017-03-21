@@ -18,17 +18,15 @@
 #include "Factory.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<AddMeshModifierAction>()
+template <>
+InputParameters
+validParams<AddMeshModifierAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddMeshModifierAction::AddMeshModifierAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddMeshModifierAction::AddMeshModifierAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddMeshModifierAction::act()
@@ -37,7 +35,8 @@ AddMeshModifierAction::act()
   if (_app.isRecovering())
     return;
 
-  // Add a pointer to the mesh, this is required for this MeshModifier to inherit from the BlockRestrictable,
+  // Add a pointer to the mesh, this is required for this MeshModifier to inherit from the
+  // BlockRestrictable,
   // as is the case for SideSetAroundSubdomain
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 

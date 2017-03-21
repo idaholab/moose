@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class TrussMaterial;
 
-template<>
+template <>
 InputParameters validParams<TrussMaterial>();
 
 class TrussMaterial : public Material
@@ -43,4 +43,4 @@ protected:
   Real _current_length;
 };
 
-#endif //TRUSSMATERIAL_H
+#endif // TRUSSMATERIAL_H

@@ -10,11 +10,9 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticMeanCap;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticMeanCap>();
 
 /**
@@ -26,12 +24,12 @@ InputParameters validParams<TensorMechanicsPlasticMeanCap>();
  */
 class TensorMechanicsPlasticMeanCap : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticMeanCap(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
 
- protected:
+protected:
   Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
   RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const override;

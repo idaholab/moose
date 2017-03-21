@@ -14,15 +14,16 @@
 
 #include "ShapeSideUserObject.h"
 
-template<>
-InputParameters validParams<ShapeSideUserObject>()
+template <>
+InputParameters
+validParams<ShapeSideUserObject>()
 {
   InputParameters params = validParams<SideUserObject>();
   params += ShapeUserObject<SideUserObject>::validParams();
   return params;
 }
 
-ShapeSideUserObject::ShapeSideUserObject(const InputParameters & parameters) :
-    ShapeUserObject<SideUserObject>(parameters, ShapeType::Side)
+ShapeSideUserObject::ShapeSideUserObject(const InputParameters & parameters)
+  : ShapeUserObject<SideUserObject>(parameters, ShapeType::Side)
 {
 }

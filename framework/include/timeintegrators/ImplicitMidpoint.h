@@ -19,7 +19,7 @@
 
 class ImplicitMidpoint;
 
-template<>
+template <>
 InputParameters validParams<ImplicitMidpoint>();
 
 /**
@@ -67,6 +67,5 @@ protected:
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_stage1;
 };
-
 
 #endif /* IMPLICITMIDPOINT_H */

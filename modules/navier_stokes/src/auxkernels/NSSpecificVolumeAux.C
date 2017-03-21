@@ -12,20 +12,21 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NSSpecificVolumeAux>()
+template <>
+InputParameters
+validParams<NSSpecificVolumeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  params.addClassDescription("Auxiliary kernel for computing the specific volume (1/rho) of the fluid.");
+  params.addClassDescription(
+      "Auxiliary kernel for computing the specific volume (1/rho) of the fluid.");
   params.addRequiredCoupledVar(NS::density, "density");
 
   return params;
 }
 
-NSSpecificVolumeAux::NSSpecificVolumeAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _rho(coupledValue(NS::density))
+NSSpecificVolumeAux::NSSpecificVolumeAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _rho(coupledValue(NS::density))
 {
 }
 

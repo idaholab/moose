@@ -17,10 +17,10 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementL2Norm;
 
-template<>
+template <>
 InputParameters validParams<ElementL2Norm>();
 
 class ElementL2Norm : public ElementIntegralVariablePostprocessor
@@ -34,4 +34,4 @@ protected:
   virtual Real computeQpIntegral() override;
 };
 
-#endif //ELEMENTL2NORM_H
+#endif // ELEMENTL2NORM_H

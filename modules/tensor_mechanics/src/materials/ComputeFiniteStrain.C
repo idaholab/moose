@@ -24,7 +24,8 @@ validParams<ComputeFiniteStrain>()
   InputParameters params = validParams<ComputeIncrementalStrainBase>();
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains.");
-  params.addParam<MooseEnum>("decomposition_method", ComputeFiniteStrain::decompositionType(),
+  params.addParam<MooseEnum>("decomposition_method",
+                             ComputeFiniteStrain::decompositionType(),
                              "Methods to calculate the strain and rotation increments");
   return params;
 }
@@ -44,9 +45,11 @@ ComputeFiniteStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Deformation gradient
-    RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp],
+    RankTwoTensor A((*_grad_disp[0])[_qp],
+                    (*_grad_disp[1])[_qp],
                     (*_grad_disp[2])[_qp]); // Deformation gradient
-    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp],
+    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
+                       (*_grad_disp_old[1])[_qp],
                        (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
 
     _deformation_gradient[_qp] = A;
@@ -143,7 +146,8 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
       total_strain_increment = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
 
-      const Real a[3] = {invFhat(1, 2) - invFhat(2, 1), invFhat(2, 0) - invFhat(0, 2),
+      const Real a[3] = {invFhat(1, 2) - invFhat(2, 1),
+                         invFhat(2, 0) - invFhat(0, 2),
                          invFhat(0, 1) - invFhat(1, 0)};
 
       Real q = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) / 4.0;
@@ -164,9 +168,8 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
         C2 =
             0.125 + q * 0.03125 * (std::pow(p, 2.0) - 12.0 * (p - 1.0)) / std::pow(p, 2.0) +
             std::pow(q, 2.0) * (p - 2.0) * (std::pow(p, 2.0) - 10.0 * p + 32.0) / std::pow(p, 3.0) +
-            std::pow(q, 3.0) *
-                (1104.0 - 992.0 * p + 376.0 * std::pow(p, 2.0) - 72.0 * std::pow(p, 3.0) +
-                 5.0 * std::pow(p, 4.0)) /
+            std::pow(q, 3.0) * (1104.0 - 992.0 * p + 376.0 * std::pow(p, 2.0) -
+                                72.0 * std::pow(p, 3.0) + 5.0 * std::pow(p, 4.0)) /
                 (512.0 * std::pow(p, 4.0));
 
       const Real C3 = 0.5 * std::sqrt((p * q * (3.0 - q) + std::pow(p, 3.0) + std::pow(q, 2.0)) /

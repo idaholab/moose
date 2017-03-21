@@ -6,25 +6,29 @@
 /****************************************************************/
 #include "CoupledConvectionReactionSub.h"
 
-template<>
-InputParameters validParams<CoupledConvectionReactionSub>()
+template <>
+InputParameters
+validParams<CoupledConvectionReactionSub>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "Weight of the equilibrium species");
   params.addParam<Real>("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
-  params.addParam<Real>("sto_u", 1.0, "Stoichiometric coef of the primary spceices the kernel operates on in the equilibrium reaction");
-  params.addRequiredParam<std::vector<Real> >("sto_v", "The stoichiometric coefficients of coupled primary species in equilibrium reaction");
+  params.addParam<Real>("sto_u", 1.0, "Stoichiometric coef of the primary spceices the kernel "
+                                      "operates on in the equilibrium reaction");
+  params.addRequiredParam<std::vector<Real>>(
+      "sto_v",
+      "The stoichiometric coefficients of coupled primary species in equilibrium reaction");
   params.addRequiredCoupledVar("p", "Pressure");
   params.addCoupledVar("v", "List of coupled primary species");
   return params;
 }
 
-CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters) :
-    Kernel(parameters),
+CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters)
+  : Kernel(parameters),
     _weight(getParam<Real>("weight")),
-    _log_k (getParam<Real>("log_k")),
+    _log_k(getParam<Real>("log_k")),
     _sto_u(getParam<Real>("sto_u")),
-    _sto_v(getParam<std::vector<Real> >("sto_v")),
+    _sto_v(getParam<std::vector<Real>>("sto_v")),
     _cond(getMaterialProperty<Real>("conductivity")),
     _grad_p(coupledGradient("p"))
 {
@@ -41,18 +45,20 @@ CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters
   }
 }
 
-Real CoupledConvectionReactionSub::computeQpResidual()
+Real
+CoupledConvectionReactionSub::computeQpResidual()
 {
   RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
   RealGradient d_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
   RealGradient d_var_sum = 0.0;
-  const Real d_v_u = std::pow(_u[_qp],_sto_u);
+  const Real d_v_u = std::pow(_u[_qp], _sto_u);
 
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
     d_u *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
-    RealGradient d_var = d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+    RealGradient d_var =
+        d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
     for (unsigned int j = 0; j < _vals.size(); ++j)
       if (j != i)
         d_var *= std::pow((*_vals[j])[_qp], _sto_v[j]);
@@ -63,11 +69,13 @@ Real CoupledConvectionReactionSub::computeQpResidual()
   return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum);
 }
 
-Real CoupledConvectionReactionSub::computeQpJacobian()
+Real
+CoupledConvectionReactionSub::computeQpJacobian()
 {
   RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
   RealGradient d_u_1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_phi[_j][_qp];
-  RealGradient d_u_2 = _phi[_j][_qp] * _sto_u * (_sto_u - 1.0) * std::pow(_u[_qp], _sto_u - 2.0) * _grad_u[_qp];
+  RealGradient d_u_2 =
+      _phi[_j][_qp] * _sto_u * (_sto_u - 1.0) * std::pow(_u[_qp], _sto_u - 2.0) * _grad_u[_qp];
   RealGradient d_u;
   RealGradient d_var_sum = 0.0;
   const Real d_v_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _phi[_j][_qp];
@@ -77,7 +85,8 @@ Real CoupledConvectionReactionSub::computeQpJacobian()
     d_u_1 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
     d_u_2 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
-    RealGradient d_var = d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+    RealGradient d_var =
+        d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
     for (unsigned int j = 0; j < _vals.size(); ++j)
       if (j != i)
         d_var *= std::pow((*_vals[j])[_qp], _sto_v[j]);
@@ -86,10 +95,11 @@ Real CoupledConvectionReactionSub::computeQpJacobian()
   }
 
   d_u = d_u_1 + d_u_2;
-  return  _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum);
+  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum);
 }
 
-Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
+Real
+CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (_vals.size() == 0)
     return 0.0;
@@ -110,7 +120,8 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (jvar == _vars[i])
     {
-      diff2_1 = _sto_v[i] * (_sto_v[i] - 1.0) * std::pow((*_vals[i])[_qp], _sto_v[i] - 2.0) * _phi[_j][_qp] * (*_grad_vals[i])[_qp];
+      diff2_1 = _sto_v[i] * (_sto_v[i] - 1.0) * std::pow((*_vals[i])[_qp], _sto_v[i] - 2.0) *
+                _phi[_j][_qp] * (*_grad_vals[i])[_qp];
       diff2_2 = _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * _grad_phi[_j][_qp];
     }
 
@@ -130,13 +141,14 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
     if (jvar == _vars[i])
     {
       var = i;
-      val_jvar = val_u * _sto_v[i] * std::pow((*_vals[i])[_qp],_sto_v[i] - 1.0) * _phi[_j][_qp];
+      val_jvar = val_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * _phi[_j][_qp];
     }
 
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (i != var)
     {
-      diff3 = val_jvar * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+      diff3 = val_jvar * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) *
+              (*_grad_vals[i])[_qp];
 
       for (unsigned int j = 0; j < _vals.size(); ++j)
         if (j != var && j != i)
@@ -145,5 +157,6 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
       diff3_sum += diff3;
     }
 
-  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (diff1 + diff2 + diff3_sum);
+  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel *
+         (diff1 + diff2 + diff3_sum);
 }

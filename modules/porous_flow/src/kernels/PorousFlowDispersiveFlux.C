@@ -7,56 +7,80 @@
 
 #include "PorousFlowDispersiveFlux.h"
 
-template<>
-InputParameters validParams<PorousFlowDispersiveFlux>()
+template <>
+InputParameters
+validParams<PorousFlowDispersiveFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<unsigned int>("fluid_component", 0, "The index corresponding to the fluid component for this kernel");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
-  params.addRequiredParam<std::vector<Real>>("disp_long", "Vector of longitudinal dispersion coefficients for each phase");
-  params.addRequiredParam<std::vector<Real>>("disp_trans", "Vector of transverse dispersion coefficients for each phase");
-  params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector downwards (m/s^2)");
-  params.addClassDescription("Dispersive and diffusive flux of the component given by fluid_component in all phases");
+  params.addParam<unsigned int>(
+      "fluid_component", 0, "The index corresponding to the fluid component for this kernel");
+  params.addRequiredParam<UserObjectName>(
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
+  params.addRequiredParam<std::vector<Real>>(
+      "disp_long", "Vector of longitudinal dispersion coefficients for each phase");
+  params.addRequiredParam<std::vector<Real>>(
+      "disp_trans", "Vector of transverse dispersion coefficients for each phase");
+  params.addRequiredParam<RealVectorValue>("gravity",
+                                           "Gravitational acceleration vector downwards (m/s^2)");
+  params.addClassDescription(
+      "Dispersive and diffusive flux of the component given by fluid_component in all phases");
   return params;
 }
 
-PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & parameters) :
-    Kernel(parameters),
+PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & parameters)
+  : Kernel(parameters),
 
     _fluid_density_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
-    _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_fluid_phase_density_qp_dvar")),
-    _grad_mass_frac(getMaterialProperty<std::vector<std::vector<RealGradient>>>("PorousFlow_grad_mass_frac_qp")),
-    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>("dPorousFlow_mass_frac_qp_dvar")),
+    _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
+        "dPorousFlow_fluid_phase_density_qp_dvar")),
+    _grad_mass_frac(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
+        "PorousFlow_grad_mass_frac_qp")),
+    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
+        "dPorousFlow_mass_frac_qp_dvar")),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
     _tortuosity(getMaterialProperty<std::vector<Real>>("PorousFlow_tortuosity_qp")),
-    _dtortuosity_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_tortuosity_qp_dvar")),
-    _diffusion_coeff(getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_diffusion_coeff_qp")),
-    _ddiffusion_coeff_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>("dPorousFlow_diffusion_coeff_qp_dvar")),
+    _dtortuosity_dvar(
+        getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_tortuosity_qp_dvar")),
+    _diffusion_coeff(
+        getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_diffusion_coeff_qp")),
+    _ddiffusion_coeff_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
+        "dPorousFlow_diffusion_coeff_qp_dvar")),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _fluid_component(getParam<unsigned int>("fluid_component")),
     _num_phases(_dictator.numPhases()),
     _identity_tensor(RankTwoTensor::initIdentity),
-    _relative_permeability(getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp")),
-    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_relative_permeability_qp_dvar")),
+    _relative_permeability(
+        getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp")),
+    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
+        "dPorousFlow_relative_permeability_qp_dvar")),
     _fluid_viscosity(getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp")),
-    _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_qp_dvar")),
+    _dfluid_viscosity_dvar(
+        getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_qp_dvar")),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
-    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>("dPorousFlow_permeability_qp_dgradvar")),
+    _dpermeability_dvar(
+        getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>(
+        "dPorousFlow_permeability_qp_dgradvar")),
     _grad_p(getMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
-    _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_grad_porepressure_qp_dgradvar")),
-    _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>("dPorousFlow_grad_porepressure_qp_dvar")),
+    _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real>>>(
+        "dPorousFlow_grad_porepressure_qp_dgradvar")),
+    _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
+        "dPorousFlow_grad_porepressure_qp_dvar")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _disp_long(getParam<std::vector<Real>>("disp_long")),
     _disp_trans(getParam<std::vector<Real>>("disp_trans"))
-  {
+{
   // Check that sufficient values of the dispersion coefficients have been entered
   if (_disp_long.size() != _num_phases)
-    mooseError("The number of longitudinal dispersion coefficients disp_long in ", _name, " is not equal to the number of phases");
+    mooseError("The number of longitudinal dispersion coefficients disp_long in ",
+               _name,
+               " is not equal to the number of phases");
 
   if (_disp_trans.size() != _num_phases)
-    mooseError("The number of transverse dispersion coefficients disp_trans in ", _name, " is not equal to the number of phases");
+    mooseError("The number of transverse dispersion coefficients disp_trans in ",
+               _name,
+               " is not equal to the number of phases");
 }
 
 Real
@@ -73,11 +97,12 @@ PorousFlowDispersiveFlux::computeQpResidual()
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     // Diffusive component
-    diffusion = _porosity_qp[_qp] * _tortuosity[_qp][ph] * _diffusion_coeff[_qp][ph][_fluid_component];
+    diffusion =
+        _porosity_qp[_qp] * _tortuosity[_qp][ph] * _diffusion_coeff[_qp][ph][_fluid_component];
 
     // Calculate Darcy velocity
-    velocity = (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] *
-      _gravity) * _relative_permeability[_qp][ph] / _fluid_viscosity[_qp][ph]);
+    velocity = (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity) *
+                _relative_permeability[_qp][ph] / _fluid_viscosity[_qp][ph]);
     velocity_abs = std::sqrt(velocity * velocity);
 
     if (velocity_abs > 0.0)
@@ -89,7 +114,8 @@ PorousFlowDispersiveFlux::computeQpResidual()
       dispersion = (_disp_long[ph] - _disp_trans[ph]) * v2 / velocity_abs;
     }
 
-    flux += _fluid_density_qp[_qp][ph] * (diffusion * _identity_tensor + dispersion) * _grad_mass_frac[_qp][ph][_fluid_component];
+    flux += _fluid_density_qp[_qp][ph] * (diffusion * _identity_tensor + dispersion) *
+            _grad_mass_frac[_qp][ph][_fluid_component];
   }
   return _grad_test[_i][_qp] * flux;
 }
@@ -127,11 +153,12 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     // Diffusive component
-    diffusion = _porosity_qp[_qp] * _tortuosity[_qp][ph] * _diffusion_coeff[_qp][ph][_fluid_component];
+    diffusion =
+        _porosity_qp[_qp] * _tortuosity[_qp][ph] * _diffusion_coeff[_qp][ph][_fluid_component];
 
     // Calculate Darcy velocity
-    velocity = (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] *
-      _gravity) * _relative_permeability[_qp][ph] / _fluid_viscosity[_qp][ph]);
+    velocity = (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity) *
+                _relative_permeability[_qp][ph] / _fluid_viscosity[_qp][ph]);
     velocity_abs = std::sqrt(velocity * velocity);
 
     if (velocity_abs > 0.0)
@@ -144,10 +171,14 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
     }
 
     // Derivative of Darcy velocity
-    RealVectorValue dvelocity = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity);
+    RealVectorValue dvelocity = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
+                                (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
     for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-      dvelocity += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-    dvelocity += _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
+      dvelocity += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
+                   (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+    dvelocity +=
+        _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
+                              _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
     dvelocity += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
 
     Real dvelocity_abs = 0.0;
@@ -155,9 +186,12 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
       dvelocity_abs = velocity * dvelocity / velocity_abs;
 
     // Derivative of diffusion term (note: dispersivity is assumed constant)
-    Real ddiffusion = _phi[_j][_qp] * _dporosity_qp_dvar[_qp][pvar] * _tortuosity[_qp][ph] * _diffusion_coeff[_qp][ph][_fluid_component];
-    ddiffusion += _phi[_j][_qp] * _porosity_qp[_qp] * _dtortuosity_dvar[_qp][ph][pvar] * _diffusion_coeff[_qp][ph][_fluid_component];
-    ddiffusion += _phi[_j][_qp] * _porosity_qp[_qp] * _tortuosity[_qp][ph] * _ddiffusion_coeff_dvar[_qp][ph][_fluid_component][pvar];
+    Real ddiffusion = _phi[_j][_qp] * _dporosity_qp_dvar[_qp][pvar] * _tortuosity[_qp][ph] *
+                      _diffusion_coeff[_qp][ph][_fluid_component];
+    ddiffusion += _phi[_j][_qp] * _porosity_qp[_qp] * _dtortuosity_dvar[_qp][ph][pvar] *
+                  _diffusion_coeff[_qp][ph][_fluid_component];
+    ddiffusion += _phi[_j][_qp] * _porosity_qp[_qp] * _tortuosity[_qp][ph] *
+                  _ddiffusion_coeff_dvar[_qp][ph][_fluid_component][pvar];
     ddiffusion += _disp_trans[ph] * dvelocity_abs;
 
     // Derivative of dispersion term (note: dispersivity is assumed constant)
@@ -169,12 +203,17 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
       dv2a.vectorOuterProduct(velocity, dvelocity);
       dv2b.vectorOuterProduct(dvelocity, velocity);
       ddispersion = (_disp_long[ph] - _disp_trans[ph]) * (dv2a + dv2b) / velocity_abs;
-      ddispersion -= (_disp_long[ph] - _disp_trans[ph]) * v2 * dvelocity_abs / velocity_abs / velocity_abs;
+      ddispersion -=
+          (_disp_long[ph] - _disp_trans[ph]) * v2 * dvelocity_abs / velocity_abs / velocity_abs;
     }
 
-    dflux += _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * (diffusion * _identity_tensor + dispersion) * _grad_mass_frac[_qp][ph][_fluid_component];
-    dflux += _fluid_density_qp[_qp][ph] * (ddiffusion * _identity_tensor + ddispersion) * _grad_mass_frac[_qp][ph][_fluid_component];
-    dflux += _fluid_density_qp[_qp][ph] * (diffusion * _identity_tensor + dispersion) * _dmass_frac_dvar[_qp][ph][_fluid_component][pvar] * _grad_phi[_j][_qp];
+    dflux += _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] *
+             (diffusion * _identity_tensor + dispersion) *
+             _grad_mass_frac[_qp][ph][_fluid_component];
+    dflux += _fluid_density_qp[_qp][ph] * (ddiffusion * _identity_tensor + ddispersion) *
+             _grad_mass_frac[_qp][ph][_fluid_component];
+    dflux += _fluid_density_qp[_qp][ph] * (diffusion * _identity_tensor + dispersion) *
+             _dmass_frac_dvar[_qp][ph][_fluid_component][pvar] * _grad_phi[_j][_qp];
   }
 
   return _grad_test[_i][_qp] * dflux;

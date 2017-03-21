@@ -7,18 +7,23 @@
 #include "ComputeVolumetricEigenstrain.h"
 #include "RankTwoTensor.h"
 
-template<>
-InputParameters validParams<ComputeVolumetricEigenstrain>()
+template <>
+InputParameters
+validParams<ComputeVolumetricEigenstrain>()
 {
   InputParameters params = validParams<ComputeEigenstrainBase>();
-  params.addClassDescription("Computes an eigenstrain that is defined by a set of scalar material properties that summed together define the volumetric change.  This also computes the derivatives of that eigenstrain with respect to a supplied set of variable dependencies.");
-  params.addRequiredParam<std::vector<MaterialPropertyName>>("volumetric_materials", "List of scalar materials defining the volumetric change");
+  params.addClassDescription("Computes an eigenstrain that is defined by a set of scalar material "
+                             "properties that summed together define the volumetric change.  This "
+                             "also computes the derivatives of that eigenstrain with respect to a "
+                             "supplied set of variable dependencies.");
+  params.addRequiredParam<std::vector<MaterialPropertyName>>(
+      "volumetric_materials", "List of scalar materials defining the volumetric change");
   params.addRequiredCoupledVar("args", "variable dependencies for the volumetric_expansion");
   return params;
 }
 
-ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters & parameters) :
-    DerivativeMaterialInterface<ComputeEigenstrainBase>(parameters),
+ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters & parameters)
+  : DerivativeMaterialInterface<ComputeEigenstrainBase>(parameters),
     _num_args(coupledComponents("args")),
     _volumetric_material_names(getParam<std::vector<MaterialPropertyName>>("volumetric_materials")),
     _volumetric_materials(_volumetric_material_names.size()),
@@ -45,7 +50,8 @@ ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters
       for (unsigned int k = j; k < _num_args; ++k)
       {
         const VariableName & kname = getVar("args", k)->name();
-        _d2volumetric_materials[i][j][k] = &getMaterialPropertyDerivative<Real>("prefactor", jname, kname);
+        _d2volumetric_materials[i][j][k] =
+            &getMaterialPropertyDerivative<Real>("prefactor", jname, kname);
       }
     }
   }
@@ -53,13 +59,15 @@ ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters
   for (unsigned int j = 0; j < _num_args; ++j)
   {
     const VariableName & jname = getVar("args", j)->name();
-    _delastic_strain[j] = &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", jname);
+    _delastic_strain[j] =
+        &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", jname);
     _d2elastic_strain[j].resize(_num_args);
 
     for (unsigned int k = j; k < _num_args; ++k)
     {
       const VariableName & kname = getVar("args", k)->name();
-      _d2elastic_strain[j][k] = &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", jname, kname);
+      _d2elastic_strain[j][k] =
+          &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", jname, kname);
     }
   }
 }
@@ -67,7 +75,7 @@ ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters
 void
 ComputeVolumetricEigenstrain::initialSetup()
 {
-  for (auto vmn: _volumetric_material_names)
+  for (auto vmn : _volumetric_material_names)
     validateCoupling<Real>(vmn);
 
   for (unsigned int i = 0; i < _num_args; ++i)
@@ -80,7 +88,8 @@ ComputeVolumetricEigenstrain::initialSetup()
     for (unsigned int j = 0; j < _num_args; ++j)
     {
       const VariableName & jname = getVar("args", j)->name();
-      if (_fe_problem.isMatPropRequested(propertyNameSecond(_base_name + "elastic_strain", iname, jname)))
+      if (_fe_problem.isMatPropRequested(
+              propertyNameSecond(_base_name + "elastic_strain", iname, jname)))
         mooseError("Second Derivative of elastic_strain requested, but not yet implemented");
       else
         _d2elastic_strain[i][j] = nullptr;
@@ -99,5 +108,5 @@ ComputeVolumetricEigenstrain::computeQpEigenstrain()
   _eigenstrain[_qp].zero();
   _eigenstrain[_qp].addIa(eigenstrain_comp);
 
-  //TODO: Compute derivatives of the elastic strain wrt the variables specified in args
+  // TODO: Compute derivatives of the elastic strain wrt the variables specified in args
 }

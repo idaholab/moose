@@ -23,9 +23,10 @@ validParams<TensorMechanicsAction>()
 
   // parameters specified here only appear in the input file sub-blocks of the
   // Master action, not in the common parameters area
-  params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) "
-                                                       "that the stress divergence kernels will be "
-                                                       "applied to");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "The list of ids of the blocks (subdomain) "
+                                              "that the stress divergence kernels will be "
+                                              "applied to");
   params.addParamNamesToGroup("block", "Advanced");
 
   params.addParam<MultiMooseEnum>("additional_generate_output",
@@ -171,7 +172,8 @@ TensorMechanicsAction::act()
       _problem->addVariable(disp,
                             FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                    Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0, _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
+                            1.0,
+                            _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
     }
   }
 

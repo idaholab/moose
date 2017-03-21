@@ -11,7 +11,7 @@
 
 class GBDependentAnisotropicTensor;
 
-template<>
+template <>
 InputParameters validParams<GBDependentAnisotropicTensor>();
 /**
  * GB dependent anisotropic tensor Ref. Forest, MSMSE, 2015

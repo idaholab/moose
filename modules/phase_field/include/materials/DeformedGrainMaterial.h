@@ -9,11 +9,11 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class DeformedGrainMaterial;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<DeformedGrainMaterial>();
 
 /**
@@ -81,4 +81,4 @@ protected:
   const Real _JtoeV;
 };
 
-#endif //DEFORMEDGRAINMATERIAL_H
+#endif // DEFORMEDGRAINMATERIAL_H

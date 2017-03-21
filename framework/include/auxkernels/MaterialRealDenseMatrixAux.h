@@ -21,16 +21,15 @@
 // Forward declarations
 class MaterialRealDenseMatrixAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialRealDenseMatrixAux>();
 
 /**
  * AuxKernel for outputting a DenseMatrix<Real> material property component to an AuxVariable
  */
-class MaterialRealDenseMatrixAux : public MaterialAuxBase<DenseMatrix<Real> >
+class MaterialRealDenseMatrixAux : public MaterialAuxBase<DenseMatrix<Real>>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this AuxKernel
@@ -48,4 +47,4 @@ protected:
   unsigned int _col;
 };
 
-#endif //MATERIALREALDENSEMATRIXAUX_H
+#endif // MATERIALREALDENSEMATRIXAUX_H

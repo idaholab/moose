@@ -12,7 +12,7 @@
 
 class EulerAngleProvider;
 
-template<>
+template <>
 InputParameters validParams<EulerAngleProvider>();
 
 /**
@@ -28,4 +28,4 @@ public:
   virtual unsigned int getGrainNum() const = 0;
 };
 
-#endif //EULERANGLEPROVIDER_H
+#endif // EULERANGLEPROVIDER_H

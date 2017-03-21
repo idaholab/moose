@@ -14,26 +14,24 @@
 
 #include "ExplicitODE.h"
 
-template<>
-InputParameters validParams<ExplicitODE>()
+template <>
+InputParameters
+validParams<ExplicitODE>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
   params.addParam<Real>("lambda", 1, "Lambda on the right-hand side");
   return params;
 }
 
-ExplicitODE::ExplicitODE(const InputParameters & parameters) :
-    AuxScalarKernel(parameters),
-    _lambda(getParam<Real>("lambda"))
+ExplicitODE::ExplicitODE(const InputParameters & parameters)
+  : AuxScalarKernel(parameters), _lambda(getParam<Real>("lambda"))
 {
 }
 
-ExplicitODE::~ExplicitODE()
-{
-}
+ExplicitODE::~ExplicitODE() {}
 
 Real
 ExplicitODE::computeValue()
 {
-  return _u_old[_i] * (1 - (_lambda*_dt));
+  return _u_old[_i] * (1 - (_lambda * _dt));
 }

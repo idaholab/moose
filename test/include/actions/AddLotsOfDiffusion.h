@@ -19,9 +19,8 @@
 
 class AddLotsOfDiffusion;
 
-template<>
+template <>
 InputParameters validParams<AddLotsOfDiffusion>();
-
 
 class AddLotsOfDiffusion : public AddVariableAction
 {

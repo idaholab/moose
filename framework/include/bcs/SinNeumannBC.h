@@ -17,11 +17,10 @@
 
 #include "IntegratedBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class SinNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<SinNeumannBC>();
 
 /**
@@ -46,4 +45,4 @@ private:
   Real _duration;
 };
 
-#endif //SINNEUMANNBC_H
+#endif // SINNEUMANNBC_H

@@ -21,14 +21,13 @@
 
 class BicubicSplineFunction;
 
-template<>
+template <>
 InputParameters validParams<BicubicSplineFunction>();
 
 /**
  * Function that uses spline interpolation
  */
-class BicubicSplineFunction : public Function,
-                              public FunctionInterface
+class BicubicSplineFunction : public Function, public FunctionInterface
 {
 public:
   BicubicSplineFunction(const InputParameters & parameters);
@@ -51,6 +50,5 @@ protected:
   Function & _yx1;
   Function & _yx2;
 };
-
 
 #endif /* BICUBICSPLINEFUNCTION_H */

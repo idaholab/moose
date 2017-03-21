@@ -9,18 +9,20 @@
 #include "Assembly.h"
 #include "GeneralizedPlaneStrainUserObject.h"
 
-template<>
-InputParameters validParams<GeneralizedPlaneStrain>()
+template <>
+InputParameters
+validParams<GeneralizedPlaneStrain>()
 {
   InputParameters params = validParams<ScalarKernel>();
   params.addClassDescription("Generalized Plane Strain Scalar Kernel");
-  params.addRequiredParam<UserObjectName>("generalized_plane_strain", "The name of the GeneralizedPlaneStrainUO UserObject");
+  params.addRequiredParam<UserObjectName>("generalized_plane_strain",
+                                          "The name of the GeneralizedPlaneStrainUO UserObject");
 
   return params;
 }
 
-GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameters) :
-    ScalarKernel(parameters),
+GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameters)
+  : ScalarKernel(parameters),
     _gps(getUserObject<GeneralizedPlaneStrainUserObject>("generalized_plane_strain"))
 {
 }

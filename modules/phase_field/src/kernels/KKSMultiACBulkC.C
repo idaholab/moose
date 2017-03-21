@@ -6,21 +6,26 @@
 /****************************************************************/
 #include "KKSMultiACBulkC.h"
 
-template<>
-InputParameters validParams<KKSMultiACBulkC>()
+template <>
+InputParameters
+validParams<KKSMultiACBulkC>()
 {
   InputParameters params = validParams<KKSMultiACBulkBase>();
-  params.addClassDescription("Multi-phase KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. This includes all terms dependent on chemical potential.");
-  params.addRequiredCoupledVar("cj_names", "Array of phase concentrations cj. Place in same order as Fj_names!");
+  params.addClassDescription("Multi-phase KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. "
+                             "This includes all terms dependent on chemical potential.");
+  params.addRequiredCoupledVar(
+      "cj_names", "Array of phase concentrations cj. Place in same order as Fj_names!");
   return params;
 }
 
-KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
-    KKSMultiACBulkBase(parameters),
-    _c1_name(getVar("cj_names", 0)->name()), //Can use any dFj/dcj since they are equal so pick first cj in the list
+KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
+  : KKSMultiACBulkBase(parameters),
+    _c1_name(getVar("cj_names", 0)
+                 ->name()), // Can use any dFj/dcj since they are equal so pick first cj in the list
     _cjs(_num_j),
     _cjs_var(_num_j),
-    _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name)), //Use first Fj in list for dFj/dcj
+    _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0],
+                                                     _c1_name)), // Use first Fj in list for dFj/dcj
     _prop_d2F1dc12(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, _c1_name))
 {
   if (_num_j != coupledComponents("cj_names"))
@@ -33,16 +38,17 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
     _cjs_var[i] = coupled("cj_names", i);
   }
 
-  //Resize to number of coupled variables (_nvar from KKSMultiACBulkBase constructor)
+  // Resize to number of coupled variables (_nvar from KKSMultiACBulkBase constructor)
   _prop_d2F1dc1darg.resize(_nvar);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable *cvar = _coupled_moose_vars[i];
+    MooseVariable * cvar = _coupled_moose_vars[i];
 
     // get second partial derivatives wrt c1 and other coupled variable
-    _prop_d2F1dc1darg[i] = &getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, cvar->name());
+    _prop_d2F1dc1darg[i] =
+        &getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, cvar->name());
   }
 }
 
@@ -90,9 +96,8 @@ KKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
     for (unsigned int n = 0; n < _num_j; ++n)
       sum += (*_prop_dhjdetai[n])[_qp] * (*_cjs[n])[_qp];
 
-    res -= _L[_qp] * (sum * _prop_d2F1dc12[_qp]
-                      + _prop_dF1dc1[_qp] * (*_prop_dhjdetai[0])[_qp] )
-                   * _phi[_j][_qp] * _test[_i][_qp];
+    res -= _L[_qp] * (sum * _prop_d2F1dc12[_qp] + _prop_dF1dc1[_qp] * (*_prop_dhjdetai[0])[_qp]) *
+           _phi[_j][_qp] * _test[_i][_qp];
     return res;
   }
 
@@ -100,8 +105,8 @@ KKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   {
     if (jvar == _cjs_var[i])
     {
-      res -= _L[_qp] * _prop_dF1dc1[_qp] * (*_prop_dhjdetai[i])[_qp]
-                     * _phi[_j][_qp] * _test[_i][_qp];
+      res -=
+          _L[_qp] * _prop_dF1dc1[_qp] * (*_prop_dhjdetai[i])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
       return res;
     }
   }
@@ -110,10 +115,10 @@ KKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   for (unsigned int n = 0; n < _num_j; ++n)
-    sum += _prop_dF1dc1[_qp] * (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_cjs[n])[_qp]
-            + (*_prop_d2F1dc1darg[cvar])[_qp] * (*_prop_dhjdetai[n])[_qp] * (*_cjs[n])[_qp];
+    sum += _prop_dF1dc1[_qp] * (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_cjs[n])[_qp] +
+           (*_prop_d2F1dc1darg[cvar])[_qp] * (*_prop_dhjdetai[n])[_qp] * (*_cjs[n])[_qp];
 
-  res -= _L[_qp] * sum * _phi[_j][_qp]  * _test[_i][_qp];
+  res -= _L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
 
   return res;
 }

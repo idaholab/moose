@@ -11,7 +11,7 @@
 
 class HeatConductionApp;
 
-template<>
+template <>
 InputParameters validParams<HeatConductionApp>();
 
 class HeatConductionApp : public MooseApp

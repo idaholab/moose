@@ -23,8 +23,9 @@
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"
 
-template<>
-InputParameters validParams<FileMesh>()
+template <>
+InputParameters
+validParams<FileMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
@@ -32,22 +33,18 @@ InputParameters validParams<FileMesh>()
   return params;
 }
 
-FileMesh::FileMesh(const InputParameters & parameters) :
-    MooseMesh(parameters),
-    _file_name(getParam<MeshFileName>("file"))
+FileMesh::FileMesh(const InputParameters & parameters)
+  : MooseMesh(parameters), _file_name(getParam<MeshFileName>("file"))
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
 
-FileMesh::FileMesh(const FileMesh & other_mesh) :
-    MooseMesh(other_mesh),
-    _file_name(other_mesh._file_name)
+FileMesh::FileMesh(const FileMesh & other_mesh)
+  : MooseMesh(other_mesh), _file_name(other_mesh._file_name)
 {
 }
 
-FileMesh::~FileMesh()
-{
-}
+FileMesh::~FileMesh() {}
 
 MooseMesh &
 FileMesh::clone() const
@@ -85,7 +82,8 @@ FileMesh::buildMesh()
     // the mesh with the exodus reader instead of using mesh.read().  This will read the mesh on
     // every processor
 
-    if (_app.setFileRestart() && (_file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size()))
+    if (_app.setFileRestart() && (_file_name.rfind(".exd") < _file_name.size() ||
+                                  _file_name.rfind(".e") < _file_name.size()))
     {
       _exreader = libmesh_make_unique<ExodusII_IO>(getMesh());
       _exreader->read(_file_name);

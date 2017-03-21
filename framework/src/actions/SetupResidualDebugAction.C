@@ -19,17 +19,19 @@
 #include "Factory.h"
 #include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<SetupResidualDebugAction>()
+template <>
+InputParameters
+validParams<SetupResidualDebugAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<NonlinearVariableName> >("show_var_residual", "Variables for which residuals will be sent to the output file");
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "show_var_residual", "Variables for which residuals will be sent to the output file");
   return params;
 }
 
-SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters) :
-    Action(parameters),
-    _show_var_residual(getParam<std::vector<NonlinearVariableName> >("show_var_residual"))
+SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters)
+  : Action(parameters),
+    _show_var_residual(getParam<std::vector<NonlinearVariableName>>("show_var_residual"))
 {
 }
 

@@ -20,10 +20,11 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,
-                                                                         const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
-                                                                         SparseMatrix<Number> & jacobian) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
+    FEProblemBase & fe_problem,
+    const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
+    SparseMatrix<Number> & jacobian)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _jacobian(jacobian),
@@ -32,8 +33,9 @@ ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProbl
 }
 
 // Splitting Constructor
-ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
+    ComputeNodalKernelBCJacobiansThread & x, Threads::split split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _jacobian(x._jacobian),
@@ -54,7 +56,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+  std::vector<std::pair<MooseVariable *, MooseVariable *>> & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
     MooseVariable & ivariable = *(it.first);
@@ -64,7 +66,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     unsigned int jvar = jvariable.number();
 
     // The NodalKernels that are active and are coupled to the jvar in question
-    std::vector<std::shared_ptr<NodalKernel> > active_involved_kernels;
+    std::vector<std::shared_ptr<NodalKernel>> active_involved_kernels;
 
     if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
     {
@@ -111,7 +113,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         Node * node = bnode->_node;
         if (node->processor_id() == _fe_problem.processor_id())
         {
-          _fe_problem.reinitNodeFace(node, boundary_id,  _tid);
+          _fe_problem.reinitNodeFace(node, boundary_id, _tid);
           for (const auto & nodal_kernel : active_involved_kernels)
             nodal_kernel->computeOffDiagJacobian(jvar);
 
@@ -119,7 +121,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         }
       }
 
-      if (_num_cached == 20) //cache 20 nodes worth before adding into the jacobian
+      if (_num_cached == 20) // cache 20 nodes worth before adding into the jacobian
       {
         _num_cached = 0;
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

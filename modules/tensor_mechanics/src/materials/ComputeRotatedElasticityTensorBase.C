@@ -7,8 +7,9 @@
 #include "ComputeRotatedElasticityTensorBase.h"
 #include "RotationTensor.h"
 
-template<>
-InputParameters validParams<ComputeRotatedElasticityTensorBase>()
+template <>
+InputParameters
+validParams<ComputeRotatedElasticityTensorBase>()
 {
   InputParameters params = validParams<ComputeElasticityTensorBase>();
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
@@ -17,11 +18,11 @@ InputParameters validParams<ComputeRotatedElasticityTensorBase>()
   return params;
 }
 
-ComputeRotatedElasticityTensorBase::ComputeRotatedElasticityTensorBase(const InputParameters & parameters) :
-    ComputeElasticityTensorBase(parameters),
+ComputeRotatedElasticityTensorBase::ComputeRotatedElasticityTensorBase(
+    const InputParameters & parameters)
+  : ComputeElasticityTensorBase(parameters),
     _Euler_angles(getParam<Real>("euler_angle_1"),
                   getParam<Real>("euler_angle_2"),
                   getParam<Real>("euler_angle_3"))
 {
 }
-

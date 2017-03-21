@@ -12,7 +12,7 @@
 
 class MortarPeriodicMesh;
 
-template<>
+template <>
 InputParameters validParams<MortarPeriodicMesh>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   std::vector<SubdomainID> _mortar_subdomains;
 };
 
-#endif //MORTARPERIODICMESH_H
+#endif // MORTARPERIODICMESH_H

@@ -6,16 +6,18 @@
 /****************************************************************/
 #include "INSMomentumTractionForm.h"
 
-template<>
-InputParameters validParams<INSMomentumTractionForm>()
+template <>
+InputParameters
+validParams<INSMomentumTractionForm>()
 {
   InputParameters params = validParams<INSMomentumBase>();
-  params.addClassDescription("This class computes momentum equation residual and Jacobian viscous contributions for the 'traction' form of the governing equations.");
+  params.addClassDescription("This class computes momentum equation residual and Jacobian viscous "
+                             "contributions for the 'traction' form of the governing equations.");
   return params;
 }
 
-INSMomentumTractionForm::INSMomentumTractionForm(const InputParameters & parameters) :
-    INSMomentumBase(parameters)
+INSMomentumTractionForm::INSMomentumTractionForm(const InputParameters & parameters)
+  : INSMomentumBase(parameters)
 {
 }
 
@@ -27,26 +29,26 @@ INSMomentumTractionForm::computeQpResidualViscousPart()
 
   switch (_component)
   {
-  case 0:
-    tau_row(0) = 2.*_grad_u_vel[_qp](0);                    // 2*du/dx1
-    tau_row(1) = _grad_u_vel[_qp](1) + _grad_v_vel[_qp](0); // du/dx2 + dv/dx1
-    tau_row(2) = _grad_u_vel[_qp](2) + _grad_w_vel[_qp](0); // du/dx3 + dw/dx1
-    break;
+    case 0:
+      tau_row(0) = 2. * _grad_u_vel[_qp](0);                  // 2*du/dx1
+      tau_row(1) = _grad_u_vel[_qp](1) + _grad_v_vel[_qp](0); // du/dx2 + dv/dx1
+      tau_row(2) = _grad_u_vel[_qp](2) + _grad_w_vel[_qp](0); // du/dx3 + dw/dx1
+      break;
 
-  case 1:
-    tau_row(0) = _grad_v_vel[_qp](0) + _grad_u_vel[_qp](1); // dv/dx1 + du/dx2
-    tau_row(1) = 2.*_grad_v_vel[_qp](1);                    // 2*dv/dx2
-    tau_row(2) = _grad_v_vel[_qp](2) + _grad_w_vel[_qp](1); // dv/dx3 + dw/dx2
-    break;
+    case 1:
+      tau_row(0) = _grad_v_vel[_qp](0) + _grad_u_vel[_qp](1); // dv/dx1 + du/dx2
+      tau_row(1) = 2. * _grad_v_vel[_qp](1);                  // 2*dv/dx2
+      tau_row(2) = _grad_v_vel[_qp](2) + _grad_w_vel[_qp](1); // dv/dx3 + dw/dx2
+      break;
 
-  case 2:
-    tau_row(0) = _grad_w_vel[_qp](0) + _grad_u_vel[_qp](2); // dw/dx1 + du/dx3
-    tau_row(1) = _grad_w_vel[_qp](1) + _grad_v_vel[_qp](2); // dw/dx2 + dv/dx3
-    tau_row(2) = 2.*_grad_w_vel[_qp](2);                    // 2*dw/dx3
-    break;
+    case 2:
+      tau_row(0) = _grad_w_vel[_qp](0) + _grad_u_vel[_qp](2); // dw/dx1 + du/dx3
+      tau_row(1) = _grad_w_vel[_qp](1) + _grad_v_vel[_qp](2); // dw/dx2 + dv/dx3
+      tau_row(2) = 2. * _grad_w_vel[_qp](2);                  // 2*dw/dx3
+      break;
 
-  default:
-    mooseError("Unrecognized _component requested.");
+    default:
+      mooseError("Unrecognized _component requested.");
   }
 
   // The viscous part, _mu * tau : grad(v)
@@ -58,7 +60,7 @@ INSMomentumTractionForm::computeQpJacobianViscousPart()
 {
   // Viscous part, full stress tensor.  The extra contribution comes from the "2"
   // on the diagonal of the viscous stress tensor.
-  return _mu * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
+  return _mu * (_grad_phi[_j][_qp] * _grad_test[_i][_qp] +
                 _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
 }
 

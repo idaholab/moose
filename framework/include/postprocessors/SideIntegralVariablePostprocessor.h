@@ -18,10 +18,10 @@
 #include "SideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideIntegralVariablePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralVariablePostprocessor>();
 
 /**
@@ -30,9 +30,8 @@ InputParameters validParams<SideIntegralVariablePostprocessor>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class SideIntegralVariablePostprocessor :
-  public SideIntegralPostprocessor,
-  public MooseVariableInterface
+class SideIntegralVariablePostprocessor : public SideIntegralPostprocessor,
+                                          public MooseVariableInterface
 {
 public:
   SideIntegralVariablePostprocessor(const InputParameters & parameters);

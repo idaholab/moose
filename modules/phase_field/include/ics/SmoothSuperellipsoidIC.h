@@ -12,7 +12,7 @@
 // Forward Declarations
 class SmoothSuperellipsoidIC;
 
-template<>
+template <>
 InputParameters validParams<SmoothSuperellipsoidIC>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   const Point _center;
 };
 
-#endif //SMOOTHSUPERELLIPSOIDIC_H
+#endif // SMOOTHSUPERELLIPSOIDIC_H

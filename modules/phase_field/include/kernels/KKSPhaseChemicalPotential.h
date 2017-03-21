@@ -11,10 +11,10 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSPhaseChemicalPotential;
 
-template<>
+template <>
 InputParameters validParams<KKSPhaseChemicalPotential>();
 
 /**
@@ -31,10 +31,7 @@ InputParameters validParams<KKSPhaseChemicalPotential>();
  *
  * \see KKSPhaseConcentration
  */
-class KKSPhaseChemicalPotential : public DerivativeMaterialInterface<
-                                         JvarMapKernelInterface<
-                                         Kernel
-                                         > >
+class KKSPhaseChemicalPotential : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   KKSPhaseChemicalPotential(const InputParameters & parameters);
@@ -56,8 +53,8 @@ private:
   const MaterialProperty<Real> & _d2fadca2;
   const MaterialProperty<Real> & _d2fbdcbca;
 
-  std::vector<const MaterialProperty<Real>* > _d2fadcadarg;
-  std::vector<const MaterialProperty<Real>* > _d2fbdcbdarg;
+  std::vector<const MaterialProperty<Real> *> _d2fadcadarg;
+  std::vector<const MaterialProperty<Real> *> _d2fbdcbdarg;
 };
 
-#endif //KKSPHASECHEMICALPOTENTIAL_H
+#endif // KKSPHASECHEMICALPOTENTIAL_H

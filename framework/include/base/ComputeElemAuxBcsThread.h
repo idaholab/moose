@@ -29,11 +29,13 @@ class AuxKernel;
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblemBase & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxBcsThread(FEProblemBase & problem,
+                          const MooseObjectWarehouse<AuxKernel> & storage,
+                          bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
-  void operator() (const ConstBndElemRange & range);
+  void operator()(const ConstBndElemRange & range);
 
   void join(const ComputeElemAuxBcsThread & /*y*/);
 
@@ -48,4 +50,4 @@ protected:
   bool _need_materials;
 };
 
-#endif //COMPUTEELEMAUXBCSTHREAD_H
+#endif // COMPUTEELEMAUXBCSTHREAD_H

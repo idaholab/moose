@@ -12,7 +12,7 @@
 // Forward Declarations
 class LatticeSmoothCircleIC;
 
-template<>
+template <>
 InputParameters validParams<LatticeSmoothCircleIC>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   Point _range;
 };
 
-#endif //LATTICESMOOTHCIRCLEIC_H
+#endif // LATTICESMOOTHCIRCLEIC_H

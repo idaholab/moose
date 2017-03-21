@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "Q2PPorepressureFlux.h"
 
 #include "Assembly.h"
@@ -16,21 +15,26 @@
 
 #include <iostream>
 
-
-template<>
-InputParameters validParams<Q2PPorepressureFlux>()
+template <>
+InputParameters
+validParams<Q2PPorepressureFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<UserObjectName>("fluid_density", "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
+  params.addRequiredParam<UserObjectName>(
+      "fluid_density",
+      "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
   params.addRequiredCoupledVar("saturation_variable", "The variable representing fluid saturation");
-  params.addRequiredParam<UserObjectName>("fluid_relperm", "A RichardsRelPerm UserObject (eg RichardsRelPermPower) that defines the fluid relative permeability as a function of the saturation variable");
+  params.addRequiredParam<UserObjectName>(
+      "fluid_relperm", "A RichardsRelPerm UserObject (eg RichardsRelPermPower) that defines the "
+                       "fluid relative permeability as a function of the saturation variable");
   params.addRequiredParam<Real>("fluid_viscosity", "The fluid dynamic viscosity");
-  params.addClassDescription("Flux according to Darcy-Richards flow.  The Variable for this Kernel should be the porepressure.");
+  params.addClassDescription("Flux according to Darcy-Richards flow.  The Variable for this Kernel "
+                             "should be the porepressure.");
   return params;
 }
 
-Q2PPorepressureFlux::Q2PPorepressureFlux(const InputParameters & parameters) :
-    Kernel(parameters),
+Q2PPorepressureFlux::Q2PPorepressureFlux(const InputParameters & parameters)
+  : Kernel(parameters),
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _sat(coupledNodalValue("saturation_variable")),
     _sat_var(coupled("saturation_variable")),
@@ -44,7 +48,6 @@ Q2PPorepressureFlux::Q2PPorepressureFlux(const InputParameters & parameters) :
     _dmobility_ds(0)
 {
 }
-
 
 void
 Q2PPorepressureFlux::prepareNodalValues()
@@ -60,29 +63,28 @@ Q2PPorepressureFlux::prepareNodalValues()
   _dmobility_dp.resize(_num_nodes);
   _dmobility_ds.resize(_num_nodes);
 
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
-    density = _density.density(_var.nodalSln()[nodenum]); // fluid density at the node
+    density = _density.density(_var.nodalSln()[nodenum]);      // fluid density at the node
     ddensity_dp = _density.ddensity(_var.nodalSln()[nodenum]); // d(fluid density)/dP at the node
     relperm = _relperm.relperm(_sat[nodenum]); // relative permeability of the fluid at node nodenum
     drelperm_ds = _relperm.drelperm(_sat[nodenum]); // d(relperm)/dsat
 
     // calculate the mobility and its derivatives wrt P and S
-    _mobility[nodenum] = density*relperm/_viscosity;
-    _dmobility_dp[nodenum] = ddensity_dp*relperm/_viscosity;
-    _dmobility_ds[nodenum] = density*drelperm_ds/_viscosity;
+    _mobility[nodenum] = density * relperm / _viscosity;
+    _dmobility_dp[nodenum] = ddensity_dp * relperm / _viscosity;
+    _dmobility_ds[nodenum] = density * drelperm_ds / _viscosity;
   }
 }
-
 
 Real
 Q2PPorepressureFlux::computeQpResidual()
 {
   // note this is not the complete residual:
   // the upwind mobility parts get added in computeResidual
-  return   _grad_test[_i][_qp]*(_permeability[_qp]*(_grad_u[_qp] - _density.density(_u[_qp])*_gravity[_qp]));
+  return _grad_test[_i][_qp] *
+         (_permeability[_qp] * (_grad_u[_qp] - _density.density(_u[_qp]) * _gravity[_qp]));
 }
-
 
 void
 Q2PPorepressureFlux::computeResidual()
@@ -96,14 +98,11 @@ Q2PPorepressureFlux::computeJacobian()
   upwind(false, true, _var.number());
 }
 
-
 void
 Q2PPorepressureFlux::computeOffDiagJacobian(unsigned int jvar)
 {
   upwind(false, true, jvar);
 }
-
-
 
 Real
 Q2PPorepressureFlux::computeQpJac(unsigned int dvar)
@@ -111,12 +110,12 @@ Q2PPorepressureFlux::computeQpJac(unsigned int dvar)
   // this is just the derivative of the flux WITHOUT the upstream mobility terms
   // Those terms get added in during computeJacobian()
   if (dvar == _var.number())
-    return _grad_test[_i][_qp]*(_permeability[_qp]*(_grad_phi[_j][_qp] - _density.ddensity(_u[_qp])*_gravity[_qp]*_phi[_j][_qp]));
+    return _grad_test[_i][_qp] *
+           (_permeability[_qp] *
+            (_grad_phi[_j][_qp] - _density.ddensity(_u[_qp]) * _gravity[_qp] * _phi[_j][_qp]));
   else
     return 0;
 }
-
-
 
 void
 Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
@@ -138,7 +137,6 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   if (compute_jac)
   {
@@ -150,7 +148,6 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJac(jvar);
   }
-
 
   // Now perform the upwinding by multiplying the residuals at the
   // upstream nodes by their mobilities
@@ -175,7 +172,6 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
   // flowing out of node i must be the sum of the masses flowing
   // into the other nodes.
 
-
   // FIRST:
   // this is a dirty way of getting around precision loss problems
   // and problems at steadystate where upwinding oscillates from
@@ -184,7 +180,7 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
   // in cosflow it is necessary.
   // I will code a better algorithm if necessary
   bool reached_steady = true;
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     if (_local_re(nodenum) >= 1E-20)
     {
@@ -209,9 +205,8 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
     dtotal_in.assign(_num_nodes, 0);
   }
 
-
   // PERFORM THE UPWINDING!
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     if (_local_re(nodenum) >= 0 || reached_steady) // upstream node
     {
@@ -221,10 +216,10 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
           _local_ke(nodenum, _j) *= _mobility[nodenum];
         if (jvar == _var.number())
           // deriv wrt P
-          _local_ke(nodenum, nodenum) += _dmobility_dp[nodenum]*_local_re(nodenum);
+          _local_ke(nodenum, nodenum) += _dmobility_dp[nodenum] * _local_re(nodenum);
         else
           // deriv wrt S
-          _local_ke(nodenum, nodenum) += _dmobility_ds[nodenum]*_local_re(nodenum);
+          _local_ke(nodenum, nodenum) += _dmobility_ds[nodenum] * _local_re(nodenum);
         for (_j = 0; _j < _phi.size(); _j++)
           dtotal_mass_out[_j] += _local_ke(nodenum, _j);
       }
@@ -240,23 +235,22 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
     }
   }
 
-
   // CONSERVE MASS
   // proportion the total_mass_out mass to the inflow nodes, weighting by their _local_re values
   if (!reached_steady)
-    for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+    for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
       if (_local_re(nodenum) < 0)
       {
         if (compute_jac)
           for (_j = 0; _j < _phi.size(); _j++)
           {
-            _local_ke(nodenum, _j) *= total_mass_out/total_in;
-            _local_ke(nodenum, _j) += _local_re(nodenum)*(dtotal_mass_out[_j]/total_in - dtotal_in[_j]*total_mass_out/total_in/total_in);
+            _local_ke(nodenum, _j) *= total_mass_out / total_in;
+            _local_ke(nodenum, _j) +=
+                _local_re(nodenum) * (dtotal_mass_out[_j] / total_in -
+                                      dtotal_in[_j] * total_mass_out / total_in / total_in);
           }
-        _local_re(nodenum) *= total_mass_out/total_in;
+        _local_re(nodenum) *= total_mass_out / total_in;
       }
-
-
 
   // ADD RESULTS TO RESIDUAL OR JACOBIAN
   if (compute_res)
@@ -280,13 +274,11 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
       const unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i,i);
+        diag(i) = _local_ke(i, i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }
-
 }
-

@@ -16,16 +16,15 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class GenericDiffusion;
 
-template<>
+template <>
 InputParameters validParams<GenericDiffusion>();
 
 class GenericDiffusion : public Kernel
 {
 public:
-
   GenericDiffusion(const InputParameters & parameters);
 
 protected:
@@ -35,4 +34,4 @@ protected:
   const MaterialProperty<Real> & _diffusivity;
 };
 
-#endif //GENERICDIFFUSION_H
+#endif // GENERICDIFFUSION_H

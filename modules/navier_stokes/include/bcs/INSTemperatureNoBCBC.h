@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSTemperatureNoBCBC;
 
-template<>
+template <>
 InputParameters validParams<INSTemperatureNoBCBC>();
 
 /**
@@ -24,7 +24,7 @@ class INSTemperatureNoBCBC : public IntegratedBC
 public:
   INSTemperatureNoBCBC(const InputParameters & parameters);
 
-  virtual ~INSTemperatureNoBCBC(){}
+  virtual ~INSTemperatureNoBCBC() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -33,6 +33,5 @@ protected:
 
   Real _k;
 };
-
 
 #endif // INSTEMPERATURENOBCBC_H

@@ -16,7 +16,8 @@ IsotropicElasticityTensor::IsotropicElasticityTensor(const bool constant)
     _mu(0),
     _nu(0),
     _k(0)
-{}
+{
+}
 
 void
 IsotropicElasticityTensor::setLambda(const Real lambda)
@@ -67,24 +68,25 @@ IsotropicElasticityTensor::calculateLameCoefficients()
   else if (_lambda_set && _nu_set)
     _mu = (_lambda * (1.0 - 2.0 * _nu)) / (2.0 * _nu);
   else if (_lambda_set && _k_set)
-    _mu = ( 3.0 * (_k - _lambda) ) / 2.0;
+    _mu = (3.0 * (_k - _lambda)) / 2.0;
   else if (_lambda_set && _E_set)
-    _mu = ( (_E - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_E-3.0*_lambda)*(_E-3.0*_lambda) + 8.0*_lambda*_E ) / 4.0 );
+    _mu = ((_E - 3.0 * _lambda) / 4.0) +
+          (std::sqrt((_E - 3.0 * _lambda) * (_E - 3.0 * _lambda) + 8.0 * _lambda * _E) / 4.0);
   else if (_mu_set && _nu_set)
-    _lambda = ( 2.0 * _mu * _nu ) / (1.0 - 2.0*_nu);
+    _lambda = (2.0 * _mu * _nu) / (1.0 - 2.0 * _nu);
   else if (_mu_set && _k_set)
-    _lambda = ( 3.0 * _k - 2.0 * _mu ) / 3.0;
+    _lambda = (3.0 * _k - 2.0 * _mu) / 3.0;
   else if (_mu_set && _E_set)
-    _lambda = ((2.0*_mu - _E) * _mu) / (_E - 3.0*_mu);
+    _lambda = ((2.0 * _mu - _E) * _mu) / (_E - 3.0 * _mu);
   else if (_nu_set && _k_set)
   {
     _lambda = (3.0 * _k * _nu) / (1.0 + _nu);
-    _mu = (3.0 * _k * (1.0 - 2.0*_nu)) / (2.0 * (1.0 + _nu));
+    _mu = (3.0 * _k * (1.0 - 2.0 * _nu)) / (2.0 * (1.0 + _nu));
   }
   else if (_E_set && _nu_set) // Young's Modulus and Poisson's Ratio
   {
-    _lambda = (_nu * _E) / ( (1.0+_nu) * (1-2.0*_nu) );
-    _mu = _E / ( 2.0 * (1.0+_nu));
+    _lambda = (_nu * _E) / ((1.0 + _nu) * (1 - 2.0 * _nu));
+    _mu = _E / (2.0 * (1.0 + _nu));
   }
   else if (_E_set && _k_set)
   {
@@ -96,9 +98,12 @@ IsotropicElasticityTensor::calculateLameCoefficients()
 }
 
 Real
-IsotropicElasticityTensor::isotropicEntry(const unsigned int i, const unsigned j, const unsigned k, const unsigned l)
+IsotropicElasticityTensor::isotropicEntry(const unsigned int i,
+                                          const unsigned j,
+                                          const unsigned k,
+                                          const unsigned l)
 {
-  return _lambda*(i==j)*(k==l) + _mu*((i==k)*(j==l)+(i==l)*(j==k));
+  return _lambda * (i == j) * (k == l) + _mu * ((i == k) * (j == l) + (i == l) * (j == k));
 }
 
 void
@@ -110,13 +115,13 @@ IsotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   i = j = k = l = 0;
 
   // Walk down the columns of the 9x9 matrix
-  for (unsigned int q=0; q<81; ++q)
+  for (unsigned int q = 0; q < 81; ++q)
   {
     // This algorithm was developed by Derek Gaston and Cody Permann
     // it's based on page 29 of Michael Tonk's notes
-    j += i/3;
-    k += j/3;
-    l += k/3;
+    j += i / 3;
+    k += j / 3;
+    l += k / 3;
 
     i %= 3;
     j %= 3;

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef CRACKFRONTDATA_H
 #define CRACKFRONTDATA_H
 
@@ -16,10 +15,10 @@
 
 class MooseMesh;
 
-//Forward Declarations
+// Forward Declarations
 class CrackFrontData;
 
-template<>
+template <>
 InputParameters validParams<CrackFrontData>();
 
 class CrackFrontData : public GeneralPostprocessor
@@ -29,7 +28,6 @@ public:
 
   virtual void initialize();
   virtual void execute() {}
-
 
   /**
    * This will return the degrees of freedom in the system.
@@ -45,4 +43,4 @@ protected:
   const Real _scale_factor;
 };
 
-#endif //CRACKFRONTDATA_H
+#endif // CRACKFRONTDATA_H

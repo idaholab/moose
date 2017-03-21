@@ -11,33 +11,28 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<CNSFVMaterial>()
+template <>
+InputParameters
+validParams<CNSFVMaterial>()
 {
   InputParameters params = validParams<Material>();
 
   params.addClassDescription("A material kernel for the CNS equations.");
 
-  params.addRequiredCoupledVar("rho",
-  "Conserved variable: rho");
+  params.addRequiredCoupledVar("rho", "Conserved variable: rho");
 
-  params.addRequiredCoupledVar("rhou",
-  "Conserved variable: rhou");
+  params.addRequiredCoupledVar("rhou", "Conserved variable: rhou");
 
-  params.addCoupledVar("rhov",
-  "Conserved variable: rhov");
+  params.addCoupledVar("rhov", "Conserved variable: rhov");
 
-  params.addCoupledVar("rhow",
-  "Conserved variable: rhow");
+  params.addCoupledVar("rhow", "Conserved variable: rhow");
 
-  params.addRequiredCoupledVar("rhoe",
-  "Conserved variable: rhoe");
+  params.addRequiredCoupledVar("rhoe", "Conserved variable: rhoe");
 
-  params.addRequiredParam<UserObjectName>("slope_limiting",
-  "Name for slope limiting user object");
+  params.addRequiredParam<UserObjectName>("slope_limiting", "Name for slope limiting user object");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   return params;
 }
@@ -68,15 +63,13 @@ CNSFVMaterial::CNSFVMaterial(const InputParameters & parameters)
 {
 }
 
-CNSFVMaterial::~CNSFVMaterial()
-{
-}
+CNSFVMaterial::~CNSFVMaterial() {}
 
 void
 CNSFVMaterial::computeQpProperties()
 {
   /// initialize the conserved variables: rho, rhou, rhov, rhow, rhoe
-  _rho[_qp]  = _rhoc[_qp];
+  _rho[_qp] = _rhoc[_qp];
   _rhou[_qp] = _rhouc[_qp];
   _rhov[_qp] = _rhovc[_qp];
   _rhow[_qp] = _rhowc[_qp];
@@ -87,9 +80,7 @@ CNSFVMaterial::computeQpProperties()
   _vadv[_qp] = _rhov[_qp] / _rho[_qp];
   _wadv[_qp] = _rhow[_qp] / _rho[_qp];
 
-  Real vdov = _uadv[_qp] * _uadv[_qp] +
-              _vadv[_qp] * _vadv[_qp] +
-              _wadv[_qp] * _wadv[_qp];
+  Real vdov = _uadv[_qp] * _uadv[_qp] + _vadv[_qp] * _vadv[_qp] + _wadv[_qp] * _wadv[_qp];
 
   Real v = 1. / _rho[_qp];
   Real e = _rhoe[_qp] / _rho[_qp] - 0.5 * vdov;
@@ -118,7 +109,7 @@ CNSFVMaterial::computeQpProperties()
     _wadv[_qp] += ugrad[3] * dvec;
     _temp[_qp] += ugrad[4] * dvec;
 
-    _rho[_qp]  = _fp.rho(_pres[_qp], _temp[_qp]);
+    _rho[_qp] = _fp.rho(_pres[_qp], _temp[_qp]);
 
     _rhou[_qp] = _rho[_qp] * _uadv[_qp];
 
@@ -127,9 +118,8 @@ CNSFVMaterial::computeQpProperties()
     _rhow[_qp] = _rho[_qp] * _wadv[_qp];
 
     _rhoe[_qp] = _rho[_qp] * _fp.e(_pres[_qp], _rho[_qp]) +
-                 _rho[_qp] * 0.5 * (_uadv[_qp] * _uadv[_qp] +
-                                    _vadv[_qp] * _vadv[_qp] +
-                                    _wadv[_qp] * _wadv[_qp]);
+                 _rho[_qp] * 0.5 *
+                     (_uadv[_qp] * _uadv[_qp] + _vadv[_qp] * _vadv[_qp] + _wadv[_qp] * _wadv[_qp]);
 
     /// clear the temporary vectors
 

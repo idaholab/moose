@@ -10,33 +10,36 @@
 // libMesh includes
 #include "libmesh/mesh_modification.h"
 
-template<>
-InputParameters validParams<MortarPeriodicMesh>()
+template <>
+InputParameters
+validParams<MortarPeriodicMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
-  params.addClassDescription("Set up an orthogonal mesh with additional dim-1 dimensional side domains for use with the Mortar method.");
+  params.addClassDescription("Set up an orthogonal mesh with additional dim-1 dimensional side "
+                             "domains for use with the Mortar method.");
   MultiMooseEnum periodic_dirs("x=0 y=1 z=2");
-  params.addRequiredParam<MultiMooseEnum>("periodic_directions", periodic_dirs, "Directions along which additional Mortar meshes are generated");
+  params.addRequiredParam<MultiMooseEnum>(
+      "periodic_directions",
+      periodic_dirs,
+      "Directions along which additional Mortar meshes are generated");
   return params;
 }
 
-MortarPeriodicMesh::MortarPeriodicMesh(const InputParameters & parameters) :
-    GeneratedMesh(parameters),
+MortarPeriodicMesh::MortarPeriodicMesh(const InputParameters & parameters)
+  : GeneratedMesh(parameters),
     _periodic_dirs(getParam<MultiMooseEnum>("periodic_directions")),
     _mortar_subdomains(_dim, Moose::INVALID_BLOCK_ID)
 {
 }
 
-MortarPeriodicMesh::MortarPeriodicMesh(const MortarPeriodicMesh & other_mesh) :
-    GeneratedMesh(other_mesh),
+MortarPeriodicMesh::MortarPeriodicMesh(const MortarPeriodicMesh & other_mesh)
+  : GeneratedMesh(other_mesh),
     _periodic_dirs(other_mesh._periodic_dirs),
     _mortar_subdomains(other_mesh._mortar_subdomains)
 {
 }
 
-MortarPeriodicMesh::~MortarPeriodicMesh()
-{
-}
+MortarPeriodicMesh::~MortarPeriodicMesh() {}
 
 MooseMesh &
 MortarPeriodicMesh::clone() const
@@ -51,7 +54,7 @@ MortarPeriodicMesh::buildMesh()
   GeneratedMesh::buildMesh();
 
   // boundaries
-  const std::vector<BoundaryName> boundary_names = { "left", "bottom", "back" };
+  const std::vector<BoundaryName> boundary_names = {"left", "bottom", "back"};
 
   buildBndElemList();
 
@@ -65,10 +68,10 @@ MortarPeriodicMesh::buildMesh()
         if ((*it)->_bnd_id == current_boundary_id)
         {
           Elem * elem = (*it)->_elem;
-          unsigned short int  s = (*it)->_side;
+          unsigned short int s = (*it)->_side;
 
           // build element from the side
-          std::unique_ptr<Elem> side (elem->build_side(s, false));
+          std::unique_ptr<Elem> side(elem->build_side(s, false));
           side->processor_id() = elem->processor_id();
 
           // Add the side set subdomain

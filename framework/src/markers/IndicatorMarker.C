@@ -14,18 +14,17 @@
 
 #include "IndicatorMarker.h"
 
-template<>
-InputParameters validParams<IndicatorMarker>()
+template <>
+InputParameters
+validParams<IndicatorMarker>()
 {
   InputParameters params = validParams<Marker>();
-  params.addRequiredParam<IndicatorName>("indicator", "The name of the Indicator that this Marker uses.");
+  params.addRequiredParam<IndicatorName>("indicator",
+                                         "The name of the Indicator that this Marker uses.");
   return params;
 }
 
-
-IndicatorMarker::IndicatorMarker(const InputParameters & parameters) :
-    Marker(parameters),
-    _error_vector(getErrorVector(parameters.get<IndicatorName>("indicator")))
+IndicatorMarker::IndicatorMarker(const InputParameters & parameters)
+  : Marker(parameters), _error_vector(getErrorVector(parameters.get<IndicatorName>("indicator")))
 {
 }
-

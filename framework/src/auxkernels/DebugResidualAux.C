@@ -15,16 +15,18 @@
 #include "DebugResidualAux.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<DebugResidualAux>()
+template <>
+InputParameters
+validParams<DebugResidualAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<NonlinearVariableName>("debug_variable", "The variable that is being debugged.");
+  params.addRequiredParam<NonlinearVariableName>("debug_variable",
+                                                 "The variable that is being debugged.");
   return params;
 }
 
-DebugResidualAux::DebugResidualAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+DebugResidualAux::DebugResidualAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _debug_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("debug_variable"))),
     _residual_copy(_nl_sys.residualGhosted())
 {

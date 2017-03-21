@@ -15,7 +15,7 @@
 #ifndef RANDOMDATA_H
 #define RANDOMDATA_H
 
-//MOOSE includes
+// MOOSE includes
 #include "MooseTypes.h"
 #include "MooseRandom.h"
 
@@ -51,7 +51,7 @@ public:
 private:
   void updateGenerators();
 
-  template<typename T>
+  template <typename T>
   void updateGeneratorHelper(T it, T end_it);
 
   FEProblemBase & _rd_problem;
@@ -68,4 +68,4 @@ private:
   std::unordered_map<dof_id_type, unsigned int> _seeds;
 };
 
-#endif //RANDOMDATA_H
+#endif // RANDOMDATA_H

@@ -18,7 +18,9 @@
 #include "InputParameters.h"
 
 // Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
-OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & parameters) : OutputMapWrapper<MultiMooseEnum>()
+OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on,
+                                     const InputParameters & parameters)
+  : OutputMapWrapper<MultiMooseEnum>()
 {
   // Initialize each of the 'execute_on' settings for the various types of outputs
   if (parameters.have_parameter<MultiMooseEnum>("execute_nodal_on"))
@@ -43,10 +45,9 @@ OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on, const In
     _map.insert(std::make_pair("system_information", Output::getExecuteOptions("initial")));
 }
 
-// Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based output types
-OutputDataWarehouse::OutputDataWarehouse() :
-    OutputMapWrapper<OutputData>(),
-    _has_show_list(false)
+// Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based
+// output types
+OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper<OutputData>(), _has_show_list(false)
 {
   _map["nodal"] = OutputData();
   _map["elemental"] = OutputData();

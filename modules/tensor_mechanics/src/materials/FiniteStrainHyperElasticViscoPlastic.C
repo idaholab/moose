@@ -7,40 +7,63 @@
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<FiniteStrainHyperElasticViscoPlastic>()
+template <>
+InputParameters
+validParams<FiniteStrainHyperElasticViscoPlastic>()
 {
   InputParameters params = validParams<ComputeStressBase>();
-  params.addParam<Real>("resid_abs_tol", 1e-10, "Absolute Tolerance for flow rate residual equation");
-  params.addParam<Real>("resid_rel_tol", 1e-6, "Relative Tolerance for flow rate residual equation");
+  params.addParam<Real>(
+      "resid_abs_tol", 1e-10, "Absolute Tolerance for flow rate residual equation");
+  params.addParam<Real>(
+      "resid_rel_tol", 1e-6, "Relative Tolerance for flow rate residual equation");
   params.addParam<unsigned int>("maxiters", 50, "Maximum iteration for flow rate update");
   params.addParam<unsigned int>("max_substep_iteration", 1, "Maximum number of substep iteration");
-  params.addParam<std::vector<UserObjectName> >("flow_rate_user_objects", "List of User object names that computes flow rate and derivatives");
-  params.addParam<std::vector<UserObjectName> >("strength_user_objects", "List of User object names that computes strength variables and derivatives");
-  params.addParam<std::vector<UserObjectName> >("internal_var_user_objects", "List of User object names that integrates internal variables and computes derivatives");
-  params.addParam<std::vector<UserObjectName> >("internal_var_rate_user_objects", "List of User object names that computes internal variable rates and derivatives");
-  params.addClassDescription("Material class for hyper-elastic visco-platic flow: Can handle multiple flow models defined by flowratemodel type user objects");
+  params.addParam<std::vector<UserObjectName>>(
+      "flow_rate_user_objects",
+      "List of User object names that computes flow rate and derivatives");
+  params.addParam<std::vector<UserObjectName>>(
+      "strength_user_objects",
+      "List of User object names that computes strength variables and derivatives");
+  params.addParam<std::vector<UserObjectName>>(
+      "internal_var_user_objects",
+      "List of User object names that integrates internal variables and computes derivatives");
+  params.addParam<std::vector<UserObjectName>>(
+      "internal_var_rate_user_objects",
+      "List of User object names that computes internal variable rates and derivatives");
+  params.addClassDescription("Material class for hyper-elastic visco-platic flow: Can handle "
+                             "multiple flow models defined by flowratemodel type user objects");
 
   return params;
 }
 
-FiniteStrainHyperElasticViscoPlastic::FiniteStrainHyperElasticViscoPlastic(const InputParameters & parameters) :
-    ComputeStressBase(parameters),
+FiniteStrainHyperElasticViscoPlastic::FiniteStrainHyperElasticViscoPlastic(
+    const InputParameters & parameters)
+  : ComputeStressBase(parameters),
     _resid_abs_tol(getParam<Real>("resid_abs_tol")),
     _resid_rel_tol(getParam<Real>("resid_rel_tol")),
     _maxiters(getParam<unsigned int>("maxiters")),
     _max_substep_iter(getParam<unsigned int>("max_substep_iteration")),
-    _flow_rate_uo_names(isParamValid("flow_rate_user_objects") ? getParam<std::vector<UserObjectName> >("flow_rate_user_objects") : std::vector<UserObjectName>(0)),
-    _strength_uo_names(isParamValid("strength_user_objects") ? getParam<std::vector<UserObjectName> >("strength_user_objects") : std::vector<UserObjectName>(0)),
-    _int_var_uo_names(isParamValid("internal_var_user_objects") ? getParam<std::vector<UserObjectName> >("internal_var_user_objects") : std::vector<UserObjectName>(0)),
-    _int_var_rate_uo_names(isParamValid("internal_var_rate_user_objects") ? getParam<std::vector<UserObjectName> >("internal_var_rate_user_objects") : std::vector<UserObjectName>(0)),
+    _flow_rate_uo_names(isParamValid("flow_rate_user_objects")
+                            ? getParam<std::vector<UserObjectName>>("flow_rate_user_objects")
+                            : std::vector<UserObjectName>(0)),
+    _strength_uo_names(isParamValid("strength_user_objects")
+                           ? getParam<std::vector<UserObjectName>>("strength_user_objects")
+                           : std::vector<UserObjectName>(0)),
+    _int_var_uo_names(isParamValid("internal_var_user_objects")
+                          ? getParam<std::vector<UserObjectName>>("internal_var_user_objects")
+                          : std::vector<UserObjectName>(0)),
+    _int_var_rate_uo_names(
+        isParamValid("internal_var_rate_user_objects")
+            ? getParam<std::vector<UserObjectName>>("internal_var_rate_user_objects")
+            : std::vector<UserObjectName>(0)),
     _pk2_prop_name(_base_name + "pk2"),
     _pk2(declareProperty<RankTwoTensor>(_pk2_prop_name)),
     _fp(declareProperty<RankTwoTensor>(_base_name + "fp")),
     _fp_old(declarePropertyOld<RankTwoTensor>(_base_name + "fp")),
     _ce(declareProperty<RankTwoTensor>(_base_name + "ce")),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _deformation_gradient_old(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment"))
 {
   initUOVariables();
@@ -78,14 +101,17 @@ FiniteStrainHyperElasticViscoPlastic::initUOVariables()
 }
 
 void
-FiniteStrainHyperElasticViscoPlastic::initNumUserObjects(const std::vector<UserObjectName> & uo_names, unsigned int & uo_num)
+FiniteStrainHyperElasticViscoPlastic::initNumUserObjects(
+    const std::vector<UserObjectName> & uo_names, unsigned int & uo_num)
 {
   uo_num = uo_names.size();
 }
 
 template <typename T>
 void
-FiniteStrainHyperElasticViscoPlastic::initProp(const std::vector<UserObjectName> & uo_names, unsigned int uo_num, std::vector<MaterialProperty<T> *> & uo_prop)
+FiniteStrainHyperElasticViscoPlastic::initProp(const std::vector<UserObjectName> & uo_names,
+                                               unsigned int uo_num,
+                                               std::vector<MaterialProperty<T> *> & uo_prop)
 {
   uo_prop.resize(uo_num);
   for (unsigned int i = 0; i < uo_num; ++i)
@@ -94,7 +120,9 @@ FiniteStrainHyperElasticViscoPlastic::initProp(const std::vector<UserObjectName>
 
 template <typename T>
 void
-FiniteStrainHyperElasticViscoPlastic::initPropOld(const std::vector<UserObjectName> & uo_names, unsigned int uo_num, std::vector<MaterialProperty<T> *> & uo_prop_old)
+FiniteStrainHyperElasticViscoPlastic::initPropOld(const std::vector<UserObjectName> & uo_names,
+                                                  unsigned int uo_num,
+                                                  std::vector<MaterialProperty<T> *> & uo_prop_old)
 {
   uo_prop_old.resize(uo_num);
   for (unsigned int i = 0; i < uo_num; ++i)
@@ -103,7 +131,9 @@ FiniteStrainHyperElasticViscoPlastic::initPropOld(const std::vector<UserObjectNa
 
 template <typename T>
 void
-FiniteStrainHyperElasticViscoPlastic::initUserObjects(const std::vector<UserObjectName> & uo_names, unsigned int uo_num, std::vector<const T *> & uo)
+FiniteStrainHyperElasticViscoPlastic::initUserObjects(const std::vector<UserObjectName> & uo_names,
+                                                      unsigned int uo_num,
+                                                      std::vector<const T *> & uo)
 {
   uo.resize(uo_num);
 
@@ -184,24 +214,28 @@ FiniteStrainHyperElasticViscoPlastic::computeQpStress()
     preSolveQp();
 
     converge = true;
-    _dt_substep = _dt/num_substep;
+    _dt_substep = _dt / num_substep;
 
     for (unsigned int istep = 0; istep < num_substep; ++istep)
     {
-      _dfgrd_tmp = (istep+1) * delta_dfgrd/num_substep + _deformation_gradient_old[_qp];
+      _dfgrd_tmp = (istep + 1) * delta_dfgrd / num_substep + _deformation_gradient_old[_qp];
       if (!solveQp())
       {
         converge = false;
         substep_iter++;
-        num_substep*=2;
+        num_substep *= 2;
         break;
       }
     }
 
     if (substep_iter > _max_substep_iter)
-      mooseError("Constitutive failure with substepping at quadrature point ", _q_point[_qp](0), " ", _q_point[_qp](1), " ", _q_point[_qp](2));
-  }
-  while (!converge);
+      mooseError("Constitutive failure with substepping at quadrature point ",
+                 _q_point[_qp](0),
+                 " ",
+                 _q_point[_qp](1),
+                 " ",
+                 _q_point[_qp](2));
+  } while (!converge);
 
   postSolveQp();
 }
@@ -276,7 +310,7 @@ FiniteStrainHyperElasticViscoPlastic::solveFlowrate()
   unsigned int iter = 0;
 
 #ifdef DEBUG
-  std::vector<Real> rnormst(_maxiters+1),flowratest(_maxiters+1);
+  std::vector<Real> rnormst(_maxiters + 1), flowratest(_maxiters + 1);
 #endif
 
   if (!computeFlowRateResidual())
@@ -382,7 +416,8 @@ FiniteStrainHyperElasticViscoPlastic::computeFlowRateJacobian()
   for (unsigned int i = 0; i < _num_flow_rate_uos; ++i)
     for (unsigned int j = 0; j < _num_flow_rate_uos; ++j)
     {
-      if (i == j) _jac(i, j) = 1;
+      if (i == j)
+        _jac(i, j) = 1;
       _jac(i, j) -= dflowrate_dflowrate(i, j);
       _jac(i, j) -= _dflowrate_dpk2[i].doubleContraction(_dpk2_dflowrate[j]);
     }
@@ -413,8 +448,6 @@ FiniteStrainHyperElasticViscoPlastic::computeFlowRateFunction()
   return true;
 }
 
-
-
 void
 FiniteStrainHyperElasticViscoPlastic::computePK2StressAndDerivative()
 {
@@ -438,7 +471,7 @@ FiniteStrainHyperElasticViscoPlastic::computeElasticStrain()
 {
   RankTwoTensor iden;
   iden.addIa(1.0);
-  _ee = 0.5 * (_ce[_qp]-iden);
+  _ee = 0.5 * (_ce[_qp] - iden);
 }
 
 void
@@ -450,7 +483,6 @@ FiniteStrainHyperElasticViscoPlastic::computeDeeDce()
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       _dee_dce(i, j, i, j) = 0.5;
 }
-
 
 void
 FiniteStrainHyperElasticViscoPlastic::computeElasticRightCauchyGreenTensor()
@@ -469,7 +501,7 @@ FiniteStrainHyperElasticViscoPlastic::computeElasticPlasticDeformGrad()
     val += _flow_rate(i) * _flow_dirn[i] * _dt_substep;
 
   _fp_tmp_inv = _fp_tmp_old_inv * (iden - val);
-  _fp_tmp_inv = std::pow(_fp_tmp_inv.det(), -1.0/3.0) * _fp_tmp_inv;
+  _fp_tmp_inv = std::pow(_fp_tmp_inv.det(), -1.0 / 3.0) * _fp_tmp_inv;
   _fe = _dfgrd_tmp * _fp_tmp_inv;
 }
 
@@ -523,13 +555,14 @@ FiniteStrainHyperElasticViscoPlastic::computeQpJacobian()
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-        _dfe_df(i, j, i, l) =  _fp_tmp_inv(l, j);
+        _dfe_df(i, j, i, l) = _fp_tmp_inv(l, j);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
         for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          _df_dstretch_inc(i, j, k, l) = _rotation_increment[_qp](i, k) * _deformation_gradient_old[_qp](l, j);
+          _df_dstretch_inc(i, j, k, l) =
+              _rotation_increment[_qp](i, k) * _deformation_gradient_old[_qp](l, j);
 
   _Jacobian_mult[_qp] = _tan_mod * _dfe_df * _df_dstretch_inc;
 }
@@ -606,7 +639,8 @@ FiniteStrainHyperElasticViscoPlastic::computeIntVarDerivatives()
   for (unsigned int i = 0; i < _num_int_var_uos; ++i)
     for (unsigned int j = 0; j < _num_int_var_uos; ++j)
     {
-      if (i == j) _dintvar_dintvar(i, j) = 1;
+      if (i == j)
+        _dintvar_dintvar(i, j) = 1;
       for (unsigned int k = 0; k < _num_int_var_rate_uos; ++k)
         _dintvar_dintvar(i, j) -= _dintvar_dintvarrate(i, k) * _dintvarrate_dintvar(k, j);
     }

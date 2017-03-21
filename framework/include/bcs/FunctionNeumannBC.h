@@ -17,11 +17,11 @@
 
 #include "IntegratedBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionNeumannBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionNeumannBC>();
 
 /**

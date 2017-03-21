@@ -24,20 +24,22 @@
  * Intermediate base class that ties together all the interfaces for getting
  * MooseVariables with the MooseVariableDependencyInterface
  */
-class NeighborCoupleableMooseVariableDependencyIntermediateInterface :
-  public NeighborCoupleable,
-  public ScalarCoupleable,
-  public NeighborMooseVariableInterface,
-  public MooseVariableDependencyInterface
+class NeighborCoupleableMooseVariableDependencyIntermediateInterface
+    : public NeighborCoupleable,
+      public ScalarCoupleable,
+      public NeighborMooseVariableInterface,
+      public MooseVariableDependencyInterface
 {
 public:
-  NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object, bool nodal, bool neighbor_nodal) :
-    NeighborCoupleable(moose_object, nodal, neighbor_nodal),
-    ScalarCoupleable(moose_object),
-    NeighborMooseVariableInterface(moose_object, nodal)
+  NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
+                                                                 bool nodal,
+                                                                 bool neighbor_nodal)
+    : NeighborCoupleable(moose_object, nodal, neighbor_nodal),
+      ScalarCoupleable(moose_object),
+      NeighborMooseVariableInterface(moose_object, nodal)
   {
     const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-    for (unsigned int i=0; i<coupled_vars.size(); i++)
+    for (unsigned int i = 0; i < coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
 
     addMooseVariableDependency(mooseVariable());

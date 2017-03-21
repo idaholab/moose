@@ -12,8 +12,9 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<ClosePackIC>()
+template <>
+InputParameters
+validParams<ClosePackIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
   params.addClassDescription("Close packed arrangement of smooth circles");
@@ -21,9 +22,8 @@ InputParameters validParams<ClosePackIC>()
   return params;
 }
 
-ClosePackIC::ClosePackIC(const InputParameters & parameters) :
-    SmoothCircleBaseIC(parameters),
-    _radius(parameters.get<Real>("radius"))
+ClosePackIC::ClosePackIC(const InputParameters & parameters)
+  : SmoothCircleBaseIC(parameters), _radius(parameters.get<Real>("radius"))
 {
 }
 

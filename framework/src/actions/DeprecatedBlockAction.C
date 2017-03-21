@@ -14,8 +14,9 @@
 
 #include "DeprecatedBlockAction.h"
 
-template<>
-InputParameters validParams<DeprecatedBlockAction>()
+template <>
+InputParameters
+validParams<DeprecatedBlockAction>()
 {
   InputParameters params = validParams<Action>();
 
@@ -23,13 +24,10 @@ InputParameters validParams<DeprecatedBlockAction>()
   return params;
 }
 
-DeprecatedBlockAction::DeprecatedBlockAction(InputParameters parameters) :
-    Action(parameters)
-{
-}
+DeprecatedBlockAction::DeprecatedBlockAction(InputParameters parameters) : Action(parameters) {}
 
 void
 DeprecatedBlockAction::act()
 {
-  mooseError("Input file block '" + name()  + "' has been deprecated.");
+  mooseError("Input file block '" + name() + "' has been deprecated.");
 }

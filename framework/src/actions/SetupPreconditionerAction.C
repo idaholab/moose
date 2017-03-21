@@ -23,16 +23,17 @@
 
 unsigned int SetupPreconditionerAction::_count = 0;
 
-template<>
-InputParameters validParams<SetupPreconditionerAction>()
+template <>
+InputParameters
+validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params) :
-    MooseObjectAction(params)
+SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 
@@ -43,14 +44,15 @@ SetupPreconditionerAction::act()
   {
     // build the preconditioner
     _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
-    std::shared_ptr<MoosePreconditioner> pc = _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
+    std::shared_ptr<MoosePreconditioner> pc =
+        _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 
     _problem->getNonlinearSystemBase().setPreconditioner(pc);
 
-    /**
-     * Go ahead and set common precondition options here.  The child classes will still be called
-     * through the action warehouse
-     */
+/**
+ * Go ahead and set common precondition options here.  The child classes will still be called
+ * through the action warehouse
+ */
 #if LIBMESH_HAVE_PETSC
     Moose::PetscSupport::storePetscOptions(*_problem, _moose_object_pars);
 #endif

@@ -5,7 +5,7 @@
 
 class StochasticToolsApp;
 
-template<>
+template <>
 InputParameters validParams<StochasticToolsApp>();
 
 class StochasticToolsApp : public MooseApp

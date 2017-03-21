@@ -17,13 +17,15 @@ class PiecewiseLinear;
 class IsotropicPlasticity : public ReturnMappingModel
 {
 public:
-  IsotropicPlasticity( const InputParameters & parameters);
+  IsotropicPlasticity(const InputParameters & parameters);
 
   virtual void initStatefulProperties(unsigned n_points);
 
 protected:
-  virtual void computeYieldStress( unsigned qp );
-  virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
+  virtual void computeYieldStress(unsigned qp);
+  virtual void computeStressInitialize(unsigned qp,
+                                       Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor);
   virtual void computeStressFinalize(unsigned qp, const SymmTensor & plasticStrainIncrement);
 
   virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar);
@@ -51,7 +53,7 @@ protected:
   MaterialProperty<Real> & _hardening_variable_old;
 };
 
-template<>
+template <>
 InputParameters validParams<IsotropicPlasticity>();
 
 #endif // ISOTROPICPLASTICITY_H

@@ -6,23 +6,29 @@
 /****************************************************************/
 #include "GrainAdvectionAux.h"
 
-template<>
-InputParameters validParams<GrainAdvectionAux>()
+template <>
+InputParameters
+validParams<GrainAdvectionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Calculates the advection velocity of grain due to rigid body translation and rotation");
-  params.addParam<Real>("translation_constant", 1.0, "constant value characterizing grain translation");
+  params.addClassDescription(
+      "Calculates the advection velocity of grain due to rigid body translation and rotation");
+  params.addParam<Real>(
+      "translation_constant", 1.0, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
-  params.addParam<UserObjectName>("grain_tracker_object", "userobject for getting volume and center of mass of grains");
-  params.addParam<VectorPostprocessorName>("grain_volumes", "The feature volume VectorPostprocessorValue.");
-  params.addParam<UserObjectName>("grain_force", "userobject for getting force and torque acting on grains");
+  params.addParam<UserObjectName>("grain_tracker_object",
+                                  "userobject for getting volume and center of mass of grains");
+  params.addParam<VectorPostprocessorName>("grain_volumes",
+                                           "The feature volume VectorPostprocessorValue.");
+  params.addParam<UserObjectName>("grain_force",
+                                  "userobject for getting force and torque acting on grains");
   MooseEnum component("x=0 y=1 z=2");
   params.addParam<MooseEnum>("component", component, "The gradient component to compute");
   return params;
 }
 
-GrainAdvectionAux::GrainAdvectionAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+GrainAdvectionAux::GrainAdvectionAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
     _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes")),
     _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
@@ -40,7 +46,8 @@ void
 GrainAdvectionAux::precalculateValue()
 {
   // ID of unique grain at current point
-  const auto grain_id = _grain_tracker.getEntityValue(_current_elem->id(), FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
+  const auto grain_id = _grain_tracker.getEntityValue(
+      _current_elem->id(), FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
   if (grain_id >= 0)
   {
     mooseAssert(grain_id < _grain_volumes.size(), "grain index is out of bounds");
@@ -48,7 +55,8 @@ GrainAdvectionAux::precalculateValue()
     const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
 
     const RealGradient velocity_translation = _mt / volume * _grain_forces[grain_id];
-    const RealGradient velocity_rotation = _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
+    const RealGradient velocity_rotation =
+        _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
     _velocity_advection = velocity_translation + velocity_rotation;
   }
   else

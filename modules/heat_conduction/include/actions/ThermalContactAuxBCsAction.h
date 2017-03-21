@@ -13,11 +13,11 @@ class ThermalContactAuxBCsAction : public Action
 {
 public:
   ThermalContactAuxBCsAction(const InputParameters & params);
-  virtual ~ThermalContactAuxBCsAction(){}
+  virtual ~ThermalContactAuxBCsAction() {}
   virtual void act();
 };
 
-template<>
+template <>
 InputParameters validParams<ThermalContactAuxBCsAction>();
 
 #endif

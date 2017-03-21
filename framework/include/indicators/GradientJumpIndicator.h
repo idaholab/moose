@@ -19,11 +19,10 @@
 
 class GradientJumpIndicator;
 
-template<>
+template <>
 InputParameters validParams<GradientJumpIndicator>();
 
-class GradientJumpIndicator :
-  public InternalSideIndicator
+class GradientJumpIndicator : public InternalSideIndicator
 {
 public:
   GradientJumpIndicator(const InputParameters & parameters);

@@ -11,13 +11,13 @@
 // Moose Includes
 #include "GeneralDamper.h"
 
-//Forward Declarations
+// Forward Declarations
 class ContactSlipDamper;
 class AuxiliarySystem;
 class DisplacedProblem;
 class PenetrationLocator;
 
-template<>
+template <>
 InputParameters validParams<ContactSlipDamper>();
 
 /**
@@ -48,7 +48,7 @@ protected:
    */
   bool operateOnThisInteraction(const PenetrationLocator & pen_loc);
 
-  std::set<std::pair<int, int> > _interactions;
+  std::set<std::pair<int, int>> _interactions;
 
   int _num_contact_nodes;
   int _num_sticking;
@@ -62,7 +62,8 @@ protected:
   bool _debug_output;
 
   /// Convenient typedef for frequently used iterator
-  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_iterator;
+  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator
+      pl_iterator;
 };
 
-#endif //CONTACTSLIPDAMPER_H
+#endif // CONTACTSLIPDAMPER_H

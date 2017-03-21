@@ -14,13 +14,13 @@
 // Forward Declarations
 class PorousFlowFluidMass;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowFluidMass>();
 
 /**
  * Postprocessor produces the mass of a given fluid component in a region
  */
-class PorousFlowFluidMass: public ElementIntegralPostprocessor
+class PorousFlowFluidMass : public ElementIntegralPostprocessor
 {
 public:
   PorousFlowFluidMass(const InputParameters & parameters);
@@ -49,4 +49,4 @@ protected:
   MooseVariable * const _var;
 };
 
-#endif //POROUSFLOWFLUIDMASS_H
+#endif // POROUSFLOWFLUIDMASS_H

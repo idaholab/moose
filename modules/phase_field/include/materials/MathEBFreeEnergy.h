@@ -10,10 +10,10 @@
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
 
-//Forward Declarations
+// Forward Declarations
 class MathEBFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<MathEBFreeEnergy>();
 
 /**
@@ -21,8 +21,7 @@ InputParameters validParams<MathEBFreeEnergy>();
  * and uses automatic differentiation to get the derivatives.
  * \f$ F = \frac14 (1 + c)^2 (1 - c)^2 \f$.
  */
-class MathEBFreeEnergy : public DerivativeParsedMaterialHelper,
-                         public ExpressionBuilder
+class MathEBFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
   MathEBFreeEnergy(const InputParameters & parameters);
@@ -32,4 +31,4 @@ protected:
   EBTerm _c;
 };
 
-#endif //MATHEBFREEENERGY_H
+#endif // MATHEBFREEENERGY_H

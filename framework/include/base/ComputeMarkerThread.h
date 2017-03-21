@@ -49,4 +49,4 @@ protected:
   const MooseObjectWarehouse<Marker> & _marker_whs;
 };
 
-#endif //COMPUTEMARKERTHREAD_H
+#endif // COMPUTEMARKERTHREAD_H

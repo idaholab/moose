@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSMassSpecifiedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSMassSpecifiedNormalFlowBC>();
 
 /**

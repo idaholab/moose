@@ -46,12 +46,13 @@ public:
    * Constructor taking an FEProblemBase reference, a function to call,
    * and the THREAD_ID argument.
    */
-  SwapBackSentinel(FEProblemBase & fe_problem, SwapBackFunction func, THREAD_ID tid, bool predicate=true) :
-      _fe_problem(fe_problem),
-      _func(func),
-      _thread_id(tid),
-      _predicate(predicate)
-  {}
+  SwapBackSentinel(FEProblemBase & fe_problem,
+                   SwapBackFunction func,
+                   THREAD_ID tid,
+                   bool predicate = true)
+    : _fe_problem(fe_problem), _func(func), _thread_id(tid), _predicate(predicate)
+  {
+  }
 
   /**
    * The destructor calls swap back function only if the predicate is true.

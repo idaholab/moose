@@ -12,7 +12,7 @@
 
 class MethaneFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<MethaneFluidProperties>();
 
 /**
@@ -25,11 +25,11 @@ public:
   MethaneFluidProperties(const InputParameters & parameters);
   virtual ~MethaneFluidProperties();
 
- /**
-  * Methane molar mass
-  * @return molar mass (kg/mol)
-  */
- virtual Real molarMass() const override;
+  /**
+   * Methane molar mass
+   * @return molar mass (kg/mol)
+   */
+  virtual Real molarMass() const override;
 
   /**
    * Methane critical pressure
@@ -69,7 +69,8 @@ public:
    * @param[out] drho_dp derivative of density wrt pressure
    * @param[out] drho_dT derivative of density wrt temperature
    */
-  virtual void rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_dpT(
+      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   /**
    * Internal energy from pressure and temperature
@@ -89,7 +90,8 @@ public:
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
-  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
+  virtual void
+  e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /**
    * Density and internal energy and their derivatives wrt pressure and temperature
@@ -103,7 +105,14 @@ public:
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
-  virtual void rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const override;
+  virtual void rho_e_dpT(Real pressure,
+                         Real temperature,
+                         Real & rho,
+                         Real & drho_dp,
+                         Real & drho_dT,
+                         Real & e,
+                         Real & de_dp,
+                         Real & de_dT) const override;
 
   /**
    * Speed of sound
@@ -156,7 +165,8 @@ public:
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void mu_drhoT(
+      Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
    * Thermal conductivity as a function of pressure and temperature.
@@ -202,7 +212,8 @@ public:
    * @param[out] dh_dp derivative of enthalpy wrt pressure
    * @param[out] dh_dT derivative of enthalpy wrt temperature
    */
-  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
+  virtual void
+  h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   /**
    * Thermal expansion coefficient

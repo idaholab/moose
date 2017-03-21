@@ -9,11 +9,11 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class Function;
 class OutOfPlanePressure;
 
-template<>
+template <>
 InputParameters validParams<OutOfPlanePressure>();
 
 /**
@@ -26,7 +26,6 @@ InputParameters validParams<OutOfPlanePressure>();
 class OutOfPlanePressure : public Kernel
 {
 public:
-
   OutOfPlanePressure(const InputParameters & parameters);
 
 protected:
@@ -37,4 +36,4 @@ private:
   Function & _function;
   const Real _factor;
 };
-#endif //OUTOFPLANEPRESSURE_H
+#endif // OUTOFPLANEPRESSURE_H

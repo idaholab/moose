@@ -17,10 +17,10 @@
 
 #include "ElementUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class RandomElementalUserObject;
 
-template<>
+template <>
 InputParameters validParams<RandomElementalUserObject>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   std::map<dof_id_type, unsigned long> _random_data;
 };
 
-#endif //RANDOMELEMENTALUSEROBJECT_H
+#endif // RANDOMELEMENTALUSEROBJECT_H

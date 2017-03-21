@@ -32,21 +32,22 @@ struct CutFace
 class XFEMGeometricCut
 {
 public:
-
   XFEMGeometricCut(Real t0, Real t1);
   virtual ~XFEMGeometricCut();
 
   virtual bool active(Real time) = 0;
 
-  virtual bool cutElementByGeometry(const Elem* elem, std::vector<CutEdge> & cut_edges,
-                                    Real time) = 0;
-  virtual bool cutElementByGeometry(const Elem* elem, std::vector<CutFace> & cut_faces,
-                                    Real time) = 0;
+  virtual bool
+  cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time) = 0;
+  virtual bool
+  cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) = 0;
 
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_edges,
-                                    std::vector<CutEdge> & cut_edges, Real time) = 0;
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_faces,
-                                    std::vector<CutFace> & cut_faces, Real time) = 0;
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
+                                     std::vector<CutEdge> & cut_edges,
+                                     Real time) = 0;
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
+                                     std::vector<CutFace> & cut_faces,
+                                     Real time) = 0;
 
   Real cutFraction(Real time);
 
@@ -55,6 +56,5 @@ protected:
   Real _t_end;
   Real crossProduct2D(Real ax, Real ay, Real bx, Real by);
 };
-
 
 #endif

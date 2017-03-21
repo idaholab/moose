@@ -9,18 +9,20 @@
 
 #include "XFEM.h"
 
-template<>
-InputParameters validParams<XFEMCutPlaneAux>()
+template <>
+InputParameters
+validParams<XFEMCutPlaneAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   MooseEnum quantity("origin_x origin_y origin_z normal_x normal_y normal_z");
-  params.addRequiredParam<MooseEnum>("quantity", quantity, "The quantity to be extracted.  Choices: "+quantity.getRawNames());
+  params.addRequiredParam<MooseEnum>(
+      "quantity", quantity, "The quantity to be extracted.  Choices: " + quantity.getRawNames());
   params.addParam<unsigned int>("plane_id", 0, "The index of the cut plane");
   return params;
 }
 
-XFEMCutPlaneAux::XFEMCutPlaneAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+XFEMCutPlaneAux::XFEMCutPlaneAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _quantity(Xfem::XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity")))),
     _plane_id(getParam<unsigned int>("plane_id"))
 {

@@ -8,23 +8,43 @@
 
 #include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<ComputeCappedWeakPlaneStress>()
+template <>
+InputParameters
+validParams<ComputeCappedWeakPlaneStress>()
 {
   InputParameters params = validParams<PQPlasticModel>();
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
-  params.addRequiredParam<UserObjectName>("cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  Physically the cohesion should not be negative.");
-  params.addRequiredParam<UserObjectName>("tan_friction_angle", "A TensorMechanicsHardening UserObject that defines hardening of tan(friction angle).  Physically the friction angle should be between 0 and 90deg.");
-  params.addRequiredParam<UserObjectName>("tan_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the tan(dilation angle).  Usually the dilation angle is not greater than the friction angle, and it is between 0 and 90deg.");
-  params.addRequiredParam<UserObjectName>("tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the weak-plane tensile strength.  In physical situations this is positive (and always must be greater than negative compressive-strength.");
-  params.addRequiredParam<UserObjectName>("compressive_strength", "A TensorMechanicsHardening UserObject that defines hardening of the weak-plane compressive strength.  In physical situations this is positive.");
-  params.addRequiredRangeCheckedParam<Real>("tip_smoother", "tip_smoother>=0", "The cone vertex at shear-stress = 0 will be smoothed by the given amount.  Typical value is 0.1*cohesion");
-  params.addParam<bool>("perfect_guess", true, "Provide a guess to the Newton-Raphson proceedure that is the result from perfect plasticity.  With severe hardening/softening this may be suboptimal.");
+  params.addRequiredParam<UserObjectName>(
+      "cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
+                  "Physically the cohesion should not be negative.");
+  params.addRequiredParam<UserObjectName>("tan_friction_angle",
+                                          "A TensorMechanicsHardening UserObject that defines "
+                                          "hardening of tan(friction angle).  Physically the "
+                                          "friction angle should be between 0 and 90deg.");
+  params.addRequiredParam<UserObjectName>(
+      "tan_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
+                            "tan(dilation angle).  Usually the dilation angle is not greater than "
+                            "the friction angle, and it is between 0 and 90deg.");
+  params.addRequiredParam<UserObjectName>(
+      "tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the "
+                          "weak-plane tensile strength.  In physical situations this is positive "
+                          "(and always must be greater than negative compressive-strength.");
+  params.addRequiredParam<UserObjectName>("compressive_strength",
+                                          "A TensorMechanicsHardening UserObject that defines "
+                                          "hardening of the weak-plane compressive strength.  In "
+                                          "physical situations this is positive.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "tip_smoother", "tip_smoother>=0", "The cone vertex at shear-stress = 0 will be smoothed by "
+                                         "the given amount.  Typical value is 0.1*cohesion");
+  params.addParam<bool>("perfect_guess", true, "Provide a guess to the Newton-Raphson proceedure "
+                                               "that is the result from perfect plasticity.  With "
+                                               "severe hardening/softening this may be "
+                                               "suboptimal.");
   return params;
 }
 
-ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters & parameters) :
-    PQPlasticModel(parameters, 3, 2),
+ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters & parameters)
+  : PQPlasticModel(parameters, 3, 2),
     _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
     _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
     _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
@@ -40,15 +60,17 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
   // With arbitary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
   if (_tan_phi.value(0) < 0 || _tan_psi.value(0) < 0)
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in [0, Pi/2]");
+    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in "
+               "[0, Pi/2]");
   if (_tan_phi.value(0) < _tan_psi.value(0))
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle");
+    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than "
+               "dilation angle");
   if (_cohesion.value(0) < 0)
     mooseError("ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative");
   if (_tstrength.value(0) + _cstrength.value(0) <= _smoothing_tol)
-    mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol");
+    mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive "
+               "strength must be greater than smoothing_tol");
 }
-
 
 void
 ComputeCappedWeakPlaneStress::initialiseReturnProcess()
@@ -63,7 +85,11 @@ ComputeCappedWeakPlaneStress::finaliseReturnProcess()
 }
 
 void
-ComputeCappedWeakPlaneStress::preReturnMap(Real /*p_trial*/, Real q_trial, const RankTwoTensor & stress_trial, const std::vector<Real> & /*intnl_old*/, const std::vector<Real> & yf)
+ComputeCappedWeakPlaneStress::preReturnMap(Real /*p_trial*/,
+                                           Real q_trial,
+                                           const RankTwoTensor & stress_trial,
+                                           const std::vector<Real> & /*intnl_old*/,
+                                           const std::vector<Real> & yf)
 {
   // If it's obvious, then simplify the return-type
   if (yf[1] >= 0)
@@ -93,7 +119,13 @@ ComputeCappedWeakPlaneStress::setEppEqq(const RankFourTensor & Eijkl, Real & Epp
 }
 
 void
-ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & /*intnl*/, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const
+ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                                   Real p_ok,
+                                                   Real q_ok,
+                                                   Real gaE,
+                                                   const std::vector<Real> & /*intnl*/,
+                                                   const f_and_derivs & smoothed_q,
+                                                   RankTwoTensor & stress) const
 {
   stress = stress_trial;
   stress(2, 2) = p_ok;
@@ -111,17 +143,31 @@ ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_
 }
 
 void
-ComputeCappedWeakPlaneStress::setIntnlDerivatives(Real /*p_trial*/, Real q_trial, Real /*p*/, Real q, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & dintnl) const
+ComputeCappedWeakPlaneStress::setIntnlDerivatives(Real /*p_trial*/,
+                                                  Real q_trial,
+                                                  Real /*p*/,
+                                                  Real q,
+                                                  const std::vector<Real> & intnl,
+                                                  std::vector<std::vector<Real>> & dintnl) const
 {
   const Real tanpsi = _tan_psi.value(intnl[0]);
   dintnl[0][0] = 0.0;
   dintnl[0][1] = -1.0 / _Eqq;
   dintnl[1][0] = -1.0 / _Epp;
-  dintnl[1][1] = tanpsi / _Eqq - (q_trial - q) * _tan_psi.derivative(intnl[0]) * dintnl[0][1] / _Eqq;
+  dintnl[1][1] =
+      tanpsi / _Eqq - (q_trial - q) * _tan_psi.derivative(intnl[0]) * dintnl[0][1] / _Eqq;
 }
 
 void
-ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*stress_trial*/, Real /*p_trial*/, Real q_trial, const RankTwoTensor & /*stress*/, Real /*p*/, Real q, Real gaE, const f_and_derivs & smoothed_q, RankFourTensor & cto) const
+ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*stress_trial*/,
+                                                        Real /*p_trial*/,
+                                                        Real q_trial,
+                                                        const RankTwoTensor & /*stress*/,
+                                                        Real /*p*/,
+                                                        Real q,
+                                                        Real gaE,
+                                                        const f_and_derivs & smoothed_q,
+                                                        RankFourTensor & cto) const
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
@@ -137,14 +183,23 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
   const Real dintnl0_dqt = 1.0 / Ezxzx;
   const Real dintnl1_dp = -1.0 / Ezzzz;
   const Real dintnl1_dpt = 1.0 / Ezzzz;
-  const Real dintnl1_dq = tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dq / Ezxzx;
-  const Real dintnl1_dqt = - tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dqt / Ezxzx;
+  const Real dintnl1_dq =
+      tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dq / Ezxzx;
+  const Real dintnl1_dqt =
+      -tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dqt / Ezxzx;
 
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
   {
     const Real dpt_depii = _elasticity_tensor[_qp](2, 2, i, i);
     cto(2, 2, i, i) = _dp_dpt * dpt_depii;
-    const Real poisson_effect = _elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz * (_dgaE_dpt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dpt + gaE * smoothed_q.d2g[0][1] * _dq_dpt + gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dq * _dq_dpt) + gaE * smoothed_q.d2g_di[0][1] * (dintnl1_dpt + dintnl1_dp * _dp_dpt + dintnl1_dq * _dq_dpt)) * dpt_depii;
+    const Real poisson_effect =
+        _elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz *
+        (_dgaE_dpt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dpt +
+         gaE * smoothed_q.d2g[0][1] * _dq_dpt +
+         gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dq * _dq_dpt) +
+         gaE * smoothed_q.d2g_di[0][1] *
+             (dintnl1_dpt + dintnl1_dp * _dp_dpt + dintnl1_dq * _dq_dpt)) *
+        dpt_depii;
     cto(0, 0, i, i) -= poisson_effect;
     cto(1, 1, i, i) -= poisson_effect;
     if (q_trial > 0.0)
@@ -154,33 +209,52 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
     }
   }
 
-  const Real poisson_effect = - _elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz * (_dgaE_dqt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dqt + gaE * smoothed_q.d2g[0][1] * _dq_dqt + gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dqt + dintnl0_dq * _dq_dqt) + gaE * smoothed_q.d2g_di[0][1] * (dintnl1_dqt + dintnl1_dp * _dp_dqt + dintnl1_dq * _dq_dqt));
+  const Real poisson_effect =
+      -_elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz *
+      (_dgaE_dqt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dqt +
+       gaE * smoothed_q.d2g[0][1] * _dq_dqt +
+       gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dqt + dintnl0_dq * _dq_dqt) +
+       gaE * smoothed_q.d2g_di[0][1] * (dintnl1_dqt + dintnl1_dp * _dp_dqt + dintnl1_dq * _dq_dqt));
 
-  const Real dqt_dep20 = (q_trial == 0.0 ? 1.0 : _in_trial02 / q_trial) * _elasticity_tensor[_qp](2, 0, 2, 0);
+  const Real dqt_dep20 =
+      (q_trial == 0.0 ? 1.0 : _in_trial02 / q_trial) * _elasticity_tensor[_qp](2, 0, 2, 0);
   cto(2, 2, 2, 0) = cto(2, 2, 0, 2) = _dp_dqt * dqt_dep20;
-  cto(0, 0, 2, 0) = cto(0, 0, 0, 2) = cto(1, 1, 2, 0) = cto(1, 1, 0, 2) =  poisson_effect* dqt_dep20;
+  cto(0, 0, 2, 0) = cto(0, 0, 0, 2) = cto(1, 1, 2, 0) = cto(1, 1, 0, 2) =
+      poisson_effect * dqt_dep20;
   if (q_trial > 0.0)
   {
     // for q_trial=0, Jacobian_mult is just given by the elastic case
-    cto(0, 2, 0, 2) = cto(2, 0, 0, 2) = cto(0, 2, 2, 0) = cto(2, 0, 2, 0) = _elasticity_tensor[_qp](2, 0, 2, 0) * q / q_trial + _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
-    cto(1, 2, 0, 2) = cto(2, 1, 0, 2) = cto(1, 2, 2, 0) = cto(2, 1, 2, 0) = _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
+    cto(0, 2, 0, 2) = cto(2, 0, 0, 2) = cto(0, 2, 2, 0) = cto(2, 0, 2, 0) =
+        _elasticity_tensor[_qp](2, 0, 2, 0) * q / q_trial +
+        _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
+    cto(1, 2, 0, 2) = cto(2, 1, 0, 2) = cto(1, 2, 2, 0) = cto(2, 1, 2, 0) =
+        _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
   }
 
-  const Real dqt_dep21 = (q_trial == 0.0 ? 1.0 : _in_trial12 / q_trial) * _elasticity_tensor[_qp](2, 1, 2, 1);
+  const Real dqt_dep21 =
+      (q_trial == 0.0 ? 1.0 : _in_trial12 / q_trial) * _elasticity_tensor[_qp](2, 1, 2, 1);
   cto(2, 2, 2, 1) = cto(2, 2, 1, 2) = _dp_dqt * dqt_dep21;
-  cto(0, 0, 2, 1) = cto(0, 0, 1, 2) = cto(1, 1, 2, 1) = cto(1, 1, 1, 2) = poisson_effect * dqt_dep21;
+  cto(0, 0, 2, 1) = cto(0, 0, 1, 2) = cto(1, 1, 2, 1) = cto(1, 1, 1, 2) =
+      poisson_effect * dqt_dep21;
   if (q_trial > 0.0)
   {
     // for q_trial=0, Jacobian_mult is just given by the elastic case
-    cto(0, 2, 1, 2) = cto(2, 0, 1, 2) = cto(0, 2, 2, 1) = cto(2, 0, 2, 1) = _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
-    cto(1, 2, 1, 2) = cto(2, 1, 1, 2) = cto(1, 2, 2, 1) = cto(2, 1, 2, 1) = _elasticity_tensor[_qp](2, 1, 2, 1) * q / q_trial + _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
+    cto(0, 2, 1, 2) = cto(2, 0, 1, 2) = cto(0, 2, 2, 1) = cto(2, 0, 2, 1) =
+        _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
+    cto(1, 2, 1, 2) = cto(2, 1, 1, 2) = cto(1, 2, 2, 1) = cto(2, 1, 2, 1) =
+        _elasticity_tensor[_qp](2, 1, 2, 1) * q / q_trial +
+        _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
   }
 }
 
 void
-ComputeCappedWeakPlaneStress::yieldFunctionValues(Real p, Real q, const std::vector<Real> & intnl, std::vector<Real> & yf) const
+ComputeCappedWeakPlaneStress::yieldFunctionValues(Real p,
+                                                  Real q,
+                                                  const std::vector<Real> & intnl,
+                                                  std::vector<Real> & yf) const
 {
-  yf[0] = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) - _cohesion.value(intnl[0]);
+  yf[0] = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
+          _cohesion.value(intnl[0]);
 
   if (_stress_return_type == StressReturnType::no_tension)
     yf[1] = std::numeric_limits<Real>::lowest();
@@ -190,14 +264,18 @@ ComputeCappedWeakPlaneStress::yieldFunctionValues(Real p, Real q, const std::vec
   if (_stress_return_type == StressReturnType::no_compression)
     yf[2] = std::numeric_limits<Real>::lowest();
   else
-    yf[2] = - p - _cstrength.value(intnl[1]);
+    yf[2] = -p - _cstrength.value(intnl[1]);
 }
 
 void
-ComputeCappedWeakPlaneStress::computeAllQ(Real p, Real q, const std::vector<Real> & intnl, std::vector<f_and_derivs> & all_q) const
+ComputeCappedWeakPlaneStress::computeAllQ(Real p,
+                                          Real q,
+                                          const std::vector<Real> & intnl,
+                                          std::vector<f_and_derivs> & all_q) const
 {
   // yield function values
-  all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) - _cohesion.value(intnl[0]);
+  all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
+               _cohesion.value(intnl[0]);
   if (_stress_return_type == StressReturnType::no_tension)
     all_q[1].f = std::numeric_limits<Real>::lowest();
   else
@@ -205,13 +283,13 @@ ComputeCappedWeakPlaneStress::computeAllQ(Real p, Real q, const std::vector<Real
   if (_stress_return_type == StressReturnType::no_compression)
     all_q[2].f = std::numeric_limits<Real>::lowest();
   else
-    all_q[2].f = - p - _cstrength.value(intnl[1]);
+    all_q[2].f = -p - _cstrength.value(intnl[1]);
 
   // d(yield Function)/d(p, q)
   // derivatives wrt p
   all_q[0].df[0] = _tan_phi.value(intnl[0]);
   all_q[1].df[0] = 1.0;
-  all_q[2].df[0] = - 1.0;
+  all_q[2].df[0] = -1.0;
 
   // derivatives wrt q
   if (_small_smoother2 == 0.0)
@@ -228,14 +306,14 @@ ComputeCappedWeakPlaneStress::computeAllQ(Real p, Real q, const std::vector<Real
   all_q[2].df_di[0] = 0.0;
   // derivatives wrt intnl[q] (tensile plastic strain)
   all_q[0].df_di[1] = 0.0;
-  all_q[1].df_di[1] = - _tstrength.derivative(intnl[1]);
-  all_q[2].df_di[1] = - _cstrength.derivative(intnl[1]);
+  all_q[1].df_di[1] = -_tstrength.derivative(intnl[1]);
+  all_q[2].df_di[1] = -_cstrength.derivative(intnl[1]);
 
   // d(flowPotential)/d(p, q)
   // derivatives wrt p
   all_q[0].dg[0] = _tan_psi.value(intnl[0]);
   all_q[1].dg[0] = 1.0;
-  all_q[2].dg[0] = - 1.0;
+  all_q[2].dg[0] = -1.0;
   // derivatives wrt q
   if (_small_smoother2 == 0.0)
     all_q[0].dg[1] = 1.0;
@@ -285,7 +363,13 @@ ComputeCappedWeakPlaneStress::computeAllQ(Real p, Real q, const std::vector<Real
 }
 
 void
-ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, const std::vector<Real> & intnl_old, Real & p, Real & q, Real & gaE, std::vector<Real> & intnl) const
+ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial,
+                                             Real q_trial,
+                                             const std::vector<Real> & intnl_old,
+                                             Real & p,
+                                             Real & q,
+                                             Real & gaE,
+                                             std::vector<Real> & intnl) const
 {
   const Real tanpsi = _tan_psi.value(intnl_old[0]);
 
@@ -311,10 +395,10 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, const s
       q = q_trial;
       gaE = p_trial - p;
     }
-    else if ((p_trial <= - comp) && (q_trial <= q_at_C))
+    else if ((p_trial <= -comp) && (q_trial <= q_at_C))
     {
       // pure compressive failure
-      p = - comp;
+      p = -comp;
       q = q_trial;
       gaE = p - p_trial;
     }
@@ -323,8 +407,10 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, const s
       // shear failure or a mixture
       // Calculate ga assuming a pure shear failure
       const Real ga = (q_trial + p_trial * tanphi - coh) / (_Eqq + _Epp * tanphi * tanpsi);
-      if (ga <= 0 && p_trial <= tens && p_trial >= - comp) {
-        // very close to one of the rounded corners:  there is no advantage to guessing the solution, so:
+      if (ga <= 0 && p_trial <= tens && p_trial >= -comp)
+      {
+        // very close to one of the rounded corners:  there is no advantage to guessing the
+        // solution, so:
         p = p_trial;
         q = q_trial;
         gaE = 0.0;
@@ -334,10 +420,11 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, const s
         q = q_trial - _Eqq * ga;
         if (q <= 0.0 && q_at_T <= 0.0)
         {
-          // user has set tensile strength so large that it is irrelevant: return to the tip of the shear cone
+          // user has set tensile strength so large that it is irrelevant: return to the tip of the
+          // shear cone
           q = 0.0;
           p = coh / tanphi;
-          gaE = (p_trial - p) / tanpsi;  // just a guess, based on the angle to the corner
+          gaE = (p_trial - p) / tanpsi; // just a guess, based on the angle to the corner
         }
         else if (q <= q_at_T)
         {
@@ -350,7 +437,7 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, const s
         {
           // pure shear is incorrect: mixture of compression and shear is correct
           q = q_at_C;
-          p = - comp;
+          p = -comp;
           if (p - p_trial < _Epp * tanpsi * (q_trial - q) / _Eqq)
             // trial point is sitting almost directly above corner
             gaE = (q_trial - q) * _Epp / _Eqq;
@@ -371,13 +458,17 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, const s
 }
 
 void
-ComputeCappedWeakPlaneStress::setIntnlValues(Real p_trial, Real q_trial, Real p, Real q, const std::vector<Real> & intnl_old, std::vector<Real> & intnl) const
+ComputeCappedWeakPlaneStress::setIntnlValues(Real p_trial,
+                                             Real q_trial,
+                                             Real p,
+                                             Real q,
+                                             const std::vector<Real> & intnl_old,
+                                             std::vector<Real> & intnl) const
 {
   intnl[0] = intnl_old[0] + (q_trial - q) / _Eqq;
   const Real tanpsi = _tan_psi.value(intnl[0]);
   intnl[1] = intnl_old[1] + (p_trial - p) / _Epp - (q_trial - q) * tanpsi / _Eqq;
 }
-
 
 RankTwoTensor
 ComputeCappedWeakPlaneStress::dpdstress(const RankTwoTensor & /*stress*/) const
@@ -429,7 +520,7 @@ ComputeCappedWeakPlaneStress::d2qdstress2(const RankTwoTensor & stress) const
     for (unsigned j = 0; j < _tensor_dimensionality; ++j)
       for (unsigned k = 0; k < _tensor_dimensionality; ++k)
         for (unsigned l = 0; l < _tensor_dimensionality; ++l)
-          d2(i, j, k, l) = - dq(i, j) * dq(k, l) / q;
+          d2(i, j, k, l) = -dq(i, j) * dq(k, l) / q;
 
   d2(0, 2, 0, 2) += 0.25 / q;
   d2(0, 2, 2, 0) += 0.25 / q;

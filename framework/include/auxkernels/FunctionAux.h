@@ -17,11 +17,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionAux;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionAux>();
 
 /**

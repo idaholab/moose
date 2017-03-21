@@ -13,18 +13,19 @@
 /****************************************************************/
 #include "DiffMKernel.h"
 
-template<>
-InputParameters validParams<DiffMKernel>()
+template <>
+InputParameters
+validParams<DiffMKernel>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<MaterialPropertyName>("mat_prop", "the name of the material property we are going to use");
+  params.addRequiredParam<MaterialPropertyName>(
+      "mat_prop", "the name of the material property we are going to use");
   params.addParam<Real>("offset", 4.0, "Offset on residual evaluation");
   return params;
 }
 
-
-DiffMKernel::DiffMKernel(const InputParameters & parameters) :
-    Kernel(parameters),
+DiffMKernel::DiffMKernel(const InputParameters & parameters)
+  : Kernel(parameters),
     _diff(getMaterialProperty<Real>("mat_prop")),
     _offset(getParam<Real>("offset"))
 {

@@ -10,17 +10,19 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>()
+template <>
+InputParameters
+validParams<ComputeAxisymmetricRZFiniteStrain>()
 {
   InputParameters params = validParams<Compute2DFiniteStrain>();
-  params.addClassDescription("Compute a strain increment for finite strains under axisymmetric assumptions.");
+  params.addClassDescription(
+      "Compute a strain increment for finite strains under axisymmetric assumptions.");
   return params;
 }
 
-ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters) :
-    Compute2DFiniteStrain(parameters),
-    _disp_old_0(coupledValueOld("displacements", 0))
+ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(
+    const InputParameters & parameters)
+  : Compute2DFiniteStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 

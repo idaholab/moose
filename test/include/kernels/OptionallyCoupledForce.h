@@ -20,7 +20,7 @@
 // Forward Declaration
 class OptionallyCoupledForce;
 
-template<>
+template <>
 InputParameters validParams<OptionallyCoupledForce>();
 
 /**
@@ -48,4 +48,4 @@ private:
   bool _v_coupled;
 };
 
-#endif //OPTIONALLYCOUPLEDFORCE_H
+#endif // OPTIONALLYCOUPLEDFORCE_H

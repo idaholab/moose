@@ -23,7 +23,7 @@ class LayeredBase;
 class UserObject;
 class SubProblem;
 
-template<>
+template <>
 InputParameters validParams<LayeredBase>();
 
 /**

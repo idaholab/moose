@@ -23,7 +23,7 @@ class Function;
 class FEProblemBase;
 class FunctionInterface;
 
-template<>
+template <>
 InputParameters validParams<FunctionInterface>();
 
 /**
@@ -59,7 +59,7 @@ public:
 
 private:
   /// Parameters of the object with this interface
-  const InputParameters &_fni_params;
+  const InputParameters & _fni_params;
 
   /// Reference to FEProblemBase instance
   FEProblemBase & _fni_feproblem;
@@ -68,4 +68,4 @@ private:
   THREAD_ID _fni_tid;
 };
 
-#endif //FUNCTIONINTERFACE_H
+#endif // FUNCTIONINTERFACE_H

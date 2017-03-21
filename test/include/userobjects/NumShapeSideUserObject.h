@@ -17,10 +17,10 @@
 
 #include "ShapeSideUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumShapeSideUserObject;
 
-template<>
+template <>
 InputParameters validParams<NumShapeSideUserObject>();
 
 /**
@@ -31,8 +31,7 @@ InputParameters validParams<NumShapeSideUserObject>();
  * These Jacobian terms can be utilized by a Kernel that uses the integral in the
  * calculation of its residual.
  */
-class NumShapeSideUserObject :
-  public ShapeSideUserObject
+class NumShapeSideUserObject : public ShapeSideUserObject
 {
 public:
   NumShapeSideUserObject(const InputParameters & parameters);

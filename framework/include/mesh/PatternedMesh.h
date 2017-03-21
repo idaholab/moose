@@ -21,7 +21,7 @@
 
 class PatternedMesh;
 
-template<>
+template <>
 InputParameters validParams<PatternedMesh>();
 
 /**
@@ -50,7 +50,7 @@ protected:
   const std::vector<MeshFileName> & _files;
 
   // The pattern, starting with the upper left corner
-  const std::vector<std::vector<unsigned int> > & _pattern;
+  const std::vector<std::vector<unsigned int>> & _pattern;
 
   // Pointer to the original "row" mesh to be repeated and stitched
   ReplicatedMesh * _original_mesh;

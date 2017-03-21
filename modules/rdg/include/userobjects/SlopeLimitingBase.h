@@ -11,10 +11,10 @@
 #include "ElementLoopUserObject.h"
 #include "SlopeReconstructionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class SlopeLimitingBase;
 
-template<>
+template <>
 InputParameters validParams<SlopeLimitingBase>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<SlopeLimitingBase>();
 class SlopeLimitingBase : public ElementLoopUserObject
 {
 public:
-
   SlopeLimitingBase(const InputParameters & parameters);
 
   virtual void initialize();
@@ -44,7 +43,7 @@ protected:
   virtual void deserialize(std::vector<std::string> & serialized_buffers);
 
   /// store the updated slopes into this map indexed by element ID
-  std::map<dof_id_type, std::vector<RealGradient> > _lslope;
+  std::map<dof_id_type, std::vector<RealGradient>> _lslope;
 
   /// option whether to include BCs
   bool _include_bc;
@@ -54,18 +53,18 @@ protected:
 
   /// required data for face assembly
   const MooseArray<Point> & _q_point_face;
-  QBase * & _qrule_face;
+  QBase *& _qrule_face;
   const MooseArray<Real> & _JxW_face;
   const MooseArray<Point> & _normals_face;
 
   /// current side of the current element
   unsigned int & _side;
 
-  const Elem * & _side_elem;
+  const Elem *& _side_elem;
   const Real & _side_volume;
 
   /// the neighboring element
-  const Elem * & _neighbor_elem;
+  const Elem *& _neighbor_elem;
 
 private:
   static Threads::spin_mutex _mutex;

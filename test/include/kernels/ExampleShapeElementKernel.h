@@ -41,7 +41,7 @@ protected:
   const std::vector<dof_id_type> & _v_dofs;
 };
 
-template<>
+template <>
 InputParameters validParams<ExampleShapeElementKernel>();
 
-#endif //EXAMPLESHAPEELEMENTKERNEL_H
+#endif // EXAMPLESHAPEELEMENTKERNEL_H

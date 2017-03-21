@@ -15,12 +15,13 @@
 // Forward Declarations
 class PorousFlowMassVolumetricExpansion;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMassVolumetricExpansion>();
 
 /**
  * Kernel = mass_component * d(volumetric_strain)/dt
- * where mass_component = porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
+ * where mass_component =
+ * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * which is lumped to the nodes
  */
 class PorousFlowMassVolumetricExpansion : public TimeKernel
@@ -99,9 +100,10 @@ protected:
    * Derivative of volumetric-strain part of the residual with respect to the Variable
    * with variable number jvar.
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param jvar take the derivative of the volumetric-strain part of the residual wrt this variable number
+   * @param jvar take the derivative of the volumetric-strain part of the residual wrt this variable
+   * number
    */
   Real computedVolQpJac(unsigned int jvar) const;
 };
 
-#endif //POROUSFLOWMASSVOLUMETRICEXPANSION_H
+#endif // POROUSFLOWMASSVOLUMETRICEXPANSION_H

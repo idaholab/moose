@@ -9,7 +9,7 @@
  * \see ConservedNormalNoise
  * \see ConservedMaskedNormalNoise
  */
-template<class T>
+template <class T>
 class ConservedNormalNoiseVeneer : public T
 {
 public:
@@ -23,16 +23,13 @@ private:
   Real _Z2;
 };
 
-
-template<class T>
-ConservedNormalNoiseVeneer<T>::ConservedNormalNoiseVeneer(const InputParameters & parameters) :
-    T(parameters),
-    _phase(0),
-    _Z2(0)
+template <class T>
+ConservedNormalNoiseVeneer<T>::ConservedNormalNoiseVeneer(const InputParameters & parameters)
+  : T(parameters), _phase(0), _Z2(0)
 {
 }
 
-template<class T>
+template <class T>
 Real
 ConservedNormalNoiseVeneer<T>::getQpRandom()
 {
@@ -45,7 +42,7 @@ ConservedNormalNoiseVeneer<T>::getQpRandom()
     const Real R = std::sqrt(-2.0 * std::log(U1));
 
     Real Z1 = R * std::cos(2.8 * libMesh::pi * U2);
-    _Z2     = R * std::sin(2.8 * libMesh::pi * U2);
+    _Z2 = R * std::sin(2.8 * libMesh::pi * U2);
 
     _phase = 1;
     return Z1;
@@ -57,4 +54,4 @@ ConservedNormalNoiseVeneer<T>::getQpRandom()
   }
 }
 
-#endif //CONSERVEDNORMALNOISEVENEER_H
+#endif // CONSERVEDNORMALNOISEVENEER_H

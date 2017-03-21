@@ -11,8 +11,7 @@
 
 class TensorMechanicsHardeningModel;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsHardeningModel>();
 
 /**
@@ -25,7 +24,7 @@ InputParameters validParams<TensorMechanicsHardeningModel>();
  */
 class TensorMechanicsHardeningModel : public GeneralUserObject
 {
- public:
+public:
   TensorMechanicsHardeningModel(const InputParameters & parameters);
 
   void initialize();

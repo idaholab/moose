@@ -5,17 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H
 #define COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class CoupledDirectionalMeshHeightInterpolation;
 
-template<>
+template <>
 InputParameters validParams<CoupledDirectionalMeshHeightInterpolation>();
 
 /**
@@ -32,7 +30,6 @@ InputParameters validParams<CoupledDirectionalMeshHeightInterpolation>();
 class CoupledDirectionalMeshHeightInterpolation : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -54,4 +51,4 @@ protected:
   Real _direction_max;
 };
 
-#endif //COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H
+#endif // COUPLEDDIRECTIONALMESHHEIGHTINTERPOLATION_H

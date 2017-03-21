@@ -18,7 +18,7 @@ class RankTwoAux;
  * supplied indices.
  */
 
-template<>
+template <>
 InputParameters validParams<RankTwoAux>();
 
 class RankTwoAux : public AuxKernel
@@ -35,4 +35,4 @@ private:
   const unsigned int _j;
 };
 
-#endif //RANKTWOAUX_H
+#endif // RANKTWOAUX_H

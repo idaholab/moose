@@ -12,7 +12,7 @@
 
 class PorousFlowInternalEnergyIdeal;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowInternalEnergyIdeal>();
 
 /**

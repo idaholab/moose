@@ -21,20 +21,18 @@
 #include <algorithm>
 #include <cctype>
 
-SyntaxTree::SyntaxTree(bool use_long_names) :
-    SyntaxFormatterInterface(),
-    _root(NULL),
-    _use_long_names(use_long_names)
+SyntaxTree::SyntaxTree(bool use_long_names)
+  : SyntaxFormatterInterface(), _root(NULL), _use_long_names(use_long_names)
 {
 }
 
-SyntaxTree::~SyntaxTree()
-{
-  delete (_root);
-}
+SyntaxTree::~SyntaxTree() { delete (_root); }
 
 void
-SyntaxTree::insertNode(std::string syntax, const std::string &action, bool is_action_params, InputParameters *params)
+SyntaxTree::insertNode(std::string syntax,
+                       const std::string & action,
+                       bool is_action_params,
+                       InputParameters * params)
 {
   if (_root == NULL)
     _root = new TreeNode("", *this);
@@ -43,9 +41,9 @@ SyntaxTree::insertNode(std::string syntax, const std::string &action, bool is_ac
 }
 
 std::string
-SyntaxTree::print(const std::string &search_string)
+SyntaxTree::print(const std::string & search_string)
 {
-  bool found=false;
+  bool found = false;
   std::string output;
 
   // Clear the list of "seen" parameters before printing the tree
@@ -61,21 +59,23 @@ SyntaxTree::print(const std::string &search_string)
 }
 
 void
-SyntaxTree::seenIt(const std::string &prefix, const std::string &item)
+SyntaxTree::seenIt(const std::string & prefix, const std::string & item)
 {
   _params_printed.insert(prefix + item);
 }
 
 bool
-SyntaxTree::haveSeenIt(const std::string &prefix, const std::string &item) const
+SyntaxTree::haveSeenIt(const std::string & prefix, const std::string & item) const
 {
   return _params_printed.find(prefix + item) != _params_printed.end();
 }
 
-SyntaxTree::TreeNode::TreeNode(const std::string &name, SyntaxTree &syntax_tree, const std::string *action, InputParameters *params, TreeNode *parent) :
-    _name(name),
-    _parent(parent),
-    _syntax_tree(syntax_tree)
+SyntaxTree::TreeNode::TreeNode(const std::string & name,
+                               SyntaxTree & syntax_tree,
+                               const std::string * action,
+                               InputParameters * params,
+                               TreeNode * parent)
+  : _name(name), _parent(parent), _syntax_tree(syntax_tree)
 {
   if (action)
     _action_params.insert(std::make_pair(*action, new InputParameters(*params)));
@@ -94,8 +94,10 @@ SyntaxTree::TreeNode::~TreeNode()
 }
 
 void
-SyntaxTree::TreeNode::insertNode(std::string &syntax, const std::string &action, bool is_action_params,
-                                 InputParameters *params)
+SyntaxTree::TreeNode::insertNode(std::string & syntax,
+                                 const std::string & action,
+                                 bool is_action_params,
+                                 InputParameters * params)
 {
   std::string::size_type pos = syntax.find_first_of("/");
   std::string item;
@@ -104,14 +106,15 @@ SyntaxTree::TreeNode::insertNode(std::string &syntax, const std::string &action,
   item = syntax.substr(0, pos);
   if (pos != std::string::npos)
   {
-    syntax = syntax.substr(pos+1);
+    syntax = syntax.substr(pos + 1);
     is_leaf = false;
   }
 
   bool node_created = false;
   if (_children.find(item) == _children.end())
   {
-    _children[item] = new TreeNode(item, _syntax_tree, is_leaf && is_action_params ? &action : NULL, params, this);
+    _children[item] = new TreeNode(
+        item, _syntax_tree, is_leaf && is_action_params ? &action : NULL, params, this);
     if (is_leaf && !is_action_params)
       _children[item]->insertParams(action, is_action_params, params);
     node_created = true;
@@ -124,7 +127,9 @@ SyntaxTree::TreeNode::insertNode(std::string &syntax, const std::string &action,
 }
 
 void
-SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_params, InputParameters *params)
+SyntaxTree::TreeNode::insertParams(const std::string & action,
+                                   bool is_action_params,
+                                   InputParameters * params)
 {
   if (is_action_params)
     _action_params.insert(std::make_pair(action, new InputParameters(*params)));
@@ -133,7 +138,7 @@ SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_par
 }
 
 std::string
-SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool &found)
+SyntaxTree::TreeNode::print(short depth, const std::string & search_string, bool & found)
 {
   std::string doc = "";
   std::string long_name(getLongName());
@@ -145,8 +150,8 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     for (const auto & c_it : _children)
     {
       bool local_found = false;
-      std::string local_out (c_it.second->print(depth+1, search_string, local_found));
-      found |= local_found;  // Update the current frame's found variable
+      std::string local_out(c_it.second->print(depth + 1, search_string, local_found));
+      found |= local_found; // Update the current frame's found variable
       if (local_found)
         out += local_out;
     }
@@ -157,7 +162,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
   // if (_name == "GlobalParamsAction")
   //   found = true;
 
-  std::string indent((depth+1)*2, ' ');
+  std::string indent((depth + 1) * 2, ' ');
 
   std::multimap<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin();
   do
@@ -180,20 +185,22 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     for (const auto & a_it : _action_params)
       if (a_it.first != "EmptyAction")
       {
-        local_out += _syntax_tree.printParams(name, long_name, *(a_it.second), depth, local_search_string, local_found);
-        found |= local_found;   // Update the current frame's found variable
-        //DEBUG
+        local_out += _syntax_tree.printParams(
+            name, long_name, *(a_it.second), depth, local_search_string, local_found);
+        found |= local_found; // Update the current frame's found variable
+        // DEBUG
         // Moose::out << "\n" << indent << "(" << ait->first << ")";
-        //DEBUG
+        // DEBUG
       }
 
     if (it != _moose_object_params.end())
     {
-      local_out += _syntax_tree.printParams(name, long_name, *it->second, depth, local_search_string, local_found);
+      local_out += _syntax_tree.printParams(
+          name, long_name, *it->second, depth, local_search_string, local_found);
       found |= local_found;
-      //DEBUG
+      // DEBUG
       // Moose::out << "\n" << indent << "{" << it->first << "}";
-      //DEBUG
+      // DEBUG
     }
 
     local_out += _syntax_tree.preTraverse(depth);
@@ -201,8 +208,8 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     for (const auto & c_it : _children)
     {
       bool child_found = false;
-      std::string child_out (c_it.second->print(depth+1, local_search_string, child_found));
-      found |= child_found;   // Update the current frame's found variable
+      std::string child_out(c_it.second->print(depth + 1, local_search_string, child_found));
+      found |= child_found; // Update the current frame's found variable
 
       if (child_found)
         local_out += child_out;
@@ -222,7 +229,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
 }
 
 std::string
-SyntaxTree::TreeNode::getLongName(const std::string &delim) const
+SyntaxTree::TreeNode::getLongName(const std::string & delim) const
 {
   if (_parent)
     return _parent->getLongName(delim) + delim + _name;

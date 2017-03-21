@@ -19,11 +19,13 @@
 #include "ThreadedNodeLoop.h"
 
 // Forward declarations
-template <typename T> class MooseObjectWarehouse;
+template <typename T>
+class MooseObjectWarehouse;
 class NodalDamper;
 class NonlinearSystemBase;
 
-class ComputeNodalDampingThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalDampingThread
+    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalDampingThread(FEProblemBase & feproblem);
@@ -45,4 +47,4 @@ protected:
   const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;
 };
 
-#endif //COMPUTENODALDAMPINGTHREAD_H
+#endif // COMPUTENODALDAMPINGTHREAD_H

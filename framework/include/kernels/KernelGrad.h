@@ -18,10 +18,10 @@
 // local includes
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class KernelGrad;
 
-template<>
+template <>
 InputParameters validParams<KernelGrad>();
 
 /**
@@ -36,7 +36,8 @@ public:
   /**
    * Factory constructor initializes all internal references needed for residual computation.
    *
-   * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
+   * @param parameters The parameters object for holding additional parameters for kernels and
+   * derived kernels
    */
   KernelGrad(const InputParameters & parameters);
 
@@ -60,4 +61,4 @@ protected:
   virtual Real computeQpResidual() override;
 };
 
-#endif //KERNELGRAD_H
+#endif // KERNELGRAD_H

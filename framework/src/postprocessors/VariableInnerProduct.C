@@ -14,17 +14,19 @@
 
 #include "VariableInnerProduct.h"
 
-template<>
-InputParameters validParams<VariableInnerProduct>()
+template <>
+InputParameters
+validParams<VariableInnerProduct>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
-  params.addRequiredCoupledVar("second_variable", "The name of the second variable in the inner product (variable, second_variable)");
+  params.addRequiredCoupledVar(
+      "second_variable",
+      "The name of the second variable in the inner product (variable, second_variable)");
   return params;
 }
 
-VariableInnerProduct::VariableInnerProduct(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters),
-    _v(coupledValue("second_variable"))
+VariableInnerProduct::VariableInnerProduct(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters), _v(coupledValue("second_variable"))
 {
 }
 

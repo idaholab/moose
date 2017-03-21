@@ -14,16 +14,17 @@
 
 #include "CumulativeValuePostprocessor.h"
 
-template<>
-InputParameters validParams<CumulativeValuePostprocessor>()
+template <>
+InputParameters
+validParams<CumulativeValuePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor");
   return params;
 }
 
-CumulativeValuePostprocessor::CumulativeValuePostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+CumulativeValuePostprocessor::CumulativeValuePostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _sum(0.0),
     _sum_old(getPostprocessorValueOldByName(name())),
     _pps_value(getPostprocessorValue("postprocessor"))

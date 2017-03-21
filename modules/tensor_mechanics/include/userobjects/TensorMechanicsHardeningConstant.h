@@ -11,8 +11,7 @@
 
 class TensorMechanicsHardeningConstant;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsHardeningConstant>();
 
 /**
@@ -21,7 +20,7 @@ InputParameters validParams<TensorMechanicsHardeningConstant>();
  */
 class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
 {
- public:
+public:
   TensorMechanicsHardeningConstant(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -30,7 +29,7 @@ class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
 
   virtual std::string modelName() const override;
 
- private:
+private:
   /// The value that the parameter will take
   Real _val;
 };

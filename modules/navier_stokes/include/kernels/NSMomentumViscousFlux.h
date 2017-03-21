@@ -13,7 +13,7 @@
 // ForwardDeclarations
 class NSMomentumViscousFlux;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumViscousFlux>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   friend class NSViscStressTensorDerivs;
 };
 
-#endif //NSMOMENTUMVISCOUSFLUX_H
+#endif // NSMOMENTUMVISCOUSFLUX_H

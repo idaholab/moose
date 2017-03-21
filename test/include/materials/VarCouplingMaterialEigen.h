@@ -18,7 +18,7 @@
 
 class VarCouplingMaterialEigen;
 
-template<>
+template <>
 InputParameters validParams<VarCouplingMaterialEigen>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   MaterialProperty<Real> & _mat_old;
 };
 
-#endif //VARCOUPLINGMATERIALEIGEN_H
+#endif // VARCOUPLINGMATERIALEIGEN_H

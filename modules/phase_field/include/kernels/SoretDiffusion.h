@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declaration
+// Forward Declaration
 class SoretDiffusion;
 
-template<>
+template <>
 InputParameters validParams<SoretDiffusion>();
 /**
  * SoretDiffusion adds the soret effect in the split form of the Cahn-Hilliard
@@ -57,4 +57,4 @@ protected:
   const Real _kB;
 };
 
-#endif //SORETDIFFUSION_H
+#endif // SORETDIFFUSION_H

@@ -14,24 +14,30 @@
 
 #include "MaterialRealTensorValueAux.h"
 
-template<>
-InputParameters validParams<MaterialRealTensorValueAux>()
+template <>
+InputParameters
+validParams<MaterialRealTensorValueAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<> >();
+  InputParameters params = validParams<MaterialAuxBase<>>();
   params.addParam<unsigned int>("row", 0, "The row component to consider for this kernel");
   params.addParam<unsigned int>("column", 0, "The column component to consider for this kernel");
   return params;
 }
 
-MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & parameters) :
-    MaterialAuxBase<RealTensorValue>(parameters),
+MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & parameters)
+  : MaterialAuxBase<RealTensorValue>(parameters),
     _row(getParam<unsigned int>("row")),
     _col(getParam<unsigned int>("column"))
 {
   if (_row > LIBMESH_DIM)
-    mooseError("The row component ", _row, " does not exist for ", LIBMESH_DIM, " dimensional problems");
+    mooseError(
+        "The row component ", _row, " does not exist for ", LIBMESH_DIM, " dimensional problems");
   if (_col > LIBMESH_DIM)
-    mooseError("The column component ", _col, " does not exist for ", LIBMESH_DIM, " dimensional problems");
+    mooseError("The column component ",
+               _col,
+               " does not exist for ",
+               LIBMESH_DIM,
+               " dimensional problems");
 }
 
 Real

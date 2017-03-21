@@ -6,18 +6,17 @@
 /****************************************************************/
 #include "GBEvolution.h"
 
-template<>
-InputParameters validParams<GBEvolution>()
+template <>
+InputParameters
+validParams<GBEvolution>()
 {
   InputParameters params = validParams<GBEvolutionBase>();
   params.addRequiredParam<Real>("GBenergy", "Grain boundary energy in J/m^2");
   return params;
 }
 
-
-GBEvolution::GBEvolution(const InputParameters & parameters) :
-    GBEvolutionBase(parameters),
-    _GBEnergy(getParam<Real>("GBenergy"))
+GBEvolution::GBEvolution(const InputParameters & parameters)
+  : GBEvolutionBase(parameters), _GBEnergy(getParam<Real>("GBenergy"))
 {
 }
 

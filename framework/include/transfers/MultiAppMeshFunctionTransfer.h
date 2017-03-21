@@ -20,7 +20,7 @@
 // Forward declarations
 class MultiAppMeshFunctionTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppMeshFunctionTransfer>();
 
 /**
@@ -28,8 +28,7 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>();
  * the MultiApp is.  Copies that value into a postprocessor in the
  * MultiApp.
  */
-class MultiAppMeshFunctionTransfer :
-  public MultiAppTransfer
+class MultiAppMeshFunctionTransfer : public MultiAppTransfer
 {
 public:
   MultiAppMeshFunctionTransfer(const InputParameters & parameters);

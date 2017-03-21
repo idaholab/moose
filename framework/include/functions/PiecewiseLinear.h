@@ -20,7 +20,7 @@
 // Forward declarations
 class PiecewiseLinear;
 
-template<>
+template <>
 InputParameters validParams<PiecewiseLinear>();
 
 /**

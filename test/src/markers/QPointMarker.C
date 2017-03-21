@@ -16,16 +16,15 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
-template<>
-InputParameters validParams<QPointMarker>()
+template <>
+InputParameters
+validParams<QPointMarker>()
 {
   InputParameters params = validParams<Marker>();
   return params;
 }
 
-
-QPointMarker::QPointMarker(const InputParameters & parameters) :
-    QuadraturePointMarker(parameters)
+QPointMarker::QPointMarker(const InputParameters & parameters) : QuadraturePointMarker(parameters)
 {
 }
 
