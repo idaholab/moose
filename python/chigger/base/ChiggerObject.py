@@ -12,7 +12,6 @@
 #                                                               #
 #              See COPYRIGHT for full restrictions              #
 #################################################################
-import inspect
 import mooseutils
 from .. import utils
 

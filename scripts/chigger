@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+#pylint: disable=missing-docstring
+#################################################################
+#                   DO NOT MODIFY THIS HEADER                   #
+#  MOOSE - Multiphysics Object Oriented Simulation Environment  #
+#                                                               #
+#            (c) 2010 Battelle Energy Alliance, LLC             #
+#                      ALL RIGHTS RESERVED                      #
+#                                                               #
+#           Prepared by Battelle Energy Alliance, LLC           #
+#             Under Contract No. DE-AC07-05ID14517              #
+#              With the U. S. Department of Energy              #
+#                                                               #
+#              See COPYRIGHT for full restrictions              #
+#################################################################
+import os
+import sys
+import argparse
+import multiprocessing
+import chigger
+
+def command_line_options():
+    """
+    Command-line options for chigger tool.
+    """
+    parser = argparse.ArgumentParser(description="Command-line utility for working with chigger "
+                                                 "visualization tools.")
+    subparser = parser.add_subparsers(title='Commands', help='Chigger utility to utilize.',
+                                      dest='command')
+    exodus_parser = subparser.add_parser('info', help='Operate on a ExodusII file.')
+    exodus_parser.add_argument('filename', type=str, help="The ExodusII file to open.")
+
+    movie_parser = subparser.add_parser('img2mov',
+                                        help="Convert a series of images to a movie using ffmpeg.")
+    movie_parser.add_argument('pattern', type=str,
+                              help="The image pattern to consider (uses python glob).")
+    movie_parser.add_argument('--output', '-o', type=str,
+                              help="The output filename, including the extension.")
+
+    if sys.platform == 'darwin':
+        ffmpeg = os.path.join(os.environ['HOME'], 'ffmpeg')
+    else:
+        ffmpeg = '/usr/bin/ffmpeg'
+    movie_parser.add_argument('--ffmpeg', type=str, default=ffmpeg,
+                              help="The ffmpeg executable to utilized (default: %(default)s).")
+    movie_parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(),
+                              help="The number of threads to utilize for conversion "
+                                   "(default: %(default)s).")
+    movie_parser.add_argument('--quality', type=int, default=1,
+                              help="The quality scale to use (1-31; default: %(default)s).")
+    movie_parser.add_argument('--bitrate', type=str, default='10M',
+                              help="The ffmpeg bitrate to utilize (default: %(default)s).")
+    movie_parser.add_argument('--duration', type=int, default='60',
+                              help="The output duration of the movie in seconds "
+                                   "(default: %(default)s).")
+    movie_parser.add_argument('--framerate', type=int,
+                              help="The output framerate, if this is provided the --duration is "
+                                   "ignored.")
+    movie_parser.add_argument('--dry-run', action='store_true',
+                              help="Display, but do not execute, the ffmpeg command.")
+    movie_parser.add_argument('--output-framerate-increase', type=float, default=0,
+                              help="Increases the output framerate by given amount to make certain "
+                                   "that no frames are dropped (default: %((default)s).")
+    return parser.parse_args()
+
+def exodus_info(opt):
+    """
+    Display information about the supplied ExodusII file.
+    """
+    reader = chigger.exodus.ExodusReader(opt.filename)
+    print reader
+
+def img2mov(opt):
+    """
+    Converts images to movies.
+    """
+    values = vars(opt)
+    values.pop('command')
+    chigger.utils.img2mov(values.pop('pattern'), values.pop('output'), **values)
+
+if __name__ == '__main__':
+
+    options = command_line_options()
+    cmd = options.command
+    if cmd == 'info':
+        retcode = exodus_info(options)
+    elif cmd == 'img2mov':
+        retcode = img2mov(options)
+    else:
+        retcode = 1
+
+    sys.exit(retcode)

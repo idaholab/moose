@@ -319,7 +319,7 @@ exclude-protected=_asdict,_fields,_replace,_source,_make
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=5
+max-args=50
 
 # Argument names that match this expression will be ignored. Default to name
 # with leading underscore
