@@ -128,7 +128,7 @@ class Tests(Testing.PeacockTester):
 
     def testWrongExe(self):
         # use the test/moose_test-opt to try to process a modules/combined input file
-        input_file = os.path.join(os.environ["MOOSE_DIR"], "modules", "combined", "tests", "thermal_strain", "thermal_strain_test.i")
+        input_file = os.path.join("../../common/transient_heat_test.i")
         self.create_app([input_file, Testing.find_moose_test_exe()])
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.input.tabName())
