@@ -13,21 +13,29 @@
 /****************************************************************/
 #include "PackedColumn.h"
 
-template<>
-InputParameters validParams<PackedColumn>()
+template <>
+InputParameters
+validParams<PackedColumn>()
 {
   InputParameters params = validParams<Material>();
 
-  // Add a parameter to get the radius of the spheres in the column (used later to interpolate permeability).
-  params.addParam<Real>("sphere_radius", "The radius of the steel spheres that are packed in the column.  Used to interpolate _permeability.");
-  params.addCoupledVar("phase", "The variable indicating the phase (steel=1 or water=0). If supplied this is used to compute the porosity instead of the supplied value.");
-  params.addCoupledVar("thermal_conductivity", "When supplied the variable be will be used for thermal conductivity rather than being computed.");
+  // Add a parameter to get the radius of the spheres in the column (used later to interpolate
+  // permeability).
+  params.addParam<Real>("sphere_radius",
+                        "The radius of the steel spheres that are packed in the "
+                        "column.  Used to interpolate _permeability.");
+  params.addCoupledVar("phase",
+                       "The variable indicating the phase (steel=1 or water=0). If "
+                       "supplied this is used to compute the porosity instead of the "
+                       "supplied value.");
+  params.addCoupledVar("thermal_conductivity",
+                       "When supplied the variable be will be used for "
+                       "thermal conductivity rather than being computed.");
   return params;
 }
 
-
-PackedColumn::PackedColumn(const InputParameters & parameters) :
-    Material(parameters),
+PackedColumn::PackedColumn(const InputParameters & parameters)
+  : Material(parameters),
 
     // Get the one parameter from the input file
     _sphere_radius(getParam<Real>("sphere_radius")),
@@ -43,7 +51,8 @@ PackedColumn::PackedColumn(const InputParameters & parameters) :
     _use_phase_variable(isParamValid("phase")),
     _phase(_use_phase_variable ? coupledValue("phase") : _zero),
     _use_variable_conductivity(isParamValid("thermal_conductivity")),
-    _conductivity_variable(_use_variable_conductivity ? coupledValue("thermal_conductivity") : _zero)
+    _conductivity_variable(_use_variable_conductivity ? coupledValue("thermal_conductivity")
+                                                      : _zero)
 {
   // From the paper: Table 1
   std::vector<Real> sphere_sizes = {1, 3};
@@ -78,13 +87,13 @@ PackedColumn::computeQpProperties()
 
   // We will compute a "bulk" thermal conductivity, specific heat and density
   // as a linear combination of the water and steel
-  Real water_k = 0.6;  // (W/m*K)
-  Real water_cp = 4181.3; // (J/kg*K)
-  Real water_rho = 995.6502;  // (kg/m^3 @ 303K)
+  Real water_k = 0.6;        // (W/m*K)
+  Real water_cp = 4181.3;    // (J/kg*K)
+  Real water_rho = 995.6502; // (kg/m^3 @ 303K)
 
-  Real steel_cp = 466;  // (J/kg*K)
-  Real steel_rho = 8000;  // (kg/m^3)
-  Real steel_k = 18;  // (W/m*K)
+  Real steel_cp = 466;   // (J/kg*K)
+  Real steel_rho = 8000; // (kg/m^3)
+  Real steel_k = 18;     // (W/m*K)
 
   // Now actually set the value at the quadrature point
   if (_use_variable_conductivity)
@@ -93,5 +102,6 @@ PackedColumn::computeQpProperties()
     _thermal_conductivity[_qp] = _porosity[_qp] * water_k + (1.0 - _porosity[_qp]) * steel_k;
 
   _density[_qp] = _porosity[_qp] * water_rho + (1.0 - _porosity[_qp]) * steel_rho;
-  _heat_capacity[_qp] = _porosity[_qp] * water_cp*water_rho + (1.0 - _porosity[_qp]) * steel_cp*steel_rho;
+  _heat_capacity[_qp] =
+      _porosity[_qp] * water_cp * water_rho + (1.0 - _porosity[_qp]) * steel_cp * steel_rho;
 }

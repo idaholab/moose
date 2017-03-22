@@ -18,18 +18,18 @@
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
-template<>
-InputParameters validParams<ExampleDiffusion>()
+template <>
+InputParameters
+validParams<ExampleDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
   return params;
 }
 
-
-ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
-    Diffusion(parameters),
-    _diffusivity(getMaterialProperty<Real>("diffusivity"))
-{}
+ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters)
+  : Diffusion(parameters), _diffusivity(getMaterialProperty<Real>("diffusivity"))
+{
+}
 
 Real
 ExampleDiffusion::computeQpResidual()

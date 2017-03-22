@@ -17,16 +17,14 @@
 
 #include "EBSDAccessFunctors.h"
 
-//CPPUnit includes
+// CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
-class EBSDAccessFunctorsTest :
-  public CppUnit::TestFixture,
-  public EBSDAccessFunctors
+class EBSDAccessFunctorsTest : public CppUnit::TestFixture, public EBSDAccessFunctors
 {
-  CPPUNIT_TEST_SUITE( EBSDAccessFunctorsTest );
+  CPPUNIT_TEST_SUITE(EBSDAccessFunctorsTest);
 
-  CPPUNIT_TEST( test );
+  CPPUNIT_TEST(test);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -43,4 +41,4 @@ private:
   EulerAngles _angles;
 };
 
-#endif //EBSDACCESSFUNCTORSTEST_H
+#endif // EBSDACCESSFUNCTORSTEST_H

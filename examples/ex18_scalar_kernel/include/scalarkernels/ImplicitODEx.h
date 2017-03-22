@@ -15,7 +15,6 @@
 #ifndef IMPLICITODEX_H
 #define IMPLICITODEX_H
 
-
 #include "ODEKernel.h"
 
 /**
@@ -31,7 +30,7 @@ class ImplicitODEx;
  * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
-template<>
+template <>
 InputParameters validParams<ImplicitODEx>();
 
 /**
@@ -81,6 +80,5 @@ protected:
    */
   const VariableValue & _y;
 };
-
 
 #endif /* IMPLICITODEX_H */

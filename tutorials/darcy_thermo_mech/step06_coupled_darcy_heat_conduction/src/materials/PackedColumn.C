@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "PackedColumn.h"
 
-template<>
-InputParameters validParams<PackedColumn>()
+template <>
+InputParameters
+validParams<PackedColumn>()
 {
   InputParameters params = validParams<Material>();
 
@@ -26,9 +27,8 @@ InputParameters validParams<PackedColumn>()
   return params;
 }
 
-
-PackedColumn::PackedColumn(const InputParameters & parameters) :
-    Material(parameters),
+PackedColumn::PackedColumn(const InputParameters & parameters)
+  : Material(parameters),
     // Get the one parameter from the input file
     _sphere_radius(getParam<Real>("sphere_radius")),
     // Declare two material properties.  This returns references that
@@ -70,16 +70,17 @@ PackedColumn::computeQpProperties()
   // We will compute "bulk" thermal conductivity, specific heat, and
   // density as linear combinations of the water and steel (all values
   // are from Wikipedia).
-  Real water_k = 0.6;  // (W/m*K)
-  Real water_cp = 4181.3; // (J/kg*K)
-  Real water_rho = 995.6502;  // (kg/m^3 @ 303K)
+  Real water_k = 0.6;        // (W/m*K)
+  Real water_cp = 4181.3;    // (J/kg*K)
+  Real water_rho = 995.6502; // (kg/m^3 @ 303K)
 
-  Real steel_k = 18;  // (W/m*K)
-  Real steel_cp = 466;  // (J/kg*K)
-  Real steel_rho = 8000;  // (kg/m^3)
+  Real steel_k = 18;     // (W/m*K)
+  Real steel_cp = 466;   // (J/kg*K)
+  Real steel_rho = 8000; // (kg/m^3)
 
   // Now actually set the value at the quadrature point
   _thermal_conductivity[_qp] = _porosity[_qp] * water_k + (1.0 - _porosity[_qp]) * steel_k;
   _density[_qp] = _porosity[_qp] * water_rho + (1.0 - _porosity[_qp]) * steel_rho;
-  _heat_capacity[_qp] = _porosity[_qp] * water_cp * water_rho + (1.0 - _porosity[_qp]) * steel_cp*steel_rho;
+  _heat_capacity[_qp] =
+      _porosity[_qp] * water_cp * water_rho + (1.0 - _porosity[_qp]) * steel_cp * steel_rho;
 }

@@ -52,16 +52,16 @@ StiffenedGasFluidPropertiesTest::buildObjects()
   eos_pars.set<Real>("cv") = 1816;
   eos_pars.set<std::string>("_object_name") = "name3";
   _fe_problem->addUserObject("StiffenedGasFluidProperties", "fp", eos_pars);
-  _fp = & _fe_problem->getUserObject<StiffenedGasFluidProperties>("fp");
+  _fp = &_fe_problem->getUserObject<StiffenedGasFluidProperties>("fp");
 }
 
 void
 StiffenedGasFluidPropertiesTest::setUp()
 {
   char str[] = "foo";
-  char * argv[] = { str, NULL };
+  char * argv[] = {str, NULL};
 
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **) argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 
   registerObjects(*_factory);
@@ -79,19 +79,19 @@ StiffenedGasFluidPropertiesTest::tearDown()
 void
 StiffenedGasFluidPropertiesTest::testAll()
 {
-  Real T = 20. + 273.15;    // K
-  Real p = 101325;          // Pa
+  Real T = 20. + 273.15; // K
+  Real p = 101325;       // Pa
 
   Real rho = _fp->rho(p, T);
   Real v = 1 / rho;
   Real e;
 
   REL_TEST("rho", _fp->rho(p, T), 1391.568186, 3e-10);
-  REL_TEST("e",   _fp->e(p, rho), 83974.12646, 5e-11);
+  REL_TEST("e", _fp->e(p, rho), 83974.12646, 5e-11);
 
   _fp->rho_e(p, T, rho, e);
   REL_TEST("rho", rho, 1391.568186, 3e-10);
-  REL_TEST("e",   e,   83974.12646, 5e-11);
+  REL_TEST("e", e, 83974.12646, 5e-11);
 
   REL_TEST("p", _fp->pressure(v, e), p, 1e-11);
   REL_TEST("T", _fp->temperature(v, e), T, 1e-15);

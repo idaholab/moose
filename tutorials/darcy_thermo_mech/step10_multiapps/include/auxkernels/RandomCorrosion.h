@@ -21,9 +21,15 @@
 
 // Forward declarations
 class RandomCorrosion;
-namespace libMesh{ namespace MeshTools { class BoundingBox; } }
+namespace libMesh
+{
+namespace MeshTools
+{
+class BoundingBox;
+}
+}
 
-template<>
+template <>
 InputParameters validParams<RandomCorrosion>();
 
 /**
@@ -39,7 +45,6 @@ InputParameters validParams<RandomCorrosion>();
 class RandomCorrosion : public AuxKernel
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for the RandomCorrosion object.
@@ -52,7 +57,6 @@ public:
   void timestepSetup() override;
 
 protected:
-
   /**
    * Computes the "corrosion" for the supplied phase variable.
    * @return The compute "phase" variable
@@ -66,7 +70,6 @@ protected:
   Point getRandomPoint();
 
 private:
-
   /// The vector of random points to apply "corrosion"
   std::vector<Point> _points;
 

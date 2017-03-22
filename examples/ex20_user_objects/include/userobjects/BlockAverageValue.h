@@ -20,10 +20,10 @@
 // libmesh includes
 #include "libmesh/mesh_tools.h"
 
-//Forward Declarations
+// Forward Declarations
 class BlockAverageValue;
 
-template<>
+template <>
 InputParameters validParams<BlockAverageValue>();
 
 /**

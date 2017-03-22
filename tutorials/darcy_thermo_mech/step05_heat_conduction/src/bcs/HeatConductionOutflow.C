@@ -14,18 +14,20 @@
 
 #include "HeatConductionOutflow.h"
 
-template<>
-InputParameters validParams<HeatConductionOutflow>()
+template <>
+InputParameters
+validParams<HeatConductionOutflow>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-HeatConductionOutflow::HeatConductionOutflow(const InputParameters & parameters) :
-  IntegratedBC(parameters),
-  // IntegratedBCs can retrieve material properties!
-  _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
-{}
+HeatConductionOutflow::HeatConductionOutflow(const InputParameters & parameters)
+  : IntegratedBC(parameters),
+    // IntegratedBCs can retrieve material properties!
+    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity"))
+{
+}
 
 Real
 HeatConductionOutflow::computeQpResidual()

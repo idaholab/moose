@@ -14,9 +14,9 @@
 
 #include "DarcyPressure.h"
 
-
-template<>
-InputParameters validParams<DarcyPressure>()
+template <>
+InputParameters
+validParams<DarcyPressure>()
 {
   // Start with the parameters from our parent
   InputParameters params = validParams<Diffusion>();
@@ -27,14 +27,14 @@ InputParameters validParams<DarcyPressure>()
   params.addRequiredParam<Real>("permeability", "The permeability (K) of the fluid");
 
   // Add a parameter with a default value.  This value can be overriden in the input file.
-  params.addParam<Real>("viscosity", 7.98e-4, "The viscosity (mu) of the fluid.  Default is for 30 degrees C.");
+  params.addParam<Real>(
+      "viscosity", 7.98e-4, "The viscosity (mu) of the fluid.  Default is for 30 degrees C.");
 
   return params;
 }
 
-
-DarcyPressure::DarcyPressure(const InputParameters & parameters) :
-    Diffusion(parameters),
+DarcyPressure::DarcyPressure(const InputParameters & parameters)
+  : Diffusion(parameters),
 
     // Get the parameters from the input file
     _permeability(getParam<Real>("permeability")),
@@ -42,20 +42,18 @@ DarcyPressure::DarcyPressure(const InputParameters & parameters) :
 {
 }
 
-DarcyPressure::~DarcyPressure()
-{
-}
+DarcyPressure::~DarcyPressure() {}
 
 Real
 DarcyPressure::computeQpResidual()
 {
   // K/mu * grad_u * grad_phi[i]
-  return (_permeability/_viscosity) * Diffusion::computeQpResidual();
+  return (_permeability / _viscosity) * Diffusion::computeQpResidual();
 }
 
 Real
 DarcyPressure::computeQpJacobian()
 {
   // K/mu * grad_phi[j] * grad_phi[i]
-  return (_permeability/_viscosity) * Diffusion::computeQpJacobian();
+  return (_permeability / _viscosity) * Diffusion::computeQpJacobian();
 }

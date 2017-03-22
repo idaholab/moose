@@ -20,19 +20,19 @@
 
 class InputParametersTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( InputParametersTest );
+  CPPUNIT_TEST_SUITE(InputParametersTest);
 
-  CPPUNIT_TEST( checkControlParamPrivateError );
-  CPPUNIT_TEST( checkControlParamTypeError );
-  CPPUNIT_TEST( checkControlParamValidError );
-  CPPUNIT_TEST( checkSuppressedError );
-  CPPUNIT_TEST( checkRangeCheckedParam );
+  CPPUNIT_TEST(checkControlParamPrivateError);
+  CPPUNIT_TEST(checkControlParamTypeError);
+  CPPUNIT_TEST(checkControlParamValidError);
+  CPPUNIT_TEST(checkSuppressedError);
+  CPPUNIT_TEST(checkRangeCheckedParam);
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void setUp(){}
-  void tearDown(){}
+  void setUp() {}
+  void tearDown() {}
 
   void checkRangeCheckedParam();
   void checkControlParamPrivateError();
@@ -45,4 +45,4 @@ public:
 private:
 };
 
-#endif  // INPUTPARAMETERSTEST_H
+#endif // INPUTPARAMETERSTEST_H

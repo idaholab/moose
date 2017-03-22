@@ -17,10 +17,10 @@
 
 #include "IntegratedBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<CoupledNeumannBC>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<CoupledNeumannBC>();
 class CoupledNeumannBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -53,4 +52,4 @@ private:
   const VariableValue & _some_var_val;
 };
 
-#endif //COUPLEDNEUMANNBC_H
+#endif // COUPLEDNEUMANNBC_H

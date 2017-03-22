@@ -14,21 +14,20 @@
 
 #include "EBSDMeshErrorTest.h"
 
-//Moose includes
+// Moose includes
 #include "EBSDMesh.h"
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "MooseUnitApp.h"
 #include "AppFactory.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( EBSDMeshErrorTest );
-
+CPPUNIT_TEST_SUITE_REGISTRATION(EBSDMeshErrorTest);
 
 void
 EBSDMeshErrorTest::setUp()
 {
-  const char *argv[2] = { "foo", "\0" };
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char**)argv);
+  const char * argv[2] = {"foo", "\0"};
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 }
 
@@ -37,7 +36,6 @@ EBSDMeshErrorTest::tearDown()
 {
   delete _app;
 }
-
 
 void
 EBSDMeshErrorTest::fileDoesNotExist()
@@ -58,10 +56,10 @@ EBSDMeshErrorTest::fileDoesNotExist()
     // trigger mesh building with invalid EBSD filename
     mesh->buildMesh();
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT( msg.find("Can't open EBSD file: FILEDOESNOTEXIST") != std::string::npos );
+    CPPUNIT_ASSERT(msg.find("Can't open EBSD file: FILEDOESNOTEXIST") != std::string::npos);
   }
 }
 
@@ -71,10 +69,11 @@ EBSDMeshErrorTest::headerError()
   const unsigned int ntestcase = 4;
 
   const char * testcase[ntestcase][2] = {
-    {"data/ebsd/ebsd3D_zerostep.txt", "Error reading header, EBSD data step size is zero."},
-    {"data/ebsd/ebsd3D_zerosize.txt", "Error reading header, EBSD grid size is zero."},
-    {"data/ebsd/ebsd3D_zerodim.txt", "Error reading header, EBSD data is zero dimensional."},
-    {"data/ebsd/ebsd3D_norefine.txt", "EBSDMesh error. Requested uniform_refine levels not possible."},
+      {"data/ebsd/ebsd3D_zerostep.txt", "Error reading header, EBSD data step size is zero."},
+      {"data/ebsd/ebsd3D_zerosize.txt", "Error reading header, EBSD grid size is zero."},
+      {"data/ebsd/ebsd3D_zerodim.txt", "Error reading header, EBSD data is zero dimensional."},
+      {"data/ebsd/ebsd3D_norefine.txt",
+       "EBSDMesh error. Requested uniform_refine levels not possible."},
   };
 
   for (unsigned int i = 0; i < ntestcase; ++i)
@@ -101,10 +100,10 @@ EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
     // trigger mesh building with invalid EBSD filename
     mesh->buildMesh();
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT_MESSAGE( filename, msg.find(error) != std::string::npos );
+    CPPUNIT_ASSERT_MESSAGE(filename, msg.find(error) != std::string::npos);
   }
 }
 
@@ -122,7 +121,7 @@ EBSDMeshErrorTest::geometrySpecifiedError()
   testParam<unsigned int>(nint, int_params, "TestB");
 }
 
-template<typename T>
+template <typename T>
 void
 EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list, std::string name)
 {
@@ -148,10 +147,12 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list, std:
       // construct mesh object
       std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
     }
-    catch(const std::exception & e)
+    catch (const std::exception & e)
     {
       std::string msg(e.what());
-      CPPUNIT_ASSERT( msg.find("Do not specify mesh geometry information, it is read from the EBSD file.") != std::string::npos );
+      CPPUNIT_ASSERT(
+          msg.find("Do not specify mesh geometry information, it is read from the EBSD file.") !=
+          std::string::npos);
     }
   }
 }

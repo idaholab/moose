@@ -17,16 +17,15 @@
 
 #include "Diffusion.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleDiffusion;
 
-template<>
+template <>
 InputParameters validParams<ExampleDiffusion>();
 
 class ExampleDiffusion : public Diffusion
 {
 public:
-
   ExampleDiffusion(const InputParameters & parameters);
 
 protected:
@@ -36,4 +35,4 @@ protected:
   const MaterialProperty<Real> & _diffusivity;
 };
 
-#endif //EXAMPLEDIFFUSION_H
+#endif // EXAMPLEDIFFUSION_H

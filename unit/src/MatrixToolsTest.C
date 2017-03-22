@@ -13,11 +13,9 @@
 /****************************************************************/
 #include "MatrixToolsTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( MatrixToolsTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(MatrixToolsTest);
 
-MatrixToolsTest::MatrixToolsTest()
-{
-}
+MatrixToolsTest::MatrixToolsTest() {}
 
 void
 MatrixToolsTest::matrixInversionTest1()
@@ -28,8 +26,8 @@ MatrixToolsTest::matrixInversionTest1()
   // has inverse
   // ( 1  -2)
   // (-0.5 2)
-  std::vector<PetscScalar> mat2(2*2);
-  std::vector<std::vector<Real> > m(2);
+  std::vector<PetscScalar> mat2(2 * 2);
+  std::vector<std::vector<Real>> m(2);
   for (auto & row : m)
     row.resize(2);
 
@@ -59,8 +57,8 @@ MatrixToolsTest::matrixInversionTest2()
   // (4 5 6)
   // (7 8 1)
   // is singular
-  std::vector<PetscScalar> mat3(3*3);
-  std::vector<std::vector<Real> > m(3);
+  std::vector<PetscScalar> mat3(3 * 3);
+  std::vector<std::vector<Real>> m(3);
   for (auto & row : m)
     row.resize(3);
 
@@ -77,13 +75,13 @@ MatrixToolsTest::matrixInversionTest2()
   CPPUNIT_ASSERT_THROW(MatrixTools::inverse(mat3, 3), MooseException);
   CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m), MooseException);
 
-  std::vector<std::vector<Real> > m2(2);
+  std::vector<std::vector<Real>> m2(2);
   for (auto & row : m)
     row.resize(3);
 
   CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m2), MooseException);
 
-  std::vector<std::vector<Real> > m3(0);
+  std::vector<std::vector<Real>> m3(0);
   CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m3, m3), MooseException);
 }
 
@@ -98,8 +96,8 @@ MatrixToolsTest::matrixInversionTest3()
   // (-24 18  5)
   // (20 -15 -4)
   // (-5  4   1)
-  std::vector<PetscScalar> mat3(3*3);
-  std::vector<std::vector<Real> > m(3);
+  std::vector<PetscScalar> mat3(3 * 3);
+  std::vector<std::vector<Real>> m(3);
   for (auto & row : m)
     row.resize(3);
 

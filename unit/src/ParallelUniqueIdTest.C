@@ -19,7 +19,6 @@
 
 // CPPUNIT_TEST_SUITE_REGISTRATION( ParallelUniqueIdTest );
 
-
 // void
 // ParallelUniqueIdTest::constructor()
 // {
@@ -45,4 +44,3 @@
 //     CPPUNIT_ASSERT( puid2.id == 0 );
 //   #endif
 // }
-

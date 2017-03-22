@@ -21,7 +21,7 @@
 // Forward Declarations
 class ExampleIC;
 
-template<>
+template <>
 InputParameters validParams<ExampleIC>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<ExampleIC>();
 class ExampleIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor: Same as the rest of the MOOSE Objects
    */
@@ -47,4 +46,4 @@ private:
   Real _coefficient;
 };
 
-#endif //EXAMPLEIC_H
+#endif // EXAMPLEIC_H

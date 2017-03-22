@@ -15,7 +15,7 @@
 #ifndef CO2FLUIDPROPERTIESTEST_H
 #define CO2FLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
@@ -129,4 +129,4 @@ private:
   const CO2FluidProperties * _fp;
 };
 
-#endif  // CO2FLUIDPROPERTIESTEST_H
+#endif // CO2FLUIDPROPERTIESTEST_H

@@ -15,7 +15,7 @@
 #ifndef USERFUNCTIONTEST_H
 #define USERFUNCTIONTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Forward declarations
@@ -27,12 +27,12 @@ class MooseApp;
 class ParsedFunctionTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( ParsedFunctionTest );
+  CPPUNIT_TEST_SUITE(ParsedFunctionTest);
 
-  CPPUNIT_TEST( basicConstructor );
-  CPPUNIT_TEST( advancedConstructor );
-  CPPUNIT_TEST( testVariables );
-  CPPUNIT_TEST( testConstants );
+  CPPUNIT_TEST(basicConstructor);
+  CPPUNIT_TEST(advancedConstructor);
+  CPPUNIT_TEST(testVariables);
+  CPPUNIT_TEST(testConstants);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -52,4 +52,4 @@ protected:
   FEProblem * _fe_problem;
 };
 
-#endif  // USERFUNCTIONTEST_H
+#endif // USERFUNCTIONTEST_H

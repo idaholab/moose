@@ -15,7 +15,7 @@
 #ifndef EBSDMESHERRORTEST_H
 #define EBSDMESHERRORTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Forward declarations
@@ -24,11 +24,11 @@ class MooseApp;
 
 class EBSDMeshErrorTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( EBSDMeshErrorTest );
+  CPPUNIT_TEST_SUITE(EBSDMeshErrorTest);
 
-  CPPUNIT_TEST( geometrySpecifiedError );
-  CPPUNIT_TEST( fileDoesNotExist );
-  CPPUNIT_TEST( headerError );
+  CPPUNIT_TEST(geometrySpecifiedError);
+  CPPUNIT_TEST(fileDoesNotExist);
+  CPPUNIT_TEST(headerError);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -50,4 +50,4 @@ private:
   void headerErrorHelper(const char * filename, const char * error);
 };
 
-#endif //EBSDMESHERRORTEST_H
+#endif // EBSDMESHERRORTEST_H

@@ -15,16 +15,16 @@
 #ifndef MONOTONECUBICINTERPOLATIONTEST_H
 #define MONOTONECUBICINTERPOLATIONTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MonotoneCubicInterpolationTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( MonotoneCubicInterpolationTest );
+  CPPUNIT_TEST_SUITE(MonotoneCubicInterpolationTest);
 
-  CPPUNIT_TEST( fitQuadraticFunction );
-  CPPUNIT_TEST( fitAkimaDataSet );
-  CPPUNIT_TEST( getSampleSize );
+  CPPUNIT_TEST(fitQuadraticFunction);
+  CPPUNIT_TEST(fitAkimaDataSet);
+  CPPUNIT_TEST(getSampleSize);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -43,4 +43,4 @@ private:
   static const double _tol;
 };
 
-#endif  // MONOTONECUBICINTERPOLATIONTEST_H
+#endif // MONOTONECUBICINTERPOLATIONTEST_H

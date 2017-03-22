@@ -17,10 +17,10 @@
 #ifndef EXAMPLEMATERIAL_H
 #define EXAMPLEMATERIAL_H
 
-//Forward Declarations
+// Forward Declarations
 class ExampleMaterial;
 
-template<>
+template <>
 InputParameters validParams<ExampleMaterial>();
 
 /**
@@ -46,4 +46,4 @@ private:
   const MaterialProperty<Real> & _diffusivity_old;
 };
 
-#endif //EXAMPLEMATERIAL_H
+#endif // EXAMPLEMATERIAL_H

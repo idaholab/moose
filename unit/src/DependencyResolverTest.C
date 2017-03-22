@@ -14,7 +14,7 @@
 
 #include "DependencyResolverTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( DependencyResolverTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(DependencyResolverTest);
 
 void
 DependencyResolverTest::setUp()
@@ -45,10 +45,10 @@ DependencyResolverTest::operatorParensTest()
   // "bead" will come out after the independent items
   std::sort(unsorted.begin(), unsorted.end(), _strict_ordering);
 
-  CPPUNIT_ASSERT( unsorted[2] == "b");
-  CPPUNIT_ASSERT( unsorted[3] == "e");
-  CPPUNIT_ASSERT( unsorted[4] == "a");
-  CPPUNIT_ASSERT( unsorted[5] == "d");
+  CPPUNIT_ASSERT(unsorted[2] == "b");
+  CPPUNIT_ASSERT(unsorted[3] == "e");
+  CPPUNIT_ASSERT(unsorted[4] == "a");
+  CPPUNIT_ASSERT(unsorted[5] == "d");
 }
 
 void
@@ -56,9 +56,9 @@ DependencyResolverTest::ptrTest()
 {
   DependencyResolver<int *> resolver;
 
-  int *mat3 = new int;
-  int *mat1 = new int;
-  int *mat2 = new int;
+  int * mat3 = new int;
+  int * mat1 = new int;
+  int * mat2 = new int;
 
   resolver.insertDependency(mat2, mat1);
   resolver.insertDependency(mat3, mat1);
@@ -69,14 +69,13 @@ DependencyResolverTest::ptrTest()
   sorted[1] = mat2;
   sorted[2] = mat3;
 
-
   /*const std::vector<std::set<int *> > & sets =*/
   resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
-  CPPUNIT_ASSERT( sorted[0] == mat1);
-  CPPUNIT_ASSERT( sorted[1] == mat2);
-  CPPUNIT_ASSERT( sorted[2] == mat3);
+  CPPUNIT_ASSERT(sorted[0] == mat1);
+  CPPUNIT_ASSERT(sorted[1] == mat2);
+  CPPUNIT_ASSERT(sorted[2] == mat3);
 
   delete mat1;
   delete mat2;
@@ -101,14 +100,13 @@ DependencyResolverTest::simpleTest()
   sorted[1] = mat2;
   sorted[2] = mat3;
 
-
   /*const std::vector<std::set<int> > & sets =*/
   resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
-  CPPUNIT_ASSERT( sorted[0] == mat1);
-  CPPUNIT_ASSERT( sorted[1] == mat2);
-  CPPUNIT_ASSERT( sorted[2] == mat3);
+  CPPUNIT_ASSERT(sorted[0] == mat1);
+  CPPUNIT_ASSERT(sorted[1] == mat2);
+  CPPUNIT_ASSERT(sorted[2] == mat3);
 }
 
 void
@@ -119,15 +117,15 @@ DependencyResolverTest::resolverSets()
 
   const auto & sets = _resolver.getSortedValuesSets();
 
-  CPPUNIT_ASSERT( sets.size() == 3 );
-  CPPUNIT_ASSERT( sets[0].size() == 2);
-  CPPUNIT_ASSERT( std::find(sets[0].begin(), sets[0].end(), "a") != sets[0].end() );
-  CPPUNIT_ASSERT( std::find(sets[0].begin(), sets[0].end(), "aa") != sets[0].end() );
+  CPPUNIT_ASSERT(sets.size() == 3);
+  CPPUNIT_ASSERT(sets[0].size() == 2);
+  CPPUNIT_ASSERT(std::find(sets[0].begin(), sets[0].end(), "a") != sets[0].end());
+  CPPUNIT_ASSERT(std::find(sets[0].begin(), sets[0].end(), "aa") != sets[0].end());
 
-  CPPUNIT_ASSERT( sets[1].size() == 2);
-  CPPUNIT_ASSERT( std::find(sets[1].begin(), sets[1].end(), "b") != sets[1].end() );
-  CPPUNIT_ASSERT( std::find(sets[1].begin(), sets[1].end(), "c") != sets[1].end() );
+  CPPUNIT_ASSERT(sets[1].size() == 2);
+  CPPUNIT_ASSERT(std::find(sets[1].begin(), sets[1].end(), "b") != sets[1].end());
+  CPPUNIT_ASSERT(std::find(sets[1].begin(), sets[1].end(), "c") != sets[1].end());
 
-  CPPUNIT_ASSERT( sets[2].size() == 1);
-  CPPUNIT_ASSERT( std::find(sets[2].begin(), sets[2].end(), "d") != sets[2].end() );
+  CPPUNIT_ASSERT(sets[2].size() == 1);
+  CPPUNIT_ASSERT(std::find(sets[2].begin(), sets[2].end(), "d") != sets[2].end());
 }

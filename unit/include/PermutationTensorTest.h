@@ -15,16 +15,16 @@
 #ifndef PERMUTATIONTENSORTEST_H
 #define PERMUTATIONTENSORTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class PermutationTensorTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( PermutationTensorTest );
+  CPPUNIT_TEST_SUITE(PermutationTensorTest);
 
-  CPPUNIT_TEST( twoD );
-  CPPUNIT_TEST( threeD );
-  CPPUNIT_TEST( fourD );
+  CPPUNIT_TEST(twoD);
+  CPPUNIT_TEST(threeD);
+  CPPUNIT_TEST(fourD);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -34,4 +34,4 @@ public:
   void fourD();
 };
 
-#endif  // PERMUTATIONTENSORTEST_H
+#endif // PERMUTATIONTENSORTEST_H

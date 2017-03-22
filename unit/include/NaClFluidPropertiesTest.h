@@ -15,7 +15,7 @@
 #ifndef NACLFLUIDPROPERTIESTEST_H
 #define NACLFLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
@@ -67,4 +67,4 @@ private:
   const NaClFluidProperties * _fp;
 };
 
-#endif  // NACLFLUIDPROPERTIESTEST_H
+#endif // NACLFLUIDPROPERTIESTEST_H

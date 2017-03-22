@@ -15,19 +15,19 @@
 #ifndef MOOSERANDOMTEST_H
 #define MOOSERANDOMTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseRandomTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( MooseRandomTest );
+  CPPUNIT_TEST_SUITE(MooseRandomTest);
 
-  CPPUNIT_TEST( rand );
-  CPPUNIT_TEST( randSeq );
-  CPPUNIT_TEST( randNormal );
-  CPPUNIT_TEST( randNormal2 );
-  CPPUNIT_TEST( randl );
-  CPPUNIT_TEST( states );
+  CPPUNIT_TEST(rand);
+  CPPUNIT_TEST(randSeq);
+  CPPUNIT_TEST(randNormal);
+  CPPUNIT_TEST(randNormal2);
+  CPPUNIT_TEST(randl);
+  CPPUNIT_TEST(states);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -43,4 +43,4 @@ public:
   void states();
 };
 
-#endif  // MOOSERANDOMTEST_H
+#endif // MOOSERANDOMTEST_H

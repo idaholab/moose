@@ -15,7 +15,7 @@
 #ifndef WATER97FLUIDPROPERTIESTEST_H
 #define WATER97FLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
@@ -125,4 +125,4 @@ private:
   const Water97FluidProperties * _fp;
 };
 
-#endif  // WATER97FLUIDPROPERTIESTEST_H
+#endif // WATER97FLUIDPROPERTIESTEST_H
