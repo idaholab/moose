@@ -62,6 +62,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         self.AxisSelectLayout.setContentsMargins(0, 0, 0, 0)
         self.AxisVariableLabel = QtWidgets.QLabel('Primary Variable:')
         self.AxisVariable = QtWidgets.QComboBox()
+        self.AxisVariable.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self.AxisSelectLayout.addWidget(self.AxisVariableLabel)
         self.AxisSelectLayout.addWidget(self.AxisVariable)

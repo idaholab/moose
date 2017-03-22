@@ -43,10 +43,12 @@ class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # Variable selection
         self.VariableListLayout = QtWidgets.QHBoxLayout()
         self.VariableList = QtWidgets.QComboBox()
+        self.VariableList.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.VariableListLayout.addWidget(self.VariableList)
 
         # Component selection
         self.ComponentList = QtWidgets.QComboBox()
+        self.ComponentList.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.VariableListLayout.addWidget(self.ComponentList)
 
         # Min. value selection
@@ -59,6 +61,7 @@ class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # Colormap
         self.ColorMapList = QtWidgets.QComboBox()
+        self.ColorMapList.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.ReverseColorMap = QtWidgets.QCheckBox("Reverse Colormap")
 
         # Colorbar toggle
