@@ -32,16 +32,19 @@ validParams<FieldSplitPreconditioner>()
   InputParameters params = validParams<MoosePreconditioner>();
 
   params.addParam<std::vector<std::string>>(
-      "off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated "
-                      "with an off diagonal column from the same position in off_diag_colum.");
+      "off_diag_row",
+      "The off diagonal row you want to add into the matrix, it will be associated "
+      "with an off diagonal column from the same position in off_diag_colum.");
   params.addParam<std::vector<std::string>>("off_diag_column",
                                             "The off diagonal column you want to add into the "
                                             "matrix, it will be associated with an off diagonal "
                                             "row from the same position in off_diag_row.");
   // We should use full coupling Jacobian matrix by default
-  params.addParam<bool>("full", true, "Set to true if you want the full set of couplings.  Simply "
-                                      "for convenience so you don't have to set every off_diag_row "
-                                      "and off_diag_column combination.");
+  params.addParam<bool>("full",
+                        true,
+                        "Set to true if you want the full set of couplings.  Simply "
+                        "for convenience so you don't have to set every off_diag_row "
+                        "and off_diag_column combination.");
   params.addRequiredParam<std::vector<std::string>>(
       "topsplit", "entrance to splits, the top split will specify how splits will go.");
   return params;

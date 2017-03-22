@@ -11,9 +11,10 @@ InputParameters
 validParams<CrystalPlasticitySlipResistanceGSS>()
 {
   InputParameters params = validParams<CrystalPlasticitySlipResistance>();
-  params.addParam<std::string>("uo_state_var_name", "Name of state variable property: Same as "
-                                                    "state variable user object specified in input "
-                                                    "file.");
+  params.addParam<std::string>("uo_state_var_name",
+                               "Name of state variable property: Same as "
+                               "state variable user object specified in input "
+                               "file.");
   params.addClassDescription("Phenomenological constitutive models' slip resistance base class.  "
                              "Override the virtual functions in your class");
   return params;

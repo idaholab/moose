@@ -20,8 +20,9 @@ validParams<DarcyFluxComponent>()
   MooseEnum component("x=0 y=1 z=2");
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<RealVectorValue>(
-      "fluid_weight", "Fluid weight (gravity*density) as a vector pointing downwards (usually "
-                      "measured in kg.m^-2.s^-2 = Pa/m).  Eg '0 0 -10000'");
+      "fluid_weight",
+      "Fluid weight (gravity*density) as a vector pointing downwards (usually "
+      "measured in kg.m^-2.s^-2 = Pa/m).  Eg '0 0 -10000'");
   params.addRequiredParam<Real>("fluid_viscosity",
                                 "Fluid dynamic viscosity (usually measured in Pa.s)");
   params.addClassDescription("Darcy flux (in m^3.s^-1.m^-2, or m.s^-1)  -(k_ij/mu (nabla_j P - "

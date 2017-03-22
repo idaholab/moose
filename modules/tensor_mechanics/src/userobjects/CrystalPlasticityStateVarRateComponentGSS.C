@@ -14,9 +14,10 @@ validParams<CrystalPlasticityStateVarRateComponentGSS>()
   params.addParam<std::string>(
       "uo_slip_rate_name",
       "Name of slip rate property: Same as slip rate user object specified in input file.");
-  params.addParam<std::string>("uo_state_var_name", "Name of state variable property: Same as "
-                                                    "state variable user object specified in input "
-                                                    "file.");
+  params.addParam<std::string>("uo_state_var_name",
+                               "Name of state variable property: Same as "
+                               "state variable user object specified in input "
+                               "file.");
   params.addParam<FileName>(
       "slip_sys_hard_prop_file_name",
       "",

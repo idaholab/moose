@@ -221,10 +221,12 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
       _execute_objects[*it].addObject(object, tid);
   }
   else
-    mooseError("The object being added (", object->name(), ") must inherit from SetupInterface to "
-                                                           "be added to the "
-                                                           "ExecuteMooseObjectWarehouse "
-                                                           "container.");
+    mooseError("The object being added (",
+               object->name(),
+               ") must inherit from SetupInterface to "
+               "be added to the "
+               "ExecuteMooseObjectWarehouse "
+               "container.");
 }
 
 template <typename T>

@@ -32,12 +32,14 @@ validParams<MultiAppPostprocessorTransfer>()
       "from_postprocessor",
       "The name of the Postprocessor in the Master to transfer the value from.");
   params.addRequiredParam<PostprocessorName>(
-      "to_postprocessor", "The name of the Postprocessor in the MultiApp to transfer the value to. "
-                          " This should most likely be a Reporter Postprocessor.");
+      "to_postprocessor",
+      "The name of the Postprocessor in the MultiApp to transfer the value to. "
+      " This should most likely be a Reporter Postprocessor.");
   MooseEnum reduction_type("average sum maximum minimum");
-  params.addParam<MooseEnum>(
-      "reduction_type", reduction_type, "The type of reduction to perform to reduce postprocessor "
-                                        "values from multiple SubApps to a single value");
+  params.addParam<MooseEnum>("reduction_type",
+                             reduction_type,
+                             "The type of reduction to perform to reduce postprocessor "
+                             "values from multiple SubApps to a single value");
   return params;
 }
 

@@ -15,14 +15,16 @@ validParams<MovingPlanarFront>()
   params.addRequiredParam<RealVectorValue>("start_posn", "Initial position of the front");
   params.addRequiredParam<RealVectorValue>("end_posn", "Final position of the front");
   params.addRequiredParam<FunctionName>(
-      "distance", "The front is an infinite plane with normal pointing from start_posn to "
-                  "end_posn.  The front's distance from start_posn is defined by distance.  You "
-                  "should ensure that distance is positive");
+      "distance",
+      "The front is an infinite plane with normal pointing from start_posn to "
+      "end_posn.  The front's distance from start_posn is defined by distance.  You "
+      "should ensure that distance is positive");
   params.addRequiredParam<Real>(
-      "active_length", "This function will return true_value at a point if: (a) t >= "
-                       "activation_time; (b) t < deactivation_time; (c) the point lies in the "
-                       "domain between start_posn and the front position; (d) the distance between "
-                       "the point and the front position <= active_length.");
+      "active_length",
+      "This function will return true_value at a point if: (a) t >= "
+      "activation_time; (b) t < deactivation_time; (c) the point lies in the "
+      "domain between start_posn and the front position; (d) the distance between "
+      "the point and the front position <= active_length.");
   params.addParam<Real>("true_value", 1.0, "Return this value if a point is in the active zone.");
   params.addParam<Real>(
       "false_value", 0.0, "Return this value if a point is not in the active zone.");

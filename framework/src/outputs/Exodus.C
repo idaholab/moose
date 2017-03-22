@@ -34,13 +34,15 @@ validParams<Exodus>()
 
   // Enable sequential file output (do not set default, the use_displace criteria relies on
   // isParamValid, see Constructor)
-  params.addParam<bool>("sequence", "Enable/disable sequential file output (enabled by default "
-                                    "when 'use_displace = true', otherwise defaults to false");
+  params.addParam<bool>("sequence",
+                        "Enable/disable sequential file output (enabled by default "
+                        "when 'use_displace = true', otherwise defaults to false");
 
   // Select problem dimension for mesh output
-  params.addParam<bool>("use_problem_dimension", "Use the problem dimension to the mesh output. "
-                                                 "Set to false when outputting lower dimensional "
-                                                 "meshes embedded in a higher dimensional space.");
+  params.addParam<bool>("use_problem_dimension",
+                        "Use the problem dimension to the mesh output. "
+                        "Set to false when outputting lower dimensional "
+                        "meshes embedded in a higher dimensional space.");
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -49,8 +51,10 @@ validParams<Exodus>()
   params.addClassDescription("Object for output data in the Exodus II format");
 
   // Flag for overwriting at each timestep
-  params.addParam<bool>("overwrite", false, "When true the latest timestep will overwrite the "
-                                            "existing file, so only a single timestep exists.");
+  params.addParam<bool>("overwrite",
+                        false,
+                        "When true the latest timestep will overwrite the "
+                        "existing file, so only a single timestep exists.");
 
   // Set outputting of the input to be on by default
   params.set<MultiMooseEnum>("execute_input_on") = "initial";

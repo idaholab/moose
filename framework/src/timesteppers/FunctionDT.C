@@ -29,8 +29,10 @@ validParams<FunctionDT>()
                         "Maximum ratio of new to previous timestep sizes following a step that "
                         "required the time step to be cut due to a failed solve.");
   params.addParam<Real>("min_dt", 0, "The minimal dt to take.");
-  params.addParam<bool>("interpolate", true, "Whether or not to interpolate DT between times.  "
-                                             "This is true by default for historical reasons.");
+  params.addParam<bool>("interpolate",
+                        true,
+                        "Whether or not to interpolate DT between times.  "
+                        "This is true by default for historical reasons.");
 
   return params;
 }

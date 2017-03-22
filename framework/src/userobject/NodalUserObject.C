@@ -23,10 +23,11 @@ InputParameters
 validParams<NodalUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addParam<bool>(
-      "unique_node_execute", false, "When false (default), block restricted objects will have the "
-                                    "execute method called multiple times on a single node if the "
-                                    "node lies on a interface between two subdomains.");
+  params.addParam<bool>("unique_node_execute",
+                        false,
+                        "When false (default), block restricted objects will have the "
+                        "execute method called multiple times on a single node if the "
+                        "node lies on a interface between two subdomains.");
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();

@@ -17,9 +17,10 @@ validParams<StressUpdateBase>()
                              "return the isotropic stress state to a J2 yield surface.  This class "
                              "is intended to be a parent class for classes with specific "
                              "constitutive models.");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
-                                            "multiple mechanics material systems on the same "
-                                            "block, i.e. for multiple phases");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
   // The return stress increment classes are intended to be iterative materials, so must set compute
   // = false for all inheriting classes
   params.set<bool>("compute") = false;

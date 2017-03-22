@@ -13,13 +13,16 @@ validParams<TensorMechanicsHardeningGaussian>()
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
   params.addRequiredParam<Real>(
       "value_0", "The value of the parameter for all internal_parameter <= internal_0");
-  params.addParam<Real>("value_residual", "The value of the parameter for internal_parameter = "
-                                          "infinity.  Default = value_0, ie perfect plasticity");
+  params.addParam<Real>("value_residual",
+                        "The value of the parameter for internal_parameter = "
+                        "infinity.  Default = value_0, ie perfect plasticity");
   params.addParam<Real>(
       "internal_0", 0, "The value of the internal_parameter when hardening begins");
-  params.addParam<Real>("rate", 0, "Let p = internal_parameter.  Then value = value_0 for "
-                                   "p<internal_0, and value = value_residual + (value_0 - "
-                                   "value_residual)*exp(-0.5*rate*(p - internal_0)^2)");
+  params.addParam<Real>("rate",
+                        0,
+                        "Let p = internal_parameter.  Then value = value_0 for "
+                        "p<internal_0, and value = value_residual + (value_0 - "
+                        "value_residual)*exp(-0.5*rate*(p - internal_0)^2)");
   params.addClassDescription("Hardening is Gaussian");
   return params;
 }

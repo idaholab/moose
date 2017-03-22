@@ -20,9 +20,11 @@ validParams<SmoothSuperellipsoidBaseIC>()
       "The variable value for nested particles inside the superellipsoid in inverse configuration");
   params.addParam<Real>(
       "int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
-  params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid "
-                                                "numerical problems with higher order shape "
-                                                "functions.");
+  params.addParam<bool>("zero_gradient",
+                        false,
+                        "Set the gradient DOFs to zero. This can avoid "
+                        "numerical problems with higher order shape "
+                        "functions.");
   params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
   return params;
 }

@@ -17,8 +17,9 @@ validParams<RichardsMultiphaseProblem>()
   params.addRequiredParam<NonlinearVariableName>(
       "bounded_var", "Variable whose value will be constrained to be greater than lower_var");
   params.addRequiredParam<NonlinearVariableName>(
-      "lower_var", "Variable that acts as a lower bound to bounded_var.  It will not be "
-                   "constrained during the solution procedure");
+      "lower_var",
+      "Variable that acts as a lower bound to bounded_var.  It will not be "
+      "constrained during the solution procedure");
   return params;
 }
 

@@ -26,9 +26,11 @@ validParams<NodalExtremeValue>()
 
   // Define the parameters
   InputParameters params = validParams<NodalVariablePostprocessor>();
-  params.addParam<MooseEnum>("value_type", type_options, "Type of extreme value to return. 'max' "
-                                                         "returns the maximum value. 'min' returns "
-                                                         "the minimum value.");
+  params.addParam<MooseEnum>("value_type",
+                             type_options,
+                             "Type of extreme value to return. 'max' "
+                             "returns the maximum value. 'min' returns "
+                             "the minimum value.");
   return params;
 }
 

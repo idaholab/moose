@@ -17,9 +17,10 @@ validParams<StressDivergenceTensors>()
 {
   InputParameters params = validParams<ALEKernel>();
   params.addClassDescription("Stress divergence kernel for the Cartesian coordinate system");
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
-                                                     "the variable this kernel acts in. (0 for x, "
-                                                     "1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for x, "
+                                        "1 for y, 2 for z)");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
   params.addCoupledVar("temp", "The temperature"); // Deprecated

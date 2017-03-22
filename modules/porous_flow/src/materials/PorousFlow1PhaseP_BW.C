@@ -14,19 +14,26 @@ validParams<PorousFlow1PhaseP_BW>()
 {
   InputParameters params = validParams<PorousFlow1PhaseP>();
   params.addRequiredRangeCheckedParam<Real>(
-      "Sn", "Sn >= 0", "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
-                       "initial effective saturation, below which effective saturation never goes "
-                       "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  "
-                       "This form of effective saturation is only correct for Kn small.");
+      "Sn",
+      "Sn >= 0",
+      "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
+      "initial effective saturation, below which effective saturation never goes "
+      "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  "
+      "This form of effective saturation is only correct for Kn small.");
   params.addRangeCheckedParam<Real>(
-      "Ss", 1.0, "Ss <= 1", "High saturation.  This must be > Sn and <= 1.  Effective saturation "
-                            "where porepressure = 0.  Effective saturation never exceeds this "
-                            "value in BW's simulations/models.");
+      "Ss",
+      1.0,
+      "Ss <= 1",
+      "High saturation.  This must be > Sn and <= 1.  Effective saturation "
+      "where porepressure = 0.  Effective saturation never exceeds this "
+      "value in BW's simulations/models.");
   params.addRequiredRangeCheckedParam<Real>(
       "C", "C > 1", "BW's C parameter.  Must be > 1.  Typical value would be 1.05.");
   params.addRequiredRangeCheckedParam<Real>(
-      "las", "las > 0", "BW's lambda_s parameter multiplied by (fluid_density * gravity).  Must be "
-                        "> 0.  Typical value would be 1E5");
+      "las",
+      "las > 0",
+      "BW's lambda_s parameter multiplied by (fluid_density * gravity).  Must be "
+      "> 0.  Typical value would be 1E5");
   params.addClassDescription("Broadbridge-white form of effective saturation for negligable Kn.  "
                              "Then porepressure = -las * ((1 - th) / th - (1 / c) * Ln((C - "
                              "th)/((C - 1) * th))), for th = (Seff - Sn) / (Ss - Sn).  A Lambert-W "

@@ -12,13 +12,15 @@ InputParameters
 validParams<PorousFlowHalfGaussianSink>()
 {
   InputParameters params = validParams<PorousFlowSinkPTDefiner>();
-  params.addRequiredParam<Real>("max", "Maximum of the Gaussian flux multiplier.  Flux out is "
-                                       "multiplied by max*exp((-0.5*(p - center)/sd)^2) for "
-                                       "p<center, and by = max for p>center.  Here p is the nodal "
-                                       "porepressure for the fluid_phase specified (or, for heat "
-                                       "fluxes, it is the temperature).");
-  params.addRequiredParam<Real>("sd", "Standard deviation of the Gaussian flux multiplier "
-                                      "(measured in Pa (or K for heat fluxes)).");
+  params.addRequiredParam<Real>("max",
+                                "Maximum of the Gaussian flux multiplier.  Flux out is "
+                                "multiplied by max*exp((-0.5*(p - center)/sd)^2) for "
+                                "p<center, and by = max for p>center.  Here p is the nodal "
+                                "porepressure for the fluid_phase specified (or, for heat "
+                                "fluxes, it is the temperature).");
+  params.addRequiredParam<Real>("sd",
+                                "Standard deviation of the Gaussian flux multiplier "
+                                "(measured in Pa (or K for heat fluxes)).");
   params.addRequiredParam<Real>(
       "center", "Center of the Gaussian flux multiplier (measured in Pa (or K for heat fluxes)).");
   return params;

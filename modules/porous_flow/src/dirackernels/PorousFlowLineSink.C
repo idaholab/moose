@@ -14,24 +14,29 @@ validParams<PorousFlowLineSink>()
 {
   InputParameters params = validParams<PorousFlowLineGeometry>();
   MooseEnum p_or_t_choice("pressure=0 temperature=1", "pressure");
-  params.addParam<MooseEnum>(
-      "function_of", p_or_t_choice, "Modifying functions will be a function of either pressure and "
-                                    "permeability (eg, for boreholes that pump fluids) or "
-                                    "temperature and thermal conductivity (eg, for boreholes that "
-                                    "pump pure heat with no fluid flow)");
+  params.addParam<MooseEnum>("function_of",
+                             p_or_t_choice,
+                             "Modifying functions will be a function of either pressure and "
+                             "permeability (eg, for boreholes that pump fluids) or "
+                             "temperature and thermal conductivity (eg, for boreholes that "
+                             "pump pure heat with no fluid flow)");
   params.addRequiredParam<UserObjectName>(
-      "SumQuantityUO", "User Object of type=PorousFlowSumQuantity in which to place the total "
-                       "outflow from the line sink for each time step.");
+      "SumQuantityUO",
+      "User Object of type=PorousFlowSumQuantity in which to place the total "
+      "outflow from the line sink for each time step.");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<unsigned int>(
-      "fluid_phase", 0, "The fluid phase whose pressure (and potentially mobility, enthalpy, etc) "
-                        "controls the flux to the line sink.  For p_or_t=temperature, and without "
-                        "any use_*, this parameter is irrelevant");
-  params.addParam<unsigned int>("mass_fraction_component", "The index corresponding to a fluid "
-                                                           "component.  If supplied, the flux will "
-                                                           "be multiplied by the nodal mass "
-                                                           "fraction for the component");
+      "fluid_phase",
+      0,
+      "The fluid phase whose pressure (and potentially mobility, enthalpy, etc) "
+      "controls the flux to the line sink.  For p_or_t=temperature, and without "
+      "any use_*, this parameter is irrelevant");
+  params.addParam<unsigned int>("mass_fraction_component",
+                                "The index corresponding to a fluid "
+                                "component.  If supplied, the flux will "
+                                "be multiplied by the nodal mass "
+                                "fraction for the component");
   params.addParam<bool>(
       "use_relative_permeability", false, "Multiply the flux by the fluid relative permeability");
   params.addParam<bool>("use_mobility", false, "Multiply the flux by the fluid mobility");

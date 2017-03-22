@@ -24,7 +24,7 @@ ComputeGrainCenterUserObject::ComputeGrainCenterUserObject(const InputParameters
   : ElementUserObject(parameters),
     _ncrys(coupledComponents("etas")), // determine number of grains from the number of names passed
                                        // in.  Note this is the actual number -1
-    _vals(_ncrys), // Size variable arrays
+    _vals(_ncrys),                     // Size variable arrays
     _ncomp(4 * _ncrys),
     _grain_data(_ncomp),
     _grain_volumes(_ncrys),

@@ -14,9 +14,10 @@ InputParameters
 validParams<StressDivergenceRSpherical>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
-                                                     "the variable this kernel acts in. (0 for r, "
-                                                     "1 for z)");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for r, "
+                                        "1 for z)");
   params.addCoupledVar("disp_r", "The r displacement");
   //  params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");

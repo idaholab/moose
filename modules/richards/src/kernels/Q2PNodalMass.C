@@ -17,15 +17,17 @@ validParams<Q2PNodalMass>()
   params.addRequiredParam<UserObjectName>(
       "fluid_density",
       "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
-  params.addRequiredCoupledVar("other_var", "The other variable in the 2-phase system.  If "
-                                            "Variable=porepressure, then other_var should be the "
-                                            "saturation Variable, and vice-versa.");
+  params.addRequiredCoupledVar("other_var",
+                               "The other variable in the 2-phase system.  If "
+                               "Variable=porepressure, then other_var should be the "
+                               "saturation Variable, and vice-versa.");
   params.addRequiredParam<bool>(
-      "var_is_porepressure", "This flag is needed to correctly calculate the Jacobian entries.  If "
-                             "set to true, this Kernel will assume it is describing the mass of "
-                             "the phase with porepressure as its Variable (eg, the liquid phase).  "
-                             "If set to false, this Kernel will assumed it is describing the mass "
-                             "of the phase with saturation as its variable (eg, the gas phase)");
+      "var_is_porepressure",
+      "This flag is needed to correctly calculate the Jacobian entries.  If "
+      "set to true, this Kernel will assume it is describing the mass of "
+      "the phase with porepressure as its Variable (eg, the liquid phase).  "
+      "If set to false, this Kernel will assumed it is describing the mass "
+      "of the phase with saturation as its variable (eg, the gas phase)");
   params.addClassDescription("Fluid mass lumped to the nodes divided by dt");
   return params;
 }

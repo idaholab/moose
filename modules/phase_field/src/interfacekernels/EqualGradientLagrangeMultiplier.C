@@ -15,9 +15,11 @@ validParams<EqualGradientLagrangeMultiplier>()
   params.addRequiredParam<unsigned int>("component", "Gradient component to constrain");
   params.addCoupledVar("element_var",
                        "The gradient constrained variable on this side of the interface.");
-  params.addParam<Real>("jacobian_fill", 0.0, "Compensate on diagonal Jacobian fill term when "
-                                              "using a NullKernel on the Lagrange multiplier "
-                                              "variable");
+  params.addParam<Real>("jacobian_fill",
+                        0.0,
+                        "Compensate on diagonal Jacobian fill term when "
+                        "using a NullKernel on the Lagrange multiplier "
+                        "variable");
   return params;
 }
 

@@ -19,15 +19,17 @@ validParams<PorousFlowHeatEnergy>()
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<bool>(
       "include_porous_skeleton", true, "Include the heat energy of the porous skeleton");
-  params.addParam<std::vector<unsigned int>>("phase", "The index(es) of the fluid phase that this "
-                                                      "Postprocessor is restricted to.  Multiple "
-                                                      "indices can be entered.");
+  params.addParam<std::vector<unsigned int>>("phase",
+                                             "The index(es) of the fluid phase that this "
+                                             "Postprocessor is restricted to.  Multiple "
+                                             "indices can be entered.");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<unsigned int>(
-      "kernel_variable_number", 0, "The PorousFlow variable number (according to the dictatory) of "
-                                   "the heat-energy kernel.  This is required only in the unusual "
-                                   "situation where a variety of different finite-element "
-                                   "interpolation schemes are employed in the simulation");
+  params.addParam<unsigned int>("kernel_variable_number",
+                                0,
+                                "The PorousFlow variable number (according to the dictatory) of "
+                                "the heat-energy kernel.  This is required only in the unusual "
+                                "situation where a variety of different finite-element "
+                                "interpolation schemes are employed in the simulation");
   params.addClassDescription("Calculates the sum of heat energy of fluid component(s) and/or the "
                              "porous skeleton in a region");
   return params;

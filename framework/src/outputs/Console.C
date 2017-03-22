@@ -42,14 +42,17 @@ validParams<Console>()
       "show_multiapp_name", false, "Indent multiapp output using the multiapp name");
 
   // Table fitting options
-  params.addParam<unsigned int>("max_rows", 15, "The maximum number of postprocessor/scalar values "
-                                                "displayed on screen during a timestep (set to 0 "
-                                                "for unlimited)");
-  params.addParam<MooseEnum>(
-      "fit_mode", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are "
-                                "printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for "
-                                "desired width, AUTO: Attempt to determine width automatically "
-                                "(serial only), <n>: Desired width");
+  params.addParam<unsigned int>("max_rows",
+                                15,
+                                "The maximum number of postprocessor/scalar values "
+                                "displayed on screen during a timestep (set to 0 "
+                                "for unlimited)");
+  params.addParam<MooseEnum>("fit_mode",
+                             pps_fit_mode,
+                             "Specifies the wrapping mode for post-processor tables that are "
+                             "printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for "
+                             "desired width, AUTO: Attempt to determine width automatically "
+                             "(serial only), <n>: Desired width");
 
   // Verbosity
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
@@ -62,8 +65,10 @@ validParams<Console>()
       "The number of significant digits that are printed on time related outputs");
 
   // Performance Logging
-  params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The "
-                                           "individual log settings will override this option.");
+  params.addParam<bool>("perf_log",
+                        false,
+                        "If true, all performance logs will be printed. The "
+                        "individual log settings will override this option.");
   params.addParam<unsigned int>(
       "perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
   params.addDeprecatedParam<bool>("setup_log_early",
@@ -104,19 +109,22 @@ validParams<Console>()
   std::vector<Real> multiplier;
   multiplier.push_back(0.8);
   multiplier.push_back(2);
-  params.addParam<std::vector<Real>>(
-      "outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an "
-                                        "outlier. If the variable residual is less than "
-                                        "multiplier[0] times the total residual it is colored red. "
-                                        "If the variable residual is less than multiplier[1] times "
-                                        "the average residual it is colored yellow.");
+  params.addParam<std::vector<Real>>("outlier_multiplier",
+                                     multiplier,
+                                     "Multiplier utilized to determine if a residual norm is an "
+                                     "outlier. If the variable residual is less than "
+                                     "multiplier[0] times the total residual it is colored red. "
+                                     "If the variable residual is less than multiplier[1] times "
+                                     "the average residual it is colored yellow.");
 
   // System information controls
   MultiMooseEnum info("framework mesh aux nonlinear execution output",
                       "framework mesh aux nonlinear execution");
-  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display "
-                                                       "('framework', 'mesh', 'aux', 'nonlinear', "
-                                                       "'execution', 'output')");
+  params.addParam<MultiMooseEnum>("system_info",
+                                  info,
+                                  "List of information types to display "
+                                  "('framework', 'mesh', 'aux', 'nonlinear', "
+                                  "'execution', 'output')");
 
   // Advanced group
   params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");

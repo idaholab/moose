@@ -33,9 +33,11 @@ validParams<TimePeriod>()
                                      "The time at which the objects are to be enable/disabled.");
   params.addParam<bool>(
       "set_sync_times", false, "Set the start and end time as execute sync times.");
-  params.addParam<bool>("set_outside_of_range", true, "When true the disable/enable lists are set "
-                                                      "to opposite values when outside of the "
-                                                      "given time range.");
+  params.addParam<bool>("set_outside_of_range",
+                        true,
+                        "When true the disable/enable lists are set "
+                        "to opposite values when outside of the "
+                        "given time range.");
   return params;
 }
 

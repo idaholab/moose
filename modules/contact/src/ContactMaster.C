@@ -26,9 +26,10 @@ validParams<ContactMaster>()
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
-                                                     "the variable this kernel acts in. (0 for x, "
-                                                     "1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for x, "
+                                        "1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -52,9 +53,11 @@ validParams<ContactMaster>()
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
-  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact "
-                                                "will not be released if its tensile load is below "
-                                                "this value.  No tension release if negative.");
+  params.addParam<Real>("tension_release",
+                        0.0,
+                        "Tension release threshold.  A node in contact "
+                        "will not be released if its tensile load is below "
+                        "this value.  No tension release if negative.");
 
   params.addParam<std::string>("formulation", "default", "The contact formulation");
   params.addParam<bool>(

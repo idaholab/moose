@@ -49,10 +49,12 @@ validParams<GapHeatTransfer>()
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
   // Quadrature based
-  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat "
-                                             "transfer.  If this is true then gap_distance and "
-                                             "gap_temp should NOT be provided (and will be "
-                                             "ignored) however paired_boundary IS then required.");
+  params.addParam<bool>("quadrature",
+                        false,
+                        "Whether or not to do Quadrature point based gap heat "
+                        "transfer.  If this is true then gap_distance and "
+                        "gap_temp should NOT be provided (and will be "
+                        "ignored) however paired_boundary IS then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>(

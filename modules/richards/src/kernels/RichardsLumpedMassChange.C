@@ -17,13 +17,15 @@ validParams<RichardsLumpedMassChange>()
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variables.");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "density_UO", "List of names of user objects that define the fluid density (or densities for "
-                    "multiphase).  In the multiphase case, for ease of use, the density, Seff and "
-                    "Sat UserObjects are the same format as for RichardsMaterial, but only the one "
-                    "relevant for the specific phase is actually used.");
+      "density_UO",
+      "List of names of user objects that define the fluid density (or densities for "
+      "multiphase).  In the multiphase case, for ease of use, the density, Seff and "
+      "Sat UserObjects are the same format as for RichardsMaterial, but only the one "
+      "relevant for the specific phase is actually used.");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "seff_UO", "List of name of user objects that define effective saturation as a function of "
-                 "porepressure(s)");
+      "seff_UO",
+      "List of name of user objects that define effective saturation as a function of "
+      "porepressure(s)");
   params.addRequiredParam<std::vector<UserObjectName>>(
       "sat_UO",
       "List of names of user objects that define saturation as a function of effective saturation");

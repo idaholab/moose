@@ -26,9 +26,11 @@ validParams<SetupMeshAction>()
   InputParameters params = validParams<MooseObjectAction>();
   params.set<std::string>("type") = "FileMesh";
 
-  params.addParam<bool>("second_order", false, "Converts a first order mesh to a second order "
-                                               "mesh.  Note: This is NOT needed if you are reading "
-                                               "an actual first order mesh.");
+  params.addParam<bool>("second_order",
+                        false,
+                        "Converts a first order mesh to a second order "
+                        "mesh.  Note: This is NOT needed if you are reading "
+                        "an actual first order mesh.");
 
   params.addParam<std::vector<SubdomainID>>("block_id", "IDs of the block id/name pairs");
   params.addParam<std::vector<SubdomainName>>(
@@ -45,9 +47,10 @@ validParams<SetupMeshAction>()
                         "sideset");
 
   params.addParam<std::vector<std::string>>(
-      "displacements", "The variables corresponding to the x y z displacements of the mesh.  If "
-                       "this is provided then the displacements will be taken into account during "
-                       "the computation.");
+      "displacements",
+      "The variables corresponding to the x y z displacements of the mesh.  If "
+      "this is provided then the displacements will be taken into account during "
+      "the computation.");
   params.addParam<std::vector<BoundaryName>>("ghosted_boundaries",
                                              "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real>>("ghosted_boundaries_inflation",

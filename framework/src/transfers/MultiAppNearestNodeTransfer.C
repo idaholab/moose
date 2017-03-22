@@ -46,10 +46,12 @@ validParams<MultiAppNearestNodeTransfer>()
   params.addParam<bool>("displaced_target_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the target mesh.");
-  params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, "
-                                               "no movement or adaptivity).  This will cache "
-                                               "nearest node neighbors to greatly speed up the "
-                                               "transfer.");
+  params.addParam<bool>("fixed_meshes",
+                        false,
+                        "Set to true when the meshes are not changing (ie, "
+                        "no movement or adaptivity).  This will cache "
+                        "nearest node neighbors to greatly speed up the "
+                        "transfer.");
 
   return params;
 }

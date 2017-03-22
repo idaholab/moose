@@ -21,10 +21,11 @@ validParams<PorousFlowFullySaturatedMassTimeDerivative>()
                              "ConstantThermalExpansionCoefficient Material");
   params.addRangeCheckedParam<Real>(
       "biot_coefficient", 1.0, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
-  params.addParam<bool>(
-      "multiply_by_density", true, "If true, then this Kernel is the time derivative of the fluid "
-                                   "mass.  If false, then this Kernel is the derivative of the "
-                                   "fluid volume (which is common in poro-mechanics)");
+  params.addParam<bool>("multiply_by_density",
+                        true,
+                        "If true, then this Kernel is the time derivative of the fluid "
+                        "mass.  If false, then this Kernel is the derivative of the "
+                        "fluid volume (which is common in poro-mechanics)");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("Fully-saturated version of the single-component, single-phase fluid "

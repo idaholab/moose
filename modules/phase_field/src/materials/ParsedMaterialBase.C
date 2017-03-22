@@ -24,10 +24,11 @@ validParams<ParsedMaterialBase>()
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   // Variables with applied tolerances and their tolerance values
-  params.addParam<std::vector<std::string>>(
-      "tol_names", std::vector<std::string>(), "Vector of variable names to be protected from "
-                                               "being 0 or 1 within a tolerance (needed for log(c) "
-                                               "and log(1-c) terms)");
+  params.addParam<std::vector<std::string>>("tol_names",
+                                            std::vector<std::string>(),
+                                            "Vector of variable names to be protected from "
+                                            "being 0 or 1 within a tolerance (needed for log(c) "
+                                            "and log(1-c) terms)");
   params.addParam<std::vector<Real>>("tol_values",
                                      std::vector<Real>(),
                                      "Vector of tolerance values for the variables in tol_names");

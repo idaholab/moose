@@ -21,25 +21,29 @@ validParams<RenameBlock>()
 {
   InputParameters params = validParams<MeshModifier>();
   params.addParam<std::vector<SubdomainID>>(
-      "old_block_id", "Elements with this block number will be given the new_block_number or "
-                      "new_block_name.  You must supply either old_block_id or old_block_name.  "
-                      "You may supply a vector of old_block_id, in which case the new_block "
-                      "information must also be a vector.");
+      "old_block_id",
+      "Elements with this block number will be given the new_block_number or "
+      "new_block_name.  You must supply either old_block_id or old_block_name.  "
+      "You may supply a vector of old_block_id, in which case the new_block "
+      "information must also be a vector.");
   params.addParam<std::vector<SubdomainName>>(
-      "old_block_name", "Elements with this block name will be given the new_block_number or "
-                        "new_block_name.  You must supply either old_block_id or old_block_name.  "
-                        "You may supply a vector of old_block_name, in which case the new_block "
-                        "information must also be a vector.");
+      "old_block_name",
+      "Elements with this block name will be given the new_block_number or "
+      "new_block_name.  You must supply either old_block_id or old_block_name.  "
+      "You may supply a vector of old_block_name, in which case the new_block "
+      "information must also be a vector.");
   params.addParam<std::vector<SubdomainID>>(
-      "new_block_id", "Elements with the old block number (or name) will be given this block "
-                      "number.  You must supply either new_block_id or new_block_name.  You may "
-                      "supply a vector of new_block_id, in which case the old_block information "
-                      "must also be a vector.");
+      "new_block_id",
+      "Elements with the old block number (or name) will be given this block "
+      "number.  You must supply either new_block_id or new_block_name.  You may "
+      "supply a vector of new_block_id, in which case the old_block information "
+      "must also be a vector.");
   params.addParam<std::vector<SubdomainName>>(
-      "new_block_name", "Elements with the old block number (or name) will be given this block "
-                        "name.  You must supply either new_block_id or new_block_name.  You may "
-                        "supply a vector of new_block_id, in which case the old_block information "
-                        "must also be a vector.");
+      "new_block_name",
+      "Elements with the old block number (or name) will be given this block "
+      "name.  You must supply either new_block_id or new_block_name.  You may "
+      "supply a vector of new_block_id, in which case the old_block information "
+      "must also be a vector.");
   params.addClassDescription("RenameBlock re-numbers or re-names an old_block_id or old_block_name "
                              "with a new_block_id or new_block_name");
   return params;

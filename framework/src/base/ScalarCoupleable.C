@@ -82,9 +82,11 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
   {
     // Make sure the user originally requested this value in the InputParameter syntax
     if (!_coupleable_params.hasCoupledValue(var_name))
-      mooseError("The coupled scalar variable \"", var_name, "\" was never added to this objects's "
-                                                             "InputParameters, please double-check "
-                                                             "your spelling");
+      mooseError("The coupled scalar variable \"",
+                 var_name,
+                 "\" was never added to this objects's "
+                 "InputParameters, please double-check "
+                 "your spelling");
 
     return false;
   }

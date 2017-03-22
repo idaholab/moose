@@ -23,9 +23,10 @@ validParams<MaterialStdVectorAux>()
                              "variable.  If the std::vector is not of sufficient size then zero is "
                              "returned");
   params.addParam<unsigned int>(
-      "selected_qp", "Evaluate the std::vector<Real> at this quadpoint.  This only needs to be "
-                     "used if you are interested in a particular quadpoint in each element: "
-                     "otherwise do not include this parameter in your input file");
+      "selected_qp",
+      "Evaluate the std::vector<Real> at this quadpoint.  This only needs to be "
+      "used if you are interested in a particular quadpoint in each element: "
+      "otherwise do not include this parameter in your input file");
   params.addParamNamesToGroup("selected_qp", "Advanced");
   return params;
 }

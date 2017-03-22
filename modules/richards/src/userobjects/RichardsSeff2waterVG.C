@@ -15,13 +15,17 @@ InputParameters
 validParams<RichardsSeff2waterVG>()
 {
   InputParameters params = validParams<RichardsSeff>();
-  params.addRequiredRangeCheckedParam<Real>("al", "al > 0", "van-Genuchten alpha parameter.  Must "
-                                                            "be positive.  Single-phase VG seff = "
-                                                            "(1 + (-al*c)^(1/(1-m)))^(-m)");
+  params.addRequiredRangeCheckedParam<Real>("al",
+                                            "al > 0",
+                                            "van-Genuchten alpha parameter.  Must "
+                                            "be positive.  Single-phase VG seff = "
+                                            "(1 + (-al*c)^(1/(1-m)))^(-m)");
   params.addRequiredRangeCheckedParam<Real>(
-      "m", "m > 0 & m < 1", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally "
-                            "should be set to >0.5   Single-phase VG seff = (1 + "
-                            "(-al*p)^(1/(1-m)))^(-m)");
+      "m",
+      "m > 0 & m < 1",
+      "van-Genuchten m parameter.  Must be between 0 and 1, and optimally "
+      "should be set to >0.5   Single-phase VG seff = (1 + "
+      "(-al*p)^(1/(1-m)))^(-m)");
   params.addClassDescription("van-Genuchten effective saturation as a function of (Pwater, Pgas) "
                              "suitable for use for the water phase in two-phase simulations.  With "
                              "Pc=Pgas-Pwater,   seff = (1 + (al*pc)^(1/(1-m)))^(-m)");

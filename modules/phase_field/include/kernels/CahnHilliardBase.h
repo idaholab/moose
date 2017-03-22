@@ -57,9 +57,10 @@ CahnHilliardBase<T>::validParams()
   params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
   params.addRequiredParam<MaterialPropertyName>(
       "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
-  params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see "
-                                                 "Modules/PhaseField/DisplacementGradients "
-                                                 "action)");
+  params.addCoupledVar("displacement_gradients",
+                       "Vector of displacement gradient variables (see "
+                       "Modules/PhaseField/DisplacementGradients "
+                       "action)");
   return params;
 }
 

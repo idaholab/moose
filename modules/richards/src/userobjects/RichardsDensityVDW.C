@@ -13,24 +13,30 @@ validParams<RichardsDensityVDW>()
 {
   InputParameters params = validParams<RichardsDensity>();
   params.addRequiredRangeCheckedParam<Real>(
-      "a", "a > 0", "Parameter 'a' in the van der Waals expression (P + n^2 a/V^2)(V - nb) = nRT.  "
-                    "Example for methane 0.2303 Pa m^6 mol^-2");
+      "a",
+      "a > 0",
+      "Parameter 'a' in the van der Waals expression (P + n^2 a/V^2)(V - nb) = nRT.  "
+      "Example for methane 0.2303 Pa m^6 mol^-2");
   params.addRequiredRangeCheckedParam<Real>(
-      "b", "b > 0", "Parameter 'b' in the van der Waals expression (P + n^2 a/V^2)(V - nb) = nRT.  "
-                    "Example for methane 4.31E-5 m^3/mol");
+      "b",
+      "b > 0",
+      "Parameter 'b' in the van der Waals expression (P + n^2 a/V^2)(V - nb) = nRT.  "
+      "Example for methane 4.31E-5 m^3/mol");
   params.addRequiredRangeCheckedParam<Real>(
       "temperature", "temperature > 0", "Temperature in Kelvin");
   params.addRequiredRangeCheckedParam<Real>(
       "molar_mass",
       "molar_mass > 0",
       "Molar mass of the gas.  Example for methane 16.04246E-3 kg/mol");
-  params.addRangeCheckedParam<Real>(
-      "infinity_ratio", 10, "infinity_ratio > 0", "For P<0 the density is not physically defined, "
-                                                  "but numerically it is advantageous to define "
-                                                  "it:  density(P=-infinity) = "
-                                                  "-infinity_ratio*molar_mass, and density tends "
-                                                  "exponentially towards this value as P -> "
-                                                  "-infinity.  (Units are mol/m^3).");
+  params.addRangeCheckedParam<Real>("infinity_ratio",
+                                    10,
+                                    "infinity_ratio > 0",
+                                    "For P<0 the density is not physically defined, "
+                                    "but numerically it is advantageous to define "
+                                    "it:  density(P=-infinity) = "
+                                    "-infinity_ratio*molar_mass, and density tends "
+                                    "exponentially towards this value as P -> "
+                                    "-infinity.  (Units are mol/m^3).");
   params.addClassDescription("Density of van der Waals gas.");
   return params;
 }

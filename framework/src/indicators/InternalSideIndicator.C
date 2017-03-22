@@ -36,10 +36,12 @@ validParams<InternalSideIndicator>()
   InputParameters params = validParams<Indicator>();
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this side indicator applies to");
-  params.addParam<bool>("scale_by_flux_faces", false, "Whether or not to scale the error values by "
-                                                      "the number of flux faces.  This attempts to "
-                                                      "not penalize elements on boundaries for "
-                                                      "having less neighbors.");
+  params.addParam<bool>("scale_by_flux_faces",
+                        false,
+                        "Whether or not to scale the error values by "
+                        "the number of flux faces.  This attempts to "
+                        "not penalize elements on boundaries for "
+                        "having less neighbors.");
 
   params.addPrivateParam<BoundaryID>("_boundary_id", InternalSideIndicator::InternalBndId);
   return params;

@@ -35,9 +35,11 @@ validParams<ContactAction>()
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
-  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact "
-                                                "will not be released if its tensile load is below "
-                                                "this value.  No tension release if negative.");
+  params.addParam<Real>("tension_release",
+                        0.0,
+                        "Tension release threshold.  A node in contact "
+                        "will not be released if its tensile load is below "
+                        "this value.  No tension release if negative.");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");

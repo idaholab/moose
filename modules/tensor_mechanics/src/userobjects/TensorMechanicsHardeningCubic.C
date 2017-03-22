@@ -14,16 +14,19 @@ validParams<TensorMechanicsHardeningCubic>()
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
   params.addRequiredParam<Real>(
       "value_0", "The value of the parameter for all internal_parameter <= internal_0");
-  params.addParam<Real>("value_residual", "The value of the parameter for internal_parameter >= "
-                                          "internal_limit.  Default = value_0, ie perfect "
-                                          "plasticity");
+  params.addParam<Real>("value_residual",
+                        "The value of the parameter for internal_parameter >= "
+                        "internal_limit.  Default = value_0, ie perfect "
+                        "plasticity");
   params.addParam<Real>(
       "internal_0", 0.0, "The value of the internal_parameter when hardening begins");
-  params.addParam<Real>("internal_limit", 1.0, "The value of the internal_parameter when hardening "
-                                               "ends.  This hardening forms a cubic between "
-                                               "(internal_0, value_0) and (internal_limit, "
-                                               "value_residual) that is smooth at internal_0 and "
-                                               "internal_limit");
+  params.addParam<Real>("internal_limit",
+                        1.0,
+                        "The value of the internal_parameter when hardening "
+                        "ends.  This hardening forms a cubic between "
+                        "(internal_0, value_0) and (internal_limit, "
+                        "value_residual) that is smooth at internal_0 and "
+                        "internal_limit");
   params.addClassDescription("Hardening is Cubic");
   return params;
 }

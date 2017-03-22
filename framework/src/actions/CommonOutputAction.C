@@ -42,8 +42,10 @@ validParams<CommonOutputAction>()
       "nemesis", false, "Output the results using the default settings for Nemesis output");
   params.addParam<bool>(
       "console", true, "Output the results using the default settings for Console output");
-  params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv "
-                                      "file using the default CSV output.");
+  params.addParam<bool>("csv",
+                        false,
+                        "Output the scalar variable and postprocessors to a *.csv "
+                        "file using the default CSV output.");
   params.addParam<bool>(
       "vtk", false, "Output the results using the default settings for VTKOutput output");
   params.addParam<bool>(
@@ -82,16 +84,19 @@ validParams<CommonOutputAction>()
                                      "Times at which the output and solution is forced to occur");
   params.addParam<bool>(
       "append_date", false, "When true the date and time are appended to the output filename.");
-  params.addParam<std::string>("append_date_format", "The format of the date/time to append (see "
-                                                     "http://www.cplusplus.com/reference/ctime/"
-                                                     "strftime).");
+  params.addParam<std::string>("append_date_format",
+                               "The format of the date/time to append (see "
+                               "http://www.cplusplus.com/reference/ctime/"
+                               "strftime).");
 
   params.addParam<std::vector<VariableName>>(
-      "hide", "A list of the variables and postprocessors that should NOT be output to the Exodus "
-              "file (may include Variables, ScalarVariables, and Postprocessor names).");
+      "hide",
+      "A list of the variables and postprocessors that should NOT be output to the Exodus "
+      "file (may include Variables, ScalarVariables, and Postprocessor names).");
   params.addParam<std::vector<VariableName>>(
-      "show", "A list of the variables and postprocessors that should be output to the Exodus file "
-              "(may include Variables, ScalarVariables, and Postprocessor names).");
+      "show",
+      "A list of the variables and postprocessors that should be output to the Exodus file "
+      "(may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Add the 'execute_on' input parameter
   params.addParam<MultiMooseEnum>(

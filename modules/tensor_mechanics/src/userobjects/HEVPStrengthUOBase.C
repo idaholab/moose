@@ -11,9 +11,10 @@ InputParameters
 validParams<HEVPStrengthUOBase>()
 {
   InputParameters params = validParams<DiscreteElementUserObject>();
-  params.addParam<std::string>("intvar_prop_name", "Name of internal variable property to "
-                                                   "calculate material resistance: Same as "
-                                                   "internal variable user object");
+  params.addParam<std::string>("intvar_prop_name",
+                               "Name of internal variable property to "
+                               "calculate material resistance: Same as "
+                               "internal variable user object");
   params.addClassDescription("User Object to compute material resistance");
   return params;
 }

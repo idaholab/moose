@@ -33,9 +33,11 @@ validParams<CreateProblemAction>()
   params.addParam<MooseEnum>(
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
 
-  params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape "
-                                           "function caching system.  This can increase speed with "
-                                           "an associated memory cost.");
+  params.addParam<bool>("fe_cache",
+                        false,
+                        "Whether or not to turn on the finite element shape "
+                        "function caching system.  This can increase speed with "
+                        "an associated memory cost.");
 
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
@@ -43,9 +45,10 @@ validParams<CreateProblemAction>()
                         true,
                         "Set to false to disable material->subdomain coverage check");
 
-  params.addParam<FileNameNoExtension>("restart_file_base", "File base name used for restart (e.g. "
-                                                            "<path>/<filebase> or <path>/LATEST to "
-                                                            "grab the latest file available)");
+  params.addParam<FileNameNoExtension>("restart_file_base",
+                                       "File base name used for restart (e.g. "
+                                       "<path>/<filebase> or <path>/LATEST to "
+                                       "grab the latest file available)");
 
   return params;
 }

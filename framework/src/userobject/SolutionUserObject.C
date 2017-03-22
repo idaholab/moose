@@ -53,9 +53,10 @@ validParams<SolutionUserObject>()
       "system", "nl0", "The name of the system to pull values out of (xda only).");
 
   // When using ExodusII a specific time is extracted
-  params.addParam<std::string>("timestep", "Index of the single timestep used or \"LATEST\" for "
-                                           "the last timestep (exodusII only).  If not supplied, "
-                                           "time interpolation will occur.");
+  params.addParam<std::string>("timestep",
+                               "Index of the single timestep used or \"LATEST\" for "
+                               "the last timestep (exodusII only).  If not supplied, "
+                               "time interpolation will occur.");
 
   // Add ability to perform coordinate transformation: scale, factor
   params.addParam<std::vector<Real>>(

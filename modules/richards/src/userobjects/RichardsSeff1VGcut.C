@@ -15,9 +15,11 @@ validParams<RichardsSeff1VGcut>()
 {
   InputParameters params = validParams<RichardsSeff1VG>();
   params.addRequiredRangeCheckedParam<Real>(
-      "p_cut", "p_cut < 0", "cutoff in pressure.  Must be negative.  If p>p_cut then use "
-                            "van-Genuchten function.  Otherwise use a linear relationship which is "
-                            "chosen so the value and derivative match van-Genuchten at p=p_cut");
+      "p_cut",
+      "p_cut < 0",
+      "cutoff in pressure.  Must be negative.  If p>p_cut then use "
+      "van-Genuchten function.  Otherwise use a linear relationship which is "
+      "chosen so the value and derivative match van-Genuchten at p=p_cut");
   params.addClassDescription("cut van-Genuchten effective saturation as a function of capillary "
                              "pressure.  Single-phase  seff = (1 + (-al*p)^(1/(1-m)))^(-m) for "
                              "p>p_cut, otherwise user a a linear relationship that is chosen so "

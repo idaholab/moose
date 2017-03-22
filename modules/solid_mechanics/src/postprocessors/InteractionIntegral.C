@@ -18,8 +18,9 @@ validParams<InteractionIntegral>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
-  params.addCoupledVar("temp", "The temperature (optional). Must be provided to correctly compute "
-                               "stress intensity factors in models with thermal strain gradients.");
+  params.addCoupledVar("temp",
+                       "The temperature (optional). Must be provided to correctly compute "
+                       "stress intensity factors in models with thermal strain gradients.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   params.addParam<unsigned int>(
@@ -27,9 +28,10 @@ validParams<InteractionIntegral>()
       "The index of the point on the crack front corresponding to this q function");
   params.addParam<Real>(
       "K_factor", "Conversion factor between interaction integral and stress intensity factor K");
-  params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through "
-                                                  "the plane of the crack, normal to the specified "
-                                                  "axis (0=x, 1=y, 2=z)");
+  params.addParam<unsigned int>("symmetry_plane",
+                                "Account for a symmetry plane passing through "
+                                "the plane of the crack, normal to the specified "
+                                "axis (0=x, 1=y, 2=z)");
   params.addParam<bool>("t_stress", false, "Calculate T-stress");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.set<bool>("use_displaced_mesh") = false;

@@ -35,12 +35,14 @@ validParams<HomogenizedElasticConstants>()
   params.addCoupledVar("dz_zx", "solution in zx");
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
-  params.addRequiredParam<unsigned int>("column", "An integer corresponding to the direction the "
-                                                  "variable this kernel acts in. (0 for xx, 1 for "
-                                                  "yy, 2 for zz, 3 for xy, 4 for yz, 5 for zx)");
-  params.addRequiredParam<unsigned int>("row", "An integer corresponding to the direction the "
-                                               "variable this kernel acts in. (0 for xx, 1 for yy, "
-                                               "2 for zz, 3 for xy, 4 for yz, 5 for zx)");
+  params.addRequiredParam<unsigned int>("column",
+                                        "An integer corresponding to the direction the "
+                                        "variable this kernel acts in. (0 for xx, 1 for "
+                                        "yy, 2 for zz, 3 for xy, 4 for yz, 5 for zx)");
+  params.addRequiredParam<unsigned int>("row",
+                                        "An integer corresponding to the direction the "
+                                        "variable this kernel acts in. (0 for xx, 1 for yy, "
+                                        "2 for zz, 3 for xy, 4 for yz, 5 for zx)");
   return params;
 }
 

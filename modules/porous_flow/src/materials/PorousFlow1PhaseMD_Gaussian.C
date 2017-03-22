@@ -15,8 +15,10 @@ validParams<PorousFlow1PhaseMD_Gaussian>()
   params.addRequiredCoupledVar("mass_density",
                                "Variable that represents log(mass-density) of the single phase");
   params.addRequiredRangeCheckedParam<Real>(
-      "al", "al>0", "For this class, the capillary function is assumed to be saturation = "
-                    "exp(-(al*porepressure)^2) for porepressure<0.");
+      "al",
+      "al>0",
+      "For this class, the capillary function is assumed to be saturation = "
+      "exp(-(al*porepressure)^2) for porepressure<0.");
   params.addRequiredRangeCheckedParam<Real>(
       "density_P0", "density_P0>0", "The density of the fluid phase at zero porepressure");
   params.addRequiredRangeCheckedParam<Real>(

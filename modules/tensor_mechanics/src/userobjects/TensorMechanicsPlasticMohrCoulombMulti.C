@@ -18,26 +18,33 @@ validParams<TensorMechanicsPlasticMohrCoulombMulti>()
   params.addClassDescription("Non-associative Mohr-Coulomb plasticity with hardening/softening");
   params.addRequiredParam<UserObjectName>(
       "cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion");
-  params.addRequiredParam<UserObjectName>("friction_angle", "A TensorMechanicsHardening UserObject "
-                                                            "that defines hardening of the "
-                                                            "friction angle (in radians)");
-  params.addRequiredParam<UserObjectName>("dilation_angle", "A TensorMechanicsHardening UserObject "
-                                                            "that defines hardening of the "
-                                                            "dilation angle (in radians)");
-  params.addParam<unsigned int>("max_iterations", 10, "Maximum number of Newton-Raphson iterations "
-                                                      "allowed in the custom return-map algorithm. "
-                                                      " For highly nonlinear hardening this may "
-                                                      "need to be higher than 10.");
-  params.addParam<Real>("shift", "Yield surface is shifted by this amount to avoid problems with "
-                                 "defining derivatives when eigenvalues are equal.  If this is "
-                                 "larger than f_tol, a warning will be issued.  This may be set "
-                                 "very small when using the custom returnMap.  Default = f_tol.");
-  params.addParam<bool>("use_custom_returnMap", true, "Use a custom return-map algorithm for this "
-                                                      "plasticity model, which may speed up "
-                                                      "computations considerably.  Set to true "
-                                                      "only for isotropic elasticity with no "
-                                                      "hardening of the dilation angle.  In this "
-                                                      "case you may set 'shift' very small.");
+  params.addRequiredParam<UserObjectName>("friction_angle",
+                                          "A TensorMechanicsHardening UserObject "
+                                          "that defines hardening of the "
+                                          "friction angle (in radians)");
+  params.addRequiredParam<UserObjectName>("dilation_angle",
+                                          "A TensorMechanicsHardening UserObject "
+                                          "that defines hardening of the "
+                                          "dilation angle (in radians)");
+  params.addParam<unsigned int>("max_iterations",
+                                10,
+                                "Maximum number of Newton-Raphson iterations "
+                                "allowed in the custom return-map algorithm. "
+                                " For highly nonlinear hardening this may "
+                                "need to be higher than 10.");
+  params.addParam<Real>("shift",
+                        "Yield surface is shifted by this amount to avoid problems with "
+                        "defining derivatives when eigenvalues are equal.  If this is "
+                        "larger than f_tol, a warning will be issued.  This may be set "
+                        "very small when using the custom returnMap.  Default = f_tol.");
+  params.addParam<bool>("use_custom_returnMap",
+                        true,
+                        "Use a custom return-map algorithm for this "
+                        "plasticity model, which may speed up "
+                        "computations considerably.  Set to true "
+                        "only for isotropic elasticity with no "
+                        "hardening of the dilation angle.  In this "
+                        "case you may set 'shift' very small.");
 
   return params;
 }

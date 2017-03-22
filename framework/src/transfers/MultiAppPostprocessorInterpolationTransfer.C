@@ -41,9 +41,11 @@ validParams<MultiAppPostprocessorInterpolationTransfer>()
 
   params.addParam<MooseEnum>("interp_type", interp_type, "The algorithm to use for interpolation.");
 
-  params.addParam<Real>("radius", -1, "Radius to use for radial_basis interpolation.  If negative "
-                                      "then the radius is taken as the max distance between "
-                                      "points.");
+  params.addParam<Real>("radius",
+                        -1,
+                        "Radius to use for radial_basis interpolation.  If negative "
+                        "then the radius is taken as the max distance between "
+                        "points.");
 
   return params;
 }

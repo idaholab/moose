@@ -11,28 +11,39 @@ InputParameters
 validParams<TensorMechanicsPlasticSimpleTester>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addRequiredParam<Real>("a", "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
-                                     "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
-                                     "f*(stress_yz + stress_zy)/2 - strength");
-  params.addRequiredParam<Real>("b", "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
-                                     "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
-                                     "f*(stress_yz + stress_zy)/2 - strength");
-  params.addParam<Real>("c", 0, "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
+  params.addRequiredParam<Real>("a",
+                                "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
                                 "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
                                 "f*(stress_yz + stress_zy)/2 - strength");
-  params.addParam<Real>("d", 0, "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
+  params.addRequiredParam<Real>("b",
+                                "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
                                 "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
                                 "f*(stress_yz + stress_zy)/2 - strength");
-  params.addParam<Real>("e", 0, "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
-                                "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
-                                "f*(stress_yz + stress_zy)/2 - strength");
-  params.addParam<Real>("f", 0, "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
-                                "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
-                                "f*(stress_yz + stress_zy)/2 - strength");
-  params.addRequiredParam<Real>("strength", "Yield function = a*stress_yy + b*stress_zz + "
-                                            "c*stress_xx + d*(stress_xy + stress_yx)/2 + "
-                                            "e*(stress_xz + stress_zx)/2 + f*(stress_yz + "
-                                            "stress_zy)/2 - strength");
+  params.addParam<Real>("c",
+                        0,
+                        "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
+                        "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
+                        "f*(stress_yz + stress_zy)/2 - strength");
+  params.addParam<Real>("d",
+                        0,
+                        "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
+                        "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
+                        "f*(stress_yz + stress_zy)/2 - strength");
+  params.addParam<Real>("e",
+                        0,
+                        "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
+                        "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
+                        "f*(stress_yz + stress_zy)/2 - strength");
+  params.addParam<Real>("f",
+                        0,
+                        "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
+                        "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "
+                        "f*(stress_yz + stress_zy)/2 - strength");
+  params.addRequiredParam<Real>("strength",
+                                "Yield function = a*stress_yy + b*stress_zz + "
+                                "c*stress_xx + d*(stress_xy + stress_yx)/2 + "
+                                "e*(stress_xz + stress_zx)/2 + f*(stress_yz + "
+                                "stress_zy)/2 - strength");
   params.addClassDescription("Class that can be used for testing multi-surface plasticity models.  "
                              "Yield function = a*stress_yy + b*stress_zz + c*stress_xx + "
                              "d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + "

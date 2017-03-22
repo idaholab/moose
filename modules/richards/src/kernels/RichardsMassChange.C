@@ -15,8 +15,10 @@ InputParameters
 validParams<RichardsMassChange>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  params.addParam<bool>("use_supg", false, "True for using SUPG in this kernel, false otherwise.  "
-                                           "This has no effect if the material does not use SUPG.");
+  params.addParam<bool>("use_supg",
+                        false,
+                        "True for using SUPG in this kernel, false otherwise.  "
+                        "This has no effect if the material does not use SUPG.");
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   return params;

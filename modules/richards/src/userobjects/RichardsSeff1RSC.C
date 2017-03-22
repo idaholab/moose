@@ -21,12 +21,14 @@ InputParameters
 validParams<RichardsSeff1RSC>()
 {
   InputParameters params = validParams<RichardsSeff>();
-  params.addParam<Real>("oil_viscosity", "Viscosity of oil (gas) phase.  It is assumed this is "
-                                         "double the water-phase viscosity.  (Note that this "
-                                         "effective saturation is mostly useful for 2-phase, not "
-                                         "single-phase.)");
-  params.addParam<Real>("scale_ratio", "This is porosity/permeability/beta^2, where beta may be "
-                                       "chosen by the user.  It has dimensions [time]");
+  params.addParam<Real>("oil_viscosity",
+                        "Viscosity of oil (gas) phase.  It is assumed this is "
+                        "double the water-phase viscosity.  (Note that this "
+                        "effective saturation is mostly useful for 2-phase, not "
+                        "single-phase.)");
+  params.addParam<Real>("scale_ratio",
+                        "This is porosity/permeability/beta^2, where beta may be "
+                        "chosen by the user.  It has dimensions [time]");
   params.addParam<Real>("shift", "effective saturation is a function of (Pc - shift)");
   params.addClassDescription(
       "Rogers-Stallybrass-Clements version of effective saturation for the water phase, valid for "

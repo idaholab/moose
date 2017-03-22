@@ -27,10 +27,11 @@ validParams<Transform>()
   params.addRequiredParam<MooseEnum>(
       "transform", transforms, "The type of transformation to perform (TRANSLATE, ROTATE, SCALE)");
   params.addRequiredParam<RealVectorValue>(
-      "vector_value", "The value to use for the transformation. When using TRANSLATE or SCALE, the "
-                      "xyz coordinates are applied in each direction respectively. When using "
-                      "ROTATE, the values are interpreted as the Euler angles phi, theta and psi "
-                      "given in degrees.");
+      "vector_value",
+      "The value to use for the transformation. When using TRANSLATE or SCALE, the "
+      "xyz coordinates are applied in each direction respectively. When using "
+      "ROTATE, the values are interpreted as the Euler angles phi, theta and psi "
+      "given in degrees.");
 
   return params;
 }

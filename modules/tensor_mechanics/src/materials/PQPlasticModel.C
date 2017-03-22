@@ -20,18 +20,21 @@ validParams<PQPlasticModel>()
       20,
       "max_NR_iterations>0",
       "Maximum number of Newton-Raphson iterations allowed during the return-map algorithm");
-  params.addParam<bool>("perform_finite_strain_rotations", false, "Tensors are correctly rotated "
-                                                                  "in finite-strain simulations.  "
-                                                                  "For optimal performance you can "
-                                                                  "set this to 'false' if you are "
-                                                                  "only ever using small strains");
+  params.addParam<bool>("perform_finite_strain_rotations",
+                        false,
+                        "Tensors are correctly rotated "
+                        "in finite-strain simulations.  "
+                        "For optimal performance you can "
+                        "set this to 'false' if you are "
+                        "only ever using small strains");
   params.addRequiredParam<Real>(
-      "smoothing_tol", "Intersections of the yield surfaces will be smoothed by this amount (this "
-                       "is measured in units of stress).  Often this is related to other physical "
-                       "parameters (eg, 0.1*cohesion) but it is important to set this small enough "
-                       "so that the individual yield surfaces do not mix together in the smoothing "
-                       "process to produce a result where no stress is admissible (for example, "
-                       "mixing together tensile and compressive failure envelopes).");
+      "smoothing_tol",
+      "Intersections of the yield surfaces will be smoothed by this amount (this "
+      "is measured in units of stress).  Often this is related to other physical "
+      "parameters (eg, 0.1*cohesion) but it is important to set this small enough "
+      "so that the individual yield surfaces do not mix together in the smoothing "
+      "process to produce a result where no stress is admissible (for example, "
+      "mixing together tensile and compressive failure envelopes).");
   params.addRequiredParam<Real>("yield_function_tol",
                                 "The return-map process will be deemed to have converged if all "
                                 "yield functions are within yield_function_tol of zero.  If this "
@@ -39,18 +42,22 @@ validParams<PQPlasticModel>()
                                 "code detects precision loss then it also deems the return-map "
                                 "process has converged.");
   MooseEnum tangent_operator("elastic nonlinear", "nonlinear");
-  params.addParam<MooseEnum>(
-      "tangent_operator", tangent_operator, "Type of tangent operator to return.  'elastic': "
-                                            "return the elasticity tensor.  'nonlinear': return "
-                                            "the full consistent tangent operator.");
-  params.addParam<Real>(
-      "min_step_size", 1.0, "In order to help the Newton-Raphson procedure, the applied strain "
-                            "increment may be applied in sub-increments of size greater than this "
-                            "value.  Usually it is better for Moose's nonlinear convergence to "
-                            "increase max_NR_iterations rather than decrease this parameter.");
-  params.addParam<bool>("warn_about_precision_loss", false, "Output a message to the console every "
-                                                            "time precision-loss is encountered "
-                                                            "during the Newton-Raphson process");
+  params.addParam<MooseEnum>("tangent_operator",
+                             tangent_operator,
+                             "Type of tangent operator to return.  'elastic': "
+                             "return the elasticity tensor.  'nonlinear': return "
+                             "the full consistent tangent operator.");
+  params.addParam<Real>("min_step_size",
+                        1.0,
+                        "In order to help the Newton-Raphson procedure, the applied strain "
+                        "increment may be applied in sub-increments of size greater than this "
+                        "value.  Usually it is better for Moose's nonlinear convergence to "
+                        "increase max_NR_iterations rather than decrease this parameter.");
+  params.addParam<bool>("warn_about_precision_loss",
+                        false,
+                        "Output a message to the console every "
+                        "time precision-loss is encountered "
+                        "during the Newton-Raphson process");
   return params;
 }
 

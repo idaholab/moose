@@ -27,8 +27,9 @@ validParams<Axisymmetric2D3DSolutionFunction>()
   params.addRequiredParam<UserObjectName>("solution",
                                           "The SolutionUserObject to extract data from.");
   params.addParam<std::vector<std::string>>(
-      "from_variables", "The names of the variables in the file that are to be extracted, in x, y "
-                        "order if they are vector components");
+      "from_variables",
+      "The names of the variables in the file that are to be extracted, in x, y "
+      "order if they are vector components");
 
   params.addParam<Real>(
       "scale_factor",

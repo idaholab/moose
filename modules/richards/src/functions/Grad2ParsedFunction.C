@@ -15,9 +15,10 @@ validParams<Grad2ParsedFunction>()
   InputParameters params = validParams<MooseParsedFunction>();
   params += validParams<MooseParsedFunction>();
   params.addRequiredParam<RealVectorValue>(
-      "direction", "The direction in which to take the derivative.  This must not be a zero-length "
-                   "vector.  This function returned a finite-difference approx to "
-                   "(direction.nabla)^2 function");
+      "direction",
+      "The direction in which to take the derivative.  This must not be a zero-length "
+      "vector.  This function returned a finite-difference approx to "
+      "(direction.nabla)^2 function");
   return params;
 }
 

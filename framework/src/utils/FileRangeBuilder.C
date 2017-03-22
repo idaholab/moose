@@ -13,11 +13,13 @@ InputParameters
 validParams<FileRangeBuilder>()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<FileName>("file", "Name of single image file to extract mesh parameters from.  "
-                                    "If provided, a 2D mesh is created.");
-  params.addParam<FileNameNoExtension>("file_base", "Image file base to open, use this option when "
-                                                    "a stack of images must be read (ignored if "
-                                                    "'file' is given)");
+  params.addParam<FileName>("file",
+                            "Name of single image file to extract mesh parameters from.  "
+                            "If provided, a 2D mesh is created.");
+  params.addParam<FileNameNoExtension>("file_base",
+                                       "Image file base to open, use this option when "
+                                       "a stack of images must be read (ignored if "
+                                       "'file' is given)");
   params.addParam<std::vector<unsigned int>>(
       "file_range",
       "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");

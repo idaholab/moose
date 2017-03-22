@@ -19,12 +19,14 @@ validParams<KKSPhaseChemicalPotential>()
                              "kernel is ca.");
   params.addRequiredCoupledVar(
       "cb", "Phase b concentration"); // note that ca is u, the non-linear variable!
-  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function "
-                                                           "Fa (f_name in the corresponding "
-                                                           "derivative function material)");
-  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function "
-                                                           "Fb (f_name in the corresponding "
-                                                           "derivative function material)");
+  params.addRequiredParam<MaterialPropertyName>("fa_name",
+                                                "Base name of the free energy function "
+                                                "Fa (f_name in the corresponding "
+                                                "derivative function material)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name",
+                                                "Base name of the free energy function "
+                                                "Fb (f_name in the corresponding "
+                                                "derivative function material)");
   params.addCoupledVar(
       "args_a",
       "Vector of further parameters to Fa (optional, to add in second cross derivatives of Fa)");

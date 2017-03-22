@@ -38,14 +38,16 @@ validParams<PhysicsBasedPreconditioner>()
   InputParameters params = validParams<MoosePreconditioner>();
 
   params.addRequiredParam<std::vector<std::string>>(
-      "solve_order", "The order the block rows will be solved in.  Put the name of variables here "
-                     "to stand for solving that variable's block row.  A variable may appear more "
-                     "than once (to create cylces if you like).");
+      "solve_order",
+      "The order the block rows will be solved in.  Put the name of variables here "
+      "to stand for solving that variable's block row.  A variable may appear more "
+      "than once (to create cylces if you like).");
   params.addRequiredParam<std::vector<std::string>>("preconditioner", "TODO: docstring");
 
   params.addParam<std::vector<std::string>>(
-      "off_diag_row", "The off diagonal row you want to add into the matrix, it will be associated "
-                      "with an off diagonal column from the same position in off_diag_colum.");
+      "off_diag_row",
+      "The off diagonal row you want to add into the matrix, it will be associated "
+      "with an off diagonal column from the same position in off_diag_colum.");
   params.addParam<std::vector<std::string>>("off_diag_column",
                                             "The off diagonal column you want to add into the "
                                             "matrix, it will be associated with an off diagonal "

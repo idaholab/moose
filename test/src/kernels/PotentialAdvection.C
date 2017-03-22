@@ -19,9 +19,11 @@ validParams<PotentialAdvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("potential", "The potential responsible for charge advection");
-  params.addParam<bool>("positive_charge", true, "Whether the potential is advecting positive "
-                                                 "charges. Should be set to false if charges are "
-                                                 "negative.");
+  params.addParam<bool>("positive_charge",
+                        true,
+                        "Whether the potential is advecting positive "
+                        "charges. Should be set to false if charges are "
+                        "negative.");
   return params;
 }
 

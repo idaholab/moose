@@ -15,10 +15,12 @@ validParams<RichardsSeffPrimePrimeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("pressure_vars", "List of variables that represent the pressure");
-  params.addRequiredParam<int>("wrtnum1", "This aux kernel will return d^2(seff)/dP_wrtnum1 "
-                                          "dP_wrtnum2.  0<=wrtnum1<number_of_pressure_vars.");
-  params.addRequiredParam<int>("wrtnum2", "This aux kernel will return d^2(seff)/dP_wrtnum1 "
-                                          "dP_wrtnum2.  0<=wrtnum2<number_of_pressure_vars.");
+  params.addRequiredParam<int>("wrtnum1",
+                               "This aux kernel will return d^2(seff)/dP_wrtnum1 "
+                               "dP_wrtnum2.  0<=wrtnum1<number_of_pressure_vars.");
+  params.addRequiredParam<int>("wrtnum2",
+                               "This aux kernel will return d^2(seff)/dP_wrtnum1 "
+                               "dP_wrtnum2.  0<=wrtnum2<number_of_pressure_vars.");
   params.addRequiredParam<UserObjectName>("seff_UO",
                                           "Name of user object that defines effective saturation.");
   params.addClassDescription("auxillary variable which is 2nd derivative of effective saturation");

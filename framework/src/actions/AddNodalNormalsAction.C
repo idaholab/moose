@@ -31,9 +31,11 @@ validParams<AddNodalNormalsAction>()
       "boundary", everywhere, "The boundary ID or name where the normals will be computed");
   params.addParam<BoundaryName>("corner_boundary", "boundary ID or name with nodes at 'corners'");
   MooseEnum orders("FIRST SECOND", "FIRST");
-  params.addParam<MooseEnum>("order", orders, "Specifies the order of variables that hold the "
-                                              "nodal normals. Needs to match the order of the "
-                                              "mesh");
+  params.addParam<MooseEnum>("order",
+                             orders,
+                             "Specifies the order of variables that hold the "
+                             "nodal normals. Needs to match the order of the "
+                             "mesh");
 
   return params;
 }

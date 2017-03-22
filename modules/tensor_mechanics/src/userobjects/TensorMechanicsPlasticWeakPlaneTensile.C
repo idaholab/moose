@@ -14,9 +14,10 @@ validParams<TensorMechanicsPlasticWeakPlaneTensile>()
   params.addParam<Real>("stress_coefficient",
                         1.0,
                         "The yield function is stress_coefficient * stress_zz - tensile_strength");
-  params.addRequiredParam<UserObjectName>("tensile_strength", "A TensorMechanicsHardening "
-                                                              "UserObject that defines hardening "
-                                                              "of the weak-plane tensile strength");
+  params.addRequiredParam<UserObjectName>("tensile_strength",
+                                          "A TensorMechanicsHardening "
+                                          "UserObject that defines hardening "
+                                          "of the weak-plane tensile strength");
   params.addClassDescription("Associative weak-plane tensile plasticity with hardening/softening");
 
   return params;

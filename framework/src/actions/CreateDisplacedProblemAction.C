@@ -23,9 +23,10 @@ validParams<CreateDisplacedProblemAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::vector<std::string>>(
-      "displacements", "The variables corresponding to the x y z displacements of the mesh.  If "
-                       "this is provided then the displacements will be taken into account during "
-                       "the computation.");
+      "displacements",
+      "The variables corresponding to the x y z displacements of the mesh.  If "
+      "this is provided then the displacements will be taken into account during "
+      "the computation.");
 
   return params;
 }

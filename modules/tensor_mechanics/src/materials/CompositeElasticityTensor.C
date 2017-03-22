@@ -13,9 +13,10 @@ validParams<CompositeElasticityTensor>()
   InputParameters params = CompositeTensorBase<RankFourTensor, Material>::validParams();
   params.addClassDescription("Assemble an elasticity tensor from multiple tensor contributions "
                              "weighted by material properties");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
-                                            "multiple mechanics material systems on the same "
-                                            "block, i.e. for multiple phases");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
   return params;
 }
 

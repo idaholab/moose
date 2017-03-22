@@ -18,19 +18,26 @@ validParams<TensorMechanicsPlasticTensileMulti>()
   params.addRequiredParam<UserObjectName>(
       "tensile_strength",
       "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");
-  params.addParam<Real>("shift", "Yield surface is shifted by this amount to avoid problems with "
-                                 "defining derivatives when eigenvalues are equal.  If this is "
-                                 "larger than f_tol, a warning will be issued.  Default = f_tol.");
-  params.addParam<unsigned int>("max_iterations", 10, "Maximum number of Newton-Raphson iterations "
-                                                      "allowed in the custom return-map algorithm. "
-                                                      " For highly nonlinear hardening this may "
-                                                      "need to be higher than 10.");
-  params.addParam<bool>("use_custom_returnMap", true, "Whether to use the custom returnMap "
-                                                      "algorithm.  Set to true if you are using "
-                                                      "isotropic elasticity.");
-  params.addParam<bool>("use_custom_cto", true, "Whether to use the custom consistent tangent "
-                                                "operator computations.  Set to true if you are "
-                                                "using isotropic elasticity.");
+  params.addParam<Real>("shift",
+                        "Yield surface is shifted by this amount to avoid problems with "
+                        "defining derivatives when eigenvalues are equal.  If this is "
+                        "larger than f_tol, a warning will be issued.  Default = f_tol.");
+  params.addParam<unsigned int>("max_iterations",
+                                10,
+                                "Maximum number of Newton-Raphson iterations "
+                                "allowed in the custom return-map algorithm. "
+                                " For highly nonlinear hardening this may "
+                                "need to be higher than 10.");
+  params.addParam<bool>("use_custom_returnMap",
+                        true,
+                        "Whether to use the custom returnMap "
+                        "algorithm.  Set to true if you are using "
+                        "isotropic elasticity.");
+  params.addParam<bool>("use_custom_cto",
+                        true,
+                        "Whether to use the custom consistent tangent "
+                        "operator computations.  Set to true if you are "
+                        "using isotropic elasticity.");
   return params;
 }
 

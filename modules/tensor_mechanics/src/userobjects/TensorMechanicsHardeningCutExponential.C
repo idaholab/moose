@@ -13,12 +13,15 @@ validParams<TensorMechanicsHardeningCutExponential>()
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
   params.addRequiredParam<Real>(
       "value_0", "The value of the parameter for all internal_parameter <= internal_0");
-  params.addParam<Real>("value_residual", "The value of the parameter for internal_parameter = "
-                                          "infinity.  Default = value_0, ie perfect plasticity");
+  params.addParam<Real>("value_residual",
+                        "The value of the parameter for internal_parameter = "
+                        "infinity.  Default = value_0, ie perfect plasticity");
   params.addParam<Real>("internal_0", 0, "The cutoff of internal parameter");
-  params.addParam<Real>("rate", 0, "Let p = internal_parameter.  Then value = value_0 for "
-                                   "p<internal_0, and otherwise, value = value_residual + (value_0 "
-                                   "- value_residual)*exp(-rate*(p - internal_0)");
+  params.addParam<Real>("rate",
+                        0,
+                        "Let p = internal_parameter.  Then value = value_0 for "
+                        "p<internal_0, and otherwise, value = value_residual + (value_0 "
+                        "- value_residual)*exp(-rate*(p - internal_0)");
   params.addClassDescription("Hardening is Cut-exponential");
   return params;
 }

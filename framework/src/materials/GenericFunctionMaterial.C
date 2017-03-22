@@ -22,9 +22,10 @@ validParams<GenericFunctionMaterial>()
   InputParameters params = validParams<Material>();
   params.addParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will have");
-  params.addParam<std::vector<FunctionName>>("prop_values", "The corresponding names of the "
-                                                            "functions that are going to provide "
-                                                            "the values for the variables");
+  params.addParam<std::vector<FunctionName>>("prop_values",
+                                             "The corresponding names of the "
+                                             "functions that are going to provide "
+                                             "the values for the variables");
   params.addParam<bool>("enable_stateful", false, "Enable the declaration of old and older values");
   return params;
 }
