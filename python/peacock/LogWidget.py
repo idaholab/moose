@@ -42,10 +42,10 @@ class LogWidget(QWidget, MooseWidget):
             msg: The message to write
             color: The color to write the text in.
         """
-        msg = str(msg)
-
         if not msg:
             return
+
+        msg = msg.encode('utf-8') # make sure if there are bad characters in the message that we can show them.
 
         if not color or color == "None":
             color = "white"

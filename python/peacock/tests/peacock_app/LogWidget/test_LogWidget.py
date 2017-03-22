@@ -23,5 +23,12 @@ class Tests(Testing.PeacockTester):
         self.assertIn("bar", w.log.toHtml())
         self.assertEqual("Foo\nbar\n\n", w.log.toPlainText())
 
+    def testUnicode(self):
+        w = LogWidget()
+        w.show()
+        mooseutils.mooseMessage("Foo \xe0\xe0 bar", color="RED")
+        self.assertIn("Foo", w.log.toHtml())
+        self.assertIn("bar", w.log.toHtml())
+
 if __name__ == '__main__':
     Testing.run_tests()
