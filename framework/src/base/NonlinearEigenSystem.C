@@ -21,6 +21,8 @@
 #include "KernelBase.h"
 #include "NodalBC.h"
 #include "TimeIntegrator.h"
+#include "SlepcSupport.h"
+
 
 // libmesh includes
 #include "libmesh/eigen_system.h"
@@ -42,11 +44,25 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   p->computeJacobian(
       *eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
 
+  Mat petsc_mat_A = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_A).mat();
+
+  PetscObjectComposeFunction((PetscObject)petsc_mat_A,"formJacobianA",Moose::SlepcSupport::moose_slepc_eigen_formJacobianA);
+  PetscObjectComposeFunction((PetscObject)petsc_mat_A,"formFunctionA",Moose::SlepcSupport::moose_slepc_eigen_formFunctionA);
+
+
   if (eigen_system.generalized())
   {
     if (eigen_system.matrix_B)
+    {
+      p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
       p->computeJacobian(
           *eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
+
+      Mat petsc_mat_B = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_B).mat();
+
+      PetscObjectComposeFunction((PetscObject)petsc_mat_B,"formJacobianB",Moose::SlepcSupport::moose_slepc_eigen_formJacobianB);
+      PetscObjectComposeFunction((PetscObject)petsc_mat_B,"formFunctionB",Moose::SlepcSupport::moose_slepc_eigen_formFunctionB);
+    }
     else
       mooseError("It is a generalized eigenvalue problem but matrix B is empty\n");
   }
