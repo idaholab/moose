@@ -12,10 +12,13 @@ validParams<TensorMechanicsHardeningExponential>()
 {
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
   params.addRequiredParam<Real>("value_0", "The value of the parameter at internal_parameter = 0");
-  params.addParam<Real>("value_residual", "The value of the parameter for internal_parameter = "
-                                          "infinity.  Default = value_0, ie perfect plasticity");
-  params.addParam<Real>("rate", 0, "Let p = internal_parameter.  Then value = value_residual + "
-                                   "(value_0 - value_residual)*exp(-rate*intnal_parameter)");
+  params.addParam<Real>("value_residual",
+                        "The value of the parameter for internal_parameter = "
+                        "infinity.  Default = value_0, ie perfect plasticity");
+  params.addParam<Real>("rate",
+                        0,
+                        "Let p = internal_parameter.  Then value = value_residual + "
+                        "(value_0 - value_residual)*exp(-rate*intnal_parameter)");
   params.addClassDescription("Hardening is Exponential");
   return params;
 }

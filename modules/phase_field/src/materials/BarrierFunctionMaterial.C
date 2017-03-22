@@ -15,9 +15,11 @@ validParams<BarrierFunctionMaterial>()
                              "polynomial.\nSIMPLE: eta^2*(1-eta)^2\nLOW: eta*(1-eta)");
   MooseEnum g_order("SIMPLE=0 LOW", "SIMPLE");
   params.addParam<MooseEnum>("g_order", g_order, "Polynomial order of the barrier function g(eta)");
-  params.addParam<bool>("well_only", false, "Make the g zero in [0:1] so it only contributes to "
-                                            "enforcing the eta range and not to the phase "
-                                            "transformation berrier.");
+  params.addParam<bool>("well_only",
+                        false,
+                        "Make the g zero in [0:1] so it only contributes to "
+                        "enforcing the eta range and not to the phase "
+                        "transformation berrier.");
   params.set<std::string>("function_name") = std::string("g");
   return params;
 }

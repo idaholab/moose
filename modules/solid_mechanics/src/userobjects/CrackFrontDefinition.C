@@ -57,9 +57,10 @@ addCrackFrontDefinitionParams(InputParameters & params)
       2,
       "axis_2d>=0 & axis_2d<=2",
       "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
-  params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through "
-                                                  "the plane of the crack, normal to the specified "
-                                                  "axis (0=x, 1=y, 2=z)");
+  params.addParam<unsigned int>("symmetry_plane",
+                                "Account for a symmetry plane passing through "
+                                "the plane of the crack, normal to the specified "
+                                "axis (0=x, 1=y, 2=z)");
   params.addParam<bool>("t_stress", false, "Calculate T-stress");
   params.addParam<bool>("q_function_rings", false, "Generate rings of nodes for q-function");
   params.addParam<unsigned int>("last_ring", "The number of rings of nodes to generate");

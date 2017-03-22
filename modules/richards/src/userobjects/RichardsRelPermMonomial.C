@@ -15,8 +15,10 @@ validParams<RichardsRelPermMonomial>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
   params.addRequiredRangeCheckedParam<Real>(
-      "simm", "simm >= 0 & simm < 1", "Immobile saturation.  Must be between 0 and 1.   Define s = "
-                                      "(seff - simm)/(1 - simm).  Then relperm = s^n");
+      "simm",
+      "simm >= 0 & simm < 1",
+      "Immobile saturation.  Must be between 0 and 1.   Define s = "
+      "(seff - simm)/(1 - simm).  Then relperm = s^n");
   params.addRequiredRangeCheckedParam<Real>(
       "n",
       "n >= 0",

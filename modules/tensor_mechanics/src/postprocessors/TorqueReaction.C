@@ -17,9 +17,10 @@ validParams<TorqueReaction>()
   params.addRequiredParam<std::vector<AuxVariableName>>("react", "The reaction variables");
   params.addParam<RealVectorValue>(
       "axis_origin", Point(), "Origin of the axis of rotation used to calculate the torque");
-  params.addRequiredParam<RealVectorValue>("direction_vector", "The direction vector of the axis "
-                                                               "of rotation about which the "
-                                                               "calculated torque is calculated");
+  params.addRequiredParam<RealVectorValue>("direction_vector",
+                                           "The direction vector of the axis "
+                                           "of rotation about which the "
+                                           "calculated torque is calculated");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }

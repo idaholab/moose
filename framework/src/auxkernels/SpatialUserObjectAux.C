@@ -21,8 +21,9 @@ validParams<SpatialUserObjectAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>(
-      "user_object", "The UserObject UserObject to get values from.  Note that the UserObject "
-                     "_must_ implement the spatialValue() virtual function!");
+      "user_object",
+      "The UserObject UserObject to get values from.  Note that the UserObject "
+      "_must_ implement the spatialValue() virtual function!");
   return params;
 }
 

@@ -13,9 +13,10 @@ validParams<ComputeElasticityTensorCP>()
 {
   InputParameters params = validParams<ComputeElasticityTensor>();
   params.addClassDescription("Compute an elasticity tensor for crystal plasticity.");
-  params.addParam<UserObjectName>("read_prop_user_object", "The ElementReadPropertyFile "
-                                                           "GeneralUserObject to read element "
-                                                           "specific property values from file");
+  params.addParam<UserObjectName>("read_prop_user_object",
+                                  "The ElementReadPropertyFile "
+                                  "GeneralUserObject to read element "
+                                  "specific property values from file");
   return params;
 }
 

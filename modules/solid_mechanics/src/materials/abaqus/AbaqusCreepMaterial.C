@@ -17,9 +17,10 @@ InputParameters
 validParams<AbaqusCreepMaterial>()
 {
   InputParameters params = validParams<SolidModel>();
-  params.addRequiredParam<FileName>("plugin", "The path to the compiled dynamic library for the "
-                                              "plugin you want to use (without -opt.plugin or "
-                                              "-dbg.plugin)");
+  params.addRequiredParam<FileName>("plugin",
+                                    "The path to the compiled dynamic library for the "
+                                    "plugin you want to use (without -opt.plugin or "
+                                    "-dbg.plugin)");
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
   params.addRequiredParam<Real>("poissons_ratio", "Poissons Ratio");
   params.addRequiredParam<Real>("num_state_vars",
@@ -28,9 +29,11 @@ validParams<AbaqusCreepMaterial>()
       "integration_flag", "The creep integration method: Explicit = 0 and Implicit = 1");
   params.addRequiredParam<unsigned int>(
       "solve_definition", "Creep/Swell Explicit/Implicit Integration Definition to use: 1 - 5");
-  params.addParam<unsigned int>("routine_flag", 0, "The flag determining when the routine is "
-                                                   "called: Start of increment = 0 and End of "
-                                                   "Increment = 1");
+  params.addParam<unsigned int>("routine_flag",
+                                0,
+                                "The flag determining when the routine is "
+                                "called: Start of increment = 0 and End of "
+                                "Increment = 1");
   return params;
 }
 

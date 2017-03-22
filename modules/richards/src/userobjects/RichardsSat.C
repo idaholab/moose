@@ -19,8 +19,10 @@ validParams<RichardsSat>()
       "s_res >= 0 & s_res < 1",
       "Residual fluid saturation for the phase.  0 <= s_res < 1.");
   params.addRequiredRangeCheckedParam<Real>(
-      "sum_s_res", "sum_s_res < 1", "Sum of s_res over all phases.  s_res <= sum_s_res < 1.  It is "
-                                    "up to you to ensure the sum is done correctly.");
+      "sum_s_res",
+      "sum_s_res < 1",
+      "Sum of s_res over all phases.  s_res <= sum_s_res < 1.  It is "
+      "up to you to ensure the sum is done correctly.");
   params.addClassDescription("User object yielding saturation for a phase as a function of "
                              "effective saturation of that phase");
   return params;

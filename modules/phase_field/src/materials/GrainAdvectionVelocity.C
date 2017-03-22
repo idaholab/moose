@@ -19,8 +19,9 @@ validParams<GrainAdvectionVelocity>()
   params.addParam<Real>(
       "translation_constant", 500, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
-                                            "type of force density under consideration");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "type of force density under consideration");
   params.addParam<UserObjectName>("grain_data",
                                   "UserObject for getting the center of mass of grains");
   params.addParam<UserObjectName>("grain_force",

@@ -52,8 +52,9 @@ validParams<FiniteStrainUObasedCP>()
       "uo_state_vars",
       "List of names of user objects that define the state variable for this material.");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "uo_state_var_evol_rate_comps", "List of names of user objects that define the state "
-                                      "variable evolution rate components for this material.");
+      "uo_state_var_evol_rate_comps",
+      "List of names of user objects that define the state "
+      "variable evolution rate components for this material.");
   return params;
 }
 

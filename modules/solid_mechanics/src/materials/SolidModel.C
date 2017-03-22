@@ -79,25 +79,31 @@ validParams<SolidModel>()
       "active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>(
       "max_cracks", 3, "The maximum number of cracks allowed at a material point.");
-  params.addParam<Real>("cracking_neg_fraction", "The fraction of the cracking strain at which a "
-                                                 "transitition begins during decreasing strain to "
-                                                 "the original stiffness.");
+  params.addParam<Real>("cracking_neg_fraction",
+                        "The fraction of the cracking strain at which a "
+                        "transitition begins during decreasing strain to "
+                        "the original stiffness.");
   params.addParam<MooseEnum>("formulation",
                              formulation,
                              "Element formulation.  Choices are: " + formulation.getRawNames());
-  params.addParam<std::string>(
-      "increment_calculation", "RashidApprox", "The algorithm to use when computing the "
-                                               "incremental strain and rotation (RashidApprox or "
-                                               "Eigen). For use with Nonlinear3D/RZ formulation.");
-  params.addParam<bool>("large_strain", false, "Whether to include large strain terms in "
-                                               "AxisymmetricRZ, SphericalR, and PlaneStrain "
-                                               "formulations.");
+  params.addParam<std::string>("increment_calculation",
+                               "RashidApprox",
+                               "The algorithm to use when computing the "
+                               "incremental strain and rotation (RashidApprox or "
+                               "Eigen). For use with Nonlinear3D/RZ formulation.");
+  params.addParam<bool>("large_strain",
+                        false,
+                        "Whether to include large strain terms in "
+                        "AxisymmetricRZ, SphericalR, and PlaneStrain "
+                        "formulations.");
   params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
   params.addParam<bool>(
       "compute_InteractionIntegral", false, "Whether to compute the Interaction Integral.");
-  params.addParam<bool>("store_stress_older", false, "Parameter which indicates whether the older "
-                                                     "stress state, required for HHT time "
-                                                     "integration, needs to be stored");
+  params.addParam<bool>("store_stress_older",
+                        false,
+                        "Parameter which indicates whether the older "
+                        "stress state, required for HHT time "
+                        "integration, needs to be stored");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");

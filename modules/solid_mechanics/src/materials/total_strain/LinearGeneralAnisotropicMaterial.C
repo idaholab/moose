@@ -22,9 +22,10 @@ validParams<LinearGeneralAnisotropicMaterial>()
 {
   InputParameters params = validParams<SolidMechanicsMaterial>();
   params.addRequiredParam<std::vector<Real>>("C_matrix", "Stiffness tensor for matrix");
-  params.addRequiredParam<bool>("all_21", "True if all 21 independent values are given; else false "
-                                          "indicates only 9 values given (C11, C12, C13, C22, C23, "
-                                          "C33, C44, C55, C66.");
+  params.addRequiredParam<bool>("all_21",
+                                "True if all 21 independent values are given; else false "
+                                "indicates only 9 values given (C11, C12, C13, C22, C23, "
+                                "C33, C44, C55, C66.");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
   params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");

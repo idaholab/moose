@@ -20,9 +20,11 @@ validParams<OneDContactConstraint>()
 {
   InputParameters params = validParams<NodeFaceConstraint>();
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<bool>("jacobian_update", false, "Whether or not to update the 'in contact' list "
-                                                  "every jacobian evaluation (by default it will "
-                                                  "happen once per timestep");
+  params.addParam<bool>("jacobian_update",
+                        false,
+                        "Whether or not to update the 'in contact' list "
+                        "every jacobian evaluation (by default it will "
+                        "happen once per timestep");
   return params;
 }
 

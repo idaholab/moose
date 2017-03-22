@@ -138,23 +138,29 @@ validParams<MooseApp>()
       0,
       "Specify additional initial uniform refinements for automatic scaling");
 
-  params.addCommandLineParam<std::string>(
-      "recover", "--recover [file_base]", "Continue the calculation.  If file_base is omitted then "
+  params.addCommandLineParam<std::string>("recover",
+                                          "--recover [file_base]",
+                                          "Continue the calculation.  If file_base is omitted then "
                                           "the most recent recovery file will be utilized");
 
-  params.addCommandLineParam<bool>(
-      "half_transient", "--half-transient", false, "When true the simulation will only run half of "
-                                                   "its specified transient (ie half the "
-                                                   "timesteps).  This is useful for testing "
-                                                   "recovery and restart");
+  params.addCommandLineParam<bool>("half_transient",
+                                   "--half-transient",
+                                   false,
+                                   "When true the simulation will only run half of "
+                                   "its specified transient (ie half the "
+                                   "timesteps).  This is useful for testing "
+                                   "recovery and restart");
 
   // No default on these two options, they must not both be valid
   params.addCommandLineParam<bool>(
-      "trap_fpe", "--trap-fpe", "Enable Floating Point Exception handling in critical sections of "
-                                "code.  This is enabled automatically in DEBUG mode");
-  params.addCommandLineParam<bool>(
-      "no_trap_fpe", "--no-trap-fpe", "Disable Floating Point Exception handling in critical "
-                                      "sections of code when using DEBUG mode.");
+      "trap_fpe",
+      "--trap-fpe",
+      "Enable Floating Point Exception handling in critical sections of "
+      "code.  This is enabled automatically in DEBUG mode");
+  params.addCommandLineParam<bool>("no_trap_fpe",
+                                   "--no-trap-fpe",
+                                   "Disable Floating Point Exception handling in critical "
+                                   "sections of code when using DEBUG mode.");
 
   params.addCommandLineParam<bool>("error", "--error", false, "Turn all warnings into errors");
 
@@ -164,9 +170,11 @@ validParams<MooseApp>()
       false,
       "Enable all performance logging for timing purposes. This will disable all "
       "screen output of performance logs for all Console objects.");
-  params.addCommandLineParam<bool>(
-      "no_timing", "--no-timing", false, "Disabled performance logging. Overrides -t or --timing "
-                                         "if passed in conjunction with this flag");
+  params.addCommandLineParam<bool>("no_timing",
+                                   "--no-timing",
+                                   false,
+                                   "Disabled performance logging. Overrides -t or --timing "
+                                   "if passed in conjunction with this flag");
 
   // Options ignored by MOOSE but picked up by libMesh, these are here so that they are displayed in
   // the application help
@@ -1081,9 +1089,11 @@ MooseApp::executeMeshModifiers()
       auto depend_it = _mesh_modifiers.find(depend_name);
 
       if (depend_it == _mesh_modifiers.end())
-        mooseError("The MeshModifier \"", depend_name, "\" was not created, did you make a "
-                                                       "spelling mistake or forget to include it "
-                                                       "in your input file?");
+        mooseError("The MeshModifier \"",
+                   depend_name,
+                   "\" was not created, did you make a "
+                   "spelling mistake or forget to include it "
+                   "in your input file?");
 
       resolver.insertDependency(it.second, depend_it->second);
     }

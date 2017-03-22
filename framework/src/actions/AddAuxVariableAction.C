@@ -27,9 +27,11 @@ validParams<AddAuxVariableAction>()
 
   params.addParam<MooseEnum>(
       "family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orders, "Specifies the order of the FE shape function to use "
-                                              "for this variable (additional orders not listed are "
-                                              "allowed)");
+  params.addParam<MooseEnum>("order",
+                             orders,
+                             "Specifies the order of the FE shape function to use "
+                             "for this variable (additional orders not listed are "
+                             "allowed)");
   params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
   params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
 

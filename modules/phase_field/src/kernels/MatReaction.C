@@ -11,8 +11,9 @@ InputParameters
 validParams<MatReaction>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("v", "Set this to make v a coupled variable, otherwise it will use the "
-                            "kernel's nonlinear variable for v");
+  params.addCoupledVar("v",
+                       "Set this to make v a coupled variable, otherwise it will use the "
+                       "kernel's nonlinear variable for v");
   params.addClassDescription("Kernel to add -L*v, where L=reaction rate, v=variable");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The reaction rate used with the kernel");
   params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");

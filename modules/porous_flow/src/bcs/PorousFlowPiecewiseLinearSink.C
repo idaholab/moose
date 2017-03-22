@@ -13,9 +13,10 @@ validParams<PorousFlowPiecewiseLinearSink>()
 {
   InputParameters params = validParams<PorousFlowSinkPTDefiner>();
   params.addRequiredParam<std::vector<Real>>(
-      "pt_vals", "Tuple of pressure values (for the fluid_phase specified).  Must be monotonically "
-                 "increasing.  For heat fluxes that don't involve fluids, these are temperature "
-                 "values");
+      "pt_vals",
+      "Tuple of pressure values (for the fluid_phase specified).  Must be monotonically "
+      "increasing.  For heat fluxes that don't involve fluids, these are temperature "
+      "values");
   params.addRequiredParam<std::vector<Real>>(
       "multipliers", "Tuple of multiplying values.  The flux values are multiplied by these.");
   return params;

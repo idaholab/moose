@@ -31,9 +31,10 @@ validParams<PerformanceData>()
   params.addParam<MooseEnum>(
       "column", column_options, "The column you want the value of (Default: total_time_with_sub).");
   params.addParam<std::string>("category", "Execution", "The category or \"Header\" for the event");
-  params.addRequiredParam<std::string>("event", "The name or \"label\" of the event (\"ALIVE\" and "
-                                                "\"ACTIVE\" are also valid events, category and "
-                                                "column are ignored for these cases).");
+  params.addRequiredParam<std::string>("event",
+                                       "The name or \"label\" of the event (\"ALIVE\" and "
+                                       "\"ACTIVE\" are also valid events, category and "
+                                       "column are ignored for these cases).");
 
   return params;
 }

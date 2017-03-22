@@ -13,22 +13,25 @@ validParams<KKSGlobalFreeEnergy>()
   InputParameters params = validParams<TotalFreeEnergyBase>();
   params.addClassDescription(
       "Total free energy in KKS system, including chemical, barrier and gradient terms");
-  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function "
-                                                           "F (f_name in the corresponding "
-                                                           "derivative function material)");
-  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function "
-                                                           "F (f_name in the corresponding "
-                                                           "derivative function material)");
+  params.addRequiredParam<MaterialPropertyName>("fa_name",
+                                                "Base name of the free energy function "
+                                                "F (f_name in the corresponding "
+                                                "derivative function material)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name",
+                                                "Base name of the free energy function "
+                                                "F (f_name in the corresponding "
+                                                "derivative function material)");
   params.addParam<MaterialPropertyName>(
       "h_name", "h", "Base name for the switching function h(eta)");
   params.addParam<MaterialPropertyName>(
       "g_name", "g", "Base name for the double well function g(eta)");
   params.addRequiredParam<Real>("w", "Double well height parameter");
-  params.addParam<std::vector<MaterialPropertyName>>(
-      "kappa_names", std::vector<MaterialPropertyName>(), "Vector of kappa names corresponding to "
-                                                          "each variable name in interfacial_vars "
-                                                          "in the same order. For basic KKS, there "
-                                                          "is 1 kappa, 1 interfacial_var.");
+  params.addParam<std::vector<MaterialPropertyName>>("kappa_names",
+                                                     std::vector<MaterialPropertyName>(),
+                                                     "Vector of kappa names corresponding to "
+                                                     "each variable name in interfacial_vars "
+                                                     "in the same order. For basic KKS, there "
+                                                     "is 1 kappa, 1 interfacial_var.");
   return params;
 }
 

@@ -25,8 +25,9 @@ validParams<RealFunctionControl>()
   params.addRequiredParam<FunctionName>(
       "function", "The function to use for controlling the specified parameter.");
   params.addRequiredParam<std::string>(
-      "parameter", "The input parameter(s) to control. Specify a single parameter name and all "
-                   "parameters in all objects matching the name will be updated");
+      "parameter",
+      "The input parameter(s) to control. Specify a single parameter name and all "
+      "parameters in all objects matching the name will be updated");
   return params;
 }
 

@@ -29,15 +29,17 @@ InputParameters
 validParams<AddPeriodicBCAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<std::string>>("auto_direction", "If using a generated mesh, you can "
-                                                              "specifiy just the dimension(s) you "
-                                                              "want to mark as periodic");
+  params.addParam<std::vector<std::string>>("auto_direction",
+                                            "If using a generated mesh, you can "
+                                            "specifiy just the dimension(s) you "
+                                            "want to mark as periodic");
 
   params.addParam<BoundaryName>("primary", "Boundary ID associated with the primary boundary.");
   params.addParam<BoundaryName>("secondary", "Boundary ID associated with the secondary boundary.");
-  params.addParam<RealVectorValue>("translation", "Vector that translates coordinates on the "
-                                                  "primary boundary to coordinates on the "
-                                                  "secondary boundary.");
+  params.addParam<RealVectorValue>("translation",
+                                   "Vector that translates coordinates on the "
+                                   "primary boundary to coordinates on the "
+                                   "secondary boundary.");
   params.addParam<std::vector<std::string>>("transform_func",
                                             "Functions that specify the transformation");
   params.addParam<std::vector<std::string>>("inv_transform_func",

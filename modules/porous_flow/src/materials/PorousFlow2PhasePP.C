@@ -13,9 +13,10 @@ validParams<PorousFlow2PhasePP>()
 {
   InputParameters params = validParams<PorousFlowVariableBase>();
 
-  params.addRequiredCoupledVar("phase0_porepressure", "Variable that is the porepressure of phase "
-                                                      "0 (eg, the water phase).  It will be <= "
-                                                      "phase1_porepressure.");
+  params.addRequiredCoupledVar("phase0_porepressure",
+                               "Variable that is the porepressure of phase "
+                               "0 (eg, the water phase).  It will be <= "
+                               "phase1_porepressure.");
   params.addRequiredCoupledVar("phase1_porepressure",
                                "Variable that is the porepressure of phase 1 (eg, the gas phase)");
   params.addClassDescription("This Material calculates the 2 porepressures and the 2 saturations "

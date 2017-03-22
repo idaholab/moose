@@ -19,9 +19,10 @@ validParams<RankTwoScalarAux>()
   params.addParam<MooseEnum>(
       "scalar_type", RankTwoScalarTools::scalarOptions(), "Type of scalar output");
   params.addParam<unsigned int>(
-      "selected_qp", "Evaluate the tensor at this quadpoint.  This option only needs to be used if "
-                     "you are interested in a particular quadpoint in each element: otherwise do "
-                     "not include this parameter in your input file");
+      "selected_qp",
+      "Evaluate the tensor at this quadpoint.  This option only needs to be used if "
+      "you are interested in a particular quadpoint in each element: otherwise do "
+      "not include this parameter in your input file");
   params.addParamNamesToGroup("selected_qp", "Advanced");
 
   params.addParam<Point>(

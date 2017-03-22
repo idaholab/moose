@@ -33,9 +33,11 @@ validParams<PiecewiseBilinear>()
       "yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<Real>(
       "scale_factor", 1.0, "Scale factor to be applied to the axis, yaxis, or xaxis values");
-  params.addParam<bool>("radial", false, "Set to true if you want to interpolate along a radius "
-                                         "rather that along a specific axis, and note that you "
-                                         "have to define xaxis and yaxis in the input file");
+  params.addParam<bool>("radial",
+                        false,
+                        "Set to true if you want to interpolate along a radius "
+                        "rather that along a specific axis, and note that you "
+                        "have to define xaxis and yaxis in the input file");
   return params;
 }
 

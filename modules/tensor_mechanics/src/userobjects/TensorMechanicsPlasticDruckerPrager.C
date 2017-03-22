@@ -25,16 +25,19 @@ validParams<TensorMechanicsPlasticDruckerPrager>()
       "the DP circle is the largest circle that wholey fits inside the MC hex.  Native: The DP "
       "cohesion, friction angle and dilation angle are set equal to the mc_ parameters entered.");
   params.addRequiredParam<UserObjectName>(
-      "mc_cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                     "Mohr-Coulomb cohesion.  Physically this should not be negative.");
+      "mc_cohesion",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "Mohr-Coulomb cohesion.  Physically this should not be negative.");
   params.addRequiredParam<UserObjectName>(
-      "mc_friction_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                           "Mohr-Coulomb friction angle (in radians).  Physically this should be "
-                           "between 0 and Pi/2.");
+      "mc_friction_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "Mohr-Coulomb friction angle (in radians).  Physically this should be "
+      "between 0 and Pi/2.");
   params.addRequiredParam<UserObjectName>(
-      "mc_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                           "Mohr-Coulomb dilation angle (in radians).  Usually the dilation angle "
-                           "is not greater than the friction angle, and it is between 0 and Pi/2.");
+      "mc_dilation_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "Mohr-Coulomb dilation angle (in radians).  Usually the dilation angle "
+      "is not greater than the friction angle, and it is between 0 and Pi/2.");
   params.addClassDescription(
       "Non-associative Drucker Prager plasticity with no smoothing of the cone tip.");
   return params;

@@ -16,9 +16,11 @@ validParams<MultiBarrierFunctionMaterial>()
   MooseEnum h_order("SIMPLE=0", "SIMPLE");
   params.addParam<MooseEnum>(
       "g_order", h_order, "Polynomial order of the switching function h(eta)");
-  params.addParam<bool>("well_only", false, "Make the g zero in [0:1] so it only contributes to "
-                                            "enforcing the eta range and not to the phase "
-                                            "transformation berrier.");
+  params.addParam<bool>("well_only",
+                        false,
+                        "Make the g zero in [0:1] so it only contributes to "
+                        "enforcing the eta range and not to the phase "
+                        "transformation berrier.");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
   return params;
 }

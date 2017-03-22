@@ -13,9 +13,10 @@ InputParameters
 validParams<DesorptionToPorespace>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("conc_var", "Variable representing the concentration (kg/m^3) of "
-                                           "fluid in the matrix that will be desorped to "
-                                           "porespace");
+  params.addRequiredCoupledVar("conc_var",
+                               "Variable representing the concentration (kg/m^3) of "
+                               "fluid in the matrix that will be desorped to "
+                               "porespace");
   params.addClassDescription("Mass flow rate to the porespace from the matrix.  Add this to the "
                              "other kernels for the porepressure variable to form the complete DE");
   return params;

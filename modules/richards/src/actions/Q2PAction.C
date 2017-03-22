@@ -24,8 +24,9 @@ validParams<Q2PAction>()
       "water_density",
       "A RichardsDensity UserObject that defines the water density as a function of porepressure.");
   params.addRequiredParam<UserObjectName>(
-      "water_relperm", "A RichardsRelPerm UserObject that defines the water relative permeability "
-                       "as a function of water saturation (eg RichardsRelPermPower).");
+      "water_relperm",
+      "A RichardsRelPerm UserObject that defines the water relative permeability "
+      "as a function of water saturation (eg RichardsRelPermPower).");
   params.addParam<UserObjectName>(
       "water_relperm_for_diffusion",
       "A RichardsRelPerm UserObject that defines the water relative permeability as a function of "
@@ -36,20 +37,24 @@ validParams<Q2PAction>()
       "gas_density",
       "A RichardsDensity UserObject that defines the gas density as a function of porepressure.");
   params.addRequiredParam<UserObjectName>(
-      "gas_relperm", "A RichardsRelPerm UserObject that defines the gas relative permeability as a "
-                     "function of water saturation (eg Q2PRelPermPowerGas).");
+      "gas_relperm",
+      "A RichardsRelPerm UserObject that defines the gas relative permeability as a "
+      "function of water saturation (eg Q2PRelPermPowerGas).");
   params.addRequiredParam<Real>("gas_viscosity", "The gas viscosity");
   params.addRequiredParam<Real>("diffusivity", "The diffusivity");
   params.addParam<std::vector<OutputName>>("output_nodal_masses_to",
                                            "Output Nodal masses to this Output object.  If you "
                                            "don't want any outputs, don't input anything here");
   params.addParam<std::vector<OutputName>>(
-      "output_total_masses_to", "Output total water and gas mass to this Output object.  If you "
-                                "don't want any outputs, don't input anything here");
-  params.addParam<bool>("save_gas_flux_in_Q2PGasFluxResidual", false, "Save the residual for the "
-                                                                      "Q2PPorepressureFlux into "
-                                                                      "the AuxVariable called "
-                                                                      "Q2PGasFluxResidual");
+      "output_total_masses_to",
+      "Output total water and gas mass to this Output object.  If you "
+      "don't want any outputs, don't input anything here");
+  params.addParam<bool>("save_gas_flux_in_Q2PGasFluxResidual",
+                        false,
+                        "Save the residual for the "
+                        "Q2PPorepressureFlux into "
+                        "the AuxVariable called "
+                        "Q2PGasFluxResidual");
   params.addParam<bool>("save_water_flux_in_Q2PWaterFluxResidual",
                         false,
                         "Save the residual for the Q2PSaturationFlux into the AuxVariable called "

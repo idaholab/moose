@@ -16,8 +16,9 @@ validParams<Q2PSaturationDiffusion>()
       "fluid_density",
       "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
   params.addRequiredParam<UserObjectName>(
-      "fluid_relperm", "A RichardsRelPerm UserObject that defines the fluid relative permeability "
-                       "as a function of water saturation (eg RichardsRelPermPower)");
+      "fluid_relperm",
+      "A RichardsRelPerm UserObject that defines the fluid relative permeability "
+      "as a function of water saturation (eg RichardsRelPermPower)");
   params.addRequiredCoupledVar("porepressure_variable",
                                "The variable representing the porepressure");
   params.addRequiredParam<Real>("fluid_viscosity", "The fluid dynamic viscosity");

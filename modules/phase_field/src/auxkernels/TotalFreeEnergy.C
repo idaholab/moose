@@ -14,10 +14,11 @@ validParams<TotalFreeEnergy>()
   params.addClassDescription("Total free energy (both the bulk and gradient parts), where the bulk "
                              "free energy has been defined in a material");
   params.addParam<MaterialPropertyName>("f_name", "F", " Base name of the free energy function");
-  params.addParam<std::vector<MaterialPropertyName>>(
-      "kappa_names", std::vector<MaterialPropertyName>(), "Vector of kappa names corresponding to "
-                                                          "each variable name in interfacial_vars "
-                                                          "in the same order.");
+  params.addParam<std::vector<MaterialPropertyName>>("kappa_names",
+                                                     std::vector<MaterialPropertyName>(),
+                                                     "Vector of kappa names corresponding to "
+                                                     "each variable name in interfacial_vars "
+                                                     "in the same order.");
   return params;
 }
 

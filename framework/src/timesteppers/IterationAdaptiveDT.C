@@ -27,34 +27,43 @@ validParams<IterationAdaptiveDT>()
   params.addClassDescription("Adjust the timestep based on the number of iterations");
   params.addParam<int>("optimal_iterations",
                        "The target number of nonlinear iterations for adaptive timestepping");
-  params.addParam<int>("iteration_window", "Attempt to grow/shrink timestep if the iteration count "
-                                           "is below/above 'optimal_iterations plus/minus "
-                                           "iteration_window' (default = optimal_iterations/5).");
-  params.addParam<unsigned>("linear_iteration_ratio", "The ratio of linear to nonlinear iterations "
-                                                      "to determine target linear iterations and "
-                                                      "window for adaptive timestepping (default = "
-                                                      "25)");
-  params.addParam<PostprocessorName>("postprocessor_dtlim", "If specified, the postprocessor value "
-                                                            "is used as an upper limit for the "
-                                                            "current time step length");
+  params.addParam<int>("iteration_window",
+                       "Attempt to grow/shrink timestep if the iteration count "
+                       "is below/above 'optimal_iterations plus/minus "
+                       "iteration_window' (default = optimal_iterations/5).");
+  params.addParam<unsigned>("linear_iteration_ratio",
+                            "The ratio of linear to nonlinear iterations "
+                            "to determine target linear iterations and "
+                            "window for adaptive timestepping (default = "
+                            "25)");
+  params.addParam<PostprocessorName>("postprocessor_dtlim",
+                                     "If specified, the postprocessor value "
+                                     "is used as an upper limit for the "
+                                     "current time step length");
   params.addParam<FunctionName>("timestep_limiting_function",
                                 "A 'Piecewise' type function used to control the timestep by "
                                 "limiting the change in the function over a timestep");
   params.addParam<Real>(
       "max_function_change",
       "The absolute value of the maximum change in timestep_limiting_function over a timestep");
-  params.addParam<bool>("force_step_every_function_point", false, "Forces the timestepper to take "
-                                                                  "a step that is consistent with "
-                                                                  "points defined in the function");
+  params.addParam<bool>("force_step_every_function_point",
+                        false,
+                        "Forces the timestepper to take "
+                        "a step that is consistent with "
+                        "points defined in the function");
   params.addRequiredParam<Real>("dt", "The default timestep size between solves");
   params.addParam<std::vector<Real>>("time_t", "The values of t");
   params.addParam<std::vector<Real>>("time_dt", "The values of dt");
-  params.addParam<Real>("growth_factor", 2.0, "Factor to apply to timestep if easy convergence (if "
-                                              "'optimal_iterations' is specified) or if recovering "
-                                              "from failed solve");
-  params.addParam<Real>("cutback_factor", 0.5, "Factor to apply to timestep if difficult "
-                                               "convergence (if 'optimal_iterations' is specified) "
-                                               "or if solution failed");
+  params.addParam<Real>("growth_factor",
+                        2.0,
+                        "Factor to apply to timestep if easy convergence (if "
+                        "'optimal_iterations' is specified) or if recovering "
+                        "from failed solve");
+  params.addParam<Real>("cutback_factor",
+                        0.5,
+                        "Factor to apply to timestep if difficult "
+                        "convergence (if 'optimal_iterations' is specified) "
+                        "or if solution failed");
   return params;
 }
 

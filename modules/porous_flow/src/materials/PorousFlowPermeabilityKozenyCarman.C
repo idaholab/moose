@@ -20,13 +20,16 @@ validParams<PorousFlowPermeabilityKozenyCarman>()
       "phi^n/(1-phi)^m (where phi is porosity, f is a scalar constant with typical values "
       "0.01-0.001, and d is grain size). kozeny_carman_phi0 = k0 (1-phi0)^m/phi0^n * "
       "phi^n/(1-phi)^m (where phi is porosity, and k0 is the permeability at porosity phi0)");
-  params.addRangeCheckedParam<Real>("k0", "k0 > 0", "The permeability scalar value (usually in "
-                                                    "m^2) at the reference porosity, required for "
-                                                    "kozeny_carman_phi0");
-  params.addParam<RealTensorValue>("k_anisotropy", "A tensor to multiply the calculated scalar "
-                                                   "permeability, in order to obtain anisotropy if "
-                                                   "required. Defaults to isotropic permeability "
-                                                   "if not specified.");
+  params.addRangeCheckedParam<Real>("k0",
+                                    "k0 > 0",
+                                    "The permeability scalar value (usually in "
+                                    "m^2) at the reference porosity, required for "
+                                    "kozeny_carman_phi0");
+  params.addParam<RealTensorValue>("k_anisotropy",
+                                   "A tensor to multiply the calculated scalar "
+                                   "permeability, in order to obtain anisotropy if "
+                                   "required. Defaults to isotropic permeability "
+                                   "if not specified.");
   params.addRangeCheckedParam<Real>(
       "phi0", "phi0 > 0 & phi0 < 1", "The reference porosity, required for kozeny_carman_phi0");
   params.addRangeCheckedParam<Real>(

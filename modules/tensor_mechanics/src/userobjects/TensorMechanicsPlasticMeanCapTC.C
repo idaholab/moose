@@ -27,11 +27,12 @@ validParams<TensorMechanicsPlasticMeanCapTC>()
                                           "typically be positive).  Yield function = trace(stress) "
                                           "- tensile_strength for trace(stress)>tensile_strength.");
   params.addRequiredParam<UserObjectName>(
-      "compressive_strength", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                              "mean-cap compressive strength.  This should always be less than "
-                              "tensile_strength (it will typically be negative).  Yield function = "
-                              "- (trace(stress) - compressive_strength) for "
-                              "trace(stress)<compressive_strength.");
+      "compressive_strength",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "mean-cap compressive strength.  This should always be less than "
+      "tensile_strength (it will typically be negative).  Yield function = "
+      "- (trace(stress) - compressive_strength) for "
+      "trace(stress)<compressive_strength.");
   params.addClassDescription(
       "Associative mean-cap tensile and compressive plasticity with hardening/softening");
 

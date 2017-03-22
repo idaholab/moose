@@ -32,8 +32,9 @@ validParams<MultiAppDTKUserObjectTransfer>()
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<UserObjectName>(
-      "user_object", "The UserObject you want to transfer values from.  Note: This might be a "
-                     "UserObject from your MultiApp's input file!");
+      "user_object",
+      "The UserObject you want to transfer values from.  Note: This might be a "
+      "UserObject from your MultiApp's input file!");
   return params;
 }
 

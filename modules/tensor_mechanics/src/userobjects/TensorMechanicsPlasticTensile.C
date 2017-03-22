@@ -33,16 +33,19 @@ validParams<TensorMechanicsPlasticTensile>()
       "cap_start",
       0.0,
       "For the 'cap' tip_scheme, smoothing is performed in the stress_mean > cap_start region");
-  params.addRangeCheckedParam<Real>(
-      "cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap "
-                                      "degenerates to a hemisphere: small values mean a slow "
-                                      "degeneration to a hemisphere (and zero means the 'cap' will "
-                                      "be totally inactive).  Typical value is 1/tensile_strength");
-  params.addParam<Real>("tensile_lode_cutoff", "If the second invariant of stress is less than "
-                                               "this amount, the Lode angle is assumed to be zero. "
-                                               " This is to gaurd against precision-loss problems, "
-                                               "and this parameter should be set small.  Default = "
-                                               "0.00001*((yield_Function_tolerance)^2)");
+  params.addRangeCheckedParam<Real>("cap_rate",
+                                    0.0,
+                                    "cap_rate>=0",
+                                    "For the 'cap' tip_scheme, this controls how quickly the cap "
+                                    "degenerates to a hemisphere: small values mean a slow "
+                                    "degeneration to a hemisphere (and zero means the 'cap' will "
+                                    "be totally inactive).  Typical value is 1/tensile_strength");
+  params.addParam<Real>("tensile_lode_cutoff",
+                        "If the second invariant of stress is less than "
+                        "this amount, the Lode angle is assumed to be zero. "
+                        " This is to gaurd against precision-loss problems, "
+                        "and this parameter should be set small.  Default = "
+                        "0.00001*((yield_Function_tolerance)^2)");
   params.addClassDescription(
       "Associative tensile plasticity with hardening/softening, and tensile_strength = 1");
 

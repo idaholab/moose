@@ -14,13 +14,17 @@ validParams<RichardsRelPermVG>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
   params.addRequiredRangeCheckedParam<Real>(
-      "simm", "simm >= 0 & simm < 1", "Immobile saturation.  Must be between 0 and 1.  Define s = "
-                                      "(seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 "
-                                      "- s^(1/m))^m)^2");
+      "simm",
+      "simm >= 0 & simm < 1",
+      "Immobile saturation.  Must be between 0 and 1.  Define s = "
+      "(seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 "
+      "- s^(1/m))^m)^2");
   params.addRequiredRangeCheckedParam<Real>(
-      "m", "m > 0 & m < 1", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally "
-                            "should be set >0.5.  Define s = (seff - simm)/(1 - simm).  Then "
-                            "relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2");
+      "m",
+      "m > 0 & m < 1",
+      "van-Genuchten m parameter.  Must be between 0 and 1, and optimally "
+      "should be set >0.5.  Define s = (seff - simm)/(1 - simm).  Then "
+      "relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2");
   params.addClassDescription("VG form of relative permeability.  Define s = (seff - simm)/(1 - "
                              "simm).  Then relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2, if s>0, "
                              "and relperm=0 otherwise");

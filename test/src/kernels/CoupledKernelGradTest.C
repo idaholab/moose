@@ -20,9 +20,11 @@ validParams<CoupledKernelGradTest>()
   InputParameters p = validParams<KernelGrad>();
   p.addRequiredCoupledVar("var2", "Coupled Variable");
   p.addRequiredParam<std::vector<Real>>("vel", "velocity");
-  p.addParam<bool>("test_coupling_error", false, "Set to true to verify that error messages are "
-                                                 "produced if a coupling is requested that wasn't "
-                                                 "declared");
+  p.addParam<bool>("test_coupling_error",
+                   false,
+                   "Set to true to verify that error messages are "
+                   "produced if a coupling is requested that wasn't "
+                   "declared");
   return p;
 }
 

@@ -39,11 +39,13 @@ validParams<GapConductance>()
                        "Variable to be used in the gap_conductivity_function in place of time");
 
   // Quadrature based
-  params.addParam<bool>("quadrature", false, "Whether or not to do quadrature point based gap heat "
-                                             "transfer.  If this is true then gap_distance and "
-                                             "gap_temp should NOT be provided (and will be "
-                                             "ignored); however, paired_boundary and variable are "
-                                             "then required.");
+  params.addParam<bool>("quadrature",
+                        false,
+                        "Whether or not to do quadrature point based gap heat "
+                        "transfer.  If this is true then gap_distance and "
+                        "gap_temp should NOT be provided (and will be "
+                        "ignored); however, paired_boundary and variable are "
+                        "then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>(
@@ -84,11 +86,13 @@ validParams<GapConductance>()
                                     "emissivity_2>=0 & emissivity_2<=1",
                                     "The emissivity of the cladding surface");
 
-  params.addParam<bool>("use_displaced_mesh", true, "Whether or not this object should use the "
-                                                    "displaced mesh for computation.  Note that in "
-                                                    "the case this is true but no displacements "
-                                                    "are provided in the Mesh block the "
-                                                    "undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh",
+                        true,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that in "
+                        "the case this is true but no displacements "
+                        "are provided in the Mesh block the "
+                        "undisplaced mesh will still be used.");
 
   return params;
 }

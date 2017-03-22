@@ -18,9 +18,10 @@ InputParameters
 validParams<TrussMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
-                                            "multiple mechanics material systems on the same "
-                                            "block, i.e. for multiple phases");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");

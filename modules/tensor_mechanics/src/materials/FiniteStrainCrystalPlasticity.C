@@ -44,9 +44,10 @@ validParams<FiniteStrainCrystalPlasticity>()
       "num_slip_sys_flowrate_props",
       2,
       "Number of flow rate properties for a slip system"); // Used for reading flow rate parameters
-  params.addParam<UserObjectName>("read_prop_user_object", "The ElementReadPropertyFile "
-                                                           "GeneralUserObject to read element "
-                                                           "specific property values from file");
+  params.addParam<UserObjectName>("read_prop_user_object",
+                                  "The ElementReadPropertyFile "
+                                  "GeneralUserObject to read element "
+                                  "specific property values from file");
   MooseEnum tan_mod_options("exact none", "none"); // Type of read
   params.addParam<MooseEnum>("tan_mod_type",
                              tan_mod_options,
@@ -56,9 +57,10 @@ validParams<FiniteStrainCrystalPlasticity>()
       "intvar_read_type",
       intvar_read_options,
       "Read from options for initial value of internal variables: Default from .i file");
-  params.addParam<unsigned int>(
-      "num_slip_sys_props", 0, "Number of slip system specific properties provided in the file "
-                               "containing slip system normals and directions");
+  params.addParam<unsigned int>("num_slip_sys_props",
+                                0,
+                                "Number of slip system specific properties provided in the file "
+                                "containing slip system normals and directions");
   params.addParam<bool>(
       "gen_random_stress_flag",
       false,

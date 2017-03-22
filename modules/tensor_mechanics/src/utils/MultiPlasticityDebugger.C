@@ -13,10 +13,11 @@ validParams<MultiPlasticityDebugger>()
 {
   InputParameters params = validParams<MultiPlasticityLinearSystem>();
   MooseEnum debug_fspb_type("none crash jacobian jacobian_and_linear_system", "none");
-  params.addParam<MooseEnum>(
-      "debug_fspb", debug_fspb_type, "Debug types for use by developers when creating new "
-                                     "plasticity models, not for general use.  2 = debug Jacobian "
-                                     "entries, 3 = check the entire Jacobian, and check Ax=b");
+  params.addParam<MooseEnum>("debug_fspb",
+                             debug_fspb_type,
+                             "Debug types for use by developers when creating new "
+                             "plasticity models, not for general use.  2 = debug Jacobian "
+                             "entries, 3 = check the entire Jacobian, and check Ax=b");
   params.addParam<RealTensorValue>("debug_jac_at_stress",
                                    RealTensorValue(),
                                    "Debug Jacobian entries at this stress.  For use by developers");
@@ -444,8 +445,9 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
     if (anyActiveSurfaces(model, active_not_deact))
       x[ind++] = dintnl[model];
 
-  mooseAssert(ind == orig_rhs.size(), "Incorrect extracting of changes from NR solution in the "
-                                      "finite-difference checking of nrStep");
+  mooseAssert(ind == orig_rhs.size(),
+              "Incorrect extracting of changes from NR solution in the "
+              "finite-difference checking of nrStep");
 
   Moose::err << "\nThis yields x =";
   for (unsigned i = 0; i < orig_rhs.size(); ++i)

@@ -16,12 +16,16 @@ validParams<TensorMechanicsPlasticJ2>()
       "A TensorMechanicsHardening UserObject that defines hardening of the yield strength");
   params.addRangeCheckedParam<unsigned>(
       "max_iterations", 10, "max_iterations>0", "Maximum iterations for custom J2 return map");
-  params.addParam<bool>("use_custom_returnMap", true, "Whether to use the custom returnMap "
-                                                      "algorithm.  Set to true if you are using "
-                                                      "isotropic elasticity.");
-  params.addParam<bool>("use_custom_cto", true, "Whether to use the custom consistent tangent "
-                                                "operator computations.  Set to true if you are "
-                                                "using isotropic elasticity.");
+  params.addParam<bool>("use_custom_returnMap",
+                        true,
+                        "Whether to use the custom returnMap "
+                        "algorithm.  Set to true if you are using "
+                        "isotropic elasticity.");
+  params.addParam<bool>("use_custom_cto",
+                        true,
+                        "Whether to use the custom consistent tangent "
+                        "operator computations.  Set to true if you are "
+                        "using isotropic elasticity.");
   params.addClassDescription("J2 plasticity, associative, with hardening");
 
   return params;

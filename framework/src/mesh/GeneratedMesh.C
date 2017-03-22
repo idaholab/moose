@@ -47,9 +47,11 @@ validParams<GeneratedMesh>()
   params.addParam<Real>("xmax", 1.0, "Upper X Coordinate of the generated mesh");
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
-  params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to "
-                                                      "generate (default: linear element for "
-                                                      "requested dimension)");
+  params.addParam<MooseEnum>("elem_type",
+                             elem_types,
+                             "The type of element from libMesh to "
+                             "generate (default: linear element for "
+                             "requested dimension)");
   params.addParam<bool>(
       "gauss_lobatto_grid",
       false,

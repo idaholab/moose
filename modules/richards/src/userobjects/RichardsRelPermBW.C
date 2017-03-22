@@ -18,21 +18,28 @@ validParams<RichardsRelPermBW>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
   params.addRequiredRangeCheckedParam<Real>(
-      "Sn", "Sn >= 0", "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
-                       "initial effective saturation, below which effective saturation never goes "
-                       "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.");
+      "Sn",
+      "Sn >= 0",
+      "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
+      "initial effective saturation, below which effective saturation never goes "
+      "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.");
   params.addRangeCheckedParam<Real>(
-      "Ss", 1.0, "Ss <= 1", "High saturation.  This must be > Sn and <= 1.  Effective saturation "
-                            "where porepressure = 0.  Effective saturation never exceeds this "
-                            "value in BW's simulations/models.");
+      "Ss",
+      1.0,
+      "Ss <= 1",
+      "High saturation.  This must be > Sn and <= 1.  Effective saturation "
+      "where porepressure = 0.  Effective saturation never exceeds this "
+      "value in BW's simulations/models.");
   params.addRangeCheckedParam<Real>(
       "Kn", 0.0, "Kn >= 0", "Relative permeability at Seff = Sn.  Must be < Ks");
   params.addRangeCheckedParam<Real>(
       "Ks", 1.0, "Ks <= 1", "Relative permeability at Seff = Ss.  Must be > Kn");
   params.addRequiredRangeCheckedParam<Real>(
-      "C", "C > 1", "BW's C parameter.  Must be > 1.   Define s = (seff - Sn)/(Ss - Sn).  Then "
-                    "relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, otherwise relperm = Kn if "
-                    "s<=0, otherwise relperm = Ks if s>=1.");
+      "C",
+      "C > 1",
+      "BW's C parameter.  Must be > 1.   Define s = (seff - Sn)/(Ss - Sn).  Then "
+      "relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, otherwise relperm = Kn if "
+      "s<=0, otherwise relperm = Ks if s>=1.");
   params.addClassDescription("Broadbridge-White form of relative permeability.  Define s = (seff - "
                              "Sn)/(Ss - Sn).  Then relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, "
                              "otherwise relperm = Kn if s<=0, otherwise relperm = Ks if s>=1.");

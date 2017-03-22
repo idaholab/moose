@@ -26,9 +26,10 @@ InputParameters
 validParams<PatternedMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-  params.addRequiredParam<std::vector<MeshFileName>>("files", "The name of the mesh files to read. "
-                                                              " They are automatically assigned "
-                                                              "ids starting with zero.");
+  params.addRequiredParam<std::vector<MeshFileName>>("files",
+                                                     "The name of the mesh files to read. "
+                                                     " They are automatically assigned "
+                                                     "ids starting with zero.");
 
   params.addRangeCheckedParam<Real>(
       "x_width", 0, "x_width>=0", "The tile width in the x direction");

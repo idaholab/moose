@@ -17,11 +17,13 @@ validParams<Q2PBorehole>()
       "fluid_density",
       "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
   params.addRequiredParam<UserObjectName>(
-      "fluid_relperm", "A RichardsRelPerm UserObject (eg RichardsRelPermPower) that defines the "
-                       "fluid relative permeability as a function of the saturation Variable.");
-  params.addRequiredCoupledVar("other_var", "The other variable in the 2-phase system.  If "
-                                            "Variable=porepressure, the other_var=saturation, and "
-                                            "vice-versa.");
+      "fluid_relperm",
+      "A RichardsRelPerm UserObject (eg RichardsRelPermPower) that defines the "
+      "fluid relative permeability as a function of the saturation Variable.");
+  params.addRequiredCoupledVar("other_var",
+                               "The other variable in the 2-phase system.  If "
+                               "Variable=porepressure, the other_var=saturation, and "
+                               "vice-versa.");
   params.addRequiredParam<bool>("var_is_porepressure",
                                 "This flag is needed to correctly calculate the Jacobian entries.  "
                                 "If set to true, this Sink will extract fluid from the phase with "

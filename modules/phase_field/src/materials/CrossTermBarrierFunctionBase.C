@@ -15,9 +15,10 @@ validParams<CrossTermBarrierFunctionBase>()
   MooseEnum g_order("SIMPLE=0 LOW", "SIMPLE");
   params.addParam<MooseEnum>("g_order", g_order, "Polynomial order of the barrier function g(eta)");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
-  params.addRequiredParam<std::vector<Real>>("W_ij", "Terms controlling barrier height set W=1 in "
-                                                     "DerivativeMultiPhaseMaterial for these to "
-                                                     "apply");
+  params.addRequiredParam<std::vector<Real>>("W_ij",
+                                             "Terms controlling barrier height set W=1 in "
+                                             "DerivativeMultiPhaseMaterial for these to "
+                                             "apply");
   return params;
 }
 

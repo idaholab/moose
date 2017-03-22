@@ -50,16 +50,19 @@ validParams<MultiSmoothSuperellipsoidIC>()
                                      "Vector of plus or minus fractions of random variation in the "
                                      "bubble semiaxis in the z direction for uniform, standard "
                                      "deviation for normal. Must be set to 0 if 2D.");
-  params.addParam<bool>("check_extremes", false, "Check all Superellipsoid extremes (center +- "
-                                                 "each semiaxis) for overlap, must have "
-                                                 "prevent_overlap set to True.");
+  params.addParam<bool>("check_extremes",
+                        false,
+                        "Check all Superellipsoid extremes (center +- "
+                        "each semiaxis) for overlap, must have "
+                        "prevent_overlap set to True.");
   params.addParam<bool>("prevent_overlap",
                         false,
                         "Check all Superellipsoid centers for overlap with other Superellipsoids.");
-  params.addParam<bool>(
-      "vary_axes_independently", true, "If true the length of each semiaxis is randomly chosen "
-                                       "within the provided parameters, if false then one random "
-                                       "number is generated and applied to all semiaxes.");
+  params.addParam<bool>("vary_axes_independently",
+                        true,
+                        "If true the length of each semiaxis is randomly chosen "
+                        "within the provided parameters, if false then one random "
+                        "number is generated and applied to all semiaxes.");
   MooseEnum rand_options("uniform normal none", "none");
   params.addParam<MooseEnum>(
       "semiaxis_variation_type",

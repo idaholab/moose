@@ -22,15 +22,17 @@ validParams<FeatureFloodCountAux>()
                                             "Use \"flood_counter\" instead.");
   params.addRequiredParam<UserObjectName>("flood_counter",
                                           "The FeatureFloodCount UserObject to get values from.");
-  params.addParam<unsigned int>("map_index", "The index of which map to retrieve values from when "
-                                             "using FeatureFloodCount with multiple maps.");
+  params.addParam<unsigned int>("map_index",
+                                "The index of which map to retrieve values from when "
+                                "using FeatureFloodCount with multiple maps.");
   MooseEnum field_display(
       "UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS CENTROID ACTIVE_BOUNDS",
       "UNIQUE_REGION");
-  params.addParam<MooseEnum>(
-      "field_display", field_display, "Determines how the auxilary field should be colored. "
-                                      "(UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is "
-                                      "elemental, default: UNIQUE_REGION)");
+  params.addParam<MooseEnum>("field_display",
+                             field_display,
+                             "Determines how the auxilary field should be colored. "
+                             "(UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is "
+                             "elemental, default: UNIQUE_REGION)");
 
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
   execute_options = "initial timestep_end";

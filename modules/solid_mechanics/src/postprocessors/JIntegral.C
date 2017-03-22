@@ -21,9 +21,10 @@ validParams<JIntegral>()
       "The index of the point on the crack front corresponding to this q function");
   params.addParam<bool>(
       "convert_J_to_K", false, "Convert J-integral to stress intensity factor K.");
-  params.addParam<unsigned int>("symmetry_plane", "Account for a symmetry plane passing through "
-                                                  "the plane of the crack, normal to the specified "
-                                                  "axis (0=x, 1=y, 2=z)");
+  params.addParam<unsigned int>("symmetry_plane",
+                                "Account for a symmetry plane passing through "
+                                "the plane of the crack, normal to the specified "
+                                "axis (0=x, 1=y, 2=z)");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;

@@ -13,8 +13,10 @@ validParams<CoupledConvectionReactionSub>()
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "Weight of the equilibrium species");
   params.addParam<Real>("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
-  params.addParam<Real>("sto_u", 1.0, "Stoichiometric coef of the primary spceices the kernel "
-                                      "operates on in the equilibrium reaction");
+  params.addParam<Real>("sto_u",
+                        1.0,
+                        "Stoichiometric coef of the primary spceices the kernel "
+                        "operates on in the equilibrium reaction");
   params.addRequiredParam<std::vector<Real>>(
       "sto_v",
       "The stoichiometric coefficients of coupled primary species in equilibrium reaction");

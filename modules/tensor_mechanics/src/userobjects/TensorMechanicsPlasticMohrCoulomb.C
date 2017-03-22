@@ -13,16 +13,19 @@ validParams<TensorMechanicsPlasticMohrCoulomb>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
   params.addRequiredParam<UserObjectName>(
-      "cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
-                  "Physically the cohesion should not be negative.");
+      "cohesion",
+      "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
+      "Physically the cohesion should not be negative.");
   params.addRequiredParam<UserObjectName>(
-      "friction_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                        "friction angle (in radians).  Physically the friction angle should be "
-                        "between 0 and 90deg.");
+      "friction_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "friction angle (in radians).  Physically the friction angle should be "
+      "between 0 and 90deg.");
   params.addRequiredParam<UserObjectName>(
-      "dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                        "dilation angle (in radians).  Usually the dilation angle is not greater "
-                        "than the friction angle, and it is between 0 and 90deg.");
+      "dilation_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "dilation angle (in radians).  Usually the dilation angle is not greater "
+      "than the friction angle, and it is between 0 and 90deg.");
   params.addRangeCheckedParam<Real>(
       "mc_edge_smoother",
       25.0,
@@ -31,24 +34,28 @@ validParams<TensorMechanicsPlasticMohrCoulomb>()
   MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
   params.addParam<MooseEnum>(
       "tip_scheme", tip_scheme, "Scheme by which the pyramid's tip will be smoothed.");
-  params.addRequiredRangeCheckedParam<Real>(
-      "mc_tip_smoother", "mc_tip_smoother>=0", "Smoothing parameter: the cone vertex at mean = "
-                                               "cohesion*cot(friction_angle), will be smoothed by "
-                                               "the given amount.  Typical value is 0.1*cohesion");
+  params.addRequiredRangeCheckedParam<Real>("mc_tip_smoother",
+                                            "mc_tip_smoother>=0",
+                                            "Smoothing parameter: the cone vertex at mean = "
+                                            "cohesion*cot(friction_angle), will be smoothed by "
+                                            "the given amount.  Typical value is 0.1*cohesion");
   params.addParam<Real>(
       "cap_start",
       0.0,
       "For the 'cap' tip_scheme, smoothing is performed in the stress_mean > cap_start region");
-  params.addRangeCheckedParam<Real>(
-      "cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap "
-                                      "degenerates to a hemisphere: small values mean a slow "
-                                      "degeneration to a hemisphere (and zero means the 'cap' will "
-                                      "be totally inactive).  Typical value is 1/tensile_strength");
-  params.addParam<Real>("mc_lode_cutoff", "If the second invariant of stress is less than this "
-                                          "amount, the Lode angle is assumed to be zero.  This is "
-                                          "to gaurd against precision-loss problems, and this "
-                                          "parameter should be set small.  Default = "
-                                          "0.00001*((yield_Function_tolerance)^2)");
+  params.addRangeCheckedParam<Real>("cap_rate",
+                                    0.0,
+                                    "cap_rate>=0",
+                                    "For the 'cap' tip_scheme, this controls how quickly the cap "
+                                    "degenerates to a hemisphere: small values mean a slow "
+                                    "degeneration to a hemisphere (and zero means the 'cap' will "
+                                    "be totally inactive).  Typical value is 1/tensile_strength");
+  params.addParam<Real>("mc_lode_cutoff",
+                        "If the second invariant of stress is less than this "
+                        "amount, the Lode angle is assumed to be zero.  This is "
+                        "to gaurd against precision-loss problems, and this "
+                        "parameter should be set small.  Default = "
+                        "0.00001*((yield_Function_tolerance)^2)");
   params.addClassDescription("Non-associative Mohr-Coulomb plasticity with hardening/softening");
 
   return params;

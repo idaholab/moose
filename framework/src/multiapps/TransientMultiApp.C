@@ -34,24 +34,31 @@ validParams<TransientMultiApp>()
   InputParameters params = validParams<MultiApp>();
   params += validParams<TransientInterface>();
 
-  params.addParam<bool>("sub_cycling", false, "Set to true to allow this MultiApp to take smaller "
-                                              "timesteps than the rest of the simulation.  More "
-                                              "than one timestep will be performed for each "
-                                              "'master' timestep");
+  params.addParam<bool>("sub_cycling",
+                        false,
+                        "Set to true to allow this MultiApp to take smaller "
+                        "timesteps than the rest of the simulation.  More "
+                        "than one timestep will be performed for each "
+                        "'master' timestep");
 
-  params.addParam<bool>("interpolate_transfers", false, "Only valid when sub_cycling.  This allows "
-                                                        "transferred values to be interpolated "
-                                                        "over the time frame the MultiApp is "
-                                                        "executing over when sub_cycling");
+  params.addParam<bool>("interpolate_transfers",
+                        false,
+                        "Only valid when sub_cycling.  This allows "
+                        "transferred values to be interpolated "
+                        "over the time frame the MultiApp is "
+                        "executing over when sub_cycling");
 
-  params.addParam<bool>(
-      "detect_steady_state", false, "If true then while sub_cycling a steady state check will be "
-                                    "done.  In this mode output will only be done once the "
-                                    "MultiApp reaches the target time or steady state is reached");
+  params.addParam<bool>("detect_steady_state",
+                        false,
+                        "If true then while sub_cycling a steady state check will be "
+                        "done.  In this mode output will only be done once the "
+                        "MultiApp reaches the target time or steady state is reached");
 
-  params.addParam<Real>("steady_state_tol", 1e-8, "The relative difference between the new "
-                                                  "solution and the old solution that will be "
-                                                  "considered to be at steady state");
+  params.addParam<Real>("steady_state_tol",
+                        1e-8,
+                        "The relative difference between the new "
+                        "solution and the old solution that will be "
+                        "considered to be at steady state");
 
   params.addParam<bool>("output_sub_cycles", false, "If true then every sub-cycle will be output.");
   params.addParam<bool>(
@@ -60,18 +67,22 @@ validParams<TransientMultiApp>()
   params.addParam<unsigned int>(
       "max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
-  params.addParam<bool>("tolerate_failure", false, "If true this MultiApp won't participate in dt "
-                                                   "decisions and will always be fast-forwarded to "
-                                                   "the current time.");
+  params.addParam<bool>("tolerate_failure",
+                        false,
+                        "If true this MultiApp won't participate in dt "
+                        "decisions and will always be fast-forwarded to "
+                        "the current time.");
 
   params.addParam<bool>(
       "catch_up",
       false,
       "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
 
-  params.addParam<Real>("max_catch_up_steps", 2, "Maximum number of steps to allow an app to take "
-                                                 "when trying to catch back up after a failed "
-                                                 "solve.");
+  params.addParam<Real>("max_catch_up_steps",
+                        2,
+                        "Maximum number of steps to allow an app to take "
+                        "when trying to catch back up after a failed "
+                        "solve.");
 
   return params;
 }

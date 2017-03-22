@@ -30,9 +30,10 @@ validParams<LayeredBase>()
 
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
   params.addParam<unsigned int>("num_layers", "The number of layers.");
-  params.addParam<std::vector<Real>>("bounds", "The 'bounding' positions of the layers i.e.: '0, "
-                                               "1.2, 3.7, 4.2' will mean 3 layers between those "
-                                               "positions.");
+  params.addParam<std::vector<Real>>("bounds",
+                                     "The 'bounding' positions of the layers i.e.: '0, "
+                                     "1.2, 3.7, 4.2' will mean 3 layers between those "
+                                     "positions.");
 
   MooseEnum sample_options("direct interpolate average", "direct");
   params.addParam<MooseEnum>("sample_type",
@@ -42,9 +43,11 @@ validParams<LayeredBase>()
                              " 'interpolate' does a linear interpolation between the two closest "
                              "layers.  'average' averages the two closest layers.");
 
-  params.addParam<unsigned int>("average_radius", 1, "When using 'average' sampling this is how "
-                                                     "the number of values both above and below "
-                                                     "the layer that will be averaged.");
+  params.addParam<unsigned int>("average_radius",
+                                1,
+                                "When using 'average' sampling this is how "
+                                "the number of values both above and below "
+                                "the layer that will be averaged.");
 
   params.addParam<bool>(
       "cumulative",

@@ -14,9 +14,11 @@ InputParameters
 validParams<GrainTrackerElasticity>()
 {
   InputParameters params = validParams<GrainTracker>();
-  params.addParam<bool>("random_rotations", true, "Generate random rotations when the Euler Angle "
-                                                  "provider runs out of data (otherwise error "
-                                                  "out)");
+  params.addParam<bool>("random_rotations",
+                        true,
+                        "Generate random rotations when the Euler Angle "
+                        "provider runs out of data (otherwise error "
+                        "out)");
   params.addRequiredParam<std::vector<Real>>("C_ijkl", "Unrotated stiffness tensor");
   params.addParam<MooseEnum>(
       "fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");

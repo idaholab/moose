@@ -27,9 +27,11 @@ validParams<ComputeElasticSmearedCrackingStress>()
       "active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>(
       "max_cracks", 3, "The maximum number of cracks allowed at a material point.");
-  params.addParam<Real>("cracking_neg_fraction", 0, "The fraction of the cracking strain at which "
-                                                    "a transitition begins during decreasing "
-                                                    "strain to the original stiffness.");
+  params.addParam<Real>("cracking_neg_fraction",
+                        0,
+                        "The fraction of the cracking strain at which "
+                        "a transitition begins during decreasing "
+                        "strain to the original stiffness.");
   return params;
 }
 

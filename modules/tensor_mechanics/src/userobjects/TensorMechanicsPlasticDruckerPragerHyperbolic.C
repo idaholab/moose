@@ -12,19 +12,25 @@ InputParameters
 validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticDruckerPrager>();
-  params.addParam<bool>("use_custom_returnMap", true, "Whether to use the custom returnMap "
-                                                      "algorithm.  Set to true if you are using "
-                                                      "isotropic elasticity.");
-  params.addParam<bool>("use_custom_cto", true, "Whether to use the custom consistent tangent "
-                                                "operator computations.  Set to true if you are "
-                                                "using isotropic elasticity.");
+  params.addParam<bool>("use_custom_returnMap",
+                        true,
+                        "Whether to use the custom returnMap "
+                        "algorithm.  Set to true if you are using "
+                        "isotropic elasticity.");
+  params.addParam<bool>("use_custom_cto",
+                        true,
+                        "Whether to use the custom consistent tangent "
+                        "operator computations.  Set to true if you are "
+                        "using isotropic elasticity.");
   params.addClassDescription("J2 plasticity, associative, with hardening");
-  params.addRangeCheckedParam<Real>(
-      "smoother", 0.0, "smoother>=0", "The cone vertex at J2=0 is smoothed.  The maximum mean "
-                                      "stress possible, which is Cohesion*Cot(friction_angle) for "
-                                      "smoother=0, becomes (Cohesion - "
-                                      "smoother/3)*Cot(friction_angle).  This is a non-hardening "
-                                      "parameter");
+  params.addRangeCheckedParam<Real>("smoother",
+                                    0.0,
+                                    "smoother>=0",
+                                    "The cone vertex at J2=0 is smoothed.  The maximum mean "
+                                    "stress possible, which is Cohesion*Cot(friction_angle) for "
+                                    "smoother=0, becomes (Cohesion - "
+                                    "smoother/3)*Cot(friction_angle).  This is a non-hardening "
+                                    "parameter");
   params.addRangeCheckedParam<unsigned>(
       "max_iterations",
       40,

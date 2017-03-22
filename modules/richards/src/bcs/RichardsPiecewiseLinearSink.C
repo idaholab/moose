@@ -15,45 +15,55 @@ validParams<RichardsPiecewiseLinearSink>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<bool>(
-      "use_mobility", "If true, then fluxes are multiplied by (density*permeability_nn/viscosity), "
-                      "where the '_nn' indicates the component normal to the boundary.  In this "
-                      "case bare_flux is measured in Pa.s^-1.  This can be used in conjunction "
-                      "with use_relperm.");
-  params.addRequiredParam<bool>("use_relperm", "If true, then fluxes are multiplied by relative "
-                                               "permeability.  This can be used in conjunction "
-                                               "with use_mobility");
-  params.addParam<std::vector<UserObjectName>>("relperm_UO", "List of names of user objects that "
-                                                             "define relative permeability.  Only "
-                                                             "needed if fully_upwind is used");
+      "use_mobility",
+      "If true, then fluxes are multiplied by (density*permeability_nn/viscosity), "
+      "where the '_nn' indicates the component normal to the boundary.  In this "
+      "case bare_flux is measured in Pa.s^-1.  This can be used in conjunction "
+      "with use_relperm.");
+  params.addRequiredParam<bool>("use_relperm",
+                                "If true, then fluxes are multiplied by relative "
+                                "permeability.  This can be used in conjunction "
+                                "with use_mobility");
+  params.addParam<std::vector<UserObjectName>>("relperm_UO",
+                                               "List of names of user objects that "
+                                               "define relative permeability.  Only "
+                                               "needed if fully_upwind is used");
   params.addParam<std::vector<UserObjectName>>(
-      "seff_UO", "List of name of user objects that define effective saturation as a function of "
-                 "pressure list.  Only needed if fully_upwind is used");
-  params.addParam<std::vector<UserObjectName>>("density_UO", "List of names of user objects that "
-                                                             "define the fluid density.  Only "
-                                                             "needed if fully_upwind is used");
+      "seff_UO",
+      "List of name of user objects that define effective saturation as a function of "
+      "pressure list.  Only needed if fully_upwind is used");
+  params.addParam<std::vector<UserObjectName>>("density_UO",
+                                               "List of names of user objects that "
+                                               "define the fluid density.  Only "
+                                               "needed if fully_upwind is used");
   params.addRequiredParam<std::vector<Real>>(
       "pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real>>(
-      "bare_fluxes", "Tuple of flux values (measured in kg.m^-2.s^-1 for use_mobility=false, and "
-                     "in Pa.s^-1 if use_mobility=true).  This flux is OUT of the medium: hence "
-                     "positive values of flux means this will be a SINK, while negative values "
-                     "indicate this flux will be a SOURCE.  A piecewise-linear fit is performed to "
-                     "the (pressure,bare_fluxes) pairs to obtain the flux at any arbitrary "
-                     "pressure, and the first or last bare_flux values are used if the quad-point "
-                     "pressure falls outside this range.");
-  params.addParam<FunctionName>("multiplying_fcn", 1.0, "If this function is provided, the flux "
-                                                        "will be multiplied by this function.  "
-                                                        "This is useful for spatially or "
-                                                        "temporally varying sinks");
+      "bare_fluxes",
+      "Tuple of flux values (measured in kg.m^-2.s^-1 for use_mobility=false, and "
+      "in Pa.s^-1 if use_mobility=true).  This flux is OUT of the medium: hence "
+      "positive values of flux means this will be a SINK, while negative values "
+      "indicate this flux will be a SOURCE.  A piecewise-linear fit is performed to "
+      "the (pressure,bare_fluxes) pairs to obtain the flux at any arbitrary "
+      "pressure, and the first or last bare_flux values are used if the quad-point "
+      "pressure falls outside this range.");
+  params.addParam<FunctionName>("multiplying_fcn",
+                                1.0,
+                                "If this function is provided, the flux "
+                                "will be multiplied by this function.  "
+                                "This is useful for spatially or "
+                                "temporally varying sinks");
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addParam<bool>("fully_upwind", false, "Use full upwinding");
   params.addParam<PostprocessorName>(
-      "area_pp", 1, "An area postprocessor.  If given, the bare_fluxes will be divided by this "
-                    "quantity.  This means the bare fluxes are measured in kg.s^-1.  This is "
-                    "useful for the case when you wish to provide the *total* flux, and let MOOSE "
-                    "proportion it uniformly across the boundary.  In that case you would have "
-                    "use_mobility=false=use_relperm, and only one bare flux should be specified");
+      "area_pp",
+      1,
+      "An area postprocessor.  If given, the bare_fluxes will be divided by this "
+      "quantity.  This means the bare fluxes are measured in kg.s^-1.  This is "
+      "useful for the case when you wish to provide the *total* flux, and let MOOSE "
+      "proportion it uniformly across the boundary.  In that case you would have "
+      "use_mobility=false=use_relperm, and only one bare flux should be specified");
   return params;
 }
 

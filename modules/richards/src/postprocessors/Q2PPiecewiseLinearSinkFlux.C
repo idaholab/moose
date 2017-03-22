@@ -16,33 +16,37 @@ validParams<Q2PPiecewiseLinearSinkFlux>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
   params.addParam<UserObjectName>(
-      "fluid_density", "The fluid density as a RichardsDensity UserObject.  If this and the "
-                       "fluid_viscosity are given, then fluxes are multiplied by "
-                       "(density*permeability_nn/viscosity), where the '_nn' indicates the "
-                       "component normal to the boundary.  In this case bare_flux is measured in "
-                       "Pa.s^-1.  This can be used in conjunction with fluid_relperm.");
+      "fluid_density",
+      "The fluid density as a RichardsDensity UserObject.  If this and the "
+      "fluid_viscosity are given, then fluxes are multiplied by "
+      "(density*permeability_nn/viscosity), where the '_nn' indicates the "
+      "component normal to the boundary.  In this case bare_flux is measured in "
+      "Pa.s^-1.  This can be used in conjunction with fluid_relperm.");
   params.addParam<Real>("fluid_viscosity", "The fluid dynamic viscosity.");
   params.addParam<UserObjectName>(
-      "fluid_relperm", "The fluid density as a RichardsRelPerm UserObject (eg RichardsRelPermPower "
-                       "for water, or Q2PRelPermPostGas for gas).  If this and the saturation "
-                       "variable are defined then the flux will be motiplied by relative "
-                       "permeability.  This can be used in conjunction with fluid_density");
+      "fluid_relperm",
+      "The fluid density as a RichardsRelPerm UserObject (eg RichardsRelPermPower "
+      "for water, or Q2PRelPermPostGas for gas).  If this and the saturation "
+      "variable are defined then the flux will be motiplied by relative "
+      "permeability.  This can be used in conjunction with fluid_density");
   params.addCoupledVar("saturation", "The name of the water saturation variable");
   params.addRequiredCoupledVar("porepressure", "The name of the porepressure variable");
   params.addRequiredParam<std::vector<Real>>(
       "pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real>>(
-      "bare_fluxes", "Tuple of flux values (measured in kg.m^-2.s^-1 if not using fluid_density, "
-                     "otherwise in Pa.s^-1).  This flux is OUT of the medium: hence positive "
-                     "values of flux means this will be a SINK, while negative values indicate "
-                     "this flux will be a SOURCE.  A piecewise-linear fit is performed to the "
-                     "(pressure,bare_fluxes) pairs to obtain the flux at any arbitrary pressure, "
-                     "and the first or last bare_flux values are used if the quad-point pressure "
-                     "falls outside this range.");
-  params.addParam<FunctionName>(
-      "multiplying_fcn", 1.0, "The flux will be multiplied by this spatially-and-temporally "
-                              "varying function.  This is useful if the boundary is a moving "
-                              "boundary controlled by RichardsExcav.");
+      "bare_fluxes",
+      "Tuple of flux values (measured in kg.m^-2.s^-1 if not using fluid_density, "
+      "otherwise in Pa.s^-1).  This flux is OUT of the medium: hence positive "
+      "values of flux means this will be a SINK, while negative values indicate "
+      "this flux will be a SOURCE.  A piecewise-linear fit is performed to the "
+      "(pressure,bare_fluxes) pairs to obtain the flux at any arbitrary pressure, "
+      "and the first or last bare_flux values are used if the quad-point pressure "
+      "falls outside this range.");
+  params.addParam<FunctionName>("multiplying_fcn",
+                                1.0,
+                                "The flux will be multiplied by this spatially-and-temporally "
+                                "varying function.  This is useful if the boundary is a moving "
+                                "boundary controlled by RichardsExcav.");
   params.addClassDescription("Records the fluid flow into a sink (positive values indicate fluid "
                              "is flowing from porespace into the sink).");
   return params;
