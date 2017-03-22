@@ -42,7 +42,7 @@
     prereq = 'frictionless_kin_sm'
     # This test is fails reliably on INTEL compilers with PETSc 3.7.4 and 3.7.5, so restrict the test to not INTEL
     compiler = 'GCC CLANG'
-    petsc_version = '>=3.7.5'
+    petsc_version = '>=3.7.6'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -85,7 +85,7 @@
     # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
     dof_id_bytes = 4
     # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    petsc_version = '>=3.7.5'
+    petsc_version = '>=3.7.6'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'

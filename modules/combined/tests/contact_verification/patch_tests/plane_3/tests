@@ -1,4 +1,4 @@
-[Tests]
+eTests]
   [./glued_kin]
     type = 'CSVDiff'
     input = 'plane3_template1.i'
@@ -9,7 +9,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'glued_kin_sm'
-    petsc_version = '>=3.7.5'
+    petsc_version = '>=3.7.6'
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -32,7 +32,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_kin_sm'
-    petsc_version = '>=3.7.5'
+    petsc_version = '>=3.7.6'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -65,7 +65,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_kin_sm'
-    petsc_version = '>=3.7.5'
+    petsc_version = '>=3.7.6'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -89,7 +89,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    petsc_version = '>=3.7.5'
+    petsc_version = '>=3.7.6'
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -147,7 +147,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    petsc_version = '>=3.7.5'
+    skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'
