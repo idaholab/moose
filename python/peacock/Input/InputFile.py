@@ -39,12 +39,21 @@ class InputFile(object):
         self.changed = False
         self.root_node = GPNode("/", None)
 
+        # Do some basic checks on the filename to make sure
+        # it is probably a real input file since the GetPot
+        # parser doesn't do any checks.
         if not path.exists(filename):
             msg = "Input file %s does not exist" % filename
             mooseutils.mooseError(msg)
             raise PeacockException(msg)
+
         if not path.isfile(filename):
             msg = "Input file %s is not a file" % filename
+            mooseutils.mooseError(msg)
+            raise PeacockException(msg)
+
+        if not filename.endswith(".i"):
+            msg = "Input file %s does not have the proper extension" % filename
             mooseutils.mooseError(msg)
             raise PeacockException(msg)
 

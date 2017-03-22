@@ -136,6 +136,11 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(tab.MeshPlugin.isEnabled(), False)
         self.assertEqual(tab.vtkwin.isVisible(), False)
 
+    def testBadInput(self):
+        self.create_app(["-i", "../../common/out_transient.e", Testing.find_moose_test_exe()])
+        tabs = self.app.main_widget.tab_plugin
+        self.check_current_tab(tabs, self.exe.tabName())
+
     def testClearSettings(self):
         args = ["--clear-settings"]
         self.create_app(args)
