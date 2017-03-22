@@ -23,9 +23,10 @@ InputParameters
 validParams<RealControlParameterReporter>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<std::string>("parameter", "The input parameter to control, the name must "
-                                                    "be complete (e.g. "
-                                                    "Kernels/object/param_name).");
+  params.addRequiredParam<std::string>("parameter",
+                                       "The input parameter to control, the name must "
+                                       "be complete (e.g. "
+                                       "Kernels/object/param_name).");
   return params;
 }
 

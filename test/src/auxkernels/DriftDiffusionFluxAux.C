@@ -19,9 +19,11 @@ validParams<DriftDiffusionFluxAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("potential", "The potential responsible for charge advection");
-  params.addParam<bool>("positive_charge", true, "Whether the potential is advecting positive "
-                                                 "charges. Should be set to false if charges are "
-                                                 "negative.");
+  params.addParam<bool>("positive_charge",
+                        true,
+                        "Whether the potential is advecting positive "
+                        "charges. Should be set to false if charges are "
+                        "negative.");
   params.addRequiredCoupledVar("u", "The drift-diffusing species.");
   params.addParam<int>("component", 0, "The flux component you want to see.");
   return params;

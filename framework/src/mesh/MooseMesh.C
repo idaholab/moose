@@ -1114,8 +1114,9 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
                                 unsigned int var_number,
                                 PeriodicBoundaries * pbs) const
 {
-  mooseAssert(!Threads::in_threads, "This function should only be called outside of a threaded "
-                                    "region due to the use of PointLocator");
+  mooseAssert(!Threads::in_threads,
+              "This function should only be called outside of a threaded "
+              "region due to the use of PointLocator");
 
   periodic_node_map.clear();
 

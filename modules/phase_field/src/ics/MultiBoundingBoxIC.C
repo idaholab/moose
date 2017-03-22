@@ -18,9 +18,10 @@ validParams<MultiBoundingBoxIC>()
   params.addRequiredParam<std::vector<Point>>("corners", "The corner coordinates boxes");
   params.addRequiredParam<std::vector<Point>>(
       "opposite_corners", "The coordinates of the opposite corners of the boxes");
-  params.addRequiredParam<std::vector<Real>>("inside", "The value of the variable inside each box "
-                                                       "(one value per box or a single value for "
-                                                       "all boxes)");
+  params.addRequiredParam<std::vector<Real>>("inside",
+                                             "The value of the variable inside each box "
+                                             "(one value per box or a single value for "
+                                             "all boxes)");
   params.addParam<Real>("outside", 0.0, "The value of the variable outside the box");
   return params;
 }

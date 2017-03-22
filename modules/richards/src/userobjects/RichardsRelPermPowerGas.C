@@ -15,12 +15,16 @@ validParams<RichardsRelPermPowerGas>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
   params.addRequiredRangeCheckedParam<Real>(
-      "simm", "simm >= 0 & simm < 1", "Immobile saturation.  Must be between 0 and 1.   Define s = "
-                                      "(seff - simm)/(1 - simm).  Then relperm = 1 - (n+1)(1-s)^n "
-                                      "+ n(1-s)^(n+1)");
+      "simm",
+      "simm >= 0 & simm < 1",
+      "Immobile saturation.  Must be between 0 and 1.   Define s = "
+      "(seff - simm)/(1 - simm).  Then relperm = 1 - (n+1)(1-s)^n "
+      "+ n(1-s)^(n+1)");
   params.addRequiredRangeCheckedParam<Real>(
-      "n", "n >= 2", "Exponent.  Must be >= 2.   Define s = (seff - simm)/(1 - simm).  Then "
-                     "relperm = 1 - (n+1)(1-s)^n + n(1-s)^(n+1)");
+      "n",
+      "n >= 2",
+      "Exponent.  Must be >= 2.   Define s = (seff - simm)/(1 - simm).  Then "
+      "relperm = 1 - (n+1)(1-s)^n + n(1-s)^(n+1)");
   params.addClassDescription("Power form of relative permeability that might be useful for gases.  "
                              "Define s = (seff - simm)/(1 - simm).  Then relperm = 1 - "
                              "(n+1)(1-s)^n + n(1-s)^(n+1) if s<simm, otherwise relperm=1");

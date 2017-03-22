@@ -22,9 +22,10 @@ validParams<VectorPostprocessorScalarKernel>()
 
   params.addRequiredParam<VectorPostprocessorName>("vpp",
                                                    "VectorPostprocessor to pull the values out of");
-  params.addRequiredParam<std::string>("vector", "The vector to use from the VectorPostprocessor.  "
-                                                 "This vector MUST be the same size as the scalar "
-                                                 "variable's ORDER.");
+  params.addRequiredParam<std::string>("vector",
+                                       "The vector to use from the VectorPostprocessor.  "
+                                       "This vector MUST be the same size as the scalar "
+                                       "variable's ORDER.");
 
   return params;
 }

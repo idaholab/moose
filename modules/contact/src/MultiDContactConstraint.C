@@ -21,13 +21,16 @@ validParams<MultiDContactConstraint>()
 {
   InputParameters params = validParams<NodeFaceConstraint>();
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<bool>("jacobian_update", false, "Whether or not to update the 'in contact' list "
-                                                  "every jacobian evaluation (by default it will "
-                                                  "happen once per timestep");
+  params.addParam<bool>("jacobian_update",
+                        false,
+                        "Whether or not to update the 'in contact' list "
+                        "every jacobian evaluation (by default it will "
+                        "happen once per timestep");
 
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
-                                                     "the variable this kernel acts in. (0 for x, "
-                                                     "1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for x, "
+                                        "1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");

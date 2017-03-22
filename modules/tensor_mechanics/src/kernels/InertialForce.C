@@ -20,11 +20,15 @@ validParams<InertialForce>()
   params.addRequiredCoupledVar("acceleration", "acceleration variable");
   params.addRequiredParam<Real>("beta", "beta parameter for Newmark Time integration");
   params.addRequiredParam<Real>("gamma", "gamma parameter for Newmark Time integration");
-  params.addParam<MaterialPropertyName>("eta", 0.0, "Name of material property or a constant real "
-                                                    "number defining the eta parameter for the "
-                                                    "Rayleigh damping.");
-  params.addParam<Real>("alpha", 0, "alpha parameter for mass dependent numerical damping induced "
-                                    "by HHT time integration scheme");
+  params.addParam<MaterialPropertyName>("eta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the eta parameter for the "
+                                        "Rayleigh damping.");
+  params.addParam<Real>("alpha",
+                        0,
+                        "alpha parameter for mass dependent numerical damping induced "
+                        "by HHT time integration scheme");
   return params;
 }
 

@@ -20,8 +20,9 @@ validParams<BimodalSuperellipsoidsIC>()
   params.addRequiredParam<Real>(
       "small_spac",
       "minimum spacing between small particles, measured from closest edge to closest edge");
-  params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, "
-                                              "measured from closest edge to closest edge");
+  params.addRequiredParam<Real>("large_spac",
+                                "minimum spacing between large and small particles, "
+                                "measured from closest edge to closest edge");
   params.addRequiredParam<Real>(
       "small_a", "Mean semiaxis a value for the randomly placed (small) superellipsoids");
   params.addRequiredParam<Real>(
@@ -30,9 +31,11 @@ validParams<BimodalSuperellipsoidsIC>()
       "small_c", "Mean semiaxis c value for the randomly placed (small) superellipsoids");
   params.addRequiredParam<Real>("small_n",
                                 "Exponent n for the randomly placed (small) superellipsoids");
-  params.addParam<Real>("size_variation", 0.0, "Plus or minus fraction of random variation in the "
-                                               "semiaxes for uniform, standard deviation for "
-                                               "normal");
+  params.addParam<Real>("size_variation",
+                        0.0,
+                        "Plus or minus fraction of random variation in the "
+                        "semiaxes for uniform, standard deviation for "
+                        "normal");
   MooseEnum rand_options("uniform normal none", "none");
   params.addParam<MooseEnum>(
       "size_variation_type", rand_options, "Type of distribution that random semiaxes will follow");

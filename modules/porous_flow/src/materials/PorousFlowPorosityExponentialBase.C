@@ -19,9 +19,11 @@ validParams<PorousFlowPorosityExponentialBase>()
                         "is not necessary for simulations involving only linear lagrange elements. "
                         " If you set this to true, you will also want to set the same parameter to "
                         "true for related Kernels and Materials");
-  params.addParam<bool>("ensure_positive", true, "Modify the usual exponential relationships that "
-                                                 "governs porosity so that porosity is always "
-                                                 "positive");
+  params.addParam<bool>("ensure_positive",
+                        true,
+                        "Modify the usual exponential relationships that "
+                        "governs porosity so that porosity is always "
+                        "positive");
   params.addClassDescription("Base class Material for porosity that is computed via an exponential "
                              "relationship with coupled variables (strain, porepressure, "
                              "temperature)");

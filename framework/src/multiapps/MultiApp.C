@@ -47,11 +47,13 @@ validParams<MultiApp>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the "
-                                                     "displaced mesh for computation.  Note that "
-                                                     "in the case this is true but no "
-                                                     "displacements are provided in the Mesh block "
-                                                     "the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that "
+                        "in the case this is true but no "
+                        "displacements are provided in the Mesh block "
+                        "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   std::ostringstream app_types_strings;
@@ -60,26 +62,31 @@ validParams<MultiApp>()
     app_types_strings << it->first << " ";
   MooseEnum app_types_options(app_types_strings.str(), "", true);
 
-  params.addParam<MooseEnum>(
-      "app_type", app_types_options, "The type of application to build (applications not "
-                                     "registered can be loaded with dynamic libraries. Master "
-                                     "application type will be used if not provided.");
-  params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please "
-                                                   "avoid committing absolute paths in addition to "
-                                                   "MOOSE_LIBRARY_PATH)");
+  params.addParam<MooseEnum>("app_type",
+                             app_types_options,
+                             "The type of application to build (applications not "
+                             "registered can be loaded with dynamic libraries. Master "
+                             "application type will be used if not provided.");
+  params.addParam<std::string>("library_path",
+                               "",
+                               "Path to search for dynamic libraries (please "
+                               "avoid committing absolute paths in addition to "
+                               "MOOSE_LIBRARY_PATH)");
   params.addParam<std::vector<Point>>(
-      "positions", "The positions of the App locations.  Each set of 3 values will represent a "
-                   "Point.  This and 'positions_file' cannot be both supplied. If this and "
-                   "'positions_file' are not supplied, a single position (0,0,0) will be used");
+      "positions",
+      "The positions of the App locations.  Each set of 3 values will represent a "
+      "Point.  This and 'positions_file' cannot be both supplied. If this and "
+      "'positions_file' are not supplied, a single position (0,0,0) will be used");
   params.addParam<std::vector<FileName>>("positions_file",
                                          "A filename that should be looked in for positions. Each "
                                          "set of 3 values in that file will represent a Point.  "
                                          "This and 'positions' cannot be both supplied");
 
   params.addRequiredParam<std::vector<FileName>>(
-      "input_files", "The input file for each App.  If this parameter only contains one input file "
-                     "it will be used for all of the Apps.  When using 'positions_from_file' it is "
-                     "also admissable to provide one input_file per file.");
+      "input_files",
+      "The input file for each App.  If this parameter only contains one input file "
+      "it will be used for all of the Apps.  When using 'positions_from_file' it is "
+      "also admissable to provide one input_file per file.");
   params.addParam<Real>("bounding_box_inflation",
                         0.01,
                         "Relative amount to 'inflate' the bounding box of this MultiApp.");
@@ -107,10 +114,11 @@ validParams<MultiApp>()
                         "modeling the insertion of 'new' material for that app.");
 
   params.addParam<std::vector<unsigned int>>(
-      "reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App "
-                    "'numbers' starting with 0 corresponding to the order of the App positions.  "
-                    "Resetting an App means that it is destroyed and recreated, possibly modeling "
-                    "the insertion of 'new' material for that app.");
+      "reset_apps",
+      "The Apps that will be reset when 'reset_time' is hit.  These are the App "
+      "'numbers' starting with 0 corresponding to the order of the App positions.  "
+      "Resetting an App means that it is destroyed and recreated, possibly modeling "
+      "the insertion of 'new' material for that app.");
 
   params.addParam<Real>(
       "move_time",
@@ -118,8 +126,9 @@ validParams<MultiApp>()
       "The time at which Apps designated by move_apps are moved to move_positions.");
 
   params.addParam<std::vector<unsigned int>>(
-      "move_apps", "Apps, designated by their 'numbers' starting with 0 corresponding to the order "
-                   "of the App positions, to be moved at move_time to move_positions");
+      "move_apps",
+      "Apps, designated by their 'numbers' starting with 0 corresponding to the order "
+      "of the App positions, to be moved at move_time to move_positions");
 
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");

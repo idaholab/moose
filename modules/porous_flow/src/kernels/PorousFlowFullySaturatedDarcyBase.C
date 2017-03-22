@@ -14,10 +14,12 @@ validParams<PorousFlowFullySaturatedDarcyBase>()
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<RealVectorValue>("gravity",
                                            "Gravitational acceleration vector downwards (m/s^2)");
-  params.addParam<bool>("multiply_by_density", true, "If true, then this Kernel is the fluid mass "
-                                                     "flux.  If false, then this Kernel is the "
-                                                     "fluid volume flux (which is common in "
-                                                     "poro-mechanics)");
+  params.addParam<bool>("multiply_by_density",
+                        true,
+                        "If true, then this Kernel is the fluid mass "
+                        "flux.  If false, then this Kernel is the "
+                        "fluid volume flux (which is common in "
+                        "poro-mechanics)");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Darcy flux suitable for models involving a fully-saturated, single "

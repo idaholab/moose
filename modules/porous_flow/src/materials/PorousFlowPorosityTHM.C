@@ -12,8 +12,9 @@ InputParameters
 validParams<PorousFlowPorosityTHM>()
 {
   InputParameters params = validParams<PorousFlowPorosityExponentialBase>();
-  params.addRequiredCoupledVar("porosity_zero", "The porosity at zero volumetric strain and zero "
-                                                "temperature and zero effective porepressure");
+  params.addRequiredCoupledVar("porosity_zero",
+                               "The porosity at zero volumetric strain and zero "
+                               "temperature and zero effective porepressure");
   params.addRequiredParam<Real>(
       "thermal_expansion_coeff",
       "Thermal expansion coefficient of the drained porous solid skeleton");

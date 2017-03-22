@@ -16,17 +16,23 @@ validParams<RichardsSeff2gasVGshifted>()
 {
   InputParameters params = validParams<RichardsSeff>();
   params.addRequiredRangeCheckedParam<Real>(
-      "al", "al > 0", "van-Genuchten alpha parameter.  Must be positive.   seff = (1 + "
-                      "(-al*(P0-P1-shift))^(1/(1-m)))^(-m) (then scaled to 0 to 1)");
+      "al",
+      "al > 0",
+      "van-Genuchten alpha parameter.  Must be positive.   seff = (1 + "
+      "(-al*(P0-P1-shift))^(1/(1-m)))^(-m) (then scaled to 0 to 1)");
   params.addRequiredRangeCheckedParam<Real>(
-      "m", "m > 0 & m < 1", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally "
-                            "should be set to >0.5   seff = (1 + "
-                            "(-al*(P0-P1-shift)^(1/(1-m)))^(-m) (then scaled to 0 to 1)");
+      "m",
+      "m > 0 & m < 1",
+      "van-Genuchten m parameter.  Must be between 0 and 1, and optimally "
+      "should be set to >0.5   seff = (1 + "
+      "(-al*(P0-P1-shift)^(1/(1-m)))^(-m) (then scaled to 0 to 1)");
   params.addRequiredRangeCheckedParam<Real>(
-      "shift", "shift > 0", "Shift in capillary-pressure porepressure values.  Standard "
-                            "van-Genuchten Seff = Seff(Pwater-Pgas) is shifted to the right, and "
-                            "then scaled to 0<=Seff<=1.  This means that dS/dP>0 at S=1 which is "
-                            "useful to provide nonsingular Jacobians for small dt.");
+      "shift",
+      "shift > 0",
+      "Shift in capillary-pressure porepressure values.  Standard "
+      "van-Genuchten Seff = Seff(Pwater-Pgas) is shifted to the right, and "
+      "then scaled to 0<=Seff<=1.  This means that dS/dP>0 at S=1 which is "
+      "useful to provide nonsingular Jacobians for small dt.");
   params.addClassDescription("Shifted van-Genuchten effective saturation as a function of (Pwater, "
                              "Pgas) suitable for use for the gas phase in two-phase simulations.   "
                              "  seff = (1 + (-al*(P0-p1-shift))^(1/(1-m)))^(-m), then scaled so it "

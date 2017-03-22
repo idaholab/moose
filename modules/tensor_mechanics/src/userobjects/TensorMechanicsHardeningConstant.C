@@ -12,11 +12,15 @@ InputParameters
 validParams<TensorMechanicsHardeningConstant>()
 {
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
-  params.addParam<Real>("value", 1.0, "The value of the parameter for all internal parameter.  "
-                                      "This is perfect plasticity - there is no hardening.");
-  params.addParam<bool>("convert_to_radians", false, "If true, the value you entered will be "
-                                                     "multiplied by Pi/180 before passing to the "
-                                                     "Plasticity algorithms");
+  params.addParam<Real>("value",
+                        1.0,
+                        "The value of the parameter for all internal parameter.  "
+                        "This is perfect plasticity - there is no hardening.");
+  params.addParam<bool>("convert_to_radians",
+                        false,
+                        "If true, the value you entered will be "
+                        "multiplied by Pi/180 before passing to the "
+                        "Plasticity algorithms");
   params.addClassDescription(
       "No hardening - the parameter is independent of the internal parameter(s)");
   return params;

@@ -12,9 +12,10 @@ InputParameters
 validParams<CrystalPlasticitySlipRate>()
 {
   InputParameters params = validParams<CrystalPlasticityUOBase>();
-  params.addParam<unsigned int>(
-      "num_slip_sys_props", 0, "Number of slip system specific properties provided in the file "
-                               "containing slip system normals and directions");
+  params.addParam<unsigned int>("num_slip_sys_props",
+                                0,
+                                "Number of slip system specific properties provided in the file "
+                                "containing slip system normals and directions");
   params.addParam<std::vector<Real>>("flowprops", "Parameters used in slip rate equations");
   params.addRequiredParam<FileName>("slip_sys_file_name",
                                     "Name of the file containing the slip system");

@@ -15,26 +15,35 @@ validParams<ComputeCappedDruckerPragerStress>()
   InputParameters params = validParams<PQPlasticModel>();
   params.addClassDescription("Capped Drucker-Prager plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
-      "DP_model", "A TensorMechanicsPlasticDruckerPrager UserObject that defines the "
-                  "Drucker-Prager parameters (cohesion, friction angle and dilation angle)");
+      "DP_model",
+      "A TensorMechanicsPlasticDruckerPrager UserObject that defines the "
+      "Drucker-Prager parameters (cohesion, friction angle and dilation angle)");
   params.addRequiredParam<UserObjectName>(
-      "tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                          "tensile strength.  In physical situations this is positive (and always "
-                          "must be greater than negative compressive-strength.");
+      "tensile_strength",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "tensile strength.  In physical situations this is positive (and always "
+      "must be greater than negative compressive-strength.");
   params.addRequiredParam<UserObjectName>(
-      "compressive_strength", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                              "compressive strength.  In physical situations this is positive.");
+      "compressive_strength",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "compressive strength.  In physical situations this is positive.");
   params.addRequiredRangeCheckedParam<Real>(
-      "tip_smoother", "tip_smoother>=0", "The cone vertex at J2 = 0 will be smoothed by the given "
-                                         "amount.  Typical value is 0.1*cohesion");
-  params.addParam<bool>("perfect_guess", true, "Provide a guess to the Newton-Raphson proceedure "
-                                               "that is the result from perfect plasticity.  With "
-                                               "severe hardening/softening this may be "
-                                               "suboptimal.");
-  params.addParam<bool>("small_dilation", true, "If true, and if the trial stress exceeds the "
-                                                "tensile strength, then the user gaurantees that "
-                                                "the returned stress will be independent of the "
-                                                "compressive strength.");
+      "tip_smoother",
+      "tip_smoother>=0",
+      "The cone vertex at J2 = 0 will be smoothed by the given "
+      "amount.  Typical value is 0.1*cohesion");
+  params.addParam<bool>("perfect_guess",
+                        true,
+                        "Provide a guess to the Newton-Raphson proceedure "
+                        "that is the result from perfect plasticity.  With "
+                        "severe hardening/softening this may be "
+                        "suboptimal.");
+  params.addParam<bool>("small_dilation",
+                        true,
+                        "If true, and if the trial stress exceeds the "
+                        "tensile strength, then the user gaurantees that "
+                        "the returned stress will be independent of the "
+                        "compressive strength.");
   return params;
 }
 

@@ -21,8 +21,9 @@ validParams<RichardsFullyUpwindFlux>()
   params.addRequiredParam<std::vector<UserObjectName>>(
       "relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "seff_UO", "List of name of user objects that define effective saturation as a function of "
-                 "pressure list");
+      "seff_UO",
+      "List of name of user objects that define effective saturation as a function of "
+      "pressure list");
   params.addRequiredParam<std::vector<UserObjectName>>(
       "density_UO", "List of names of user objects that define the fluid density");
   params.addRequiredParam<UserObjectName>(

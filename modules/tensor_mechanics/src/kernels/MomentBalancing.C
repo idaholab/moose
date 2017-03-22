@@ -17,8 +17,10 @@ validParams<MomentBalancing>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredRangeCheckedParam<unsigned int>(
-      "component", "component<3", "An integer corresponding to the direction the variable this "
-                                  "kernel acts in. (0 for x, 1 for y, 2 for z)");
+      "component",
+      "component<3",
+      "An integer corresponding to the direction the variable this "
+      "kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
   params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");

@@ -608,8 +608,9 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(Real scalar) const
 
 inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const TypeVector<Real> & rhs) const
 {
-  mooseAssert(_n_cols == LIBMESH_DIM, "Cannot perform matvec operation! The column dimension of "
-                                      "the ColumnMajorMatrix does not match the TypeVector!");
+  mooseAssert(_n_cols == LIBMESH_DIM,
+              "Cannot perform matvec operation! The column dimension of "
+              "the ColumnMajorMatrix does not match the TypeVector!");
 
   ColumnMajorMatrix ret_matrix(_n_rows, 1);
 

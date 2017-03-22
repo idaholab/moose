@@ -18,15 +18,18 @@ validParams<Q2PMaterial>()
       "mat_porosity",
       "mat_porosity>=0 & mat_porosity<=1",
       "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");
-  params.addCoupledVar("por_change", 0, "An auxillary variable describing porosity changes.  "
-                                        "Porosity = mat_porosity + por_change.  If this is not "
-                                        "provided, zero is used.");
+  params.addCoupledVar("por_change",
+                       0,
+                       "An auxillary variable describing porosity changes.  "
+                       "Porosity = mat_porosity + por_change.  If this is not "
+                       "provided, zero is used.");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
-  params.addCoupledVar("perm_change", "A list of auxillary variable describing permeability "
-                                      "changes.  There must be 9 of these (in 3D), corresponding "
-                                      "to the xx, xy, xz, yx, yy, yz, zx, zy, zz components "
-                                      "respectively (in 3D).  Permeability = "
-                                      "mat_permeability*10^(perm_change).");
+  params.addCoupledVar("perm_change",
+                       "A list of auxillary variable describing permeability "
+                       "changes.  There must be 9 of these (in 3D), corresponding "
+                       "to the xx, xy, xz, yx, yy, yz, zx, zy, zz components "
+                       "respectively (in 3D).  Permeability = "
+                       "mat_permeability*10^(perm_change).");
   params.addRequiredParam<RealVectorValue>(
       "gravity",
       "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-10)");

@@ -16,16 +16,19 @@ InputParameters
 validParams<RichardsHalfGaussianSinkFlux>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
-  params.addRequiredParam<Real>("max", "Maximum of the flux (measured in kg.m^-2.s^-1).  Flux out "
-                                       "= max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and Flux "
-                                       "out = max for p>centre.  Note, to make this a source "
-                                       "rather than a sink, let max<0");
-  params.addRequiredParam<Real>("sd", "Standard deviation of the Gaussian (measured in Pa).  Flux "
-                                      "out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and "
-                                      "Flux out = max for p>centre.");
-  params.addRequiredParam<Real>("centre", "Centre of the Gaussian (measured in Pa).  Flux out = "
-                                          "max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and "
-                                          "Flux out = max for p>centre.");
+  params.addRequiredParam<Real>("max",
+                                "Maximum of the flux (measured in kg.m^-2.s^-1).  Flux out "
+                                "= max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and Flux "
+                                "out = max for p>centre.  Note, to make this a source "
+                                "rather than a sink, let max<0");
+  params.addRequiredParam<Real>("sd",
+                                "Standard deviation of the Gaussian (measured in Pa).  Flux "
+                                "out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and "
+                                "Flux out = max for p>centre.");
+  params.addRequiredParam<Real>("centre",
+                                "Centre of the Gaussian (measured in Pa).  Flux out = "
+                                "max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and "
+                                "Flux out = max for p>centre.");
   params.addParam<FunctionName>(
       "multiplying_fcn",
       1.0,

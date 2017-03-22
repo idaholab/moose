@@ -13,14 +13,19 @@ validParams<PorousFlowRelativePermeabilityBW>()
 {
   InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
   params.addRequiredRangeCheckedParam<Real>(
-      "Sn", "Sn >= 0", "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
-                       "initial effective saturation, below which effective saturation never goes "
-                       "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  "
-                       "This form of effective saturation is only correct for Kn small.");
+      "Sn",
+      "Sn >= 0",
+      "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
+      "initial effective saturation, below which effective saturation never goes "
+      "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  "
+      "This form of effective saturation is only correct for Kn small.");
   params.addRangeCheckedParam<Real>(
-      "Ss", 1.0, "Ss <= 1", "High saturation.  This must be > Sn and <= 1.  Effective saturation "
-                            "where porepressure = 0.  Effective saturation never exceeds this "
-                            "value in BW's simulations/models.");
+      "Ss",
+      1.0,
+      "Ss <= 1",
+      "High saturation.  This must be > Sn and <= 1.  Effective saturation "
+      "where porepressure = 0.  Effective saturation never exceeds this "
+      "value in BW's simulations/models.");
   params.addRequiredRangeCheckedParam<Real>(
       "Kn", "Kn >= 0", "Low relative permeability.  This must be < Ks, and non-negative.");
   params.addRequiredRangeCheckedParam<Real>(

@@ -57,7 +57,7 @@ Real
 SplitCHCRes::computeQpJacobian()
 {
   Real jacobian = SplitCHBase::computeQpJacobian(); //(df_prime_zero_dc+de_prime_dc)*_test[_i][_qp];
-                                                    //from SplitCHBase
+                                                    // from SplitCHBase
 
   jacobian += _kappa[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 

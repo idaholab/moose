@@ -26,8 +26,9 @@ validParams<Q2PSaturationFlux>()
   params.addRequiredCoupledVar("porepressure_variable",
                                "The variable representing the porepressure");
   params.addRequiredParam<UserObjectName>(
-      "fluid_relperm", "A RichardsRelPerm UserObject (eg RichardsRelPermPowerGas) that defines the "
-                       "fluid relative permeability as a function of the saturation Variable.");
+      "fluid_relperm",
+      "A RichardsRelPerm UserObject (eg RichardsRelPermPowerGas) that defines the "
+      "fluid relative permeability as a function of the saturation Variable.");
   params.addRequiredParam<Real>("fluid_viscosity", "The fluid dynamic viscosity");
   params.addClassDescription(
       "Flux according to Darcy-Richards flow.  The Variable of this Kernel must be the saturation");

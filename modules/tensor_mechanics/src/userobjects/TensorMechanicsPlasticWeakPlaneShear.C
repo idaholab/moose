@@ -13,33 +13,39 @@ validParams<TensorMechanicsPlasticWeakPlaneShear>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
   params.addRequiredParam<UserObjectName>(
-      "cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
-                  "Physically the cohesion should not be negative.");
+      "cohesion",
+      "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
+      "Physically the cohesion should not be negative.");
   params.addRequiredParam<UserObjectName>("tan_friction_angle",
                                           "A TensorMechanicsHardening UserObject that defines "
                                           "hardening of tan(friction angle).  Physically the "
                                           "friction angle should be between 0 and 90deg.");
   params.addRequiredParam<UserObjectName>(
-      "tan_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                            "tan(dilation angle).  Usually the dilation angle is not greater than "
-                            "the friction angle, and it is between 0 and 90deg.");
+      "tan_dilation_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "tan(dilation angle).  Usually the dilation angle is not greater than "
+      "the friction angle, and it is between 0 and 90deg.");
   MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
   params.addParam<MooseEnum>(
       "tip_scheme", tip_scheme, "Scheme by which the cone's tip will be smoothed.");
   params.addRequiredRangeCheckedParam<Real>(
-      "smoother", "smoother>=0", "For the 'hyperbolic' tip_scheme, the cone vertex at shear-stress "
-                                 "= 0 will be smoothed by the given amount.  For the 'cap' "
-                                 "tip_scheme, additional smoothing will occur.  Typical value is "
-                                 "0.1*cohesion");
+      "smoother",
+      "smoother>=0",
+      "For the 'hyperbolic' tip_scheme, the cone vertex at shear-stress "
+      "= 0 will be smoothed by the given amount.  For the 'cap' "
+      "tip_scheme, additional smoothing will occur.  Typical value is "
+      "0.1*cohesion");
   params.addParam<Real>(
       "cap_start",
       0.0,
       "For the 'cap' tip_scheme, smoothing is performed in the stress_zz > cap_start region");
-  params.addRangeCheckedParam<Real>(
-      "cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap "
-                                      "degenerates to a hemisphere: small values mean a slow "
-                                      "degeneration to a hemisphere (and zero means the 'cap' will "
-                                      "be totally inactive).  Typical value is 1/cohesion");
+  params.addRangeCheckedParam<Real>("cap_rate",
+                                    0.0,
+                                    "cap_rate>=0",
+                                    "For the 'cap' tip_scheme, this controls how quickly the cap "
+                                    "degenerates to a hemisphere: small values mean a slow "
+                                    "degeneration to a hemisphere (and zero means the 'cap' will "
+                                    "be totally inactive).  Typical value is 1/cohesion");
   params.addClassDescription("Non-associative finite-strain weak-plane shear perfect plasticity.  "
                              "Here cohesion = 1, tan(phi) = 1 = tan(psi)");
 

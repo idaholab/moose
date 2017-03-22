@@ -16,8 +16,10 @@ validParams<HomogenizedHeatConduction>()
       "thermal_conductivity",
       "The diffusion coefficient for the temperature gradient (Default: thermal_conductivity)");
   params.addRequiredRangeCheckedParam<unsigned int>(
-      "component", "component < 3", "An integer corresponding to the direction the variable this "
-                                    "kernel acts in. (0 for x, 1 for y, 2 for z)");
+      "component",
+      "component < 3",
+      "An integer corresponding to the direction the variable this "
+      "kernel acts in. (0 for x, 1 for y, 2 for z)");
   return params;
 }
 

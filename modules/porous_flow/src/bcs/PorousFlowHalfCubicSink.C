@@ -14,13 +14,15 @@ validParams<PorousFlowHalfCubicSink>()
 {
   InputParameters params = validParams<PorousFlowSinkPTDefiner>();
   params.addRequiredParam<Real>(
-      "max", "Maximum of the cubic flux multiplier.  Denote x = porepressure - center (or in the "
-             "case of a heat flux with no fluid, x = temperature - center).  Then Flux out is "
-             "multiplied by (max/cutoff^3)*(2x + cutoff)(x - cutoff)^2 for cutoff < x < 0.  Flux "
-             "out is multiplied by max for x >= 0.  Flux out is multiplied by 0 for x <= cutoff.");
-  params.addRequiredParam<FunctionName>("cutoff", "Cutoff of the cubic (measured in Pa (or K for "
-                                                  "temperature BCs)).  This needs to be less than "
-                                                  "zero.");
+      "max",
+      "Maximum of the cubic flux multiplier.  Denote x = porepressure - center (or in the "
+      "case of a heat flux with no fluid, x = temperature - center).  Then Flux out is "
+      "multiplied by (max/cutoff^3)*(2x + cutoff)(x - cutoff)^2 for cutoff < x < 0.  Flux "
+      "out is multiplied by max for x >= 0.  Flux out is multiplied by 0 for x <= cutoff.");
+  params.addRequiredParam<FunctionName>("cutoff",
+                                        "Cutoff of the cubic (measured in Pa (or K for "
+                                        "temperature BCs)).  This needs to be less than "
+                                        "zero.");
   params.addRequiredParam<Real>(
       "center", "Center of the cubic flux multiplier (measured in Pa (or K for temperature BCs)).");
   return params;

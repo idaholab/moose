@@ -14,13 +14,15 @@ validParams<RichardsSUPGstandard>()
 {
   InputParameters params = validParams<RichardsSUPG>();
   params.addRequiredRangeCheckedParam<Real>(
-      "p_SUPG", "p_SUPG > 0", "SUPG pressure.  This parameter controls the strength of the "
-                              "upwinding.  This parameter must be positive.  If you need to track "
-                              "advancing fronts in a problem, then set to less than your expected "
-                              "range of pressures in your unsaturated zone.  Otherwise, set "
-                              "larger, and then minimal upwinding will occur and convergence will "
-                              "typically be good.  If you need no SUPG, it is more efficient not "
-                              "to use this UserObject.");
+      "p_SUPG",
+      "p_SUPG > 0",
+      "SUPG pressure.  This parameter controls the strength of the "
+      "upwinding.  This parameter must be positive.  If you need to track "
+      "advancing fronts in a problem, then set to less than your expected "
+      "range of pressures in your unsaturated zone.  Otherwise, set "
+      "larger, and then minimal upwinding will occur and convergence will "
+      "typically be good.  If you need no SUPG, it is more efficient not "
+      "to use this UserObject.");
   params.addClassDescription(
       "Standard SUPG relationships for Richards flow based on Appendix A of      TJR Hughes, M "
       "Mallet and A Mizukami ``A new finite element formulation for computational fluid dynamics:: "

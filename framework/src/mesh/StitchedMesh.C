@@ -27,8 +27,9 @@ validParams<StitchedMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
   params.addRequiredParam<std::vector<MeshFileName>>(
-      "files", "The name of the mesh files to read.  These mesh files will be 'stitched' into the "
-               "current mesh in this order.");
+      "files",
+      "The name of the mesh files to read.  These mesh files will be 'stitched' into the "
+      "current mesh in this order.");
 
   params.addRequiredParam<std::vector<BoundaryName>>(
       "stitch_boundaries",

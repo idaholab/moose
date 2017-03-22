@@ -17,9 +17,10 @@ validParams<ComputeStrainBase>()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
-                                            "multiple mechanics material systems on the same "
-                                            "block, i.e. for multiple phases");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
   params.addParam<bool>(
       "volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<std::vector<MaterialPropertyName>>(

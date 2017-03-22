@@ -37,9 +37,11 @@ validParams<TableOutput>()
       AdvancedOutput<FileOutput>::enableOutputTypes("postprocessor scalar vector_postprocessor");
 
   // Option for writing vector_postprocessor time file
-  params.addParam<bool>("time_data", false, "When true and VecptorPostprocessor data exists, write "
-                                            "a csv file containing the timestep and time "
-                                            "information.");
+  params.addParam<bool>("time_data",
+                        false,
+                        "When true and VecptorPostprocessor data exists, write "
+                        "a csv file containing the timestep and time "
+                        "information.");
 
   // Add option for appending file on restart
   params.addParam<bool>("append_restart", false, "Append existing file on restart");

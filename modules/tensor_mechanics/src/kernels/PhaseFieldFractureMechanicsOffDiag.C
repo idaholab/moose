@@ -16,9 +16,10 @@ validParams<PhaseFieldFractureMechanicsOffDiag>()
                              "diagonal damage dependent Jacobian components. To be used with "
                              "StressDivergenceTensors or DynamicStressDivergenceTensors.");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
-                                                     "the variable this kernel acts in. (0 for x, "
-                                                     "1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for x, "
+                                        "1 for y, 2 for z)");
   params.addCoupledVar(
       "c",
       "Phase field damage variable: Used to indicate calculation of Off Diagonal Jacobian term");

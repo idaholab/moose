@@ -24,9 +24,11 @@ validParams<RateDepSmearCrackModel>()
   params.addParam<bool>("input_random_scaling_var",
                         false,
                         "Flag to specify scaling parameter to generate random stress");
-  params.addParam<Real>("random_scaling_var", 1e9, "Scaling value: Too large a value can cause "
-                                                   "non-positive definiteness - use 0.1 of young's "
-                                                   "modulus");
+  params.addParam<Real>("random_scaling_var",
+                        1e9,
+                        "Scaling value: Too large a value can cause "
+                        "non-positive definiteness - use 0.1 of young's "
+                        "modulus");
 
   return params;
 }

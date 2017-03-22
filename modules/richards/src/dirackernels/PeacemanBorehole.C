@@ -14,44 +14,50 @@ validParams<PeacemanBorehole>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<FunctionName>(
-      "character", "If zero then borehole does nothing.  If positive the borehole acts as a sink "
-                   "(production well) for porepressure > borehole pressure, and does nothing "
-                   "otherwise.  If negative the borehole acts as a source (injection well) for "
-                   "porepressure < borehole pressure, and does nothing otherwise.  The flow rate "
-                   "to/from the borehole is multiplied by |character|, so usually character = +/- "
-                   "1, but you can specify other quantities to provide an overall scaling to the "
-                   "flow if you like.");
+      "character",
+      "If zero then borehole does nothing.  If positive the borehole acts as a sink "
+      "(production well) for porepressure > borehole pressure, and does nothing "
+      "otherwise.  If negative the borehole acts as a source (injection well) for "
+      "porepressure < borehole pressure, and does nothing otherwise.  The flow rate "
+      "to/from the borehole is multiplied by |character|, so usually character = +/- "
+      "1, but you can specify other quantities to provide an overall scaling to the "
+      "flow if you like.");
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>(
-      "unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  "
-                     "Note that the borehole pressure at a given z position is bottom_pressure + "
-                     "unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the "
-                     "bottom point of the borehole.  If you don't want bottomhole pressure to vary "
-                     "in the borehole just set unit_weight=0.  Typical value is = (0,0,-1E4)");
+      "unit_weight",
+      "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  "
+      "Note that the borehole pressure at a given z position is bottom_pressure + "
+      "unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the "
+      "bottom point of the borehole.  If you don't want bottomhole pressure to vary "
+      "in the borehole just set unit_weight=0.  Typical value is = (0,0,-1E4)");
   params.addRequiredParam<std::string>(
-      "point_file", "The file containing the borehole radii and coordinates of the point sinks "
-                    "that approximate the borehole.  Each line in the file must contain a "
-                    "space-separated radius and coordinate.  Ie r x y z.  The last point in the "
-                    "file is defined as the borehole bottom, where the borehole pressure is "
-                    "bottom_pressure.  If your file contains just one point, you must also specify "
-                    "the borehole_length and borehole_direction.  Note that you will get "
-                    "segementation faults if your points do not lie within your mesh!");
+      "point_file",
+      "The file containing the borehole radii and coordinates of the point sinks "
+      "that approximate the borehole.  Each line in the file must contain a "
+      "space-separated radius and coordinate.  Ie r x y z.  The last point in the "
+      "file is defined as the borehole bottom, where the borehole pressure is "
+      "bottom_pressure.  If your file contains just one point, you must also specify "
+      "the borehole_length and borehole_direction.  Note that you will get "
+      "segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>(
-      "SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total "
-                       "outflow from the borehole for each time step.");
-  params.addParam<Real>(
-      "re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective "
-                           "radius.  This depends on the meshing scheme.  Peacemann "
-                           "finite-difference calculations give 0.28, while for rectangular finite "
-                           "elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y "
-                           "Zhang, Well flow models for various numerical methods, Int J Num "
-                           "Analysis and Modeling, 3 (2008) 375-388.)");
-  params.addParam<Real>(
-      "well_constant", -1.0, "Usually this is calculated internally from the element geometry, the "
-                             "local borehole direction and segment length, and the permeability.  "
-                             "However, if this parameter is given as a positive number then this "
-                             "number is used instead of the internal calculation.  This speeds up "
-                             "computation marginally.  re_constant becomes irrelevant");
+      "SumQuantityUO",
+      "User Object of type=RichardsSumQuantity in which to place the total "
+      "outflow from the borehole for each time step.");
+  params.addParam<Real>("re_constant",
+                        0.28,
+                        "The dimensionless constant used in evaluating the borehole effective "
+                        "radius.  This depends on the meshing scheme.  Peacemann "
+                        "finite-difference calculations give 0.28, while for rectangular finite "
+                        "elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y "
+                        "Zhang, Well flow models for various numerical methods, Int J Num "
+                        "Analysis and Modeling, 3 (2008) 375-388.)");
+  params.addParam<Real>("well_constant",
+                        -1.0,
+                        "Usually this is calculated internally from the element geometry, the "
+                        "local borehole direction and segment length, and the permeability.  "
+                        "However, if this parameter is given as a positive number then this "
+                        "number is used instead of the internal calculation.  This speeds up "
+                        "computation marginally.  re_constant becomes irrelevant");
   params.addRangeCheckedParam<Real>(
       "borehole_length",
       0.0,

@@ -15,15 +15,18 @@ validParams<RichardsBorehole>()
   InputParameters params = validParams<PeacemanBorehole>();
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
-  params.addParam<std::vector<UserObjectName>>("relperm_UO", "List of names of user objects that "
-                                                             "define relative permeability.  Only "
-                                                             "needed if fully_upwind is used");
+  params.addParam<std::vector<UserObjectName>>("relperm_UO",
+                                               "List of names of user objects that "
+                                               "define relative permeability.  Only "
+                                               "needed if fully_upwind is used");
   params.addParam<std::vector<UserObjectName>>(
-      "seff_UO", "List of name of user objects that define effective saturation as a function of "
-                 "pressure list.  Only needed if fully_upwind is used");
-  params.addParam<std::vector<UserObjectName>>("density_UO", "List of names of user objects that "
-                                                             "define the fluid density.  Only "
-                                                             "needed if fully_upwind is used");
+      "seff_UO",
+      "List of name of user objects that define effective saturation as a function of "
+      "pressure list.  Only needed if fully_upwind is used");
+  params.addParam<std::vector<UserObjectName>>("density_UO",
+                                               "List of names of user objects that "
+                                               "define the fluid density.  Only "
+                                               "needed if fully_upwind is used");
   params.addParam<bool>("fully_upwind", false, "Fully upwind the flux");
   params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, "
                              "and radii using a number of point sinks whose positions are read "

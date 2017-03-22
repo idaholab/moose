@@ -26,13 +26,15 @@ validParams<MollifiedLangmuirMaterial>()
   params.addRequiredParam<Real>("langmuir_pressure", "Langmuir pressure.  Units Pa");
   params.addRequiredCoupledVar("conc_var", "The concentration of gas variable");
   params.addRequiredCoupledVar("pressure_var", "The gas porepressure variable");
-  params.addRangeCheckedParam<Real>(
-      "mollifier", 0.1, "mollifier > 0", "The reciprocal of time constants will be "
-                                         "one_over_time_const*tanh( |conc_var - "
-                                         "equilib_conc|/(mollifier*langmuir_density)).  So for "
-                                         "mollifier very small you will get a stepchange between "
-                                         "desorption and adsorption, but for mollifier bigger you "
-                                         "will be a gradual change");
+  params.addRangeCheckedParam<Real>("mollifier",
+                                    0.1,
+                                    "mollifier > 0",
+                                    "The reciprocal of time constants will be "
+                                    "one_over_time_const*tanh( |conc_var - "
+                                    "equilib_conc|/(mollifier*langmuir_density)).  So for "
+                                    "mollifier very small you will get a stepchange between "
+                                    "desorption and adsorption, but for mollifier bigger you "
+                                    "will be a gradual change");
   params.addClassDescription("Material type that holds info regarding MollifiedLangmuir desorption "
                              "from matrix to porespace and viceversa");
   return params;

@@ -28,9 +28,11 @@ validParams<DynamicObjectRegistrationAction>()
                                             "will be registered from (dynamic registration).");
   params.addParam<std::vector<std::string>>(
       "object_names", "The names of the objects to register (Default: register all).");
-  params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please "
-                                                   "avoid committing absolute paths in addition to "
-                                                   "MOOSE_LIBRARY_PATH)");
+  params.addParam<std::string>("library_path",
+                               "",
+                               "Path to search for dynamic libraries (please "
+                               "avoid committing absolute paths in addition to "
+                               "MOOSE_LIBRARY_PATH)");
   return params;
 }
 

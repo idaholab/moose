@@ -26,9 +26,11 @@ validParams<TestDiscontinuousValuePP>()
       "variable", "The name of the variable that this postprocessor operates on.");
   params.addRequiredParam<Point>("point",
                                  "The physical point where the solution will be evaluated.");
-  params.addParam<bool>("evaluate_gradient", false, "Option to evaluate gradient instead of value. "
-                                                    "If this is true, gradient_component must be "
-                                                    "selected.");
+  params.addParam<bool>("evaluate_gradient",
+                        false,
+                        "Option to evaluate gradient instead of value. "
+                        "If this is true, gradient_component must be "
+                        "selected.");
   params.addParam<MooseEnum>(
       "gradient_component", gradient_components, "Component of gradient to be evaluated");
   params.addRequiredParam<UserObjectName>("solution",

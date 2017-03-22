@@ -26,12 +26,14 @@ validParams<AddExtraNodeset>()
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
                                                      "The name of the boundary to create");
 
-  params.addParam<std::vector<unsigned int>>("nodes", "The nodes you want to be in the nodeset "
-                                                      "(Either this parameter or \"coord\" must be "
-                                                      "supplied).");
-  params.addParam<std::vector<Real>>("coord", "The nodes with coordinates you want to be in the "
-                                              "nodeset (Either this parameter or \"nodes\" must be "
-                                              "supplied).");
+  params.addParam<std::vector<unsigned int>>("nodes",
+                                             "The nodes you want to be in the nodeset "
+                                             "(Either this parameter or \"coord\" must be "
+                                             "supplied).");
+  params.addParam<std::vector<Real>>("coord",
+                                     "The nodes with coordinates you want to be in the "
+                                     "nodeset (Either this parameter or \"nodes\" must be "
+                                     "supplied).");
   params.addParam<Real>(
       "tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
 

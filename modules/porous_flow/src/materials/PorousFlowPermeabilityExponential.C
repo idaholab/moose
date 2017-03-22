@@ -19,10 +19,11 @@ validParams<PorousFlowPermeabilityExponential>()
                              "are: log_k (log k = A phi + B); ln_k (ln k = A phi + B); exp_k (k = "
                              "B exp(A phi)); where k is permeability, phi is porosity, A and B are "
                              "empirical constants.");
-  params.addParam<RealTensorValue>("k_anisotropy", "A tensor to multiply the calculated scalar "
-                                                   "permeability, in order to obtain anisotropy if "
-                                                   "required. Defaults to isotropic permeability "
-                                                   "if not specified.");
+  params.addParam<RealTensorValue>("k_anisotropy",
+                                   "A tensor to multiply the calculated scalar "
+                                   "permeability, in order to obtain anisotropy if "
+                                   "required. Defaults to isotropic permeability "
+                                   "if not specified.");
   params.addRequiredParam<Real>("A", "Empirical constant; see poroperm_function.");
   params.addRequiredParam<Real>("B", "Empirical constant; see poroperm_function.");
   params.addClassDescription(

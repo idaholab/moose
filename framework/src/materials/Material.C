@@ -34,11 +34,13 @@ validParams<Material>()
   params += validParams<RandomInterface>();
   params += validParams<MaterialPropertyInterface>();
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the "
-                                                     "displaced mesh for computation.  Note that "
-                                                     "in the case this is true but no "
-                                                     "displacements are provided in the Mesh block "
-                                                     "the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that "
+                        "in the case this is true but no "
+                        "displacements are provided in the Mesh block "
+                        "the undisplaced mesh will still be used.");
   params.addParam<bool>("compute",
                         true,
                         "When false, MOOSE will not call compute methods on this material. "
@@ -54,8 +56,9 @@ validParams<Material>()
   params += validParams<OutputInterface>();
   params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.addParam<std::vector<std::string>>(
-      "output_properties", "List of material properties, from this material, to output (outputs "
-                           "must also be defined to an output type)");
+      "output_properties",
+      "List of material properties, from this material, to output (outputs "
+      "must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh constant_on_elem", "Advanced");

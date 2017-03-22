@@ -22,21 +22,25 @@ validParams<RichardsMaterial>()
 
   params.addRequiredParam<Real>(
       "mat_porosity", "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");
-  params.addCoupledVar("por_change", 0, "An auxillary variable describing porosity changes.  "
-                                        "Porosity = mat_porosity + por_change.  If this is not "
-                                        "provided, zero is used.");
+  params.addCoupledVar("por_change",
+                       0,
+                       "An auxillary variable describing porosity changes.  "
+                       "Porosity = mat_porosity + por_change.  If this is not "
+                       "provided, zero is used.");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
-  params.addCoupledVar("perm_change", "A list of auxillary variable describing permeability "
-                                      "changes.  There must be 9 of these, corresponding to the "
-                                      "xx, xy, xz, yx, yy, yz, zx, zy, zz components respectively. "
-                                      " Permeability = mat_permeability*10^(perm_change).");
+  params.addCoupledVar("perm_change",
+                       "A list of auxillary variable describing permeability "
+                       "changes.  There must be 9 of these, corresponding to the "
+                       "xx, xy, xz, yx, yy, yz, zx, zy, zz components respectively. "
+                       " Permeability = mat_permeability*10^(perm_change).");
   params.addRequiredParam<UserObjectName>(
       "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addRequiredParam<std::vector<UserObjectName>>(
       "relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName>>(
-      "seff_UO", "List of name of user objects that define effective saturation as a function of "
-                 "pressure list");
+      "seff_UO",
+      "List of name of user objects that define effective saturation as a function of "
+      "pressure list");
   params.addRequiredParam<std::vector<UserObjectName>>(
       "sat_UO",
       "List of names of user objects that define saturation as a function of effective saturation");
@@ -159,9 +163,11 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters)
         getParam<std::vector<UserObjectName>>("sat_UO").size() == _num_p &&
         getParam<std::vector<UserObjectName>>("density_UO").size() == _num_p &&
         getParam<std::vector<UserObjectName>>("SUPG_UO").size() == _num_p))
-    mooseError("There are ", _num_p, " Richards fluid variables, so you need to specify this "
-                                     "number of viscosities, relperm_UO, seff_UO, sat_UO, "
-                                     "density_UO, SUPG_UO");
+    mooseError("There are ",
+               _num_p,
+               " Richards fluid variables, so you need to specify this "
+               "number of viscosities, relperm_UO, seff_UO, sat_UO, "
+               "density_UO, SUPG_UO");
 
   _d2density.resize(_num_p);
   _d2rel_perm_dv.resize(_num_p);

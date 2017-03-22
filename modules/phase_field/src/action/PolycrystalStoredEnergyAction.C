@@ -16,9 +16,10 @@ validParams<PolycrystalStoredEnergyAction>()
   InputParameters params = validParams<Action>();
   params.addClassDescription("Action that adds the contribution of stored energy associated with "
                              "dislocations to grain growth models");
-  params.addRequiredParam<unsigned int>("op_num", "specifies the total number of OPs representing "
-                                                  "all grains (deformed + undeformed "
-                                                  "(recrystallized)) to create");
+  params.addRequiredParam<unsigned int>("op_num",
+                                        "specifies the total number of OPs representing "
+                                        "all grains (deformed + undeformed "
+                                        "(recrystallized)) to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addRequiredParam<unsigned int>("deformed_grain_num",

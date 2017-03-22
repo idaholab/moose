@@ -24,9 +24,10 @@ validParams<ComputeMultiPlasticityStress>()
                                             20,
                                             "max_NR_iterations>0",
                                             "Maximum number of Newton-Raphson iterations allowed");
-  params.addRequiredParam<Real>("ep_plastic_tolerance", "The Newton-Raphson process is only deemed "
-                                                        "converged if the plastic strain increment "
-                                                        "constraints have L2 norm less than this.");
+  params.addRequiredParam<Real>("ep_plastic_tolerance",
+                                "The Newton-Raphson process is only deemed "
+                                "converged if the plastic strain increment "
+                                "constraints have L2 norm less than this.");
   params.addRangeCheckedParam<Real>(
       "min_stepsize",
       0.01,
@@ -54,19 +55,21 @@ validParams<ComputeMultiPlasticityStress>()
       "constraints until the solution is found.  You may specify fall-back options.  Eg "
       "optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe'.");
   params.addParam<RealVectorValue>(
-      "transverse_direction", "If this parameter is provided, before the return-map algorithm is "
-                              "called a rotation is performed so that the 'z' axis in the new "
-                              "frame lies along the transverse_direction in the original frame.  "
-                              "After returning, the inverse rotation is performed.  The "
-                              "transverse_direction will itself rotate with large strains.  This "
-                              "is so that transversely-isotropic plasticity models may be easily "
-                              "defined in the frame where the isotropy holds in the x-y plane.");
-  params.addParam<bool>(
-      "ignore_failures", false, "The return-map algorithm will return with the best admissible "
-                                "stresses and internal parameters that it can, even if they don't "
-                                "fully correspond to the applied strain increment.  To speed "
-                                "computations, this flag can be set to true, the max_NR_iterations "
-                                "set small, and the min_stepsize large.");
+      "transverse_direction",
+      "If this parameter is provided, before the return-map algorithm is "
+      "called a rotation is performed so that the 'z' axis in the new "
+      "frame lies along the transverse_direction in the original frame.  "
+      "After returning, the inverse rotation is performed.  The "
+      "transverse_direction will itself rotate with large strains.  This "
+      "is so that transversely-isotropic plasticity models may be easily "
+      "defined in the frame where the isotropy holds in the x-y plane.");
+  params.addParam<bool>("ignore_failures",
+                        false,
+                        "The return-map algorithm will return with the best admissible "
+                        "stresses and internal parameters that it can, even if they don't "
+                        "fully correspond to the applied strain increment.  To speed "
+                        "computations, this flag can be set to true, the max_NR_iterations "
+                        "set small, and the min_stepsize large.");
   MooseEnum tangent_operator("elastic linear nonlinear", "nonlinear");
   params.addParam<MooseEnum>("tangent_operator",
                              tangent_operator,
@@ -76,11 +79,13 @@ validParams<ComputeMultiPlasticityStress>()
                              "stress.  'nonlinear': return the full, general consistent tangent "
                              "operator.  The calculations assume the hardening potentials are "
                              "independent of stress and hardening parameters.");
-  params.addParam<bool>("perform_finite_strain_rotations", true, "Tensors are correctly rotated in "
-                                                                 "finite-strain simulations.  For "
-                                                                 "optimal performance you can set "
-                                                                 "this to 'false' if you are only "
-                                                                 "ever using small strains");
+  params.addParam<bool>("perform_finite_strain_rotations",
+                        true,
+                        "Tensors are correctly rotated in "
+                        "finite-strain simulations.  For "
+                        "optimal performance you can set "
+                        "this to 'false' if you are only "
+                        "ever using small strains");
   params.addClassDescription("Material for multi-surface finite-strain plasticity");
   return params;
 }

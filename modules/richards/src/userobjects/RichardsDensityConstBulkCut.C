@@ -16,14 +16,16 @@ validParams<RichardsDensityConstBulkCut>()
   InputParameters params = validParams<RichardsDensity>();
   params.addRequiredParam<Real>("dens0", "Reference density of fluid.  Eg 1000");
   params.addRequiredParam<Real>("bulk_mod", "Bulk modulus of fluid.  Eg 2E9");
-  params.addParam<Real>(
-      "cut_limit", 1E5, "For porepressure > cut_limit, density = dens0*Exp(pressure/bulk).  For "
+  params.addParam<Real>("cut_limit",
+                        1E5,
+                        "For porepressure > cut_limit, density = dens0*Exp(pressure/bulk).  For "
                         "porepressure < cut_limie, density = cubic*dens0*Exp(pressure/bulk), where "
                         "cubic=1 for pressure=cut_limit, and cubic=0 for pressure<=zero_point");
-  params.addParam<Real>(
-      "zero_point", 0, "For porepressure > cut_limit, density = dens0*Exp(pressure/bulk).  For "
-                       "porepressure < cut_limie, density = cubic*dens0*Exp(pressure/bulk), where "
-                       "cubic=1 for pressure=cut_limit, and cubic=0 for pressure<=zero_point");
+  params.addParam<Real>("zero_point",
+                        0,
+                        "For porepressure > cut_limit, density = dens0*Exp(pressure/bulk).  For "
+                        "porepressure < cut_limie, density = cubic*dens0*Exp(pressure/bulk), where "
+                        "cubic=1 for pressure=cut_limit, and cubic=0 for pressure<=zero_point");
   params.addClassDescription(
       "Fluid density assuming constant bulk modulus.  dens0 * Exp(pressure/bulk)");
   return params;

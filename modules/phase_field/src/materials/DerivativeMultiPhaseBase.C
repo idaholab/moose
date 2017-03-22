@@ -20,9 +20,10 @@ validParams<DerivativeMultiPhaseBase>()
 
   // All arguments of the phase free energies
   params.addCoupledVar("args", "Arguments of the fi free energies - use vector coupling");
-  params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see "
-                                                 "Modules/PhaseField/DisplacementGradients "
-                                                 "action)");
+  params.addCoupledVar("displacement_gradients",
+                       "Vector of displacement gradient variables (see "
+                       "Modules/PhaseField/DisplacementGradients "
+                       "action)");
 
   // Barrier
   params.addParam<MaterialPropertyName>(

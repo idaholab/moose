@@ -63,9 +63,10 @@ MatDiffusionBase<T>::validParams()
   InputParameters params = ::validParams<Kernel>();
   params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
   params.addCoupledVar("args", "Vector of arguments of the diffusivity");
-  params.addCoupledVar("conc", "Coupled concentration variable for kernel to operate on; if this "
-                               "is not specified, the kernel's nonlinear variable will be used as "
-                               "usual");
+  params.addCoupledVar("conc",
+                       "Coupled concentration variable for kernel to operate on; if this "
+                       "is not specified, the kernel's nonlinear variable will be used as "
+                       "usual");
   return params;
 }
 

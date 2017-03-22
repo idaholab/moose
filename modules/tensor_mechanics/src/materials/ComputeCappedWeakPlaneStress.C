@@ -15,31 +15,38 @@ validParams<ComputeCappedWeakPlaneStress>()
   InputParameters params = validParams<PQPlasticModel>();
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
-      "cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
-                  "Physically the cohesion should not be negative.");
+      "cohesion",
+      "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  "
+      "Physically the cohesion should not be negative.");
   params.addRequiredParam<UserObjectName>("tan_friction_angle",
                                           "A TensorMechanicsHardening UserObject that defines "
                                           "hardening of tan(friction angle).  Physically the "
                                           "friction angle should be between 0 and 90deg.");
   params.addRequiredParam<UserObjectName>(
-      "tan_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                            "tan(dilation angle).  Usually the dilation angle is not greater than "
-                            "the friction angle, and it is between 0 and 90deg.");
+      "tan_dilation_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "tan(dilation angle).  Usually the dilation angle is not greater than "
+      "the friction angle, and it is between 0 and 90deg.");
   params.addRequiredParam<UserObjectName>(
-      "tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the "
-                          "weak-plane tensile strength.  In physical situations this is positive "
-                          "(and always must be greater than negative compressive-strength.");
+      "tensile_strength",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "weak-plane tensile strength.  In physical situations this is positive "
+      "(and always must be greater than negative compressive-strength.");
   params.addRequiredParam<UserObjectName>("compressive_strength",
                                           "A TensorMechanicsHardening UserObject that defines "
                                           "hardening of the weak-plane compressive strength.  In "
                                           "physical situations this is positive.");
   params.addRequiredRangeCheckedParam<Real>(
-      "tip_smoother", "tip_smoother>=0", "The cone vertex at shear-stress = 0 will be smoothed by "
-                                         "the given amount.  Typical value is 0.1*cohesion");
-  params.addParam<bool>("perfect_guess", true, "Provide a guess to the Newton-Raphson proceedure "
-                                               "that is the result from perfect plasticity.  With "
-                                               "severe hardening/softening this may be "
-                                               "suboptimal.");
+      "tip_smoother",
+      "tip_smoother>=0",
+      "The cone vertex at shear-stress = 0 will be smoothed by "
+      "the given amount.  Typical value is 0.1*cohesion");
+  params.addParam<bool>("perfect_guess",
+                        true,
+                        "Provide a guess to the Newton-Raphson proceedure "
+                        "that is the result from perfect plasticity.  With "
+                        "severe hardening/softening this may be "
+                        "suboptimal.");
   return params;
 }
 

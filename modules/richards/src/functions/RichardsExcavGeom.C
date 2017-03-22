@@ -13,19 +13,24 @@ validParams<RichardsExcavGeom>()
 {
   InputParameters params = validParams<Function>();
   params.addRequiredParam<RealVectorValue>(
-      "start_posn", "Start point of the excavation.  This is an (x,y,z) point in the middle of the "
-                    "coal face at the very beginning of the panel.");
+      "start_posn",
+      "Start point of the excavation.  This is an (x,y,z) point in the middle of the "
+      "coal face at the very beginning of the panel.");
   params.addRequiredParam<Real>("start_time", "Commencement time of the excavation");
-  params.addRequiredParam<RealVectorValue>("end_posn", "End position of the excavation.  This is "
-                                                       "an (x,y,z) point in the middle of the coal "
-                                                       "face at the very end of the panel.");
+  params.addRequiredParam<RealVectorValue>("end_posn",
+                                           "End position of the excavation.  This is "
+                                           "an (x,y,z) point in the middle of the coal "
+                                           "face at the very end of the panel.");
   params.addRequiredParam<Real>("end_time", "Time at the completion of the excavation");
-  params.addRequiredParam<Real>("active_length", "This function is only active at a point if the "
-                                                 "distance between the point and the coal face <= "
-                                                 "active_length.");
-  params.addParam<Real>("true_value", 1.0, "Return this value if a point is in the active zone.  "
-                                           "This is usually used for controlling "
-                                           "permeability-changes");
+  params.addRequiredParam<Real>("active_length",
+                                "This function is only active at a point if the "
+                                "distance between the point and the coal face <= "
+                                "active_length.");
+  params.addParam<Real>("true_value",
+                        1.0,
+                        "Return this value if a point is in the active zone.  "
+                        "This is usually used for controlling "
+                        "permeability-changes");
   params.addParam<Real>(
       "deactivation_time", 1.0E30, "Time at which this function is totally turned off");
   params.addClassDescription("This function defines excavation geometry.  It can be used to "

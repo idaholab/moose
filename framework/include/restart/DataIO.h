@@ -156,9 +156,10 @@ inline void
 dataStore(std::ostream & stream, T & v, void * /*context*/)
 {
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
-  static_assert(std::is_polymorphic<T>::value == false, "Cannot serialize a class that has virtual "
-                                                        "members!\nWrite a custom dataStore() "
-                                                        "template specialization!\n\n");
+  static_assert(std::is_polymorphic<T>::value == false,
+                "Cannot serialize a class that has virtual "
+                "members!\nWrite a custom dataStore() "
+                "template specialization!\n\n");
   static_assert(std::is_trivially_copyable<T>::value || std::is_same<T, Point>::value,
                 "Cannot serialize a class that is not trivially copyable!\nWrite a custom "
                 "dataStore() template specialization!\n\n");

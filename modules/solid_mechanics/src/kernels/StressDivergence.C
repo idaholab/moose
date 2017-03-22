@@ -19,9 +19,10 @@ InputParameters
 validParams<StressDivergence>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
-                                                     "the variable this kernel acts in. (0 for x, "
-                                                     "1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component",
+                                        "An integer corresponding to the direction "
+                                        "the variable this kernel acts in. (0 for x, "
+                                        "1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");

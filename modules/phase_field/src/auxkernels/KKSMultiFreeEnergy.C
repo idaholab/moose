@@ -23,10 +23,11 @@ validParams<KKSMultiFreeEnergy>()
       "gj_names",
       "Barrier Function Materials that provide g. Place in same order as Fj_names and hj_names!");
   params.addRequiredParam<Real>("w", "Double well height parameter");
-  params.addParam<std::vector<MaterialPropertyName>>(
-      "kappa_names", std::vector<MaterialPropertyName>(), "Vector of kappa names corresponding to "
-                                                          "each variable name in interfacial_vars "
-                                                          "in the same order.");
+  params.addParam<std::vector<MaterialPropertyName>>("kappa_names",
+                                                     std::vector<MaterialPropertyName>(),
+                                                     "Vector of kappa names corresponding to "
+                                                     "each variable name in interfacial_vars "
+                                                     "in the same order.");
   return params;
 }
 

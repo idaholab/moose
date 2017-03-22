@@ -47,9 +47,11 @@ validParams<MultiAppProjectionTransfer>()
   MooseEnum proj_type("l2", "l2");
   params.addParam<MooseEnum>("proj_type", proj_type, "The type of the projection.");
 
-  params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, "
-                                               "no movement or adaptivity).  This will cache some "
-                                               "information to speed up the transfer.");
+  params.addParam<bool>("fixed_meshes",
+                        false,
+                        "Set to true when the meshes are not changing (ie, "
+                        "no movement or adaptivity).  This will cache some "
+                        "information to speed up the transfer.");
 
   return params;
 }

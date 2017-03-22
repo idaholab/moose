@@ -67,9 +67,11 @@ validParams<Transient>()
   params.addParam<int>("n_startup_steps", 0, "The number of timesteps during startup");
   params.addParam<bool>(
       "trans_ss_check", false, "Whether or not to check for steady state conditions");
-  params.addParam<Real>("ss_check_tol", 1.0e-08, "Whenever the relative residual changes by less "
-                                                 "than this the solution will be considered to be "
-                                                 "at steady state.");
+  params.addParam<Real>("ss_check_tol",
+                        1.0e-08,
+                        "Whenever the relative residual changes by less "
+                        "than this the solution will be considered to be "
+                        "at steady state.");
   params.addParam<Real>(
       "ss_tmin",
       0.0,
@@ -85,23 +87,30 @@ validParams<Transient>()
                         2.0e-14,
                         "the tolerance setting for final timestep size and sync times");
 
-  params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be "
-                                                  "chosen by the MultiApps.  If false (the "
-                                                  "default) then the minimum over the master dt "
-                                                  "and the MultiApps is used");
+  params.addParam<bool>("use_multiapp_dt",
+                        false,
+                        "If true then the dt for the simulation will be "
+                        "chosen by the MultiApps.  If false (the "
+                        "default) then the minimum over the master dt "
+                        "and the MultiApps is used");
 
-  params.addParam<unsigned int>(
-      "picard_max_its", 1, "Number of times each timestep will be solved.  Mainly used when "
-                           "wanting to do Picard iterations with MultiApps that are set to "
-                           "execute_on timestep_end or timestep_begin");
-  params.addParam<Real>("picard_rel_tol", 1e-8, "The relative nonlinear residual drop to shoot for "
-                                                "during Picard iterations.  This check is "
-                                                "performed based on the Master app's nonlinear "
-                                                "residual.");
-  params.addParam<Real>("picard_abs_tol", 1e-50, "The absolute nonlinear residual to shoot for "
-                                                 "during Picard iterations.  This check is "
-                                                 "performed based on the Master app's nonlinear "
-                                                 "residual.");
+  params.addParam<unsigned int>("picard_max_its",
+                                1,
+                                "Number of times each timestep will be solved.  Mainly used when "
+                                "wanting to do Picard iterations with MultiApps that are set to "
+                                "execute_on timestep_end or timestep_begin");
+  params.addParam<Real>("picard_rel_tol",
+                        1e-8,
+                        "The relative nonlinear residual drop to shoot for "
+                        "during Picard iterations.  This check is "
+                        "performed based on the Master app's nonlinear "
+                        "residual.");
+  params.addParam<Real>("picard_abs_tol",
+                        1e-50,
+                        "The absolute nonlinear residual to shoot for "
+                        "during Picard iterations.  This check is "
+                        "performed based on the Master app's nonlinear "
+                        "residual.");
 
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
                               "ss_tmin abort_on_solve_fail timestep_tolerance use_multiapp_dt",

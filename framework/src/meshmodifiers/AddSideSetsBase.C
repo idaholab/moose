@@ -31,8 +31,10 @@ validParams<AddSideSetsBase>()
   InputParameters params = validParams<MeshModifier>();
   params.addParam<Real>(
       "variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
-  params.addParam<bool>("fixed_normal", false, "This Boolean determines whether we fix our normal "
-                                               "or allow it to vary to \"paint\" around curves");
+  params.addParam<bool>("fixed_normal",
+                        false,
+                        "This Boolean determines whether we fix our normal "
+                        "or allow it to vary to \"paint\" around curves");
 
   return params;
 }

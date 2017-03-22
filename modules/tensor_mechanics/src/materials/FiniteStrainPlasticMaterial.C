@@ -14,8 +14,9 @@ validParams<FiniteStrainPlasticMaterial>()
   InputParameters params = validParams<ComputeStressBase>();
 
   params.addRequiredParam<std::vector<Real>>(
-      "yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should "
-                      "start with equivalent plastic strain 0");
+      "yield_stress",
+      "Input data as pairs of equivalent plastic strain and yield stress: Should "
+      "start with equivalent plastic strain 0");
   params.addParam<Real>("rtol", 1e-8, "Plastic strain NR tolerance");
   params.addParam<Real>("ftol", 1e-4, "Consistency condition NR tolerance");
   params.addParam<Real>("eptol", 1e-7, "Equivalent plastic strain NR tolerance");

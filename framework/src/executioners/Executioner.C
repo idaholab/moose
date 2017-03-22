@@ -40,9 +40,10 @@ validParams<Executioner>()
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
-  params.addParam<std::vector<std::string>>("splitting", "Top-level splitting defining a "
-                                                         "hierarchical decomposition into "
-                                                         "subsystems to help the solver.");
+  params.addParam<std::vector<std::string>>("splitting",
+                                            "Top-level splitting defining a "
+                                            "hierarchical decomposition into "
+                                            "subsystems to help the solver.");
 
 // Default Solver Behavior
 #ifdef LIBMESH_HAVE_PETSC

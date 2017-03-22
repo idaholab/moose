@@ -23,16 +23,19 @@ validParams<GeneralizedPlaneStrainAction>()
                                                  "y direction for 1D Axisymmetric or in z "
                                                  "direction for 2D Cartesian problems)");
   params.addParam<NonlinearVariableName>("temperature", "The temperature variable");
-  params.addParam<FunctionName>("out_of_plane_pressure", "0", "Function used to prescribe pressure "
-                                                              "in the out-of-plane direction (y "
-                                                              "for 1D Axisymmetric or z for 2D "
-                                                              "Cartesian problems)");
+  params.addParam<FunctionName>("out_of_plane_pressure",
+                                "0",
+                                "Function used to prescribe pressure "
+                                "in the out-of-plane direction (y "
+                                "for 1D Axisymmetric or z for 2D "
+                                "Cartesian problems)");
   params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) "
-                                                       "that the GeneralizedPlaneStrain kernels "
-                                                       "will be applied to");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "The list of ids of the blocks (subdomain) "
+                                              "that the GeneralizedPlaneStrain kernels "
+                                              "will be applied to");
 
   return params;
 }

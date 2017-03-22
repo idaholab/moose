@@ -20,9 +20,10 @@ InputParameters
 validParams<RecomputeMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<std::string>("f_name", "The name of the property that holds the value to "
-                                                 "of the function for which the root is being "
-                                                 "computed");
+  params.addRequiredParam<std::string>("f_name",
+                                       "The name of the property that holds the value to "
+                                       "of the function for which the root is being "
+                                       "computed");
   params.addRequiredParam<std::string>(
       "f_prime_name",
       "The name of the property that holds the value to of the derivative of the function");

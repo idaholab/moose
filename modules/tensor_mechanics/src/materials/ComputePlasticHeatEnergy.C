@@ -12,9 +12,10 @@ InputParameters
 validParams<ComputePlasticHeatEnergy>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
-                                            "multiple mechanics material systems on the same "
-                                            "block, i.e. for multiple phases");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
   params.addClassDescription("Plastic heat energy density = stress * plastic_strain_rate");
   return params;
 }

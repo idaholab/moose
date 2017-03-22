@@ -21,38 +21,50 @@ validParams<PorousFlowSink>()
                                 "pressure, and you can use mass_fraction_component, use_mobility, "
                                 "use_relperm, use_enthalpy and use_energy.  If not supplied, then "
                                 "this BC can only be a function of temperature");
-  params.addParam<unsigned int>("mass_fraction_component", "The index corresponding to a fluid "
-                                                           "component.  If supplied, the flux will "
-                                                           "be multiplied by the nodal mass "
-                                                           "fraction for the component");
-  params.addParam<bool>("use_mobility", false, "If true, then fluxes are multiplied by "
-                                               "(density*permeability_nn/viscosity), where the "
-                                               "'_nn' indicates the component normal to the "
-                                               "boundary.  In this case bare_flux is measured in "
-                                               "Pa.m^-1.  This can be used in conjunction with "
-                                               "other use_*");
-  params.addParam<bool>("use_relperm", false, "If true, then fluxes are multiplied by relative "
-                                              "permeability.  This can be used in conjunction with "
-                                              "other use_*");
-  params.addParam<bool>("use_enthalpy", false, "If true, then fluxes are multiplied by enthalpy.  "
-                                               "In this case bare_flux is measured in kg.m^-2.s^-1 "
-                                               "/ (J.kg).  This can be used in conjunction with "
-                                               "other use_*");
-  params.addParam<bool>(
-      "use_internal_energy", false, "If true, then fluxes are multiplied by fluid internal energy. "
-                                    " In this case bare_flux is measured in kg.m^-2.s^-1 / (J.kg). "
-                                    " This can be used in conjunction with other use_*");
-  params.addParam<bool>("use_thermal_conductivity", false, "If true, then fluxes are multiplied by "
-                                                           "thermal conductivity projected onto "
-                                                           "the normal direction.  This can be "
-                                                           "used in conjunction with other use_*");
+  params.addParam<unsigned int>("mass_fraction_component",
+                                "The index corresponding to a fluid "
+                                "component.  If supplied, the flux will "
+                                "be multiplied by the nodal mass "
+                                "fraction for the component");
+  params.addParam<bool>("use_mobility",
+                        false,
+                        "If true, then fluxes are multiplied by "
+                        "(density*permeability_nn/viscosity), where the "
+                        "'_nn' indicates the component normal to the "
+                        "boundary.  In this case bare_flux is measured in "
+                        "Pa.m^-1.  This can be used in conjunction with "
+                        "other use_*");
+  params.addParam<bool>("use_relperm",
+                        false,
+                        "If true, then fluxes are multiplied by relative "
+                        "permeability.  This can be used in conjunction with "
+                        "other use_*");
+  params.addParam<bool>("use_enthalpy",
+                        false,
+                        "If true, then fluxes are multiplied by enthalpy.  "
+                        "In this case bare_flux is measured in kg.m^-2.s^-1 "
+                        "/ (J.kg).  This can be used in conjunction with "
+                        "other use_*");
+  params.addParam<bool>("use_internal_energy",
+                        false,
+                        "If true, then fluxes are multiplied by fluid internal energy. "
+                        " In this case bare_flux is measured in kg.m^-2.s^-1 / (J.kg). "
+                        " This can be used in conjunction with other use_*");
+  params.addParam<bool>("use_thermal_conductivity",
+                        false,
+                        "If true, then fluxes are multiplied by "
+                        "thermal conductivity projected onto "
+                        "the normal direction.  This can be "
+                        "used in conjunction with other use_*");
   params.addParam<FunctionName>(
-      "flux_function", 1.0, "The flux.  The flux is OUT of the medium: hence positive values of "
-                            "this function means this BC will act as a SINK, while negative values "
-                            "indicate this flux will be a SOURCE.  The functional form is useful "
-                            "for spatially or temporally varying sinks.  Without any use_*, this "
-                            "function is measured in kg.m^-2.s^-1 (or J.m^-2.s^-1 for the case "
-                            "with only heat and no fluids)");
+      "flux_function",
+      1.0,
+      "The flux.  The flux is OUT of the medium: hence positive values of "
+      "this function means this BC will act as a SINK, while negative values "
+      "indicate this flux will be a SOURCE.  The functional form is useful "
+      "for spatially or temporally varying sinks.  Without any use_*, this "
+      "function is measured in kg.m^-2.s^-1 (or J.m^-2.s^-1 for the case "
+      "with only heat and no fluids)");
   return params;
 }
 
