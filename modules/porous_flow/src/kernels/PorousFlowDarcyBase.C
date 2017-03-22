@@ -263,7 +263,16 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
           for (_j = 0; _j < _phi.size(); _j++)
             component_ke[n][_j][ph] *= mob;
 
-          component_ke[n][n][ph] += dmob * component_re[n][ph];
+          if (_test.size() == _phi.size())
+            /* mobility at node=n depends only on the variables at node=n, by construction.  For
+             * linear-lagrange variables, this means that Jacobian entries involving the derivative
+             * of mobility will only be nonzero for derivatives wrt variables at node=n.  Hence the
+             * [n][n] in the line below.  However, for other variable types (eg constant monomials)
+             * I cannot tell what variable number contributes to the derivative.  However, in all
+             * cases I can possibly imagine, the derivative is zero anyway, since in the full
+             * upwinding scheme, mobility shouldn't depend on these other sorts of variables.
+             */
+            component_ke[n][n][ph] += dmob * component_re[n][ph];
 
           for (_j = 0; _j < _phi.size(); _j++)
             dtotal_mass_out[_j] += component_ke[n][_j][ph];
