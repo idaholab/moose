@@ -224,4 +224,13 @@ CO2FluidPropertiesTest::derivatives()
   ABS_TEST("mu", mu, _fp->mu(rho, T), 1.0e-15);
   REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-6);
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
+
+  // Henry's constant
+  T = 300.0;
+
+  Real dKh_dT_fd = (_fp->henryConstant(T + dT) - _fp->henryConstant(T - dT)) / (2.0 * dT);
+  Real Kh = 0.0, dKh_dT = 0.0;
+  _fp->henryConstant_dT(T, Kh, dKh_dT);
+  REL_TEST("henry", Kh, _fp->henryConstant(T), 1.0e-6);
+  REL_TEST("dhenry_dT", dKh_dT_fd, dKh_dT, 1.0e-6);
 }
