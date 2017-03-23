@@ -58,7 +58,7 @@ protected:
   Point _top_right;
   Point _range;
 
-  bool _advanced_op_assignment;
+  MooseEnum _coloring_algorithm;
 
   std::vector<Point> _centerpoints;
   std::vector<unsigned int> _assigned_op;

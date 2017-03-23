@@ -8,6 +8,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Conversion.h"
+#include "PolycrystalICTools.h"
 
 template <>
 InputParameters
@@ -22,9 +23,9 @@ validParams<PolycrystalVoronoiICAction>()
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
-  params.addParam<bool>("advanced_op_assignment",
-                        false,
-                        "Enable advanced grain to op assignment (avoid invalid graph coloring)");
+  params.addParam<MooseEnum>("coloring_algorithm",
+                             PolycrystalICTools::coloringAlgorithms(),
+                             PolycrystalICTools::coloringAlgorithmDescriptions());
   return params;
 }
 
@@ -54,7 +55,7 @@ PolycrystalVoronoiICAction::act()
     poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<unsigned int>("rand_seed") = getParam<unsigned int>("rand_seed");
     poly_params.set<bool>("columnar_3D") = getParam<bool>("columnar_3D");
-    poly_params.set<bool>("advanced_op_assignment") = getParam<bool>("advanced_op_assignment");
+    poly_params.set<MooseEnum>("coloring_algorithm") = getParam<MooseEnum>("coloring_algorithm");
 
     // Add initial condition
     _problem->addInitialCondition(

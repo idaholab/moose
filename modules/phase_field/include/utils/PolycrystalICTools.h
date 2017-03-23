@@ -44,7 +44,12 @@ buildNodalGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & node_t
 
 std::vector<unsigned int> assignOpsToGrains(const AdjacencyGraph & adjacency_matrix,
                                             unsigned int n_grains,
-                                            unsigned int n_ops);
+                                            unsigned int n_ops,
+                                            const MooseEnum & coloring_algorithm);
+
+MooseEnum coloringAlgorithms();
+
+std::string coloringAlgorithmDescriptions();
 }
 
 #endif // POLYCRYSTALICTOOLS_H

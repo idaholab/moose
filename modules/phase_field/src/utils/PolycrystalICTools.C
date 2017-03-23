@@ -8,6 +8,11 @@
 #include "PolycrystalICTools.h"
 #include "MooseMesh.h"
 
+#ifdef LIBMESH_HAVE_PETSC
+#include <petscmat.h>
+#include <petscis.h>
+#endif
+
 namespace GraphColoring
 {
 const unsigned int INVALID_COLOR = std::numeric_limits<unsigned int>::max();
@@ -316,19 +321,92 @@ PolycrystalICTools::buildNodalGrainAdjacencyGraph(
 std::vector<unsigned int>
 PolycrystalICTools::assignOpsToGrains(const AdjacencyGraph & adjacency_matrix,
                                       unsigned int n_grains,
-                                      unsigned int n_ops)
+                                      unsigned int n_ops,
+                                      const MooseEnum & coloring_algorithm)
 {
   Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
 
   std::vector<unsigned int> grain_to_op(n_grains, GraphColoring::INVALID_COLOR);
 
-  if (!colorGraph(adjacency_matrix, grain_to_op, n_grains, n_ops, 0))
-    mooseError(
-        "Unable to find a valid Grain to op configuration, do you have enough op variables?");
+  if (coloring_algorithm == "BT")
+  {
+    if (!colorGraph(adjacency_matrix, grain_to_op, n_grains, n_ops, 0))
+      mooseError(
+          "Unable to find a valid Grain to op configuration, do you have enough op variables?");
+  }
+  else // PETSc Coloring algorithms
+  {
+#ifdef LIBMESH_HAVE_PETSC
+    PetscScalar * a;
+    PetscMalloc1(n_grains * n_grains, &a);
+    for (unsigned int i = 0; i < n_grains; ++i)
+      for (unsigned int j = 0; j < n_grains; ++j)
+        a[i * n_grains + j] = adjacency_matrix[i][j];
+
+    Mat A, B;
+    MatCreate(MPI_COMM_SELF, &A);
+    MatSetSizes(A, n_grains, n_grains, n_grains, n_grains);
+    MatSetType(A, MATSEQDENSE);
+    MatSeqDenseSetPreallocation(A, a);
+    MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+
+    MatConvert(A, MATAIJ, MAT_INITIAL_MATRIX, &B);
+
+    MatColoring mc;
+    ISColoring iscoloring;
+    MatColoringCreate(B, &mc);
+    MatColoringSetType(mc, static_cast<std::string>(coloring_algorithm).c_str());
+    MatColoringSetMaxColors(mc, static_cast<PetscInt>(n_ops));
+    MatColoringSetDistance(mc, 1);
+    MatColoringSetFromOptions(mc);
+    MatColoringApply(mc, &iscoloring);
+
+    PetscInt nn;
+    IS * isis;
+    ISColoringGetIS(iscoloring, &nn, &isis);
+
+    mooseAssert(nn <= static_cast<PetscInt>(n_grains), "Too many colors used");
+    for (int i = 0; i < nn; i++)
+    {
+      PetscInt isize;
+      const PetscInt * indices;
+      ISGetLocalSize(isis[i], &isize);
+      ISGetIndices(isis[i], &indices);
+      for (int j = 0; j < isize; j++)
+        grain_to_op[indices[j]] = i;
+      ISRestoreIndices(isis[i], &indices);
+    }
+
+    MatDestroy(&A);
+    MatDestroy(&B);
+    MatColoringDestroy(&mc);
+    ISColoringDestroy(&iscoloring);
+#else
+    mooseError("Selected coloring algorithm requires PETSc");
+#endif
+  }
 
   Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
 
   return grain_to_op;
+}
+
+MooseEnum
+PolycrystalICTools::coloringAlgorithms()
+{
+  return MooseEnum("legacy bt jp power sl lf id greedy", "legacy");
+}
+
+std::string
+PolycrystalICTools::coloringAlgorithmDescriptions()
+{
+  return "The grain neighbor graph coloring algorithm to use. \"legacy\" is the original "
+         "algorithm "
+         "which does not guarantee a valid coloring. \"bt\" is a simple backtracking algorithm "
+         "which will produce a valid coloring but has potential exponential run time. The "
+         "remaining algorithms require PETSc but are recommended for larger problems (See "
+         "MatColoringType)";
 }
 
 /**
