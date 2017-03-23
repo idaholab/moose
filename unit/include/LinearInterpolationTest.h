@@ -15,16 +15,16 @@
 #ifndef LINEARINTERPOLATIONTEST_H
 #define LINEARINTERPOLATIONTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class LinearInterpolationTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( LinearInterpolationTest );
+  CPPUNIT_TEST_SUITE(LinearInterpolationTest);
 
-  CPPUNIT_TEST( constructor );
-  CPPUNIT_TEST( sample );
-  CPPUNIT_TEST( getSampleSize );
+  CPPUNIT_TEST(constructor);
+  CPPUNIT_TEST(sample);
+  CPPUNIT_TEST(getSampleSize);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -43,4 +43,4 @@ private:
   static const double _tol;
 };
 
-#endif  // LINEARINTERPOLATIONTEST_H
+#endif // LINEARINTERPOLATIONTEST_H

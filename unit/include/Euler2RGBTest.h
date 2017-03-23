@@ -15,14 +15,14 @@
 #ifndef EULER2RGBTEST_H
 #define EULER2RGBTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
 class Euler2RGBTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( Euler2RGBTest );
+  CPPUNIT_TEST_SUITE(Euler2RGBTest);
 
-  CPPUNIT_TEST( test );
+  CPPUNIT_TEST(test);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -35,4 +35,4 @@ public:
 private:
 };
 
-#endif //EULER2RGBTEST_H
+#endif // EULER2RGBTEST_H

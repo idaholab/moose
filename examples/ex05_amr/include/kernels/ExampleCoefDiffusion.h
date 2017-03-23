@@ -17,16 +17,15 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleCoefDiffusion;
 
-template<>
+template <>
 InputParameters validParams<ExampleCoefDiffusion>();
 
 class ExampleCoefDiffusion : public Kernel
 {
 public:
-
   ExampleCoefDiffusion(const InputParameters & parameters);
 
 protected:

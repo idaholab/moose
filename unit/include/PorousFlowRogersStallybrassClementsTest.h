@@ -15,7 +15,7 @@
 #ifndef POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
 #define POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,11 +24,11 @@
 class PorousFlowRogersStallybrassClementsTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowRogersStallybrassClementsTest );
+  CPPUNIT_TEST_SUITE(PorousFlowRogersStallybrassClementsTest);
 
-  CPPUNIT_TEST( satTest );
-  CPPUNIT_TEST( dsatTest );
-  CPPUNIT_TEST( d2satTest );
+  CPPUNIT_TEST(satTest);
+  CPPUNIT_TEST(dsatTest);
+  CPPUNIT_TEST(d2satTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -39,8 +39,8 @@ public:
   void dsatTest();
   void d2satTest();
 
- private:
+private:
   Real _ep;
 };
 
-#endif  // POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
+#endif // POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H

@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class ExampleAux;
 
-template<>
+template <>
 InputParameters validParams<ExampleAux>();
 
 /**
@@ -30,7 +29,6 @@ InputParameters validParams<ExampleAux>();
 class ExampleAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -45,4 +43,4 @@ protected:
   Real _value;
 };
 
-#endif //EXAMPLEAUX_H
+#endif // EXAMPLEAUX_H

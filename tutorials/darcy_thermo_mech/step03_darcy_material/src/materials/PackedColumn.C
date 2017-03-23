@@ -13,20 +13,23 @@
 /****************************************************************/
 #include "PackedColumn.h"
 
-template<>
-InputParameters validParams<PackedColumn>()
+template <>
+InputParameters
+validParams<PackedColumn>()
 {
   InputParameters params = validParams<Material>();
 
-  // Add a parameter to get the radius of the spheres in the column (used later to interpolate permeability).
-  params.addParam<Real>("sphere_radius", "The radius of the steel spheres that are packed in the column.  Used to interpolate _permeability.");
+  // Add a parameter to get the radius of the spheres in the column (used later to interpolate
+  // permeability).
+  params.addParam<Real>("sphere_radius",
+                        "The radius of the steel spheres that are packed in the "
+                        "column.  Used to interpolate _permeability.");
 
   return params;
 }
 
-
-PackedColumn::PackedColumn(const InputParameters & parameters) :
-    Material(parameters),
+PackedColumn::PackedColumn(const InputParameters & parameters)
+  : Material(parameters),
 
     // Get the one parameter from the input file
     _sphere_radius(getParam<Real>("sphere_radius")),

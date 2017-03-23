@@ -20,13 +20,12 @@
 // Forward Declarations
 class ExampleTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<ExampleTimeDerivative>();
 
 class ExampleTimeDerivative : public TimeDerivative
 {
 public:
-
   ExampleTimeDerivative(const InputParameters & parameters);
 
 protected:
@@ -37,4 +36,4 @@ protected:
   Real _time_coefficient;
 };
 
-#endif //EXAMPLETIMEDERIVATIVE
+#endif // EXAMPLETIMEDERIVATIVE

@@ -21,7 +21,7 @@
 
 class PackedColumn;
 
-template<>
+template <>
 InputParameters validParams<PackedColumn>();
 
 /**

@@ -19,13 +19,12 @@
 
 class ExampleImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<ExampleImplicitEuler>();
 
 class ExampleImplicitEuler : public TimeDerivative
 {
 public:
-
   ExampleImplicitEuler(const InputParameters & parameters);
 
 protected:
@@ -36,4 +35,4 @@ protected:
   const MaterialProperty<Real> & _time_coefficient;
 };
 
-#endif //EXAMPLEIMPLICITEULER
+#endif // EXAMPLEIMPLICITEULER

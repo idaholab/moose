@@ -15,19 +15,19 @@
 #ifndef MOOSEENUMTEST_H
 #define MOOSEENUMTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 #include <string>
 
 class MooseEnumTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( MooseEnumTest );
+  CPPUNIT_TEST_SUITE(MooseEnumTest);
 
-  CPPUNIT_TEST( multiTestOne );
-  CPPUNIT_TEST( withNamesFromTest );
-  CPPUNIT_TEST( testDeprecate );
-  CPPUNIT_TEST( testErrors );
+  CPPUNIT_TEST(multiTestOne);
+  CPPUNIT_TEST(withNamesFromTest);
+  CPPUNIT_TEST(testDeprecate);
+  CPPUNIT_TEST(testErrors);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -38,4 +38,4 @@ public:
   void testErrors();
 };
 
-#endif  // MOOSEENUMTEST_H
+#endif // MOOSEENUMTEST_H

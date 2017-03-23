@@ -15,17 +15,17 @@
 #ifndef LINEARINTERPOLATIONTEST_H
 #define LINEARINTERPOLATIONTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class IndirectSort : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( IndirectSort );
+  CPPUNIT_TEST_SUITE(IndirectSort);
 
-  CPPUNIT_TEST( realSort );
-  CPPUNIT_TEST( intSort );
-  CPPUNIT_TEST( testStableSort );
-  CPPUNIT_TEST( testDoubleSort );
+  CPPUNIT_TEST(realSort);
+  CPPUNIT_TEST(intSort);
+  CPPUNIT_TEST(testStableSort);
+  CPPUNIT_TEST(testDoubleSort);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -36,4 +36,4 @@ public:
   void testDoubleSort();
 };
 
-#endif  // LINEARINTERPOLATIONTEST_H
+#endif // LINEARINTERPOLATIONTEST_H

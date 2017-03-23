@@ -15,7 +15,7 @@
 #ifndef LINESEGMENTTEST_H
 #define LINESEGMENTTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,13 +24,13 @@
 class LineSegmentTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( LineSegmentTest );
+  CPPUNIT_TEST_SUITE(LineSegmentTest);
 
-  CPPUNIT_TEST( closestPointTest );
-  CPPUNIT_TEST( closestNormalPointTest );
-  CPPUNIT_TEST( containsPointTest );
-  CPPUNIT_TEST( planeIntersectTest );
-  CPPUNIT_TEST( lineIntersectTest );
+  CPPUNIT_TEST(closestPointTest);
+  CPPUNIT_TEST(closestNormalPointTest);
+  CPPUNIT_TEST(containsPointTest);
+  CPPUNIT_TEST(planeIntersectTest);
+  CPPUNIT_TEST(lineIntersectTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -57,4 +57,4 @@ private:
   LineSegment _neg3diag;
 };
 
-#endif  // LINESEGMENTTEST_H
+#endif // LINESEGMENTTEST_H

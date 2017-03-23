@@ -25,7 +25,7 @@ public:
   virtual void act() override;
 };
 
-template<>
+template <>
 InputParameters validParams<ConvectionDiffusionAction>();
 
-#endif //CONVECTIONDIFFUSIONACTION_H
+#endif // CONVECTIONDIFFUSIONACTION_H

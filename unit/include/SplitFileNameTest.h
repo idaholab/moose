@@ -15,7 +15,7 @@
 #ifndef SPLITFILENAMETEST_H
 #define SPLITFILENAMETEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class SplitFileNameTest : public CppUnit::TestFixture
@@ -29,4 +29,4 @@ public:
   void invalidName();
 };
 
-#endif  // SPLITFILENAMETEST_H
+#endif // SPLITFILENAMETEST_H

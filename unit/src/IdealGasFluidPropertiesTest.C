@@ -48,16 +48,16 @@ IdealGasFluidPropertiesTest::buildObjects()
   uo_pars.set<Real>("R") = 287.04;
   uo_pars.set<Real>("gamma") = 1.41;
   _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
-  _fp = & _fe_problem->getUserObject<IdealGasFluidProperties>("fp");
+  _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>("fp");
 }
 
 void
 IdealGasFluidPropertiesTest::setUp()
 {
   char str[] = "foo";
-  char * argv[] = { str, NULL };
+  char * argv[] = {str, NULL};
 
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **) argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 
   registerObjects(*_factory);
@@ -75,19 +75,19 @@ IdealGasFluidPropertiesTest::tearDown()
 void
 IdealGasFluidPropertiesTest::testAll()
 {
-  Real T = 120. + 273.15;   // K
-  Real p = 101325;          // Pa
+  Real T = 120. + 273.15; // K
+  Real p = 101325;        // Pa
 
   Real rho = _fp->rho(p, T);
   Real v = 1 / rho;
   Real e;
 
   REL_TEST("rho", _fp->rho(p, T), 0.897875065343506, 1e-15);
-  REL_TEST("e",   _fp->e(p, rho), 275243.356097561, 1e-15);
+  REL_TEST("e", _fp->e(p, rho), 275243.356097561, 1e-15);
 
   _fp->rho_e(p, T, rho, e);
   REL_TEST("rho", rho, 0.897875065343506, 1e-15);
-  REL_TEST("e",   e,   275243.356097561,  1e-15);
+  REL_TEST("e", e, 275243.356097561, 1e-15);
 
   REL_TEST("p", _fp->pressure(v, e), p, 1e-15);
   REL_TEST("T", _fp->temperature(v, e), T, 1e-15);
@@ -117,7 +117,6 @@ IdealGasFluidPropertiesTest::testAll()
     ABS_TEST("dp_de", dp_de, dp_de_fd, 1e-8);
     ABS_TEST("dT_dv", dT_dv, dT_dv_fd, 1e-15);
     ABS_TEST("dT_de", dT_de, dT_de_fd, 1e-11);
-
   }
 
   Real dp = 1e1;

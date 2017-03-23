@@ -18,7 +18,7 @@
 
 class DarcyThermoMechApp;
 
-template<>
+template <>
 InputParameters validParams<DarcyThermoMechApp>();
 
 class DarcyThermoMechApp : public MooseApp

@@ -15,7 +15,7 @@
 #ifndef MATRIXTOOLSTEST_H
 #define MATRIXTOOLSTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,11 +24,11 @@
 class MatrixToolsTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( MatrixToolsTest );
+  CPPUNIT_TEST_SUITE(MatrixToolsTest);
 
-  CPPUNIT_TEST( matrixInversionTest1 );
-  CPPUNIT_TEST( matrixInversionTest2 );
-  CPPUNIT_TEST( matrixInversionTest3 );
+  CPPUNIT_TEST(matrixInversionTest1);
+  CPPUNIT_TEST(matrixInversionTest2);
+  CPPUNIT_TEST(matrixInversionTest3);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -40,4 +40,4 @@ public:
   void matrixInversionTest3();
 };
 
-#endif  // MATRIXTOOLSTEST_H
+#endif // MATRIXTOOLSTEST_H

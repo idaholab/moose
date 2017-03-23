@@ -17,19 +17,18 @@
 
 #include "Diffusion.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleDiffusion;
 
 /* This class extends the Diffusion kernel to multiply by a coefficient
  * read from the input file
  */
-template<>
+template <>
 InputParameters validParams<ExampleDiffusion>();
 
 class ExampleDiffusion : public Diffusion
 {
 public:
-
   ExampleDiffusion(const InputParameters & parameters);
 
 protected:
@@ -39,4 +38,4 @@ protected:
 
   Real _diffusivity;
 };
-#endif //EXAMPLEDIFFUSION_H
+#endif // EXAMPLEDIFFUSION_H

@@ -13,15 +13,14 @@
 /****************************************************************/
 #include "RankFourTensorTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( RankFourTensorTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(RankFourTensorTest);
 
 RankFourTensorTest::RankFourTensorTest()
 {
   _iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
 }
 
-RankFourTensorTest::~RankFourTensorTest()
-{}
+RankFourTensorTest::~RankFourTensorTest() {}
 
 void
 RankFourTensorTest::invSymmTest1()
@@ -32,9 +31,8 @@ RankFourTensorTest::invSymmTest1()
   input[1] = 3;
   RankFourTensor a(input, RankFourTensor::symmetric_isotropic);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_iSymmetric - a.invSymm()*a).L2norm(), 1E-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }
-
 
 void
 RankFourTensorTest::invSymmTest2()
@@ -80,5 +78,5 @@ RankFourTensorTest::invSymmTest2()
   a(1, 2, 1, 2) = a(1, 2, 2, 1) = a(2, 1, 1, 2) = a(2, 1, 2, 1) = 1.4;
   a(1, 2, 2, 2) = a(2, 1, 2, 2) = 0.1;
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_iSymmetric - a.invSymm()*a).L2norm(), 1E-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }

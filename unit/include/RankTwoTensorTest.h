@@ -15,7 +15,7 @@
 #ifndef RANKTWOTENSORTEST_H
 #define RANKTWOTENSORTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,29 +24,29 @@
 class RankTwoTensorTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( RankTwoTensorTest );
+  CPPUNIT_TEST_SUITE(RankTwoTensorTest);
 
-  CPPUNIT_TEST( L2normTest );
-  CPPUNIT_TEST( addIaTest );
-  CPPUNIT_TEST( transposeTest );
-  CPPUNIT_TEST( doubleContractionTest );
-  CPPUNIT_TEST( rotateTest );
-  CPPUNIT_TEST( deviatoricTest );
-  CPPUNIT_TEST( traceTest );
-  CPPUNIT_TEST( dtraceTest );
-  CPPUNIT_TEST( secondInvariantTest );
-  CPPUNIT_TEST( dsecondInvariantTest );
-  CPPUNIT_TEST( d2secondInvariantTest );
-  CPPUNIT_TEST( thirdInvariantTest );
-  CPPUNIT_TEST( dthirdInvariantTest );
-  CPPUNIT_TEST( d2thirdInvariantTest );
-  CPPUNIT_TEST( sin3LodeTest );
-  CPPUNIT_TEST( dsin3LodeTest );
-  CPPUNIT_TEST( d2sin3LodeTest );
-  CPPUNIT_TEST( detTest );
-  CPPUNIT_TEST( ddetTest );
-  CPPUNIT_TEST( inverseTest );
-  CPPUNIT_TEST( initialContractionTest );
+  CPPUNIT_TEST(L2normTest);
+  CPPUNIT_TEST(addIaTest);
+  CPPUNIT_TEST(transposeTest);
+  CPPUNIT_TEST(doubleContractionTest);
+  CPPUNIT_TEST(rotateTest);
+  CPPUNIT_TEST(deviatoricTest);
+  CPPUNIT_TEST(traceTest);
+  CPPUNIT_TEST(dtraceTest);
+  CPPUNIT_TEST(secondInvariantTest);
+  CPPUNIT_TEST(dsecondInvariantTest);
+  CPPUNIT_TEST(d2secondInvariantTest);
+  CPPUNIT_TEST(thirdInvariantTest);
+  CPPUNIT_TEST(dthirdInvariantTest);
+  CPPUNIT_TEST(d2thirdInvariantTest);
+  CPPUNIT_TEST(sin3LodeTest);
+  CPPUNIT_TEST(dsin3LodeTest);
+  CPPUNIT_TEST(d2sin3LodeTest);
+  CPPUNIT_TEST(detTest);
+  CPPUNIT_TEST(ddetTest);
+  CPPUNIT_TEST(inverseTest);
+  CPPUNIT_TEST(initialContractionTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -76,7 +76,7 @@ public:
   void inverseTest();
   void initialContractionTest();
 
- private:
+private:
   RankTwoTensor _m0;
   RankTwoTensor _m1;
   RankTwoTensor _m2;
@@ -85,4 +85,4 @@ public:
   RankTwoTensor _unsymmetric1;
 };
 
-#endif  // RANKTWOTENSORTEST_H
+#endif // RANKTWOTENSORTEST_H

@@ -46,16 +46,16 @@ SimpleFluidPropertiesTest::buildObjects()
 
   InputParameters uo_pars = _factory->getValidParams("SimpleFluidProperties");
   _fe_problem->addUserObject("SimpleFluidProperties", "fp", uo_pars);
-  _fp = & _fe_problem->getUserObject<SimpleFluidProperties>("fp");
+  _fp = &_fe_problem->getUserObject<SimpleFluidProperties>("fp");
 }
 
 void
 SimpleFluidPropertiesTest::setUp()
 {
   char str[] = "foo";
-  char * argv[] = { str, NULL };
+  char * argv[] = {str, NULL};
 
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **) argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 
   registerObjects(*_factory);
@@ -98,7 +98,6 @@ SimpleFluidPropertiesTest::properties()
   REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
   REL_TEST("h", _fp->h(P, T), cp * T, 1.0E-8);
   ABS_TEST("henry", _fp->henryConstant(T), henry, 1.0E-8);
-
 
   P = 1E7;
   T = 300;

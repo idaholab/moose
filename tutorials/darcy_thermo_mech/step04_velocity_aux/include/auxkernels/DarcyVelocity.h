@@ -20,7 +20,7 @@
 // Forward Declarations
 class DarcyVelocity;
 
-template<>
+template <>
 InputParameters validParams<DarcyVelocity>();
 
 /**

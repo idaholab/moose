@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-//CPPUnit includes
+// CPPUnit includes
 #include "cppunit/XmlOutputter.h"
 #include "cppunit/CompilerOutputter.h"
 #include "cppunit/ui/text/TestRunner.h"
 #include "cppunit/extensions/TestFactoryRegistry.h"
 
-//Moose includes
+// Moose includes
 #include "Moose.h"
 #include "MooseInit.h"
 
@@ -31,13 +31,14 @@
 
 PerfLog Moose::perf_log("CppUnit");
 
-int main(int argc, char **argv)
+int
+main(int argc, char ** argv)
 {
   MooseInit init(argc, argv);
 
   registerApp(DarcyThermoMechApp);
 
-  CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
+  CppUnit::Test * suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 
   CppUnit::TextTestRunner runner;
   runner.addTest(suite);
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
   // If you run with --xml, output will be sent to an xml file instead of the screen
   if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
   {
-    runner.setOutputter ( new CppUnit::XmlOutputter( &runner.result(), out ) );
+    runner.setOutputter(new CppUnit::XmlOutputter(&runner.result(), out));
     out.open("test_results.xml");
   }
 
@@ -55,13 +56,13 @@ int main(int argc, char **argv)
     // Note: upon calling setOutputter, any previous outputter is
     // destroyed. The TextTestRunner assumes ownership of the outputter, so you
     // don't have to worry about deleting it.
-    runner.setOutputter ( new CppUnit::CompilerOutputter( &runner.result(), Moose::err ) );
+    runner.setOutputter(new CppUnit::CompilerOutputter(&runner.result(), Moose::err));
   }
 
   bool wasSuccessful = runner.run(/*testPath=*/"",
-                                 /*doWait=*/false,
-                                 /*doPrintResult=*/true,
-                                 /*doPrintProgress=*/false);
+                                  /*doWait=*/false,
+                                  /*doPrintResult=*/true,
+                                  /*doPrintProgress=*/false);
 
   return wasSuccessful ? 0 : 1;
 }

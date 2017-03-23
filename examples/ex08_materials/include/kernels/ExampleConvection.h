@@ -19,24 +19,21 @@
 
 class ExampleConvection;
 
-template<>
+template <>
 InputParameters validParams<ExampleConvection>();
 
 class ExampleConvection : public Kernel
 {
 public:
-
   ExampleConvection(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual() override;
 
   virtual Real computeQpJacobian() override;
 
 private:
-
   const MaterialProperty<RealGradient> & _velocity;
 };
 
-#endif //EXAMPLECONVECTION_H
+#endif // EXAMPLECONVECTION_H

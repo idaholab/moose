@@ -30,7 +30,7 @@ class ExampleConvection;
  * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
-template<>
+template <>
 InputParameters validParams<ExampleConvection>();
 
 /**
@@ -43,7 +43,6 @@ InputParameters validParams<ExampleConvection>();
 class ExampleConvection : public Kernel
 {
 public:
-
   /**
    * This is the constructor declaration.  This class takes a
    * string and a InputParameters object, just like other

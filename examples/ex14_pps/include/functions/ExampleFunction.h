@@ -19,7 +19,7 @@
 
 class ExampleFunction;
 
-template<>
+template <>
 InputParameters validParams<ExampleFunction>();
 
 class ExampleFunction : public Function
@@ -33,4 +33,4 @@ protected:
   Real _alpha;
 };
 
-#endif //EXAMPLEFUNCTION_H
+#endif // EXAMPLEFUNCTION_H

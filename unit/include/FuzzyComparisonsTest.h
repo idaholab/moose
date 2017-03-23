@@ -15,7 +15,7 @@
 #ifndef FUZZYCOMPARISONSTEST_H
 #define FUZZYCOMPARISONSTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class FuzzyComparisonsTest : public CppUnit::TestFixture
@@ -28,4 +28,4 @@ public:
   void fuzzyFunctions();
 };
 
-#endif  // FUZZYCOMPARISONSTEST_H
+#endif // FUZZYCOMPARISONSTEST_H

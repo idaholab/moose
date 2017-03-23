@@ -18,7 +18,7 @@
 
 class ExampleApp;
 
-template<>
+template <>
 InputParameters validParams<ExampleApp>();
 
 class ExampleApp : public MooseApp
@@ -28,7 +28,7 @@ public:
   virtual ~ExampleApp();
   static void registerApps();
   static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax& syntax, ActionFactory & action_factory);
+  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
 
 #endif /* EXAMPLEAPP_H */

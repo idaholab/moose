@@ -14,10 +14,11 @@
 
 #include "TransientHalf.h"
 
-//Moose includes
+// Moose includes
 
-template<>
-InputParameters validParams<TransientHalf>()
+template <>
+InputParameters
+validParams<TransientHalf>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addParam<Real>("dt", 1., "The initial time step size.");
@@ -26,10 +27,8 @@ InputParameters validParams<TransientHalf>()
   return params;
 }
 
-TransientHalf::TransientHalf(const InputParameters & parameters) :
-    TimeStepper(parameters),
-    _ratio(getParam<Real>("ratio")),
-    _min_dt(getParam<Real>("min_dt"))
+TransientHalf::TransientHalf(const InputParameters & parameters)
+  : TimeStepper(parameters), _ratio(getParam<Real>("ratio")), _min_dt(getParam<Real>("min_dt"))
 {
 }
 

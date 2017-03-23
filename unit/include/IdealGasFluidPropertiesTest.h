@@ -15,13 +15,12 @@
 #ifndef IDEALGASFLUIDPROPERTIESTEST_H
 #define IDEALGASFLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
 class MooseMesh;
 class FEProblem;
 class IdealGasFluidProperties;
-
 
 class IdealGasFluidPropertiesTest : public CppUnit::TestFixture
 {

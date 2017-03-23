@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class HeatConductionOutflow;
 
-template<>
+template <>
 InputParameters validParams<HeatConductionOutflow>();
 
 /**
@@ -56,6 +55,5 @@ protected:
   /// Thermal conductivity of the material
   const MaterialProperty<Real> & _thermal_conductivity;
 };
-
 
 #endif // HEATCONDUCTIONOUTFLOW_H

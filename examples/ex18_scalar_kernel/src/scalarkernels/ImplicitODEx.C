@@ -18,16 +18,17 @@
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
-template<>
-InputParameters validParams<ImplicitODEx>()
+template <>
+InputParameters
+validParams<ImplicitODEx>()
 {
   InputParameters params = validParams<ODEKernel>();
   params.addCoupledVar("y", "variable Y coupled into this kernel");
   return params;
 }
 
-ImplicitODEx::ImplicitODEx(const InputParameters & parameters) :
-    // You must call the constructor of the base class first
+ImplicitODEx::ImplicitODEx(const InputParameters & parameters)
+  : // You must call the constructor of the base class first
     ODEKernel(parameters),
     // get the coupled variable number and values
     _y_var(coupledScalar("y")),
@@ -53,7 +54,7 @@ Real
 ImplicitODEx::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _y_var)
-    return -2.;         // dF/dy
+    return -2.; // dF/dy
   else
-    return 0.;          // everything else
+    return 0.; // everything else
 }

@@ -14,8 +14,9 @@
 
 #include "ExampleAux.h"
 
-template<>
-InputParameters validParams<ExampleAux>()
+template <>
+InputParameters
+validParams<ExampleAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam<Real>("value", 0.0, "Scalar value used for our auxiliary calculation");
@@ -23,15 +24,16 @@ InputParameters validParams<ExampleAux>()
   return params;
 }
 
-ExampleAux::ExampleAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+ExampleAux::ExampleAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
 
     // We can couple in a value from one of our kernels with a call to coupledValueAux
     _coupled_val(coupledValue("coupled")),
 
     // Set our member scalar value from InputParameters (read from the input file)
     _value(getParam<Real>("value"))
-{}
+{
+}
 
 /**
  * Auxiliary Kernels override computeValue() instead of computeQpResidual().  Aux Variables

@@ -39,9 +39,9 @@ SyntaxTest::errorChecks()
     _syntax.registerTaskName("first", true);
 
     // Unreachable
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_ASSERT(false);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
 
@@ -53,9 +53,9 @@ SyntaxTest::errorChecks()
     _syntax.registerTaskName("second_mo", false);
 
     // Unreachable
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_ASSERT(false);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
 
@@ -67,9 +67,9 @@ SyntaxTest::errorChecks()
     _syntax.appendTaskName("third", "MooseSystem");
 
     // Unreachable
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_ASSERT(false);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
 
@@ -81,9 +81,9 @@ SyntaxTest::errorChecks()
     _syntax.addDependency("forth", "third");
 
     // Unreachable
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_ASSERT(false);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
 
