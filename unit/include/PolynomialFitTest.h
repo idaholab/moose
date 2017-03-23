@@ -15,16 +15,16 @@
 #ifndef POLYNOMIALFITTEST_H
 #define POLYNOMIALFITTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class PolynomialFitTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( PolynomialFitTest );
+  CPPUNIT_TEST_SUITE(PolynomialFitTest);
 
-  CPPUNIT_TEST( constructor );
-  CPPUNIT_TEST( sample );
-  CPPUNIT_TEST( getSampleSize );
+  CPPUNIT_TEST(constructor);
+  CPPUNIT_TEST(sample);
+  CPPUNIT_TEST(getSampleSize);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -43,4 +43,4 @@ private:
   static const double _tol;
 };
 
-#endif  // POLYNOMIALFITTEST_H
+#endif // POLYNOMIALFITTEST_H

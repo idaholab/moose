@@ -15,7 +15,7 @@
 #ifndef POROUSFLOWFLACRELPERMTEST_H
 #define POROUSFLOWFLACRELPERMTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,11 +24,11 @@
 class PorousFlowFLACrelpermTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowFLACrelpermTest );
+  CPPUNIT_TEST_SUITE(PorousFlowFLACrelpermTest);
 
-  CPPUNIT_TEST( relpermTest );
-  CPPUNIT_TEST( drelpermTest );
-  CPPUNIT_TEST( d2relpermTest );
+  CPPUNIT_TEST(relpermTest);
+  CPPUNIT_TEST(drelpermTest);
+  CPPUNIT_TEST(d2relpermTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -39,8 +39,8 @@ public:
   void drelpermTest();
   void d2relpermTest();
 
- private:
+private:
   Real _ep;
 };
 
-#endif  // POROUSFLOWFLACRELPERMTEST_H
+#endif // POROUSFLOWFLACRELPERMTEST_H

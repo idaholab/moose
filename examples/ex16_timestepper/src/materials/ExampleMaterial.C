@@ -14,8 +14,9 @@
 
 #include "ExampleMaterial.h"
 
-template<>
-InputParameters validParams<ExampleMaterial>()
+template <>
+InputParameters
+validParams<ExampleMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<Real>("diffusivity", 1.0, "The Diffusivity");
@@ -23,8 +24,8 @@ InputParameters validParams<ExampleMaterial>()
   return params;
 }
 
-ExampleMaterial::ExampleMaterial(const InputParameters & parameters) :
-    Material(parameters),
+ExampleMaterial::ExampleMaterial(const InputParameters & parameters)
+  : Material(parameters),
 
     // Get a parameter value for the diffusivity
     _input_diffusivity(getParam<Real>("diffusivity")),
@@ -39,7 +40,8 @@ ExampleMaterial::ExampleMaterial(const InputParameters & parameters) :
     // Declare that this material is going to have a Real
     // valued property named "time_coefficient" that Kernels can use.
     _time_coefficient(declareProperty<Real>("time_coefficient"))
-{}
+{
+}
 
 void
 ExampleMaterial::computeQpProperties()

@@ -15,7 +15,7 @@
 #ifndef ROTATIONMATRIXTEST_H
 #define ROTATIONMATRIXTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,9 +24,9 @@
 class RotationMatrixTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( RotationMatrixTest );
+  CPPUNIT_TEST_SUITE(RotationMatrixTest);
 
-  CPPUNIT_TEST( rotVecToVecTest );
+  CPPUNIT_TEST(rotVecToVecTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -36,7 +36,6 @@ public:
 
   void rotVecToVecTest();
   void rotVtoU(RealVectorValue v, RealVectorValue u);
-
 };
 
-#endif  // ROTATIONMATRIXTEST_H
+#endif // ROTATIONMATRIXTEST_H

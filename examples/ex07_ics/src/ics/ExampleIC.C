@@ -14,18 +14,19 @@
 
 #include "ExampleIC.h"
 
-template<>
-InputParameters validParams<ExampleIC>()
+template <>
+InputParameters
+validParams<ExampleIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("coefficient", "The value of the initial condition");
   return params;
 }
 
-ExampleIC::ExampleIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
-    _coefficient(getParam<Real>("coefficient"))
-{}
+ExampleIC::ExampleIC(const InputParameters & parameters)
+  : InitialCondition(parameters), _coefficient(getParam<Real>("coefficient"))
+{
+}
 
 Real
 ExampleIC::value(const Point & p)

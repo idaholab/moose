@@ -61,9 +61,9 @@ void
 BrineFluidPropertiesTest::setUp()
 {
   char str[] = "foo";
-  char * argv[] = { str, NULL };
+  char * argv[] = {str, NULL};
 
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **) argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 
   registerObjects(*_factory);

@@ -18,14 +18,12 @@
 
 class ExampleGaussContForcing;
 
-template<>
+template <>
 InputParameters validParams<ExampleGaussContForcing>();
-
 
 class ExampleGaussContForcing : public Kernel
 {
 public:
-
   ExampleGaussContForcing(const InputParameters & parameters);
 
 protected:
@@ -48,4 +46,4 @@ protected:
   const Real _z_max;
 };
 
-#endif //EXAMPLEGAUSSCONTFORCING_H
+#endif // EXAMPLEGAUSSCONTFORCING_H

@@ -17,13 +17,13 @@
 #include "Executioner.h"
 #include "MooseMesh.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( MinimalApp );
+CPPUNIT_TEST_SUITE_REGISTRATION(MinimalApp);
 
 void
 MinimalApp::createMinimalAppTest()
 {
-  const char *argv[1] = { "\0" };
-  MooseApp * app = AppFactory::createApp("MooseUnitApp", 1, (char**)argv);
+  const char * argv[1] = {"\0"};
+  MooseApp * app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   app->parameters().set<bool>("minimal") = true;
   app->run();
   CPPUNIT_ASSERT(app->executioner()->name() == "Executioner");

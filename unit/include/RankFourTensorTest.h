@@ -15,7 +15,7 @@
 #ifndef RANKFOURTENSORTEST_H
 #define RANKFOURTENSORTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,10 +24,10 @@
 class RankFourTensorTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( RankFourTensorTest );
+  CPPUNIT_TEST_SUITE(RankFourTensorTest);
 
-  CPPUNIT_TEST( invSymmTest1 );
-  CPPUNIT_TEST( invSymmTest2 );
+  CPPUNIT_TEST(invSymmTest1);
+  CPPUNIT_TEST(invSymmTest2);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -38,8 +38,8 @@ public:
   void invSymmTest1();
   void invSymmTest2();
 
- private:
+private:
   RankFourTensor _iSymmetric;
 };
 
-#endif  // RANKFOURTENSORTEST_H
+#endif // RANKFOURTENSORTEST_H

@@ -15,7 +15,7 @@
 #ifndef POROUSFLOWBROADBRIDGEWHITETEST_H
 #define POROUSFLOWBROADBRIDGEWHITETEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,14 +24,14 @@
 class PorousFlowBroadbridgeWhiteTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowBroadbridgeWhiteTest );
+  CPPUNIT_TEST_SUITE(PorousFlowBroadbridgeWhiteTest);
 
-  CPPUNIT_TEST( satTest );
-  CPPUNIT_TEST( dsatTest );
-  CPPUNIT_TEST( d2satTest );
-  CPPUNIT_TEST( relpermTest );
-  CPPUNIT_TEST( drelpermTest );
-  CPPUNIT_TEST( d2relpermTest );
+  CPPUNIT_TEST(satTest);
+  CPPUNIT_TEST(dsatTest);
+  CPPUNIT_TEST(d2satTest);
+  CPPUNIT_TEST(relpermTest);
+  CPPUNIT_TEST(drelpermTest);
+  CPPUNIT_TEST(d2relpermTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -45,7 +45,7 @@ public:
   void drelpermTest();
   void d2relpermTest();
 
- private:
+private:
   Real _ep;
   Real _c;
   Real _sn;
@@ -55,4 +55,4 @@ public:
   Real _ks;
 };
 
-#endif  // POROUSFLOWBROADBRIDGEWHITETEST_H
+#endif // POROUSFLOWBROADBRIDGEWHITETEST_H

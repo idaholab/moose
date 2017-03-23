@@ -20,7 +20,7 @@
 
 class DarcyPressure;
 
-template<>
+template <>
 InputParameters validParams<DarcyPressure>();
 
 /**
@@ -52,6 +52,5 @@ protected:
   const MaterialProperty<Real> & _permeability;
   const MaterialProperty<Real> & _viscosity;
 };
-
 
 #endif // DARCYPRESSURE_H

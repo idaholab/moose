@@ -18,10 +18,10 @@
 #include "Material.h"
 #include "LinearInterpolation.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleMaterial;
 
-template<>
+template <>
 InputParameters validParams<ExampleMaterial>();
 
 /**
@@ -60,4 +60,4 @@ private:
   LinearInterpolation _piecewise_func;
 };
 
-#endif //EXAMPLEMATERIAL_H
+#endif // EXAMPLEMATERIAL_H

@@ -16,14 +16,13 @@
 #include "SplitFileNameTest.h"
 #include <cmath>
 
-CPPUNIT_TEST_SUITE_REGISTRATION( SplitFileNameTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(SplitFileNameTest);
 
 void
 SplitFileNameTest::invalidName()
 {
   std::string full = "/this/is/not/valid/";
   std::pair<std::string, std::string> split = MooseUtils::splitFileName(full);
-
 }
 
 void

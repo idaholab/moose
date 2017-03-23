@@ -46,16 +46,16 @@ MethaneFluidPropertiesTest::buildObjects()
 
   InputParameters uo_pars = _factory->getValidParams("MethaneFluidProperties");
   _fe_problem->addUserObject("MethaneFluidProperties", "fp", uo_pars);
-  _fp = & _fe_problem->getUserObject<MethaneFluidProperties>("fp");
+  _fp = &_fe_problem->getUserObject<MethaneFluidProperties>("fp");
 }
 
 void
 MethaneFluidPropertiesTest::setUp()
 {
   char str[] = "foo";
-  char * argv[] = { str, NULL };
+  char * argv[] = {str, NULL};
 
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **) argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 
   registerObjects(*_factory);

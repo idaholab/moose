@@ -15,7 +15,7 @@
 #ifndef SIMPLEFLUIDPROPERTIESTEST_H
 #define SIMPLEFLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
@@ -56,4 +56,4 @@ private:
   const SimpleFluidProperties * _fp;
 };
 
-#endif  // SIMPLEFLUIDPROPERTIESTEST_H
+#endif // SIMPLEFLUIDPROPERTIESTEST_H

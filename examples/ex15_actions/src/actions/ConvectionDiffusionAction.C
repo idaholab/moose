@@ -17,24 +17,24 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<ConvectionDiffusionAction>()
+template <>
+InputParameters
+validParams<ConvectionDiffusionAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("variables", "The names of the convection and diffusion variables in the simulation");
+  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+      "variables", "The names of the convection and diffusion variables in the simulation");
 
   return params;
 }
 
-ConvectionDiffusionAction::ConvectionDiffusionAction(InputParameters params) :
-    Action(params)
-{
-}
+ConvectionDiffusionAction::ConvectionDiffusionAction(InputParameters params) : Action(params) {}
 
 void
 ConvectionDiffusionAction::act()
 {
-  std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
+  std::vector<NonlinearVariableName> variables =
+      getParam<std::vector<NonlinearVariableName>>("variables");
   std::vector<VariableName> vel_vec_variable;
 
   /**
@@ -57,9 +57,9 @@ ConvectionDiffusionAction::act()
   {
     InputParameters params = _factory.getValidParams("ExampleConvection");
     params.set<NonlinearVariableName>("variable") = variables[0];
-//    params.addCoupledVar("some_variable", "The gradient of this var");
+    //    params.addCoupledVar("some_variable", "The gradient of this var");
     vel_vec_variable.push_back(variables[1]);
-    params.set<std::vector<VariableName> >("some_variable") = vel_vec_variable;
+    params.set<std::vector<VariableName>>("some_variable") = vel_vec_variable;
     _problem->addKernel("ExampleConvection", "conv", params);
   }
 
@@ -70,4 +70,3 @@ ConvectionDiffusionAction::act()
     _problem->addKernel("Diffusion", "diff_v", params);
   }
 }
-

@@ -17,24 +17,23 @@
 
 #include "ExpressionBuilder.h"
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
-class ExpressionBuilderTest : public CppUnit::TestFixture,
-                              public ExpressionBuilder
+class ExpressionBuilderTest : public CppUnit::TestFixture, public ExpressionBuilder
 {
   /**
    * This macro generates a bunch of boilerplate C++ code
    * for creating a new test suite.
    */
-  CPPUNIT_TEST_SUITE( ExpressionBuilderTest );
+  CPPUNIT_TEST_SUITE(ExpressionBuilderTest);
 
   /**
    * Adds the passed method name to the suite of tests.
    * You must have a public (?) void member function with
    * that name, taking no arguments, in the class.
    */
-  CPPUNIT_TEST( test );
+  CPPUNIT_TEST(test);
 
   /**
    * This macro is required at the end of the list of CppUnit
@@ -47,7 +46,6 @@ public:
    * Unit test functions must return void and take no arguments.
    */
   void test();
-
 };
 
 #endif // EXPRESSIONBUILDERTEST_H

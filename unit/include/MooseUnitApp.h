@@ -18,7 +18,7 @@
 
 class MooseUnitApp;
 
-template<>
+template <>
 InputParameters validParams<MooseUnitApp>();
 
 class MooseUnitApp : public MooseApp

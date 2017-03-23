@@ -15,7 +15,7 @@
 #ifndef RANKTWOEIGENROUTINESTEST_H
 #define RANKTWOEIGENROUTINESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,14 +24,14 @@
 class RankTwoEigenRoutinesTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( RankTwoEigenRoutinesTest );
+  CPPUNIT_TEST_SUITE(RankTwoEigenRoutinesTest);
 
-  CPPUNIT_TEST( symmetricEigenvaluesTest );
-  CPPUNIT_TEST( dsymmetricEigenvaluesTest );
-  CPPUNIT_TEST( d2symmetricEigenvaluesTest1 );
-  CPPUNIT_TEST( d2symmetricEigenvaluesTest2 );
+  CPPUNIT_TEST(symmetricEigenvaluesTest);
+  CPPUNIT_TEST(dsymmetricEigenvaluesTest);
+  CPPUNIT_TEST(d2symmetricEigenvaluesTest1);
+  CPPUNIT_TEST(d2symmetricEigenvaluesTest2);
 
-  CPPUNIT_TEST( someIdentitiesTest );
+  CPPUNIT_TEST(someIdentitiesTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -46,7 +46,7 @@ public:
 
   void someIdentitiesTest();
 
- private:
+private:
   RankTwoTensor _m0;
   RankTwoTensor _m1;
   RankTwoTensor _m2;
@@ -58,4 +58,4 @@ public:
   RankTwoTensor _m8;
 };
 
-#endif  // RANKTWOEIGENROUTINESTEST_H
+#endif // RANKTWOEIGENROUTINESTEST_H

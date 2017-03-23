@@ -15,7 +15,7 @@
 #ifndef DEPENDENCYRESOLVERTEST_H
 #define DEPENDENCYRESOLVERTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 #include "DependencyResolver.h"
@@ -24,12 +24,12 @@
 
 class DependencyResolverTest : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( DependencyResolverTest );
+  CPPUNIT_TEST_SUITE(DependencyResolverTest);
 
-  CPPUNIT_TEST( operatorParensTest );
-  CPPUNIT_TEST( resolverSets );
-  CPPUNIT_TEST( ptrTest );
-  CPPUNIT_TEST( simpleTest );
+  CPPUNIT_TEST(operatorParensTest);
+  CPPUNIT_TEST(resolverSets);
+  CPPUNIT_TEST(ptrTest);
+  CPPUNIT_TEST(simpleTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -46,4 +46,4 @@ private:
   DependencyResolver<std::string> _strict_ordering;
 };
 
-#endif  // DEPENDENCYRESOLVERTEST_H
+#endif // DEPENDENCYRESOLVERTEST_H

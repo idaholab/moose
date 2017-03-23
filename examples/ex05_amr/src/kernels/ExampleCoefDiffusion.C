@@ -14,17 +14,19 @@
 
 #include "ExampleCoefDiffusion.h"
 
-template<>
-InputParameters validParams<ExampleCoefDiffusion>()
+template <>
+InputParameters
+validParams<ExampleCoefDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.set<Real>("coef") = 0.0;
   return params;
 }
 
-ExampleCoefDiffusion::ExampleCoefDiffusion(const InputParameters & parameters) :Kernel(parameters),
-   _coef(getParam<Real>("coef"))
-{}
+ExampleCoefDiffusion::ExampleCoefDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getParam<Real>("coef"))
+{
+}
 
 Real
 ExampleCoefDiffusion::computeQpResidual()

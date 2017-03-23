@@ -14,8 +14,9 @@
 
 #include "DarcyVelocity.h"
 
-template<>
-InputParameters validParams<DarcyVelocity>()
+template <>
+InputParameters
+validParams<DarcyVelocity>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -34,8 +35,8 @@ InputParameters validParams<DarcyVelocity>()
   return params;
 }
 
-DarcyVelocity::DarcyVelocity(const InputParameters & parameters) :
-    AuxKernel(parameters),
+DarcyVelocity::DarcyVelocity(const InputParameters & parameters)
+  : AuxKernel(parameters),
 
     // This will automatically convert the MooseEnum to an integer
     _component(getParam<MooseEnum>("component")),

@@ -14,9 +14,9 @@
 
 #include "DarcyPressure.h"
 
-
-template<>
-InputParameters validParams<DarcyPressure>()
+template <>
+InputParameters
+validParams<DarcyPressure>()
 {
   // Start with the parameters from our parent
   InputParameters params = validParams<Diffusion>();
@@ -28,9 +28,8 @@ InputParameters validParams<DarcyPressure>()
   return params;
 }
 
-
-DarcyPressure::DarcyPressure(const InputParameters & parameters) :
-    Diffusion(parameters),
+DarcyPressure::DarcyPressure(const InputParameters & parameters)
+  : Diffusion(parameters),
 
     // Get the permeability and viscosity from the Material system
     // This returns a MaterialProperty<Real> reference that we store
@@ -40,20 +39,18 @@ DarcyPressure::DarcyPressure(const InputParameters & parameters) :
 {
 }
 
-DarcyPressure::~DarcyPressure()
-{
-}
+DarcyPressure::~DarcyPressure() {}
 
 Real
 DarcyPressure::computeQpResidual()
 {
   // Use the MaterialProperty references we stored earlier
-  return (_permeability[_qp]/_viscosity[_qp]) * Diffusion::computeQpResidual();
+  return (_permeability[_qp] / _viscosity[_qp]) * Diffusion::computeQpResidual();
 }
 
 Real
 DarcyPressure::computeQpJacobian()
 {
   // Use the MaterialProperty references we stored earlier
-  return (_permeability[_qp]/_viscosity[_qp]) * Diffusion::computeQpJacobian();
+  return (_permeability[_qp] / _viscosity[_qp]) * Diffusion::computeQpJacobian();
 }

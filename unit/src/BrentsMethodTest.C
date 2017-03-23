@@ -30,8 +30,7 @@ BrentsMethodTest::bracket()
   Real x1 = 0.5;
   Real x2 = 1.0;
 
-  auto func = [this](Real x)
-    {return this->f(x);};
+  auto func = [this](Real x) { return this->f(x); };
 
   // Call bracket to determine the bracketing interval
   BrentsMethod::bracket(func, x1, x2);
@@ -46,25 +45,27 @@ BrentsMethodTest::bracket()
     // Trigger identical initial guess error
     BrentsMethod::bracket(func, x1, x1);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("Bad initial range (0) used in BrentsMethod::bracket") != std::string::npos);
+    CPPUNIT_ASSERT(msg.find("Bad initial range (0) used in BrentsMethod::bracket") !=
+                   std::string::npos);
   }
 
   // Test that a warning is thrown if no bracketing interval is found after 50 iterations.
   try
   {
     // Trigger no bracketing interval warning by adding 4 to f(x), whereby no real root exists
-    auto func2 = [this](Real x)
-      {return this->f(x) + 4.0;};
+    auto func2 = [this](Real x) { return this->f(x) + 4.0; };
 
     BrentsMethod::bracket(func2, x1, x2);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("No bracketing interval found by BrentsMethod::bracket after 50 iterations") != std::string::npos);
+    CPPUNIT_ASSERT(
+        msg.find("No bracketing interval found by BrentsMethod::bracket after 50 iterations") !=
+        std::string::npos);
   }
 }
 
@@ -75,8 +76,7 @@ BrentsMethodTest::root()
   Real x1 = 0.5;
   Real x2 = 10.0;
 
-  auto func = [this](Real x)
-    {return this->f(x);};
+  auto func = [this](Real x) { return this->f(x); };
 
   // Check that the root is 5.170302597
   CPPUNIT_ASSERT_DOUBLES_EQUAL(5.170302597, BrentsMethod::root(func, x1, x2), 1.0E-8);
@@ -88,7 +88,7 @@ BrentsMethodTest::root()
     x2 = 1.0;
     Real x = BrentsMethod::root(func, x1, x2);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
     CPPUNIT_ASSERT(msg.find("Root must be bracketed in BrentsMethod::root") != std::string::npos);

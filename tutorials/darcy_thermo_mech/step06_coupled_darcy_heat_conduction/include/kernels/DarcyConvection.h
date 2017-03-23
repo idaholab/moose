@@ -20,7 +20,7 @@
 // Forward Declaration
 class DarcyConvection;
 
-template<>
+template <>
 InputParameters validParams<DarcyConvection>();
 
 /**

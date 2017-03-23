@@ -15,7 +15,7 @@
 #ifndef POROUSFLOWVANGENUCHTENTEST_H
 #define POROUSFLOWVANGENUCHTENTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
@@ -24,17 +24,17 @@
 class PorousFlowVanGenuchtenTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowVanGenuchtenTest );
+  CPPUNIT_TEST_SUITE(PorousFlowVanGenuchtenTest);
 
-  CPPUNIT_TEST( satTest );
-  CPPUNIT_TEST( dsatTest );
-  CPPUNIT_TEST( d2satTest );
-  CPPUNIT_TEST( capTest );
-  CPPUNIT_TEST( dcapTest );
-  CPPUNIT_TEST( d2capTest );
-  CPPUNIT_TEST( relpermTest );
-  CPPUNIT_TEST( drelpermTest );
-  CPPUNIT_TEST( d2relpermTest );
+  CPPUNIT_TEST(satTest);
+  CPPUNIT_TEST(dsatTest);
+  CPPUNIT_TEST(d2satTest);
+  CPPUNIT_TEST(capTest);
+  CPPUNIT_TEST(dcapTest);
+  CPPUNIT_TEST(d2capTest);
+  CPPUNIT_TEST(relpermTest);
+  CPPUNIT_TEST(drelpermTest);
+  CPPUNIT_TEST(d2relpermTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -51,8 +51,8 @@ public:
   void drelpermTest();
   void d2relpermTest();
 
- private:
+private:
   Real _ep;
 };
 
-#endif  // POROUSFLOWVANGENUCHTENTEST_H
+#endif // POROUSFLOWVANGENUCHTENTEST_H

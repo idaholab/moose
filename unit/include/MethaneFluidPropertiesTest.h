@@ -15,7 +15,7 @@
 #ifndef METHANEFLUIDPROPERTIESTEST_H
 #define METHANEFLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
@@ -68,4 +68,4 @@ private:
   const MethaneFluidProperties * _fp;
 };
 
-#endif  // METHANEFLUIDPROPERTIESTEST_H
+#endif // METHANEFLUIDPROPERTIESTEST_H

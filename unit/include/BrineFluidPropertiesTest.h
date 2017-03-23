@@ -15,7 +15,7 @@
 #ifndef BRINEFLUIDPROPERTIESTEST_H
 #define BRINEFLUIDPROPERTIESTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
@@ -93,4 +93,4 @@ private:
   const SinglePhaseFluidPropertiesPT * _water_fp;
 };
 
-#endif  // BRINEFLUIDPROPERTIESTEST_H
+#endif // BRINEFLUIDPROPERTIESTEST_H

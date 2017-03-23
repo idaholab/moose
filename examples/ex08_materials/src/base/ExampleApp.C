@@ -22,15 +22,15 @@
 #include "ExampleConvection.h"
 #include "ExampleMaterial.h"
 
-template<>
-InputParameters validParams<ExampleApp>()
+template <>
+InputParameters
+validParams<ExampleApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-ExampleApp::ExampleApp(InputParameters parameters) :
-    MooseApp(parameters)
+ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -41,9 +41,7 @@ ExampleApp::ExampleApp(InputParameters parameters) :
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
 
-ExampleApp::~ExampleApp()
-{
-}
+ExampleApp::~ExampleApp() {}
 
 void
 ExampleApp::registerObjects(Factory & factory)
@@ -64,6 +62,6 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax& /*syntax*/, ActionFactory & /*action_factory*/)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

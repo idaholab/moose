@@ -18,10 +18,10 @@
 #include "Material.h"
 #include "BlockAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class BlockAverageDiffusionMaterial;
 
-template<>
+template <>
 InputParameters validParams<BlockAverageDiffusionMaterial>();
 
 class BlockAverageDiffusionMaterial : public Material
@@ -49,4 +49,4 @@ private:
   const BlockAverageValue & _block_average_value;
 };
 
-#endif //BLOCKAVERAGEDIFFUSIONMATERIAL_H
+#endif // BLOCKAVERAGEDIFFUSIONMATERIAL_H

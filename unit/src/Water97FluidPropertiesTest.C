@@ -46,16 +46,16 @@ Water97FluidPropertiesTest::buildObjects()
 
   InputParameters uo_pars = _factory->getValidParams("Water97FluidProperties");
   _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
-  _fp = & _fe_problem->getUserObject<Water97FluidProperties>("fp");
+  _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
 }
 
 void
 Water97FluidPropertiesTest::setUp()
 {
   char str[] = "foo";
-  char * argv[] = { str, NULL };
+  char * argv[] = {str, NULL};
 
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **) argv);
+  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
 
   registerObjects(*_factory);
@@ -100,10 +100,12 @@ Water97FluidPropertiesTest::inRegion()
     // Trigger invalid pressure error
     region = _fp->inRegion(101.0e6, 300.0);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("Pressure 1.01e+08 is out of range in Water97FluidProperties::inRegion") != std::string::npos);
+    CPPUNIT_ASSERT(
+        msg.find("Pressure 1.01e+08 is out of range in Water97FluidProperties::inRegion") !=
+        std::string::npos);
   }
 
   try
@@ -111,10 +113,12 @@ Water97FluidPropertiesTest::inRegion()
     // Trigger another invalid pressure error
     region = _fp->inRegion(51.0e6, 1200.0);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("Pressure 5.1e+07 is out of range in Water97FluidProperties::inRegion") != std::string::npos);
+    CPPUNIT_ASSERT(
+        msg.find("Pressure 5.1e+07 is out of range in Water97FluidProperties::inRegion") !=
+        std::string::npos);
   }
 
   try
@@ -122,10 +126,12 @@ Water97FluidPropertiesTest::inRegion()
     // Trigger invalid temperature error
     region = _fp->inRegion(5.0e6, 2001.0);
   }
-  catch(const std::exception & e)
+  catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("Temperature 2001 is out of range in Water97FluidProperties::inRegion") != std::string::npos);
+    CPPUNIT_ASSERT(
+        msg.find("Temperature 2001 is out of range in Water97FluidProperties::inRegion") !=
+        std::string::npos);
   }
 }
 

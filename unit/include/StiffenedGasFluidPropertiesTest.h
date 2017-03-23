@@ -15,13 +15,12 @@
 #ifndef StiffenedGasFluidPropertiesTest_H
 #define StiffenedGasFluidPropertiesTest_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
 class MooseMesh;
 class FEProblem;
 class StiffenedGasFluidProperties;
-
 
 class StiffenedGasFluidPropertiesTest : public CppUnit::TestFixture
 {

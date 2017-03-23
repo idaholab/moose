@@ -21,7 +21,7 @@
 // Forward Declarations
 class ExampleDirac;
 
-template<>
+template <>
 InputParameters validParams<ExampleDirac>();
 
 class ExampleDirac : public DiracKernel
@@ -37,4 +37,4 @@ protected:
   Point _point;
 };
 
-#endif //EXAMPLEDIRAC_H
+#endif // EXAMPLEDIRAC_H

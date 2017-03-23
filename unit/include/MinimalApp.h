@@ -15,16 +15,16 @@
 #ifndef MINIMALAPP_H
 #define MINIMALAPP_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 #include <string>
 
 class MinimalApp : public CppUnit::TestFixture
 {
-  CPPUNIT_TEST_SUITE( MinimalApp );
+  CPPUNIT_TEST_SUITE(MinimalApp);
 
-  CPPUNIT_TEST( createMinimalAppTest );
+  CPPUNIT_TEST(createMinimalAppTest);
 
   CPPUNIT_TEST_SUITE_END();
 
