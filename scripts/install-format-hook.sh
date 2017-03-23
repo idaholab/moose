@@ -9,12 +9,13 @@ if [[ -f $hookfile ]]; then
 fi
 
 echo '#!/bin/bash
-patch=$(git clang-format --diff)
+patch=$(git clang-format --diff -- framework/src framework/include modules/*/src modules/*/include test unit examples tutorials)
 if [[ "$patch" =~ "no modified files to format" || "$patch" =~ "clang-format did not modify any files" ]]; then
     echo "" > /dev/null
 else
     echo ""
-    echo "formatting fixes required" >&2
+    echo "Your code has bad style." >&2
+    echo "Run 'git clang-format' to resolve the following issues:" >&2
     echo ""
     echo "$patch"
     exit 1

@@ -165,6 +165,7 @@
 #include "PiecewiseMultilinear.h"
 #include "LinearCombinationFunction.h"
 #include "ImageFunction.h"
+#include "VectorPostprocessorFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
@@ -605,6 +606,7 @@ registerObjects(Factory & factory)
   registerFunction(PiecewiseMultilinear);
   registerFunction(LinearCombinationFunction);
   registerFunction(ImageFunction);
+  registerFunction(VectorPostprocessorFunction);
 
   // materials
   registerMaterial(GenericConstantMaterial);
