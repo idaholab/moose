@@ -768,6 +768,54 @@ Water97FluidProperties::pSat(Real temperature) const
   return p * 1.e6;
 }
 
+void
+Water97FluidProperties::pSat_dT(Real temperature, Real & psat, Real & dpsat_dT) const
+{
+  // Check whether the input temperature is within the region of validity of this equation.
+  // Valid for 273.15 K <= t <= 647.096 K
+  if (temperature < 273.15 || temperature > _T_critical)
+    mooseError(
+        "Water97FluidProperties::pSat_dT: Temperature is outside range 273.15 K <= T <= 647.096 K");
+
+  // Constants for region 4 (the saturation curve up to the critical point)
+  const std::vector<Real> n4{0.11670521452767e4,
+                             -0.72421316703206e6,
+                             -0.17073846940092e2,
+                             0.12020824702470e5,
+                             -0.32325550322333e7,
+                             0.14915108613530e2,
+                             -0.48232657361591e4,
+                             0.40511340542057e6,
+                             -0.238555575678490,
+                             0.65017534844798e3};
+
+  Real theta, dtheta_dT, theta2, a, b, c, da_dtheta, db_dtheta, dc_dtheta;
+  theta = temperature + n4[8] / (temperature - n4[9]);
+  dtheta_dT = 1.0 - n4[8] / (temperature - n4[9]) / (temperature - n4[9]);
+  theta2 = theta * theta;
+
+  a = theta2 + n4[0] * theta + n4[1];
+  b = n4[2] * theta2 + n4[3] * theta + n4[4];
+  c = n4[5] * theta2 + n4[6] * theta + n4[7];
+
+  da_dtheta = 2.0 * theta + n4[0];
+  db_dtheta = 2.0 * n4[2] * theta + n4[3];
+  dc_dtheta = 2.0 * n4[5] * theta + n4[6];
+
+  Real denominator = -b + std::sqrt(b * b - 4.0 * a * c);
+
+  psat = std::pow(2.0 * c / denominator, 4.0) * 1.0e6;
+
+  // The derivative wrt temperature is given by the chain rule
+  Real dpsat = 4.0 * std::pow(2.0 * c / denominator, 3.0);
+  dpsat *= (2.0 * dc_dtheta / denominator -
+            2.0 * c / denominator / denominator *
+                (-db_dtheta +
+                 std::pow(b * b - 4.0 * a * c, -0.5) *
+                     (b * db_dtheta - 2.0 * da_dtheta * c - 2.0 * a * dc_dtheta)));
+  dpsat_dT = dpsat * dtheta_dT * 1.0e6;
+}
+
 Real
 Water97FluidProperties::TSat(Real pressure) const
 {
