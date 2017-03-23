@@ -15,7 +15,6 @@
 import os
 import collections
 import bisect
-
 import vtk
 
 import mooseutils
@@ -444,3 +443,23 @@ class ExodusReader(base.ChiggerObject):
 
         self.__variableinfo = collections.OrderedDict(sorted(unsorted.items(),
                                                              key=lambda x: x[0].lower()))
+
+    def __str__(self):
+        """
+        Overload the str function so that information is printed when print is called on the object.
+        """
+        self.checkUpdateState()
+
+        # The string to return
+        out = ''
+
+        # Variables
+        variables = [(ExodusReader.NODAL, 'NODAL VARIABLES'),
+                     (ExodusReader.ELEMENTAL, 'ELEMENTAL VARIABLES'),
+                     (ExodusReader.GLOBAL, 'POSTPROCESSORS')]
+        for vartype, vartitle in variables:
+            out += '\n{}:\n'.format(mooseutils.colorText(vartitle, 'GREEN'))
+            for varinfo in self.getVariableInformation([vartype]).itervalues():
+                out += '  {}\n'.format(mooseutils.colorText(varinfo.name, 'CYAN'))
+                out += '{:>16}: {}\n'.format('components', varinfo.num_components)
+        return out

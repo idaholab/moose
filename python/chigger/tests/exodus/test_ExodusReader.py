@@ -169,15 +169,6 @@ class TestExodusReader(unittest.TestCase):
             chigger.exodus.ExodusReader('foo.e')
 
         reader = chigger.exodus.ExodusReader(self.single, variables=['convected', 'func_pp'])
-
-        methods = [('getGlobalData', 'foo'), ('getTimeData',), ('getTimes',)]
-        for method in methods:
-            with self.assertRaisesRegexp(mooseutils.MooseException, 'The "{}" method requires the ExodusReader be updated, please call "update" method first.'.format(method[0])):
-                func = getattr(reader, method[0])
-                func(*method[1:])
-
-        reader.update()
-
         with self.assertRaisesRegexp(mooseutils.MooseException, 'The variable "convected" must be a global variable.'):
             reader.getGlobalData('convected')
 

@@ -39,6 +39,7 @@ def get_options():
             allow=['left', 'right', 'top', 'bottom'])
     opt.add('axis_point1', [0, 0], 'Starting location of axis, in absolute viewport coordinates.')
     opt.add('axis_point2', [0, 0], 'Ending location of axis, in absolute viewport coordinates.')
+    opt.add('axis_scale', 1, "The axis scaling factor.")
     return opt
 
 def set_options(vtkaxis, opt):
@@ -106,3 +107,6 @@ def set_options(vtkaxis, opt):
 
     if opt.isOptionValid('axis_point2'):
         vtkaxis.SetPoint2(*opt['axis_point2'])
+
+    if opt.isOptionValid('axis_scale'):
+        vtkaxis.SetScalingFactor(opt['axis_scale'])

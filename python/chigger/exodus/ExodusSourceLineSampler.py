@@ -49,6 +49,7 @@ class ExodusSourceLineSampler(geometric.LineSource):
         super(ExodusSourceLineSampler, self).setOptions(*args, **kwargs)
 
         bounds = self._exodus_source.getBounds()
+        print bounds
         if not self.isOptionValid('point1'):
             self.setOption('point1', bounds[0])
         if not self.isOptionValid('point2'):

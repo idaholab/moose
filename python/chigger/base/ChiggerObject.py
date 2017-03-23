@@ -12,7 +12,6 @@
 #                                                               #
 #              See COPYRIGHT for full restrictions              #
 #################################################################
-import inspect
 import mooseutils
 from .. import utils
 
@@ -189,13 +188,7 @@ class ChiggerObject(object):
 
     def checkUpdateState(self):
         """
-        Raises a MooseException if the object is not updated. (protected)
-
-        Inputs: None
-        Returns: None
+        Checks if the object needs update and performs updated, if needed.
         """
         if self.needsUpdate():
-            m = inspect.stack()[1][3]
-            n = self.__class__.__name__
-            raise mooseutils.MooseException('The "{}" method requires the {} be updated, please '
-                                            'call "update" method first.'.format(m, n))
+            self.update()

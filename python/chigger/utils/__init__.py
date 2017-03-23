@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import numpy as np
 import vtk
+import mooseutils
 from Options import Option, Options
 import AxisOptions
 import FontOptions
@@ -147,3 +148,60 @@ def animate(pattern, output, delay=20, restart_delay=500, loop=True):
         cmd += ['-loop', '0']
     cmd += [output]
     subprocess.call(cmd)
+
+def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitrate='10M',
+            num_threads=1, quality=1, dry_run=False, output_framerate_increase=0):
+    """
+    Use ffmpeg to convert a series of images to a movie.
+
+    Args:
+        pattern[str]: The glob pattern defining the files to be converted.
+        output[str]: The name of the output file, including the extension.
+        ffmpeg[str]: The ffmpeg executable.
+        duration[int]: The desired duration of the movie (in seconds)
+        framerate[int]: Ignores the duration and sets the movie framerate directly.
+        bitrate[str]: The ffmeg "-b:v" setting.
+        num_threads[int]: The number of threads to utilize in rendering.
+        quality[int]: The ffmpeg quality setting (ranges from 1 to 31).
+        dry_run[bool]: When True the command is not executed.
+        factor[float]: Output framerate adjustment to help guarantee no dropped frames, if you see
+                       drooped frames in ffmpeg output, increase this number.
+    """
+
+    # Check ffmpeg
+    if not os.path.exists(ffmpeg) and not dry_run:
+        msg = "The ffmpeg executable was not located: {}"
+        raise mooseutils.MooseException(msg.format(ffmpeg))
+
+    # Compute framerate from the duration if framerate is not given
+    if not framerate:
+        n = len(glob.glob(pattern))
+        framerate = n/duration
+
+    # Determine the video codec
+    _, ext = os.path.splitext(output)
+    if ext == '.mov':
+        codec = 'mpeg2video'
+    elif ext == '.mp4':
+        codec = 'mpeg4'
+    else:
+        msg = "Unsupported output format {}, please use '.mov'"
+        raise mooseutils.MooseException(msg.format(ffmpeg))
+
+    # Build the command
+    cmd = [ffmpeg]
+    cmd += ['-pattern_type', 'glob']
+    cmd += ['-framerate', str(framerate)]
+    cmd += ['-i', pattern]
+    cmd += ['-c:v', codec]
+    cmd += ['-b:v', bitrate]
+    cmd += ['-pix_fmt', 'yuv420p']
+    cmd += ['-q:v', str(quality)]
+    cmd += ['-threads', str(num_threads)]
+    cmd += ['-framerate', str(framerate + output_framerate_increase)]
+    cmd += [output]
+
+    c = ' '.join(cmd)
+    print '{0}\n{1}\n{0}'.format('-'*(len(c)), c)
+    if not dry_run:
+        subprocess.call(cmd)
