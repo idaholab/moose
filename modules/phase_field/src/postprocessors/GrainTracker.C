@@ -156,6 +156,10 @@ GrainTracker::doesFeatureIntersectBoundary(unsigned int feature_id) const
 void
 GrainTracker::initialize()
 {
+  // Don't track grains if the current simulation step is before the specified tracking step
+  if (_t_step < _tracking_step)
+    return;
+
   /**
    * If we are passed the first time, we need to save the existing
    * grains before beginning the tracking on the current step. We'll do that
@@ -170,6 +174,10 @@ GrainTracker::initialize()
 void
 GrainTracker::execute()
 {
+  // Don't track grains if the current simulation step is before the specified tracking step
+  if (_t_step < _tracking_step)
+    return;
+
   Moose::perf_log.push("execute()", "GrainTracker");
   FeatureFloodCount::execute();
   Moose::perf_log.pop("execute()", "GrainTracker");

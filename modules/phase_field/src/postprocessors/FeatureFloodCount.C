@@ -544,7 +544,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
   else
   {
     for (auto global_index : local_to_global_all)
-      if (global_index > largest_global_index)
+      if (global_index != FeatureFloodCount::invalid_size_t && global_index > largest_global_index)
         largest_global_index = global_index;
   }
 
@@ -843,15 +843,14 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         bool pb_intersect = false;
         // clang-format off
-        if (it1 != it2 &&                          // iterators aren't pointing at the same place
-            it1->_var_index ==  it2->_var_index && // and the sets have matching variable indices
-            ((use_periodic_boundary_info &&        // and (if merging across periodic nodes
-              (pb_intersect = it1->periodicBoundariesIntersect(*it2)))
-                                                   //   do those periodic nodes intersect?
-              ||                                   //   or
-             (it1->boundingBoxesIntersect(*it2) && //   if the region bboxes intersect
-              it1->ghostedIntersect(*it2)          //   do the ghosted entities also intersect)
-              )))
+        if (it1 != it2 &&                            // iters aren't pointing at the same item and
+            it1->_var_index ==  it2->_var_index &&   // the sets have matching variable indices and
+            ((it1->boundingBoxesIntersect(*it2) &&   //  (if the feature's bboxes intersect and
+              it1->ghostedIntersect(*it2))           //   the ghosted entities also intersect)
+              ||                                     //   or
+             (use_periodic_boundary_info &&          //  (if merging across periodic nodes and
+              it1->periodicBoundariesIntersect(*it2) //   those node sets intersect)
+            )))
         // clang-format on
         {
           it2->merge(std::move(*it1));
