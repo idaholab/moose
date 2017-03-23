@@ -14,58 +14,71 @@
 
 #include "FileLineInfo.h"
 
-FileLineInfo::FileLineInfo()
-  : _line(-1)
-{
-}
+FileLineInfo::FileLineInfo() : _line(-1) {}
 
-FileLineInfo::FileLineInfo(const std::string & f, int l) : _line(l), _file(f)
-{
-}
+FileLineInfo::FileLineInfo(const std::string & f, int l) : _line(l), _file(f) {}
 
-bool FileLineInfo::isValid() const
+bool
+FileLineInfo::isValid() const
 {
   return !_file.empty() && _line >= 0;
 }
 
-int FileLineInfo::line() const
+int
+FileLineInfo::line() const
 {
   return _line;
 }
 
-std::string FileLineInfo::file() const
+std::string
+FileLineInfo::file() const
 {
   return _file;
 }
 
-void FileLineInfoMap::addInfo(const std::string & key0, const std::string & file, int line)
+void
+FileLineInfoMap::addInfo(const std::string & key0, const std::string & file, int line)
 {
   FileLineInfo f(file, line);
   if (f.isValid())
     _map[key0] = f;
 }
 
-void FileLineInfoMap::addInfo(const std::string & key0, const std::string & key1, const std::string & file, int line)
+void
+FileLineInfoMap::addInfo(const std::string & key0,
+                         const std::string & key1,
+                         const std::string & file,
+                         int line)
 {
   addInfo(makeKey(key0, key1), file, line);
 }
 
-void FileLineInfoMap::addInfo(const std::string & key0, const std::string & key1, const std::string & key2, const std::string & file, int line)
+void
+FileLineInfoMap::addInfo(const std::string & key0,
+                         const std::string & key1,
+                         const std::string & key2,
+                         const std::string & file,
+                         int line)
 {
   addInfo(makeKey(key0, key1, key2), file, line);
 }
 
-std::string FileLineInfoMap::makeKey(const std::string & key0, const std::string & key1) const
+std::string
+FileLineInfoMap::makeKey(const std::string & key0, const std::string & key1) const
 {
   return key0 + "%" + key1;
 }
 
-std::string FileLineInfoMap::makeKey(const std::string & key0, const std::string & key1, const std::string & key2) const
+std::string
+FileLineInfoMap::makeKey(const std::string & key0,
+                         const std::string & key1,
+                         const std::string & key2) const
 {
   return key0 + "%" + key1 + "%" + key2;
 }
 
-FileLineInfo FileLineInfoMap::getInfo(const std::string & key0) const
+FileLineInfo
+FileLineInfoMap::getInfo(const std::string & key0) const
 {
   auto it = _map.find(key0);
   if (it == _map.end())
@@ -73,12 +86,16 @@ FileLineInfo FileLineInfoMap::getInfo(const std::string & key0) const
   return it->second;
 }
 
-FileLineInfo FileLineInfoMap::getInfo(const std::string & key0, const std::string & key1) const
+FileLineInfo
+FileLineInfoMap::getInfo(const std::string & key0, const std::string & key1) const
 {
   return getInfo(makeKey(key0, key1));
 }
 
-FileLineInfo FileLineInfoMap::getInfo(const std::string & key0, const std::string & key1, const std::string & key2) const
+FileLineInfo
+FileLineInfoMap::getInfo(const std::string & key0,
+                         const std::string & key1,
+                         const std::string & key2) const
 {
   return getInfo(makeKey(key0, key1, key2));
 }

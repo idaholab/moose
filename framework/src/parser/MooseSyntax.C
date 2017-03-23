@@ -69,6 +69,8 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
 
   registerSyntax("AddICAction", "Variables/*/InitialCondition");
+
+  registerSyntax("AddAuxVariableAction", "AuxVariables/*");
   syntax.registerSyntaxType("AuxVariables/*", "VariableName");
   syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
   //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
