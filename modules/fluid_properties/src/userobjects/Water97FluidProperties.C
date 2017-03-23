@@ -1590,3 +1590,11 @@ Real Water97FluidProperties::henryConstant(Real /*temperature*/) const
   mooseError("Water97FluidProperties::henryConstant() not defined");
   return 0.0;
 }
+
+void
+Water97FluidProperties::henryConstant_dT(Real /* temperature */,
+                                         Real & /* Kh */,
+                                         Real & /* dKh_dT */) const
+{
+  mooseError("Water97FluidProperties::henryConstant_dT() not defined");
+}

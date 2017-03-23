@@ -97,6 +97,9 @@ public:
   /// Henry's law constant for dissolution in water
   virtual Real henryConstant(Real temperature) const override;
 
+  /// Henry's law constant for dissolution in water and derivative wrt temperature
+  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
+
 protected:
   /// molar mass
   const Real _molar_mass;

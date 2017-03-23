@@ -588,6 +588,12 @@ CO2FluidProperties::henryConstant(Real temperature) const
   return henryConstantIAPWS(temperature, -8.55445, 4.01195, 9.52345);
 }
 
+void
+CO2FluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const
+{
+  henryConstantIAPWS_dT(temperature, Kh, dKh_dT, -8.55445, 4.01195, 9.52345);
+}
+
 Real
 CO2FluidProperties::e(Real pressure, Real temperature) const
 {

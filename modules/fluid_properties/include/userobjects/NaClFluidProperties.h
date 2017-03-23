@@ -226,12 +226,16 @@ public:
   virtual Real beta(Real pressure, Real temperature) const override;
 
   /**
-   * Henry's law constant (not valid for NaCl)
-   *
-   * @param temperature fluid temperature (K)
-   * @return constants for Henry's constant (-)
+   * Henry's law constant
+   * Note: not implemented in this fluid property
    */
   virtual Real henryConstant(Real temperature) const override;
+
+  /**
+   * Henry's law constant and derivative wrt temperature
+   * Note: not implemented in this fluid property
+   */
+  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
 protected:
   /// NaCl molar mass (kg/mol)
