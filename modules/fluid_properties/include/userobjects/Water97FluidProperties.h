@@ -255,6 +255,22 @@ public:
   Real pSat(Real temperature) const;
 
   /**
+   * Saturation pressure as a function of temperature and derivative
+   * wrt temperature.
+   *
+   * Eq. (30) from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * Valid for 273.15 K <= t <= 647.096 K
+   *
+   * @param temperature water temperature (K)
+   * @param[out] saturation pressure (Pa)
+   * @param[out] derivative of saturation pressure wrt temperature (Pa/K)
+   */
+  void pSat_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
+
+  /**
    * Saturation temperature as a function of pressure.
    *
    * Eq. (31) from Revised Release on the IAPWS Industrial

@@ -425,6 +425,16 @@ Water97FluidPropertiesTest::derivatives()
   T = 650.0;
   regionDerivatives(p, T, 1.0e-2);
 
+  // Region 4 (saturation curve)
+  T = 300.0;
+  Real dT = 1.0e-4;
+
+  Real dpSat_dT_fd = (_fp->pSat(T + dT) - _fp->pSat(T - dT)) / (2.0 * dT);
+  Real pSat = 0.0, dpSat_dT = 0.0;
+  _fp->pSat_dT(T, pSat, dpSat_dT);
+
+  REL_TEST("dpSat_dT", dpSat_dT, dpSat_dT_fd, 1.0e-6);
+
   // Region 5
   p = 30.0e6;
   T = 1500.0;
@@ -434,7 +444,7 @@ Water97FluidPropertiesTest::derivatives()
   Real rho = 998.0;
   T = 298.15;
   Real drho = 1.0e-4;
-  Real dT = 1.0e-4;
+  dT = 1.0e-4;
 
   Real dmu_drho_fd = (_fp->mu(rho + drho, T) - _fp->mu(rho - drho, T)) / (2.0 * drho);
   Real dmu_dT_fd = (_fp->mu(rho, T + dT) - _fp->mu(rho, T - dT)) / (2.0 * dT);
