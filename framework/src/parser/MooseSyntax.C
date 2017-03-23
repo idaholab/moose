@@ -54,6 +54,7 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
 
   syntax.registerActionSyntax("AddFunctionAction", "Functions/*");
+  syntax.registerSyntaxType("Functions/*", "FunctionName");
 
   syntax.registerActionSyntax("GlobalParamsAction", "GlobalParams");
 
@@ -62,12 +63,16 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   syntax.registerActionSyntax("AddVariableAction", "Variables/*");
+  syntax.registerSyntaxType("Variables/*", "VariableName");
+  syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
 
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 
   syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*");
+  syntax.registerSyntaxType("AuxVariables/*", "VariableName");
+  syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
   //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
   //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
 
@@ -82,8 +87,11 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
   syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
+  syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");
+  syntax.registerSyntaxType("Postprocessors/*", "UserObjectName");
 
   syntax.registerActionSyntax("AddVectorPostprocessorAction", "VectorPostprocessors/*");
+  syntax.registerSyntaxType("VectorPostprocessors/*", "VectorPostprocessorName");
 
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
 
@@ -116,6 +124,7 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*");
+  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   syntax.registerActionSyntax("AddControlAction", "Controls/*");
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds");
 

@@ -63,6 +63,21 @@ public:
                            const std::string & task);
 
   /**
+   *  Registration a type with a block. For example, associate FunctionName with the Functions block
+   * @param syntax The target syntax to associate the type with
+   * @param type The name of the type to associate with the syntax
+   */
+  void registerSyntaxType(const std::string & syntax, const std::string & type);
+
+  /**
+   * Get a multimap of registered associations of syntax with type.
+   */
+  const std::multimap<std::string, std::string> & getAssociatedTypes() const
+  {
+    return _associated_types;
+  }
+
+  /**
    * This method deprecates previously registered syntax. You should use the exact form that you
    * want deprecated
    * in the passed in parameter.
@@ -104,6 +119,9 @@ protected:
 
   /// Actions/Syntax association
   std::multimap<std::string, ActionInfo> _associated_actions;
+
+  /// Syntax/Type association
+  std::multimap<std::string, std::string> _associated_types;
 
   std::set<std::string> _deprecated_syntax;
 };
