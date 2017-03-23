@@ -2,7 +2,6 @@
 
 all:: CROW
 
-
 CROW: $(PYTHON_MODULES)
 
 .PHONY : crow_clean
