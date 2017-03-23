@@ -58,7 +58,7 @@ class RunParallel:
         self.big_queue = deque()
 
         # Jobs that have been finished
-        self.finished_jobs = set()
+        self.finished_jobs_dict = {}
 
         # List of skipped jobs to resolve prereq issues for tests that never run
         self.skipped_jobs = set()
@@ -82,7 +82,9 @@ class RunParallel:
             self.startReadyJobs(slot_check)
 
         # Get the number of slots that this job takes
-        slots = tester.getProcs(self.options) * tester.getThreads(self.options)
+        slots = 1
+        if not self.options.pbs:
+            slots = tester.getProcs(self.options) * tester.getThreads(self.options)
 
         # Is this job always too big?
         if slot_check and slots > self.job_slots:
@@ -94,10 +96,19 @@ class RunParallel:
                 self.skipped_jobs.add(tester.specs['test_name'])
             return
 
-        # Now make sure that this job doesn't have an unsatisfied prereq
-        if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs) and self.options.pbs is None:
+        # Is this job depending on another job not yet finished?
+        if tester.specs['prereq'] != [] and not self.options.processingPBS \
+           and len(set(tester.specs['prereq']) - set(self.finished_jobs_dict.keys())):
             self.queue.append([tester, command, os.getcwd()])
             return
+
+        # Prereqs have been satisfied above, so now (if using PBS) add the job id/s to this test's qsub script
+        if tester.specs['prereq'] != [] and self.options.pbs and not self.options.processingPBS:
+            job_id = []
+            file = os.path.join(tester.specs['test_dir'], self.options.pbs + '-' + tester.specs['job_name'] + '.sh')
+            for prereq_test in tester.specs['prereq']:
+                job_id.append(self.finished_jobs_dict[prereq_test])
+            self.addJobID(file, ':'.join(job_id))
 
         # Make sure we are complying with the requested load average
         self.satisfyLoad()
@@ -143,6 +154,13 @@ class RunParallel:
         self.jobs[job_index] = (p, command, tester, clock(), f, slots)
         self.slots_in_use = self.slots_in_use + slots
 
+    def addJobID(self, file, job_id):
+        with open(file, 'r') as f:
+            tmp_contents = f.read()
+        with open(file, 'w') as f:
+            tmp_contents = tmp_contents.replace( '<JOB_ID>', str(job_id) )
+            f.write(tmp_contents)
+
     def startReadyJobs(self, slot_check):
         queue_items = len(self.queue)
         for i in range(0, queue_items):
@@ -186,6 +204,9 @@ class RunParallel:
         log( 'Command %d done:    %s' % (job_index, command) )
         output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
 
+        # Set the initial job_id to 0
+        job_id = 0
+
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
         # status yet in the postprocessing stage. We'll inspect didPass() after processing results
@@ -224,8 +245,16 @@ class RunParallel:
             f.close()
 
             # PBS jobs
-            if self.options.pbs and not self.options.processingPBS:
-                self.harness.handleTestStatus(tester, output)
+            if self.options.pbs:
+                if self.options.processingPBS:
+                    # Handle qstat status codes. handleQstatStatus will then pass its output to testOutputAndFinish.
+                    # This is so we can correctly use testOutputAndFinish based on qstat status (queued, running
+                    # or otherwise non-finished jobs have no output for testOutputAndFinish to use yet).
+                    # TODO: refactor testOutputAndFinish to handle Qstat output.
+                    self.harness.handleQstatStatus(tester, p.returncode, output, time, clock())
+                else:
+                    # Handle a process that just finished launching a job using qsub
+                    job_id = self.harness.handleTestStatus(tester, output)
 
             # All other jobs
             else:
@@ -241,8 +270,8 @@ class RunParallel:
 
                 self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
-        if tester.didPass():
-            self.finished_jobs.add(tester.specs['test_name'])
+        if tester.didPass() or tester.getStatus() == tester.bucket_pbs:
+            self.finished_jobs_dict[tester.specs['test_name']] = job_id
         else:
             self.skipped_jobs.add(tester.specs['test_name'])
 
