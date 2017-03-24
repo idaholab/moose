@@ -99,7 +99,7 @@ FluidPropertiesApp__associateSyntax(Syntax & syntax, ActionFactory & action_fact
 void
 FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax(
+  registerSyntaxTask(
       "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
 
   registerMooseObjectTask("add_fluid_properties", FluidProperties, false);

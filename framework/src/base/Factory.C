@@ -183,3 +183,9 @@ Factory::getConstructedObjects() const
     list.push_back(name);
   return list;
 }
+
+FileLineInfo
+Factory::getLineInfo(const std::string & name) const
+{
+  return _name_to_line.getInfo(name);
+}

@@ -75,18 +75,18 @@ JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bo
   return val;
 }
 
-void
+bool
 JsonSyntaxTree::addParameters(const std::string & parent,
                               const std::string & path,
                               bool is_type,
                               const std::string & action,
-                              const std::string & task_name,
                               bool is_action,
-                              InputParameters * params)
+                              InputParameters * params,
+                              const FileLineInfo & lineinfo)
 {
   moosecontrib::Json::Value all_params;
   if (action == "EmptyAction")
-    return;
+    return false;
 
   size_t count = 0;
   for (auto & iter : *params)
@@ -124,14 +124,17 @@ JsonSyntaxTree::addParameters(const std::string & parent,
   }
   if (_search != "" && count == 0)
     // no parameters that matched the search string
-    return;
+    return false;
 
   moosecontrib::Json::Value & json = getJson(parent, path, is_type);
+
   if (is_action)
   {
     json[action]["parameters"] = all_params;
-    json[action]["tasks"].append(task_name);
+    json[action]["description"] = params->getClassDescription();
     json[action]["action_path"] = path;
+    if (lineinfo.isValid())
+      json[action]["file_info"][lineinfo.file()] = lineinfo.line();
   }
   else if (params)
   {
@@ -139,7 +142,10 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;
     json["description"] = params->getClassDescription();
+    if (lineinfo.isValid())
+      json["file_info"][lineinfo.file()] = lineinfo.line();
   }
+  return true;
 }
 
 std::string
@@ -210,4 +216,15 @@ JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string type)
     auto & j = getJson(path);
     j["associated_types"].append(type);
   }
+}
+
+void
+JsonSyntaxTree::addActionTask(const std::string & path,
+                              const std::string & action,
+                              const std::string & task_name,
+                              const FileLineInfo & lineinfo)
+{
+  moosecontrib::Json::Value & json = getJson("", path, false);
+  if (lineinfo.isValid())
+    json[action]["tasks"][task_name]["file_info"][lineinfo.file()] = lineinfo.line();
 }

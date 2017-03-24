@@ -18,6 +18,7 @@
 #include <string>
 #include <map>
 #include "DependencyResolver.h"
+#include "FileLineInfo.h"
 
 /**
  * Holding syntax for parsing input files
@@ -51,7 +52,9 @@ public:
   // Registration function for associating Moose Actions with syntax
   void registerActionSyntax(const std::string & action,
                             const std::string & syntax,
-                            const std::string & task = "");
+                            const std::string & task = "",
+                            const std::string & file = "",
+                            int line = -1);
 
   /**
    *  Registration function that replaces existing Moose Actions with a completely new action
@@ -60,7 +63,9 @@ public:
    */
   void replaceActionSyntax(const std::string & action,
                            const std::string & syntax,
-                           const std::string & task);
+                           const std::string & task,
+                           const std::string & file = "",
+                           int line = -1);
 
   /**
    *  Registration a type with a block. For example, associate FunctionName with the Functions block
@@ -107,6 +112,17 @@ public:
 
   bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
 
+  /**
+   * Gets the file and line where the syntax/action/task combo was registered.
+   * @param syntax Syntax name
+   * @param action Action name
+   * @param task Task name
+   * @return A FileLineInfo associated with the syntax/action/task triplet
+   */
+  FileLineInfo getLineInfo(const std::string & syntax,
+                           const std::string & action,
+                           const std::string & task) const;
+
 protected:
   /// The list of registered tasks and a flag indicating whether or not they are required
   std::map<std::string, bool> _registered_tasks;
@@ -124,6 +140,7 @@ protected:
   std::multimap<std::string, std::string> _associated_types;
 
   std::set<std::string> _deprecated_syntax;
+  FileLineInfoMap _syntax_to_line;
 };
 
 #endif // MOOSESYNTAX_H

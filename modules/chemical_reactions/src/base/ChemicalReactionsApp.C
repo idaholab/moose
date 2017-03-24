@@ -106,18 +106,15 @@ ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fa
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
-  syntax.registerActionSyntax("AddSecondarySpeciesAction",
-                              "ReactionNetwork/AqueousEquilibriumReactions");
-  syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
-  syntax.registerActionSyntax("AddCoupledEqSpeciesKernelsAction",
-                              "ReactionNetwork/AqueousEquilibriumReactions");
-  syntax.registerActionSyntax("AddCoupledEqSpeciesAuxKernelsAction",
-                              "ReactionNetwork/AqueousEquilibriumReactions");
-  syntax.registerActionSyntax("AddCoupledSolidKinSpeciesKernelsAction",
-                              "ReactionNetwork/SolidKineticReactions");
-  syntax.registerActionSyntax("AddCoupledSolidKinSpeciesAuxKernelsAction",
-                              "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
+  registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddCoupledEqSpeciesKernelsAction", "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddCoupledEqSpeciesAuxKernelsAction",
+                 "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddCoupledSolidKinSpeciesKernelsAction", "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddCoupledSolidKinSpeciesAuxKernelsAction",
+                 "ReactionNetwork/SolidKineticReactions");
   registerAction(AddPrimarySpeciesAction, "add_variable");
   registerAction(AddSecondarySpeciesAction, "add_aux_variable");
   registerAction(AddCoupledEqSpeciesKernelsAction, "add_kernel");

@@ -104,22 +104,27 @@ Syntax::isActionRequired(const std::string & task)
 void
 Syntax::registerActionSyntax(const std::string & action,
                              const std::string & syntax,
-                             const std::string & task)
+                             const std::string & task,
+                             const std::string & file,
+                             int line)
 {
   ActionInfo action_info;
   action_info._action = action;
   action_info._task = task;
 
   _associated_actions.insert(std::make_pair(syntax, action_info));
+  _syntax_to_line.addInfo(syntax, action, task, file, line);
 }
 
 void
 Syntax::replaceActionSyntax(const std::string & action,
                             const std::string & syntax,
-                            const std::string & task)
+                            const std::string & task,
+                            const std::string & file,
+                            int line)
 {
   _associated_actions.erase(syntax);
-  registerActionSyntax(action, syntax, task);
+  registerActionSyntax(action, syntax, task, file, line);
 }
 
 void
@@ -241,4 +246,12 @@ void
 Syntax::registerSyntaxType(const std::string & syntax, const std::string & type)
 {
   _associated_types.insert(std::make_pair(syntax, type));
+}
+
+FileLineInfo
+Syntax::getLineInfo(const std::string & syntax,
+                    const std::string & action,
+                    const std::string & task) const
+{
+  return _syntax_to_line.getInfo(syntax, action, task);
 }

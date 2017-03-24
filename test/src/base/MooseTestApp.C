@@ -585,19 +585,18 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(TestGetActionsAction, "meta_action");
 
-  syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
-  syntax.registerActionSyntax("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
-  syntax.registerActionSyntax(
-      "AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+  registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
+  registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
+  registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
 
   registerAction(ApplyCoupledVariablesTestAction, "meta_action");
-  syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
-  syntax.registerActionSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
-  syntax.registerActionSyntax("TestGetActionsAction", "TestGetActions");
-  syntax.registerActionSyntax("BadAddKernelAction", "BadKernels/*");
+  registerSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
+  registerSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
+  registerSyntax("TestGetActionsAction", "TestGetActions");
+  registerSyntax("BadAddKernelAction", "BadKernels/*");
 
   registerAction(AddMatAndKernel, "add_kernel");
   registerAction(AddMatAndKernel, "add_material");
   registerAction(AddMatAndKernel, "add_variable");
-  syntax.registerActionSyntax("AddMatAndKernel", "AddMatAndKernel");
+  registerSyntax("AddMatAndKernel", "AddMatAndKernel");
 }

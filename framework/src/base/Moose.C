@@ -1084,7 +1084,8 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
 
 #undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action)                                                               \
+  action_factory.reg<tplt>(stringifyName(tplt), action, __FILE__, __LINE__)
 
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
