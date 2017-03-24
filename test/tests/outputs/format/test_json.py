@@ -155,7 +155,7 @@ class TestJSON(unittest.TestCase):
         # There is a problem with the GetPotParser parsing this because
         # the comments got split and there is a unmatched " on a line of the comment.
         # This breaks the parser and it doesn't read in all the parameters.
-        #self.assertIn("petsc_options", split.params_list)
+        # self.assertIn("petsc_options", split.params_list)
 
     def testInputFileFormatSearch(self):
         """
@@ -168,6 +168,26 @@ class TestJSON(unittest.TestCase):
         self.assertEqual(len(root.children_list), 1)
         self.assertIn("initial_steps", root.children["Adaptivity"].params_list)
         self.assertEqual(len(root.children["Adaptivity"].params_list), 1)
+
+    def testLineInfo(self):
+        """
+        Make sure file/line information works
+        """
+        data = self.getJsonData()
+        adapt = data["Adaptivity"]["actions"]["SetAdaptivityOptionsAction"]
+        fi = adapt["file_info"]
+        self.assertEqual(len(fi.keys()), 1)
+        fname = fi.keys()[0]
+        # Clang seems to have the full path name for __FILE__
+        # gcc seems to just use the path that is given on the command line, which won't include "framework"
+        self.assertTrue(fname.endswith(os.path.join("src", "parser", "MooseSyntax.C")))
+        self.assertGreater(fi[fname], 0)
+
+        fi = adapt["tasks"]["set_adaptivity_options"]["file_info"]
+        self.assertEqual(len(fi.keys()), 1)
+        fname = fi.keys()[0]
+        self.assertTrue(fname.endswith(os.path.join("src", "base", "Moose.C")))
+        self.assertGreater(fi[fname], 0)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

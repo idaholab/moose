@@ -381,22 +381,22 @@ TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fact
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("EmptyAction", "BCs/CavityPressure");
-  syntax.registerActionSyntax("CavityPressureAction", "BCs/CavityPressure/*");
-  syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
-  syntax.registerActionSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
+  registerSyntax("EmptyAction", "BCs/CavityPressure");
+  registerSyntax("CavityPressureAction", "BCs/CavityPressure/*");
+  registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
+  registerSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
 
-  syntax.registerActionSyntax("LegacyTensorMechanicsAction", "Kernels/TensorMechanics");
-  syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
-  syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
+  registerSyntax("LegacyTensorMechanicsAction", "Kernels/TensorMechanics");
+  registerSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
+  registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
 
-  syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
-  syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
+  registerSyntax("EmptyAction", "BCs/Pressure");
+  registerSyntax("PressureAction", "BCs/Pressure/*");
 
-  syntax.registerActionSyntax("GeneralizedPlaneStrainAction",
-                              "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
-  syntax.registerActionSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
-  syntax.registerActionSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
+  registerSyntax("GeneralizedPlaneStrainAction",
+                 "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+  registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
+  registerSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem");

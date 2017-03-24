@@ -160,3 +160,10 @@ SimpleFluidProperties::h_dpT(
 }
 
 Real SimpleFluidProperties::henryConstant(Real /*temperature*/) const { return _henry_constant; }
+
+void
+SimpleFluidProperties::henryConstant_dT(Real /*temperature*/, Real & Kh, Real & dKh_dT) const
+{
+  Kh = _henry_constant;
+  dKh_dT = 0.0;
+}

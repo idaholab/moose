@@ -16,6 +16,7 @@
 #define JSONSYNTAXTREE_H
 
 #include "InputParameters.h"
+#include "FileLineInfo.h"
 #include "json/json.h"
 #include <string>
 #include <vector>
@@ -35,18 +36,34 @@ public:
    * @param path The path of the action
    * @param is_type Whether this belongs to a "<type>" or not
    * @param action Name of the action
-   * @param task_name Task name associated with these parameters
    * @param is_action Wheter it is an action
    * @param params The InputParameters to add to the tree
+   * @param lineinfo The FileLineInfo where the action/path was registered
+   * @return Whether the parameters were added to the tree (ie if it matched the search string).
    */
-  void addParameters(const std::string & parent_path,
+  bool addParameters(const std::string & parent_path,
                      const std::string & path,
                      bool is_type,
                      const std::string & action,
-                     const std::string & task_name,
                      bool is_action,
-                     InputParameters * params);
+                     InputParameters * params,
+                     const FileLineInfo & lineinfo);
 
+  /**
+   * Add a task to the tree
+   * @param path The path of the action
+   * @param action Name of the action
+   * @param task Name of the task
+   * @param lineinfo The FileLineInfo where the action/task was registered
+   */
+  void addActionTask(const std::string & path,
+                     const std::string & action,
+                     const std::string & task,
+                     const FileLineInfo & lineinfo);
+  /**
+   * Get the root of the tree.
+   * @return The top level Json::Value holding the tree.
+   */
   const moosecontrib::Json::Value & getRoot() const { return _root; }
 
   /**

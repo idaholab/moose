@@ -579,22 +579,33 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     if (act_info._task == "")
       act_info._task = _action_factory.getTaskName(act_info._action);
 
-    all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter.first, act_info));
+    all_names.push_back(std::make_pair(iter.first, act_info));
   }
 
   for (const auto & act_names : all_names)
   {
-    InputParameters action_obj_params = _action_factory.getValidParams(act_names.second._action);
-    root.addParameters("",
-                       act_names.first,
-                       false,
-                       act_names.second._action,
-                       act_names.second._task,
-                       true,
-                       &action_obj_params);
+    const auto & act_info = act_names.second;
+    const std::string & action = act_info._action;
+    const std::string & task = act_info._task;
+    const std::string act_name = act_names.first;
+    InputParameters action_obj_params = _action_factory.getValidParams(action);
+    bool params_added = root.addParameters("",
+                                           act_name,
+                                           false,
+                                           action,
+                                           true,
+                                           &action_obj_params,
+                                           _syntax.getLineInfo(act_name, action, ""));
 
-    const std::string & task = act_names.second._task;
-    std::string act_name = act_names.first;
+    if (params_added)
+    {
+      auto tasks = _action_factory.getTasksByAction(action);
+      for (auto & t : tasks)
+      {
+        auto info = _action_factory.getLineInfo(action, t);
+        root.addActionTask(act_name, action, t, info);
+      }
+    }
 
     // We need to see if this action is inherited from MooseObjectAction
     // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
@@ -645,13 +656,14 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 
           moose_obj_params.set<std::string>("type") = moose_obj->first;
 
-          root.addParameters(act_names.first,
+          auto lineinfo = _factory.getLineInfo(moose_obj->first);
+          root.addParameters(act_name,
                              name,
                              is_type,
                              moose_obj->first,
-                             "",
                              is_action_params,
-                             &moose_obj_params);
+                             &moose_obj_params,
+                             lineinfo);
         }
       }
     }

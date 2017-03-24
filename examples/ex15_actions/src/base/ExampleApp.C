@@ -75,5 +75,5 @@ ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    * contain a leading slash.  Wildcard characters can be used to replace a piece of the
    * path.
    */
-  syntax.registerActionSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
+  registerSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
 }

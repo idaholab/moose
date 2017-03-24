@@ -149,3 +149,8 @@ ActionFactory::getTasksByAction(const std::string & action) const
 
   return tasks;
 }
+FileLineInfo
+ActionFactory::getLineInfo(const std::string & name, const std::string & task) const
+{
+  return _name_to_line.getInfo(name, task);
+}

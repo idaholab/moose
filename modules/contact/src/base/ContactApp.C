@@ -95,16 +95,16 @@ ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("ContactAction", "Contact/*");
+  registerSyntax("ContactAction", "Contact/*");
 
-  syntax.registerActionSyntax("ContactPenetrationAuxAction", "Contact/*");
-  syntax.registerActionSyntax("ContactPenetrationVarAction", "Contact/*");
+  registerSyntax("ContactPenetrationAuxAction", "Contact/*");
+  registerSyntax("ContactPenetrationVarAction", "Contact/*");
 
-  syntax.registerActionSyntax("ContactPressureAuxAction", "Contact/*");
-  syntax.registerActionSyntax("ContactPressureVarAction", "Contact/*");
+  registerSyntax("ContactPressureAuxAction", "Contact/*");
+  registerSyntax("ContactPressureVarAction", "Contact/*");
 
-  syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
-  syntax.registerActionSyntax("NodalAreaVarAction", "Contact/*");
+  registerSyntax("NodalAreaAction", "Contact/*");
+  registerSyntax("NodalAreaVarAction", "Contact/*");
 
   registerAction(ContactAction, "add_aux_kernel");
   registerAction(ContactAction, "add_aux_variable");

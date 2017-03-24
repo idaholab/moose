@@ -118,15 +118,13 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   addTaskDependency("add_slave_flux_vector", "ready_to_init");
   addTaskDependency("init_problem", "add_slave_flux_vector");
   registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
-  syntax.registerActionSyntax("AddSlaveFluxVectorAction", "ThermalContact/*");
+  registerSyntax("AddSlaveFluxVectorAction", "ThermalContact/*");
 
-  syntax.registerActionSyntax("ThermalContactAuxBCsAction", "ThermalContact/*", "add_aux_kernel");
-  syntax.registerActionSyntax(
-      "ThermalContactAuxVarsAction", "ThermalContact/*", "add_aux_variable");
-  syntax.registerActionSyntax("ThermalContactBCsAction", "ThermalContact/*", "add_bc");
-  syntax.registerActionSyntax(
-      "ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
-  syntax.registerActionSyntax("ThermalContactMaterialsAction", "ThermalContact/*", "add_material");
+  registerSyntaxTask("ThermalContactAuxBCsAction", "ThermalContact/*", "add_aux_kernel");
+  registerSyntaxTask("ThermalContactAuxVarsAction", "ThermalContact/*", "add_aux_variable");
+  registerSyntaxTask("ThermalContactBCsAction", "ThermalContact/*", "add_bc");
+  registerSyntaxTask("ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
+  registerSyntaxTask("ThermalContactMaterialsAction", "ThermalContact/*", "add_material");
 
   registerAction(ThermalContactAuxBCsAction, "add_aux_kernel");
   registerAction(ThermalContactAuxVarsAction, "add_aux_variable");

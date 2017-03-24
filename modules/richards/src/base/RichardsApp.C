@@ -225,10 +225,10 @@ RichardsApp::registerObjects(Factory & factory)
 void
 RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_kernel");
-  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_aux_variable");
-  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_function");
-  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_postprocessor");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_kernel");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_aux_variable");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_function");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_postprocessor");
 
   registerAction(Q2PAction, "add_kernel");
   registerAction(Q2PAction, "add_aux_variable");

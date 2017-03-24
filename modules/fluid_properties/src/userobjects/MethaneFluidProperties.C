@@ -267,3 +267,9 @@ MethaneFluidProperties::henryConstant(Real temperature) const
 {
   return henryConstantIAPWS(temperature, -10.44708, 4.66491, 12.12986);
 }
+
+void
+MethaneFluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const
+{
+  henryConstantIAPWS_dT(temperature, Kh, dKh_dT, -10.44708, 4.66491, 12.12986);
+}

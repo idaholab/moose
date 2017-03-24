@@ -21,13 +21,19 @@
 
 #include "Action.h" // Technically required for std::shared_ptr<Action>(Action*) constructor
 #include "InputParameters.h"
+#include "FileLineInfo.h"
 
 /**
  * Macros
  */
 #define stringifyName(name) #name
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action)                                                               \
+  action_factory.reg<tplt>(stringifyName(tplt), action, __FILE__, __LINE__)
 
+#define registerSyntax(action, action_syntax)                                                      \
+  syntax.registerActionSyntax(action, action_syntax, "", __FILE__, __LINE__)
+#define registerSyntaxTask(action, action_syntax, task)                                            \
+  syntax.registerActionSyntax(action, action_syntax, task, __FILE__, __LINE__)
 #define registerTask(name, is_required) syntax.registerTaskName(name, is_required)
 #define registerMooseObjectTask(name, moose_system, is_required)                                   \
   syntax.registerTaskName(name, stringifyName(moose_system), is_required)
@@ -69,7 +75,10 @@ public:
   virtual ~ActionFactory();
 
   template <typename T>
-  void reg(const std::string & name, const std::string & task)
+  void reg(const std::string & name,
+           const std::string & task,
+           const std::string & file = "",
+           int line = -1)
   {
     BuildInfo build_info;
     build_info._build_pointer = &buildAction<T>;
@@ -78,7 +87,16 @@ public:
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
     _task_to_action_map.insert(std::make_pair(task, name));
+    _name_to_line.addInfo(name, task, file, line);
   }
+
+  /**
+   * Gets file and line information where an action was registered.
+   * @param name Action name
+   * @param task task name
+   * @return A FileLineInfo associated with the name/task pair
+   */
+  FileLineInfo getLineInfo(const std::string & name, const std::string & task) const;
 
   std::string getTaskName(const std::string & action);
 
@@ -117,6 +135,7 @@ protected:
 
   std::multimap<std::string, BuildInfo> _name_to_build_info;
 
+  FileLineInfoMap _name_to_line;
   std::multimap<std::string, std::string> _task_to_action_map;
 
   // TODO: I don't think we need this anymore
