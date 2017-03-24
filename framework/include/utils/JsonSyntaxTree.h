@@ -46,7 +46,15 @@ public:
                      const std::string & task_name,
                      bool is_action,
                      InputParameters * params);
+
   const moosecontrib::Json::Value & getRoot() const { return _root; }
+
+  /**
+   * Add an associated type to a block
+   * @param path Path of the block
+   * @param type Type name to associate the block with
+   */
+  void addSyntaxType(const std::string & path, const std::string type);
 
 protected:
   std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p);

@@ -89,6 +89,10 @@ class TestJSON(unittest.TestCase):
         self.assertIn("petsc_options", split["parameters"])
         self.assertIn("splitting_type", split["parameters"])
 
+        f = data["Functions"]["star"]
+        self.assertIn("associated_types", f)
+        self.assertEquals(["FunctionName"], f["associated_types"])
+
     def testJsonSearch(self):
         """
         Make sure parameter search works

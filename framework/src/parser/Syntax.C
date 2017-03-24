@@ -236,3 +236,9 @@ Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task
 
   return false;
 }
+
+void
+Syntax::registerSyntaxType(const std::string & syntax, const std::string & type)
+{
+  _associated_types.insert(std::make_pair(syntax, type));
+}

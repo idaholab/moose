@@ -201,3 +201,13 @@ JsonSyntaxTree::buildOutputString(
       ch = ' ';
   return tmp_str;
 }
+
+void
+JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string type)
+{
+  if (MooseUtils::wildCardMatch(path, _search))
+  {
+    auto & j = getJson(path);
+    j["associated_types"].append(type);
+  }
+}
