@@ -76,6 +76,9 @@ public:
 protected:
   std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p);
 
+  std::string prettyCppType(const std::string & cpp_type);
+  std::string basicCppType(const std::string & cpp_type);
+
   std::string
   buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
   static std::vector<std::string> splitPath(const std::string & path);
