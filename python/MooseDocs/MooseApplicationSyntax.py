@@ -330,7 +330,7 @@ class MooseApplicationSyntax(object):
                         objects[key] = name
 
                     # Action syntax map
-                    for match in re.finditer(r'registerActionSyntax\("(?P<action>\w+)"\s*,\s*"(?P<key>.*?)\"[,\);]', content):
+                    for match in re.finditer(r'(registerActionSyntax|registerSyntax|registerSyntaxTask)\("(?P<action>\w+)"\s*,\s*"(?P<key>.*?)\"[,\);]', content):
                         key = match.group('key')
                         action = match.group('action')
                         actions[key].add(action)
