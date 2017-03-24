@@ -189,14 +189,10 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(
       {
         /**
          * We've found a grain neighbor interface. In order to assign order parameters though, we
-         * need to make
-         * sure that we build out a small buffer region to avoid literal "corner cases" where nodes
-         * on opposite
-         * corners of a QUAD end up with the same OP because those nodes are not nodal neighbors.
-         *
-         * To do that we'll build a halo region based on these interface nodes. For now, we need to
-         * record
-         * the nodes inside of the grain and those outside of the grain.
+         * need to make sure that we build out a small buffer region to avoid literal "corner cases"
+         * where nodes on opposite corners of a QUAD end up with the same OP because those nodes are
+         * not nodal neighbors. To do that we'll build a halo region based on these interface nodes.
+         * For now, we need to record the nodes inside of the grain and those outside of the grain.
          */
 
         // First add corresponding element and grain information
@@ -302,14 +298,10 @@ PolycrystalICTools::buildNodalGrainAdjacencyGraph(
       if (my_grain != their_grain)
         /**
          * We've found a grain neighbor interface. In order to assign order parameters though, we
-         * need to make
-         * sure that we build out a small buffer region to avoid literal "corner cases" where nodes
-         * on opposite
-         * corners of a QUAD end up with the same OP because those nodes are not nodal neighbors.
-         *
-         * To do that we'll build a halo region based on these interface nodes. For now, we need to
-         * record
-         * the nodes inside of the grain and those outside of the grain.
+         * need to make sure that we build out a small buffer region to avoid literal "corner cases"
+         * where nodes on opposite corners of a QUAD end up with the same OP because those nodes are
+         * not nodal neighbors. To do that we'll build a halo region based on these interface nodes.
+         * For now, we need to record the nodes inside of the grain and those outside of the grain.
          */
         adjacency_matrix[my_grain][their_grain] = 1;
     }
