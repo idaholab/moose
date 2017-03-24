@@ -567,6 +567,9 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 {
   std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
 
+  for (const auto & iter : _syntax.getAssociatedTypes())
+    root.addSyntaxType(iter.first, iter.second);
+
   for (const auto & iter : _syntax.getAssociatedActions())
   {
     Syntax::ActionInfo act_info = iter.second;
