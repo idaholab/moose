@@ -86,7 +86,7 @@ BrentsMethodTest::root()
   {
     // Trigger no bracketing interval error
     x2 = 1.0;
-    Real x = BrentsMethod::root(func, x1, x2);
+    BrentsMethod::root(func, x1, x2);
   }
   catch (const std::exception & e)
   {
