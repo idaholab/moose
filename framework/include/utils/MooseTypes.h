@@ -364,6 +364,9 @@ DerivativeStringClass(VectorPostprocessorName);
 /// This type is used for objects that expect Moose Function objects
 DerivativeStringClass(FunctionName);
 
+/// This type is used for objects that expect Moose Distribution objects
+DerivativeStringClass(DistributionName);
+
 /// This type is used for objects that expect "UserObject" names
 DerivativeStringClass(UserObjectName);
 

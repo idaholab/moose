@@ -200,3 +200,12 @@ markdown_extensions:
                       - /BCs
                       - /DiracKernels
                       - /Functions
+              - stochastic_tools:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/stochastic_tools/src
+                      - modules/stochastic_tools/include
+                  hide:
+                      - /Modules
+                      - /UserObjects
+                      - /Postprocessors

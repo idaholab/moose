@@ -19,6 +19,7 @@
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
+#include "DistributionInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "ParallelUniqueId.h"
@@ -42,6 +43,7 @@ InputParameters validParams<UserObject>();
 class UserObject : public MooseObject,
                    public SetupInterface,
                    public FunctionInterface,
+                   public DistributionInterface,
                    public Restartable,
                    public MeshChangedInterface,
                    public ScalarCoupleable

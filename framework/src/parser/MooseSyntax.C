@@ -58,6 +58,8 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerSyntax("GlobalParamsAction", "GlobalParams");
 
+  registerSyntax("AddDistributionAction", "Distributions/*");
+
   registerSyntax("SetupDebugAction", "Debug");
   registerSyntax("SetupResidualDebugAction", "Debug");
 
