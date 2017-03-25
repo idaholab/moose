@@ -37,7 +37,7 @@ protected:
   Real _base;
   Real _coef;
   MaterialProperty<Real> & _diffusion;
-  MaterialProperty<Real> * const _diffusion_old;
+  const MaterialProperty<Real> * const _diffusion_old;
 };
 
 #endif // VARCOUPLINGMATERIAL_H

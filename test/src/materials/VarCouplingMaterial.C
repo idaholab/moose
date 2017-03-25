@@ -32,15 +32,15 @@ VarCouplingMaterial::VarCouplingMaterial(const InputParameters & parameters)
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),
     _diffusion(declareProperty<Real>("diffusion")),
-    _diffusion_old(getParam<bool>("declare_old") ? &declarePropertyOld<Real>("diffusion") : NULL)
+    _diffusion_old(getParam<bool>("declare_old") ? &getMaterialPropertyOld<Real>("diffusion")
+                                                 : nullptr)
 {
 }
 
 void
 VarCouplingMaterial::initQpStatefulProperties()
 {
-  if (_diffusion_old)
-    _diffusion[_qp] = _var[_qp];
+  _diffusion[_qp] = _var[_qp];
 }
 
 void

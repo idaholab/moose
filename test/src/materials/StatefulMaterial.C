@@ -32,10 +32,9 @@ StatefulMaterial::StatefulMaterial(const InputParameters & parameters)
     // valued property named "diffusivity" that Kernels can use.
     _diffusivity(declareProperty<Real>("diffusivity")),
 
-    // Declare that we are going to have an old value of diffusivity
-    // Note: this is _expensive_ and currently means that you can't
-    // use adaptivity!  Only do this if you REALLY need it!
-    _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
+    // Retrieve/use an old value of diffusivity.
+    // Note: this is _expensive_ - only do this if you REALLY need it!
+    _diffusivity_old(getMaterialPropertyOld<Real>("diffusivity"))
 {
 }
 

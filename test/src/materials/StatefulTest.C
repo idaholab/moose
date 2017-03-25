@@ -48,8 +48,8 @@ StatefulTest::StatefulTest(const InputParameters & parameters)
   for (unsigned int i = 0; i < _num_props; ++i)
   {
     _properties[i] = &declareProperty<Real>(_prop_names[i]);
-    _properties_old[i] = &declarePropertyOld<Real>(_prop_names[i]);
-    _properties_older[i] = &declarePropertyOlder<Real>(_prop_names[i]);
+    _properties_old[i] = &getMaterialPropertyOld<Real>(_prop_names[i]);
+    _properties_older[i] = &getMaterialPropertyOlder<Real>(_prop_names[i]);
   }
 }
 
