@@ -8,6 +8,10 @@
 #include "PolycrystalICTools.h"
 #include "MooseMesh.h"
 
+// libMesh includes
+#include "libmesh/periodic_boundaries.h"
+#include "libmesh/point_locator_base.h"
+
 #ifdef LIBMESH_HAVE_PETSC
 #include <petscmat.h>
 #include <petscis.h>
@@ -34,7 +38,11 @@ bool isGraphValid(const std::vector<std::vector<bool>> & adjacency_matrix,
                   unsigned int n_vertices,
                   unsigned int vertex,
                   unsigned int color);
-void visitElementalNeighbors(const Elem * elem, std::set<dof_id_type> & halo_ids);
+void visitElementalNeighbors(const Elem * elem,
+                             const MeshBase & mesh,
+                             const PointLocatorBase & point_locator,
+                             const PeriodicBoundaries * pb,
+                             std::set<dof_id_type> & halo_ids);
 
 std::vector<unsigned int>
 PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoints,
@@ -125,19 +133,21 @@ std::vector<std::vector<bool>>
 PolycrystalICTools::buildGrainAdjacencyGraph(
     const std::map<dof_id_type, unsigned int> & entity_to_grain,
     MooseMesh & mesh,
+    const PeriodicBoundaries * pb,
     unsigned int n_grains,
     bool is_elemental)
 {
   if (is_elemental)
-    return buildElementalGrainAdjacencyGraph(entity_to_grain, mesh, n_grains);
+    return buildElementalGrainAdjacencyGraph(entity_to_grain, mesh, pb, n_grains);
   else
-    return buildNodalGrainAdjacencyGraph(entity_to_grain, mesh, n_grains);
+    return buildNodalGrainAdjacencyGraph(entity_to_grain, mesh, pb, n_grains);
 }
 
 AdjacencyGraph
 PolycrystalICTools::buildElementalGrainAdjacencyGraph(
     const std::map<dof_id_type, unsigned int> & element_to_grain,
     MooseMesh & mesh,
+    const PeriodicBoundaries * pb,
     unsigned int n_grains)
 {
   std::vector<std::vector<bool>> adjacency_matrix(n_grains);
@@ -154,6 +164,7 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(
   std::vector<std::set<dof_id_type>> local_ids(n_grains);
   std::vector<std::set<dof_id_type>> halo_ids(n_grains);
 
+  std::unique_ptr<PointLocatorBase> point_locator = mesh.getMesh().sub_point_locator();
   const auto end = mesh.getMesh().active_elements_end();
   for (auto el = mesh.getMesh().active_elements_begin(); el != end; ++el)
   {
@@ -167,11 +178,12 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(
     // Loop over all neighbors (at the the same level as the current element)
     for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
     {
-      const Elem * neighbor_ancestor = elem->neighbor(i);
+      const Elem * neighbor_ancestor = elem->topological_neighbor(i, mesh, *point_locator, pb);
       if (neighbor_ancestor)
         // Retrieve only the active neighbors for each side of this element, append them to the list
         // of active neighbors
-        neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+        neighbor_ancestor->active_family_tree_by_topological_neighbor(
+            all_active_neighbors, elem, mesh, *point_locator, pb, false);
     }
 
     // Loop over all active element neighbors
@@ -220,7 +232,8 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(
            ++entity_it)
       {
         if (true)
-          visitElementalNeighbors(mesh.elemPtr(*entity_it), halo_ids[i]);
+          visitElementalNeighbors(
+              mesh.elemPtr(*entity_it), mesh.getMesh(), *point_locator, pb, halo_ids[i]);
         else
           mooseError("Unimplemented");
       }
@@ -264,6 +277,7 @@ AdjacencyGraph
 PolycrystalICTools::buildNodalGrainAdjacencyGraph(
     const std::map<dof_id_type, unsigned int> & node_to_grain,
     MooseMesh & mesh,
+    const PeriodicBoundaries * /*pb*/,
     unsigned int n_grains)
 {
   // Build node to elem map
@@ -405,7 +419,11 @@ PolycrystalICTools::coloringAlgorithmDescriptions()
  * Utility routines
  */
 void
-visitElementalNeighbors(const Elem * elem, std::set<dof_id_type> & halo_ids)
+visitElementalNeighbors(const Elem * elem,
+                        const MeshBase & mesh,
+                        const PointLocatorBase & point_locator,
+                        const PeriodicBoundaries * pb,
+                        std::set<dof_id_type> & halo_ids)
 {
   mooseAssert(elem, "Elem is NULL");
 
@@ -414,11 +432,12 @@ visitElementalNeighbors(const Elem * elem, std::set<dof_id_type> & halo_ids)
   // Loop over all neighbors (at the the same level as the current element)
   for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
   {
-    const Elem * neighbor_ancestor = elem->neighbor(i);
+    const Elem * neighbor_ancestor = elem->topological_neighbor(i, mesh, point_locator, pb);
     if (neighbor_ancestor)
       // Retrieve only the active neighbors for each side of this element, append them to the list
       // of active neighbors
-      neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+      neighbor_ancestor->active_family_tree_by_topological_neighbor(
+          all_active_neighbors, elem, mesh, point_locator, pb, false);
   }
 
   // Loop over all active element neighbors

@@ -29,17 +29,20 @@ unsigned int assignPointToGrain(const Point & p,
 std::vector<std::vector<bool>>
 buildGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & entity_to_grain,
                          MooseMesh & mesh,
+                         const PeriodicBoundaries * pb,
                          unsigned int n_grains,
                          bool is_elemental);
 
 AdjacencyGraph
 buildElementalGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & element_to_grain,
                                   MooseMesh & mesh,
+                                  const PeriodicBoundaries * pb,
                                   unsigned int n_grains);
 
 AdjacencyGraph
 buildNodalGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & node_to_grain,
                               MooseMesh & mesh,
+                              const PeriodicBoundaries * pb,
                               unsigned int n_grains);
 
 std::vector<unsigned int> assignOpsToGrains(const AdjacencyGraph & adjacency_matrix,

@@ -8,6 +8,7 @@
 #include "EBSDReader.h"
 #include "MooseMesh.h"
 #include "PolycrystalICTools.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
@@ -77,8 +78,10 @@ ReconVarIC::initialSetup()
       entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), index));
     }
 
+    const PeriodicBoundaries * pb =
+        _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
     auto grain_neighbor_graph =
-        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
+        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, pb, _grain_num, true);
 
     _assigned_op = PolycrystalICTools::assignOpsToGrains(
         grain_neighbor_graph, _grain_num, _op_num, _coloring_algorithm);

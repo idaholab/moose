@@ -33,7 +33,7 @@
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
       grain_num = 100 #Number of grains
-      coloring_algorithm = bt
+      coloring_algorithm = jp
       rand_seed = 10
     [../]
   [../]
