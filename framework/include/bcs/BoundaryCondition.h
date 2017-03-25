@@ -20,6 +20,7 @@
 #include "SetupInterface.h"
 #include "ParallelUniqueId.h"
 #include "FunctionInterface.h"
+#include "DistributionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
@@ -48,6 +49,7 @@ class BoundaryCondition : public MooseObject,
                           public BoundaryRestrictableRequired,
                           public SetupInterface,
                           public FunctionInterface,
+                          public DistributionInterface,
                           public UserObjectInterface,
                           public TransientInterface,
                           public PostprocessorInterface,

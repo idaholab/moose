@@ -6,6 +6,12 @@
 #include "StateSimTester.h"
 #include "StateSimRunner.h"
 
+// distributions
+#include "UniformDistribution.h"
+
+// for test purpose only
+#include "TestDistributionPostprocessor.h"
+
 template <>
 InputParameters
 validParams<StochasticToolsApp>()
@@ -48,6 +54,12 @@ StochasticToolsApp::registerObjects(Factory & factory)
 {
   registerUserObject(StateSimRunner);
   registerPostprocessor(StateSimTester);
+
+  // distributions
+  registerDistribution(UniformDistribution);
+
+  // for test purpose only
+  registerDistribution(TestDistributionPostprocessor);
 }
 
 // External entry point for dynamic syntax association

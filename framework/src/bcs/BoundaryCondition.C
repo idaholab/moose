@@ -48,6 +48,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     BoundaryRestrictableRequired(parameters, nodal),
     SetupInterface(this),
     FunctionInterface(this),
+    DistributionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),

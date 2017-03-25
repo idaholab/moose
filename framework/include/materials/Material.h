@@ -24,6 +24,7 @@
 #include "MooseVariableDependencyInterface.h"
 #include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
+#include "DistributionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -57,6 +58,7 @@ class Material : public MooseObject,
                  public MooseVariableDependencyInterface,
                  public ScalarCoupleable,
                  public FunctionInterface,
+                 public DistributionInterface,
                  public UserObjectInterface,
                  public TransientInterface,
                  public MaterialPropertyInterface,
