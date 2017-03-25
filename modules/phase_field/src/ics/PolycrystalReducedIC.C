@@ -116,10 +116,9 @@ PolycrystalReducedIC::initialSetup()
      * We have a utility for this too. This one makes no assumptions about how the
      * grain structure was built. It uses the entity_to_grain map.
      */
-    const PeriodicBoundaries * pb =
-        _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
-    AdjacencyGraph grain_neighbor_graph =
-        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, pb, _grain_num, true);
+    const auto * pb = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
+    const auto grain_neighbor_graph =
+        PolycrystalICTools::buildGrainAdjacencyMatrix(entity_to_grain, _mesh, pb, _grain_num, true);
 
     /**
      * Now we need to assign ops in some optimal fashion.

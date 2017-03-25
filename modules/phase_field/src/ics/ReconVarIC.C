@@ -78,10 +78,9 @@ ReconVarIC::initialSetup()
       entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), index));
     }
 
-    const PeriodicBoundaries * pb =
-        _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
-    auto grain_neighbor_graph =
-        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, pb, _grain_num, true);
+    const auto * pb = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
+    const auto grain_neighbor_graph =
+        PolycrystalICTools::buildGrainAdjacencyMatrix(entity_to_grain, _mesh, pb, _grain_num, true);
 
     _assigned_op = PolycrystalICTools::assignOpsToGrains(
         grain_neighbor_graph, _grain_num, _op_num, _coloring_algorithm);

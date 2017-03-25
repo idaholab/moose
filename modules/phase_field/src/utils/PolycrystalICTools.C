@@ -28,12 +28,12 @@ const unsigned int HALO_THICKNESS = 4;
 }
 
 // Forward declarations
-bool colorGraph(const std::vector<std::vector<bool>> & adjacency_matrix,
+bool colorGraph(const PolycrystalICTools::AdjacencyMatrix<Real> & adjacency_matrix,
                 std::vector<unsigned int> & colors,
                 unsigned int n_vertices,
                 unsigned int n_ops,
                 unsigned int vertex);
-bool isGraphValid(const std::vector<std::vector<bool>> & adjacency_matrix,
+bool isGraphValid(const PolycrystalICTools::AdjacencyMatrix<Real> & adjacency_matrix,
                   std::vector<unsigned int> & colors,
                   unsigned int n_vertices,
                   unsigned int vertex,
@@ -129,8 +129,8 @@ PolycrystalICTools::assignPointToGrain(const Point & p,
   return min_index;
 }
 
-std::vector<std::vector<bool>>
-PolycrystalICTools::buildGrainAdjacencyGraph(
+PolycrystalICTools::AdjacencyMatrix<Real>
+PolycrystalICTools::buildGrainAdjacencyMatrix(
     const std::map<dof_id_type, unsigned int> & entity_to_grain,
     MooseMesh & mesh,
     const PeriodicBoundaries * pb,
@@ -138,26 +138,22 @@ PolycrystalICTools::buildGrainAdjacencyGraph(
     bool is_elemental)
 {
   if (is_elemental)
-    return buildElementalGrainAdjacencyGraph(entity_to_grain, mesh, pb, n_grains);
+    return buildElementalGrainAdjacencyMatrix(entity_to_grain, mesh, pb, n_grains);
   else
-    return buildNodalGrainAdjacencyGraph(entity_to_grain, mesh, pb, n_grains);
+    return buildNodalGrainAdjacencyMatrix(entity_to_grain, mesh, pb, n_grains);
 }
 
-AdjacencyGraph
-PolycrystalICTools::buildElementalGrainAdjacencyGraph(
+PolycrystalICTools::AdjacencyMatrix<Real>
+PolycrystalICTools::buildElementalGrainAdjacencyMatrix(
     const std::map<dof_id_type, unsigned int> & element_to_grain,
     MooseMesh & mesh,
     const PeriodicBoundaries * pb,
     unsigned int n_grains)
 {
-  std::vector<std::vector<bool>> adjacency_matrix(n_grains);
+  AdjacencyMatrix<Real> adjacency_matrix(n_grains);
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
   mesh.errorIfDistributedMesh("advanced_op_assignment = true");
-
-  // initialize
-  for (unsigned int i = 0; i < n_grains; ++i)
-    adjacency_matrix[i].resize(n_grains, false);
 
   std::vector<const Elem *> all_active_neighbors;
 
@@ -265,16 +261,16 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(
 
       if (!set_intersection.empty())
       {
-        adjacency_matrix[i][j] = true;
-        adjacency_matrix[j][i] = true;
+        adjacency_matrix(i, j) = true;
+        adjacency_matrix(j, i) = true;
       }
     }
 
   return adjacency_matrix;
 }
 
-AdjacencyGraph
-PolycrystalICTools::buildNodalGrainAdjacencyGraph(
+PolycrystalICTools::AdjacencyMatrix<Real>
+PolycrystalICTools::buildNodalGrainAdjacencyMatrix(
     const std::map<dof_id_type, unsigned int> & node_to_grain,
     MooseMesh & mesh,
     const PeriodicBoundaries * /*pb*/,
@@ -284,10 +280,7 @@ PolycrystalICTools::buildNodalGrainAdjacencyGraph(
   std::vector<std::vector<const Elem *>> nodes_to_elem_map;
   MeshTools::build_nodes_to_elem_map(mesh.getMesh(), nodes_to_elem_map);
 
-  std::vector<std::vector<bool>> adjacency_matrix(n_grains);
-  // initialize
-  for (unsigned int i = 0; i < n_grains; ++i)
-    adjacency_matrix[i].resize(n_grains, false);
+  AdjacencyMatrix<Real> adjacency_matrix(n_grains);
 
   const auto end = mesh.getMesh().active_nodes_end();
   for (auto nl = mesh.getMesh().active_nodes_begin(); nl != end; ++nl)
@@ -317,7 +310,7 @@ PolycrystalICTools::buildNodalGrainAdjacencyGraph(
          * not nodal neighbors. To do that we'll build a halo region based on these interface nodes.
          * For now, we need to record the nodes inside of the grain and those outside of the grain.
          */
-        adjacency_matrix[my_grain][their_grain] = 1;
+        adjacency_matrix(my_grain, their_grain) = 1;
     }
   }
 
@@ -325,7 +318,7 @@ PolycrystalICTools::buildNodalGrainAdjacencyGraph(
 }
 
 std::vector<unsigned int>
-PolycrystalICTools::assignOpsToGrains(const AdjacencyGraph & adjacency_matrix,
+PolycrystalICTools::assignOpsToGrains(const AdjacencyMatrix<Real> & adjacency_matrix,
                                       unsigned int n_grains,
                                       unsigned int n_ops,
                                       const MooseEnum & coloring_algorithm)
@@ -343,16 +336,19 @@ PolycrystalICTools::assignOpsToGrains(const AdjacencyGraph & adjacency_matrix,
   else // PETSc Coloring algorithms
   {
 #ifdef LIBMESH_HAVE_PETSC
-    PetscScalar * a;
-    PetscMalloc1(n_grains * n_grains, &a);
-    for (unsigned int i = 0; i < n_grains; ++i)
-      for (unsigned int j = 0; j < n_grains; ++j)
-        a[i * n_grains + j] = adjacency_matrix[i][j];
+    //    PetscScalar * a;
+    //    PetscMalloc1(n_grains * n_grains, &a);
+    //    for (unsigned int i = 0; i < n_grains; ++i)
+    //      for (unsigned int j = 0; j < n_grains; ++j)
+    //        a[i * n_grains + j] = adjacency_matrix(i, j);
 
     Mat A, B;
     MatCreate(MPI_COMM_SELF, &A);
     MatSetSizes(A, n_grains, n_grains, n_grains, n_grains);
     MatSetType(A, MATSEQDENSE);
+
+    // PETSc requires a non-const data array to populate the matrix
+    PetscScalar * a = const_cast<PetscScalar *>(adjacency_matrix.rawDataPtr());
     MatSeqDenseSetPreallocation(A, a);
     MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
@@ -452,7 +448,7 @@ visitElementalNeighbors(const Elem * elem,
  * Backtracking graph coloring routines
  */
 bool
-colorGraph(const AdjacencyGraph & adjacency_matrix,
+colorGraph(const PolycrystalICTools::AdjacencyMatrix<Real> & adjacency_matrix,
            std::vector<unsigned int> & colors,
            unsigned int n_vertices,
            unsigned int n_colors,
@@ -485,7 +481,7 @@ colorGraph(const AdjacencyGraph & adjacency_matrix,
 }
 
 bool
-isGraphValid(const AdjacencyGraph & adjacency_matrix,
+isGraphValid(const PolycrystalICTools::AdjacencyMatrix<Real> & adjacency_matrix,
              std::vector<unsigned int> & colors,
              unsigned int n_vertices,
              unsigned int vertex,
@@ -493,7 +489,7 @@ isGraphValid(const AdjacencyGraph & adjacency_matrix,
 {
   // See if the proposed color is valid based on the current neighbor colors
   for (unsigned int neighbor = 0; neighbor < n_vertices; ++neighbor)
-    if (adjacency_matrix[vertex][neighbor] && color == colors[neighbor])
+    if (adjacency_matrix(vertex, neighbor) && color == colors[neighbor])
       return false;
   return true;
 }
