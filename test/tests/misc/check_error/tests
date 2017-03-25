@@ -305,14 +305,14 @@
   [./bad_stateful_material_only_old]
     type = 'RunException'
     input = 'bad_stateful_material.i'
-    expect_err = "Material '\S+' has stateful properties declared but not associated"
+    expect_err = "One or more Material Properties were not supplied on block"
   [../]
 
   [./bad_stateful_material_only_older]
     type = 'RunException'
     input = 'bad_stateful_material.i'
-    expect_err = "Material '\S+' has stateful properties declared but not associated"
-    cli_args = 'Materials/stateful_mat/declare_only_older=true'
+    expect_err = "One or more Material Properties were not supplied on block"
+    cli_args = 'Materials/stateful_mat/get_older=true'
   [../]
 
   [./missing_mesh_test]

@@ -65,7 +65,6 @@
     prop_names = prop
     prop_values = func
     block = 0
-    enable_stateful = true
   [../]
 []
 

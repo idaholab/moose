@@ -267,11 +267,6 @@ private:
   /// Small helper function to call storeMatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
 
-  /// Small helper function to cache MaterialProperty ids while they are being declared.
-  template <typename T>
-  MaterialProperty<T> & cachePropertyIdWhileDeclaring(const std::string & prop_name,
-                                                      MaterialProperty<T> & prop);
-
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();
 
@@ -334,38 +329,23 @@ Material::getMaterialPropertyByName(const std::string & prop_name)
   // same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
-  _fe_problem.markMatPropRequested(prop_name);
-  return _material_data->getProperty<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOldByName(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
-  _fe_problem.markMatPropRequested(prop_name);
-  return _material_data->getPropertyOld<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
-  _fe_problem.markMatPropRequested(prop_name);
-  return _material_data->getPropertyOlder<T>(prop_name);
-}
-
-template <typename T>
-MaterialProperty<T> &
-Material::cachePropertyIdWhileDeclaring(const std::string & prop_name, MaterialProperty<T> & prop)
-{
-  // Ask the Storage what id it has assigned to the MaterialProperty named prop_name
-  const MaterialPropertyStorage & storage = _fe_problem.getMaterialPropertyStorage();
-  _supplied_prop_ids.insert(storage.retrievePropertyId(prop_name));
-  return prop;
+  return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
 }
 
 template <typename T>
@@ -373,7 +353,7 @@ MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::CURRENT);
-  return cachePropertyIdWhileDeclaring(prop_name, _material_data->declareProperty<T>(prop_name));
+  return _material_data->declareProperty<T>(prop_name);
 }
 
 template <typename T>
@@ -381,7 +361,7 @@ MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::OLD);
-  return cachePropertyIdWhileDeclaring(prop_name, _material_data->declarePropertyOld<T>(prop_name));
+  return _material_data->declarePropertyOld<T>(prop_name);
 }
 
 template <typename T>
@@ -389,8 +369,7 @@ MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::OLDER);
-  return cachePropertyIdWhileDeclaring(prop_name,
-                                       _material_data->declarePropertyOlder<T>(prop_name));
+  return _material_data->declarePropertyOlder<T>(prop_name);
 }
 
 template <typename T>

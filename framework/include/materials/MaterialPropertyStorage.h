@@ -231,7 +231,7 @@ public:
   unsigned int addPropertyOlder(const std::string & prop_name);
 
   std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
-  std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
+  const std::map<unsigned int, std::string> statefulPropNames() const { return _prop_names; }
 
   /// Returns the property ID for the given prop_name, adding the property and
   /// creating a new ID if it hasn't already been created.

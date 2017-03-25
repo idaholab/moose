@@ -23,7 +23,7 @@ class BadStatefulMaterial;
 template <>
 InputParameters validParams<BadStatefulMaterial>();
 
-// Only declares old or older property
+/// Tries to retrieve non-existing old/older versions of a material property.
 class BadStatefulMaterial : public Material
 {
 public:
@@ -32,9 +32,6 @@ public:
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
-
-private:
-  MaterialProperty<Real> & _prop_old;
 };
 
 #endif // STATEFULMATERIAL_H
