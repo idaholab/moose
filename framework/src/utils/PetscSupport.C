@@ -50,6 +50,10 @@
 #include <petscsnes.h>
 #include <petscksp.h>
 
+// For graph coloring
+#include <petscmat.h>
+#include <petscis.h>
+
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
 // PETSc 3.2.x and lower
 #include <private/kspimpl.h>
@@ -731,6 +735,63 @@ setSinglePetscOption(const std::string & name, const std::string & value)
   // don't have a specific communicator in this helper function.
   if (ierr)
     mooseError("Error setting PETSc option.");
+}
+
+void
+colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
+                     unsigned int size,
+                     unsigned int colors,
+                     std::vector<unsigned int> & vertex_colors,
+                     const char * coloring_algorithm)
+{
+  // Mat A will be a dense matrix from the incoming data structure
+  Mat A;
+  MatCreate(MPI_COMM_SELF, &A);
+  MatSetSizes(A, size, size, size, size);
+  MatSetType(A, MATSEQDENSE);
+  // PETSc requires a non-const data array to populate the matrix
+  MatSeqDenseSetPreallocation(A, adjacency_matrix);
+  MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+  MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+
+  // Sparse matrix
+  Mat B;
+  MatConvert(A, MATAIJ, MAT_INITIAL_MATRIX, &B);
+
+  MatColoring mc;
+  ISColoring iscoloring;
+  MatColoringCreate(B, &mc);
+  MatColoringSetType(mc, coloring_algorithm);
+  MatColoringSetMaxColors(mc, static_cast<PetscInt>(colors));
+
+  // Petsc normally colors by distance two (neighbors of neighbors), we just want one
+  MatColoringSetDistance(mc, 1);
+  MatColoringSetFromOptions(mc);
+  MatColoringApply(mc, &iscoloring);
+
+  PetscInt nn;
+  IS * isis;
+  ISColoringGetIS(iscoloring, &nn, &isis);
+
+  mooseAssert(nn <= static_cast<PetscInt>(colors), "Not enough available colors");
+  for (int i = 0; i < nn; i++)
+  {
+    PetscInt isize;
+    const PetscInt * indices;
+    ISGetLocalSize(isis[i], &isize);
+    ISGetIndices(isis[i], &indices);
+    for (int j = 0; j < isize; j++)
+    {
+      mooseAssert(indices[j] < vertex_colors.size(), "Index out of bounds");
+      vertex_colors[indices[j]] = i;
+    }
+    ISRestoreIndices(isis[i], &indices);
+  }
+
+  MatDestroy(&A);
+  MatDestroy(&B);
+  MatColoringDestroy(&mc);
+  ISColoringDestroy(&iscoloring);
 }
 
 } // Namespace PetscSupport

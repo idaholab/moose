@@ -37,7 +37,8 @@ public:
   T & operator()(unsigned int i, unsigned int j) { return _data[i * _size + j]; }
   T operator()(unsigned int i, unsigned int j) const { return _data[i * _size + j]; }
 
-  const T * rawDataPtr() const { return _data.data(); }
+  std::size_t size() const { return _size; }
+  T * rawDataPtr() { return _data.data(); }
 
 private:
   const std::size_t _size;
@@ -74,7 +75,7 @@ buildNodalGrainAdjacencyMatrix(const std::map<dof_id_type, unsigned int> & node_
                                const PeriodicBoundaries * pb,
                                unsigned int n_grains);
 
-std::vector<unsigned int> assignOpsToGrains(const AdjacencyMatrix<Real> & adjacency_matrix,
+std::vector<unsigned int> assignOpsToGrains(AdjacencyMatrix<Real> & adjacency_matrix,
                                             unsigned int n_grains,
                                             unsigned int n_ops,
                                             const MooseEnum & coloring_algorithm);

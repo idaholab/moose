@@ -12,11 +12,6 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/point_locator_base.h"
 
-#ifdef LIBMESH_HAVE_PETSC
-#include <petscmat.h>
-#include <petscis.h>
-#endif
-
 namespace GraphColoring
 {
 const unsigned int INVALID_COLOR = std::numeric_limits<unsigned int>::max();
@@ -318,7 +313,7 @@ PolycrystalICTools::buildNodalGrainAdjacencyMatrix(
 }
 
 std::vector<unsigned int>
-PolycrystalICTools::assignOpsToGrains(const AdjacencyMatrix<Real> & adjacency_matrix,
+PolycrystalICTools::assignOpsToGrains(AdjacencyMatrix<Real> & adjacency_matrix,
                                       unsigned int n_grains,
                                       unsigned int n_ops,
                                       const MooseEnum & coloring_algorithm)
@@ -327,7 +322,8 @@ PolycrystalICTools::assignOpsToGrains(const AdjacencyMatrix<Real> & adjacency_ma
 
   std::vector<unsigned int> grain_to_op(n_grains, GraphColoring::INVALID_COLOR);
 
-  if (coloring_algorithm == "BT")
+  // Use a simple backtracking coloring algorithm
+  if (coloring_algorithm == "bt")
   {
     if (!colorGraph(adjacency_matrix, grain_to_op, n_grains, n_ops, 0))
       mooseError(
@@ -336,54 +332,10 @@ PolycrystalICTools::assignOpsToGrains(const AdjacencyMatrix<Real> & adjacency_ma
   else // PETSc Coloring algorithms
   {
 #ifdef LIBMESH_HAVE_PETSC
-    //    PetscScalar * a;
-    //    PetscMalloc1(n_grains * n_grains, &a);
-    //    for (unsigned int i = 0; i < n_grains; ++i)
-    //      for (unsigned int j = 0; j < n_grains; ++j)
-    //        a[i * n_grains + j] = adjacency_matrix(i, j);
-
-    Mat A, B;
-    MatCreate(MPI_COMM_SELF, &A);
-    MatSetSizes(A, n_grains, n_grains, n_grains, n_grains);
-    MatSetType(A, MATSEQDENSE);
-
-    // PETSc requires a non-const data array to populate the matrix
-    PetscScalar * a = const_cast<PetscScalar *>(adjacency_matrix.rawDataPtr());
-    MatSeqDenseSetPreallocation(A, a);
-    MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-
-    MatConvert(A, MATAIJ, MAT_INITIAL_MATRIX, &B);
-
-    MatColoring mc;
-    ISColoring iscoloring;
-    MatColoringCreate(B, &mc);
-    MatColoringSetType(mc, static_cast<std::string>(coloring_algorithm).c_str());
-    MatColoringSetMaxColors(mc, static_cast<PetscInt>(n_ops));
-    MatColoringSetDistance(mc, 1);
-    MatColoringSetFromOptions(mc);
-    MatColoringApply(mc, &iscoloring);
-
-    PetscInt nn;
-    IS * isis;
-    ISColoringGetIS(iscoloring, &nn, &isis);
-
-    mooseAssert(nn <= static_cast<PetscInt>(n_grains), "Too many colors used");
-    for (int i = 0; i < nn; i++)
-    {
-      PetscInt isize;
-      const PetscInt * indices;
-      ISGetLocalSize(isis[i], &isize);
-      ISGetIndices(isis[i], &indices);
-      for (int j = 0; j < isize; j++)
-        grain_to_op[indices[j]] = i;
-      ISRestoreIndices(isis[i], &indices);
-    }
-
-    MatDestroy(&A);
-    MatDestroy(&B);
-    MatColoringDestroy(&mc);
-    ISColoringDestroy(&iscoloring);
+    const std::string & ca_str = coloring_algorithm;
+    Real * am_data = adjacency_matrix.rawDataPtr();
+    Moose::PetscSupport::colorAdjacencyMatrix(
+        am_data, n_grains, n_ops, grain_to_op, ca_str.c_str());
 #else
     mooseError("Selected coloring algorithm requires PETSc");
 #endif

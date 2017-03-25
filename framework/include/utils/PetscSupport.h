@@ -111,6 +111,18 @@ MultiMooseEnum getCommonPetscKeys();
 void setSinglePetscOption(const std::string & name, const std::string & value = "");
 
 void addPetscOptionsFromCommandline();
+
+/**
+ * This method takes an adjacency matrix, and a desired number of colors and applies
+ * a graph coloring algorithm to produce a coloring. The coloring is returned as a vector
+ * of unsigned integers indicating which color or group each vextex in the adjacency matrix
+ * belongs to.
+ */
+void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
+                          unsigned int size,
+                          unsigned int colors,
+                          std::vector<unsigned int> & vertex_colors,
+                          const char * coloring_algorithm);
 }
 }
 

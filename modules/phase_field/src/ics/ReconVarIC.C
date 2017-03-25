@@ -79,7 +79,7 @@ ReconVarIC::initialSetup()
     }
 
     const auto * pb = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
-    const auto grain_neighbor_graph =
+    auto grain_neighbor_graph =
         PolycrystalICTools::buildGrainAdjacencyMatrix(entity_to_grain, _mesh, pb, _grain_num, true);
 
     _assigned_op = PolycrystalICTools::assignOpsToGrains(
