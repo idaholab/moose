@@ -1701,14 +1701,6 @@ GrainTracker::getNextUniqueID()
 /*************************************************
  ************** Helper Structures ****************
  ************************************************/
-GrainDistance::GrainDistance()
-  : GrainDistance(std::numeric_limits<Real>::max(),
-                  std::numeric_limits<std::size_t>::max(),
-                  std::numeric_limits<std::size_t>::max(),
-                  std::numeric_limits<unsigned int>::max())
-{
-}
-
 GrainDistance::GrainDistance(Real distance, std::size_t var_index)
   : GrainDistance(distance,
                   var_index,

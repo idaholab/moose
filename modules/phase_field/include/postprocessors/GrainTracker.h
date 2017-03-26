@@ -262,8 +262,6 @@ private:
  */
 struct GrainDistance
 {
-  GrainDistance();
-
   GrainDistance(Real distance, std::size_t var_index);
 
   GrainDistance(Real distance,
