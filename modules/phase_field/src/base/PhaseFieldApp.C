@@ -526,6 +526,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
   registerSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
+  registerSyntax("PolycrystalVoronoiVoidICAction", "ICs/PolycrystalICs/PolycrystalVoronoiVoidIC");
   registerSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
