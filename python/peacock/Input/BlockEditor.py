@@ -50,6 +50,7 @@ class BlockEditor(QWidget, MooseWidget):
         self.reset_button = None
         self.new_parameter_button = None
         self.param_editor = None
+        self.setWindowTitle(block.path)
 
         if block.types:
             self.param_editor = ParamsByType(block)
@@ -90,6 +91,7 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.apply_button.setEnabled(enabled)
         self.reset_button.setEnabled(enabled)
+        self.setWindowTitle(self.block.path)
 
     def setWatchedBlockList(self, path, children):
         self.param_editor.setWatchedBlockList(path, children)

@@ -30,7 +30,7 @@ class InputFileEditor(QWidget, MooseWidget):
         self.setLayout(self.top_layout)
         self.block_tree = BlockTree(self.tree)
         self.top_layout.addWidget(self.block_tree)
-        self.block_tree.blockClicked.connect(lambda block: self.blockSelected.emit(block, self.tree))
+        self.block_tree.blockClicked.connect(self._blockClicked)
         self.block_tree.blockDoubleClicked.connect(self._blockEditorRequested)
         self.block_tree.changed.connect(lambda block: self.blockChanged.emit(block, self.tree))
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -47,6 +47,8 @@ class InputFileEditor(QWidget, MooseWidget):
             block[BlockInfo]: The block to edit.
         """
         if self.block_editor:
+            # raise it to front in case it is behind windows
+            self.block_editor.raise_()
             return
 
         self.block_tree.blockSignals(True)
@@ -70,6 +72,17 @@ class InputFileEditor(QWidget, MooseWidget):
         """
         self.block_editor.setParent(None) # Don't know if this is required
         self.block_editor = None
+
+    def _blockClicked(self, block):
+        """
+        Called when an item in the tree is clicked.
+        Input:
+            block[BlockInfo]: Block that was clicked
+        """
+        self.blockSelected.emit(block, self.tree)
+        if self.block_editor:
+            # raise it to front in case it is behind windows
+            self.block_editor.raise_()
 
     def onNeedBlockList(self, paths):
         """
@@ -110,6 +123,8 @@ class InputFileEditor(QWidget, MooseWidget):
         Input:
             input_file[str]: The new input file
         """
+        self._closeBlockEditor()
+
         if self.tree.app_info.valid():
             input_file = os.path.abspath(input_file)
             if self.tree.setInputFile(input_file):
@@ -122,10 +137,19 @@ class InputFileEditor(QWidget, MooseWidget):
             self.tree.input_filename = input_file
         return False
 
-    def closing(self):
+    def _closeBlockEditor(self):
+        """
+        Just closes the block editor if it is open
+        """
         if self.block_editor:
             self.block_editor.close()
             self.block_editor = None
+
+    def closing(self):
+        """
+        Called when the parent is about to close.
+        """
+        self._closeBlockEditor()
 
     def writeInputFile(self, filename):
         """
