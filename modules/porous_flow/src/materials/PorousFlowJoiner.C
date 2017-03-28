@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "PorousFlowJoiner.h"
-
 #include "Conversion.h"
 
 template <>
@@ -57,13 +56,14 @@ PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters)
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + Moose::stringify(ph));
-    _dphase_property_dp[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph),
-                                                                   _pressure_variable_name);
-    _dphase_property_ds[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph),
-                                                                   _saturation_variable_name);
-    _dphase_property_dt[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph),
-                                                                   _temperature_variable_name);
+    std::string phase = Moose::stringify(ph);
+    _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + phase);
+    _dphase_property_dp[ph] =
+        &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _pressure_variable_name);
+    _dphase_property_ds[ph] =
+        &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _saturation_variable_name);
+    _dphase_property_dt[ph] =
+        &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _temperature_variable_name);
   }
 }
 

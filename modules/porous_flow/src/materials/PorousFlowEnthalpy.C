@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "PorousFlowEnthalpy.h"
-#include "Conversion.h"
 
 template <>
 InputParameters
@@ -28,45 +27,35 @@ PorousFlowEnthalpy::PorousFlowEnthalpy(const InputParameters & parameters)
     _pp_coeff(getParam<Real>("porepressure_coefficient")),
 
     _energy(_nodal_material
-                ? getMaterialProperty<Real>("PorousFlow_fluid_phase_internal_energy_nodal" +
-                                            Moose::stringify(_phase_num))
-                : getMaterialProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" +
-                                            Moose::stringify(_phase_num))),
+                ? getMaterialProperty<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase)
+                : getMaterialProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase)),
     _denergy_dp(
         _nodal_material
-            ? getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_nodal" +
-                                                      Moose::stringify(_phase_num),
-                                                  _pressure_variable_name)
-            : getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" +
-                                                      Moose::stringify(_phase_num),
-                                                  _pressure_variable_name)),
-    _denergy_dt(
-        _nodal_material
-            ? getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_nodal" +
-                                                      Moose::stringify(_phase_num),
-                                                  _temperature_variable_name)
-            : getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" +
-                                                      Moose::stringify(_phase_num),
-                                                  _temperature_variable_name)),
+            ? getMaterialPropertyDerivative<Real>(
+                  "PorousFlow_fluid_phase_internal_energy_nodal" + _phase, _pressure_variable_name)
+            : getMaterialPropertyDerivative<Real>(
+                  "PorousFlow_fluid_phase_internal_energy_qp" + _phase, _pressure_variable_name)),
+    _denergy_dt(_nodal_material ? getMaterialPropertyDerivative<Real>(
+                                      "PorousFlow_fluid_phase_internal_energy_nodal" + _phase,
+                                      _temperature_variable_name)
+                                : getMaterialPropertyDerivative<Real>(
+                                      "PorousFlow_fluid_phase_internal_energy_qp" + _phase,
+                                      _temperature_variable_name)),
 
-    _density(_nodal_material ? getMaterialProperty<Real>("PorousFlow_fluid_phase_density_nodal" +
-                                                         Moose::stringify(_phase_num))
-                             : getMaterialProperty<Real>("PorousFlow_fluid_phase_density_qp" +
-                                                         Moose::stringify(_phase_num))),
+    _density(_nodal_material
+                 ? getMaterialProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase)
+                 : getMaterialProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
     _ddensity_dp(_nodal_material
-                     ? getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" +
-                                                               Moose::stringify(_phase_num),
-                                                           _pressure_variable_name)
-                     : getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" +
-                                                               Moose::stringify(_phase_num),
-                                                           _pressure_variable_name)),
-    _ddensity_dt(_nodal_material
-                     ? getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" +
-                                                               Moose::stringify(_phase_num),
-                                                           _temperature_variable_name)
-                     : getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" +
-                                                               Moose::stringify(_phase_num),
-                                                           _temperature_variable_name)),
+                     ? getMaterialPropertyDerivative<Real>(
+                           "PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name)
+                     : getMaterialPropertyDerivative<Real>(
+                           "PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name)),
+    _ddensity_dt(
+        _nodal_material
+            ? getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase,
+                                                  _temperature_variable_name)
+            : getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
+                                                  _temperature_variable_name)),
 
     _enthalpy(_nodal_material
                   ? declareProperty<Real>("PorousFlow_fluid_phase_enthalpy_nodal" + _phase)
