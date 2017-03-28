@@ -65,6 +65,7 @@
 #include "PorousFlowNearestQp.h"
 #include "PorousFlowConstantBiotModulus.h"
 #include "PorousFlowConstantThermalExpansionCoefficient.h"
+#include "PorousFlowFluidStateWaterNCG.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -203,6 +204,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowNearestQp);
   registerMaterial(PorousFlowConstantBiotModulus);
   registerMaterial(PorousFlowConstantThermalExpansionCoefficient);
+  registerMaterial(PorousFlowFluidStateWaterNCG);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
