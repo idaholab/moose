@@ -15,10 +15,10 @@
 #include "JsonSyntaxTree.h"
 
 #include "Parser.h"
+#include "pcrecpp.h"
 
 #include <algorithm>
 #include <cctype>
-#include <regex>
 
 JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(search_string) {}
 
@@ -260,16 +260,15 @@ JsonSyntaxTree::prettyCppType(const std::string & cpp_type)
 {
   // On mac many of the std:: classes are inline namespaced with __1
   // On linux std::string can be inline namespaced with __cxx11
-  auto s = std::regex_replace(cpp_type, std::regex("std::__\\w+::"), "std::");
+  std::string s = cpp_type;
+  pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
   // It would be nice if std::string actually looked normal
-  s = std::regex_replace(
-      s,
-      std::regex("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*"),
-      "std::string");
+  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
+      .GlobalReplace("std::string", &s);
   // It would be nice if std::vector looked normal
-  auto r = std::regex("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
-  s = std::regex_replace(s, r, "std::vector<$1>");
+  pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
+  r.GlobalReplace("std::vector<\\1>", &s);
   // Do it again for nested vectors
-  s = std::regex_replace(s, r, "std::vector<$1>");
+  r.GlobalReplace("std::vector<\\1>", &s);
   return s;
 }
