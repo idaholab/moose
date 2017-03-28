@@ -2,11 +2,11 @@
   order = SECOND
   family = LAGRANGE
   volumetric_locking_correction = true
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = brick4_mesh.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Problem]
@@ -78,7 +78,6 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-    displacements = 'disp_x disp_y disp_z'
     save_in = 'saved_x saved_y saved_z'
   [../]
 []
@@ -273,7 +272,6 @@
   [../]
   [./bot_strain]
     type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
     block = '1'
   [../]
   [./bot_stress]
@@ -288,7 +286,6 @@
   [../]
   [./top_strain]
     type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
     block = '2'
   [../]
   [./top_stress]
@@ -299,8 +296,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -317,7 +312,6 @@
   num_steps = 10
   dtmin = 1.0
   l_tol = 1e-4
-
 []
 
 [VectorPostprocessors]
@@ -369,11 +363,7 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     master = 4
-    order = SECOND
     system = constraint
     model = coulomb
     formulation = penalty
