@@ -6,6 +6,9 @@
   nx = 1
   ny = 1
   nz = 1
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -180,9 +183,6 @@
     type = Density
     block = 0
     density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

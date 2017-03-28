@@ -135,18 +135,13 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options = '-ksp_snes_ew'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
 
-
   line_search = 'none'
-
 
   l_max_its = 100
   nl_max_its = 100
