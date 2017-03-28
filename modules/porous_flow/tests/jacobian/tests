@@ -385,4 +385,26 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+
+  [./waterncg_twophase]
+    type = 'PetscJacobianTester'
+    input = 'waterncg.i'
+    ratio_tol = 1e-5 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = '-mat_fd_type ds'
+  [../]
+  [./waterncg_liqiud]
+    type = 'PetscJacobianTester'
+    input = 'waterncg.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = 'ICs/active='pgas z_liquid''
+  [../]
+  [./waterncg_gas]
+    type = 'PetscJacobianTester'
+    input = 'waterncg.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = 'ICs/active='pgas z_gas' -mat_fd_type ds'
+  [../]
 []
