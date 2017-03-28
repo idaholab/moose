@@ -1018,6 +1018,7 @@ EFAElement2D::createChild(const std::set<EFAElement *> & CrackTipElements,
             {
               EFANode * local = this->createLocalNodeFromGlobalNode(master_nodes[k]);
               coor += _local_node_coor[local->id()] * master_weights[k];
+              delete local;
             }
             local_embedded_node_coor.push_back(coor);
           }

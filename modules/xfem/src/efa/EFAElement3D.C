@@ -971,6 +971,7 @@ EFAElement3D::createChild(const std::set<EFAElement *> & CrackTipElements,
           {
             EFANode * local = this->createLocalNodeFromGlobalNode(master_nodes[i]);
             coor += _local_node_coor[local->id()] * master_weights[i];
+            delete local;
           }
           cut_plane_points.push_back(coor);
         }
