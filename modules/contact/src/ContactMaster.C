@@ -30,9 +30,15 @@ validParams<ContactMaster>()
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
                                         "1 for y, 2 for z)");
+
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+
+  params.addCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
@@ -83,15 +89,29 @@ ContactMaster::ContactMaster(const InputParameters & parameters)
     _capture_tolerance(getParam<Real>("capture_tolerance")),
     _updateContactSet(true),
     _residual_copy(_sys.residualGhosted()),
-    _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
-    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
-    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
     _mesh_dimension(_mesh.dimension()),
-    _vars(_x_var, _y_var, _z_var),
+    _vars(3, libMesh::invalid_uint),
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution())
 {
+  if (isParamValid("displacements"))
+  {
+    // modern parameter scheme for displacements
+    for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+      _vars[i] = coupled("displacements", i);
+  }
+  else
+  {
+    // Legacy parameter scheme for displacements
+    if (isParamValid("disp_x"))
+      _vars[0] = coupled("disp_x");
+    if (isParamValid("disp_y"))
+      _vars[1] = coupled("disp_y");
+    if (isParamValid("disp_z"))
+      _vars[2] = coupled("disp_z");
+  }
+
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
 
@@ -143,7 +163,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     PenetrationInfo * pinfo = it->second;
 
     // Skip this pinfo if there are no DOFs on this node.
-    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1)
+    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
     if (beginning_of_step)
@@ -198,7 +218,7 @@ ContactMaster::addPoints()
     PenetrationInfo * pinfo = it->second;
 
     // Skip this pinfo if there are no DOFs on this node.
-    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1)
+    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
     if (pinfo->isCaptured())
@@ -219,7 +239,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
   // Build up residual vector
   for (unsigned int i = 0; i < _mesh_dimension; ++i)
   {
-    dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
+    dof_id_type dof_number = node->dof_number(0, _vars[i], 0);
     res_vec(i) = _residual_copy(dof_number);
   }
 
@@ -380,7 +400,7 @@ ContactMaster::computeQpJacobian()
     // Build up jac vector
     for (unsigned int i=0; i<_dim; i++)
     {
-      long int dof_number = node->dof_number(0, _vars(i), 0);
+      long int dof_number = node->dof_number(0, _vars[i], 0);
       jac_vec(i) = _jacobian_copy(dof_number, dof_number);
     }
 
@@ -391,11 +411,11 @@ ContactMaster::computeQpJacobian()
 }
 
 ContactModel
-contactModel(const std::string & the_name)
+ContactMaster::contactModel(std::string name)
 {
   ContactModel model(CM_INVALID);
-  std::string name(the_name);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
   if ("frictionless" == name)
     model = CM_FRICTIONLESS;
   else if ("glued" == name)
@@ -407,24 +427,21 @@ contactModel(const std::string & the_name)
   else if ("experimental" == name)
   {
     model = CM_FRICTIONLESS;
-    mooseWarning(
+    ::mooseWarning(
         "Use of contact model \"experimental\" is deprecated.  Use \"frictionless\" instead.");
   }
   else
-  {
-    std::string err("Invalid contact model found: ");
-    err += name;
-    mooseError(err);
-  }
+    ::mooseError("Invalid contact model found: ", name);
+
   return model;
 }
 
 ContactFormulation
-contactFormulation(const std::string & the_name)
+ContactMaster::contactFormulation(std::string name)
 {
   ContactFormulation formulation(CF_INVALID);
-  std::string name(the_name);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
   if ("default" == name || "kinematic" == name)
     formulation = CF_DEFAULT;
 
@@ -438,11 +455,8 @@ contactFormulation(const std::string & the_name)
     formulation = CF_TANGENTIAL_PENALTY;
 
   if (formulation == CF_INVALID)
-  {
-    std::string err("Invalid formulation found: ");
-    err += name;
-    mooseError(err);
-  }
+    ::mooseError("Invalid formulation found: ", name);
+
   return formulation;
 }
 
@@ -454,13 +468,12 @@ ContactMaster::nodalArea(PenetrationInfo & pinfo)
   dof_id_type dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
   Real area = (*_aux_solution)(dof);
-  if (area == 0)
+  if (area == 0.0)
   {
     if (_t_step > 1)
       mooseError("Zero nodal area found");
-
     else
-      area = 1; // Avoid divide by zero during initialization
+      area = 1.0; // Avoid divide by zero during initialization
   }
   return area;
 }
@@ -470,8 +483,7 @@ ContactMaster::getPenalty(PenetrationInfo & pinfo)
 {
   Real penalty = _penalty;
   if (_normalize_penalty)
-  {
     penalty *= nodalArea(pinfo);
-  }
+
   return penalty;
 }
