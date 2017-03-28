@@ -7,8 +7,6 @@
 
 #include "PorousFlowMassFraction.h"
 
-#include "Conversion.h"
-
 template <>
 InputParameters
 validParams<PorousFlowMassFraction>()
