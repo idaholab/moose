@@ -112,18 +112,12 @@
   [./density]
     type = Density
     density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options = '-snes_ksp'
   petsc_options_iname = '-ksp_gmres_restart'

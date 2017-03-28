@@ -11,7 +11,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  block = 0
 []
 
 [Mesh]
@@ -146,10 +145,7 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options = '-ksp_snes_ew'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
@@ -157,7 +153,6 @@
 
 
   line_search = 'none'
-
 
   l_max_its = 100
   nl_max_its = 100
