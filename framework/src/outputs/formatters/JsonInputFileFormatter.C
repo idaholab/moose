@@ -77,7 +77,11 @@ JsonInputFileFormatter::addBlock(const std::string & name,
                                  bool toplevel)
 {
   addLine("");
-  addLine("[./" + name + "]");
+  if (toplevel)
+    addLine("[" + name + "]");
+  else
+    addLine("[./" + name + "]");
+
   _level++;
   if (block.isMember("description") && !block["description"].asString().empty())
     addLine("", 0, block["description"].asString());
