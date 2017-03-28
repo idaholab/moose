@@ -240,7 +240,7 @@ class RenderWindow(base.ChiggerObject):
         for result in self._results:
             result.getVTKRenderer().ResetCamera()
 
-    def write(self, filename):
+    def write(self, filename, dialog=False):
         """
         Writes the VTKWindow to an image.
         """
@@ -262,13 +262,14 @@ class RenderWindow(base.ChiggerObject):
         if ext not in writers:
             w = ', '.join(writers.keys())
             msg = "The filename must end with one of the following extensions: {}.".format(w)
-            mooseutils.mooseError(msg)
+            mooseutils.mooseError(msg, dialog=dialog)
             return
 
         # Check that the directory exists
         dirname = os.path.dirname(filename)
         if (len(dirname) > 0) and (not os.path.isdir(dirname)):
-            mooseutils.mooseError("The directory does not exist:", os.path.dirname(filename))
+            msg = "The directory does not exist: {}".format(dirname)
+            mooseutils.mooseError(msg, dialog=dialog)
             return
 
         # Build a filter for writing an image
