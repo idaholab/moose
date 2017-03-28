@@ -158,8 +158,6 @@
     type = Density
     block = PATCH
     density = 12.335297548665
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 
