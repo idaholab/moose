@@ -15,6 +15,7 @@
 #include "JsonSyntaxTree.h"
 
 #include "Parser.h"
+#include "pcrecpp.h"
 
 #include <algorithm>
 #include <cctype>
@@ -113,7 +114,9 @@ JsonSyntaxTree::addParameters(const std::string & parent,
       param_json["default"] = params->defaultCoupledValue(iter.first);
 
     param_json["options"] = buildOptions(iter);
-    param_json["cpp_type"] = params->type(iter.first);
+    std::string t = prettyCppType(params->type(iter.first));
+    param_json["cpp_type"] = t;
+    param_json["basic_type"] = basicCppType(t);
     param_json["group_name"] = params->getGroupName(iter.first);
     param_json["name"] = iter.first;
 
@@ -227,4 +230,45 @@ JsonSyntaxTree::addActionTask(const std::string & path,
   moosecontrib::Json::Value & json = getJson("", path, false);
   if (lineinfo.isValid())
     json[action]["tasks"][task_name]["file_info"][lineinfo.file()] = lineinfo.line();
+}
+
+std::string
+JsonSyntaxTree::basicCppType(const std::string & cpp_type)
+{
+  std::string s = "String";
+  if (cpp_type.find("std::vector") != std::string::npos ||
+      cpp_type.find("MultiMooseEnum") != std::string::npos ||
+      cpp_type.find("VectorPostprocessorName") != std::string::npos ||
+      cpp_type.find("libMesh::Point") != std::string::npos ||
+      cpp_type.find("libMesh::VectorValue") != std::string::npos ||
+      cpp_type.find("libMesh::TensorValue") != std::string::npos)
+    s = "Array";
+  else if (cpp_type == "int" || cpp_type == "unsigned int" || cpp_type == "short" ||
+           cpp_type == "unsigned short" || cpp_type == "char" || cpp_type == "unsigned char" ||
+           cpp_type == "long" || cpp_type == "unsigned long")
+    s = "Integer";
+  else if (cpp_type == "double" || cpp_type == "float")
+    s = "Real";
+  else if (cpp_type == "bool")
+    s = "Boolean";
+
+  return s;
+}
+
+std::string
+JsonSyntaxTree::prettyCppType(const std::string & cpp_type)
+{
+  // On mac many of the std:: classes are inline namespaced with __1
+  // On linux std::string can be inline namespaced with __cxx11
+  std::string s = cpp_type;
+  pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
+  // It would be nice if std::string actually looked normal
+  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
+      .GlobalReplace("std::string", &s);
+  // It would be nice if std::vector looked normal
+  pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
+  r.GlobalReplace("std::vector<\\1>", &s);
+  // Do it again for nested vectors
+  r.GlobalReplace("std::vector<\\1>", &s);
+  return s;
 }

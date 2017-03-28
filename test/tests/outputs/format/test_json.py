@@ -82,6 +82,12 @@ class TestJSON(unittest.TestCase):
         self.assertIn("Transient", exe["types"])
         self.assertNotIn("subblock_types", exe)
 
+        params = exe["actions"]["CreateExecutionerAction"]["parameters"]
+        self.assertEqual(params["active"]["cpp_type"], "std::vector<std::string>")
+        self.assertEqual(params["active"]["basic_type"], "Array")
+        self.assertEqual(params["type"]["cpp_type"], "std::string")
+        self.assertEqual(params["type"]["basic_type"], "String")
+
         # Preconditioning has a Preconditioning/*/* syntax which is unusual
         self.assertIn("Preconditioning", data)
         p = data["Preconditioning"]

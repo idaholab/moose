@@ -72,6 +72,7 @@ class ParameterInfo(object):
             "Point" in self.cpp_type or
             self.user_added or
             ("basic_string" in self.cpp_type and self.name == "value") or
+            ("std::string" in self.cpp_type and self.name == "value") or
             ' ' in self.value or
             ';' in self.value or
             '=' in self.value or
