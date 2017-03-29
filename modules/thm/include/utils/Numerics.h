@@ -17,11 +17,11 @@ static const Real Stefan_Boltzman_const = 5.670e-8;
  * @return -1 for negative values, 0 for zero and 1 for positive values
  */
 template <typename T>
-int sgn(T val)
+int
+sgn(T val)
 {
   return (T(0) < val) - (val < T(0));
 }
-
 
 /**
  * Compute Reynolds number
@@ -99,7 +99,17 @@ Real surfaceTension(Real temperature);
  * @param ts Saturation temperature
  * @return The region
  */
-int    ireg_vu_SBTL95(double v, double u, double & vt, double & ps, double & ts, double & x, double & v1, double & v2, double & v2t, double & u1, double & u2);
+int ireg_vu_SBTL95(double v,
+                   double u,
+                   double & vt,
+                   double & ps,
+                   double & ts,
+                   double & x,
+                   double & v1,
+                   double & v2,
+                   double & v2t,
+                   double & u1,
+                   double & u2);
 
 /**
  * Derivative of specific volume wrt alpha_liquid
@@ -142,4 +152,4 @@ Real de_dU1(Real U0, Real U1);
  */
 Real de_dU2(Real U0);
 
-#endif  // NUMERICS_H
+#endif // NUMERICS_H

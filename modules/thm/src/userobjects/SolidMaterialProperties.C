@@ -1,8 +1,9 @@
 #include "SolidMaterialProperties.h"
 #include "R7Conversion.h"
 
-template<>
-InputParameters validParams<SolidMaterialProperties>()
+template <>
+InputParameters
+validParams<SolidMaterialProperties>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addParam<FunctionName>("k", "Thermal conductivity");
@@ -16,8 +17,8 @@ InputParameters validParams<SolidMaterialProperties>()
   return params;
 }
 
-SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
+SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     ZeroInterface(parameters),
     _k(getFunction("k")),
     _Cp(getFunction("Cp")),
@@ -25,9 +26,7 @@ SolidMaterialProperties::SolidMaterialProperties(const InputParameters & paramet
 {
 }
 
-SolidMaterialProperties::~SolidMaterialProperties()
-{
-}
+SolidMaterialProperties::~SolidMaterialProperties() {}
 
 void
 SolidMaterialProperties::initialize()

@@ -14,8 +14,8 @@ enum EConvHeatTransGeom
 ///< Type of the end
 enum EEndType
 {
-  IN,                 ///< inlet
-  OUT                 ///< outlet
+  IN, ///< inlet
+  OUT ///< outlet
 };
 
 enum EValveStatusType
@@ -28,9 +28,9 @@ enum EValveStatusType
 
 enum EValveActionType
 {
-  VALVE_NO_ACTION = 0,    ///< maintaining current status
-  VALVE_TURNING_ON = 1,   ///< turning on the valve
-  VALVE_TURNING_OFF = -1  ///< turning off the valve
+  VALVE_NO_ACTION = 0,   ///< maintaining current status
+  VALVE_TURNING_ON = 1,  ///< turning on the valve
+  VALVE_TURNING_OFF = -1 ///< turning off the valve
 };
 
 enum ETHCouplingType
@@ -62,19 +62,18 @@ enum EHeatStructureType
 enum EClosuresType
 {
   CLOSURES_SIMPLE = 0,
-  CLOSURES_TRACE  = 1
+  CLOSURES_TRACE = 1
 };
-
 
 enum EFlowRegimeNamesType
 {
-  FR_DISPERSEDBUBBLE,   ///< Weight of DispersedBubble Correlations  PreCHF
-  FR_CAPSLUG,           ///< Weight of TaylorCap / Slug Flow
-  FR_ANNULARMIST,       ///< Weight of Annular Mist Correlations PreCHF
-  FR_STRATIFIED,        ///< Weight of Horiz Stratified Flow Exp PreCHF
-  FR_INVERTEDANNULAR,   ///< Weight of Inverted Annular Flow Correlations PostCHF
-  FR_INVERTEDSLUG,      ///< Weight of InvertedSlug Flow Correlations PostCHF
-  FR_DISPERSED          ///< Weight of Dispersed Flow Correlations PostCHF
+  FR_DISPERSEDBUBBLE, ///< Weight of DispersedBubble Correlations  PreCHF
+  FR_CAPSLUG,         ///< Weight of TaylorCap / Slug Flow
+  FR_ANNULARMIST,     ///< Weight of Annular Mist Correlations PreCHF
+  FR_STRATIFIED,      ///< Weight of Horiz Stratified Flow Exp PreCHF
+  FR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
+  FR_INVERTEDSLUG,    ///< Weight of InvertedSlug Flow Correlations PostCHF
+  FR_DISPERSED        ///< Weight of Dispersed Flow Correlations PostCHF
 };
 
 enum EWallDragFlowRegimeNamesType
@@ -91,11 +90,11 @@ enum EWallHeatTransferRegimeNamesType
   WHT_SINGLECONVECTION,   ///< Weight of Single Phase Forced Convection PreCHF
   WHT_TWOPHASECONVECTION, ///< Weight of Two Phase Forced Convection PreCHF
   WHT_FILMCONDENSATION,   ///< Weight of Film Condensation PreCHF
-  WHT_SUBCOOLED,         ///< Weight of Subcooled Nucleate boiling PreCHF
-  WHT_NUCLEATE,          ///< Weight of Stable Nucleate boiling PreCHF
-  WHT_TRANSITION,        ///< Weight of Transition Boiling PreCHF
-  WHT_INVERTEDANNULAR,   ///< Weight of Inverted Annular Flow Correlations PostCHF
-  WHT_DISPERSED          ///< Weight of Dispersed Flow Correlations PostCHF
+  WHT_SUBCOOLED,          ///< Weight of Subcooled Nucleate boiling PreCHF
+  WHT_NUCLEATE,           ///< Weight of Stable Nucleate boiling PreCHF
+  WHT_TRANSITION,         ///< Weight of Transition Boiling PreCHF
+  WHT_INVERTEDANNULAR,    ///< Weight of Inverted Annular Flow Correlations PostCHF
+  WHT_DISPERSED           ///< Weight of Dispersed Flow Correlations PostCHF
 };
 
 /**
@@ -104,8 +103,8 @@ enum EWallHeatTransferRegimeNamesType
 enum ECheckValveType
 {
   CHECK_VALVE_FLOW = 0,   ///< the type of check valve which closes by flow reversal
-  CHECK_VALVE_STATIC = 1,    ///< the type of check valve which closes by static differential pressure
-  CHECK_VALVE_DYNAMIC = 2  ///< the type of check valve which closes by dynamic differential pressure
+  CHECK_VALVE_STATIC = 1, ///< the type of check valve which closes by static differential pressure
+  CHECK_VALVE_DYNAMIC = 2 ///< the type of check valve which closes by dynamic differential pressure
 };
 }
 

@@ -16,8 +16,6 @@ namespace WallFriction
  * @param Dh Hydraulic diameter
  */
 Real Churchill(Real Re, Real roughness, Real Dh);
-
-
 }
 
 #endif /* WALLFRICTIONMODELS_H */

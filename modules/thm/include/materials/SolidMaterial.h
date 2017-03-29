@@ -7,7 +7,7 @@
 // Forward Declarations
 class SolidMaterial;
 
-template<>
+template <>
 InputParameters validParams<SolidMaterial>();
 
 /**

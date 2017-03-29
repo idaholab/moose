@@ -7,15 +7,13 @@
 
 class SolidMaterialProperties;
 
-template<>
+template <>
 InputParameters validParams<SolidMaterialProperties>();
 
 /**
  *
  */
-class SolidMaterialProperties :
-  public GeneralUserObject,
-  public ZeroInterface
+class SolidMaterialProperties : public GeneralUserObject, public ZeroInterface
 {
 public:
   SolidMaterialProperties(const InputParameters & parameters);
