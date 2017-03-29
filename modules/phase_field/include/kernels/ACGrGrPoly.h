@@ -16,9 +16,11 @@ template <>
 InputParameters validParams<ACGrGrPoly>();
 
 /**
- * This kernel calculates the residual and jacobian for grain growth for a two-phase or single phase,
+ * This kernel calculates the residual and jacobian for grain growth for a
+ * two-phase or single phase,
  * poly-crystal system. A single material property gamma_asymm is used for
- * the prefactor of the cross-terms between order parameters. Ratios are then used to define second-phase energy and mobility relative to parent-phase.
+ * the prefactor of the cross-terms between order parameters. Ratios are then
+ * used to define second-phase energy and mobility relative to parent-phase.
  */
 class ACGrGrPoly : public ACGrGrBase
 {
