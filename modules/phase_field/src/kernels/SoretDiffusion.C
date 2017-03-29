@@ -9,7 +9,6 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
-
 template <>
 InputParameters
 validParams<SoretDiffusion>()

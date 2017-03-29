@@ -25,7 +25,10 @@ class LayeredBase;
 class SubProblem;
 class UserObject;
 
-namespace libMesh { class Point; }
+namespace libMesh
+{
+class Point;
+}
 
 template <typename T>
 InputParameters validParams();

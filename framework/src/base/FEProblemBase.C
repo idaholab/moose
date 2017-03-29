@@ -89,11 +89,13 @@
 #include "libmesh/coupling_matrix.h"
 
 // Anonymous namespace for helper function
-namespace {
+namespace
+{
 /**
  * Method for sorting the MooseVariables based on variable numbers
  */
-bool sortMooseVariables(MooseVariable * a, MooseVariable * b)
+bool
+sortMooseVariables(MooseVariable * a, MooseVariable * b)
 {
   return a->number() < b->number();
 }

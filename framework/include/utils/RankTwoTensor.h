@@ -23,7 +23,7 @@
 class RankTwoTensor;
 class RankFourTensor;
 
-template<typename T>
+template <typename T>
 void mooseSetToZero(T & v);
 
 /**

@@ -23,15 +23,17 @@ class InputParameters;
 class SamplerBase;
 class VectorPostprocessor;
 
-namespace libMesh {
-  class Point;
+namespace libMesh
+{
+class Point;
 
-  namespace Parallel {
-    class Communicator;
-  }
+namespace Parallel
+{
+class Communicator;
+}
 }
 
-template<typename T>
+template <typename T>
 InputParameters validParams();
 
 template <>

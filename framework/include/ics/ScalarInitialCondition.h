@@ -27,7 +27,11 @@ class SystemBase;
 class Assembly;
 class MooseVariableScalar;
 
-namespace libMesh { template <typename T> class DenseVector; }
+namespace libMesh
+{
+template <typename T>
+class DenseVector;
+}
 
 template <>
 InputParameters validParams<ScalarInitialCondition>();

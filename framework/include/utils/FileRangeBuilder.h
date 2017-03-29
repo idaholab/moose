@@ -15,7 +15,7 @@
 class FileRangeBuilder;
 class InputParameters;
 
-template<typename T>
+template <typename T>
 InputParameters validParams();
 
 /**

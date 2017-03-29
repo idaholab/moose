@@ -17,7 +17,10 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-namespace libMesh { class LinearImplicitSystem; }
+namespace libMesh
+{
+class LinearImplicitSystem;
+}
 
 class MultiAppProjectionTransfer;
 

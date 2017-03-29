@@ -1255,24 +1255,22 @@ InputParameters::getParamHelper(const std::string & name, const InputParameters 
 // implementation, but the definition will be in InputParameters.C so
 // we won't need to bring in *MooseEnum header files here.
 template <>
-const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                           const InputParameters & pars,
-                                           const MooseEnum*);
+const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name,
+                                                             const InputParameters & pars,
+                                                             const MooseEnum *);
 
 template <>
-const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum*);
+const MultiMooseEnum & InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                                       const InputParameters & pars,
+                                                                       const MultiMooseEnum *);
 
 template <typename T>
 const std::vector<T> &
 InputParameters::getParamHelper(const std::string & name,
                                 const InputParameters & pars,
-                                const std::vector<T>*)
+                                const std::vector<T> *)
 {
-  return pars.get<std::vector<T> >(name);
+  return pars.get<std::vector<T>>(name);
 }
 
 InputParameters emptyInputParameters();

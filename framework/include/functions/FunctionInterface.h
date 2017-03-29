@@ -25,7 +25,7 @@ class Function;
 class InputParameters;
 class MooseObject;
 
-template<typename T>
+template <typename T>
 InputParameters validParams();
 
 template <>
