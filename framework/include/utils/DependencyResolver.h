@@ -179,11 +179,9 @@ void
 DependencyResolver<T>::insertDependency(const T & key, const T & value)
 {
   _depends.insert(std::make_pair(key, value));
-  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) ==
-      _ordering_vector.end())
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
     _ordering_vector.push_back(key);
-  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) ==
-      _ordering_vector.end())
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
     _ordering_vector.push_back(value);
 }
 
@@ -192,8 +190,7 @@ void
 DependencyResolver<T>::addItem(const T & value)
 {
   _independent_items.push_back(value);
-  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) ==
-      _ordering_vector.end())
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
     _ordering_vector.push_back(value);
 }
 
@@ -209,8 +206,8 @@ DependencyResolver<T>::getSortedValuesSets()
    * 1) we will remove values from the map
    * 2) We need the copy to be sorted in an unambiguous order.
    */
-  typedef std::multimap<T, T, DependencyResolverComparator<T> > dep_multimap;
-  dep_multimap depends (_depends.begin(), _depends.end(), comp);
+  typedef std::multimap<T, T, DependencyResolverComparator<T>> dep_multimap;
+  dep_multimap depends(_depends.begin(), _depends.end(), comp);
 
   // Build up a set of all keys in depends that have nothing depending on them,
   // and put it in the nodepends set.  These are the leaves of the dependency tree.

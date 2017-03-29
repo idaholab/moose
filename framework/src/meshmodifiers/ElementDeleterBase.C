@@ -53,21 +53,20 @@ ElementDeleterBase::modify()
       deleteable_elems.insert(elem);
   }
 
-  /**
-   * If we are in parallel we'd better have a consistent idea of what
-   * should be deleted.  This can't be checked cheaply.
-   */
+/**
+ * If we are in parallel we'd better have a consistent idea of what
+ * should be deleted.  This can't be checked cheaply.
+ */
 #ifdef DEBUG
   dof_id_type pmax_elem_id = mesh.max_elem_id();
   mesh.comm().max(pmax_elem_id);
 
-  for (dof_id_type i=0; i != pmax_elem_id; ++i)
+  for (dof_id_type i = 0; i != pmax_elem_id; ++i)
   {
-    Elem *elem = mesh.query_elem_ptr(i);
+    Elem * elem = mesh.query_elem_ptr(i);
     bool is_deleteable = elem && deleteable_elems.count(elem);
 
-    libmesh_assert(mesh.comm().semiverify
-      (elem ? &is_deleteable : libmesh_nullptr));
+    libmesh_assert(mesh.comm().semiverify(elem ? &is_deleteable : libmesh_nullptr));
   }
 #endif
 
