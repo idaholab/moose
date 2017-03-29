@@ -6,7 +6,7 @@
 
 class OneDMomentumFlux;
 
-template<>
+template <>
 InputParameters validParams<OneDMomentumFlux>();
 
 /**

@@ -1,7 +1,8 @@
 #include "OneDMomentumFlux.h"
 
-template<>
-InputParameters validParams<OneDMomentumFlux>()
+template <>
+InputParameters
+validParams<OneDMomentumFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("alpha", 1.0, "Volume fraction");
@@ -16,16 +17,17 @@ InputParameters validParams<OneDMomentumFlux>()
   return params;
 }
 
-OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters) :
-    DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
+  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _alpha(coupledValue("alpha")),
     _u_vel(coupledValue("u")),
     _pressure(getMaterialProperty<Real>("pressure")),
-    _dp_darhoA (getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
-    _dp_darhoEA(isCoupled("rhoEA") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoEA") : NULL),
+    _dp_darhoEA(isCoupled("rhoEA") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoEA")
+                                   : NULL),
     _area(coupledValue("area")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint),
@@ -37,9 +39,7 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters) :
 {
 }
 
-OneDMomentumFlux::~OneDMomentumFlux()
-{
-}
+OneDMomentumFlux::~OneDMomentumFlux() {}
 
 Real
 OneDMomentumFlux::computeQpResidual()
@@ -48,7 +48,6 @@ OneDMomentumFlux::computeQpResidual()
   // The contribution due to the convective flux.  Negative sign on
   // the F2 term comes from integration by parts.
   return -F2 * _grad_test[_i][_qp](0);
-
 }
 
 Real
@@ -69,7 +68,8 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
     // (2,1) entry of flux Jacobian is the same as the constant area case, p_0 - u^2
     Real A21 = _alpha[_qp] * _dp_darhoA[_qp] * _area[_qp] - _u_vel[_qp] * _u_vel[_qp];
 
-    // The contribution from the convective flux term.  Negative sign comes from integration by parts.
+    // The contribution from the convective flux term.  Negative sign comes from integration by
+    // parts.
     return -A21 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _rhoEA_var_number)
@@ -82,7 +82,8 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _beta_var_number)
   {
-    return -(_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp]) * _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -(_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp]) *
+           _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else
     return 0.;

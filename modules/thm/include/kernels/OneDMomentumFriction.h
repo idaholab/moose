@@ -7,7 +7,7 @@
 // Forward Declarations
 class OneDMomentumFriction;
 
-template<>
+template <>
 InputParameters validParams<OneDMomentumFriction>();
 
 /**
