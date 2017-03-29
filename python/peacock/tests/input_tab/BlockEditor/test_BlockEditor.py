@@ -31,7 +31,7 @@ class Tests(Testing.PeacockTester):
 
     def newWidget(self, path):
         b = self.tree.getBlockInfo(path)
-        e = BlockEditor(b)
+        e = BlockEditor(b, self.tree.app_info.type_to_block_map)
         e.needBlockList.connect(lambda paths: self.needBlockList(e, paths))
         e.removeBlock.connect(self.removeBlock)
         e.cloneBlock.connect(self.cloneBlock)
@@ -104,7 +104,7 @@ class Tests(Testing.PeacockTester):
     def testBlockComments(self):
         b = BlockInfo(None, "/Foo", True, "")
         c = "some comments"
-        e = BlockEditor(b)
+        e = BlockEditor(b, self.tree.app_info.type_to_block_map)
         self.checkWidget(e)
         self.assertEqual(b.comments, "")
         e.comment_edit.setComments(c)
@@ -128,7 +128,7 @@ class Tests(Testing.PeacockTester):
 
     def testUserParams(self):
         b = BlockInfo(None, "/Foo", True, "")
-        e = BlockEditor(b)
+        e = BlockEditor(b, self.tree.app_info.type_to_block_map)
         self.checkWidget(e)
         self.assertEqual(len(b.parameters_list), 0)
         e.addUserParamPressed()

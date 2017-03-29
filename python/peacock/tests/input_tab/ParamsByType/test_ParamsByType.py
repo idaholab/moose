@@ -26,7 +26,7 @@ class Tests(Testing.PeacockTester):
             w.setWatchedBlockList(b, self.block_children)
 
     def createWidget(self, block, name="myname", user_params=True):
-        t = ParamsByType(block)
+        t = ParamsByType(block, {})
         t.resize(480, 480)
         t.needBlockList.connect(lambda paths: self.needBlockList(t, paths))
         if block:
@@ -101,7 +101,7 @@ class Tests(Testing.PeacockTester):
 
         # had a problem where after we created a user param it
         # wasn't showing up in a new widget
-        t = ParamsByType(t.block)
+        t = ParamsByType(t.block, {})
         self.assertEqual(t.block.blockType(), "type_2")
         self.assertEqual(t.combo.currentText(), "type_2")
         self.assertNotEqual(t.getTable().findTable("Main").findRow("foo"), -1)

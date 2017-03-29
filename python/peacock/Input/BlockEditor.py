@@ -32,7 +32,7 @@ class BlockEditor(QWidget, MooseWidget):
     removeBlock = pyqtSignal(object) # block to remove
     editingFinished = pyqtSignal()
 
-    def __init__(self, block, **kwds):
+    def __init__(self, block, type_to_block_map, **kwds):
         """
         Sets up an editor for a block.
         Input:
@@ -53,11 +53,11 @@ class BlockEditor(QWidget, MooseWidget):
         self.setWindowTitle(block.path)
 
         if block.types:
-            self.param_editor = ParamsByType(block)
+            self.param_editor = ParamsByType(block, type_to_block_map)
         elif block.parameters:
-            self.param_editor = ParamsByGroup(block, block.orderedParameters())
+            self.param_editor = ParamsByGroup(block, block.orderedParameters(), type_to_block_map)
         else:
-            self.param_editor = ParamsTable(block, block.orderedParameters())
+            self.param_editor = ParamsTable(block, block.orderedParameters(), type_to_block_map)
 
         self.param_editor.needBlockList.connect(self.needBlockList)
         self.param_editor.changed.connect(self._blockChanged)
@@ -204,12 +204,12 @@ if __name__ == "__main__":
     qapp = QApplication(sys.argv)
     main_win = QMainWindow()
     exe_info = ExecutableInfo()
-    #exe_info.clearCache()
+    exe_info.clearCache()
     exe_info.setPath(sys.argv[1])
     tree = InputTree(exe_info)
     tree.setInputFile(sys.argv[2])
     b = tree.getBlockInfo(sys.argv[3])
-    w = BlockEditor(b)
+    w = BlockEditor(b, tree.app_info.type_to_block_map)
     main_win.setCentralWidget(w)
     main_win.show()
     main_win.resize(640, 480)

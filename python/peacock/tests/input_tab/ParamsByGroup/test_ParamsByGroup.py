@@ -29,7 +29,8 @@ class Tests(Testing.PeacockTester):
         b = BlockInfo(None, "/Foo")
         for p in params:
             b.addParameter(p)
-        t = ParamsByGroup(b, params)
+        tmap = {"VariableName": ["/Variables"]}
+        t = ParamsByGroup(b, params, tmap)
         t.resize(480, 480)
         t.addName("some name")
         t.addUserParam("user_param")
@@ -61,7 +62,7 @@ class Tests(Testing.PeacockTester):
 
     def testEmpty(self):
         b = BlockInfo(None, "/Foo")
-        t = ParamsByGroup(b, [])
+        t = ParamsByGroup(b, [], {})
         t.needBlockList.connect(lambda paths: self.needBlockList(t, paths))
         self.assertEqual(t.count(), 0)
         t.setWatchedBlockList(t.count(), [])

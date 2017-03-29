@@ -52,7 +52,7 @@ class InputFileEditor(QWidget, MooseWidget):
             return
 
         self.block_tree.blockSignals(True)
-        self.block_editor = BlockEditor(block, parent=self)
+        self.block_editor = BlockEditor(block, self.tree.app_info.type_to_block_map, parent=self)
         self.block_editor.needBlockList.connect(self.onNeedBlockList)
         self.block_editor.blockChanged.connect(lambda block: self.blockChanged.emit(block, self.tree))
         self.block_editor.blockRenamed.connect(self.block_tree.renameBlock)
