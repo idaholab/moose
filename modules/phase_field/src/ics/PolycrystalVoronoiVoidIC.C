@@ -33,10 +33,11 @@ validParams<PolycrystalVoronoiVoidIC>()
   params.addRequiredParam<MooseEnum>("structure_type",
                                      structure_options,
                                      "Which structure type is being initialized, grains or voids");
-  params.addParam<unsigned int>(
-      "op_index",
-      0,
-      "The index for the current order parameter, not needed if structure_type = voids");
+  params.addParam<unsigned int>("op_index",
+                                0,
+                                "The index for the current "
+                                "order parameter, not needed if "
+                                "structure_type = voids");
   return params;
 }
 
@@ -50,12 +51,14 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
     _columnar_3D(getParam<bool>("columnar_3D"))
 {
   if (_invalue < _outvalue)
-    mooseError(
-        "PolycrystalVoronoiVoidIC requires that the voids be represented with invalue > outvalue");
+    mooseError("PolycrystalVoronoiVoidIC requires that the voids be "
+               "represented with invalue > outvalue");
   if (_numbub == 0)
-    mooseError("PolycrystalVoronoiVoidIC requires numbub > 0. If you want no voids to be "
+    mooseError("PolycrystalVoronoiVoidIC requires numbub > 0. If you want no voids to "
+               "be "
                "represented, use invalue = outvalue. In general, you should use "
-               "PolycrystalReducedIC to represent Voronoi grain structures without voids.");
+               "PolycrystalReducedIC to represent Voronoi grain structures without "
+               "voids.");
 }
 
 void
@@ -76,7 +79,8 @@ PolycrystalVoronoiVoidIC::initialSetup()
   // Create _centerpoints and _assigned_op vectors
   computeGrainCenters();
 
-  // Call initial setup from MultiSmoothCircleIC to create _centers and _radii for voids
+  // Call initial setup from MultiSmoothCircleIC to create _centers and _radii
+  // for voids
   MultiSmoothCircleIC::initialSetup();
 }
 
@@ -97,14 +101,16 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       num_tries++;
 
       if (num_tries > _max_num_tries)
-        mooseError("Too many tries of assigning void centers in PolycrystalVoronoiVoidIC");
+        mooseError("Too many tries of assigning void centers in "
+                   "PolycrystalVoronoiVoidIC");
 
       Point rand_point;
 
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         rand_point(i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
 
-      // Allow the vectors to be sorted based on their distance from the rand_point
+      // Allow the vectors to be sorted based on their distance from the
+      // rand_point
       std::vector<PolycrystalVoronoiVoidIC::DistancePoint> diff(_grain_num);
 
       for (unsigned int gr = 0; gr < _grain_num; ++gr)
@@ -118,7 +124,8 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       Point closest_point = _centerpoints[diff[0].gr];
       Point next_closest_point = _centerpoints[diff[1].gr];
 
-      // Find Slope of Line in the plane orthogonal to the diff_centerpoint vector
+      // Find Slope of Line in the plane orthogonal to the diff_centerpoint
+      // vector
       Point diff_centerpoints =
           _mesh.minPeriodicVector(_var.number(), closest_point, next_closest_point);
       Point diff_rand_center = _mesh.minPeriodicVector(_var.number(), closest_point, rand_point);
@@ -152,7 +159,8 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
           try_again = true;
       }
 
-      // Two algorithms are available for screening bubbles falling in grain interior. They produce
+      // Two algorithms are available for screening bubbles falling in grain
+      // interior. They produce
       // nearly identical results.
       // Here only one is listed. The other one is available upon request.
 
@@ -245,7 +253,8 @@ PolycrystalVoronoiVoidIC::grainValueCalc(const Point & p)
   unsigned int min_index =
       PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.norm());
 
-  // If the current order parameter index (_op_index) is equal to the min_index, set the value to
+  // If the current order parameter index (_op_index) is equal to the min_index,
+  // set the value to
   // 1.0
   if (_assigned_op[min_index] == _op_index)
     val = 1.0;
@@ -263,14 +272,16 @@ void
 PolycrystalVoronoiVoidIC::computeGrainCenters()
 {
   if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalVoronoiVoidIC: Number of order parameters (op_num) can't be "
+    mooseError("ERROR in PolycrystalVoronoiVoidIC: Number of order parameters "
+               "(op_num) can't be "
                "larger than the number of grains (grain_num)");
 
   // Initialize vectors
   _centerpoints.resize(_grain_num);
   _assigned_op.resize(_grain_num);
 
-  // Randomly generate the centers of the individual grains represented by the Voronoi tessellation
+  // Randomly generate the centers of the individual grains represented by the
+  // Voronoi tessellation
   for (unsigned int grain = 0; grain < _grain_num; grain++)
   {
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -280,6 +291,7 @@ PolycrystalVoronoiVoidIC::computeGrainCenters()
       _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
   }
 
-  // Assign grains to specific order parameters in a way that maximizes the distance
+  // Assign grains to specific order parameters in a way that maximizes the
+  // distance
   _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
 }

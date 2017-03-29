@@ -14,14 +14,14 @@
 // Forward Declarationsc
 class PolycrystalVoronoiVoidIC;
 
-template<>
+template <>
 InputParameters validParams<PolycrystalVoronoiVoidIC>();
 
 /**
- * PolycrystalVoronoiVoidIC initializes either grain or void values for a voronoi tesselation with voids distributed along the grain boundaries.
+ * PolycrystalVoronoiVoidIC initializes either grain or void values for a
+ * voronoi tesselation with voids distributed along the grain boundaries.
  */
-class PolycrystalVoronoiVoidIC :
-  public MultiSmoothCircleIC
+class PolycrystalVoronoiVoidIC : public MultiSmoothCircleIC
 {
 public:
   PolycrystalVoronoiVoidIC(const InputParameters & parameters);
@@ -62,11 +62,8 @@ protected:
   /// Sorts the temp_centerpoints into order of magnitude
   struct DistancePointComparator
   {
-    bool operator () (const DistancePoint & a, const DistancePoint & b)
-      {
-        return a.d < b.d;
-      }
+    bool operator()(const DistancePoint & a, const DistancePoint & b) { return a.d < b.d; }
   } _customLess;
 };
 
-#endif //POLYCRYSTALVORONOIVOIDIC_H
+#endif // POLYCRYSTALVORONOIVOIDIC_H
