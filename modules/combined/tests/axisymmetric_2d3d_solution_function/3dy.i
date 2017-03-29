@@ -4,11 +4,11 @@
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = 3dy.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -177,31 +177,23 @@
   [../]
 []
 
-#[Preconditioning]
-#  [./SMP]
-#    type = SMP
-#    full = true
-#  [../]
-#[]
-
 [Executioner]
+  type = Transient
+  solve_type = 'PJFNK'
 
- solve_type = 'PJFNK'
+  petsc_options = '-ksp_snes_ew'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = ' 201                hypre    boomeramg      4'
+  line_search = 'none'
+  l_max_its = 25
+  nl_max_its = 20
+  nl_rel_tol = 1e-10
+  l_tol = 1e-2
 
-   type = Transient
-   petsc_options = '-ksp_snes_ew'
-   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-   petsc_options_value = ' 201                hypre    boomeramg      4'
-   line_search = 'none'
-   l_max_its = 25
-   nl_max_its = 20
-   nl_rel_tol = 1e-10
-   l_tol = 1e-2
-
-   start_time = 0.0
-   dt = 1
-   end_time = 1
-   dtmin = 1
+  start_time = 0.0
+  dt = 1
+  end_time = 1
+  dtmin = 1
 []
 
 [Outputs]

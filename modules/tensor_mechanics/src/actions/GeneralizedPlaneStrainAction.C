@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "GeneralizedPlaneStrainAction.h"
-
 #include "FEProblem.h"
 #include "Conversion.h"
 #include "MooseMesh.h"
@@ -77,7 +76,7 @@ GeneralizedPlaneStrainAction::act()
       _problem->addKernel(k_type, k_name, params);
     }
 
-    // add temperature kernel only if temperature is a nonlinear variable (and not an axuvariable)
+    // add temperature kernel only if temperature is a nonlinear variable (and not an auxvariable)
     if (isParamValid("temperature") &&
         _problem->getNonlinearSystemBase().hasVariable("temperature"))
     {

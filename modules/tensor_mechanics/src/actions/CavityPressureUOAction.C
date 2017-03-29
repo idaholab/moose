@@ -5,10 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "CavityPressureUOAction.h"
-
 #include "Factory.h"
 #include "FEProblem.h"
-#include "Parser.h"
 
 template <>
 InputParameters
