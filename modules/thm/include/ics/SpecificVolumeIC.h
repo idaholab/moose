@@ -5,7 +5,7 @@
 
 class SpecificVolumeIC;
 
-template<>
+template <>
 InputParameters validParams<SpecificVolumeIC>();
 
 /**
@@ -24,6 +24,5 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
 
 #endif /* SPECIFICVOLUMEIC_H */

@@ -5,7 +5,7 @@
 
 class SpecificInternalEnergyIC;
 
-template<>
+template <>
 InputParameters validParams<SpecificInternalEnergyIC>();
 
 /**
@@ -24,6 +24,5 @@ protected:
   const VariableValue & _rhou;
   const VariableValue & _rhoE;
 };
-
 
 #endif /* SPECIFICINTERNALENERGYIC_H */

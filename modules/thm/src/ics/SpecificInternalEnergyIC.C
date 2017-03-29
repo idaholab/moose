@@ -1,7 +1,8 @@
 #include "SpecificInternalEnergyIC.h"
 
-template<>
-InputParameters validParams<SpecificInternalEnergyIC>()
+template <>
+InputParameters
+validParams<SpecificInternalEnergyIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
@@ -10,17 +11,15 @@ InputParameters validParams<SpecificInternalEnergyIC>()
   return params;
 }
 
-SpecificInternalEnergyIC::SpecificInternalEnergyIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+SpecificInternalEnergyIC::SpecificInternalEnergyIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _rho(coupledValue("rhoA")),
     _rhou(coupledValue("rhouA")),
     _rhoE(coupledValue("rhoEA"))
 {
 }
 
-SpecificInternalEnergyIC::~SpecificInternalEnergyIC()
-{
-}
+SpecificInternalEnergyIC::~SpecificInternalEnergyIC() {}
 
 Real
 SpecificInternalEnergyIC::value(const Point & /*p*/)
