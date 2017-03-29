@@ -561,7 +561,7 @@ public:
    *   (1) A local parameter must exist with the same name as common parameter
    *   (2) Common parameter must valid
    *   (3) Local parameter must be invalid OR not have been set from its default
-   *   (4) Neither may be private
+   *   (4) Both cannot be private
    *
    * Output objects have a set of common parameters that are passed
    * down to each of the output objects created. This method is used for
@@ -571,6 +571,51 @@ public:
    */
   void applyParameters(const InputParameters & common,
                        std::vector<std::string> exclude = std::vector<std::string>());
+
+  /**
+   * Method for applying common parameters
+   * @param common The set of parameters to apply to the parameters stored in this object
+   * @param include A vector of parameters to apply
+   *
+   * In order to apply common parameter 4 statements must be satisfied
+   *   (1) A local parameter must exist with the same name as common parameter
+   *   (2) Common parameter must valid
+   *   (3) Local parameter must be invalid OR not have been set from its default
+   *   (4) Both cannot be private
+   *
+   * Output objects have a set of common parameters that are passed
+   * down to each of the output objects created. This method is used for
+   * applying those common parameters.
+   *
+   * @see CommonOutputAction AddOutputAction
+   */
+  void applySpecificParameters(const InputParameters & common,
+                               const std::vector<std::string> & include);
+
+  /**
+   * Apply values from a single parameter in common, to a single parameter stored in this object
+   * @param common The set of InputParameters from which to extract parameters from
+   * @param common_name The name within common from which to get the parameter values
+   *
+   * In order to apply common parameter 4 statements must be satisfied
+   *   (1) A local parameter must exist with the same name as common parameter
+   *   (2) Common parameter must valid
+   *   (3) Local parameter must be invalid OR not have been set from its default
+   *   (4) Both cannot be private
+   */
+  void applyParameter(const InputParameters & common, const std::string & common_name);
+
+  /**
+   * Apply properties of a single coupled variable in common, to a single coupled variable stored in
+   * this object
+   * @param common The set of InputParameters from which to extract the coupled variable's
+   * properties
+   * @param var_name The name of the coupled variable whose properties are to be applied
+   *
+   * In order to apply the properties, both the local parameters and the common parameters must
+   * have a coupled variable with name var_name
+   */
+  void applyCoupledVar(const InputParameters & common, const std::string & var_name);
 
   /**
    * Deprecated method.  Use isParamSetByUser() instead.

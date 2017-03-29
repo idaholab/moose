@@ -628,10 +628,6 @@ void
 InputParameters::applyParameters(const InputParameters & common,
                                  const std::vector<std::string> exclude)
 {
-  // Disable the display of deprecated message when applying common parameters, this avoids a dump
-  // of messages
-  _show_deprecated_message = false;
-
   // Loop through the common parameters
   for (const auto & it : common)
   {
@@ -642,29 +638,7 @@ InputParameters::applyParameters(const InputParameters & common,
     if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
       continue;
 
-    // Extract the properties from the local parameter for the current common parameter name
-    bool local_exist = _values.find(common_name) != _values.end();
-    bool local_set = _set_by_add_param.find(common_name) == _set_by_add_param.end();
-    bool local_priv = isPrivate(common_name);
-    bool local_valid = isParamValid(common_name);
-
-    // Extract the properties from the common parameter
-    bool common_valid = common.isParamValid(common_name);
-    bool common_priv = common.isPrivate(common_name);
-
-    /* In order to apply common parameter 4 statements must be satisfied
-     * (1) A local parameter must exist with the same name as common parameter
-     * (2) Common parameter must valid
-     * (3) Local parameter must be invalid OR not have been set from its default
-     * (4) Neither may be private
-     */
-    if (local_exist && common_valid && (!local_valid || !local_set) &&
-        (!common_priv || !local_priv))
-    {
-      delete _values[common_name];
-      _values[common_name] = it.second->clone();
-      set_attributes(common_name, false);
-    }
+    applyParameter(common, common_name);
   }
 
   // Loop through the coupled variables
@@ -679,16 +653,94 @@ InputParameters::applyParameters(const InputParameters & common,
     if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
       continue;
 
-    // If the local parameters has a coupled variable, populate it with the value from the common
-    // parameters
-    if (hasCoupledValue(var_name))
-    {
-      if (common.hasDefaultCoupledValue(var_name))
-        addCoupledVar(
-            var_name, common.defaultCoupledValue(var_name), common.getDocString(var_name));
-      else
-        addCoupledVar(var_name, common.getDocString(var_name));
-    }
+    applyCoupledVar(common, var_name);
+  }
+}
+
+void
+InputParameters::applySpecificParameters(const InputParameters & common,
+                                         const std::vector<std::string> & include)
+{
+  // Loop through the common parameters
+  for (const auto & it : common)
+  {
+    // Common parameter name
+    const std::string & common_name = it.first;
+
+    // Continue to next parameter, if the current is not in list of included parameters
+    if (std::find(include.begin(), include.end(), common_name) == include.end())
+      continue;
+
+    applyParameter(common, common_name);
+  }
+
+  // Loop through the coupled variables
+  for (std::set<std::string>::const_iterator it = common.coupledVarsBegin();
+       it != common.coupledVarsEnd();
+       ++it)
+  {
+    // Variable name
+    const std::string var_name = *it;
+
+    // Continue to next variable, if the current is not in list of included parameters
+    if (std::find(include.begin(), include.end(), var_name) == include.end())
+      continue;
+
+    applyCoupledVar(common, var_name);
+  }
+}
+
+void
+InputParameters::applyCoupledVar(const InputParameters & common, const std::string & var_name)
+{
+  // Disable the display of deprecated message when applying common parameters, this avoids a dump
+  // of messages
+  _show_deprecated_message = false;
+
+  // If the local parameters has a coupled variable, populate it with the value from the common
+  // parameters, if the common parameters has the coupled variable too
+  if (hasCoupledValue(var_name))
+  {
+    if (common.hasDefaultCoupledValue(var_name))
+      addCoupledVar(var_name, common.defaultCoupledValue(var_name), common.getDocString(var_name));
+    else if (common.hasCoupledValue(var_name))
+      addCoupledVar(var_name, common.getDocString(var_name));
+  }
+
+  // Enable deprecated message printing
+  _show_deprecated_message = true;
+}
+
+void
+InputParameters::applyParameter(const InputParameters & common, const std::string & common_name)
+{
+  // Disable the display of deprecated message when applying common parameters, this avoids a dump
+  // of messages
+  _show_deprecated_message = false;
+
+  // Extract the properties from the local parameter for the current common parameter name
+  const bool local_exist = _values.find(common_name) != _values.end();
+  const bool local_set = _set_by_add_param.find(common_name) == _set_by_add_param.end();
+  const bool local_priv = isPrivate(common_name);
+  const bool local_valid = isParamValid(common_name);
+
+  // Extract the properties from the common parameter
+  const bool common_exist = common._values.find(common_name) != common._values.end();
+  const bool common_priv = common.isPrivate(common_name);
+  const bool common_valid = common.isParamValid(common_name);
+
+  /* In order to apply common parameter 4 statements must be satisfied
+   * (1) A local parameter must exist with the same name as common parameter
+   * (2) Common parameter must valid and exist
+   * (3) Local parameter must be invalid OR not have been set from its default
+   * (4) Both cannot be private
+   */
+  if (local_exist && common_exist && common_valid && (!local_valid || !local_set) &&
+      (!common_priv || !local_priv))
+  {
+    delete _values[common_name];
+    _values[common_name] = common._values.find(common_name)->second->clone();
+    set_attributes(common_name, false);
   }
 
   // Enable deprecated message printing
