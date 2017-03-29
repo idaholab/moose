@@ -27,11 +27,11 @@
 // Forward Declarations
 namespace libMesh
 {
-  class Elem;
-  namespace Parallel
-  {
-    class Communicator;
-  }
+class Elem;
+namespace Parallel
+{
+class Communicator;
+}
 }
 
 namespace MooseUtils

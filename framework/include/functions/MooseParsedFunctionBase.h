@@ -28,7 +28,7 @@ class InputParameters;
 class MooseParsedFunctionBase;
 class MooseParsedFunctionWrapper;
 
-template<typename T>
+template <typename T>
 InputParameters validParams();
 
 /**

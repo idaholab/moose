@@ -14,8 +14,9 @@
 class MooseEnum;
 class RankTwoTensor;
 
-namespace libMesh {
-  class Point;
+namespace libMesh
+{
+class Point;
 }
 
 namespace RankTwoScalarTools

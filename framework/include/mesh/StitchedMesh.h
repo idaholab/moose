@@ -20,7 +20,10 @@
 // Forward declarations
 class StitchedMesh;
 
-namespace libMesh { class ReplicatedMesh; }
+namespace libMesh
+{
+class ReplicatedMesh;
+}
 
 template <>
 InputParameters validParams<StitchedMesh>();

@@ -29,7 +29,7 @@ class SamplerBase;
 class VectorPostprocessor;
 class VectorPostprocessorData;
 
-template<typename T>
+template <typename T>
 InputParameters validParams();
 
 template <>

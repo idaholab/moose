@@ -27,7 +27,7 @@
 class FunctionParserUtils;
 class InputParameters;
 
-template<typename T>
+template <typename T>
 InputParameters validParams();
 
 template <>
