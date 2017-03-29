@@ -5,7 +5,7 @@
 
 class HeatExchangeCoefficientPartitioning;
 
-template<>
+template <>
 InputParameters validParams<HeatExchangeCoefficientPartitioning>();
 
 /**
@@ -17,9 +17,9 @@ public:
   HeatExchangeCoefficientPartitioning(const InputParameters & parameters);
   virtual ~HeatExchangeCoefficientPartitioning();
 
-  virtual void execute() {};
-  virtual void initialize() {};
-  virtual void finalize() {};
+  virtual void execute(){};
+  virtual void initialize(){};
+  virtual void finalize(){};
 
   virtual Real getPartition(Real alpha_liquid, Real dalpha_liquid_dt) const;
   virtual Real getPartitionDer(Real alpha_liquid, Real dalpha_liquid_dt, Real area) const;
@@ -30,6 +30,5 @@ protected:
   /// Lower cut-off limit
   Real _upper;
 };
-
 
 #endif /* HEATEXCHANGECOEFFICIENTPARTITIONING_H */
