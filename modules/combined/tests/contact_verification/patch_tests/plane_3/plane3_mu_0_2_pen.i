@@ -2,11 +2,11 @@
   order = SECOND
   family = LAGRANGE
   volumetric_locking_correction = true
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = plane3_mesh.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -66,7 +66,6 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-    displacements = 'disp_x disp_y'
     save_in = 'saved_x saved_y'
   [../]
 []
@@ -255,7 +254,6 @@
   [../]
   [./bot_strain]
     type = ComputeIncrementalSmallStrain
-    displacements = 'disp_x disp_y'
     block = '1'
   [../]
   [./bot_stress]
@@ -270,7 +268,6 @@
   [../]
   [./top_strain]
     type = ComputeIncrementalSmallStrain
-    displacements = 'disp_x disp_y'
     block = '2'
   [../]
   [./top_stress]
@@ -281,8 +278,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -299,7 +294,6 @@
   num_steps = 10
   dtmin = 1.0
   l_tol = 1e-3
-
 []
 
 [VectorPostprocessors]
@@ -345,10 +339,7 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 4
-    order = SECOND
     system = constraint
     model = coulomb
     formulation = penalty

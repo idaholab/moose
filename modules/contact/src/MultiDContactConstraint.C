@@ -51,24 +51,36 @@ MultiDContactConstraint::MultiDContactConstraint(const InputParameters & paramet
     _residual_copy(_sys.residualGhosted()),
     _jacobian_update(getParam<bool>("jacobian_update")),
     _component(getParam<unsigned int>("component")),
-    _model(contactModel(getParam<std::string>("model"))),
+    _model(ContactMaster::contactModel(getParam<std::string>("model"))),
     _penalty(getParam<Real>("penalty")),
-    _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
-    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
-    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
     _mesh_dimension(_mesh.dimension()),
-    _vars(_x_var, _y_var, _z_var)
+    _vars(3, libMesh::invalid_uint)
 {
   _overwrite_slave_residual = false;
+
+  if (isParamValid("displacements"))
+  {
+    // modern parameter scheme for displacements
+    for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+      _vars[i] = coupled("displacements", i);
+  }
+  else
+  {
+    // Legacy parameter scheme for displacements
+    if (isParamValid("disp_x"))
+      _vars[0] = coupled("disp_x");
+    if (isParamValid("disp_y"))
+      _vars[1] = coupled("disp_y");
+    if (isParamValid("disp_z"))
+      _vars[2] = coupled("disp_z");
+  }
 }
 
 void
 MultiDContactConstraint::timestepSetup()
 {
   if (_component == 0)
-  {
     updateContactSet();
-  }
 }
 
 void
@@ -81,44 +93,38 @@ MultiDContactConstraint::jacobianSetup()
 void
 MultiDContactConstraint::updateContactSet()
 {
-  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
+  auto & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<dof_id_type, PenetrationInfo *>::iterator
-      it = _penetration_locator._penetration_info.begin(),
-      end = _penetration_locator._penetration_info.end();
-
-  for (; it != end; ++it)
+  for (auto & pinfo_pair : _penetration_locator._penetration_info)
   {
-    PenetrationInfo * pinfo = it->second;
+    PenetrationInfo * pinfo = pinfo_pair.second;
 
     // Skip this pinfo if there are no DOFs on this node.
-    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1)
+    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
     const Node * node = pinfo->_node;
 
-    dof_id_type slave_node_num = it->first;
-    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
+    dof_id_type slave_node_num = pinfo_pair.first;
+    auto hpit = has_penetrated.find(slave_node_num);
 
     RealVectorValue res_vec;
     // Build up residual vector
     for (unsigned int i = 0; i < _mesh_dimension; ++i)
     {
-      dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
+      dof_id_type dof_number = node->dof_number(0, _vars[i], 0);
       res_vec(i) = _residual_copy(dof_number);
     }
 
-    //    Real resid = 0;
+    // Real resid = 0;
     switch (_model)
     {
       case CM_FRICTIONLESS:
-
-        //      resid = pinfo->_normal * res_vec;
+        // resid = pinfo->_normal * res_vec;
         break;
 
       case CM_GLUED:
-
-        //      resid = pinfo->_normal * res_vec;
+        // resid = pinfo->_normal * res_vec;
         break;
 
       default:
@@ -126,23 +132,28 @@ MultiDContactConstraint::updateContactSet()
         break;
     }
 
-    //    if (hpit != has_penetrated.end() && resid < 0)
-    //      Moose::err<<resid<<std::endl;
-    /*
-        if (hpit != has_penetrated.end() && resid < -.15)
-        {
-          Moose::err<<std::endl<<"Unlocking node "<<node->id()<<" because resid:
-       "<<resid<<std::endl<<std::endl;
+    // if (hpit != has_penetrated.end() && resid < 0)
+    //   Moose::err << resid << std::endl;
+    //
+    // if (hpit != has_penetrated.end() && resid < -.15)
+    // {
+    //   Moose::err << std::endl
+    //              << "Unlocking node " << node->id()
+    //              << " because resid:
+    //                 "<<resid<<std::endl<<std::endl;
+    //
+    //                 has_penetrated.erase(hpit);
+    //   unlocked_this_step[slave_node_num] = true;
+    // }
+    // else
 
-          has_penetrated.erase(hpit);
-          unlocked_this_step[slave_node_num] = true;
-        }
-        else*/
     if (pinfo->_distance > 0 &&
         hpit == has_penetrated.end()) // && !unlocked_this_step[slave_node_num])
     {
-      //      Moose::err<<std::endl<<"Locking node "<<node->id()<<" because distance:
-      //      "<<pinfo->_distance<<std::endl<<std::endl;
+      // Moose::err << std::endl
+      //            << "Locking node " << node->id() << " because distance:" << pinfo->_distance
+      //            << std::endl
+      //            << std::endl;
 
       has_penetrated.insert(slave_node_num);
     }
@@ -161,17 +172,23 @@ Real
 MultiDContactConstraint::computeQpSlaveValue()
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  /*
-    Moose::err<<std::endl
-             <<"Popping out node: "<<_current_node->id()<<std::endl
-             <<"Closest Point "<<_component<<": "<<pinfo->_closest_point(_component)<<std::endl
-             <<"Current Node "<<_component<<": "<<(*_current_node)(_component)<<std::endl
-             <<"Current Value: "<<_u_slave[_qp]<<std::endl
-             <<"New Value: "<<pinfo->_closest_point(_component) - ((*_current_node)(_component) -
-    _u_slave[_qp])<<std::endl
-             <<"Change: "<<_u_slave[_qp] - (pinfo->_closest_point(_component) -
-    ((*_current_node)(_component) - _u_slave[_qp]))<<std::endl<<std::endl;
-  */
+
+  // Moose::err << std::endl
+  //            << "Popping out node: " << _current_node->id() << std::endl
+  //            << "Closest Point " << _component << ": " << pinfo->_closest_point(_component)
+  //            << std::endl
+  //            << "Current Node " << _component << ": " << (*_current_node)(_component) <<
+  //            std::endl
+  //            << "Current Value: " << _u_slave[_qp] << std::endl
+  //            << "New Value: "
+  //            << pinfo->_closest_point(_component) - ((*_current_node)(_component)-_u_slave[_qp])
+  //            << std::endl
+  //            << "Change: "
+  //            << _u_slave[_qp] - (pinfo->_closest_point(_component) -
+  //                                ((*_current_node)(_component)-_u_slave[_qp]))
+  //            << std::endl
+  //            << std::endl;
+
   return pinfo->_closest_point(_component) - ((*_current_node)(_component)-_u_slave[_qp]);
 }
 
@@ -185,13 +202,13 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
   // Build up residual vector
   for (unsigned int i = 0; i < _mesh_dimension; ++i)
   {
-    dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
+    dof_id_type dof_number = node->dof_number(0, _vars[i], 0);
     res_vec(i) = _residual_copy(dof_number);
   }
 
   const RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
   const RealVectorValue pen_force(_penalty * distance_vec);
-  Real resid = 0;
+  Real resid = 0.0;
 
   switch (type)
   {
@@ -199,14 +216,11 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       switch (_model)
       {
         case CM_FRICTIONLESS:
-
           resid = pinfo->_normal(_component) * (pinfo->_normal * (pen_force - res_vec));
           break;
 
         case CM_GLUED:
-
           resid = pen_force(_component) - res_vec(_component);
-
           break;
 
         default:
@@ -218,7 +232,6 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       switch (_model)
       {
         case CM_FRICTIONLESS:
-
           resid = pinfo->_normal(_component) * (pinfo->_normal * res_vec);
           break;
 
@@ -232,7 +245,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       }
       return _test_master[_i][_qp] * resid;
   }
-  return 0;
+  return 0.0;
 }
 
 Real
@@ -240,7 +253,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
-  double slave_jac = 0;
+  Real slave_jac = 0.0;
   switch (type)
   {
     case Moose::SlaveSlave:
@@ -255,11 +268,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
           break;
 
         case CM_GLUED:
-          /*
-                resid = pen_force(_component)
-                  - res_vec(_component)
-                  ;
-          */
+          // resid = pen_force(_component) - res_vec(_component);
           break;
 
         default:
@@ -267,6 +276,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
           break;
       }
       return _test_slave[_i][_qp] * slave_jac;
+
     case Moose::SlaveMaster:
       switch (_model)
       {
@@ -289,12 +299,14 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
           break;
       }
       return _test_slave[_i][_qp] * slave_jac;
+
     case Moose::MasterSlave:
       slave_jac =
           (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
       return slave_jac * _test_master[_i][_qp];
+
     case Moose::MasterMaster:
-      return 0;
+      return 0.0;
   }
-  return 0;
+  return 0.0;
 }

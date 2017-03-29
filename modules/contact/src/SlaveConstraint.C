@@ -30,9 +30,15 @@ validParams<SlaveConstraint>()
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
                                         "1 for y, 2 for z)");
-  params.addRequiredCoupledVar("disp_x", "The x displacement");
+
+  params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+
+  params.addCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
@@ -61,8 +67,8 @@ validParams<SlaveConstraint>()
 SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
-    _model(contactModel(getParam<std::string>("model"))),
-    _formulation(contactFormulation(getParam<std::string>("formulation"))),
+    _model(ContactMaster::contactModel(getParam<std::string>("model"))),
+    _formulation(ContactMaster::contactFormulation(getParam<std::string>("formulation"))),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("master"),
@@ -71,28 +77,38 @@ SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _residual_copy(_sys.residualGhosted()),
-    _x_var(coupled("disp_x")),
-    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
-    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
-    _vars(_x_var, _y_var, _z_var),
+    _vars(3, libMesh::invalid_uint),
     _mesh_dimension(_mesh.dimension()),
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution())
 {
+  if (isParamValid("displacements"))
+  {
+    // modern parameter scheme for displacements
+    for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+      _vars[i] = coupled("displacements", i);
+  }
+  else
+  {
+    // Legacy parameter scheme for displacements
+    if (isParamValid("disp_x"))
+      _vars[0] = coupled("disp_x");
+    if (isParamValid("disp_y"))
+      _vars[1] = coupled("disp_y");
+    if (isParamValid("disp_z"))
+      _vars[2] = coupled("disp_z");
+  }
+
   if (parameters.isParamValid("tangential_tolerance"))
-  {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_distance"))
-  {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_method"))
-  {
     _penetration_locator.setNormalSmoothingMethod(
         parameters.get<std::string>("normal_smoothing_method"));
-  }
 }
 
 void
@@ -110,7 +126,7 @@ SlaveConstraint::addPoints()
     PenetrationInfo * pinfo = it->second;
 
     // Skip this pinfo if there are no DOFs on this node.
-    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars(_component)) < 1)
+    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
     dof_id_type slave_node_num = it->first;

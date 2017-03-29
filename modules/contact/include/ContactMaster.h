@@ -46,6 +46,9 @@ public:
 
   virtual void updateContactSet(bool beginning_of_step = false);
 
+  static ContactFormulation contactFormulation(std::string name);
+  static ContactModel contactModel(std::string name);
+
 protected:
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
@@ -66,13 +69,9 @@ protected:
 
   std::map<Point, PenetrationInfo *> _point_to_info;
 
-  unsigned int _x_var;
-  unsigned int _y_var;
-  unsigned int _z_var;
-
   const unsigned int _mesh_dimension;
 
-  VectorValue<unsigned> _vars;
+  std::vector<unsigned int> _vars;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
