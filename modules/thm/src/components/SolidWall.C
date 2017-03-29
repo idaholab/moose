@@ -4,22 +4,17 @@
 #include "Pipe.h"
 #include "Factory.h"
 
-template<>
-InputParameters validParams<SolidWall>()
+template <>
+InputParameters
+validParams<SolidWall>()
 {
   InputParameters params = validParams<BoundaryBase>();
   return params;
 }
 
+SolidWall::SolidWall(const InputParameters & params) : BoundaryBase(params) {}
 
-SolidWall::SolidWall(const InputParameters & params) :
-    BoundaryBase(params)
-{
-}
-
-SolidWall::~SolidWall()
-{
-}
+SolidWall::~SolidWall() {}
 
 void
 SolidWall::addVariables()
@@ -33,7 +28,7 @@ SolidWall::addMooseObjects1Phase()
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModel::RHOUA;
-    params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
+    params.set<std::vector<unsigned int>>("r7:boundary") = bnd_id;
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "rhou"), params);
   }
@@ -46,14 +41,14 @@ SolidWall::addMooseObjects2Phase()
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModel::ALPHA_RHOU_A_LIQUID;
-    params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
+    params.set<std::vector<unsigned int>>("r7:boundary") = bnd_id;
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "alpha_rhou_A_liquid"), params);
   }
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModel::ALPHA_RHOU_A_VAPOR;
-    params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
+    params.set<std::vector<unsigned int>>("r7:boundary") = bnd_id;
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "alpha_rhou_A_vapor"), params);
   }

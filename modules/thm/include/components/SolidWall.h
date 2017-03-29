@@ -5,7 +5,7 @@
 
 class SolidWall;
 
-template<>
+template <>
 InputParameters validParams<SolidWall>();
 
 /**
