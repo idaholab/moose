@@ -5,7 +5,7 @@
 
 class AddHeatStructureMaterialAction;
 
-template<>
+template <>
 InputParameters validParams<AddHeatStructureMaterialAction>();
 
 class AddHeatStructureMaterialAction : public AddUserObjectAction
