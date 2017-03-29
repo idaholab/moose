@@ -33,6 +33,8 @@ ElementDeleterBase::ElementDeleterBase(const InputParameters & parameters)
 void
 ElementDeleterBase::modify()
 {
+  libmesh_assert(this->comm().verify(this->name()));
+
   // Check that we have access to the mesh
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling ElementDeleterBase::modify()");
@@ -50,6 +52,23 @@ ElementDeleterBase::modify()
     if (shouldDelete(elem))
       deleteable_elems.insert(elem);
   }
+
+/**
+ * If we are in parallel we'd better have a consistent idea of what
+ * should be deleted.  This can't be checked cheaply.
+ */
+#ifdef DEBUG
+  dof_id_type pmax_elem_id = mesh.max_elem_id();
+  mesh.comm().max(pmax_elem_id);
+
+  for (dof_id_type i = 0; i != pmax_elem_id; ++i)
+  {
+    Elem * elem = mesh.query_elem_ptr(i);
+    bool is_deleteable = elem && deleteable_elems.count(elem);
+
+    libmesh_assert(mesh.comm().semiverify(elem ? &is_deleteable : libmesh_nullptr));
+  }
+#endif
 
   /**
    * Delete all of the elements

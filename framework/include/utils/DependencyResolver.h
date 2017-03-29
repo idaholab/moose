@@ -179,8 +179,10 @@ void
 DependencyResolver<T>::insertDependency(const T & key, const T & value)
 {
   _depends.insert(std::make_pair(key, value));
-  _ordering_vector.push_back(key);
-  _ordering_vector.push_back(value);
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
+    _ordering_vector.push_back(key);
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
+    _ordering_vector.push_back(value);
 }
 
 template <typename T>
@@ -188,30 +190,36 @@ void
 DependencyResolver<T>::addItem(const T & value)
 {
   _independent_items.push_back(value);
-  _ordering_vector.push_back(value);
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
+    _ordering_vector.push_back(value);
 }
 
 template <typename T>
 const std::vector<std::vector<T>> &
 DependencyResolver<T>::getSortedValuesSets()
 {
-  /* Make a copy of the map to work on since we will remove values from the map*/
-  std::multimap<T, T> depends = _depends;
-
   // Use the original ordering for ordering subvectors
   DependencyResolverComparator<T> comp(_ordering_vector);
+
+  /**
+   * Make a copy of the map to work on since:
+   * 1) we will remove values from the map
+   * 2) We need the copy to be sorted in an unambiguous order.
+   */
+  typedef std::multimap<T, T, DependencyResolverComparator<T>> dep_multimap;
+  dep_multimap depends(_depends.begin(), _depends.end(), comp);
 
   // Build up a set of all keys in depends that have nothing depending on them,
   // and put it in the nodepends set.  These are the leaves of the dependency tree.
   std::set<T> nodepends;
-  for (typename std::multimap<T, T>::iterator i = depends.begin(); i != depends.end(); ++i)
+  for (auto i : depends)
   {
-    T key = i->first;
+    T key = i.first;
 
     bool founditem = false;
-    for (typename std::multimap<T, T>::iterator i2 = depends.begin(); i2 != depends.end(); ++i2)
+    for (auto i2 : depends)
     {
-      if (i2->second == key)
+      if (i2.second == key)
       {
         founditem = true;
         break;
@@ -226,9 +234,9 @@ DependencyResolver<T>::getSortedValuesSets()
   {
     T key = *siter;
     bool founditem = false;
-    for (typename std::multimap<T, T>::iterator i2 = depends.begin(); i2 != depends.end(); ++i2)
+    for (auto i2 : depends)
     {
-      if (i2->first == key || i2->second == key)
+      if (i2.first == key || i2.second == key)
       {
         founditem = true;
         break;
@@ -253,14 +261,13 @@ DependencyResolver<T>::getSortedValuesSets()
      * to duplicate keys
      */
     std::set<T, DependencyResolverComparator<T>> keys(
-        typename DependencyResolver<T>::template key_iterator<std::multimap<T, T>>(depends.begin()),
-        typename DependencyResolver<T>::template key_iterator<std::multimap<T, T>>(depends.end()),
+        typename DependencyResolver<T>::template key_iterator<dep_multimap>(depends.begin()),
+        typename DependencyResolver<T>::template key_iterator<dep_multimap>(depends.end()),
         comp);
 
     std::set<T, DependencyResolverComparator<T>> values(
-        typename DependencyResolver<T>::template value_iterator<std::multimap<T, T>>(
-            depends.begin()),
-        typename DependencyResolver<T>::template value_iterator<std::multimap<T, T>>(depends.end()),
+        typename DependencyResolver<T>::template value_iterator<dep_multimap>(depends.begin()),
+        typename DependencyResolver<T>::template value_iterator<dep_multimap>(depends.end()),
         comp);
 
     std::vector<T> current_set(next_set);
@@ -279,7 +286,7 @@ DependencyResolver<T>::getSortedValuesSets()
     /* Now remove items from the temporary map that have been "resolved" */
     if (!difference.empty())
     {
-      for (typename std::multimap<T, T>::iterator iter = depends.begin(); iter != depends.end();)
+      for (auto iter = depends.begin(); iter != depends.end();)
       {
         if (difference.find(iter->second) != difference.end())
         {
@@ -310,9 +317,12 @@ DependencyResolver<T>::getSortedValuesSets()
       {
         std::ostringstream oss;
         oss << "Cyclic dependency detected in the Dependency Resolver.  Remaining items are:\n";
-        for (typename std::multimap<T, T>::iterator j = depends.begin(); j != depends.end(); ++j)
-          oss << j->first << " -> " << j->second << "\n";
-        throw CyclicDependencyException<T>(oss.str(), depends);
+        for (auto j : depends)
+          oss << j.first << " -> " << j.second << "\n";
+        // Return a multimap without a weird comparator, to avoid
+        // dangling reference problems and for backwards compatibility
+        std::multimap<T, T> cyclic_deps(depends.begin(), depends.end());
+        throw CyclicDependencyException<T>(oss.str(), cyclic_deps);
       }
     }
   }
