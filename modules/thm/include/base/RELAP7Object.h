@@ -5,7 +5,7 @@
 
 class RELAP7Object;
 
-template<>
+template <>
 InputParameters validParams<RELAP7Object>();
 
 /**
@@ -27,7 +27,9 @@ protected:
    * @param params[in,out] params  the parameters to which the parameter will be passed
    */
   template <typename T>
-  void passParameter(const std::string & name, const std::string & new_name, InputParameters & params) const;
+  void passParameter(const std::string & name,
+                     const std::string & new_name,
+                     InputParameters & params) const;
 
   /**
    * Passes a parameter from this object's input parameters to another set of input parameters.
@@ -44,7 +46,9 @@ protected:
 
 template <typename T>
 void
-RELAP7Object::passParameter(const std::string & name, const std::string & new_name, InputParameters & params) const
+RELAP7Object::passParameter(const std::string & name,
+                            const std::string & new_name,
+                            InputParameters & params) const
 {
   if (isParamValid(name))
     params.set<T>(new_name) = _pars.get<T>(name);
