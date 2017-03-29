@@ -328,7 +328,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         if filename.endswith('.py'):
             self.parent().write(filename)
         else:
-            self._window.write(filename)
+            self._window.write(filename, dialog=True)
 
     def _adjustTimers(self, start=[], stop=[]):
         """

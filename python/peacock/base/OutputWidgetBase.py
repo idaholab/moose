@@ -113,6 +113,7 @@ class OutputWidgetBase(QtWidgets.QWidget):
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+        dialog.setDefaultSuffix("png")
 
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
             filename = str(dialog.selectedFiles()[0])
