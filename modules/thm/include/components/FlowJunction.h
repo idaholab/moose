@@ -6,7 +6,7 @@
 
 class FlowJunction;
 
-template<>
+template <>
 InputParameters validParams<FlowJunction>();
 
 /**

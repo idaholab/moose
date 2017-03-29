@@ -1,11 +1,10 @@
 #include "PipeBase.h"
 
-
 const std::string PipeBase::_type("pipe");
 
-
-template<>
-InputParameters validParams<PipeBase>()
+template <>
+InputParameters
+validParams<PipeBase>()
 {
   InputParameters params = validParams<GeometricalComponent>();
   params += validParams<FlowModel>();
@@ -13,16 +12,12 @@ InputParameters validParams<PipeBase>()
   return params;
 }
 
-
-PipeBase::PipeBase(const InputParameters & params) :
-    GeometricalComponent(params),
-    FlowModel(name(), params)
+PipeBase::PipeBase(const InputParameters & params)
+  : GeometricalComponent(params), FlowModel(name(), params)
 {
 }
 
-PipeBase::~PipeBase()
-{
-}
+PipeBase::~PipeBase() {}
 
 void
 PipeBase::init()

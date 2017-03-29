@@ -5,7 +5,7 @@
 
 class AddComponentPhysicsAction;
 
-template<>
+template <>
 InputParameters validParams<AddComponentPhysicsAction>();
 
 class AddComponentPhysicsAction : public R7Action

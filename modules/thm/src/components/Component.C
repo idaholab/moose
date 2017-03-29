@@ -5,8 +5,9 @@
 unsigned int Component::subdomain_ids = 0;
 unsigned int Component::bc_ids = 0;
 
-template<>
-InputParameters validParams<Component>()
+template <>
+InputParameters
+validParams<Component>()
 {
   InputParameters params = validParams<RELAP7Object>();
   params.addPrivateParam<Simulation *>("_sim");
@@ -39,7 +40,10 @@ Component::genName(const std::string & prefix, unsigned int id, const std::strin
 }
 
 std::string
-Component::genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix)
+Component::genName(const std::string & prefix,
+                   unsigned int i,
+                   unsigned int j,
+                   const std::string & suffix)
 {
   std::stringstream ss;
   ss << prefix << ":" << i << ":" << j;
@@ -49,7 +53,9 @@ Component::genName(const std::string & prefix, unsigned int i, unsigned int j, c
 }
 
 std::string
-Component::genName(const std::string & prefix, const std::string & middle, const std::string & suffix)
+Component::genName(const std::string & prefix,
+                   const std::string & middle,
+                   const std::string & suffix)
 {
   std::stringstream ss;
   ss << prefix << ":" << middle;
@@ -81,10 +87,11 @@ Component::split(const std::string & rname)
   return result;
 }
 
-Component::Component(const InputParameters & parameters) :
-    RELAP7Object(parameters),
+Component::Component(const InputParameters & parameters)
+  : RELAP7Object(parameters),
     _id(comp_id++),
-    _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent") : NULL),
+    _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent")
+                                                              : NULL),
     _sim(*getParam<Simulation *>("_sim")),
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
@@ -93,9 +100,7 @@ Component::Component(const InputParameters & parameters) :
 {
 }
 
-Component::~Component()
-{
-}
+Component::~Component() {}
 
 void
 Component::init()
@@ -138,8 +143,13 @@ Component::setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSyste
     }
   }
 
-  mooseError(name(), ": Trying to set coordinate system ", coord_type, " on a block id '", block_id, "',"
-    " but this component does not have such a block.");
+  mooseError(name(),
+             ": Trying to set coordinate system ",
+             coord_type,
+             " on a block id '",
+             block_id,
+             "',"
+             " but this component does not have such a block.");
 }
 
 void
@@ -149,20 +159,28 @@ Component::aliasParam(const std::string & rname, const std::string & name)
 }
 
 void
-Component::aliasParam(const std::string & rname, const std::string & name, const std::string & comp_name)
+Component::aliasParam(const std::string & rname,
+                      const std::string & name,
+                      const std::string & comp_name)
 {
   Component * comp = const_cast<Component *>(&getComponentByName<Component>(comp_name));
   _param_alias_map[rname] = std::pair<Component *, std::string>(comp, name);
 }
 
 void
-Component::aliasVectorParam(const std::string & rname, const std::string & name, unsigned int pos, Component * /*comp = NULL*/)
+Component::aliasVectorParam(const std::string & rname,
+                            const std::string & name,
+                            unsigned int pos,
+                            Component * /*comp = NULL*/)
 {
   createVectorControllableParMapping(rname, name, pos);
 }
 
 void
-Component::connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name)
+Component::connectObject(const InputParameters & params,
+                         const std::string & rname,
+                         const std::string & mooseName,
+                         const std::string & name)
 {
   ControlLogicNameEntry rne(params.get<std::string>("_moose_base") + "::" + mooseName, name);
   if (_parent != NULL)
@@ -172,7 +190,11 @@ Component::connectObject(const InputParameters & params, const std::string & rna
 }
 
 void
-Component::connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
+Component::connectObject(const InputParameters & params,
+                         const std::string & rname,
+                         const std::string & mooseName,
+                         const std::string & name,
+                         const std::string & par_name)
 {
   ControlLogicNameEntry rne(params.get<std::string>("_moose_base") + "::" + mooseName, par_name);
   if (_parent != NULL)
@@ -181,9 +203,10 @@ Component::connectObject(const InputParameters & params, const std::string & rna
     _rname_map[rname][name].push_back(rne);
 }
 
-
 void
-Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos)
+Component::createVectorControllableParMapping(const std::string & rname,
+                                              const std::string & mooseName,
+                                              unsigned int pos)
 {
   ControlLogicMapContainer mc(mooseName, pos);
   _rvect_map.insert(std::pair<std::string, ControlLogicMapContainer>(rname, mc));

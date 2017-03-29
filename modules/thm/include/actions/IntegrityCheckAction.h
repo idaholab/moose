@@ -5,7 +5,7 @@
 
 class IntegrityCheckAction;
 
-template<>
+template <>
 InputParameters validParams<IntegrityCheckAction>();
 
 /**
@@ -21,7 +21,5 @@ public:
 
 protected:
 };
-
-
 
 #endif /* INTEGRITYCHECKACTION_H */

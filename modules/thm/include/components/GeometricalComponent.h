@@ -9,11 +9,12 @@
 
 class GeometricalComponent;
 
-template<>
+template <>
 InputParameters validParams<GeometricalComponent>();
 
 /**
- * Intermediate class for all geometrical components (i.e components that have position, direction, etc. in space - they generate a mesh)
+ * Intermediate class for all geometrical components (i.e components that have position, direction,
+ * etc. in space - they generate a mesh)
  */
 class GeometricalComponent : public Component
 {
@@ -77,14 +78,16 @@ protected:
   /// Node locations along the main axis
   std::vector<Real> _node_locations;
 
-  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection> > _connections;
+  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection>> _connections;
 
 private:
   unsigned int validateNSectionsConsistent(int n_lengths, int n_n_elems);
   void generateNodeLocations();
   unsigned int computeNumberOfNodes(unsigned int n_elems);
   std::vector<Real> getUniformNodeLocations(Real length, unsigned int n_nodes);
-  void placeLocalNodeLocations(Real start_length, unsigned int start_node, std::vector<Real> & local_node_locations);
+  void placeLocalNodeLocations(Real start_length,
+                               unsigned int start_node,
+                               std::vector<Real> & local_node_locations);
 };
 
 #endif /* GEOMETRICALCOMPONENT_H */

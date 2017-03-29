@@ -5,7 +5,7 @@
 
 class RELAP7Mesh;
 
-template<>
+template <>
 InputParameters validParams<RELAP7Mesh>();
 
 /**

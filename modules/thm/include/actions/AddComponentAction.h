@@ -16,5 +16,4 @@ public:
   virtual void act();
 };
 
-
 #endif /* ADDCOMPONENTACTION_H */

@@ -11,7 +11,7 @@
 class Component;
 class FEProblem;
 
-template<>
+template <>
 InputParameters validParams<Component>();
 
 /**
@@ -22,9 +22,8 @@ class Component : public RELAP7Object
 public:
   struct ControlLogicNameEntry
   {
-    ControlLogicNameEntry(const std::string & object_name, const std::string par_name) :
-        _object_name(object_name),
-        _par_name(par_name)
+    ControlLogicNameEntry(const std::string & object_name, const std::string par_name)
+      : _object_name(object_name), _par_name(par_name)
     {
     }
 
@@ -35,13 +34,13 @@ public:
   };
 
   /**
-   * Used to map friendly names to vector parameters, i.e. inlet:K_loss => K_loss[1], where K_loss is a vector parameter.
+   * Used to map friendly names to vector parameters, i.e. inlet:K_loss => K_loss[1], where K_loss
+   * is a vector parameter.
    */
   struct ControlLogicMapContainer
   {
-    ControlLogicMapContainer(const std::string & controllable_par_name, unsigned int & position) :
-        _controllable_par_name(controllable_par_name),
-        _position(position)
+    ControlLogicMapContainer(const std::string & controllable_par_name, unsigned int & position)
+      : _controllable_par_name(controllable_par_name), _position(position)
     {
     }
 
@@ -78,7 +77,7 @@ public:
 
   virtual void addVariables() = 0;
 
-  virtual void addMooseObjects() { }
+  virtual void addMooseObjects() {}
 
   virtual const std::string & getType() = 0;
 
@@ -92,7 +91,7 @@ public:
    * @param name The parameter name that has the component name
    * @return true if the component exists and has type T, false otherwise
    */
-  template<typename T>
+  template <typename T>
   bool hasComponentByName(const std::string & name) const;
 
   /**
@@ -100,7 +99,7 @@ public:
    * @tparam T the type of the component we are requesting
    * @param name The parameter name that has the component name
    */
-  template<typename T>
+  template <typename T>
   const T & getComponent(const std::string & name) const;
 
   /**
@@ -108,11 +107,12 @@ public:
    * @tparam T the type of the component we are requesting
    * @param cname The name of the component
    */
-  template<typename T>
+  template <typename T>
   const T & getComponentByName(const std::string & cname) const;
 
   /**
-   * Get the ids associated with the component.  These can either be subdomain ids or boundary ids depending
+   * Get the ids associated with the component.  These can either be subdomain ids or boundary ids
+   * depending
    * on what you are asking for.
    *
    * @param piece The name of the piece of the component you are interested in.
@@ -128,17 +128,14 @@ public:
    */
   virtual std::string variableName(std::string piece) const = 0;
 
-  template<typename T>
-  bool
-  hasRParam(const std::string & param_name);
+  template <typename T>
+  bool hasRParam(const std::string & param_name);
 
-  template<typename T>
-  const T &
-  getRParam(const std::string & param_name);
+  template <typename T>
+  const T & getRParam(const std::string & param_name);
 
-  template<typename T>
-  void
-  setRParam(const std::string & param_name, const T & value);
+  template <typename T>
+  void setRParam(const std::string & param_name, const T & value);
 
   /**
    * Alias a component's input parameter
@@ -153,33 +150,56 @@ public:
    * @param name The input parameter name being aliased
    * @param comp_name The name of the (child) component
    */
-  void aliasParam(const std::string & rname, const std::string & name, const std::string & comp_name);
+  void
+  aliasParam(const std::string & rname, const std::string & name, const std::string & comp_name);
 
-  void aliasVectorParam(const std::string & rname, const std::string & name, unsigned int pos, Component * comp = NULL);
+  void aliasVectorParam(const std::string & rname,
+                        const std::string & name,
+                        unsigned int pos,
+                        Component * comp = NULL);
 
   /**
    * Connect with control logic
    */
-  void connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name);
+  void connectObject(const InputParameters & params,
+                     const std::string & rname,
+                     const std::string & mooseName,
+                     const std::string & name);
   /**
    * Connect with control logic
    */
-  void connectObject(const InputParameters & params, const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
+  void connectObject(const InputParameters & params,
+                     const std::string & rname,
+                     const std::string & mooseName,
+                     const std::string & name,
+                     const std::string & par_name);
 
   /**
-   * This function creates a mapping between a control logic friendly name and a vector variable within a MOOSE object
+   * This function creates a mapping between a control logic friendly name and a vector variable
+   * within a MOOSE object
    * @param rname  - control logic friendly name
    * @param mooseName - vector parameter name within an object
    * @param pos - position in the vector
    */
-  void createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos);
+  void createVectorControllableParMapping(const std::string & rname,
+                                          const std::string & mooseName,
+                                          unsigned int pos);
 
-  const std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry> > > & getControllableParams() { return _rname_map; }
+  const std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry>>> &
+  getControllableParams()
+  {
+    return _rname_map;
+  }
 
 public:
-  static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix = "");
-  static std::string genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix = "");
-  static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
+  static std::string
+  genName(const std::string & prefix, unsigned int id, const std::string & suffix = "");
+  static std::string genName(const std::string & prefix,
+                             unsigned int i,
+                             unsigned int j,
+                             const std::string & suffix = "");
+  static std::string
+  genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
 
 protected:
   /**
@@ -209,18 +229,19 @@ protected:
   std::vector<Moose::CoordinateSystemType> _coord_sys;
 
   /// Mapping from a friendly name to MOOSE object name
-  std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry> > > _rname_map;
+  std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry>>> _rname_map;
   /// Mapping of friendly names
   std::map<std::string, ControlLogicMapContainer> _rvect_map;
   /// Map for aliasing component param names
-  std::map<std::string, std::pair<Component *, std::string> > _param_alias_map;
+  std::map<std::string, std::pair<Component *, std::string>> _param_alias_map;
 
   const Real & _zero;
 
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
   /// Sets the coordinate system for block_id sudomain
-  virtual void setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSystemType coord_type);
+  virtual void setSubdomainCoordSystem(unsigned int block_id,
+                                       Moose::CoordinateSystemType coord_type);
 
   /**
    * Split the control logic name into "section name" and "property name"
@@ -235,8 +256,7 @@ private:
   static unsigned int bc_ids;
 };
 
-
-template<typename T>
+template <typename T>
 bool
 Component::hasComponentByName(const std::string & name) const
 {
@@ -246,7 +266,7 @@ Component::hasComponentByName(const std::string & name) const
     return false;
 }
 
-template<typename T>
+template <typename T>
 const T &
 Component::getComponent(const std::string & pname) const
 {
@@ -254,7 +274,7 @@ Component::getComponent(const std::string & pname) const
   return getComponentByName<T>(comp_name);
 }
 
-template<typename T>
+template <typename T>
 const T &
 Component::getComponentByName(const std::string & comp_name) const
 {
@@ -263,26 +283,33 @@ Component::getComponentByName(const std::string & comp_name) const
     if (_sim.hasComponentOfType<T>(comp_name))
       return _sim.getComponentByName<T>(comp_name);
     else
-      mooseError(name(), ": Requested component (", comp_name, ") have to be of type ", demangle(typeid(T).name()), ".");
+      mooseError(name(),
+                 ": Requested component (",
+                 comp_name,
+                 ") have to be of type ",
+                 demangle(typeid(T).name()),
+                 ".");
   }
   else
     mooseError(name(), ": Requesting a non-existing component (", comp_name, "). Typo?");
 }
 
-
-template<typename T>
+template <typename T>
 bool
 Component::hasRParam(const std::string & param_name)
 {
   std::vector<std::string> s = split(param_name);
 
-  std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
+  std::map<std::string, std::vector<ControlLogicNameEntry>> & rmap = _rname_map[s[0]];
 
   THREAD_ID tid = 0;
-  const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
-  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  const std::vector<ControlLogicNameEntry> & entries =
+      (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end();
+       ++it)
   {
-    InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(it->_object_name, tid);
+    InputParameters & params =
+        _app.getInputParameterWarehouse().getInputParameters(it->_object_name, tid);
     std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
     if (params.have_parameter<T>(par_name))
       return true;
@@ -294,7 +321,8 @@ Component::hasRParam(const std::string & param_name)
   else
   {
     // not found, check in the alias map
-    std::map<std::string, std::pair<Component *, std::string> >::iterator it = _param_alias_map.find(param_name);
+    std::map<std::string, std::pair<Component *, std::string>>::iterator it =
+        _param_alias_map.find(param_name);
     if (it != _param_alias_map.end())
     {
       Component * comp = it->second.first;
@@ -310,26 +338,29 @@ Component::hasRParam(const std::string & param_name)
   else
   {
     ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
-    if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
+    if (parameters().have_parameter<std::vector<T>>(name_cont.getControllableParName()))
       return true;
   }
 
   return false;
 }
 
-template<typename T>
+template <typename T>
 const T &
 Component::getRParam(const std::string & param_name)
 {
   std::vector<std::string> s = split(param_name);
 
-  std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
+  std::map<std::string, std::vector<ControlLogicNameEntry>> & rmap = _rname_map[s[0]];
 
   THREAD_ID tid = 0;
-  const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
-  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  const std::vector<ControlLogicNameEntry> & entries =
+      (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end();
+       ++it)
   {
-    InputParameters & params = _app.getInputParameterWarehouse().getInputParameters(it->_object_name, tid);
+    InputParameters & params =
+        _app.getInputParameterWarehouse().getInputParameters(it->_object_name, tid);
     std::string par_name = it->_par_name.empty() ? s[1] : it->_par_name;
     if (params.have_parameter<T>(par_name))
       return params.get<T>(par_name);
@@ -341,7 +372,8 @@ Component::getRParam(const std::string & param_name)
   else
   {
     // not found, check in the alias map
-    std::map<std::string, std::pair<Component *, std::string> >::iterator it = _param_alias_map.find(param_name);
+    std::map<std::string, std::pair<Component *, std::string>>::iterator it =
+        _param_alias_map.find(param_name);
     if (it != _param_alias_map.end())
     {
       Component * comp = it->second.first;
@@ -357,22 +389,25 @@ Component::getRParam(const std::string & param_name)
   else
   {
     ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
-    if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
-      return parameters().get<std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
+    if (parameters().have_parameter<std::vector<T>>(name_cont.getControllableParName()))
+      return parameters().get<std::vector<T>>(
+          name_cont.getControllableParName())[name_cont.getControllableParPosition()];
   }
   mooseError(name() + ": parameter '" + param_name + "' was not found.");
 }
 
-template<typename T>
+template <typename T>
 void
 Component::setRParam(const std::string & param_name, const T & value)
 {
   std::vector<std::string> s = split(param_name);
 
   InputParameterWarehouse ipw = _app.getInputParameterWarehouse();
-  std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
-  const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
-  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  std::map<std::string, std::vector<ControlLogicNameEntry>> & rmap = _rname_map[s[0]];
+  const std::vector<ControlLogicNameEntry> & entries =
+      (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end();
+       ++it)
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
@@ -393,7 +428,8 @@ Component::setRParam(const std::string & param_name, const T & value)
   else
   {
     // not found, check in the alias map
-    std::map<std::string, std::pair<Component *, std::string> >::iterator it = _param_alias_map.find(param_name);
+    std::map<std::string, std::pair<Component *, std::string>>::iterator it =
+        _param_alias_map.find(param_name);
     if (it != _param_alias_map.end())
     {
       Component * comp = it->second.first;
@@ -410,13 +446,13 @@ Component::setRParam(const std::string & param_name, const T & value)
   if (_rvect_map.find(param_name) != _rvect_map.end())
   {
     ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
-    if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
+    if (parameters().have_parameter<std::vector<T>>(name_cont.getControllableParName()))
     {
-      std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());
+      std::vector<T> tempp = parameters().get<std::vector<T>>(name_cont.getControllableParName());
       tempp[name_cont.getControllableParPosition()] = value;
 
       InputParameters & params = ipw.getInputParameters("Component", name(), tid);
-      params.set<std::vector<T> >(name_cont.getControllableParName()) = tempp;
+      params.set<std::vector<T>>(name_cont.getControllableParName()) = tempp;
     }
   }
 }

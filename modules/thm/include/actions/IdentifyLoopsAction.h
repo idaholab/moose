@@ -5,7 +5,7 @@
 
 class IdentifyLoopsAction;
 
-template<>
+template <>
 InputParameters validParams<IdentifyLoopsAction>();
 
 /**

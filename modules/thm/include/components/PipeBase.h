@@ -10,18 +10,18 @@
 
 class PipeBase;
 
-template<>
+template <>
 InputParameters validParams<PipeBase>();
 
 /**
  * A base class for pipe components
  *
  * A pipe is defined by its position, direction, length and area.
- * Mesh: mesh is generated in such a way, that the pipe starts at the origin (0, 0, 0) and is aligned with x-axis. Its
+ * Mesh: mesh is generated in such a way, that the pipe starts at the origin (0, 0, 0) and is
+ * aligned with x-axis. Its
  * subdivided into _n_elems elements (of type EDGE2).
  */
-class PipeBase : public GeometricalComponent,
-  public FlowModel
+class PipeBase : public GeometricalComponent, public FlowModel
 {
 public:
   PipeBase(const InputParameters & params);
