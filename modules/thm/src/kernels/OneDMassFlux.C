@@ -1,7 +1,8 @@
 #include "OneDMassFlux.h"
 
-template<>
-InputParameters validParams<OneDMassFlux>()
+template <>
+InputParameters
+validParams<OneDMassFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("rhouA", "conserved x-momentum");
@@ -9,16 +10,12 @@ InputParameters validParams<OneDMassFlux>()
   return params;
 }
 
-OneDMassFlux::OneDMassFlux(const InputParameters & parameters) :
-    Kernel(parameters),
-    _rhouA(coupledValue("rhouA")),
-    _rhouA_var_number(coupled("rhouA"))
+OneDMassFlux::OneDMassFlux(const InputParameters & parameters)
+  : Kernel(parameters), _rhouA(coupledValue("rhouA")), _rhouA_var_number(coupled("rhouA"))
 {
 }
 
-OneDMassFlux::~OneDMassFlux()
-{
-}
+OneDMassFlux::~OneDMassFlux() {}
 
 Real
 OneDMassFlux::computeQpResidual()

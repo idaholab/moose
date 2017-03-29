@@ -5,7 +5,7 @@
 
 class OneDMassFlux;
 
-template<>
+template <>
 InputParameters validParams<OneDMassFlux>();
 
 /**
@@ -25,6 +25,5 @@ protected:
   const VariableValue & _rhouA;
   unsigned int _rhouA_var_number;
 };
-
 
 #endif /* ONEDMASSFLUX_H */
