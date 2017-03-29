@@ -179,8 +179,12 @@ void
 DependencyResolver<T>::insertDependency(const T & key, const T & value)
 {
   _depends.insert(std::make_pair(key, value));
-  _ordering_vector.push_back(key);
-  _ordering_vector.push_back(value);
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) ==
+      _ordering_vector.end())
+    _ordering_vector.push_back(key);
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) ==
+      _ordering_vector.end())
+    _ordering_vector.push_back(value);
 }
 
 template <typename T>
@@ -188,7 +192,9 @@ void
 DependencyResolver<T>::addItem(const T & value)
 {
   _independent_items.push_back(value);
-  _ordering_vector.push_back(value);
+  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) ==
+      _ordering_vector.end())
+    _ordering_vector.push_back(value);
 }
 
 template <typename T>
