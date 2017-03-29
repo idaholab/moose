@@ -11,8 +11,6 @@
 #include "Conversion.h"
 #include "AddVariableAction.h"
 
-// #include "libmesh/string_to_enum.h"
-
 template <>
 InputParameters
 validParams<ContactAction>()
@@ -64,10 +62,9 @@ validParams<ContactAction>()
                              system,
                              "System to use for constraint enforcement.  Options are: " +
                                  system.getRawNames());
-  params.addParam<bool>(
-      "normalize_penalty",
-      false,
-      "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
+  params.addParam<bool>("normalize_penalty",
+                        false,
+                        "Whether to normalize the penalty parameter with the nodal area.");
   params.addParam<bool>("master_slave_jacobian",
                         true,
                         "Whether to include jacobian entries coupling master and slave nodes.");
