@@ -6,7 +6,7 @@
 
 class OneDHeatForcingFunction;
 
-template<>
+template <>
 InputParameters validParams<OneDHeatForcingFunction>();
 
 /**
@@ -26,6 +26,5 @@ protected:
   const Real & _volume;
   Function & _power_shape_function;
 };
-
 
 #endif /* ONEDHEATFORCINGFUNCTION_H */

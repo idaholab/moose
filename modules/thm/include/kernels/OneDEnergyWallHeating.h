@@ -7,7 +7,7 @@
 // Forward Declarations
 class OneDEnergyWallHeating;
 
-template<>
+template <>
 InputParameters validParams<OneDEnergyWallHeating>();
 
 // The spatial part of the 1D energy conservation for Navier-Stokes flow
@@ -34,7 +34,6 @@ protected:
   // For Jacobian terms
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
-
 };
 
-#endif //ONEDENERGYWALLHEATING_H
+#endif // ONEDENERGYWALLHEATING_H

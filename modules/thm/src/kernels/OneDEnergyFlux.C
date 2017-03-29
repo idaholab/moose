@@ -1,7 +1,8 @@
 #include "OneDEnergyFlux.h"
 
-template<>
-InputParameters validParams<OneDEnergyFlux>()
+template <>
+InputParameters
+validParams<OneDEnergyFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("area", "Cross-sectional area");
@@ -19,8 +20,8 @@ InputParameters validParams<OneDEnergyFlux>()
   return params;
 }
 
-OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters) :
-    DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
+  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _rhouA(coupledValue("rhouA")),
@@ -28,7 +29,7 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters) :
     _u_vel(coupledValue("u")),
     _enthalpy(coupledValue("enthalpy")),
     _pressure(getMaterialProperty<Real>("pressure")),
-    _dp_darhoA (getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
     _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoEA")),
     _rhoA_var_number(coupled("rhoA")),
@@ -41,9 +42,7 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters) :
 {
 }
 
-OneDEnergyFlux::~OneDEnergyFlux()
-{
-}
+OneDEnergyFlux::~OneDEnergyFlux() {}
 
 Real
 OneDEnergyFlux::computeQpResidual()
@@ -73,7 +72,9 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _beta_var_number)
   {
-    return -(_u_vel[_qp] * (_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp])) * _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -(_u_vel[_qp] *
+             (_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp])) *
+           _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else
     return 0.;

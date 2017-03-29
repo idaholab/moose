@@ -1,8 +1,9 @@
 #include "OneDEnergyHeatSource.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<OneDEnergyHeatSource>()
+template <>
+InputParameters
+validParams<OneDEnergyHeatSource>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<FunctionName>("q", "Volumetric heat source given by a function");
@@ -10,17 +11,15 @@ InputParameters validParams<OneDEnergyHeatSource>()
   return params;
 }
 
-OneDEnergyHeatSource::OneDEnergyHeatSource(const InputParameters & parameters) :
-    Kernel(parameters),
-    _q(getFunction("q")),
-    _area(coupledValue("area"))
+OneDEnergyHeatSource::OneDEnergyHeatSource(const InputParameters & parameters)
+  : Kernel(parameters), _q(getFunction("q")), _area(coupledValue("area"))
 {
 }
 
 Real
 OneDEnergyHeatSource::computeQpResidual()
 {
-  return - _q.value(_t, _q_point[_qp]) * _area[_qp] * _test[_i][_qp];
+  return -_q.value(_t, _q_point[_qp]) * _area[_qp] * _test[_i][_qp];
 }
 
 Real

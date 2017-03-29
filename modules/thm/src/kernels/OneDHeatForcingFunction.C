@@ -1,19 +1,21 @@
 #include "OneDHeatForcingFunction.h"
 
-template<>
-InputParameters validParams<OneDHeatForcingFunction>()
+template <>
+InputParameters
+validParams<OneDHeatForcingFunction>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addRequiredParam<Real>("volume", "The total heat structure volume");
-  params.addParam<FunctionName>("power_shape_function", "The name of the function that defines the power shape");
+  params.addParam<FunctionName>("power_shape_function",
+                                "The name of the function that defines the power shape");
 
   return params;
 }
 
-OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & parameters) :
-    Kernel(parameters),
+OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & parameters)
+  : Kernel(parameters),
     _power_fraction(getParam<Real>("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
     _volume(getParam<Real>("volume")),
@@ -21,9 +23,7 @@ OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & paramet
 {
 }
 
-OneDHeatForcingFunction::~OneDHeatForcingFunction()
-{
-}
+OneDHeatForcingFunction::~OneDHeatForcingFunction() {}
 
 Real
 OneDHeatForcingFunction::computeQpResidual()
@@ -32,5 +32,3 @@ OneDHeatForcingFunction::computeQpResidual()
   Real local_power = power_density * _power_shape_function.value(_t, _q_point[_qp]);
   return -local_power * _test[_i][_qp];
 }
-
-

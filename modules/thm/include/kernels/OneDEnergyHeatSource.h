@@ -7,7 +7,7 @@
 class OneDEnergyHeatSource;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<OneDEnergyHeatSource>();
 
 /**
@@ -29,4 +29,4 @@ protected:
   const VariableValue & _area;
 };
 
-#endif //ONEDENERGYHEATSOURCE_H
+#endif // ONEDENERGYHEATSOURCE_H

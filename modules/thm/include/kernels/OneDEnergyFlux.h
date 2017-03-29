@@ -6,7 +6,7 @@
 
 class OneDEnergyFlux;
 
-template<>
+template <>
 InputParameters validParams<OneDEnergyFlux>();
 
 /**

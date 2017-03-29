@@ -7,7 +7,7 @@
 class OneDEnergyWallHeatFlux;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<OneDEnergyWallHeatFlux>();
 
 class OneDEnergyWallHeatFlux : public Kernel
@@ -26,4 +26,4 @@ protected:
   const VariableValue & _Phf;
 };
 
-#endif //ONEDENERGYWALLHEATFLUX_H
+#endif // ONEDENERGYWALLHEATFLUX_H
