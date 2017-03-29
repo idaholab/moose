@@ -2,8 +2,9 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-template<>
-InputParameters validParams<ReynoldsNumberAux>()
+template <>
+InputParameters
+validParams<ReynoldsNumberAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addCoupledVar("alpha", 1, "Volume fraction of the phase");
@@ -12,12 +13,13 @@ InputParameters validParams<ReynoldsNumberAux>()
   params.addRequiredCoupledVar("Dh", "Hydraulic diameter");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object with fluid properties");
+  params.addRequiredParam<UserObjectName>("fp",
+                                          "The name of the user object with fluid properties");
   return params;
 }
 
-ReynoldsNumberAux::ReynoldsNumberAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+ReynoldsNumberAux::ReynoldsNumberAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _alpha(coupledValue("alpha")),
     _rho(coupledValue("rho")),
     _u_vel(coupledValue("u_vel")),
@@ -28,9 +30,7 @@ ReynoldsNumberAux::ReynoldsNumberAux(const InputParameters & parameters) :
 {
 }
 
-ReynoldsNumberAux::~ReynoldsNumberAux()
-{
-}
+ReynoldsNumberAux::~ReynoldsNumberAux() {}
 
 Real
 ReynoldsNumberAux::computeValue()

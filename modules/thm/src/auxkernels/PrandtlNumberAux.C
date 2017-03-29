@@ -2,27 +2,27 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-template<>
-InputParameters validParams<PrandtlNumberAux>()
+template <>
+InputParameters
+validParams<PrandtlNumberAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object with fluid properties");
+  params.addRequiredParam<UserObjectName>("fp",
+                                          "The name of the user object with fluid properties");
   return params;
 }
 
-PrandtlNumberAux::PrandtlNumberAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+PrandtlNumberAux::PrandtlNumberAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 
-PrandtlNumberAux::~PrandtlNumberAux()
-{
-}
+PrandtlNumberAux::~PrandtlNumberAux() {}
 
 Real
 PrandtlNumberAux::computeValue()

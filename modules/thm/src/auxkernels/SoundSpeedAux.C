@@ -1,8 +1,9 @@
 #include "SoundSpeedAux.h"
 #include "SinglePhaseFluidProperties.h"
 
-template<>
-InputParameters validParams<SoundSpeedAux>()
+template <>
+InputParameters
+validParams<SoundSpeedAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("v", "specific volume");
@@ -12,17 +13,15 @@ InputParameters validParams<SoundSpeedAux>()
   return params;
 }
 
-SoundSpeedAux::SoundSpeedAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+SoundSpeedAux::SoundSpeedAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 
-SoundSpeedAux::~SoundSpeedAux()
-{
-}
+SoundSpeedAux::~SoundSpeedAux() {}
 
 Real
 SoundSpeedAux::computeValue()

@@ -6,7 +6,7 @@
 class SoundSpeedAux;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<SoundSpeedAux>();
 
 /**

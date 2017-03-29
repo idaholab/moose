@@ -1,22 +1,20 @@
 #include "HydraulicDiameterCircularAux.h"
 
-template<>
-InputParameters validParams<HydraulicDiameterCircularAux>()
+template <>
+InputParameters
+validParams<HydraulicDiameterCircularAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("area", "Cross-sectional area");
   return params;
 }
 
-HydraulicDiameterCircularAux::HydraulicDiameterCircularAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _area(coupledValue("area"))
+HydraulicDiameterCircularAux::HydraulicDiameterCircularAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _area(coupledValue("area"))
 {
 }
 
-HydraulicDiameterCircularAux::~HydraulicDiameterCircularAux()
-{
-}
+HydraulicDiameterCircularAux::~HydraulicDiameterCircularAux() {}
 
 Real
 HydraulicDiameterCircularAux::computeValue()

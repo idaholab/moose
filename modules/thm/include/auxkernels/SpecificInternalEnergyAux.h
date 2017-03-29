@@ -5,7 +5,7 @@
 
 class SpecificInternalEnergyAux;
 
-template<>
+template <>
 InputParameters validParams<SpecificInternalEnergyAux>();
 
 /**

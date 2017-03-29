@@ -6,7 +6,7 @@
 class ReynoldsNumberAux;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<ReynoldsNumberAux>();
 
 /**

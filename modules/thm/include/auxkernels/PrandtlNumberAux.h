@@ -6,7 +6,7 @@
 class PrandtlNumberAux;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<PrandtlNumberAux>();
 
 /**

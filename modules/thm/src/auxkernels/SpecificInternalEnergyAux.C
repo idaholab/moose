@@ -1,7 +1,8 @@
 #include "SpecificInternalEnergyAux.h"
 
-template<>
-InputParameters validParams<SpecificInternalEnergyAux>()
+template <>
+InputParameters
+validParams<SpecificInternalEnergyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
@@ -10,17 +11,15 @@ InputParameters validParams<SpecificInternalEnergyAux>()
   return params;
 }
 
-SpecificInternalEnergyAux::SpecificInternalEnergyAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+SpecificInternalEnergyAux::SpecificInternalEnergyAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _rho(coupledValue("rhoA")),
     _rhou(coupledValue("rhouA")),
     _rhoE(coupledValue("rhoEA"))
 {
 }
 
-SpecificInternalEnergyAux::~SpecificInternalEnergyAux()
-{
-}
+SpecificInternalEnergyAux::~SpecificInternalEnergyAux() {}
 
 Real
 SpecificInternalEnergyAux::computeValue()

@@ -5,7 +5,7 @@
 
 class HydraulicDiameterAux;
 
-template<>
+template <>
 InputParameters validParams<HydraulicDiameterAux>();
 
 /**
@@ -22,6 +22,5 @@ protected:
 
   const VariableValue & _area;
 };
-
 
 #endif /* HYDRAULICDIAMETERAUX_H */

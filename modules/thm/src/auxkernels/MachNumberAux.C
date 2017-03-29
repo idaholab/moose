@@ -2,8 +2,9 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-template<>
-InputParameters validParams<MachNumberAux>()
+template <>
+InputParameters
+validParams<MachNumberAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("u_vel", "x-component of phase velocity");
@@ -13,8 +14,8 @@ InputParameters validParams<MachNumberAux>()
   return params;
 }
 
-MachNumberAux::MachNumberAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+MachNumberAux::MachNumberAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _u_vel(coupledValue("u_vel")),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
@@ -22,9 +23,7 @@ MachNumberAux::MachNumberAux(const InputParameters & parameters) :
 {
 }
 
-MachNumberAux::~MachNumberAux()
-{
-}
+MachNumberAux::~MachNumberAux() {}
 
 Real
 MachNumberAux::computeValue()

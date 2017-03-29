@@ -6,7 +6,7 @@
 class MachNumberAux;
 class SinglePhaseFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<MachNumberAux>();
 
 /**

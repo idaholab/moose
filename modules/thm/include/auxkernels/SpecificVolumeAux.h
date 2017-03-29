@@ -5,7 +5,7 @@
 
 class SpecificVolumeAux;
 
-template<>
+template <>
 InputParameters validParams<SpecificVolumeAux>();
 
 /**
@@ -24,6 +24,5 @@ protected:
   const VariableValue & _area;
   const VariableValue & _alpha;
 };
-
 
 #endif /* SPECIFICVOLUMEAUX_H */
