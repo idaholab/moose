@@ -143,6 +143,11 @@ validParams<MooseApp>()
                                           "Continue the calculation.  If file_base is omitted then "
                                           "the most recent recovery file will be utilized");
 
+  params.addCommandLineParam<std::string>("recoversuffix",
+                                          "--recoversuffix [suffix]",
+                                          "Use a different file extension, other than cpr, "
+                                          "for a recovery file");
+
   params.addCommandLineParam<bool>("half_transient",
                                    "--half-transient",
                                    false,
@@ -225,6 +230,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _distributed_mesh_on_command_line(false),
     _recover(false),
     _restart(false),
+    _recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
@@ -444,6 +450,13 @@ MooseApp::setupOptions()
       // a dash then we are going to eventually find the newest recovery file to use
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
         _recover_base = recover_following_arg;
+
+      // Optionally get command line argument following
+      // --recoversuffix on command line
+      if (isParamValid("recoversuffix"))
+      {
+        _recover_suffix = getParam<std::string>("recoversuffix");
+      }
     }
 
     _parser.parse(_input_filename);

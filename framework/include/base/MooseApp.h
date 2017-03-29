@@ -295,6 +295,16 @@ public:
   void setRecoverFileBase(std::string recover_base) { _recover_base = recover_base; }
 
   /**
+   * The suffix for the recovery file.
+   */
+  std::string getRecoverFileSuffix() { return _recover_suffix; }
+
+  /**
+   * mutator for recover_suffix
+   */
+  void setRecoverFileSuffix(std::string recover_suffix) { _recover_suffix = recover_suffix; }
+
+  /**
    *  Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
@@ -602,6 +612,9 @@ protected:
 
   /// The base name to recover from.  If blank then we will find the newest recovery file.
   std::string _recover_base;
+
+  /// The file suffix to recover from.  If blank then we will use "cpr" for binary CheckpointIO.
+  std::string _recover_suffix;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
