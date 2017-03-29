@@ -1,7 +1,8 @@
 #include "ConstantMaterial.h"
 
-template<>
-InputParameters validParams<ConstantMaterial>()
+template <>
+InputParameters
+validParams<ConstantMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<Real>("value", 0., "Constant value being assigned into the property");
@@ -9,16 +10,14 @@ InputParameters validParams<ConstantMaterial>()
   return params;
 }
 
-ConstantMaterial::ConstantMaterial(const InputParameters & parameters) :
-    Material(parameters),
+ConstantMaterial::ConstantMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _value(getParam<Real>("value")),
     _property(declareProperty<Real>(getParam<std::string>("property_name")))
 {
 }
 
-ConstantMaterial::~ConstantMaterial()
-{
-}
+ConstantMaterial::~ConstantMaterial() {}
 
 void
 ConstantMaterial::computeQpProperties()

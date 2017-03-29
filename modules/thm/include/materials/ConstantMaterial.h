@@ -5,7 +5,7 @@
 
 class ConstantMaterial;
 
-template<>
+template <>
 InputParameters validParams<ConstantMaterial>();
 
 /**
