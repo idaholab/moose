@@ -59,7 +59,7 @@ protected:
 
   const unsigned int _mesh_dimension;
 
-  VectorValue<unsigned> _vars;
+  std::vector<unsigned int> _vars;
 };
 
 #endif

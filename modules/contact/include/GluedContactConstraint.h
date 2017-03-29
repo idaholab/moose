@@ -65,7 +65,7 @@ protected:
   unsigned int _y_var;
   unsigned int _z_var;
 
-  VectorValue<unsigned> _vars;
+  std::vector<unsigned int> _vars;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
