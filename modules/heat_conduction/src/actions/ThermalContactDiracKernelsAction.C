@@ -39,24 +39,9 @@ ThermalContactDiracKernelsAction::act()
   if (!getParam<bool>("quadrature"))
   {
     InputParameters params = _factory.getValidParams("GapHeatPointSourceMaster");
-    params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
+    params.applyParameters(parameters());
     params.set<BoundaryName>("boundary") = getParam<BoundaryName>("master");
-    params.set<BoundaryName>("slave") = getParam<BoundaryName>("slave");
-    if (isParamValid("tangential_tolerance"))
-    {
-      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
-    }
-    if (isParamValid("normal_smoothing_distance"))
-    {
-      params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
-    }
-    if (isParamValid("normal_smoothing_method"))
-    {
-      params.set<std::string>("normal_smoothing_method") =
-          getParam<std::string>("normal_smoothing_method");
-    }
-
     _problem->addDiracKernel(
-        "GapHeatPointSourceMaster", "GapHeatPointSourceMaster_" + _name, params);
+        "GapHeatPointSourceMaster", "GapHeatPointSourceMaster_" + name(), params);
   }
 }

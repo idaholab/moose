@@ -16,33 +16,30 @@ class GapHeatTransfer;
 template <>
 InputParameters validParams<GapHeatTransfer>();
 
+/**
+ * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
+ */
 class GapHeatTransfer : public IntegratedBC
 {
 public:
   GapHeatTransfer(const InputParameters & parameters);
 
-  virtual ~GapHeatTransfer() {}
+  virtual void computeResidual() override;
 
 protected:
-  /**
-   * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation
-   */
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  virtual void computeResidual();
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned jvar);
   virtual Real gapLength() const;
   virtual Real dgapLength(Real normalComponent) const;
-
   virtual Real computeSlaveFluxContribution(Real grad_t);
-
   virtual void computeGapValues();
 
   bool _gap_geometry_params_set;
   GapConductance::GAP_GEOMETRY _gap_geometry_type;
 
-  bool _quadrature;
+  const bool _quadrature;
 
   NumericVector<Number> * _slave_flux;
 
@@ -66,13 +63,7 @@ protected:
 
   bool _has_info;
 
-  const bool _xdisp_coupled;
-  const bool _ydisp_coupled;
-  const bool _zdisp_coupled;
-
-  const unsigned int _xdisp_var;
-  const unsigned int _ydisp_var;
-  const unsigned int _zdisp_var;
+  std::vector<unsigned int> _disp_vars;
 
   const VariableValue & _gap_distance_value;
   const VariableValue & _gap_temp_value;

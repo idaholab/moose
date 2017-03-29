@@ -82,7 +82,6 @@
   [./TensorMechanics]
     [./GeneralizedPlaneStrain]
       [./gps]
-        displacements = 'disp_x disp_y'
         use_displaced_mesh = true
       [../]
     [../]
@@ -186,7 +185,6 @@
 [Preconditioning]
   [./SMP]
     type = SMP
-#    full = true
     off_diag_row =    'disp_x disp_y'
     off_diag_column = 'disp_y disp_x'
   [../]
@@ -196,8 +194,6 @@
   [./mech]
     master = 8
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e+10
     normalize_penalty = true
     system = Constraint
