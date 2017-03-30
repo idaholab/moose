@@ -110,6 +110,9 @@ ContactMaster::ContactMaster(const InputParameters & parameters)
       _vars[1] = coupled("disp_y");
     if (isParamValid("disp_z"))
       _vars[2] = coupled("disp_z");
+
+    mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
+                    "will go away with the deprecation of the Solid Mechanics module).");
   }
 
   if (parameters.isParamValid("tangential_tolerance"))

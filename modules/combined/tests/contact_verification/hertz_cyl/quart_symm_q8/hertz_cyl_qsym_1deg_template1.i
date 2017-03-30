@@ -1,6 +1,5 @@
 [GlobalParams]
   order = SECOND
-  family = LAGRANGE
   volumetric_locking_correction = true
   displacements = 'disp_x disp_y'
 []
@@ -271,8 +270,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -342,9 +339,6 @@
   [./interface]
     master = 3
     slave = 4
-    disp_x = disp_x
-    disp_y = disp_y
-    order = SECOND
     system = constraint
     normalize_penalty = true
     tangential_tolerance = 1e-3

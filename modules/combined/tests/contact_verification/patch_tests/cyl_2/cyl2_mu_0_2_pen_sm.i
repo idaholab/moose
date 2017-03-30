@@ -1,5 +1,8 @@
 [Mesh]
   file = cyl2_mesh.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -10,12 +13,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -37,8 +36,6 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -319,8 +316,6 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 4
     system = constraint
     model = coulomb

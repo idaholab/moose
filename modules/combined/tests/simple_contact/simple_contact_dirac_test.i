@@ -3,23 +3,18 @@
 
 [Mesh]
   file = contact.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -42,9 +37,6 @@
   [./dummy_name]
     master = 3
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     penalty = 1e5
     formulation = kinematic
   [../]
@@ -131,7 +123,6 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'

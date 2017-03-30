@@ -1,8 +1,11 @@
 [Mesh]
   file = 8ElemTensionRelease.e
-  displacements = 'disp_x disp_y'
   partitioner = centroid
   centroid_partitioner_direction = x
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
 []
 
 [Functions]
@@ -15,20 +18,13 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-[] # Variables
+[]
 
 [AuxVariables]
   [./status]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./pid]
     order = CONSTANT
@@ -47,8 +43,6 @@
   [./dummy_name]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e6
     model = frictionless
     tangential_tolerance = 0.01
@@ -72,7 +66,6 @@
 []
 
 [BCs]
-
   [./lateral]
     type = PresetBC
     variable = disp_x
@@ -93,11 +86,9 @@
     boundary = 4
     value = 0.0
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -119,12 +110,10 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
@@ -143,8 +132,8 @@
     type = SimplePredictor
     scale = 1.0
   [../]
-[] # Executioner
+[]
 
 [Outputs]
   exodus = true
-[] # Output
+[]

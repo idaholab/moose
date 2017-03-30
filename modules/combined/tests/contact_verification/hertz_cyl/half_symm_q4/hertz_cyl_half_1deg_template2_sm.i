@@ -1,5 +1,8 @@
 [Mesh]
   file = hertz_cyl_half_1deg.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -30,12 +33,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -389,8 +388,6 @@
   [./interface]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
     system = constraint
     model = coulomb
     formulation = kinematic

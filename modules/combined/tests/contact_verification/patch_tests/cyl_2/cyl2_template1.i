@@ -6,8 +6,6 @@
 #
 
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   volumetric_locking_correction = true
   displacements = 'disp_x disp_y'
 []

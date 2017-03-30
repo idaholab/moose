@@ -1,8 +1,10 @@
 [Mesh]
   file = sliding_elastic_blocks_2d.e
-  displacements = 'disp_x disp_y'
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
 
 [Variables]
   [./disp_x]
@@ -13,8 +15,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -205,15 +205,10 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu     superlu_dist'
-
 
   line_search = 'none'
 
@@ -250,8 +245,6 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 2
     model = coulomb
     system = constraint
@@ -264,7 +257,7 @@
 [Dampers]
   [./contact_slip]
     type = ContactSlipDamper
-    master = '2'
-    slave = '3'
+    slave = 3
+    master = 2
   [../]
 []
