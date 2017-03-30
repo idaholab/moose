@@ -17,8 +17,8 @@
     cli_args = 'Variables/z/initial_condition=0.999 Outputs/file_base=waterncg_gas'
   [../]
   [./theis]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'theis.i'
-    exodiff = "theis_out.e"
+    csvdiff = "theis_csvout.csv"
   [../]
 []
