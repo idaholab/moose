@@ -5,10 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "CavityPressurePPAction.h"
-
 #include "Factory.h"
 #include "FEProblem.h"
-#include "Parser.h"
 
 template <>
 InputParameters
@@ -33,11 +31,9 @@ CavityPressurePPAction::act()
   params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
   params.set<std::string>("quantity") = "cavity_pressure";
 
-  if (isParamValid("output"))
-    _problem->addPostprocessor(
-        "CavityPressurePostprocessor", getParam<std::string>("output"), params);
-  else
-    _problem->addPostprocessor("CavityPressurePostprocessor", _name, params);
+  _problem->addPostprocessor("CavityPressurePostprocessor",
+                             isParamValid("output") ? getParam<std::string>("output") : _name,
+                             params);
 
   if (isParamValid("output_initial_moles"))
   {
