@@ -237,12 +237,20 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
 {
   std::string s = "String";
   if (cpp_type.find("std::vector") != std::string::npos ||
-      cpp_type.find("MultiMooseEnum") != std::string::npos ||
-      cpp_type.find("VectorPostprocessorName") != std::string::npos ||
-      cpp_type.find("libMesh::Point") != std::string::npos ||
       cpp_type.find("libMesh::VectorValue") != std::string::npos ||
       cpp_type.find("libMesh::TensorValue") != std::string::npos)
-    s = "Array";
+  {
+    // Get the template type and use its basic type for the array type
+    pcrecpp::RE r("^[^<]+<\\s*(.*)\\s*>$");
+    std::string t;
+    r.FullMatch(cpp_type, &t);
+    s = "Array:" + basicCppType(t);
+  }
+  else if (cpp_type.find("MultiMooseEnum") != std::string::npos ||
+           cpp_type.find("VectorPostprocessorName") != std::string::npos)
+    s = "Array:String";
+  else if (cpp_type.find("libMesh::Point") != std::string::npos)
+    s = "Array:Real";
   else if (cpp_type == "int" || cpp_type == "unsigned int" || cpp_type == "short" ||
            cpp_type == "unsigned short" || cpp_type == "char" || cpp_type == "unsigned char" ||
            cpp_type == "long" || cpp_type == "unsigned long")

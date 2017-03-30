@@ -84,7 +84,7 @@ class TestJSON(unittest.TestCase):
 
         params = exe["actions"]["CreateExecutionerAction"]["parameters"]
         self.assertEqual(params["active"]["cpp_type"], "std::vector<std::string>")
-        self.assertEqual(params["active"]["basic_type"], "Array")
+        self.assertEqual(params["active"]["basic_type"], "Array:String")
         self.assertEqual(params["type"]["cpp_type"], "std::string")
         self.assertEqual(params["type"]["basic_type"], "String")
 
