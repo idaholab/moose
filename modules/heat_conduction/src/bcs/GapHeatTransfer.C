@@ -9,18 +9,15 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
+#include "AddVariableAction.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
-
-Threads::spin_mutex slave_flux_mutex;
 
 template <>
 InputParameters
 validParams<GapHeatTransfer>()
 {
-  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
-
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
@@ -56,9 +53,20 @@ validParams<GapHeatTransfer>()
                         "gap_temp should NOT be provided (and will be "
                         "ignored) however paired_boundary IS then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
+
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   params.addParam<MooseEnum>("order", orders, "The finite element order");
+
   params.addParam<bool>(
       "warnings", false, "Whether to output warning messages concerning nodes not being found");
+
+  params.addCoupledVar("disp_x", "The x displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
+
+  params.addCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
 
   // Node based options
   params.addCoupledVar("gap_distance", "Distance across the gap");
@@ -83,12 +91,7 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
     _gap_distance(std::numeric_limits<Real>::max()),
     _edge_multiplier(1.0),
     _has_info(false),
-    _xdisp_coupled(isCoupled("disp_x")),
-    _ydisp_coupled(isCoupled("disp_y")),
-    _zdisp_coupled(isCoupled("disp_z")),
-    _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
-    _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-    _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+    _disp_vars(3, libMesh::invalid_uint),
     _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
     _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
     _penetration_locator(
@@ -99,6 +102,25 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
                            Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
     _warnings(getParam<bool>("warnings"))
 {
+  if (isParamValid("displacements"))
+  {
+    // modern parameter scheme for displacements
+    for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+      _disp_vars[i] = coupled("displacements", i);
+  }
+  else
+  {
+    // Legacy parameter scheme for displacements
+    if (isParamValid("disp_x"))
+      _disp_vars[0] = coupled("disp_x");
+    if (isParamValid("disp_y"))
+      _disp_vars[1] = coupled("disp_y");
+    if (isParamValid("disp_z"))
+      _disp_vars[2] = coupled("disp_z");
+
+    // TODO: these are only used in one Bison test. Deprecate soon!
+  }
+
   if (_quadrature)
   {
     if (!parameters.isParamValid("paired_boundary"))
@@ -133,7 +155,7 @@ GapHeatTransfer::computeQpResidual()
   computeGapValues();
 
   if (!_has_info)
-    return 0;
+    return 0.0;
 
   Real grad_t = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp];
 
@@ -141,7 +163,7 @@ GapHeatTransfer::computeQpResidual()
   // side of the gap.
   if (!_quadrature)
   {
-    Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
     const Real slave_flux = computeSlaveFluxContribution(grad_t);
     _slave_flux->add(_var.dofIndices()[_i], slave_flux);
   }
@@ -161,7 +183,7 @@ GapHeatTransfer::computeQpJacobian()
   computeGapValues();
 
   if (!_has_info)
-    return 0;
+    return 0.0;
 
   return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] +
                            _edge_multiplier * _gap_conductance[_qp]) *
@@ -174,27 +196,18 @@ GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
   computeGapValues();
 
   if (!_has_info)
-    return 0;
+    return 0.0;
 
-  unsigned coupled_component(0);
-  bool active(false);
-  if (_xdisp_coupled && jvar == _xdisp_var)
-  {
-    coupled_component = 0;
-    active = true;
-  }
-  else if (_ydisp_coupled && jvar == _ydisp_var)
-  {
-    coupled_component = 1;
-    active = true;
-  }
-  else if (_zdisp_coupled && jvar == _zdisp_var)
-  {
-    coupled_component = 2;
-    active = true;
-  }
+  unsigned int coupled_component;
+  bool active = false;
+  for (coupled_component = 0; coupled_component < _disp_vars.size(); ++coupled_component)
+    if (jvar == _disp_vars[coupled_component])
+    {
+      active = true;
+      break;
+    }
 
-  Real dRdx(0);
+  Real dRdx = 0.0;
   if (active)
   {
     // Compute dR/du_[xyz]
@@ -241,7 +254,7 @@ GapHeatTransfer::gapLength() const
   if (_has_info)
     return GapConductance::gapLength(_gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap);
 
-  return 1;
+  return 1.0;
 }
 
 Real
@@ -302,7 +315,6 @@ GapHeatTransfer::computeGapValues()
     }
   }
 
-  Point current_point(_q_point[_qp]);
   GapConductance::computeGapRadii(
-      _gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
+      _gap_geometry_type, _q_point[_qp], _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
 }

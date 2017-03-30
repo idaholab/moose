@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
+#include "AddVariableAction.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
@@ -20,11 +21,8 @@ template <>
 InputParameters
 validParams<GapConductance>()
 {
-  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
-
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>(
-      "appended_property_name", "", "Name appended to material properties to make them unique");
+  params += GapConductance::actionParameters();
 
   params.addRequiredCoupledVar("variable", "Temperature variable");
 
@@ -47,15 +45,6 @@ validParams<GapConductance>()
                         "ignored); however, paired_boundary and variable are "
                         "then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<bool>(
-      "warnings", false, "Whether to output warning messages concerning nodes not being found");
-
-  // Common
-  params.addRangeCheckedParam<Real>(
-      "min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
-  params.addRangeCheckedParam<Real>(
-      "max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
 
   // Deprecated parameter
   MooseEnum coord_types("default XYZ");
@@ -65,10 +54,27 @@ validParams<GapConductance>()
       "Gap calculation type (default or XYZ).",
       "The functionality of this parameter is replaced by 'gap_geometry_type'.");
 
+  params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
+
+  params.addParam<bool>("use_displaced_mesh",
+                        true,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that in "
+                        "the case this is true but no displacements "
+                        "are provided in the Mesh block the "
+                        "undisplaced mesh will still be used.");
+
+  return params;
+}
+
+InputParameters
+GapConductance::actionParameters()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>(
+      "appended_property_name", "", "Name appended to material properties to make them unique");
   MooseEnum gap_geom_types("PLATE CYLINDER SPHERE");
-  params.addParam<MooseEnum>("gap_geometry_type",
-                             gap_geom_types,
-                             "Gap calculation type. Choices are: " + gap_geom_types.getRawNames());
+  params.addParam<MooseEnum>("gap_geometry_type", gap_geom_types, "Gap calculation type.");
 
   params.addParam<RealVectorValue>("cylinder_axis_point_1",
                                    "Start point for line defining cylindrical axis");
@@ -76,7 +82,6 @@ validParams<GapConductance>()
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
-  params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
   params.addRangeCheckedParam<Real>("emissivity_1",
                                     0.0,
                                     "emissivity_1>=0 & emissivity_1<=1",
@@ -86,13 +91,17 @@ validParams<GapConductance>()
                                     "emissivity_2>=0 & emissivity_2<=1",
                                     "The emissivity of the cladding surface");
 
-  params.addParam<bool>("use_displaced_mesh",
-                        true,
-                        "Whether or not this object should use the "
-                        "displaced mesh for computation.  Note that in "
-                        "the case this is true but no displacements "
-                        "are provided in the Mesh block the "
-                        "undisplaced mesh will still be used.");
+  params.addParam<bool>(
+      "warnings", false, "Whether to output warning messages concerning nodes not being found");
+
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
+
+  // Common
+  params.addRangeCheckedParam<Real>(
+      "min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
+  params.addRangeCheckedParam<Real>(
+      "max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
 
   return params;
 }

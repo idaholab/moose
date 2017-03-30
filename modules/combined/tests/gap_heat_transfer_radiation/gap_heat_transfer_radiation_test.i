@@ -47,7 +47,6 @@
 []
 
 [Functions]
-
   [./temp]
     type = PiecewiseLinear
     x = '0   1'
@@ -101,7 +100,6 @@
 []
 
 [Materials]
-
   [./heat1]
     type = HeatConductionMaterial
     block = '1 2'
@@ -113,24 +111,16 @@
     block = '1 2'
     density = 1.0
   [../]
-
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
 
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
 
-
   line_search = 'none'
-
 
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-10
@@ -144,7 +134,6 @@
 []
 
 [Postprocessors]
-
   [./temp_left]
     type = SideAverageValue
     boundary = 2

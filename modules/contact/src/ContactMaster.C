@@ -424,12 +424,6 @@ ContactMaster::contactModel(std::string name)
     model = CM_COULOMB;
   else if ("coulomb_mp" == name)
     model = CM_COULOMB_MP;
-  else if ("experimental" == name)
-  {
-    model = CM_FRICTIONLESS;
-    ::mooseWarning(
-        "Use of contact model \"experimental\" is deprecated.  Use \"frictionless\" instead.");
-  }
   else
     ::mooseError("Invalid contact model found: ", name);
 
