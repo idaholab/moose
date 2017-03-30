@@ -26,6 +26,7 @@ class Tests(Testing.PeacockTester):
         Testing.process_events(self.qapp, t=5)
         app.main_widget.setTab(result_plugin.tabName())
         Testing.set_window_size(vtkwin)
+        Testing.process_events(self.qapp, t=1)
         vtkwin.onWrite(filename)
         self.assertFalse(Testing.gold_diff(filename))
         return app
