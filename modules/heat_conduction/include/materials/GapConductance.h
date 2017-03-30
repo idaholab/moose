@@ -24,15 +24,13 @@ public:
 
   GapConductance(const InputParameters & parameters);
 
-  virtual ~GapConductance() {}
+  static InputParameters actionParameters();
 
   static Real gapLength(
       const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real min_gap, Real max_gap);
 
   static Real gapRect(Real distance, Real min_gap, Real max_gap);
-
   static Real gapCyl(Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
-
   static Real gapSphere(Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
 
   static void setGapGeometryParameters(const InputParameters & params,
@@ -51,9 +49,10 @@ public:
                               Real & r2,
                               Real & radius);
 
+  virtual void computeProperties() override;
+
 protected:
-  virtual void computeProperties();
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /**
    * Override this to compute the conductance at _qp

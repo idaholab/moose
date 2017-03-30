@@ -54,10 +54,10 @@
 # fail exodiff. For this reason the parameter execute_on = initial should not
 # be used. That parameter is left to default settings in these regression tests.
 #
- [GlobalParams]
+[GlobalParams]
   order = SECOND
   family = LAGRANGE
-  []
+[]
 
 
 [Mesh]
@@ -65,7 +65,6 @@
 []
 
 [Functions]
-
   [./temp]
     type = PiecewiseLinear
     x = '0   1'
@@ -145,8 +144,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -163,15 +160,14 @@
      order = fifth
      side_order = seventh
   [../]
-
 []
 
 [Outputs]
   exodus = true
-   [./Console]
+  [./Console]
     type = Console
     perf_log = true
-   [../]
+  [../]
 []
 
 [Postprocessors]

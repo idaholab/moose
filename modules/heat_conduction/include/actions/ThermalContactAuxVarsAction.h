@@ -13,8 +13,8 @@ class ThermalContactAuxVarsAction : public Action
 {
 public:
   ThermalContactAuxVarsAction(const InputParameters & params);
-  virtual ~ThermalContactAuxVarsAction() {}
-  virtual void act();
+
+  virtual void act() override;
 
   static std::string getGapValueName(const InputParameters & param)
   {

@@ -13,8 +13,8 @@ class ThermalContactMaterialsAction : public Action
 {
 public:
   ThermalContactMaterialsAction(const InputParameters & params);
-  virtual ~ThermalContactMaterialsAction() {}
-  virtual void act();
+
+  virtual void act() override;
 };
 
 template <>
