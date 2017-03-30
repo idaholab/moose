@@ -7,9 +7,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 50
+  nx = 100
   xmax = 2000
-  bias_x = 1.1
+  bias_x = 1.05
 []
 
 [Problem]
@@ -25,7 +25,19 @@
 
 [AuxVariables]
   [./saturation_gas]
-    order = CONSTANT
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./x1]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./y0]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./pgas2]
+    order = FIRST
     family = MONOMIAL
   [../]
 []
@@ -38,13 +50,36 @@
     phase = 1
     execute_on = timestep_end
   [../]
+  [./x1]
+    type = PorousFlowPropertyAux
+    variable = x1
+    property = mass_fraction
+    phase = 0
+    fluid_component = 1
+    execute_on = timestep_end
+  [../]
+  [./y0]
+    type = PorousFlowPropertyAux
+    variable = y0
+    property = mass_fraction
+    phase = 1
+    fluid_component = 0
+    execute_on = timestep_end
+  [../]
+  [./pgas2]
+    type = PorousFlowPropertyAux
+    variable = pgas2
+    property = pressure
+    phase = 1
+    execute_on = timestep_end
+  [../]
 []
 
 [Variables]
   [./pgas]
     initial_condition = 20e6
   [../]
-  [./z]
+  [./zi]
     initial_condition = 0
   [../]
 []
@@ -63,19 +98,19 @@
   [./mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
-    variable = z
+    variable = zi
   [../]
   [./flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
-    variable = z
+    variable = zi
   [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pgas z'
+    porous_flow_vars = 'pgas zi'
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
@@ -103,19 +138,21 @@
   [./waterncg]
     type = PorousFlowFluidStateWaterNCG
     gas_porepressure = pgas
-    z = z
+    z = zi
     gas_fp = co2
     water_fp = water
     at_nodes = true
     temperature_unit = Celsius
+    sat_lr = 0.1
   [../]
   [./waterncg_qp]
     type = PorousFlowFluidStateWaterNCG
     gas_porepressure = pgas
-    z = z
+    z = zi
     gas_fp = co2
     water_fp = water
     temperature_unit = Celsius
+    sat_lr = 0.1
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
@@ -129,13 +166,15 @@
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     at_nodes = true
-    n = 1
+    n = 2
     phase = 0
+    s_res = 0.1
+    sum_s_res = 0.1
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     at_nodes = true
-    n = 1
+    n = 2
     phase = 1
   [../]
   [./relperm_all]
@@ -158,8 +197,8 @@
   [./source]
     type = PorousFlowSquarePulsePointSource
     point = '0 0 0'
-    mass_flux = 0.5
-    variable = z
+    mass_flux = 2
+    variable = zi
   [../]
 []
 
@@ -175,13 +214,30 @@
 
 [Executioner]
   type = Transient
-  solve_type = Newton
-  end_time = 3e4
-  dtmax = 1e4
+  solve_type = NEWTON
+  end_time = 1e5
+  dtmax = 1e5
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
-    growth_factor = 2
+    growth_factor = 1.5
+  [../]
+[]
+
+[VectorPostprocessors]
+  [./line]
+    type = NodalValueSampler
+    sort_by = x
+    variable = 'pgas zi'
+    execute_on = 'timestep_end'
+  [../]
+  [./line2]
+    type = LineValueSampler
+    sort_by = x
+    start_point = '0 0 0'
+    end_point = '1000 0 0'
+    num_points = 1500
+    variable = 'saturation_gas x1 pgas'
   [../]
 []
 
@@ -191,19 +247,38 @@
     point =  '4 0 0'
     variable = pgas
   [../]
-  [./z]
+  [./sgas]
+    type = PointValue
+    point =  '4 0 0'
+    variable = saturation_gas
+  [../]
+  [./zi]
     type = PointValue
     point = '4 0 0'
-    variable = z
+    variable = zi
   [../]
   [./massgas]
     type = PorousFlowFluidMass
     fluid_component = 1
+  [../]
+  [./x1]
+    type = PointValue
+    point =  '4 0 0'
+    variable = x1
+  [../]
+  [./y0]
+    type = PointValue
+    point =  '4 0 0'
+    variable = y0
   [../]
 []
 
 [Outputs]
   print_linear_residuals = false
   print_perf_log = true
-  exodus = true
+  [./csvout]
+    type = CSV
+    execute_on = timestep_end
+    execute_vector_postprocessors_on = final
+  [../]
 []
