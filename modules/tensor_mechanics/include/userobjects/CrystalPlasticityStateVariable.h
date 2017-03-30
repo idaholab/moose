@@ -23,12 +23,15 @@ public:
   CrystalPlasticityStateVariable(const InputParameters & parameters);
 
   virtual bool updateStateVariable(unsigned int qp, Real dt, std::vector<Real> & val) const;
-  virtual void initSlipSysProps(std::vector<Real> & val) const;
+  virtual void initSlipSysProps(std::vector<Real> & val, const Point & q_point) const;
 
 protected:
   virtual void readInitialValueFromFile(std::vector<Real> & val) const;
 
   virtual void readInitialValueFromInline(std::vector<Real> & val) const;
+
+  virtual void provideInitialValueByUser(std::vector<Real> & /*val*/,
+                                         const Point & /*q_point*/) const;
 
   unsigned int _num_mat_state_var_evol_rate_comps;
 

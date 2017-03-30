@@ -194,7 +194,7 @@ FiniteStrainUObasedCP::initQpStatefulProperties()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
     // Initializes slip system related properties
-    _uo_state_vars[i]->initSlipSysProps((*_mat_prop_state_vars[i])[_qp]);
+    _uo_state_vars[i]->initSlipSysProps((*_mat_prop_state_vars[i])[_qp], _q_point[_qp]);
     (*_mat_prop_state_vars_old[i])[_qp] = (*_mat_prop_state_vars[i])[_qp];
   }
 }

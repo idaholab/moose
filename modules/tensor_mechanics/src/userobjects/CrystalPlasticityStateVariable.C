@@ -15,7 +15,7 @@ validParams<CrystalPlasticityStateVariable>()
       "state_variable_file_name",
       "",
       "Name of the file containing the initial values of slip system resistances");
-  MooseEnum intvar_read_options("file_input inline_input ", "inline_input");
+  MooseEnum intvar_read_options("file_input inline_input user_input", "inline_input");
   params.addParam<MooseEnum>(
       "intvar_read_type",
       intvar_read_options,
@@ -64,7 +64,8 @@ CrystalPlasticityStateVariable::CrystalPlasticityStateVariable(const InputParame
 }
 
 void
-CrystalPlasticityStateVariable::initSlipSysProps(std::vector<Real> & val) const
+CrystalPlasticityStateVariable::initSlipSysProps(std::vector<Real> & val,
+                                                 const Point & q_point) const
 {
   switch (_intvar_read_type)
   {
@@ -73,6 +74,9 @@ CrystalPlasticityStateVariable::initSlipSysProps(std::vector<Real> & val) const
       break;
     case 1:
       readInitialValueFromInline(val);
+      break;
+    case 2:
+      provideInitialValueByUser(val, q_point);
       break;
     default:
       mooseError("CrystalPlasticityStateVariable: Read option for initial value of internal "
@@ -126,6 +130,15 @@ CrystalPlasticityStateVariable::readInitialValueFromInline(std::vector<Real> & v
     for (unsigned int j = is; j <= ie; ++j)
       val[j] = _group_values[i];
   }
+}
+
+void
+CrystalPlasticityStateVariable::provideInitialValueByUser(std::vector<Real> & /*val*/,
+                                                          const Point & /*q_point*/) const
+{
+  mooseError("Error CrystalPlasticityStateVariable: User has to overwrite "
+             "'provideInitialValueByUser' function"
+             "in order to provide specific initial values based on quadrature point location.");
 }
 
 bool
