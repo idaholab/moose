@@ -143,6 +143,18 @@ Water97FluidPropertiesTest::b23()
 }
 
 void
+Water97FluidPropertiesTest::b2bc()
+{
+  REL_TEST("b2bc", _fp->b2bc(100.0e6), 0.3516004323e7, 1.0e-8);
+}
+
+void
+Water97FluidPropertiesTest::b3ab()
+{
+  REL_TEST("b3ab", _fp->b3ab(25.0e6), 2.095936454e6, 1.0e-8);
+}
+
+void
 Water97FluidPropertiesTest::pSat()
 {
   REL_TEST("pSat", _fp->pSat(300), 3.53658941e3, 1.0e-8);
@@ -405,6 +417,37 @@ Water97FluidPropertiesTest::properties()
   REL_TEST("k", _fp->k(_fp->rho(1.0e6, 323.15), 323.15), 0.641, 1.0e-4);
   REL_TEST("k", _fp->k(_fp->rho(20.0e6, 623.15), 623.15), 0.4541, 1.0e-4);
   REL_TEST("k", _fp->k(_fp->rho(50.0e6, 773.15), 773.15), 0.2055, 1.0e-4);
+
+  // Backwards equation T(p,h)
+  // Region 1
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(3.0e6, 500.0e3), 0.391798509e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(80.0e6, 500.0e3), 0.378108626e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(80.0e6, 1500.0e3), 0.611041229e3, 1.0e-8);
+
+  // Region 2 (subregion a)
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(1.0e3, 3000.0e3), 0.534433241e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(3.0e6, 3000.0e3), 0.575373370e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(3.0e6, 4000.0e3), 0.101077577e4, 1.0e-8);
+
+  // Region 2 (subregion b)
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(5.0e6, 3500.0e3), 0.801299102e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(5.0e6, 4000.0e3), 0.101531583e4, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(25.0e6, 3500.0e3), 0.875279054e3, 1.0e-8);
+
+  // Region 2 (subregion c)
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(40.0e6, 2700.0e3), 0.743056411e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(60.0e6, 2700.0e3), 0.791137067e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(60.0e6, 3200.0e3), 0.882756860e3, 1.0e-8);
+
+  // Region 3 (subregion a)
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(20.0e6, 1700.0e3), 0.6293083892e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(50.0e6, 2000.0e3), 0.6905718338e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(100.0e6, 2100.0e3), 0.7336163014e3, 1.0e-8);
+
+  // Region 3 (subregion b)
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(20.0e6, 2500.0e3), 0.6418418053e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(50.0e6, 2400.0e3), 0.7351848618e3, 1.0e-8);
+  REL_TEST("T(p,h)", _fp->temperature_from_ph(100.0e6, 2700.0e3), 0.8420460876e3, 1.0e-8);
 }
 
 void
