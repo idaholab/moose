@@ -319,6 +319,59 @@ public:
   unsigned int inRegion(Real pressure, Real temperature) const;
 
   /**
+   * Provides the correct subregion index for a (P,T) point in
+   * region 3. From Revised Supplementary Release on Backward Equations for
+   * Specific Volume as a Function of Pressure and Temperature v(p,T)
+   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param temperature water temperature (K)
+   * @return subregion index
+   */
+  unsigned int subregion3(Real pressure, Real temperature) const;
+
+  /**
+   * Specific volume in all subregions of region 3 EXCEPT subregion n (13).
+   *
+   * @param pi scaled water pressure
+   * @param theta scaled water temperature
+   * @param a to e constants
+   * @param sid subregion ID of the subregion
+   * @return volume water specific volume (m^3/kg)
+   */
+  Real subregionVolume(
+      Real pi, Real theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const;
+
+  /**
+   * Density function for Region 3 - supercritical water and steam
+   *
+   * To avoid iteration, use the backwards equations for region 3
+   * from Revised Supplementary Release on Backward Equations for
+   * Specific Volume as a Function of Pressure and Temperature v(p,T)
+   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam.
+   *
+   * @param pressure water pressure (Pa)
+   * @param temperature water temperature (K)
+   * @return density (kg/m^3) in region 3
+   */
+  Real densityRegion3(Real pressure, Real temperature) const;
+
+  /**
+   * Henry's law constant
+   * Note: not implemented in this fluid property
+   */
+  virtual Real henryConstant(Real temperature) const override;
+
+  /**
+   * Henry's law constant and derivative wrt temperature
+   * Note: not implemented in this fluid property
+   */
+  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
+
+protected:
+  /**
    * Gibbs free energy in Region 1 - single phase liquid region
    *
    * From Eq. (7) From Revised Release on the IAPWS Industrial
@@ -550,59 +603,6 @@ public:
    */
   Real d2gamma5_dpitau(Real pi, Real tau) const;
 
-  /**
-   * Provides the correct subregion index for a (P,T) point in
-   * region 3. From Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam
-   *
-   * @param pressure water pressure (Pa)
-   * @param temperature water temperature (K)
-   * @return subregion index
-   */
-  unsigned int subregion3(Real pressure, Real temperature) const;
-
-  /**
-   * Specific volume in all subregions of region 3 EXCEPT subregion n (13).
-   *
-   * @param pi scaled water pressure
-   * @param theta scaled water temperature
-   * @param a to e constants
-   * @param sid subregion ID of the subregion
-   * @return volume water specific volume (m^3/kg)
-   */
-  Real subregionVolume(
-      Real pi, Real theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const;
-
-  /**
-   * Density function for Region 3 - supercritical water and steam
-   *
-   * To avoid iteration, use the backwards equations for region 3
-   * from Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam.
-   *
-   * @param pressure water pressure (Pa)
-   * @param temperature water temperature (K)
-   * @return density (kg/m^3) in region 3
-   */
-  Real densityRegion3(Real pressure, Real temperature) const;
-
-  /**
-   * Henry's law constant
-   * Note: not implemented in this fluid property
-   */
-  virtual Real henryConstant(Real temperature) const override;
-
-  /**
-   * Henry's law constant and derivative wrt temperature
-   * Note: not implemented in this fluid property
-   */
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
-
-protected:
   /// Water molar mass (kg/mol)
   const Real _Mh2o;
   /// Specific gas constant for H2O (universal gas constant / molar mass of water - J/kg/K)
