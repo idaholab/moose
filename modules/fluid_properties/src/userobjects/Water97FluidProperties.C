@@ -810,8 +810,9 @@ Water97FluidProperties::pSat_dT(Real temperature, Real & psat, Real & dpsat_dT) 
   Real dpsat = 4.0 * std::pow(2.0 * c / denominator, 3.0);
   dpsat *= (2.0 * dc_dtheta / denominator -
             2.0 * c / denominator / denominator *
-                (-db_dtheta + std::pow(b * b - 4.0 * a * c, -0.5) *
-                                  (b * db_dtheta - 2.0 * da_dtheta * c - 2.0 * a * dc_dtheta)));
+                (-db_dtheta +
+                 std::pow(b * b - 4.0 * a * c, -0.5) *
+                     (b * db_dtheta - 2.0 * da_dtheta * c - 2.0 * a * dc_dtheta)));
   dpsat_dT = dpsat * dtheta_dT * 1.0e6;
 }
 
