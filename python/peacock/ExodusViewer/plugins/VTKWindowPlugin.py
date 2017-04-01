@@ -65,6 +65,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self.__qvtkinteractor = RetinaQVTKRenderWindowInteractor(self)
         else:
             self.__qvtkinteractor = QVTKRenderWindowInteractor(self)
+        self.__qvtkinteractor.hide()
 
         # Member variables
         self._highlight = None
@@ -107,6 +108,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._initialized = False
         self._reset_required = False
         self._adjustTimers(start=['initialize'], stop=['update'])
+        self.__qvtkinteractor.hide()
         self.windowReset.emit()
 
     def onReloadWindow(self):
@@ -152,6 +154,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
                 self.reset()
                 return
 
+        self.__qvtkinteractor.show()
         # Call the base class initialization (this enables the plugin)
         super(VTKWindowPlugin, self).initialize()
 
