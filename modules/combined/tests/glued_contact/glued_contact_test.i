@@ -1,5 +1,8 @@
 [Mesh]
   file = glued_contact_test.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -20,20 +23,12 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
-[] # Variables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -47,9 +42,6 @@
   [./dummy_name]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     penalty = 1e6
     model = glued
     formulation = kinematic
@@ -57,7 +49,6 @@
 []
 
 [BCs]
-
   [./bottom_lateral]
     type = FunctionPresetBC
     variable = disp_x
@@ -85,11 +76,9 @@
     boundary = 4
     value = 0.0
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -113,24 +102,18 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-#  petsc_options_iname = '-pc_type -pc_hypre_type -snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart'
-#  petsc_options_value = 'hypre    boomeramg      ls         basic    basic                    101'
+  #petsc_options_iname = '-pc_type -pc_hypre_type -snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart'
+  #petsc_options_value = 'hypre    boomeramg      ls         basic    basic                    101'
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'ilu      101'
 
-
   line_search = 'none'
-
 
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
@@ -145,7 +128,7 @@
     type = SimplePredictor
     scale = 1.0
   [../]
-[] # Executioner
+[]
 
 [Postprocessors]
   active = ''
@@ -160,4 +143,4 @@
 [Outputs]
   file_base = out
   exodus = true
-[] # Outputs
+[]

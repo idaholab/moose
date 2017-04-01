@@ -1,6 +1,4 @@
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   volumetric_locking_correction = true
   displacements = 'disp_x disp_y'
 []
@@ -17,12 +15,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -413,8 +407,6 @@
   [./interface]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e+10

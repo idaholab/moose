@@ -1,14 +1,12 @@
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = 2blocks3d.e
-  displacements = 'disp_x disp_y disp_z'
   patch_size = 5
 []
 
@@ -106,8 +104,6 @@
 []
 
 [Preconditioning]
-  active = 'FSP'
-
   [./FSP]
     type = FSP
     # It is the starting point of splitting

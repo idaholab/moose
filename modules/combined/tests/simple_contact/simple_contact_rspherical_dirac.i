@@ -18,6 +18,9 @@
 [Mesh]
   file = simple_contact_rspherical.e
   construct_side_list_from_node_list = true
+[]
+
+[GlobalParams]
   displacements = 'disp_x'
 []
 
@@ -30,8 +33,6 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -94,12 +95,10 @@
   [./fred]
     master = 2
     slave = 3
-    disp_x = disp_x
   [../]
 []
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = '1 2 3'
@@ -109,13 +108,10 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
-
 []
 
 [Executioner]
-
   type = Transient
-
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'

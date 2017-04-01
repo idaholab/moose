@@ -1,5 +1,9 @@
 [Mesh]
   file = cyl3_mesh.e
+[]
+
+[GlobalParams]
+  order = SECOND
   displacements = 'disp_x disp_y'
 []
 
@@ -30,12 +34,8 @@
 
 [Variables]
   [./disp_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
@@ -57,38 +57,26 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./saved_x]
-    order = SECOND
   [../]
   [./saved_y]
-    order = SECOND
   [../]
   [./diag_saved_x]
-    order = SECOND
   [../]
   [./diag_saved_y]
-    order = SECOND
   [../]
   [./inc_slip_x]
-    order = SECOND
   [../]
   [./inc_slip_y]
-    order = SECOND
   [../]
   [./accum_slip_x]
-    order = SECOND
   [../]
   [./accum_slip_y]
-    order = SECOND
   [../]
   [./tang_force_x]
-    order = SECOND
   [../]
   [./tang_force_y]
-    order = SECOND
   [../]
 []
 
@@ -283,8 +271,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -301,7 +287,6 @@
   num_steps = 10
   dtmin = 1.0
   l_tol = 1e-3
-
 []
 
 [VectorPostprocessors]
@@ -348,9 +333,6 @@
   [./leftright]
     slave = 3
     master = 4
-    disp_y = disp_y
-    disp_x = disp_x
-    order = SECOND
     system = constraint
     model = coulomb
     normalize_penalty = true

@@ -1,32 +1,26 @@
 [Mesh]
   file = nodal_area_Hex20.e
+[]
+
+[GlobalParams]
+  order = SECOND
   displacements = 'displ_x displ_y displ_z'
 []
 
 [Functions]
-
   [./disp]
     type = PiecewiseLinear
     x = '0     1'
     y = '0  20e-6'
   [../]
-
 []
 
 [Variables]
   [./displ_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
-
   [./displ_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
-
   [./displ_z]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
@@ -36,16 +30,10 @@
     family = MONOMIAL
   [../]
   [./react_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./react_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./react_z]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
@@ -70,7 +58,6 @@
 []
 
 [BCs]
-
   [./move_right]
     type = FunctionPresetBC
     boundary = '1'
@@ -98,26 +85,19 @@
     variable = displ_z
     value = 0
   [../]
-
 []
 
 [Contact]
   [./dummy_name]
     master = 3
     slave = 2
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
     model = frictionless
     penalty = 1e7
-    order = SECOND
     tangential_tolerance = 1e-5
   [../]
 []
 
-
 [Materials]
-
   [./dummy]
     type = Elastic
     block = '1 2'
@@ -129,14 +109,12 @@
     youngs_modulus = 1e6
     poissons_ratio = 0
   [../]
-
 []
 
 [Executioner]
   type = Transient
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
 

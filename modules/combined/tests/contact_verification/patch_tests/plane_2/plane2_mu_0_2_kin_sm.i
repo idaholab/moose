@@ -1,5 +1,8 @@
 [Mesh]
   file = plane2_mesh.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -31,12 +34,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -58,8 +57,6 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -262,8 +259,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -280,7 +275,6 @@
   num_steps = 10
   dtmin = 1.0
   l_tol = 1e-3
-
 []
 
 [VectorPostprocessors]
@@ -326,8 +320,6 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 4
     system = constraint
     model = coulomb

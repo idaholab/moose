@@ -1,5 +1,8 @@
 [Mesh]
   file = single_point_2d.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -12,8 +15,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -179,15 +180,10 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu    superlu_dist'
-
 
   line_search = 'none'
 
@@ -217,8 +213,6 @@
   [./leftright]
     master = 2
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     model = coulomb
     system = constraint
   [../]

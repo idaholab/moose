@@ -1,12 +1,10 @@
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   volumetric_locking_correction = true
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = brick1_mesh.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Problem]
@@ -414,9 +412,6 @@
   [./leftright]
     slave = 3
     master = 4
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     system = constraint
     model = coulomb
     normalize_penalty = true

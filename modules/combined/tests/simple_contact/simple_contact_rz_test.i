@@ -9,6 +9,9 @@
 
 [Mesh]
   file = contact_rz.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -27,13 +30,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -80,8 +78,6 @@
   [./dummy_name]
     master = 3
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e5
     system = constraint
   [../]
@@ -182,7 +178,6 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'

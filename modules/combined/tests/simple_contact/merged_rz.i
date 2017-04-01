@@ -1,5 +1,8 @@
 [Mesh]
   file = merged_rz.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -161,7 +164,6 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'

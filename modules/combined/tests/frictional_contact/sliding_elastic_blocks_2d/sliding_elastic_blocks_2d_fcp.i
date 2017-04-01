@@ -1,5 +1,8 @@
 [Mesh]
   file = sliding_elastic_blocks_2d.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -36,8 +39,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -171,15 +172,10 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
-
 
   line_search = 'none'
 
@@ -214,8 +210,6 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 2
     model = glued
     penalty = 1e+6
