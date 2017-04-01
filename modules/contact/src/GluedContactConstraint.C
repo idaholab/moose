@@ -33,6 +33,10 @@ validParams<GluedContactConstraint>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
 
+  params.addCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
@@ -101,6 +105,9 @@ GluedContactConstraint::GluedContactConstraint(const InputParameters & parameter
       _vars[1] = coupled("disp_y");
     if (isParamValid("disp_z"))
       _vars[2] = coupled("disp_z");
+
+    mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
+                    "will go away with the deprecation of the Solid Mechanics module).");
   }
 
   _penetration_locator.setUpdate(false);

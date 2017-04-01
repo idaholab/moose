@@ -1,5 +1,8 @@
 [Mesh]
   file = ring2_mesh.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -10,12 +13,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -37,8 +36,6 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -315,8 +312,6 @@
   [./leftright]
     slave = 3
     master = 4
-    disp_x = disp_x
-    disp_y = disp_y
     system = constraint
     model = coulomb
     formulation = penalty

@@ -5,18 +5,12 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -67,9 +61,6 @@
     component = 0
     boundary = 3
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 
   [./master_y]
@@ -78,9 +69,6 @@
     component = 1
     boundary = 3
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 
   [./master_z]
@@ -89,9 +77,6 @@
     component = 2
     boundary = 3
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 
   [./slave_x]
@@ -100,9 +85,6 @@
     component = 0
     boundary = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 
   [./slave_y]
@@ -111,9 +93,6 @@
     component = 1
     boundary = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 
   [./slave_z]
@@ -122,9 +101,6 @@
     component = 2
     boundary = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

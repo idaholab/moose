@@ -115,6 +115,9 @@ ContactAction::act()
       if (isParamValid("disp_z"))
         displacements.push_back(getParam<NonlinearVariableName>("disp_z"));
     }
+
+    mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
+                    "will go away with the deprecation of the Solid Mechanics module).");
   }
 
   // Determine number of dimensions

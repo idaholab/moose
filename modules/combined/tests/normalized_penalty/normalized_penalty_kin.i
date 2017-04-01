@@ -1,11 +1,11 @@
 [GlobalParams]
   disp_x = disp_x
   disp_y = disp_y
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = normalized_penalty.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -24,34 +24,21 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./saved_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -78,7 +65,7 @@
     index = 0
     execute_on = timestep_end
   [../]
-[] # AuxKernels
+[]
 
 [BCs]
   [./left_x]
@@ -101,8 +88,7 @@
     boundary = '3 4'
     value = 0
   [../]
-
-[] # BCs
+[]
 
 [Materials]
   [./stiffStuff1]
@@ -111,24 +97,17 @@
 
     youngs_modulus = 3e8
     poissons_ratio = 0.0
-
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
 
-
   line_search = 'none'
-
 
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-10
@@ -137,8 +116,8 @@
   nl_max_its = 10
   dt = 1.0
   num_steps = 2
-[] # Executioner
+[]
 
 [Outputs]
   exodus = true
-[] # Output
+[]

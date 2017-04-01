@@ -1,26 +1,21 @@
 [Mesh]
   type = FileMesh
   file = simplest_contact.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Variables]
-  # Variables
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  # AuxVariables
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -48,8 +43,6 @@
     component = 0
     slave = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e6
     nodal_area = penetration
     boundary = 2
@@ -61,8 +54,6 @@
     component = 1
     slave = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e6
     nodal_area = penetration
     boundary = 3
@@ -70,7 +61,6 @@
 []
 
 [BCs]
-  # BCs
   [./left_x]
     type = DirichletBC
     variable = disp_x
@@ -98,7 +88,6 @@
 []
 
 [Materials]
-  # Materials
   [./stiffStuff1]
     type = LinearIsotropicMaterial
     block = 1

@@ -1,6 +1,9 @@
 # This is a dirac (contact formulation) version of frictionless_penalty.i
 [Mesh]
   file = blocks_2d.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -13,8 +16,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./inc_slip_x]
   [../]
@@ -162,11 +163,8 @@
 
 [Contact]
   [./leftright]
-#    system = Constraint
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
     model = frictionless
     formulation = penalty
     penalty = 1e+7

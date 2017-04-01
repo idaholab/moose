@@ -1,12 +1,11 @@
 [GlobalParams]
   order = SECOND
-  family = LAGRANGE
+  displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
 []
 
 [Mesh]
   file = hertz_cyl_half_1deg.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -403,9 +402,6 @@
   [./interface]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    order = SECOND
     system = constraint
     model = coulomb
     formulation = kinematic
