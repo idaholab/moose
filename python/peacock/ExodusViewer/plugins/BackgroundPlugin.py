@@ -1,9 +1,10 @@
 import sys
 import chigger
 from PyQt5 import QtCore, QtGui, QtWidgets
+import peacock
 from ExodusPlugin import ExodusPlugin
 
-class BackgroundPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Plugin responsible for background and labels
     """
@@ -19,16 +20,16 @@ class BackgroundPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     removeResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
 
     def __init__(self):
-        super(BackgroundPlugin, self).__init__()
+        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QGridLayout)
+        ExodusPlugin.__init__(self)
 
         # Default colors
         self._top = QtGui.QColor(111, 111, 111)
         self._bottom = QtGui.QColor(180, 180, 180)
 
         # Setup this widget
-        self.MainLayout = QtWidgets.QGridLayout()
-        self.setTitle('Background and Labels:')
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
+        self.setTitle('Background and Labels')
 
         # Top
         self.TopLabel = QtWidgets.QLabel('Background Top:')
@@ -62,6 +63,7 @@ class BackgroundPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self._variable_labels = None
         self._volume_axes = None
         self.setup()
+        self.setCollapsed(True)
 
     def color(self):
         """

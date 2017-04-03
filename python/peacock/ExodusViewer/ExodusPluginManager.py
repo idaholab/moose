@@ -10,8 +10,9 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         super(ExodusPluginManager, self).__init__(plugins=plugins, plugin_base=ExodusPlugin)
 
         # The layouts for this widget
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.MainLayout = QtWidgets.QHBoxLayout()
+
         self.LeftLayout = QtWidgets.QVBoxLayout()
         self.RightLayout = QtWidgets.QVBoxLayout()
         self.WindowLayout = QtWidgets.QHBoxLayout()

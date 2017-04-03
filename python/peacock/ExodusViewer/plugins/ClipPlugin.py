@@ -1,10 +1,11 @@
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
+import peacock
 from ExodusPlugin import ExodusPlugin
 from peacock.utils import WidgetUtils
 
-class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Controls for clipping data in x,y,z direction.
     """
@@ -27,28 +28,27 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # Setup this widget widget
         self.setTitle('Clipping')
-        self.setCheckable(True)
-        self.setChecked(False)
-        self.clicked.connect(self.clip)
 
-        self.MainLayout = QtWidgets.QHBoxLayout()
-        self.MainLayout.setContentsMargins(0, 10, 0, 10)
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
+
+        self.ClipToggle = QtWidgets.QCheckBox()
 
         self.ClipDirection = QtWidgets.QComboBox()
         self.ClipSlider = QtWidgets.QSlider()
 
+        self.MainLayout.addWidget(self.ClipToggle)
         self.MainLayout.addWidget(self.ClipDirection)
         self.MainLayout.addWidget(self.ClipSlider)
 
         self.setup()
+        self.setCollapsed(True)
 
     def repr(self):
         """
         Return python scripting content.
         """
         output = dict()
-        if self.isChecked():
+        if self.ClipToggle.isChecked():
             options, sub_options = self._clipper.options().toScriptString()
             output['filters'] = ['clipper = chigger.filters.PlaneClipper()']
             output['filters'] += ['clipper.setOptions({})'.format(', '.join(options))]
@@ -70,7 +70,7 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
 
         # Update visibility status
-        checked = self.isChecked()
+        checked = self.ClipToggle.isChecked()
         self.ClipDirection.setEnabled(checked)
         self.ClipSlider.setEnabled(checked)
         filters = self._result.getOption('filters')
@@ -97,6 +97,12 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.store(self._variable, 'Variable')
         self.resultOptionsChanged.emit({'filters':filters})
         self.windowRequiresUpdate.emit()
+
+    def _setupClipToggle(self, qobject):
+        """
+        Setup method for the clip toggle.
+        """
+        qobject.clicked.connect(self.clip)
 
     def _setupClipDirection(self, qobject):
         """
@@ -154,6 +160,7 @@ def main(size=None):
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), ClipPlugin])
+    widget.ClipPlugin.setCollapsed(False)
     widget.show()
 
     return widget, widget.VTKWindowPlugin
