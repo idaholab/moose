@@ -93,6 +93,7 @@
 #include "PFCFreezingIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
+#include "PolycrystalVoronoiVoidIC.h"
 #include "RampIC.h"
 #include "ReconPhaseVarIC.h"
 #include "ReconVarIC.h"
@@ -236,9 +237,9 @@
 #include "EulerAngle2RGBAction.h"
 #include "HHPFCRFFSplitKernelAction.h"
 #include "HHPFCRFFSplitVariablesAction.h"
-#include "MatVecRealGradAuxKernelAction.h"
 #include "MaterialVectorAuxKernelAction.h"
 #include "MaterialVectorGradAuxKernelAction.h"
+#include "MatVecRealGradAuxKernelAction.h"
 #include "MortarPeriodicAction.h"
 #include "MultiAuxVariablesAction.h"
 #include "PFCRFFKernelAction.h"
@@ -250,6 +251,7 @@
 #include "PolycrystalStoredEnergyAction.h"
 #include "PolycrystalVariablesAction.h"
 #include "PolycrystalVoronoiICAction.h"
+#include "PolycrystalVoronoiVoidICAction.h"
 #include "ReconVarICAction.h"
 #include "RigidBodyMultiKernelAction.h"
 #include "Tricrystal2CircleGrainsICAction.h"
@@ -380,6 +382,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
+  registerInitialCondition(PolycrystalVoronoiVoidIC);
   registerInitialCondition(RampIC);
   registerInitialCondition(ReconPhaseVarIC);
   registerInitialCondition(ReconVarIC);
@@ -523,6 +526,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
   registerSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
+  registerSyntax("PolycrystalVoronoiVoidICAction", "ICs/PolycrystalICs/PolycrystalVoronoiVoidIC");
   registerSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
@@ -531,19 +535,19 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(BicrystalCircleGrainICAction, "add_ic");
   registerAction(CHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(CHPFCRFFSplitVariablesAction, "add_variable");
-  registerAction(DisplacementGradientsAction, "add_variable");
-  registerAction(DisplacementGradientsAction, "add_material");
   registerAction(DisplacementGradientsAction, "add_kernel");
-  registerAction(EulerAngle2RGBAction, "add_aux_variable");
+  registerAction(DisplacementGradientsAction, "add_material");
+  registerAction(DisplacementGradientsAction, "add_variable");
   registerAction(EulerAngle2RGBAction, "add_aux_kernel");
+  registerAction(EulerAngle2RGBAction, "add_aux_variable");
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
-  registerAction(MatVecRealGradAuxKernelAction, "add_aux_kernel");
   registerAction(MaterialVectorAuxKernelAction, "add_aux_kernel");
   registerAction(MaterialVectorGradAuxKernelAction, "add_aux_kernel");
-  registerAction(MortarPeriodicAction, "add_variable");
-  registerAction(MortarPeriodicAction, "add_mortar_interface");
+  registerAction(MatVecRealGradAuxKernelAction, "add_aux_kernel");
   registerAction(MortarPeriodicAction, "add_constraint");
+  registerAction(MortarPeriodicAction, "add_mortar_interface");
+  registerAction(MortarPeriodicAction, "add_variable");
   registerAction(MultiAuxVariablesAction, "add_aux_variable");
   registerAction(PFCRFFKernelAction, "add_kernel");
   registerAction(PFCRFFVariablesAction, "add_variable");
@@ -554,8 +558,9 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalStoredEnergyAction, "add_kernel");
   registerAction(PolycrystalVariablesAction, "add_variable");
   registerAction(PolycrystalVoronoiICAction, "add_ic");
-  registerAction(ReconVarICAction, "add_ic");
+  registerAction(PolycrystalVoronoiVoidICAction, "add_ic");
   registerAction(ReconVarICAction, "add_aux_variable");
+  registerAction(ReconVarICAction, "add_ic");
   registerAction(RigidBodyMultiKernelAction, "add_kernel");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
 }

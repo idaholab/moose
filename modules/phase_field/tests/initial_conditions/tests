@@ -35,6 +35,24 @@
     scale_refine = 1
   [../]
 
+  [./PolycrystalVoronoiVoidIC_moregrains]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_moregrains.i'
+    exodiff = 'PolycrystalVoronoiVoidIC_moregrains_out.e'
+  [../]
+
+  [./PolycrystalVoronoiVoidIC_notperiodic]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_notperiodic.i'
+    exodiff = 'PolycrystalVoronoiVoidIC_notperiodic_out.e'
+  [../]
+
+  [./PolycrystalVoronoiVoidIC_periodic]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_periodic.i'
+    exodiff = 'PolycrystalVoronoiVoidIC_periodic_out.e'
+  [../]
+
   [./SmoothCircleIC]
     type = Exodiff
     input = 'SmoothCircleIC.i'
