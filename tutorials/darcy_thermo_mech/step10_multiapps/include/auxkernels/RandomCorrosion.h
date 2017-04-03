@@ -17,17 +17,10 @@
 
 // MOOSE includes
 #include "AuxKernel.h"
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 // Forward declarations
 class RandomCorrosion;
-namespace libMesh
-{
-namespace MeshTools
-{
-class BoundingBox;
-}
-}
 
 template <>
 InputParameters validParams<RandomCorrosion>();
@@ -74,7 +67,7 @@ private:
   std::vector<Point> _points;
 
   /// The bounding box of the domain, used for generating "corrosion" points
-  MeshTools::BoundingBox _box;
+  BoundingBox _box;
 
   /// Nodal tolerance for determining if "corrosion" should occur at the current node
   const Real & _nodal_tol;
