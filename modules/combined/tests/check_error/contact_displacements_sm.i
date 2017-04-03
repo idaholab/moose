@@ -44,8 +44,7 @@
   [./fred]
     master = 1
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 

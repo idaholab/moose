@@ -46,9 +46,12 @@
 # These stresses are a precise match to the simulation result.
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = gravity_2D.e
-  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -225,8 +228,6 @@
     type = Density
     block = 1
     density = 2
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
 []
 

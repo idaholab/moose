@@ -19,13 +19,16 @@
 #   xy = 400.4
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Problem]
   coord_type = RZ
 []
 
 [Mesh]
   file = elastic_patch_rz.e
-  displacements = 'disp_x disp_y'
 []
 
 [Functions]
@@ -191,8 +194,6 @@
     type = Density
     block = 1
     density = 0.283
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 

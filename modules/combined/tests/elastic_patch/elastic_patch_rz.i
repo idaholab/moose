@@ -5,7 +5,9 @@
 #   xx = yy = zz = 2000
 #   xy = 400
 #
+
 [GlobalParams]
+  displacements = 'disp_x disp_y'
   temperature = temp
 []
 
@@ -44,7 +46,6 @@
 []
 
 [Modules/TensorMechanics/Master/All]
-  displacements = 'disp_x disp_y'
   strain = SMALL
   incremental = true
   eigenstrain_names = eigenstrain
@@ -114,8 +115,6 @@
   [./density]
     type = Density
     density = 0.283
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 

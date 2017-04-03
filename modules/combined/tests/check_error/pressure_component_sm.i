@@ -1,12 +1,9 @@
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = cube.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -49,7 +46,7 @@
   [./fred]
     type = Pressure
     boundary = 4
-    component = 123456789 # ERROR
+    component = 123456789
     variable = disp_x
   [../]
 []
