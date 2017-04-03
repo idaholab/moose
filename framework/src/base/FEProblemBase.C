@@ -4310,7 +4310,7 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
   _xfem = xfem;
   _xfem->setMesh(&_mesh);
   if (_displaced_mesh)
-    _xfem->setSecondMesh(_displaced_mesh);
+    _xfem->setDisplacedMesh(_displaced_mesh);
   _xfem->setMaterialData(&_material_data);
   _xfem->setBoundaryMaterialData(&_bnd_material_data);
 

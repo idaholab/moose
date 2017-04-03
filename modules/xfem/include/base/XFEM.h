@@ -201,36 +201,89 @@ private:
 
   ElementFragmentAlgorithm _efa_mesh;
 
-  std::map<unique_id_type, std::vector<Real>> _new_node_solution;
-  std::map<unique_id_type, std::vector<Real>> _new_node_aux_solution;
-  std::map<unique_id_type, std::vector<Real>> _new_elem_solution;
-  std::map<unique_id_type, std::vector<Real>> _new_elem_aux_solution;
-  std::vector<Real> _stored_solution_scratch;
-  std::vector<unsigned int> _stored_solution_dofs_scratch;
+  /**
+   * Data structure to store the nonlinear solution for nodes/elements affected by XFEM
+   * For each node/element, this is stored as a vector that contains all components
+   * of all applicable variables in an order defined by getElementSolutionDofs() or
+   * getNodeSolutionDofs(). This vector first contains the current solution in that
+   * order, followed by the old and older solutions, also in that same order.
+   */
+  std::map<unique_id_type, std::vector<Real>> _cached_solution;
 
-  void saveSolutionForNode(const Node * node_to_store_to,
-                           const Node * node_to_store_from,
-                           SystemBase & sys,
-                           std::map<unique_id_type, std::vector<Real>> & stored_solution,
-                           const NumericVector<Number> & current_solution,
-                           const NumericVector<Number> & old_solution);
+  /**
+   * Data structure to store the auxiliary solution for nodes/elements affected by XFEM
+   * For each node/element, this is stored as a vector that contains all components
+   * of all applicable variables in an order defined by getElementSolutionDofs() or
+   * getNodeSolutionDofs(). This vector first contains the current solution in that
+   * order, followed by the old and older solutions, also in that same order.
+   */
+  std::map<unique_id_type, std::vector<Real>> _cached_aux_solution;
 
-  void saveSolutionForElement(const Elem * elem_to_store_to,
-                              const Elem * elem_to_store_from,
-                              SystemBase & sys,
-                              std::map<unique_id_type, std::vector<Real>> & stored_solution,
-                              const NumericVector<Number> & current_solution,
-                              const NumericVector<Number> & old_solution);
+  /**
+   * Store the solution in stored_solution for a given node
+   * @param node_to_store_to   Node for which the solution will be stored
+   * @param node_to_store_from Node from which the solution to be stored is obtained
+   * @param sys                System from which the solution is stored
+   * @param stored_solution    Data structure that the stored solution is saved to
+   * @param current_solution   Current solution vector that the solution is obtained from
+   * @param old_solution       Old solution vector that the solution is obtained from
+   * @param older_solution     Older solution vector that the solution is obtained from
+   */
+  void storeSolutionForNode(const Node * node_to_store_to,
+                            const Node * node_to_store_from,
+                            SystemBase & sys,
+                            std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                            const NumericVector<Number> & current_solution,
+                            const NumericVector<Number> & old_solution,
+                            const NumericVector<Number> & older_solution);
 
-  void setElementSolution(SystemBase & sys,
-                          const std::map<unique_id_type, std::vector<Real>> & stored_solution,
-                          NumericVector<Number> & current_solution,
-                          NumericVector<Number> & old_solution);
+  /**
+   * Store the solution in stored_solution for a given element
+   * @param elem_to_store_to   Element for which the solution will be stored
+   * @param elem_to_store_from Element from which the solution to be stored is obtained
+   * @param sys                System from which the solution is stored
+   * @param stored_solution    Data structure that the stored solution is saved to
+   * @param current_solution   Current solution vector that the solution is obtained from
+   * @param old_solution       Old solution vector that the solution is obtained from
+   * @param older_solution     Older solution vector that the solution is obtained from
+   */
+  void storeSolutionForElement(const Elem * elem_to_store_to,
+                               const Elem * elem_to_store_from,
+                               SystemBase & sys,
+                               std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                               const NumericVector<Number> & current_solution,
+                               const NumericVector<Number> & old_solution,
+                               const NumericVector<Number> & older_solution);
 
-  void setNodeSolution(SystemBase & sys,
-                       const std::map<unique_id_type, std::vector<Real>> & stored_solution,
-                       NumericVector<Number> & current_solution,
-                       NumericVector<Number> & old_solution);
+  /**
+   * Set the solution for all locally-owned nodes/elements that have stored values
+   * @param sys              System for which the solution is set
+   * @param stored_solution  Data structure that the stored solution is obtained from
+   * @param current_solution Current solution vector that will be set
+   * @param old_solution     Old solution vector that will be set
+   * @param older_solution   Older solution vector that will be set
+   */
+  void setSolution(SystemBase & sys,
+                   const std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                   NumericVector<Number> & current_solution,
+                   NumericVector<Number> & old_solution,
+                   NumericVector<Number> & older_solution);
+
+  /**
+   * Get a vector of the dof indices for all components of all variables
+   * associated with an element
+   * @param elem Element for which dof indices are found
+   * @param sys  System for which the dof indices are found
+   */
+  std::vector<unsigned int> getElementSolutionDofs(const Elem * elem, SystemBase & sys) const;
+
+  /**
+   * Get a vector of the dof indices for all components of all variables
+   * associated with a node
+   * @param node Node for which dof indices are found
+   * @param sys  System for which the dof indices are found
+   */
+  std::vector<unsigned int> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
 };
 
 #endif // XFEM_H

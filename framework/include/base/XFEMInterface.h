@@ -50,12 +50,12 @@ public:
   explicit XFEMInterface(const InputParameters & params)
     : ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
       _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-      _material_data(NULL),
-      _bnd_material_data(NULL),
-      _moose_mesh(NULL),
-      _moose_mesh2(NULL),
-      _mesh(NULL),
-      _mesh2(NULL)
+      _material_data(nullptr),
+      _bnd_material_data(nullptr),
+      _moose_mesh(nullptr),
+      _moose_displaced_mesh(nullptr),
+      _mesh(nullptr),
+      _displaced_mesh(nullptr)
   {
   }
 
@@ -74,12 +74,12 @@ public:
   }
 
   /**
-   * Set the pointer to the secondary (displaced) mesh that is modified by XFEM
+   * Set the pointer to the displaced mesh that is modified by XFEM
    */
-  void setSecondMesh(MooseMesh * mesh2)
+  void setDisplacedMesh(MooseMesh * displaced_mesh)
   {
-    _moose_mesh2 = mesh2;
-    _mesh2 = &mesh2->getMesh();
+    _moose_displaced_mesh = displaced_mesh;
+    _displaced_mesh = &displaced_mesh->getMesh();
   }
 
   /**
@@ -122,9 +122,9 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> * _bnd_material_data;
 
   MooseMesh * _moose_mesh;
-  MooseMesh * _moose_mesh2;
+  MooseMesh * _moose_displaced_mesh;
   MeshBase * _mesh;
-  MeshBase * _mesh2;
+  MeshBase * _displaced_mesh;
 };
 
 #endif // XFEMINTERFACE_H
