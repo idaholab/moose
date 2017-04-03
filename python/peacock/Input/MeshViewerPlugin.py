@@ -74,4 +74,3 @@ class MeshViewerPlugin(VTKWindowPlugin):
     def closing(self):
         self._removeFileNoError(self.temp_input_file)
         self._removeFileNoError(self.current_temp_mesh_file)
-

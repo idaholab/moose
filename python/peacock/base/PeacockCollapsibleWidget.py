@@ -26,8 +26,9 @@ class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
 
     ICONSIZE = QtCore.QSize(16, 16)
 
-    def __init__(self, parent=None, title='', collapsed=False, collapsible_layout=QtWidgets.QHBoxLayout):
+    def __init__(self, parent=None, title='', collapsed=False, collapsible_layout=QtWidgets.QHBoxLayout, **kwargs):
         super(PeacockCollapsibleWidget, self).__init__(parent)
+
 
         # Group Title Widget
         self._title_widget = QtWidgets.QLabel(title)
@@ -41,34 +42,28 @@ class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
         self._collapse_button.setStyleSheet("QPushButton {border:none}")
         self._collapse_button.clicked.connect(self._callbackHideButton)
 
-        self._main_layout = QtWidgets.QVBoxLayout()
+        self._main_layout = QtWidgets.QVBoxLayout(self)
         self._main_layout.setContentsMargins(5, 5, 0, 0)
 
         self._title_layout = QtWidgets.QHBoxLayout()
-        self._title_layout.addWidget(self._title_widget)
-        self._title_layout.addStretch()
         self._title_layout.addWidget(self._collapse_button)
+        self._title_layout.addWidget(self._title_widget)
+        self._title_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self._collapsible_layout = collapsible_layout()
         self._main_layout.addLayout(self._title_layout)
         self._main_layout.addLayout(self._collapsible_layout)
-        self.setLayout(self._main_layout)
+        self._main_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self._collapsed = None
         self.setCollapsed(collapsed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
     def collapsibleLayout(self):
         """
         Returns the layout, the contents of this layout will be collapsible.
         """
         return self._collapsible_layout
-
-    #def setEnabled(self, *args, **kwargs):
-    #    """
-    #    Forces the collapse button to always be available.
-    #    """
-    #    super(PeacockCollapsibleWidget, self).setEnabled(*args, **kwargs)
-    #    self._collapse_button.setEnabled(True)
 
     def setTitle(self, title):
         """

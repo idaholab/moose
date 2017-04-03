@@ -57,7 +57,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         super(VTKWindowPlugin, self).__init__(**kwargs)
 
         # Setup widget
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setMainLayoutName('WindowLayout')
 
         # Create the QVTK interactor

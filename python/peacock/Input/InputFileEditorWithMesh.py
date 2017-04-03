@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from peacock.ExodusViewer.plugins.MeshPlugin import MeshPlugin
 from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
-from peacock.ExodusViewer.plugins.ClipPlugin import ClipPlugin
 from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
@@ -35,12 +34,10 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
     def __init__(self, size=None, plugins=None):
         if not plugins:
             plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
-                    lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
-                    lambda: MeshPlugin(layout='RightLayout'),
-                    lambda: BlockPlugin(layout='WindowLayout'),
-                    lambda: BackgroundPlugin(layout='RightLayout'),
-                    lambda: ClipPlugin(layout='RightLayout')
-                ]
+                       lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
+                       lambda: MeshPlugin(layout='BottomLayout'),
+                       lambda: BackgroundPlugin(values=False, layout='BottomLayout'),
+                       lambda: BlockPlugin(layout='RightLayout', collapsible_layout=QVBoxLayout)]
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
         # The layouts for this widget
         self.exe_info = None
@@ -53,6 +50,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.LeftLayout = QVBoxLayout()
         self.WindowLayout = QVBoxLayout()
         self.RightLayout = QVBoxLayout()
+        self.BottomLayout = QHBoxLayout()
 
         self.setLayout(self.MainLayout)
         self.MainLayout.addLayout(self.LeftLayout)
@@ -61,15 +59,16 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
 
         self.setup()
         self.setupVTKWindow()
-        self.RightLayout.addStretch(1)
+        self.RightLayout.addStretch()
+        self.BottomLayout.addStretch()
+        self.WindowLayout.addLayout(self.BottomLayout)
 
         self.InputFileEditorPlugin.blockChanged.connect(self.blockChanged)
         self.InputFileEditorPlugin.blockSelected.connect(self.highlightChanged)
         self.InputFileEditorPlugin.inputFileChanged.connect(self._updateFromInputFile)
 
         self.fixLayoutWidth('LeftLayout')
-        self.fixLayoutWidth('RightLayout')
-
+        self.fixLayoutWidth('BottomLayout')
 
     def setupVTKWindow(self):
         """
@@ -162,7 +161,6 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.MeshPlugin.setEnabled(enabled)
         self.BlockPlugin.setEnabled(enabled)
         self.BackgroundPlugin.setEnabled(enabled)
-        self.ClipPlugin.setEnabled(enabled)
 
     def onWorkingDirChanged(self, path):
         """

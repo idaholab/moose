@@ -47,6 +47,18 @@ class PluginManager(MooseWidget):
         # List of all plugins for connecting signal
         self._all_plugins = []
 
+    def __contains__(self, item):
+        """
+        Provide "in" access into the list of plugins.
+        """
+        return item in self._plugins
+
+    def __getitem__(self, item):
+        """
+        Provide operator[] access to plugins.
+        """
+        return self._plugins[item]
+
     def addObject(self, widget):
         """
         Method for adding a widget to a layout.
@@ -159,6 +171,6 @@ class PluginManager(MooseWidget):
         for child in self._plugins.itervalues():
             if child.mainLayoutName() == layout:
                 width = max(child.sizeHint().width(), width)
-            for child in self._plugins.itervalues():
-                if child.mainLayoutName() == layout:
-                    child.setFixedWidth(width)
+        for child in self._plugins.itervalues():
+            if child.mainLayoutName() == layout:
+                child.setFixedWidth(width)
