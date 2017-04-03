@@ -32,14 +32,6 @@ public:
   virtual void initialSetup();
 
 protected:
-  bool assignColors(const AdjacencyGraph & adjacency_matrix,
-                    std::vector<unsigned int> & colors,
-                    unsigned int grain) const;
-  bool isGraphValid(const AdjacencyGraph & adjacency_matrix,
-                    std::vector<unsigned int> & colors,
-                    unsigned int grain,
-                    unsigned int color) const;
-
   MooseMesh & _mesh;
 
   /// mesh dimension
@@ -58,7 +50,7 @@ protected:
   Point _top_right;
   Point _range;
 
-  bool _advanced_op_assignment;
+  MooseEnum _coloring_algorithm;
 
   std::vector<Point> _centerpoints;
   std::vector<unsigned int> _assigned_op;

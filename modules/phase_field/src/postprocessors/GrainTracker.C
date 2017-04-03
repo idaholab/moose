@@ -1155,7 +1155,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
     Real curr_bbox_diff = boundingRegionDistance(grain._bboxes, other_grain._bboxes);
 
     GrainDistance grain_distance_obj(
-        curr_bbox_diff, target_grain_index, target_grain_id, target_var_index);
+        curr_bbox_diff, target_var_index, target_grain_index, target_grain_id);
 
     // To handle touching halos we penalize the top pick each time we see another
     if (curr_bbox_diff == -1.0 && !min_distances[target_var_index].empty())
@@ -1170,6 +1170,21 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
     while (insert_it != min_distances[target_var_index].end() && !(grain_distance_obj < *insert_it))
       ++insert_it;
     min_distances[target_var_index].insert(insert_it, grain_distance_obj);
+  }
+
+  /**
+   * See if we have any completely open OPs (excluding reserve order parameters) or the order
+   * parameter corresponding to this grain, we need to put them in the list or the grain  tracker
+   * won't realize that those vars are available for remapping.
+   */
+  for (auto var_index = beginIndex(_vars); var_index < _reserve_op_index; ++var_index)
+  {
+    // Don't put an entry in for matching variable indices (i.e. we can't remap to ourselves)
+    if (grain._var_index == var_index)
+      continue;
+
+    if (min_distances[var_index].empty())
+      min_distances[var_index].emplace_front(std::numeric_limits<Real>::max(), var_index);
   }
 }
 
@@ -1228,10 +1243,13 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsi
     if (target_it->_distance > 0)
     {
       _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
-               << " from variable index " << curr_var_index << " to " << target_it->_var_index
-               << " whose closest grain (#" << target_it->_grain_id << ") is at a distance of "
-               << target_it->_distance << "\n"
-               << COLOR_DEFAULT;
+               << " from variable index " << curr_var_index << " to " << target_it->_var_index;
+      if (target_it->_distance == std::numeric_limits<Real>::max())
+        _console << " which currently contains zero grains." << COLOR_DEFAULT;
+      else
+        _console << " whose closest grain (#" << target_it->_grain_id << ") is at a distance of "
+                 << target_it->_distance << "\n"
+                 << COLOR_DEFAULT;
 
       grain._status |= Status::DIRTY;
       grain._var_index = target_it->_var_index;
@@ -1683,19 +1701,19 @@ GrainTracker::getNextUniqueID()
 /*************************************************
  ************** Helper Structures ****************
  ************************************************/
-GrainDistance::GrainDistance()
-  : _grain_id(std::numeric_limits<unsigned int>::max()),
-    _distance(std::numeric_limits<Real>::max()),
-    _grain_index(std::numeric_limits<std::size_t>::max()),
-    _var_index(std::numeric_limits<std::size_t>::max())
+GrainDistance::GrainDistance(Real distance, std::size_t var_index)
+  : GrainDistance(distance,
+                  var_index,
+                  std::numeric_limits<std::size_t>::max(),
+                  std::numeric_limits<unsigned int>::max())
 {
 }
 
 GrainDistance::GrainDistance(Real distance,
+                             std::size_t var_index,
                              std::size_t grain_index,
-                             unsigned int grain_id,
-                             std::size_t var_index)
-  : _grain_id(grain_id), _distance(distance), _grain_index(grain_index), _var_index(var_index)
+                             unsigned int grain_id)
+  : _distance(distance), _var_index(var_index), _grain_index(grain_index), _grain_id(grain_id)
 {
 }
 

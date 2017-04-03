@@ -9,6 +9,7 @@
 #include "IndirectSort.h"
 #include "MooseRandom.h"
 #include "MooseMesh.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
@@ -24,9 +25,9 @@ validParams<PolycrystalReducedIC>()
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
-  params.addParam<bool>("advanced_op_assignment",
-                        false,
-                        "Enable advanced grain to op assignment (avoid invalid graph coloring)");
+  params.addParam<MooseEnum>("coloring_algorithm",
+                             PolycrystalICTools::coloringAlgorithms(),
+                             PolycrystalICTools::coloringAlgorithmDescriptions());
   return params;
 }
 
@@ -39,7 +40,7 @@ PolycrystalReducedIC::PolycrystalReducedIC(const InputParameters & parameters)
     _op_index(getParam<unsigned int>("op_index")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _columnar_3D(getParam<bool>("columnar_3D")),
-    _advanced_op_assignment(getParam<bool>("advanced_op_assignment"))
+    _coloring_algorithm(getParam<MooseEnum>("coloring_algorithm"))
 {
 }
 
@@ -72,7 +73,7 @@ PolycrystalReducedIC::initialSetup()
       _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
   }
 
-  if (!_advanced_op_assignment)
+  if (_coloring_algorithm == "legacy")
     // Assign grains to specific order parameters in a way that maximizes the distance
     _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
   else
@@ -115,13 +116,15 @@ PolycrystalReducedIC::initialSetup()
      * We have a utility for this too. This one makes no assumptions about how the
      * grain structure was built. It uses the entity_to_grain map.
      */
-    AdjacencyGraph grain_neighbor_graph =
-        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
+    const auto * pb = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
+    auto grain_neighbor_graph =
+        PolycrystalICTools::buildGrainAdjacencyMatrix(entity_to_grain, _mesh, pb, _grain_num, true);
 
     /**
      * Now we need to assign ops in some optimal fashion.
      */
-    _assigned_op = PolycrystalICTools::assignOpsToGrains(grain_neighbor_graph, _grain_num, _op_num);
+    _assigned_op = PolycrystalICTools::assignOpsToGrains(
+        grain_neighbor_graph, _grain_num, _op_num, _coloring_algorithm);
   }
 }
 

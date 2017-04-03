@@ -63,7 +63,7 @@
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
-      advanced_op_assignment = true
+      coloring_algorithm = bt
     [../]
   [../]
 []

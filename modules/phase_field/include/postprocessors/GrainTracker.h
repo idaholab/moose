@@ -262,11 +262,12 @@ private:
  */
 struct GrainDistance
 {
-  GrainDistance();
+  GrainDistance(Real distance, std::size_t var_index);
+
   GrainDistance(Real distance,
+                std::size_t var_index,
                 std::size_t grain_index,
-                unsigned int grain_id,
-                std::size_t var_index);
+                unsigned int grain_id);
 
   // Copy constructors
   GrainDistance(const GrainDistance & f) = default;
@@ -278,10 +279,10 @@ struct GrainDistance
 
   bool operator<(const GrainDistance & rhs) const;
 
-  unsigned int _grain_id;
   Real _distance;
-  std::size_t _grain_index;
   std::size_t _var_index;
+  std::size_t _grain_index;
+  unsigned int _grain_id;
 };
 
 template <>
