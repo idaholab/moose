@@ -82,10 +82,6 @@
   [../]
 []
 
-[Problem]
-  type = FEProblem
-[]
-
 [Postprocessors]
   [./temperature_in]
     type = Receiver
