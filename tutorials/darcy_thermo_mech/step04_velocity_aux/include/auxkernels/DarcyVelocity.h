@@ -32,8 +32,6 @@ class DarcyVelocity : public AuxKernel
 public:
   DarcyVelocity(const InputParameters & parameters);
 
-  virtual ~DarcyVelocity() {}
-
 protected:
   /**
    * AuxKernels MUST override computeValue.  computeValue() is called on

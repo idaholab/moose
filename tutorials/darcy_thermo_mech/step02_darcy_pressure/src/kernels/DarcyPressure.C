@@ -42,8 +42,6 @@ DarcyPressure::DarcyPressure(const InputParameters & parameters)
 {
 }
 
-DarcyPressure::~DarcyPressure() {}
-
 Real
 DarcyPressure::computeQpResidual()
 {

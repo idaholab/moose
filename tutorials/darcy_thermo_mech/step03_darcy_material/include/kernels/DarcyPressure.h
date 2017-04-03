@@ -34,7 +34,6 @@ class DarcyPressure : public Diffusion
 {
 public:
   DarcyPressure(const InputParameters & parameters);
-  virtual ~DarcyPressure();
 
 protected:
   /**

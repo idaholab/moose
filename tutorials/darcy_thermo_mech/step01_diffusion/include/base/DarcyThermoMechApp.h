@@ -25,7 +25,6 @@ class DarcyThermoMechApp : public MooseApp
 {
 public:
   DarcyThermoMechApp(InputParameters parameters);
-  virtual ~DarcyThermoMechApp();
 
   static void registerApps();
   static void registerObjects(Factory & factory);
