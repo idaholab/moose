@@ -256,8 +256,8 @@ PolycrystalICTools::buildElementalGrainAdjacencyMatrix(
 
       if (!set_intersection.empty())
       {
-        adjacency_matrix(i, j) = true;
-        adjacency_matrix(j, i) = true;
+        adjacency_matrix(i, j) = 1.;
+        adjacency_matrix(j, i) = 1.;
       }
     }
 
@@ -305,7 +305,7 @@ PolycrystalICTools::buildNodalGrainAdjacencyMatrix(
          * not nodal neighbors. To do that we'll build a halo region based on these interface nodes.
          * For now, we need to record the nodes inside of the grain and those outside of the grain.
          */
-        adjacency_matrix(my_grain, their_grain) = 1;
+        adjacency_matrix(my_grain, their_grain) = 1.;
     }
   }
 
@@ -349,7 +349,7 @@ PolycrystalICTools::assignOpsToGrains(AdjacencyMatrix<Real> & adjacency_matrix,
 MooseEnum
 PolycrystalICTools::coloringAlgorithms()
 {
-  return MooseEnum("legacy bt jp power sl lf id greedy", "legacy");
+  return MooseEnum("legacy bt jp power greedy", "legacy");
 }
 
 std::string
