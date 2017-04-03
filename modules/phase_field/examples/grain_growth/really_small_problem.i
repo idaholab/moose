@@ -31,7 +31,7 @@
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
       grain_num = 12 # Number of grains
-      advanced_op_assignment = true
+      coloring_algorithm = bt
       rand_seed = 10
     [../]
   [../]

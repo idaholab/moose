@@ -7,6 +7,8 @@
 #include "ReconVarIC.h"
 #include "EBSDReader.h"
 #include "MooseMesh.h"
+#include "PolycrystalICTools.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
@@ -19,9 +21,9 @@ validParams<ReconVarIC>()
                                         "Specifies the number of order parameters to create");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
   params.addParam<bool>("all_op_elemental", false, "");
-  params.addParam<bool>("advanced_op_assignment",
-                        false,
-                        "Enable advanced grain to op assignment (avoid invalid graph coloring)");
+  params.addParam<MooseEnum>("coloring_algorithm",
+                             PolycrystalICTools::coloringAlgorithms(),
+                             PolycrystalICTools::coloringAlgorithmDescriptions());
   return params;
 }
 
@@ -34,7 +36,7 @@ ReconVarIC::ReconVarIC(const InputParameters & parameters)
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index")),
     _all_op_elemental(getParam<bool>("all_op_elemental")),
-    _advanced_op_assignment(getParam<bool>("advanced_op_assignment")),
+    _coloring_algorithm(getParam<MooseEnum>("coloring_algorithm")),
     _node_to_grain_weight_map(_ebsd_reader.getNodeToGrainWeightMap())
 {
 }
@@ -50,7 +52,7 @@ ReconVarIC::initialSetup()
     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger "
                "than the number of grains (grain_num)");
 
-  if (!_advanced_op_assignment)
+  if (_coloring_algorithm == "legacy")
   {
     // fetch all center points
     _centerpoints.resize(_grain_num);
@@ -76,10 +78,12 @@ ReconVarIC::initialSetup()
       entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), index));
     }
 
+    const auto * pb = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
     auto grain_neighbor_graph =
-        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
+        PolycrystalICTools::buildGrainAdjacencyMatrix(entity_to_grain, _mesh, pb, _grain_num, true);
 
-    _assigned_op = PolycrystalICTools::assignOpsToGrains(grain_neighbor_graph, _grain_num, _op_num);
+    _assigned_op = PolycrystalICTools::assignOpsToGrains(
+        grain_neighbor_graph, _grain_num, _op_num, _coloring_algorithm);
   }
 }
 

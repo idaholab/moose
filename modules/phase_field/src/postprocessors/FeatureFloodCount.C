@@ -841,7 +841,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
            it2 != _partial_feature_sets[map_num].end();
            ++it2)
       {
-        bool pb_intersect = false;
         // clang-format off
         if (it1 != it2 &&                            // iters aren't pointing at the same item and
             it1->_var_index ==  it2->_var_index &&   // the sets have matching variable indices and
