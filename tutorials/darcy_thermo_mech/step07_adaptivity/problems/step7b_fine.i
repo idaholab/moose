@@ -104,7 +104,6 @@
 [Materials]
   [./column]
     type = PackedColumn
-    block = 0
     sphere_radius = 1
   [../]
 []

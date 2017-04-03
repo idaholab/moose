@@ -37,7 +37,6 @@
 [Materials]
   [./steel]
     type = GenericConstantMaterial
-    block = 0
     prop_names = thermal_conductivity
     prop_values = 18 # K: (W/m*K) from wikipedia @296K
   [../]
