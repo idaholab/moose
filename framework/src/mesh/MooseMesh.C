@@ -1959,9 +1959,19 @@ MooseMesh::init()
   }
 
   if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
-    // For now, only read the recovery mesh on the Ultimate Master.. sub-apps need to just build
-    // their mesh like normal
+  {
+    // Some partitioners are not idempotent.  Some recovery data
+    // files require partitioning to match mesh partitioning.  This
+    // means that, when recovering, we can't safely repartition.
+    bool skip_partitioning_later = getMesh().skip_partitioning();
+    getMesh().skip_partitioning(true);
+
+    // For now, only read the recovery mesh on the Ultimate Master..
+    // sub-apps need to just build their mesh like normal
     getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
+
+    getMesh().skip_partitioning(skip_partitioning_later);
+  }
   else // Normally just build the mesh
     buildMesh();
 }
