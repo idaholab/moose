@@ -26,7 +26,8 @@ class ExodusViewer(peacock.base.ViewerBase):
 
     def __init__(self, plugins=[VTKWindowPlugin, FilePlugin, GoldDiffPlugin, VariablePlugin, \
                                 MeshPlugin, BackgroundPlugin, ClipPlugin, ContourPlugin, CameraPlugin, \
-                                OutputPlugin, MediaControlPlugin, BlockPlugin]):
+                                OutputPlugin, MediaControlPlugin,
+                                lambda: BlockPlugin(layout='RightLayout')]):
         super(ExodusViewer, self).__init__(manager=ExodusPluginManager, plugins=plugins)
 
     def initialize(self, filenames=[], **kwargs):

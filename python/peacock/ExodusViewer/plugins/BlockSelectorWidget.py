@@ -115,7 +115,6 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         qobject.setMaximumHeight(70)
         qobject.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
 
-
     @QtCore.pyqtSlot(QtWidgets.QListWidgetItem)
     def _callbackListWidget(self, item):
         """

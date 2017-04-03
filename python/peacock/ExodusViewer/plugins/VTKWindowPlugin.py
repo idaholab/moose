@@ -53,8 +53,8 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     #: pyqtSignal: Emitted when the camera for this window has changed
     cameraChanged = QtCore.pyqtSignal(vtk.vtkCamera)
 
-    def __init__(self, size=None):
-        super(VTKWindowPlugin, self).__init__()
+    def __init__(self, size=None, **kwargs):
+        super(VTKWindowPlugin, self).__init__(**kwargs)
 
         # Setup widget
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)

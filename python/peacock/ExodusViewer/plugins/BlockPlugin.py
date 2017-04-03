@@ -18,11 +18,11 @@ class BlockPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     readerOptionsChanged = QtCore.pyqtSignal(dict)
 
     def __init__(self, **kwargs):
-        super(BlockPlugin, self).__init__(**kwargs)
+        peacock.base.PeacockCollapsibleWidget.__init__(self)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Current variable (used for caching settings
         self._contour = False
-        self.setMainLayoutName('RightLayout')
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
 
         # Setup this widget
@@ -131,7 +131,6 @@ def main(size=None):
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), BlockPlugin])
-    widget.BlockPlugin.setCollapsed(False)
     widget.show()
 
     return widget, widget.VTKWindowPlugin

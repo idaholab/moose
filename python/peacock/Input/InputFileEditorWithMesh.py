@@ -5,7 +5,7 @@ from peacock.ExodusViewer.plugins.ClipPlugin import ClipPlugin
 from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
-from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QGridLayout, QBoxLayout
+from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QGridLayout, QBoxLayout, QHBoxLayout
 from PyQt5.QtCore import pyqtSignal
 from MeshViewerPlugin import MeshViewerPlugin
 from InputFileEditorPlugin import InputFileEditorPlugin
@@ -34,12 +34,12 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
 
     def __init__(self, size=None, plugins=None):
         if not plugins:
-            plugins = [InputFileEditorPlugin,
-                    lambda: MeshViewerPlugin(size=size),
-                    MeshPlugin,
-                    BlockPlugin,
-                    BackgroundPlugin,
-                    ClipPlugin,
+            plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
+                    lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
+                    lambda: MeshPlugin(layout='RightLayout'),
+                    lambda: BlockPlugin(layout='WindowLayout'),
+                    lambda: BackgroundPlugin(layout='RightLayout'),
+                    lambda: ClipPlugin(layout='RightLayout')
                 ]
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
         # The layouts for this widget
@@ -49,33 +49,27 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         # in setupVTKWindow()
         self.vtkwin = None
 
-        self.MainLayout = QGridLayout()
-        # This seemed to be required for the plugin system.
-        # We allocate them but never use them. Instead
-        # we add the plugins into our grid layout.
+        self.MainLayout = QHBoxLayout()
         self.LeftLayout = QVBoxLayout()
-        self.RightLayout = QVBoxLayout()
         self.WindowLayout = QVBoxLayout()
+        self.RightLayout = QVBoxLayout()
 
         self.setLayout(self.MainLayout)
+        self.MainLayout.addLayout(self.LeftLayout)
+        self.MainLayout.addLayout(self.WindowLayout)
+        self.MainLayout.addLayout(self.RightLayout)
 
         self.setup()
         self.setupVTKWindow()
-        # We want the block plugin on the right side of the mesh and to be vertical.
-        # By default it adds itself to LeftLayout and is horizontal.
-        self.MainLayout.addWidget(self.vtkwin, 0, 1, 1, 2)
-        self.MainLayout.addWidget(self.BlockPlugin, 0, 3)
-        self.BlockPlugin.MainLayout.setDirection(QBoxLayout.TopToBottom)
-        self.MainLayout.addWidget(self.InputFileEditorPlugin, 0, 0, 2, 1)
-        self.MainLayout.addWidget(self.MeshPlugin, 1, 1)
-        self.MainLayout.addWidget(self.BackgroundPlugin, 1, 2)
-        self.MainLayout.addWidget(self.ClipPlugin, 1, 3)
-        # Get the Mesh render window to do most of the stretching
-        self.MainLayout.setColumnStretch(1, 2)
-        self.MainLayout.setRowStretch(0, 2)
+        self.RightLayout.addStretch(1)
+
         self.InputFileEditorPlugin.blockChanged.connect(self.blockChanged)
         self.InputFileEditorPlugin.blockSelected.connect(self.highlightChanged)
         self.InputFileEditorPlugin.inputFileChanged.connect(self._updateFromInputFile)
+
+        self.fixLayoutWidth('LeftLayout')
+        self.fixLayoutWidth('RightLayout')
+
 
     def setupVTKWindow(self):
         """
