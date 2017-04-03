@@ -45,13 +45,13 @@ DarcyPressure::DarcyPressure(const InputParameters & parameters)
 Real
 DarcyPressure::computeQpResidual()
 {
-  // K/mu * grad_u * grad_phi[i]
+  // K / mu * grad_u * grad_phi[i]
   return (_permeability / _viscosity) * Diffusion::computeQpResidual();
 }
 
 Real
 DarcyPressure::computeQpJacobian()
 {
-  // K/mu * grad_phi[j] * grad_phi[i]
+  // K / mu * grad_phi[j] * grad_phi[i]
   return (_permeability / _viscosity) * Diffusion::computeQpJacobian();
 }
