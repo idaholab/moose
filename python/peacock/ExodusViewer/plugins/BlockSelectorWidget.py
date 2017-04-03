@@ -19,7 +19,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         # Setup this widget
         self.setContentsMargins(0, 0, 0, 0)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
 
         # Member variables
         self._type = block_type

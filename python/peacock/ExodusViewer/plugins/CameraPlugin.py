@@ -1,9 +1,10 @@
 import sys
 import math
 from PyQt5 import QtCore, QtWidgets
+import peacock
 from ExodusPlugin import ExodusPlugin
 
-class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class CameraPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Widget for adjusting the camera.
     """
@@ -13,9 +14,7 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         super(CameraPlugin, self).__init__()
 
         self.setTitle('Camera')
-        self.MainLayout = QtWidgets.QHBoxLayout()
-        self.MainLayout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
 
         self.FillScreenButton = QtWidgets.QPushButton('Fill Screen')
         self.ResetButton = QtWidgets.QPushButton('Reset')
