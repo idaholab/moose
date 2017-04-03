@@ -19,7 +19,7 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     appendResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
     removeResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
 
-    def __init__(self, **kwargs):
+    def __init__(self, values=True, **kwargs):
         peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QGridLayout)
         ExodusPlugin.__init__(self, **kwargs)
 
@@ -30,6 +30,7 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         # Setup this widget
         self.MainLayout = self.collapsibleLayout()
         self.setTitle('Background and Labels')
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         # Top
         self.TopLabel = QtWidgets.QLabel('Background Top:')
@@ -54,8 +55,10 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self.MainLayout.addWidget(self.Elements, 1, 3)
         self.Nodes = QtWidgets.QCheckBox('Label Nodes')
         self.MainLayout.addWidget(self.Nodes, 2, 3)
-        self.Values = QtWidgets.QCheckBox('Label Values')
-        self.MainLayout.addWidget(self.Values, 3, 3)
+
+        if values:
+            self.Values = QtWidgets.QCheckBox('Label Values')
+            self.MainLayout.addWidget(self.Values, 3, 3)
 
         # Storage for Chigger objects that are toggled by this plugin
         self._cell_labels = None
@@ -63,7 +66,6 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self._variable_labels = None
         self._volume_axes = None
         self.setup()
-        self.setCollapsed(True)
 
     def color(self):
         """

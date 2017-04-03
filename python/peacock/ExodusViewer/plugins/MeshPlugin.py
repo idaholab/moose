@@ -28,6 +28,7 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
         # QGroupBox settings
         self.setTitle('Mesh')
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         # Main Layout
         self.MainLayout = self.collapsibleLayout()

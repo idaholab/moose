@@ -223,7 +223,7 @@ class MediaControlWidgetBase(object):
     def __addEditBox(self, name, label, tooltip):
         edit = QtWidgets.QLineEdit()
         edit.setToolTip(tooltip)
-        edit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        edit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Maximum)
         edit.editingFinished.connect(getattr(self, '_callback' + name))
 
         label = QtWidgets.QLabel(label)
