@@ -10,13 +10,16 @@
 # Stress xx, yy, zz = E/(1+nu)/(1-2nu)*strain*((1-nu) + nu + nu) = 6000
 #
 
+[GlobalParams]
+  displacements = 'disp_x'
+[]
+
 [Problem]
   coord_type = RSPHERICAL
 []
 
 [Mesh]
   file = elastic_patch_rspherical.e
-  displacements = 'disp_x'
 []
 
 [Functions]
@@ -136,7 +139,6 @@
     type = Density
     block = '1 2 3'
     density = 0.283
-    disp_r = disp_x
   [../]
 []
 

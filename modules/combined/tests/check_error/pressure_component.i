@@ -43,7 +43,7 @@
   [./fred]
     type = Pressure
     boundary = 4
-    component = 123456789 # ERROR
+    component = 123456789
     variable = disp_x
   [../]
 []

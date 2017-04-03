@@ -18,6 +18,10 @@
 #   yz = zx =    0
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = elastic_patch_rz.e
 []
@@ -176,8 +180,6 @@
     type = Density
     block = 1
     density = 0.283
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
 []
 

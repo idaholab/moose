@@ -32,9 +32,12 @@
 #   element is at x=9.75 where the stress is 10.
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   file = gravity_hex20_test.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -122,9 +125,6 @@
     type = Density
     block = 1
     density = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

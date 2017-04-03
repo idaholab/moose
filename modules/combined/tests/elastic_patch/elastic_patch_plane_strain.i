@@ -103,8 +103,6 @@
   [./density]
     type = Density
     density = 0.283
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
 []
 

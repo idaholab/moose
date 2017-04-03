@@ -33,13 +33,16 @@
 #   element is at y=9.75 where the stress is 10.
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Problem]
   coord_type = RZ
 []
 
 [Mesh]
   file = gravity_rz_test.e
-  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -127,8 +130,6 @@
     type = Density
     block = 1
     density = 2
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 

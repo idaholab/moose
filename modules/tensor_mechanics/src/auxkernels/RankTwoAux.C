@@ -23,9 +23,7 @@ validParams<RankTwoAux>()
       "index_j",
       "index_j >= 0 & index_j <= 2",
       "The index j of ij for the tensor to output (0, 1, 2)");
-  params.addParam<unsigned int>(
-      "selected_qp",
-      "Evaluate the tensor at this specific quadpoint");
+  params.addParam<unsigned int>("selected_qp", "Evaluate the tensor at this specific quadpoint");
   params.addParamNamesToGroup("selected_qp", "Advanced");
   return params;
 }
@@ -49,7 +47,11 @@ RankTwoAux::computeValue()
     if (_selected_qp >= _q_point.size())
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      mooseError("RankTwoAux.  selected_qp specified as ", _selected_qp, " but there are only ", _q_point.size(), " quadpoints in the element");
+      mooseError("RankTwoAux.  selected_qp specified as ",
+                 _selected_qp,
+                 " but there are only ",
+                 _q_point.size(),
+                 " quadpoints in the element");
     }
     qp = _selected_qp;
   }
