@@ -34,12 +34,32 @@ class Water97FluidPropertiesTest : public CppUnit::TestFixture
   CPPUNIT_TEST(inRegion);
 
   /**
-   * Verify calculation of water properties in for the boundary between regions 2 and 3
+   * Verify calculation of the boundary between regions 2 and 3
    * using the verification point (P,T) = (16.5291643 MPa, 623.15 K)
    * Revised Release on the IAPWS Industrial Formulation 1997 for the
    * Thermodynamic Properties of Water and Steam, IAPWS 2007
    */
   CPPUNIT_TEST(b23);
+
+  /**
+   * Verify calculation of the boundary between regions 2b and 2c for the
+   * backwards equation T(p,h) using the verification point
+   * (p,h) = (100 MPa, 0.3516004323e4 kj/kg) from
+   * Revised Release on the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam, IAPWS 2007
+   */
+  CPPUNIT_TEST(b2bc);
+
+  /**
+   * Verify calculation of the boundary between regions 3a and 3b for the
+   * backwards equation T(p,h) using the verification point
+   * (p,h) = (25 MPa, 2.095936454e3 kj/kg) from
+   * Revised Supplementary Release on Backward Equations for
+   * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
+   * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+   * Steam
+   */
+  CPPUNIT_TEST(b3ab);
 
   /**
    * Verify calculation of water properties in region 4 (saturation line)
@@ -109,6 +129,8 @@ public:
 
   void inRegion();
   void b23();
+  void b2bc();
+  void b3ab();
   void pSat();
   void TSat();
   void subregion3();
