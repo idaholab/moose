@@ -19,9 +19,9 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     appendResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
     removeResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QGridLayout)
-        ExodusPlugin.__init__(self)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Default colors
         self._top = QtGui.QColor(111, 111, 111)

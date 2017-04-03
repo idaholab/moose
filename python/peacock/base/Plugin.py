@@ -12,11 +12,11 @@ class Plugin(MooseWidget):
     see Manager.py
     """
 
-    def __init__(self):
+    def __init__(self, layout='MainLayout'):
         super(Plugin, self).__init__()
 
         # Name of layout that this plugin should be added (see PluginManager.py)
-        self._main_layout_name = 'MainLayout'
+        self._main_layout_name = layout
 
         # Widget is disabled until initialize is called
         self.setEnabled(False)

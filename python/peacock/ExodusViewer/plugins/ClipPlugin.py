@@ -16,8 +16,9 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     resultOptionsChanged = QtCore.pyqtSignal(dict)
 
-    def __init__(self):
-        super(ClipPlugin, self).__init__()
+    def __init__(self, **kwargs):
+        peacock.base.PeacockCollapsibleWidget.__init__(self)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Member variables
         self._origin = None

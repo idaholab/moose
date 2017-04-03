@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from PyQt5.QtWidgets import QFileDialog, QPlainTextEdit
+from PyQt5.QtWidgets import QFileDialog, QPlainTextEdit, QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
 from peacock.base.Plugin import Plugin
@@ -19,6 +19,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
 
     def __init__(self, **kwds):
         super(InputFileEditorPlugin, self).__init__(**kwds)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         self._menus_initialized = False
         self._recently_used_menu = None
