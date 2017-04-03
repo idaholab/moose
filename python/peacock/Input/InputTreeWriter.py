@@ -90,7 +90,7 @@ def nodeParamsString(output, entry, indent, sep, ignore_type=False):
     params = mergeWriteFirstLists(entry.parameters_write_first, entry.parameters_list)
     for name in params:
         if ignore_type and name == "type":
-            return
+            continue
         info = entry.parameters[name]
         val = info.inputFileValue()
         comments = info.comments
