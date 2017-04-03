@@ -755,7 +755,14 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
 
   // Convert A to a sparse matrix
-  MatConvert(A, MATAIJ, MAT_INPLACE_MATRIX, &A);
+  MatConvert(A,
+             MATAIJ,
+#if PETSC_VERSION_LESS_THAN(3, 7, 0)
+             MAT_REUSE_MATRIX,
+#else
+             MAT_INPLACE_MATRIX,
+#endif
+             &A);
 
   MatColoring mc;
   ISColoring iscoloring;
@@ -781,7 +788,7 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
     ISGetIndices(is[i], &indices);
     for (int j = 0; j < isize; j++)
     {
-      mooseAssert(indices[j] < vertex_colors.size(), "Index out of bounds");
+      mooseAssert(indices[j] < static_cast<PetscInt>(vertex_colors.size()), "Index out of bounds");
       vertex_colors[indices[j]] = i;
     }
     ISRestoreIndices(is[i], &indices);
