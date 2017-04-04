@@ -315,17 +315,27 @@ class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Helper for updating the variable list while maintaining the current selection
         """
         variables = self._reader.getVariableInformation(var_types=[self._reader.NODAL, self._reader.ELEMENTAL])
-        current = self.VariableList.currentText()
-        self.VariableList.clear()
-        for vinfo in variables.itervalues():
-            self.VariableList.addItem(vinfo.name, vinfo)
 
-        # Set the current variable
-        idx = self.VariableList.findText(current)
-        if idx > -1:
-            self.VariableList.setCurrentIndex(idx)
+        # We want to avoid clearing the list and rebuilding it as that
+        # can cause confusion if somebody is in the middle of a selection
+        new_vars = {v.name for v in variables.values()}
+        cur_vars = {self.VariableList.itemText(i) for i in range(self.VariableList.count())}
+        if new_vars == cur_vars:
+            for vinfo in variables.itervalues():
+                idx = self.VariableList.findText(vinfo.name) # should always return a valid index
+                self.VariableList.setItemData(idx, vinfo)
         else:
-            self.VariableList.setCurrentIndex(0)
+            current = self.VariableList.currentText()
+            self.VariableList.clear()
+            for vinfo in variables.itervalues():
+                self.VariableList.addItem(vinfo.name, vinfo)
+
+            # Set the current variable
+            idx = self.VariableList.findText(current)
+            if idx > -1:
+                self.VariableList.setCurrentIndex(idx)
+            else:
+                self.VariableList.setCurrentIndex(0)
 
 def main(size=None):
     """
