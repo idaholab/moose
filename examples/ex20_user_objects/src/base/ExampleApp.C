@@ -11,12 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE Includes
 #include "ExampleApp.h"
-#include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Example Includes
+// Example 20 Includes
 #include "BlockAverageDiffusionMaterial.h"
 #include "BlockAverageValue.h"
 #include "ExampleDiffusion.h"
@@ -39,8 +40,6 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
   Moose::associateSyntax(_syntax, _action_factory);
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
-
-ExampleApp::~ExampleApp() {}
 
 void
 ExampleApp::registerApps()

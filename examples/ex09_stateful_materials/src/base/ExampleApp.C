@@ -11,9 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE Includes
 #include "ExampleApp.h"
-#include "Moose.h"
-#include "Factory.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
@@ -40,8 +40,6 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
   Moose::associateSyntax(_syntax, _action_factory);
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
-
-ExampleApp::~ExampleApp() {}
 
 void
 ExampleApp::registerObjects(Factory & factory)

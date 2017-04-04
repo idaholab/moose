@@ -11,11 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "Moose.h"
+
+// MOOSE Includes
 #include "ExampleApp.h"
 #include "AppFactory.h"
 #include "ActionFactory.h" // <- Actions are special (they have their own factory)
-#include "Syntax.h"
 #include "MooseSyntax.h"
 
 // Example 15 Includes
@@ -40,8 +40,6 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
   Moose::associateSyntax(_syntax, _action_factory);
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
-
-ExampleApp::~ExampleApp() {}
 
 void
 ExampleApp::registerApps()
