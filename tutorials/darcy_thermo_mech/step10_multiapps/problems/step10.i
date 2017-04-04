@@ -144,7 +144,6 @@
 [Materials]
   [./column]
     type = PackedColumn
-    block = 0
     sphere_radius = 1
     thermal_conductivity = k_eff # Use the AuxVariable instead of calculating
   [../]
@@ -153,17 +152,14 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
-    block = 0
   [../]
 
   [./small_strain_arz]
     type = ComputeAxisymmetricRZFiniteStrain
-    block = 0
   [../]
 
   [./elastic_strain]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   [../]
 []
 

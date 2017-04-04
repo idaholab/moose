@@ -44,11 +44,11 @@ DarcyVelocity::DarcyVelocity(const InputParameters & parameters)
     // Get the gradient of the variable
     _pressure_gradient(coupledGradient("darcy_pressure")),
 
-    // Snag permeability from the Material system.
+    // Set reference to the permeability MaterialProperty.
     // Only AuxKernels operating on Elemental Auxiliary Variables can do this
     _permeability(getMaterialProperty<Real>("permeability")),
 
-    // Snag viscosity from the Material system.
+    // Set reference to the viscosity MaterialProperty.
     // Only AuxKernels operating on Elemental Auxiliary Variables can do this
     _viscosity(getMaterialProperty<Real>("viscosity"))
 {

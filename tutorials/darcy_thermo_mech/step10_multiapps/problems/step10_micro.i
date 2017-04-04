@@ -76,14 +76,9 @@
 [Materials]
   [./column]
     type = PackedColumn
-    block = 0
     sphere_radius = 1 # mm
     phase = phi
   [../]
-[]
-
-[Problem]
-  type = FEProblem
 []
 
 [Postprocessors]

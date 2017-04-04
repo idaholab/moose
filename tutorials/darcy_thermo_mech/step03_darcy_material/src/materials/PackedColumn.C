@@ -22,6 +22,7 @@ validParams<PackedColumn>()
   // Add a parameter to get the radius of the spheres in the column (used later to interpolate
   // permeability).
   params.addParam<Real>("sphere_radius",
+                        1.0,
                         "The radius of the steel spheres that are packed in the "
                         "column.  Used to interpolate _permeability.");
 

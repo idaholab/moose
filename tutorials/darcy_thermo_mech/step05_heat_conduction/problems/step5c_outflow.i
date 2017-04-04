@@ -41,7 +41,6 @@
 [Materials]
   [./steel]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '18 466 8000' # W/m*K, J/kg-K, kg/m^3 @ 296K
   [../]

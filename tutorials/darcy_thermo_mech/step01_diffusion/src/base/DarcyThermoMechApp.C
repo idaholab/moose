@@ -36,8 +36,6 @@ DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) : MooseApp(pa
   DarcyThermoMechApp::associateSyntax(_syntax, _action_factory);
 }
 
-DarcyThermoMechApp::~DarcyThermoMechApp() {}
-
 void
 DarcyThermoMechApp::registerApps()
 {
