@@ -24,7 +24,6 @@ validParams<DarcyPressure>()
   // No parameters are necessary here because we're going to get
   // permeability and viscosity from the Material
   // so we just return params...
-
   return params;
 }
 
@@ -38,8 +37,6 @@ DarcyPressure::DarcyPressure(const InputParameters & parameters)
     _viscosity(getMaterialProperty<Real>("viscosity"))
 {
 }
-
-DarcyPressure::~DarcyPressure() {}
 
 Real
 DarcyPressure::computeQpResidual()
