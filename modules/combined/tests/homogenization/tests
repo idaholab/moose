@@ -1,10 +1,4 @@
 [Tests]
-  [./longFiber_test]
-    type = 'Exodiff'
-    input = 'anisoLongFiber.i'
-    exodiff = 'anisoLongFiber_out.e'
-  [../]
-
   [./heatConduction_test]
     type = 'Exodiff'
     input = 'heatConduction2D.i'
@@ -12,7 +6,12 @@
     max_parallel = 1
   [../]
 
-  [./shortFiber_test]
+  [./longFiber_sm]
+    type = 'Exodiff'
+    input = 'anisoLongFiber.i'
+    exodiff = 'anisoLongFiber_out.e'
+  [../]
+  [./shortFiber_sm]
     type = 'Exodiff'
     input = 'anisoShortFiber.i'
     exodiff = 'anisoShortFiber_out.e'

@@ -1,8 +1,15 @@
 [Tests]
-  [./test]
+  [./2block-3D]
     type = 'Exodiff'
     input = '2blocks3d.i'
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
+  [../]
+  [./2block-3D-sm]
+    type = 'Exodiff'
+    input = '2blocks3d_sm.i'
+    exodiff = '2blocks3d_out.e'
+    max_parallel = 4
+    prereq = '2block-3D'
   [../]
 []

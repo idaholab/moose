@@ -37,6 +37,18 @@
     exodiff_opts = '-TM'
   [../]
 
+  [./plc]
+    type = 'Exodiff'
+    input = 'creep_only_combined_class_sm1.i'
+    exodiff = 'creep_only_combined_class_sm_out.e'
+  [../]
+  [./plc2]
+    type = 'Exodiff'
+    input = 'creep_only_combined_class_sm2.i'
+    exodiff = 'creep_only_combined_class_sm_out.e'
+    prereq = plc
+  [../]
+
   [./small_strain_tm]
     type = Exodiff
     input = 'power_law_creep_smallstrain.i'

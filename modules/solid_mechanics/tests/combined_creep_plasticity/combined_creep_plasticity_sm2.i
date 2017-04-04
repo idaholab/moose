@@ -54,22 +54,16 @@
 #
 #   The numerically computed solution is:
 #
-#    e_tot(1) = 2.39718         (~0.006% error)
-#    e_tot(1.5) = 3.15555       (~0.40% error)
+#    e_tot(1) = 2.39826         (~0.04% error)
+#    e_tot(1.5) = 3.15663       (~0.36% error)
 #
-#
-#   Note that this test is not a completely correct representation of the analytical problem
-#     since the code does not set an initial condition for the stress.  Currently (21 Feb 2012),
-#     no capability exists for setting the initial condition of stress.  Until
-#     that is available, some error will be inherent in the solution. This error has been
-#     minimized by using a very small initial time increment.
-#
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
-
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -77,21 +71,13 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
-
-  [./temp]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 1000.0
   [../]
 []
 
@@ -100,23 +86,15 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./elastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./creep_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -130,194 +108,111 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-  [../]
-
-  [./heat]
-    type = HeatConduction
-    variable = temp
-  [../]
-
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
-    variable = temp
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    variable = stress_yy
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./elastic_strain_yy]
-    type = RankTwoAux
-    variable = elastic_strain_yy
-    rank_two_tensor = elastic_strain
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_yy]
-    type = RankTwoAux
-    variable = plastic_strain_yy
-    rank_two_tensor = plastic_strain
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./creep_strain_yy]
-    type = RankTwoAux
-    variable = creep_strain_yy
-    rank_two_tensor = creep_strain
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./total_strain_yy]
-    type = RankTwoAux
-    variable = total_strain_yy
-    rank_two_tensor = total_strain
-    index_i = 1
-    index_j = 1
-  [../]
-[]
-
-[BCs]
-  [./u_top_pull]
-    type = Pressure
-    variable = disp_y
-    component = 1
-    boundary = 5
-    factor = 1
-    function = top_pull
-  [../]
-
-  [./u_bottom_fix]
-    type = PresetBC
-    variable = disp_y
-    boundary = 3
-    value = 0.0
-  [../]
-
-  [./u_yz_fix]
-    type = PresetBC
-    variable = disp_x
-    boundary = 4
-    value = 0.0
-  [../]
-
-  [./u_xy_fix]
-    type = PresetBC
-    variable = disp_z
-    boundary = 2
-    value = 0.0
-  [../]
-
-  [./temp_top_fix]
-    type = PresetBC
-    variable = temp
-    boundary = 5
-    value = 1000.0
-  [../]
-  [./temp_bottom_fix]
-    type = PresetBC
-    variable = temp
-    boundary = 3
-    value = 1000.0
-  [../]
-[]
-
-[Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    block = 1
-    youngs_modulus = 1e3
-    poissons_ratio = 0.3
-  [../]
-
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 1
-  [../]
-
-  [./creep_plas]
-    type = ComputeReturnMappingStress
-    block = 1
-    return_mapping_models = 'creep plas'
-    absolute_tolerance = 1e-8
-    output_iteration_info = false
-    max_iterations = 50
-  [../]
-
-  [./creep]
-    type = PowerLawCreepStressUpdate
-    block = 1
-    coefficient = 0.5e-7
-    n_exponent = 5
-    m_exponent = -0.5
-    activation_energy = 0
-    relative_tolerance = 1e-5
-    absolute_tolerance = 1e-20
-    max_iterations = 30
-    temperature =  temp
-  [../]
-
-  [./plas]
-    type = IsotropicPlasticityStressUpdate
-    block = 1
-    hardening_constant = 100
-    yield_stress = 20
-    temperature = temp
-    max_iterations = 30
-    relative_tolerance = 1e-5
-    absolute_tolerance = 1e-20
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    block = 1
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = Density
-    block = 1
-    density = 1
+[SolidMechanics]
+  [./solid]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
   [../]
 []
 
-[Postprocessors]
-  [./elem_plastic_strain_yy]
-    type = ElementalVariableValue
-    variable = plastic_strain_yy
-    elementid = 0
+[AuxKernels]
+  [./stress_yy]
+    type = MaterialTensorAux
+    variable = stress_yy
+    tensor = stress
+    index = 1
   [../]
-
-  [./elem_creep_strain_yy]
-    type = ElementalVariableValue
-    variable = creep_strain_yy
-    elementid = 0
-  [../]
-
-  [./elem_elastic_strain_yy]
-    type = ElementalVariableValue
+  [./elastic_strain_yy]
+    type = MaterialTensorAux
     variable = elastic_strain_yy
-    elementid = 0
+    tensor = elastic_strain
+    index = 1
+  [../]
+  [./plastic_strain_yy]
+    type = MaterialTensorAux
+    variable = plastic_strain_yy
+    tensor = plastic_strain
+    index = 1
+  [../]
+  [./creep_strain_yy]
+    type = MaterialTensorAux
+    variable = creep_strain_yy
+    tensor = creep_strain
+    index = 1
+  [../]
+[]
+
+
+[BCs]
+  [./u_top_pull]
+    type = Pressure
+    variable = disp_y
+    component = 1
+    boundary = top
+    factor = 1
+    function = top_pull
+  [../]
+  [./u_bottom_fix]
+    type = PresetBC
+    variable = disp_y
+    boundary = bottom
+    value = 0.0
+  [../]
+  [./u_yz_fix]
+    type = PresetBC
+    variable = disp_x
+    boundary = left
+    value = 0.0
+  [../]
+  [./u_xy_fix]
+    type = PresetBC
+    variable = disp_z
+    boundary = back
+    value = 0.0
+  [../]
+[]
+
+[Materials]
+  [./creep_plas]
+    type = SolidModel
+    block = 0
+    youngs_modulus = 1e3
+    poissons_ratio = .3
+    constitutive_model = combined
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    formulation = nonlinear3D
   [../]
 
-  [./elem_total_strain_yy]
-    type = ElementalVariableValue
-    variable = total_strain_yy
-    elementid = 0
+  [./combined]
+    type = CombinedCreepPlasticity
+    block = 0
+    submodels = 'creep plas'
+    absolute_tolerance = 1e-5
+    max_its = 50
+  [../]
+
+  [./creep]
+    type = PowerLawCreepModel
+    block = 0
+    coefficient = 0.5e-7
+    n_exponent = 5
+    m_exponent = -0.5
+    activation_energy = 0
+    relative_tolerance = 1e-5
+    absolute_tolerance = 1e-20
+    max_its = 30
+  [../]
+  [./plas]
+    type = IsotropicPlasticity
+    block = 0
+    hardening_constant = 100
+    yield_stress = 20
+    max_its = 30
+    relative_tolerance = 1e-5
+    absolute_tolerance = 1e-20
   [../]
 []
 
@@ -328,8 +223,8 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
-  petsc_options_value = '101           asm      lu'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '101'
 
   line_search = 'none'
 
@@ -339,9 +234,8 @@
   nl_abs_tol = 1e-10
   l_tol = 1e-5
   start_time = 0.0
-  end_time = 1.4999999999
+  end_time = 1.5
 
-  dt = 0.001
   [./TimeStepper]
     type = FunctionDT
     time_t  = '0        0.5    1.0    1.5'
@@ -356,5 +250,6 @@
 []
 
 [Outputs]
+  file_base = combined_creep_plasticity_sm_out
   exodus = true
 []
