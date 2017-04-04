@@ -10,6 +10,7 @@
 
 // libmesh includes
 #include "libmesh/quadrature.h"
+#include "libmesh/utility.h"
 
 MooseEnum
 ComputeFiniteStrain::decompositionType()
@@ -156,8 +157,8 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
 
       // cos theta_a
       const Real C1 =
-          std::sqrt(p + 3.0 * std::pow(p, 2.0) * (1.0 - (p + q)) / std::pow(p + q, 2.0) -
-                    2.0 * std::pow(p, 3.0) * (1.0 - (p + q)) / std::pow(p + q, 3.0));
+          std::sqrt(p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
+                    2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q));
 
       Real C2;
       if (q > 0.01)
@@ -165,15 +166,15 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
         C2 = (1.0 - C1) / (4.0 * q);
       else
         // alternate form for small q
-        C2 =
-            0.125 + q * 0.03125 * (std::pow(p, 2.0) - 12.0 * (p - 1.0)) / std::pow(p, 2.0) +
-            std::pow(q, 2.0) * (p - 2.0) * (std::pow(p, 2.0) - 10.0 * p + 32.0) / std::pow(p, 3.0) +
-            std::pow(q, 3.0) * (1104.0 - 992.0 * p + 376.0 * std::pow(p, 2.0) -
-                                72.0 * std::pow(p, 3.0) + 5.0 * std::pow(p, 4.0)) /
-                (512.0 * std::pow(p, 4.0));
-
-      const Real C3 = 0.5 * std::sqrt((p * q * (3.0 - q) + std::pow(p, 3.0) + std::pow(q, 2.0)) /
-                                      std::pow(p + q, 3.0)); // sin theta_a/(2 sqrt(q))
+        C2 = 0.125 + q * 0.03125 * (Utility::pow<2>(p) - 12.0 * (p - 1.0)) / Utility::pow<2>(p) +
+             Utility::pow<2>(q) * (p - 2.0) * (Utility::pow<2>(p) - 10.0 * p + 32.0) /
+                 Utility::pow<3>(p) +
+             Utility::pow<3>(q) * (1104.0 - 992.0 * p + 376.0 * Utility::pow<2>(p) -
+                                   72.0 * Utility::pow<3>(p) + 5.0 * Utility::pow<4>(p)) /
+                 (512.0 * Utility::pow<4>(p));
+      const Real C3 =
+          0.5 * std::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
+                          Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
       // 93, so we transpose it before storing
