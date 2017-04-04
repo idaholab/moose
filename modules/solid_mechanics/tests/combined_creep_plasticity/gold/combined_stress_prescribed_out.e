@@ -1,0 +1,1 @@
+../../../../tensor_mechanics/tests/combined_creep_plasticity/gold/combined_stress_prescribed_out.e

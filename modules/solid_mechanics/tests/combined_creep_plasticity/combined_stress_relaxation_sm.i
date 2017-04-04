@@ -13,19 +13,22 @@
 #    stress_yy = |--------------------|
 #                \ 3*a*E^4*ef^3*t + 1 /
 #
-#    where E  = 2.8e7 (Young's modulus)
-#          a  = 3e-26 (creep coefficient)
-#          ef = 0.01  (displacement)
-#          t  =       (time)
+#    where E  = 2.0e11  (Young's modulus)
+#          a  = 3e-26  (creep coefficient)
+#          ef = 0.01   (displacement)
+#          t  = 2160.0    (time)
 #
-# The solution computed is very close to the exact solution.  This test is not a
-#     correct representation of the problem since it does not set the initial
-#     condition for the displacement and the stress.  Currently (1 March 2011),
-#     no capability exists for setting the initial condition of stress.  Until
-#     that is available, some error will be inherent in the solution.
+#    such that the analytical solution is computed to be 2.9518e3 Pa
+#
+# Averaged over the single element block, MOOSE calculates the stress in the yy direction to be
+#     to be 3.046e3 Pa, which is a 3.2% error from the analytical solution.
 #
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -34,42 +37,36 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./temp]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 1000.0
-  [../]
 []
 
 [AuxVariables]
-
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
+  [./creep_strain_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-[]
-
-[Functions]
-  [./top_pull]
-    type = PiecewiseLinear
-    x = '0 20'
-    y = '0 1'
+  [./creep_strain_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -81,136 +78,114 @@
   [../]
 []
 
-[Kernels]
-  [./heat]
-    type = HeatConduction
-    variable = temp
-  [../]
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
-    variable = temp
-  [../]
-[]
-
-
 [AuxKernels]
   [./stress_yy]
     type = MaterialTensorAux
-    variable = stress_yy
     tensor = stress
+    variable = stress_yy
     index = 1
   [../]
-
+  [./creep_strain_xx]
+    type = MaterialTensorAux
+    tensor = creep_strain
+    variable = creep_strain_xx
+    index = 0
+  [../]
   [./creep_strain_yy]
     type = MaterialTensorAux
-    variable = creep_strain_yy
     tensor = creep_strain
+    variable = creep_strain_yy
+    index = 1
+  [../]
+  [./creep_strain_zz]
+    type = MaterialTensorAux
+    tensor = creep_strain
+    variable = creep_strain_zz
+    index = 2
+  [../]
+  [./elastic_strain_yy]
+    type = MaterialTensorAux
+    tensor = elastic_strain
+    variable = elastic_strain_yy
     index = 1
   [../]
 []
-
 
 [BCs]
   [./u_top_pull]
     type = PresetBC
     variable = disp_y
-    boundary = 5
+    boundary = top
     value = 0.01
   [../]
   [./u_bottom_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
   [./u_yz_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
   [./u_xy_fix]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
-    boundary = 2
+    boundary = back
     value = 0.0
-  [../]
-
-  [./temp_top_fix]
-    type = PresetBC
-    variable = temp
-    boundary = 5
-    value = 1000.0
-  [../]
-  [./temp_bottom_fix]
-    type = PresetBC
-    variable = temp
-    boundary = 3
-    value = 1000.0
   [../]
 []
 
 [Materials]
-  [./creep_plas]
-    type = PLC_LSH
-    block = 1
-    youngs_modulus = 2.8e7
-    poissons_ratio = .3
+  [./creep]
+    type = PowerLawCreep
+    block = 0
+    youngs_modulus = 2.0e11
+    poissons_ratio = 0.3
     coefficient = 3.0e-26
     n_exponent = 4
-    activation_energy = 0
-    relative_tolerance = 1.e-5
+    activation_energy = 0.0
+    relative_tolerance = 1e-08
+    absolute_tolerance = 1e-20
     max_its = 100
-    hardening_constant = 1
-    yield_stress = 1e30
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    temp = temp
     output_iteration_info = false
+    formulation = Nonlinear3D
   [../]
+[]
 
-  [./thermal]
-    type = HeatConductionMaterial
-    block = 1
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = Density
-    block = 1
-    density = 1
+[Postprocessors]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
   [../]
 []
 
 [Executioner]
-#  type = SolutionTimeAdaptive
   type = Transient
+#  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
-  petsc_options_value = '101           asm      lu'
-
+  petsc_options = '-snes_ksp'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '101'
 
   line_search = 'none'
-
 
   l_max_its = 100
   nl_max_its = 100
   nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
+  nl_abs_tol = 1e-8
   l_tol = 1e-5
   start_time = 0.0
-#  end_time = 2160000
-  end_time = 21600
-#  num_steps = 50
-#  dt = 1.e-3
-#  dtmax = 1.e-4
-  dt = 1e-2
+  end_time = 2160
+
   [./TimeStepper]
     type = FunctionDT
     time_dt = '1e-2 1e-1 1e0 1e1 1e2'
@@ -218,12 +193,7 @@
   [../]
 []
 
-[Postprocessors]
-  [./timestep]
-    type = TimestepSize
-  [../]
-[]
-
 [Outputs]
   exodus = true
+  file_base = combined_stress_relaxation_out
 []

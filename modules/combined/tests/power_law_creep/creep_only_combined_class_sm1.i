@@ -1,5 +1,8 @@
 #
-# Simple power law creep example (without instantaneous plasticity)
+# Simple power law creep example (without instantaneous plasticity).
+# NOTE: this test is not replicated in a direct tensor mechanics form because the functioning
+#   of the individual TM power law creep and TM isotropic plasticity is already tested in the
+#   tensor mechanics module.
 #
 # The mesh is a 1x1x1 cube with a constant pressure of 10 MPa on the top face.
 #   Symmetry boundary conditions on three planes provide a uniaxial stress
@@ -41,7 +44,14 @@
 #
 #
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+[]
+
+[GlobalParams]
   displacements = 'x_disp y_disp z_disp'
 []
 
@@ -98,7 +108,6 @@
 [Functions]
   [./top_pull]
     type = PiecewiseLinear
-
     x = '0 1'
     y = '1 1'
   [../]
@@ -185,53 +194,41 @@
     type = Pressure
     variable = y_disp
     component = 1
-    boundary = 5
+    boundary = top
     factor = -10.0e6
     function = top_pull
   [../]
-
   [./u_bottom_fix]
     type = DirichletBC
     variable = y_disp
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
-
   [./u_yz_fix]
     type = DirichletBC
     variable = x_disp
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
-
   [./u_xy_fix]
     type = DirichletBC
     variable = z_disp
-    boundary = 2
+    boundary = back
     value = 0.0
   [../]
-
-  [./temp_top_fix]
+  [./temp_fix]
     type = DirichletBC
     variable = temp
-    boundary = 5
+    boundary = 'top bottom'
     value = 1000.0
   [../]
-
-  [./temp_bottom_fix]
-    type = DirichletBC
-    variable = temp
-    boundary = 3
-    value = 1000.0
-  [../]
-
 []
 
 [Materials]
 
   [./creep]
     type = PLC_LSH
-    block = 1
+    block = 0
     youngs_modulus = 2.e11
     poissons_ratio = .3
     yield_stress = 20e6
@@ -252,18 +249,15 @@
 
   [./thermal]
     type = HeatConductionMaterial
-    block = 1
+    block = 0
     specific_heat = 1.0
     thermal_conductivity = 100.
   [../]
 
   [./density]
     type = Density
-    block = 1
+    block = 0
     density = 1.0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
   [../]
 []
 
@@ -294,6 +288,7 @@
 []
 
 [Outputs]
+  file_base = creep_only_combined_class_sm_out
   exodus = true
   csv = true
 []

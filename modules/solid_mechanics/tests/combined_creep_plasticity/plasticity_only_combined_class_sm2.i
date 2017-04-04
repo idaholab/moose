@@ -1,7 +1,7 @@
 #
 # Test considers only linear strain hardening by setting the power-law
 #   creep coefficient to zero.
-##
+#
 # The mesh is a 1x1x1 cube pulled in the y direction.  Young's
 #    modulus is 2.4e5, and the yield stress is 2.4e2.  This gives
 #    a strain at yield of 0.001.  This strain is reached after 5
@@ -10,7 +10,11 @@
 #
 
 [Mesh]
-  file = PLC_LSH_lsh.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -117,45 +121,49 @@
   [./y_pull_function]
     type = FunctionDirichletBC
     variable = disp_y
-    boundary = 5
+    boundary = top
     function = top_pull
   [../]
 
   [./x_bot]
     type = DirichletBC
     variable = disp_x
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
   [./y_bot]
     type = DirichletBC
     variable = disp_y
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
   [./z_bot]
     type = DirichletBC
     variable = disp_z
-    boundary = 2
+    boundary = back
     value = 0.0
   [../]
 []
 
 [Materials]
-  [./lsh]
-    type = PLC_LSH
-    block = 1
+  [./driver]
+    type = SolidModel
+    block = 0
     youngs_modulus = 2.4e5
     poissons_ratio = .3
-    yield_stress = 2.4e2
-    hardening_constant = 1206.
-    coefficient = 0.0
-    n_exponent = 1.0
-    activation_energy = 0.0
-    relative_tolerance = 1.e-8
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+    constitutive_model = lsh
+  [../]
+  [./lsh]
+    type = IsotropicPlasticity
+    block = 0
+    yield_stress = 2.4e2
+    hardening_constant = 1206.
+    relative_tolerance = 1e-8
+    absolute_tolerance = 1e-12
+#    output_iteration_info = true
   [../]
 []
 
@@ -186,5 +194,6 @@
 []
 
 [Outputs]
+  file_base = plasticity_only_combined_class_sm_out
   exodus = true
 []
