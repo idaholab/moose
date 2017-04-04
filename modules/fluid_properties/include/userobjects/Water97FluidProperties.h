@@ -319,6 +319,93 @@ public:
   unsigned int inRegion(Real pressure, Real temperature) const;
 
   /**
+   * Provides the correct subregion index for a (P,T) point in
+   * region 3. From Revised Supplementary Release on Backward Equations for
+   * Specific Volume as a Function of Pressure and Temperature v(p,T)
+   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param temperature water temperature (K)
+   * @return subregion index
+   */
+  unsigned int subregion3(Real pressure, Real temperature) const;
+
+  /**
+   * Specific volume in all subregions of region 3 EXCEPT subregion n (13).
+   *
+   * @param pi scaled water pressure
+   * @param theta scaled water temperature
+   * @param a to e constants
+   * @param sid subregion ID of the subregion
+   * @return volume water specific volume (m^3/kg)
+   */
+  Real subregionVolume(
+      Real pi, Real theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const;
+
+  /**
+   * Density function for Region 3 - supercritical water and steam
+   *
+   * To avoid iteration, use the backwards equations for region 3
+   * from Revised Supplementary Release on Backward Equations for
+   * Specific Volume as a Function of Pressure and Temperature v(p,T)
+   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam.
+   *
+   * @param pressure water pressure (Pa)
+   * @param temperature water temperature (K)
+   * @return density (kg/m^3) in region 3
+   */
+  Real densityRegion3(Real pressure, Real temperature) const;
+
+  /**
+   * Henry's law constant
+   * Note: not implemented in this fluid property
+   */
+  virtual Real henryConstant(Real temperature) const override;
+
+  /**
+   * Henry's law constant and derivative wrt temperature
+   * Note: not implemented in this fluid property
+   */
+  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
+
+  /**
+   * Backwards equation T(p, h)
+   * From Revised Release on the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  virtual Real temperature_from_ph(Real pressure, Real enthalpy) const;
+
+  /**
+   * Boundary between subregions b and c in region 2.
+   * Equation 21 from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam.
+   *
+   * @param pressure water pressure (Pa)
+   * @return enthalpy at boundary (J/kg)
+   */
+  Real b2bc(Real pressure) const;
+
+  /**
+   * Boundary between subregions a and b in region 3.
+   * Equation 1 from Revised Supplementary Release on Backward Equations for
+   * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
+   * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+   * Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @return enthalpy at boundary (J/kg)
+   */
+  Real b3ab(Real pressure) const;
+
+protected:
+  /**
    * Gibbs free energy in Region 1 - single phase liquid region
    *
    * From Eq. (7) From Revised Release on the IAPWS Industrial
@@ -550,73 +637,6 @@ public:
    */
   Real d2gamma5_dpitau(Real pi, Real tau) const;
 
-  /**
-   * Provides the correct subregion index for a (P,T) point in
-   * region 3. From Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam
-   *
-   * @param pressure water pressure (Pa)
-   * @param temperature water temperature (K)
-   * @return subregion index
-   */
-  unsigned int subregion3(Real pressure, Real temperature) const;
-
-  /**
-   * Specific volume in all subregions of region 3 EXCEPT subregion n (13).
-   *
-   * @param pi scaled water pressure
-   * @param theta scaled water temperature
-   * @param a to e constants
-   * @param sid subregion ID of the subregion
-   * @return volume water specific volume (m^3/kg)
-   */
-  Real subregionVolume(
-      Real pi, Real theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const;
-
-  /**
-   * Density function for Region 3 - supercritical water and steam
-   *
-   * To avoid iteration, use the backwards equations for region 3
-   * from Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam.
-   *
-   * @param pressure water pressure (Pa)
-   * @param temperature water temperature (K)
-   * @return density (kg/m^3) in region 3
-   */
-  Real densityRegion3(Real pressure, Real temperature) const;
-
-  /**
-   * Henry's law constant
-   * Note: not implemented in this fluid property
-   */
-  virtual Real henryConstant(Real temperature) const override;
-
-  /**
-   * Henry's law constant and derivative wrt temperature
-   * Note: not implemented in this fluid property
-   */
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
-
-protected:
-  /// Water molar mass (kg/mol)
-  const Real _Mh2o;
-  /// Specific gas constant for H2O (universal gas constant / molar mass of water - J/kg/K)
-  const Real _Rw;
-  /// Critical pressure (Pa)
-  const Real _p_critical;
-  /// Critical temperature (K)
-  const Real _T_critical;
-  /// Critical density (kg/m^3)
-  const Real _rho_critical;
-  /// Triple point pressure (Pa)
-  const Real _p_triple;
-  /// Triple point temperature (K)
-  const Real _T_triple;
   /// Enum of subregion ids for region 3
   enum subregionEnum
   {
@@ -648,6 +668,130 @@ protected:
   Real tempXY(Real pressure, subregionEnum xy) const;
 
   /**
+   * Determines the phase region that the given pressure and enthaply values
+   * lie in.
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return region phase region index
+   */
+  unsigned int inRegionPH(Real pressure, Real enthalpy) const;
+
+  /**
+   * Provides the correct subregion index for a (P,h) point in
+   * region 2. From Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return subregion index
+   */
+  unsigned int subregion2ph(Real pressure, Real enthalpy) const;
+
+  /**
+   * Provides the correct subregion index for a (P,h) point in
+   * region 3. From Revised Supplementary Release on Backward Equations for
+   * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
+   * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+   * Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return subregion index
+   */
+  unsigned int subregion3ph(Real pressure, Real enthalpy) const;
+
+  /**
+   * Backwards equation T(p, h) in Region 1
+   * Eq. (11) from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  Real temperature_from_ph1(Real pressure, Real enthalpy) const;
+
+  /**
+   * Backwards equation T(p, h) in Region 2a
+   * Eq. (22) from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  Real temperature_from_ph2a(Real pressure, Real enthalpy) const;
+
+  /**
+   * Backwards equation T(p, h) in Region 2b
+   * Eq. (23) from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  Real temperature_from_ph2b(Real pressure, Real enthalpy) const;
+
+  /**
+   * Backwards equation T(p, h) in Region 2c
+   * Eq. (24) from Revised Release on the IAPWS Industrial
+   * Formulation 1997 for the Thermodynamic Properties of Water
+   * and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  Real temperature_from_ph2c(Real pressure, Real enthalpy) const;
+
+  /**
+   * Backwards equation T(p, h) in Region 3a
+   * Eq. (2) from Revised Supplementary Release on Backward Equations for
+   * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
+   * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+   * Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  Real temperature_from_ph3a(Real pressure, Real enthalpy) const;
+
+  /**
+   * Backwards equation T(p, h) in Region 3b
+   * Eq. (3) from Revised Supplementary Release on Backward Equations for
+   * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
+   * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+   * Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return temperature water temperature (K)
+   */
+  Real temperature_from_ph3b(Real pressure, Real enthalpy) const;
+
+  /// Water molar mass (kg/mol)
+  const Real _Mh2o;
+  /// Specific gas constant for H2O (universal gas constant / molar mass of water - J/kg/K)
+  const Real _Rw;
+  /// Critical pressure (Pa)
+  const Real _p_critical;
+  /// Critical temperature (K)
+  const Real _T_critical;
+  /// Critical density (kg/m^3)
+  const Real _rho_critical;
+  /// Triple point pressure (Pa)
+  const Real _p_triple;
+  /// Triple point temperature (K)
+  const Real _T_triple;
+
+  /**
    * Reference constants used in to calculate thermophysical properties of water.
    * Taken from Revised Release on the IAPWS Industrial Formulation 1997 for the Thermodynamic
    * Properties of Water and Steam and from Revised Supplementary Release on Backward Equations for
@@ -673,6 +817,18 @@ protected:
   const std::vector<int> _J1{-2, -1, 0,   1,  2,   3,   4,   5,   -9,  -7, -1, 0,
                              1,  3,  -3,  0,  1,   3,   17,  -4,  0,   6,  -5, -2,
                              10, -8, -11, -6, -29, -31, -38, -39, -40, -41};
+
+  const std::vector<Real> _nph1{
+      -0.23872489924521e3,  0.40421188637945e3,    0.11349746881718e3,   -0.58457616048039e1,
+      -0.15285482413140e-3, -0.10866707695377e-5,  -0.13391744872602e2,  0.43211039183559e2,
+      -0.54010067170506e2,  0.30535892203916e2,    -0.65964749423638e1,  0.93965400878363e-2,
+      0.11573647505340e-6,  -0.25858641282073e-4,  -0.40644363084799e-8, 0.66456186191635e-7,
+      0.80670734103027e-10, -0.93477771213947e-12, 0.58265442020601e-14, -0.15020185953503e-16};
+
+  const std::vector<int> _Iph1{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 5, 6};
+
+  const std::vector<int> _Jph1{0, 1,  2,  6,  22, 32, 0,  1,  2,  3,
+                               4, 10, 32, 10, 32, 10, 32, 32, 32, 32};
 
   /// Constants for region 2
   const std::vector<Real> _n02{-0.96927686500217e1,
@@ -707,6 +863,56 @@ protected:
   const std::vector<int> _J2{0,  1,  2,  3,  6,  1,  2,  4,  7,  36, 0,  1,  3,  6, 35,
                              1,  2,  3,  7,  3,  16, 35, 0,  11, 25, 8,  36, 13, 4, 10,
                              14, 29, 50, 57, 20, 35, 48, 21, 53, 39, 26, 40, 58};
+
+  const std::vector<Real> _nph2a{
+      0.10898952318288e4,  0.84951654495535e3,   -0.10781748091826e3, 0.33153654801263e2,
+      -0.74232016790248e1, 0.11765048724356e2,   0.18445749355790e1,  -0.41792700549624e1,
+      0.62478196935812e1,  -0.17344563108114e2,  -0.20058176862096e3, 0.27196065473796e3,
+      -0.45511318285818e3, 0.30919688604755e4,   0.25226640357872e6,  -0.61707422868339e-2,
+      -0.31078046629583,   0.11670873077107e2,   0.12812798404046e9,  -0.98554909623276e9,
+      0.28224546973002e10, -0.35948971410703e10, 0.17227349913197e10, -0.13551334240775e5,
+      0.12848734664650e8,  0.13865724283226e1,   0.23598832556514e6,  -0.13105236545054e8,
+      0.73999835474766e4,  -0.55196697030060e6,  0.37154085996233e7,  0.19127729239660e5,
+      -0.41535164835634e6, -0.62459855192507e2};
+
+  const std::vector<int> _Iph2a{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2,
+                                2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7};
+
+  const std::vector<int> _Jph2a{0, 1,  2,  3,  7,  20, 0,  1,  2,  3,  7,  9,  11, 18, 44, 0,  2,
+                                7, 36, 38, 40, 42, 44, 24, 44, 12, 32, 44, 32, 36, 42, 34, 44, 28};
+
+  const std::vector<Real> _nph2b{
+      0.14895041079516e4,    0.74307798314034e3,   -0.97708318797837e2,   0.24742464705674e1,
+      -0.63281320016026,     0.11385952129658e1,   -0.47811863648625,     0.85208123431544e-2,
+      0.93747147377932,      0.33593118604916e1,   0.33809355601454e1,    0.16844539671904,
+      0.73875745236695,      -0.47128737436186,    0.15020273139707,      -0.21764114219750e-2,
+      -0.21810755324761e-1,  -0.10829784403677,    -0.46333324635812e-1,  0.71280351959551e-4,
+      0.11032831789999e-3,   0.18955248387902e-3,  0.30891541160537e-2,   0.13555504554949e-2,
+      0.28640237477456e-6,   -0.10779857357512e-4, -0.76462712454814e-4,  0.14052392818316e-4,
+      -0.31083814331434e-4,  -0.10302738212103e-5, 0.28217281635040e-6,   0.12704902271945e-5,
+      0.73803353468292e-7,   -0.11030139238909e-7, -0.81456365207833e-13, -0.25180545682962e-10,
+      -0.17565233969407e-17, 0.86934156344163e-14};
+
+  const std::vector<int> _Iph2b{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+                                2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 6, 7, 7, 9, 9};
+
+  const std::vector<int> _Jph2b{0,  1,  2,  12, 18, 24, 28, 40, 0, 2,  6,  12, 18,
+                                24, 28, 40, 2,  8,  18, 40, 1,  2, 12, 24, 2,  12,
+                                18, 24, 28, 40, 18, 24, 40, 28, 2, 28, 1,  40};
+
+  const std::vector<Real> _nph2c{
+      -0.32368398555242e13, 0.73263350902181e13,   0.35825089945447e12,  -0.58340131851590e12,
+      -0.10783068217470e11, 0.20825544563171e11,   0.61074783564516e6,   0.85977722535580e6,
+      -0.25745723604170e5,  0.31081088422714e5,    0.12082315865936e4,   0.48219755109255e3,
+      0.37966001272486e1,   -0.10842984880077e2,   -0.45364172676660e-1, 0.14559115658698e-12,
+      0.11261597407230e-11, -0.17804982240686e-10, 0.12324579690832e-6,  -0.11606921130984e-5,
+      0.27846367088554e-4,  -0.59270038474176e-3,  0.12918582991878e-2};
+
+  const std::vector<int> _Iph2c{-7, -7, -6, -6, -5, -5, -2, -2, -1, -1, 0, 0,
+                                1,  1,  2,  6,  6,  6,  6,  6,  6,  6,  6};
+
+  const std::vector<int> _Jph2c{0, 4, 0, 2, 0, 2, 0,  1,  0,  2,  0, 1,
+                                4, 8, 4, 0, 1, 4, 10, 12, 16, 20, 22};
 
   /// Constants for region 3
   const std::vector<Real> _n3{
@@ -1108,6 +1314,41 @@ protected:
        3,  -6, -2, 1, 1, -6, -3, 1,  8, -8, -10, -8, -5,  -4, -12, -10, -8, -6},
       {-3, 1, 5, 8, 8, -4, -1, 4, 5, -8, 4, 8, -6, 6, -2, 1, -8, -2, -5, -8},
       {3, 6, 6, 8, 5, 6, 8, -2, 5, 6, 2, -6, 3, 1, 6, -6, -2, -6, -5, -4, -1, -8, -4}};
+
+  const std::vector<Real> _nph3a{
+      -0.133645667811215e-6, 0.455912656802978e-5,  -0.146294640700979e-4, 0.639341312970080e-2,
+      0.372783927268847e3,   -0.718654377460447e4,  0.573494752103400e6,   -0.267569329111439e7,
+      -0.334066283302614e-4, -0.245479214069597e-1, 0.478087847764996e2,   0.764664131818904e-5,
+      0.128350627676972e-2,  0.171219081377331e-1,  -0.851007304583213e1,  -0.136513461629781e-1,
+      -0.384460997596657e-5, 0.337423807911655e-2,  -0.551624873066791,    0.729202277107470,
+      -0.992522757376041e-2, -.119308831407288,     .793929190615421,      .454270731799386,
+      .20999859125991,       -0.642109823904738e-2, -0.235155868604540e-1, 0.252233108341612e-2,
+      -0.764885133368119e-2, 0.136176427574291e-1,  -0.133027883575669e-1};
+
+  const std::vector<int> _Iph3a{-12, -12, -12, -12, -12, -12, -12, -12, -10, -10, -10,
+                                -8,  -8,  -8,  -8,  -5,  -3,  -2,  -2,  -2,  -1,  -1,
+                                0,   0,   1,   3,   3,   4,   4,   10,  12};
+
+  const std::vector<int> _Jph3a{0, 1, 2, 6, 14, 16, 20, 22, 1, 5, 12, 0, 2, 4, 10, 2,
+                                0, 1, 3, 4, 0,  2,  0,  1,  1, 0, 1,  0, 3, 4, 5};
+
+  const std::vector<Real> _nph3b{
+      0.323254573644920e-4,  -0.127575556587181e-3, -0.475851877356068e-3, 0.156183014181602e-2,
+      0.105724860113781,     -0.858514221132534e2,  0.724140095480911e3,   0.296475810273257e-2,
+      -0.592721983365988e-2, -0.126305422818666e-1, -0.115716196364853,    0.849000969739595e2,
+      -0.108602260086615e-1, 0.154304475328851e-1,  0.750455441524466e-1,  0.252520973612982e-1,
+      -0.602507901232996e-1, -0.307622221350501e1,  -0.574011959864879e-1, 0.503471360939849e1,
+      -0.925081888584834,    0.391733882917546e1,   -0.773146007130190e2,  0.949308762098587e4,
+      -0.141043719679409e7,  0.849166230819026e7,   0.861095729446704,     0.323346442811720,
+      0.873281936020439,     -0.436653048526683,    0.286596714529479,     -0.131778331276228,
+      0.676682064330275e-2};
+
+  const std::vector<int> _Iph3b{-12, -12, -10, -10, -10, -10, -10, -8, -8, -8, -8,
+                                -8,  -6,  -6,  -6,  -4,  -4,  -3,  -2, -2, -1, -1,
+                                -1,  -1,  -1,  -1,  0,   0,   1,   3,  5,  6,  8};
+
+  const std::vector<int> _Jph3b{0, 1, 0, 1, 5, 10, 12, 0,  1,  2, 4, 10, 0, 1, 2, 0, 1,
+                                5, 0, 4, 2, 4, 6,  10, 14, 16, 0, 2, 1,  1, 1, 1, 1};
 
   /// Constants for region 5
   const std::vector<int> _J05{0, 1, -3, -2, -1, 2};

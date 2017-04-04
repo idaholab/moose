@@ -891,9 +891,9 @@ Water97FluidProperties::inRegion(Real pressure, Real temperature) const
 {
   // Valid for 273.15 K <= T <= 1073.15 K, p <= 100 MPa
   //          1073.15 K <= T <= 2273.15 K, p <= 50 Mpa
-  if (temperature > 273.15 && temperature <= 1073.15)
+  if (temperature >= 273.15 && temperature <= 1073.15)
   {
-    if (pressure < 0.0 || pressure > 100.0e6)
+    if (pressure < pSat(273.15) || pressure > 100.0e6)
       mooseError("Pressure ", pressure, " is out of range in Water97FluidProperties::inRegion");
   }
   else if (temperature > 1073.15 && temperature <= 2273.15)
@@ -1597,4 +1597,244 @@ Water97FluidProperties::henryConstant_dT(Real /* temperature */,
                                          Real & /* dKh_dT */) const
 {
   mooseError("Water97FluidProperties::henryConstant_dT() not defined");
+}
+
+unsigned int
+Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
+{
+  unsigned int region;
+
+  // Need to calculate enthalpies at the boundaries to delineate regions
+  Real p273 = pSat(273.15);
+  Real p623 = pSat(623.15);
+
+  if (pressure >= p273 && pressure <= p623)
+  {
+    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, TSat(pressure)))
+      region = 1;
+    else if (enthalpy > h(pressure, TSat(pressure)) && enthalpy <= h(pressure, 1073.15))
+      region = 2;
+    else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
+      region = 5;
+    else
+      mooseError("Enthalpy ", enthalpy, " is out of range in Water97FluidProperties::inRegionPHa");
+  }
+  else if (pressure > p623 && pressure <= 50.0e6)
+  {
+    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, 623.15))
+      region = 1;
+    else if (enthalpy > h(pressure, 623.15) && enthalpy <= h(pressure, b23T(pressure)))
+      region = 3;
+    else if (enthalpy > h(pressure, b23T(pressure)) && enthalpy <= h(pressure, 1073.15))
+      region = 2;
+    else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
+      region = 5;
+    else
+      mooseError("Enthalpy ", enthalpy, " is out of range in Water97FluidProperties::inRegionPHb");
+  }
+  else if (pressure > 50.0e6 && pressure <= 100.0e6)
+  {
+    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, 623.15))
+      region = 1;
+    else if (enthalpy > h(pressure, 623.15) && enthalpy <= h(pressure, b23T(pressure)))
+      region = 3;
+    else if (enthalpy > h(pressure, b23T(pressure)) && enthalpy <= h(pressure, 1073.15))
+      region = 2;
+    else
+      mooseError("Enthalpy ", enthalpy, " is out of range in Water97FluidProperties::inRegionPHc");
+  }
+  else
+    mooseError("Pressure ", pressure, " is out of range in Water97FluidProperties::inRegionPH");
+
+  return region;
+}
+
+unsigned int
+Water97FluidProperties::subregion2ph(Real pressure, Real enthalpy) const
+{
+  unsigned int subregion;
+
+  if (pressure <= 4.0e6)
+    subregion = 1;
+  else if (pressure > 4.0e6 && pressure < 6.5467e6)
+    subregion = 2;
+  else
+  {
+    if (enthalpy >= b2bc(pressure))
+      subregion = 2;
+    else
+      subregion = 3;
+  }
+
+  return subregion;
+}
+
+unsigned int
+Water97FluidProperties::subregion3ph(Real pressure, Real enthalpy) const
+{
+  unsigned int subregion;
+
+  if (enthalpy <= b3ab(pressure))
+    subregion = 1;
+  else
+    subregion = 2;
+
+  return subregion;
+}
+
+Real
+Water97FluidProperties::b2bc(Real pressure) const
+{
+  // Check whether the input pressure is within the region of validity of this equation.
+  if (pressure < 6.5467e6 || pressure > 100.0e6)
+    mooseError(
+        "Water97FluidProperties::b2bc: Pressure is outside range of 6.5467 MPa <= p <= 100 MPa");
+
+  Real pi = pressure / 1.0e6;
+
+  return (0.26526571908428e4 + std::sqrt((pi - 0.45257578905948e1) / 0.12809002730136e-3)) * 1.0e3;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph(Real pressure, Real enthalpy) const
+{
+  Real temperature = 0.0;
+
+  // Determine which region the point is in
+  unsigned int region = inRegionPH(pressure, enthalpy);
+
+  switch (region)
+  {
+    case 1:
+      temperature = temperature_from_ph1(pressure, enthalpy);
+      break;
+
+    case 2:
+    {
+      // First, determine which subregion the point is in:
+      unsigned int subregion = subregion2ph(pressure, enthalpy);
+
+      if (subregion == 1)
+        temperature = temperature_from_ph2a(pressure, enthalpy);
+      else if (subregion == 2)
+        temperature = temperature_from_ph2b(pressure, enthalpy);
+      else
+        temperature = temperature_from_ph2c(pressure, enthalpy);
+      break;
+    }
+
+    case 3:
+    {
+      // First, determine which subregion the point is in:
+      unsigned int subregion = subregion3ph(pressure, enthalpy);
+
+      if (subregion == 1)
+        temperature = temperature_from_ph3a(pressure, enthalpy);
+      else
+        temperature = temperature_from_ph3b(pressure, enthalpy);
+      break;
+    }
+
+    case 5:
+      mooseError("Water97FluidProperties::temperature_from_ph() not implemented for region 5");
+      break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegionPH has given an incorrect region");
+  }
+
+  return temperature;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph1(Real pressure, Real enthalpy) const
+{
+  Real pi = pressure / 1.0e6;
+  Real eta = enthalpy / 2500.0e3;
+  Real sum = 0.0;
+
+  for (unsigned int i = 0; i < _nph1.size(); ++i)
+    sum += _nph1[i] * std::pow(pi, _Iph1[i]) * std::pow(eta + 1.0, _Jph1[i]);
+
+  return sum;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph2a(Real pressure, Real enthalpy) const
+{
+  Real pi = pressure / 1.0e6;
+  Real eta = enthalpy / 2000.0e3;
+  Real sum = 0.0;
+
+  for (unsigned int i = 0; i < _nph2a.size(); ++i)
+    sum += _nph2a[i] * std::pow(pi, _Iph2a[i]) * std::pow(eta - 2.1, _Jph2a[i]);
+
+  return sum;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph2b(Real pressure, Real enthalpy) const
+{
+  Real pi = pressure / 1.0e6;
+  Real eta = enthalpy / 2000.0e3;
+  Real sum = 0.0;
+
+  for (unsigned int i = 0; i < _nph2b.size(); ++i)
+    sum += _nph2b[i] * std::pow(pi - 2.0, _Iph2b[i]) * std::pow(eta - 2.6, _Jph2b[i]);
+
+  return sum;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph2c(Real pressure, Real enthalpy) const
+{
+  Real pi = pressure / 1.0e6;
+  Real eta = enthalpy / 2000.0e3;
+  Real sum = 0.0;
+
+  for (unsigned int i = 0; i < _nph2c.size(); ++i)
+    sum += _nph2c[i] * std::pow(pi + 25.0, _Iph2c[i]) * std::pow(eta - 1.8, _Jph2c[i]);
+
+  return sum;
+}
+
+Real
+Water97FluidProperties::b3ab(Real pressure) const
+{
+  // Check whether the input pressure is within the region of validity of this equation.
+  if (pressure < b23p(623.15) || pressure > 100.0e6)
+    mooseError(
+        "Water97FluidProperties::b3ab: Pressure is outside range of 16.529 MPa <= p <= 100 MPa");
+
+  Real pi = pressure / 1.0e6;
+  Real eta = 0.201464004206875e4 + 0.374696550136983e1 * pi - 0.219921901054187e-1 * pi * pi +
+             0.87513168600995e-4 * pi * pi * pi;
+
+  return eta * 1.0e3;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph3a(Real pressure, Real enthalpy) const
+{
+  Real pi = pressure / 100.0e6;
+  Real eta = enthalpy / 2300.0e3;
+  Real sum = 0.0;
+
+  for (unsigned int i = 0; i < _nph3a.size(); ++i)
+    sum += _nph3a[i] * std::pow(pi + 0.24, _Iph3a[i]) * std::pow(eta - 0.615, _Jph3a[i]);
+
+  return sum * 760.0;
+}
+
+Real
+Water97FluidProperties::temperature_from_ph3b(Real pressure, Real enthalpy) const
+{
+  Real pi = pressure / 100.0e6;
+  Real eta = enthalpy / 2800.0e3;
+  Real sum = 0.0;
+
+  for (unsigned int i = 0; i < _nph3b.size(); ++i)
+    sum += _nph3b[i] * std::pow(pi + 0.298, _Iph3b[i]) * std::pow(eta - 0.72, _Jph3b[i]);
+
+  return sum * 860.0;
 }
