@@ -157,5 +157,12 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         self.assertIsNone(self._window._window.getOption('style'))
         self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(), vtk.vtkInteractorStyleImage)
 
+    def testNoFile(self):
+        """
+        Test that window shows up with peacock image.
+        """
+        self._window.onFileChanged()
+        self.assertImage('testPeacockMessage.png')
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
