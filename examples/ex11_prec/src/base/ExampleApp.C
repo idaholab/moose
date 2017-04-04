@@ -36,8 +36,6 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
 
-ExampleApp::~ExampleApp() {}
-
 void
 ExampleApp::registerObjects(Factory & /*factory*/)
 {
