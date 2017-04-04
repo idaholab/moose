@@ -8,9 +8,12 @@
 
 // distributions
 #include "UniformDistribution.h"
-
+// samplers
+#include "MonteCarloSampler.h"
 // for test purpose only
 #include "TestDistributionPostprocessor.h"
+#include "TestSamplerDiffMKernel.h"
+#include "TestSamplerMaterial.h"
 
 template <>
 InputParameters
@@ -58,8 +61,13 @@ StochasticToolsApp::registerObjects(Factory & factory)
   // distributions
   registerDistribution(UniformDistribution);
 
+  // samplers
+  registerSampler(MonteCarloSampler);
+
   // for test purpose only
-  registerDistribution(TestDistributionPostprocessor);
+  registerPostprocessor(TestDistributionPostprocessor);
+  registerKernel(TestSamplerDiffMKernel);
+  registerMaterial(TestSamplerMaterial);
 }
 
 // External entry point for dynamic syntax association

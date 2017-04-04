@@ -1053,6 +1053,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           MaterialName, it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalar(
           DistributionName, it.second, full_name, it.first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(
+          SamplerName, it.second, full_name, it.first, in_global, global_params_block);
 
       /**
        * Vector types

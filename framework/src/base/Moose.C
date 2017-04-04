@@ -384,6 +384,7 @@
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "AddDistributionAction.h"
+#include "AddSamplerAction.h"
 #include "CreateExecutionerAction.h"
 #include "DetermineSystemType.h"
 #include "EmptyAction.h"
@@ -892,6 +893,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);
   registerMooseObjectTask("add_distribution",             Distribution,           false);
+  registerMooseObjectTask("add_sampler",                  Sampler,           false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
@@ -1021,6 +1023,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_quadrature)"
                            "(add_function)"
                            "(add_distribution)"
+                           "(add_sampler"
                            "(add_periodic_bc)"
                            "(add_user_object)"
                            "(setup_function_complete)"
@@ -1103,6 +1106,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(AddDistributionAction, "add_distribution");
+  registerAction(AddSamplerAction, "add_sampler");
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
