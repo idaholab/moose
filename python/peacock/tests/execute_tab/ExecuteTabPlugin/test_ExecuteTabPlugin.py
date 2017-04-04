@@ -27,14 +27,12 @@ class Tests(Testing.PeacockTester):
         w.startJob.connect(self.startJob)
         w.executableInfoChanged.connect(self.exeInfoChanged)
         menubar = main_win.menuBar()
-        kwargs = {}
         if args:
             parser = argparse.ArgumentParser()
             w.commandLineArgs(parser)
             parsed_args = parser.parse_args(args)
             parsed_args.arguments = []
-            kwargs["cmd_line_options"] = parsed_args
-        w.initialize(**kwargs)
+            w.initialize(parsed_args)
         w.addToMainMenu(menubar)
         main_win.show()
         return main_win, w

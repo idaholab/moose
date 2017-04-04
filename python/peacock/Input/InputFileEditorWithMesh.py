@@ -4,7 +4,7 @@ from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
 from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
-from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QGridLayout, QBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import pyqtSignal
 from MeshViewerPlugin import MeshViewerPlugin
 from InputFileEditorPlugin import InputFileEditorPlugin
@@ -182,23 +182,6 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
             return reply != QMessageBox.No
         return True
 
-    def parseOptions(self, options):
-        if not options:
-            return
-        if options.input_file:
-            p = os.path.abspath(options.input_file)
-            self.setInputFile(p)
-            self.inputFileChanged.emit(p)
-            options.input_file = p
-            return
-        for arg in options.arguments:
-            if arg.endswith(".i"):
-                p = os.path.abspath(arg)
-                self.setInputFile(p)
-                self.inputFileChanged.emit(p)
-                options.input_file = p
-                return
-
     def setInputFile(self, input_file):
         """
         Utility function so that callers don't have to know
@@ -208,16 +191,27 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         return self.InputFileEditorPlugin.setInputFile(input_file)
 
-    def initialize(self, *args, **kwargs):
+    def initialize(self, options):
         """
-        Initializes this widget.
+        Initializes this widget,
         kwargs can contain 'cmd_line_options' with a argparse namespace of options
         that were parsed on the command line.
         """
-        options = kwargs.pop('cmd_line_options', None)
-        super(InputFileEditorWithMesh, self).initialize(*args, **kwargs)
+        super(InputFileEditorWithMesh, self).initialize(options)
         self.setViewerEnabled(False)
-        self.parseOptions(options)
+
+        # Locate input file in arguments without command
+        if not options.input_file and options.arguments:
+            for arg in options.arguments:
+                if arg.endswith(".i"):
+                    options.input_file = os.path.abspath(arg)
+                    break
+
+        # Load the supplied input file.
+        if options.input_file:
+            p = os.path.abspath(options.input_file)
+            self.setInputFile(p)
+            self.inputFileChanged.emit(p)
 
     def closing(self):
         """

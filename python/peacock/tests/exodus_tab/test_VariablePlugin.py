@@ -19,9 +19,8 @@ class TestVariablePlugin(Testing.PeacockImageTestCase):
 
         # The file to open
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
-        print self._filenames
         self._widget, self._window = main(size=[400,400])
-        self._widget.initialize(self._filenames)
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Start with 'diffused' variable
         self._widget.VariablePlugin.VariableList.setCurrentIndex(2)

@@ -50,9 +50,11 @@ class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
         self._title_layout.addWidget(self._title_widget)
         self._title_layout.setAlignment(QtCore.Qt.AlignTop)
 
-        self._collapsible_layout = collapsible_layout()
+        self._collapsible_widget = QtWidgets.QWidget()
+        self._collapsible_layout = collapsible_layout(self._collapsible_widget)
+        self._collapsible_layout.setContentsMargins(0, 0, 0, 0)
         self._main_layout.addLayout(self._title_layout)
-        self._main_layout.addLayout(self._collapsible_layout)
+        self._main_layout.addWidget(self._collapsible_widget)
         self._main_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self._collapsed = None
@@ -89,7 +91,8 @@ class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
         Toggles the collapsible content.
         """
         self._collapsed = not self._collapsed
-        PeacockCollapsibleWidget.toggleCollapsed(self._collapsible_layout, self._collapsed)
+        self._collapsible_widget.setHidden(self._collapsed)
+#        PeacockCollapsibleWidget.toggleCollapsed(self._collapsible_layout, self._collapsed)
 
         name = 'plus.svg' if self._collapsed else 'minus.svg'
         self._collapse_button.setIcon(WidgetUtils.createIcon(name))

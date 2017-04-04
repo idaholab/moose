@@ -94,7 +94,8 @@ def main(size=None):
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    filenames = ['../../tests/chigger/input/mug_blocks_out.e', '../../tests/chigger/input/displace.e', '../../tests/chigger/input/vector_out.e']
+    from peacock.utils import Testing
+    filenames = Testing.get_chigger_input_list('mesh_only.e', 'mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget = main()
-    widget.initialize(filenames)
+    widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

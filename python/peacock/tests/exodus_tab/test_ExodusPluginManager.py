@@ -39,7 +39,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         self._widget = main(size=[600,600])
         self._window = self._widget.VTKWindowPlugin
-        self._widget.initialize(self._filenames)
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Start with 'diffused' variable
         self._widget.VariablePlugin.VariableList.setCurrentIndex(2)

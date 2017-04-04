@@ -22,7 +22,6 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestFilePlugin, cls).setUpClass()
-
         if os.path.exists(cls.temp_file):
             os.remove(cls.temp_file)
 
@@ -42,7 +41,7 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         """
 
         # Test that things initialize correctly
-        self._widget.initialize(self._filenames)
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
         self.assertEqual(4, self._widget.FilePlugin.AvailableFiles.count())
         self.assertEqual(os.path.basename(self._filenames[0]), str(self._widget.FilePlugin.AvailableFiles.currentText()))
         self._window.onResultOptionsChanged({'variable':'diffused'})
@@ -53,7 +52,7 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         """
         Test that new files load when selected and save camera state.
         """
-        self._widget.initialize(self._filenames)
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Setup a camera
         camera = vtk.vtkCamera()
@@ -86,7 +85,7 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         """
         Test that a file that does not exist initially is disabled then available.
         """
-        self._widget.initialize(self._filenames)
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Index 3 should be disabled
         self._widget.FilePlugin.AvailableFiles.showPopup()
@@ -128,12 +127,14 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         """
         Test opening many files with uninitialized plugin.
         """
+        shutil.copyfile(self._filenames[0], self._filenames[3])
+
         mock_exec.return_value = QtWidgets.QFileDialog.Accepted
         mock_open_files.return_value = self._filenames
         self._widget.FilePlugin.OpenFiles.clicked.emit()
 
         avail = self._widget.FilePlugin.AvailableFiles
-        self.assertEqual(self._filenames, [avail.itemData(i) for i in range(avail.count())])
+        self.assertEqual(self._filenames, self._widget.FilePlugin.getFilenames())
         self.assertEqual([os.path.basename(f) for f in self._filenames], [avail.itemText(i) for i in range(avail.count())])
         self.assertEqual(avail.count(), 4)
         self.assertEqual(avail.currentText(), os.path.basename(self._filenames[3]))

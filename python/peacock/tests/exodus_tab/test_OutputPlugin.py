@@ -38,7 +38,7 @@ class TestOutputPlugin(Testing.PeacockImageTestCase):
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
 
     def testPython(self):
         """
@@ -71,6 +71,7 @@ class TestOutputPlugin(Testing.PeacockImageTestCase):
         Tests the PNG button is working.
         """
         imagename = self._repr_script.replace('.py', '.png')
+        self._window.onResultOptionsChanged({'variable':'diffused'})
         self._widget.OutputPlugin.write.emit(imagename)
         differ = mooseutils.ImageDiffer(os.path.join('gold', imagename), imagename)
         print differ.message()

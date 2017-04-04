@@ -34,10 +34,11 @@ class CameraPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Resets the camera.
         """
-        self._result.getVTKRenderer().ResetCameraClippingRange()
-        self._result.getVTKRenderer().ResetCamera()
-        self._result.setNeedsUpdate(True)
-        self.windowRequiresUpdate.emit()
+        if self._result:
+            self._result.getVTKRenderer().ResetCameraClippingRange()
+            self._result.getVTKRenderer().ResetCamera()
+            self._result.setNeedsUpdate(True)
+            self.windowRequiresUpdate.emit()
 
     def _setupResetButton(self, qobject):
         """
@@ -49,16 +50,17 @@ class CameraPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Recomputes the original view.
         """
-        renderer = self._result.getVTKRenderer()
-        renderer.ResetCamera()
-        camera = renderer.GetActiveCamera()
-        fp = camera.GetFocalPoint()
-        p = camera.GetPosition()
-        dist = math.sqrt( (p[0]-fp[0])**2 + (p[1]-fp[1])**2 + (p[2]-fp[2])**2 )
-        camera.SetPosition(fp[0], fp[1], fp[2]+dist)
-        camera.SetViewUp(0.0, 1.0, 0.0)
-        self._result.setNeedsUpdate(True)
-        self.windowRequiresUpdate.emit()
+        if self._result:
+            renderer = self._result.getVTKRenderer()
+            renderer.ResetCamera()
+            camera = renderer.GetActiveCamera()
+            fp = camera.GetFocalPoint()
+            p = camera.GetPosition()
+            dist = math.sqrt( (p[0]-fp[0])**2 + (p[1]-fp[1])**2 + (p[2]-fp[2])**2 )
+            camera.SetPosition(fp[0], fp[1], fp[2]+dist)
+            camera.SetViewUp(0.0, 1.0, 0.0)
+            self._result.setNeedsUpdate(True)
+            self.windowRequiresUpdate.emit()
 
 
 def main(size=None):
@@ -77,5 +79,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
-    widget.initialize([filename])
+    window.onFileChanged(filename)
     sys.exit(app.exec_())

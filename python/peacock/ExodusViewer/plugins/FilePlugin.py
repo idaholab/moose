@@ -75,14 +75,19 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
         self.setup()
 
-    def initialize(self, filenames):
+    def getFilenames(self):
+        """
+        Return the current filenames.
+        """
+        return [self.AvailableFiles.itemData(i) for i in range(self.AvailableFiles.count())]
+
+    def onSetFilenames(self, filenames):
         """
         Updates the list of available files for selection.
 
         Args:
             filenames[list]: The filenames to include in the AvailableFiles widget.
         """
-        super(FilePlugin, self).initialize()
 
         # Clear the existing list of files
         self.AvailableFiles.blockSignals(True)
@@ -143,7 +148,7 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         if self.FileOpenDialog.exec_() == QtWidgets.QDialog.Accepted:
             filenames = [str(fname) for fname in list(self.FileOpenDialog.selectedFiles())]
             if self.AvailableFiles.count() == 0:
-                self.initialize(filenames)
+                self.onSetFilenames(filenames)
         else:
             return
 

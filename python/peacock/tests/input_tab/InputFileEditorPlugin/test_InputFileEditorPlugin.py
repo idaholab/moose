@@ -26,7 +26,6 @@ class Tests(Testing.PeacockTester):
         w = InputFileEditorPlugin()
         main_win.setCentralWidget(w)
         main_win.show()
-        w.initialize()
         app_info = ExecutableInfo()
         if app_init:
             app_info.setPath(Testing.find_moose_test_exe())

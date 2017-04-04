@@ -129,16 +129,6 @@ class PluginManager(MooseWidget):
             for plugin1 in self._all_plugins:
                 plugin0.connect(plugin1)
 
-    def initialize(self, *args, **kwargs):
-        """
-        Initialize the plugin widgets, all arguments are passed to the Plugin initialize method.
-        """
-        for name, plugins in self._plugins.iteritems():
-            if not isinstance(plugins, list):
-                plugins = [plugins]
-            for plugin in plugins:
-                plugin.initialize(*args, **kwargs)
-
     def write(self, filename):
         """
         Write the python script.

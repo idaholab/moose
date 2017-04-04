@@ -2,6 +2,7 @@ import sys
 from PyQt5 import QtWidgets
 
 import mooseutils
+import peacock
 from PostprocessorViewer import PostprocessorViewer
 from plugins.FigurePlugin import FigurePlugin
 from plugins.MediaControlPlugin import MediaControlPlugin
@@ -38,14 +39,12 @@ class VectorPostprocessorViewer(PostprocessorViewer):
     def __init__(self, plugins=[FigurePlugin, MediaControlPlugin, PostprocessorSelectPlugin, AxesSettingsPlugin, AxisTabsPlugin, OutputPlugin], **kwargs):
         super(VectorPostprocessorViewer, self).__init__(reader=mooseutils.VectorPostprocessorReader, plugins=plugins, **kwargs)
 
-    def initialize(self, filenames=[], **kwargs):
+    def initialize(self, options):
         """
         Initialize the manager by appending supplied files from parser.
         """
-        options = kwargs.pop('cmd_line_options', None)
-        if options:
-            filenames += options.vectorpostprocessors
-        super(VectorPostprocessorViewer, self).initialize(filenames, **kwargs)
+        filenames = peacock.utils.getOptionFilenames(options, 'vectorpostprocessors', '*.csv')
+        self.onSetFilenames(filenames)
 
 def main():
     """

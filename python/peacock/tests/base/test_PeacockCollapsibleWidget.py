@@ -10,6 +10,7 @@ class TestPeacockCollapsibleWidget(unittest.TestCase):
     """
     def testCollapseDefault(self):
         app = QtWidgets.QApplication(sys.argv)
+        self.assertIsNotNone(app)
         collapse = peacock.base.PeacockCollapsibleWidget(title='The Title')
         main = collapse.collapsibleLayout()
 
@@ -26,6 +27,8 @@ class TestPeacockCollapsibleWidget(unittest.TestCase):
 
     def testCollapseStartCollapse(self):
         app = QtWidgets.QApplication(sys.argv)
+        self.assertIsNotNone(app)
+
         collapse = peacock.base.PeacockCollapsibleWidget(collapsed=True, title='The Title')
         main = collapse.collapsibleLayout()
 

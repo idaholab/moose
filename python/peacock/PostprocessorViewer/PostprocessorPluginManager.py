@@ -12,9 +12,6 @@ class PostprocessorPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
     def __init__(self, plugins=[]):
         super(PostprocessorPluginManager, self).__init__(plugins=plugins)
 
-        # Member variables
-        self._data = None
-
         # The layouts for this widget
         self.MainLayout = QtWidgets.QHBoxLayout()
         self.setLayout(self.MainLayout)
@@ -25,32 +22,6 @@ class PostprocessorPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         self.MainLayout.addLayout(self.RightLayout)
 
         self.setup()
-        self.LeftLayout.addStretch(1)
-
-    def initialize(self, data):
-        """
-        Set the data for this widget to operate on.
-
-        Args:
-            data[list]: A list of PostprocessorDataWidget object to be used in this widget.
-        """
-
-        # Update the local storage
-        self._data = data
-
-        # Call the plugin initialize methods
-        super(PostprocessorPluginManager, self).initialize(self._data)
-
-        # Fix the width of left-side plugins to the maximum of all the others.
-        width = 0
-        for plugin in self._plugins.itervalues():
-            if plugin.mainLayoutName() == 'LeftLayout':
-                width = max(width, plugin.minimumSizeHint().width())
-        for plugin in self._plugins.itervalues():
-            if plugin.mainLayoutName() == 'LeftLayout':
-                plugin.setFixedWidth(width)
-
-        self.adjustSize()
 
     def repr(self):
         """
@@ -92,9 +63,9 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    data = [PostprocessorDataWidget(mooseutils.PostprocessorReader('../../tests/input/white_elephant_jan_2016.csv'))]
-    #data = [PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../../tests/input/vpp_*.csv')),
-    #        PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../../tests/input/vpp2_*.csv'))]
+    data = [PostprocessorDataWidget(mooseutils.PostprocessorReader('../tests/input/white_elephant_jan_2016.csv'))]
+    #data = [PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../tests/input/vpp_*.csv')),
+    #        PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../tests/input/vpp2_*.csv'))]
     widget, _ = main()
-    widget.initialize(data)
+    widget.call('onSetData', data)
     sys.exit(app.exec_())

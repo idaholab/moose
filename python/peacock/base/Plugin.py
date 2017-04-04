@@ -18,9 +18,6 @@ class Plugin(MooseWidget):
         # Name of layout that this plugin should be added (see PluginManager.py)
         self._main_layout_name = layout
 
-        # Widget is disabled until initialize is called
-        self.setEnabled(False)
-
         # The default size policy
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
 
@@ -52,11 +49,11 @@ class Plugin(MooseWidget):
                     mooseutils.mooseDebug('{}.{} --> {}.{}'.format(self.__class__.__name__, name, other.__class__.__name__, slot_name))
                     signal.connect(getattr(other, slot_name))
 
-    def initialize(self, *args, **kwargs):
-        """
-        This method is called by the Manager after all plugins have been created.
-        """
-        self.setEnabled(True)
+    #def initialize(self, *args, **kwargs):
+    #    """
+    #    This method is called by the Manager after all plugins have been created.
+    #    """
+    #    self.setEnabled(True)
 
     def setMainLayoutName(self, name):
         """

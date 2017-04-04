@@ -21,7 +21,7 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
         self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
 
@@ -114,7 +114,7 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         """
 
         # Change the file to something with displacements
-        filename = '../../chigger/input/displace.e'
+        filename = Testing.get_chigger_input('displace.e')
         self._window.onFileChanged(filename)
         self._window._reader.update(timestep=4)
         self._window._result.update(camera=None, colorbar={'visible':False}, block=['2'])
