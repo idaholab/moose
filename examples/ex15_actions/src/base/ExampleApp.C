@@ -11,11 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "Moose.h"
+
+// MOOSE Includes
 #include "ExampleApp.h"
 #include "AppFactory.h"
 #include "ActionFactory.h" // <- Actions are special (they have their own factory)
-#include "Syntax.h"
 #include "MooseSyntax.h"
 
 // Example 15 Includes

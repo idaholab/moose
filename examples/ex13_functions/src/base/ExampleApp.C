@@ -11,8 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE Includes
 #include "ExampleApp.h"
-#include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 

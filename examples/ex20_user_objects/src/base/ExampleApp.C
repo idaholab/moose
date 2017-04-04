@@ -11,12 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE Includes
 #include "ExampleApp.h"
-#include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Example Includes
+// Example 20 Includes
 #include "BlockAverageDiffusionMaterial.h"
 #include "BlockAverageValue.h"
 #include "ExampleDiffusion.h"
