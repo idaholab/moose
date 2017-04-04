@@ -95,18 +95,19 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
         Input:
             options[argparse namespace]: The command line options as returned by ArgumentParser.parse_args()
         """
+        if options.executable and not os.path.isabs(options.executable):
+            options.executable = os.path.abspath(os.path.join(options.start_dir, options.executable))
         exe_path = ExeFinder.getExecutablePath(options, start_dir=self.search_from_dir)
         if exe_path:
             self.ExecuteOptionsPlugin.setExecutablePath(exe_path)
 
-    def initialize(self, *args, **kwargs):
+    def initialize(self, options):
         """
         Initialize this widget.
         It will search kwargs for "cmd_line_options" to help initialize
         this object from arguments on the command line.
         """
-        super(ExecuteTabPlugin, self).initialize(*args, **kwargs)
-        options = kwargs.pop('cmd_line_options', None)
+        super(ExecuteTabPlugin, self).initialize(options)
         self.setExe(options)
         self.setEnabled(True)
 

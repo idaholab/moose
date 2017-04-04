@@ -117,19 +117,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Reloads the current file.
         """
-        if self._filename:
-            self.onFileChanged(self._filename)
-
-    def initialize(self, *args, **kwargs):
-        """
-        Assumes that first file in the supplied list should be loaded, if a FilePlugin is not present.
-
-        Input:
-            filenames[list]: (optional) List of filenames to initialize the VTK window with, the first will be displayed
-                             and only if a FilePlugin is not present.
-        """
-        if len(args) == 1 and isinstance(args[0], list) and not hasattr(self.parent(), 'FilePlugin'):
-            self.onFileChanged(args[0][0])
+        self.onFileChanged(self._filename)
 
     def onFileChanged(self, filename=str()):
         """
@@ -147,19 +135,15 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Do nothing if the widget is not visible or the file doesn't exist
         self._filename = filename
         file_exists = os.path.exists(self._filename)
-        if not self.isVisible():# or not file_exists:
+        if not self.isVisible():
             return
 
         # Determine if the file and GUI are in a valid state for rendering result
         if file_exists and self._run_start_time:
             if os.path.getmtime(self._filename) < self._run_start_time:
                 self.reset()
-                #return
 
-        # Call the base class initialization (this enables the plugin)
-        self.setEnabled(True)
-        #super(VTKWindowPlugin, self).initialize()
-
+        # Display Exodus result
         if file_exists:
             # Clear any-existing VTK objects on the window
             self._window.clear()
@@ -188,9 +172,10 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._window.update()
             self._adjustTimers(start=['update'], stop=['initialize'])
             self.windowCreated.emit(self._reader, self._result, self._window)
+            self.setEnabled(True)
 
+        # Display loading message
         elif self._peacock_logo not in self._window:
-            print 'FILENAME:', self._filename
             if self._filename:
                 msg = '{} does not currently exist.\nIt will load automatically when it is created.'
                 self._peacock_text.update(text=msg.format(self._filename))
@@ -201,6 +186,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._window.append(self._peacock_logo)
             self._window.append(self._peacock_text)
             self._window.update()
+            self.setEnabled(False)
 
     def onInputFileChanged(self, *args):
         """
@@ -295,18 +281,18 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Updates the VTK render window.
         """
-
         if not self._initialized:
             return
 
-        # Try to preform an update, if the file disappears startup the initialization timer again and remove results
-        try:
-            if self._window.needsUpdate():
-                self._window.update()
-                self.windowUpdated.emit()
-        except Exception:
-            mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
-            self.reset()
+        if self._window.needsUpdate():
+            self._window.update()
+            self.windowUpdated.emit()
+
+            if self._reader:
+                err = self._reader.getErrorObserver()
+                if err:
+                    self.onReloadWindow()
+                    mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
 
     def onCameraChanged(self, camera):
         """

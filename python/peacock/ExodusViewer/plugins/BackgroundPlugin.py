@@ -172,7 +172,9 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Enables/disables the extents on the VTKwindow.
         """
-        if value:
+        if not self._result:
+            return
+        elif value:
             self._volume_axes = chigger.misc.VolumeAxes(self._result)
             self.appendResult.emit(self._volume_axes)
         else:
@@ -253,7 +255,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
-    widget.initialize([filename])
+    widget.onSetFilenames([filename])
     window.onResultOptionsChanged({'variable':'diffused'})
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

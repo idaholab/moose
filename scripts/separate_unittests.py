@@ -49,7 +49,7 @@ else:
     # No test name passed in. Break out each test and run them in their own process
     final_code = 0
     for name in all_tests.keys():
-        cmd = [__file__, "-f", parsed.pyfile, "-v", str(parsed.verbosity), "-t", str(t)]
+        cmd = [__file__, "-f", parsed.pyfile, "-v", str(parsed.verbosity), "-t", name]
         if parsed.buffer:
             cmd.append("-b")
         ret = subprocess.call(cmd)

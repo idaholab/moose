@@ -22,7 +22,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
         self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
 

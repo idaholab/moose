@@ -39,13 +39,13 @@ class PeacockMainWindow(BasePeacockMainWindow):
     def commandLineArgs(parser):
         BasePeacockMainWindow.commandLineArgs(parser, PeacockMainWindow.PLUGINS)
 
-    def initialize(self, command_line_options, *args, **kwargs):
+    def initialize(self, options):
         curr_dir = ""
-        if command_line_options.working_dir:
-            curr_dir = os.path.abspath(command_line_options.working_dir)
-        super(PeacockMainWindow, self).initialize(command_line_options, *args, **kwargs)
+        if options.working_dir:
+            curr_dir = os.path.abspath(options.working_dir)
+        super(PeacockMainWindow, self).initialize(options)
 
-        if command_line_options.working_dir:
+        if options.working_dir:
             # if the input file is set then it will change directory to where
             # it exists. We need to honor the command line switch for the working dir.
             self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(curr_dir)
@@ -128,19 +128,19 @@ class PeacockMainWindow(BasePeacockMainWindow):
         if output_files:
             mooseutils.mooseMessage("Exodus filenames: %s" % output_files)
             self.tab_plugin.ExodusViewer.onStartJob(csv, inputfile, t)
-            self.tab_plugin.ExodusViewer.initialize(output_files)
+            self.tab_plugin.ExodusViewer.onSetFilenames(output_files)
 
         if csv or OutputNames.csvEnabled(tree):
             pp_files = OutputNames.getPostprocessorFiles(tree, inputfile)
             if pp_files:
                 mooseutils.mooseMessage("Postprocessor filenames: %s" % pp_files)
                 self.tab_plugin.PostprocessorViewer.onStartJob(csv, inputfile, t)
-                self.tab_plugin.PostprocessorViewer.initialize(pp_files)
+                self.tab_plugin.PostprocessorViewer.onSetFilenames(pp_files)
 
         vpp_files = OutputNames.getVectorPostprocessorFiles(tree, inputfile)
         if vpp_files:
             mooseutils.mooseMessage("VectorPostprocessor filenames: %s" % vpp_files)
-            self.tab_plugin.VectorPostprocessorViewer.initialize(vpp_files)
+            self.tab_plugin.VectorPostprocessorViewer.onSetFilenames(vpp_files)
 
     def _addMenus(self):
         """

@@ -23,7 +23,7 @@ class BlockPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
         # Current variable (used for caching settings
         self._contour = False
-        #self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
 
         # Setup this widget
         self.setTitle('Block Selection')
@@ -148,6 +148,6 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget, window = main()
-    widget.initialize(filenames)
+    window.onFileChanged(filenames[0])
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

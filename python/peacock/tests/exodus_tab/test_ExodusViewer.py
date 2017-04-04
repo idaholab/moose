@@ -27,7 +27,7 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
         self._widget = main(size=[400,400])
-        self._widget.initialize([self._filename])
+        self._widget.onSetFilenames([self._filename])
 
         # Start with 'diffused' variable
         self._widget.currentWidget().VariablePlugin.VariableList.setCurrentIndex(2)

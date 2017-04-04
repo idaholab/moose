@@ -21,7 +21,7 @@ class TestMediaControlPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
         self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
 
@@ -228,7 +228,7 @@ class TestMediaControlPlugin(Testing.PeacockImageTestCase):
         """
         Test that mesh only disables media controls.
         """
-        filename = '../../chigger/input/mesh_only.e'
+        filename = Testing.get_chigger_input('mesh_only.e')
         self._window.onFileChanged(filename)
         #self.assertFalse(self._widget.MediaControlPlugin.isEnabled())
         self.assertImage('testMeshOnly.png')

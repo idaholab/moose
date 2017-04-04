@@ -48,7 +48,7 @@ class TestVectorPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
             for i in [0,1,3,5,7,9]:
                 shutil.copyfile('../input/vpp2_000{}.csv'.format(i), '{}_test2_000{}.csv'.format(self.__class__.__name__, i))
 
-        for data in self._widget._data[0]:
+        for data in self._widget._data:
             data.load()
 
     def tearDown(self):

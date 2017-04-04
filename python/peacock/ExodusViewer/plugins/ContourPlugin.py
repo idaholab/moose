@@ -53,11 +53,10 @@ class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self.setup()
         self.setCollapsed(True)
 
-    def initialize(self, *args):
+    def onSetFilenames(self, *args):
         """
         The contour option should be disabled initially, because it depends on variable type.
         """
-        super(ContourPlugin, self).initialize(*args)
         self.setActive()
 
     def setActive(self):

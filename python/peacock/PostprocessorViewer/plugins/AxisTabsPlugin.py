@@ -88,7 +88,7 @@ def main(filenames):
     import mooseutils
 
     widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxisTabsPlugin, PostprocessorSelectPlugin])
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     control = widget.currentWidget().AxisTabsPlugin
     window = widget.currentWidget().FigurePlugin
     window.setFixedSize(QtCore.QSize(625, 625))

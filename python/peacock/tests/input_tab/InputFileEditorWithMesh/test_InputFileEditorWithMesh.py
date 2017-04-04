@@ -35,10 +35,8 @@ class BaseTests(Testing.PeacockTester):
         menubar = main_win.menuBar()
         menubar.setNativeMenuBar(False)
         w.addToMainMenu(menubar)
-        w.initialize()
         w.setEnabled(True)
         main_win.show()
-        self.assertEqual(w.vtkwin.isVisible(), False)
         w.numTimeStepsChanged.connect(self.timeStepChanged)
         return main_win, w
 
@@ -66,9 +64,7 @@ class BaseTests(Testing.PeacockTester):
 class Tests(BaseTests):
     def testBasic(self):
         main_win, w = self.newWidget()
-        self.assertEqual(w.vtkwin.isVisible(), False)
         w.setInputFile(self.input_file)
-        self.assertEqual(w.vtkwin.isVisible(), True)
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(self.basic_mesh)
         self.assertFalse(Testing.gold_diff(self.basic_mesh))
@@ -76,7 +72,6 @@ class Tests(BaseTests):
     def testHighlight(self):
         main_win, w = self.newWidget()
         w.setInputFile(self.input_file)
-        self.assertEqual(w.vtkwin.isVisible(), True)
         tree = w.InputFileEditorPlugin.tree
         b = tree.getBlockInfo("/BCs/left")
         self.assertNotEqual(b, None)
@@ -140,22 +135,15 @@ class Tests(BaseTests):
                 )
         InputFileEditorWithMesh.commandLineArgs(parser)
         main_win, w = self.newWidget()
-        opts = {"cmd_line_options": parser.parse_args([])}
-        self.assertEqual(w.vtkwin.isVisible(), False)
 
         abs_input_file = os.path.abspath(self.input_file)
-        opts = {"cmd_line_options": parser.parse_args(['-i', self.input_file])}
-        w.initialize(**opts)
-        self.assertEqual(w.vtkwin.isVisible(), True)
+        w.initialize(parser.parse_args(['-i', self.input_file]))
         self.assertEqual(w.InputFileEditorPlugin.tree.input_filename, abs_input_file)
 
         w.InputFileEditorPlugin._clearInputFile()
-        self.assertEqual(w.vtkwin.isVisible(), False)
         self.assertEqual(w.InputFileEditorPlugin.tree.input_filename, None)
 
-        opts = {"cmd_line_options": parser.parse_args([self.input_file])}
-        w.initialize(**opts)
-        self.assertEqual(w.vtkwin.isVisible(), True)
+        w.initialize(parser.parse_args([self.input_file]))
         self.assertEqual(w.InputFileEditorPlugin.tree.input_filename, abs_input_file)
 
     def testBlockChanged(self):

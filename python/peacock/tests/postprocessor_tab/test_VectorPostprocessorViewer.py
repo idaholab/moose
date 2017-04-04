@@ -23,7 +23,7 @@ class TestVectorPostprocessorViewer(Testing.PeacockImageTestCase):
         """
         self._filename = "{}_test_*.csv".format(self.__class__.__name__)
         self._widget = VectorPostprocessorViewer(timeout=None)
-        self._widget.initialize([self._filename])
+        self._widget.onSetFilenames([self._filename])
 
     def copyfiles(self):
         """
@@ -31,7 +31,7 @@ class TestVectorPostprocessorViewer(Testing.PeacockImageTestCase):
         """
         for i in [0, 1, 3, 5, 7, 9]:
             shutil.copyfile('../input/vpp2_000{}.csv'.format(i), "{}_test_000{}.csv".format(self.__class__.__name__, i))
-        for data in self._widget._data[0]:
+        for data in self._widget._data:
             data.load()
 
     def tearDown(self):

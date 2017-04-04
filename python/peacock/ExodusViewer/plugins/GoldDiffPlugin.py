@@ -92,15 +92,13 @@ class GoldDiffPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         if os.path.isfile(exodiff):
             self._exodiff = exodiff
 
-    def initialize(self, *args):
+    def onSetFilenames(self, *args):
         """
         Initialize this widget.
 
         All plugins are created at this point, so the link camera button can be connect if the VTKWindowPlugin
         is available on the parent.
         """
-        super(GoldDiffPlugin, self).initialize()
-
         # Enable/disable the link camera toggle based on the existence of the main window.
         if hasattr(self.parent(), 'VTKWindowPlugin'):
             self.LinkToggle.clicked.connect(self._callbackLinkToggle)
@@ -269,7 +267,8 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget, window = main()
-    widget.initialize(filenames)
+    widget.FilePlugin.onSetFilenames(filenames)
+    widget.GoldDiffPlugin.onSetFilenames(filenames)
     window.onResultOptionsChanged({'variable':'diffused'})
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

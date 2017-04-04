@@ -46,7 +46,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item.setCheckState(QtCore.Qt.Unchecked)
         self._widget.BlockPlugin.BlockSelector.ListWidget.itemClicked.emit(item)
         self.assertEqual(self._widget.BlockPlugin.BlockSelector.checkState(), [QtCore.Qt.Checked, QtCore.Qt.Unchecked])
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.ListHeader.checkState(), QtCore.Qt.PartiallyChecked)
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.ListHeader.checkState(), QtCore.Qt.Unchecked)
         self.assertImage('testBlocks.png')
 
         # Uncheck "all"
@@ -92,7 +92,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         self._widget.BlockPlugin.SidesetSelector.ListWidget.itemClicked.emit(item)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ['top'])
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.checkState(), [QtCore.Qt.Unchecked, QtCore.Qt.Checked])
-        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.ListHeader.checkState(), QtCore.Qt.PartiallyChecked)
+        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.ListHeader.checkState(), QtCore.Qt.Unchecked)
         self.assertImage('testSidesets.png')
 
         # Uncheck "all"
@@ -140,7 +140,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         self._widget.BlockPlugin.NodesetSelector.ListWidget.itemClicked.emit(item)
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ['2'])
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.checkState(), [QtCore.Qt.Unchecked, QtCore.Qt.Checked])
-        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.ListHeader.checkState(), QtCore.Qt.PartiallyChecked)
+        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.ListHeader.checkState(), QtCore.Qt.Unchecked)
         self.assertImage('testNodesets.png')
 
         # Uncheck "all"

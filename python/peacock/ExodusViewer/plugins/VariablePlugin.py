@@ -338,6 +338,8 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
             else:
                 self.VariableList.setCurrentIndex(0)
 
+        self.setEnabled(self.VariableList.count())
+
 def main(size=None):
     """
     Run the VTKFilePlugin all by its lonesome.

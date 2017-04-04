@@ -157,7 +157,7 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         settings.clear()
         settings.sync()
 
-    def initialize(self, command_line_options, *args, **kwargs):
+    def initialize(self, command_line_options):
         """
         Initialize the main window
         Input:
@@ -165,6 +165,8 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         """
         if command_line_options.clear_settings:
             self._clearSettings()
+
+        command_line_options.start_dir = os.getcwd()
 
         self._addMenus()
         for name, plugin in self.tab_plugin._plugins.items():
@@ -174,9 +176,7 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
             if w:
                 self.settings.addTab(plugin.tabName(), w)
 
-
-        kwargs = {"cmd_line_options": command_line_options}
-        self.tab_plugin.initialize(*args, **kwargs)
+        self.tab_plugin.initialize(command_line_options)
         for name, plugin in self.tab_plugin._plugins.items():
             plugin.setEnabled(True)
         self._setWindowSize(command_line_options)

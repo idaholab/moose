@@ -19,6 +19,9 @@ class ExodusPlugin(peacock.base.Plugin):
         self._result = None
         self._window = None
 
+        # Disable the widget (the onWindowCreated slot will enable)
+        self.setEnabled(False)
+
     def onPlayStart(self):
         """
         Disables the plugin when playing begins.
