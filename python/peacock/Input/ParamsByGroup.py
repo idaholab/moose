@@ -26,7 +26,7 @@ class ParamsByGroup(QTabWidget, MooseWidget):
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()
 
-    def __init__(self, block, params, **kwds):
+    def __init__(self, block, params, type_block_map, **kwds):
         """
         Constructor.
         Input:
@@ -47,7 +47,7 @@ class ParamsByGroup(QTabWidget, MooseWidget):
             group_param_map[group] = params
 
         for g in sorted(group_param_map.keys(), key=tabSort):
-            t = ParamsTable(self.block, group_param_map[g])
+            t = ParamsTable(self.block, group_param_map[g], type_block_map)
             t.needBlockList.connect(self.needBlockList)
             t.blockRenamed.connect(self.blockRenamed)
             t.changed.connect(self.changed)

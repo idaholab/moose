@@ -1,0 +1,12 @@
+[Tests]
+  [./init_solution_propagation]
+    type = Exodiff
+    input = init_solution_propagation.i
+    exodiff = 'init_solution_propagation_out.e init_solution_propagation_out.e-s002 init_solution_propagation_out.e-s003 init_solution_propagation_out.e-s004 init_solution_propagation_out.e-s005 init_solution_propagation_out.e-s006'
+    abs_zero = 1e-8
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    min_parallel=4
+    unique_id = true
+  [../]
+[]

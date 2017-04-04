@@ -189,7 +189,7 @@ XFEM::storeCrackTipOriginAndDirection()
 }
 
 bool
-XFEM::update(Real time)
+XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
   bool mesh_changed = false;
 
@@ -198,7 +198,7 @@ XFEM::update(Real time)
   storeCrackTipOriginAndDirection();
 
   if (markCuts(time))
-    mesh_changed = cutMeshWithEFA();
+    mesh_changed = cutMeshWithEFA(nl, aux);
 
   if (mesh_changed)
   {
@@ -219,15 +219,15 @@ XFEM::update(Real time)
     //    _mesh->prepare_for_use(true,true); //doing this preserves the numbering, but generates
     //    warning
 
-    if (_mesh2)
+    if (_displaced_mesh)
     {
-      _mesh2->update_parallel_id_counts();
-      MeshCommunication().make_elems_parallel_consistent(*_mesh2);
-      MeshCommunication().make_nodes_parallel_consistent(*_mesh2);
-      _mesh2->allow_renumbering(false);
-      _mesh2->skip_partitioning(true);
-      _mesh2->prepare_for_use();
-      //      _mesh2->prepare_for_use(true,true);
+      _displaced_mesh->update_parallel_id_counts();
+      MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
+      MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
+      _displaced_mesh->allow_renumbering(false);
+      _displaced_mesh->skip_partitioning(true);
+      _displaced_mesh->prepare_for_use();
+      //      _displaced_mesh->prepare_for_use(true,true);
     }
   }
 
@@ -237,46 +237,36 @@ XFEM::update(Real time)
 }
 
 void
-XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & /*aux*/)
+XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
-  const std::vector<MooseVariable *> & nl_vars = nl.getVariables(0); // TODO pass in real thread id?
-
   nl.serializeSolution();
-  //  NumericVector<Number> & c_solution = *nl.sys().solution;
+  aux.serializeSolution();
   NumericVector<Number> & current_solution = *nl.system().current_local_solution;
   NumericVector<Number> & old_solution = nl.solutionOld();
+  NumericVector<Number> & older_solution = nl.solutionOlder();
+  NumericVector<Number> & current_aux_solution = *aux.system().current_local_solution;
+  NumericVector<Number> & old_aux_solution = aux.solutionOld();
+  NumericVector<Number> & older_aux_solution = aux.solutionOlder();
 
-  for (std::map<unique_id_type, unique_id_type>::iterator nit = _new_node_to_parent_node.begin();
-       nit != _new_node_to_parent_node.end();
-       ++nit)
-  {
-    for (unsigned int ivar = 0; ivar < nl_vars.size(); ++ivar)
-    {
-      Node * new_node = getNodeFromUniqueID(nit->first);
-      Node * parent_node = getNodeFromUniqueID(nit->second);
-      Point new_point(*new_node);
-      Point parent_point(*parent_node);
-      if (new_point != parent_point)
-        mooseError("Points don't match");
-      unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(), 0);
-      unsigned int parent_node_dof =
-          parent_node->dof_number(nl.number(), nl_vars[ivar]->number(), 0);
-      if (parent_node->processor_id() == _mesh->processor_id())
-      {
-        current_solution.set(new_node_dof, current_solution(parent_node_dof));
-        old_solution.set(new_node_dof, old_solution(parent_node_dof));
-      }
-    }
-  }
+  setSolution(nl, _cached_solution, current_solution, old_solution, older_solution);
+  setSolution(
+      aux, _cached_aux_solution, current_aux_solution, old_aux_solution, older_aux_solution);
 
   current_solution.close();
   old_solution.close();
+  older_solution.close();
+  current_aux_solution.close();
+  old_aux_solution.close();
+  older_aux_solution.close();
+
+  _cached_solution.clear();
+  _cached_aux_solution.clear();
 }
 
 Node *
 XFEM::getNodeFromUniqueID(unique_id_type uid)
 {
-  Node * matching_node = NULL;
+  Node * matching_node = nullptr;
   MeshBase::node_iterator node_it = _mesh->nodes_begin();
   const MeshBase::node_iterator node_end = _mesh->nodes_end();
 
@@ -289,9 +279,26 @@ XFEM::getNodeFromUniqueID(unique_id_type uid)
       break;
     }
   }
-  if (!matching_node)
-    mooseError("Couldn't find node matching unique id: ", uid);
   return matching_node;
+}
+
+Elem *
+XFEM::getElemFromUniqueID(unique_id_type uid)
+{
+  Elem * matching_elem = nullptr;
+  MeshBase::element_iterator elem_it = _mesh->elements_begin();
+  const MeshBase::element_iterator elem_end = _mesh->elements_end();
+
+  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
+  {
+    Elem * elem = *elem_it;
+    if (elem->unique_id() == uid)
+    {
+      matching_elem = elem;
+      break;
+    }
+  }
+  return matching_elem;
 }
 
 void
@@ -944,14 +951,13 @@ XFEM::initCutIntersectionEdge(
 }
 
 bool
-XFEM::cutMeshWithEFA()
+XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
-  bool mesh_changed = false;
-
   std::map<unsigned int, Node *> efa_id_to_new_node;
   std::map<unsigned int, Node *> efa_id_to_new_node2;
   std::map<unsigned int, Elem *> efa_id_to_new_elem;
-  _new_node_to_parent_node.clear();
+  _cached_solution.clear();
+  _cached_aux_solution.clear();
 
   _efa_mesh.updatePhysicalLinksAndFragments();
   // DEBUG
@@ -961,29 +967,49 @@ XFEM::cutMeshWithEFA()
   // DEBUG
   //_efa_mesh.printMesh();
 
-  // Add new nodes
-  const std::vector<EFANode *> NewNodes = _efa_mesh.getNewNodes();
-  for (unsigned int i = 0; i < NewNodes.size(); ++i)
+  const std::vector<EFANode *> new_nodes = _efa_mesh.getNewNodes();
+  const std::vector<EFAElement *> new_elements = _efa_mesh.getChildElements();
+  const std::vector<EFAElement *> delete_elements = _efa_mesh.getParentElements();
+
+  bool mesh_changed = (new_nodes.size() + new_elements.size() + delete_elements.size() > 0);
+
+  // Prepare to cache solution on DOFs modified by XFEM
+  if (mesh_changed)
   {
-    unsigned int new_node_id = NewNodes[i]->id();
-    unsigned int parent_id = NewNodes[i]->parent()->id();
+    nl.serializeSolution();
+    aux.serializeSolution();
+  }
+  NumericVector<Number> & current_solution = *nl.system().current_local_solution;
+  NumericVector<Number> & old_solution = nl.solutionOld();
+  NumericVector<Number> & older_solution = nl.solutionOlder();
+  NumericVector<Number> & current_aux_solution = *aux.system().current_local_solution;
+  NumericVector<Number> & old_aux_solution = aux.solutionOld();
+  NumericVector<Number> & older_aux_solution = aux.solutionOlder();
+
+  std::map<Node *, Node *> new_nodes_to_parents;
+
+  // Add new nodes
+  for (unsigned int i = 0; i < new_nodes.size(); ++i)
+  {
+    unsigned int new_node_id = new_nodes[i]->id();
+    unsigned int parent_id = new_nodes[i]->parent()->id();
 
     Node * parent_node = _mesh->node_ptr(parent_id);
     Node * new_node = Node::build(*parent_node, _mesh->n_nodes()).release();
     new_node->processor_id() = parent_node->processor_id();
     _mesh->add_node(new_node);
-    _new_node_to_parent_node[new_node->unique_id()] = parent_node->unique_id();
+
+    new_nodes_to_parents[new_node] = parent_node;
 
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id, new_node));
     _console << "XFEM added new node: " << new_node->id() << "\n";
-    mesh_changed = true;
-    if (_mesh2)
+    if (_displaced_mesh)
     {
-      const Node * parent_node2 = _mesh2->node_ptr(parent_id);
-      Node * new_node2 = Node::build(*parent_node2, _mesh2->n_nodes()).release();
+      const Node * parent_node2 = _displaced_mesh->node_ptr(parent_id);
+      Node * new_node2 = Node::build(*parent_node2, _displaced_mesh->n_nodes()).release();
       new_node2->processor_id() = parent_node2->processor_id();
-      _mesh2->add_node(new_node2);
+      _displaced_mesh->add_node(new_node2);
 
       new_node2->set_n_systems(parent_node2->n_systems());
       efa_id_to_new_node2.insert(std::make_pair(new_node_id, new_node2));
@@ -991,33 +1017,31 @@ XFEM::cutMeshWithEFA()
   }
 
   // Add new elements
-  const std::vector<EFAElement *> NewElements = _efa_mesh.getChildElements();
-
   std::map<unsigned int, std::vector<const Elem *>> temporary_parent_children_map;
 
-  for (unsigned int i = 0; i < NewElements.size(); ++i)
+  for (unsigned int i = 0; i < new_elements.size(); ++i)
   {
-    unsigned int parent_id = NewElements[i]->getParent()->id();
-    unsigned int efa_child_id = NewElements[i]->id();
+    unsigned int parent_id = new_elements[i]->getParent()->id();
+    unsigned int efa_child_id = new_elements[i]->id();
 
     Elem * parent_elem = _mesh->elem(parent_id);
     Elem * libmesh_elem = Elem::build(parent_elem->type()).release();
 
     // parent has at least two children
-    if (NewElements[i]->getParent()->numChildren() > 1)
+    if (new_elements[i]->getParent()->numChildren() > 1)
       temporary_parent_children_map[parent_id].push_back(libmesh_elem);
 
     Elem * parent_elem2 = NULL;
     Elem * libmesh_elem2 = NULL;
-    if (_mesh2)
+    if (_displaced_mesh)
     {
-      parent_elem2 = _mesh2->elem(parent_id);
+      parent_elem2 = _displaced_mesh->elem(parent_id);
       libmesh_elem2 = Elem::build(parent_elem2->type()).release();
     }
 
-    for (unsigned int j = 0; j < NewElements[i]->numNodes(); ++j)
+    for (unsigned int j = 0; j < new_elements[i]->numNodes(); ++j)
     {
-      unsigned int node_id = NewElements[i]->getNode(j)->id();
+      unsigned int node_id = new_elements[i]->getNode(j)->id();
       Node * libmesh_node;
 
       std::map<unsigned int, Node *>::iterator nit = efa_id_to_new_node.find(node_id);
@@ -1028,25 +1052,52 @@ XFEM::cutMeshWithEFA()
 
       libmesh_elem->set_node(j) = libmesh_node;
 
+      // Store solution for all nodes affected by XFEM (even existing nodes)
+      if (parent_elem->is_semilocal(_mesh->processor_id()))
+      {
+        Node * solution_node = libmesh_node; // Node from which to store solution
+        if (new_nodes_to_parents.find(libmesh_node) != new_nodes_to_parents.end())
+          solution_node = new_nodes_to_parents[libmesh_node];
+
+        if ((_moose_mesh->isSemiLocal(solution_node)) ||
+            (solution_node->processor_id() == _mesh->processor_id()))
+        {
+          storeSolutionForNode(libmesh_node,
+                               solution_node,
+                               nl,
+                               _cached_solution,
+                               current_solution,
+                               old_solution,
+                               older_solution);
+          storeSolutionForNode(libmesh_node,
+                               solution_node,
+                               aux,
+                               _cached_aux_solution,
+                               current_aux_solution,
+                               old_aux_solution,
+                               older_aux_solution);
+        }
+      }
+
       Node * parent_node = parent_elem->get_node(j);
       std::vector<boundary_id_type> parent_node_boundary_ids =
           _mesh->boundary_info->boundary_ids(parent_node);
       _mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
 
-      if (_mesh2)
+      if (_displaced_mesh)
       {
         std::map<unsigned int, Node *>::iterator nit2 = efa_id_to_new_node2.find(node_id);
         if (nit2 != efa_id_to_new_node2.end())
           libmesh_node = nit2->second;
         else
-          libmesh_node = _mesh2->node_ptr(node_id);
+          libmesh_node = _displaced_mesh->node_ptr(node_id);
 
         libmesh_elem2->set_node(j) = libmesh_node;
 
         parent_node = parent_elem2->get_node(j);
         parent_node_boundary_ids.clear();
-        parent_node_boundary_ids = _mesh2->boundary_info->boundary_ids(parent_node);
-        _mesh2->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
+        parent_node_boundary_ids = _displaced_mesh->boundary_info->boundary_ids(parent_node);
+        _displaced_mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
       }
     }
 
@@ -1073,6 +1124,22 @@ XFEM::cutMeshWithEFA()
             (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
         }
       }
+
+      // Store solution for all elements affected by XFEM
+      storeSolutionForElement(libmesh_elem,
+                              parent_elem,
+                              nl,
+                              _cached_solution,
+                              current_solution,
+                              old_solution,
+                              older_solution);
+      storeSolutionForElement(libmesh_elem,
+                              parent_elem,
+                              aux,
+                              _cached_aux_solution,
+                              current_aux_solution,
+                              old_aux_solution,
+                              older_aux_solution);
     }
 
     // The crack tip origin map is stored before cut, thus the elem should be updated with new
@@ -1091,14 +1158,14 @@ XFEM::cutMeshWithEFA()
     XFEMCutElem * xfce = NULL;
     if (_mesh->mesh_dimension() == 2)
     {
-      EFAElement2D * new_efa_elem2d = dynamic_cast<EFAElement2D *>(NewElements[i]);
+      EFAElement2D * new_efa_elem2d = dynamic_cast<EFAElement2D *>(new_elements[i]);
       if (!new_efa_elem2d)
         mooseError("EFAelem is not of EFAelement2D type");
       xfce = new XFEMCutElem2D(libmesh_elem, new_efa_elem2d, (*_material_data)[0]->nQPoints());
     }
     else if (_mesh->mesh_dimension() == 3)
     {
-      EFAElement3D * new_efa_elem3d = dynamic_cast<EFAElement3D *>(NewElements[i]);
+      EFAElement3D * new_efa_elem3d = dynamic_cast<EFAElement3D *>(new_elements[i]);
       if (!new_efa_elem3d)
         mooseError("EFAelem is not of EFAelement3D type");
       xfce = new XFEMCutElem3D(libmesh_elem, new_efa_elem3d, (*_material_data)[0]->nQPoints());
@@ -1106,11 +1173,11 @@ XFEM::cutMeshWithEFA()
     _cut_elem_map.insert(std::pair<unique_id_type, XFEMCutElem *>(libmesh_elem->unique_id(), xfce));
     efa_id_to_new_elem.insert(std::make_pair(efa_child_id, libmesh_elem));
 
-    if (_mesh2)
+    if (_displaced_mesh)
     {
       libmesh_elem2->set_p_level(parent_elem2->p_level());
       libmesh_elem2->set_p_refinement_flag(parent_elem2->p_refinement_flag());
-      _mesh2->add_elem(libmesh_elem2);
+      _displaced_mesh->add_elem(libmesh_elem2);
       libmesh_elem2->set_n_systems(parent_elem2->n_systems());
       libmesh_elem2->subdomain_id() = parent_elem2->subdomain_id();
       libmesh_elem2->processor_id() = parent_elem2->processor_id();
@@ -1123,14 +1190,14 @@ XFEM::cutMeshWithEFA()
           _mesh->boundary_info->boundary_ids(parent_elem, side);
       _mesh->boundary_info->add_side(libmesh_elem, side, parent_elem_boundary_ids);
     }
-    if (_mesh2)
+    if (_displaced_mesh)
     {
       n_sides = parent_elem2->n_sides();
       for (unsigned int side = 0; side < n_sides; ++side)
       {
         std::vector<boundary_id_type> parent_elem_boundary_ids =
-            _mesh2->boundary_info->boundary_ids(parent_elem2, side);
-        _mesh2->boundary_info->add_side(libmesh_elem2, side, parent_elem_boundary_ids);
+            _displaced_mesh->boundary_info->boundary_ids(parent_elem2, side);
+        _displaced_mesh->boundary_info->add_side(libmesh_elem2, side, parent_elem_boundary_ids);
       }
     }
 
@@ -1141,25 +1208,22 @@ XFEM::cutMeshWithEFA()
           _mesh->boundary_info->edge_boundary_ids(parent_elem, edge);
       _mesh->boundary_info->add_edge(libmesh_elem, edge, parent_elem_boundary_ids);
     }
-    if (_mesh2)
+    if (_displaced_mesh)
     {
       n_edges = parent_elem2->n_edges();
       for (unsigned int edge = 0; edge < n_edges; ++edge)
       {
         std::vector<boundary_id_type> parent_elem_boundary_ids =
-            _mesh2->boundary_info->edge_boundary_ids(parent_elem2, edge);
-        _mesh2->boundary_info->add_edge(libmesh_elem2, edge, parent_elem_boundary_ids);
+            _displaced_mesh->boundary_info->edge_boundary_ids(parent_elem2, edge);
+        _displaced_mesh->boundary_info->add_edge(libmesh_elem2, edge, parent_elem_boundary_ids);
       }
     }
-
-    mesh_changed = true;
   }
 
   // delete elements
-  const std::vector<EFAElement *> DeleteElements = _efa_mesh.getParentElements();
-  for (unsigned int i = 0; i < DeleteElements.size(); ++i)
+  for (unsigned int i = 0; i < delete_elements.size(); ++i)
   {
-    Elem * elem_to_delete = _mesh->elem(DeleteElements[i]->id());
+    Elem * elem_to_delete = _mesh->elem(delete_elements[i]->id());
 
     // delete the XFEMCutElem object for any elements that are to be deleted
     std::map<unique_id_type, XFEMCutElem *>::iterator cemit =
@@ -1187,7 +1251,7 @@ XFEM::cutMeshWithEFA()
          it != _sibling_displaced_elems.end();
          ++it)
     {
-      Elem * elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id());
+      Elem * elem_to_delete2 = _displaced_mesh->elem(delete_elements[i]->id());
 
       if (elem_to_delete2 == it->first || elem_to_delete2 == it->second)
       {
@@ -1201,14 +1265,13 @@ XFEM::cutMeshWithEFA()
     unsigned int deleted_elem_id = elem_to_delete->id();
     _mesh->delete_elem(elem_to_delete);
     _console << "XFEM deleted element: " << deleted_elem_id << "\n";
-    mesh_changed = true;
 
-    if (_mesh2)
+    if (_displaced_mesh)
     {
-      Elem * elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id());
+      Elem * elem_to_delete2 = _displaced_mesh->elem(delete_elements[i]->id());
       elem_to_delete2->nullify_neighbors();
-      _mesh2->boundary_info->remove(elem_to_delete2);
-      _mesh2->delete_elem(elem_to_delete2);
+      _displaced_mesh->boundary_info->remove(elem_to_delete2);
+      _displaced_mesh->delete_elem(elem_to_delete2);
     }
   }
 
@@ -1224,14 +1287,14 @@ XFEM::cutMeshWithEFA()
   }
 
   // add sibling elems on displaced mesh
-  if (_mesh2)
+  if (_displaced_mesh)
   {
     for (ElementPairLocator::ElementPairList::iterator it = _sibling_elems.begin();
          it != _sibling_elems.end();
          ++it)
     {
-      Elem * elem = _mesh2->elem(it->first->id());
-      Elem * elem_pair = _mesh2->elem(it->second->id());
+      Elem * elem = _displaced_mesh->elem(it->first->id());
+      Elem * elem_pair = _displaced_mesh->elem(it->second->id());
       _sibling_displaced_elems.push_back(std::make_pair(elem, elem_pair));
     }
   }
@@ -1334,13 +1397,13 @@ XFEM::getCutPlane(const Elem * elem,
       if ((unsigned int)quantity < 3)
       {
         unsigned int index = (unsigned int)quantity;
-        planedata = xfce->getCutPlaneOrigin(plane_id, _mesh2);
+        planedata = xfce->getCutPlaneOrigin(plane_id, _displaced_mesh);
         comp = planedata(index);
       }
       else if ((unsigned int)quantity < 6)
       {
         unsigned int index = (unsigned int)quantity - 3;
-        planedata = xfce->getCutPlaneNormal(plane_id, _mesh2);
+        planedata = xfce->getCutPlaneNormal(plane_id, _displaced_mesh);
         comp = planedata(index);
       }
       else
@@ -1391,7 +1454,7 @@ XFEM::getFragmentFaces(const Elem * elem,
   {
     const XFEMCutElem * xfce = it->second;
     if (displaced_mesh)
-      xfce->getFragmentFaces(frag_faces, _mesh2);
+      xfce->getFragmentFaces(frag_faces, _displaced_mesh);
     else
       xfce->getFragmentFaces(frag_faces);
   }
@@ -1518,7 +1581,7 @@ XFEM::getXFEMIntersectionInfo(const Elem * elem,
   {
     const XFEMCutElem * xfce = it->second;
     if (displaced_mesh)
-      xfce->getIntersectionInfo(plane_id, normal, intersectionPoints, _mesh2);
+      xfce->getIntersectionInfo(plane_id, normal, intersectionPoints, _displaced_mesh);
     else
       xfce->getIntersectionInfo(plane_id, normal, intersectionPoints);
   }
@@ -1593,4 +1656,176 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
       quad_wts[j + l] = sg2[l][3] * jac;
     }
   }
+}
+
+void
+XFEM::storeSolutionForNode(const Node * node_to_store_to,
+                           const Node * node_to_store_from,
+                           SystemBase & sys,
+                           std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                           const NumericVector<Number> & current_solution,
+                           const NumericVector<Number> & old_solution,
+                           const NumericVector<Number> & older_solution)
+{
+  std::vector<unsigned int> stored_solution_dofs = getNodeSolutionDofs(node_to_store_from, sys);
+  std::vector<Real> stored_solution_scratch;
+  // Size for current solution, as well as for old, and older solution only for transient case
+  unsigned int stored_solution_size =
+      (_fe_problem->isTransient() ? stored_solution_dofs.size() * 3 : stored_solution_dofs.size());
+  stored_solution_scratch.reserve(stored_solution_size);
+
+  // Store in the order defined in stored_solution_dofs first for the current, then for old and
+  // older if applicable
+  for (auto dof : stored_solution_dofs)
+    stored_solution_scratch.push_back(current_solution(dof));
+
+  if (_fe_problem->isTransient())
+  {
+    for (auto dof : stored_solution_dofs)
+      stored_solution_scratch.push_back(old_solution(dof));
+
+    for (auto dof : stored_solution_dofs)
+      stored_solution_scratch.push_back(older_solution(dof));
+  }
+
+  if (stored_solution_scratch.size() > 0)
+    stored_solution[node_to_store_to->unique_id()] = stored_solution_scratch;
+}
+
+void
+XFEM::storeSolutionForElement(const Elem * elem_to_store_to,
+                              const Elem * elem_to_store_from,
+                              SystemBase & sys,
+                              std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                              const NumericVector<Number> & current_solution,
+                              const NumericVector<Number> & old_solution,
+                              const NumericVector<Number> & older_solution)
+{
+  std::vector<unsigned int> stored_solution_dofs = getElementSolutionDofs(elem_to_store_from, sys);
+  std::vector<Real> stored_solution_scratch;
+  // Size for current solution, as well as for old, and older solution only for transient case
+  unsigned int stored_solution_size =
+      (_fe_problem->isTransient() ? stored_solution_dofs.size() * 3 : stored_solution_dofs.size());
+  stored_solution_scratch.reserve(stored_solution_size);
+
+  // Store in the order defined in stored_solution_dofs first for the current, then for old and
+  // older if applicable
+  for (auto dof : stored_solution_dofs)
+    stored_solution_scratch.push_back(current_solution(dof));
+
+  if (_fe_problem->isTransient())
+  {
+    for (auto dof : stored_solution_dofs)
+      stored_solution_scratch.push_back(old_solution(dof));
+
+    for (auto dof : stored_solution_dofs)
+      stored_solution_scratch.push_back(older_solution(dof));
+  }
+
+  if (stored_solution_scratch.size() > 0)
+    stored_solution[elem_to_store_to->unique_id()] = stored_solution_scratch;
+}
+
+void
+XFEM::setSolution(SystemBase & sys,
+                  const std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                  NumericVector<Number> & current_solution,
+                  NumericVector<Number> & old_solution,
+                  NumericVector<Number> & older_solution)
+{
+  for (auto dit = stored_solution.begin(); dit != stored_solution.end(); ++dit)
+  {
+    unsigned int dof_obj_pid = 0;
+    Node * node = getNodeFromUniqueID(dit->first);
+    Elem * elem = nullptr;
+    if (node)
+      dof_obj_pid = node->processor_id();
+    else
+    {
+      elem = getElemFromUniqueID(dit->first);
+      if (!elem)
+        mooseError("Cannot get node or element from unique id");
+      dof_obj_pid = elem->processor_id();
+    }
+
+    if (dof_obj_pid == _mesh->processor_id())
+    {
+      const std::vector<Real> & dof_obj_solution = dit->second;
+      std::vector<unsigned int> stored_solution_dofs =
+          (node ? getNodeSolutionDofs(node, sys) : getElementSolutionDofs(elem, sys));
+
+      // Solution vector is stored first for current, then old and older solutions.
+      // These are the offsets to the beginning of the old and older solutions in the vector.
+      const unsigned int old_solution_offset = stored_solution_dofs.size();
+      const unsigned int older_solution_offset = old_solution_offset * 2;
+
+      for (unsigned int i = 0; i < stored_solution_dofs.size(); ++i)
+      {
+        current_solution.set(stored_solution_dofs[i], dof_obj_solution[i]);
+        if (_fe_problem->isTransient())
+        {
+          old_solution.set(stored_solution_dofs[i], dof_obj_solution[old_solution_offset + i]);
+          older_solution.set(stored_solution_dofs[i], dof_obj_solution[older_solution_offset + i]);
+        }
+      }
+    }
+  }
+}
+
+std::vector<unsigned int>
+XFEM::getElementSolutionDofs(const Elem * elem, SystemBase & sys) const
+{
+  SubdomainID sid = elem->subdomain_id();
+  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  std::vector<unsigned int> solution_dofs;
+  solution_dofs.reserve(vars.size()); // just an approximation
+  for (auto var : vars)
+  {
+    if (!var->isNodal())
+    {
+      const std::set<SubdomainID> & var_subdomains = sys.getSubdomainsForVar(var->number());
+      if (var_subdomains.empty() || var_subdomains.find(sid) != var_subdomains.end())
+      {
+        unsigned int n_comp = elem->n_comp(sys.number(), var->number());
+        for (unsigned int icomp = 0; icomp < n_comp; ++icomp)
+        {
+          unsigned int elem_dof = elem->dof_number(sys.number(), var->number(), icomp);
+          solution_dofs.push_back(elem_dof);
+        }
+      }
+    }
+  }
+  return solution_dofs;
+}
+
+std::vector<unsigned int>
+XFEM::getNodeSolutionDofs(const Node * node, SystemBase & sys) const
+{
+  const std::set<SubdomainID> & sids = _moose_mesh->getNodeBlockIds(*node);
+  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  std::vector<unsigned int> solution_dofs;
+  solution_dofs.reserve(vars.size()); // just an approximation
+  for (auto var : vars)
+  {
+    if (var->isNodal())
+    {
+      const std::set<SubdomainID> & var_subdomains = sys.getSubdomainsForVar(var->number());
+      std::set<SubdomainID> intersect;
+      set_intersection(var_subdomains.begin(),
+                       var_subdomains.end(),
+                       sids.begin(),
+                       sids.end(),
+                       std::inserter(intersect, intersect.begin()));
+      if (var_subdomains.empty() || !intersect.empty())
+      {
+        unsigned int n_comp = node->n_comp(sys.number(), var->number());
+        for (unsigned int icomp = 0; icomp < n_comp; ++icomp)
+        {
+          unsigned int node_dof = node->dof_number(sys.number(), var->number(), icomp);
+          solution_dofs.push_back(node_dof);
+        }
+      }
+    }
+  }
+  return solution_dofs;
 }

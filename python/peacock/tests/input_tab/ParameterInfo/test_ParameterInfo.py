@@ -8,6 +8,7 @@ class Tests(Testing.PeacockTester):
             name,
             default="",
             cpp_type="string",
+            basic_type="String",
             description="",
             group_name="",
             required="Yes",
@@ -16,6 +17,7 @@ class Tests(Testing.PeacockTester):
         return {"name": name,
                 "default": default,
                 "cpp_type": cpp_type,
+                "basic_type": basic_type,
                 "description": description,
                 "group_name": group_name,
                 "required": required,
@@ -65,7 +67,7 @@ class Tests(Testing.PeacockTester):
 
     def testTypes(self):
         p = ParameterInfo(None, "p0")
-        y = self.createData("p1", cpp_type="vector<string>", default=None)
+        y = self.createData("p1", cpp_type="vector<string>", basic_type="Array", default=None)
         p.setFromData(y)
         self.assertEqual(p.needsQuotes(), True)
         self.assertEqual(p.isVectorType(), True)
@@ -73,7 +75,7 @@ class Tests(Testing.PeacockTester):
         p.value = "foo"
         self.assertEqual(p.inputFileValue(), "'foo'")
 
-        y = self.createData("p1", cpp_type="bool", default="0")
+        y = self.createData("p1", cpp_type="bool", basic_type="Boolean", default="0")
         p.setFromData(y)
         self.assertEqual(p.value, "false")
         self.assertEqual(p.default, "false")
@@ -81,7 +83,7 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(p.isVectorType(), False)
         self.assertEqual(p.inputFileValue(), "false")
 
-        y = self.createData("p1", cpp_type="bool", default="1")
+        y = self.createData("p1", cpp_type="bool", basic_type="Boolean", default="1")
         p.setFromData(y)
         self.assertEqual(p.value, "true")
         self.assertEqual(p.default, "true")

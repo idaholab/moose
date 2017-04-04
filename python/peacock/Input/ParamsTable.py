@@ -31,7 +31,7 @@ class ParamsTable(QTableWidget, MooseWidget):
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()
 
-    def __init__(self, block, params, **kwds):
+    def __init__(self, block, params, type_block_map, **kwds):
         """
         Constructor.
         Input:
@@ -49,6 +49,7 @@ class ParamsTable(QTableWidget, MooseWidget):
         self.watch_blocks_params = {}
         self.name_param = None
         self.removed_params = []
+        self.type_to_block_map = type_block_map
         for p in self.params:
             self.addParam(p)
 
@@ -280,9 +281,7 @@ class ParamsTable(QTableWidget, MooseWidget):
     def _createBlockWatcher(self, param, watch_blocks):
         self.param_watch_blocks[param.name] = watch_blocks
         for b in watch_blocks:
-            params = self.watch_blocks_params.get(b, [])
-            params.append(param.name)
-            self.watch_blocks_params[b] = params
+            self.watch_blocks_params.setdefault(b, []).append(param.name)
         tooltip = "Automatically updates from the following %s" % ' '.join(watch_blocks)
         self._createOptions(param, tooltip)
 
@@ -364,50 +363,11 @@ class ParamsTable(QTableWidget, MooseWidget):
         """
         See if the cpp_type requires dynamic options based on other nodes.
         Input:
-            cpp_type: ParamNode.cpp_type
+            cpp_type[ParameterInfo.cpp_type]
         Return:
             list of paths that will be used as options, or None
         """
-        d = {"NonlinearVariableName": ["/Variables"],
-                "VariableName": ["/Variables", "/AuxVariables"],
-                "AuxVariableName": ["/AuxVariables"],
-                "FunctionName": ["/Functions"],
-                "PostprocessorName": ["/Postprocessors"],
-                "UserObjectName": ["/UserObjects"],
-                "MarkerName": ["/Adaptivity/Markers"],
-                "IndicatorName": ["/Adaptivity/Indicators"],
-                "MultiAppName": ["/MultiApps"],
-                "OutputName": ["/Outputs"],
-            }
-
-        for key, value in d.items():
+        for key, value in self.type_to_block_map.iteritems():
             if key in cpp_type:
                 return value
         return None
-
-    # def meshInfoListOptions(self):
-    #     """
-    #     FIXME: Not sure if I need this or not.
-    #     tuple is (block_names, sidesetnames, nodesetnames)
-    #     """
-    #     d = { "std::__1::vector<BlockName>": (True, False, False),
-    #             "std::vector<BlockName>": (True, False, False),
-    #             "std::vector<BoundaryName>": (False, True, True),
-    #             "std::__1::vector<BoundaryName, std::__1::allocator<BoundaryName> >": (False, True, True),
-    #             "std::__1::vector<BoundaryName>": (False, True, True),
-    #             "std::vector<SubdomainName, std::allocator<SubdomainName> >": (True, False, False),
-    #             "std::__1::vector<SubdomainName, std::__1::allocator<SubdomainName> >": (True, False, False),
-    #             "std::__1::vector<SubdomainName>": (True, False, False),
-    #         }
-    #     return d
-
-    # def meshInfoOptions(self):
-    #     """
-    #     FIXME: Not sure if I need this or not.
-    #     tuple is (block_names, sidesetnames, nodesetnames)
-    #     """
-    #     d = { "BlockName": (True, False, False),
-    #             "BoundaryName": (False, True, True),
-    #             "SubdomainName": (True, False, False),
-    #         }
-    #     return d

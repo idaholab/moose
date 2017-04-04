@@ -19,6 +19,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableBase.h"
 #include "InputParameters.h"
+#include "MooseMesh.h"
 
 class MooseApp;
 class AuxiliarySystem;
@@ -49,10 +50,12 @@ public:
   explicit XFEMInterface(const InputParameters & params)
     : ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
       _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-      _material_data(NULL),
-      _bnd_material_data(NULL),
-      _mesh(NULL),
-      _mesh2(NULL)
+      _material_data(nullptr),
+      _bnd_material_data(nullptr),
+      _moose_mesh(nullptr),
+      _moose_displaced_mesh(nullptr),
+      _mesh(nullptr),
+      _displaced_mesh(nullptr)
   {
   }
 
@@ -64,12 +67,20 @@ public:
   /**
    * Set the pointer to the primary mesh that is modified by XFEM
    */
-  void setMesh(MeshBase * mesh) { _mesh = mesh; }
+  void setMesh(MooseMesh * mesh)
+  {
+    _moose_mesh = mesh;
+    _mesh = &mesh->getMesh();
+  }
 
   /**
-   * Set the pointer to the secondary (displaced) mesh that is modified by XFEM
+   * Set the pointer to the displaced mesh that is modified by XFEM
    */
-  void setSecondMesh(MeshBase * mesh2) { _mesh2 = mesh2; }
+  void setDisplacedMesh(MooseMesh * displaced_mesh)
+  {
+    _moose_displaced_mesh = displaced_mesh;
+    _displaced_mesh = &displaced_mesh->getMesh();
+  }
 
   /**
    * Set the pointer to the MaterialData
@@ -90,7 +101,7 @@ public:
   /**
    * Method to update the mesh due to modified cut definitions
    */
-  virtual bool update(Real time) = 0;
+  virtual bool update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux) = 0;
 
   /**
    * Initialize the solution on newly created nodes
@@ -110,8 +121,10 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> * _material_data;
   std::vector<std::shared_ptr<MaterialData>> * _bnd_material_data;
 
+  MooseMesh * _moose_mesh;
+  MooseMesh * _moose_displaced_mesh;
   MeshBase * _mesh;
-  MeshBase * _mesh2;
+  MeshBase * _displaced_mesh;
 };
 
 #endif // XFEMINTERFACE_H
