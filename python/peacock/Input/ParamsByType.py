@@ -13,7 +13,7 @@ class ParamsByType(QWidget, MooseWidget):
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()
 
-    def __init__(self, block, **kwds):
+    def __init__(self, block, type_block_map, **kwds):
         """
         Constructor.
         Input:
@@ -24,6 +24,7 @@ class ParamsByType(QWidget, MooseWidget):
         self.combo = QComboBox()
         self.types = []
         self.type_params_map = {}
+        self.type_block_map = type_block_map
         self.table_stack = QStackedWidget()
         self.type_table_map = {}
 
@@ -101,7 +102,7 @@ class ParamsByType(QWidget, MooseWidget):
         t = self.type_table_map.get(type_name)
         if t:
             return t
-        t = ParamsByGroup(self.block, self.type_params_map.get(type_name, self.block.orderedParameters()))
+        t = ParamsByGroup(self.block, self.type_params_map.get(type_name, self.block.orderedParameters()), self.type_block_map)
         t.needBlockList.connect(self.needBlockList)
         t.blockRenamed.connect(self.blockRenamed)
         t.changed.connect(self.changed)

@@ -99,6 +99,7 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerSyntax("AddOutputAction", "Outputs/*");
   registerSyntax("CommonOutputAction", "Outputs");
+  syntax.registerSyntaxType("Outputs/*", "OutputName");
 
   // Note: Preconditioner Actions will be built by this setup action
   registerSyntax("SetupPreconditionerAction", "Preconditioning/*");
@@ -138,10 +139,12 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
   registerSyntax("AddIndicatorAction", "Adaptivity/Indicators/*");
+  syntax.registerSyntaxType("Adaptivity/Indicators/*", "IndicatorName");
 
   // Marker
   registerSyntax("AddElementalFieldAction", "Adaptivity/Markers/*");
   registerSyntax("AddMarkerAction", "Adaptivity/Markers/*");
+  syntax.registerSyntaxType("Adaptivity/Markers/*", "MarkerName");
 
   // New Adaptivity System
   registerSyntax("SetAdaptivityOptionsAction", "Adaptivity");
@@ -151,6 +154,7 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   // Multi Apps
   registerSyntax("AddMultiAppAction", "MultiApps/*");
+  syntax.registerSyntaxType("MultiApps/*", "MultiAppName");
 
   // Transfers
   registerSyntax("AddTransferAction", "Transfers/*");

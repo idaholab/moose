@@ -11,12 +11,13 @@ class ExecutableInfo(object):
     Holds the Json of an executable.
     """
     SETTINGS_KEY = "ExecutableInfo"
-    CACHE_VERSION = 3
+    CACHE_VERSION = 4
     def __init__(self, **kwds):
         super(ExecutableInfo, self).__init__(**kwds)
         self.json_data = None
         self.path = None
         self.path_map = {}
+        self.type_to_block_map = {}
 
     def setPath(self, new_path):
         """
@@ -67,6 +68,7 @@ class ExecutableInfo(object):
         return {"json_data": self.json_data.toPickle(),
                 "path_map": self.path_map,
                 "path": self.path,
+                "type_to_block_map": self.type_to_block_map,
                 }
 
     def fromPickle(self, data):
@@ -74,6 +76,7 @@ class ExecutableInfo(object):
         self.json_data.fromPickle(data["json_data"])
         self.path_map = data["path_map"]
         self.path = data["path"]
+        self.type_to_block_map = data["type_to_block_map"]
 
     def _createBasicInfo(self, parent, jdata, is_hard):
         full_name = os.path.join(parent.path, jdata["name"])
@@ -126,6 +129,10 @@ class ExecutableInfo(object):
             param_info = ParameterInfo(info, name)
             param_info.setFromData(param)
             info.addParameter(param_info)
+
+        for t in jdata.get("associated_types", []):
+            self.type_to_block_map.setdefault(t, []).append(parent.path)
+
         return info
 
     def readFromFiles(self, json_file):
@@ -168,18 +175,11 @@ class ExecutableInfo(object):
 
 if __name__ == '__main__':
     import sys
-    import json
     if len(sys.argv) < 2:
         print("Usage: <path_to_exe>")
         exit(1)
     exe_info = ExecutableInfo()
     exe_info.clearCache()
     exe_info.setPath(sys.argv[1])
-    #print(json.dumps(exe_info.path_map, indent=2))
-    #print(exe_info.dumpDefaultTree(False))
-    #print(exe_info.dump())
     print("Keys: %s" % (sorted(exe_info.path_map.keys())))
-    from BlockInfo import BlockJsonEncoder
-    n = exe_info.path_map.get("/Executioner")
-    print(n.dump())
-    print(json.dumps(n, cls=BlockJsonEncoder, indent=2))
+    print(exe_info.type_to_block_map)

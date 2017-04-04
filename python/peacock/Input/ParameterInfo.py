@@ -10,6 +10,7 @@ class ParameterInfo(object):
         self.name = name
         self.required = False
         self.cpp_type = "string"
+        self.basic_type = "String"
         self.group_name = "Main"
         self.description = ""
         self.default = ""
@@ -28,6 +29,7 @@ class ParameterInfo(object):
         if self.default is None:
             self.default = ""
         self.cpp_type = data["cpp_type"]
+        self.basic_type = data["basic_type"]
         self.description = data["description"]
         self.group_name = data["group_name"]
         if not self.group_name:
@@ -68,8 +70,7 @@ class ParameterInfo(object):
         Return:
             bool
         """
-        return (self.isVectorType() or
-            "Point" in self.cpp_type or
+        return ( self.isVectorType() or
             self.user_added or
             ("basic_string" in self.cpp_type and self.name == "value") or
             ("std::string" in self.cpp_type and self.name == "value") or
@@ -85,11 +86,7 @@ class ParameterInfo(object):
         Return:
             bool
         """
-        if ('vector' in self.cpp_type or
-            'Vector' in self.cpp_type or
-            'MultiMooseEnum' == self.cpp_type):
-            return True
-        return False
+        return self.basic_type.startswith("Array")
 
     def inputFileValue(self):
         """

@@ -17,10 +17,11 @@ class Tests(Testing.PeacockTester):
     def commentsChanged(self):
         self.comments_changed += 1
 
-    def createParam(self, name, value="", cpp_type="string", options=[], required=False, user_added=False):
+    def createParam(self, name, value="", cpp_type="string", options=[], required=False, user_added=False, basic_type="String"):
         p = ParameterInfo(None, name)
         p.value = value
         p.cpp_type = cpp_type
+        p.basic_type = basic_type
         p.options = options
         p.required = required
         p.user_added = user_added
@@ -38,7 +39,8 @@ class Tests(Testing.PeacockTester):
         b = BlockInfo(None, "/Foo")
         for p in params:
             b.addParameter(p)
-        t = ParamsTable(b, params)
+        tmap = {"VariableName": ["/Variables", "/AuxVariables"]}
+        t = ParamsTable(b, params, tmap)
         t.resize(480, 480)
         t.addName("some name")
         t.addName("some name") # shouldn't be a problem
@@ -60,15 +62,15 @@ class Tests(Testing.PeacockTester):
         params.append(self.createParam("p3", cpp_type="FileNameNoExtension"))
         params.append(self.createParam("p4", cpp_type="MeshFileName"))
         params.append(self.createParam("p5", options=options))
-        params.append(self.createParam("p7", cpp_type="vector", options=options))
+        params.append(self.createParam("p7", cpp_type="vector", options=options, basic_type="Array"))
         params.append(self.createParam("p8"))
         params.append(self.createParam("p9", cpp_type="VariableName"))
-        params.append(self.createParam("p10", cpp_type="vector<VariableName>"))
+        params.append(self.createParam("p10", cpp_type="vector<VariableName>", basic_type="Array"))
         return params
 
     def testEmpty(self):
         b = BlockInfo(None, "/Foo")
-        t = ParamsTable(b, [])
+        t = ParamsTable(b, [], {})
         t.needBlockList.connect(lambda paths: self.needBlockList(t, paths))
         self.assertEqual(t.rowCount(), 0)
         t.setWatchedBlockList("/Bar", [])
