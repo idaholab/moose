@@ -131,10 +131,10 @@ FindValueOnLine::getValueAtPoint(const Point & p)
 {
   const Elem * elem = (*_pl)(p);
 
-  bool found_element = elem;
-  _communicator.max(found_element);
+  processor_id_type elem_proc_id = elem ? elem->processor_id() : DofObject::invalid_processor_id;
+  _communicator.min(elem_proc_id);
 
-  if (!found_element)
+  if (elem_proc_id == DofObject::invalid_processor_id)
   {
     // there is no element
     mooseError("No element found at the current search point. Please make sure the sampling line "
@@ -155,7 +155,7 @@ FindValueOnLine::getValueAtPoint(const Point & p)
   }
 
   // broadcast value
-  _communicator.broadcast(value, elem->processor_id());
+  _communicator.broadcast(value, elem_proc_id);
   return value;
 }
 
