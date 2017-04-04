@@ -263,44 +263,6 @@ XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   _cached_aux_solution.clear();
 }
 
-Node *
-XFEM::getNodeFromUniqueID(unique_id_type uid)
-{
-  Node * matching_node = nullptr;
-  MeshBase::node_iterator node_it = _mesh->nodes_begin();
-  const MeshBase::node_iterator node_end = _mesh->nodes_end();
-
-  for (node_it = _mesh->nodes_begin(); node_it != node_end; ++node_it)
-  {
-    Node * node = *node_it;
-    if (node->unique_id() == uid)
-    {
-      matching_node = node;
-      break;
-    }
-  }
-  return matching_node;
-}
-
-Elem *
-XFEM::getElemFromUniqueID(unique_id_type uid)
-{
-  Elem * matching_elem = nullptr;
-  MeshBase::element_iterator elem_it = _mesh->elements_begin();
-  const MeshBase::element_iterator elem_end = _mesh->elements_end();
-
-  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
-  {
-    Elem * elem = *elem_it;
-    if (elem->unique_id() == uid)
-    {
-      matching_elem = elem;
-      break;
-    }
-  }
-  return matching_elem;
-}
-
 void
 XFEM::buildEFAMesh()
 {
@@ -1733,41 +1695,59 @@ XFEM::setSolution(SystemBase & sys,
                   NumericVector<Number> & old_solution,
                   NumericVector<Number> & older_solution)
 {
-  for (auto dit = stored_solution.begin(); dit != stored_solution.end(); ++dit)
+  for (auto node_it = _mesh->local_nodes_begin(); node_it != _mesh->nodes_end(); ++node_it)
   {
-    unsigned int dof_obj_pid = 0;
-    Node * node = getNodeFromUniqueID(dit->first);
-    Elem * elem = nullptr;
-    if (node)
-      dof_obj_pid = node->processor_id();
-    else
+    Node * node = *node_it;
+    auto mit = stored_solution.find(node->unique_id());
+    if (mit != stored_solution.end())
     {
-      elem = getElemFromUniqueID(dit->first);
-      if (!elem)
-        mooseError("Cannot get node or element from unique id");
-      dof_obj_pid = elem->processor_id();
+      const std::vector<Real> & stored_node_solution = mit->second;
+      std::vector<unsigned int> stored_solution_dofs = getNodeSolutionDofs(node, sys);
+      setSolutionForDOFs(stored_node_solution,
+                         stored_solution_dofs,
+                         current_solution,
+                         old_solution,
+                         older_solution);
     }
+  }
 
-    if (dof_obj_pid == _mesh->processor_id())
+  for (auto elem_it = _mesh->local_elements_begin(); elem_it != _mesh->local_elements_end();
+       ++elem_it)
+  {
+    Elem * elem = *elem_it;
+    auto mit = stored_solution.find(elem->unique_id());
+    if (mit != stored_solution.end())
     {
-      const std::vector<Real> & dof_obj_solution = dit->second;
-      std::vector<unsigned int> stored_solution_dofs =
-          (node ? getNodeSolutionDofs(node, sys) : getElementSolutionDofs(elem, sys));
+      const std::vector<Real> & stored_elem_solution = mit->second;
+      std::vector<unsigned int> stored_solution_dofs = getElementSolutionDofs(elem, sys);
+      setSolutionForDOFs(stored_elem_solution,
+                         stored_solution_dofs,
+                         current_solution,
+                         old_solution,
+                         older_solution);
+    }
+  }
+}
 
-      // Solution vector is stored first for current, then old and older solutions.
-      // These are the offsets to the beginning of the old and older solutions in the vector.
-      const unsigned int old_solution_offset = stored_solution_dofs.size();
-      const unsigned int older_solution_offset = old_solution_offset * 2;
+void
+XFEM::setSolutionForDOFs(const std::vector<Real> & stored_solution,
+                         const std::vector<unsigned int> & stored_solution_dofs,
+                         NumericVector<Number> & current_solution,
+                         NumericVector<Number> & old_solution,
+                         NumericVector<Number> & older_solution)
+{
+  // Solution vector is stored first for current, then old and older solutions.
+  // These are the offsets to the beginning of the old and older solutions in the vector.
+  const unsigned int old_solution_offset = stored_solution_dofs.size();
+  const unsigned int older_solution_offset = old_solution_offset * 2;
 
-      for (unsigned int i = 0; i < stored_solution_dofs.size(); ++i)
-      {
-        current_solution.set(stored_solution_dofs[i], dof_obj_solution[i]);
-        if (_fe_problem->isTransient())
-        {
-          old_solution.set(stored_solution_dofs[i], dof_obj_solution[old_solution_offset + i]);
-          older_solution.set(stored_solution_dofs[i], dof_obj_solution[older_solution_offset + i]);
-        }
-      }
+  for (unsigned int i = 0; i < stored_solution_dofs.size(); ++i)
+  {
+    current_solution.set(stored_solution_dofs[i], stored_solution[i]);
+    if (_fe_problem->isTransient())
+    {
+      old_solution.set(stored_solution_dofs[i], stored_solution[old_solution_offset + i]);
+      older_solution.set(stored_solution_dofs[i], stored_solution[older_solution_offset + i]);
     }
   }
 }

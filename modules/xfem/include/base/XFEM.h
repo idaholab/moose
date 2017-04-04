@@ -76,9 +76,6 @@ public:
    */
   virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux);
 
-  Node * getNodeFromUniqueID(unique_id_type uid);
-  Elem * getElemFromUniqueID(unique_id_type uid);
-
   void buildEFAMesh();
   bool markCuts(Real time);
   bool markCutEdgesByGeometry(Real time);
@@ -268,6 +265,20 @@ private:
                    NumericVector<Number> & current_solution,
                    NumericVector<Number> & old_solution,
                    NumericVector<Number> & older_solution);
+
+  /**
+   * Set the solution for a set of DOFs
+   * @param stored_solution      Stored solution values to set the solution to
+   * @param stored_solution_dofs Dof indices for the entries in stored_solution
+   * @param current_solution     Current solution vector that will be set
+   * @param old_solution         Old solution vector that will be set
+   * @param older_solution       Older solution vector that will be set
+   */
+  void setSolutionForDOFs(const std::vector<Real> & stored_solution,
+                          const std::vector<unsigned int> & stored_solution_dofs,
+                          NumericVector<Number> & current_solution,
+                          NumericVector<Number> & old_solution,
+                          NumericVector<Number> & older_solution);
 
   /**
    * Get a vector of the dof indices for all components of all variables
