@@ -63,20 +63,6 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters)
   if (!_original_mesh)
     mooseError("StitchedMesh does not support DistributedMesh");
 
-  // Read the first mesh into the original mesh... then we'll stitch all of the others into that
-  _original_mesh->read(_files[0]);
-
-  _meshes.reserve(_files.size() - 1);
-
-  // Read in all of the other meshes
-  for (auto i = beginIndex(_files, 1); i < _files.size(); ++i)
-  {
-    _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
-    auto & mesh = _meshes.back();
-
-    mesh->read(_files[i]);
-  }
-
   if (_stitch_boundaries.size() % 2 != 0)
     mooseError("There must be an even amount of stitch_boundaries in ", name());
 
@@ -104,6 +90,20 @@ StitchedMesh::clone() const
 void
 StitchedMesh::buildMesh()
 {
+  // Read the first mesh into the original mesh... then we'll stitch all of the others into that
+  _original_mesh->read(_files[0]);
+
+  _meshes.reserve(_files.size() - 1);
+
+  // Read in all of the other meshes
+  for (auto i = beginIndex(_files, 1); i < _files.size(); ++i)
+  {
+    _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
+    auto & mesh = _meshes.back();
+
+    mesh->read(_files[i]);
+  }
+
   // Stich 'em
   for (auto i = beginIndex(_meshes); i < _meshes.size(); i++)
   {
