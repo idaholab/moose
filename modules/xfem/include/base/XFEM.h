@@ -76,9 +76,6 @@ public:
    */
   virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux);
 
-  Node * getNodeFromUniqueID(unique_id_type uid);
-  Elem * getElemFromUniqueID(unique_id_type uid);
-
   void buildEFAMesh();
   bool markCuts(Real time);
   bool markCutEdgesByGeometry(Real time);
@@ -270,12 +267,26 @@ private:
                    NumericVector<Number> & older_solution);
 
   /**
+   * Set the solution for a set of DOFs
+   * @param stored_solution      Stored solution values to set the solution to
+   * @param stored_solution_dofs Dof indices for the entries in stored_solution
+   * @param current_solution     Current solution vector that will be set
+   * @param old_solution         Old solution vector that will be set
+   * @param older_solution       Older solution vector that will be set
+   */
+  void setSolutionForDOFs(const std::vector<Real> & stored_solution,
+                          const std::vector<dof_id_type> & stored_solution_dofs,
+                          NumericVector<Number> & current_solution,
+                          NumericVector<Number> & old_solution,
+                          NumericVector<Number> & older_solution);
+
+  /**
    * Get a vector of the dof indices for all components of all variables
    * associated with an element
    * @param elem Element for which dof indices are found
    * @param sys  System for which the dof indices are found
    */
-  std::vector<unsigned int> getElementSolutionDofs(const Elem * elem, SystemBase & sys) const;
+  std::vector<dof_id_type> getElementSolutionDofs(const Elem * elem, SystemBase & sys) const;
 
   /**
    * Get a vector of the dof indices for all components of all variables
@@ -283,7 +294,7 @@ private:
    * @param node Node for which dof indices are found
    * @param sys  System for which the dof indices are found
    */
-  std::vector<unsigned int> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
+  std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
 };
 
 #endif // XFEM_H
