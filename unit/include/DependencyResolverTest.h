@@ -30,6 +30,7 @@ class DependencyResolverTest : public CppUnit::TestFixture
   CPPUNIT_TEST(resolverSets);
   CPPUNIT_TEST(ptrTest);
   CPPUNIT_TEST(simpleTest);
+  CPPUNIT_TEST(dependsOnTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -40,10 +41,12 @@ public:
   void resolverSets();
   void ptrTest();
   void simpleTest();
+  void dependsOnTest();
 
 private:
   DependencyResolver<std::string> _resolver;
   DependencyResolver<std::string> _strict_ordering;
+  DependencyResolver<std::string> _tree;
 };
 
 #endif // DEPENDENCYRESOLVERTEST_H

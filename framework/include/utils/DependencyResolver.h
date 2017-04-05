@@ -89,6 +89,24 @@ public:
    */
   const std::vector<T> & getSortedValues();
 
+  /**
+   * Return true if key depends on value.
+   * That is, return true, if a chain of calls of the form
+   * insertDependency(key, v0)
+   * insertDependency(v0, v1)
+   * insertDependency(v1, v2)
+   * ...
+   * insertDependency(vN, value)
+   * has been performed.
+   * dependsOn(x, x) always returns true
+   */
+  bool dependsOn(const T & key, const T & value);
+
+  /**
+   * Return true if any of elements of keys depends on value
+   */
+  bool dependsOn(const std::vector<T> & keys, const T & value);
+
   bool operator()(const T & a, const T & b);
 
 private:
@@ -352,6 +370,37 @@ DependencyResolver<T>::getSortedValues()
     std::copy(subset.begin(), subset.end(), std::back_inserter(_ordered_items_vector));
 
   return _ordered_items_vector;
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::dependsOn(const T & key, const T & value)
+{
+  if (key == value)
+    return true;
+
+  // recursively call dependsOn on all the things that key depends on
+  std::pair<typename std::multimap<T, T>::iterator, typename std::multimap<T, T>::iterator> ret;
+  ret = _depends.equal_range(key);
+  for (typename std::multimap<T, T>::iterator it = ret.first; it != ret.second; ++it)
+    if (dependsOn(it->second, value))
+      return true;
+
+  // No dependencies were found,
+  // or the key is not in the tree (so it has no dependencies).
+  // In this latter case, the only way that key depends on value is if key == value,
+  // but we've already checked that
+  return false;
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::dependsOn(const std::vector<T> & keys, const T & value)
+{
+  for (auto key : keys)
+    if (dependsOn(key, value))
+      return true;
+  return false;
 }
 
 template <typename T>
