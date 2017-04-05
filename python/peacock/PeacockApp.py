@@ -24,8 +24,7 @@ class PeacockApp(object):
         parsed_args = parser.parse_args(args)
 
         peacock_dir = os.path.dirname(os.path.realpath(__file__))
-        chigger_dir = os.path.dirname(peacock_dir)
-        icon_path = os.path.join(chigger_dir, "icons", "peacock_logo.ico")
+        icon_path = os.path.join(peacock_dir, "icons", "peacock_logo.ico")
         qapp.setWindowIcon(QIcon(icon_path))
 
         qtutils.setAppInformation("peacock")

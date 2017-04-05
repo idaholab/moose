@@ -109,6 +109,7 @@ class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # Create the colorbar
         self._colorbar = chigger.exodus.ExodusColorBar(result)
+        self._colorbar.setOptions(font_size=12*self.devicePixelRatio())
 
         # Populate variable list with nodal/elemental variables
         self.VariableList.blockSignals(True)
