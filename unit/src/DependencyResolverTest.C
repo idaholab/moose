@@ -28,6 +28,27 @@ DependencyResolverTest::setUp()
   _strict_ordering.insertDependency("a", "e");
   _strict_ordering.insertDependency("d", "a");
   // Ordering will be "bead"
+
+  /**
+   *          k0     k1
+   *        / |  \  /
+   *      m0  m1  m2
+   *     / \   |\  |
+   *    mA  mB | \ |
+   *          \|  mD
+   *           mC
+   */
+  _tree.insertDependency("k0", "m0");
+  _tree.insertDependency("k0", "m1");
+  _tree.insertDependency("k0", "m2");
+  _tree.insertDependency("k1", "m2");
+  _tree.insertDependency("m0", "mA");
+  _tree.insertDependency("m0", "mB");
+  _tree.insertDependency("m1", "mC");
+  _tree.insertDependency("m1", "mD");
+  _tree.insertDependency("mB", "mC");
+  _tree.insertDependency("m1", "mD");
+  _tree.insertDependency("m2", "mD");
 }
 
 void
@@ -128,4 +149,44 @@ DependencyResolverTest::resolverSets()
 
   CPPUNIT_ASSERT(sets[2].size() == 1);
   CPPUNIT_ASSERT(std::find(sets[2].begin(), sets[2].end(), "d") != sets[2].end());
+}
+
+void
+DependencyResolverTest::dependsOnTest()
+{
+  CPPUNIT_ASSERT(_resolver.dependsOn("b", "a"));
+  CPPUNIT_ASSERT(_resolver.dependsOn("c", "a"));
+  CPPUNIT_ASSERT(_resolver.dependsOn("d", "c"));
+  CPPUNIT_ASSERT(_resolver.dependsOn("d", "a"));
+  CPPUNIT_ASSERT(_resolver.dependsOn("b", "b"));
+  CPPUNIT_ASSERT(_resolver.dependsOn("a", "a"));
+  CPPUNIT_ASSERT(!_resolver.dependsOn("b", "c"));
+  CPPUNIT_ASSERT(!_resolver.dependsOn("b", "d"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "m0"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "m1"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "m2"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "mA"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "mB"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "mC"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k0", "mD"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k1", "m0"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k1", "m1"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k1", "m2"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k1", "mA"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k1", "mB"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k1", "mC"));
+  CPPUNIT_ASSERT(_tree.dependsOn("k1", "mD"));
+  CPPUNIT_ASSERT(_tree.dependsOn("m0", "m0"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("m0", "m1"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("m0", "m2"));
+  CPPUNIT_ASSERT(_tree.dependsOn("m0", "mA"));
+  CPPUNIT_ASSERT(_tree.dependsOn("m0", "mB"));
+  CPPUNIT_ASSERT(_tree.dependsOn("m0", "mC"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("m0", "mD"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("m0", "k0"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("m0", "k1"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k1", "k0"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("k0", "k1"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("m1", "something_else"));
+  CPPUNIT_ASSERT(!_tree.dependsOn("something_else", "k0"));
 }
