@@ -163,7 +163,7 @@ ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, Boundar
   {
 
     // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor(side);
+    const Elem * neighbor = elem->neighbor_ptr(side);
 
     if (!(neighbor->level() == elem->level()))
       mooseError("Sorry, interface kernels do not work with mesh adaptivity");
@@ -198,7 +198,7 @@ ComputeResidualThread::onInternalSide(const Elem * elem, unsigned int side)
   if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor(side);
+    const Elem * neighbor = elem->neighbor_ptr(side);
 
     // Get the global id of the element and the neighbor
     const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
