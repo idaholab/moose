@@ -36,7 +36,7 @@ XFEM::XFEM(const InputParameters & params) : XFEMInterface(params), _efa_mesh(Mo
 
 XFEM::~XFEM()
 {
-  for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
+  for (std::size_t i = 0; i < _geometric_cuts.size(); ++i)
     delete _geometric_cuts[i];
 
   for (std::map<unique_id_type, XFEMCutElem *>::iterator cemit = _cut_elem_map.begin();
@@ -1183,7 +1183,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   }
 
   // delete elements
-  for (unsigned int i = 0; i < delete_elements.size(); ++i)
+  for (std::size_t i = 0; i < delete_elements.size(); ++i)
   {
     Elem * elem_to_delete = _mesh->elem(delete_elements[i]->id());
 
@@ -1301,7 +1301,7 @@ XFEM::getEFANodeCoords(EFANode * CEMnode,
   std::vector<double> master_weights;
 
   CEMElem->getMasterInfo(CEMnode, master_nodes, master_weights);
-  for (unsigned int i = 0; i < master_nodes.size(); ++i)
+  for (std::size_t i = 0; i < master_nodes.size(); ++i)
   {
     if (master_nodes[i]->category() == EFANode::N_CATEGORY_PERMANENT)
     {
@@ -1315,7 +1315,7 @@ XFEM::getEFANodeCoords(EFANode * CEMnode,
     else
       mooseError("master nodes must be permanent");
   }
-  for (unsigned int i = 0; i < master_nodes.size(); ++i)
+  for (std::size_t i = 0; i < master_nodes.size(); ++i)
     node_coor += master_weights[i] * master_points[i];
 
   return node_coor;
@@ -1558,7 +1558,7 @@ XFEM::getXFEMqRuleOnLine(std::vector<Point> & intersection_points,
   Point p2 = intersection_points[1];
 
   // number of quadrature points
-  unsigned int num_qpoints = 2;
+  std::size_t num_qpoints = 2;
 
   // quadrature coordinates
   Real xi0 = -std::sqrt(1.0 / 3.0);
@@ -1581,9 +1581,9 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
                             std::vector<Point> & quad_pts,
                             std::vector<Real> & quad_wts) const
 {
-  unsigned nnd_pe = intersection_points.size();
+  std::size_t nnd_pe = intersection_points.size();
   Point xcrd(0.0, 0.0, 0.0);
-  for (unsigned int i = 0; i < nnd_pe; ++i)
+  for (std::size_t i = 0; i < nnd_pe; ++i)
     xcrd += intersection_points[i];
   xcrd /= nnd_pe;
 
@@ -1592,7 +1592,7 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
 
   Real jac = 0.0;
 
-  for (unsigned int j = 0; j < nnd_pe; ++j) // loop all sub-trigs
+  for (std::size_t j = 0; j < nnd_pe; ++j) // loop all sub-tris
   {
     std::vector<std::vector<Real>> shape(3, std::vector<Real>(3, 0.0));
     std::vector<Point> subtrig_points(3, Point(0.0, 0.0, 0.0)); // sub-trig nodal coords
@@ -1603,12 +1603,12 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
     subtrig_points[2] = intersection_points[jplus1];
 
     std::vector<std::vector<Real>> sg2;
-    Xfem::stdQuadr2D(3, 1, sg2);                  // get sg2
-    for (unsigned int l = 0; l < sg2.size(); ++l) // loop all int pts on a sub-trig
+    Xfem::stdQuadr2D(3, 1, sg2);                 // get sg2
+    for (std::size_t l = 0; l < sg2.size(); ++l) // loop all int pts on a sub-trig
     {
       Xfem::shapeFunc2D(3, sg2[l], subtrig_points, shape, jac, true); // Get shape
       std::vector<Real> tsg_line(3, 0.0);
-      for (unsigned int k = 0; k < 3; ++k) // loop sub-trig nodes
+      for (std::size_t k = 0; k < 3; ++k) // loop sub-trig nodes
       {
         tsg_line[0] += shape[k][2] * subtrig_points[k](0);
         tsg_line[1] += shape[k][2] * subtrig_points[k](1);
@@ -1629,10 +1629,10 @@ XFEM::storeSolutionForNode(const Node * node_to_store_to,
                            const NumericVector<Number> & old_solution,
                            const NumericVector<Number> & older_solution)
 {
-  std::vector<unsigned int> stored_solution_dofs = getNodeSolutionDofs(node_to_store_from, sys);
+  std::vector<dof_id_type> stored_solution_dofs = getNodeSolutionDofs(node_to_store_from, sys);
   std::vector<Real> stored_solution_scratch;
   // Size for current solution, as well as for old, and older solution only for transient case
-  unsigned int stored_solution_size =
+  std::size_t stored_solution_size =
       (_fe_problem->isTransient() ? stored_solution_dofs.size() * 3 : stored_solution_dofs.size());
   stored_solution_scratch.reserve(stored_solution_size);
 
@@ -1663,10 +1663,10 @@ XFEM::storeSolutionForElement(const Elem * elem_to_store_to,
                               const NumericVector<Number> & old_solution,
                               const NumericVector<Number> & older_solution)
 {
-  std::vector<unsigned int> stored_solution_dofs = getElementSolutionDofs(elem_to_store_from, sys);
+  std::vector<dof_id_type> stored_solution_dofs = getElementSolutionDofs(elem_to_store_from, sys);
   std::vector<Real> stored_solution_scratch;
   // Size for current solution, as well as for old, and older solution only for transient case
-  unsigned int stored_solution_size =
+  std::size_t stored_solution_size =
       (_fe_problem->isTransient() ? stored_solution_dofs.size() * 3 : stored_solution_dofs.size());
   stored_solution_scratch.reserve(stored_solution_size);
 
@@ -1695,14 +1695,15 @@ XFEM::setSolution(SystemBase & sys,
                   NumericVector<Number> & old_solution,
                   NumericVector<Number> & older_solution)
 {
-  for (auto node_it = _mesh->local_nodes_begin(); node_it != _mesh->nodes_end(); ++node_it)
+  const auto nodes_end = _mesh->local_nodes_end();
+  for (auto node_it = _mesh->local_nodes_begin(); node_it != nodes_end; ++node_it)
   {
     Node * node = *node_it;
     auto mit = stored_solution.find(node->unique_id());
     if (mit != stored_solution.end())
     {
       const std::vector<Real> & stored_node_solution = mit->second;
-      std::vector<unsigned int> stored_solution_dofs = getNodeSolutionDofs(node, sys);
+      std::vector<dof_id_type> stored_solution_dofs = getNodeSolutionDofs(node, sys);
       setSolutionForDOFs(stored_node_solution,
                          stored_solution_dofs,
                          current_solution,
@@ -1711,15 +1712,15 @@ XFEM::setSolution(SystemBase & sys,
     }
   }
 
-  for (auto elem_it = _mesh->local_elements_begin(); elem_it != _mesh->local_elements_end();
-       ++elem_it)
+  const auto elems_end = _mesh->local_elements_end();
+  for (auto elem_it = _mesh->local_elements_begin(); elem_it != elems_end; ++elem_it)
   {
     Elem * elem = *elem_it;
     auto mit = stored_solution.find(elem->unique_id());
     if (mit != stored_solution.end())
     {
       const std::vector<Real> & stored_elem_solution = mit->second;
-      std::vector<unsigned int> stored_solution_dofs = getElementSolutionDofs(elem, sys);
+      std::vector<dof_id_type> stored_solution_dofs = getElementSolutionDofs(elem, sys);
       setSolutionForDOFs(stored_elem_solution,
                          stored_solution_dofs,
                          current_solution,
@@ -1731,17 +1732,17 @@ XFEM::setSolution(SystemBase & sys,
 
 void
 XFEM::setSolutionForDOFs(const std::vector<Real> & stored_solution,
-                         const std::vector<unsigned int> & stored_solution_dofs,
+                         const std::vector<dof_id_type> & stored_solution_dofs,
                          NumericVector<Number> & current_solution,
                          NumericVector<Number> & old_solution,
                          NumericVector<Number> & older_solution)
 {
   // Solution vector is stored first for current, then old and older solutions.
   // These are the offsets to the beginning of the old and older solutions in the vector.
-  const unsigned int old_solution_offset = stored_solution_dofs.size();
-  const unsigned int older_solution_offset = old_solution_offset * 2;
+  const auto old_solution_offset = stored_solution_dofs.size();
+  const auto older_solution_offset = old_solution_offset * 2;
 
-  for (unsigned int i = 0; i < stored_solution_dofs.size(); ++i)
+  for (std::size_t i = 0; i < stored_solution_dofs.size(); ++i)
   {
     current_solution.set(stored_solution_dofs[i], stored_solution[i]);
     if (_fe_problem->isTransient())
@@ -1752,12 +1753,12 @@ XFEM::setSolutionForDOFs(const std::vector<Real> & stored_solution,
   }
 }
 
-std::vector<unsigned int>
+std::vector<dof_id_type>
 XFEM::getElementSolutionDofs(const Elem * elem, SystemBase & sys) const
 {
   SubdomainID sid = elem->subdomain_id();
   const std::vector<MooseVariable *> & vars = sys.getVariables(0);
-  std::vector<unsigned int> solution_dofs;
+  std::vector<dof_id_type> solution_dofs;
   solution_dofs.reserve(vars.size()); // just an approximation
   for (auto var : vars)
   {
@@ -1769,7 +1770,7 @@ XFEM::getElementSolutionDofs(const Elem * elem, SystemBase & sys) const
         unsigned int n_comp = elem->n_comp(sys.number(), var->number());
         for (unsigned int icomp = 0; icomp < n_comp; ++icomp)
         {
-          unsigned int elem_dof = elem->dof_number(sys.number(), var->number(), icomp);
+          dof_id_type elem_dof = elem->dof_number(sys.number(), var->number(), icomp);
           solution_dofs.push_back(elem_dof);
         }
       }
@@ -1778,12 +1779,12 @@ XFEM::getElementSolutionDofs(const Elem * elem, SystemBase & sys) const
   return solution_dofs;
 }
 
-std::vector<unsigned int>
+std::vector<dof_id_type>
 XFEM::getNodeSolutionDofs(const Node * node, SystemBase & sys) const
 {
   const std::set<SubdomainID> & sids = _moose_mesh->getNodeBlockIds(*node);
   const std::vector<MooseVariable *> & vars = sys.getVariables(0);
-  std::vector<unsigned int> solution_dofs;
+  std::vector<dof_id_type> solution_dofs;
   solution_dofs.reserve(vars.size()); // just an approximation
   for (auto var : vars)
   {
@@ -1801,7 +1802,7 @@ XFEM::getNodeSolutionDofs(const Node * node, SystemBase & sys) const
         unsigned int n_comp = node->n_comp(sys.number(), var->number());
         for (unsigned int icomp = 0; icomp < n_comp; ++icomp)
         {
-          unsigned int node_dof = node->dof_number(sys.number(), var->number(), icomp);
+          dof_id_type node_dof = node->dof_number(sys.number(), var->number(), icomp);
           solution_dofs.push_back(node_dof);
         }
       }

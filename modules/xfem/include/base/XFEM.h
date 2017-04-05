@@ -275,7 +275,7 @@ private:
    * @param older_solution       Older solution vector that will be set
    */
   void setSolutionForDOFs(const std::vector<Real> & stored_solution,
-                          const std::vector<unsigned int> & stored_solution_dofs,
+                          const std::vector<dof_id_type> & stored_solution_dofs,
                           NumericVector<Number> & current_solution,
                           NumericVector<Number> & old_solution,
                           NumericVector<Number> & older_solution);
@@ -286,7 +286,7 @@ private:
    * @param elem Element for which dof indices are found
    * @param sys  System for which the dof indices are found
    */
-  std::vector<unsigned int> getElementSolutionDofs(const Elem * elem, SystemBase & sys) const;
+  std::vector<dof_id_type> getElementSolutionDofs(const Elem * elem, SystemBase & sys) const;
 
   /**
    * Get a vector of the dof indices for all components of all variables
@@ -294,7 +294,7 @@ private:
    * @param node Node for which dof indices are found
    * @param sys  System for which the dof indices are found
    */
-  std::vector<unsigned int> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
+  std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
 };
 
 #endif // XFEM_H
