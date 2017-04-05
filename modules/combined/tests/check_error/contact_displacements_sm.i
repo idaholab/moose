@@ -1,7 +1,3 @@
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
-
 [Mesh]
   file = cube.e
 []
@@ -15,8 +11,11 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -39,26 +38,27 @@
     boundary = 2
     value = 0.0
   [../]
+[]
 
+[Contact]
   [./fred]
-    type = Pressure
-    boundary = 4
-    component = 123456789
-    variable = disp_x
+    master = 1
+    slave = 2
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    bulk_modulus = 1e6
+  [./goo]
+    type = Elastic
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
+    youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-  [../]
-  [./stress]
-    type = ComputeLinearElasticStress
   [../]
 []
 

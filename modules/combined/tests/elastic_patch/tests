@@ -1,5 +1,5 @@
 [Tests]
-  [./test_plane_strain]
+  [./plane_strain]
     type = Exodiff
     input = 'elastic_patch_plane_strain.i'
     exodiff = 'elastic_patch_plane_strain_out.e'
@@ -7,15 +7,7 @@
     max_parallel = 1
   [../]
 
-  [./test_plane_strain_large_strain]
-    type = Exodiff
-    input = 'elastic_patch_plane_strain_large_strain.i'
-    exodiff = 'elastic_patch_plane_strain_large_strain_out.e'
-    scale_refine = 3
-    max_parallel = 1
-  [../]
-
-  [./test_rz]
+  [./rz]
     type = Exodiff
     input = 'elastic_patch_rz.i'
     exodiff = 'elastic_patch_rz_out.e'
@@ -23,26 +15,67 @@
     max_parallel = 1
   [../]
 
-  [./test_rz_nonlinear]
+  [./rz_nonlinear]
     type = Exodiff
     input = 'elastic_patch_rz_nonlinear.i'
     exodiff = 'elastic_patch_rz_nonlinear_out.e'
     max_parallel = 1
   [../]
 
-  [./test_rz_large_strain]
-    type = Exodiff
-    input = 'elastic_patch_rz_large_strain.i'
-    exodiff = 'elastic_patch_rz_large_strain_out.e'
-    scale_refine = 3
-    max_parallel = 1
-  [../]
-
-  [./test_rspherical]
+  [./rspherical]
     type = Exodiff
     input = 'elastic_patch_rspherical.i'
     exodiff = 'elastic_patch_rspherical_out.e'
     max_parallel = 1
   [../]
 
+  [./plane_strain_sm]
+    type = Exodiff
+    input = 'elastic_patch_plane_strain_sm.i'
+    exodiff = 'elastic_patch_plane_strain_out.e'
+    scale_refine = 1
+    max_parallel = 1
+    prereq = 'plane_strain'
+  [../]
+
+  [./plane_strain_large_strain_sm]
+    type = Exodiff
+    input = 'elastic_patch_plane_strain_large_strain_sm.i'
+    exodiff = 'elastic_patch_plane_strain_large_strain_out.e'
+    scale_refine = 3
+    max_parallel = 1
+  [../]
+
+  [./rz_sm]
+    type = Exodiff
+    input = 'elastic_patch_rz_sm.i'
+    exodiff = 'elastic_patch_rz_out.e'
+    scale_refine = 1
+    max_parallel = 1
+    prereq = 'rz'
+  [../]
+
+  [./rz_nonlinear_sm]
+    type = Exodiff
+    input = 'elastic_patch_rz_nonlinear_sm.i'
+    exodiff = 'elastic_patch_rz_nonlinear_out.e'
+    max_parallel = 1
+    prereq = 'rz_nonlinear'
+  [../]
+
+  [./rz_large_strain_sm]
+    type = Exodiff
+    input = 'elastic_patch_rz_large_strain_sm.i'
+    exodiff = 'elastic_patch_rz_large_strain_out.e'
+    scale_refine = 3
+    max_parallel = 1
+  [../]
+
+  [./rspherical_sm]
+    type = Exodiff
+    input = 'elastic_patch_rspherical_sm.i'
+    exodiff = 'elastic_patch_rspherical_out.e'
+    max_parallel = 1
+    prereq = 'rspherical'
+  [../]
 []

@@ -34,6 +34,26 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
     _shear_modulus(_shear_modulus_set ? getParam<Real>("shear_modulus") : -1),
     _youngs_modulus(_youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1)
 {
+  unsigned int num_elastic_constants = _bulk_modulus_set + _lambda_set + _poissons_ratio_set +
+                                       _shear_modulus_set + _youngs_modulus_set;
+
+  if (num_elastic_constants != 2)
+    mooseError("Exactly two elastic constants must be defined for material '" + name() + "'.");
+
+  if (_bulk_modulus_set && _bulk_modulus <= 0.0)
+    mooseError("Bulk modulus must be positive in material '" + name() + "'.");
+
+  if (_poissons_ratio_set && (_poissons_ratio <= -1.0 || _poissons_ratio >= 0.5))
+    mooseError("Poissons ratio must be greater than -1 and less than 0.5 in "
+               "material '" +
+               name() + "'.");
+
+  if (_shear_modulus_set && _shear_modulus < 0.0)
+    mooseError("Shear modulus must not be negative in material '" + name() + "'.");
+
+  if (_youngs_modulus_set && _youngs_modulus <= 0.0)
+    mooseError("Youngs modulus must be positive in material '" + name() + "'.");
+
   std::vector<Real> iso_const(2);
 
   if (_lambda_set && _shear_modulus_set)
