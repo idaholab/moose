@@ -39,19 +39,12 @@
     boundary = 2
     value = 0.0
   [../]
-
-  [./fred]
-    type = Pressure
-    boundary = 4
-    component = 123456789
-    variable = disp_x
-  [../]
 []
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    bulk_modulus = 1e6
+    shear_modulus = -10.0
     poissons_ratio = 0.0
   [../]
   [./strain]

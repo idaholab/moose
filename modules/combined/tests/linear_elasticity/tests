@@ -1,39 +1,46 @@
 [Tests]
-  [./linear_elastic_material_test]
+  [./linear_elastic_material]
     type = 'Exodiff'
-    input = 'LinearElasticMaterial_test.i'
-    exodiff = 'LinearElasticMaterial.e'
+    input = 'linear_elastic_material.i'
+    exodiff = 'linear_elastic_material_out.e'
     max_parallel = 1
   [../]
 
-  [./linear_general_anisotropic_elasticity_test]
+  [./linear_anisotropic_material_sm]
     type = 'Exodiff'
-    input = 'Linear_Material_test.i'
-    exodiff = 'Linear_General_Anisotropic_Material_out.e'
+    input = 'linear_anisotropic_material_sm.i'
+    exodiff = 'linear_anisotropic_material_out.e'
   [../]
 
-  [./appl_str_test]
+  [./linear_anisotropic_material]
     type = 'Exodiff'
-    input = 'applied_strain_test.i'
-    exodiff = 'applied_strain.e'
+    input = 'linear_anisotropic_material.i'
+    exodiff = 'linear_anisotropic_material_out.e'
+    prereq = 'linear_anisotropic_material_sm'
   [../]
 
-  [./extra_stress_test]
+  [./applied_strain]
     type = 'Exodiff'
-    input = 'extra_stress_test.i'
-    exodiff = 'extra_stress_test_out.e'
+    input = 'applied_strain.i'
+    exodiff = 'applied_strain_out.e'
   [../]
 
-  [./tensor_test]
+  [./extra_stress]
     type = 'Exodiff'
-    input = 'Tensor_test.i'
-    exodiff = 'Tensor_test.e'
+    input = 'extra_stress.i'
+    exodiff = 'extra_stress_out.e'
+  [../]
+
+  [./tensor]
+    type = 'Exodiff'
+    input = 'tensor.i'
+    exodiff = 'tensor_out.e'
     max_parallel = 1
   [../]
 
-  [./th_exp_test]
+  [./thermal_expansion]
     type = 'Exodiff'
-    input = 'thermal_expansion_test.i'
-    exodiff = 'thermal_expansion.e'
+    input = 'thermal_expansion.i'
+    exodiff = 'thermal_expansion_out.e'
   [../]
 []

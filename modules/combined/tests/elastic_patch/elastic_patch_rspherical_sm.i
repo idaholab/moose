@@ -12,7 +12,6 @@
 
 [GlobalParams]
   displacements = 'disp_x'
-  temperature = temp
 []
 
 [Problem]
@@ -40,18 +39,30 @@
 []
 
 [AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./density]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
-  strain = SMALL
-  incremental = true
-  eigenstrain_names = eigenstrain
-  add_variables = true
-  generate_output = 'stress_xx stress_yy stress_zz'
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    temp = temp
+    use_displaced_mesh = false
+  [../]
 []
 
 [Kernels]
@@ -62,6 +73,24 @@
 []
 
 [AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+  [../]
+  [./stress_yy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yy
+    index = 1
+  [../]
+  [./stress_zz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zz
+    index = 2
+  [../]
   [./density]
     type = MaterialRealAux
     property = density
@@ -86,30 +115,29 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff1]
+    type = Elastic
+    block = '1 2 3'
+
+    disp_r = disp_x
+
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 117.56
-    thermal_expansion_coeff = 0.0
-    incremental_form = true
-    eigenstrain_name = eigenstrain
-  [../]
-  [./stress]
-    type = ComputeStrainIncrementBasedStress
+
+    temp = temp
   [../]
 
   [./heat]
     type = HeatConductionMaterial
+    block = '1 2 3'
+
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
     type = Density
+    block = '1 2 3'
     density = 0.283
   [../]
 []
@@ -123,5 +151,6 @@
 []
 
 [Outputs]
+  file_base = elastic_patch_rspherical_out
   exodus = true
 []

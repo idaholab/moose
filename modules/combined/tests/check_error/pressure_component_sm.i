@@ -15,8 +15,11 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -49,16 +52,16 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./goo]
+    type = Elastic
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     bulk_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-  [../]
-  [./stress]
-    type = ComputeLinearElasticStress
   [../]
 []
 

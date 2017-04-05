@@ -1,3 +1,6 @@
+# This test uses small strain formulation, and the use_displaced_mesh
+# is set to false for the kernels
+#
 # Gravity Test
 #
 # This test is similar to the other gravity tests, but it also tests the
@@ -45,8 +48,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  order = SECOND
-  family = LAGRANGE
 []
 
 [Mesh]
@@ -55,12 +56,20 @@
 
 [Variables]
   [./disp_x]
+    order = SECOND
+    family = LAGRANGE
   [../]
   [./disp_y]
+    order = SECOND
+    family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./stress_xx_qp_0]
     order = CONSTANT
     family = MONOMIAL
@@ -99,12 +108,11 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
-  volumetric_locking_correction = true
-  strain = FINITE
-  #incremental = true
-  add_variables = true
-  generate_output = 'stress_xx'
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+  [../]
 []
 
 [Kernels]
@@ -116,77 +124,74 @@
 []
 
 [AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+  [../]
   [./stress_xx_qp_0]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_0
-    index_i = 0
-    index_j = 0
-    selected_qp = 0
+    index = 0
+    qp_select = 0
   [../]
   [./stress_xx_qp_1]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_1
-    index_i = 0
-    index_j = 0
-    selected_qp = 1
+    index = 0
+    qp_select = 1
   [../]
   [./stress_xx_qp_2]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_2
-    index_i = 0
-    index_j = 0
-    selected_qp = 2
+    index = 0
+    qp_select = 2
   [../]
   [./stress_xx_qp_3]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_3
-    index_i = 0
-    index_j = 0
-    selected_qp = 3
+    index = 0
+    qp_select = 3
   [../]
   [./stress_xx_qp_4]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_4
-    index_i = 0
-    index_j = 0
-    selected_qp = 4
+    index = 0
+    qp_select = 4
   [../]
   [./stress_xx_qp_5]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_5
-    index_i = 0
-    index_j = 0
-    selected_qp = 5
+    index = 0
+    qp_select = 5
   [../]
   [./stress_xx_qp_6]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_6
-    index_i = 0
-    index_j = 0
-    selected_qp = 6
+    index = 0
+    qp_select = 6
   [../]
   [./stress_xx_qp_7]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_7
-    index_i = 0
-    index_j = 0
-    selected_qp = 7
+    index = 0
+    qp_select = 7
   [../]
   [./stress_xx_qp_8]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx_qp_8
-    index_i = 0
-    index_j = 0
-    selected_qp = 8
+    index = 0
+    qp_select = 8
   [../]
 []
 
@@ -206,17 +211,22 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff1]
+    type = Elastic
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+
     youngs_modulus = 1e6
     bulk_modulus = 0.333333333333333e6
-  [../]
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
+
+    formulation = NonlinearPlaneStrain
   [../]
 
   [./density]
     type = Density
+    block = 1
     density = 2
   [../]
 []
