@@ -80,7 +80,7 @@ AddSideSetsBase::flood(const Elem * elem, Point normal, BoundaryID side_id)
   _visited[side_id].insert(elem);
   for (unsigned int side = 0; side < elem->n_sides(); ++side)
   {
-    if (elem->neighbor(side))
+    if (elem->neighbor_ptr(side))
       continue;
 
     _fe_face->reinit(elem, side);
@@ -96,7 +96,7 @@ AddSideSetsBase::flood(const Elem * elem, Point normal, BoundaryID side_id)
         // element.
         // This will allow us to tolerate small changes in the normals so we can "paint" around a
         // curve.
-        flood(elem->neighbor(neighbor), _fixed_normal ? normal : normals[0], side_id);
+        flood(elem->neighbor_ptr(neighbor), _fixed_normal ? normal : normals[0], side_id);
       }
     }
   }

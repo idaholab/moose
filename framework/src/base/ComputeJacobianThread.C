@@ -233,7 +233,7 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
   if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor(side);
+    const Elem * neighbor = elem->neighbor_ptr(side);
 
     // Get the global id of the element and the neighbor
     const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
@@ -267,7 +267,7 @@ ComputeJacobianThread::onInterface(const Elem * elem, unsigned int side, Boundar
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
   {
     // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor(side);
+    const Elem * neighbor = elem->neighbor_ptr(side);
 
     if (neighbor->active())
     {

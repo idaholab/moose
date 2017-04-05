@@ -67,7 +67,7 @@ AddAllSideSetsByNormals::modify()
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      if (elem->neighbor(side))
+      if (elem->neighbor_ptr(side))
         continue;
 
       _fe_face->reinit(elem, side);

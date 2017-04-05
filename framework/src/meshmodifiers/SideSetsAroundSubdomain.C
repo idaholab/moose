@@ -121,7 +121,7 @@ SideSetsAroundSubdomain::modify()
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      const Elem * neighbor = elem->neighbor(side);
+      const Elem * neighbor = elem->neighbor_ptr(side);
 
       // On a replicated mesh, we add all subdomain sides ourselves.
       // On a distributed mesh, we may have missed sides which
@@ -185,7 +185,7 @@ SideSetsAroundSubdomain::modify()
       {
         const Elem * elem = mesh.elem_ptr(q.first);
         const unsigned int side = q.second;
-        const Elem * neighbor = elem->neighbor(side);
+        const Elem * neighbor = elem->neighbor_ptr(side);
 
         if (neighbor == NULL ||                   // element on boundary OR
             neighbor->subdomain_id() != block_id) // neighboring element is on a different subdomain
