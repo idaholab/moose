@@ -205,10 +205,19 @@ DumpObjectsProblem::dumpHelper(const std::string & system,
       }
       else
       {
+        // special treatment for some types
+        auto param_bool = dynamic_cast<InputParameters::Parameter<bool> *>(value_pair.second);
+
         // parameter value
-        std::stringstream ss;
-        value_pair.second->print(ss);
-        auto param_value = ss.str();
+        std::string param_value;
+        if (param_bool)
+          param_value = param_bool->get() ? "true" : "false";
+        else
+        {
+          std::stringstream ss;
+          value_pair.second->print(ss);
+          param_value = ss.str();
+        }
 
         // delete trailing space
         if (param_value.back() == ' ')
