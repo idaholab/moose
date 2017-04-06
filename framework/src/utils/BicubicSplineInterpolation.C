@@ -117,13 +117,19 @@ BicubicSplineInterpolation::constructColumnSplineSecondDerivativeTable()
   auto n = _x2.size();
   _y2_columns.resize(n);
 
+  // transpose the _y values so the columns can be easily iterated over
+  std::vector<std::vector<Real>> y_trans(_y[0].size(), std::vector<Real>(_y.size()));
+  for (decltype(n) i = 0; i < _y.size(); ++i)
+    for (decltype(n) j = 0; j < _y[0].size(); ++j)
+      y_trans[j][i] = _y[i][j];
+
   if (_yx11.empty())
     for (decltype(n) j = 0; j < n; ++j)
-      spline(_x1, _y[j], _y2_columns[j]);
+      spline(_x1, y_trans[j], _y2_columns[j]);
 
   else
     for (decltype(n) j = 0; j < n; ++j)
-      spline(_x1, _y[j], _y2_columns[j], _yx11[j], _yx1n[j]);
+      spline(_x1, y_trans[j], _y2_columns[j], _yx11[j], _yx1n[j]);
 }
 
 void
