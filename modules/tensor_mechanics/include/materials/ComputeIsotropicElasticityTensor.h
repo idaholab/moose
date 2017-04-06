@@ -18,8 +18,10 @@ class ComputeIsotropicElasticityTensor : public ComputeElasticityTensorBase
 public:
   ComputeIsotropicElasticityTensor(const InputParameters & parameters);
 
+  virtual bool isGuaranteedIsotropic() const override { return true; }
+
 protected:
-  virtual void computeQpElasticityTensor();
+  virtual void computeQpElasticityTensor() override;
 
   /// Elastic constants
   bool _bulk_modulus_set;
