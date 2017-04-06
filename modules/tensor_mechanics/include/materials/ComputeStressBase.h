@@ -22,15 +22,19 @@ public:
   ComputeStressBase(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
   virtual void computeQpStress() = 0;
 
-  std::string _base_name;
+  bool isElasticityTensorGuaranteedIsotropic();
+
+  const std::string _base_name;
+  const std::string _elasticity_tensor_name;
 
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
+
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
   /// Extra stress tensor
@@ -44,6 +48,17 @@ protected:
 
   /// Parameter which decides whether to store old stress. This is required for HHT time integration and Rayleigh damping
   const bool _store_stress_old;
+
+private:
+  enum class OptionalBool
+  {
+    UNDEFINED = -1,
+    FALSE = 0,
+    TRUE = 1
+  };
+
+  /// store
+  OptionalBool _elasticity_tensor_isotropic_guarantee;
 };
 
 #endif // COMPUTESTRESSBASE_H
