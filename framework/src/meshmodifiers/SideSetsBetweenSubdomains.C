@@ -79,7 +79,7 @@ SideSetsBetweenSubdomains::modify()
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      const Elem * neighbor = elem->neighbor(side);
+      const Elem * neighbor = elem->neighbor_ptr(side);
 
       // On a replicated mesh, we add all subdomain sides ourselves.
       // On a distributed mesh, we may have missed sides which
@@ -132,7 +132,7 @@ SideSetsBetweenSubdomains::modify()
       {
         const Elem * elem = mesh.elem_ptr(q.first);
         const unsigned int side = q.second;
-        const Elem * neighbor = elem->neighbor(side);
+        const Elem * neighbor = elem->neighbor_ptr(side);
 
         if (neighbor != NULL && paired_ids.count(neighbor->subdomain_id()) > 0)
         {

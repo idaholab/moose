@@ -570,10 +570,10 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
     {
       // Since elem is const here but we require a non-const Node * to
       // store in the _semilocal_node_list (otherwise things like
-      // UpdateDisplacedMeshThread don't work), we are using the "old"
-      // Elem interface to get a non-constant Node pointer from a
-      // constant Elem.
-      Node * node = elem->get_node(n);
+      // UpdateDisplacedMeshThread don't work), we are using a
+      // const_cast. A more long-term fix would be to have
+      // getActiveLocalElementRange return a non-const ElemRange.
+      Node * node = const_cast<Node *>(elem->node_ptr(n));
 
       _semilocal_node_list.insert(node);
     }
@@ -643,7 +643,7 @@ MooseMesh::buildNodeList()
   _bnd_nodes.resize(n);
   for (int i = 0; i < n; i++)
   {
-    _bnd_nodes[i] = new BndNode(&getMesh().node(nodes[i]), ids[i]);
+    _bnd_nodes[i] = new BndNode(getMesh().node_ptr(nodes[i]), ids[i]);
     _node_set_nodes[ids[i]].push_back(nodes[i]);
     _bnd_node_ids[ids[i]].insert(nodes[i]);
   }
@@ -1138,7 +1138,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
     const Elem * elem = *it;
     for (unsigned int s = 0; s < elem->n_sides(); ++s)
     {
-      if (elem->neighbor(s))
+      if (elem->neighbor_ptr(s))
         continue;
 
       boundary_info.boundary_ids(elem, s, bc_ids);
@@ -1344,7 +1344,7 @@ MooseMesh::detectPairedSidesets()
     for (unsigned int s = 0; s < elem->n_sides(); s++)
     {
       // If side is on the boundary
-      if (elem->neighbor(s) == nullptr)
+      if (elem->neighbor_ptr(s) == nullptr)
       {
         std::unique_ptr<Elem> side = elem->build_side(s);
 

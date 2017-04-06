@@ -89,7 +89,7 @@ sideIntersectedByLine(const Elem * elem,
     {
       if (side_elem->contains_point(intersection_point))
       {
-        Elem * neighbor = elem->neighbor(i);
+        const Elem * neighbor = elem->neighbor_ptr(i);
 
         // If this side is on a boundary, let's do another search and see if we can find a better
         // candidate
@@ -124,7 +124,7 @@ sideNeighborIsOn(const Elem * elem, const Elem * neighbor)
 
   for (unsigned int i = 0; i < n_sides; i++)
   {
-    if (elem->neighbor(i) == neighbor)
+    if (elem->neighbor_ptr(i) == neighbor)
       return i;
   }
 
@@ -166,12 +166,12 @@ recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment,
   if (intersected_side != -1) // -1 means that we didn't find any side
   {
     // Get the neighbor on that side
-    Elem * neighbor = current_elem->neighbor(intersected_side);
+    const Elem * neighbor = current_elem->neighbor_ptr(intersected_side);
 
     if (neighbor)
     {
       // Add it to the list
-      intersected_elems.push_back(neighbor);
+      intersected_elems.push_back(const_cast<Elem *>(neighbor));
 
       // Add the line segment across the element to the segments list
       segments.push_back(LineSegment(incoming_point, intersection_point));

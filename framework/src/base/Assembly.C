@@ -789,7 +789,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   if (_current_side_elem)
     delete _current_side_elem;
-  _current_side_elem = elem->build_side(side).release();
+  _current_side_elem = elem->build_side_ptr(side).release();
 
   reinitFEFace(elem, side);
 

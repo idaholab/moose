@@ -453,7 +453,7 @@ DisplacedProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, TH
 void
 DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 {
-  const Elem * neighbor = elem->neighbor(side);
+  const Elem * neighbor = elem->neighbor_ptr(side);
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
 
   _assembly[tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);

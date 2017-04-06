@@ -69,7 +69,7 @@ SideSetsFromPoints::modify()
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      if (elem->neighbor(side))
+      if (elem->neighbor_ptr(side))
         continue;
 
       // See if this point is on this side
