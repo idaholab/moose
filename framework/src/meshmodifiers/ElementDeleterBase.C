@@ -77,7 +77,7 @@ ElementDeleterBase::modify()
    *       but because the order of deletion might impact what happens to any existing sidesets or
    * nodesets.
    */
-  for (const auto & elem : deleteable_elems)
+  for (auto & elem : deleteable_elems)
   {
     // On distributed meshes, we'll need neighbor links to be useable
     // shortly, so we can't just leave dangling pointers.
@@ -87,13 +87,13 @@ ElementDeleterBase::modify()
     unsigned int n_sides = elem->n_sides();
     for (unsigned int n = 0; n != n_sides; ++n)
     {
-      Elem * neighbor = elem->neighbor(n);
+      Elem * neighbor = elem->neighbor_ptr(n);
       if (!neighbor || neighbor == remote_elem)
         continue;
 
       const unsigned int return_side = neighbor->which_neighbor_am_i(elem);
 
-      if (neighbor->neighbor(return_side) == elem)
+      if (neighbor->neighbor_ptr(return_side) == elem)
         neighbor->set_neighbor(return_side, nullptr);
     }
 
@@ -128,7 +128,7 @@ ElementDeleterBase::modify()
 
       const unsigned int n_sides = elem->n_sides();
       for (unsigned int n = 0; n != n_sides; ++n)
-        if (elem->neighbor(n) == remote_elem)
+        if (elem->neighbor_ptr(n) == remote_elem)
           queries[pid].push_back(std::make_pair(elem->id(), n));
     }
 
@@ -166,7 +166,7 @@ ElementDeleterBase::modify()
       {
         const Elem * elem = mesh.elem_ptr(q.first);
         const unsigned int side = q.second;
-        const Elem * neighbor = elem->neighbor(side);
+        const Elem * neighbor = elem->neighbor_ptr(side);
 
         if (neighbor == nullptr) // neighboring element was deleted!
           responses[p - 1].push_back(std::make_pair(elem->id(), side));
@@ -190,7 +190,7 @@ ElementDeleterBase::modify()
         Elem * elem = mesh.elem_ptr(r.first);
         const unsigned int side = r.second;
 
-        mooseAssert(elem->neighbor(side) == remote_elem, "element neighbor != remote_elem");
+        mooseAssert(elem->neighbor_ptr(side) == remote_elem, "element neighbor != remote_elem");
 
         elem->set_neighbor(side, nullptr);
       }

@@ -189,7 +189,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             side);
     }
 
-    const Elem * neighbor = elem->neighbor(side);
+    const Elem * neighbor = elem->neighbor_ptr(side);
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
     const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 

@@ -173,7 +173,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
                ++it)
             onBoundary(elem, side, *it);
 
-        if (elem->neighbor(side) != NULL)
+        if (elem->neighbor_ptr(side) != nullptr)
         {
           onInternalSide(elem, side);
           if (boundary_ids.size() > 0)
