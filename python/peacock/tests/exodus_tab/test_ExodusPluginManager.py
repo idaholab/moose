@@ -39,12 +39,11 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         self._widget = main(size=[600,600])
         self._window = self._widget.VTKWindowPlugin
-        self._widget.initialize(self._filenames)
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Start with 'diffused' variable
         self._widget.VariablePlugin.VariableList.setCurrentIndex(2)
         self._widget.VariablePlugin.VariableList.currentIndexChanged.emit(2)
-
 
     def testInitial(self):
         """
@@ -73,8 +72,8 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         self._widget.CameraPlugin.ResetButton.clicked.emit()
 
         # Clip
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
 
         # Background
@@ -112,8 +111,8 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         camera.SetPosition(9.2960, -0.4218, 12.6685)
         camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
         self._window.onCameraChanged(camera)
-        self._widget.ContourPlugin.setChecked(True)
-        self._widget.ContourPlugin.clicked.emit(True)
+        self._widget.ContourPlugin.ContourToggle.setChecked(True)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
         imagename = '{}_{}'.format(self.__class__.__name__, 'contour.png')
         self.python(imagename)
 
@@ -127,8 +126,8 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         camera.SetPosition(9.2960, -0.4218, 12.6685)
         camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
         self._window.onCameraChanged(camera)
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
         imagename = '{}_{}'.format(self.__class__.__name__, 'clip.png')
         self.python(imagename)
@@ -158,8 +157,8 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         camera.SetPosition(9.2960, -0.4218, 12.6685)
         camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
         self._window.onCameraChanged(camera)
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
         self._widget.MeshPlugin.ScaleY.setValue(.25)
         self._widget.MeshPlugin.ScaleY.editingFinished.emit()

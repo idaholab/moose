@@ -1,10 +1,11 @@
 from PyQt5 import QtCore, QtWidgets
 import sys
 import chigger
+import peacock
 from ExodusPlugin import ExodusPlugin
 from BlockSelectorWidget import BlockSelectorWidget
 
-class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class BlockPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Widget for controlling the visible blocks/nodesets/sidesets of the result.
     """
@@ -16,22 +17,20 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     resultOptionsChanged = QtCore.pyqtSignal(dict)
     readerOptionsChanged = QtCore.pyqtSignal(dict)
 
-    def __init__(self, **kwargs):
-        super(BlockPlugin, self).__init__(**kwargs)
+    def __init__(self, collapsible_layout=QtWidgets.QHBoxLayout, **kwargs):
+        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=collapsible_layout)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Current variable (used for caching settings
         self._contour = False
-        self.setMainLayoutName('RightLayout')
-        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
 
         # Setup this widget
         self.setTitle('Block Selection')
         self.setEnabled(False)
 
         # MainLayout
-        self.MainLayout = QtWidgets.QHBoxLayout()
-        self.MainLayout.setContentsMargins(0, 10, 0, 0)
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
 
         # Block, nodeset, and sideset selector widgets
         self.BlockSelector = BlockSelectorWidget(chigger.exodus.ExodusReader.BLOCK, title='Blocks:')
@@ -41,10 +40,12 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.MainLayout.addWidget(self.BlockSelector)
         self.MainLayout.addWidget(self.SidesetSelector)
         self.MainLayout.addWidget(self.NodesetSelector)
+        self.MainLayout.addStretch(1)
 
         self.BlockSelector.clicked.connect(self._callbackSelector)
         self.SidesetSelector.clicked.connect(self._callbackSelector)
         self.NodesetSelector.clicked.connect(self._callbackSelector)
+        self._selectors = [self.BlockSelector, self.SidesetSelector, self.NodesetSelector]
 
         self.setup()
 
@@ -94,6 +95,12 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self.blockSignals(False)
             self.__updateVariableState()
 
+            # Make the lists a uniform height
+            h = max(x.ListWidget.maximumHeight() for x in self._selectors)
+            for x in self._selectors:
+                x.ListWidget.setMaximumHeight(h)
+
+
     def _callbackSelector(self):
         """
         Updates the visible block/nodesets/sidesets based on the selector widget settings.
@@ -130,7 +137,8 @@ def main(size=None):
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), BlockPlugin])
+    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size, layout='WindowLayout'),
+                                          lambda: BlockPlugin(layout='WindowLayout')])
     widget.show()
 
     return widget, widget.VTKWindowPlugin
@@ -140,6 +148,6 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget, window = main()
-    widget.initialize(filenames)
+    window.onFileChanged(filenames[0])
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

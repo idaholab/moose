@@ -46,10 +46,11 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         # Setup this QGroupBox
         self.setTitle(data.filename())
         self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.setFixedWidth(510)
 
         # The layout to which the toggles will be added
         self.MainLayout = QtWidgets.QVBoxLayout(self)
-        self.MainLayout.setContentsMargins(5, 5, 5, 5)
+        self.MainLayout.setContentsMargins(5, 0, 0, 0)
         self.MainLayout.setSpacing(0)
         self.setLayout(self.MainLayout)
 
@@ -304,7 +305,7 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
 
     # Create main widget
     widget = PostprocessorViewer(plugins=[FigurePlugin])
-    widget.initialize(['empty_file'])
+    widget.onSetFilenames(['empty_file'])
     layout = widget.currentWidget().LeftLayout
     window = widget.currentWidget().FigurePlugin
     window.setFixedSize(QtCore.QSize(625, 625))

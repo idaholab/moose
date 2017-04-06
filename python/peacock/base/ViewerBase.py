@@ -33,14 +33,14 @@ class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
         self.setup()
         self.addManager()
 
-    def initialize(self, *args, **kwargs):
-        """
-        Initialize the widget by creating a tab and supplying data to the PluginManager initialize method.
-        """
-        super(ViewerBase, self).initialize(*args, **kwargs)
-        for i in range(self.count()):
-            self.widget(i).initialize(*args, **kwargs)
-        self._data = args
+    #def initialize(self, *args, **kwargs):
+    #    """
+    #    Initialize the widget by creating a tab and supplying data to the PluginManager initialize method.
+    #    """
+    #    super(ViewerBase, self).initialize(*args, **kwargs)
+    #    for i in range(self.count()):
+    #        self.widget(i).initialize(*args, **kwargs)
+    #    self._data = args
 
     def onClose(self):
         """
@@ -59,9 +59,6 @@ class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
         self.addManager()
         self.setCurrentIndex(self.currentIndex() + 1)
         self.cornerWidget().CloseButton.setEnabled(True)
-
-        widget = self.currentWidget()
-        widget.initialize(*self._data)
 
     def addManager(self):
         """

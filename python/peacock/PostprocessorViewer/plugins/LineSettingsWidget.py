@@ -139,14 +139,18 @@ class LineSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         Setup method for the CheckBox.
         """
         qobject.clicked.connect(self._callbackCheckBox)
+        qobject.setFixedWidth(100)
+        qobject.setToolTip(qobject.text())
 
+        metrics = qobject.fontMetrics()
+        elidedText = metrics.elidedText(qobject.text(), QtCore.Qt.ElideRight, qobject.width()-20);
+        qobject.setText(elidedText);
 
     def _callbackCheckBox(self, value):
         """
         Callback for the checkbox, emits the clicked signal.
         """
         self.update()
-
 
     def _setupPlotAxis(self, qobject):
         """
@@ -294,7 +298,7 @@ def main(*args):
 
     # Load the viewer
     widget = PostprocessorViewer(plugins=[FigurePlugin])
-    widget.initialize(['empty_file'])
+    widget.onSetFilenames(['empty_file'])
     layout = widget.currentWidget().LeftLayout
     window =  widget.currentWidget().FigurePlugin
     window.setFixedSize(QtCore.QSize(375, 375))

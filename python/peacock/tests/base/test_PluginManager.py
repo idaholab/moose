@@ -11,8 +11,6 @@ class Plugin0(QtWidgets.QWidget, peacock.base.Plugin):
         super(Plugin0, self).__init__()
         self.setup()
         self._initialize = False
-    def initialize(self, *args, **kwargs):
-        self._initialized = True
 
 class Plugin1(QtWidgets.QWidget, peacock.base.Plugin):
     def __init__(self):
@@ -21,8 +19,6 @@ class Plugin1(QtWidgets.QWidget, peacock.base.Plugin):
         self._initialize = False
     def onSignal(self):
         self._signal_emitted = True
-    def initialize(self, *args, **kwargs):
-        self._initialized = True
 
 class Manager(QtWidgets.QWidget, peacock.base.PluginManager):
     def __init__(self):
@@ -45,7 +41,6 @@ class TestPluginManger(unittest.TestCase):
         Create plugins to connected via manager.
         """
         self._manager = Manager()
-        self._manager.initialize()
 
     def testConnect(self):
         """
@@ -53,13 +48,6 @@ class TestPluginManger(unittest.TestCase):
         """
         self._manager.Plugin0.signal.emit()
         self.assertTrue(self._manager.Plugin1._signal_emitted)
-
-    def testInitialized(self):
-        """
-        Test that signal and slots are connected.
-        """
-        self.assertTrue(self._manager.Plugin0._initialized)
-        self.assertTrue(self._manager.Plugin1._initialized)
 
 if __name__ == '__main__':
     import unittest

@@ -50,6 +50,17 @@ class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
         for plugin_class in self._plugin_classes:
             plugin_class.commandLineArgs(parser)
 
+    def initialize(self, options):
+        """
+        Initialize the TabPlugin objects with the command-line options.
+
+        Input:
+            options: Command-line arguments from argparse
+        """
+        for tab_plugin in self._all_plugins:
+            tab_plugin.initialize(options)
+
+
 if __name__ == '__main__':
     import sys
     from peacock.ExodusViewer.ExodusViewer import ExodusViewer

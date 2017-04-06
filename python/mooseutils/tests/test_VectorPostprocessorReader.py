@@ -22,7 +22,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         """
         Copy the saved file locally.
         """
-        for f in glob.glob(self._pattern):
+        for f in sorted(glob.glob(self._pattern)):
             if f.endswith('time.csv') and not copytime:
                 continue
             shutil.copyfile(f, os.path.basename(f))

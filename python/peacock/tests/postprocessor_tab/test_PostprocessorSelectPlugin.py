@@ -43,7 +43,7 @@ class TestPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
             shutil.copyfile('../input/white_elephant_jan_2016.csv', self._filename)
         shutil.copyfile('../input/postprocessor.csv', self._filename2)
 
-        for data in self._widget._data[0]:
+        for data in self._widget._data:
             data.load()
 
     def tearDown(self):

@@ -10,8 +10,9 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         super(ExodusPluginManager, self).__init__(plugins=plugins, plugin_base=ExodusPlugin)
 
         # The layouts for this widget
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.MainLayout = QtWidgets.QHBoxLayout()
+
         self.LeftLayout = QtWidgets.QVBoxLayout()
         self.RightLayout = QtWidgets.QVBoxLayout()
         self.WindowLayout = QtWidgets.QHBoxLayout()
@@ -25,13 +26,10 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         self.LeftLayout.addStretch(1)
 
         # Set the width of the left-side widgets to that the VTK window gets the space
-        width = 0
-        for child in self._plugins.itervalues():
-            if child.mainLayoutName() == 'LeftLayout':
-                width = max(child.sizeHint().width(), width)
-        for child in self._plugins.itervalues():
-            if child.mainLayoutName() == 'LeftLayout':
-                child.setFixedWidth(width)
+        self.fixLayoutWidth('LeftLayout')
+
+        if 'BlockPlugin' in self:
+            self['BlockPlugin'].setCollapsed(True)
 
     def repr(self):
         """
@@ -96,7 +94,8 @@ def main(size=None):
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    filenames = ['../../tests/chigger/input/mug_blocks_out.e', '../../tests/chigger/input/displace.e', '../../tests/chigger/input/vector_out.e']
+    from peacock.utils import Testing
+    filenames = Testing.get_chigger_input_list('mesh_only.e', 'mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget = main()
-    widget.initialize(filenames)
+    widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

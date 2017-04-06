@@ -23,6 +23,7 @@ class PostprocessorDataWidget(QtCore.QObject):
         self._reader = reader
 
         # Reload Timer
+        self._timer = None
         timer = kwargs.pop('timer', None)
         if timer != None:
             self._timer = QtCore.QTimer()
@@ -36,9 +37,9 @@ class PostprocessorDataWidget(QtCore.QObject):
         return bool(self._reader)
 
     def setTimerActive(self, active):
-        if active:
+        if active and self._timer:
             self._timer.start()
-        else:
+        elif self._timer:
             self._timer.stop()
 
     def times(self):

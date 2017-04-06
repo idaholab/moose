@@ -64,6 +64,12 @@ class RenderWindow(base.ChiggerObject):
         # Store the supplied result objects
         self.append(*args)
 
+    def __contains__(self, item):
+        """
+        'in' checks for result
+        """
+        return item in self._results
+
     def getVTKInteractor(self):
         """
         Return the vtkInteractor object.

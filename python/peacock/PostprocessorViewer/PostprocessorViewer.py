@@ -1,4 +1,4 @@
-import sys, os
+import sys
 from PyQt5 import QtWidgets
 
 import peacock
@@ -57,33 +57,35 @@ class PostprocessorViewer(peacock.base.ViewerBase):
         """
         self._run_start_time = t
 
-    def initialize(self, filenames=[], **kwargs):
+    def initialize(self, options):
         """
         Initialize the widget by supplying filenames to load.
 
         Args:
             filenames[list]: A list of filenames to load.
         """
+        filenames = peacock.utils.getOptionFilenames(options, 'postprocessors', '.csv')
+        self.onSetFilenames(filenames)
 
-        options = kwargs.pop('cmd_line_options', None)
-        if options:
-            filenames += options.postprocessors
-            for arg in options.arguments:
-                if arg.endswith(".csv"):
-                    filenames.append(os.path.abspath(arg))
-            options.postprocessors = filenames # so that we can switch to this tab automatically
+    def onClone(self):
+        """
+        Clones the current Postprocessor view.
+        """
+        super(PostprocessorViewer, self).onClone()
+        self.currentWidget().call('onSetData', self._data)
 
-        if len(filenames) == 0:
-            return
-
+    def onSetFilenames(self, filenames):
+        """
+        Call the child onSetFilenames.
+        """
         self.setEnabled(True)
-        self._data = [[]] # use list of lists so the ViewerBase.initialize method works with *self._data is passed in to the widget onClone method.
+        self._data = []
         for fname in filenames:
             reader = self._reader_type(fname, run_start_time=self._run_start_time)
-            self._data[0].append(PostprocessorDataWidget(reader, timer=1000))
+            self._data.append(PostprocessorDataWidget(reader, timer=1000))
 
         for i in range(self.count()):
-            self.widget(i).initialize(self._data[0])
+            self.widget(i).call('onSetData', self._data)
 
 def main():
     """
@@ -98,5 +100,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = ['../../tests/input/white_elephant_jan_2016.csv']
     widget = main()
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     sys.exit(app.exec_())

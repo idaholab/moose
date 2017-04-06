@@ -4,4 +4,9 @@
      command = test_PluginManager.py
      display_required = True
   [../]
+  [./collapsible]
+    type = RunApp
+    command = test_PeacockCollapsibleWidget.py
+    display_required = True
+  [../]
 []

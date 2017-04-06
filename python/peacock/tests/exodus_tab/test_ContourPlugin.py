@@ -23,7 +23,7 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
         self._widget.VariablePlugin.VariableList.setCurrentIndex(2)
         self._widget.VariablePlugin.VariableList.currentIndexChanged.emit(2)
         self._window.onWindowRequiresUpdate()
@@ -45,8 +45,8 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         self.assertFalse(self._widget.ContourPlugin.ContourLevels.isEnabled())
 
         # Enable contours
-        self._widget.ContourPlugin.setChecked(True)
-        self._widget.ContourPlugin.clicked.emit(True)
+        self._widget.ContourPlugin.ContourToggle.setChecked(True)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
 
         # Test visibility
         self.assertTrue(self._widget.ContourPlugin.ContourCount.isEnabled())
@@ -60,8 +60,8 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         Test that contour count is working.
         """
         # Enable contours
-        self._widget.ContourPlugin.setChecked(True)
-        self._widget.ContourPlugin.clicked.emit(True)
+        self._widget.ContourPlugin.ContourToggle.setChecked(True)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
 
         # Set count
         self._widget.ContourPlugin.ContourCount.setValue(6)
@@ -72,8 +72,8 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         Test that the contour levels is working.
         """
         # Enable contours
-        self._widget.ContourPlugin.setChecked(True)
-        self._widget.ContourPlugin.clicked.emit(True)
+        self._widget.ContourPlugin.ContourToggle.setChecked(True)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
 
         # Set levels
         self._widget.ContourPlugin.ContourLevels.setText('0.0001 0.5 1 2')
@@ -92,25 +92,25 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
 
         # Store an initial state of the GUI
         self._widget.ContourPlugin.onVariableChanged('state0')
-        self._widget.ContourPlugin.setChecked(False)
-        self._widget.ContourPlugin.clicked.emit(False)
+        self._widget.ContourPlugin.ContourToggle.setChecked(False)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(False)
 
         # Switch variables
         self._widget.ContourPlugin.onVariableChanged('state1')
 
         # Enable contours
-        self._widget.ContourPlugin.setChecked(True)
-        self._widget.ContourPlugin.clicked.emit(True)
+        self._widget.ContourPlugin.ContourToggle.setChecked(True)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
         self._widget.ContourPlugin.ContourCount.setValue(6)
 
         # Switch back to state0
         self._widget.ContourPlugin.onVariableChanged('state0')
-        self.assertFalse(self._widget.ContourPlugin.isChecked())
+        self.assertFalse(self._widget.ContourPlugin.ContourToggle.isChecked())
         self.assertEqual(self._widget.ContourPlugin.ContourCount.value(), 10)
 
         # Switch back to state1
         self._widget.ContourPlugin.onVariableChanged('state1')
-        self.assertTrue(self._widget.ContourPlugin.isChecked())
+        self.assertTrue(self._widget.ContourPlugin.ContourToggle.isChecked())
         self.assertEqual(self._widget.ContourPlugin.ContourCount.value(), 6)
 
     @unittest.skip('in progress')
@@ -118,8 +118,8 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         """
         Test that elemental variable disables the contour.
         """
-        self._widget.ContourPlugin.setChecked(True)
-        self._widget.ContourPlugin.clicked.emit(True)
+        self._widget.ContourPlugin.ContourToggle.setChecked(True)
+        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
 
         self._widget.VariablePlugin.VariableList.setCurrentIndex(0)
         self._widget.VariablePlugin.VariableList.currentIndexChanged.emit(0)

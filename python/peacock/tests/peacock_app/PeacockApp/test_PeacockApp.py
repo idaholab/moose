@@ -22,7 +22,6 @@ class Tests(Testing.PeacockTester):
         self.app.main_widget.setTab(self.input.tabName())
         tab = tabs.currentWidget()
         self.assertEqual(tab.MeshPlugin.isEnabled(), False)
-        self.assertEqual(tab.vtkwin.isVisible(), False)
 
     def testPeacockAppWithExe(self):
         self.create_app([Testing.find_moose_test_exe()])
@@ -35,7 +34,6 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.input.tabName())
         tab = tabs.currentWidget()
         self.assertEqual(tab.MeshPlugin.isEnabled(), True)
-        self.assertEqual(tab.vtkwin.isVisible(), True)
 
     def check_result(self):
         fname = "peacock_results.png"
@@ -123,7 +121,6 @@ class Tests(Testing.PeacockTester):
             tabs = self.app.main_widget.tab_plugin
             self.check_current_tab(tabs, self.input.tabName())
             tab = tabs.currentWidget()
-            self.assertEqual(tab.vtkwin.isVisible(), True)
             self.assertEqual(tab.MeshPlugin.isEnabled(), True)
 
     def testWrongExe(self):
@@ -134,7 +131,6 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.input.tabName())
         tab = tabs.currentWidget()
         self.assertEqual(tab.MeshPlugin.isEnabled(), False)
-        self.assertEqual(tab.vtkwin.isVisible(), False)
 
     def testBadInput(self):
         self.create_app(["-i", "../../common/out_transient.e", Testing.find_moose_test_exe()])
@@ -146,6 +142,7 @@ class Tests(Testing.PeacockTester):
         self.create_app(args)
 
     def testAutoRun(self):
+        Testing.remove_file("out_transient.e")
         self.create_app(["--run", "../../common/transient.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.result.tabName())

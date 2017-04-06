@@ -19,7 +19,6 @@ class MeshViewerPlugin(VTKWindowPlugin):
         self.temp_input_file = "peacock_run_mesh_tmp.i"
         self.temp_mesh_file = "peacock_run_mesh_tmp.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
-        self.hide()
 
     def _removeFileNoError(self, fname):
         """
@@ -39,7 +38,6 @@ class MeshViewerPlugin(VTKWindowPlugin):
         We need to update the view of the mesh by generating a new mesh file.
         """
         self.meshEnabled.emit(False)
-        self.hide()
         if not tree.app_info.valid():
             return
         # if we aren't writing out the mesh node then don't show it
@@ -56,14 +54,11 @@ class MeshViewerPlugin(VTKWindowPlugin):
         try:
             args = ["-i", input_file, "--mesh-only", self.current_temp_mesh_file]
             ExeLauncher.runExe(exe_path, args, print_errors=False)
-            self.show()
             self.meshEnabled.emit(True)
             self.onFileChanged(self.current_temp_mesh_file)
         except Exception:
-            self.hide()
             self.meshEnabled.emit(False)
             self._removeFileNoError(self.current_temp_mesh_file)
-
 
         self._removeFileNoError(input_file) # we need the mesh file since it is in use but not the input file
 
@@ -74,4 +69,3 @@ class MeshViewerPlugin(VTKWindowPlugin):
     def closing(self):
         self._removeFileNoError(self.temp_input_file)
         self._removeFileNoError(self.current_temp_mesh_file)
-

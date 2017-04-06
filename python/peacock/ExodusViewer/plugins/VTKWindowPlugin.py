@@ -53,11 +53,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     #: pyqtSignal: Emitted when the camera for this window has changed
     cameraChanged = QtCore.pyqtSignal(vtk.vtkCamera)
 
-    def __init__(self, size=None):
-        super(VTKWindowPlugin, self).__init__()
+    def __init__(self, size=None, **kwargs):
+        super(VTKWindowPlugin, self).__init__(**kwargs)
 
         # Setup widget
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setMainLayoutName('WindowLayout')
 
         # Create the QVTK interactor
@@ -65,13 +65,12 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self.__qvtkinteractor = RetinaQVTKRenderWindowInteractor(self)
         else:
             self.__qvtkinteractor = QVTKRenderWindowInteractor(self)
-        self.__qvtkinteractor.hide()
 
         # Member variables
         self._highlight = None
         self._reader = None
         self._result = None
-        self._filename = None
+        self._filename = str()
         self._initialized = False
         self._run_start_time = None
         self._window = chigger.RenderWindow(vtkwindow=self.__qvtkinteractor.GetRenderWindow(), vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(), size=size)
@@ -97,6 +96,10 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._layout.addWidget(self.__qvtkinteractor)
         self.setLayout(self._layout)
 
+        # Display items for when no file exists
+        self._peacock_logo = chigger.annotations.ImageAnnotation(filename='peacock.png', opacity=0.33)
+        self._peacock_text = chigger.annotations.TextAnnotation(text='No file selected.', justification='center', font_size=18)
+
         self.setup()
 
     def reset(self):
@@ -108,28 +111,15 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._initialized = False
         self._reset_required = False
         self._adjustTimers(start=['initialize'], stop=['update'])
-        self.__qvtkinteractor.hide()
         self.windowReset.emit()
 
     def onReloadWindow(self):
         """
         Reloads the current file.
         """
-        if self._filename:
-            self.onFileChanged(self._filename)
+        self.onFileChanged(self._filename)
 
-    def initialize(self, *args, **kwargs):
-        """
-        Assumes that first file in the supplied list should be loaded, if a FilePlugin is not present.
-
-        Input:
-            filenames[list]: (optional) List of filenames to initialize the VTK window with, the first will be displayed
-                             and only if a FilePlugin is not present.
-        """
-        if len(args) == 1 and isinstance(args[0], list) and not hasattr(self.parent(), 'FilePlugin'):
-            self.onFileChanged(args[0][0])
-
-    def onFileChanged(self, filename):
+    def onFileChanged(self, filename=str()):
         """
         Initialize the VTK window to read and display a file.
 
@@ -145,46 +135,58 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Do nothing if the widget is not visible or the file doesn't exist
         self._filename = filename
         file_exists = os.path.exists(self._filename)
-        if not self.isVisible() or not file_exists:
+        if not self.isVisible():
             return
 
         # Determine if the file and GUI are in a valid state for rendering result
         if file_exists and self._run_start_time:
             if os.path.getmtime(self._filename) < self._run_start_time:
                 self.reset()
-                return
 
-        self.__qvtkinteractor.show()
-        # Call the base class initialization (this enables the plugin)
-        super(VTKWindowPlugin, self).initialize()
+        # Display Exodus result
+        if file_exists:
+            # Clear any-existing VTK objects on the window
+            self._window.clear()
 
-        # Clear any-existing VTK objects on the window
-        self._window.clear()
+            # Create the reader and result chigger objects
+            self._reader = chigger.exodus.ExodusReader(filename)
+            self._result = chigger.exodus.ExodusResult(self._reader)
 
-        # Create the reader and result chigger objects
-        self._reader = chigger.exodus.ExodusReader(filename)
-        self._result = chigger.exodus.ExodusResult(self._reader)
+            # Set the interaction mode (2D/3D)
+            self._result.update()
+            bmin, bmax = self._result.getBounds(check=sys.platform=='darwin')
+            if abs(bmax[-1] - bmin[-1]) < 1e-10:
+                self._window.setOption('style', 'interactive2D')
+            else:
+                self._window.setOption('style', 'interactive')
 
-        # Set the interaction mode (2D/3D)
-        self._result.update()
-        bmin, bmax = self._result.getBounds(check=sys.platform=='darwin')
-        if abs(bmax[-1] - bmin[-1]) < 1e-10:
-            self._window.setOption('style', 'interactive2D')
-        else:
-            self._window.setOption('style', 'interactive')
+            # Add results
+            self._window.append(self._result)
 
-        # Add results
-        self._window.append(self._result)
+            # Connect the camera to the modified event
+            self._result.getVTKRenderer().GetActiveCamera().AddObserver(vtk.vtkCommand.ModifiedEvent, self._cameraModifiedCallback)
 
-        # Connect the camera to the modified event
-        self._result.getVTKRenderer().GetActiveCamera().AddObserver(vtk.vtkCommand.ModifiedEvent, self._cameraModifiedCallback)
+            # Update the RenderWindow
+            self._initialized = True
+            self._window.resetCamera() # this needs to be here to get the objects to show up correctly, I have no idea why.
+            self._window.update()
+            self._adjustTimers(start=['update'], stop=['initialize'])
+            self.windowCreated.emit(self._reader, self._result, self._window)
+            self.setEnabled(True)
 
-        # Update the RenderWindow
-        self._initialized = True
-        self._window.resetCamera() # this needs to be here to get the objects to show up correctly, I have no idea why.
-        self._window.update()
-        self._adjustTimers(start=['update'], stop=['initialize'])
-        self.windowCreated.emit(self._reader, self._result, self._window)
+        # Display loading message
+        elif self._peacock_logo not in self._window:
+            if self._filename:
+                msg = '{} does not currently exist.\nIt will load automatically when it is created.'
+                self._peacock_text.update(text=msg.format(self._filename))
+
+            self._window.reset()
+            self._result = None
+            self._reader = None
+            self._window.append(self._peacock_logo)
+            self._window.append(self._peacock_text)
+            self._window.update()
+            self.setEnabled(False)
 
     def onInputFileChanged(self, *args):
         """
@@ -279,18 +281,18 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Updates the VTK render window.
         """
-
         if not self._initialized:
             return
 
-        # Try to preform an update, if the file disappears startup the initialization timer again and remove results
-        try:
-            if self._window.needsUpdate():
-                self._window.update()
-                self.windowUpdated.emit()
-        except Exception:
-            mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
-            self.reset()
+        if self._window.needsUpdate():
+            self._window.update()
+            self.windowUpdated.emit()
+
+            if self._reader:
+                err = self._reader.getErrorObserver()
+                if err:
+                    self.onReloadWindow()
+                    mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
 
     def onCameraChanged(self, camera):
         """
@@ -417,7 +419,8 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main(size=[600,600])
-    window.initialize([filename])
-    window._result.update(variable='diffused')
+    #window.initialize([filename])
+    window.onFileChanged()
+#    window._result.update(variable='diffused')
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

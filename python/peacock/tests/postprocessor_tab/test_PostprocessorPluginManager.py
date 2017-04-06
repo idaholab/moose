@@ -39,7 +39,7 @@ class TestPostprocessorPluginManager(Testing.PeacockImageTestCase):
         data = [PostprocessorDataWidget(mooseutils.PostprocessorReader('../input/white_elephant_jan_2016.csv'))]
         self._widget, self._window = main()
         self._widget.FigurePlugin.setFixedSize(QtCore.QSize(500, 500))
-        self._widget.initialize(data)
+        self._widget.call('onSetData', data)
 
     def plot(self):
         """

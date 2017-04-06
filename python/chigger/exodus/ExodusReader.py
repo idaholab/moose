@@ -21,6 +21,34 @@ import mooseutils
 from .. import utils
 from .. import base
 
+class ExodusReaderErrorObserver(object):
+    """
+    Observes the errors that occur in ExodusReader.
+
+    see peacock.ExodusViewer.plugins.VTKWindowPlugin
+    """
+    def __init__(self):
+        self._errors = []
+
+    def __call__(self, *args):
+        """
+        This method is called by VTK and includes the error information.
+        """
+        self._errors.append(args)
+
+    def __nonzero__(self):
+        """
+        Return True if an error occured.
+        """
+        return len(self._errors) > 0
+
+    def errors(self):
+        """
+        Return the list of errors.
+        """
+        return self._errors
+
+
 class ExodusReader(base.ChiggerObject):
     """
     A reader for an ExodusII file.
@@ -107,6 +135,10 @@ class ExodusReader(base.ChiggerObject):
         self.__blockinfo = dict() # BlockInformation objects
         self.__variableinfo = collections.OrderedDict() # VariableInformation objects
 
+        # Error handling
+        self._error_observer = ExodusReaderErrorObserver()
+        self.__vtkreader.AddObserver('ErrorEvent', self._error_observer)
+
     def update(self, **kwargs):
         """
         After changing settings and prior to using data accessing methods, this method should be
@@ -180,6 +212,9 @@ class ExodusReader(base.ChiggerObject):
         if self.__active != active:
             self.setNeedsUpdate(True)
         return super(ExodusReader, self).needsUpdate()
+
+    def getErrorObserver(self):
+        return self._error_observer
 
     def filename(self):
         """

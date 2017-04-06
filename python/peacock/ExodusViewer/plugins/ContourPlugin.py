@@ -3,9 +3,10 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 import mooseutils
 import chigger
+import peacock
 from ExodusPlugin import ExodusPlugin
 
-class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Widget for enabling and controlling contours.
     """
@@ -20,53 +21,61 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     resultOptionsChanged = QtCore.pyqtSignal(dict)
 
     def __init__(self):
-        super(ContourPlugin, self).__init__()
+        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QVBoxLayout)
+        ExodusPlugin.__init__(self)
 
         self.setTitle('Contours')
-        self.setCheckable(True)
-        self.setChecked(False)
         self.setProperty('cache', ['Variable'])
-        self.clicked.connect(self.contour)
 
-        self.MainLayout = QtWidgets.QVBoxLayout()
-        self.MainLayout.setContentsMargins(0, 10, 0, 10)
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
 
         self.CountLayout = QtWidgets.QHBoxLayout()
         self.LevelLayout = QtWidgets.QHBoxLayout()
 
-        self.MainLayout.addLayout(self.CountLayout)
-        self.MainLayout.addLayout(self.LevelLayout)
-
+        self.ContourToggle = QtWidgets.QCheckBox('Enable Contours')
         self.ContourCountLabel = QtWidgets.QLabel("Count:")
         self.ContourCount = QtWidgets.QSpinBox()
         self.ContourLevelsLabel = QtWidgets.QLabel("Levels:")
         self.ContourLevels = QtWidgets.QLineEdit()
 
+        self.MainLayout.addWidget(self.ContourToggle)
         self.CountLayout.addWidget(self.ContourCountLabel)
         self.CountLayout.addWidget(self.ContourCount)
-        self.CountLayout.addStretch(9999)
+        self.CountLayout.addStretch()
 
         self.LevelLayout.addWidget(self.ContourLevelsLabel)
         self.LevelLayout.addWidget(self.ContourLevels)
 
+        self.MainLayout.addLayout(self.CountLayout)
+        self.MainLayout.addLayout(self.LevelLayout)
+
         self._contour = chigger.filters.ContourFilter()
         self.setup()
+        self.setCollapsed(True)
 
-    def initialize(self, *args):
+    def onSetFilenames(self, *args):
         """
         The contour option should be disabled initially, because it depends on variable type.
         """
-        super(ContourPlugin, self).initialize(*args)
-        self.setEnabled(False)
+        self.setActive()
+
+    def setActive(self):
+        status = False
+        if self._result:
+            varinfo = self._result[0].getCurrentVariableInformation()
+            if (self._variable) and (varinfo.object_type == chigger.exodus.ExodusReader.NODAL):
+                status = True
+
+        self.ContourToggle.setEnabled(status)
+        self.setEnabled(status)
+        return status
 
     def onFileChanged(self, *args):
         """
         If the file changes, update the contours.
         """
         super(ContourPlugin, self).onFileChanged(*args)
-        if self.isEnabled():
-            self.contour()
+        self.contour()
 
     def onVariableChanged(self, *args):
         """
@@ -81,17 +90,13 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Called when contours are toggled or the count or levels are changed.
         """
-
         # Disable for non-nodal variables
-        varinfo = self._result[0].getCurrentVariableInformation()
-        if (not self._variable) or (varinfo.object_type != chigger.exodus.ExodusReader.NODAL):
-            self.setChecked(False)
-            self.setEnabled(False)
-        else:
-            self.setEnabled(True)
+        active = self.setActive()
+        if not active:
+            return
 
         # Set the visibility of the contours
-        checked = self.isChecked()
+        checked = self.ContourToggle.isChecked()
         self.ContourLevels.setEnabled(checked)
         self.ContourCount.setEnabled(checked)
         filters = self._result.getOption('filters')
@@ -133,7 +138,7 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Return python scripting content.
         """
         output = dict()
-        if self.isChecked():
+        if self.ContourToggle.isChecked():
             options, sub_options = self._contour.options().toScriptString()
             output['filters'] = ['contour = chigger.filters.ContourFilter()']
             output['filters'] += ['contour.setOptions({})'.format(', '.join(options))]
@@ -141,6 +146,12 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
                 output['filters'] += ['contour.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         return output
+
+    def _setupContourToggle(self, qobject):
+        """
+        Setup method for the contour toggle.
+        """
+        qobject.clicked.connect(self.contour)
 
     def _setupContourCount(self, qobject):
         """

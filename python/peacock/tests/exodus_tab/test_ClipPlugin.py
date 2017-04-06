@@ -22,7 +22,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
         self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
 
@@ -36,8 +36,8 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         self.assertFalse(self._widget.ClipPlugin.ClipSlider.isEnabled())
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # Test visibility
         self.assertTrue(self._widget.ClipPlugin.ClipDirection.isEnabled())
@@ -52,8 +52,8 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         """
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # y-axis
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
@@ -74,8 +74,8 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         """
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # Update the slider
         self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
@@ -88,8 +88,8 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         """
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # Test the initial slider position
         self.assertEqual(20, self._widget.ClipPlugin.ClipSlider.sliderPosition())
@@ -117,28 +117,28 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
 
         # Store an initial state of the GUI
         self._widget.ClipPlugin.onVariableChanged('state0')
-        self._widget.ClipPlugin.setChecked(False)
-        self._widget.ClipPlugin.clicked.emit(False)
+        self._widget.ClipPlugin.ClipToggle.setChecked(False)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(False)
 
         # Switch variables
         self._widget.ClipPlugin.onVariableChanged('state1')
 
         # Enable contours
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
+        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
         self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
         self._widget.ClipPlugin.ClipSlider.sliderReleased.emit()
 
         # Switch back to state0
         self._widget.ClipPlugin.onVariableChanged('state0')
-        self.assertFalse(self._widget.ClipPlugin.isChecked())
+        self.assertFalse(self._widget.ClipPlugin.ClipToggle.isChecked())
         self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 20)
         self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentIndex(), 0)
 
         # Switch back to state1
         self._widget.ClipPlugin.onVariableChanged('state1')
-        self.assertTrue(self._widget.ClipPlugin.isChecked())
+        self.assertTrue(self._widget.ClipPlugin.ClipToggle.isChecked())
         self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 15)
         self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentIndex(), 1)
 

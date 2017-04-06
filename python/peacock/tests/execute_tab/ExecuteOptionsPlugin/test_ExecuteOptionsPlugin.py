@@ -35,7 +35,6 @@ class Tests(Testing.PeacockTester):
         menu = menubar.addMenu("Execute")
         w.show()
         w.addToMenu(menu)
-        w.initialize()
         return main_win, w
 
     @patch.object(QFileDialog, "getOpenFileName")

@@ -13,7 +13,6 @@ from plugins.OutputPlugin import OutputPlugin
 from plugins.CameraPlugin import CameraPlugin
 from plugins.MediaControlPlugin import MediaControlPlugin
 from plugins.BlockPlugin import BlockPlugin
-import os
 
 class ExodusViewer(peacock.base.ViewerBase):
     """
@@ -26,32 +25,37 @@ class ExodusViewer(peacock.base.ViewerBase):
 
     def __init__(self, plugins=[VTKWindowPlugin, FilePlugin, GoldDiffPlugin, VariablePlugin, \
                                 MeshPlugin, BackgroundPlugin, ClipPlugin, ContourPlugin, CameraPlugin, \
-                                OutputPlugin, MediaControlPlugin, BlockPlugin]):
+                                OutputPlugin, MediaControlPlugin,
+                                lambda: BlockPlugin(layout='RightLayout')]):
         super(ExodusViewer, self).__init__(manager=ExodusPluginManager, plugins=plugins)
 
-    def initialize(self, filenames=[], **kwargs):
+    def initialize(self, options):
         """
         Initialize the ExodusViewer with the supplied filenames.
 
         Args:
-            filenames[list]: List of filenames to load.
-
-        Kwargs:
-            cmd_line_options: (Optional) Complete parsed command line parameters from argparse.
+            options: Complete parsed command line parameters from argparse.
         """
+        filenames = peacock.utils.getOptionFilenames(options, 'exodus', '.e')
+        self.onSetFilenames(filenames)
 
-        options = kwargs.pop('cmd_line_options', None)
-        if options:
-            filenames += options.exodus
-            for arg in options.arguments:
-                if arg.endswith(".e"):
-                    filenames.append(os.path.abspath(arg))
-            options.exodus = filenames # so that we can switch to this tab automatically
+    def onClone(self):
+        """
+        Clones the current Exodus view.
+        """
+        filenames = []
+        if 'FilePlugin' in self.currentWidget():
+            filenames = self.currentWidget()['FilePlugin'].getFilenames()
 
-        if len(filenames) == 0:
-            return
+        super(ExodusViewer, self).onClone()
+        self.currentWidget().call('onSetFilenames', filenames)
 
-        super(ExodusViewer, self).initialize(filenames)
+    def onSetFilenames(self, *args):
+        """
+        Call the child onSetFilenames.
+        """
+        for i in range(self.count()):
+            self.widget(i).call('onSetFilenames', *args)
 
     def onInputFileChanged(self, *args):
         """
@@ -82,8 +86,9 @@ def main(size=None):
 if __name__ == '__main__':
     import sys
     from PyQt5 import QtWidgets
-    filenames = ['../../tests/chigger/input/mesh_only.e', '../../tests/chigger/input/mug_blocks_out.e', '../../tests/chigger/input/vector_out.e', '../../tests/chigger/input/displace.e']
+    from peacock.utils import Testing
+    filenames = Testing.get_chigger_input_list('mesh_only.e', 'mug_blocks_out.e', 'vector_out.e', 'displace.e')
     app = QtWidgets.QApplication(sys.argv)
     widget = main()
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     sys.exit(app.exec_())

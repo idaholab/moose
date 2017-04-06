@@ -9,3 +9,12 @@ class TabPlugin(Plugin):
 
     def tabName(self):
         return self._name
+
+    def initialize(self, options):
+        """
+        Initialize the TabPlugin with command-line arguments.
+
+        Inputs:
+            options[Namespace]: Command-line arguments returned from argparse
+        """
+        pass

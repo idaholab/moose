@@ -1,5 +1,6 @@
 import peacock
 import mooseutils
+from PyQt5 import QtWidgets
 
 class PostprocessorPlugin(peacock.base.Plugin):
     """
@@ -15,6 +16,8 @@ class PostprocessorPlugin(peacock.base.Plugin):
         self._axes2 = None
 
         # The default layout name
+        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Maximum)
+        self.setFixedWidth(520)
         self.setMainLayoutName('LeftLayout')
 
     def onFigureCreated(self, figure, axes, axes2):
