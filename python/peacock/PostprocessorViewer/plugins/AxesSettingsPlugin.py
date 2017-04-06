@@ -29,6 +29,7 @@ class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
         self.MainLayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.MainLayout)
 
+
         # Title
         self.TitleLayout = QtWidgets.QHBoxLayout()
         self.TitleLabel = QtWidgets.QLabel('Title:')
@@ -55,11 +56,10 @@ class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
 
         self.setup()
 
-    def initialize(self, data):
+    def onSetData(self, data):
         """
         Initialize the widget.
         """
-        super(AxesSettingsPlugin, self).initialize(data)
         self.onAxesModified()
 
     @QtCore.pyqtSlot()
@@ -160,7 +160,7 @@ def main(filenames):
     import mooseutils
 
     widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxesSettingsPlugin, PostprocessorSelectPlugin])
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     control = widget.currentWidget().AxesSettingsPlugin
     window = widget.currentWidget().FigurePlugin
     window.setFixedSize(QtCore.QSize(625, 625))

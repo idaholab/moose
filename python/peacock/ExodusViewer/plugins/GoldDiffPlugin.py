@@ -6,6 +6,7 @@ from ExodusPlugin import ExodusPlugin
 from VTKWindowPlugin import VTKWindowPlugin
 import mooseutils
 import chigger
+import peacock
 
 class ExternalVTKWindowPlugin(VTKWindowPlugin):
     """
@@ -56,10 +57,9 @@ class ExternalVTKWindowPlugin(VTKWindowPlugin):
         self._widget_size = self.size()
         self._toggle.setCheckState(QtCore.Qt.Unchecked)
         self._toggle.clicked.emit(False)
-        #super(ExternalVTKWindowPlugin, self).closeEvent(*args)
 
 
-class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class GoldDiffPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Plugin for toggling the Gold/Diff VTK windows.
     """
@@ -68,9 +68,8 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     def __init__(self, size=None):
         super(GoldDiffPlugin, self).__init__()
 
-        self.setTitle('Compare Files:')
-        self.MainLayout = QtWidgets.QHBoxLayout()
-        self.setLayout(self.MainLayout)
+        self.setTitle('Compare Files')
+        self.MainLayout = self.collapsibleLayout()
 
         self.GoldToggle = QtWidgets.QCheckBox("Gold")
         self.DiffToggle = QtWidgets.QCheckBox("Exodiff")
@@ -84,6 +83,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.DiffVTKWindow = ExternalVTKWindowPlugin(self.DiffToggle, size=size, text='EXODIFF')
 
         self.setup()
+        self.setCollapsed(True)
 
         # Locate MOOSE exodiff program
         self._exodiff = None
@@ -92,15 +92,13 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if os.path.isfile(exodiff):
             self._exodiff = exodiff
 
-    def initialize(self, *args):
+    def onSetFilenames(self, *args):
         """
         Initialize this widget.
 
         All plugins are created at this point, so the link camera button can be connect if the VTKWindowPlugin
         is available on the parent.
         """
-        super(GoldDiffPlugin, self).initialize()
-
         # Enable/disable the link camera toggle based on the existence of the main window.
         if hasattr(self.parent(), 'VTKWindowPlugin'):
             self.LinkToggle.clicked.connect(self._callbackLinkToggle)
@@ -269,7 +267,8 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget, window = main()
-    widget.initialize(filenames)
+    widget.FilePlugin.onSetFilenames(filenames)
+    widget.GoldDiffPlugin.onSetFilenames(filenames)
     window.onResultOptionsChanged({'variable':'diffused'})
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

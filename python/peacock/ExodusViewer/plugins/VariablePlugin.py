@@ -1,13 +1,14 @@
 import os
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-import chigger
 import mooseutils
 import glob
+import chigger
+import peacock
 from peacock.utils import WidgetUtils
 from ExodusPlugin import ExodusPlugin
 
-class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Class for controlling variable, range, and colormaps.
     """
@@ -27,18 +28,17 @@ class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
     removeResult = QtCore.pyqtSignal(chigger.exodus.ExodusColorBar)
 
     def __init__(self, **kwargs):
-        super(VariablePlugin, self).__init__(**kwargs)
+        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QVBoxLayout)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Cache for auto limits
         self._auto = [True, True]
         self._colorbar = None
 
         # QGroupBox settings
-        self.setTitle('Variable:')
+        self.setTitle('Variable')
 
-        self.MainLayout = QtWidgets.QVBoxLayout()
-        self.MainLayout.setContentsMargins(0, 10, 0, 10)
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
 
         # Variable selection
         self.VariableListLayout = QtWidgets.QHBoxLayout()
@@ -337,6 +337,8 @@ class VariablePlugin(QtWidgets.QGroupBox, ExodusPlugin):
                 self.VariableList.setCurrentIndex(idx)
             else:
                 self.VariableList.setCurrentIndex(0)
+
+        self.setEnabled(self.VariableList.count())
 
 def main(size=None):
     """

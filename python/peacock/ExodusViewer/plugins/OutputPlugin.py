@@ -62,5 +62,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
-    window.initialize([filename])
+    window.onSetFilenames([filename])
     sys.exit(app.exec_())

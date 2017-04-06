@@ -2,9 +2,10 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from ExodusPlugin import ExodusPlugin
+import peacock
 from peacock.utils import WidgetUtils
 
-class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Controls for the mesh appearance.
     """
@@ -18,7 +19,8 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     transformOptionsChanged = QtCore.pyqtSignal(dict)
 
     def __init__(self, **kwargs):
-        super(MeshPlugin, self).__init__(**kwargs)
+        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QVBoxLayout)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Current variable (used for caching settings)
         self._variable = None
@@ -26,11 +28,10 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # QGroupBox settings
         self.setTitle('Mesh')
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         # Main Layout
-        self.MainLayout = QtWidgets.QVBoxLayout()
-        self.MainLayout.setContentsMargins(0, 10, 0, 10)
-        self.setLayout(self.MainLayout)
+        self.MainLayout = self.collapsibleLayout()
 
         # Displacements
         self.DisplacementToggle = QtWidgets.QCheckBox("Displacements")

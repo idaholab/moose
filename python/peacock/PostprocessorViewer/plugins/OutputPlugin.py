@@ -21,11 +21,10 @@ class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
         self.MainLayout.addStretch()
         self.setup()
 
-    def initialize(self, data):
+    def onSetData(self, data):
         """
         This is called when the data is changed.
         """
-        super(OutputPlugin, self).initialize(data)
         self.LiveTable.initialize(data)
 
     def repr(self):
@@ -82,7 +81,7 @@ def main(filenames):
     from MediaControlPlugin import MediaControlPlugin
 
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, timeout=None, plugins=[OutputPlugin, PostprocessorSelectPlugin, MediaControlPlugin])
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     control = widget.currentWidget().OutputPlugin
     widget.show()
 

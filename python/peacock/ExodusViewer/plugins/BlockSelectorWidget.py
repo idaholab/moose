@@ -19,7 +19,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         # Setup this widget
         self.setContentsMargins(0, 0, 0, 0)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
 
         # Member variables
         self._type = block_type
@@ -67,6 +67,11 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
             item.setText(block.name)
             self.ListWidget.insertItem(i, item)
 
+        w = max(100, self.ListWidget.sizeHintForColumn(0) + 2 * self.ListWidget.frameWidth())
+        h = self.ListWidget.sizeHintForRow(0) * min(10, self.ListWidget.count()) + 2 * self.ListWidget.frameWidth()
+        self.ListWidget.setMaximumWidth(w)
+        self.ListWidget.setMaximumHeight(h)
+
     def getBlocks(self):
         """
         Callback when the list items are changed
@@ -112,9 +117,6 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         Setup method for the list box.
         """
         qobject.itemClicked.connect(self._callbackListWidget)
-        qobject.setMaximumHeight(70)
-        qobject.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
-
 
     @QtCore.pyqtSlot(QtWidgets.QListWidgetItem)
     def _callbackListWidget(self, item):

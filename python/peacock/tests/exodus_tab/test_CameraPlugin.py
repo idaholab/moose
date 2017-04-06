@@ -21,7 +21,7 @@ class TestCameraPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.initialize([self._filename])
+        self._window.onFileChanged(self._filename)
         camera = vtk.vtkCamera()
         camera.SetViewUp(0.2152, 0.4770, 0.8522)
         camera.SetPosition(22.5359, -61.7236, 28.9816)

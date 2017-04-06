@@ -33,12 +33,10 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         except:
             pass
 
-    def initialize(self, data):
+    def onSetData(self, data):
         """
         Initializes the time controls for the current data.
         """
-        super(MediaControlPlugin, self).initialize(data)
-
         # Update data if provided
         if data != None:
             for d in self._data:
@@ -89,7 +87,7 @@ def main(filenames):
     from FigurePlugin import FigurePlugin
     from PostprocessorSelectPlugin import PostprocessorSelectPlugin
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin, PostprocessorSelectPlugin, MediaControlPlugin])
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     widget.show()
     return widget
 

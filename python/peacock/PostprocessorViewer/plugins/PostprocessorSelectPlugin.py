@@ -28,7 +28,7 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
         super(PostprocessorSelectPlugin, self).__init__()
 
         # Setup this widget
-        policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
         policy.setVerticalStretch(100) # We want this widget to be as big as possible vertically
         self.setSizePolicy(policy)
 
@@ -42,7 +42,7 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
         self.LineGroups = QtWidgets.QFrame()
         self.LineGroupsLayout = QtWidgets.QVBoxLayout()
         self.LineGroupsLayout.setSpacing(10);
-        self.LineGroupsLayout.setContentsMargins(10, 10, 10, 10);
+        self.LineGroupsLayout.setContentsMargins(0, 10, 10, 0);
         self.LineGroups.setLayout(self.LineGroupsLayout)
 
         # Creates the area that will be scrollable
@@ -58,16 +58,13 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
         # Call the setup methods
         self.setup()
 
-    def initialize(self, data):
+    def onSetData(self, data):
         """
         Called when new data is being supplied to the widget.
 
         Args:
             data[list]: A list of PostprocessorDataWidget files.
         """
-        # Enable the widget
-        super(PostprocessorSelectPlugin, self).initialize(data)
-
         # Remove existing widgets
         for group in self._groups:
             self.LineGroupsLayout.removeWidget(group)
@@ -121,28 +118,6 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
                 y2_vars[i] = y2
         self.variablesChanged.emit(x_vars, y_vars, y2_vars)
 
-    @QtCore.pyqtSlot()
-    def minimumSizeHint(self):
-        """
-        Update the widget width and the widths of the LineGroups to keep everything lined up.
-        """
-
-        # Compute the max width
-        # We let the vertical stretch factor take care of the height
-        size = QtWidgets.QWidget.minimumSizeHint(self)
-        margins = self.LineGroupsLayout.getContentsMargins()
-        w = size.width()
-        for group in self._groups:
-            w = max(w, group.width())
-
-        # Set all groups to the same width
-        for group in self._groups:
-            group.setFixedWidth(w)
-
-        # Return the minimum size for this widget
-        size.setWidth(w + margins[0] + margins[2])
-        return size
-
     def repr(self):
         """
         Produce the script items for this widget.
@@ -184,7 +159,7 @@ def main(filenames, reader=mooseutils.VectorPostprocessorReader):
     from FigurePlugin import FigurePlugin
 
     widget = PostprocessorViewer(reader, timeout=None, plugins=[FigurePlugin, PostprocessorSelectPlugin])
-    widget.initialize(filenames)
+    widget.onSetFilenames(filenames)
     control = widget.currentWidget().PostprocessorSelectPlugin
     window = widget.currentWidget().FigurePlugin
     window.setFixedSize(QtCore.QSize(625, 625))

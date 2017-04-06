@@ -23,14 +23,14 @@ class TestPostprocessorViewer(Testing.PeacockImageTestCase):
         """
         self._filename = "{}_test.csv".format(self.__class__.__name__)
         self._widget = PostprocessorViewer(reader=mooseutils.PostprocessorReader, timeout=None)
-        self._widget.initialize([self._filename])
+        self._widget.onSetFilenames([self._filename])
 
     def copyfiles(self):
         """
         Copy to temprary location.
         """
         shutil.copyfile('../input/white_elephant_jan_2016.csv', self._filename)
-        for data in self._widget._data[0]:
+        for data in self._widget._data:
             data.load()
 
     def tearDown(self):

@@ -31,16 +31,16 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         self.MainLayout.setSpacing(5)
         self.MainLayout.setAlignment(QtCore.Qt.AlignRight)
         self.setLayout(self.MainLayout)
-        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.FigureCanvas = FigureCanvasQTAgg(self._figure)
-        self.FigureCanvas.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.FigureCanvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.MainLayout.addWidget(self.FigureCanvas)
 
         self.setup()
 
-    def initialize(self, data):
+    def onSetData(self, data):
         """
         Initialize the FigurePlugin by drawing the axes and emitting the 'figureCreated' signal.
 
@@ -48,7 +48,6 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         signal being emitted. In the future this may allow us to have multiple figures or switch plot
         types from 2D to 3D.
         """
-        super(FigurePlugin, self).initialize(data)
         self.figureCreated.emit(self._figure, self._axes, self._axes2)
         self.onAxesModified()
 
@@ -123,7 +122,7 @@ def main():
     import mooseutils
 
     widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin])
-    widget.initialize([])
+    widget.onSetFilenames([])
     widget.currentWidget().FigurePlugin.setFixedSize(QtCore.QSize(375, 375))
     widget.show()
     return widget

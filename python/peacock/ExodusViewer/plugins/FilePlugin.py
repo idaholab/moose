@@ -35,7 +35,7 @@ class ExodusComboBox(QtWidgets.QComboBox):
         return [self.itemData(i) for i in range(self.count())].index(full_file)
 
 
-class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Plugin for controlling the current file being visualized.
     """
@@ -46,15 +46,14 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
     #: pyqtSignal: Emitted when the file has changed and a camera has been stashed
     cameraChanged = QtCore.pyqtSignal(vtk.vtkCamera)
 
+
     def __init__(self):
         super(FilePlugin, self).__init__()
 
         # Setup this widget widget
-        self.setTitle('Select File(s):')
         self.setEnabled(True) # The base disables, this needs to be enabled so the open button is available
-
-        self.MainLayout = QtWidgets.QHBoxLayout()
-        self.setLayout(self.MainLayout)
+        self.setTitle('Select File(s)')
+        self.MainLayout = self.collapsibleLayout()
 
         self.OpenFiles = QtWidgets.QPushButton()
         self.AvailableFiles = ExodusComboBox()
@@ -65,7 +64,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.FileOpenDialog = QtWidgets.QFileDialog()
         self.FileOpenDialog.setWindowTitle('Select ExodusII File(s)')
         self.FileOpenDialog.setNameFilter('ExodusII Files (*.e)')
-        self.FileOpenDialog.setDirectory('/Users/slauae/projects/gui/tests/chigger/input')
+        self.FileOpenDialog.setDirectory(os.getcwd())
 
         self.FileOpenDialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)
         self.FileOpenDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -76,14 +75,19 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self.setup()
 
-    def initialize(self, filenames):
+    def getFilenames(self):
+        """
+        Return the current filenames.
+        """
+        return [self.AvailableFiles.itemData(i) for i in range(self.AvailableFiles.count())]
+
+    def onSetFilenames(self, filenames):
         """
         Updates the list of available files for selection.
 
         Args:
             filenames[list]: The filenames to include in the AvailableFiles widget.
         """
-        super(FilePlugin, self).initialize()
 
         # Clear the existing list of files
         self.AvailableFiles.blockSignals(True)
@@ -144,7 +148,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if self.FileOpenDialog.exec_() == QtWidgets.QDialog.Accepted:
             filenames = [str(fname) for fname in list(self.FileOpenDialog.selectedFiles())]
             if self.AvailableFiles.count() == 0:
-                self.initialize(filenames)
+                self.onSetFilenames(filenames)
         else:
             return
 
@@ -185,6 +189,6 @@ if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
-    widget, _ = main()
+    widget, _ = main(size=[600,600])
     widget.initialize(filenames)
     sys.exit(app.exec_())
