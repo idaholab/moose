@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
 #include "Exodus.h"
-#include "MooseApp.h"
-#include "FEProblem.h"
+
+// Moose includes
 #include "DisplacedProblem.h"
 #include "ExodusFormatter.h"
+#include "FEProblem.h"
 #include "FileMesh.h"
+#include "MooseApp.h"
+#include "MooseVariableScalar.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"

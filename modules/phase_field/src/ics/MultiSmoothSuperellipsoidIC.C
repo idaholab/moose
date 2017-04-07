@@ -9,8 +9,11 @@
 // each semiaxis can be varied by a uniform or normal distribution
 
 #include "MultiSmoothSuperellipsoidIC.h"
-#include "MooseUtils.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseUtils.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters

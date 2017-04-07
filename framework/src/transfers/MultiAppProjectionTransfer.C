@@ -12,20 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppProjectionTransfer.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "AddVariableAction.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
 
 // libMesh includes
-#include "libmesh/quadrature_gauss.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/linear_implicit_system.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
-#include "libmesh/string_to_enum.h"
+#include "libmesh/numeric_vector.h"
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/quadrature_gauss.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/string_to_enum.h"
 
 void
 assemble_l2(EquationSystems & es, const std::string & system_name)

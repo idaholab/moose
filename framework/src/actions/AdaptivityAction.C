@@ -21,6 +21,7 @@
 #include "Adaptivity.h"
 #include "Executioner.h"
 #include "MooseEnum.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"

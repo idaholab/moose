@@ -15,7 +15,9 @@
 #ifndef CREATEPROBLEMACTION_H
 #define CREATEPROBLEMACTION_H
 
+// MOOSE includes
 #include "MooseObjectAction.h"
+#include "MultiMooseEnum.h"
 
 class CreateProblemAction;
 

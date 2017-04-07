@@ -18,11 +18,10 @@
 // MOOSE includes
 #include "Constraint.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MooseMesh.h"
-#include "ElementPairInfo.h"
 
 // Forward Declarations
 class ElemElemConstraint;
+class ElementPairInfo;
 class FEProblemBase;
 
 template <>

@@ -7,8 +7,12 @@
 #ifndef DOMAININTEGRALACTION_H
 #define DOMAININTEGRALACTION_H
 
+// MOOSE includes
 #include "Action.h"
+#include "MooseEnum.h"
 #include "MooseTypes.h"
+
+// libMesh includes
 #include "libmesh/vector_value.h"
 
 class DomainIntegralAction;

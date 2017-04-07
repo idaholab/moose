@@ -7,6 +7,9 @@
 
 #include "PorousFlowHeatVolumetricExpansion.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<PorousFlowHeatVolumetricExpansion>()

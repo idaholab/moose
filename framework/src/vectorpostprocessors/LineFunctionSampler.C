@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "LineFunctionSampler.h"
+
+// MOOSE includes
+#include "Function.h"
 #include "LineValueSampler.h"
 
 template <>

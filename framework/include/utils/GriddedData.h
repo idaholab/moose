@@ -15,14 +15,15 @@
 #ifndef GRIDDEDDATA_H
 #define GRIDDEDDATA_H
 
-// C++ includes
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <string>
-
 // libMesh includes
 #include "libmesh/libmesh_common.h" // Real
+
+using namespace libMesh;
+
+// C++ includes
+#include <iosfwd>
+#include <string>
+#include <vector>
 
 /**
  * Container for holding a function defined on a grid of arbitrary dimension.

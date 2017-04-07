@@ -5,7 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "PolycrystalVoronoiVoidIC.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 InputParameters
 PolycrystalVoronoiVoidIC::actionParameters()

@@ -15,14 +15,18 @@
 #ifndef RANDOMINTERFACE_H
 #define RANDOMINTERFACE_H
 
-#include "InputParameters.h"
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
+// Forward declarations
 class Assembly;
 class FEProblemBase;
+class InputParameters;
 class MooseRandom;
 class RandomData;
 class RandomInterface;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<RandomInterface>();

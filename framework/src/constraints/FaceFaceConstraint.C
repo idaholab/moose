@@ -13,10 +13,13 @@
 /****************************************************************/
 
 #include "FaceFaceConstraint.h"
+
+// MOOSE includes
+#include "Assembly.h"
 #include "FEProblem.h"
+#include "MooseVariable.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
-#include "Assembly.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"

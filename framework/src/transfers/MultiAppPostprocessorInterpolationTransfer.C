@@ -12,15 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppPostprocessorInterpolationTransfer.h"
-#include "MooseTypes.h"
+
+// MOOSE includes
 #include "FEProblem.h"
-#include "MultiApp.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
+#include "MultiApp.h"
 
 // libMesh includes
 #include "libmesh/meshfree_interpolation.h"
+#include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 

@@ -13,7 +13,10 @@
 /****************************************************************/
 
 #include "FunctionScalarIC.h"
+
+// MOOSE includes
 #include "Function.h"
+#include "MooseVariableScalar.h"
 
 template <>
 InputParameters

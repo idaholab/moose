@@ -16,11 +16,20 @@
 #define OUTPUTINTERFACE_H
 
 // MOOSE includes
-#include "InputParameters.h"
+#include "MooseTypes.h"
+
+// C++ includes
+#include <set>
+#include <string>
 
 // Forward declerations
+class InputParameters;
+class MooseApp;
 class OutputInterface;
 class OutputWarehouse;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<OutputInterface>();

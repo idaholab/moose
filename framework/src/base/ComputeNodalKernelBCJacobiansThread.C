@@ -13,11 +13,15 @@
 /****************************************************************/
 
 #include "ComputeNodalKernelBCJacobiansThread.h"
+
+// MOOSE includes
+#include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
+#include "MooseVariable.h"
 #include "NodalKernel.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(

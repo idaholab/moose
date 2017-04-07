@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "InternalSideIndicator.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "ParallelUniqueId.h"
 
 // libMesh includes
 #include "libmesh/dof_map.h"

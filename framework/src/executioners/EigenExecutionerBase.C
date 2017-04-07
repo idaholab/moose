@@ -14,11 +14,13 @@
 
 #include "EigenExecutionerBase.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseEigenSystem.h"
+#include "UserObject.h"
 
 template <>
 InputParameters

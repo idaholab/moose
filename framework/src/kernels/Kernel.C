@@ -13,13 +13,16 @@
 /****************************************************************/
 
 #include "Kernel.h"
+
+// MOOSE includes
 #include "Assembly.h"
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 

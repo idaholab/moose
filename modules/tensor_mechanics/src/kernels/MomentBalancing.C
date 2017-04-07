@@ -6,10 +6,13 @@
 /****************************************************************/
 #include "MomentBalancing.h"
 
-#include "Material.h"
-#include "RankTwoTensor.h"
+// MOOSE includes
 #include "ElasticityTensorTools.h"
+#include "Material.h"
+#include "MooseVariable.h"
+#include "PermutationTensor.h"
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 
 template <>
 InputParameters

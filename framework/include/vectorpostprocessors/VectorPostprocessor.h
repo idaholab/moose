@@ -16,7 +16,6 @@
 #define VECTORPOSTPROCESSOR_H
 
 // MOOSE includes
-#include "InputParameters.h"
 #include "MooseTypes.h"
 #include "OutputInterface.h"
 
@@ -24,10 +23,14 @@
 #include "libmesh/parallel.h"
 
 // Forward declarations
+class FEProblemBase;
+class InputParameters;
 class SamplerBase;
 class VectorPostprocessor;
 class VectorPostprocessorData;
-class FEProblemBase;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<VectorPostprocessor>();

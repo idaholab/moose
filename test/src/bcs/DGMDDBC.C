@@ -13,8 +13,12 @@
 /****************************************************************/
 
 #include "DGMDDBC.h"
-#include "Function.h"
 
+// MOOSE includes
+#include "Function.h"
+#include "MooseVariable.h"
+
+// C++ includes
 #include <cmath>
 
 template <>

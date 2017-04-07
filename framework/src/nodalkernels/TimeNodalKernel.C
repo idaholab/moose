@@ -14,7 +14,9 @@
 
 #include "TimeNodalKernel.h"
 
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
 template <>

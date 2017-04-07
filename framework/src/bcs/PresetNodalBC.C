@@ -14,6 +14,10 @@
 
 #include "PresetNodalBC.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
+// libMesh includes
 #include "libmesh/numeric_vector.h"
 
 template <>

@@ -7,9 +7,11 @@
 
 #include "NodalArea.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 

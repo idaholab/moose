@@ -5,11 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "GapHeatTransfer.h"
-#include "PenetrationLocator.h"
-#include "SystemBase.h"
+
+// MOOSE includes
+#include "AddVariableAction.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
-#include "AddVariableAction.h"
+#include "MooseVariable.h"
+#include "PenetrationLocator.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

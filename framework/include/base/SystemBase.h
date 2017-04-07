@@ -17,12 +17,9 @@
 
 #include <vector>
 
-#include "VariableWarehouse.h"
-#include "ParallelUniqueId.h"
-#include "SubProblem.h"
-#include "MooseVariableScalar.h"
-#include "MooseVariable.h"
 #include "DataIO.h"
+#include "MooseTypes.h"
+#include "VariableWarehouse.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
@@ -36,6 +33,7 @@ class Factory;
 class MooseApp;
 class MooseVariable;
 class MooseMesh;
+class SubProblem;
 class SystemBase;
 
 // libMesh forward declarations

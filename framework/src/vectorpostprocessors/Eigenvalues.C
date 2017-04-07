@@ -13,6 +13,11 @@
 /****************************************************************/
 
 #include "Eigenvalues.h"
+
+// MOOSE includes
+#include "NonlinearEigenSystem.h"
+
+// libMesh includes
 #include "libmesh/libmesh_config.h"
 
 template <>

@@ -7,6 +7,8 @@
 
 #include "OneDContactConstraint.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
 

@@ -16,7 +16,6 @@
 #define ORIENTEDBOXINTERFACE_H
 
 // MOOSE includes
-#include "InputParameters.h"
 #include "MooseTypes.h"
 
 // libMesh includes
@@ -26,7 +25,11 @@
 #include "libmesh/tensor_value.h"
 
 // Forward declarations
+class InputParameters;
 class OrientedBoxInterface;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<OrientedBoxInterface>();

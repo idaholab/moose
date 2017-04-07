@@ -16,13 +16,13 @@
 #define DIRACKERNELINFO_H
 
 #include "Moose.h"
-#include "MooseArray.h"
 
 // libMesh
 #include "libmesh/point.h"
 
 #include <set>
 #include <map>
+#include <memory>
 
 // Forward declarations
 class MooseMesh;

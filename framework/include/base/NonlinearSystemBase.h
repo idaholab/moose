@@ -33,6 +33,7 @@ class Predictor;
 class ElementDamper;
 class NodalDamper;
 class GeneralDamper;
+class GeometricSearchData;
 class IntegratedBC;
 class NodalBC;
 class PresetNodalBC;

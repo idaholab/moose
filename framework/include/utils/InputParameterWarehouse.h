@@ -16,7 +16,6 @@
 #define INPUTPARAMETERWAREHOUSE_H
 
 // MOOSE includes
-#include "ParallelUniqueId.h"
 #include "MooseObjectName.h"
 #include "MooseTypes.h"
 #include "ControllableParameter.h"

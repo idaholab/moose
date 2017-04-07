@@ -17,9 +17,13 @@
 
 #include "MooseMesh.h"
 
-#include "libmesh/serial_mesh.h"
-
+// Forward declarations
 class PatternedMesh;
+
+namespace libMesh
+{
+class ReplicatedMesh;
+}
 
 template <>
 InputParameters validParams<PatternedMesh>();

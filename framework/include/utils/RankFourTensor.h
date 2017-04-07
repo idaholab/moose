@@ -7,20 +7,21 @@
 #ifndef RANKFOURTENSOR_H
 #define RANKFOURTENSOR_H
 
-// Forward declaration of RankTwoTensor
-class RankTwoTensor;
-class RankFourTensor;
-
 // MOOSE includes
-#include "Moose.h"
-#include "PermutationTensor.h"
-#include "MooseEnum.h"
-#include "DerivativeMaterialInterface.h"
+#include "DataIO.h"
 
 // libMesh includes
 #include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
+
+// Forward declarations
+class MooseEnum;
+class RankTwoTensor;
+class RankFourTensor;
+
+template <typename T>
+void mooseSetToZero(T & v);
 
 /**
  * Helper function template specialization to set an object to zero.

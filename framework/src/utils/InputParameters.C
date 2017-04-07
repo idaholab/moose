@@ -13,8 +13,12 @@
 /****************************************************************/
 
 #include "InputParameters.h"
+
+// MOOSE includes
+#include "MooseEnum.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h"
+#include "MultiMooseEnum.h"
 
 #include <cmath>
 
@@ -944,4 +948,22 @@ InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /
   std::ostringstream oss;
   oss << r_value;
   l_value = oss.str();
+}
+
+template <>
+const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name,
+                                           const InputParameters & pars,
+                                           const MooseEnum *)
+{
+  return pars.get<MooseEnum>(name);
+}
+
+template <>
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                const InputParameters & pars,
+                                                const MultiMooseEnum *)
+{
+  return pars.get<MultiMooseEnum>(name);
 }

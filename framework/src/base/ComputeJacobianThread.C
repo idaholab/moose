@@ -13,16 +13,18 @@
 /****************************************************************/
 
 #include "ComputeJacobianThread.h"
-#include "NonlinearSystem.h"
-#include "FEProblem.h"
-#include "TimeDerivative.h"
-#include "IntegratedBC.h"
+
 #include "DGKernel.h"
+#include "FEProblem.h"
+#include "IntegratedBC.h"
 #include "InterfaceKernel.h"
 #include "KernelWarehouse.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
+#include "NonlocalIntegratedBC.h"
 #include "NonlocalKernel.h"
 #include "SwapBackSentinel.h"
-#include "NonlocalIntegratedBC.h"
+#include "TimeDerivative.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

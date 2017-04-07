@@ -6,7 +6,10 @@
 /****************************************************************/
 
 #include "PolycrystalICTools.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/periodic_boundaries.h"

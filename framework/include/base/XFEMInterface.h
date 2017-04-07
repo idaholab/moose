@@ -17,7 +17,6 @@
 
 #include "ConsoleStreamInterface.h"
 #include "MooseTypes.h"
-#include "MooseVariableBase.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
 

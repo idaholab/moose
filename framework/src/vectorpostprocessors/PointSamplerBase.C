@@ -12,9 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "PointSamplerBase.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"

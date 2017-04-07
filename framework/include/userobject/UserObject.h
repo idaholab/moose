@@ -16,14 +16,14 @@
 #define USEROBJECT_H
 
 // MOOSE includes
-#include "MooseObject.h"
-#include "SetupInterface.h"
-#include "FunctionInterface.h"
 #include "DistributionInterface.h"
-#include "Restartable.h"
+#include "FunctionInterface.h"
 #include "MeshChangedInterface.h"
-#include "ParallelUniqueId.h"
+#include "MooseObject.h"
+#include "MooseTypes.h"
+#include "Restartable.h"
 #include "ScalarCoupleable.h"
+#include "SetupInterface.h"
 
 // libMesh includes
 #include "libmesh/parallel.h"

@@ -20,14 +20,18 @@
 #include "FunctionInterface.h"
 #include "DependencyResolverInterface.h"
 
-#include "libmesh/dense_vector.h"
-
 // forward declarations
 class ScalarInitialCondition;
 class FeProblem;
 class SystemBase;
 class Assembly;
 class MooseVariableScalar;
+
+namespace libMesh
+{
+template <typename T>
+class DenseVector;
+}
 
 template <>
 InputParameters validParams<ScalarInitialCondition>();

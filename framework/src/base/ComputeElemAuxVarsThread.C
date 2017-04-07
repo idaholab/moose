@@ -13,12 +13,14 @@
 /****************************************************************/
 
 #include "ComputeElemAuxVarsThread.h"
+
+// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblemBase & problem,

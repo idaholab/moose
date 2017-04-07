@@ -12,8 +12,12 @@
 #include "ElementFragmentAlgorithm.h"
 #include "XFEMInterface.h"
 
+// libMesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/quadrature.h"
+
+// Forward declarations
+class SystemBase;
 
 namespace Xfem
 {

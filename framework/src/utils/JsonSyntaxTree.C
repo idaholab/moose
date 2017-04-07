@@ -14,9 +14,13 @@
 
 #include "JsonSyntaxTree.h"
 
+// MOOSE includes
+#include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 #include "Parser.h"
 #include "pcrecpp.h"
 
+// C++ includes
 #include <algorithm>
 #include <cctype>
 

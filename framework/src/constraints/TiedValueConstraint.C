@@ -14,6 +14,8 @@
 
 #include "TiedValueConstraint.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
 // libMesh includes

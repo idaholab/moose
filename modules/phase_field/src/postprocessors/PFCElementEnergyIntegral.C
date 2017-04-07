@@ -7,6 +7,9 @@
 
 #include "PFCElementEnergyIntegral.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<PFCElementEnergyIntegral>()

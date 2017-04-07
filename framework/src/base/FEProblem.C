@@ -16,6 +16,8 @@
 
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
+#include "MooseEigenSystem.h"
+#include "NonlinearSystem.h"
 
 template <>
 InputParameters

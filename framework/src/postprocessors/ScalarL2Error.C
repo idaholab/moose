@@ -13,7 +13,10 @@
 /****************************************************************/
 
 #include "ScalarL2Error.h"
+
+// MOOSE includes
 #include "Function.h"
+#include "MooseVariableScalar.h"
 #include "SubProblem.h"
 
 template <>

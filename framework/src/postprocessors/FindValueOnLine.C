@@ -13,8 +13,11 @@
 /****************************************************************/
 
 #include "FindValueOnLine.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 #include "MooseUtils.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters

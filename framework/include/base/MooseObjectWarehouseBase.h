@@ -19,8 +19,10 @@
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 #include "BlockRestrictable.h"
-#include "MooseVariable.h"
 #include "TransientInterface.h"
+
+// Forward declarations
+class MooseVariable;
 
 /**
  * A base storage container for MooseObjects.

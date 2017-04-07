@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "MooseArray.h"
-#include "ColumnMajorMatrix.h"
 #include "DataIO.h"
 
 #include "libmesh/libmesh_common.h"

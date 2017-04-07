@@ -6,8 +6,13 @@
 /****************************************************************/
 
 #include "RichardsHalfGaussianSink.h"
-#include "Material.h"
+
+// MOOSEincludes
 #include "Function.h"
+#include "Material.h"
+#include "MooseVariable.h"
+
+// libMesh includes
 #include "libmesh/utility.h"
 
 template <>

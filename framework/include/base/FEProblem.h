@@ -16,8 +16,6 @@
 #define FEPROBLEM_H
 
 #include "FEProblemBase.h"
-#include "NonlinearSystem.h"
-#include "MooseEigenSystem.h"
 
 class FEProblem;
 class NonlinearSystem;

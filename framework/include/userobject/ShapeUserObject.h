@@ -15,11 +15,11 @@
 #ifndef SHAPEUSEROBJECT_H
 #define SHAPEUSEROBJECT_H
 
-#include "MooseVariable.h"
-#include "MooseObject.h"
+#include "Assembly.h"
 #include "Coupleable.h"
 #include "InputParameters.h"
-#include "Assembly.h"
+#include "MooseVariable.h"
+#include "MooseObject.h"
 
 /**
  * Users of this template class must specify the type of shape functions that

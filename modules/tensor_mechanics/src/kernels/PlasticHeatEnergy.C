@@ -7,6 +7,7 @@
 
 #include "PlasticHeatEnergy.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters

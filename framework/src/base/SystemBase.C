@@ -17,6 +17,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "Conversion.h"
 #include "Parser.h"
 #include "AllLocalDofIndicesThread.h"

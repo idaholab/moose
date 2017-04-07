@@ -7,12 +7,7 @@
 
 #include "XFEM.h"
 
-#include "AuxiliarySystem.h"
-#include "NonlinearSystem.h"
-#include "FEProblem.h"
-
-#include "libmesh/mesh_communication.h"
-
+// XFEM includes
 #include "XFEMGeometricCut.h"
 #include "XFEMGeometricCut2D.h"
 #include "XFEMCutElem2D.h"
@@ -24,6 +19,15 @@
 #include "EFAFragment2D.h"
 #include "EFAFragment3D.h"
 #include "EFAFuncs.h"
+
+// MOOSE includes
+#include "AuxiliarySystem.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
+#include "FEProblem.h"
+
+// libMesh includes
+#include "libmesh/mesh_communication.h"
 
 XFEM::XFEM(const InputParameters & params) : XFEMInterface(params), _efa_mesh(Moose::out)
 {

@@ -13,7 +13,10 @@
 /****************************************************************/
 
 #include "NodalEqualValueConstraint.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseVariableScalar.h"
 
 template <>
 InputParameters

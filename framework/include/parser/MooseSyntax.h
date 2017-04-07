@@ -15,9 +15,6 @@
 #ifndef MOOSESYNTAX_H
 #define MOOSESYNTAX_H
 
-#include <string>
-#include <map>
-
 class Syntax;
 class ActionFactory;
 

@@ -16,7 +16,10 @@
 #define SWAPBACKSENTINEL_H
 
 // MOOSE includes
-#include "FEProblemBase.h"
+#include "MooseTypes.h"
+
+// Forward declarations
+class FEProblemBase;
 
 /**
  * The "SwapBackSentinel" class's destructor guarantees that

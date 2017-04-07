@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "PhysicsBasedPreconditioner.h"
+
+// MOOSE includes
+#include "ComputeJacobianBlocksThread.h"
 #include "FEProblem.h"
+#include "MooseEnum.h"
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
-#include "MooseEnum.h"
-#include "ComputeJacobianBlocksThread.h"
 
 // libMesh Includes
 #include "libmesh/libmesh_common.h"

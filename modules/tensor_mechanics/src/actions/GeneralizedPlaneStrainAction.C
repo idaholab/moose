@@ -5,9 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "GeneralizedPlaneStrainAction.h"
-#include "FEProblem.h"
+
 #include "Conversion.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters

@@ -7,8 +7,9 @@
 #ifndef POLYCRYSTALRANDOMICACTION_H
 #define POLYCRYSTALRANDOMICACTION_H
 
-#include "InputParameters.h"
 #include "Action.h"
+#include "InputParameters.h"
+#include "MooseEnum.h"
 
 /**
  * Automatically generates all variables to model a polycrystal with op_num orderparameters

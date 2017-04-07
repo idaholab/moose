@@ -16,8 +16,8 @@
 #define RANDOMDATA_H
 
 // MOOSE includes
-#include "MooseTypes.h"
 #include "MooseRandom.h"
+#include "MooseTypes.h"
 
 #include <unordered_map>
 

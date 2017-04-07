@@ -14,10 +14,13 @@
 
 #include "ScalarLagrangeMultiplier.h"
 
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

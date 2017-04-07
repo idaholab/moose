@@ -15,8 +15,8 @@
 #ifndef MOOSEVARIABLE_H
 #define MOOSEVARIABLE_H
 
+#include "MooseTypes.h"
 #include "MooseVariableBase.h"
-#include "ParallelUniqueId.h"
 
 // Forward declarations
 class Assembly;

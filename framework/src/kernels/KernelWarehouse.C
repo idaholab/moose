@@ -12,10 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "KernelWarehouse.h"
-#include "TimeDerivative.h"
+
+// MOOSE includes
 #include "KernelBase.h"
+#include "MooseVariable.h"
+#include "TimeDerivative.h"
 #include "TimeKernel.h"
 
 KernelWarehouse::KernelWarehouse() : MooseObjectWarehouse<KernelBase>() {}

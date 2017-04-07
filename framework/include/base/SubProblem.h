@@ -15,11 +15,10 @@
 #ifndef SUBPROBLEM_H
 #define SUBPROBLEM_H
 
-#include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "DiracKernelInfo.h"
 #include "GeometricSearchData.h"
-#include "MooseVariableBase.h" // VariableValue
+#include "MooseTypes.h"
 
 // libMesh includes
 #include "libmesh/coupling_matrix.h"

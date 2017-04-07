@@ -18,8 +18,6 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "MooseTypes.h"
-#include "MooseEnum.h"
-#include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 
 // libMesh includes
@@ -36,11 +34,13 @@ class FunctionParserBase
 #endif
 
 // Forward declarations
-class MooseObject;
 class Action;
-class Problem;
-class MooseApp;
 class InputParameters;
+class MooseApp;
+class MooseEnum;
+class MooseObject;
+class MultiMooseEnum;
+class Problem;
 
 /**
  * This is the templated validParams() function that every
@@ -1251,6 +1251,19 @@ InputParameters::getParamHelper(const std::string & name, const InputParameters 
   return pars.get<T>(name);
 }
 
+// Declare specializations so we don't fall back on the generic
+// implementation, but the definition will be in InputParameters.C so
+// we won't need to bring in *MooseEnum header files here.
+template <>
+const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name,
+                                                             const InputParameters & pars,
+                                                             const MooseEnum *);
+
+template <>
+const MultiMooseEnum & InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                                       const InputParameters & pars,
+                                                                       const MultiMooseEnum *);
+
 template <typename T>
 const std::vector<T> &
 InputParameters::getParamHelper(const std::string & name,
@@ -1258,24 +1271,6 @@ InputParameters::getParamHelper(const std::string & name,
                                 const std::vector<T> *)
 {
   return pars.get<std::vector<T>>(name);
-}
-
-template <>
-inline const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                           const InputParameters & pars,
-                                           const MooseEnum *)
-{
-  return pars.get<MooseEnum>(name);
-}
-
-template <>
-inline const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *)
-{
-  return pars.get<MultiMooseEnum>(name);
 }
 
 InputParameters emptyInputParameters();

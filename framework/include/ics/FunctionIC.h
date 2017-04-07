@@ -16,13 +16,16 @@
 #define FUNCTIONIC_H
 
 #include "InitialCondition.h"
-#include "InputParameters.h"
 
 #include <string>
 
 // Forward Declarations
 class FunctionIC;
 class Function;
+class InputParameters;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<FunctionIC>();

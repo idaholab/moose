@@ -16,8 +16,7 @@
 #define NEIGHBORMOOSEVARIABLEINTERFACE_H
 
 #include "MooseVariableInterface.h"
-#include "MooseVariable.h"
-#include "InputParameters.h"
+#include "MooseVariableBase.h"
 
 /**
  * Enhances MooseVariableInterface interface provide values from neighbor elements

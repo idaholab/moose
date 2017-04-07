@@ -6,11 +6,15 @@
 /****************************************************************/
 
 #include "FeatureVolumeVectorPostprocessor.h"
+
+// MOOSE includes
+#include "Assembly.h"
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
 #include "MooseMesh.h"
-#include "Assembly.h"
+#include "MooseVariable.h"
 
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

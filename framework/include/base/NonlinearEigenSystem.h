@@ -17,10 +17,7 @@
 
 #include "libmesh/libmesh_config.h"
 
-#include "SystemBase.h"
 #include "NonlinearSystemBase.h"
-#include "KernelBase.h"
-#include "TimeKernel.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -28,6 +25,7 @@
 
 // forward declarations
 class EigenProblem;
+class KernelBase;
 
 #if LIBMESH_HAVE_SLEPC
 
