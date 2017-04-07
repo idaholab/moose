@@ -23,6 +23,7 @@
 // Moose Includes
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters
