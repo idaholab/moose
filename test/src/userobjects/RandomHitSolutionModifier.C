@@ -44,6 +44,7 @@ void
 RandomHitSolutionModifier::execute()
 {
   UniquePtr<PointLocatorBase> pl = _mesh.getMesh().sub_point_locator();
+  pl->enable_out_of_mesh_mode();
 
   const std::vector<Point> & hits = _random_hits.hits();
 
