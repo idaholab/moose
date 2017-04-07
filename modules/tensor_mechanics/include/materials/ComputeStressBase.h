@@ -26,6 +26,7 @@ protected:
   virtual void computeQpProperties() override;
   virtual void computeQpStress() = 0;
 
+  /// check if all materials responsible for providing the elasticity tensor guarantee an isotropic tensor
   bool isElasticityTensorGuaranteedIsotropic();
 
   const std::string _base_name;
