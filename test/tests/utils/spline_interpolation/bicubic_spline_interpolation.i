@@ -48,6 +48,14 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./x_deriv]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./y_deriv]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
@@ -55,6 +63,18 @@
     type = FunctionAux
     variable = bi_func_value
     function = spline_fn
+  [../]
+  [./deriv_1]
+    type = FunctionDerivativeAux
+    function = spline_fn
+    variable = x_deriv
+    component = 1
+  [../]
+  [./deriv_2]
+    type = FunctionDerivativeAux
+    function = spline_fn
+    variable = y_deriv
+    component = 2
   [../]
 []
 
@@ -90,6 +110,18 @@
     type = NodalL2Error
     variable = u
     function = u_func
+    execute_on = 'initial timestep_end'
+  [../]
+  [./x_deriv_err_analytic]
+    type = NodalL2Error
+    variable = x_deriv
+    function = yx1
+    execute_on = 'initial timestep_end'
+  [../]
+  [./y_deriv_err_analytic]
+    type = NodalL2Error
+    variable = y_deriv
+    function = yx2
     execute_on = 'initial timestep_end'
   [../]
 []
