@@ -18,8 +18,8 @@ public:
   FlowJunction(const InputParameters & params);
   virtual ~FlowJunction();
 
-  virtual void addVariables();
-  virtual void addMooseObjects();
+  virtual void addVariables() override;
+  virtual void addMooseObjects() override;
 
 protected:
   std::string _lm_name;

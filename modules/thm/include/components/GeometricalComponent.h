@@ -23,7 +23,7 @@ public:
   virtual ~GeometricalComponent();
 
   virtual void setupMesh();
-  virtual void displaceMesh();
+  virtual void displaceMesh() override;
 
   virtual Point getPosition() const { return _position; }
   virtual RealVectorValue getDirection() const { return _dir; }

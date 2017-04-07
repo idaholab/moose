@@ -27,9 +27,9 @@ public:
   PipeBase(const InputParameters & params);
   virtual ~PipeBase();
 
-  virtual void init();
+  virtual void init() override;
 
-  virtual const std::string & getType() { return _type; }
+  virtual const std::string & getType() override { return _type; }
 
   // Pipe specific interface ----
   virtual UserObjectName getFluidPropertiesName() const;
