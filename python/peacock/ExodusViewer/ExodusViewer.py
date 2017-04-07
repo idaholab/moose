@@ -23,9 +23,9 @@ class ExodusViewer(peacock.base.ViewerBase):
     def commandLineArgs(parser):
         parser.add_argument('--exodus', '-r', nargs='*', default=[], help="A list of ExodusII files to open.")
 
-    def __init__(self, plugins=[VTKWindowPlugin, FilePlugin, GoldDiffPlugin, VariablePlugin, \
+    def __init__(self, plugins=[FilePlugin, GoldDiffPlugin, VariablePlugin, \
                                 MeshPlugin, BackgroundPlugin, ClipPlugin, ContourPlugin, CameraPlugin, \
-                                OutputPlugin, MediaControlPlugin,
+                                OutputPlugin, VTKWindowPlugin, MediaControlPlugin,
                                 lambda: BlockPlugin(layout='RightLayout')]):
         super(ExodusViewer, self).__init__(manager=ExodusPluginManager, plugins=plugins)
 
