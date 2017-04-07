@@ -128,6 +128,12 @@ BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
   return _ipol.sampleDerivative(p(0), p(1), deriv_var, yp1, ypn);
 }
 
+RealGradient
+BicubicSplineFunction::gradient(Real /*t*/, const Point & p)
+{
+  return RealGradient(derivative(p, 1), derivative(p, 2), 0);
+}
+
 Real
 BicubicSplineFunction::secondDerivative(const Point & p, unsigned int deriv_var)
 {
