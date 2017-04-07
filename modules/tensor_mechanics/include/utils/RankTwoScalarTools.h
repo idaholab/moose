@@ -7,7 +7,17 @@
 #ifndef RANKTWOSCALARTOOLS_H
 #define RANKTWOSCALARTOOLS_H
 
+// MOOSE includes
+#include "MooseTypes.h"
+
+// Forward declarations
+class MooseEnum;
 class RankTwoTensor;
+
+namespace libMesh
+{
+class Point;
+}
 
 namespace RankTwoScalarTools
 {

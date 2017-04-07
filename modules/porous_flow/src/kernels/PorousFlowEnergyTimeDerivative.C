@@ -7,6 +7,9 @@
 
 #include "PorousFlowEnergyTimeDerivative.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<PorousFlowEnergyTimeDerivative>()

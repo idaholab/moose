@@ -12,11 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "NodalNormalsCorner.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/numeric_vector.h"

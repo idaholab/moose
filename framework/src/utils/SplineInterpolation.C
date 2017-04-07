@@ -13,7 +13,12 @@
 /****************************************************************/
 
 #include "SplineInterpolation.h"
+
+// MOOSE includes
 #include "MooseError.h"
+
+// C++ includes
+#include <fstream>
 
 int SplineInterpolation::_file_number = 0;
 

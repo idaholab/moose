@@ -16,11 +16,11 @@
 #define VECTORPOSTPROCESSORINTERFACE_H
 
 // MOOSE includes
-#include "InputParameters.h"
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // Forward Declarations
 class FEProblemBase;
+class InputParameters;
 class MooseObject;
 
 class VectorPostprocessorInterface

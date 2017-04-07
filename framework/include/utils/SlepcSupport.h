@@ -19,10 +19,10 @@
 
 #ifdef LIBMESH_HAVE_SLEPC
 
-#include "MultiMooseEnum.h"
-#include "InputParameters.h"
+#include "Moose.h"
 
 class EigenProblem;
+class InputParameters;
 
 namespace Moose
 {

@@ -15,10 +15,20 @@
 #ifndef FUNCTIONPARSERUTILS_H
 #define FUNCTIONPARSERUTILS_H
 
-#include "InputParameters.h"
+#include "Moose.h"
+
+// libMesh includes
+#include "libmesh/fparser_ad.hh"
+
+// C++ includes
+#include <memory>
 
 // Forward declartions
 class FunctionParserUtils;
+class InputParameters;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<FunctionParserUtils>();

@@ -18,6 +18,7 @@
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libmesh includes
 #include "libmesh/numeric_vector.h"

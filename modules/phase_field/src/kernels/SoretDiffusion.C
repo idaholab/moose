@@ -5,6 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SoretDiffusion.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<SoretDiffusion>()

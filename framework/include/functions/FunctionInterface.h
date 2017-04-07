@@ -15,13 +15,18 @@
 #ifndef FUNCTIONINTERFACE_H
 #define FUNCTIONINTERFACE_H
 
-#include "ParallelUniqueId.h"
-#include "InputParameters.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class Function;
 class FEProblemBase;
 class FunctionInterface;
+class Function;
+class InputParameters;
+class MooseObject;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<FunctionInterface>();

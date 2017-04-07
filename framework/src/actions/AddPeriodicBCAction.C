@@ -13,13 +13,16 @@
 /****************************************************************/
 
 #include "AddPeriodicBCAction.h"
-#include "InputParameters.h"
-#include "FunctionPeriodicBoundary.h"
-#include "NonlinearSystem.h"
-#include "FEProblem.h"
-#include "GeneratedMesh.h"
-#include "MooseMesh.h"
+
+// MOOSE includes
 #include "DisplacedProblem.h"
+#include "FEProblem.h"
+#include "FunctionPeriodicBoundary.h"
+#include "GeneratedMesh.h"
+#include "InputParameters.h"
+#include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
 
 // LibMesh includes
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh

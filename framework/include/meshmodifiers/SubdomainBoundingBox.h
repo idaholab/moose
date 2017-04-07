@@ -16,6 +16,7 @@
 #define SUBDOMAINBOUNDINGBOX_H
 
 // MOOSE includes
+#include "MooseEnum.h"
 #include "MeshModifier.h"
 
 // libmesh includes

@@ -15,24 +15,20 @@
 #ifndef RAYTRACING_H
 #define RAYTRACING_H
 
-#include "Moose.h"
-#include "LineSegment.h"
+// MOOSE includes
 #include "MooseTypes.h"
 
-// libMesh includes
-#include "libmesh/point.h"
-#include "libmesh/point_locator_base.h"
-
-// forward declares
+// Forward declarations
 class LineSegment;
 class MooseMesh;
 
 namespace libMesh
 {
-class Point;
-class Plane;
-class MeshBase;
 class Elem;
+class MeshBase;
+class Plane;
+class Point;
+class PointLocatorBase;
 }
 
 namespace Moose

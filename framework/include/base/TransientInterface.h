@@ -15,10 +15,16 @@
 #ifndef TRANSIENTINTERFACE_H
 #define TRANSIENTINTERFACE_H
 
-#include "InputParameters.h"
+#include "Moose.h"
 
+// Forward declarations
 class FEProblemBase;
+class InputParameters;
+class MooseObject;
 class TransientInterface;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<TransientInterface>();

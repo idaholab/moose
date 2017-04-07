@@ -15,7 +15,6 @@
 #ifndef NONLINEARSYSTEM_H
 #define NONLINEARSYSTEM_H
 
-#include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 
 /**

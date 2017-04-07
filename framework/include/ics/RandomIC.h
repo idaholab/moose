@@ -16,17 +16,20 @@
 #define RANDOMIC_H
 
 #include "InitialCondition.h"
-#include "InputParameters.h"
 
 // System includes
 #include <string>
 
 // Forward Declarations
+class InputParameters;
 class RandomIC;
 namespace libMesh
 {
 class Point;
 }
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<RandomIC>();

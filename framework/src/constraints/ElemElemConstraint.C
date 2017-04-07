@@ -13,8 +13,13 @@
 /****************************************************************/
 
 #include "ElemElemConstraint.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "ElementPairInfo.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"

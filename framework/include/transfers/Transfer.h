@@ -16,8 +16,8 @@
 #define TRANSFER_H
 
 // Moose
-#include "ParallelUniqueId.h"
 #include "MooseObject.h"
+#include "MooseTypes.h"
 #include "SetupInterface.h"
 #include "Restartable.h"
 

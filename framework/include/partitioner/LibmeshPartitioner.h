@@ -15,6 +15,8 @@
 #ifndef LIBMESHPARTITIONER_H
 #define LIBMESHPARTITIONER_H
 
+// MOOSE includes
+#include "MooseEnum.h"
 #include "MoosePartitioner.h"
 
 class LibmeshPartitioner;

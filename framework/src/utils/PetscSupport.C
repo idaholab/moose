@@ -34,16 +34,16 @@
 #include "MooseMesh.h"
 
 // libMesh includes
-#include "libmesh/libmesh_common.h"
 #include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/linear_implicit_system.h"
-#include "libmesh/sparse_matrix.h"
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
-#include "libmesh/petsc_linear_solver.h"
-#include "libmesh/petsc_preconditioner.h"
 #include "libmesh/getpot.h"
+#include "libmesh/linear_implicit_system.h"
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/petsc_linear_solver.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/petsc_nonlinear_solver.h"
+#include "libmesh/petsc_preconditioner.h"
+#include "libmesh/petsc_vector.h"
+#include "libmesh/sparse_matrix.h"
 
 // PETSc includes
 #include <petsc.h>

@@ -7,6 +7,9 @@
 
 #include "PorousFlowDispersiveFlux.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<PorousFlowDispersiveFlux>()

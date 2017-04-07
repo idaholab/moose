@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "MooseTypes.h"
 #include "RestartableData.h"
-#include "ParallelUniqueId.h"
 
 // Forward declarations
 class PostprocessorData;

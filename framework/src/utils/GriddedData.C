@@ -12,9 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "GriddedData.h"
+
 // MOOSE includes
 #include "MooseError.h"
-#include "GriddedData.h"
+
+// C++ includes
+#include <fstream>
 
 /**
  * Creates a GriddedData object by reading info from file_name

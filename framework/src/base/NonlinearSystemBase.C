@@ -17,6 +17,7 @@
 #include "Problem.h"
 #include "FEProblem.h"
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"

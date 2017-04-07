@@ -13,11 +13,13 @@
 /****************************************************************/
 
 #include "MooseVariableInterface.h"
-#include "Problem.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
+
 #include "Assembly.h"
 #include "MooseError.h" // mooseDeprecated
+#include "MooseTypes.h"
+#include "MooseVariable.h"
+#include "Problem.h"
+#include "SubProblem.h"
 
 MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
                                                bool nodal,

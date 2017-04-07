@@ -12,15 +12,19 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppVariableValueSampleTransfer.h"
-#include "MooseTypes.h"
+
+// MOOSE includes
 #include "FEProblem.h"
-#include "MultiApp.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
+#include "MultiApp.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/meshfree_interpolation.h"
+#include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
 
 template <>

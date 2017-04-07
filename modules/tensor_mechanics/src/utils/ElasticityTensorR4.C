@@ -6,6 +6,9 @@
 /****************************************************************/
 #include "ElasticityTensorR4.h"
 
+// MOOSE includes
+#include "PermutationTensor.h"
+
 template <>
 void
 mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v)

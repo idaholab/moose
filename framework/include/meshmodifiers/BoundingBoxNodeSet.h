@@ -15,9 +15,11 @@
 #ifndef BOUNDINGBOXNODESET_H
 #define BOUNDINGBOXNODESET_H
 
+// MOOSE includes
 #include "MeshModifier.h"
+#include "MooseEnum.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 // Forward Declaration

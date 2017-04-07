@@ -12,6 +12,9 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<NSInitialCondition>()

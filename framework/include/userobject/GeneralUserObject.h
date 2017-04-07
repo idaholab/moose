@@ -23,7 +23,6 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
-#include "MaterialPropertyInterface.h"
 
 // Forward Declarations
 class GeneralUserObject;

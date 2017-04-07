@@ -17,6 +17,9 @@
 
 #include "ThreadedNodeLoop.h"
 
+// MOOSE includes
+#include "MooseMesh.h" // ConstBndNodeRange
+
 // Forward declarations
 class FEProblemBase;
 

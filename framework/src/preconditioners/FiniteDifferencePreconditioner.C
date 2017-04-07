@@ -13,8 +13,11 @@
 /****************************************************************/
 
 #include "FiniteDifferencePreconditioner.h"
-#include "NonlinearSystem.h"
+
+// MOOSE includes
 #include "FEProblem.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/coupling_matrix.h"

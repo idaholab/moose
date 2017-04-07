@@ -18,10 +18,7 @@
 #include "SyntaxFormatterInterface.h"
 
 #include <string>
-#include <vector>
 #include <map>
-#include <cstddef>
-#include <sstream>
 
 // Forward declarations
 class InputParameters;

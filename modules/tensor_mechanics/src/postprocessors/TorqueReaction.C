@@ -7,7 +7,9 @@
 
 #include "TorqueReaction.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters

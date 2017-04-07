@@ -29,6 +29,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
+#include "MooseVariableBase.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 
@@ -79,6 +80,7 @@ class IntegratedBC;
 namespace libMesh
 {
 class CouplingMatrix;
+class NonlinearImplicitSystem;
 }
 
 template <>
@@ -1495,14 +1497,6 @@ protected:
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif // LIBMESH_HAVE_PETSC
-
-  /**
-   * Method for sorting the MooseVariables based on variable numbers
-   */
-  static bool sortMooseVariables(MooseVariable * a, MooseVariable * b)
-  {
-    return a->number() < b->number();
-  }
 
 private:
   bool _error_on_jacobian_nonzero_reallocation;

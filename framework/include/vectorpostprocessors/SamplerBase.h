@@ -16,11 +16,25 @@
 #define SAMPLERBASE_H
 
 // MOOSE includes
-#include "InputParameters.h"
+#include "MooseTypes.h"
 
 // Forward Declarations
+class InputParameters;
 class SamplerBase;
 class VectorPostprocessor;
+
+namespace libMesh
+{
+class Point;
+
+namespace Parallel
+{
+class Communicator;
+}
+}
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<SamplerBase>();

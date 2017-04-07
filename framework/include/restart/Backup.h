@@ -17,7 +17,6 @@
 
 // C++ includes
 #include <sstream>
-#include <list>
 #include <vector>
 
 /**

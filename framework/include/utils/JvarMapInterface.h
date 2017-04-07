@@ -8,7 +8,7 @@
 #define JVARMAPINTERFACE_H
 
 #include "MooseVariable.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 template <class T>
 class JvarMapInterfaceBase;

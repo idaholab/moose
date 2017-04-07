@@ -18,6 +18,8 @@
 #include "TimeIntegrator.h"
 
 // libmesh includes
+#include "libmesh/nonlinear_solver.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
 

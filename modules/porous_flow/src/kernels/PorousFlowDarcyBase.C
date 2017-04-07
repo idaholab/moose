@@ -7,11 +7,13 @@
 
 #include "PorousFlowDarcyBase.h"
 
+// MOOSE includes
 #include "Assembly.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

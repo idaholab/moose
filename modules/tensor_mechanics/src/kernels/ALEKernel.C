@@ -7,6 +7,9 @@
 
 #include "ALEKernel.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<ALEKernel>()

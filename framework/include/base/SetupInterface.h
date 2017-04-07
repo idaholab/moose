@@ -15,12 +15,16 @@
 #ifndef SETUPINTERFACE_H
 #define SETUPINTERFACE_H
 
-#include "ExecStore.h"
-#include "MooseEnum.h"
-#include "InputParameters.h"
+#include "MooseTypes.h"
+#include "MultiMooseEnum.h"
 
 // Forward declarations
+class InputParameters;
+class MooseObject;
 class SetupInterface;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<SetupInterface>();

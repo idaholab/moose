@@ -5,11 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-// MOOSE includes
 #include "GapConductance.h"
 
+// MOOSE includes
 #include "Function.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
 #include "AddVariableAction.h"

@@ -12,12 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "SolutionUserObject.h"
+
 // MOOSE includes
 #include "MooseError.h"
-#include "SolutionUserObject.h"
-#include "RotationMatrix.h"
-#include "MooseUtils.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
+#include "MooseVariable.h"
+#include "RotationMatrix.h"
 
 // libMesh includes
 #include "libmesh/equation_systems.h"

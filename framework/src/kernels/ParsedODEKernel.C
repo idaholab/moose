@@ -14,8 +14,11 @@
 
 #include "ParsedODEKernel.h"
 
+// MOOSE includes
+#include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
+// libMesh includes
 #include "libmesh/fparser_ad.hh"
 
 template <>

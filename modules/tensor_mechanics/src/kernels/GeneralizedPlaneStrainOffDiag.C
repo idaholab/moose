@@ -6,12 +6,16 @@
 /****************************************************************/
 
 #include "GeneralizedPlaneStrainOffDiag.h"
-#include "Material.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "Material.h"
+#include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

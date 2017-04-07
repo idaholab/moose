@@ -9,10 +9,14 @@
 #define FILERANGEBUILDER_H
 
 // MOOSE includes
-#include "InputParameters.h"
+#include "Moose.h"
 
 // Forward declarations
 class FileRangeBuilder;
+class InputParameters;
+
+template <typename T>
+InputParameters validParams();
 
 /**
  * To be called in the validParams functions of classes that need to

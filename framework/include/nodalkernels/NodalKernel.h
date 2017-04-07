@@ -26,7 +26,6 @@
 #include "GeometricSearchInterface.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
-#include "Assembly.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"

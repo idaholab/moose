@@ -6,8 +6,12 @@
 /****************************************************************/
 
 #include "RichardsMassChange.h"
-#include "Material.h"
 
+// MOOSE includes
+#include "Material.h"
+#include "MooseVariable.h"
+
+// C++ includes
 #include <iostream>
 
 template <>

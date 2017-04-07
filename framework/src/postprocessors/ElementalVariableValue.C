@@ -13,7 +13,10 @@
 /****************************************************************/
 
 #include "ElementalVariableValue.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 
 template <>

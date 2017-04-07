@@ -14,6 +14,9 @@
 
 #include "FunctionParserUtils.h"
 
+// MOOSE includes
+#include "InputParameters.h"
+
 template <>
 InputParameters
 validParams<FunctionParserUtils>()

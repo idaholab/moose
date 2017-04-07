@@ -8,23 +8,23 @@
 #define RANKTWOTENSOR_H
 
 #include "Moose.h"
-#include "PermutationTensor.h"
 
 #include "RankFourTensor.h"
-#include "DerivativeMaterialInterface.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
-#include "petscsys.h"
-#include "petscblaslapack.h"
-
 #include <vector>
 #include "MooseRandom.h"
 
+// Forward declarations
 class RankTwoTensor;
+class RankFourTensor;
+
+template <typename T>
+void mooseSetToZero(T & v);
 
 /**
  * Helper function template specialization to set an object to zero.

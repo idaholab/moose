@@ -82,10 +82,24 @@
 #include "NonlocalIntegratedBC.h"
 #include "ShapeElementUserObject.h"
 #include "ShapeSideUserObject.h"
+#include "MooseVariableScalar.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
+
+// Anonymous namespace for helper function
+namespace
+{
+/**
+ * Method for sorting the MooseVariables based on variable numbers
+ */
+bool
+sortMooseVariables(MooseVariable * a, MooseVariable * b)
+{
+  return a->number() < b->number();
+}
+}
 
 Threads::spin_mutex get_function_mutex;
 

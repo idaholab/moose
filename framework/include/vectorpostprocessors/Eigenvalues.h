@@ -16,10 +16,10 @@
 #define EIGENVALUES_H
 
 #include "GeneralVectorPostprocessor.h"
-#include "NonlinearEigenSystem.h"
 
 // Forward Declarations
 class Eigenvalues;
+class NonlinearEigenSystem;
 
 template <>
 InputParameters validParams<Eigenvalues>();

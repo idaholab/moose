@@ -18,6 +18,7 @@
 #include "ParallelUniqueId.h"
 
 // libmesh includes
+#include "libmesh/dof_map.h"
 #include "libmesh/threads.h"
 #include "libmesh/system.h"
 #include LIBMESH_INCLUDE_UNORDERED_SET

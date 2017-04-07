@@ -16,9 +16,10 @@
 #define SPLIT_H
 
 // MOOSE includes
-#include "Restartable.h"
+#include "MooseEnum.h"
 #include "MooseObject.h"
 #include "PetscSupport.h"
+#include "Restartable.h"
 
 // Forward declarations
 class FEProblemBase;

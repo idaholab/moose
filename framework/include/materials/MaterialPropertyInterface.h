@@ -20,11 +20,14 @@
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
-#include "InputParameters.h"
 
 // Forward declarations
+class InputParameters;
 class MaterialPropertyInterface;
 class MooseObject;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<MaterialPropertyInterface>();

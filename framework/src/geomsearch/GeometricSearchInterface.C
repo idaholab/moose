@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "GeometricSearchInterface.h"
+
+// MOOSE includes
 #include "GeometricSearchData.h"
-#include "PenetrationLocator.h"
-#include "NearestNodeLocator.h"
-#include "SystemBase.h"
 #include "MooseObject.h"
+#include "NearestNodeLocator.h"
+#include "PenetrationLocator.h"
+#include "SubProblem.h"
+#include "SystemBase.h"
 
 GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
   : _geometric_search_data(

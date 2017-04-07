@@ -8,9 +8,13 @@
 #ifndef MATERIALTENSORCALCULATOR_H
 #define MATERIALTENSORCALCULATOR_H
 
-#include "libmesh/vector_value.h"
+// MOOSE includes
 #include "InputParameters.h"
+#include "MooseEnum.h"
 #include "SymmTensor.h"
+
+// libMesh includes
+#include "libmesh/vector_value.h"
 
 class MaterialTensorCalculator;
 

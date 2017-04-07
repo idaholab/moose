@@ -17,8 +17,8 @@
 
 // Moose Includes
 #include "Damper.h"
-#include "ParallelUniqueId.h"
 #include "MaterialPropertyInterface.h"
+#include "MooseTypes.h"
 #include "MooseVariableBase.h"
 
 // Forward Declarations

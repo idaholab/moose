@@ -12,20 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "libmesh/libmesh_config.h"
-
-// moose includes
 #include "NonlinearEigenSystem.h"
-#include "EigenProblem.h"
-#include "TimeIntegrator.h"
+
+// MOOSE includes
 #include "DirichletBC.h"
+#include "EigenProblem.h"
 #include "IntegratedBC.h"
+#include "KernelBase.h"
 #include "NodalBC.h"
+#include "TimeIntegrator.h"
 
 // libmesh includes
-#include "libmesh/sparse_matrix.h"
-#include "libmesh/petsc_matrix.h"
 #include "libmesh/eigen_system.h"
+#include "libmesh/libmesh_config.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/sparse_matrix.h"
 
 #if LIBMESH_HAVE_SLEPC
 

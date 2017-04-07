@@ -15,12 +15,15 @@
 #ifndef MESHCHANGEDINTERFACE_H
 #define MESHCHANGEDINTERFACE_H
 
-#include "InputParameters.h"
-#include "ExecStore.h"
 #include "MooseEnum.h"
 
 // Forward declarations
+class FEProblemBase;
+class InputParameters;
 class MeshChangedInterface;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<MeshChangedInterface>();

@@ -7,7 +7,10 @@
 
 #include "ComputeCosseratIncrementalSmallStrain.h"
 
-// libmesh includes
+// MOOSE includes
+#include "PermutationTensor.h"
+
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

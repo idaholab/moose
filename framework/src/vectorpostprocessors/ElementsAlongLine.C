@@ -12,8 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "ElementsAlongLine.h"
+
+// MOOSE includes
+#include "LineSegment.h"
 #include "RayTracing.h"
 #include "MooseMesh.h"
 
