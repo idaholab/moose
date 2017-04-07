@@ -62,9 +62,10 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
                "together");
 
   std::vector<std::vector<Real>> y(m, std::vector<Real>(n));
+  unsigned int k = 0;
   for (unsigned int i = 0; i < m; ++i)
-    for (unsigned int j = 0; j < m; ++j)
-      y[i][j] = yvec[i * m + j];
+    for (unsigned int j = 0; j < n; ++j)
+      y[i][j] = yvec[k++];
 
   if (_yx11.empty())
     _yx11.resize(n, 1e30);
