@@ -18,8 +18,8 @@ public:
   SolidWall(const InputParameters & params);
   virtual ~SolidWall();
 
-  virtual void addVariables();
-  virtual void addMooseObjects();
+  virtual void addVariables() override;
+  virtual void addMooseObjects() override;
 
 protected:
   virtual void addMooseObjects1Phase();
