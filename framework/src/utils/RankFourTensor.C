@@ -876,7 +876,7 @@ RankFourTensor::isIsotropic() const
   // top left block
   const Real K1 = _vals[0][0][0][0];
   const Real K2 = _vals[0][0][1][1];
-  if (!MooseUtils::absoluteFuzzyEqual(K1 - 4.0 * mu / 3.0, K2 + 2.0 * mu / 3.0))
+  if (!MooseUtils::relativeFuzzyEqual(K1 - 4.0 * mu / 3.0, K2 + 2.0 * mu / 3.0))
     return false;
   if (_vals[1][1][1][1] != K1 || _vals[2][2][2][2] != K1)
     return false;
