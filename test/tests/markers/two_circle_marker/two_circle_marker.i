@@ -14,7 +14,7 @@
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 0.1
+    coef = 0.02
   [../]
   [./time]
     type = TimeDerivative
@@ -34,7 +34,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 2
+  num_steps = 6
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -51,9 +51,9 @@
     [./two_circle_marker]
       type = TwoCircleMarker
       point1 = '0.5 0.5 0'
-      radius1 = 0.2
-      point2 = '0.3 0.7 0'
-      radius2 = 0.2
+      radius1 = 0.3
+      point2 = '0.35 0.25 0'
+      radius2 = 0.3
       inside = refine
       outside = coarsen
     [../]
