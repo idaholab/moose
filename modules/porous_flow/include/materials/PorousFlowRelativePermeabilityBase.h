@@ -49,6 +49,9 @@ protected:
    */
   virtual Real dRelativePermeability(Real seff) const = 0;
 
+  /// Relative permeability is multiplied by this quantity
+  const Real _scaling;
+
   /// Name of (dummy) saturation primary variable
   VariableName _saturation_variable_name;
 
