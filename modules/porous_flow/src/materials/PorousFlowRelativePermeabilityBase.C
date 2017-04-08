@@ -13,6 +13,8 @@ validParams<PorousFlowRelativePermeabilityBase>()
 {
   InputParameters params = validParams<PorousFlowMaterialBase>();
   params.addRangeCheckedParam<Real>(
+      "scaling", 1.0, "scaling>=0", "Relative permeability is multiplied by this factor");
+  params.addRangeCheckedParam<Real>(
       "s_res",
       0,
       "s_res >= 0 & s_res < 1",
@@ -22,8 +24,6 @@ validParams<PorousFlowRelativePermeabilityBase>()
       0,
       "sum_s_res >= 0 & sum_s_res < 1",
       "Sum of residual saturations over all phases.  Must be between 0 and 1");
-  // Note for coders: currently only coded for nodal materials.  it is not difficult to generalise
-  // to quadpoint materials!
   params.addClassDescription("Base class for PorousFlow relative permeability materials");
   return params;
 }
@@ -31,6 +31,7 @@ validParams<PorousFlowRelativePermeabilityBase>()
 PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(
     const InputParameters & parameters)
   : PorousFlowMaterialBase(parameters),
+    _scaling(getParam<Real>("scaling")),
     _saturation_variable_name(_dictator.saturationVariableNameDummy()),
     _saturation(_nodal_material
                     ? getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
@@ -77,8 +78,8 @@ PorousFlowRelativePermeabilityBase::computeQpProperties()
     drelperm = 0.0;
   }
 
-  _relative_permeability[_qp] = relperm;
-  _drelative_permeability_ds[_qp] = drelperm * _dseff_ds;
+  _relative_permeability[_qp] = relperm * _scaling;
+  _drelative_permeability_ds[_qp] = drelperm * _dseff_ds * _scaling;
 }
 
 Real
