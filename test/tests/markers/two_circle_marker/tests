@@ -1,0 +1,32 @@
+[Tests]
+  [./two_circle_marker]
+    type = 'Exodiff'
+    input = 'two_circle_marker.i'
+    exodiff = 'two_circle_marker_out.e'
+  [../]
+  [./two_circle_marker_coarsen]
+    type = 'Exodiff'
+    input = 'two_circle_marker_coarsen.i'
+    exodiff = 'two_circle_marker_coarsen_out.e-s002'
+  [../]
+  [./two_circle_marker_gaussian_ic]
+    type = 'Exodiff'
+    input = 'two_circle_marker_gaussian_ic.i'
+    exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
+  [../]  
+  [./two_circle_marker_half_transient]
+    type = RunApp
+    input = 'two_circle_marker_gaussian_ic.i'
+    cli_args = 'Outputs/checkpoint=true --half-transient'
+    recover = false
+  [../]
+  [./two_circle_marker_recover]
+    type = 'Exodiff'
+    input = 'two_circle_marker_gaussian_ic.i'
+    cli_args = '--recover'
+    recover = false
+    delete_output_before_running = false
+    prereq = two_circle_marker_half_transient
+    exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
+  [../]
+[]    
