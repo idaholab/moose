@@ -93,8 +93,7 @@ NearestNodeLocator::findNodes()
     // This means there was a user specified inflation... so we can build a BB
     if (inflation.size() > 0)
     {
-      BoundingBox my_box =
-          MeshTools::create_local_bounding_box(_mesh);
+      BoundingBox my_box = MeshTools::create_local_bounding_box(_mesh);
 
       Real distance_x = 0;
       Real distance_y = 0;
