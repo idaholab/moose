@@ -57,8 +57,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
     // We might not have el on this processor in a distributed mesh,
     // but it should be somewhere and it ought to have a material
     // defined for its subdomain
-    if (!found_elem ||
-        (el && !mat.hasBlocks(el->subdomain_id())))
+    if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
       mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
   }
 
