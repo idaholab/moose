@@ -46,7 +46,7 @@
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
-    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
+    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   [../]
 []
 

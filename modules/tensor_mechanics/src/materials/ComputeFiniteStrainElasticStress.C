@@ -26,6 +26,14 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
 }
 
 void
+ComputeFiniteStrainElasticStress::initialSetup()
+{
+  if (!isElasticityTensorGuaranteedIsotropic())
+    mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
+               "that guarantee isotropic tensors.");
+}
+
+void
 ComputeFiniteStrainElasticStress::computeQpStress()
 {
   // Calculate the stress in the intermediate configuration
