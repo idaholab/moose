@@ -61,8 +61,7 @@ private:
   const PorousFlowDictator & _dictator;
 
   /// enum of properties
-  enum PropertyEnum
-  {
+  const enum class PropertyEnum {
     PRESSURE,
     SATURATION,
     TEMPERATURE,
@@ -72,9 +71,7 @@ private:
     RELPERM,
     ENTHALPY,
     INTERNAL_ENERGY
-  };
-
-  const PropertyEnum _property_enum;
+  } _property_enum;
 
   /// Phase index
   unsigned int _phase;

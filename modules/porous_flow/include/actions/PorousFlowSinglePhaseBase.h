@@ -31,7 +31,7 @@ protected:
   const NonlinearVariableName _pp_var;
 
   /// Determines the coupling type
-  const enum CouplingTypeEnum {
+  const enum class CouplingTypeEnum {
     Hydro,
     ThermoHydro,
     HydroMechanical,
@@ -39,10 +39,10 @@ protected:
   } _coupling_type;
 
   /// whether steady or transient simulation
-  const enum SimulationTypeChoiceEnum { STEADY, TRANSIENT } _simulation_type;
+  const enum class SimulationTypeChoiceEnum { STEADY, TRANSIENT } _simulation_type;
 
   /// Name of the fluid-properties UserObject
-  const UserObjectName _fp;
+  const UserObjectName & _fp;
 
   /// fluid specific heat capacity at constant volume
   const Real _biot_coefficient;

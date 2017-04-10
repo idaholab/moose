@@ -95,7 +95,7 @@
   [./mass0]
     type = PorousFlowFullySaturatedMassTimeDerivative
     variable = pp
-    simulation_type = ThermoHydroMechanical
+    coupling_type = ThermoHydroMechanical
     biot_coefficient = 0.9
   [../]
   [./dummyT]

@@ -56,7 +56,7 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_qp_dgradvar;
 
   /// Name of porosity-permeability relationship
-  const enum PoropermFunction { log_k, ln_k, exp_k } _poroperm_function;
+  const enum class PoropermFunction { log_k, ln_k, exp_k } _poroperm_function;
 
   /// Empirical constant AA in k = k_ijk * BB * exp(AA * phi)
   Real _AA;

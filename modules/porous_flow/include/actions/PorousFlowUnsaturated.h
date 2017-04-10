@@ -37,7 +37,7 @@ protected:
   const Real _van_genuchten_m;
 
   /// Fluid relative permeability type (FLAC or Corey)
-  const enum RelpermTypeChoiceEnum { FLAC, COREY } _relperm_type;
+  const enum class RelpermTypeChoiceEnum { FLAC, COREY } _relperm_type;
 
   /// Relative permeability exponent
   const Real _relative_permeability_exponent;

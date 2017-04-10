@@ -31,7 +31,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// If true, this Material will compute density and viscosity, and their derivatives
-  const bool _compute_rho_nu;
+  const bool _compute_rho_mu;
 
   /// If true, this Material will compute internal energy and its derivatives
   const bool _compute_internal_energy;

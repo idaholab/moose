@@ -63,12 +63,14 @@ PorousFlowUnsaturated::PorousFlowUnsaturated(const InputParameters & params)
     _s_res(getParam<Real>("residual_saturation"))
 {
   _objects_to_add.push_back("PorousFlowAdvectiveFlux");
-  if (_simulation_type == TRANSIENT)
+  if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowMassTimeDerivative");
-  if ((_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical) &&
-      _simulation_type == TRANSIENT)
+  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
+      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowMassVolumetricExpansion");
-  if (_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical)
+  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
+      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
     _objects_to_add.push_back("PorousFlowHeatAdvection");
   if (_add_saturation_aux)
     _objects_to_add.push_back("SaturationAux");
@@ -87,7 +89,6 @@ PorousFlowUnsaturated::act()
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<RealVectorValue>("gravity") = _gravity;
-    params.set<std::vector<SubdomainName>>("block") = {};
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -101,13 +102,12 @@ PorousFlowUnsaturated::act()
     params.set<NonlinearVariableName>("variable") = _pp_var;
     _problem->addKernel(kernel_type, kernel_name, params);
   }
-  if (_current_task == "add_kernel" && _simulation_type == TRANSIENT)
+  if (_current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
   {
     std::string kernel_name = "PorousFlowUnsaturated_MassTimeDerivative";
     std::string kernel_type = "PorousFlowMassTimeDerivative";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -123,14 +123,14 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical) &&
-      _current_task == "add_kernel" && _simulation_type == TRANSIENT)
+  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
+      _current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
   {
     std::string kernel_name = "PorousFlowUnsaturated_MassVolumetricExpansion";
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
       kernel_name = "PorousFlowUnsaturated_MassVolumetricExpansion" + Moose::stringify(i);
@@ -145,7 +145,8 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical) &&
+  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _current_task == "add_kernel")
   {
     std::string kernel_name = "PorousFlowUnsaturated_HeatAdvection";
@@ -167,7 +168,6 @@ PorousFlowUnsaturated::act()
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<Real>("al") = _van_genuchten_alpha;
     params.set<Real>("m") = _van_genuchten_m;
-    params.set<std::vector<SubdomainName>>("block") = {};
     _problem->addMaterial(material_type, material_name, params);
   }
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_nodal") && _current_task == "add_material")
@@ -180,21 +180,20 @@ PorousFlowUnsaturated::act()
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
     params.set<Real>("al") = _van_genuchten_alpha;
     params.set<Real>("m") = _van_genuchten_m;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<bool>("at_nodes") = true;
     _problem->addMaterial(material_type, material_name, params);
   }
 
   if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_qp"))
   {
-    if (_relperm_type == FLAC)
+    if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
       addRelativePermeabilityFLAC(false, 0, _relative_permeability_exponent, _s_res, _s_res);
     else
       addRelativePermeabilityCorey(false, 0, _relative_permeability_exponent, _s_res, _s_res);
   }
   if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_nodal"))
   {
-    if (_relperm_type == FLAC)
+    if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
       addRelativePermeabilityFLAC(true, 0, _relative_permeability_exponent, _s_res, _s_res);
     else
       addRelativePermeabilityCorey(true, 0, _relative_permeability_exponent, _s_res, _s_res);

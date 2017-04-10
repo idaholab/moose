@@ -43,9 +43,10 @@ PorousFlowBasicTHM::PorousFlowBasicTHM(const InputParameters & params)
     mooseError("PorousFlowBasicTHM can only be used for a single-component fluid, so that no "
                "mass-fraction variables should be provided");
   _objects_to_add.push_back("PorousFlowFullySaturatedDarcyBase");
-  if (_simulation_type == TRANSIENT)
+  if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowFullySaturatedMassTimeDerivative");
-  if (_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical)
+  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
+      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
     _objects_to_add.push_back("PorousflowFullySaturatedHeatAdvection");
 }
 
@@ -63,17 +64,15 @@ PorousFlowBasicTHM::act()
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<RealVectorValue>("gravity") = _gravity;
     params.set<bool>("multiply_by_density") = _multiply_by_density;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<NonlinearVariableName>("variable") = _pp_var;
     _problem->addKernel(kernel_type, kernel_name, params);
   }
-  if (_current_task == "add_kernel" && _simulation_type == TRANSIENT)
+  if (_current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
   {
     std::string kernel_name = "PorousFlowBasicTHM_MassTimeDerivative";
     std::string kernel_type = "PorousFlowFullySaturatedMassTimeDerivative";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<NonlinearVariableName>("variable") = _pp_var;
     params.set<Real>("biot_coefficient") = _biot_coefficient;
     params.set<bool>("multiply_by_density") = _multiply_by_density;
@@ -81,7 +80,8 @@ PorousFlowBasicTHM::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical) &&
+  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _current_task == "add_kernel")
   {
     std::string kernel_name = "PorousFlowBasicTHM_HeatAdvection";
@@ -101,7 +101,6 @@ PorousFlowBasicTHM::act()
     std::string material_name = "PorousFlowBasicTHM_1PhaseP_qp";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
-    params.set<std::vector<SubdomainName>>("block") = {};
     _problem->addMaterial(material_type, material_name, params);
   }
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_nodal") && _current_task == "add_material")
@@ -111,13 +110,14 @@ PorousFlowBasicTHM::act()
     std::string material_name = "PorousFlowBasicTHM_1PhaseP";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<bool>("at_nodes") = true;
     _problem->addMaterial(material_type, material_name, params);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowVolumetricStrain_qp") ||
-      _deps.dependsOn(_objects_to_add, "PorousFlowVolumetricStrain_nodal"))
+  if ((_deps.dependsOn(_objects_to_add, "PorousFlowVolumetricStrain_qp") ||
+       _deps.dependsOn(_objects_to_add, "PorousFlowVolumetricStrain_nodal")) &&
+      (_coupling_type == CouplingTypeEnum::HydroMechanical ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
     addVolumetricStrainMaterial(_coupled_displacements, false);
 
   if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_qp"))

@@ -44,7 +44,7 @@ protected:
   const bool _multiply_by_density;
 
   /// Determines whether mechanical and/or thermal contributions should be added to the residual
-  const enum CouplingTypeEnum {
+  const enum class CouplingTypeEnum {
     Hydro,
     ThermoHydro,
     HydroMechanical,
