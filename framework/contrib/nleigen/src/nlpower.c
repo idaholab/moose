@@ -58,9 +58,8 @@ PetscErrorCode EPSSetUp_NLPower(EPS eps)
   }
   if (!eps->max_it) eps->max_it = PetscMax(2000, 100 * eps->n);
 
-  if (!eps->which) {
-    ierr = EPSSetWhichEigenpairs_Default(eps); CHKERRQ(ierr);
-  }
+  /* The smallest eigenvalue is taken care by default */
+  if (!eps->which)  eps->which = EPS_SMALLEST_MAGNITUDE;
 
   if (eps->which != EPS_SMALLEST_MAGNITUDE && eps->which != EPS_TARGET_MAGNITUDE)
     SETERRQ(PetscObjectComm((PetscObject)eps), 1, "Wrong value of eps->which");

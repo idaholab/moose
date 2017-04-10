@@ -37,6 +37,7 @@ typedef struct {
   PetscErrorCode (*formJacobianB)(SNES, Vec, Mat, Mat, void *);
   PetscBool      eps_composed; /* compose eps */
   PetscBool      initialed; /* initialize snes */
+  PetscReal      dvalue;
 } EPS_MONOLITH;
 
 #undef __FUNCT__
@@ -56,9 +57,10 @@ PetscErrorCode EPSSetUp_Monolith(EPS eps)
     ierr = PetscInfo(eps, "Warning: parameter mpd ignored\n");CHKERRQ(ierr);
   }
   if (!eps->max_it) eps->max_it = PetscMax(2000, 100 * eps->n);
-  if (!eps->which) {
-    ierr = EPSSetWhichEigenpairs_Default(eps);CHKERRQ(ierr);
-  }
+
+  /* The smallest eigenvalue is taken care by default */
+  if (!eps->which)  eps->which = EPS_SMALLEST_MAGNITUDE;
+
   if (eps->which != EPS_SMALLEST_MAGNITUDE && eps->which != EPS_TARGET_MAGNITUDE)
     SETERRQ(PetscObjectComm((PetscObject)eps), 1, "Wrong value of eps->which");
   if (monolith->shift_type != EPS_POWER_SHIFT_CONSTANT) {
@@ -84,6 +86,8 @@ PetscErrorCode EPSSetUp_Monolith(EPS eps)
   /* to avoid slepc setup preconditioner too early */
   if (eps->st->P) eps->st->P = NULL;
   eps->st->transform = PETSC_FALSE;
+  monolith->dvalue = 0.0;
+  ierr = PetscOptionsGetReal(PETSC_NULL,"","-adjutable_jacobian_coeffient",&monolith->dvalue,NULL);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
@@ -154,7 +158,7 @@ PetscErrorCode FormJacobian_Monolith(SNES snes, Vec x, Mat J, Mat T, void *ctx)
 
   if (A != T) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_INCOMP, "A != T \n");
 
-  /*ierr = MatAXPY(T, -0.0 * eps->eigr[eps->nconv], B, SAME_NONZERO_PATTERN);CHKERRQ(ierr);*/
+  ierr = MatAXPY(T, -monolith->dvalue * eps->eigr[eps->nconv], B, SAME_NONZERO_PATTERN);CHKERRQ(ierr);
 
   ierr = MatAssemblyBegin(T, MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
   ierr = MatAssemblyEnd(T, MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
@@ -246,8 +250,8 @@ PetscErrorCode EPSSNESSolve_Monolith(EPS eps, Vec x, Vec y)
   }
   ierr = VecCopy(x, y);CHKERRQ(ierr);
   ierr = SNESSolve(nlpower->snes, NULL, y);CHKERRQ(ierr);
-  ierr = nlpower->formJacobianA(nlpower->snes, y, A, A, nlpower->jacobianctxA);CHKERRQ(ierr);
-  ierr = nlpower->formJacobianB(nlpower->snes, y, B, B, nlpower->jacobianctxB);CHKERRQ(ierr);
+  /*ierr = nlpower->formJacobianA(nlpower->snes, y, A, A, nlpower->jacobianctxA);CHKERRQ(ierr);
+  ierr = nlpower->formJacobianB(nlpower->snes, y, B, B, nlpower->jacobianctxB);CHKERRQ(ierr);*/
   PetscFunctionReturn(0);
 }
 
@@ -259,7 +263,6 @@ PetscErrorCode EPSSolve_Monolith(EPS eps)
   PetscInt k;
   Vec v, y, e;
   PetscReal relerr, norm;
-  PetscScalar rho, sigma;
   PetscBool breakdown;
   EPS_MONOLITH *monolith = (EPS_MONOLITH *)eps->data;
   ST st;
@@ -269,8 +272,6 @@ PetscErrorCode EPSSolve_Monolith(EPS eps)
   e = eps->work[0];
 
   ierr = EPSGetStartVector_Moose(eps, 0, NULL);CHKERRQ(ierr);
-  ierr = STGetShift(eps->st, &sigma);CHKERRQ(ierr); /* original shift */
-  rho = sigma;
 
   while (eps->reason == EPS_CONVERGED_ITERATING) {
     eps->its++;

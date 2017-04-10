@@ -23,7 +23,6 @@
 #include "TimeIntegrator.h"
 #include "SlepcSupport.h"
 
-
 // libmesh includes
 #include "libmesh/eigen_system.h"
 #include "libmesh/libmesh_config.h"
