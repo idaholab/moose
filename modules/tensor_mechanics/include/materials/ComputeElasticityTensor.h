@@ -17,16 +17,11 @@ class ComputeElasticityTensor : public ComputeRotatedElasticityTensorBase
 public:
   ComputeElasticityTensor(const InputParameters & parameters);
 
-  virtual bool isGuaranteedIsotropic() const override;
-
 protected:
-  virtual void computeQpElasticityTensor() override;
+  virtual void computeQpElasticityTensor();
 
   /// Individual material information
   RankFourTensor _Cijkl;
-
-private:
-  bool _is_isotropic;
 };
 
 #endif // COMPUTEELASTICITYTENSOR_H
