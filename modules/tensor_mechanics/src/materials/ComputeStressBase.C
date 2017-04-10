@@ -105,7 +105,7 @@ ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
     if (!_fe_problem.startedInitialSetup())
       mooseError("isElasticityTensorGuaranteedIsotropic() needs to be called in initialSetup()");
 
-    _elasticity_tensor_isotropic_guarantee = OptionalBool::TRUE;
+    _elasticity_tensor_isotropic_guarantee = OptionalBool::OB_TRUE;
 
     // Reference to MaterialWarehouse for testing and retrieving block ids
     const auto & warehouse = _fe_problem.getMaterialWarehouse();
@@ -130,7 +130,7 @@ ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
             {
               // we found at least one material on the set of block we operate on
               // that does _not_ guarantee an isotropic elasticity tensor
-              _elasticity_tensor_isotropic_guarantee = OptionalBool::FALSE;
+              _elasticity_tensor_isotropic_guarantee = OptionalBool::OB_FALSE;
               break;
             }
           }
@@ -139,5 +139,5 @@ ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
     }
   }
 
-  return _elasticity_tensor_isotropic_guarantee == OptionalBool::TRUE;
+  return _elasticity_tensor_isotropic_guarantee == OptionalBool::OB_TRUE;
 }

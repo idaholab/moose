@@ -54,8 +54,8 @@ private:
   enum class OptionalBool
   {
     UNDEFINED = -1,
-    FALSE = 0,
-    TRUE = 1
+    OB_FALSE = 0,
+    OB_TRUE = 1
   };
 
   /// store
