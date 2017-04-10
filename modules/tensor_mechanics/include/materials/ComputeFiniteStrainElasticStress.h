@@ -18,10 +18,8 @@ class ComputeFiniteStrainElasticStress : public ComputeStressBase
 public:
   ComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
-  void initialSetup() override;
-
 protected:
-  virtual void computeQpStress() override;
+  virtual void computeQpStress();
 
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
