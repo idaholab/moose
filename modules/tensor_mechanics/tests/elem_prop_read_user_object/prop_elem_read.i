@@ -96,7 +96,7 @@
   [./elasticity_tensor_with_Euler]
     type = ComputeElasticityTensorCP
     block = 0
-    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
+    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
   [../]
