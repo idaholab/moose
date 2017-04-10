@@ -74,7 +74,7 @@ FlowJunction::addMooseObjects()
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
   std::vector<VariableName> cv_u(1, FlowModel::VELOCITY);
   std::vector<VariableName> cv_pressure(1, FlowModel::PRESSURE);
-  std::vector<VariableName> cv_enthalpy(1, FlowModel::ENTHALPY);
+  std::vector<VariableName> cv_enthalpy(1, FlowModel::SPECIFIC_TOTAL_ENTHALPY);
   std::vector<VariableName> cv_rhoA(1, FlowModel::RHOA);
   std::vector<VariableName> cv_rhouA(1, FlowModel::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModel::RHOEA);
