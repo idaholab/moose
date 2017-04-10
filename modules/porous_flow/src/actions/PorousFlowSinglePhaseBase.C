@@ -59,29 +59,33 @@ PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & par
     _add_darcy_aux(getParam<bool>("add_darcy_aux")),
     _add_stress_aux(getParam<bool>("add_stress_aux"))
 {
-  if ((_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical) &&
+  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _temperature_var.size() != 1)
     mooseError("PorousFlowSinglePhaseBase: You need to specify a temperature variable to perform "
                "non-isothermal simulations");
 
-  if (_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical)
+  if (_coupling_type == CouplingTypeEnum::HydroMechanical ||
+      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
   {
     _objects_to_add.push_back("StressDivergenceTensors");
     _objects_to_add.push_back("Gravity");
     _objects_to_add.push_back("PorousFlowEffectiveStressCoupling");
   }
-  if (_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical)
+  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
+      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
   {
     _objects_to_add.push_back("PorousFlowHeatConduction");
-    if (_simulation_type == TRANSIENT)
+    if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
       _objects_to_add.push_back("PorousFlowEnergyTimeDerivative");
   }
-  if (_coupling_type == ThermoHydroMechanical && _simulation_type == TRANSIENT)
+  if (_coupling_type == CouplingTypeEnum::ThermoHydroMechanical &&
+      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowHeatVolumetricExpansion");
   if (_add_darcy_aux)
     _objects_to_add.push_back("PorousFlowDarcyVelocityComponent");
-  if (_add_stress_aux &&
-      (_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical))
+  if (_add_stress_aux && (_coupling_type == CouplingTypeEnum::HydroMechanical ||
+                          _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
     _objects_to_add.push_back("StressAux");
 }
 
@@ -90,7 +94,8 @@ PorousFlowSinglePhaseBase::act()
 {
   PorousFlowActionBase::act();
 
-  if ((_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical) &&
+  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _current_task == "add_kernel")
   {
     for (unsigned i = 0; i < _ndisp; ++i)
@@ -101,7 +106,6 @@ PorousFlowSinglePhaseBase::act()
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
       params.set<unsigned>("component") = i;
-      params.set<std::vector<SubdomainName>>("block") = {};
       _problem->addKernel(kernel_type, kernel_name, params);
 
       if (_gravity(i) != 0)
@@ -111,7 +115,6 @@ PorousFlowSinglePhaseBase::act()
         params = _factory.getValidParams(kernel_type);
         params.set<NonlinearVariableName>("variable") = _displacements[i];
         params.set<Real>("value") = _gravity(i);
-        params.set<std::vector<SubdomainName>>("block") = {};
         _problem->addKernel(kernel_type, kernel_name, params);
       }
 
@@ -122,12 +125,12 @@ PorousFlowSinglePhaseBase::act()
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<Real>("biot_coefficient") = _biot_coefficient;
       params.set<unsigned>("component") = i;
-      params.set<std::vector<SubdomainName>>("block") = {};
       _problem->addKernel(kernel_type, kernel_name, params);
     }
   }
 
-  if ((_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical) &&
+  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _current_task == "add_kernel")
   {
     std::string kernel_name = "PorousFlowUnsaturated_HeatConduction";
@@ -137,7 +140,7 @@ PorousFlowSinglePhaseBase::act()
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     _problem->addKernel(kernel_type, kernel_name, params);
 
-    if (_simulation_type == TRANSIENT)
+    if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     {
       kernel_name = "PorousFlowUnsaturated_EnergyTimeDerivative";
       kernel_type = "PorousFlowEnergyTimeDerivative";
@@ -148,14 +151,13 @@ PorousFlowSinglePhaseBase::act()
     }
   }
 
-  if (_coupling_type == ThermoHydroMechanical && _simulation_type == TRANSIENT &&
-      _current_task == "add_kernel")
+  if (_coupling_type == CouplingTypeEnum::ThermoHydroMechanical &&
+      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT && _current_task == "add_kernel")
   {
     std::string kernel_name = "PorousFlowUnsaturated_HeatVolumetricExpansion";
     std::string kernel_type = "PorousFlowHeatVolumetricExpansion";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<NonlinearVariableName>("variable") = _temperature_var[0];
     _problem->addKernel(kernel_type, kernel_name, params);
   }
@@ -170,26 +172,26 @@ PorousFlowSinglePhaseBase::act()
   if (_deps.dependsOn(_objects_to_add, "PorousFlowMassFraction_nodal"))
     addMassFractionMaterial(true);
 
-  const bool compute_rho_nu_qp = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_qp") ||
+  const bool compute_rho_mu_qp = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_qp") ||
                                  _deps.dependsOn(_objects_to_add, "PorousFlowViscosity_qp");
   const bool compute_e_qp = _deps.dependsOn(_objects_to_add, "PorousFlowInternalEnergy_qp");
   const bool compute_h_qp = _deps.dependsOn(_objects_to_add, "PorousFlowEnthalpy_qp");
-  if (compute_rho_nu_qp || compute_e_qp || compute_h_qp)
-    addSingleComponentFluidMaterial(false, 0, compute_rho_nu_qp, compute_e_qp, compute_h_qp, _fp);
-  const bool compute_rho_nu_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_nodal") ||
+  if (compute_rho_mu_qp || compute_e_qp || compute_h_qp)
+    addSingleComponentFluidMaterial(false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _fp);
+  const bool compute_rho_mu_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_nodal") ||
                                     _deps.dependsOn(_objects_to_add, "PorousFlowViscosity_nodal");
   const bool compute_e_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowInternalEnergy_nodal");
   const bool compute_h_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowEnthalpy_nodal");
-  if (compute_rho_nu_nodal || compute_e_nodal || compute_h_nodal)
+  if (compute_rho_mu_nodal || compute_e_nodal || compute_h_nodal)
     addSingleComponentFluidMaterial(
-        true, 0, compute_rho_nu_nodal, compute_e_nodal, compute_h_nodal, _fp);
+        true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
 
-  if (compute_rho_nu_qp)
+  if (compute_rho_mu_qp)
   {
     joinDensity(false);
     joinViscosity(false);
   }
-  if (compute_rho_nu_nodal)
+  if (compute_rho_mu_nodal)
   {
     joinDensity(true);
     joinViscosity(true);
@@ -216,8 +218,8 @@ PorousFlowSinglePhaseBase::act()
   // add AuxVariables and AuxKernels
   if (_add_darcy_aux)
     addDarcyAux(_gravity);
-  if (_add_stress_aux &&
-      (_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical))
+  if (_add_stress_aux && (_coupling_type == CouplingTypeEnum::HydroMechanical ||
+                          _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
     addStressAux();
 }
 
@@ -229,9 +231,11 @@ PorousFlowSinglePhaseBase::addDictator()
   InputParameters params = _factory.getValidParams(uo_type);
   std::vector<VariableName> pf_vars = _mass_fraction_vars;
   pf_vars.push_back(_pp_var);
-  if (_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical)
+  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
+      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
     pf_vars.push_back(_temperature_var[0]);
-  if (_coupling_type == HydroMechanical || _coupling_type == ThermoHydroMechanical)
+  if (_coupling_type == CouplingTypeEnum::HydroMechanical ||
+      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
     pf_vars.insert(pf_vars.end(), _coupled_displacements.begin(), _coupled_displacements.end());
   params.set<std::vector<VariableName>>("porous_flow_vars") = pf_vars;
   params.set<unsigned int>("number_fluid_phases") = 1;

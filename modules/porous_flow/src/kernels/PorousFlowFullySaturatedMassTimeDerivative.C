@@ -43,9 +43,10 @@ PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDeri
     _var_is_porflow_var(_dictator.isPorousFlowVariable(_var.number())),
     _multiply_by_density(getParam<bool>("multiply_by_density")),
     _coupling_type(getParam<MooseEnum>("coupling_type").getEnum<CouplingTypeEnum>()),
-    _includes_thermal(_coupling_type == ThermoHydro || _coupling_type == ThermoHydroMechanical),
-    _includes_mechanical(_coupling_type == HydroMechanical ||
-                         _coupling_type == ThermoHydroMechanical),
+    _includes_thermal(_coupling_type == CouplingTypeEnum::ThermoHydro ||
+                      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
+    _includes_mechanical(_coupling_type == CouplingTypeEnum::HydroMechanical ||
+                         _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _biot_modulus(getMaterialProperty<Real>("PorousFlow_constant_biot_modulus_qp")),
     _thermal_coeff(

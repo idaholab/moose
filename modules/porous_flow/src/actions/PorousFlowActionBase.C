@@ -90,7 +90,6 @@ PorousFlowActionBase::addSaturationAux(unsigned phase)
     params.set<unsigned>("index") = phase;
     params.set<AuxVariableName>("variable") = "saturation" + phase_str;
     params.set<MultiMooseEnum>("execute_on") = "timestep_end";
-    params.set<std::vector<SubdomainName>>("block") = {};
     _problem->addAuxKernel(aux_kernel_type, aux_kernel_name, params);
   }
 }
@@ -119,7 +118,6 @@ PorousFlowActionBase::addDarcyAux(const RealVectorValue & gravity)
     params.set<RealVectorValue>("gravity") = gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<MultiMooseEnum>("execute_on") = "timestep_end";
-    params.set<std::vector<SubdomainName>>("block") = {};
 
     std::string aux_kernel_name = "PorousFlowActionBase_Darcy_x_Aux";
     params.set<MooseEnum>("component") = "x";
@@ -178,7 +176,6 @@ PorousFlowActionBase::addStressAux()
     InputParameters params = _factory.getValidParams(aux_kernel_type);
 
     params.set<MaterialPropertyName>("rank_two_tensor") = "stress";
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<MultiMooseEnum>("execute_on") = "timestep_end";
 
     std::string aux_kernel_name = "PorousFlowAction_stress_xx";
@@ -251,7 +248,6 @@ PorousFlowActionBase::addTemperatureMaterial(bool at_nodes)
 
     params.applySpecificParameters(parameters(), {"temperature"});
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
 
     std::string material_name = "PorousFlowActionBase_Temperature_qp";
     if (at_nodes)
@@ -277,7 +273,6 @@ PorousFlowActionBase::addMassFractionMaterial(bool at_nodes)
 
     params.applySpecificParameters(parameters(), {"mass_fraction_vars"});
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
 
     std::string material_name = "PorousFlowActionBase_MassFraction_qp";
     if (at_nodes)
@@ -297,7 +292,6 @@ PorousFlowActionBase::addEffectiveFluidPressureMaterial(bool at_nodes)
     InputParameters params = _factory.getValidParams(material_type);
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
 
     std::string material_name = "PorousFlowUnsaturated_EffectiveFluidPressure_qp";
     if (at_nodes)
@@ -320,7 +314,6 @@ PorousFlowActionBase::addVolumetricStrainMaterial(const std::vector<VariableName
     std::string material_name = "PorousFlowActionBase_VolumetricStrain";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("displacements") = displacements;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<bool>("consistent_with_displaced_mesh") = consistent_with_displaced_mesh;
     _problem->addMaterial(material_type, material_name, params);
   }
@@ -341,7 +334,6 @@ PorousFlowActionBase::addSingleComponentFluidMaterial(bool at_nodes,
 
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<unsigned int>("phase") = phase;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<bool>("compute_density_and_viscosity") = compute_density_and_viscosity;
     params.set<bool>("compute_internal_energy") = compute_internal_energy;
     params.set<bool>("compute_enthalpy") = compute_enthalpy;
@@ -369,7 +361,6 @@ PorousFlowActionBase::addRelativePermeabilityCorey(
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<Real>("n") = n;
     params.set<unsigned int>("phase") = phase;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<Real>("s_res") = s_res;
     params.set<Real>("sum_s_res") = sum_s_res;
 
@@ -394,7 +385,6 @@ PorousFlowActionBase::addRelativePermeabilityFLAC(
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<Real>("m") = m;
     params.set<unsigned int>("phase") = phase;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<Real>("s_res") = s_res;
     params.set<Real>("sum_s_res") = sum_s_res;
 
@@ -417,7 +407,6 @@ PorousFlowActionBase::addJoiner(bool at_nodes,
     std::string material_type = "PorousFlowJoiner";
     InputParameters params = _factory.getValidParams(material_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<SubdomainName>>("block") = {};
     params.set<bool>("at_nodes") = at_nodes;
     params.set<std::string>("material_property") = material_property;
     _problem->addMaterial(material_type, output_name, params);

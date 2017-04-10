@@ -50,17 +50,17 @@ PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(
 {
   switch (_poroperm_function)
   {
-    case log_k:
+    case PoropermFunction::log_k:
       _AA = _A * std::log(10.0);
       _BB = std::pow(10.0, _B);
       break;
 
-    case ln_k:
+    case PoropermFunction::ln_k:
       _AA = _A;
       _BB = std::exp(_B);
       break;
 
-    case exp_k:
+    case PoropermFunction::exp_k:
       _AA = _A;
       _BB = _B;
       break;

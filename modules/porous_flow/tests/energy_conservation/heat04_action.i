@@ -1,3 +1,5 @@
+# heat04, but using an action
+#
 # The sample is a single unit element, with fixed displacements on
 # all sides.  A heat source of strength S (J/m^3/s) is applied into
 # the element.  There is no fluid flow or heat flow.  The rise
@@ -69,9 +71,24 @@
   [../]
 []
 
+[PorousFlowUnsaturated]
+  coupling_type = ThermoHydroMechanical
+  displacements = 'disp_x disp_y disp_z'
+  porepressure = pp
+  temperature = temp
+  dictator_name = Sir
+  biot_coefficient = 1.0
+  gravity = '0 0 0'
+  fp = the_simple_fluid
+  van_genuchten_alpha = 1.0E-12
+  van_genuchten_m = 0.5
+  relative_permeability_type = Corey
+  relative_permeability_exponent = 0.0
+[]
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  PorousFlowDictator = dictator
+  PorousFlowDictator = Sir
   block = 0
 []
 
@@ -110,57 +127,6 @@
 []
 
 [Kernels]
-  [./grad_stress_x]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./grad_stress_y]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./grad_stress_z]
-    type = StressDivergenceTensors
-    variable = disp_z
-    component = 2
-  [../]
-  [./poro_x]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 1.0
-    variable = disp_x
-    component = 0
-  [../]
-  [./poro_y]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 1.0
-    variable = disp_y
-    component = 1
-  [../]
-  [./poro_z]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 1.0
-    component = 2
-    variable = disp_z
-  [../]
-  [./poro_vol_exp]
-    type = PorousFlowMassVolumetricExpansion
-    variable = pp
-    fluid_component = 0
-  [../]
-  [./mass0]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    variable = pp
-  [../]
-  [./temp]
-    type = PorousFlowEnergyTimeDerivative
-    variable = temp
-  [../]
-  [./poro_vol_exp_temp]
-    type = PorousFlowHeatVolumetricExpansion
-    variable = temp
-  [../]
   [./heat_source]
     type = UserForcingFunction
     function = 1
@@ -184,30 +150,6 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./porosity]
     order = CONSTANT
     family = MONOMIAL
@@ -215,48 +157,6 @@
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
   [./porosity]
     type = MaterialRealAux
     property = PorousFlow_porosity_qp
@@ -264,26 +164,7 @@
   [../]
 []
 
-
-[UserObjects]
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'temp pp disp_x disp_y disp_z'
-    number_fluid_phases = 1
-    number_fluid_components = 1
-  [../]
-[]
-
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    at_nodes = true
-    temperature = temp
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-    temperature = temp
-  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1.5'
@@ -295,16 +176,6 @@
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./vol_strain]
-    type = PorousFlowVolumetricStrain
-  [../]
-  [./eff_fluid_pressure]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
-  [./eff_fluid_pressure_qp]
-    type = PorousFlowEffectiveFluidPressure
   [../]
   [./porosity]
     type = PorousFlowPorosityTHM
@@ -329,42 +200,13 @@
     specific_heat_capacity = 0.2
     density = 5.0
   [../]
-  [./ppss]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = pp
+  [./permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '0 0 0 0 0 0 0 0 0'
   [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseP
-    porepressure = pp
-  [../]
-  [./massfrac]
-    type = PorousFlowMassFraction
-    at_nodes = true
-  [../]
-  [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    at_nodes = true
-    temperature_unit = Kelvin
-    fp = the_simple_fluid
-    phase = 0
-  [../]
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    temperature_unit = Kelvin
-    fp = the_simple_fluid
-    phase = 0
-  [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    include_old = true
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./internal_energy_fluids]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_internal_energy_nodal
+  [./thermal_conductivity]
+    type = PorousFlowThermalConductivityIdeal
+    dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
   [../]
 []
 
@@ -450,9 +292,6 @@
 
 [Outputs]
   execute_on = 'initial timestep_end'
-  file_base = heat04
-  exodus = true
-  [./csv]
-    type = CSV
-  [../]
+  file_base = heat04_action
+  csv = true
 []
