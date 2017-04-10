@@ -12,66 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "SimpleFluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "SimpleFluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(SimpleFluidPropertiesTest);
-
-void
-SimpleFluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(SimpleFluidProperties);
-}
-
-void
-SimpleFluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters uo_pars = _factory->getValidParams("SimpleFluidProperties");
-  _fe_problem->addUserObject("SimpleFluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<SimpleFluidProperties>("fp");
-}
-
-void
-SimpleFluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-SimpleFluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-SimpleFluidPropertiesTest::properties()
+/**
+ * Verify calculation of the fluid properties
+ */
+TEST_F(SimpleFluidPropertiesTest, properties)
 {
   const Real thermal_exp = 2.14E-4;
   const Real cv = 4186.0;
@@ -114,8 +60,11 @@ SimpleFluidPropertiesTest::properties()
   ABS_TEST("henry", _fp->henryConstant(T), henry, 1.0E-8);
 }
 
-void
-SimpleFluidPropertiesTest::derivatives()
+/**
+ * Verify calculation of the derivatives by comparing with finite
+ * differences
+ */
+TEST_F(SimpleFluidPropertiesTest, derivatives)
 {
   const Real dP = 1.0E1;
   const Real dT = 1.0E-4;

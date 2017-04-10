@@ -12,68 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "IdealGasFluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "IdealGasFluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(IdealGasFluidPropertiesTest);
-
-void
-IdealGasFluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(IdealGasFluidProperties);
-}
-
-void
-IdealGasFluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters uo_pars = _factory->getValidParams("IdealGasFluidProperties");
-  uo_pars.set<Real>("R") = 287.04;
-  uo_pars.set<Real>("gamma") = 1.41;
-  _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>("fp");
-}
-
-void
-IdealGasFluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-IdealGasFluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-IdealGasFluidPropertiesTest::testAll()
+TEST_F(IdealGasFluidPropertiesTest, testAll)
 {
   Real T = 120. + 273.15; // K
   Real p = 101325;        // Pa

@@ -12,66 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "MethaneFluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "MethaneFluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(MethaneFluidPropertiesTest);
-
-void
-MethaneFluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(MethaneFluidProperties);
-}
-
-void
-MethaneFluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters uo_pars = _factory->getValidParams("MethaneFluidProperties");
-  _fe_problem->addUserObject("MethaneFluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<MethaneFluidProperties>("fp");
-}
-
-void
-MethaneFluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-MethaneFluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-MethaneFluidPropertiesTest::henry()
+/**
+ * Verify calculation of Henry's constant using data from
+ * Guidelines on the Henry's constant and vapour liquid distribution constant
+ * for gases in H20 and D20 at high temperatures, IAPWS (2004).
+ */
+TEST_F(MethaneFluidPropertiesTest, henry)
 {
   REL_TEST("henry", _fp->henryConstant(300.0), 4069.0e6, 1.0e-3);
   REL_TEST("henry", _fp->henryConstant(400.0), 6017.1e6, 1.0e-3);
@@ -79,8 +27,13 @@ MethaneFluidPropertiesTest::henry()
   REL_TEST("henry", _fp->henryConstant(600.0), 801.8e6, 1.0e-3);
 }
 
-void
-MethaneFluidPropertiesTest::properties()
+/**
+ * Verify calculation of thermophysical properties of methane using
+ * verification data provided in
+ * Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
+ * Computer Equations
+ */
+TEST_F(MethaneFluidPropertiesTest, properties)
 {
   // Pressure = 10 MPa, temperature = 350 K
   Real p = 10.0e6;
@@ -97,8 +50,11 @@ MethaneFluidPropertiesTest::properties()
   REL_TEST("thermal conductivity", _fp->k(0.0, T), 0.04113, 1.0e-3);
 }
 
-void
-MethaneFluidPropertiesTest::derivatives()
+/**
+ * Verify calculation of the derivatives of all properties by comparing with finite
+ * differences
+ */
+TEST_F(MethaneFluidPropertiesTest, derivatives)
 {
   Real p = 10.0e6;
   Real T = 350.0;

@@ -12,16 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RotationMatrixTest.h"
+#include "gtest/gtest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(RotationMatrixTest);
-
-RotationMatrixTest::RotationMatrixTest() {}
-
-RotationMatrixTest::~RotationMatrixTest() {}
+#include "RotationMatrix.h"
 
 void
-RotationMatrixTest::rotVecToVecTest()
+rotVtoU(RealVectorValue v, RealVectorValue u)
+{
+  RealTensorValue ident(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  RealVectorValue vhat = v / v.size();
+  RealVectorValue uhat = u / u.size();
+  RealTensorValue r = RotationMatrix::rotVec1ToVec2(v, u);
+  RealVectorValue rotated_v = r * vhat;
+  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+    EXPECT_NEAR(rotated_v(i), uhat(i), 0.0001);
+  EXPECT_EQ(r * r.transpose(), ident);
+  EXPECT_EQ(r.transpose() * r, ident);
+}
+
+TEST(RotationMatrix, rotVecToVec)
 {
   // rotations of unit vectors to the x, y and z axes
   rotVtoU(RealVectorValue(1, 0, 0), RealVectorValue(1, 0, 0));
@@ -61,16 +70,3 @@ RotationMatrixTest::rotVecToVecTest()
           RealVectorValue(0.7000797283703248, -0.4967869392655946, -0.18288272103373449));
 }
 
-void
-RotationMatrixTest::rotVtoU(RealVectorValue v, RealVectorValue u)
-{
-  RealTensorValue ident(1, 0, 0, 0, 1, 0, 0, 0, 1);
-  RealVectorValue vhat = v / v.size();
-  RealVectorValue uhat = u / u.size();
-  RealTensorValue r = RotationMatrix::rotVec1ToVec2(v, u);
-  RealVectorValue rotated_v = r * vhat;
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(rotated_v(i), uhat(i), 0.0001);
-  CPPUNIT_ASSERT(r * r.transpose() == ident);
-  CPPUNIT_ASSERT(r.transpose() * r == ident);
-}

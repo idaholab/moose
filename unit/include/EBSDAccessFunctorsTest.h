@@ -15,26 +15,44 @@
 #ifndef EBSDACCESSFUNCTORSTEST_H
 #define EBSDACCESSFUNCTORSTEST_H
 
+#include "gtest/gtest.h"
 #include "EBSDAccessFunctors.h"
 
-// CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
-
-class EBSDAccessFunctorsTest : public CppUnit::TestFixture, public EBSDAccessFunctors
+class EBSDAccessFunctorsTest : public ::testing::Test, public EBSDAccessFunctors
 {
-  CPPUNIT_TEST_SUITE(EBSDAccessFunctorsTest);
+protected:
+  void SetUp()
+  {
+    // EBSD point data
+    _point._phi1 = 1.0;
+    _point._Phi = 2.0;
+    _point._phi2 = 3.0;
+    _point._symmetry = 4;
+    _point._feature_id = 5;
+    _point._phase = 6;
+    _point._p = Point(9.0, 10.0, 11.0);
+    _point._custom.resize(3);
+    for (unsigned int i = 0; i < 3; ++i)
+      _point._custom[i] = i + 12.0;
 
-  CPPUNIT_TEST(test);
+    // Averaged EBSD data
+    _avg._angles = &_angles;
+    _avg._phase = 1;
+    _avg._local_id = 2;
+    _avg._symmetry = 3;
+    _avg._feature_id = 4;
+    _avg._n = 5;
+    _avg._p = Point(6.0, 7.0, 8.0);
+    _avg._custom.resize(3);
+    for (unsigned int i = 0; i < 3; ++i)
+      _avg._custom[i] = i + 9.0;
 
-  CPPUNIT_TEST_SUITE_END();
+    // initialize Euler angle object
+    _angles.phi1 = 0.1;
+    _angles.Phi = 0.2;
+    _angles.phi2 = 0.3;
+  }
 
-public:
-  void setUp();
-  void tearDown();
-
-  void test();
-
-private:
   EBSDPointData _point;
   EBSDAvgData _avg;
 

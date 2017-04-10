@@ -11,49 +11,42 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "RankTwoEigenRoutinesTest.h"
+#include "gtest/gtest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(RankTwoEigenRoutinesTest);
+#include "RankTwoTensor.h"
 
-RankTwoEigenRoutinesTest::RankTwoEigenRoutinesTest()
+TEST(RankTwoEigenRoutines, symmetricEigenvalues)
 {
-  _m0 = RankTwoTensor(0, 0, 0, 0, 0, 0, 0, 0, 0);
-  _m1 = RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 1);
-  _m2 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 3);
-  _m3 = RankTwoTensor(1, 2, 3, 2, -5, -6, 3, -6, 9);
-  _m4 = RankTwoTensor(1, 0, 0, 0, 3, 0, 0, 0, 2);
-  _m5 = RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 2);
-  _m6 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 1);
-  _m7 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 2);
-  _m8 = RankTwoTensor(1, 1, 0, 1, 1, 0, 0, 0, 2); // has eigenvalues 0, 2 and 2
-}
-
-RankTwoEigenRoutinesTest::~RankTwoEigenRoutinesTest() {}
-
-void
-RankTwoEigenRoutinesTest::symmetricEigenvaluesTest()
-{
+  RankTwoTensor m0(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
+  RankTwoTensor m3(1, 2, 3, 2, -5, -6, 3, -6, 9);
   std::vector<Real> eigvals;
 
-  _m0.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, eigvals[2], 0.0001);
+  m0.symmetricEigenvalues(eigvals);
+  EXPECT_NEAR(0, eigvals[0], 0.0001);
+  EXPECT_NEAR(0, eigvals[1], 0.0001);
+  EXPECT_NEAR(0, eigvals[2], 0.0001);
 
-  _m2.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(2, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3, eigvals[2], 0.0001);
+  m2.symmetricEigenvalues(eigvals);
+  EXPECT_NEAR(1, eigvals[0], 0.0001);
+  EXPECT_NEAR(2, eigvals[1], 0.0001);
+  EXPECT_NEAR(3, eigvals[2], 0.0001);
 
-  _m3.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-8.17113, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.51145, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(11.6597, eigvals[2], 0.0001);
+  m3.symmetricEigenvalues(eigvals);
+  EXPECT_NEAR(-8.17113, eigvals[0], 0.0001);
+  EXPECT_NEAR(1.51145, eigvals[1], 0.0001);
+  EXPECT_NEAR(11.6597, eigvals[2], 0.0001);
 }
 
-void
-RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
+TEST(RankTwoEigenRoutines, dsymmetricEigenvalues)
 {
+  RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
+  RankTwoTensor m3(1, 2, 3, 2, -5, -6, 3, -6, 9);
+  RankTwoTensor m5(1, 0, 0, 0, 1, 0, 0, 0, 2);
+  RankTwoTensor m6(1, 0, 0, 0, 2, 0, 0, 0, 1);
+  RankTwoTensor m7(1, 0, 0, 0, 2, 0, 0, 0, 2);
+  RankTwoTensor m8(1, 1, 0, 1, 1, 0, 0, 0, 2); // has eigenvalues 0, 2 and 2
+
   // this derivative is less trivial than dtrace and dsecondInvariant,
   // so let's check with a finite-difference approximation
   Real ep = 1E-5; // small finite-difference parameter
@@ -65,34 +58,34 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
   std::vector<Real> eigvalsep;       // eigenvalues of mep in ascending order
   std::vector<Real> eigvalsep_minus; // for equal-eigenvalue cases, i take a central difference
 
-  _m2.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m2;
+  m2.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m2;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
       mep.symmetricEigenvalues(eigvalsep);
       for (unsigned k = 0; k < 3; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k]) / ep, deriv[k](i, j), ep);
+        EXPECT_NEAR((eigvalsep[k] - eigvals[k]) / ep, deriv[k](i, j), ep);
       mep(i, j) -= ep;
     }
 
-  _m3.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m3;
+  m3.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m3;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
       mep.symmetricEigenvalues(eigvalsep);
       for (unsigned k = 0; k < 3; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k]) / ep, deriv[k](i, j), ep);
+        EXPECT_NEAR((eigvalsep[k] - eigvals[k]) / ep, deriv[k](i, j), ep);
       mep(i, j) -= ep;
     }
 
   // the equal-eigenvalue cases follow:
 
-  _m5.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m5;
+  m5.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m5;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
     {
@@ -103,12 +96,12 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
       mep(i, j) -= ep;
       mep.symmetricEigenvalues(eigvalsep_minus);
       for (unsigned k = 0; k < 3; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
+        EXPECT_NEAR((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
       mep(i, j) += ep / 2.0;
     }
 
-  _m6.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m6;
+  m6.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m6;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
     {
@@ -119,12 +112,12 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
       mep(i, j) -= ep;
       mep.symmetricEigenvalues(eigvalsep_minus);
       for (unsigned k = 0; k < 3; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
+        EXPECT_NEAR((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
       mep(i, j) += ep / 2.0;
     }
 
-  _m7.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m7;
+  m7.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m7;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
     {
@@ -135,12 +128,12 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
       mep(i, j) -= ep;
       mep.symmetricEigenvalues(eigvalsep_minus);
       for (unsigned k = 0; k < 3; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
+        EXPECT_NEAR((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
       mep(i, j) += ep / 2.0;
     }
 
-  _m8.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m8;
+  m8.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m8;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
     {
@@ -151,7 +144,7 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
       mep(i, j) -= ep;
       mep.symmetricEigenvalues(eigvalsep_minus);
       for (unsigned k = 0; k < 3; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
+        EXPECT_NEAR((eigvalsep[k] - eigvalsep_minus[k]) / ep, deriv[k](i, j), ep);
       mep(i, j) += ep / 2.0;
     }
 }
@@ -174,37 +167,41 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
 * Furthermore the validity of all the elements of rank four tensor has been tested in
 * "d2symmetricEigenvaluesTest2" method using finite difference method.
 */
-void
-RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest1()
+TEST(RankTwoEigenRoutines, d2symmetricEigenvaluesTest1)
 {
+  RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
+  RankTwoTensor m4(1, 0, 0, 0, 3, 0, 0, 0, 2);
+
   std::vector<RankFourTensor> second_deriv;
-  _m4.d2symmetricEigenvalues(second_deriv);
+  m4.d2symmetricEigenvalues(second_deriv);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](0, 0, 0, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](0, 0, 0, 1), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.25, second_deriv[0](0, 1, 0, 1), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.25, second_deriv[0](0, 1, 1, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](1, 1, 0, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](2, 2, 0, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](1, 1, 1, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](0, 0, 0, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](0, 0, 0, 1), 0.000001);
+  EXPECT_NEAR(-0.25, second_deriv[0](0, 1, 0, 1), 0.000001);
+  EXPECT_NEAR(-0.25, second_deriv[0](0, 1, 1, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](1, 1, 0, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](2, 2, 0, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](1, 1, 1, 0), 0.000001);
 
-  _m2.d2symmetricEigenvalues(second_deriv);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](0, 0, 0, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](0, 0, 0, 1), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.5, second_deriv[0](0, 1, 0, 1), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.5, second_deriv[0](0, 1, 1, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](1, 1, 0, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](2, 2, 0, 0), 0.000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, second_deriv[0](1, 1, 1, 0), 0.000001);
+  m2.d2symmetricEigenvalues(second_deriv);
+  EXPECT_NEAR(0, second_deriv[0](0, 0, 0, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](0, 0, 0, 1), 0.000001);
+  EXPECT_NEAR(-0.5, second_deriv[0](0, 1, 0, 1), 0.000001);
+  EXPECT_NEAR(-0.5, second_deriv[0](0, 1, 1, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](1, 1, 0, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](2, 2, 0, 0), 0.000001);
+  EXPECT_NEAR(0, second_deriv[0](1, 1, 1, 0), 0.000001);
 }
 
 /**
 * Second derivative of Eginvalues are compared with finite difference method
 * This method checks all the elements in RankFourTensor
 **/
-void
-RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
+TEST(RankTwoEigenRoutines, d2symmetricEigenvaluesTest2)
 {
+  RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
+  RankTwoTensor m3(1, 2, 3, 2, -5, -6, 3, -6, 9);
+
   Real ep = 1E-5; // small finite-difference parameter
   std::vector<Real> eigvals, eigvalsep,
       eigvalsep_minus; // eigenvalues in ascending order provided by RankTwoTensor
@@ -214,9 +211,9 @@ RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
 
   RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
 
-  _m2.d2symmetricEigenvalues(second_deriv);
-  _m2.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m2;
+  m2.d2symmetricEigenvalues(second_deriv);
+  m2.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m2;
   for (unsigned int m = 0; m < 3; m++)
     for (unsigned i = 0; i < 3; i++)
       for (unsigned j = 0; j < 3; j++)
@@ -226,15 +223,14 @@ RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
           {
             mep(k, l) += ep;
             mep.dsymmetricEigenvalues(eigvalsep, derivep);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                (derivep[m](i, j) - deriv[m](i, j)) / ep, second_deriv[m](i, j, k, l), ep);
+            EXPECT_NEAR((derivep[m](i, j) - deriv[m](i, j)) / ep, second_deriv[m](i, j, k, l), ep);
             mep(k, l) -= ep;
           }
       }
 
-  _m3.d2symmetricEigenvalues(second_deriv);
-  _m3.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m3;
+  m3.d2symmetricEigenvalues(second_deriv);
+  m3.dsymmetricEigenvalues(eigvals, deriv);
+  mep = m3;
   for (unsigned int m = 0; m < 3; m++)
     for (unsigned i = 0; i < 3; i++)
       for (unsigned j = 0; j < 3; j++)
@@ -244,33 +240,32 @@ RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
           {
             mep(k, l) += ep;
             mep.dsymmetricEigenvalues(eigvalsep, derivep);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                (derivep[m](i, j) - deriv[m](i, j)) / ep, second_deriv[m](i, j, k, l), ep);
+            EXPECT_NEAR((derivep[m](i, j) - deriv[m](i, j)) / ep, second_deriv[m](i, j, k, l), ep);
             mep(k, l) -= ep;
           }
       }
 }
 
-void
-RankTwoEigenRoutinesTest::someIdentitiesTest()
+TEST(RankTwoEigenRoutines, someIdentities)
 {
+  RankTwoTensor m3(1, 2, 3, 2, -5, -6, 3, -6, 9);
+
   // checks identities that should hold if eigenvalues
   // and invariants are correctly calculated
   std::vector<Real> eigvals;
-  _m3.symmetricEigenvalues(eigvals);
+  m3.symmetricEigenvalues(eigvals);
 
-  Real mean = _m3.trace() / 3.0;
-  Real secondInvariant = _m3.secondInvariant();
+  Real mean = m3.trace() / 3.0;
+  Real secondInvariant = m3.secondInvariant();
   Real shear = std::sqrt(secondInvariant);
-  _m3.thirdInvariant();
+  m3.thirdInvariant();
 
-  Real lode = std::asin(_m3.sin3Lode(0, 0) / 3.0);
+  Real lode = std::asin(m3.sin3Lode(0, 0) / 3.0);
 
   Real two_pi_over_3 = 2.09439510239;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+  EXPECT_NEAR(
       eigvals[0], 2 * shear * std::sin(lode - two_pi_over_3) / std::sqrt(3.0) + mean, 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      eigvals[1], 2 * shear * std::sin(lode) / std::sqrt(3.0) + mean, 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+  EXPECT_NEAR(eigvals[1], 2 * shear * std::sin(lode) / std::sqrt(3.0) + mean, 0.0001);
+  EXPECT_NEAR(
       eigvals[2], 2 * shear * std::sin(lode + two_pi_over_3) / std::sqrt(3.0) + mean, 0.0001);
 }

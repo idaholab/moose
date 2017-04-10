@@ -14,49 +14,8 @@
 
 #include "ParsedFunctionTest.h"
 
-// Moose includes
-#include "InputParameters.h"
-#include "MooseParsedFunction.h"
-#include "FEProblem.h"
-#include "MooseUnitApp.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "MooseParsedFunctionWrapper.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(ParsedFunctionTest);
-
-void
-ParsedFunctionTest::init()
+TEST_F(ParsedFunctionTest, basicConstructor)
 {
-  const char * argv[2] = {"foo", "\0"};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("_object_name") = "mesh";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("_object_name") = "FEProblem";
-  _fe_problem = new FEProblem(problem_params);
-}
-
-void
-ParsedFunctionTest::finalize()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-ParsedFunctionTest::basicConstructor()
-{
-  init();
-
   InputParameters params = _factory->getValidParams("ParsedFunction");
   // test constructor with no additional variables
   params.set<FEProblem *>("_fe_problem") = _fe_problem;
@@ -66,16 +25,11 @@ ParsedFunctionTest::basicConstructor()
   params.set<std::string>("_object_name") = "test";
   MooseParsedFunction f(params);
   f.initialSetup();
-  CPPUNIT_ASSERT(f.value(4, Point(1, 2, 3)) == 11);
-
-  finalize();
+  EXPECT_EQ(f.value(4, Point(1, 2, 3)), 11);
 }
 
-void
-ParsedFunctionTest::advancedConstructor()
+TEST_F(ParsedFunctionTest, advancedConstructor)
 {
-  init();
-
   // test the constructor with one variable
   std::vector<std::string> one_var(1);
   one_var[0] = "q";
@@ -95,8 +49,8 @@ ParsedFunctionTest::advancedConstructor()
   f.initialSetup();
   // Access address via pointer to MooseParsedFunctionWrapper that contains pointer to
   // libMesh::ParsedFunction
-  f._function_ptr->_function_ptr->getVarAddress("q") = 4;
-  CPPUNIT_ASSERT(f.value(0, Point(1, 2)) == 7);
+  fptr(f)->getVarAddress("q") = 4;
+  EXPECT_EQ(f.value(0, Point(1, 2)), 7);
 
   // test the constructor with three variables
   std::vector<std::string> three_vars(3);
@@ -116,10 +70,10 @@ ParsedFunctionTest::advancedConstructor()
 
   MooseParsedFunction f2(params2);
   f2.initialSetup();
-  f2._function_ptr->_function_ptr->getVarAddress("q") = 4;
-  f2._function_ptr->_function_ptr->getVarAddress("w") = 2;
-  f2._function_ptr->_function_ptr->getVarAddress("r") = 1.5;
-  CPPUNIT_ASSERT(f2.value(0, Point(2, 4)) == 9);
+  fptr(f2)->getVarAddress("q") = 4;
+  fptr(f2)->getVarAddress("w") = 2;
+  fptr(f2)->getVarAddress("r") = 1.5;
+  EXPECT_EQ(f2.value(0, Point(2, 4)), 9);
 
   // test the constructor with one variable that's set
   std::vector<std::string> one_val(1);
@@ -136,7 +90,7 @@ ParsedFunctionTest::advancedConstructor()
 
   MooseParsedFunction f3(params3);
   f3.initialSetup();
-  CPPUNIT_ASSERT(f3.value(0, 2) == 5);
+  EXPECT_EQ(f3.value(0, 2), 5);
 
   // test the constructor with three variables
   std::vector<std::string> three_vals(3);
@@ -155,19 +109,14 @@ ParsedFunctionTest::advancedConstructor()
 
   MooseParsedFunction f4(params4);
   f4.initialSetup();
-  f4._function_ptr->_function_ptr->getVarAddress("r") = 2;
-  CPPUNIT_ASSERT(f4.value(0, Point(2, 4)) == 6);
-  f4._function_ptr->_function_ptr->getVarAddress("r") = 4;
-  CPPUNIT_ASSERT(f4.value(0, Point(2, 4)) == 5);
-
-  finalize();
+  fptr(f4)->getVarAddress("r") = 2;
+  EXPECT_EQ(f4.value(0, Point(2, 4)), 6);
+  fptr(f4)->getVarAddress("r") = 4;
+  EXPECT_EQ(f4.value(0, Point(2, 4)), 5);
 }
 
-void
-ParsedFunctionTest::testVariables()
+TEST_F(ParsedFunctionTest, testVariables)
 {
-  init();
-
   // a lot of this functionality is tested in advancedConstructor as well
   // test one variable, make sure we can change it by the reference any time
   std::vector<std::string> one_var(1);
@@ -185,13 +134,13 @@ ParsedFunctionTest::testVariables()
 
   MooseParsedFunction f(params);
   f.initialSetup();
-  Real & q = f._function_ptr->_function_ptr->getVarAddress("q");
+  Real & q = fptr(f)->getVarAddress("q");
   q = 4;
-  CPPUNIT_ASSERT(f.value(0, Point(1, 2)) == 7);
+  EXPECT_EQ(f.value(0, Point(1, 2)), 7);
   q = 2;
-  CPPUNIT_ASSERT(f.value(0, Point(1, 2)) == 5);
+  EXPECT_EQ(f.value(0, Point(1, 2)), 5);
   q = -4;
-  CPPUNIT_ASSERT(f.value(0, Point(1, 2)) == -1);
+  EXPECT_EQ(f.value(0, Point(1, 2)), -1);
 
   // test three variables, test updating them randomly
   std::vector<std::string> three_vars(3);
@@ -211,30 +160,25 @@ ParsedFunctionTest::testVariables()
 
   MooseParsedFunction f2(params2);
   f2.initialSetup();
-  Real & q2 = f2._function_ptr->_function_ptr->getVarAddress("q");
-  Real & w2 = f2._function_ptr->_function_ptr->getVarAddress("w");
-  Real & r2 = f2._function_ptr->_function_ptr->getVarAddress("r");
+  Real & q2 = fptr(f2)->getVarAddress("q");
+  Real & w2 = fptr(f2)->getVarAddress("w");
+  Real & r2 = fptr(f2)->getVarAddress("r");
   q2 = 4;
   w2 = 2;
   r2 = 1.5;
-  CPPUNIT_ASSERT(f2.value(0, Point(2, 4)) == 9);
+  EXPECT_EQ(f2.value(0, Point(2, 4)), 9);
   q2 = 1;
   w2 = 4;
   r2 = 2.5;
-  CPPUNIT_ASSERT(f2.value(0, Point(2, 4)) == 7);
+  EXPECT_EQ(f2.value(0, Point(2, 4)), 7);
   q2 = 2;
-  CPPUNIT_ASSERT(f2.value(0, Point(2, 4)) == 8);
+  EXPECT_EQ(f2.value(0, Point(2, 4)), 8);
   w2 = 3;
-  CPPUNIT_ASSERT(f2.value(0, Point(2, 6)) == 9);
-
-  finalize();
+  EXPECT_EQ(f2.value(0, Point(2, 6)), 9);
 }
 
-void
-ParsedFunctionTest::testConstants()
+TEST_F(ParsedFunctionTest, testConstants)
 {
-  init();
-
   // this functions tests that pi and e get correctly substituted
   // it also tests built in functions of the function parser
   InputParameters params = _factory->getValidParams("ParsedFunction");
@@ -246,7 +190,7 @@ ParsedFunctionTest::testConstants()
 
   MooseParsedFunction f(params);
   f.initialSetup();
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(2, f.value(0, 1), 0.0000001);
+  EXPECT_NEAR(2, f.value(0, 1), 0.0000001);
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
   params2.set<std::string>("_object_name") = "test2";
@@ -257,9 +201,7 @@ ParsedFunctionTest::testConstants()
 
   MooseParsedFunction f2(params2);
   f2.initialSetup();
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, f2.value(0, 1), 0.0000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1, f2.value(0, 0.5), 0.0000001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1, f2.value(0, 1.5), 0.0000001);
-
-  finalize();
+  EXPECT_NEAR(0, f2.value(0, 1), 0.0000001);
+  EXPECT_NEAR(1, f2.value(0, 0.5), 0.0000001);
+  EXPECT_NEAR(-1, f2.value(0, 1.5), 0.0000001);
 }

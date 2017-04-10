@@ -12,25 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Euler2RGBTest.h"
+#include "gtest/gtest.h"
 
 // Moose includes
 #include "Euler2RGB.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(Euler2RGBTest);
-
-void
-Euler2RGBTest::setUp()
-{
-}
-
-void
-Euler2RGBTest::tearDown()
-{
-}
-
-void
-Euler2RGBTest::test()
+TEST(Euler2RGBTest, test)
 {
   const unsigned int nsamples = 23;
 
@@ -84,9 +71,9 @@ Euler2RGBTest::test()
           sd, samples[i].phi1, samples[i].phi, samples[i].phi2, samples[i].phase, samples[i].sym);
 
       Real RGBint = 0.0;
-      for (unsigned int i = 0; i < 3; ++i)
-        RGBint = 256 * RGBint + (RGB(i) >= 1 ? 255 : std::floor(RGB(i) * 256.0));
+      for (unsigned int j = 0; j < 3; ++j)
+        RGBint = 256 * RGBint + (RGB(j) >= 1 ? 255 : std::floor(RGB(j) * 256.0));
 
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(samples[i].expect[sd - 1], RGBint, 0.00001);
+      EXPECT_NEAR(samples[i].expect[sd - 1], RGBint, 0.00001) << "case " << i + 1 << " failed";
     }
 }

@@ -11,19 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "RankFourTensorTest.h"
+#include "gtest/gtest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(RankFourTensorTest);
+#include "RankFourTensor.h"
 
-RankFourTensorTest::RankFourTensorTest()
-{
-  _iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
-}
+RankFourTensor iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
 
-RankFourTensorTest::~RankFourTensorTest() {}
-
-void
-RankFourTensorTest::invSymmTest1()
+TEST(RankFourTensor, invSymm1)
 {
   // inverse check for a standard symmetric-isotropic tensor
   std::vector<Real> input(2);
@@ -31,11 +25,10 @@ RankFourTensorTest::invSymmTest1()
   input[1] = 3;
   RankFourTensor a(input, RankFourTensor::symmetric_isotropic);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
+  EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }
 
-void
-RankFourTensorTest::invSymmTest2()
+TEST(RankFourTensor, invSymm2)
 {
   // following (basically random) "a" tensor has symmetry
   // a_ijkl = a_jikl = a_ijlk
@@ -78,5 +71,5 @@ RankFourTensorTest::invSymmTest2()
   a(1, 2, 1, 2) = a(1, 2, 2, 1) = a(2, 1, 1, 2) = a(2, 1, 2, 1) = 1.4;
   a(1, 2, 2, 2) = a(2, 1, 2, 2) = 0.1;
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
+  EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }

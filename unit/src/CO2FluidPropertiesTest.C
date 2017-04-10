@@ -12,80 +12,45 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "CO2FluidPropertiesTest.h"
+#include "Utils.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "CO2FluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(CO2FluidPropertiesTest);
-
-void
-CO2FluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(CO2FluidProperties);
-}
-
-void
-CO2FluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters uo_pars = _factory->getValidParams("CO2FluidProperties");
-  _fe_problem->addUserObject("CO2FluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<CO2FluidProperties>("fp");
-}
-
-void
-CO2FluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-CO2FluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-CO2FluidPropertiesTest::melting()
+/**
+ * Verify calculation of melting pressure using experimental data from
+ * Michels et al, The melting line of carbon dioxide up to 2800 atmospheres,
+ * Physica 9 (1942).
+ * Note that results in this reference are given in atm, but have been
+ * converted to MPa here.
+ * As we are comparing with experimental data, calculated values within 1% are
+ * considered satisfactory.
+ */
+TEST_F(CO2FluidPropertiesTest, melting)
 {
   REL_TEST("melting", _fp->meltingPressure(217.03), 2.57e6, 1.0e-2);
   REL_TEST("melting", _fp->meltingPressure(235.29), 95.86e6, 1.0e-2);
   REL_TEST("melting", _fp->meltingPressure(266.04), 286.77e6, 1.0e-2);
 }
 
-void
-CO2FluidPropertiesTest::sublimation()
+/**
+ * Verify calculation of sublimation pressure using data from
+ * Bedford et al., Recommended values of temperature for a selected set of
+ * secondary reference points, Metrologia 20 (1984).
+ */
+TEST_F(CO2FluidPropertiesTest, sublimation)
 {
   REL_TEST("sublimation", _fp->sublimationPressure(194.6857), 0.101325e6, 1.0e-4);
 }
 
-void
-CO2FluidPropertiesTest::vapor()
+/**
+ * Verify calculation of vapor pressure, vapor density and saturated liquid
+ * density using experimental data from
+ * Duschek et al., Measurement and correlation of the (pressure, density, temperature)
+ * relation of cabon dioxide II. Saturated-liquid and saturated-vapor densities and
+ * the vapor pressure along the entire coexstance curve, J. Chem. Thermo. 22 (1990).
+ * As we are comparing with experimental data, calculated values within 1% are
+ * considered satisfactory.
+ */
+TEST_F(CO2FluidPropertiesTest, vapor)
 {
   // Vapor pressure
   REL_TEST("vapor", _fp->vaporPressure(217.0), 0.52747e6, 1.0e-2);
@@ -103,16 +68,27 @@ CO2FluidPropertiesTest::vapor()
   REL_TEST("saturated liquid density", _fp->saturatedLiquidDensity(303.8), 554.14, 1.0e-2);
 }
 
-void
-CO2FluidPropertiesTest::partialDensity()
+/**
+ * Verify calculation of partial density at infinite dilution using data from
+ * Hnedkovsky et al., Volumes of aqueous solutions of CH4, CO2, H2S, and NH3
+ * at temperatures from 298.15 K to 705 K and pressures to 35 MPa,
+ * J. Chem. Thermo. 28, 1996.
+ * As we are comparing with experimental data, calculated values within 5% are
+ * considered satisfactory.
+ */
+TEST_F(CO2FluidPropertiesTest, partialDensity)
 {
   REL_TEST("partial density", _fp->partialDensity(373.15), 1182.8, 5.0e-2);
   REL_TEST("partial density", _fp->partialDensity(473.35), 880.0, 5.0e-2);
   REL_TEST("partial density", _fp->partialDensity(573.15), 593.8, 5.0e-2);
 }
 
-void
-CO2FluidPropertiesTest::henry()
+/**
+ * Verify calculation of Henry's constant using data from
+ * Guidelines on the Henry's constant and vapour liquid distribution constant
+ * for gases in H20 and D20 at high temperatures, IAPWS (2004).
+ */
+TEST_F(CO2FluidPropertiesTest, henry)
 {
   REL_TEST("henry", _fp->henryConstant(300.0), 173.63e6, 1.0e-3);
   REL_TEST("henry", _fp->henryConstant(400.0), 579.84e6, 1.0e-3);
@@ -120,24 +96,39 @@ CO2FluidPropertiesTest::henry()
   REL_TEST("henry", _fp->henryConstant(600.0), 259.53e6, 1.0e-3);
 }
 
-void
-CO2FluidPropertiesTest::thermalConductivity()
+/**
+ * Verify calculation of thermal conductivity using data from
+ * Scalabrin et al., A Reference Multiparameter Thermal Conductivity Equation
+ * for Carbon Dioxide with an Optimized Functional Form,
+ * J. Phys. Chem. Ref. Data 35 (2006)
+ */
+TEST_F(CO2FluidPropertiesTest, thermalConductivity)
 {
   REL_TEST("thermal conductivity", _fp->k(23.435, 250.0), 13.45e-3, 1.0e-3);
   REL_TEST("thermal conductivity", _fp->k(18.579, 300.0), 17.248e-3, 1.0e-3);
   REL_TEST("thermal conductivity", _fp->k(11.899, 450.0), 29.377e-3, 1.0e-3);
 }
 
-void
-CO2FluidPropertiesTest::viscosity()
+/**
+ * Verify calculation of viscosity using data from
+ * Fenghour et al., The viscosity of carbon dioxide,
+ * J. Phys. Chem. Ref. Data, 27, 31-44 (1998)
+ */
+TEST_F(CO2FluidPropertiesTest, viscosity)
 {
   REL_TEST("viscosity", _fp->mu(20.199, 280.0), 14.15e-6, 1.0e-3);
   REL_TEST("viscosity", _fp->mu(15.105, 360.0), 17.94e-6, 1.0e-3);
   REL_TEST("viscosity", _fp->mu(10.664, 500.0), 24.06e-6, 1.0e-3);
 }
 
-void
-CO2FluidPropertiesTest::propertiesSW()
+/**
+ * Verify calculation of thermophysical properties of CO2 from the Span and
+ * Wagner EOS using verification data provided in
+ * A New Equation of State for Carbon Dioxide Covering the Fluid Region from
+ * the Triple-Point Temperature to 1100K at Pressures up to 800 MPa,
+ * J. Phys. Chem. Ref. Data, 25 (1996)
+ */
+TEST_F(CO2FluidPropertiesTest, propertiesSW)
 {
   // Pressure = 1 MPa, temperature = 280 K
   Real p = 1.0e6;
@@ -171,8 +162,11 @@ CO2FluidPropertiesTest::propertiesSW()
   REL_TEST("c", _fp->c(p, T), 337.45, 1.0e-3);
 }
 
-void
-CO2FluidPropertiesTest::derivatives()
+/**
+ * Verify calculation of the derivatives of all properties by comparing with finite
+ * differences
+ */
+TEST_F(CO2FluidPropertiesTest, derivatives)
 {
   Real p = 1.0e6;
   Real T = 350.0;
