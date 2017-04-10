@@ -7,7 +7,7 @@
 []
 
 [Mesh]
-  file = 3dy_scale.e
+  file = 3dy.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -35,7 +35,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vonmises]
+  [./vonmises_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -52,7 +52,7 @@
 [UserObjects]
   [./soln]
     type = SolutionUserObject
-    mesh = gold/2d_out.e
+    mesh = 2d_out.e
     system_variables = 'disp_x disp_y temp'
   [../]
 []
@@ -62,29 +62,24 @@
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'temp'
-    axial_dimension_ratio = 2.0
   [../]
   [./soln_func_disp_x]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'disp_x disp_y'
     component = 0
-    axial_dimension_ratio = 2.0
   [../]
   [./soln_func_disp_y]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'disp_x disp_y'
     component = 1
-    axial_dimension_ratio = 2.0
-    scale_factor = 2.0
   [../]
   [./soln_func_disp_z]
     type = Axisymmetric2D3DSolutionFunction
     solution = soln
     from_variables = 'disp_x disp_y'
     component = 2
-    axial_dimension_ratio = 2.0
   [../]
 []
 
@@ -119,10 +114,10 @@
     variable = stress_zz
     index = 2
   [../]
-  [./vonmises]
+  [./vonmises_stress]
     type = MaterialTensorAux
     tensor = stress
-    variable = vonmises
+    variable = vonmises_stress
     quantity = vonmises
   [../]
   [./hoop_stress]
@@ -131,8 +126,6 @@
     variable = hoop_stress
     quantity = hoop
     execute_on = timestep_end
-    point1 = '0. 0. 0.'
-    point2 = '0. 1. 0.'
   [../]
   [./hydrostatic_stress]
     type = MaterialTensorAux
@@ -182,35 +175,27 @@
   [../]
 []
 
-#[Preconditioning]
-#  [./SMP]
-#    type = SMP
-#    full = true
-#  [../]
-#[]
-
 [Executioner]
+  type = Transient
+  solve_type = 'PJFNK'
 
- solve_type = 'PJFNK'
+  petsc_options = '-ksp_snes_ew'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = ' 201                hypre    boomeramg      4'
+  line_search = 'none'
+  l_max_its = 25
+  nl_max_its = 20
+  nl_rel_tol = 1e-10
+  l_tol = 1e-2
 
-   type = Transient
-   petsc_options = '-ksp_snes_ew'
-   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-   petsc_options_value = ' 201                hypre    boomeramg      4'
-   line_search = 'none'
-   l_max_its = 25
-   nl_max_its = 20
-   nl_rel_tol = 1e-10
-   l_tol = 1e-2
-
-   start_time = 0.0
-   dt = 1
-   end_time = 1
-   dtmin = 1
+  start_time = 0.0
+  dt = 1
+  end_time = 1
+  dtmin = 1
 []
 
 [Outputs]
-  file_base = 3dy_scale_out
+  file_base = 3dy_out
   exodus = true
   [./console]
     type = Console
