@@ -14,20 +14,4 @@
     input = 'two_circle_marker_gaussian_ic.i'
     exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
   [../]  
-  [./two_circle_marker_half_transient]
-    type = RunApp
-    input = 'two_circle_marker_gaussian_ic.i'
-    cli_args = 'Outputs/checkpoint=true --half-transient'
-    recover = false
-    prereq = two_circle_marker_gaussian_ic # so this test does not collide with above
-  [../]
-  [./two_circle_marker_recover]
-    type = 'Exodiff'
-    input = 'two_circle_marker_gaussian_ic.i'
-    cli_args = '--recover'
-    recover = false
-    delete_output_before_running = false
-    prereq = two_circle_marker_half_transient
-    exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
-  [../]
 []    
