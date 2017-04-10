@@ -11,54 +11,47 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ElementFragmentAlgorithmTest.h"
+
+#include "gtest/gtest.h"
 
 #include "MooseUtils.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(ElementFragmentAlgorithmTest);
-
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest() {}
-
-ElementFragmentAlgorithmTest::~ElementFragmentAlgorithmTest() {}
+#include "ElementFragmentAlgorithm.h"
 
 void
-ElementFragmentAlgorithmTest::CheckNodes(std::map<unsigned int, EFANode *> & nodes,
-                                         std::vector<unsigned int> & gold)
+CheckNodes(std::map<unsigned int, EFANode *> & nodes, std::vector<unsigned int> & gold)
 {
   std::map<unsigned int, EFANode *>::iterator mit;
   std::vector<unsigned int> test;
   for (mit = nodes.begin(); mit != nodes.end(); ++mit)
     test.push_back(mit->second->id());
 
-  CPPUNIT_ASSERT(test.size() == gold.size());
+  ASSERT_EQ(test.size(), gold.size());
   for (unsigned int i = 0; i < test.size(); i++)
-    CPPUNIT_ASSERT(test[i] == gold[i]);
+    EXPECT_EQ(test[i], gold[i]);
 }
 
 void
-ElementFragmentAlgorithmTest::CheckElements(std::vector<EFAElement *> & elems,
-                                            std::vector<unsigned int> & gold)
+CheckElements(std::vector<EFAElement *> & elems, std::vector<unsigned int> & gold)
 {
   std::vector<EFAElement *>::iterator it;
   std::vector<unsigned int> test;
   for (it = elems.begin(); it != elems.end(); ++it)
     test.push_back((*it)->id());
 
-  CPPUNIT_ASSERT(test.size() == gold.size());
+  ASSERT_EQ(test.size(), gold.size());
   for (unsigned int i = 0; i < test.size(); i++)
-    CPPUNIT_ASSERT(test[i] == gold[i]);
+    EXPECT_EQ(test[i], gold[i]);
 }
 
 void
-ElementFragmentAlgorithmTest::CheckElements(std::set<EFAElement *> & elems,
-                                            std::set<unsigned int> & gold)
+CheckElements(std::set<EFAElement *> & elems, std::set<unsigned int> & gold)
 {
   std::set<EFAElement *>::iterator it;
   std::set<unsigned int> test;
   for (it = elems.begin(); it != elems.end(); ++it)
     test.insert((*it)->id());
 
-  CPPUNIT_ASSERT(test.size() == gold.size());
+  ASSERT_EQ(test.size(), gold.size());
 
   std::set<unsigned int> intersection;
   set_intersection(test.begin(),
@@ -67,11 +60,11 @@ ElementFragmentAlgorithmTest::CheckElements(std::set<EFAElement *> & elems,
                    gold.end(),
                    std::inserter(intersection, intersection.begin()));
 
-  CPPUNIT_ASSERT(intersection.size() == gold.size());
+  ASSERT_EQ(intersection.size(), gold.size());
 }
 
 void
-ElementFragmentAlgorithmTest::case1Common(ElementFragmentAlgorithm & MyMesh)
+case1Common(ElementFragmentAlgorithm & MyMesh)
 {
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -104,10 +97,8 @@ ElementFragmentAlgorithmTest::case1Common(ElementFragmentAlgorithm & MyMesh)
   MyMesh.updatePhysicalLinksAndFragments();
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest1a()
+TEST(ElementFragmentAlgorithm, test1a)
 {
-  //  Moose::out<<"\n ***** Running case 1a *****"<<std::endl;
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case1Common(MyMesh);
 
@@ -115,9 +106,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest1a()
   // creates all new temporary nodes
   // sets the links in the children according to the new temporary nodes
   MyMesh.updateTopology();
-
-  //  MyMesh.printMesh();
-  // CPPUNIT_ASSERT(false);
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -145,10 +133,8 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest1a()
   CheckElements(parent_elem, pe_gold);
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest1b()
+TEST(ElementFragmentAlgorithm, test1b)
 {
-  //  Moose::out<<"\n ***** Running case 1b *****"<<std::endl;
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case1Common(MyMesh);
 
@@ -194,7 +180,7 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest1b()
 }
 
 void
-ElementFragmentAlgorithmTest::case2Mesh(ElementFragmentAlgorithm & MyMesh)
+case2Mesh(ElementFragmentAlgorithm & MyMesh)
 {
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -222,7 +208,7 @@ ElementFragmentAlgorithmTest::case2Mesh(ElementFragmentAlgorithm & MyMesh)
 }
 
 void
-ElementFragmentAlgorithmTest::case2Intersections(ElementFragmentAlgorithm & MyMesh)
+case2Intersections(ElementFragmentAlgorithm & MyMesh)
 {
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -244,10 +230,8 @@ ElementFragmentAlgorithmTest::case2Intersections(ElementFragmentAlgorithm & MyMe
   MyMesh.updatePhysicalLinksAndFragments();
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2a()
+TEST(ElementFragmentAlgorithm, test2a)
 {
-  //  Moose::out<<"\n ***** Running case 2a *****"<<std::endl;
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case2Mesh(MyMesh);
   case2Intersections(MyMesh);
@@ -280,11 +264,8 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2a()
   CheckElements(parent_elem, pe_gold);
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2b()
+TEST(ElementFragmentAlgorithm, test2b)
 {
-  //  Moose::out<<"\n ***** Running case 2b *****"<<std::endl;
-  //  Moose::out<<"\nCut first element:"<<std::endl;
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case2Mesh(MyMesh);
 
@@ -322,13 +303,11 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2b()
     CheckElements(parent_elem, pe_gold);
   }
 
-  //  Moose::out<<"\nCut second element:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
   //  MyMesh.printMesh();
 
-  //  Moose::out<<"\nCut second element:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)1, 1, 0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
@@ -362,13 +341,11 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2b()
     CheckElements(parent_elem, pe_gold);
   }
 
-  //  Moose::out<<"\nCut third element:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
   //  MyMesh.printMesh();
 
-  //  Moose::out<<"\nCut third element:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)6, 2, 0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
@@ -402,7 +379,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2b()
     CheckElements(parent_elem, pe_gold);
   }
 
-  //  Moose::out<<"\nFinal:"<<std::endl;
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
@@ -435,10 +411,8 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest2b()
   }
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest3()
+TEST(ElementFragmentAlgorithm, test3)
 {
-  //  Moose::out<<"\n ***** Running case 3 *****"<<std::endl;
 
   // 0 ----- 1 ----- 2
   // |       |       |
@@ -516,11 +490,8 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest3()
   CheckElements(parent_elem, pe_gold);
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest4()
+TEST(ElementFragmentAlgorithm, test4)
 {
-  //  Moose::out<<"\n ***** Running case 4 *****"<<std::endl;
-
   ElementFragmentAlgorithm MyMesh(Moose::out);
 
   {
@@ -646,7 +617,7 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest4()
 }
 
 void
-ElementFragmentAlgorithmTest::case5Mesh(ElementFragmentAlgorithm & MyMesh)
+case5Mesh(ElementFragmentAlgorithm & MyMesh)
 {
   // 0 ----- 1 ----- 2 ----- 3
   // |       |       |       |
@@ -676,8 +647,7 @@ ElementFragmentAlgorithmTest::case5Mesh(ElementFragmentAlgorithm & MyMesh)
   MyMesh.updateEdgeNeighbors();
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5a()
+TEST(ElementFragmentAlgorithm, test5a)
 {
   // 0 ----- 1 ----- 2 ----- 3
   // |       |       |       |
@@ -693,8 +663,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5a()
   case5Mesh(MyMesh);
 
   // add the horizontal cut
-  //  Moose::out<<"\n ***** Running case 5a *****"<<std::endl;
-  //  Moose::out<<"\nFirst cut:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)0, 0, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)0, 2, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)1, 2, 0.5);
@@ -734,7 +702,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5a()
   CheckElements(parent_elem, pe_gold);
 
   // add the lower part of the vertical cut
-  //  Moose::out<<"\nSecond cut:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)4, 1, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)4, 3, 0.5);
 
@@ -772,7 +739,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5a()
   CheckElements(parent_elem2, pe_gold2);
 
   // add the upper vertical cut
-  //  Moose::out<<"\nThird cut:"<<std::endl;
   MyMesh.addFragEdgeIntersection((unsigned int)14, 3, 0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
@@ -809,8 +775,7 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5a()
   CheckElements(parent_elem3, pe_gold3);
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5b()
+TEST(ElementFragmentAlgorithm, test5b)
 {
   // 0 ----- 1 ----- 2 ----- 3
   // |       |       |       |
@@ -826,8 +791,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5b()
   case5Mesh(MyMesh);
 
   // add the horizontal cut
-  //  Moose::out<<"\n ***** Running case 5b *****"<<std::endl;
-  //  Moose::out<<"\nFirst cut:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)0, 0, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)0, 2, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)1, 2, 0.5);
@@ -867,7 +830,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5b()
   CheckElements(parent_elem, pe_gold);
 
   // add the upper part of the vertical cut
-  //  Moose::out<<"\nSecond cut:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)9, 1, 0.5);
   MyMesh.addFragEdgeIntersection((unsigned int)9, 2, 0.5); // I cheated here
 
@@ -905,7 +867,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5b()
   CheckElements(parent_elem2, pe_gold2);
 
   // add the lower vertical cut
-  //  Moose::out<<"\nThird cut:"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)12, 1, 0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
@@ -942,8 +903,7 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5b()
   CheckElements(parent_elem3, pe_gold3);
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5c()
+TEST(ElementFragmentAlgorithm, test5c)
 {
   // 0 ----- 1 ----- 2 ----- 3
   // |       |       |       |
@@ -959,7 +919,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5c()
   case5Mesh(MyMesh);
 
   // add the horizontal cut
-  //  Moose::out<<"\n ***** Running case 5c *****"<<std::endl;
   MyMesh.addElemEdgeIntersection((unsigned int)0, 0, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)0, 2, 0.5);
   MyMesh.addElemEdgeIntersection((unsigned int)1, 1, 0.5);
@@ -1002,7 +961,7 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest5c()
 }
 
 void
-ElementFragmentAlgorithmTest::case6Mesh(ElementFragmentAlgorithm & MyMesh)
+case6Mesh(ElementFragmentAlgorithm & MyMesh)
 {
   // 3D test
   std::vector<unsigned int> v1 = {0, 1, 4, 3, 9, 10, 13, 12};
@@ -1032,13 +991,10 @@ ElementFragmentAlgorithmTest::case6Mesh(ElementFragmentAlgorithm & MyMesh)
   MyMesh.updateEdgeNeighbors();
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest6a()
+TEST(ElementFragmentAlgorithm, test6a)
 {
-  //  Moose::out<<"\n ***** Running case 6a *****"<<std::endl;
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  Moose::out << " ***** original mesh *****" << std::endl;
   //  MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
@@ -1059,7 +1015,6 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest6a()
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  Moose::out << " ***** new mesh *****" << std::endl;
   // second time, just test
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -1070,12 +1025,7 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest6a()
   //  MyMesh.printMesh();
 
   // print crack tip elems
-  //  Moose::out << " ***** crack tip elements *****" << std::endl;
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
-  //  std::set<EFAElement*>::iterator it;
-  //  for (it = crack_tip_elem.begin(); it != crack_tip_elem.end(); ++it)
-  //    Moose::out << (*it)->id() << " ";
-  //  Moose::out << std::endl;
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -1110,10 +1060,8 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest6a()
   CheckElements(crack_tip_elem, cte_gold);
 }
 
-void
-ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest6b()
+TEST(ElementFragmentAlgorithm, test6b)
 {
-  //  Moose::out<<"\n ***** Running case 6b *****"<<std::endl;
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
 
@@ -1225,22 +1173,9 @@ ElementFragmentAlgorithmTest::ElementFragmentAlgorithmTest6b()
   MyMesh.initCrackTipTopology();
 
   // second time cut, just test
-  /*  MyMesh.updatePhysicalLinksAndFragments();
-    MyMesh.updateTopology();
-    MyMesh.clearAncestry();
-    MyMesh.updateEdgeNeighbors();
-    MyMesh.initCrackTipTopology();*/
-
-  //  Moose::out << "***** final mesh *****" << std::endl;
-  //  MyMesh.printMesh();
 
   // print crack tip elems
-  //  Moose::out << " ***** crack tip elements *****" << std::endl;
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
-  //  std::set<EFAElement*>::iterator it;
-  //  for (it = crack_tip_elem.begin(); it != crack_tip_elem.end(); ++it)
-  //    Moose::out << (*it)->id() << " ";
-  //  Moose::out << std::endl;
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes2 = MyMesh.getPermanentNodes();

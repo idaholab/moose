@@ -15,56 +15,117 @@
 #ifndef ISOTROPICELASTICITYTENSORTEST_H
 #define ISOTROPICELASTICITYTENSORTEST_H
 
-// CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
 
-class IsotropicElasticityTensor;
+#include "IsotropicElasticityTensor.h"
 
-class IsotropicElasticityTensorTest : public CppUnit::TestFixture
+class IsotropicElasticityTensorTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE(IsotropicElasticityTensorTest);
-
-  CPPUNIT_TEST(constructor);
-  CPPUNIT_TEST(nonConstantConstructor);
-  CPPUNIT_TEST(calcLambdaMu);
-  CPPUNIT_TEST(calcLambdaNu);
-  CPPUNIT_TEST(calcLamdaK);
-  CPPUNIT_TEST(calcLamdaE);
-  CPPUNIT_TEST(calcMuNu);
-  CPPUNIT_TEST(calcMuK);
-  CPPUNIT_TEST(calcMuE);
-  CPPUNIT_TEST(calcNuK);
-  CPPUNIT_TEST(calcENu);
-  CPPUNIT_TEST(calcEK);
-
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  void constructor();
-  void nonConstantConstructor();
-  void calcLambdaMu();
-  void calcLambdaNu();
-  void calcLamdaK();
-  void calcLamdaE();
-  void calcMuNu();
-  void calcMuK();
-  void calcMuE();
-  void calcNuK();
-  void calcENu();
-  void calcEK();
-
+protected:
   /**
    * Measures the computed tensor against a known data set. Return a bool
    * so that if a test fails we can use the return value to fail the assert
    * inside the actual test that's failing, instead of in testMatrix and
    * the user doesn't have a clue which function called testMatrix.
    */
-  bool testMatrix(double values[9][9], IsotropicElasticityTensor & tensor);
+  bool testMatrix(double values[9][9], IsotropicElasticityTensor & tensor)
+  {
+    for (int i = 0; i < 9; ++i)
+      for (int j = 0; j < 9; ++j)
+      {
+        if (std::abs(values[i][j] - tensor(i, j)) > 0.0001) // sample data goes to 4 digits
+        {
+          Moose::out << i << ',' << j << '\n';
+          Moose::out << values[i][j] << ' ' << tensor(i, j) << '\n';
+          Moose::out << values[i][j] - tensor(i, j) << '\n';
+          return false;
+        }
+      }
 
-private:
-  /** Data to test against. */
-  static double _lambdaMu[9][9], _lambdaNu[9][9], _lambdaK[9][9], _lambdaD[9][9], _muNu[9][9],
-      _muK[9][9], _muE[9][9], _nuK[9][9], _eNu[9][9], _eK[9][9];
+    return true;
+  }
+
+  double _lambdaMu[9][9] = {{5.03, 0, 0, 0, 2.57, 0, 0, 0, 2.57},
+                            {0, 1.23, 0, 1.23, 0, 0, 0, 0, 0},
+                            {0, 0, 1.23, 0, 0, 0, 1.23, 0, 0},
+                            {0, 1.23, 0, 1.23, 0, 0, 0, 0, 0},
+                            {2.57, 0, 0, 0, 5.03, 0, 0, 0, 2.57},
+                            {0, 0, 0, 0, 0, 1.23, 0, 1.23, 0},
+                            {0, 0, 1.23, 0, 0, 0, 1.23, 0, 0},
+                            {0, 0, 0, 0, 0, 1.23, 0, 1.23, 0},
+                            {2.57, 0, 0, 0, 2.57, 0, 0, 0, 5.03}};
+  double _lambdaNu[9][9] = {{-0.4806, 0, 0, 0, 2.57, 0, 0, 0, 2.57},
+                            {0, -1.5253, 0, -1.5253, 0, 0, 0, 0, 0},
+                            {0, 0, -1.5253, 0, 0, 0, -1.5253, 0, 0},
+                            {0, -1.5253, 0, -1.5253, 0, 0, 0, 0, 0},
+                            {2.57, 0, 0, 0, -0.4806, 0, 0, 0, 2.57},
+                            {0, 0, 0, 0, 0, -1.5253, 0, -1.5253, 0},
+                            {0, 0, -1.5253, 0, 0, 0, -1.5253, 0, 0},
+                            {0, 0, 0, 0, 0, -1.5253, 0, -1.5253, 0},
+                            {2.57, 0, 0, 0, 2.57, 0, 0, 0, -0.4806}};
+  double _lambdaK[9][9] = {{5.25, 0, 0, 0, 1.23, 0, 0, 0, 1.23},
+                           {0, 2.01, 0, 2.01, 0, 0, 0, 0, 0},
+                           {0, 0, 2.01, 0, 0, 0, 2.01, 0, 0},
+                           {0, 2.01, 0, 2.01, 0, 0, 0, 0, 0},
+                           {1.23, 0, 0, 0, 5.25, 0, 0, 0, 1.23},
+                           {0, 0, 0, 0, 0, 2.01, 0, 2.01, 0},
+                           {0, 0, 2.01, 0, 0, 0, 2.01, 0, 0},
+                           {0, 0, 0, 0, 0, 2.01, 0, 2.01, 0},
+                           {1.23, 0, 0, 0, 1.23, 0, 0, 0, 5.25}};
+  double _muNu[9][9] = {{0.8097, 0, 0, 0, -4.3303, 0, 0, 0, -4.3303},
+                        {0, 2.57, 0, 2.57, 0, 0, 0, 0, 0},
+                        {0, 0, 2.57, 0, 0, 0, 2.57, 0, 0},
+                        {0, 2.57, 0, 2.57, 0, 0, 0, 0, 0},
+                        {-4.3303, 0, 0, 0, 0.8097, 0, 0, 0, -4.3303},
+                        {0, 0, 0, 0, 0, 2.57, 0, 2.57, 0},
+                        {0, 0, 2.57, 0, 0, 0, 2.57, 0, 0},
+                        {0, 0, 0, 0, 0, 2.57, 0, 2.57, 0},
+                        {-4.3303, 0, 0, 0, -4.3303, 0, 0, 0, 0.8097}};
+  double _muK[9][9] = {{4.21, 0, 0, 0, 1.75, 0, 0, 0, 1.75},
+                       {0, 1.23, 0, 1.23, 0, 0, 0, 0, 0},
+                       {0, 0, 1.23, 0, 0, 0, 1.23, 0, 0},
+                       {0, 1.23, 0, 1.23, 0, 0, 0, 0, 0},
+                       {1.75, 0, 0, 0, 4.21, 0, 0, 0, 1.75},
+                       {0, 0, 0, 0, 0, 1.23, 0, 1.23, 0},
+                       {0, 0, 1.23, 0, 0, 0, 1.23, 0, 0},
+                       {0, 0, 0, 0, 0, 1.23, 0, 1.23, 0},
+                       {1.75, 0, 0, 0, 1.75, 0, 0, 0, 4.21}};
+  double _muE[9][9] = {{2.5808, 0, 0, 0, 0.1208, 0, 0, 0, 0.1208},
+                       {0, 1.23, 0, 1.23, 0, 0, 0, 0, 0},
+                       {0, 0, 1.23, 0, 0, 0, 1.23, 0, 0},
+                       {0, 1.23, 0, 1.23, 0, 0, 0, 0, 0},
+                       {0.1208, 0, 0, 0, 2.5808, 0, 0, 0, 0.1208},
+                       {0, 0, 0, 0, 0, 1.23, 0, 1.23, 0},
+                       {0, 0, 1.23, 0, 0, 0, 1.23, 0, 0},
+                       {0, 0, 0, 0, 0, 1.23, 0, 1.23, 0},
+                       {0.1208, 0, 0, 0, 0.1208, 0, 0, 0, 2.5808}};
+  double _nuK[9][9] = {{-0.7952, 0, 0, 0, 4.2526, 0, 0, 0, 4.2526},
+                       {0, -2.5239, 0, -2.5239, 0, 0, 0, 0, 0},
+                       {0, 0, -2.5239, 0, 0, 0, -2.5239, 0, 0},
+                       {0, -2.5239, 0, -2.5239, 0, 0, 0, 0, 0},
+                       {4.2526, 0, 0, 0, -0.7952, 0, 0, 0, 4.2526},
+                       {0, 0, 0, 0, 0, -2.5239, 0, -2.5239, 0},
+                       {0, 0, -2.5239, 0, 0, 0, -2.5239, 0, 0},
+                       {0, 0, 0, 0, 0, -2.5239, 0, -2.5239, 0},
+                       {4.2526, 0, 0, 0, 4.2526, 0, 0, 0, -0.7952}};
+  double _eNu[9][9] = {{0.1816, 0, 0, 0, -0.9709, 0, 0, 0, -0.9709},
+                       {0, 0.5762, 0, 0.5762, 0, 0, 0, 0, 0},
+                       {0, 0, 0.5762, 0, 0, 0, 0.5762, 0, 0},
+                       {0, 0.5762, 0, 0.5762, 0, 0, 0, 0, 0},
+                       {-0.9709, 0, 0, 0, 0.1816, 0, 0, 0, -0.9709},
+                       {0, 0, 0, 0, 0, 0.5762, 0, 0.5762, 0},
+                       {0, 0, 0.5762, 0, 0, 0, 0.5762, 0, 0},
+                       {0, 0, 0, 0, 0, 0.5762, 0, 0.5762, 0},
+                       {-0.9709, 0, 0, 0, -0.9709, 0, 0, 0, 0.1816}};
+  double _eK[9][9] = {{3.14737, 0, 0, 0, 2.28132, 0, 0, 0, 2.28132},
+                      {0, 0.433027, 0, 0.433027, 0, 0, 0, 0, 0},
+                      {0, 0, 0.433027, 0, 0, 0, 0.433027, 0, 0},
+                      {0, 0.433027, 0, 0.433027, 0, 0, 0, 0, 0},
+                      {2.28132, 0, 0, 0, 3.14737, 0, 0, 0, 2.28132},
+                      {0, 0, 0, 0, 0, 0.433027, 0, 0.433027, 0},
+                      {0, 0, 0.433027, 0, 0, 0, 0.433027, 0, 0},
+                      {0, 0, 0, 0, 0, 0.433027, 0, 0.433027, 0},
+                      {2.28132, 0, 0, 0, 2.28132, 0, 0, 0, 3.14737}};
 };
 
 #endif // ISOTROPICELASTICITYTENSORTEST_H

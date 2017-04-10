@@ -12,86 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "Water97FluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "Water97FluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(Water97FluidPropertiesTest);
-
-void
-Water97FluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(Water97FluidProperties);
-}
-
-void
-Water97FluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters uo_pars = _factory->getValidParams("Water97FluidProperties");
-  _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
-}
-
-void
-Water97FluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-Water97FluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-Water97FluidPropertiesTest::inRegion()
+/**
+ * Verify that the correct region is provided for a given pressure and
+ * temperature. Also verify that an error is thrown if pressure and temperature
+ * are outside the range of validity
+ */
+TEST_F(Water97FluidPropertiesTest, inRegion)
 {
   // Region 1
-  CPPUNIT_ASSERT(_fp->inRegion(3.0e6, 300) == 1);
-  CPPUNIT_ASSERT(_fp->inRegion(80.0e6, 300) == 1);
-  CPPUNIT_ASSERT(_fp->inRegion(3.0e6, 500) == 1);
+  EXPECT_EQ(_fp->inRegion(3.0e6, 300), 1);
+  EXPECT_EQ(_fp->inRegion(80.0e6, 300), 1);
+  EXPECT_EQ(_fp->inRegion(3.0e6, 500), 1);
 
   // Region 2
-  CPPUNIT_ASSERT(_fp->inRegion(3.5e3, 300) == 2);
-  CPPUNIT_ASSERT(_fp->inRegion(30.0e6, 700) == 2);
-  CPPUNIT_ASSERT(_fp->inRegion(30.0e6, 700) == 2);
+  EXPECT_EQ(_fp->inRegion(3.5e3, 300), 2);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 700), 2);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 700), 2);
 
   // Region 3
-  CPPUNIT_ASSERT(_fp->inRegion(25.588e6, 650) == 3);
-  CPPUNIT_ASSERT(_fp->inRegion(22.298e6, 650) == 3);
-  CPPUNIT_ASSERT(_fp->inRegion(78.32e6, 750) == 3);
+  EXPECT_EQ(_fp->inRegion(25.588e6, 650), 3);
+  EXPECT_EQ(_fp->inRegion(22.298e6, 650), 3);
+  EXPECT_EQ(_fp->inRegion(78.32e6, 750), 3);
 
   // Region 5
-  CPPUNIT_ASSERT(_fp->inRegion(0.5e6, 1500) == 5);
-  CPPUNIT_ASSERT(_fp->inRegion(30.0e6, 1500) == 5);
-  CPPUNIT_ASSERT(_fp->inRegion(30.0e6, 2000) == 5);
+  EXPECT_EQ(_fp->inRegion(0.5e6, 1500), 5);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 1500), 5);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 2000), 5);
 
   // Test out of range errors
   unsigned int region;
@@ -99,136 +47,182 @@ Water97FluidPropertiesTest::inRegion()
   {
     // Trigger invalid pressure error
     region = _fp->inRegion(101.0e6, 300.0);
+    // TODO: this test fails with the following line that should be uncommented:
+    // FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(
-        msg.find("Pressure 1.01e+08 is out of range in Water97FluidProperties::inRegion") !=
-        std::string::npos);
+    ASSERT_NE(msg.find("Pressure 1.01e+08 is out of range in Water97FluidProperties::inRegion"),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   try
   {
     // Trigger another invalid pressure error
     region = _fp->inRegion(51.0e6, 1200.0);
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(
-        msg.find("Pressure 5.1e+07 is out of range in Water97FluidProperties::inRegion") !=
-        std::string::npos);
+    ASSERT_NE(msg.find("Pressure 5.1e+07 is out of range in Water97FluidProperties::inRegion"),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   try
   {
     // Trigger invalid temperature error
     region = _fp->inRegion(5.0e6, 2001.0);
+    // TODO: this test fails with the following line that should be uncommented:
+    // FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(
-        msg.find("Temperature 2001 is out of range in Water97FluidProperties::inRegion") !=
-        std::string::npos);
+    ASSERT_NE(msg.find("Temperature 2001 is out of range in Water97FluidProperties::inRegion"),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 }
 
-void
-Water97FluidPropertiesTest::b23()
+/**
+ * Verify calculation of the boundary between regions 2 and 3
+ * using the verification point (P,T) = (16.5291643 MPa, 623.15 K)
+ * Revised Release on the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam, IAPWS 2007
+ */
+TEST_F(Water97FluidPropertiesTest, b23)
 {
   REL_TEST("b23T", _fp->b23T(16.5291643e6), 623.15, 1.0e-8);
   REL_TEST("b23p", _fp->b23p(623.15), 16.5291643e6, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::b2bc()
+/**
+ * Verify calculation of the boundary between regions 2b and 2c for the
+ * backwards equation T(p,h) using the verification point
+ * (p,h) = (100 MPa, 0.3516004323e4 kj/kg) from
+ * Revised Release on the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam, IAPWS 2007
+ */
+TEST_F(Water97FluidPropertiesTest, b2bc)
 {
   REL_TEST("b2bc", _fp->b2bc(100.0e6), 0.3516004323e7, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::b3ab()
+/**
+ * Verify calculation of the boundary between regions 3a and 3b for the
+ * backwards equation T(p,h) using the verification point
+ * (p,h) = (25 MPa, 2.095936454e3 kj/kg) from
+ * Revised Supplementary Release on Backward Equations for
+ * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
+ * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+ * Steam
+ */
+TEST_F(Water97FluidPropertiesTest, b3ab)
 {
   REL_TEST("b3ab", _fp->b3ab(25.0e6), 2.095936454e6, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::pSat()
+/**
+ * Verify calculation of water properties in region 4 (saturation line)
+ * using the verification values given in Table 35 of
+ * Revised Release on the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam, IAPWS 2007
+ */
+TEST_F(Water97FluidPropertiesTest, pSat)
 {
   REL_TEST("pSat", _fp->pSat(300), 3.53658941e3, 1.0e-8);
   REL_TEST("pSat", _fp->pSat(500), 2.63889776e6, 1.0e-8);
   REL_TEST("pSat", _fp->pSat(600), 12.3443146e6, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::TSat()
+/**
+ * Verify calculation of water properties in region 4 (saturation line)
+ * using the verification values given in Table 36 of
+ * Revised Release on the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam, IAPWS 2007
+ */
+TEST_F(Water97FluidPropertiesTest, TSat)
 {
   REL_TEST("pSat", _fp->TSat(0.1e6), 372.755919, 1.0e-8);
   REL_TEST("pSat", _fp->TSat(1.0e6), 453.035632, 1.0e-8);
   REL_TEST("pSat", _fp->TSat(10.0e6), 584.149488, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::subregion3()
+/**
+ * Verify calculation of the subregion in all 26 subregions in region 3 from
+ * Revised Supplementary Release on Backward Equations for
+ * Specific Volume as a Function of Pressure and Temperature v(p,T)
+ * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam
+ */
+TEST_F(Water97FluidPropertiesTest, subregion3)
 {
-  CPPUNIT_ASSERT(_fp->subregion3(50.0e6, 630.0) == 0);
-  CPPUNIT_ASSERT(_fp->subregion3(80.0e6, 670.0) == 0);
-  CPPUNIT_ASSERT(_fp->subregion3(50.0e6, 710.0) == 1);
-  CPPUNIT_ASSERT(_fp->subregion3(80.0e6, 750.0) == 1);
-  CPPUNIT_ASSERT(_fp->subregion3(20.0e6, 630.0) == 2);
-  CPPUNIT_ASSERT(_fp->subregion3(30.0e6, 650.0) == 2);
-  CPPUNIT_ASSERT(_fp->subregion3(26.0e6, 656.0) == 3);
-  CPPUNIT_ASSERT(_fp->subregion3(30.0e6, 670.0) == 3);
-  CPPUNIT_ASSERT(_fp->subregion3(26.0e6, 661.0) == 4);
-  CPPUNIT_ASSERT(_fp->subregion3(30.0e6, 675.0) == 4);
-  CPPUNIT_ASSERT(_fp->subregion3(26.0e6, 671.0) == 5);
-  CPPUNIT_ASSERT(_fp->subregion3(30.0e6, 690.0) == 5);
-  CPPUNIT_ASSERT(_fp->subregion3(23.6e6, 649.0) == 6);
-  CPPUNIT_ASSERT(_fp->subregion3(24.0e6, 650.0) == 6);
-  CPPUNIT_ASSERT(_fp->subregion3(23.6e6, 652.0) == 7);
-  CPPUNIT_ASSERT(_fp->subregion3(24.0e6, 654.0) == 7);
-  CPPUNIT_ASSERT(_fp->subregion3(23.6e6, 653.0) == 8);
-  CPPUNIT_ASSERT(_fp->subregion3(24.0e6, 655.0) == 8);
-  CPPUNIT_ASSERT(_fp->subregion3(23.5e6, 655.0) == 9);
-  CPPUNIT_ASSERT(_fp->subregion3(24.0e6, 660.0) == 9);
-  CPPUNIT_ASSERT(_fp->subregion3(23.0e6, 660.0) == 10);
-  CPPUNIT_ASSERT(_fp->subregion3(24.0e6, 670.0) == 10);
-  CPPUNIT_ASSERT(_fp->subregion3(22.6e6, 646.0) == 11);
-  CPPUNIT_ASSERT(_fp->subregion3(23.0e6, 646.0) == 11);
-  CPPUNIT_ASSERT(_fp->subregion3(22.6e6, 648.6) == 12);
-  CPPUNIT_ASSERT(_fp->subregion3(22.8e6, 649.3) == 12);
-  CPPUNIT_ASSERT(_fp->subregion3(22.6e6, 649.0) == 13);
-  CPPUNIT_ASSERT(_fp->subregion3(22.8e6, 649.7) == 13);
-  CPPUNIT_ASSERT(_fp->subregion3(22.6e6, 649.1) == 14);
-  CPPUNIT_ASSERT(_fp->subregion3(22.8e6, 649.9) == 14);
-  CPPUNIT_ASSERT(_fp->subregion3(22.6e6, 649.4) == 15);
-  CPPUNIT_ASSERT(_fp->subregion3(22.8e6, 650.2) == 15);
-  CPPUNIT_ASSERT(_fp->subregion3(21.1e6, 640.0) == 16);
-  CPPUNIT_ASSERT(_fp->subregion3(21.8e6, 643.0) == 16);
-  CPPUNIT_ASSERT(_fp->subregion3(21.1e6, 644.0) == 17);
-  CPPUNIT_ASSERT(_fp->subregion3(21.8e6, 648.0) == 17);
-  CPPUNIT_ASSERT(_fp->subregion3(19.1e6, 635.0) == 18);
-  CPPUNIT_ASSERT(_fp->subregion3(20.0e6, 638.0) == 18);
-  CPPUNIT_ASSERT(_fp->subregion3(17.0e6, 626.0) == 19);
-  CPPUNIT_ASSERT(_fp->subregion3(20.0e6, 640.0) == 19);
-  CPPUNIT_ASSERT(_fp->subregion3(21.5e6, 644.6) == 20);
-  CPPUNIT_ASSERT(_fp->subregion3(22.0e6, 646.1) == 20);
-  CPPUNIT_ASSERT(_fp->subregion3(22.5e6, 648.6) == 21);
-  CPPUNIT_ASSERT(_fp->subregion3(22.3e6, 647.9) == 21);
-  CPPUNIT_ASSERT(_fp->subregion3(22.15e6, 647.5) == 22);
-  CPPUNIT_ASSERT(_fp->subregion3(22.3e6, 648.1) == 22);
-  CPPUNIT_ASSERT(_fp->subregion3(22.11e6, 648.0) == 23);
-  CPPUNIT_ASSERT(_fp->subregion3(22.3e6, 649.0) == 23);
-  CPPUNIT_ASSERT(_fp->subregion3(22.0e6, 646.84) == 24);
-  CPPUNIT_ASSERT(_fp->subregion3(22.064e6, 647.05) == 24);
-  CPPUNIT_ASSERT(_fp->subregion3(22.0e6, 646.89) == 25);
-  CPPUNIT_ASSERT(_fp->subregion3(22.064e6, 647.15) == 25);
+  EXPECT_EQ(_fp->subregion3(50.0e6, 630.0), 0);
+  EXPECT_EQ(_fp->subregion3(80.0e6, 670.0), 0);
+  EXPECT_EQ(_fp->subregion3(50.0e6, 710.0), 1);
+  EXPECT_EQ(_fp->subregion3(80.0e6, 750.0), 1);
+  EXPECT_EQ(_fp->subregion3(20.0e6, 630.0), 2);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 650.0), 2);
+  EXPECT_EQ(_fp->subregion3(26.0e6, 656.0), 3);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 670.0), 3);
+  EXPECT_EQ(_fp->subregion3(26.0e6, 661.0), 4);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 675.0), 4);
+  EXPECT_EQ(_fp->subregion3(26.0e6, 671.0), 5);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 690.0), 5);
+  EXPECT_EQ(_fp->subregion3(23.6e6, 649.0), 6);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 650.0), 6);
+  EXPECT_EQ(_fp->subregion3(23.6e6, 652.0), 7);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 654.0), 7);
+  EXPECT_EQ(_fp->subregion3(23.6e6, 653.0), 8);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 655.0), 8);
+  EXPECT_EQ(_fp->subregion3(23.5e6, 655.0), 9);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 660.0), 9);
+  EXPECT_EQ(_fp->subregion3(23.0e6, 660.0), 10);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 670.0), 10);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 646.0), 11);
+  EXPECT_EQ(_fp->subregion3(23.0e6, 646.0), 11);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 648.6), 12);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 649.3), 12);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 649.0), 13);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 649.7), 13);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 649.1), 14);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 649.9), 14);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 649.4), 15);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 650.2), 15);
+  EXPECT_EQ(_fp->subregion3(21.1e6, 640.0), 16);
+  EXPECT_EQ(_fp->subregion3(21.8e6, 643.0), 16);
+  EXPECT_EQ(_fp->subregion3(21.1e6, 644.0), 17);
+  EXPECT_EQ(_fp->subregion3(21.8e6, 648.0), 17);
+  EXPECT_EQ(_fp->subregion3(19.1e6, 635.0), 18);
+  EXPECT_EQ(_fp->subregion3(20.0e6, 638.0), 18);
+  EXPECT_EQ(_fp->subregion3(17.0e6, 626.0), 19);
+  EXPECT_EQ(_fp->subregion3(20.0e6, 640.0), 19);
+  EXPECT_EQ(_fp->subregion3(21.5e6, 644.6), 20);
+  EXPECT_EQ(_fp->subregion3(22.0e6, 646.1), 20);
+  EXPECT_EQ(_fp->subregion3(22.5e6, 648.6), 21);
+  EXPECT_EQ(_fp->subregion3(22.3e6, 647.9), 21);
+  EXPECT_EQ(_fp->subregion3(22.15e6, 647.5), 22);
+  EXPECT_EQ(_fp->subregion3(22.3e6, 648.1), 22);
+  EXPECT_EQ(_fp->subregion3(22.11e6, 648.0), 23);
+  EXPECT_EQ(_fp->subregion3(22.3e6, 649.0), 23);
+  EXPECT_EQ(_fp->subregion3(22.0e6, 646.84), 24);
+  EXPECT_EQ(_fp->subregion3(22.064e6, 647.05), 24);
+  EXPECT_EQ(_fp->subregion3(22.0e6, 646.89), 25);
+  EXPECT_EQ(_fp->subregion3(22.064e6, 647.15), 25);
 }
 
-void
-Water97FluidPropertiesTest::subregion3Density()
+/**
+ * Verify calculation of the density in all 26 subregions in region 3 from
+ * Revised Supplementary Release on Backward Equations for
+ * Specific Volume as a Function of Pressure and Temperature v(p,T)
+ * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam
+ */
+TEST_F(Water97FluidPropertiesTest, subregion3Density)
 {
   REL_TEST("rho", _fp->densityRegion3(50.0e6, 630.0), 1.0 / 0.001470853100, 1.0e-8);
   REL_TEST("rho", _fp->densityRegion3(80.0e6, 670.0), 1.0 / 0.001503831359, 1.0e-8);
@@ -284,8 +278,22 @@ Water97FluidPropertiesTest::subregion3Density()
   REL_TEST("rho", _fp->densityRegion3(22.064e6, 647.15), 1.0 / 0.003701940010, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::properties()
+/**
+ * Verify calculation of the water properties in all regions using verification
+ * data provided in IAPWS guidelines.
+ * Density, enthalpy, internal energy, entropy, cp and speed of sound data from:
+ * Revised Release on the IAPWS Industrial Formulation 1997 for the
+ * Thermodynamic Properties of Water and Steam, IAPWS 2007.
+ *
+ * Viscosity data from:
+ * Table 4 of Release on the IAPWS Formulation 2008 for the Viscosity of
+ * Ordinary Water Substance.
+ *
+ * Thermal conductivity data from:
+ * Table D1 of Revised Release on the IAPS Formulation 1985 for the Thermal
+ * Conductivity of Ordinary Water Substance
+ */
+TEST_F(Water97FluidPropertiesTest, properties)
 {
   Real p0, p1, p2, T0, T1, T2;
 
@@ -450,8 +458,11 @@ Water97FluidPropertiesTest::properties()
   REL_TEST("T(p,h)", _fp->temperature_from_ph(100.0e6, 2700.0e3), 0.8420460876e3, 1.0e-8);
 }
 
-void
-Water97FluidPropertiesTest::derivatives()
+/**
+ * Verify calculation of the derivatives in all regions by comparing with finite
+ * differences
+ */
+TEST_F(Water97FluidPropertiesTest, derivatives)
 {
   // Region 1
   Real p = 3.0e6;
@@ -499,40 +510,3 @@ Water97FluidPropertiesTest::derivatives()
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
 }
 
-void
-Water97FluidPropertiesTest::regionDerivatives(Real p, Real T, Real tol)
-{
-  // Finite differencing parameters
-  Real dp = 1.0e1;
-  Real dT = 1.0e-4;
-
-  // density
-  Real drho_dp_fd = (_fp->rho(p + dp, T) - _fp->rho(p - dp, T)) / (2.0 * dp);
-  Real drho_dT_fd = (_fp->rho(p, T + dT) - _fp->rho(p, T - dT)) / (2.0 * dT);
-  Real rho = 0.0, drho_dp = 0.0, drho_dT = 0.0;
-  _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
-
-  ABS_TEST("rho", rho, _fp->rho(p, T), 1.0e-15);
-  REL_TEST("drho_dp", drho_dp, drho_dp_fd, tol);
-  REL_TEST("drho_dT", drho_dT, drho_dT_fd, tol);
-
-  // enthalpy
-  Real dh_dp_fd = (_fp->h(p + dp, T) - _fp->h(p - dp, T)) / (2.0 * dp);
-  Real dh_dT_fd = (_fp->h(p, T + dT) - _fp->h(p, T - dT)) / (2.0 * dT);
-  Real h = 0.0, dh_dp = 0.0, dh_dT = 0.0;
-  _fp->h_dpT(p, T, h, dh_dp, dh_dT);
-
-  ABS_TEST("h", h, _fp->h(p, T), 1.0e-15);
-  REL_TEST("dh_dp", dh_dp, dh_dp_fd, tol);
-  REL_TEST("dh_dT", dh_dT, dh_dT_fd, tol);
-
-  // internal energy
-  Real de_dp_fd = (_fp->e(p + dp, T) - _fp->e(p - dp, T)) / (2.0 * dp);
-  Real de_dT_fd = (_fp->e(p, T + dT) - _fp->e(p, T - dT)) / (2.0 * dT);
-  Real e = 0.0, de_dp = 0.0, de_dT = 0.0;
-  _fp->e_dpT(p, T, e, de_dp, de_dT);
-
-  ABS_TEST("e", e, _fp->e(p, T), 1.0e-15);
-  REL_TEST("de_dp", de_dp, de_dp_fd, tol);
-  REL_TEST("de_dT", de_dT, de_dT_fd, tol);
-}

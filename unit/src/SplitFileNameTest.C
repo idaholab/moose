@@ -12,30 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "gtest/gtest.h"
+
 #include "MooseUtils.h"
-#include "SplitFileNameTest.h"
+
 #include <cmath>
 
-CPPUNIT_TEST_SUITE_REGISTRATION(SplitFileNameTest);
-
-void
-SplitFileNameTest::invalidName()
+TEST(SplitFileName, invalidName)
 {
   std::string full = "/this/is/not/valid/";
-  std::pair<std::string, std::string> split = MooseUtils::splitFileName(full);
+  EXPECT_ANY_THROW(MooseUtils::splitFileName(full));
 }
 
-void
-SplitFileNameTest::validName()
+TEST(SplitFileName, validName)
 {
   std::string full = "/this/is/valid.txt";
   std::pair<std::string, std::string> split = MooseUtils::splitFileName(full);
 
-  CPPUNIT_ASSERT(split.first.compare("/this/is") == 0);
-  CPPUNIT_ASSERT(split.second.compare("valid.txt") == 0);
+  EXPECT_EQ(split.first.compare("/this/is"), 0);
+  EXPECT_EQ(split.second.compare("valid.txt"), 0);
 
   full = "valid.txt";
   split = MooseUtils::splitFileName(full);
-  CPPUNIT_ASSERT(split.first.compare(".") == 0);
-  CPPUNIT_ASSERT(split.second.compare("valid.txt") == 0);
+  EXPECT_EQ(split.first.compare("."), 0);
+  EXPECT_EQ(split.second.compare("valid.txt"), 0);
 }

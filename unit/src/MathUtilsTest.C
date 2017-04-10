@@ -12,16 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MathUtilsTest.h"
+#include "gtest/gtest.h"
 
-// Moose includes
 #include "MathUtils.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(MathUtilsTest);
-
-void
-MathUtilsTest::pow()
+TEST(MathUtilsTest, pow)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(MathUtils::pow(1.2345, 73), std::pow(1.2345, 73), 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(MathUtils::pow(-0.99542, 58), std::pow(-0.99542, 58), 1e-5);
+  ASSERT_DOUBLE_EQ(MathUtils::pow(1.2345, 73), std::pow(1.2345, 73));
+  ASSERT_DOUBLE_EQ(MathUtils::pow(-0.99542, 58), std::pow(-0.99542, 58));
 }

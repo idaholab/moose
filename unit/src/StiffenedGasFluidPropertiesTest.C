@@ -12,72 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "StiffenedGasFluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "StiffenedGasFluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(StiffenedGasFluidPropertiesTest);
-
-void
-StiffenedGasFluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(StiffenedGasFluidProperties);
-}
-
-void
-StiffenedGasFluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters eos_pars = _factory->getValidParams("StiffenedGasFluidProperties");
-  eos_pars.set<Real>("gamma") = 2.35;
-  eos_pars.set<Real>("q") = -1167e3;
-  eos_pars.set<Real>("q_prime") = 0;
-  eos_pars.set<Real>("p_inf") = 1.e9;
-  eos_pars.set<Real>("cv") = 1816;
-  eos_pars.set<std::string>("_object_name") = "name3";
-  _fe_problem->addUserObject("StiffenedGasFluidProperties", "fp", eos_pars);
-  _fp = &_fe_problem->getUserObject<StiffenedGasFluidProperties>("fp");
-}
-
-void
-StiffenedGasFluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-StiffenedGasFluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-StiffenedGasFluidPropertiesTest::testAll()
+TEST_F(StiffenedGasFluidPropertiesTest, testAll)
 {
   Real T = 20. + 273.15; // K
   Real p = 101325;       // Pa

@@ -12,90 +12,54 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "BrineFluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "BrineFluidProperties.h"
-#include "Water97FluidProperties.h"
-#include "NaClFluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(BrineFluidPropertiesTest);
-
-void
-BrineFluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(BrineFluidProperties);
-  registerUserObject(Water97FluidProperties);
-  registerUserObject(NaClFluidProperties);
-}
-
-void
-BrineFluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  // The brine fluid properties
-  InputParameters uo_pars = _factory->getValidParams("BrineFluidProperties");
-  _fe_problem->addUserObject("BrineFluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<BrineFluidProperties>("fp");
-
-  // Get the water properties UserObject
-  _water_fp = &_fp->getComponent(BrineFluidProperties::WATER);
-}
-
-void
-BrineFluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-BrineFluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-BrineFluidPropertiesTest::vapor()
+/**
+ * Verify calculation of brine vapor pressure using data from
+ * Haas, Physical properties of the coexisting phases and thermochemical
+ * properties of the H2O component in boiling NaCl solutions, Geological Survey
+ * Bulletin, 1421-A (1976).
+ */
+TEST_F(BrineFluidPropertiesTest, vapor)
 {
   REL_TEST("vapor", _fp->pSat(473.15, 0.185), 1.34e6, 1.0e-2);
   REL_TEST("vapor", _fp->pSat(473.15, 0.267), 1.21e6, 1.0e-2);
   REL_TEST("vapor", _fp->pSat(473.15, 0.312), 1.13e6, 1.0e-2);
 }
 
-void
-BrineFluidPropertiesTest::solubility()
+/**
+ * Verify calculation of halite solubility using data from
+ * Bodnar et al, Synthetic fluid inclusions in natural quartz, III.
+ * Determination of phase equilibrium properties in the system H2O-NaCl
+ * to 1000C and 1500 bars, Geocehmica et Cosmochemica Acta, 49, 1861-1873 (1985).
+ * Note that the average of the range quoted has been used for each point.
+ */
+TEST_F(BrineFluidPropertiesTest, solubility)
 {
   REL_TEST("halite solubility", _fp->haliteSolubility(659.65), 0.442, 2.0e-2);
   REL_TEST("halite solubility", _fp->haliteSolubility(818.65), 0.6085, 2.0e-2);
   REL_TEST("halite solubility", _fp->haliteSolubility(903.15), 0.7185, 2.0e-2);
 }
 
-void
-BrineFluidPropertiesTest::properties()
+/**
+ * Verify calculation of brine properties.
+ * Experimental density values from Pitzer et al, Thermodynamic properties
+ * of aqueous sodium chloride solution, Journal of Physical and Chemical
+ * Reference Data, 13, 1-102 (1984)
+ *
+ * Experimental viscosity values from Phillips et al, Viscosity of NaCl and
+ * other solutions up to 350C and 50MPa pressures, LBL-11586 (1980)
+ *
+ * Thermal conductivity values from Ozbek and Phillips, Thermal conductivity of
+ * aqueous NaCl solutions from 20C to 330C, LBL-9086 (1980)
+ *
+ *  It is difficult to compare enthalpy and cp with experimental data, so
+ * instead we recreate the data presented in Figures 11 and 12 of
+ * Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
+ * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar,
+ * and 0 to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007)
+ */
+TEST_F(BrineFluidPropertiesTest, properties)
 {
   // Pressure, temperature and NaCl mass fraction for tests
   Real p0 = 20.0e6;
@@ -137,8 +101,11 @@ BrineFluidPropertiesTest::properties()
   REL_TEST("cp", _fp->cp(p0, 623.15, x0), 8.1e3, 1.0e-2);
 }
 
-void
-BrineFluidPropertiesTest::derivatives()
+/**
+ * Verify calculation of the derivatives of all properties by comparing with finite
+ * differences
+ */
+TEST_F(BrineFluidPropertiesTest, derivatives)
 {
   Real p = 1.0e6;
   Real T = 350.0;
