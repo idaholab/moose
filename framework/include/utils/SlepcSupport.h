@@ -44,6 +44,7 @@ PetscErrorCode moose_slepc_eigen_formJacobianA(SNES snes, Vec x, Mat jac, Mat pc
 PetscErrorCode moose_slepc_eigen_formJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
 PetscErrorCode moose_slepc_eigen_formFunctionA(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode moose_slepc_eigen_formFunctionB(SNES snes, Vec x, Vec r, void * ctx);
+void registerEigenSolvers();
 } // namespace SlepcSupport
 } // namespace moose
 

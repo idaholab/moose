@@ -254,11 +254,12 @@ enum SolveType
  */
 enum EigenSolveType
 {
-  EST_POWER,          ///< Power / Inverse / RQI
-  EST_ARNOLDI,        ///< Arnoldi
-  EST_KRYLOVSCHUR,    ///< Krylov-Schur
-  EST_JACOBI_DAVIDSON,///< Jacobi-Davidson
-  EST_NONLINEAR_POWER
+  EST_POWER,           ///< Power / Inverse / RQI
+  EST_ARNOLDI,         ///< Arnoldi
+  EST_KRYLOVSCHUR,     ///< Krylov-Schur
+  EST_JACOBI_DAVIDSON, ///< Jacobi-Davidson
+  EST_NONLINEAR_POWER, ///< Nonlinear inverse power
+  EST_MONOLITH_NEWTON  ///< Newton-based eigen solver
 };
 
 /**
