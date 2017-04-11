@@ -125,11 +125,6 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
   // Remove un-wanted space around string
   name_value[0] = MooseUtils::trim(name_value[0]);
 
-  // preserve case for raw options, append to list
-  if (!_raw_names.empty())
-    _raw_names += " ";
-  _raw_names += name_value[0];
-
   // See if there is a value supplied for this option
   // strtol allows for proper conversions of both int and hex strings
   int value;
@@ -140,8 +135,19 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
   else
     value = *_ids.rbegin() + 1;
 
+  addEnumerationName(name_value[0], value);
+}
+
+void
+MooseEnumBase::addEnumerationName(const std::string & name, const int & value)
+{
+  // preserve case for raw options, append to list
+  if (!_raw_names.empty())
+    _raw_names += " ";
+  _raw_names += name;
+
   // convert name to uppercase
-  std::string upper(name_value[0]);
+  std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
   // check ids and names
@@ -154,16 +160,26 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
   _names.push_back(upper);
   _ids.insert(value);
   _name_to_id[upper] = value;
-  _name_to_raw_name[upper] = name_value[0] + " "; // add space to make the name unique for removal
+  _id_to_name[value] = upper;
+  _name_to_raw_name[upper] = name + " "; // add space to make the name unique for removal
 }
 
 int
 MooseEnumBase::id(std::string name) const
 {
   std::transform(name.begin(), name.end(), name.begin(), ::toupper);
-  std::map<std::string, int>::const_iterator iter = _name_to_id.find(name);
+  auto iter = _name_to_id.find(name);
   if (iter == _name_to_id.end())
     mooseError("The name ", name, " is not a possible enumeration value.");
+  return iter->second;
+}
+
+const std::string &
+MooseEnumBase::name(const int & id) const
+{
+  auto iter = _id_to_name.find(id);
+  if (iter == _id_to_name.end())
+    mooseError("The id ", id, " is not a possible enumeration id.");
   return iter->second;
 }
 

@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 #include "TestSteady.h"
+#include "MooseTestAppTypes.h"
 
 template <>
 InputParameters
@@ -46,8 +47,8 @@ TestSteady::execute()
 void
 TestSteady::postSolve()
 {
-  _problem.execute("JUST_GO");
-  _problem.execute("JUST_GO");
-  _problem.execute("JUST_GO");
-  _problem.execute("JUST_GO");
+  _problem.execute(EXEC_JUST_GO);
+  _problem.execute(EXEC_JUST_GO);
+  _problem.execute(EXEC_JUST_GO);
+  _problem.execute(EXEC_JUST_GO);
 }

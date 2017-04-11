@@ -462,6 +462,19 @@
 
 #include <unistd.h>
 
+const ExecFlagType EXEC_NONE = 0x00;           // 0
+const ExecFlagType EXEC_INITIAL = 0x01;        // 1
+const ExecFlagType EXEC_LINEAR = 0x02;         // 2
+const ExecFlagType EXEC_NONLINEAR = 0x04;      // 4
+const ExecFlagType EXEC_TIMESTEP_END = 0x8;    // 8
+const ExecFlagType EXEC_TIMESTEP_BEGIN = 0x10; // 16
+const ExecFlagType EXEC_FINAL = 0x20;          // 32
+const ExecFlagType EXEC_FORCED = 0x40;         // 64
+const ExecFlagType EXEC_FAILED = 0x80;         // 128
+const ExecFlagType EXEC_CUSTOM = 0x100;        // 256
+const ExecFlagType EXEC_SUBDOMAIN = 0x200;     // 512
+const ExecFlagType EXEC_SAME_AS_MULTIAPP = 1000;
+
 namespace Moose
 {
 
@@ -1189,6 +1202,23 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
+registerExecFlags()
+{
+  registerExecFlag(EXEC_NONE, "NONE");                     // 0
+  registerExecFlag(EXEC_INITIAL, "INITIAL");               // 1
+  registerExecFlag(EXEC_LINEAR, "LINEAR");                 // 2
+  registerExecFlag(EXEC_NONLINEAR, "NONLINEAR");           // 4
+  registerExecFlag(EXEC_TIMESTEP_END, "TIMESTEP_END");     // 8
+  registerExecFlag(EXEC_TIMESTEP_BEGIN, "TIMESTEP_BEGIN"); // 16
+  registerExecFlag(EXEC_FINAL, "FINAL");                   // 32
+  registerExecFlag(EXEC_FORCED, "FORCED");                 // 64
+  registerExecFlag(EXEC_FAILED, "FAILED");                 // 128
+  registerExecFlag(EXEC_CUSTOM, "CUSTOM");                 // 256
+  registerExecFlag(EXEC_SUBDOMAIN, "SUBDOMAIN");           // 512
+  registerExecFlag(EXEC_SAME_AS_MULTIAPP, "SAME_AS_MULTIAPP");
+}
+
+void
 setSolverDefaults(FEProblemBase & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
@@ -1246,4 +1276,14 @@ bool _deprecated_is_error = false;
 
 bool _throw_on_error = false;
 
+std::map<ExecFlagType, std::string> execute_flags = std::map<ExecFlagType, std::string>();
+
 } // namespace Moose
+
+// This is outside of the MOOSE names space so that it works without Moose::, like the other
+// registration macros.
+void
+registerExecFlag(const ExecFlagType & flag, const std::string & str)
+{
+  Moose::execute_flags[flag] = str;
+}

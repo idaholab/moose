@@ -29,9 +29,6 @@
 #include <vector>
 #include <memory>
 
-// Forward Declarations
-class MultiMooseEnum;
-
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
 #define MooseSharedNamespace std
@@ -85,23 +82,6 @@ typedef unsigned int THREAD_ID;
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 
-// Previously ExecFlagType was an C++ enum. However, this did not allow for custom execute flags
-// to be defined and required a lot of conversion back and forth between the MultiMooseEnum and
-// the actual enum. The enum has now been replaced, but to allow other codes to continue to
-// operate without being modified this list of globals is defined.
-typedef std::string ExecFlagType;
-const ExecFlagType EXEC_NONE("NONE");
-const ExecFlagType EXEC_INITIAL("INITIAL");
-const ExecFlagType EXEC_LINEAR("LINEAR");
-const ExecFlagType EXEC_NONLINEAR("NONLINEAR");
-const ExecFlagType EXEC_TIMESTEP_END("TIMESTEP_END");
-const ExecFlagType EXEC_TIMESTEP_BEGIN("TIMESTEP_BEGIN");
-const ExecFlagType EXEC_FINAL("FINAL");
-const ExecFlagType EXEC_FORCED("FORCED");
-const ExecFlagType EXEC_FAILED("FAILED");
-const ExecFlagType EXEC_CUSTOM("CUSTOM");
-const ExecFlagType EXEC_SUBDOMAIN("SUBDOMAIN");
-
 
 namespace Moose
 {
@@ -109,7 +89,6 @@ const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
 const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
 const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
-
 
 /**
  * MaterialData types
@@ -125,7 +104,7 @@ enum MaterialDataType
 };
 
 /**
- * Flag for AuxKernel related exeuction type.
+ * Flag for AuxKernel related execution type.
  */
 enum AuxGroup
 {

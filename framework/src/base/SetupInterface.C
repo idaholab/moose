@@ -23,7 +23,7 @@ validParams<SetupInterface>()
   InputParameters params = emptyInputParameters();
 
   // Add the 'execute_on' input parameter for users to set
-  MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum(EXEC_LINEAR));
+  MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum(1, EXEC_LINEAR));
   params.addParam<MultiMooseEnum>("execute_on",
                                   execute_options,
                                   MooseUtils::getExecuteOnEnumDocString(execute_options));
@@ -31,11 +31,11 @@ validParams<SetupInterface>()
 }
 
 SetupInterface::SetupInterface(const MooseObject * moose_object)
-  : _execute_enum(moose_object->parameters().isParamValid("execute_on") ?
-                  moose_object->parameters().get<MultiMooseEnum>("execute_on") :
-                  _empty_execute_enum),
-  _exec_flags(_execute_enum.begin(), _execute_enum.end()),
-  _current_execute_flag(
+  : _execute_enum(moose_object->parameters().isParamValid("execute_on")
+                      ? moose_object->parameters().get<MultiMooseEnum>("execute_on")
+                      : _empty_execute_enum),
+    _exec_flags(_execute_enum.getCurrentIDs()),
+    _current_execute_flag(
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {

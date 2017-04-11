@@ -463,7 +463,6 @@ AdvancedOutput<T>::hasOutput(const ExecFlagType & type)
   for (const auto & it : T::_advanced_execute_on)
     if (shouldOutput(it.first, type))
       return true;
-
   // There is nothing to output
   return false;
 }
@@ -669,7 +668,12 @@ template <class T>
 void
 AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum & types)
 {
-  MultiMooseEnum empty_execute_on(MooseUtils::createExecuteOnEnum("", "FINAL FAILED"));
+  MultiMooseEnum empty_execute_on(MooseUtils::createExecuteOnEnum());
+  for (auto & flag : std::vector<ExecFlagType>({EXEC_FINAL, EXEC_FAILED}))
+  {
+    const auto iter = MooseUtils::getExecuteOnFlag(flag);
+    empty_execute_on.addEnumerationName(iter->second, iter->first);
+  }
 
   // Nodal output
   if (types.contains("nodal"))

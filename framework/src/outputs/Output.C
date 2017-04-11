@@ -34,6 +34,7 @@ validParams<Output>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
 
   // Displaced Mesh options
   params.addParam<bool>(
@@ -50,18 +51,16 @@ validParams<Output>()
   params.addParam<Real>(
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
-  // Add the 'execute_on' input parameter for users to set
-  MultiMooseEnum exec_enum(MooseUtils::createExecuteOnEnum("initial timestep_end",
-                                                           /*add=*/"FINAL FAILED"));
-  params.addParam<MultiMooseEnum>("execute_on",
-                                  exec_enum,
-                                  MooseUtils::getExecuteOnEnumDocString(exec_enum));
+  // Update the 'execute_on' input parameter for output
+  MooseUtils::addExecuteOnFlags(params, 2, EXEC_FINAL, EXEC_FAILED);
+  MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_TIMESTEP_END);
 
   // Add ability to append to the 'execute_on' list
-  exec_enum.clear();
+  MultiMooseEnum exec_enum(params.get<MultiMooseEnum>("execute_on"));
   params.addParam<MultiMooseEnum>("additional_execute_on",
                                   exec_enum,
                                   MooseUtils::getExecuteOnEnumDocString(exec_enum));
+  params.set<MultiMooseEnum>("additional_execute_on").clear();
 
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time ",
@@ -80,10 +79,10 @@ validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
-  ::mooseDeprecated("The 'getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum "
-                    "because MOOSE was updated to use a MultiMooseEnum for the execute flags and "
-                    "the new function provides additional arguments for modification of the enum.");
-  return MooseUtils::createExecuteOnEnum(default_type);
+  ::mooseDeprecated("The 'getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum.");
+  MultiMooseEnum exec_enum = MooseUtils::createExecuteOnEnum();
+  exec_enum = default_type;
+  return exec_enum;
 }
 
 Output::Output(const InputParameters & parameters)

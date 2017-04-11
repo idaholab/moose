@@ -153,9 +153,6 @@ public:
                          THREAD_ID tid = 0) const;
 
 protected:
-  /// Flag indicating if the warehouse is threaded
-  const bool _threaded;
-
   /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)
   const THREAD_ID _num_threads;
 
@@ -208,8 +205,7 @@ protected:
 
 template <typename T>
 MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/)
-  : _threaded(threaded),
-    _num_threads(_threaded ? libMesh::n_threads() : 1),
+  : _num_threads(threaded ? libMesh::n_threads() : 1),
     _all_objects(_num_threads),
     _active_objects(_num_threads),
     _all_block_objects(_num_threads),

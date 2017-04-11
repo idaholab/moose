@@ -22,9 +22,14 @@
 #include <set>
 
 // Forward declarations
+class MultiMooseEnum;
 namespace libMesh
 {
 class Parameters;
+}
+namespace MooseUtils
+{
+MultiMooseEnum createExecuteOnEnum(int n, ...);
 }
 
 typedef std::set<std::string>::const_iterator MooseEnumIterator;
@@ -78,8 +83,6 @@ public:
   bool operator==(const MultiMooseEnum & value) const;
   bool operator!=(const MultiMooseEnum & value) const;
   ///@}
-
-
 
   ///@{
   /**
@@ -155,7 +158,12 @@ public:
   /**
    * Get a list of the current valid enumeration.s
    */
-  const std::set<std::string> getCurrentNames() const { return _current_names; }
+  const std::set<std::string> & getCurrentNames() const { return _current_names; }
+
+  /**
+   * Get a list of the current valid enumeration.s
+   */
+  const std::vector<int> & getCurrentIDs() const { return _current_ids; }
 
   /**
    * Clear the MultiMooseEnum
@@ -184,7 +192,8 @@ public:
   // filling it in after the fact
   friend class libMesh::Parameters;
 
-  // SetupInterface can create empty MultiMooseEnums for the execution flags.
+  // The create function can build an empty MultiMooseEnums for the execution flags.
+  friend MultiMooseEnum MooseUtils::createExecuteOnEnum(int n, ...);
   friend class SetupInterface;
 
   /// Operator for printing to iostreams

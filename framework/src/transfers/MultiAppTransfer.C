@@ -38,10 +38,8 @@ validParams<MultiAppTransfer>()
 
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be
   // added by FEProblemBase when the transfer is added.
-  MultiMooseEnum multi_transfer_execute_on(params.get<MultiMooseEnum>("execute_on").getRawNames() +
-                                               " same_as_multiapp",
-                                           "same_as_multiapp");
-  params.set<MultiMooseEnum>("execute_on") = multi_transfer_execute_on;
+  MooseUtils::addExecuteOnFlags(params, 1, EXEC_SAME_AS_MULTIAPP);
+  MooseUtils::setExecuteOnFlags(params, 1, EXEC_SAME_AS_MULTIAPP);
 
   params.addParam<bool>(
       "check_multiapp_execute_on",

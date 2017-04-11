@@ -42,7 +42,8 @@ OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & execute_on,
     _map.insert(std::make_pair("input", MooseUtils::createExecuteOnEnum()));
 
   if (parameters.have_parameter<MultiMooseEnum>("execute_system_information_on"))
-    _map.insert(std::make_pair("system_information", MooseUtils::createExecuteOnEnum("initial")));
+    _map.insert(
+        std::make_pair("system_information", MooseUtils::createExecuteOnEnum(1, EXEC_INITIAL)));
 }
 
 // Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based
