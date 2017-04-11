@@ -993,6 +993,16 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     Elem * parent_elem = _mesh->elem(parent_id);
     Elem * libmesh_elem = Elem::build(parent_elem->type()).release();
 
+    for (ElementPairLocator::ElementPairList::iterator it = _sibling_elems.begin();
+         it != _sibling_elems.end();
+         ++it)
+    {
+      if (parent_elem == it->first)
+        it->first = libmesh_elem;
+      else if (parent_elem == it->second)
+        it->second = libmesh_elem;
+    }
+
     // parent has at least two children
     if (new_elements[i]->getParent()->numChildren() > 1)
       temporary_parent_children_map[parent_id].push_back(libmesh_elem);
@@ -1003,6 +1013,16 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     {
       parent_elem2 = _displaced_mesh->elem(parent_id);
       libmesh_elem2 = Elem::build(parent_elem2->type()).release();
+
+      for (ElementPairLocator::ElementPairList::iterator it = _sibling_displaced_elems.begin();
+           it != _sibling_displaced_elems.end();
+           ++it)
+      {
+        if (parent_elem2 == it->first)
+          it->first = libmesh_elem2;
+        else if (parent_elem2 == it->second)
+          it->second = libmesh_elem2;
+      }
     }
 
     for (unsigned int j = 0; j < new_elements[i]->numNodes(); ++j)
@@ -1198,32 +1218,6 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     {
       delete cemit->second;
       _cut_elem_map.erase(cemit);
-    }
-
-    // Delete any entries in _sibling_elems for this element.
-    for (ElementPairLocator::ElementPairList::iterator it = _sibling_elems.begin();
-         it != _sibling_elems.end();
-         ++it)
-    {
-      if (elem_to_delete == it->first || elem_to_delete == it->second)
-      {
-        _sibling_elems.erase(it);
-        break;
-      }
-    }
-
-    // Delete any entries in _sibling_displaced_elems for this element.
-    for (ElementPairLocator::ElementPairList::iterator it = _sibling_displaced_elems.begin();
-         it != _sibling_displaced_elems.end();
-         ++it)
-    {
-      Elem * elem_to_delete2 = _displaced_mesh->elem(delete_elements[i]->id());
-
-      if (elem_to_delete2 == it->first || elem_to_delete2 == it->second)
-      {
-        _sibling_displaced_elems.erase(it);
-        break;
-      }
     }
 
     elem_to_delete->nullify_neighbors();

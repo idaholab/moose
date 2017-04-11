@@ -8,6 +8,5 @@
     # XFEM requires --enable-unique-ids in libmesh
     min_parallel=4
     unique_id = true
-    skip = "#8763"
   [../]
 []
