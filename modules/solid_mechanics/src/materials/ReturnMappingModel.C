@@ -30,17 +30,30 @@ validParams<ReturnMappingModel>()
   return params;
 }
 
-ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters)
+ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters,
+                                       const std::string inelastic_strain_name)
   : ConstitutiveModel(parameters),
     _max_its(parameters.get<unsigned int>("max_its")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
-    _effective_strain_increment(0)
+    _effective_strain_increment(0),
+    _effective_inelastic_strain(
+        declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
+    _effective_inelastic_strain_old(
+        declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain"))
 {
 }
 
+void
+ReturnMappingModel::initStatefulProperties(unsigned n_points)
+{
+  for (unsigned qp(0); qp < n_points; ++qp)
+  {
+    _effective_inelastic_strain[qp] = 0;
+  }
+}
 void
 ReturnMappingModel::computeStress(const Elem & current_elem,
                                   unsigned qp,
@@ -163,6 +176,7 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/,
   inelastic_strain_increment *= (1.5 * scalar / effective_trial_stress);
 
   strain_increment -= inelastic_strain_increment;
+  _effective_inelastic_strain[qp] = _effective_inelastic_strain_old[qp] + scalar;
 
   // compute stress increment
   stress_new = elasticityTensor * strain_increment;

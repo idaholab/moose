@@ -1,0 +1,38 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov           
+#                       Greg Sjaardema, gdsjaar@sandia.gov          
+#             Run on    2017/04/24   15:33:42 MDT
+#  *****************************************************************
+
+#  FILE 1: /Users/casaa/prj_devel/moose/modules/combined/tests/inelastic_strain/elas_plas/elas_plas_nl1_cycle_out.e
+#   Title: elas_plas_nl1_cycle_out.e
+#          Dim = 2, Blocks = 1, Nodes = 4, Elements = 1, Nodesets = 5, Sidesets = 2
+#          Vars: Global = 21, Nodal = 2, Element = 16, Nodeset = 0, Sideset = 0, Times = 13
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:              12 @ t13
+
+GLOBAL VARIABLES relative 1.e-6 floor 6.e-5
+	stress_xx           # min:               0 @ t1	max:   5.0722854e-05 @ t11
+	stress_xy           # min:               0 @ t1	max:    4.835918e-10 @ t11
+
+ELEMENT VARIABLES relative 1.e-6 floor 6.e-5
+	stress_xx           # min:               0 @ t1,b1,e1	max:   5.0722854e-05 @ t11,b1,e1
+	stress_yy           # min:               0 @ t1,b1,e1	max:       5771073.8 @ t4,b1,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+

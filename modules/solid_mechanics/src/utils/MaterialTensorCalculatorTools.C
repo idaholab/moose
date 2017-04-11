@@ -59,6 +59,12 @@ equivalentPlasticStrain(const SymmTensor & symm_strain)
 }
 
 Real
+effectiveStrain(const SymmTensor & symm_strain)
+{
+  return std::sqrt(2.0 / 3.0 * symm_strain.doubleContraction(symm_strain));
+}
+
+Real
 hydrostatic(const SymmTensor & symm_tensor)
 {
   return symm_tensor.trace() / 3.0;
@@ -105,28 +111,52 @@ thirdInvariant(const SymmTensor & symm_tensor)
 }
 
 Real
+maxPrincipal(const SymmTensor & symm_tensor, RealVectorValue & direction)
+{
+  Real val = calcPrincipalValues(symm_tensor, (LIBMESH_DIM - 1), direction);
+  return val;
+}
+
+Real
+midPrincipal(const SymmTensor & symm_tensor, RealVectorValue & direction)
+{
+  Real val = calcPrincipalValues(symm_tensor, 1, direction);
+  return val;
+}
+
+Real
+minPrincipal(const SymmTensor & symm_tensor, RealVectorValue & direction)
+{
+  Real val = calcPrincipalValues(symm_tensor, 0, direction);
+  return val;
+}
+
+// The functions below for maxPrinciple, midPrinciple and minPrinciple are
+// deprecated. They will be replaced with the correctly spelled versions.
+
+Real
 maxPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction)
 {
-  Real val = calcPrincipleValues(symm_tensor, (LIBMESH_DIM - 1), direction);
+  Real val = calcPrincipalValues(symm_tensor, (LIBMESH_DIM - 1), direction);
   return val;
 }
 
 Real
 midPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction)
 {
-  Real val = calcPrincipleValues(symm_tensor, 1, direction);
+  Real val = calcPrincipalValues(symm_tensor, 1, direction);
   return val;
 }
 
 Real
 minPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction)
 {
-  Real val = calcPrincipleValues(symm_tensor, 0, direction);
+  Real val = calcPrincipalValues(symm_tensor, 0, direction);
   return val;
 }
 
 Real
-calcPrincipleValues(const SymmTensor & symm_tensor, unsigned int index, RealVectorValue & direction)
+calcPrincipalValues(const SymmTensor & symm_tensor, unsigned int index, RealVectorValue & direction)
 {
   ColumnMajorMatrix eval(3, 1);
   ColumnMajorMatrix evec(3, 3);
