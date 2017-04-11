@@ -93,6 +93,8 @@ def nodeParamsString(output, entry, indent, sep, ignore_type=False):
             continue
         info = entry.parameters[name]
         val = info.inputFileValue()
+        if not val and name != 'active': # we generally don't want to write out empty strings
+            continue
         comments = info.comments
         if info.value != info.default or info.user_added or info.set_in_input_file:
             paramToString(output, info.name, val, comments, indent, sep)
