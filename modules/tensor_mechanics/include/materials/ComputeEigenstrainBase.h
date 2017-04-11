@@ -47,6 +47,9 @@ protected:
    * param volumetric_strain The current volumetric strain to be applied
    */
   Real computeVolumetricStrainComponent(const Real volumetric_strain) const;
+
+  /// Restartable data to check for the zeroth and first time steps for thermal calculations
+  bool & _step_zero;
 };
 
 #endif // COMPUTEEIGENSTRAINBASE_H
