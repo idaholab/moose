@@ -61,6 +61,8 @@ validParams<Exodus>()
   // Set outputting of the input to be on by default
   params.set<MultiMooseEnum>("execute_input_on") = "initial";
 
+  MultiMooseEnum exec_enum = params.get<MultiMooseEnum>("execute_on");
+
   // Return the InputParameters
   return params;
 }
@@ -75,6 +77,7 @@ Exodus::Exodus(const InputParameters & parameters)
                                        : _use_displaced ? true : false),
     _overwrite(getParam<bool>("overwrite"))
 {
+
 }
 
 void

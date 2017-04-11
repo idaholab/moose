@@ -44,14 +44,10 @@ ControlOutput::ControlOutput(const InputParameters & parameters)
 void
 ControlOutput::output(const ExecFlagType & type)
 {
-  switch (type)
-  {
-    case EXEC_INITIAL:
-      outputControls();
-      break;
-    default:
-      outputChangedControls();
-  }
+  if (type == EXEC_INITIAL)
+    outputControls();
+  else
+    outputChangedControls();
 
   if (_show_active_objects)
     outputActiveObjects();

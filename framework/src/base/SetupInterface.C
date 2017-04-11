@@ -22,45 +22,23 @@ validParams<SetupInterface>()
 {
   InputParameters params = emptyInputParameters();
 
-  // Get an MooseEnum of the available 'execute_on' options
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-
   // Add the 'execute_on' input parameter for users to set
+  MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum(EXEC_LINEAR));
   params.addParam<MultiMooseEnum>("execute_on",
                                   execute_options,
-                                  "Set to (nonlinear|linear|timestep_end|timestep_begin|custom) "
-                                  "to execute only at that moment");
-
-  // The Output system uses different options for the 'execute_on' than other systems, therefore the
-  // check of the options
-  // cannot occur based on the 'execute_on' parameter, so this flag triggers the check
-  params.addPrivateParam<bool>("check_execute_on", true);
-
+                                  MooseUtils::getExecuteOnEnumDocString(execute_options));
   return params;
 }
 
 SetupInterface::SetupInterface(const MooseObject * moose_object)
-  : _current_execute_flag(
+  : _execute_enum(moose_object->parameters().isParamValid("execute_on") ?
+                  moose_object->parameters().get<MultiMooseEnum>("execute_on") :
+                  _empty_execute_enum),
+  _exec_flags(_execute_enum.begin(), _execute_enum.end()),
+  _current_execute_flag(
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {
-  const InputParameters & params = moose_object->parameters();
-
-  /**
-   * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all
-   * to adjust their execution flags.
-   * Our way of dealing with this is by not having those particular classes add the this classes
-   * valid params to their own.  In
-   * those cases it won't exist so we just set it to a default and ignore it.
-   */
-  if (params.have_parameter<bool>("check_execute_on") && params.get<bool>("check_execute_on"))
-  {
-    MultiMooseEnum flags = params.get<MultiMooseEnum>("execute_on");
-    _exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(flags);
-  }
-
-  else
-    _exec_flags.push_back(EXEC_LINEAR);
 }
 
 SetupInterface::~SetupInterface() {}
@@ -90,26 +68,37 @@ SetupInterface::subdomainSetup()
 {
 }
 
+const MultiMooseEnum &
+SetupInterface::getExecuteOnEnum() const
+{
+  return _execute_enum;
+}
+
 const std::vector<ExecFlagType> &
 SetupInterface::execFlags() const
 {
+  mooseDeprecated("MOOSE has been updated to use a MultiMooseEnum for execute flags. The current "
+                  "flags should be retrieved from the \"exeucte_on\" parameters of your object, "
+                  "or by using the \"_execute_enum\" reference to the parameter or the "
+                  "getExecuteOnEnum() method.");
   return _exec_flags;
 }
+
 
 ExecFlagType
 SetupInterface::execBitFlags() const
 {
-  unsigned int exec_bit_field = EXEC_NONE;
-  for (unsigned int i = 0; i < _exec_flags.size(); ++i)
-    exec_bit_field |= _exec_flags[i];
-
-  return static_cast<ExecFlagType>(exec_bit_field);
+  mooseDeprecated("This method has been removed because MOOSE was updated to use a MultiMooseEnum "
+                  "for execute flags. This method does nothing so will likely alter application "
+                  "execution.");
+  return EXEC_NONE;
 }
 
 MultiMooseEnum
 SetupInterface::getExecuteOptions()
 {
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
-                        "timestep_begin=0x10 custom=0x100",
-                        "linear");
+  mooseDeprecated("The getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum because "
+                  "MOOSE was updated to use a MultiMooseEnum for the execute flags and the "
+                  "new function provides additional arguments for modification of the enum.");
+  return MooseUtils::createExecuteOnEnum();
 }

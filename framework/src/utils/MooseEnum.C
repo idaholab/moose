@@ -151,3 +151,12 @@ MooseEnum::checkDeprecated() const
 {
   checkDeprecatedBase(_current_name);
 }
+
+void
+MooseEnum::removeEnumerationName(std::string name)
+{
+  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+  if (name == _current_name)
+    mooseError("The current enumeration value of ", name, " cannot be removed.");
+  MooseEnumBase::removeEnumerationName(name);
+}

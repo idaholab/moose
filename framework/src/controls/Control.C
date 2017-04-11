@@ -25,8 +25,8 @@ validParams<Control>()
   params += validParams<FunctionInterface>();
   params.registerBase("Control");
 
-  params.set<MultiMooseEnum>("execute_on") = Control::getExecuteOptions();
-
+  params.set<MultiMooseEnum>("execute_on") =
+      MooseUtils::createExecuteOnEnum("initial timestep_end");
   return params;
 }
 
@@ -46,7 +46,8 @@ Control::Control(const InputParameters & parameters)
 MultiMooseEnum
 Control::getExecuteOptions()
 {
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
-                        "timestep_begin=0x10 custom=0x100 subdomain=0x200",
-                        "initial timestep_end");
+  ::mooseDeprecated("The 'getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum "
+                    "because MOOSE was updated to use a MultiMooseEnum for the execute flags and "
+                    "the new function provides additional arguments for modification of the enum.");
+  return MooseUtils::createExecuteOnEnum("initial timestep_end");
 }

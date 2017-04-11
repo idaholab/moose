@@ -685,6 +685,8 @@ void
 Transient::postExecute()
 {
   _time_stepper->postExecute();
+
+  _problem.execute(EXEC_FINAL);
 }
 
 void

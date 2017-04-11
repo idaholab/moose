@@ -26,8 +26,7 @@ validParams<MaterialCopyUserObject>()
   params.addRequiredParam<unsigned int>("copy_to_element",
                                         "The id of the element to which data is copied");
 
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_end";
+  MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum("timestep_end"));
   params.set<MultiMooseEnum>("execute_on") = execute_options;
 
   return params;

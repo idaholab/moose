@@ -51,18 +51,17 @@ validParams<Output>()
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
   // Add the 'execute_on' input parameter for users to set
+  MultiMooseEnum exec_enum(MooseUtils::createExecuteOnEnum("initial timestep_end",
+                                                           /*add=*/"FINAL FAILED"));
   params.addParam<MultiMooseEnum>("execute_on",
-                                  Output::getExecuteOptions("initial timestep_end"),
-                                  "Set to "
-                                  "(none|initial|linear|nonlinear|timestep_end|timestep_begin|"
-                                  "final|failed|custom) to execute only at that moment");
+                                  exec_enum,
+                                  MooseUtils::getExecuteOnEnumDocString(exec_enum));
 
   // Add ability to append to the 'execute_on' list
+  exec_enum.clear();
   params.addParam<MultiMooseEnum>("additional_execute_on",
-                                  Output::getExecuteOptions(),
-                                  "This list of output flags is added to the existing flags "
-                                  "(initial|linear|nonlinear|timestep_end|timestep_begin|final|"
-                                  "failed|custom) to execute only at that moment");
+                                  exec_enum,
+                                  MooseUtils::getExecuteOnEnumDocString(exec_enum));
 
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time ",
@@ -81,12 +80,10 @@ validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
-  // Build the string of options
-  std::string options = "none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
-                        "timestep_begin=0x10 final=0x20 failed=0x80";
-
-  // The numbers associated must be in sync with the ExecFlagType in Moose.h
-  return MultiMooseEnum(options, default_type);
+  ::mooseDeprecated("The 'getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum "
+                    "because MOOSE was updated to use a MultiMooseEnum for the execute flags and "
+                    "the new function provides additional arguments for modification of the enum.");
+  return MooseUtils::createExecuteOnEnum(default_type);
 }
 
 Output::Output(const InputParameters & parameters)

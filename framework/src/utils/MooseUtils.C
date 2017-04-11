@@ -16,6 +16,7 @@
 #include "MooseUtils.h"
 #include "MooseError.h"
 #include "MaterialProperty.h"
+#include "MultiMooseEnum.h"
 
 // libMesh includes
 #include "libmesh/elem.h"
@@ -549,6 +550,35 @@ wildCardMatch(std::string name, std::string search_string)
   }
   else
     return false;
+}
+
+MultiMooseEnum
+createExecuteOnEnum(const std::string & default_flags,
+                    const std::string & add_flags,
+                    const std::string & remove_flags)
+{
+  MultiMooseEnum exec_enum("NONE=0x00 INITIAL=0x01 LINEAR=0x02 NONLINEAR=0x04 TIMESTEP_END=0x08 "
+                           "TIMESTEP_BEGIN=0x10 CUSTOM=0x100 SUBDOMAIN=0x200");
+
+  if (!add_flags.empty())
+    exec_enum.addEnumerationNames(add_flags);
+
+  if (!remove_flags.empty())
+    exec_enum.removeEnumerationNames(remove_flags);
+
+  exec_enum = default_flags;
+  return exec_enum;
+}
+
+std::string
+getExecuteOnEnumDocString(const MultiMooseEnum & exec_enum)
+{
+  std::string doc("The list of flag(s) indicating when this object should be executed, the available optoins include \'");
+  for (const std::string & name : exec_enum.getNames())
+    doc += name + "', '";
+  doc.erase(doc.end() - 4, doc.end());
+  doc += "').";
+  return doc;
 }
 
 } // MooseUtils namespace

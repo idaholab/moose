@@ -289,3 +289,12 @@ operator<<(std::ostream & out, const MultiMooseEnum & obj)
             infix_ostream_iterator<std::string>(out, " "));
   return out;
 }
+
+void
+MultiMooseEnum::removeEnumerationName(std::string name)
+{
+  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+  if (_current_names.find(name) != _current_names.end())
+    mooseError("A current enumeration value of ", name, " cannot be removed.");
+  MooseEnumBase::removeEnumerationName(name);
+}

@@ -142,7 +142,7 @@ protected:
 
   /// Postprocessor for normalization
   const Real & _normalization;
-  ExecFlagType _norm_execflag;
+  const MultiMooseEnum * _norm_exec;
 
   // Chebyshev acceleration
   class Chebyshev_Parameters

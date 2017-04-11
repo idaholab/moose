@@ -15,6 +15,7 @@
 #ifndef MESHCHANGEDINTERFACE_H
 #define MESHCHANGEDINTERFACE_H
 
+#include "InputParameters.h"
 #include "MooseEnum.h"
 
 // Forward declarations

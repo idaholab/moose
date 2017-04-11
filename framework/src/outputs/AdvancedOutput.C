@@ -539,7 +539,10 @@ AdvancedOutput<T>::initExecutionTypes(const std::string & name, MultiMooseEnum &
   // If the parameter does not exists; set it to a state where no valid entries exists so nothing
   // gets executed
   else if (!T::_pars.template have_parameter<MultiMooseEnum>(param_name))
-    input = AdvancedOutput<T>::getExecuteOptions();
+  {
+    input = T::_execute_on;
+    input.clear();
+  }
 }
 
 template <class T>
@@ -666,20 +669,21 @@ template <class T>
 void
 AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum & types)
 {
+  MultiMooseEnum empty_execute_on(MooseUtils::createExecuteOnEnum("", "FINAL FAILED"));
+
   // Nodal output
   if (types.contains("nodal"))
   {
     params.addParam<MultiMooseEnum>(
-        "execute_nodal_on", T::getExecuteOptions(), "Control the output of nodal variables");
+        "execute_nodal_on", empty_execute_on, "Control the output of nodal variables");
     params.addParamNamesToGroup("execute_nodal_on", "Variables");
   }
 
   // Elemental output
   if (types.contains("elemental"))
   {
-    params.addParam<MultiMooseEnum>("execute_elemental_on",
-                                    T::getExecuteOptions(),
-                                    "Control the output of elemental variables");
+    params.addParam<MultiMooseEnum>(
+        "execute_elemental_on", empty_execute_on, "Control the output of elemental variables");
     params.addParamNamesToGroup("execute_elemental_on", "Variables");
 
     // Add material output control, which are output via elemental variables
@@ -696,7 +700,7 @@ AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum
   if (types.contains("scalar"))
   {
     params.addParam<MultiMooseEnum>(
-        "execute_scalars_on", T::getExecuteOptions(), "Control the output of scalar variables");
+        "execute_scalars_on", empty_execute_on, "Control the output of scalar variables");
     params.addParamNamesToGroup("execute_scalars_on", "Variables");
   }
 
@@ -718,9 +722,8 @@ AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum
   // Postprocessors
   if (types.contains("postprocessor"))
   {
-    params.addParam<MultiMooseEnum>("execute_postprocessors_on",
-                                    T::getExecuteOptions(),
-                                    "Control of when postprocessors are output");
+    params.addParam<MultiMooseEnum>(
+        "execute_postprocessors_on", empty_execute_on, "Control of when postprocessors are output");
     params.addParamNamesToGroup("execute_postprocessors_on", "Variables");
   }
 
@@ -728,7 +731,7 @@ AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum
   if (types.contains("vector_postprocessor"))
   {
     params.addParam<MultiMooseEnum>("execute_vector_postprocessors_on",
-                                    T::getExecuteOptions(),
+                                    empty_execute_on,
                                     "Enable/disable the output of VectorPostprocessors");
     params.addParamNamesToGroup("execute_vector_postprocessors_on", "Variables");
   }
@@ -737,7 +740,7 @@ AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum
   if (types.contains("input"))
   {
     params.addParam<MultiMooseEnum>(
-        "execute_input_on", T::getExecuteOptions(), "Enable/disable the output of the input file");
+        "execute_input_on", empty_execute_on, "Enable/disable the output of the input file");
     params.addParamNamesToGroup("execute_input_on", "Variables");
   }
 
@@ -745,7 +748,7 @@ AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum
   if (types.contains("system_information"))
   {
     params.addParam<MultiMooseEnum>("execute_system_information_on",
-                                    T::getExecuteOptions(),
+                                    empty_execute_on,
                                     "Control when the output of the simulation information occurs");
     params.addParamNamesToGroup("execute_system_information_on", "Variables");
   }

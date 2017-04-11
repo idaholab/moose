@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 /**
  * The base class for both the MooseEnum and MultiMooseEnum classes.
@@ -26,13 +27,13 @@
 class MooseEnumBase
 {
 public:
+
   /**
    * Constructor that takes a list of enumeration values, and a
    * separate string to set a default for this instance.
    * @param names - a list of names for this enumeration
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   * it's range of
-   *                       defined values.
+   *                             it's range of defined values.
    */
   MooseEnumBase(std::string names, bool allow_out_of_range = false);
 
@@ -73,14 +74,43 @@ public:
    */
   virtual bool isValid() const = 0;
 
+  /**
+   * Return the id given a name.
+   @return name The name of a valid enumeration.
+   */
+  int id(std::string name) const;
+
+  /**
+   * Adds possible enumeration names.
+   */
+  void addEnumerationNames(const std::string & names);
+
+  /**
+   * Removes possible enumeration names.
+   */
+  void removeEnumerationNames(const std::string & names);\
+
 protected:
   MooseEnumBase();
+
+  /**
+   * Adds a possible enumeration value to the enum.
+   * @param raw_name The enumeration name, which may include an id (e.g., foo=42).
+   */
+  void addEnumerationName(const std::string & raw_name);
+
+  /**
+   * Remove a possible enumeration value to the enum.
+   * @param name The enumeration name to remove.
+   */
+  virtual void removeEnumerationName(std::string name);
 
   /**
    * Populates the _names vector
    * @param names - a space separated list of names used to populate the internal names vector
    */
   void fillNames(std::string names, std::string option_delim = " ");
+
 
   // The method that must be implemented to check derived class values against the _deprecated_names
   // list
@@ -103,11 +133,17 @@ protected:
   /// The map of deprecated names and optional replacements
   std::map<std::string, std::string> _deprecated_names;
 
+  /// Map id to raw name for removal
+  std::map<std::string, std::string> _name_to_raw_name;
+
   /**
    * The index of values assigned that are NOT values in this enum.  If this index is 0 (false) then
    * out of range values are not allowed.
    */
   int _out_of_range_index;
+
+  /// A set of ids utilized to check that it is not set the same for multiple keys
+  std::set<int> _ids;
 
   /// Constants
   const static int INVALID_ID;

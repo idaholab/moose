@@ -35,6 +35,7 @@ public:
   using MooseObjectWarehouse<T>::initialSetup;
   using MooseObjectWarehouse<T>::timestepSetup;
   using MooseObjectWarehouse<T>::subdomainSetup;
+  using MooseObjectWarehouse<T>::_threaded;
 
   /**
    * Constructor.
@@ -97,7 +98,12 @@ public:
 
 protected:
   // Map of execute objects to storage containers for MooseObjects
-  std::map<ExecFlagType, MooseObjectWarehouse<T>> _execute_objects;
+  // This mutable to allow the const version of operator[] to create and return an empty
+  // warehouse on-demand, this was done to allow for arbitrary execute on flags without the need
+  // to check prior to retrieving a warehouse. Doing the check is possible but would require adding
+  // an additional has method at each place it is accessed, which is inconsistent with the current
+  // usage and would add a lot of lines of code.
+  mutable std::map<ExecFlagType, MooseObjectWarehouse<T>> _execute_objects;
 
   /// A helper method for extracting objects from the various storage containers
   typename std::map<ExecFlagType, MooseObjectWarehouse<T>>::iterator
@@ -109,9 +115,6 @@ template <typename T>
 ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(bool threaded)
   : MooseObjectWarehouse<T>(threaded)
 {
-  // Initialize the active/all data structures with the correct map entries and empty vectors
-  for (const auto & exec_type : Moose::exec_types)
-    _execute_objects.insert(std::make_pair(exec_type, MooseObjectWarehouse<T>(threaded)));
 }
 
 template <typename T>
@@ -125,12 +128,10 @@ operator[](ExecFlagType exec_flag) const
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);
-
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters "
-               "is likely out-of-date.");
+    _execute_objects.insert(std::make_pair(exec_flag, MooseObjectWarehouse<T>(_threaded)));
 
-  return iter->second;
+  return _execute_objects[exec_flag];
 }
 
 template <typename T>
@@ -138,12 +139,10 @@ MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagTyp
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);
-
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters "
-               "is likely out-of-date.");
+    _execute_objects.insert(std::make_pair(exec_flag, MooseObjectWarehouse<T>(_threaded)));
 
-  return iter->second;
+  return _execute_objects[exec_flag];
 }
 
 template <typename T>
@@ -183,26 +182,16 @@ void
 ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  switch (exec_flag)
-  {
-    case EXEC_INITIAL:
-      initialSetup(tid);
-      break;
-    case EXEC_TIMESTEP_BEGIN:
+  if (exec_flag == EXEC_INITIAL)
+    initialSetup(tid);
+  else if (exec_flag == EXEC_TIMESTEP_BEGIN)
       timestepSetup(tid);
-      break;
-    case EXEC_SUBDOMAIN:
+  else if (exec_flag == EXEC_SUBDOMAIN)
       subdomainSetup(tid);
-      break;
-    case EXEC_NONLINEAR:
+  else if (exec_flag == EXEC_NONLINEAR)
       jacobianSetup(tid);
-      break;
-    case EXEC_LINEAR:
+  else if (exec_flag == EXEC_LINEAR)
       residualSetup(tid);
-      break;
-    default:
-      break;
-  }
 }
 
 template <typename T>
@@ -215,17 +204,12 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
   // Update the execute flag lists of objects
   std::shared_ptr<SetupInterface> ptr = std::dynamic_pointer_cast<SetupInterface>(object);
   if (ptr)
-  {
-    const std::vector<ExecFlagType> flags = ptr->execFlags();
-    for (std::vector<ExecFlagType>::const_iterator it = flags.begin(); it != flags.end(); ++it)
-      _execute_objects[*it].addObject(object, tid);
-  }
+    for (const ExecFlagType & exec_flag : ptr->getExecuteOnEnum().getCurrentNames())
+        _execute_objects[exec_flag].addObject(object, tid);
   else
     mooseError("The object being added (",
                object->name(),
-               ") must inherit from SetupInterface to "
-               "be added to the "
-               "ExecuteMooseObjectWarehouse "
+               ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse "
                "container.");
 }
 

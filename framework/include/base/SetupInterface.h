@@ -17,6 +17,8 @@
 
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
+#include "MooseEnum.h"
+#include "InputParameters.h"
 
 // Forward declarations
 class InputParameters;
@@ -62,6 +64,11 @@ public:
   virtual void subdomainSetup();
 
   /**
+   * Return the execute on MultiMooseEnum for this object.
+   */
+  const MultiMooseEnum & getExecuteOnEnum() const;
+
+  /**
    * Get the execution flag for the object
    */
   virtual const std::vector<ExecFlagType> & execFlags() const;
@@ -72,14 +79,24 @@ public:
   ExecFlagType execBitFlags() const;
 
   /**
-   * Returns the available options for the 'execute_on' input parameters
+   * (DEPRECATED) Returns the available options for the 'execute_on' input parameters
    * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
    */
   static MultiMooseEnum getExecuteOptions();
 
+
+
+private:
+
+  MultiMooseEnum _empty_execute_enum;
+
 protected:
-  /// execution flag (when is the object executed/evaluated)
-  std::vector<ExecFlagType> _exec_flags;
+
+  const MultiMooseEnum & _execute_enum;
+
+
+  /// execution flag (when is the object executed/evaluated) (deprecated)
+  const std::vector<ExecFlagType> _exec_flags;
 
   /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;
