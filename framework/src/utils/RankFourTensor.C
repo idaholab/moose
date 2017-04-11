@@ -10,6 +10,7 @@
 #include "RankTwoTensor.h"
 #include "MooseEnum.h"
 #include "MooseException.h"
+#include "MooseUtils.h"
 #include "MatrixTools.h"
 #include "MaterialProperty.h"
 #include "PermutationTensor.h"
@@ -837,4 +838,60 @@ RankFourTensor::sum3x1() const
   a(1) = _vals[1][1][0][0] + _vals[1][1][1][1] + _vals[1][1][2][2]; // C1100 + C1111 + C1122
   a(2) = _vals[2][2][0][0] + _vals[2][2][1][1] + _vals[2][2][2][2]; // C2200 + C2211 + C2222
   return a;
+}
+
+bool
+RankFourTensor::isSymmetric() const
+{
+  for (unsigned int i = 1; i < N; ++i)
+    for (unsigned int j = 0; j < i; ++j)
+      for (unsigned int k = 1; k < N; ++k)
+        for (unsigned int l = 0; l < k; ++l)
+        {
+          // minor symmetries
+          if (_vals[i][j][k][l] != _vals[j][i][k][l] || _vals[i][j][k][l] != _vals[i][j][l][k])
+            return false;
+
+          // major symmetry
+          if (_vals[i][j][k][l] != _vals[k][l][i][j])
+            return false;
+        }
+  return true;
+}
+
+bool
+RankFourTensor::isIsotropic() const
+{
+  // prerequisite is symmetry
+  if (!isSymmetric())
+    return false;
+
+  // inspect shear components
+  const Real mu = _vals[0][1][0][1];
+  // ...diagonal
+  if (_vals[1][2][1][2] != mu || _vals[2][0][2][0] != mu)
+    return false;
+  // ...off-diagonal
+  if (_vals[2][0][1][2] != 0.0 || _vals[0][1][1][2] != 0.0 || _vals[0][1][2][0] != 0.0)
+    return false;
+
+  // off diagonal blocks in Voigt
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      if (_vals[i][i][(j + 1) % N][(j + 2) % N] != 0.0)
+        return false;
+
+  // top left block
+  const Real K1 = _vals[0][0][0][0];
+  const Real K2 = _vals[0][0][1][1];
+  if (!MooseUtils::relativeFuzzyEqual(K1 - 4.0 * mu / 3.0, K2 + 2.0 * mu / 3.0))
+    return false;
+  if (_vals[1][1][1][1] != K1 || _vals[2][2][2][2] != K1)
+    return false;
+  for (unsigned int i = 1; i < N; ++i)
+    for (unsigned int j = 0; j < i; ++j)
+      if (_vals[i][i][j][j] != K2)
+        return false;
+
+  return true;
 }

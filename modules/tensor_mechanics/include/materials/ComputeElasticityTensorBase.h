@@ -19,6 +19,9 @@ class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>
 public:
   ComputeElasticityTensorBase(const InputParameters & parameters);
 
+  /// is the elasticity tensor provided by this material guaranteed to be isotropic
+  virtual bool isGuaranteedIsotropic() const { return false; }
+
 protected:
   virtual void computeQpProperties();
   virtual void computeQpElasticityTensor() = 0;
