@@ -53,9 +53,9 @@ protected:
 private:
   enum class OptionalBool
   {
-    UNDEFINED = -1,
-    FALSE = 0,
-    TRUE = 1
+    VALUE_UNDEFINED = -1,
+    VALUE_FALSE = 0,
+    VALUE_TRUE = 1
   };
 
   /// store
