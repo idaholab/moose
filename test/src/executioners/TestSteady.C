@@ -42,3 +42,12 @@ TestSteady::execute()
 {
   Steady::execute();
 }
+
+void
+TestSteady::postSolve()
+{
+  _problem.execute("JUST_GO");
+  _problem.execute("JUST_GO");
+  _problem.execute("JUST_GO");
+  _problem.execute("JUST_GO");
+}

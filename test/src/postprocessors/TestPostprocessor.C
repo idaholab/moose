@@ -19,10 +19,11 @@ InputParameters
 validParams<TestPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  MooseEnum test_type("grow use_older_value report_old");
+  MooseEnum test_type("grow use_older_value report_old custom_execute_on");
   params.addRequiredParam<MooseEnum>("test_type", test_type, "The type of test to perform");
   params.addParam<PostprocessorName>("report_name",
                                      "The name of the postprocessor value to report");
+  params.set<MultiMooseEnum>("execute_on").addEnumerationNames("just_go");
   return params;
 }
 
@@ -55,6 +56,9 @@ TestPostprocessor::getValue()
 
   else if (_test_type == "report_old")
     return getPostprocessorValueOld("report_name");
+
+  else if (_test_type == "custom_execute_on")
+    return _execute_count++;
 
   // This should not be attainable
   else
