@@ -45,7 +45,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _store_stress_old(getParam<bool>("store_stress_old")),
-    _elasticity_tensor_isotropic_guarantee(OptionalBool::UNDEFINED)
+    _elasticity_tensor_isotropic_guarantee(OptionalBool::VALUE_UNDEFINED)
 {
   // Declares old stress and older stress if the parameter _store_stress_old is true. This parameter
   // can be set from the input file using any of the child classes of ComputeStressBase.
@@ -100,12 +100,12 @@ bool
 ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
 {
   // we need to determine this on demand in initialSetup
-  if (_elasticity_tensor_isotropic_guarantee == OptionalBool::UNDEFINED)
+  if (_elasticity_tensor_isotropic_guarantee == OptionalBool::VALUE_UNDEFINED)
   {
     if (!_fe_problem.startedInitialSetup())
       mooseError("isElasticityTensorGuaranteedIsotropic() needs to be called in initialSetup()");
 
-    _elasticity_tensor_isotropic_guarantee = OptionalBool::TRUE;
+    _elasticity_tensor_isotropic_guarantee = OptionalBool::VALUE_TRUE;
 
     // Reference to MaterialWarehouse for testing and retrieving block ids
     const auto & warehouse = _fe_problem.getMaterialWarehouse();
@@ -130,7 +130,7 @@ ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
             {
               // we found at least one material on the set of block we operate on
               // that does _not_ guarantee an isotropic elasticity tensor
-              _elasticity_tensor_isotropic_guarantee = OptionalBool::FALSE;
+              _elasticity_tensor_isotropic_guarantee = OptionalBool::VALUE_FALSE;
               break;
             }
           }
@@ -139,5 +139,5 @@ ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
     }
   }
 
-  return _elasticity_tensor_isotropic_guarantee == OptionalBool::TRUE;
+  return _elasticity_tensor_isotropic_guarantee == OptionalBool::VALUE_TRUE;
 }
