@@ -62,4 +62,18 @@
     map = false
     unique_id = true
   [../]
+  [./edge_crack_2d_cut_interior_nodes]
+    type = Exodiff
+    input = edge_crack_2d_cut_interior_nodes.i
+    exodiff = 'edge_crack_2d_cut_interior_nodes_out.e edge_crack_2d_cut_interior_nodes_out.e-s002 edge_crack_2d_cut_interior_nodes_out.e-s003'
+    map = false
+    unique_id = true
+  [../]
+  [./edge_crack_3d_cut_interior_nodes]
+    type = Exodiff
+    input = edge_crack_3d_cut_interior_nodes.i
+    exodiff = 'edge_crack_3d_cut_interior_nodes_out.e'
+    map = false
+    unique_id = true
+  [../]
 []
