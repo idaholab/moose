@@ -27,7 +27,7 @@ Real component(const SymmTensor & symm_tensor, unsigned int index);
 Real component(const SymmTensor & symm_tensor, unsigned int index, RealVectorValue & direction);
 
 /*
- * The von Mises Stress is calculated in non-principle stress space
+ * The von Mises Stress is calculated in non-principal stress space
  * \sigma_{vm} = \sqrt \frac{1}{2} \left( (\sigma_x - \sigma_y)^2 + (\sigma_y - \sigma_z)^2 +
  * (\sigma_z - \sigma_z)^2 + 6 * \left( \tau_{xy}^2 + \tau_{yz}^2 + \tau_{zx}^2 \right) \right)
  * This scalar quanitity is often used to determine the onset of plasticity by
@@ -41,6 +41,12 @@ Real vonMisesStress(const SymmTensor & symm_stress);
  * Users must take care to pass in the plastic inelastic_strain only.
  */
 Real equivalentPlasticStrain(const SymmTensor & symm_strain);
+
+/*
+ * The effective strain is calculated as
+ * \epsilon_{eff} = \sqrt{\frac{2}{3}\epsilon_{ij} \epsilon_{ij}}
+ */
+Real effectiveStrain(const SymmTensor & symm_strain);
 
 /*
  * The hydrostatic scalar of a tensor is computed as the sum of the diagonal
@@ -77,29 +83,32 @@ Real secondInvariant(const SymmTensor & symm_tensor);
 Real thirdInvariant(const SymmTensor & symm_tensor);
 
 /*
- * The max Principle method returns the largest principle value for a symmetric
+ * The max Principal method returns the largest principal value for a symmetric
  * tensor, using the calcEigenValues method.
  */
+Real maxPrincipal(const SymmTensor & symm_tensor, RealVectorValue & direction);
 Real maxPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction);
 
 /*
- * The mid Principle method calculates the second largest principle value for a
+ * The mid Principal method calculates the second largest principal value for a
  * tensor.  This method is valid only for 3D problems and will return an error
  * if called in 2D problems.
  */
+Real midPrincipal(const SymmTensor & symm_tensor, RealVectorValue & direction);
 Real midPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction);
 
 /*
- * The min Principle stress returns the smallest principle value from a symmetric
+ * The min Principal stress returns the smallest principal value from a symmetric
  * tensor.
  */
+Real minPrincipal(const SymmTensor & symm_tensor, RealVectorValue & direction);
 Real minPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction);
 
 /*
- * This method is called by the *Principle methods to calculate the eigenvalues
+ * This method is called by the *Principal methods to calculate the eigenvalues
  * of a symmetric tensor and return the desired value based on vector position.
  */
-Real calcPrincipleValues(const SymmTensor & symm_tensor,
+Real calcPrincipalValues(const SymmTensor & symm_tensor,
                          unsigned int index,
                          RealVectorValue & direction);
 

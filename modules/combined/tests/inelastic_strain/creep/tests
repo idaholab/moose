@@ -1,0 +1,7 @@
+[Tests]
+  [./creep]
+    type = 'Exodiff'
+    input = 'creep_nl1.i'
+    exodiff = 'creep_nl1_out.e'
+  [../]
+[]

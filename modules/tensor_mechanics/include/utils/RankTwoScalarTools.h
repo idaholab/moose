@@ -71,6 +71,12 @@ Real vonMisesStress(const RankTwoTensor & tensor);
 Real equivalentPlasticStrain(const RankTwoTensor & strain);
 
 /*
+ * The effective strain is calculated as
+ * \epsilon_{eff} = \sqrt{\frac{2}{3}\epsilon_{ij} \epsilon_{ij}}
+ */
+Real effectiveStrain(const RankTwoTensor & strain);
+
+/*
  * The hydrostatic scalar of a tensor is computed as the sum of the diagonal
  * terms divided by 3.
  */
@@ -110,26 +116,29 @@ Real secondInvariant(const RankTwoTensor & r2tensor);
 Real thirdInvariant(const RankTwoTensor & r2tensor);
 
 /*
- * The max Principle method returns the largest principle value for a symmetric
+ * The max Principal method returns the largest principal value for a symmetric
  * tensor, using the calcEigenValues method.
  */
+Real maxPrincipal(const RankTwoTensor & r2tensor);
 Real maxPrinciple(const RankTwoTensor & r2tensor);
 
 /*
- * The mid Principle method calculates the second largest principle value for a
+ * The mid Principal method calculates the second largest principal value for a
  * tensor.  This method is valid only for 3D problems and will return an error
  * if called in 2D problems.
  */
+Real midPrincipal(const RankTwoTensor & r2tensor);
 Real midPrinciple(const RankTwoTensor & r2tensor);
 
 /*
- * The min Principle stress returns the smallest principle value from a symmetric
+ * The min Principal stress returns the smallest principal value from a symmetric
  * tensor.
  */
+Real minPrincipal(const RankTwoTensor & r2tensor);
 Real minPrinciple(const RankTwoTensor & r2tensor);
 
 /*
- * This method is called by the *Principle methods to calculate the eigenvalues
+ * This method is called by the *Principal methods to calculate the eigenvalues
  * of a symmetric tensor and return the desired value based on vector position.
  */
 Real calcEigenValues(const RankTwoTensor & r2tensor, unsigned int index);

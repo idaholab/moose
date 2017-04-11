@@ -72,9 +72,6 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
 
   _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(
       new LinearInterpolation(_hf_temperatures, yield_stress_vec));
-
-  _scalar_plastic_strain = &declareProperty<Real>("scalar_plastic_strain");
-  _scalar_plastic_strain_old = &declarePropertyOld<Real>("scalar_plastic_strain");
 }
 
 void
@@ -135,7 +132,7 @@ IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
 Real
 IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
 {
-  const Real strain = (*_scalar_plastic_strain_old)[qp] + scalar;
+  const Real strain = _effective_inelastic_strain_old[qp] + scalar;
 
   const Real stress =
       (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point()) +
@@ -147,7 +144,7 @@ IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
 Real
 IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar*/)
 {
-  const Real strain_old = (*_scalar_plastic_strain_old)[qp];
+  const Real strain_old = _effective_inelastic_strain_old[qp];
 
   const Real derivative =
       (1.0 - _hf_fraction) *
