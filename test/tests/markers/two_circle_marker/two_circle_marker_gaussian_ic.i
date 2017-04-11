@@ -25,6 +25,7 @@
     vars = 'sigma x0 y0'
     vals = '0.05 0.35 0.25'
   [../]
+[]
 
 [Kernels]
   [./diff]
