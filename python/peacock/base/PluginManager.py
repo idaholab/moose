@@ -126,6 +126,7 @@ class PluginManager(MooseWidget):
 
         # Connect signal/slots of plugins
         for plugin0 in self._all_plugins:
+            plugin0._plugin_manager = self
             for plugin1 in self._all_plugins:
                 plugin0.connect(plugin1)
 
