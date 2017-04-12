@@ -52,7 +52,7 @@ XFEMElementPairLocator::reinit()
     if (!_use_displaced_mesh)
     {
       ElementPairInfo new_elem_info(
-          elem1, elem2, q_points1, q_points1, weights1, weights1, normal1, normal1);
+          elem1, elem2, q_points1, q_points1, weights1, weights1, normal1, -normal1);
       _element_pair_info.insert(
           std::pair<std::pair<const Elem *, const Elem *>, ElementPairInfo>(*it, new_elem_info));
     }
