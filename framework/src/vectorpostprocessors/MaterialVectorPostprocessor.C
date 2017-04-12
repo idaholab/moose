@@ -48,7 +48,16 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
   for (auto & id : _elem_filter)
   {
     auto el = _mesh.getMesh().query_elem_ptr(id);
-    if (!el || !mat.hasBlocks(el->subdomain_id()))
+
+    // We'd better have found the requested element on *some*
+    // processor.
+    bool found_elem = (el != nullptr);
+    this->comm().max(found_elem);
+
+    // We might not have el on this processor in a distributed mesh,
+    // but it should be somewhere and it ought to have a material
+    // defined for its subdomain
+    if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
       mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
   }
 
