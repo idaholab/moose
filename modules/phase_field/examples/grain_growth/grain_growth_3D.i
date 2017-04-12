@@ -21,7 +21,7 @@
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 8 # Number of order parameters used
+  op_num = 9 # Number of order parameters used
   var_name_base = gr # Base name of grains
 []
 
