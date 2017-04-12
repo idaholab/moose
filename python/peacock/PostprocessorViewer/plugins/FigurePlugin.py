@@ -37,6 +37,7 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         self.FigureCanvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.MainLayout.addWidget(self.FigureCanvas)
+        self.setFixedWidth(QtWidgets.QWIDGETSIZE_MAX) # reset the fixed width so it can be resized
 
         self.setup()
 
