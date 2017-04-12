@@ -99,7 +99,7 @@ class ParameterInfo(object):
             return str(self.value)
 
     def toolTip(self):
-        return self.description
+        return self.description + "\nDefault: %s" % self.default
 
     def dump(self, o, indent=0, sep='  '):
         o.write("%sName: %s\n" % (indent*sep, self.name))
