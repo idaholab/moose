@@ -19,6 +19,11 @@
     input = 'corey3.i'
     csvdiff = 'corey3_out_vpp_0001.csv'
   [../]
+  [./corey4]
+    type = 'CSVDiff'
+    input = 'corey4.i'
+    csvdiff = 'corey4_out_vpp_0001.csv'
+  [../]
   [./vangenuchten1]
     type = 'CSVDiff'
     input = 'vangenuchten1.i'
