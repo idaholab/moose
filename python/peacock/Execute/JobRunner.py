@@ -98,8 +98,12 @@ class JobRunner(QObject, MooseWidget):
         """
         self.killed = True
         mooseutils.mooseMessage("Killing")
-        self.process.kill()
-        self.process.waitForFinished()
+        self.process.terminate()
+        self.process.waitForFinished(1000)
+        if self.isRunning():
+            mooseutils.mooseMessage("Failed to terminate job cleanly. Doing a hard kill.")
+            self.process.kill()
+            self.process.waitForFinished()
 
     @pyqtSlot()
     def _readOutput(self):
