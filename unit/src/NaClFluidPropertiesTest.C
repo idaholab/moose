@@ -12,66 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseApp.h"
-#include "Utils.h"
 #include "NaClFluidPropertiesTest.h"
 
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
-#include "NaClFluidProperties.h"
-
-CPPUNIT_TEST_SUITE_REGISTRATION(NaClFluidPropertiesTest);
-
-void
-NaClFluidPropertiesTest::registerObjects(Factory & factory)
-{
-  registerUserObject(NaClFluidProperties);
-}
-
-void
-NaClFluidPropertiesTest::buildObjects()
-{
-  InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-  mesh_params.set<MooseEnum>("dim") = "3";
-  mesh_params.set<std::string>("name") = "mesh";
-  mesh_params.set<std::string>("_object_name") = "name1";
-  _mesh = new GeneratedMesh(mesh_params);
-
-  InputParameters problem_params = _factory->getValidParams("FEProblem");
-  problem_params.set<MooseMesh *>("mesh") = _mesh;
-  problem_params.set<std::string>("name") = "problem";
-  problem_params.set<std::string>("_object_name") = "name2";
-  _fe_problem = new FEProblem(problem_params);
-
-  InputParameters uo_pars = _factory->getValidParams("NaClFluidProperties");
-  _fe_problem->addUserObject("NaClFluidProperties", "fp", uo_pars);
-  _fp = &_fe_problem->getUserObject<NaClFluidProperties>("fp");
-}
-
-void
-NaClFluidPropertiesTest::setUp()
-{
-  char str[] = "foo";
-  char * argv[] = {str, NULL};
-
-  _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
-  _factory = &_app->getFactory();
-
-  registerObjects(*_factory);
-  buildObjects();
-}
-
-void
-NaClFluidPropertiesTest::tearDown()
-{
-  delete _fe_problem;
-  delete _mesh;
-  delete _app;
-}
-
-void
-NaClFluidPropertiesTest::halite()
+/**
+ * Verify calculation of the NACL properties the solid halite phase.
+ * Density data from Brown, "The NaCl pressure standard", J. Appl. Phys., 86 (1999).
+ *
+ * Values for cp and enthalpy are difficult to compare against. Instead, the
+ * values provided by the BrineFluidProperties UserObject were compared against
+ * simple correlations, eg. from NIST sodium chloride data.
+ *
+ * Values for thermal conductivity from Urqhart and Bauer,
+ * Experimental determination of single-crystal halite thermal conductivity,
+ * diffusivity and specific heat from -75 C to 300 C, Int. J. Rock Mech.
+ * and Mining Sci., 78 (2015)
+ */
+TEST_F(NaClFluidPropertiesTest, halite)
 {
   // Density and cp
   Real p0, p1, p2, T0, T1, T2;
@@ -103,8 +59,11 @@ NaClFluidPropertiesTest::halite()
   REL_TEST("k", _fp->k(p0, 523.15), 3.024, 2.0e-2);
 }
 
-void
-NaClFluidPropertiesTest::derivatives()
+/**
+ * Verify calculation of the derivatives of halite properties by comparing with finite
+ * differences
+ */
+TEST_F(NaClFluidPropertiesTest, derivatives)
 {
   Real p = 30.0e6;
   Real T = 300.0;

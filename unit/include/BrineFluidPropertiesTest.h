@@ -15,76 +15,74 @@
 #ifndef BRINEFLUIDPROPERTIESTEST_H
 #define BRINEFLUIDPROPERTIESTEST_H
 
-// CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
+
+#include "MooseApp.h"
+#include "Utils.h"
+#include "FEProblem.h"
+#include "AppFactory.h"
+#include "GeneratedMesh.h"
+#include "BrineFluidProperties.h"
+#include "Water97FluidProperties.h"
+#include "NaClFluidProperties.h"
 
 class MooseMesh;
 class FEProblem;
 class BrineFluidProperties;
 class SinglePhaseFluidPropertiesPT;
 
-class BrineFluidPropertiesTest : public CppUnit::TestFixture
+class BrineFluidPropertiesTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE(BrineFluidPropertiesTest);
+protected:
+  void SetUp()
+  {
+    char str[] = "foo";
+    char * argv[] = {str, NULL};
 
-  /**
-   * Verify calculation of brine vapor pressure using data from
-   * Haas, Physical properties of the coexisting phases and thermochemical
-   * properties of the H2O component in boiling NaCl solutions, Geological Survey
-   * Bulletin, 1421-A (1976).
-   */
-  CPPUNIT_TEST(vapor);
+    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _factory = &_app->getFactory();
 
-  /**
-   * Verify calculation of halite solubility using data from
-   * Bodnar et al, Synthetic fluid inclusions in natural quartz, III.
-   * Determination of phase equilibrium properties in the system H2O-NaCl
-   * to 1000C and 1500 bars, Geocehmica et Cosmochemica Acta, 49, 1861-1873 (1985).
-   * Note that the average of the range quoted has been used for each point.
-   */
-  CPPUNIT_TEST(solubility);
+    registerObjects(*_factory);
+    buildObjects();
+  }
 
-  /**
-   * Verify calculation of brine properties.
-   * Experimental density values from Pitzer et al, Thermodynamic properties
-   * of aqueous sodium chloride solution, Journal of Physical and Chemical
-   * Reference Data, 13, 1-102 (1984)
-   *
-   * Experimental viscosity values from Phillips et al, Viscosity of NaCl and
-   * other solutions up to 350C and 50MPa pressures, LBL-11586 (1980)
-   *
-   * Thermal conductivity values from Ozbek and Phillips, Thermal conductivity of
-   * aqueous NaCl solutions from 20C to 330C, LBL-9086 (1980)
-   *
-   *  It is difficult to compare enthalpy and cp with experimental data, so
-   * instead we recreate the data presented in Figures 11 and 12 of
-   * Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar,
-   * and 0 to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007)
-   */
-  CPPUNIT_TEST(properties);
+  void TearDown()
+  {
+    delete _fe_problem;
+    delete _mesh;
+    delete _app;
+  }
 
-  /**
-   * Verify calculation of the derivatives of all properties by comparing with finite
-   * differences
-   */
-  CPPUNIT_TEST(derivatives);
+  void registerObjects(Factory & factory)
+  {
+    registerUserObject(BrineFluidProperties);
+    registerUserObject(Water97FluidProperties);
+    registerUserObject(NaClFluidProperties);
+  }
 
-  CPPUNIT_TEST_SUITE_END();
+  void buildObjects()
+  {
+    InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
+    mesh_params.set<MooseEnum>("dim") = "3";
+    mesh_params.set<std::string>("name") = "mesh";
+    mesh_params.set<std::string>("_object_name") = "name1";
+    _mesh = new GeneratedMesh(mesh_params);
 
-public:
-  void registerObjects(Factory & factory);
-  void buildObjects();
+    InputParameters problem_params = _factory->getValidParams("FEProblem");
+    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<std::string>("name") = "problem";
+    problem_params.set<std::string>("_object_name") = "name2";
+    _fe_problem = new FEProblem(problem_params);
 
-  void setUp();
-  void tearDown();
+    // The brine fluid properties
+    InputParameters uo_pars = _factory->getValidParams("BrineFluidProperties");
+    _fe_problem->addUserObject("BrineFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<BrineFluidProperties>("fp");
 
-  void vapor();
-  void solubility();
-  void properties();
-  void derivatives();
+    // Get the water properties UserObject
+    _water_fp = &_fp->getComponent(BrineFluidProperties::WATER);
+  }
 
-private:
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;

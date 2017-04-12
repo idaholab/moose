@@ -11,65 +11,55 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "PorousFlowRogersStallybrassClementsTest.h"
+#include "gtest/gtest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(PorousFlowRogersStallybrassClementsTest);
+#include "PorousFlowRogersStallybrassClements.h"
 
-PorousFlowRogersStallybrassClementsTest::PorousFlowRogersStallybrassClementsTest() : _ep(1.0E-8) {}
+const double eps = 1.0E-8;
 
-void
-PorousFlowRogersStallybrassClementsTest::satTest()
+TEST(PorousFlowRogersStallybrassClements, sat)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      0.0, PorousFlowRogersStallybrassClements::effectiveSaturation(50, 0.7, 0.5), 1.0E-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      std::pow(2.0, -0.5),
-      PorousFlowRogersStallybrassClements::effectiveSaturation(1.1, 1.1, 4.4),
-      1.0E-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      std::pow(1.0 + std::exp(1.0), -0.5),
-      PorousFlowRogersStallybrassClements::effectiveSaturation(5.5, 1.1, 4.4),
-      1.0E-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      1.0, PorousFlowRogersStallybrassClements::effectiveSaturation(-50, 0.7, 0.5), 1.0E-5);
+  EXPECT_NEAR(0.0, PorousFlowRogersStallybrassClements::effectiveSaturation(50, 0.7, 0.5), 1.0E-5);
+  EXPECT_NEAR(std::pow(2.0, -0.5),
+              PorousFlowRogersStallybrassClements::effectiveSaturation(1.1, 1.1, 4.4),
+              1.0E-5);
+  EXPECT_NEAR(std::pow(1.0 + std::exp(1.0), -0.5),
+              PorousFlowRogersStallybrassClements::effectiveSaturation(5.5, 1.1, 4.4),
+              1.0E-5);
+  EXPECT_NEAR(1.0, PorousFlowRogersStallybrassClements::effectiveSaturation(-50, 0.7, 0.5), 1.0E-5);
 }
 
-void
-PorousFlowRogersStallybrassClementsTest::dsatTest()
+TEST(PorousFlowRogersStallybrassClements, dsat)
 {
   Real fd;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      0.0, PorousFlowRogersStallybrassClements::dEffectiveSaturation(50, 0.7, 0.5), 1.0E-5);
-  fd = (PorousFlowRogersStallybrassClements::effectiveSaturation(1.1 + _ep, 1.1, 4.4) -
+  EXPECT_NEAR(0.0, PorousFlowRogersStallybrassClements::dEffectiveSaturation(50, 0.7, 0.5), 1.0E-5);
+  fd = (PorousFlowRogersStallybrassClements::effectiveSaturation(1.1 + eps, 1.1, 4.4) -
         PorousFlowRogersStallybrassClements::effectiveSaturation(1.1, 1.1, 4.4)) /
-       _ep;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      fd, PorousFlowRogersStallybrassClements::dEffectiveSaturation(1.1, 1.1, 4.4), 1.0E-5);
-  fd = (PorousFlowRogersStallybrassClements::effectiveSaturation(5.5 + _ep, 1.1, 4.4) -
+       eps;
+  EXPECT_NEAR(fd, PorousFlowRogersStallybrassClements::dEffectiveSaturation(1.1, 1.1, 4.4), 1.0E-5);
+  fd = (PorousFlowRogersStallybrassClements::effectiveSaturation(5.5 + eps, 1.1, 4.4) -
         PorousFlowRogersStallybrassClements::effectiveSaturation(5.5, 1.1, 4.4)) /
-       _ep;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      fd, PorousFlowRogersStallybrassClements::dEffectiveSaturation(5.5, 1.1, 4.4), 1.0E-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+       eps;
+  EXPECT_NEAR(fd, PorousFlowRogersStallybrassClements::dEffectiveSaturation(5.5, 1.1, 4.4), 1.0E-5);
+  EXPECT_NEAR(
       0.0, PorousFlowRogersStallybrassClements::dEffectiveSaturation(-50, 0.7, 0.5), 1.0E-5);
 }
 
-void
-PorousFlowRogersStallybrassClementsTest::d2satTest()
+TEST(PorousFlowRogersStallybrassClements, d2sat)
 {
   Real fd;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+  EXPECT_NEAR(
       0.0, PorousFlowRogersStallybrassClements::d2EffectiveSaturation(50, 0.7, 0.5), 1.0E-5);
-  fd = (PorousFlowRogersStallybrassClements::dEffectiveSaturation(1.1 + _ep, 1.1, 4.4) -
+  fd = (PorousFlowRogersStallybrassClements::dEffectiveSaturation(1.1 + eps, 1.1, 4.4) -
         PorousFlowRogersStallybrassClements::dEffectiveSaturation(1.1, 1.1, 4.4)) /
-       _ep;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+       eps;
+  EXPECT_NEAR(
       fd, PorousFlowRogersStallybrassClements::d2EffectiveSaturation(1.1, 1.1, 4.4), 1.0E-5);
-  fd = (PorousFlowRogersStallybrassClements::dEffectiveSaturation(5.5 + _ep, 1.1, 4.4) -
+  fd = (PorousFlowRogersStallybrassClements::dEffectiveSaturation(5.5 + eps, 1.1, 4.4) -
         PorousFlowRogersStallybrassClements::dEffectiveSaturation(5.5, 1.1, 4.4)) /
-       _ep;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+       eps;
+  EXPECT_NEAR(
       fd, PorousFlowRogersStallybrassClements::d2EffectiveSaturation(5.5, 1.1, 4.4), 1.0E-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
+  EXPECT_NEAR(
       0.0, PorousFlowRogersStallybrassClements::d2EffectiveSaturation(-50, 0.7, 0.5), 1.0E-5);
 }

@@ -15,68 +15,24 @@
 #ifndef RANKTWOTENSORTEST_H
 #define RANKTWOTENSORTEST_H
 
-// CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
 
 // Moose includes
 #include "RankTwoTensor.h"
 
-class RankTwoTensorTest : public CppUnit::TestFixture
+class RankTwoTensorTest : public ::testing::Test
 {
+protected:
+  void SetUp()
+  {
+    _m0 = RankTwoTensor(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    _m1 = RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 1);
+    _m2 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 3);
+    _m3 = RankTwoTensor(1, 2, 3, 2, -5, -6, 3, -6, 9);
+    _unsymmetric0 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 9);
+    _unsymmetric1 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 10);
+  }
 
-  CPPUNIT_TEST_SUITE(RankTwoTensorTest);
-
-  CPPUNIT_TEST(L2normTest);
-  CPPUNIT_TEST(addIaTest);
-  CPPUNIT_TEST(transposeTest);
-  CPPUNIT_TEST(doubleContractionTest);
-  CPPUNIT_TEST(rotateTest);
-  CPPUNIT_TEST(deviatoricTest);
-  CPPUNIT_TEST(traceTest);
-  CPPUNIT_TEST(dtraceTest);
-  CPPUNIT_TEST(secondInvariantTest);
-  CPPUNIT_TEST(dsecondInvariantTest);
-  CPPUNIT_TEST(d2secondInvariantTest);
-  CPPUNIT_TEST(thirdInvariantTest);
-  CPPUNIT_TEST(dthirdInvariantTest);
-  CPPUNIT_TEST(d2thirdInvariantTest);
-  CPPUNIT_TEST(sin3LodeTest);
-  CPPUNIT_TEST(dsin3LodeTest);
-  CPPUNIT_TEST(d2sin3LodeTest);
-  CPPUNIT_TEST(detTest);
-  CPPUNIT_TEST(ddetTest);
-  CPPUNIT_TEST(inverseTest);
-  CPPUNIT_TEST(initialContractionTest);
-
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  RankTwoTensorTest();
-  ~RankTwoTensorTest();
-
-  void L2normTest();
-  void addIaTest();
-  void transposeTest();
-  void doubleContractionTest();
-  void rotateTest();
-  void deviatoricTest();
-  void traceTest();
-  void dtraceTest();
-  void secondInvariantTest();
-  void dsecondInvariantTest();
-  void d2secondInvariantTest();
-  void thirdInvariantTest();
-  void dthirdInvariantTest();
-  void d2thirdInvariantTest();
-  void sin3LodeTest();
-  void dsin3LodeTest();
-  void d2sin3LodeTest();
-  void detTest();
-  void ddetTest();
-  void inverseTest();
-  void initialContractionTest();
-
-private:
   RankTwoTensor _m0;
   RankTwoTensor _m1;
   RankTwoTensor _m2;

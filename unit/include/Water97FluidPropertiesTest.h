@@ -16,130 +16,95 @@
 #define WATER97FLUIDPROPERTIESTEST_H
 
 // CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
 
-class MooseMesh;
-class FEProblem;
-class Water97FluidProperties;
+#include "MooseApp.h"
+#include "Utils.h"
+#include "FEProblem.h"
+#include "AppFactory.h"
+#include "GeneratedMesh.h"
+#include "Water97FluidProperties.h"
 
-class Water97FluidPropertiesTest : public CppUnit::TestFixture
+class Water97FluidPropertiesTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE(Water97FluidPropertiesTest);
+protected:
+  void SetUp()
+  {
+    char str[] = "foo";
+    char * argv[] = {str, NULL};
 
-  /**
-   * Verify that the correct region is provided for a given pressure and
-   * temperature. Also verify that an error is thrown if pressure and temperature
-   * are outside the range of validity
-   */
-  CPPUNIT_TEST(inRegion);
+    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _factory = &_app->getFactory();
 
-  /**
-   * Verify calculation of the boundary between regions 2 and 3
-   * using the verification point (P,T) = (16.5291643 MPa, 623.15 K)
-   * Revised Release on the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam, IAPWS 2007
-   */
-  CPPUNIT_TEST(b23);
+    registerObjects(*_factory);
+    buildObjects();
+  }
 
-  /**
-   * Verify calculation of the boundary between regions 2b and 2c for the
-   * backwards equation T(p,h) using the verification point
-   * (p,h) = (100 MPa, 0.3516004323e4 kj/kg) from
-   * Revised Release on the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam, IAPWS 2007
-   */
-  CPPUNIT_TEST(b2bc);
+  void TearDown()
+  {
+    delete _fe_problem;
+    delete _mesh;
+    delete _app;
+  }
 
-  /**
-   * Verify calculation of the boundary between regions 3a and 3b for the
-   * backwards equation T(p,h) using the verification point
-   * (p,h) = (25 MPa, 2.095936454e3 kj/kg) from
-   * Revised Supplementary Release on Backward Equations for
-   * the Functions T(p,h), v(p,h) and T(p,s), v(p,s) for Region 3 of the IAPWS
-   * Industrial Formulation 1997 for the Thermodynamic Properties of Water and
-   * Steam
-   */
-  CPPUNIT_TEST(b3ab);
+  void registerObjects(Factory & factory) { registerUserObject(Water97FluidProperties); }
 
-  /**
-   * Verify calculation of water properties in region 4 (saturation line)
-   * using the verification values given in Table 35 of
-   * Revised Release on the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam, IAPWS 2007
-   */
-  CPPUNIT_TEST(pSat);
+  void buildObjects()
+  {
+    InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
+    mesh_params.set<MooseEnum>("dim") = "3";
+    mesh_params.set<std::string>("name") = "mesh";
+    mesh_params.set<std::string>("_object_name") = "name1";
+    _mesh = new GeneratedMesh(mesh_params);
 
-  /**
-   * Verify calculation of water properties in region 4 (saturation line)
-   * using the verification values given in Table 36 of
-   * Revised Release on the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam, IAPWS 2007
-   */
-  CPPUNIT_TEST(TSat);
+    InputParameters problem_params = _factory->getValidParams("FEProblem");
+    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<std::string>("name") = "problem";
+    problem_params.set<std::string>("_object_name") = "name2";
+    _fe_problem = new FEProblem(problem_params);
 
-  /**
-   * Verify calculation of the subregion in all 26 subregions in region 3 from
-   * Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam
-   */
-  CPPUNIT_TEST(subregion3);
+    InputParameters uo_pars = _factory->getValidParams("Water97FluidProperties");
+    _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
+  }
 
-  /**
-   * Verify calculation of the density in all 26 subregions in region 3 from
-   * Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam
-   */
-  CPPUNIT_TEST(subregion3Density);
+  void regionDerivatives(Real p, Real T, Real tol)
+  {
+    // Finite differencing parameters
+    Real dp = 1.0e1;
+    Real dT = 1.0e-4;
 
-  /**
-   * Verify calculation of the water properties in all regions using verification
-   * data provided in IAPWS guidelines.
-   * Density, enthalpy, internal energy, entropy, cp and speed of sound data from:
-   * Revised Release on the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam, IAPWS 2007.
-   *
-   * Viscosity data from:
-   * Table 4 of Release on the IAPWS Formulation 2008 for the Viscosity of
-   * Ordinary Water Substance.
-   *
-   * Thermal conductivity data from:
-   * Table D1 of Revised Release on the IAPS Formulation 1985 for the Thermal
-   * Conductivity of Ordinary Water Substance
-   */
-  CPPUNIT_TEST(properties);
+    // density
+    Real drho_dp_fd = (_fp->rho(p + dp, T) - _fp->rho(p - dp, T)) / (2.0 * dp);
+    Real drho_dT_fd = (_fp->rho(p, T + dT) - _fp->rho(p, T - dT)) / (2.0 * dT);
+    Real rho = 0.0, drho_dp = 0.0, drho_dT = 0.0;
+    _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
 
-  /**
-   * Verify calculation of the derivatives in all regions by comparing with finite
-   * differences
-   */
-  CPPUNIT_TEST(derivatives);
+    ABS_TEST("rho", rho, _fp->rho(p, T), 1.0e-15);
+    REL_TEST("drho_dp", drho_dp, drho_dp_fd, tol);
+    REL_TEST("drho_dT", drho_dT, drho_dT_fd, tol);
 
-  CPPUNIT_TEST_SUITE_END();
+    // enthalpy
+    Real dh_dp_fd = (_fp->h(p + dp, T) - _fp->h(p - dp, T)) / (2.0 * dp);
+    Real dh_dT_fd = (_fp->h(p, T + dT) - _fp->h(p, T - dT)) / (2.0 * dT);
+    Real h = 0.0, dh_dp = 0.0, dh_dT = 0.0;
+    _fp->h_dpT(p, T, h, dh_dp, dh_dT);
 
-public:
-  void registerObjects(Factory & factory);
-  void buildObjects();
+    ABS_TEST("h", h, _fp->h(p, T), 1.0e-15);
+    REL_TEST("dh_dp", dh_dp, dh_dp_fd, tol);
+    REL_TEST("dh_dT", dh_dT, dh_dT_fd, tol);
 
-  void setUp();
-  void tearDown();
+    // internal energy
+    Real de_dp_fd = (_fp->e(p + dp, T) - _fp->e(p - dp, T)) / (2.0 * dp);
+    Real de_dT_fd = (_fp->e(p, T + dT) - _fp->e(p, T - dT)) / (2.0 * dT);
+    Real e = 0.0, de_dp = 0.0, de_dT = 0.0;
+    _fp->e_dpT(p, T, e, de_dp, de_dT);
 
-  void inRegion();
-  void b23();
-  void b2bc();
-  void b3ab();
-  void pSat();
-  void TSat();
-  void subregion3();
-  void subregion3Density();
-  void properties();
-  void derivatives();
-  void regionDerivatives(Real p, Real T, Real tol);
+    ABS_TEST("e", e, _fp->e(p, T), 1.0e-15);
+    REL_TEST("de_dp", de_dp, de_dp_fd, tol);
+    REL_TEST("de_dT", de_dT, de_dT_fd, tol);
+  }
 
-private:
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;

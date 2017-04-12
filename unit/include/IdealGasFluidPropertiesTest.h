@@ -15,31 +15,60 @@
 #ifndef IDEALGASFLUIDPROPERTIESTEST_H
 #define IDEALGASFLUIDPROPERTIESTEST_H
 
-// CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "gtest/gtest.h"
 
-class MooseMesh;
-class FEProblem;
-class IdealGasFluidProperties;
+#include "MooseApp.h"
+#include "Utils.h"
+#include "FEProblem.h"
+#include "AppFactory.h"
+#include "GeneratedMesh.h"
+#include "IdealGasFluidProperties.h"
 
-class IdealGasFluidPropertiesTest : public CppUnit::TestFixture
+class IdealGasFluidPropertiesTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE(IdealGasFluidPropertiesTest);
-
-  CPPUNIT_TEST(testAll);
-
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  void registerObjects(Factory & factory);
-  void buildObjects();
-
-  void setUp();
-  void tearDown();
-  // test
-  void testAll();
-
 protected:
+  void SetUp()
+  {
+    char str[] = "foo";
+    char * argv[] = {str, NULL};
+
+    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _factory = &_app->getFactory();
+
+    registerObjects(*_factory);
+    buildObjects();
+  }
+
+  void TearDown()
+  {
+    delete _fe_problem;
+    delete _mesh;
+    delete _app;
+  }
+
+  void registerObjects(Factory & factory) { registerUserObject(IdealGasFluidProperties); }
+
+  void buildObjects()
+  {
+    InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
+    mesh_params.set<MooseEnum>("dim") = "3";
+    mesh_params.set<std::string>("name") = "mesh";
+    mesh_params.set<std::string>("_object_name") = "name1";
+    _mesh = new GeneratedMesh(mesh_params);
+
+    InputParameters problem_params = _factory->getValidParams("FEProblem");
+    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<std::string>("name") = "problem";
+    problem_params.set<std::string>("_object_name") = "name2";
+    _fe_problem = new FEProblem(problem_params);
+
+    InputParameters uo_pars = _factory->getValidParams("IdealGasFluidProperties");
+    uo_pars.set<Real>("R") = 287.04;
+    uo_pars.set<Real>("gamma") = 1.41;
+    _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>("fp");
+  }
+
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;

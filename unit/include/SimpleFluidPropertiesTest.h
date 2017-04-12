@@ -15,40 +15,58 @@
 #ifndef SIMPLEFLUIDPROPERTIESTEST_H
 #define SIMPLEFLUIDPROPERTIESTEST_H
 
-// CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
 
-class MooseMesh;
-class FEProblem;
-class SimpleFluidProperties;
+#include "FEProblem.h"
+#include "AppFactory.h"
+#include "GeneratedMesh.h"
+#include "SimpleFluidProperties.h"
+#include "MooseApp.h"
+#include "Utils.h"
 
-class SimpleFluidPropertiesTest : public CppUnit::TestFixture
+class SimpleFluidPropertiesTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE(SimpleFluidPropertiesTest);
+protected:
+  void SetUp()
+  {
+    char str[] = "foo";
+    char * argv[] = {str, NULL};
 
-  /**
-   * Verify calculation of the fluid properties
-   */
-  CPPUNIT_TEST(properties);
+    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _factory = &_app->getFactory();
 
-  /**
-   * Verify calculation of the derivatives by comparing with finite
-   * differences
-   */
-  CPPUNIT_TEST(derivatives);
+    registerObjects(*_factory);
+    buildObjects();
+  }
 
-  CPPUNIT_TEST_SUITE_END();
+  void TearDown()
+  {
+    delete _fe_problem;
+    delete _mesh;
+    delete _app;
+  }
 
-public:
-  void registerObjects(Factory & factory);
-  void buildObjects();
+  void registerObjects(Factory & factory) { registerUserObject(SimpleFluidProperties); }
 
-  void setUp();
-  void tearDown();
-  void properties();
-  void derivatives();
+  void buildObjects()
+  {
+    InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
+    mesh_params.set<MooseEnum>("dim") = "3";
+    mesh_params.set<std::string>("name") = "mesh";
+    mesh_params.set<std::string>("_object_name") = "name1";
+    _mesh = new GeneratedMesh(mesh_params);
 
-private:
+    InputParameters problem_params = _factory->getValidParams("FEProblem");
+    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<std::string>("name") = "problem";
+    problem_params.set<std::string>("_object_name") = "name2";
+    _fe_problem = new FEProblem(problem_params);
+
+    InputParameters uo_pars = _factory->getValidParams("SimpleFluidProperties");
+    _fe_problem->addUserObject("SimpleFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<SimpleFluidProperties>("fp");
+  }
+
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;

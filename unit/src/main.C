@@ -13,12 +13,7 @@
 /****************************************************************/
 
 #include "MooseUnitApp.h"
-
-// CPPUnit includes
-#include "cppunit/XmlOutputter.h"
-#include "cppunit/CompilerOutputter.h"
-#include "cppunit/ui/text/TestRunner.h"
-#include "cppunit/extensions/TestFactoryRegistry.h"
+#include "gtest/gtest.h"
 
 // Moose includes
 #include "Moose.h"
@@ -28,43 +23,17 @@
 #include <fstream>
 #include <string>
 
-PerfLog Moose::perf_log("CppUnit");
+PerfLog Moose::perf_log("gtest");
 
-int
+GTEST_API_ int
 main(int argc, char ** argv)
 {
+  // gtest removes (only) its args from argc and argv - so this  must be before moose init
+  testing::InitGoogleTest(&argc, argv);
+
   MooseInit init(argc, argv);
-
   registerApp(MooseUnitApp);
-
-  // Set the throw_on_error variable for unit tests
   Moose::_throw_on_error = true;
 
-  CppUnit::Test * suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
-
-  CppUnit::TextTestRunner runner;
-  runner.addTest(suite);
-  std::ofstream out;
-
-  // If you run with --xml, output will be sent to an xml file instead of the screen
-  if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
-  {
-    runner.setOutputter(new CppUnit::XmlOutputter(&runner.result(), out));
-    out.open("test_results.xml");
-  }
-
-  else
-  {
-    // Note: upon calling setOutputter, any previous outputter is
-    // destroyed. The TextTestRunner assumes ownership of the outputter, so you
-    // don't have to worry about deleting it.
-    runner.setOutputter(new CppUnit::CompilerOutputter(&runner.result(), Moose::err));
-  }
-
-  bool wasSucessful = runner.run(/*testPath=*/"",
-                                 /*doWait=*/false,
-                                 /*doPrintResult=*/true,
-                                 /*doPrintProgress=*/false);
-
-  return wasSucessful ? 0 : 1;
+  return RUN_ALL_TESTS();
 }

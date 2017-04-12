@@ -12,90 +12,71 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseArrayTest.h"
+#include "gtest/gtest.h"
 
-// Moose includes
 #include "MooseArray.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(MooseArrayTest);
-
-void
-MooseArrayTest::setUp()
-{
-}
-
-void
-MooseArrayTest::tearDown()
-{
-}
-
-void
-MooseArrayTest::defaultConstructor()
+TEST(MooseArray, defaultConstructor)
 {
   MooseArray<int> ma;
-  CPPUNIT_ASSERT(ma.size() == 0);
+  EXPECT_EQ(ma.size(), 0);
 }
 
-void
-MooseArrayTest::sizeConstructor()
+TEST(MooseArray, sizeConstructor)
 {
   MooseArray<int> ma(6);
-  CPPUNIT_ASSERT(ma.size() == 6);
+  EXPECT_EQ(ma.size(), 6);
   ma[5] = 42;
-  CPPUNIT_ASSERT(ma[5] == 42);
+  EXPECT_EQ(ma[5], 42);
 
   ma.release();
 }
 
-void
-MooseArrayTest::valueConstructor()
+TEST(MooseArray, valueConstructor)
 {
   int value = 42;
   MooseArray<int> ma(6, value);
-  CPPUNIT_ASSERT(ma[0] == 42);
-  CPPUNIT_ASSERT(ma[1] == 42);
-  CPPUNIT_ASSERT(ma[2] == 42);
-  CPPUNIT_ASSERT(ma[3] == 42);
-  CPPUNIT_ASSERT(ma[4] == 42);
-  CPPUNIT_ASSERT(ma[5] == 42);
-  CPPUNIT_ASSERT(ma.size() == 6);
+  EXPECT_EQ(ma[0], 42);
+  EXPECT_EQ(ma[1], 42);
+  EXPECT_EQ(ma[2], 42);
+  EXPECT_EQ(ma[3], 42);
+  EXPECT_EQ(ma[4], 42);
+  EXPECT_EQ(ma[5], 42);
+  EXPECT_EQ(ma.size(), 6);
 
   ma[5] = 44;
-  CPPUNIT_ASSERT(ma[5] == 44);
+  EXPECT_EQ(ma[5], 44);
 
   ma.release();
 }
 
-void
-MooseArrayTest::setAllValues()
+TEST(MooseArray, setAllValues)
 {
   MooseArray<int> ma(6);
   ma[5] = 44;
   int value = 42;
   ma.setAllValues(value);
 
-  CPPUNIT_ASSERT(ma[0] == 42);
-  CPPUNIT_ASSERT(ma[1] == 42);
-  CPPUNIT_ASSERT(ma[2] == 42);
-  CPPUNIT_ASSERT(ma[3] == 42);
-  CPPUNIT_ASSERT(ma[4] == 42);
-  CPPUNIT_ASSERT(ma[5] == 42);
-  CPPUNIT_ASSERT(ma.size() == 6);
+  EXPECT_EQ(ma[0], 42);
+  EXPECT_EQ(ma[1], 42);
+  EXPECT_EQ(ma[2], 42);
+  EXPECT_EQ(ma[3], 42);
+  EXPECT_EQ(ma[4], 42);
+  EXPECT_EQ(ma[5], 42);
+  EXPECT_EQ(ma.size(), 6);
 
   ma.release();
 }
 
-void
-MooseArrayTest::release()
+TEST(MooseArray, release)
 {
   MooseArray<int> ma(6);
-  CPPUNIT_ASSERT(ma.size() == 6);
+  EXPECT_EQ(ma.size(), 6);
   ma.release();
-  CPPUNIT_ASSERT(ma.size() == 0);
+  EXPECT_EQ(ma.size(), 0);
 }
 
-void
-MooseArrayTest::resize()
+TEST(MooseArray, resize)
 {
   MooseArray<int> ma(4);
   ma[0] = 1;
@@ -103,32 +84,31 @@ MooseArrayTest::resize()
   ma[2] = 3;
   ma[3] = 4;
 
-  CPPUNIT_ASSERT(ma.size() == 4);
+  EXPECT_EQ(ma.size(), 4);
   ma.resize(6, 42);
-  CPPUNIT_ASSERT(ma.size() == 6);
-  CPPUNIT_ASSERT(ma[4] == 42);
-  CPPUNIT_ASSERT(ma[5] == 42);
+  EXPECT_EQ(ma.size(), 6);
+  EXPECT_EQ(ma[4], 42);
+  EXPECT_EQ(ma[5], 42);
   ma[0] = 1;
   ma[5] = 44;
-  CPPUNIT_ASSERT(ma[0] == 1);
-  CPPUNIT_ASSERT(ma[5] == 44);
+  EXPECT_EQ(ma[0], 1);
+  EXPECT_EQ(ma[5], 44);
 
   ma.resize(2, 44);
-  CPPUNIT_ASSERT(ma.size() == 2);
+  EXPECT_EQ(ma.size(), 2);
 
   ma.resize(4, 33);
-  CPPUNIT_ASSERT(ma.size() == 4);
+  EXPECT_EQ(ma.size(), 4);
 
   // These tests only pass if resize() sets default_value works when resizing
   // to a value still less than _allocated_size
-  // CPPUNIT_ASSERT( ma[2] == 33 );
-  // CPPUNIT_ASSERT( ma[3] == 33 );
+  // EXPECT_EQ( ma[2], 33 );
+  // EXPECT_EQ( ma[3], 33 );
 
   ma.release();
 }
 
-void
-MooseArrayTest::resizeDefault()
+TEST(MooseArray, resizeDefault)
 {
   MooseArray<int> ma(4);
   ma[0] = 1;
@@ -136,34 +116,32 @@ MooseArrayTest::resizeDefault()
   ma[2] = 3;
   ma[3] = 4;
 
-  CPPUNIT_ASSERT(ma.size() == 4);
+  EXPECT_EQ(ma.size(), 4);
   ma.resize(6);
   ma[0] = 1;
   ma[5] = 42;
-  CPPUNIT_ASSERT(ma.size() == 6);
-  CPPUNIT_ASSERT(ma[0] == 1);
-  CPPUNIT_ASSERT(ma[5] == 42);
+  EXPECT_EQ(ma.size(), 6);
+  EXPECT_EQ(ma[0], 1);
+  EXPECT_EQ(ma[5], 42);
 
   ma.resize(2);
-  CPPUNIT_ASSERT(ma.size() == 2);
+  EXPECT_EQ(ma.size(), 2);
   ma[0] = 1;
-  CPPUNIT_ASSERT(ma[0] == 1);
+  EXPECT_EQ(ma[0], 1);
 
   ma.release();
 }
 
-void
-MooseArrayTest::size()
+TEST(MooseArray, size)
 {
   // mostly tested in other functions
   MooseArray<int> ma(6);
-  CPPUNIT_ASSERT(ma.size() == 6);
+  EXPECT_EQ(ma.size(), 6);
 
   ma.release();
 }
 
-void
-MooseArrayTest::access()
+TEST(MooseArray, access)
 {
   MooseArray<int> ma(4);
   ma[0] = 1;
@@ -171,16 +149,15 @@ MooseArrayTest::access()
   ma[2] = 3;
   ma[3] = 4;
 
-  CPPUNIT_ASSERT(ma[0] == 1);
-  CPPUNIT_ASSERT(ma[1] == 2);
-  CPPUNIT_ASSERT(ma[2] == 3);
-  CPPUNIT_ASSERT(ma[3] == 4);
+  EXPECT_EQ(ma[0], 1);
+  EXPECT_EQ(ma[1], 2);
+  EXPECT_EQ(ma[2], 3);
+  EXPECT_EQ(ma[3], 4);
 
   ma.release();
 }
 
-void
-MooseArrayTest::shallowCopy()
+TEST(MooseArray, shallowCopy)
 {
   // shallow copy a few different sizes of arrays and make sure the sizes and values stay consistent
   MooseArray<Real> ma4(4, 8);
@@ -199,14 +176,14 @@ MooseArrayTest::shallowCopy()
   ma4.shallowCopy(ma3);
   ma2.shallowCopy(ma3);
 
-  CPPUNIT_ASSERT(ma4.size() == 3);
-  CPPUNIT_ASSERT(ma4[0] == 1);
-  CPPUNIT_ASSERT(ma4[1] == 2);
-  CPPUNIT_ASSERT(ma4[2] == 3);
-  CPPUNIT_ASSERT(ma2.size() == 3);
-  CPPUNIT_ASSERT(ma2[0] == 1);
-  CPPUNIT_ASSERT(ma2[1] == 2);
-  CPPUNIT_ASSERT(ma2[2] == 3);
+  EXPECT_EQ(ma4.size(), 3);
+  EXPECT_EQ(ma4[0], 1);
+  EXPECT_EQ(ma4[1], 2);
+  EXPECT_EQ(ma4[2], 3);
+  EXPECT_EQ(ma2.size(), 3);
+  EXPECT_EQ(ma2[0], 1);
+  EXPECT_EQ(ma2[1], 2);
+  EXPECT_EQ(ma2[2], 3);
 
   // Resize which will trigger another allocation, but the first is cleaned up
   ma4.resize(5, 42);
@@ -216,15 +193,15 @@ MooseArrayTest::shallowCopy()
   ma3.shallowCopy(ma4);
   ma4[0] = 22;
 
-  CPPUNIT_ASSERT(ma4.size() == 5);
-  CPPUNIT_ASSERT(ma2.size() == 5);
-  CPPUNIT_ASSERT(ma3.size() == 5);
-  CPPUNIT_ASSERT(ma2[4] == 42);
-  CPPUNIT_ASSERT(ma3[4] == 42);
-  CPPUNIT_ASSERT(ma4[4] == 42);
-  CPPUNIT_ASSERT(ma2[0] == 22);
-  CPPUNIT_ASSERT(ma3[0] == 22);
-  CPPUNIT_ASSERT(ma4[0] == 22);
+  EXPECT_EQ(ma4.size(), 5);
+  EXPECT_EQ(ma2.size(), 5);
+  EXPECT_EQ(ma3.size(), 5);
+  EXPECT_EQ(ma2[4], 42);
+  EXPECT_EQ(ma3[4], 42);
+  EXPECT_EQ(ma4[4], 42);
+  EXPECT_EQ(ma2[0], 22);
+  EXPECT_EQ(ma3[0], 22);
+  EXPECT_EQ(ma4[0], 22);
 
   // Cleanup
   ma_tmp1.release();
@@ -232,8 +209,7 @@ MooseArrayTest::shallowCopy()
   ma4.release();
 }
 
-void
-MooseArrayTest::shallowCopyStdVector()
+TEST(MooseArray, shallowCopyStdVector)
 {
   std::vector<Real> avec;
   avec.push_back(1.2);
@@ -244,13 +220,12 @@ MooseArrayTest::shallowCopyStdVector()
 
   ma.shallowCopy(avec);
 
-  CPPUNIT_ASSERT(ma[0] == 1.2);
-  CPPUNIT_ASSERT(ma[1] == 3.4);
-  CPPUNIT_ASSERT(ma[2] == 6.7);
+  EXPECT_EQ(ma[0], 1.2);
+  EXPECT_EQ(ma[1], 3.4);
+  EXPECT_EQ(ma[2], 6.7);
 }
 
-void
-MooseArrayTest::operatorEqualsStdVector()
+TEST(MooseArray, operatorEqualsStdVector)
 {
   std::vector<Real> avec;
   avec.push_back(1.2);
@@ -261,15 +236,14 @@ MooseArrayTest::operatorEqualsStdVector()
 
   ma = avec;
 
-  CPPUNIT_ASSERT(ma[0] == 1.2);
-  CPPUNIT_ASSERT(ma[1] == 3.4);
-  CPPUNIT_ASSERT(ma[2] == 6.7);
+  EXPECT_EQ(ma[0], 1.2);
+  EXPECT_EQ(ma[1], 3.4);
+  EXPECT_EQ(ma[2], 6.7);
 
   ma.release();
 }
 
-void
-MooseArrayTest::stdVector()
+TEST(MooseArray, stdVector)
 {
   MooseArray<Real> ma(3);
   ma[0] = 1.2;
@@ -278,9 +252,9 @@ MooseArrayTest::stdVector()
 
   std::vector<Real> avec = ma.stdVector();
 
-  CPPUNIT_ASSERT(avec[0] == 1.2);
-  CPPUNIT_ASSERT(avec[1] == 3.4);
-  CPPUNIT_ASSERT(avec[2] == 6.7);
+  EXPECT_EQ(avec[0], 1.2);
+  EXPECT_EQ(avec[1], 3.4);
+  EXPECT_EQ(avec[2], 6.7);
 
   ma.release();
 }

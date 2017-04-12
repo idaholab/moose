@@ -12,107 +12,99 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SyntaxTest.h"
+#include "gtest/gtest.h"
+
 #include "Syntax.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(SyntaxTest);
-
-void
-SyntaxTest::setUp()
+class SyntaxTest : public ::testing::Test
 {
-  _syntax.registerTaskName("first", false);
-  _syntax.registerTaskName("second", true);
+protected:
+  void SetUp()
+  {
+    _syntax.registerTaskName("first", false);
+    _syntax.registerTaskName("second", true);
 
-  // MOOSE object task
-  _syntax.registerTaskName("first_mo", "MooseSystem1", false);
-  _syntax.registerTaskName("second_mo", "MooseSystem2", true);
+    // MOOSE object task
+    _syntax.registerTaskName("first_mo", "MooseSystem1", false);
+    _syntax.registerTaskName("second_mo", "MooseSystem2", true);
 
-  _syntax.registerActionSyntax("SomeAction", "TopBlock");
-  _syntax.registerActionSyntax("SomeAction", "TopBlock", "second");
-}
+    _syntax.registerActionSyntax("SomeAction", "TopBlock");
+    _syntax.registerActionSyntax("SomeAction", "TopBlock", "second");
+  }
 
-void
-SyntaxTest::errorChecks()
+  Syntax _syntax;
+};
+
+TEST_F(SyntaxTest, errorChecks)
 {
   try
   {
     _syntax.registerTaskName("first", true);
-
-    // Unreachable
-    CPPUNIT_ASSERT(false);
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
 
-    CPPUNIT_ASSERT(msg.find("is already registered") != std::string::npos);
+    EXPECT_NE(msg.find("is already registered"), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   try
   {
     _syntax.registerTaskName("second_mo", false);
-
-    // Unreachable
-    CPPUNIT_ASSERT(false);
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
 
-    CPPUNIT_ASSERT(msg.find("is already registered") != std::string::npos);
+    EXPECT_NE(msg.find("is already registered"), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   try
   {
     _syntax.appendTaskName("third", "MooseSystem");
-
-    // Unreachable
-    CPPUNIT_ASSERT(false);
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
 
-    CPPUNIT_ASSERT(msg.find("is not a registered task name") != std::string::npos);
+    EXPECT_NE(msg.find("is not a registered task name"), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   try
   {
     _syntax.addDependency("forth", "third");
-
-    // Unreachable
-    CPPUNIT_ASSERT(false);
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
 
-    CPPUNIT_ASSERT(msg.find("is not a registered task name") != std::string::npos);
+    EXPECT_NE(msg.find("is not a registered task name"), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 }
 
-void
-SyntaxTest::testGeneral()
+TEST_F(SyntaxTest, general)
 {
-  CPPUNIT_ASSERT(_syntax.hasTask("second"));
-  CPPUNIT_ASSERT(_syntax.hasTask("third") == false);
+  EXPECT_TRUE(_syntax.hasTask("second"));
+  EXPECT_FALSE(_syntax.hasTask("third"));
 
-  CPPUNIT_ASSERT(_syntax.isActionRequired("first") == false);
-  CPPUNIT_ASSERT(_syntax.isActionRequired("second_mo"));
+  EXPECT_FALSE(_syntax.isActionRequired("first"));
+  EXPECT_TRUE(_syntax.isActionRequired("second_mo"));
 
   // TODO: test this
   _syntax.replaceActionSyntax("MooseSystem", "NewBlock", "first");
 }
 
-void
-SyntaxTest::testDeprecated()
+TEST_F(SyntaxTest, deprecated)
 {
   _syntax.deprecateActionSyntax("TopBlock");
 
-  CPPUNIT_ASSERT(_syntax.isDeprecatedSyntax("TopBlock"));
-}
-
-void
-SyntaxTest::tearDown()
-{
+  EXPECT_TRUE(_syntax.isDeprecatedSyntax("TopBlock"));
 }
