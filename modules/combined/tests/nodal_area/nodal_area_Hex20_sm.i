@@ -25,6 +25,10 @@
 []
 
 [AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./react_x]
   [../]
   [./react_y]
@@ -33,14 +37,23 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = true
-    incremental = true
-    save_in = 'react_x react_y react_z'
-    add_variables = true
-    strain = FINITE
-    generate_output = 'stress_xx'
+[SolidMechanics]
+  [./solid]
+    disp_x = displ_x
+    disp_y = displ_y
+    disp_z = displ_z
+    save_in_disp_x = react_x
+    save_in_disp_y = react_y
+    save_in_disp_z = react_z
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
   [../]
 []
 
@@ -84,16 +97,16 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./dummy]
+    type = Elastic
     block = '1 2'
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
 
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 2'
+    disp_x = displ_x
+    disp_y = displ_y
+    disp_z = displ_z
+
+    youngs_modulus = 1e6
+    poissons_ratio = 0
   [../]
 []
 
