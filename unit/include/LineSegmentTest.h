@@ -15,36 +15,27 @@
 #ifndef LINESEGMENTTEST_H
 #define LINESEGMENTTEST_H
 
-// CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
 
-// Moose includes
 #include "LineSegment.h"
 
-class LineSegmentTest : public CppUnit::TestFixture
+class LineSegmentTest : public ::testing::Test
 {
-
-  CPPUNIT_TEST_SUITE(LineSegmentTest);
-
-  CPPUNIT_TEST(closestPointTest);
-  CPPUNIT_TEST(closestNormalPointTest);
-  CPPUNIT_TEST(containsPointTest);
-  CPPUNIT_TEST(planeIntersectTest);
-  CPPUNIT_TEST(lineIntersectTest);
-
-  CPPUNIT_TEST_SUITE_END();
-
 public:
-  LineSegmentTest();
-  ~LineSegmentTest();
+  LineSegmentTest()
+    : _posx(Point(0, 0), Point(5, 0)),
+      _posy(Point(0, 0), Point(0, 5)),
+      _negy(Point(0, 0), Point(0, -5)),
+      _posdiag(Point(0, 0), Point(5, 5)),
+      _negdiag(Point(0, 0), Point(-5, -5)),
+      _pos3x(Point(0, 0, 0), Point(5, 0, 0)),
+      _neg3y(Point(0, 0, 0), Point(0, -5, 0)),
+      _pos3diag(Point(0, 0, 0), Point(5, 5, 5)),
+      _neg3diag(Point(0, 0, 0), Point(-5, -5, -5))
+  {
+  }
 
-  void closestPointTest();
-  void closestNormalPointTest();
-  void containsPointTest();
-  void planeIntersectTest();
-  void lineIntersectTest();
-
-private:
+protected:
   LineSegment _posx;
   LineSegment _posy;
   LineSegment _negy;

@@ -15,51 +15,58 @@
 #ifndef NACLFLUIDPROPERTIESTEST_H
 #define NACLFLUIDPROPERTIESTEST_H
 
-// CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "gtest/gtest.h"
 
-class MooseMesh;
-class FEProblem;
-class NaClFluidProperties;
+#include "MooseApp.h"
+#include "Utils.h"
+#include "FEProblem.h"
+#include "AppFactory.h"
+#include "GeneratedMesh.h"
+#include "NaClFluidProperties.h"
 
-class NaClFluidPropertiesTest : public CppUnit::TestFixture
+class NaClFluidPropertiesTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE(NaClFluidPropertiesTest);
+protected:
+  void SetUp()
+  {
+    char str[] = "foo";
+    char * argv[] = {str, NULL};
 
-  /**
-   * Verify calculation of the NACL properties the solid halite phase.
-   * Density data from Brown, "The NaCl pressure standard", J. Appl. Phys., 86 (1999).
-   *
-   * Values for cp and enthalpy are difficult to compare against. Instead, the
-   * values provided by the BrineFluidProperties UserObject were compared against
-   * simple correlations, eg. from NIST sodium chloride data.
-   *
-   * Values for thermal conductivity from Urqhart and Bauer,
-   * Experimental determination of single-crystal halite thermal conductivity,
-   * diffusivity and specific heat from -75 C to 300 C, Int. J. Rock Mech.
-   * and Mining Sci., 78 (2015)
-   */
-  CPPUNIT_TEST(halite);
+    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _factory = &_app->getFactory();
 
-  /**
-   * Verify calculation of the derivatives of halite properties by comparing with finite
-   * differences
-   */
-  CPPUNIT_TEST(derivatives);
+    registerObjects(*_factory);
+    buildObjects();
+  }
 
-  CPPUNIT_TEST_SUITE_END();
+  void TearDown()
+  {
+    delete _fe_problem;
+    delete _mesh;
+    delete _app;
+  }
 
-public:
-  void registerObjects(Factory & factory);
-  void buildObjects();
+  void registerObjects(Factory & factory) { registerUserObject(NaClFluidProperties); }
 
-  void setUp();
-  void tearDown();
+  void buildObjects()
+  {
+    InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
+    mesh_params.set<MooseEnum>("dim") = "3";
+    mesh_params.set<std::string>("name") = "mesh";
+    mesh_params.set<std::string>("_object_name") = "name1";
+    _mesh = new GeneratedMesh(mesh_params);
 
-  void halite();
-  void derivatives();
+    InputParameters problem_params = _factory->getValidParams("FEProblem");
+    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<std::string>("name") = "problem";
+    problem_params.set<std::string>("_object_name") = "name2";
+    _fe_problem = new FEProblem(problem_params);
 
-private:
+    InputParameters uo_pars = _factory->getValidParams("NaClFluidProperties");
+    _fe_problem->addUserObject("NaClFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<NaClFluidProperties>("fp");
+  }
+
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;

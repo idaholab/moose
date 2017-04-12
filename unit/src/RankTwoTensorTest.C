@@ -13,58 +13,39 @@
 /****************************************************************/
 #include "RankTwoTensorTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION(RankTwoTensorTest);
-
-RankTwoTensorTest::RankTwoTensorTest()
+TEST_F(RankTwoTensorTest, L2norm)
 {
-  _m0 = RankTwoTensor(0, 0, 0, 0, 0, 0, 0, 0, 0);
-  _m1 = RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 1);
-  _m2 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 3);
-  _m3 = RankTwoTensor(1, 2, 3, 2, -5, -6, 3, -6, 9);
-  _unsymmetric0 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 9);
-  _unsymmetric1 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 10);
+  EXPECT_NEAR(0, _m0.L2norm(), 0.0001);
+  EXPECT_NEAR(1.732051, _m1.L2norm(), 0.0001);
+  EXPECT_NEAR(3.741657, _m2.L2norm(), 0.0001);
+  EXPECT_NEAR(14.31782, _m3.L2norm(), 0.0001);
+  EXPECT_NEAR(16.88194, _unsymmetric0.L2norm(), 0.0001);
 }
 
-RankTwoTensorTest::~RankTwoTensorTest() {}
-
-void
-RankTwoTensorTest::L2normTest()
-{
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.732051, _m1.L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3.741657, _m2.L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(14.31782, _m3.L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(16.88194, _unsymmetric0.L2norm(), 0.0001);
-}
-
-void
-RankTwoTensorTest::addIaTest()
+TEST_F(RankTwoTensorTest, addIa)
 {
   RankTwoTensor m(1, 2, 3, 4, 5, 6, 7, 8, 9);
   m.addIa(1.23);
   RankTwoTensor n(2.23, 2, 3, 4, 6.23, 6, 7, 8, 10.23);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m - n).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m - n).L2norm(), 0.0001);
 }
 
-void
-RankTwoTensorTest::transposeTest()
+TEST_F(RankTwoTensorTest, transpose)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m0.transpose() - _m0).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m1.transpose() - _m1).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m2.transpose() - _m2).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m3.transpose() - _m3).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m0.transpose() - _m0).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m1.transpose() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m2.transpose() - _m2).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m3.transpose() - _m3).L2norm(), 0.0001);
   RankTwoTensor t(1, -4, 7, 2, -5, 8, 3, -6, 9);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric0.transpose() - t).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_unsymmetric0.transpose() - t).L2norm(), 0.0001);
 }
 
-void
-RankTwoTensorTest::doubleContractionTest()
+TEST_F(RankTwoTensorTest, doubleContraction)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(121, _m3.doubleContraction(_unsymmetric0), 0.0001);
+  EXPECT_NEAR(121, _m3.doubleContraction(_unsymmetric0), 0.0001);
 }
 
-void
-RankTwoTensorTest::rotateTest()
+TEST_F(RankTwoTensorTest, rotate)
 {
   Real sqrt2 = 0.707106781187;
   RealTensorValue rtv0(sqrt2, -sqrt2, 0, sqrt2, sqrt2, 0, 0, 0, 1); // rotation about "0" axis
@@ -88,25 +69,25 @@ RankTwoTensorTest::rotateTest()
   m3 = _m3;
   answer = RankTwoTensor(-4, 3, 6.363961, 3, 0, -2.1213403, 6.363961, -2.1213403, 9);
   m3.rotate(rtv0);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - answer).L2norm(), 0.0001);
   m3.rotate(rot0T);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - _m3).L2norm(), 0.0001);
 
   // rotate about "1" axis with RealTensorValue, then back again with RankTwoTensor
   m3 = _m3;
   answer = RankTwoTensor(2, 5.656854, -4, 5.656854, -5, -2.828427, -4, -2.828427, 8);
   m3.rotate(rtv1);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - answer).L2norm(), 0.0001);
   m3.rotate(rot1T);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - _m3).L2norm(), 0.0001);
 
   // rotate about "2" axis with RealTensorValue, then back again with RankTwoTensor
   m3 = _m3;
   answer = RankTwoTensor(1, -sqrt2, 3.5355339, -sqrt2, 8, -7, 3.5355339, -7, -4);
   m3.rotate(rtv2);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - answer).L2norm(), 0.0001);
   m3.rotate(rot2T);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - _m3).L2norm(), 0.0001);
 
   // rotate with "rot"
   m3 = _m3;
@@ -120,85 +101,75 @@ RankTwoTensorTest::rotateTest()
                          -2.0857864,
                          2.0355339);
   m3.rotate(rot);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (m3 - answer).L2norm(), 0.0001);
 }
 
-void
-RankTwoTensorTest::traceTest()
+TEST_F(RankTwoTensorTest, trace)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.trace(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3, _m1.trace(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(6, _m2.trace(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(5, _m3.trace(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(5, _unsymmetric0.trace(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(6, _unsymmetric1.trace(), 0.0001);
+  EXPECT_NEAR(0, _m0.trace(), 0.0001);
+  EXPECT_NEAR(3, _m1.trace(), 0.0001);
+  EXPECT_NEAR(6, _m2.trace(), 0.0001);
+  EXPECT_NEAR(5, _m3.trace(), 0.0001);
+  EXPECT_NEAR(5, _unsymmetric0.trace(), 0.0001);
+  EXPECT_NEAR(6, _unsymmetric1.trace(), 0.0001);
 }
 
-void
-RankTwoTensorTest::secondInvariantTest()
+TEST_F(RankTwoTensorTest, secondInvariant)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.secondInvariant(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m1.secondInvariant(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1, _m2.secondInvariant(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(84, _unsymmetric1.secondInvariant(), 0.0001);
+  EXPECT_NEAR(0, _m0.secondInvariant(), 0.0001);
+  EXPECT_NEAR(0, _m1.secondInvariant(), 0.0001);
+  EXPECT_NEAR(1, _m2.secondInvariant(), 0.0001);
+  EXPECT_NEAR(84, _unsymmetric1.secondInvariant(), 0.0001);
 }
 
-void
-RankTwoTensorTest::detTest()
+TEST_F(RankTwoTensorTest, det)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.det(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1, _m1.det(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(6, _m2.det(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-144, _m3.det(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _unsymmetric0.det(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3, _unsymmetric1.det(), 0.0001);
+  EXPECT_NEAR(0, _m0.det(), 0.0001);
+  EXPECT_NEAR(1, _m1.det(), 0.0001);
+  EXPECT_NEAR(6, _m2.det(), 0.0001);
+  EXPECT_NEAR(-144, _m3.det(), 0.0001);
+  EXPECT_NEAR(0, _unsymmetric0.det(), 0.0001);
+  EXPECT_NEAR(3, _unsymmetric1.det(), 0.0001);
 }
 
-void
-RankTwoTensorTest::deviatoricTest()
+TEST_F(RankTwoTensorTest, deviatoric)
 {
   RankTwoTensor dev(-1, 2, 3, -4, -7, -6, 7, 8, 8);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (dev - _unsymmetric1.deviatoric()).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (dev - _unsymmetric1.deviatoric()).L2norm(), 0.0001);
 }
 
-void
-RankTwoTensorTest::inverseTest()
+TEST_F(RankTwoTensorTest, inverse)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m3 * _m3.inverse() - _m1).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric1 * _unsymmetric1.inverse() - _m1).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric1.inverse() * _unsymmetric1 - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m3 * _m3.inverse() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_unsymmetric1 * _unsymmetric1.inverse() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_unsymmetric1.inverse() * _unsymmetric1 - _m1).L2norm(), 0.0001);
 }
 
-void
-RankTwoTensorTest::dtraceTest()
+TEST_F(RankTwoTensorTest, dtrace)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m0.dtrace() - _m1).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m3.dtrace() - _m1).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric0.dtrace() - _m1).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric1.dtrace() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m0.dtrace() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m3.dtrace() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_unsymmetric0.dtrace() - _m1).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_unsymmetric1.dtrace() - _m1).L2norm(), 0.0001);
 }
 
-void
-RankTwoTensorTest::dsecondInvariantTest()
+TEST_F(RankTwoTensorTest, dsecondInvariant)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m0.dsecondInvariant() - _m0.deviatoric()).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m3.dsecondInvariant() - _m3.deviatoric()).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      0,
-      (_unsymmetric0.dsecondInvariant() -
-       0.5 * (_unsymmetric0.deviatoric() + _unsymmetric0.deviatoric().transpose()))
-          .L2norm(),
-      0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(
-      0,
-      (_unsymmetric1.dsecondInvariant() -
-       0.5 * (_unsymmetric1.deviatoric() + _unsymmetric1.deviatoric().transpose()))
-          .L2norm(),
-      0.0001);
+  EXPECT_NEAR(0, (_m0.dsecondInvariant() - _m0.deviatoric()).L2norm(), 0.0001);
+  EXPECT_NEAR(0, (_m3.dsecondInvariant() - _m3.deviatoric()).L2norm(), 0.0001);
+  EXPECT_NEAR(0,
+              (_unsymmetric0.dsecondInvariant() -
+               0.5 * (_unsymmetric0.deviatoric() + _unsymmetric0.deviatoric().transpose()))
+                  .L2norm(),
+              0.0001);
+  EXPECT_NEAR(0,
+              (_unsymmetric1.dsecondInvariant() -
+               0.5 * (_unsymmetric1.deviatoric() + _unsymmetric1.deviatoric().transpose()))
+                  .L2norm(),
+              0.0001);
 }
 
-void
-RankTwoTensorTest::d2secondInvariantTest()
+TEST_F(RankTwoTensorTest, d2secondInvariant)
 {
   // Here i do a finite-difference calculation of the second
   // derivative and compare with the closed-solution form
@@ -221,7 +192,7 @@ RankTwoTensorTest::d2secondInvariantTest()
         {
           mep(k, l) += ep;
           d1ep = mep.dsecondInvariant();
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
         }
     }
@@ -237,7 +208,7 @@ RankTwoTensorTest::d2secondInvariantTest()
         {
           mep(k, l) += ep;
           d1ep = mep.dsecondInvariant();
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
 
           // note that because d1 and d2 explicitly symmeterise the matrix
@@ -245,21 +216,19 @@ RankTwoTensorTest::d2secondInvariantTest()
           mep(k, l) += 0.5 * ep;
           mep(l, k) += 0.5 * ep;
           d1ep = mep.dsecondInvariant();
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= 0.5 * ep;
           mep(l, k) -= 0.5 * ep;
         }
     }
 }
 
-void
-RankTwoTensorTest::thirdInvariantTest()
+TEST_F(RankTwoTensorTest, thirdInvariant)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(214, _unsymmetric1.thirdInvariant(), 0.0001);
+  EXPECT_NEAR(214, _unsymmetric1.thirdInvariant(), 0.0001);
 }
 
-void
-RankTwoTensorTest::dthirdInvariantTest()
+TEST_F(RankTwoTensorTest, dthirdInvariant)
 {
   // this derivative is less trivial
   // so let's check with a finite-difference approximation
@@ -275,8 +244,7 @@ RankTwoTensorTest::dthirdInvariantTest()
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(
-          (mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
+      EXPECT_NEAR((mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
       mep(i, j) -= ep;
     }
 
@@ -287,22 +255,19 @@ RankTwoTensorTest::dthirdInvariantTest()
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(
-          (mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
+      EXPECT_NEAR((mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
       mep(i, j) -= ep;
 
       // since thirdInvariant is explicitly symmeterised, we can also do
       mep(i, j) += 0.5 * ep;
       mep(j, i) += 0.5 * ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(
-          (mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
+      EXPECT_NEAR((mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
       mep(i, j) -= 0.5 * ep;
       mep(j, i) -= 0.5 * ep;
     }
 }
 
-void
-RankTwoTensorTest::d2thirdInvariantTest()
+TEST_F(RankTwoTensorTest, d2thirdInvariant)
 {
   // Here i do a finite-difference calculation of the third
   // derivative and compare with the closed-solution form
@@ -325,7 +290,7 @@ RankTwoTensorTest::d2thirdInvariantTest()
         {
           mep(k, l) += ep;
           d1ep = mep.dthirdInvariant();
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
         }
     }
@@ -341,7 +306,7 @@ RankTwoTensorTest::d2thirdInvariantTest()
         {
           mep(k, l) += ep;
           d1ep = mep.dthirdInvariant();
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
 
           // note that because d1 and d2 explicitly symmeterise the matrix
@@ -349,21 +314,19 @@ RankTwoTensorTest::d2thirdInvariantTest()
           mep(k, l) += 0.5 * ep;
           mep(l, k) += 0.5 * ep;
           d1ep = mep.dthirdInvariant();
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= 0.5 * ep;
           mep(l, k) -= 0.5 * ep;
         }
     }
 }
 
-void
-RankTwoTensorTest::sin3LodeTest()
+TEST_F(RankTwoTensorTest, sin3Lode)
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.72218212, _unsymmetric1.sin3Lode(0, 0), 0.0001);
+  EXPECT_NEAR(-0.72218212, _unsymmetric1.sin3Lode(0, 0), 0.0001);
 }
 
-void
-RankTwoTensorTest::dsin3LodeTest()
+TEST_F(RankTwoTensorTest, dsin3Lode)
 {
   // this derivative is less trivial
   // so let's check with a finite-difference approximation
@@ -379,7 +342,7 @@ RankTwoTensorTest::dsin3LodeTest()
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
+      EXPECT_NEAR((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
       mep(i, j) -= ep;
     }
 
@@ -390,20 +353,19 @@ RankTwoTensorTest::dsin3LodeTest()
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
+      EXPECT_NEAR((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
       mep(i, j) -= ep;
 
       // since sin3Lode is explicitly symmeterised, we can also do
       mep(i, j) += 0.5 * ep;
       mep(j, i) += 0.5 * ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
+      EXPECT_NEAR((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
       mep(i, j) -= 0.5 * ep;
       mep(j, i) -= 0.5 * ep;
     }
 }
 
-void
-RankTwoTensorTest::d2sin3LodeTest()
+TEST_F(RankTwoTensorTest, d2sin3Lode)
 {
   // Here i do a finite-difference calculation of the third
   // derivative and compare with the closed-solution form
@@ -426,7 +388,7 @@ RankTwoTensorTest::d2sin3LodeTest()
         {
           mep(k, l) += ep;
           d1ep = mep.dsin3Lode(0);
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
         }
     }
@@ -442,7 +404,7 @@ RankTwoTensorTest::d2sin3LodeTest()
         {
           mep(k, l) += ep;
           d1ep = mep.dsin3Lode(0);
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
 
           // note that because d1 and d2 explicitly symmeterise the matrix
@@ -450,15 +412,14 @@ RankTwoTensorTest::d2sin3LodeTest()
           mep(k, l) += 0.5 * ep;
           mep(l, k) += 0.5 * ep;
           d1ep = mep.dsin3Lode(0);
-          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
+          EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= 0.5 * ep;
           mep(l, k) -= 0.5 * ep;
         }
     }
 }
 
-void
-RankTwoTensorTest::ddetTest()
+TEST_F(RankTwoTensorTest, ddet)
 {
   // this derivative is less trivial than dtrace and dsecondInvariant,
   // so let's check with a finite-difference approximation
@@ -474,7 +435,7 @@ RankTwoTensorTest::ddetTest()
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.det() - det) / ep, deriv(i, j), ep);
+      EXPECT_NEAR((mep.det() - det) / ep, deriv(i, j), ep);
       mep(i, j) -= ep;
     }
 
@@ -485,13 +446,12 @@ RankTwoTensorTest::ddetTest()
     for (unsigned j = 0; j < 3; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.det() - det) / ep, deriv(i, j), ep);
+      EXPECT_NEAR((mep.det() - det) / ep, deriv(i, j), ep);
       mep(i, j) -= ep;
     }
 }
 
-void
-RankTwoTensorTest::initialContractionTest()
+TEST_F(RankTwoTensorTest, initialContraction)
 {
   // following (basically random) "a" tensor has symmetry
   // a_ijkl = a_jikl = a_ijlk
@@ -536,5 +496,5 @@ RankTwoTensorTest::initialContractionTest()
 
   const RankTwoTensor ic = _unsymmetric1.initialContraction(a);
   const RankTwoTensor ic1 = a.transposeMajor() * _unsymmetric1;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, (ic - ic1).L2norm(), 0.0001);
+  EXPECT_NEAR(0.0, (ic - ic1).L2norm(), 0.0001);
 }
