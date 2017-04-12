@@ -25,7 +25,27 @@
 []
 
 [AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./vonmises_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./hoop_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./hydrostatic_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -56,23 +76,51 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = true
-    add_variables  = true
-    incremental = true
-    strain = FINITE
-    eigenstrain_names = thermal_expansion
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress'
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
+    temp = temp
   [../]
 []
 
 [AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+  [../]
+  [./stress_yy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yy
+    index = 1
+  [../]
+  [./stress_zz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zz
+    index = 2
+  [../]
+  [./vonmises_stress]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = vonmises_stress
+    quantity = vonmises
+  [../]
   [./hoop_stress]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = hoop_stress
-    scalar_type = HoopStress
+    quantity = hoop
+    execute_on = timestep_end
+  [../]
+  [./hydrostatic_stress]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = hydrostatic_stress
+    quantity = hydrostatic
     execute_on = timestep_end
   [../]
 []
@@ -127,23 +175,17 @@
     temp = temp
   [../]
 
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./solid_mechanics1]
+    type = Elastic
+    block = '1'
+    disp_r = disp_x
+    disp_z = disp_y
+    temp = temp
     youngs_modulus = 193.05e9
     poissons_ratio = 0.3
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-  [../]
-
-  [./thermal_expansion]
-    type = ComputeThermalExpansionEigenstrain
-    thermal_expansion_coeff = 13e-6
+    thermal_expansion = 13e-6
     stress_free_temperature = 295.00
-    temperature = temp
-    incremental_form = true
-    eigenstrain_name = thermal_expansion
+    formulation = NonlinearRZ
   [../]
 
   [./density]
