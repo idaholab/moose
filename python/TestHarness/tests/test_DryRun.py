@@ -14,12 +14,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # Skipped caveat test which returns skipped instead of 'DRY RUN'
         output = self.runTests('-i', 'depend_skip_tests', '--dry-run')
         self.assertIn('skipped (always skipped)', output)
-
-        # NOTE: This test normally returns (skipped dependency). However
-        # with dry run, the TestHarness has no idea that this is the case
-        # because in order to figure that out, the test has to 'run' and we are
-        # not running any tests (its a dry run after all)!
-        self.assertRegexpMatches(output, 'test_harness\.needs_a.*?DRY RUN')
+        self.assertIn('skipped (skipped dependency)', output)
 
         # Deleted caveat test which returns a deleted failing tests while
         # performing a dry run
