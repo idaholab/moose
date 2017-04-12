@@ -28,6 +28,7 @@ class Plugin(MooseWidget):
 
         # The Peacock tab index
         self._index = None
+        self._plugin_manager = None
 
     @staticmethod
     def commandLineArgs(parser):
