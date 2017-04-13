@@ -62,9 +62,10 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
                "together");
 
   std::vector<std::vector<Real>> y(m, std::vector<Real>(n));
+  unsigned int k = 0;
   for (unsigned int i = 0; i < m; ++i)
-    for (unsigned int j = 0; j < m; ++j)
-      y[i][j] = yvec[i * m + j];
+    for (unsigned int j = 0; j < n; ++j)
+      y[i][j] = yvec[k++];
 
   if (_yx11.empty())
     _yx11.resize(n, 1e30);
@@ -126,6 +127,12 @@ BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
     mooseError("deriv_var must equal 1 or 2");
 
   return _ipol.sampleDerivative(p(0), p(1), deriv_var, yp1, ypn);
+}
+
+RealGradient
+BicubicSplineFunction::gradient(Real /*t*/, const Point & p)
+{
+  return RealGradient(derivative(p, 1), derivative(p, 2), 0);
 }
 
 Real
