@@ -332,11 +332,13 @@ class TestHarness:
         specs['place'] = 'free'
         specs['no_copy'] = self.options.input_file_name
 
-        # Some gold files are located outside 'gold' and are specified with the gold_dir spec
+        # Include any additional files needed for the test
+        if 'pbs_copy_files' in tester.specs:
+            specs['copy_files'] = tester.specs['pbs_copy_files']
+
+        # Some tests files specify a different gold directory
         if 'gold_dir' in tester.specs:
-            specs['copy_files'] = tester.specs['gold_dir']
-        else:
-            specs['copy_files'] = 'gold'
+            specs['copy_files'] = specs['copy_files'] + ' ' + tester.specs['gold_dir']
 
         # Convert MAX_TIME to hours:minutes for walltime use
         hours = int(int(specs['max_time']) / 3600)
