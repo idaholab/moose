@@ -290,6 +290,7 @@ GrainTracker::finalize()
   auto num_halo_layers = _halo_level >= 1
                              ? _halo_level - 1
                              : 0; // The first level of halos already exists so subtract one
+
   if (_ebsd_reader && _first_time)
   {
     expandEBSDGrains();
@@ -419,14 +420,34 @@ GrainTracker::expandHalos(unsigned int num_layers_to_expand)
          * set we don't continue to iterate on those new ids.
          */
         std::set<dof_id_type> orig_halo_ids(feature._halo_ids);
-
         for (auto entity : orig_halo_ids)
         {
           if (_is_elemental)
             visitElementalNeighbors(_mesh.elemPtr(entity),
                                     feature._var_index,
                                     &feature,
-                                    /*expand_halos_only =*/true);
+                                    /*expand_halos_only =*/true,
+                                    /*disjoint_only =*/false);
+          else
+            visitNodalNeighbors(_mesh.nodePtr(entity),
+                                feature._var_index,
+                                &feature,
+                                /*expand_halos_only =*/true);
+        }
+
+        /**
+         * We have to handle disjoint halo IDs slightly differently. Once you are disjoint, you
+         * can't go back so make sure that we keep placing these IDs in the disjoint set.
+         */
+        std::set<dof_id_type> disjoint_orig_halo_ids(feature._disjoint_halo_ids);
+        for (auto entity : disjoint_orig_halo_ids)
+        {
+          if (_is_elemental)
+            visitElementalNeighbors(_mesh.elemPtr(entity),
+                                    feature._var_index,
+                                    &feature,
+                                    /*expand_halos_only =*/true,
+                                    /*disjoint_only =*/true);
           else
             visitNodalNeighbors(_mesh.nodePtr(entity),
                                 feature._var_index,
