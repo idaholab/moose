@@ -100,7 +100,7 @@ class GoldDiffPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         is available on the parent.
         """
         # Enable/disable the link camera toggle based on the existence of the main window.
-        if hasattr(self.parent(), 'VTKWindowPlugin'):
+        if self._plugin_manager and 'VTKWindowPlugin' in self._plugin_manager:
             self.LinkToggle.clicked.connect(self._callbackLinkToggle)
             self.LinkToggle.setChecked(True)
             self.LinkToggle.clicked.emit(True)
@@ -229,11 +229,11 @@ class GoldDiffPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Connect/disconnect the cameras between windows.
 
-        NOTE: This doesn't get called (b/c the button is disabled) if VTKWindowPlugin does not exist on parent.
+        NOTE: This doesn't get called (b/c the button is disabled) if VTKWindowPlugin does not exist on the plugin manager.
         see initialization
         """
         self.store(self._filename, 'Filename')
-        master = self.parent().VTKWindowPlugin
+        master = self._plugin_manager.VTKWindowPlugin
         slaves = [self.GoldVTKWindow, self.DiffVTKWindow]
         if value:
             for slave in slaves:

@@ -1,5 +1,5 @@
 import re
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import peacock
 import mooseutils
 from plugins.ExodusPlugin import ExodusPlugin
@@ -13,23 +13,39 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.MainLayout = QtWidgets.QHBoxLayout()
 
+        self.LeftScrollArea = QtWidgets.QScrollArea()
+        self.LeftScrollArea.setWidgetResizable(True)
+        self.LeftScrollArea.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.LeftScrollArea.setStyleSheet("QScrollArea { background: transparent; }");
+        self.LeftScrollArea.viewport().setStyleSheet(".QWidget { background: transparent; }");
+        self.LeftScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.LeftScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.LeftScrollContent = QtWidgets.QWidget()
+        self.LeftScrollArea.setWidget(self.LeftScrollContent)
         self.LeftLayout = QtWidgets.QVBoxLayout()
+        self.LeftScrollContent.setLayout(self.LeftLayout)
+        self.LeftLayout.setContentsMargins(0, 0, 0, 0)
         self.RightLayout = QtWidgets.QVBoxLayout()
         self.WindowLayout = QtWidgets.QHBoxLayout()
 
         self.setLayout(self.MainLayout)
-        self.MainLayout.addLayout(self.LeftLayout)
+        self.MainLayout.addWidget(self.LeftScrollArea)
         self.MainLayout.addLayout(self.RightLayout)
         self.RightLayout.addLayout(self.WindowLayout)
-
         self.setup()
         self.LeftLayout.addStretch(1)
 
         # Set the width of the left-side widgets to that the VTK window gets the space
         self.fixLayoutWidth('LeftLayout')
+        self.LeftScrollContent.setFixedWidth(self.LeftLayout.sizeHint().width())
+        self.LeftScrollArea.setFixedWidth(self.LeftScrollContent.width() + 15) # This gets rid of the horizontal "wiggle"
 
         if 'BlockPlugin' in self:
             self['BlockPlugin'].setCollapsed(True)
+        if 'BackgroundPlugin' in self:
+            self['BackgroundPlugin'].setCollapsed(True)
+        if 'CameraPlugin' in self:
+            self['CameraPlugin'].setCollapsed(True)
 
     def repr(self):
         """
