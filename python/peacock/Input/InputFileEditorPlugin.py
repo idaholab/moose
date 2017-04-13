@@ -34,7 +34,6 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         self.check_widget.needInputFile.connect(self.writeInputFile)
         self.check_widget.hide()
         self.blockChanged.connect(self._updateChanged)
-        self.blockSelected.connect(self._updateChanged)
 
         self.input_file_view = QPlainTextEdit()
         self.input_file_view.setReadOnly(True)
@@ -166,6 +165,16 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
     def clearRecentlyUsed(self):
         if self._menus_initialized:
             self._recently_used_menu.clearValues()
+
+    def onCurrentChanged(self, index):
+        """
+        This is called when the tab is changed.
+        If the block editor window is open we want to raise it
+        to the front so it doesn't get lost.
+        """
+        if index == self._index:
+            if self.block_editor:
+                self.block_editor.raise_()
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
