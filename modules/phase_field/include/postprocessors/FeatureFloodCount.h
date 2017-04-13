@@ -185,7 +185,7 @@ public:
     bool boundingBoxesIntersect(const FeatureData & rhs) const;
 
     /**
-     * The routine called to see if two features are mergable:
+     * The routine called to see if two features are mergeable:
      *  - Features must be represented by the same variable (_var_index)
      *  - Features must either intersect on halos or
      *  - Features must intersect on a periodic BC
