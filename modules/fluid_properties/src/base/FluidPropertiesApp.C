@@ -15,6 +15,7 @@
 #include "MultiComponentFluidPropertiesMaterialPT.h"
 
 #include "IdealGasFluidProperties.h"
+#include "IdealGasFluidPropertiesPT.h"
 #include "StiffenedGasFluidProperties.h"
 #include "MethaneFluidProperties.h"
 #include "Water97FluidProperties.h"
@@ -76,6 +77,7 @@ FluidPropertiesApp::registerObjects(Factory & factory)
   registerMaterial(MultiComponentFluidPropertiesMaterialPT);
 
   registerUserObject(IdealGasFluidProperties);
+  registerUserObject(IdealGasFluidPropertiesPT);
   registerUserObject(StiffenedGasFluidProperties);
   registerUserObject(MethaneFluidProperties);
   registerUserObject(Water97FluidProperties);
