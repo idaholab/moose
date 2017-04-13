@@ -122,7 +122,8 @@ class BlockEditor(QWidget, MooseWidget):
         self.new_parameter_button = WidgetUtils.addButton(self.button_layout, self, "Add parameter", self.addUserParamPressed)
         self.new_parameter_button.setToolTip("Add a non standard parameter")
 
-        self.close_button = WidgetUtils.addButton(self.button_layout, self, "Close window", self.close)
+        self.close_button = WidgetUtils.addButton(self.button_layout, self, "Close", self._applyAndClose)
+        self.close_button.setToolTip("Apply any changes and close the window")
 
     def _findFreeParamName(self, max_params=1000):
         """
@@ -169,6 +170,14 @@ class BlockEditor(QWidget, MooseWidget):
         self.param_editor.save()
         self._blockChanged(enabled=False)
         self.blockChanged.emit(self.block)
+
+    def _applyAndClose(self):
+        """
+        Apply any changes the user has made then close the window
+        """
+        if self.apply_button.isEnabled():
+            self.applyChanges()
+        self.close()
 
     def resetChanges(self):
         """
