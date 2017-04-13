@@ -85,7 +85,7 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
             : declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_qp_dvar")),
 
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
-    _R(8.3144621),
+    _R(8.3144598),
     _pc(getParam<Real>("pc")),
     _sat_lr(getParam<Real>("sat_lr")),
     _dseff_ds(1.0 / (1.0 - _sat_lr)),
