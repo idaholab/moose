@@ -90,8 +90,8 @@ dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
 // Utility routines
 void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node);
 void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem);
-bool areElemListsMergeable(std::list<dof_id_type> elem_list1,
-                           std::list<dof_id_type> elem_list2,
+bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
+                           const std::list<dof_id_type> & elem_list2,
                            MeshBase & mesh);
 
 template <>
@@ -1682,8 +1682,8 @@ updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
 }
 
 bool
-areElemListsMergeable(std::list<dof_id_type> elem_list1,
-                      std::list<dof_id_type> elem_list2,
+areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
+                      const std::list<dof_id_type> & elem_list2,
                       MeshBase & mesh)
 {
   for (const auto elem_id1 : elem_list1)
