@@ -174,8 +174,7 @@ public:
      * Update the minimum and maximum coordinates of a bounding box
      * given a Point, Elem or BBox parameter.
      */
-    void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Point & node);
-    void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem);
+    void updateBBoxExtremes(MeshBase & mesh);
     void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const MeshTools::BoundingBox & rhs_bbox);
     ///@}
 
@@ -184,6 +183,17 @@ public:
      * the other FeatureData's bounding boxes.
      */
     bool boundingBoxesIntersect(const FeatureData & rhs) const;
+
+    /**
+     * The routine called to see if two features are mergeable:
+     *  - Features must be represented by the same variable (_var_index)
+     *  - Features must either intersect on halos or
+     *  - Features must intersect on a periodic BC
+     *
+     *  Optimization: We may use the bounding boxes as a coarse-level check before checking
+     *  halo intersection.
+     */
+    bool mergeable(const FeatureData & rhs, bool use_pb) const;
 
     ///@{
     /**
@@ -238,6 +248,9 @@ public:
 
     /// Holds the ids surrounding the feature
     std::set<dof_id_type> _halo_ids;
+
+    /// Holds halo ids that extend onto a non-topologically connected surface
+    std::set<dof_id_type> _disjoint_halo_ids;
 
     /// Holds the nodes that belong to the feature on a periodic boundary
     std::set<dof_id_type> _periodic_nodes;
@@ -331,7 +344,8 @@ protected:
   void visitElementalNeighbors(const Elem * elem,
                                std::size_t current_index,
                                FeatureData * feature,
-                               bool expand_halos_only);
+                               bool expand_halos_only,
+                               bool disjoint_only);
   ///@}
 
   /**
@@ -344,7 +358,9 @@ protected:
                             std::vector<const T *> neighbor_entities,
                             std::size_t current_index,
                             FeatureData * feature,
-                            bool expand_halos_only);
+                            bool expand_halos_only,
+                            bool topological_neighbor,
+                            bool disjoint_only);
 
   /**
    * This routine uses the local flooded data to build up the local feature data structures
@@ -423,7 +439,7 @@ protected:
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
-  void appendPeriodicNeighborNodes(FeatureData & data) const;
+  void appendPeriodicNeighborNodes(FeatureData & feature) const;
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
@@ -568,6 +584,8 @@ protected:
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries * _pbs;
+
+  std::unique_ptr<PointLocatorBase> _point_locator;
 
   /// Average value of the domain which can optionally be used to find features in a field
   const PostprocessorValue & _element_average_value;

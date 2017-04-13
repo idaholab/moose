@@ -18,6 +18,15 @@
     max_parallel = 1
   [../]
 
+  [./test_halo_periodic_bc]
+    type = 'Exodiff'
+    input = 'grain_halo_over_bc.i'
+    exodiff = 'grain_halo_over_bc_out.e'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+    max_parallel = 1
+  [../]
+
   [./test_elemental]
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
