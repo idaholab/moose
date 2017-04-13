@@ -191,6 +191,9 @@ TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : Moo
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  TensorMechanicsApp::registerExecFlags();
 }
 
 TensorMechanicsApp::~TensorMechanicsApp() {}
@@ -433,4 +436,9 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_user_object");
+}
+
+void
+TensorMechanicsApp::registerExecFlags()
+{
 }

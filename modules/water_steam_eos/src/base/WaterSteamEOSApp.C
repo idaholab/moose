@@ -25,6 +25,9 @@ WaterSteamEOSApp::WaterSteamEOSApp(const InputParameters & parameters) : MooseAp
 
   Moose::associateSyntax(_syntax, _action_factory);
   WaterSteamEOSApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  WaterSteamEOSApp::registerExecFlags();
 }
 
 WaterSteamEOSApp::~WaterSteamEOSApp() {}
@@ -60,5 +63,10 @@ WaterSteamEOSApp__associateSyntax(Syntax & syntax, ActionFactory & action_factor
 }
 void
 WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+void
+WaterSteamEOSApp::registerExecFlags()
 {
 }

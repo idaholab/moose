@@ -24,11 +24,9 @@ validParams<DiscreteNucleationMap>()
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");
   params.addCoupledVar("periodic",
                        "Use the periodicity settings of this variable to populate the grain map");
-  MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   // the mapping needs to run at timestep begin, which is after the adaptivity
   // run of the previous timestep.
-  setup_options = "timestep_begin";
-  params.set<MultiMooseEnum>("execute_on") = setup_options;
+  MooseUtils::setExecuteOnFlags(params, 1, EXEC_TIMESTEP_BEGIN);
   return params;
 }
 

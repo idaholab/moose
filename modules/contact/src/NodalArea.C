@@ -20,8 +20,7 @@ InputParameters
 validParams<NodalArea>()
 {
   InputParameters params = validParams<SideIntegralVariableUserObject>();
-
-  params.set<MultiMooseEnum>("execute_on") = "linear";
+  MooseUtils::setExecuteOnFlags(params, 1, EXEC_LINEAR);
   return params;
 }
 

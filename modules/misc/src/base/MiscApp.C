@@ -38,6 +38,9 @@ MiscApp::MiscApp(const InputParameters & parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   MiscApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  MiscApp::registerExecFlags();
 }
 
 MiscApp::~MiscApp() {}
@@ -92,5 +95,10 @@ MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+void
+MiscApp::registerExecFlags()
 {
 }

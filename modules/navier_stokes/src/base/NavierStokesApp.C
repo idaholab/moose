@@ -163,6 +163,9 @@ NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(paramete
   Moose::associateSyntax(_syntax, _action_factory);
   FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  NavierStokesApp::registerExecFlags();
 }
 
 NavierStokesApp::~NavierStokesApp() {}
@@ -374,4 +377,9 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 
 #undef registerAction
 #define registerAction(type, action) action_factory.regLegacy<type>(stringifyName(type), action)
+}
+
+void
+NavierStokesApp::registerExecFlags()
+{
 }

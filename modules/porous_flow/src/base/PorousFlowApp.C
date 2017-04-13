@@ -125,6 +125,9 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(para
   FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  PorousFlowApp::registerExecFlags();
 }
 
 PorousFlowApp::~PorousFlowApp() {}
@@ -289,4 +292,9 @@ PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PorousFlowBasicTHM, "add_material");
   registerAction(PorousFlowBasicTHM, "add_aux_variable");
   registerAction(PorousFlowBasicTHM, "add_aux_kernel");
+}
+
+void
+PorousFlowApp::registerExecFlags()
+{
 }

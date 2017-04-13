@@ -250,6 +250,14 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (getParam<bool>("error_deprecated") && getParam<bool>("allow_deprecated"))
     mooseError("Both error deprecated and allowed deprecated were set.");
+
+  if (Moose::execute_flags.empty())
+  {
+    mooseDeprecated("MOOSE has been updated to include a Moose::registerExecFlags() function, "
+                    "which should be added to the application constructor. It is also possible to "
+                    "add additional flags, see the MooseTestApp.C/h for an example.");
+    Moose::registerExecFlags();
+  }
 }
 
 MooseApp::~MooseApp()

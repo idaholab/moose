@@ -55,8 +55,7 @@ ThermalContactAuxBCsAction::act()
   params.applyParameters(parameters(), {"variable"});
   params.set<AuxVariableName>("variable") = ThermalContactAuxVarsAction::getGapValueName(_pars);
 
-  MultiMooseEnum execute_options = SetupInterface::getExecuteOptions();
-  execute_options = "initial linear";
+  MultiMooseEnum execute_options = MooseUtils::createExecuteOnEnum(2, EXEC_INITIAL, EXEC_LINEAR);
   params.set<MultiMooseEnum>("execute_on") = execute_options;
 
   params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};

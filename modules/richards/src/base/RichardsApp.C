@@ -118,6 +118,9 @@ RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(paramete
 
   Moose::associateSyntax(_syntax, _action_factory);
   RichardsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  RichardsApp::registerExecFlags();
 }
 
 RichardsApp::~RichardsApp() {}
@@ -234,4 +237,9 @@ RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(Q2PAction, "add_aux_variable");
   registerAction(Q2PAction, "add_function");
   registerAction(Q2PAction, "add_postprocessor");
+}
+
+void
+RichardsApp::registerExecFlags()
+{
 }

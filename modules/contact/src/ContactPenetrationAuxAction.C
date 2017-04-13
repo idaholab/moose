@@ -45,10 +45,7 @@ ContactPenetrationAuxAction::act()
 
   {
     InputParameters params = _factory.getValidParams("PenetrationAux");
-
-    MultiMooseEnum execute_options = SetupInterface::getExecuteOptions();
-    execute_options = "initial linear";
-    params.set<MultiMooseEnum>("execute_on") = execute_options;
+    MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_LINEAR);
 
     // Extract global params
     if (isParamValid("parser_syntax"))

@@ -45,6 +45,9 @@ FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) : MooseApp(pa
 
   Moose::associateSyntax(_syntax, _action_factory);
   FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  FluidPropertiesApp::registerExecFlags();
 }
 
 FluidPropertiesApp::~FluidPropertiesApp() {}
@@ -109,4 +112,9 @@ FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.addDependency("add_fluid_properties", "init_displaced_problem");
 
   registerAction(AddFluidPropertiesAction, "add_fluid_properties");
+}
+
+void
+FluidPropertiesApp::registerExecFlags()
+{
 }

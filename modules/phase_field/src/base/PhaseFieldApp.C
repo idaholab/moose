@@ -281,6 +281,9 @@ PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) : MooseApp(para
 
   Moose::associateSyntax(_syntax, _action_factory);
   PhaseFieldApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  PhaseFieldApp::registerExecFlags();
 }
 
 PhaseFieldApp::~PhaseFieldApp() {}
@@ -563,4 +566,9 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(ReconVarICAction, "add_ic");
   registerAction(RigidBodyMultiKernelAction, "add_kernel");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
+}
+
+void
+PhaseFieldApp::registerExecFlags()
+{
 }

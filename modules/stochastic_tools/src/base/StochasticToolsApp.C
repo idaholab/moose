@@ -27,6 +27,9 @@ StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(pa
 
   Moose::associateSyntax(_syntax, _action_factory);
   StochasticToolsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  StochasticToolsApp::registerExecFlags();
 }
 
 StochasticToolsApp::~StochasticToolsApp() {}
@@ -70,5 +73,10 @@ StochasticToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fact
 }
 void
 StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+void
+StochasticToolsApp::registerExecFlags()
 {
 }

@@ -46,10 +46,7 @@ validParams<GrainTrackerInterface>()
   params.set<bool>("enable_var_coloring") =
       true; // Generally we need to see the variable (OP) indices
 
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "initial timestep_end";
-  params.set<MultiMooseEnum>("execute_on") = execute_options;
-
+  MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_TIMESTEP_END);
   return params;
 }
 

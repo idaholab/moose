@@ -41,6 +41,9 @@ XFEMApp::XFEMApp(const InputParameters & parameters) : MooseApp(parameters)
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   XFEMApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags();
+  XFEMApp::registerExecFlags();
 }
 
 XFEMApp::~XFEMApp() {}
@@ -98,4 +101,9 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(XFEMAction, "add_aux_kernel");
 
   registerSyntax("XFEMAction", "XFEM");
+}
+
+void
+XFEMApp::registerExecFlags()
+{
 }
