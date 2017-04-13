@@ -16,9 +16,8 @@
 #define USEROBJECTINTERFACE_H
 
 // MOOSE includes
-#include "ParallelUniqueId.h"
-#include "FEProblem.h"
-#include "UserObject.h"
+#include "FEProblemBase.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class InputParameters;
@@ -42,7 +41,7 @@ public:
    * @param name The name of the parameter key of the user object to retrieve
    * @return The user object with name associated with the parameter 'name'
    */
-  template<class T>
+  template <class T>
   const T & getUserObject(const std::string & name);
 
   /**
@@ -50,7 +49,7 @@ public:
    * @param name The name of the user object to retrieve
    * @return The user object with the name
    */
-  template<class T>
+  template <class T>
   const T & getUserObjectByName(const std::string & name);
 
   /**
@@ -71,8 +70,8 @@ private:
   /// Parameters of the object with this interface
   const InputParameters & _uoi_params;
 
-  /// Reference to the FEProblem instance
-  FEProblem & _uoi_feproblem;
+  /// Reference to the FEProblemBase instance
+  FEProblemBase & _uoi_feproblem;
 
   /// Thread ID
   THREAD_ID _uoi_tid;
@@ -81,8 +80,7 @@ private:
   bool isDiscreteUserObject(const UserObject & uo) const;
 };
 
-
-template<class T>
+template <class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
@@ -90,7 +88,7 @@ UserObjectInterface::getUserObject(const std::string & name)
   return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), tid);
 }
 
-template<class T>
+template <class T>
 const T &
 UserObjectInterface::getUserObjectByName(const std::string & name)
 {
@@ -98,4 +96,4 @@ UserObjectInterface::getUserObjectByName(const std::string & name)
   return _uoi_feproblem.getUserObject<T>(name, tid);
 }
 
-#endif //USEROBJECTINTERFACE_H
+#endif // USEROBJECTINTERFACE_H

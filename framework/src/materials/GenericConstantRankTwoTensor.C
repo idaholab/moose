@@ -7,20 +7,23 @@
 
 #include "GenericConstantRankTwoTensor.h"
 
-template<>
-InputParameters validParams<GenericConstantRankTwoTensor>()
+template <>
+InputParameters
+validParams<GenericConstantRankTwoTensor>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<std::vector<Real> >("tensor_values", "Vector of values defining the constant rank two tensor");
-  params.addRequiredParam<MaterialPropertyName>("tensor_name", "Name of the tensor material property to be created");
+  params.addRequiredParam<std::vector<Real>>(
+      "tensor_values", "Vector of values defining the constant rank two tensor");
+  params.addRequiredParam<MaterialPropertyName>(
+      "tensor_name", "Name of the tensor material property to be created");
   return params;
 }
 
-GenericConstantRankTwoTensor::GenericConstantRankTwoTensor(const InputParameters & parameters) :
-    Material(parameters),
+GenericConstantRankTwoTensor::GenericConstantRankTwoTensor(const InputParameters & parameters)
+  : Material(parameters),
     _prop(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name")))
 {
-  _tensor.fillFromInputVector(getParam<std::vector<Real> >("tensor_values"));
+  _tensor.fillFromInputVector(getParam<std::vector<Real>>("tensor_values"));
 }
 
 void

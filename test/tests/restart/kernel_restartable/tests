@@ -68,5 +68,6 @@
     cli_args = 'Problem/restart_file_base=kernel_restartable_out_threads_cp/0005'
     expect_err = 'Cannot restart using a different number of threads'
     group = 'requirements'
+    max_parallel = 1
   [../]
 []

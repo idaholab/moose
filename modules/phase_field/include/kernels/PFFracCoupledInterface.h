@@ -9,23 +9,21 @@
 
 #include "KernelGrad.h"
 
+// Forward Declarations
+class PFFracCoupledInterface;
+
+template <>
+InputParameters validParams<PFFracCoupledInterface>();
+
 /**
  * Phase-field fracture model
  * This class computes the contribution to residual and jacobian of the variable beta
  * by the grad of c (damage variable)
  * Refer to formulation: Miehe et. al., Int. J. Num. Methods Engg., 2010, 83. 1273-1311 Equation 63
  */
-
-//Forward Declarations
-class PFFracCoupledInterface;
-
-template<>
-InputParameters validParams<PFFracCoupledInterface>();
-
 class PFFracCoupledInterface : public KernelGrad
 {
 public:
-
   PFFracCoupledInterface(const InputParameters & parameters);
 
 protected:
@@ -36,7 +34,6 @@ protected:
   const VariableValue & _c;
   const VariableGradient & _grad_c;
   unsigned int _c_var;
-
-private:
 };
-#endif //PFFRACCOUPLEDINTERFACE_H
+
+#endif // PFFRACCOUPLEDINTERFACE_H

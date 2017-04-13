@@ -13,28 +13,27 @@
 /****************************************************************/
 
 #include "ExplicitTVDRK2.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<ExplicitTVDRK2>()
+template <>
+InputParameters
+validParams<ExplicitTVDRK2>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _stage(1),
     _residual_old(_nl.addVector("residual_old", false, GHOSTED))
 {
 }
 
-ExplicitTVDRK2::~ExplicitTVDRK2()
-{
-}
+ExplicitTVDRK2::~ExplicitTVDRK2() {}
 
 void
 ExplicitTVDRK2::preSolve()
@@ -85,7 +84,7 @@ ExplicitTVDRK2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_old;
   _fe_problem.time() = time_stage2;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Advance solutions old->older, current->old.  Also moves Material
   // properties and other associated state forward in time.
@@ -98,7 +97,7 @@ ExplicitTVDRK2::solve()
   _stage = 3;
   _fe_problem.timeOld() = time_stage2;
   _fe_problem.time() = time_new;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;
@@ -152,5 +151,5 @@ ExplicitTVDRK2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("ExplicitTVDRK2::postStep(): _stage = " << _stage << ", only _stage = 1-3 is allowed.");
+    mooseError("ExplicitTVDRK2::postStep(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
 }

@@ -19,7 +19,7 @@ public:
   CHInterface(const InputParameters & parameters);
 };
 
-template<>
+template <>
 InputParameters validParams<CHInterface>();
 
-#endif //CHINTERFACE_H
+#endif // CHINTERFACE_H

@@ -11,7 +11,8 @@
 
 class CrystalPlasticityStateVarRateComponent;
 
-template<>InputParameters validParams<CrystalPlasticityStateVarRateComponent>();
+template <>
+InputParameters validParams<CrystalPlasticityStateVarRateComponent>();
 
 /**
  * Crystal plasticity state variable evolution rate component userobject base class.
@@ -21,9 +22,10 @@ template<>InputParameters validParams<CrystalPlasticityStateVarRateComponent>();
 class CrystalPlasticityStateVarRateComponent : public CrystalPlasticityUOBase
 {
 public:
-   CrystalPlasticityStateVarRateComponent(const InputParameters & parameters);
+  CrystalPlasticityStateVarRateComponent(const InputParameters & parameters);
 
-   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp, std::vector<Real> & val) const = 0;
+  virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
+                                                       std::vector<Real> & val) const = 0;
 };
 
 #endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H

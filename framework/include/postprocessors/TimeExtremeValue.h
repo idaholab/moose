@@ -17,11 +17,11 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class TimeExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<TimeExtremeValue>();
 
 /// A postprocessor for reporting the max/min value of another postprocessor over time
@@ -32,7 +32,9 @@ public:
   enum ExtremeType
   {
     MAX,
-    MIN
+    MIN,
+    ABS_MAX,
+    ABS_MIN
   };
 
   /**
@@ -40,14 +42,14 @@ public:
    * @param parameters The input parameters
    */
   TimeExtremeValue(const InputParameters & parameters);
-  virtual void initialize() {}
-  virtual void execute();
-  virtual Real getValue();
+  virtual void initialize() override {}
+  virtual void execute() override;
+  virtual Real getValue() override;
 
 protected:
   const PostprocessorValue & _postprocessor;
 
-  /// The extreme value type ("min" or "max")
+  /// The extreme value type ("max", "min", etc.)
   ExtremeType _type;
 
   /// The extreme value

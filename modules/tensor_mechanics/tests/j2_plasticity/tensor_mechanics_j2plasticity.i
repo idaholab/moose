@@ -20,7 +20,6 @@
     coord = '0.0 0.0 0.0'
     new_boundary = 6
   [../]
-
   [./snode]
     type = AddExtraNodeset
     coord = '1.0 0.0 0.0'
@@ -33,12 +32,10 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
- [./y_disp]
+  [./y_disp]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./z_disp]
     order = FIRST
     family = LAGRANGE
@@ -52,29 +49,30 @@
   [../]
 []
 
-
-
 [Materials]
-  active='felastic'
-  [./felastic]
+  [./fplastic]
     type = FiniteStrainPlasticMaterial
     block=0
-    fill_method = symmetric9
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
-    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
     yield_stress='0. 445. 0.05 610. 0.1 680. 0.38 810. 0.95 920. 2. 950.'
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    block = 0
+    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = 'x_disp y_disp z_disp'
   [../]
 []
 
 [Functions]
-
- [./topfunc]
-   type = ParsedFunction
-   value = 't'
- [../]
-
+  [./topfunc]
+    type = ParsedFunction
+    value = 't'
+  [../]
 []
 
 [BCs]
@@ -108,7 +106,6 @@
     boundary = 6
     value = 0.0
   [../]
-
   [./side1]
     type = PresetBC
     variable = y_disp
@@ -190,17 +187,13 @@
 []
 
 [Executioner]
-  start_time = 0.0
-  end_time=1.0
+  type = Transient
+
   dt=0.1
   dtmax=1
   dtmin=0.1
-  type = Transient
+  end_time=1.0
 
-  solve_type = 'PJFNK'
-
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomerang
   nl_abs_tol = 1e-10
 []
 

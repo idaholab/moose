@@ -11,14 +11,19 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DiscreteNucleationMap>()
+template <>
+InputParameters
+validParams<DiscreteNucleationMap>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addClassDescription("Generates a spatial smoothed map of all nucleation sites with the "
+                             "data of the DiscreteNucleationInserter for use by the "
+                             "DiscreteNucleation material.");
   params.addParam<Real>("radius", 0.0, "Radius for the inserted nuclei");
   params.addParam<Real>("int_width", 0.0, "Nucleus interface width for smooth nuclei");
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");
-  params.addCoupledVar("periodic", "Use the periodicity settings of this variable to populate the grain map");
+  params.addCoupledVar("periodic",
+                       "Use the periodicity settings of this variable to populate the grain map");
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   // the mapping needs to run at timestep begin, which is after the adaptivity
   // run of the previous timestep.
@@ -27,8 +32,8 @@ InputParameters validParams<DiscreteNucleationMap>()
   return params;
 }
 
-DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters) :
-    ElementUserObject(parameters),
+DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters)
+  : ElementUserObject(parameters),
     _mesh_changed(false),
     _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
     _periodic(isCoupled("periodic") ? coupled("periodic") : -1),
@@ -71,23 +76,23 @@ DiscreteNucleationMap::execute()
       for (unsigned i = 0; i < _nucleus_list.size(); ++i)
       {
         // use a non-periodic or periodic distance
-        r = _periodic < 0 ?
-              (_q_point[qp] - _nucleus_list[i].second).norm() :
-              _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
+        r = _periodic < 0
+                ? (_q_point[qp] - _nucleus_list[i].second).norm()
+                : _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
         if (r < rmin)
           rmin = r;
       }
 
       // compute intensity value with smooth interface
       Real value = 0.0;
-      if (rmin <= _radius - _int_width/2.0) //Inside circle
+      if (rmin <= _radius - _int_width / 2.0) // Inside circle
       {
         active_nuclei++;
         value = 1.0;
       }
-      else if (rmin < _radius + _int_width/2.0) //Smooth interface
+      else if (rmin < _radius + _int_width / 2.0) // Smooth interface
       {
-        Real int_pos = (rmin - _radius + _int_width/2.0)/_int_width;
+        Real int_pos = (rmin - _radius + _int_width / 2.0) / _int_width;
         active_nuclei++;
         value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
       }
@@ -96,12 +101,13 @@ DiscreteNucleationMap::execute()
 
     // if the map is not empty insert it
     if (active_nuclei > 0)
-      _nucleus_map.insert(std::pair<dof_id_type, std::vector<Real> >(_current_elem->id(), _elem_map));
+      _nucleus_map.insert(
+          std::pair<dof_id_type, std::vector<Real>>(_current_elem->id(), _elem_map));
   }
 }
 
 void
-DiscreteNucleationMap::threadJoin(const UserObject &y)
+DiscreteNucleationMap::threadJoin(const UserObject & y)
 {
   // if the map needs to be updated we merge the maps from all threads
   if (_rebuild_map)

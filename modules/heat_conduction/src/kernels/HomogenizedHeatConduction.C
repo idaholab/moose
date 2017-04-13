@@ -6,19 +6,26 @@
 /****************************************************************/
 #include "HomogenizedHeatConduction.h"
 
-template<>
-InputParameters validParams<HomogenizedHeatConduction>()
+template <>
+InputParameters
+validParams<HomogenizedHeatConduction>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<MaterialPropertyName>("diffusion_coefficient_name", "thermal_conductivity", "The diffusion coefficient for the temperature gradient (Default: thermal_conductivity)");
-  params.addRequiredRangeCheckedParam<unsigned int>("component", "component < 3", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addParam<MaterialPropertyName>(
+      "diffusion_coefficient",
+      "thermal_conductivity",
+      "The diffusion coefficient for the temperature gradient (Default: thermal_conductivity)");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component < 3",
+      "An integer corresponding to the direction the variable this "
+      "kernel acts in. (0 for x, 1 for y, 2 for z)");
   return params;
 }
 
-
-HomogenizedHeatConduction::HomogenizedHeatConduction(const InputParameters & parameters) :
-    Kernel(parameters),
-    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
+HomogenizedHeatConduction::HomogenizedHeatConduction(const InputParameters & parameters)
+  : Kernel(parameters),
+    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient")),
     _component(getParam<unsigned int>("component"))
 {
 }

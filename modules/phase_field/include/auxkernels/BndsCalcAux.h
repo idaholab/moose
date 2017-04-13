@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BndsCalcAux;
 
-template<>
+template <>
 InputParameters validParams<BndsCalcAux>();
 
 /**
@@ -26,8 +26,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  unsigned int _ncrys;
+  const unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
 };
 
-#endif //BNDSCALCAUX_H
+#endif // BNDSCALCAUX_H

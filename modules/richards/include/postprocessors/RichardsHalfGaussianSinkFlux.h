@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSHALFGAUSSIANSINKFLUX_H
 #define RICHARDSHALFGAUSSIANSINKFLUX_H
 
@@ -14,10 +13,10 @@
 
 class Function;
 
-//Forward Declarations
+// Forward Declarations
 class RichardsHalfGaussianSinkFlux;
 
-template<>
+template <>
 InputParameters validParams<RichardsHalfGaussianSinkFlux>();
 
 /**
@@ -27,7 +26,7 @@ InputParameters validParams<RichardsHalfGaussianSinkFlux>();
  * If a function, _m_func, is used then the flux is multiplied by _m_func.
  * The result is the flux integrated over the specified sideset.
  */
-class RichardsHalfGaussianSinkFlux: public SideIntegralVariablePostprocessor
+class RichardsHalfGaussianSinkFlux : public SideIntegralVariablePostprocessor
 {
 public:
   RichardsHalfGaussianSinkFlux(const InputParameters & parameters);
@@ -35,7 +34,7 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  FEProblem & _feproblem;
+  FEProblemBase & _feproblem;
 
   /// flux out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and flux out = max otherwise
   Real _maximum;
@@ -65,8 +64,7 @@ protected:
   Function & _m_func;
 
   /// porepressure (or porepressure vector for multiphase problems)
-  const MaterialProperty<std::vector<Real> > & _pp;
-
+  const MaterialProperty<std::vector<Real>> & _pp;
 };
 
 #endif

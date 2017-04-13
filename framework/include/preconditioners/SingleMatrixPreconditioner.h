@@ -19,7 +19,7 @@
 
 class SingleMatrixPreconditioner;
 
-template<>
+template <>
 InputParameters validParams<SingleMatrixPreconditioner>();
 
 /**
@@ -31,4 +31,4 @@ public:
   SingleMatrixPreconditioner(const InputParameters & params);
 };
 
-#endif /* SINGLEMATRIXPRECONDITIONER_H_ */
+#endif /* SINGLEMATRIXPRECONDITIONER_H */

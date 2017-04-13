@@ -1,0 +1,7 @@
+[Tests]
+  [./clear]
+    type = ImageDiff
+    command = window_clear.py
+    imagediff = 'window_clear.png'
+  [../]
+[]

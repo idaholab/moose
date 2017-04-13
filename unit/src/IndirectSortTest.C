@@ -12,60 +12,55 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "IndirectSortTest.h"
+#include "gtest/gtest.h"
 
-//Moose includes
+// Moose includes
 #include "IndirectSort.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( IndirectSort );
-
-void
-IndirectSort::realSort()
+TEST(IndirectSort, realSort)
 {
   double a1[] = {1.2, 2.3, 1.4, 5.2, 3.4, 7.5, 1.5, 3.14};
-  std::vector<double> a(a1, a1+8);
+  std::vector<double> a(a1, a1 + 8);
 
   std::vector<size_t> b;
   Moose::indirectSort(a.begin(), a.end(), b);
 
-  CPPUNIT_ASSERT( b[0] == 0 );
-  CPPUNIT_ASSERT( b[1] == 2 );
-  CPPUNIT_ASSERT( b[2] == 6 );
-  CPPUNIT_ASSERT( b[3] == 1 );
-  CPPUNIT_ASSERT( b[4] == 7 );
-  CPPUNIT_ASSERT( b[5] == 4 );
-  CPPUNIT_ASSERT( b[6] == 3 );
-  CPPUNIT_ASSERT( b[7] == 5 );
+  EXPECT_EQ(b[0], 0);
+  EXPECT_EQ(b[1], 2);
+  EXPECT_EQ(b[2], 6);
+  EXPECT_EQ(b[3], 1);
+  EXPECT_EQ(b[4], 7);
+  EXPECT_EQ(b[5], 4);
+  EXPECT_EQ(b[6], 3);
+  EXPECT_EQ(b[7], 5);
 }
 
-void
-IndirectSort::intSort()
+TEST(IndirectSort, intSort)
 {
   const unsigned length = 8;
 
   std::vector<int> a(length);
-  for (unsigned int i=0; i<length; ++i)
-    a[i] = length-i-1;
+  for (unsigned int i = 0; i < length; ++i)
+    a[i] = length - i - 1;
 
   std::vector<size_t> b;
   Moose::indirectSort(a.begin(), a.end(), b);
 
-  CPPUNIT_ASSERT( b[0] == 7 );
-  CPPUNIT_ASSERT( b[1] == 6 );
-  CPPUNIT_ASSERT( b[2] == 5 );
-  CPPUNIT_ASSERT( b[3] == 4 );
-  CPPUNIT_ASSERT( b[4] == 3 );
-  CPPUNIT_ASSERT( b[5] == 2 );
-  CPPUNIT_ASSERT( b[6] == 1 );
-  CPPUNIT_ASSERT( b[7] == 0 );
+  EXPECT_EQ(b[0], 7);
+  EXPECT_EQ(b[1], 6);
+  EXPECT_EQ(b[2], 5);
+  EXPECT_EQ(b[3], 4);
+  EXPECT_EQ(b[4], 3);
+  EXPECT_EQ(b[5], 2);
+  EXPECT_EQ(b[6], 1);
+  EXPECT_EQ(b[7], 0);
 }
 
-void
-IndirectSort::testStableSort()
+TEST(IndirectSort, testStableSort)
 {
   const int length = 4;
 
-  std::vector<std::pair<int, int> > a;
+  std::vector<std::pair<int, int>> a;
   std::vector<size_t> b;
   a.reserve(length);
 
@@ -76,14 +71,13 @@ IndirectSort::testStableSort()
 
   Moose::indirectSort(a.begin(), a.end(), b);
 
-  CPPUNIT_ASSERT( b[0] == 3 );
-  CPPUNIT_ASSERT( b[1] == 1 );
-  CPPUNIT_ASSERT( b[2] == 2 );
-  CPPUNIT_ASSERT( b[3] == 0 );
+  EXPECT_EQ(b[0], 3);
+  EXPECT_EQ(b[1], 1);
+  EXPECT_EQ(b[2], 2);
+  EXPECT_EQ(b[3], 0);
 }
 
-void
-IndirectSort::testDoubleSort()
+TEST(IndirectSort, testDoubleSort)
 {
   const int length = 5;
 
@@ -101,13 +95,13 @@ IndirectSort::testDoubleSort()
   std::vector<size_t> c(b.size());
 
   // This operation is equivalent to doing another sort of the indicies
-  for (unsigned int i=0; i<b.size(); ++i)
+  for (unsigned int i = 0; i < b.size(); ++i)
     c[b[i]] = i;
-  //Moose::indirectSort(b.begin(), b.end(), c);
+  // Moose::indirectSort(b.begin(), b.end(), c);
 
-  CPPUNIT_ASSERT( c[0] == 0 );
-  CPPUNIT_ASSERT( c[1] == 3 );
-  CPPUNIT_ASSERT( c[2] == 2 );
-  CPPUNIT_ASSERT( c[3] == 4 );
-  CPPUNIT_ASSERT( c[4] == 1 );
+  EXPECT_EQ(c[0], 0);
+  EXPECT_EQ(c[1], 3);
+  EXPECT_EQ(c[2], 2);
+  EXPECT_EQ(c[3], 4);
+  EXPECT_EQ(c[4], 1);
 }

@@ -23,7 +23,7 @@
     input = vtk_diff.i
     max_parallel = 1
     vtk = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
   [./diff_serial_mesh_parallel]
     # Check that actual solution, in parallel with serial mesh
@@ -33,7 +33,7 @@
     max_parallel = 2
     min_parallel = 2
     vtk = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
   [./diff_parallel_mesh]
     # Check that actual solution, in parallel with parallel mesh
@@ -44,7 +44,7 @@
     min_parallel = 2
     vtk = true
     cli_args = Outputs/file_base=vtk_diff_parallel_mesh_out
-    mesh_mode = PARALLEL
+    mesh_mode = DISTRIBUTED
     deleted = "#6149"
   [../]
 []

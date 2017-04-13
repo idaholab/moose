@@ -21,7 +21,7 @@
 // Forward declarations
 class VariableGradientComponent;
 
-template<>
+template <>
 InputParameters validParams<VariableGradientComponent>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<VariableGradientComponent>();
 class VariableGradientComponent : public AuxKernel
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Input parameters for the object
@@ -38,14 +37,9 @@ public:
   VariableGradientComponent(const InputParameters & parameters);
 
 protected:
-
-  /**
-   * Extracts the component from the gradient of a coupled variable
-   */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
 private:
-
   /// Reference to the gradient of the coupled variable
   const VariableGradient & _gradient;
 

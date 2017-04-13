@@ -6,23 +6,27 @@
 /****************************************************************/
 #include "CrossTermBarrierFunctionBase.h"
 
-template<>
-InputParameters validParams<CrossTermBarrierFunctionBase>()
+template <>
+InputParameters
+validParams<CrossTermBarrierFunctionBase>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
   MooseEnum g_order("SIMPLE=0 LOW", "SIMPLE");
   params.addParam<MooseEnum>("g_order", g_order, "Polynomial order of the barrier function g(eta)");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
-  params.addRequiredParam<std::vector<Real> >("W_ij", "Terms controlling barrier height set W=1 in DerivativeMultiPhaseMaterial for these to apply");
+  params.addRequiredParam<std::vector<Real>>("W_ij",
+                                             "Terms controlling barrier height set W=1 in "
+                                             "DerivativeMultiPhaseMaterial for these to "
+                                             "apply");
   return params;
 }
 
-CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _function_name(getParam<std::string>("function_name")),
     _g_order(getParam<MooseEnum>("g_order")),
-    _W_ij(getParam<std::vector<Real> >("W_ij")),
+    _W_ij(getParam<std::vector<Real>>("W_ij")),
     _num_eta(coupledComponents("etas")),
     _eta_names(_num_eta),
     _eta(_num_eta),
@@ -48,12 +52,12 @@ CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
-    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, _eta_names[i]);
+    _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, _eta_names[i]);
     _eta[i] = &coupledValue("etas", i);
     for (unsigned int j = i; j < _num_eta; ++j)
     {
-      _prop_d2g[i][j] =
-      _prop_d2g[j][i] = &declarePropertyDerivative<Real>(_function_name, _eta_names[i], _eta_names[j]);
+      _prop_d2g[i][j] = _prop_d2g[j][i] =
+          &declarePropertyDerivative<Real>(_function_name, _eta_names[i], _eta_names[j]);
     }
   }
 }

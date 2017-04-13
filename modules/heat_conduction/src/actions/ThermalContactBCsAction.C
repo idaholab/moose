@@ -11,114 +11,77 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "Conversion.h"
+#include "AddVariableAction.h"
 
-static unsigned int n = 0;
-
-template<>
-InputParameters validParams<ThermalContactBCsAction>()
+template <>
+InputParameters
+validParams<ThermalContactBCsAction>()
 {
-  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
-
   InputParameters params = validParams<Action>();
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
-  params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
+  params.addParam<std::string>(
+      "appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addRequiredParam<std::string>(
+      "type",
+      "A string representing the Moose object that will be used for heat conduction over the gap");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
-  params.addParam<VariableName>("disp_x", "The x displacement");
-  params.addParam<VariableName>("disp_y", "The y displacement");
-  params.addParam<VariableName>("disp_z", "The z displacement");
+
+  // TODO: these are only used in one Bison test. Deprecate soon!
+  params.addParam<std::vector<VariableName>>("disp_x", "The x displacement");
+  params.addParam<std::vector<VariableName>>("disp_y", "The y displacement");
+  params.addParam<std::vector<VariableName>>("disp_z", "The z displacement");
+
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
-  params.addParam<std::vector<std::string> >("save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
-  params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
+
+  params.addParam<bool>(
+      "warnings", false, "Whether to output warning messages concerning nodes not being found");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
+  params.addParam<bool>(
+      "quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
 
   return params;
 }
 
-ThermalContactBCsAction::ThermalContactBCsAction(const InputParameters & params) :
-  Action(params)
-{
-}
+ThermalContactBCsAction::ThermalContactBCsAction(const InputParameters & params) : Action(params) {}
 
 void
 ThermalContactBCsAction::act()
 {
-  bool quadrature = getParam<bool>("quadrature");
+  const bool quadrature = getParam<bool>("quadrature");
 
   InputParameters params = _factory.getValidParams(getParam<std::string>("type"));
-
-  // Extract global params
-  if (isParamValid("parser_syntax"))
-    _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
-  else
-    mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
-
-  if (isParamValid("save_in"))
-  {
-    params.set<std::vector<std::string> >("save_in") = getParam<std::vector<std::string> >("save_in");
-  }
-
-  params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
+  params.applyParameters(parameters());
 
   if (!quadrature)
   {
-    std::vector<VariableName> vars(1);
-    vars[0] = "penetration";
-    params.set<std::vector<VariableName> >("gap_distance") = vars;
-    vars[0] = ThermalContactAuxVarsAction::getGapValueName(_pars);
-    params.set<std::vector<VariableName> >("gap_temp") = vars;
+    params.set<std::vector<VariableName>>("gap_distance") = {"penetration"};
+    params.set<std::vector<VariableName>>("gap_temp") = {
+        ThermalContactAuxVarsAction::getGapValueName(_pars)};
   }
   else
   {
     params.set<bool>("quadrature") = true;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
-    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-    params.set<bool>("warnings") = getParam<bool>("warnings");
     params.set<bool>("use_displaced_mesh") = true;
   }
 
-  std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
-  params.set<std::vector<BoundaryName> >("boundary") = bnds;
-
-  params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
-
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-
-  if (isParamValid("disp_x"))
-  {
-    std::vector<VariableName> disp_x(1, getParam<VariableName>("disp_x"));
-    params.set< std::vector<VariableName> >("disp_x") = disp_x;
-  }
-  if (isParamValid("disp_y"))
-  {
-    std::vector<VariableName> disp_y(1, getParam<VariableName>("disp_y"));
-    params.set< std::vector<VariableName> >("disp_y") = disp_y;
-  }
-  if (isParamValid("disp_z"))
-  {
-    std::vector<VariableName> disp_z(1, getParam<VariableName>("disp_z"));
-    params.set< std::vector<VariableName> >("disp_z") = disp_z;
-  }
-
-  _problem->addBoundaryCondition(getParam<std::string>("type"),
-      "gap_bc_" + Moose::stringify(n),
-      params);
+  params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+  _problem->addBoundaryCondition(getParam<std::string>("type"), "gap_bc_" + name(), params);
 
   if (quadrature)
   {
     // Swap master and slave for this one
-    std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
-    params.set<std::vector<BoundaryName> >("boundary") = bnds;
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
 
-    _problem->addBoundaryCondition(getParam<std::string>("type"),
-        "gap_bc_master_" + Moose::stringify(n),
-        params);
+    _problem->addBoundaryCondition(
+        getParam<std::string>("type"), "gap_bc_master_" + name(), params);
   }
-
-
-  ++n;
 }

@@ -9,21 +9,21 @@
 
 #include "XFEM.h"
 
-template<>
-InputParameters validParams<XFEMVolFracAux>()
+template <>
+InputParameters
+validParams<XFEMVolFracAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-XFEMVolFracAux::XFEMVolFracAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
+XFEMVolFracAux::XFEMVolFracAux(const InputParameters & parameters) : AuxKernel(parameters)
 {
   if (isNodal())
     mooseError("XFEMVolFracAux must be run on an element variable");
-  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
+  FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblem in XFEMVolFracAux");
+    mooseError("Problem casting _subproblem to FEProblemBase in XFEMVolFracAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
     mooseError("Problem casting to XFEM in XFEMVolFracAux");

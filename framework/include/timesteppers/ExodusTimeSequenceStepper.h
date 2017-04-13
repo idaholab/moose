@@ -19,7 +19,7 @@
 
 class ExodusTimeSequenceStepper;
 
-template<>
+template <>
 InputParameters validParams<ExodusTimeSequenceStepper>();
 
 /**
@@ -36,4 +36,4 @@ protected:
   std::string _mesh_file;
 };
 
-#endif //EXODUSTIMESEQUENCESTEPPER_H
+#endif // EXODUSTIMESEQUENCESTEPPER_H

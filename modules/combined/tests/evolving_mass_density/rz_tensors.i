@@ -76,7 +76,7 @@
 []
 
 [Kernels]
-  [./StressDivergence2DAxisymmetricRZ]
+  [./TensorMechanics]
     use_displaced_mesh = true
   [../]
 []
@@ -158,8 +158,6 @@
     type = Density
     block = PATCH
     density = 12.335297548665
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 

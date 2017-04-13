@@ -19,27 +19,28 @@
 class IsotropicPowerLawHardening : public IsotropicPlasticity
 {
 public:
-  IsotropicPowerLawHardening( const InputParameters & parameters);
+  IsotropicPowerLawHardening(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
+  virtual void computeStressInitialize(unsigned qp,
+                                       Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor);
 
-  virtual Real computeHardening(unsigned qp, Real scalar);
+  virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
 
   virtual void computeYieldStress(unsigned qp);
 
   Real _youngs_modulus;
   Real _effectiveTrialStress;
 
-  //Coefficients
+  // Coefficients
   Real _K;
   Real _n;
 
 private:
-
 };
 
-template<>
+template <>
 InputParameters validParams<IsotropicPowerLawHardening>();
 
 #endif // ISOTROPICPOWERLAWHARDENING_H

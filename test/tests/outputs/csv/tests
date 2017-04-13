@@ -11,6 +11,12 @@
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
   [../]
+  [./no_time]
+    # Tests output of postprocessors and scalars to CSV files for transient propblems without a time column
+    type = CSVDiff
+    input = 'csv_no_time.i'
+    csvdiff = 'csv_no_time_out.csv'
+  [../]
   [./transient_exodus]
     # Tests output of postprocessors and scalars to Exodus files for transient propblems
     type = Exodiff

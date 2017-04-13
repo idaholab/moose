@@ -11,7 +11,7 @@
 
 class INSExplicitTimestepSelector;
 
-template<>
+template <>
 InputParameters validParams<INSExplicitTimestepSelector>();
 
 /**

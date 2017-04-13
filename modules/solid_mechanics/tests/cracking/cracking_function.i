@@ -114,17 +114,17 @@
 
 [AuxKernels]
   [./crack_xx_flags]
-    type = MaterialVectorAux
-    vector = crack_flags
+    type = MaterialRealVectorValueAux
+    property = crack_flags
     variable = crack_xx_flags
-    index = 0
+    component = 0
     block = 1
   [../]
   [./crack_yy_flags]
-    type = MaterialVectorAux
-    vector = crack_flags
+    type = MaterialRealVectorValueAux
+    property = crack_flags
     variable = crack_yy_flags
-    index = 1
+    component = 1
     block = 1
   [../]
   [./stress_xx]

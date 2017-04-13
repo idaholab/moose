@@ -16,8 +16,9 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<SetupInterface>()
+template <>
+InputParameters
+validParams<SetupInterface>()
 {
   InputParameters params = emptyInputParameters();
 
@@ -25,23 +26,31 @@ InputParameters validParams<SetupInterface>()
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
 
   // Add the 'execute_on' input parameter for users to set
-  params.addParam<MultiMooseEnum>("execute_on", execute_options, "Set to (nonlinear|linear|timestep_end|timestep_begin|custom) to execute only at that moment");
+  params.addParam<MultiMooseEnum>("execute_on",
+                                  execute_options,
+                                  "Set to (nonlinear|linear|timestep_end|timestep_begin|custom) "
+                                  "to execute only at that moment");
 
-  // The Output system uses different options for the 'execute_on' than other systems, therefore the check of the options
+  // The Output system uses different options for the 'execute_on' than other systems, therefore the
+  // check of the options
   // cannot occur based on the 'execute_on' parameter, so this flag triggers the check
   params.addPrivateParam<bool>("check_execute_on", true);
 
   return params;
 }
 
-SetupInterface::SetupInterface(const MooseObject * moose_object) :
-    _current_execute_flag((moose_object->parameters().getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
+SetupInterface::SetupInterface(const MooseObject * moose_object)
+  : _current_execute_flag(
+        (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+            ->getCurrentExecuteOnFlag())
 {
   const InputParameters & params = moose_object->parameters();
 
   /**
-   * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all to adjust their execution flags.
-   * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
+   * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all
+   * to adjust their execution flags.
+   * Our way of dealing with this is by not having those particular classes add the this classes
+   * valid params to their own.  In
    * those cases it won't exist so we just set it to a default and ignore it.
    */
   if (params.have_parameter<bool>("check_execute_on") && params.get<bool>("check_execute_on"))
@@ -54,24 +63,32 @@ SetupInterface::SetupInterface(const MooseObject * moose_object) :
     _exec_flags.push_back(EXEC_LINEAR);
 }
 
-SetupInterface::~SetupInterface()
+SetupInterface::~SetupInterface() {}
+
+void
+SetupInterface::initialSetup()
 {
 }
 
 void
-SetupInterface::initialSetup() {}
+SetupInterface::timestepSetup()
+{
+}
 
 void
-SetupInterface::timestepSetup() {}
+SetupInterface::jacobianSetup()
+{
+}
 
 void
-SetupInterface::jacobianSetup() {}
+SetupInterface::residualSetup()
+{
+}
 
 void
-SetupInterface::residualSetup() {}
-
-void
-SetupInterface::subdomainSetup() {}
+SetupInterface::subdomainSetup()
+{
+}
 
 const std::vector<ExecFlagType> &
 SetupInterface::execFlags() const
@@ -83,7 +100,7 @@ ExecFlagType
 SetupInterface::execBitFlags() const
 {
   unsigned int exec_bit_field = EXEC_NONE;
-  for (unsigned int i=0; i<_exec_flags.size(); ++i)
+  for (unsigned int i = 0; i < _exec_flags.size(); ++i)
     exec_bit_field |= _exec_flags[i];
 
   return static_cast<ExecFlagType>(exec_bit_field);
@@ -92,5 +109,7 @@ SetupInterface::execBitFlags() const
 MultiMooseEnum
 SetupInterface::getExecuteOptions()
 {
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 custom=0x100", "linear");
+  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
+                        "timestep_begin=0x10 custom=0x100",
+                        "linear");
 }

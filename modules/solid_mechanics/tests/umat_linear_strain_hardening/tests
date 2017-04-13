@@ -6,5 +6,6 @@
     library_mode = 'DYNAMIC'
     compiler = 'INTEL'
     valgrind = 'NONE'
+    skip = 'ill-posed test' # See #5104
   [../]
 []

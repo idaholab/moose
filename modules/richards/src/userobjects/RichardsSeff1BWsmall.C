@@ -5,72 +5,96 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
-//  "Broadbridge-White" form of effective saturation for Kn small (P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
+//  "Broadbridge-White" form of effective saturation for Kn small (P Broadbridge and I White
+//  ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water
+//  Resources Research 24 (1988) 145-154)
 //
 #include "RichardsSeff1BWsmall.h"
+#include "libmesh/utility.h"
 
-#include <cmath>
-
-template<>
-InputParameters validParams<RichardsSeff1BWsmall>()
+template <>
+InputParameters
+validParams<RichardsSeff1BWsmall>()
 {
   InputParameters params = validParams<RichardsSeff>();
-  params.addRequiredRangeCheckedParam<Real>("Sn", "Sn >= 0", "Low saturation.  This must be < Ss, and non-negative.  This is BW's initial effective saturation, below which effective saturation never goes in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  This form of effective saturation is only correct for Kn small.");
-  params.addRangeCheckedParam<Real>("Ss", 1.0, "Ss <= 1", "High saturation.  This must be > Sn and <= 1.  Effective saturation where porepressure = 0.  Effective saturation never exceeds this value in BW's simulations/models.");
-  params.addRequiredRangeCheckedParam<Real>("C", "C > 1", "BW's C parameter.  Must be > 1.  Typical value would be 1.05.");
-  params.addRequiredRangeCheckedParam<Real>("las", "las > 0", "BW's lambda_s parameter multiplied by (fluiddensity*gravity).  Must be > 0.  Typical value would be 1E5");
-  params.addClassDescription("Broadbridge-white form of effective saturation for negligable Kn.  Then porepressure = -las*( (1-th)/th - (1/c)Ln((C-th)/((C-1)th))), for th = (Seff - Sn)/(Ss - Sn).  A Lambert-W function must be evaluated to express Seff in terms of porepressure, which can be expensive");
+  params.addRequiredRangeCheckedParam<Real>(
+      "Sn",
+      "Sn >= 0",
+      "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
+      "initial effective saturation, below which effective saturation never goes "
+      "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  "
+      "This form of effective saturation is only correct for Kn small.");
+  params.addRangeCheckedParam<Real>(
+      "Ss",
+      1.0,
+      "Ss <= 1",
+      "High saturation.  This must be > Sn and <= 1.  Effective saturation "
+      "where porepressure = 0.  Effective saturation never exceeds this "
+      "value in BW's simulations/models.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "C", "C > 1", "BW's C parameter.  Must be > 1.  Typical value would be 1.05.");
+  params.addRequiredRangeCheckedParam<Real>("las",
+                                            "las > 0",
+                                            "BW's lambda_s parameter multiplied "
+                                            "by (fluiddensity*gravity).  Must be "
+                                            "> 0.  Typical value would be 1E5");
+  params.addClassDescription("Broadbridge-white form of effective saturation for negligable Kn.  "
+                             "Then porepressure = -las*( (1-th)/th - (1/c)Ln((C-th)/((C-1)th))), "
+                             "for th = (Seff - Sn)/(Ss - Sn).  A Lambert-W function must be "
+                             "evaluated to express Seff in terms of porepressure, which can be "
+                             "expensive");
   return params;
 }
 
-RichardsSeff1BWsmall::RichardsSeff1BWsmall(const InputParameters & parameters) :
-    RichardsSeff(parameters),
+RichardsSeff1BWsmall::RichardsSeff1BWsmall(const InputParameters & parameters)
+  : RichardsSeff(parameters),
     _sn(getParam<Real>("Sn")),
     _ss(getParam<Real>("Ss")),
     _c(getParam<Real>("C")),
     _las(getParam<Real>("las"))
 {
   if (_ss <= _sn)
-    mooseError("In BW effective saturation Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
+    mooseError("In BW effective saturation Sn set to ",
+               _sn,
+               " and Ss set to ",
+               _ss,
+               " but these must obey Ss > Sn");
 }
-
-
 
 Real
 RichardsSeff1BWsmall::LambertW(const Real z) const
 {
-/* Lambert W function.
-   Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.
-   Revised KMB 97 Nov 20; 98 Feb 11, Nov 24, Dec 28; 99 Jan 13; 00 Feb 23; 01 Apr 09
+  /* Lambert W function.
+     Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.
+     Revised KMB 97 Nov 20; 98 Feb 11, Nov 24, Dec 28; 99 Jan 13; 00 Feb 23; 01 Apr 09
 
-   Computes Lambert W function, principal branch.
-   See LambertW1.c for -1 branch.
+     Computes Lambert W function, principal branch.
+     See LambertW1.c for -1 branch.
 
-   Returned value W(z) satisfies W(z)*exp(W(z))=z
-   test data...
-      W(1)= 0.5671432904097838730
-      W(2)= 0.8526055020137254914
-      W(20)=2.2050032780240599705
-   To solve (a+b*R)*exp(-c*R)-d=0 for R, use
-   R=-(b*W(-exp(-a*c/b)/b*d*c)+a*c)/b/c
+     Returned value W(z) satisfies W(z)*exp(W(z))=z
+     test data...
+        W(1)= 0.5671432904097838730
+        W(2)= 0.8526055020137254914
+        W(20)=2.2050032780240599705
+     To solve (a+b*R)*exp(-c*R)-d=0 for R, use
+     R=-(b*W(-exp(-a*c/b)/b*d*c)+a*c)/b/c
 
-   Test:
-     gcc -DTESTW LambertW.c -o LambertW -lm && LambertW
-   Library:
-     gcc -O3 -c LambertW.c
+     Test:
+       gcc -DTESTW LambertW.c -o LambertW -lm && LambertW
+     Library:
+       gcc -O3 -c LambertW.c
 
-   Modified trially by Andy to use MOOSE things
-*/
+     Modified trially by Andy to use MOOSE things
+  */
   mooseAssert(z > 0, "LambertW function in RichardsSeff1BWsmall called with negative argument");
 
   int i;
-  const Real eps=4.0e-16; //, em1=0.3678794411714423215955237701614608;
-  Real p,e,t,w;
+  const Real eps = 4.0e-16; //, em1=0.3678794411714423215955237701614608;
+  Real p, e, t, w;
 
   /* Uncomment this stuff is you ever need to call with a negative argument
   if (z < -em1)
-    mooseError("LambertW: bad argument " << z << "\n");
+    mooseError("LambertW: bad argument ", z, "\n");
 
   if (0.0 == z)
     return 0.0;
@@ -94,26 +118,26 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   if (z < 1.0)
   {
     /* series near 0 */
-    p=std::sqrt(2.0*(2.7182818284590452353602874713526625*z+1.0));
-    w=-1.0+p*(1.0+p*(-0.333333333333333333333+p*0.152777777777777777777777));
+    p = std::sqrt(2.0 * (2.7182818284590452353602874713526625 * z + 1.0));
+    w = -1.0 + p * (1.0 + p * (-0.333333333333333333333 + p * 0.152777777777777777777777));
   }
   else
-    w=std::log(z); /* asymptotic */
+    w = std::log(z); /* asymptotic */
   if (z > 3.0)
-    w-=std::log(w); /* useful? */
+    w -= std::log(w); /* useful? */
   for (i = 0; i < 10; i++)
   {
     /* Halley iteration */
-    e=std::exp(w);
-    t=w*e-z;
-    p=w+1.0;
-    t/=e*p-0.5*(p+1.0)*t/p;
-    w-=t;
-    if (std::fabs(t) < eps*(1.0+std::fabs(w)))
+    e = std::exp(w);
+    t = w * e - z;
+    p = w + 1.0;
+    t /= e * p - 0.5 * (p + 1.0) * t / p;
+    w -= t;
+    if (std::abs(t) < eps * (1.0 + std::abs(w)))
       return w; /* rel-abs error */
   }
   /* should never get here */
-  mooseError("LambertW: No convergence at z= " << z << "\n");
+  mooseError("LambertW: No convergence at z= ", z, "\n");
 }
 
 Real
@@ -123,13 +147,15 @@ RichardsSeff1BWsmall::seff(std::vector<const VariableValue *> p, unsigned int qp
   if (pp >= 0)
     return 1.0;
 
-  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
-  Real th = _c/(1 + LambertW(x)); // use branch 0 for positive x
-  return _sn + (_ss - _sn)*th;
+  Real x = (_c - 1.0) * std::exp(_c - 1 - _c * pp / _las);
+  Real th = _c / (1.0 + LambertW(x)); // use branch 0 for positive x
+  return _sn + (_ss - _sn) * th;
 }
 
 void
-RichardsSeff1BWsmall::dseff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff1BWsmall::dseff(std::vector<const VariableValue *> p,
+                            unsigned int qp,
+                            std::vector<Real> & result) const
 {
   result[0] = 0.0;
 
@@ -137,13 +163,15 @@ RichardsSeff1BWsmall::dseff(std::vector<const VariableValue *> p, unsigned int q
   if (pp >= 0)
     return;
 
-  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
+  Real x = (_c - 1) * std::exp(_c - 1.0 - _c * pp / _las);
   Real lamw = LambertW(x);
-  result[0] = std::pow(_c, 2)/_las*lamw/std::pow(1 + lamw, 3);
+  result[0] = Utility::pow<2>(_c) / _las * lamw / Utility::pow<3>(1 + lamw);
 }
 
 void
-RichardsSeff1BWsmall::d2seff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff1BWsmall::d2seff(std::vector<const VariableValue *> p,
+                             unsigned int qp,
+                             std::vector<std::vector<Real>> & result) const
 {
   result[0][0] = 0.0;
 
@@ -151,7 +179,8 @@ RichardsSeff1BWsmall::d2seff(std::vector<const VariableValue *> p, unsigned int 
   if (pp >= 0)
     return;
 
-  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
+  Real x = (_c - 1) * std::exp(_c - 1 - _c * pp / _las);
   Real lamw = LambertW(x);
-  result[0][0] = -std::pow(_c, 3)/std::pow(_las, 2)*lamw*(1 - 2*lamw)/std::pow(1 + lamw, 5);
+  result[0][0] = -Utility::pow<3>(_c) / Utility::pow<2>(_las) * lamw * (1.0 - 2.0 * lamw) /
+                 Utility::pow<5>(1 + lamw);
 }

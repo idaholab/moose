@@ -12,7 +12,7 @@
 // Forward Declarations
 class KKSXeVacSolidMaterial;
 
-template<>
+template <>
 InputParameters validParams<KKSXeVacSolidMaterial>();
 
 class KKSXeVacSolidMaterial : public DerivativeFunctionMaterialBase
@@ -53,4 +53,4 @@ private:
   Real cLogC(Real c);
 };
 
-#endif //KKSXEVACSOLIDMATERIAL_H
+#endif // KKSXEVACSOLIDMATERIAL_H

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = CSVDiff
+    input = spherical_average.i
+    csvdiff = 'spherical_average_out_average_0001.csv'
+  [../]
+[]

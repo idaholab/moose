@@ -23,7 +23,7 @@ class Function;
 class ScalarL2Error;
 class MooseVariableScalar;
 
-template<>
+template <>
 InputParameters validParams<ScalarL2Error>();
 
 /**
@@ -35,17 +35,17 @@ class ScalarL2Error : public GeneralPostprocessor
 public:
   ScalarL2Error(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
 
   /**
    * Get the L2 Error.
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
   MooseVariableScalar & _var;
   Function & _func;
 };
 
-#endif //SCALARL2ERROR_H
+#endif // SCALARL2ERROR_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERMMONOMIAL_H
 #define RICHARDSRELPERMMONOMIAL_H
 
@@ -13,8 +12,7 @@
 
 class RichardsRelPermMonomial;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsRelPermMonomial>();
 
 /**
@@ -47,7 +45,6 @@ public:
   Real d2relperm(Real seff) const;
 
 protected:
-
   /// immobile saturation
   Real _simm;
 
@@ -56,7 +53,6 @@ protected:
 
   /// 0^0, which is used if _n=0
   Real _zero_to_the_zero;
-
 };
 
 #endif // RICHARDSRELPERMMONOMIAL_H

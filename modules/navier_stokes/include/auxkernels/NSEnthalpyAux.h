@@ -7,12 +7,13 @@
 #ifndef NSENTHALPYAUX_H
 #define NSENTHALPYAUX_H
 
+// MOOSE includes
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSEnthalpyAux;
 
-template<>
+template <>
 InputParameters validParams<NSEnthalpyAux>();
 
 /**
@@ -34,10 +35,8 @@ protected:
   virtual Real computeValue();
 
   const VariableValue & _rho;
-  const VariableValue & _rhoe;
+  const VariableValue & _rhoE;
   const VariableValue & _pressure;
-
-  const Real _gamma;
 };
 
 #endif // NSENTHALPYAUX_H

@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef RANDOMHITSOLUTIONMODIFIER_H
 #define RANDOMHITSOLUTIONMODIFIER_H
 
@@ -20,17 +19,16 @@
 #include "GeneralUserObject.h"
 #include "MooseMesh.h"
 
-//Forward Declarations
+// Forward Declarations
 class RandomHitUserObject;
 class RandomHitSolutionModifier;
 
-template<>
+template <>
 InputParameters validParams<RandomHitSolutionModifier>();
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class RandomHitSolutionModifier :
-  public GeneralUserObject
+class RandomHitSolutionModifier : public GeneralUserObject
 {
 public:
   RandomHitSolutionModifier(const InputParameters & parameters);
@@ -40,7 +38,7 @@ public:
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
-  virtual void initialize(){}
+  virtual void initialize() {}
 
   /**
    * Compute the hit positions for this timestep
@@ -48,9 +46,10 @@ public:
   virtual void execute();
 
   /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
+   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where
+   * you want to do MPI communication!
    */
-  virtual void finalize(){}
+  virtual void finalize() {}
 
 protected:
   const RandomHitUserObject & _random_hits;

@@ -19,17 +19,16 @@
 
 class ValueThresholdMarker;
 
-template<>
+template <>
 InputParameters validParams<ValueThresholdMarker>();
 
 class ValueThresholdMarker : public QuadraturePointMarker
 {
 public:
   ValueThresholdMarker(const InputParameters & parameters);
-  virtual ~ValueThresholdMarker(){};
 
 protected:
-  virtual MarkerValue computeQpMarker();
+  virtual MarkerValue computeQpMarker() override;
 
   bool _coarsen_set;
   Real _coarsen;

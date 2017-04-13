@@ -21,26 +21,21 @@
 // Forward declerations
 class AddOutputAction;
 
-template<>
+template <>
 InputParameters validParams<AddOutputAction>();
 
 /**
  * Action for creating output objects
  */
-class AddOutputAction: public MooseObjectAction
+class AddOutputAction : public MooseObjectAction
 {
 public:
-
   /**
    * Class constructor
    */
   AddOutputAction(InputParameters params);
 
-  /**
-   * Creates the actual output object
-   */
-  virtual void act();
-
+  virtual void act() override;
 };
 
-#endif //ADDOUTPUTACTION_H
+#endif // ADDOUTPUTACTION_H

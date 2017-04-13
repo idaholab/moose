@@ -14,18 +14,20 @@
 
 #include "NonlinearSource.h"
 
-template<>
-InputParameters validParams<NonlinearSource>()
+template <>
+InputParameters
+validParams<NonlinearSource>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredCoupledVar("coupled_var", "The variable whose value is coupled into the source term.");
+  params.addRequiredCoupledVar("coupled_var",
+                               "The variable whose value is coupled into the source term.");
   params.addRequiredParam<Real>("scale_factor", "Strength of the source term");
   params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
   return params;
 }
 
-NonlinearSource::NonlinearSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
+NonlinearSource::NonlinearSource(const InputParameters & parameters)
+  : DiracKernel(parameters),
     _coupled_var(coupledValue("coupled_var")),
     _coupled_var_num(coupled("coupled_var")),
     _scale_factor(parameters.get<Real>("scale_factor")),

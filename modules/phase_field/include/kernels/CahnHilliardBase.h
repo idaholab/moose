@@ -14,7 +14,7 @@
  * equation in a general way that can be templated to a scalar or
  * tensor mobility.
  */
-template<typename T>
+template <typename T>
 class CahnHilliardBase : public CHBulk<T>
 {
 public:
@@ -43,35 +43,41 @@ protected:
 
 private:
   const unsigned int _nvar;
-  std::vector<const MaterialProperty<Real>* > _second_derivatives;
-  std::vector<const MaterialProperty<Real>* > _third_derivatives;
-  std::vector<std::vector<const MaterialProperty<Real>* > > _third_cross_derivatives;
+  std::vector<const MaterialProperty<Real> *> _second_derivatives;
+  std::vector<const MaterialProperty<Real> *> _third_derivatives;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _third_cross_derivatives;
   std::vector<const VariableGradient *> _grad_vars;
 };
 
-template<typename T>
+template <typename T>
 InputParameters
 CahnHilliardBase<T>::validParams()
 {
   InputParameters params = CHBulk<Real>::validParams();
   params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy");
-  params.addRequiredParam<MaterialPropertyName>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
-  params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
+  params.addRequiredParam<MaterialPropertyName>(
+      "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
+  params.addCoupledVar("displacement_gradients",
+                       "Vector of displacement gradient variables (see "
+                       "Modules/PhaseField/DisplacementGradients "
+                       "action)");
   return params;
 }
 
-template<typename T>
-CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters) :
-    CHBulk<T>(parameters),
+template <typename T>
+CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters)
+  : CHBulk<T>(parameters),
     _nvar(_coupled_moose_vars.size()),
-    _second_derivatives(_nvar+1),
-    _third_derivatives(_nvar+1),
+    _second_derivatives(_nvar + 1),
+    _third_derivatives(_nvar + 1),
     _third_cross_derivatives(_nvar),
-    _grad_vars(_nvar+1)
+    _grad_vars(_nvar + 1)
 {
   // derivatives w.r.t. and gradients of the kernel variable
-  _second_derivatives[0] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name());
-  _third_derivatives[0]  = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), _var.name());
+  _second_derivatives[0] =
+      &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name());
+  _third_derivatives[0] = &this->template getMaterialPropertyDerivative<Real>(
+      "f_name", _var.name(), _var.name(), _var.name());
   _grad_vars[0] = &(_grad_u);
 
   // Iterate over all coupled variables
@@ -81,23 +87,26 @@ CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters) :
     if (iname == _var.name())
       mooseError("The kernel variable should not be specified in the coupled `args` parameter.");
 
-    _second_derivatives[i+1] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
-    _third_derivatives[i+1]  = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), iname);
+    _second_derivatives[i + 1] =
+        &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
+    _third_derivatives[i + 1] = &this->template getMaterialPropertyDerivative<Real>(
+        "f_name", _var.name(), _var.name(), iname);
 
     _third_cross_derivatives[i].resize(_nvar);
     for (unsigned int j = 0; j < _nvar; ++j)
     {
       VariableName jname = _coupled_moose_vars[j]->name();
-      _third_cross_derivatives[i][j] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname, jname);
+      _third_cross_derivatives[i][j] =
+          &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname, jname);
     }
 
-    _grad_vars[i+1] = &(_coupled_moose_vars[i]->gradSln());
+    _grad_vars[i + 1] = &(_coupled_moose_vars[i]->gradSln());
   }
 }
 
-template<typename T>
+template <typename T>
 void
-CahnHilliardBase<T>:: initialSetup()
+CahnHilliardBase<T>::initialSetup()
 {
   /**
    * Check if both the non-linear as well as the auxiliary variables variables
@@ -108,7 +117,7 @@ CahnHilliardBase<T>:: initialSetup()
   this->template validateDerivativeMaterialPropertyBase<Real>("f_name");
 }
 
-template<typename T>
+template <typename T>
 RealGradient
 CahnHilliardBase<T>::computeGradDFDCons(PFFunctionType type)
 {
@@ -131,20 +140,18 @@ CahnHilliardBase<T>::computeGradDFDCons(PFFunctionType type)
   mooseError("Internal error");
 }
 
-template<typename T>
+template <typename T>
 Real
 CahnHilliardBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!this->mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = this->mapJvarToCvar(jvar);
 
-  RealGradient J =   _grad_u[_qp] * _phi[_j][_qp] * (*_third_derivatives[cvar+1])[_qp]
-                   + _grad_phi[_j][_qp] * (*_second_derivatives[cvar+1])[_qp];
+  RealGradient J = _grad_u[_qp] * _phi[_j][_qp] * (*_third_derivatives[cvar + 1])[_qp] +
+                   _grad_phi[_j][_qp] * (*_second_derivatives[cvar + 1])[_qp];
 
   for (unsigned int i = 0; i < _nvar; ++i)
-    J += _phi[_j][_qp] * (*_grad_vars[i+1])[_qp] * (*_third_cross_derivatives[i][cvar])[_qp];
+    J += _phi[_j][_qp] * (*_grad_vars[i + 1])[_qp] * (*_third_cross_derivatives[i][cvar])[_qp];
 
   return CHBulk<T>::computeQpOffDiagJacobian(jvar) + _M[_qp] * _grad_test[_i][_qp] * J;
 }

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSEFFVG_H
 #define RICHARDSSEFFVG_H
 
@@ -21,7 +20,6 @@
 class RichardsSeffVG
 {
 public:
-
   /**
    * effective saturation as a fcn of porepressure
    * @param p porepressure
@@ -45,7 +43,6 @@ public:
    * @param m van-genuchten m parameter
    */
   static Real d2seff(Real p, Real al, Real m);
-
 };
 
 #endif // RICHARDSSEFFVG_H

@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class MollifiedLangmuirMaterial;
 
-template<>
+template <>
 InputParameters validParams<MollifiedLangmuirMaterial>();
 
 /**
@@ -25,13 +25,9 @@ public:
   MollifiedLangmuirMaterial(const InputParameters & parameters);
 
 protected:
-
-  /// computes mass flow rates and derivatives
-  virtual void computeQpProperties();
-
+  virtual void computeQpProperties() override;
 
 private:
-
   /// reciprocal of desorption time constant
   const VariableValue * _one_over_de_time_const;
 
@@ -39,10 +35,10 @@ private:
   const VariableValue * _one_over_ad_time_const;
 
   /// langmuir density
-  Real _langmuir_dens;
+  const Real _langmuir_dens;
 
   /// langmuir pressure
-  Real _langmuir_p;
+  const Real _langmuir_p;
 
   /// concentration of adsorbed fluid in matrix
   const VariableValue * _conc;
@@ -56,7 +52,7 @@ private:
    * Here equilib_conc = langmuir_dens*_pressure/(_pressure + _langmuir_p)
    * which is the langmuir expression
    */
-  Real _mollifier;
+  const Real _mollifier;
 
   /// mass flow rate from the matrix = mass flow rate to the porespace
   MaterialProperty<Real> & _mass_rate_from_matrix;
@@ -66,7 +62,6 @@ private:
 
   /// derivative of mass flow rate wrt pressure
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
-
 };
 
-#endif //MOLLFIEDLANGMUIRMATERIAL_H
+#endif // MOLLFIEDLANGMUIRMATERIAL_H

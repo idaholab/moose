@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'RunException'
+    input = 'node_list_from_side_list.i'
+    expect_err = 'The object \'left\' contains the following boundary ids that do no exist on the mesh: 3'
+  [../]
+[]

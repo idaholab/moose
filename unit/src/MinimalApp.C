@@ -12,22 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MinimalApp.h"
+#include "gtest/gtest.h"
+
 #include "AppFactory.h"
 #include "Executioner.h"
 #include "MooseMesh.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( MinimalApp );
-
-void
-MinimalApp::createMinimalAppTest()
+TEST(MinimalApp, create)
 {
-  const char *argv[1] = { "\0" };
-  MooseApp * app = AppFactory::createApp("MooseUnitApp", 1, (char**)argv);
+  const char * argv[1] = {"\0"};
+  MooseApp * app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
   app->parameters().set<bool>("minimal") = true;
   app->run();
-  CPPUNIT_ASSERT(app->executioner()->name() == "Executioner");
-  CPPUNIT_ASSERT(app->executioner()->feProblem().name() == "MOOSE Problem");
-  CPPUNIT_ASSERT(app->executioner()->feProblem().mesh().nElem() == 1);
+  EXPECT_EQ(app->executioner()->name(), "Executioner");
+  EXPECT_EQ(app->executioner()->feProblem().name(), "MOOSE Problem");
+  EXPECT_EQ(app->executioner()->feProblem().mesh().nElem(), 1);
   delete app;
 }

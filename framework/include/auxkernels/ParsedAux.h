@@ -17,26 +17,23 @@
 
 #include "AuxKernel.h"
 #include "FunctionParserUtils.h"
-#include "libmesh/fparser_ad.hh"
 
-//Forward Declarations
+// Forward Declarations
 class ParsedAux;
 
-template<>
+template <>
 InputParameters validParams<AuxKernel>();
 
 /**
  * AuxKernel that evaluates a parsed function expression
  */
-class ParsedAux :
-  public AuxKernel,
-  public FunctionParserUtils
+class ParsedAux : public AuxKernel, public FunctionParserUtils
 {
 public:
   ParsedAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// function expression
   std::string _function;

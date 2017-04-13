@@ -6,17 +6,22 @@
 /****************************************************************/
 #include "NSMomentumConvectiveWeakStagnationBC.h"
 
-template<>
-InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>()
+template <>
+InputParameters
+validParams<NSMomentumConvectiveWeakStagnationBC>()
 {
-  InputParameters params = validParams<NSWeakStagnationBC>();
-  params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
+  InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("The convective part (sans pressure term) of the momentum equation "
+                             "boundary integral evaluated at specified stagnation temperature, "
+                             "stagnation pressure, and flow direction values.");
+  params.addRequiredParam<unsigned>(
+      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 
-NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBC(parameters),
-    _component(getParam<unsigned>("component"))
+NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(
+    const InputParameters & parameters)
+  : NSWeakStagnationBaseBC(parameters), _component(getParam<unsigned>("component"))
 {
 }
 

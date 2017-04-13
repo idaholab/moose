@@ -4,6 +4,8 @@
 # will be used (one up from the scripts directory where this script is located)
 REPO_DIR=${1:-"$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../"}
 
+echo "if you have clang-format installed, please use it instead of this script"
+
 if [ ! -d "$REPO_DIR" ]; then
   echo "$REPO_DIR directory does not exist";
 else

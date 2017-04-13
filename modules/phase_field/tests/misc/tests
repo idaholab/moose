@@ -1,0 +1,29 @@
+[Tests]
+  [./timestepmaterial]
+    type = 'Exodiff'
+    input = 'timestepmaterial.i'
+    exodiff = 'timestepmaterial_out.e'
+  [../]
+  [./variablegradientmaterial]
+    type = 'Exodiff'
+    input = 'variablegradientmaterial.i'
+    exodiff = 'variablegradientmaterial_out.e'
+  [../]
+
+  [./interface_grad]
+    type = 'Exodiff'
+    input = 'interface_grad.i'
+    exodiff = 'interface_grad_out.e'
+  [../]
+  [./interface_flux]
+    type = 'Exodiff'
+    input = 'interface_flux.i'
+    exodiff = 'interface_flux_out.e'
+  [../]
+
+  [./equal_gradient_lagrange]
+    type = 'Exodiff'
+    input = 'equal_gradient_lagrange.i'
+    exodiff = 'equal_gradient_lagrange_out.e'
+  [../]
+[]

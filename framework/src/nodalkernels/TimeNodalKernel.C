@@ -13,19 +13,21 @@
 /****************************************************************/
 
 #include "TimeNodalKernel.h"
-#include "Assembly.h"
 
-template<>
-InputParameters validParams<TimeNodalKernel>()
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
+
+template <>
+InputParameters
+validParams<TimeNodalKernel>()
 {
   InputParameters params = validParams<NodalKernel>();
   return params;
 }
 
-TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters) :
-    NodalKernel(parameters)
-{
-}
+TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters) : NodalKernel(parameters) {}
 
 void
 TimeNodalKernel::computeResidual()
@@ -40,8 +42,8 @@ TimeNodalKernel::computeResidual()
     if (_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i=0; i<_save_in.size(); i++)
-        _save_in[i]->sys().solution().add(_save_in[i]->nodalDofIndex(), res);
+      for (const auto & var : _save_in)
+        var->sys().solution().add(var->nodalDofIndex(), res);
     }
   }
 }

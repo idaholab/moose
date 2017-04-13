@@ -1,47 +1,75 @@
 [Tests]
-  [./increment_options_test]
+  [./increment_options_sm]
     type = 'RunException'
-    input = 'increment_options_test.i'
+    input = 'increment_options_sm.i'
     expect_err = "The options for the increment calculation are RashidApprox and Eigen."
   [../]
-
-  [./num_constants_test]
+  [./num_constants_sm]
     type = 'RunException'
-    input = 'num_constants_test.i'
+    input = 'num_constants_sm.i'
     expect_err = "Exactly two elastic constants must be defined for material 'goo'"
   [../]
-
-  [./youngs_modulus_test]
+  [./youngs_modulus_sm]
     type = 'RunException'
-    input = 'youngs_modulus_test.i'
+    input = 'youngs_modulus_sm.i'
     expect_err = "Youngs modulus must be positive in material 'goo'"
   [../]
-
-  [./bulk_modulus_test]
+  [./bulk_modulus_sm]
     type = 'RunException'
-    input = 'bulk_modulus_test.i'
+    input = 'bulk_modulus_sm.i'
     expect_err = "Bulk modulus must be positive in material 'goo'"
   [../]
-
-  [./poissons_ratio_test]
+  [./poissons_ratio_sm]
     type = 'RunException'
-    input = 'poissons_ratio_test.i'
+    input = 'poissons_ratio_sm.i'
     expect_err = "Poissons ratio must be greater than -1 and less than 0.5 in material 'goo'"
   [../]
-
-  [./contact_displacements_test]
+  [./contact_displacements_sm]
+    type = 'RunException'
+    input = 'contact_displacements_sm.i'
+    expect_err = "Contact requires updated coordinates.  Use the"
+  [../]
+  [./shear_modulus_sm]
+    type = 'RunException'
+    input = 'shear_modulus_sm.i'
+    expect_err = "Shear modulus must not be negative in material 'goo'"
+  [../]
+  [./pressure_component_sm]
+    type = 'RunException'
+    input = 'pressure_component_sm.i'
+    expect_err = "Invalid component given for fred: 123456789."
+  [../]
+  [./num_constants]
+    type = 'RunException'
+    input = 'num_constants.i'
+    expect_err = "Exactly two elastic constants must be defined for material 'elasticity_tensor'"
+  [../]
+  [./youngs_modulus]
+    type = 'RunException'
+    input = 'youngs_modulus.i'
+    expect_err = "Youngs modulus must be positive in material 'elasticity_tensor'"
+  [../]
+  [./bulk_modulus]
+    type = 'RunException'
+    input = 'bulk_modulus.i'
+    expect_err = "Bulk modulus must be positive in material 'elasticity_tensor'"
+  [../]
+  [./poissons_ratio]
+    type = 'RunException'
+    input = 'poissons_ratio.i'
+    expect_err = "Poissons ratio must be greater than -1 and less than 0.5 in material 'elasticity_tensor'"
+  [../]
+  [./contact_displacements]
     type = 'RunException'
     input = 'contact_displacements.i'
     expect_err = "Contact requires updated coordinates.  Use the"
   [../]
-
-  [./shear_modulus_test]
+  [./shear_modulus]
     type = 'RunException'
-    input = 'shear_modulus_test.i'
-    expect_err = "Shear modulus must not be negative in material 'goo'"
+    input = 'shear_modulus.i'
+    expect_err = "Shear modulus must not be negative in material 'elasticity_tensor'"
   [../]
-
-  [./pressure_component_test]
+  [./pressure_component]
     type = 'RunException'
     input = 'pressure_component.i'
     expect_err = "Invalid component given for fred: 123456789."

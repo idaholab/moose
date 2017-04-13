@@ -28,29 +28,29 @@ class ComputeIndicatorThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   /**
-   * @param fe_problem reference to the FEProblem we are computing on
+   * @param fe_problem reference to the FEProblemBase we are computing on
    * @param sys reference to the AuxSystem we are computing on
    * @param indicator_whs Warehouse of Indicator objects.
    * @param finalize Whether or not we are just in the "finalize" stage or not.
    */
-  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, bool finalize = false);
+  ComputeIndicatorThread(FEProblemBase & fe_problem, bool finalize = false);
 
   // Splitting Constructor
   ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split);
 
   virtual ~ComputeIndicatorThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void postElement(const Elem * /*elem*/) override;
+  virtual void post() override;
 
   void join(const ComputeIndicatorThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   AuxiliarySystem & _aux_sys;
 
   /// Indicator Storage
@@ -62,4 +62,4 @@ protected:
   bool _finalize;
 };
 
-#endif //COMPUTEINDICATORTHREAD_H
+#endif // COMPUTEINDICATORTHREAD_H

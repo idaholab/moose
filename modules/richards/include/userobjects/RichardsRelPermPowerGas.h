@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERMPOWERGAS_H
 #define RICHARDSRELPERMPOWERGAS_H
 
@@ -13,8 +12,7 @@
 
 class RichardsRelPermPowerGas;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsRelPermPowerGas>();
 
 /**
@@ -46,13 +44,11 @@ public:
   Real d2relperm(Real seff) const;
 
 protected:
-
   /// immobile saturation
   Real _simm;
 
   /// exponent
   Real _n;
-
 };
 
 #endif // RICHARDSRELPERMPOWERGAS_H

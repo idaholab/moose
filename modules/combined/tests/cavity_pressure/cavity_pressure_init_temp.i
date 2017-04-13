@@ -25,7 +25,7 @@
 #   V0 = 7
 #   n0 = f(p0)
 #   p0 = 100
-#   R = 8.314472 J * K^(−1) * mol^(−1)
+#   R = 8.314472 J * K^(-1) * mol^(-1)
 #
 # So, n0 = p0 * V0 / R / T0 = 100 * 7 / 8.314472 / 240.544439
 #        = 0.35
@@ -36,9 +36,18 @@
 #   is told that that initial temperature is T0.  Thus, the final solution
 #   is unchanged.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  order = FIRST
+  family = LAGRANGE
+[]
+
 [Mesh]
   file = cavity_pressure.e
-  displacements = 'disp_x disp_y disp_z'
+[]
+
+[GlobalParams]
+  volumetric_locking_correction=true
 []
 
 [Functions]
@@ -67,41 +76,25 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 500
   [../]
   [./material_input]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 0
   [../]
 []
 
 [AuxVariables]
   [./pressure_residual_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./pressure_residual_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./pressure_residual_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./stress_xx]
     order = CONSTANT
@@ -131,7 +124,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
   [./heat]
@@ -273,7 +265,6 @@
       volume = internalVolume
       startup_time = 0.5
       output = ppress
-      displacements = 'disp_x disp_y disp_z'
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
     [../]
   [../]
@@ -290,8 +281,6 @@
   [../]
   [./strain1]
     type = ComputeFiniteStrain
-    thermal_expansion_coeff = 0
-    displacements = 'disp_x disp_y disp_z'
     block = 1
   [../]
   [./stress1]
@@ -308,8 +297,6 @@
   [../]
   [./strain2]
     type = ComputeFiniteStrain
-    thermal_expansion_coeff = 0
-    displacements = 'disp_x disp_y disp_z'
     block = 2
   [../]
   [./stress2]

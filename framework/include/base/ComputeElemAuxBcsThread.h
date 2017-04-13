@@ -17,29 +17,31 @@
 #define COMPUTEELEMAUXBCSTHREAD_H
 
 // MOOSE includes
-#include "ParallelUniqueId.h"
 #include "MooseObjectWarehouse.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class AuxiliarySystem;
 class AuxKernel;
 
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxBcsThread(FEProblemBase & problem,
+                          const MooseObjectWarehouse<AuxKernel> & storage,
+                          bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
-  void operator() (const ConstBndElemRange & range);
+  void operator()(const ConstBndElemRange & range);
 
   void join(const ComputeElemAuxBcsThread & /*y*/);
 
 protected:
-  FEProblem & _problem;
-  AuxiliarySystem & _sys;
+  FEProblemBase & _problem;
+  AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
 
   /// Storage object containing active AuxKernel objects
@@ -48,4 +50,4 @@ protected:
   bool _need_materials;
 };
 
-#endif //COMPUTEELEMAUXBCSTHREAD_H
+#endif // COMPUTEELEMAUXBCSTHREAD_H

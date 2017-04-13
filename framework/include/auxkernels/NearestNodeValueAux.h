@@ -17,12 +17,11 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class NearestNodeValueAux;
 class NearestNodeLocator;
 
-template<>
+template <>
 InputParameters validParams<NearestNodeValueAux>();
 
 /**
@@ -37,16 +36,14 @@ public:
    */
   NearestNodeValueAux(const InputParameters & parameters);
 
-  virtual ~NearestNodeValueAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   NearestNodeLocator & _nearest_node;
 
-  const NumericVector<Number> * & _serialized_solution;
+  const NumericVector<Number> *& _serialized_solution;
 
   unsigned int _paired_variable;
 };
 
-#endif //NEARESTNODEVALUEAUX_H
+#endif // NEARESTNODEVALUEAUX_H

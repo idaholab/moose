@@ -11,9 +11,8 @@
 
 class GaussContForcing;
 
-template<>
+template <>
 InputParameters validParams<GaussContForcing>();
-
 
 /**
  * Note: This class is duplicated from moose_test.  It is useful for testing
@@ -21,7 +20,6 @@ InputParameters validParams<GaussContForcing>();
 class GaussContForcing : public Kernel
 {
 public:
-
   GaussContForcing(const InputParameters & parameters);
 
 protected:
@@ -44,4 +42,4 @@ protected:
   const Real _z_max;
 };
 
-#endif //GAUSSCONTFORCING_H
+#endif // GAUSSCONTFORCING_H

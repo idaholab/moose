@@ -12,7 +12,7 @@
 
 class TensorMechanicsPlasticModel;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticModel>();
 
 /**
@@ -39,7 +39,7 @@ InputParameters validParams<TensorMechanicsPlasticModel>();
  */
 class TensorMechanicsPlasticModel : public GeneralUserObject
 {
- public:
+public:
   TensorMechanicsPlasticModel(const InputParameters & parameters);
 
   void initialize();
@@ -56,7 +56,8 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] f the yield functions
    */
-  virtual void yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const;
+  virtual void
+  yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const;
 
   /**
    * The derivative of yield functions with respect to stress
@@ -64,7 +65,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] df_dstress df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
-  virtual void dyieldFunction_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & df_dstress) const;
+  virtual void dyieldFunction_dstressV(const RankTwoTensor & stress,
+                                       Real intnl,
+                                       std::vector<RankTwoTensor> & df_dstress) const;
 
   /**
    * The derivative of yield functions with respect to the internal parameter
@@ -72,7 +75,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] df_dintnl df_dintnl[alpha] = df[alpha]/dintnl
    */
-  virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & df_dintnl) const;
+  virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress,
+                                      Real intnl,
+                                      std::vector<Real> & df_dintnl) const;
 
   /**
    * The flow potentials
@@ -80,7 +85,8 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] r r[alpha] is the flow potential for the "alpha" yield function
    */
-  virtual void flowPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & r) const;
+  virtual void
+  flowPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & r) const;
 
   /**
    * The derivative of the flow potential with respect to stress
@@ -88,7 +94,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] dr_dstress dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
-  virtual void dflowPotential_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankFourTensor> & dr_dstress) const;
+  virtual void dflowPotential_dstressV(const RankTwoTensor & stress,
+                                       Real intnl,
+                                       std::vector<RankFourTensor> & dr_dstress) const;
 
   /**
    * The derivative of the flow potential with respect to the internal parameter
@@ -96,7 +104,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] dr_dintnl  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl
    */
-  virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
+  virtual void dflowPotential_dintnlV(const RankTwoTensor & stress,
+                                      Real intnl,
+                                      std::vector<RankTwoTensor> & dr_dintnl) const;
 
   /**
    * The hardening potential
@@ -104,7 +114,8 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] h h[alpha] is the hardening potential for the "alpha" yield function
    */
-  virtual void hardPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & h) const;
+  virtual void
+  hardPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & h) const;
 
   /**
    * The derivative of the hardening potential with respect to stress
@@ -112,7 +123,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] dh_dstress dh_dstress[alpha](i, j) = dh[alpha]/dstress(i, j)
    */
-  virtual void dhardPotential_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & dh_dstress) const;
+  virtual void dhardPotential_dstressV(const RankTwoTensor & stress,
+                                       Real intnl,
+                                       std::vector<RankTwoTensor> & dh_dstress) const;
 
   /**
    * The derivative of the hardening potential with respect to the internal parameter
@@ -120,7 +133,9 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param intnl internal parameter
    * @param[out] dh_dintnl dh_dintnl[alpha] = dh[alpha]/dintnl
    */
-  virtual void dhardPotential_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & dh_dintnl) const;
+  virtual void dhardPotential_dintnlV(const RankTwoTensor & stress,
+                                      Real intnl,
+                                      std::vector<Real> & dh_dintnl) const;
 
   /**
    * The active yield surfaces, given a vector of yield functions.
@@ -137,11 +152,14 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @param[out] act act[i] = true if the i_th yield function is active
    * @param[out] returned_stress Approximate value of the returned stress
    */
-  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl,
-                                 const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
+  virtual void activeConstraints(const std::vector<Real> & f,
+                                 const RankTwoTensor & stress,
+                                 Real intnl,
+                                 const RankFourTensor & Eijkl,
+                                 std::vector<bool> & act,
+                                 RankTwoTensor & returned_stress) const;
 
-  /// Returns the model name (eg "MohrCoulomb")
-  virtual std::string modelName() const;
+  virtual std::string modelName() const = 0;
 
   /// Returns false.  You will want to override this in your derived class if you write a custom returnMap function
   virtual bool useCustomReturnMap() const;
@@ -215,17 +233,31 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
     * @param intnl_old Value of the internal parameter
     * @param E_ijkl Elasticity tensor
     * @param ep_plastic_tolerance Tolerance defined by the user for the plastic strain
-    * @param[out] returned_stress In case (C): lies on the yield surface after returning and produces the correct plastic strain (normality condition).  Otherwise: not defined
-    * @param[out] returned_intnl In case (C): the value of the internal parameter after returning.  Otherwise: not defined
-    * @param[out] dpm  In case (C): the plastic multipliers needed to bring about the return.  Otherwise: not defined
-    * @param[out] delta_dp In case (C): The change in plastic strain induced by the return process.  Otherwise: not defined
-    * @param[out] yf In case (C): the yield function at (returned_stress, returned_intnl).  Otherwise: the yield function at (trial_stress, intnl_old)
-    * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
-    * @return true if a successful return (or a return-map not needed), false if the trial_stress is inadmissible but the return process failed
+    * @param[out] returned_stress In case (C): lies on the yield surface after returning and
+   * produces the correct plastic strain (normality condition).  Otherwise: not defined
+    * @param[out] returned_intnl In case (C): the value of the internal parameter after returning.
+   * Otherwise: not defined
+    * @param[out] dpm  In case (C): the plastic multipliers needed to bring about the return.
+   * Otherwise: not defined
+    * @param[out] delta_dp In case (C): The change in plastic strain induced by the return process.
+   * Otherwise: not defined
+    * @param[out] yf In case (C): the yield function at (returned_stress, returned_intnl).
+   * Otherwise: the yield function at (trial_stress, intnl_old)
+    * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is
+   * admissible, and true if the trial_stress is inadmissible.  This can be used by the calling
+   * prorgram
+    * @return true if a successful return (or a return-map not needed), false if the trial_stress is
+   * inadmissible but the return process failed
     */
-  virtual bool returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
-                         Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                         std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+  virtual bool returnMap(const RankTwoTensor & trial_stress,
+                         Real intnl_old,
+                         const RankFourTensor & E_ijkl,
+                         Real ep_plastic_tolerance,
+                         RankTwoTensor & returned_stress,
+                         Real & returned_intnl,
+                         std::vector<Real> & dpm,
+                         RankTwoTensor & delta_dp,
+                         std::vector<Real> & yf,
                          bool & trial_stress_inadmissible) const;
 
   /**
@@ -238,14 +270,19 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
     * it will default to E_ijkl.)
     *
     * @param stress_old trial stress before returning
+    * @param intnl_old internal parameter before returning
     * @param stress current returned stress state
     * @param intnl internal parameter
     * @param E_ijkl elasticity tensor
     * @param cumulative_pm the cumulative plastic multipliers
     * @return the consistent tangent operator: E_ijkl if not over-ridden
     */
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
-                                                   const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
+  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress,
+                                                   Real intnl_old,
+                                                   const RankTwoTensor & stress,
+                                                   Real intnl,
+                                                   const RankFourTensor & E_ijkl,
+                                                   const std::vector<Real> & cumulative_pm) const;
 
   /**
    * Returns true if the Kuhn-Tucker conditions for the
@@ -256,8 +293,7 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    */
   bool KuhnTuckerSingleSurface(Real yf, Real dpm, Real dpm_tol) const;
 
- protected:
-
+protected:
   /// The following functions are what you should override when building single-plasticity models
   /**
    * The yield function
@@ -330,7 +366,6 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
    * @return the derivative
    */
   virtual Real dhardPotential_dintnl(const RankTwoTensor & stress, Real intnl) const;
-
 };
 
 #endif // TENSORMECHANICSPLASTICMODEL_H

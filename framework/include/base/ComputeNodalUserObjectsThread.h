@@ -23,24 +23,24 @@
 // Forward declarations
 class SubProblem;
 
-class ComputeNodalUserObjectsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalUserObjectsThread
+    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalUserObjectsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects);
+  ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,
+                                const MooseObjectWarehouse<NodalUserObject> & user_objects);
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
   virtual ~ComputeNodalUserObjectsThread();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
 protected:
-
-  /// Storage for NodalUserObjects (see FEProblem::cmputeUserObjects)
+  /// Storage for NodalUserObjects (see FEProblemBase::cmputeUserObjects)
   const MooseObjectWarehouse<NodalUserObject> & _user_objects;
-
 };
 
-#endif //COMPUTENODALUserObjectsTHREAD_H
+#endif // COMPUTENODALUserObjectsTHREAD_H

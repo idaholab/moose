@@ -11,7 +11,7 @@
 
 class HEVPFlowRatePowerLawJ2;
 
-template<>
+template <>
 InputParameters validParams<HEVPFlowRatePowerLawJ2>();
 
 /**
@@ -36,7 +36,6 @@ protected:
 
   RankTwoTensor computePK2Deviatoric(const RankTwoTensor &, const RankTwoTensor &) const;
   Real computeEqvStress(const RankTwoTensor &, const RankTwoTensor &) const;
-
 };
 
 #endif

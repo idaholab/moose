@@ -30,8 +30,9 @@
 bool ExceptionKernel::_res_has_thrown = false;
 bool ExceptionKernel::_jac_has_thrown = false;
 
-template<>
-InputParameters validParams<ExceptionKernel>()
+template <>
+InputParameters
+validParams<ExceptionKernel>()
 {
   InputParameters params = validParams<Kernel>();
   MooseEnum when("residual=0 jacobian initial_condition", "residual");
@@ -39,17 +40,16 @@ InputParameters validParams<ExceptionKernel>()
   return params;
 }
 
-
-ExceptionKernel::ExceptionKernel(const InputParameters & parameters) :
-    Kernel(parameters),
-    _when(static_cast<WhenType>((int) getParam<MooseEnum>("when")))
+ExceptionKernel::ExceptionKernel(const InputParameters & parameters)
+  : Kernel(parameters), _when(static_cast<WhenType>((int)getParam<MooseEnum>("when")))
 {
 }
 
 Real
 ExceptionKernel::computeQpResidual()
 {
-  // We need a thread lock here so that we don't introduce a race condition when inspecting or changing the static variable
+  // We need a thread lock here so that we don't introduce a race condition when inspecting or
+  // changing the static variable
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
 
   if (_when == INITIAL_CONDITION)
@@ -72,7 +72,8 @@ ExceptionKernel::computeQpResidual()
 Real
 ExceptionKernel::computeQpJacobian()
 {
-  // We need a thread lock here so that we don't introduce a race condition when inspecting or changing the static variable
+  // We need a thread lock here so that we don't introduce a race condition when inspecting or
+  // changing the static variable
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
 
   // Throw on the first nonlinear step of the first timestep -- should
@@ -91,5 +92,6 @@ ExceptionKernel::computeQpJacobian()
 bool
 ExceptionKernel::time_to_throw()
 {
-  return (_t_step==1 && _fe_problem.getNonlinearSystem().getCurrentNonlinearIterationNumber()==1);
+  return (_t_step == 1 &&
+          _fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1);
 }

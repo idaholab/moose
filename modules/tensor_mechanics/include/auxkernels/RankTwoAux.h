@@ -18,23 +18,27 @@ class RankTwoAux;
  * supplied indices.
  */
 
-template<>
+template <>
 InputParameters validParams<RankTwoAux>();
 
 class RankTwoAux : public AuxKernel
 {
 public:
   RankTwoAux(const InputParameters & parameters);
-  virtual ~RankTwoAux() {}
 
 protected:
   virtual Real computeValue();
 
 private:
-
   const MaterialProperty<RankTwoTensor> & _tensor;
   const unsigned int _i;
   const unsigned int _j;
+
+  /// whether or not selected_qp has been set
+  const bool _has_selected_qp;
+
+  /// The std::vector will be evaluated at this quadpoint only if defined
+  const unsigned int _selected_qp;
 };
 
-#endif //RANKTWOAUX_H
+#endif // RANKTWOAUX_H

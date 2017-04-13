@@ -23,14 +23,14 @@
  * at the bottom of the file.
  */
 
-//Forward Declarations
+// Forward Declarations
 class ExampleConvection;
 
 /**
  * validParams returns the parameters that this Kernel accepts / needs
  * The actual body of the function MUST be in the .C file.
  */
-template<>
+template <>
 InputParameters validParams<ExampleConvection>();
 
 /**
@@ -43,7 +43,6 @@ InputParameters validParams<ExampleConvection>();
 class ExampleConvection : public Kernel
 {
 public:
-
   /**
    * This is the Constructor declaration AND definition.
    * It is ok to have the definition in the .h if the function body
@@ -57,7 +56,7 @@ protected:
    *
    * This should always be defined in the .C
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * Responsible for computing the diagonal block of the preconditioning matrix.
@@ -69,7 +68,7 @@ protected:
    *
    * This should always be defined in the .C
    */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
 private:
   /**
@@ -85,4 +84,4 @@ private:
   Real _z;
 };
 
-#endif //EXAMPLECONVECTION_H
+#endif // EXAMPLECONVECTION_H

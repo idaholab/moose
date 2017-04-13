@@ -21,21 +21,16 @@
 
 class QuadraturePointMarker;
 
-template<>
+template <>
 InputParameters validParams<QuadraturePointMarker>();
 
-class QuadraturePointMarker :
-  public Marker,
-  public Coupleable,
-  public MaterialPropertyInterface
+class QuadraturePointMarker : public Marker, public Coupleable, public MaterialPropertyInterface
 {
 public:
   QuadraturePointMarker(const InputParameters & parameters);
-  virtual ~QuadraturePointMarker(){};
 
 protected:
-
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   /**
    * Override this to compute a marker value at each quadrature point.
@@ -48,10 +43,10 @@ protected:
   virtual MarkerValue computeQpMarker() = 0;
 
   /// The quadrature rule for the system
-  QBase * & _qrule;
+  QBase *& _qrule;
 
   /// Position of the current quadrature point
-  const MooseArray< Point > & _q_point;
+  const MooseArray<Point> & _q_point;
 
   /// The current quadrature point
   unsigned int _qp;

@@ -17,14 +17,13 @@
 
 #include "IntegratedBC.h"
 
-//libMesh includes
+// libMesh includes
 #include "libmesh/vector_value.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class VectorNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<VectorNeumannBC>();
 
 /**
@@ -34,7 +33,6 @@ InputParameters validParams<VectorNeumannBC>();
 class VectorNeumannBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -42,10 +40,10 @@ public:
   VectorNeumannBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// Vector to dot with the normal.
   const RealVectorValue & _value;
 };
 
-#endif //NEUMANNBC_H
+#endif // NEUMANNBC_H

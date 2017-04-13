@@ -18,45 +18,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
-
-[Variables]
-  [./disp_x]
-  [../]
-
-  [./disp_y]
-  [../]
-
-  [./disp_z]
-  [../]
-[]
-
-
-[AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-[]
-
 
 [Functions]
   [./top_pull]
@@ -70,47 +32,14 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    incremental = true
+    add_variables = true
+    generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
   [../]
 []
-
-
-[AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_yy
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-
-  [./plastic_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_zz
-    index_i = 2
-    index_j = 2
-  [../]
- []
-
 
 [BCs]
   [./y_pull_function]
@@ -144,25 +73,15 @@
 
 [Materials]
   [./elasticity_tensor]
-    block = 0
   [../]
-  [./small_strain]
-    type = ComputeIncrementalSmallStrain
-    block = 0
-  [../]
-
-
-  [./isotropic_plasticity_recompute]
-    type = RecomputeRadialReturnIsotropicPlasticity
-    block = 0
+  [./isotropic_plasticity]
+    type = IsotropicPlasticityStressUpdate
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
   [../]
-
   [./radial_return_stress]
     type = ComputeReturnMappingStress
-    block = 0
-    return_mapping_stress_model = 'isotropic_plasticity_recompute'
+    return_mapping_models = 'isotropic_plasticity'
   [../]
 []
 
@@ -189,7 +108,6 @@
   dt = 0.00125
   dtmin = 0.0001
 []
-
 
 [Outputs]
   [./out]

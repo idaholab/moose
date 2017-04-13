@@ -99,7 +99,6 @@
 [Materials]
   [./CuGrGranisotropic]
     type = GBAnisotropy
-    block = 0
     T = 600 # K
 
     op_num = 3

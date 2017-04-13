@@ -25,20 +25,16 @@
 // Forward declarations
 class MoosePartitioner;
 
-template<>
+template <>
 InputParameters validParams<MoosePartitioner>();
 
 /**
  * Base class for MOOSE partitioner
  */
-class MoosePartitioner :
-  public libMesh::Partitioner,
-  public MooseObject,
-  public Restartable
+class MoosePartitioner : public libMesh::Partitioner, public MooseObject, public Restartable
 {
 public:
   MoosePartitioner(const InputParameters & params);
-  virtual ~MoosePartitioner();
 };
 
 #endif /* MOOSEPARTITIONER_H */

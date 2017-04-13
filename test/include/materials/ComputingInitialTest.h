@@ -16,10 +16,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class ComputingInitialTest;
 
-template<>
+template <>
 InputParameters validParams<ComputingInitialTest>();
 
 /**
@@ -35,7 +35,7 @@ protected:
   virtual void computeQpProperties();
 
   MaterialProperty<Real> & _thermal_conductivity;
-  MaterialProperty<Real> & _thermal_conductivity_old;
+  const MaterialProperty<Real> & _thermal_conductivity_old;
 };
 
-#endif //COMPUTINGINITIALTEST_H
+#endif // COMPUTINGINITIALTEST_H

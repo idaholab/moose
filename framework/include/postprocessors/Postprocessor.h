@@ -24,7 +24,7 @@
 // Forward declarations
 class Postprocessor;
 
-template<>
+template <>
 InputParameters validParams<Postprocessor>();
 
 /**
@@ -36,8 +36,6 @@ class Postprocessor : public OutputInterface
 {
 public:
   Postprocessor(const InputParameters & parameters);
-
-  virtual ~Postprocessor(){ }
 
   /**
    * This will get called to actually grab the final value the postprocessor has calculated.

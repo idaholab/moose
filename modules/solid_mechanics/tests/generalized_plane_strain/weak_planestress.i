@@ -64,7 +64,7 @@
 
 [Postprocessors]
   [./react_z]
-    type = MaterialTensorIntegral
+    type = MaterialTensorIntegralSM
     tensor = stress
     index = 2
   [../]

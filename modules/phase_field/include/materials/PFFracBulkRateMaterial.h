@@ -18,7 +18,7 @@
 
 class PFFracBulkRateMaterial;
 
-template<>
+template <>
 InputParameters validParams<PFFracBulkRateMaterial>();
 
 class PFFracBulkRateMaterial : public Material
@@ -39,12 +39,11 @@ protected:
   Real _gc;
 
   ///Material property where the gc values are stored
-  MaterialProperty<Real> &_gc_prop;
+  MaterialProperty<Real> & _gc_prop;
   ///Function to specify varying gc
   Function * _function_prop;
 
 private:
-
 };
 
-#endif //PFFRACBULKRATEMATERIAL_H
+#endif // PFFRACBULKRATEMATERIAL_H

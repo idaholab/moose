@@ -8,30 +8,31 @@
 #ifndef POROUSFLOWPOROSITYCONST_H
 #define POROUSFLOWPOROSITYCONST_H
 
-#include "PorousFlowPorosityUnity.h"
+#include "PorousFlowPorosityBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityConst;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityConst>();
 
 /**
- * Material designed to provide the porosity
- * which is assumed constant
+ * Material to provide a constant value of porosity. This can be specified
+ * by either a constant value in the input file, or taken from an aux variable.
+ * Note: this material assumes that the porosity remains constant throughout a
+ * simulation, so the coupled aux variable porosity must also remain constant.
  */
-class PorousFlowPorosityConst : public PorousFlowPorosityUnity
+class PorousFlowPorosityConst : public PorousFlowPorosityBase
 {
 public:
   PorousFlowPorosityConst(const InputParameters & parameters);
 
 protected:
-  /// constant input value of porosity
-  const Real _input_porosity;
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
+  /// Constant porosity
+  const VariableValue & _input_porosity;
 };
 
-#endif //POROUSFLOWPOROSITYCONST_H
+#endif // POROUSFLOWPOROSITYCONST_H

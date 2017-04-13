@@ -5,19 +5,21 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef DISPLACEMENTABOUTAXIS_H
 #define DISPLACEMENTABOUTAXIS_H
 
 #include "PresetNodalBC.h"
 
-//Forward Declarations
+// MOOSE includes
+#include "ColumnMajorMatrix.h"
+
+// Forward Declarations
 class DisplacementAboutAxis;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<DisplacementAboutAxis>();
-void addDisplacementAboutAxisParams(InputParameters& params);
+void addDisplacementAboutAxisParams(InputParameters & params);
 
 /**
  * Implements a boundary condition that enforces rotational displacement around
@@ -55,4 +57,4 @@ protected:
   ColumnMajorMatrix _transformation_matrix_inv;
 };
 
-#endif //DISPLACEMENTABOUTAXIS_H
+#endif // DISPLACEMENTABOUTAXIS_H

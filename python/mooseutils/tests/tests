@@ -1,0 +1,31 @@
+[Tests]
+  [./mooseMessage]
+    type = PythonUnitTest
+    input = 'test_mooseMessage.py'
+    buffer = True
+  [../]
+
+  [./mooseMessageDialog]
+    type = PythonUnitTest
+    input = test_mooseMessageDialog.py
+    display_required = True
+  [../]
+
+  [./moose_data_frame]
+    type = PythonUnitTest
+    input = test_MooseDataFrame.py
+  [../]
+
+  [./postprocessors]
+    type = PythonUnitTest
+    input = test_PostprocessorReader.py
+    buffer = True
+  [../]
+
+  [./vector_postprocessors]
+    type = PythonUnitTest
+    input = test_VectorPostprocessorReader.py
+    separate = True
+  [../]
+
+[]

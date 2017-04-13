@@ -15,58 +15,82 @@
 #include "ReadDoubleIndex.h"
 #include <sstream>
 
-template<>
-InputParameters validParams<ReadDoubleIndex>()
+template <>
+InputParameters
+validParams<ReadDoubleIndex>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addRequiredParam<std::vector<std::vector<Real> > >("real_di", "A double index field of real numbers.");
-  params.addRequiredParam<std::vector<std::vector<unsigned int> > >("uint_di", "A double index field of unsigned integers.");
-  params.addRequiredParam<std::vector<std::vector<int> > >("int_di", "A double index field of integers.");
-  params.addRequiredParam<std::vector<std::vector<long> > >("long_di", "A double index field of long integers.");
-  params.addRequiredParam<std::vector<std::vector<SubdomainID> > >("subid_di", "A double index field of SubdomainID.");
-  params.addRequiredParam<std::vector<std::vector<BoundaryID> > >("bid_di", "A double index field of SubdomainID.");
-  params.addRequiredParam<std::vector<std::vector<std::string> > >("str_di", "A double index field of std::string.");
-  params.addRequiredParam<std::vector<std::vector<FileName> > >("file_di", "A double index field of FileName.");
-  params.addRequiredParam<std::vector<std::vector<FileNameNoExtension> > >("file_no_di", "A double index field of FileNameNoExtension.");
-  params.addRequiredParam<std::vector<std::vector<MeshFileName> > >("mesh_file_di", "A double index field of MeshFileName.");
-  params.addRequiredParam<std::vector<std::vector<SubdomainName> > >("subdomain_name_di", "A double index field of SubdomainName.");
-  params.addRequiredParam<std::vector<std::vector<BoundaryName> > >("boundary_name_di", "A double index field of BoundaryName.");
-  params.addRequiredParam<std::vector<std::vector<FunctionName> > >("function_name_di", "A double index field of FunctionName.");
-  params.addRequiredParam<std::vector<std::vector<UserObjectName> > >("userobject_name_di", "A double index field of UserObjectName.");
-  params.addRequiredParam<std::vector<std::vector<IndicatorName> > >("indicator_name_di", "A double index field of IndicatorName.");
-  params.addRequiredParam<std::vector<std::vector<MarkerName> > >("marker_name_di", "A double index field of MarkerName.");
-  params.addRequiredParam<std::vector<std::vector<MultiAppName> > >("multiapp_name_di", "A double index field of MultiAppName.");
-  params.addRequiredParam<std::vector<std::vector<PostprocessorName> > >("postprocessor_name_di", "A double index field of PostprocessorName.");
-  params.addRequiredParam<std::vector<std::vector<VectorPostprocessorName> > >("vector_postprocessor_name_di", "A double index field of VectorPostprocessorName.");
-  params.addRequiredParam<std::vector<std::vector<OutputName> > >("output_name_di", "A double index field of OutputName.");
-  params.addRequiredParam<std::vector<std::vector<MaterialPropertyName> > >("material_property_name_di", "A double index field of MaterialPropertyName.");
+  params.addRequiredParam<std::vector<std::vector<Real>>>("real_di",
+                                                          "A double index field of real numbers.");
+  params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
+      "uint_di", "A double index field of unsigned integers.");
+  params.addRequiredParam<std::vector<std::vector<int>>>("int_di",
+                                                         "A double index field of integers.");
+  params.addRequiredParam<std::vector<std::vector<long>>>("long_di",
+                                                          "A double index field of long integers.");
+  params.addRequiredParam<std::vector<std::vector<SubdomainID>>>(
+      "subid_di", "A double index field of SubdomainID.");
+  params.addRequiredParam<std::vector<std::vector<BoundaryID>>>(
+      "bid_di", "A double index field of SubdomainID.");
+  params.addRequiredParam<std::vector<std::vector<std::string>>>(
+      "str_di", "A double index field of std::string.");
+  params.addRequiredParam<std::vector<std::vector<FileName>>>("file_di",
+                                                              "A double index field of FileName.");
+  params.addRequiredParam<std::vector<std::vector<FileNameNoExtension>>>(
+      "file_no_di", "A double index field of FileNameNoExtension.");
+  params.addRequiredParam<std::vector<std::vector<MeshFileName>>>(
+      "mesh_file_di", "A double index field of MeshFileName.");
+  params.addRequiredParam<std::vector<std::vector<SubdomainName>>>(
+      "subdomain_name_di", "A double index field of SubdomainName.");
+  params.addRequiredParam<std::vector<std::vector<BoundaryName>>>(
+      "boundary_name_di", "A double index field of BoundaryName.");
+  params.addRequiredParam<std::vector<std::vector<FunctionName>>>(
+      "function_name_di", "A double index field of FunctionName.");
+  params.addRequiredParam<std::vector<std::vector<UserObjectName>>>(
+      "userobject_name_di", "A double index field of UserObjectName.");
+  params.addRequiredParam<std::vector<std::vector<IndicatorName>>>(
+      "indicator_name_di", "A double index field of IndicatorName.");
+  params.addRequiredParam<std::vector<std::vector<MarkerName>>>(
+      "marker_name_di", "A double index field of MarkerName.");
+  params.addRequiredParam<std::vector<std::vector<MultiAppName>>>(
+      "multiapp_name_di", "A double index field of MultiAppName.");
+  params.addRequiredParam<std::vector<std::vector<PostprocessorName>>>(
+      "postprocessor_name_di", "A double index field of PostprocessorName.");
+  params.addRequiredParam<std::vector<std::vector<VectorPostprocessorName>>>(
+      "vector_postprocessor_name_di", "A double index field of VectorPostprocessorName.");
+  params.addRequiredParam<std::vector<std::vector<OutputName>>>(
+      "output_name_di", "A double index field of OutputName.");
+  params.addRequiredParam<std::vector<std::vector<MaterialPropertyName>>>(
+      "material_property_name_di", "A double index field of MaterialPropertyName.");
   return params;
 }
 
-
-ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params) :
-    GeneralUserObject(params),
-    _real_di(getParam<std::vector<std::vector<Real> > >("real_di")),
-    _uint_di(getParam<std::vector<std::vector<unsigned int> > >("uint_di")),
-    _int_di(getParam<std::vector<std::vector<int> > >("int_di")),
-    _long_di(getParam<std::vector<std::vector<long> > >("long_di")),
-    _subid_di(getParam<std::vector<std::vector<SubdomainID> > >("subid_di")),
-    _bid_di(getParam<std::vector<std::vector<BoundaryID> > >("bid_di")),
-    _str_di(getParam<std::vector<std::vector<std::string> > >("str_di")),
-    _file_di(getParam<std::vector<std::vector<FileName> > >("file_di")),
-    _file_no_di(getParam<std::vector<std::vector<FileNameNoExtension> > >("file_no_di")),
-    _mesh_file_di(getParam<std::vector<std::vector<MeshFileName> > >("mesh_file_di")),
-    _subdomain_name_di(getParam<std::vector<std::vector<SubdomainName> > >("subdomain_name_di")),
-    _boundary_name_di(getParam<std::vector<std::vector<BoundaryName> > >("boundary_name_di")),
-    _function_name_di(getParam<std::vector<std::vector<FunctionName> > >("function_name_di")),
-    _userobject_name_di(getParam<std::vector<std::vector<UserObjectName> > >("userobject_name_di")),
-    _indicator_name_di(getParam<std::vector<std::vector<IndicatorName> > >("indicator_name_di")),
-    _marker_name_di(getParam<std::vector<std::vector<MarkerName> > >("marker_name_di")),
-    _multiapp_name_di(getParam<std::vector<std::vector<MultiAppName> > >("multiapp_name_di")),
-    _postprocessor_name_di(getParam<std::vector<std::vector<PostprocessorName> > >("postprocessor_name_di")),
-    _vector_postprocessor_name_di(getParam<std::vector<std::vector<VectorPostprocessorName> > >("vector_postprocessor_name_di")),
-    _output_name_di(getParam<std::vector<std::vector<OutputName> > >("output_name_di")),
-    _material_property_name_di(getParam<std::vector<std::vector<MaterialPropertyName> > >("material_property_name_di"))
+ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params)
+  : GeneralUserObject(params),
+    _real_di(getParam<std::vector<std::vector<Real>>>("real_di")),
+    _uint_di(getParam<std::vector<std::vector<unsigned int>>>("uint_di")),
+    _int_di(getParam<std::vector<std::vector<int>>>("int_di")),
+    _long_di(getParam<std::vector<std::vector<long>>>("long_di")),
+    _subid_di(getParam<std::vector<std::vector<SubdomainID>>>("subid_di")),
+    _bid_di(getParam<std::vector<std::vector<BoundaryID>>>("bid_di")),
+    _str_di(getParam<std::vector<std::vector<std::string>>>("str_di")),
+    _file_di(getParam<std::vector<std::vector<FileName>>>("file_di")),
+    _file_no_di(getParam<std::vector<std::vector<FileNameNoExtension>>>("file_no_di")),
+    _mesh_file_di(getParam<std::vector<std::vector<MeshFileName>>>("mesh_file_di")),
+    _subdomain_name_di(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_name_di")),
+    _boundary_name_di(getParam<std::vector<std::vector<BoundaryName>>>("boundary_name_di")),
+    _function_name_di(getParam<std::vector<std::vector<FunctionName>>>("function_name_di")),
+    _userobject_name_di(getParam<std::vector<std::vector<UserObjectName>>>("userobject_name_di")),
+    _indicator_name_di(getParam<std::vector<std::vector<IndicatorName>>>("indicator_name_di")),
+    _marker_name_di(getParam<std::vector<std::vector<MarkerName>>>("marker_name_di")),
+    _multiapp_name_di(getParam<std::vector<std::vector<MultiAppName>>>("multiapp_name_di")),
+    _postprocessor_name_di(
+        getParam<std::vector<std::vector<PostprocessorName>>>("postprocessor_name_di")),
+    _vector_postprocessor_name_di(getParam<std::vector<std::vector<VectorPostprocessorName>>>(
+        "vector_postprocessor_name_di")),
+    _output_name_di(getParam<std::vector<std::vector<OutputName>>>("output_name_di")),
+    _material_property_name_di(
+        getParam<std::vector<std::vector<MaterialPropertyName>>>("material_property_name_di"))
 {
   std::vector<unsigned int> array_length;
   array_length.resize(3);

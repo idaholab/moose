@@ -14,8 +14,9 @@
 
 #include "DarcyVelocity.h"
 
-template<>
-InputParameters validParams<DarcyVelocity>()
+template <>
+InputParameters
+validParams<DarcyVelocity>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -34,8 +35,8 @@ InputParameters validParams<DarcyVelocity>()
   return params;
 }
 
-DarcyVelocity::DarcyVelocity(const InputParameters & parameters) :
-    AuxKernel(parameters),
+DarcyVelocity::DarcyVelocity(const InputParameters & parameters)
+  : AuxKernel(parameters),
 
     // This will automatically convert the MooseEnum to an integer
     _component(getParam<MooseEnum>("component")),
@@ -43,11 +44,11 @@ DarcyVelocity::DarcyVelocity(const InputParameters & parameters) :
     // Get the gradient of the variable
     _pressure_gradient(coupledGradient("darcy_pressure")),
 
-    // Snag permeability from the Material system.
+    // Set reference to the permeability MaterialProperty.
     // Only AuxKernels operating on Elemental Auxiliary Variables can do this
     _permeability(getMaterialProperty<Real>("permeability")),
 
-    // Snag viscosity from the Material system.
+    // Set reference to the viscosity MaterialProperty.
     // Only AuxKernels operating on Elemental Auxiliary Variables can do this
     _viscosity(getMaterialProperty<Real>("viscosity"))
 {
@@ -60,5 +61,5 @@ DarcyVelocity::computeValue()
   // Then pull out the "component" of it we are looking for (x, y or z)
   // Note that getting a particular component of a gradient is done using the
   // parenthesis operator
-  return -(_permeability[_qp]/_viscosity[_qp])*_pressure_gradient[_qp](_component);
+  return -(_permeability[_qp] / _viscosity[_qp]) * _pressure_gradient[_qp](_component);
 }

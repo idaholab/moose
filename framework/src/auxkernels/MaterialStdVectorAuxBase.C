@@ -15,10 +15,11 @@
 // MOOSE includes
 #include "MaterialStdVectorAuxBase.h"
 
-template<>
-InputParameters validParams<MaterialStdVectorAuxBase<> >()
+template <>
+InputParameters
+validParams<MaterialStdVectorAuxBase<>>()
 {
-  InputParameters params = validParams<MaterialAuxBase<> >();
+  InputParameters params = validParams<MaterialAuxBase<>>();
   params.addParam<unsigned int>("index", 0, "The index to consider for this kernel");
   return params;
 }

@@ -1,0 +1,7 @@
+[Tests]
+  [./cahn_hilliard]
+    type = RunApp
+    input = 'cahn_hilliard.i'
+    check_input = True
+  [../]
+[]

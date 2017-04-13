@@ -15,16 +15,14 @@
 #include "AddDamperAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddDamperAction>()
+template <>
+InputParameters
+validParams<AddDamperAction>()
 {
-   return validParams<MooseObjectAction>();
+  return validParams<MooseObjectAction>();
 }
 
-AddDamperAction::AddDamperAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddDamperAction::AddDamperAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddDamperAction::act()

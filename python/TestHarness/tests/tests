@@ -1,0 +1,42 @@
+[Tests]
+  [./long_running]
+    type = PythonUnitTest
+    input = test_LongRunning.py
+  [../]
+  [./diff]
+    type = PythonUnitTest
+    input = test_Diff.py
+  [../]
+  [./cyclic]
+    type = PythonUnitTest
+    input = test_Cyclic.py
+  [../]
+  [./dependency_skip]
+    type = PythonUnitTest
+    input = test_DependencySkip.py
+  [../]
+  [./missing_gold]
+    type = PythonUnitTest
+    input = test_MissingGold.py
+  [../]
+  [./expect]
+    type = PythonUnitTest
+    input = test_Expect.py
+  [../]
+  [./duplicate]
+    type = PythonUnitTest
+    input = test_Duplicate.py
+  [../]
+  [./deleted]
+    type = PythonUnitTest
+    input = test_Deleted.py
+  [../]
+  [./dry_run]
+    type = PythonUnitTest
+    input = test_DryRun.py
+  [../]
+  [./dislpay_required]
+    type = PythonUnitTest
+    input = test_DisplayRequired.py
+  [../]
+[]

@@ -6,20 +6,27 @@
 /****************************************************************/
 #include "MultiBarrierFunctionMaterial.h"
 
-template<>
-InputParameters validParams<MultiBarrierFunctionMaterial>()
+template <>
+InputParameters
+validParams<MultiBarrierFunctionMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription("Double well phase transformation barrier free energy contribution.");
   params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
   MooseEnum h_order("SIMPLE=0", "SIMPLE");
-  params.addParam<MooseEnum>("g_order", h_order, "Polynomial order of the switching function h(eta)");
-  params.addParam<bool>("well_only", false, "Make the g zero in [0:1] so it only contributes to enforcing the eta range and not to the phase transformation berrier.");
+  params.addParam<MooseEnum>(
+      "g_order", h_order, "Polynomial order of the switching function h(eta)");
+  params.addParam<bool>("well_only",
+                        false,
+                        "Make the g zero in [0:1] so it only contributes to "
+                        "enforcing the eta range and not to the phase "
+                        "transformation berrier.");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
   return params;
 }
 
-MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _function_name(getParam<std::string>("function_name")),
     _g_order(getParam<MooseEnum>("g_order")),
     _well_only(getParam<bool>("well_only")),
@@ -33,7 +40,7 @@ MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const InputParameters
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
     const VariableName & eta_name = getVar("etas", i)->name();
-    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, eta_name);
+    _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, eta_name);
     _prop_d2g[i] = &declarePropertyDerivative<Real>(_function_name, eta_name, eta_name);
     _eta[i] = &coupledValue("etas", i);
   }
@@ -59,9 +66,9 @@ MultiBarrierFunctionMaterial::computeQpProperties()
     switch (_g_order)
     {
       case 0: // SIMPLE
-        g                   +=  n*n * (1.0 - n) * (1.0 - n);
-        (*_prop_dg[i])[_qp]  =  2.0 * n * (n - 1.0) * (2.0 * n - 1.0);
-        (*_prop_d2g[i])[_qp] = 12.0 * (n*n - n) + 2.0;
+        g += n * n * (1.0 - n) * (1.0 - n);
+        (*_prop_dg[i])[_qp] = 2.0 * n * (n - 1.0) * (2.0 * n - 1.0);
+        (*_prop_d2g[i])[_qp] = 12.0 * (n * n - n) + 2.0;
         break;
     }
   }

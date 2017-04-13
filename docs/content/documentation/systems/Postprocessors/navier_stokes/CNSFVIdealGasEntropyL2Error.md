@@ -1,0 +1,7 @@
+!description /Postprocessors/CNSFVIdealGasEntropyL2Error
+
+!parameters /Postprocessors/CNSFVIdealGasEntropyL2Error
+
+!inputfiles /Postprocessors/CNSFVIdealGasEntropyL2Error
+
+!childobjects /Postprocessors/CNSFVIdealGasEntropyL2Error

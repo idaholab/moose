@@ -1,6 +1,6 @@
 # Patch Test
 
-# This test is designed to compute constant xx, yy, zz, xy, yz, and zx
+# This test is designed to compute constant xx, yy, zz, xy, yz, and xz
 #  stress on a set of irregular hexes.  The mesh is composed of one
 #  block with seven elements.  The elements form a unit cube with one
 #  internal element.  There is a nodeset for each exterior node.
@@ -39,13 +39,15 @@
 #  stress xy = 2 * 2.4e5 * 2e-6 / 2 = 0.48
 #             (2 * G   * gamma_xy / 2 = 2 * G * epsilon_xy)
 #  stress yz = 2 * 2.4e5 * 4e-6 / 2 = 0.96
-#  stress zx = 2 * 2.4e5 * 6e-6 / 2 = 1.44
+#  stress xz = 2 * 2.4e5 * 6e-6 / 2 = 1.44
 
-
-[Mesh]#Comment
-  file = thermal_elastic.e
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-[] # Mesh
+[]
+
+[Mesh]
+  file = thermal_elastic.e
+[]
 
 [Functions]
   [./ramp1]
@@ -83,133 +85,30 @@
     x = '0     1     2'
     y = '100.0 100.0 500.0'
   [../]
-  [./ym_func]
-    type = PiecewiseLinear
-    x = '100 500'
-    y = '1e6 6e5'
-  [../]
-  [./pr_func]
-    type = PiecewiseLinear
-    x = '100 500'
-    y = '0   0.25'
-  [../]
-
-[] # Functions
+[]
 
 [Variables]
-
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 100.0
   [../]
+[]
 
-[] # Variables
-
-[AuxVariables]
-
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-[] # AuxVariables
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz'
+    strain = FINITE
   [../]
 []
 
 [Kernels]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
-
-[AuxKernels]
-
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
-  [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xy
-    index = 3
-  [../]
-  [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yz
-    index = 4
-  [../]
-  [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zx
-    index = 5
-  [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./node1_x]
     type = DirichletBC
     variable = disp_x
@@ -368,32 +267,37 @@
     boundary = '10 12'
     function = tempFunc
   [../]
-
-[] # BCs
+[]
 
 [Materials]
+  [./youngs_modulus]
+    type = PiecewiseLinearInterpolationMaterial
+    x = '100 500'
+    y = '1e6 6e5'
+    property = youngs_modulus
+    variable = temp
+  [../]
+  [./poissons_ratio]
+    type = PiecewiseLinearInterpolationMaterial
+    x = '100 500'
+    y = '0   0.25'
+    property = poissons_ratio
+    variable = temp
+  [../]
 
-  [./stiffStuff1]
-    type = Elastic
-    block = '1 2 3 4 5 6 7'
+  [./elasticity_tensor]
+    type = ComputeVariableIsotropicElasticityTensor
+    args = temp
+    youngs_modulus = youngs_modulus
+    poissons_ratio = poissons_ratio
+  [../]
 
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    bulk_modulus = 0.333333333333333e6
-    shear_modulus = 0.5e6
-    youngs_modulus_function = ym_func
-    poissons_ratio_function = pr_func
-
-    temp = temp
-
-    increment_calculation = eigen
+  [./stress]
+    type = ComputeVariableElasticConstantStress
   [../]
 
   [./heat]
     type = HeatConductionMaterial
-    block = '1 2 3 4 5 6 7'
 
     specific_heat = 1.0
     thermal_conductivity = 1.0
@@ -401,36 +305,27 @@
 
   [./density]
     type = Density
-    block = '1 2 3 4 5 6 7'
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-9
+  nl_abs_tol = 1e-9
 
   l_max_its = 20
 
   start_time = 0.0
   dt = 1.0
-  num_steps = 2
   end_time = 2.0
-[] # Executioner
+[]
 
 [Outputs]
   exodus = true
-[] # Outputs
+[]

@@ -8,6 +8,6 @@
     type = 'RunException'
     input = 'setup_postprocessor_data.i'
     expect_err = 'TestSetupPostprocessorDataActionFunction fail'
-	 cli_args = 'Functions/tester/postprocessor=unknown'
+    cli_args = 'Functions/tester/postprocessor=unknown'
   [../]
 []

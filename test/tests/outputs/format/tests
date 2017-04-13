@@ -104,4 +104,9 @@
     input = 'output_test_xdr.i'
     check_files = 'output_test_xdr_out_0001.xdr output_test_xdr_out_0001_mesh.xdr'
   [../]
+
+  [./json]
+    type = 'PythonUnitTest'
+    input = 'test_json.py'
+  [../]
 []

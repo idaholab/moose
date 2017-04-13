@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumVars;
 
-template<>
+template <>
 InputParameters validParams<NumVars>();
 
 class NumVars : public GeneralPostprocessor
@@ -28,17 +28,14 @@ class NumVars : public GeneralPostprocessor
 public:
   NumVars(const InputParameters & parameters);
 
-  virtual void initialize() {}
+  virtual void initialize() override {}
 
-  virtual void execute() {}
+  virtual void execute() override {}
 
-  /**
-   * This will return the number of elements in the system
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
   MooseEnum _system;
 };
 
-#endif //NUMVARS_H
+#endif // NUMVARS_H

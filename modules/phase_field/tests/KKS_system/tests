@@ -22,4 +22,10 @@
     input = 'kks_xevac.i'
     exodiff = 'kks_xevac.e'
   [../]
+
+  [./kks_multiphase]
+    type = 'Exodiff'
+    input = 'kks_multiphase.i'
+    exodiff = 'kks_multiphase_out.e'
+  [../]
 []

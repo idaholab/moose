@@ -21,7 +21,7 @@
 // Forward declarations
 class AddControlAction;
 
-template<>
+template <>
 InputParameters validParams<AddControlAction>();
 
 /**
@@ -33,23 +33,13 @@ InputParameters validParams<AddControlAction>();
 class AddControlAction : public MooseObjectAction
 {
 public:
-
   /**
    * Class constructor
    * @param params Parameters for this Action
    */
   AddControlAction(InputParameters parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~AddControlAction(){};
-
-  /**
-   * Create and store the Control object.
-   */
-  virtual void act();
-
+  virtual void act() override;
 };
 
 #endif // ADDCONTROLACTION_H

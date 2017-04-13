@@ -21,8 +21,7 @@ namespace SolidMechanics
 class Element;
 }
 
-
-template<>
+template <>
 InputParameters validParams<SolidModel>();
 
 /**
@@ -31,16 +30,16 @@ InputParameters validParams<SolidModel>();
 class SolidModel : public DerivativeMaterialInterface<Material>
 {
 public:
-  SolidModel( const InputParameters & parameters);
+  SolidModel(const InputParameters & parameters);
   virtual ~SolidModel();
 
-  virtual void initStatefulProperties( unsigned n_points );
+  virtual void initStatefulProperties(unsigned n_points);
 
   virtual void applyThermalStrain();
   virtual void applyVolumetricStrain();
 
-  static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
-                                     SymmTensor & result );
+  static void
+  rotateSymmetricTensor(const ColumnMajorMatrix & R, const SymmTensor & T, SymmTensor & result);
 
   enum CRACKING_RELEASE
   {
@@ -50,18 +49,9 @@ public:
     CR_UNKNOWN
   };
 
-  QBase * qrule()
-  {
-    return _qrule;
-  }
-  const Point & q_point( unsigned i ) const
-  {
-    return _q_point[i];
-  }
-  Real JxW( unsigned i ) const
-  {
-    return _JxW[i];
-  }
+  QBase * qrule() { return _qrule; }
+  const Point & q_point(unsigned i) const { return _q_point[i]; }
+  Real JxW(unsigned i) const { return _JxW[i]; }
 
 protected:
   Moose::CoordinateSystemType _coord_type;
@@ -86,6 +76,8 @@ protected:
   const CRACKING_RELEASE _cracking_release;
   Real _cracking_stress;
   const Real _cracking_residual_stress;
+  const Real _cracking_beta;
+  const std::string _compute_method;
   Function * const _cracking_stress_function;
 
   Real _cracking_alpha;
@@ -107,12 +99,14 @@ protected:
   bool _mean_alpha_function;
   Real _ref_temp;
 
-  std::map<SubdomainID, std::vector<MooseSharedPointer<VolumetricModel> > > _volumetric_models;
+  std::map<SubdomainID, std::vector<MooseSharedPointer<VolumetricModel>>> _volumetric_models;
   std::set<std::string> _dep_matl_props;
 
   MaterialProperty<SymmTensor> & _stress;
+
 private:
   MaterialProperty<SymmTensor> & _stress_old_prop;
+
 protected:
   SymmTensor _stress_old;
 
@@ -136,6 +130,7 @@ protected:
   ColumnMajorMatrix _principal_strain;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor_old;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this
@@ -148,13 +143,17 @@ protected:
   SymmTensor _strain_increment;
 
   const bool _compute_JIntegral;
+  const bool _compute_InteractionIntegral;
   bool _store_stress_older;
 
-  //These are used in calculation of the J integral
+  // These are used in calculation of the J integral
   MaterialProperty<Real> * _SED;
   MaterialProperty<Real> * _SED_old;
   MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+
+  // This is used in calculation of the J Integral and Interaction Integral
+  MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
 
   virtual void initQpStatefulProperties();
 
@@ -195,49 +194,40 @@ protected:
   // Compute quantity used in thermal term of J Integral
   virtual void computeThermalJvec();
 
+  // Compute current thermal expansion coefficient, used in J Integral and Interaction Integral
+  virtual void computeCurrentInstantaneousThermalExpansionCoefficient();
+
   /*
    * Determine whether new cracks have formed.
    * Rotate old and new stress to global, if cracking active
    */
   virtual void crackingStressRotation();
 
-  virtual Real computeCrackFactor( int i, Real & sigma, Real & flagVal );
+  virtual Real computeCrackFactor(int i, Real & sigma, Real & flagVal);
 
   /// Rotate stress to current configuration
   virtual void finalizeStress();
 
-
   virtual void computePreconditioning();
 
-  void applyCracksToTensor( SymmTensor & tensor, const RealVectorValue & sigma );
+  void applyCracksToTensor(SymmTensor & tensor, const RealVectorValue & sigma);
 
-  void
-  elasticityTensor( SymmElasticityTensor * e );
+  void elasticityTensor(SymmElasticityTensor * e);
 
-  SymmElasticityTensor *
-  elasticityTensor() const
-  {
-    return _local_elasticity_tensor;
-  }
+  SymmElasticityTensor * elasticityTensor() const { return _local_elasticity_tensor; }
 
-  const SolidMechanics::Element * element() const
-  {
-    return _element;
-  }
+  const SolidMechanics::Element * element() const { return _element; }
 
-  int delta(int i, int j) const
-  {
-    return i == j;
-  }
+  int delta(int i, int j) const { return i == j; }
 
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & createProperty(const std::string & prop_name)
   {
     std::string name(prop_name + _appended_property_name);
     return declareProperty<T>(name);
   }
 
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
   {
     std::string name(prop_name + _appended_property_name);
@@ -250,9 +240,9 @@ protected:
 
   std::vector<SubdomainID> _block_id;
 
-  std::map<SubdomainID, MooseSharedPointer<ConstitutiveModel> > _constitutive_model;
+  std::map<SubdomainID, MooseSharedPointer<ConstitutiveModel>> _constitutive_model;
   // This set keeps track of the dynamic memory allocated in this object
-  std::set<MooseSharedPointer<ConstitutiveModel> > _models_to_free;
+  std::set<MooseSharedPointer<ConstitutiveModel>> _models_to_free;
   bool _constitutive_active;
 
   /// Compute the stress (sigma += deltaSigma)
@@ -260,19 +250,19 @@ protected:
 
   void createConstitutiveModel(const std::string & cm_name);
 
+  ///@{ Restartable data to check for the zeroth and first time steps for thermal calculations
+  bool & _step_zero;
+  bool & _step_one;
+  ///@}
 
 private:
-
-  void computeCrackStrainAndOrientation( ColumnMajorMatrix & principal_strain );
+  void computeCrackStrainAndOrientation(ColumnMajorMatrix & principal_strain);
 
   SolidMechanics::Element * createElement();
 
   SolidMechanics::Element * _element;
 
   SymmElasticityTensor * _local_elasticity_tensor;
-
 };
-
-
 
 #endif

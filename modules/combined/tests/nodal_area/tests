@@ -31,7 +31,8 @@
   [../]
   [./Hex20_2]
     type = 'Exodiff'
-    input = 'nodal_area_Hex20_2.i'
+    input = 'nodal_area_Hex20.i'
+    cli_args = 'Contact/dummy_name/model=frictionless Outputs/file_base=nodal_area_Hex20_out'
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20
@@ -62,6 +63,56 @@
     exodiff = 'nodal_area_Hex27_out.e'
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex27
+    min_parallel = 2
+  [../]
+  [./Hex20_sm]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_sm.i'
+    cli_args = 'Outputs/file_base=nodal_area_Hex20_out'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+    prereq = Hex202Proc
+  [../]
+  [./Hex20_2_sm]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_sm.i'
+    cli_args = 'Contact/dummy_name/model=frictionless Outputs/file_base=nodal_area_Hex20_out'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+    prereq = Hex20_sm
+  [../]
+  [./Hex20_3_sm]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_3_sm.i'
+    cli_args = 'Outputs/file_base=nodal_area_Hex20_3_out'
+    exodiff = 'nodal_area_Hex20_3_out.e'
+    custom_cmp = 'nodal_area_Hex20_3.exodiff'
+    prereq = Hex20_3
+  [../]
+  [./Hex202Proc_sm]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_sm.i'
+    cli_args = 'Outputs/file_base=nodal_area_Hex20_out'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+    prereq = Hex20_2_sm
+    min_parallel = 2
+  [../]
+  [./Hex27_sm]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex27_sm.i'
+    cli_args = 'Outputs/file_base=nodal_area_Hex27_out'
+    exodiff = 'nodal_area_Hex27_out.e'
+    custom_cmp = 'nodal_area_Hex27.exodiff'
+    prereq = Hex272Proc
+  [../]
+  [./Hex272Proc_sm]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex27_sm.i'
+    cli_args = 'Outputs/file_base=nodal_area_Hex27_out'
+    exodiff = 'nodal_area_Hex27_out.e'
+    custom_cmp = 'nodal_area_Hex27.exodiff'
+    prereq = Hex27_sm
     min_parallel = 2
   [../]
 []

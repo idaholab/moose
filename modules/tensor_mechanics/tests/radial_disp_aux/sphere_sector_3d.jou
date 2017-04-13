@@ -1,0 +1,24 @@
+## /Applications/Cubit-14.0/Cubit.app/Contents/MacOS/cubitclx
+## Cubit Version 14.0
+## Cubit Build 387010
+## Revised 2013-06-11 10:13:37 -0600 (Tue, 11 Jun 2013)
+## Running 08/22/2016 02:36:50 PM
+## Command Options:
+## -warning = On
+## -information = On
+create sphere radius 1
+webcut volume all with plane xplane
+webcut volume all with plane yplane
+webcut volume all with plane zplane
+delete volume 4 8 6 2
+delete volume 1 5 7
+volume 3 scheme tetprimitive
+volume 3 size 0.25
+mesh volume 3
+block 1 volume 3
+block 1 element type HEX27
+sideset 1 surface 35
+sideset 2 surface 36
+sideset 3 surface 34
+sideset 5 surface 37
+export mesh 'sphere_sector_3d.e' overwrite

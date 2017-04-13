@@ -1,7 +1,32 @@
 [Tests]
-  [./test]
+  [./csv_log]
     type = CheckFiles
     input = print_perf_data.i
     check_files = print_perf_data_out.csv
+  [../]
+
+  [./use_log_data_no_print]
+    type = RunApp
+    input = use_log_data_no_print.i
+
+    # Make sure that the perf_log table doesn't just report
+    # the same active time each timestep
+
+    # The RE below looks for numbers in the last column of the table that are identical.
+    # This indicates that logging has been disabled which we don't want to see.
+    #
+    #   | time           | elapsed_active |
+    #   +----------------+----------------+
+    #   |   0.000000e+00 |   0.000000e+00 |
+    #   |   1.000000e-01 |   3.028400e-02 |  <- Does this number match
+    #   |   2.000000e-01 |   4.311600e-02 |  <- this number?
+
+    # Match non-space content followed by a single space, a pipe, then the newline character.
+    #   Make sure that the non-space content matches the entire number by bounding it on both
+    #   sides with required spaces.
+    # On the next line match the same number again after throwing away as much content as you
+    #   need that doesn't match.
+    #   Make sure that you don't cross lines by not allowing the throwaway content to have newlines.
+    absent_out = '(\s(\S+)\s\|\n)[^\n]*\1'
   [../]
 []

@@ -1,0 +1,7 @@
+[Tests]
+  [./get_actions]
+    type = RunApp
+    input = test_get_actions.i
+    expect_out = 'Getting actions is successful'
+  [../]
+[]

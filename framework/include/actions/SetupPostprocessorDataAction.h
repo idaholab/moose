@@ -21,7 +21,7 @@
 // Forward declerations
 class SetupPostprocessorDataAction;
 
-template<>
+template <>
 InputParameters validParams<SetupPostprocessorDataAction>();
 
 /**
@@ -34,22 +34,13 @@ InputParameters validParams<SetupPostprocessorDataAction>();
 class SetupPostprocessorDataAction : public Action
 {
 public:
-
   /**
    * Class constructor
    * @param params Input parameters for the action
    */
   SetupPostprocessorDataAction(InputParameters params);
 
-  /**
-   * Class destructor
-   */
-  virtual ~SetupPostprocessorDataAction();
-
-  /**
-   * Perform the initialization of the Post
-   */
-  virtual void act();
+  virtual void act() override;
 };
 
-#endif //SETUPPOSTPROCESSORDATAACTION_H
+#endif // SETUPPOSTPROCESSORDATAACTION_H

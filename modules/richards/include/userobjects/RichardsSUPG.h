@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 //  Base class for Richards SUPG
 //
 #ifndef RICHARDSSUPG_H
@@ -15,8 +14,7 @@
 
 class RichardsSUPG;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsSUPG>();
 
 /**
@@ -40,7 +38,10 @@ public:
    * @param density fluid density
    * @param gravity gravitational acceleration vector
    */
-  virtual RealVectorValue velSUPG(RealTensorValue perm, RealVectorValue gradp, Real density, RealVectorValue gravity) const = 0;
+  virtual RealVectorValue velSUPG(RealTensorValue perm,
+                                  RealVectorValue gradp,
+                                  Real density,
+                                  RealVectorValue gravity) const = 0;
 
   /**
    * derivative of SUPG velocity wrt gradient of porepressure
@@ -54,7 +55,8 @@ public:
    * @param density_prime derivative of fluid density wrt porepressure
    * @param gravity gravitational acceleration vector
    */
-  virtual RealVectorValue dvelSUPG_dp(RealTensorValue perm, Real density_prime, RealVectorValue gravity) const = 0;
+  virtual RealVectorValue
+  dvelSUPG_dp(RealTensorValue perm, Real density_prime, RealVectorValue gravity) const = 0;
 
   /**
    * |bb| ~ 2*velocity/element_length
@@ -64,7 +66,11 @@ public:
    * @param eta_prime spatial gradient of the isoparametric coordinate eta
    * @param zeta_prime spatial gradient of the isoparametric coordinate zeta
    */
-  virtual RealVectorValue bb(RealVectorValue vel, int dimen, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const = 0;
+  virtual RealVectorValue bb(RealVectorValue vel,
+                             int dimen,
+                             RealVectorValue xi_prime,
+                             RealVectorValue eta_prime,
+                             RealVectorValue zeta_prime) const = 0;
 
   /**
    * derivative of bb*bb wrt gradient of porepressure
@@ -74,7 +80,11 @@ public:
    * @param eta_prime spatial gradient of the isoparametric coordinate eta
    * @param zeta_prime spatial gradient of the isoparametric coordinate zeta
    */
-  virtual RealVectorValue dbb2_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const = 0;
+  virtual RealVectorValue dbb2_dgradp(RealVectorValue vel,
+                                      RealTensorValue dvel_dgradp,
+                                      RealVectorValue xi_prime,
+                                      RealVectorValue eta_prime,
+                                      RealVectorValue zeta_prime) const = 0;
 
   /**
    * derivative of bb*bb wrt porepressure
@@ -84,7 +94,11 @@ public:
    * @param eta_prime spatial gradient of the isoparametric coordinate eta
    * @param zeta_prime spatial gradient of the isoparametric coordinate zeta
    */
-  virtual Real dbb2_dp(RealVectorValue vel, RealVectorValue dvel_dp, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const = 0;
+  virtual Real dbb2_dp(RealVectorValue vel,
+                       RealVectorValue dvel_dp,
+                       RealVectorValue xi_prime,
+                       RealVectorValue eta_prime,
+                       RealVectorValue zeta_prime) const = 0;
 
   /**
    * The SUPG tau parameter.
@@ -103,7 +117,11 @@ public:
    * @param b the b parameter: |b| ~ 2*SUPGvelocity/element_length
    * @param db2_dgradp derivative of b*b wrt gradient of porepressure
    */
-  virtual RealVectorValue dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, Real traceperm, RealVectorValue b, RealVectorValue db2_dgradp) const = 0;
+  virtual RealVectorValue dtauSUPG_dgradp(RealVectorValue vel,
+                                          RealTensorValue dvel_dgradp,
+                                          Real traceperm,
+                                          RealVectorValue b,
+                                          RealVectorValue db2_dgradp) const = 0;
 
   /**
    * derivative of tau wrt porepressure (keeping gradp fixed)
@@ -113,7 +131,11 @@ public:
    * @param b the b parameter: |b| ~ 2*SUPGvelocity/element_length
    * @param db2_dp derivative of b*b wrt porepressure
    */
-  virtual Real dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, Real traceperm, RealVectorValue b, Real db2_dp) const = 0;
+  virtual Real dtauSUPG_dp(RealVectorValue vel,
+                           RealVectorValue dvel_dp,
+                           Real traceperm,
+                           RealVectorValue b,
+                           Real db2_dp) const = 0;
 
   /**
    * Returns true if SUPG is trivial.

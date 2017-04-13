@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 
 #ifndef PFCRFF_ENERGY_DENSITY_H
 #define PFCRFF_ENERGY_DENSITY_H
@@ -7,13 +13,13 @@
 
 class PFCRFFEnergyDensity;
 
-template<>
+template <>
 InputParameters validParams<PFCRFFEnergyDensity>();
 
 class PFCRFFEnergyDensity : public AuxKernel
 {
 public:
-   PFCRFFEnergyDensity( const InputParameters & parameters);
+  PFCRFFEnergyDensity(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
@@ -27,7 +33,6 @@ protected:
   unsigned int _num_exp_terms;
   MooseEnum _log_approach;
   Real _tol;
-
 };
 
-#endif //PFCRFF_ENERGY_DENSITY_H
+#endif // PFCRFF_ENERGY_DENSITY_H

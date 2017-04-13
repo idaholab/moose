@@ -19,6 +19,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 
 # dependency on tensor_mechanics
 TENSOR_MECHANICS := yes
+SKIP_LOADER      := yes
 include $(MODULE_DIR)/modules.mk
 
 # dep apps

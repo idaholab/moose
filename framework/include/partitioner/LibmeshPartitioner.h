@@ -15,11 +15,13 @@
 #ifndef LIBMESHPARTITIONER_H
 #define LIBMESHPARTITIONER_H
 
+// MOOSE includes
+#include "MooseEnum.h"
 #include "MoosePartitioner.h"
 
 class LibmeshPartitioner;
 
-template<>
+template <>
 InputParameters validParams<LibmeshPartitioner>();
 
 class LibmeshPartitioner : public MoosePartitioner
@@ -28,14 +30,14 @@ public:
   LibmeshPartitioner(const InputParameters & params);
   virtual ~LibmeshPartitioner();
 
-  virtual UniquePtr<Partitioner> clone() const;
-  virtual void partition(MeshBase &mesh, const unsigned int n);
-  virtual void partition(MeshBase &mesh);
+  virtual std::unique_ptr<Partitioner> clone() const;
+  virtual void partition(MeshBase & mesh, const unsigned int n);
+  virtual void partition(MeshBase & mesh);
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n);
 
-  Partitioner * _partitioner;
+  std::unique_ptr<Partitioner> _partitioner;
   MooseEnum _partitioner_name;
 };
 

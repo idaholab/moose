@@ -22,7 +22,7 @@
 #include <string>
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * Class for doing restart.
@@ -32,8 +32,8 @@ class FEProblem;
 class Resurrector
 {
 public:
-  Resurrector(FEProblem & fe_problem);
-  virtual ~Resurrector();
+  Resurrector(FEProblemBase & fe_problem);
+  virtual ~Resurrector() = default;
 
   /**
    * Set the file base name from which we will restart
@@ -49,9 +49,8 @@ public:
   void restartRestartableData();
 
 protected:
-
-  /// Reference to a FEProblem being restarted
-  FEProblem & _fe_problem;
+  /// Reference to a FEProblemBase being restarted
+  FEProblemBase & _fe_problem;
 
   /// name of the file that we restart from
   std::string _restart_file_base;

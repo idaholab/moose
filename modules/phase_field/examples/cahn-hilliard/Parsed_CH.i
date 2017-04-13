@@ -86,11 +86,9 @@
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c'
     prop_values = '1.0 0.5'
-    block = 0
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fbulk
     args = c
     constant_names = W

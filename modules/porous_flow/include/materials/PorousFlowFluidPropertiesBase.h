@@ -8,44 +8,31 @@
 #ifndef POROUSFLOWFLUIDPROPERTIESBASE_H
 #define POROUSFLOWFLUIDPROPERTIESBASE_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
+#include "PorousFlowMaterialBase.h"
 #include "PorousFlowDictator.h"
 
 class PorousFlowFluidPropertiesBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowFluidPropertiesBase>();
 
 /**
- * Base class for fluid properties
+ * Base class for fluid properties materials. All PorousFlow fluid
+ * materials must override computeQpProperties()
  */
-class PorousFlowFluidPropertiesBase : public DerivativeMaterialInterface<Material>
+class PorousFlowFluidPropertiesBase : public PorousFlowMaterialBase
 {
 public:
   PorousFlowFluidPropertiesBase(const InputParameters & parameters);
 
 protected:
-  /// Somehow should be able to make this pure virtual?
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
-  /// Phase number of fluid that this relative permeability relates to
-  const unsigned int _phase_num;
+  /// Pore pressure at the nodes or quadpoints
+  const MaterialProperty<std::vector<Real>> & _porepressure;
 
-  /// Pore pressure at the nodes
-  const MaterialProperty<std::vector<Real> > & _porepressure_nodal;
-
-  /// Pore pressure at the qps
-  const MaterialProperty<std::vector<Real> > & _porepressure_qp;
-
-  /// Fluid temperature at the nodes
-  const MaterialProperty<std::vector<Real> > & _temperature_nodal;
-
-  /// Fluid temperature at the qps
-  const MaterialProperty<std::vector<Real> > & _temperature_qp;
-
-  /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator_UO;
+  /// Fluid temperature at the nodes or quadpoints
+  const MaterialProperty<Real> & _temperature;
 
   /// Name of (dummy) pressure primary variable
   const VariableName _pressure_variable_name;
@@ -60,4 +47,4 @@ protected:
   const Real _R;
 };
 
-#endif //POROUSFLOWFLUIDPROPERTIESBASE_H
+#endif // POROUSFLOWFLUIDPROPERTIESBASE_H

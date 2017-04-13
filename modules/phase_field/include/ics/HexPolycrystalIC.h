@@ -7,39 +7,30 @@
 #ifndef HEXPOLYCRYSTALIC_H
 #define HEXPOLYCRYSTALIC_H
 
-#include "Kernel.h"
 #include "PolycrystalReducedIC.h"
 #include "MooseRandom.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class HexPolycrystalIC;
 
-template<>
+template <>
 InputParameters validParams<HexPolycrystalIC>();
 
 /**
  * HexPolycrystalIC creates a hexagonal polycrystal initial condition.
  * Only works for squared number of grains and with periodic BCs
-*/
+ */
 class HexPolycrystalIC : public PolycrystalReducedIC
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   HexPolycrystalIC(const InputParameters & parameters);
 
   virtual void initialSetup();
 
 private:
-  Real _x_offset;
-  Real _perturbation_percent;
+  const Real _x_offset;
+  const Real _perturbation_percent;
   MooseRandom _random;
 };
 
-#endif //HEXPOLYCRYSTALIC_H
+#endif // HEXPOLYCRYSTALIC_H

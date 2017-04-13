@@ -1,146 +1,79 @@
 #
 # Rotation Test
 #
-# This test is designed to compute a uniaxial stress and then follow that
-# stress as the mesh is rotated 90 degrees.
+# This test is designed to compute stress based on uniaxial strain
+# and then follow that stress as the mesh is rotated 90 degrees.
 #
 # The mesh is composed of one block with a single element.  The nodal
-# displacements in the x and y directions are prescribed.  Poisson's
-# ratio is zero.
+# displacements in the three directions are prescribed.  Poisson's
+# ratio is 1/3, and Young's modulus is 1e6.
+#
+# This test is mentioned in
+# K. Kamojjala, R. Brannon, A. Sadeghirad, and J. Guilkey, "Verification
+#   tests in solid mechanics," Engineering with Computers, Vol. 31, 2015.
+#   DOI: 10.1007/s00366-013-0342-x
 #
 [Mesh]
   type = FileMesh
   file = rotation_test.e
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Functions]
-  # Functions
   [./x_200]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
   [../]
   [./y_200]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
   [../]
   [./x_300]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
   [../]
   [./y_300]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
   [../]
   [./x_400]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
   [../]
   [./y_400]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
   [../]
 []
 
-[Variables]
-  # Variables
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  active = ''
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[Kernels]
+[Modules]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
-  [../]
-[]
-
-[AuxKernels]
-  active = ''
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
+    [./Master]
+      [./all]
+        strain = FINITE
+        add_variables = true
+        generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+      [../]
+    [../]
   [../]
 []
 
 [BCs]
-  # BCs
   [./no_x]
     type = PresetBC
     variable = disp_x
@@ -198,21 +131,13 @@
 []
 
 [Materials]
-  # Materials
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 1
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
-    block = 1
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 1
     fill_method = symmetric9
-    C_ijkl = '10.0e6  0.0   0.0 10.0e6  0.0  10.0e6 5e6 5e6 5e6'
+    C_ijkl = '1.5e6 0.75e6 0.75e6 1.5e6 0.75e6 1.5e6 0.375e6 0.375e6 0.375e6'
   [../]
 []
 
@@ -224,7 +149,6 @@
 []
 
 [Executioner]
-  # Executioner
   type = Transient
   solve_type = NEWTON
   petsc_options_iname = '-pc_type '
@@ -237,19 +161,6 @@
   end_time = 2.0
 []
 
-[Postprocessors]
-active = ''
-  [./stress_xx]
-    type = ElementAverageValue
-    variable = stress_xx
-  [../]
-  [./stress_yy]
-    type = ElementAverageValue
-    variable = stress_yy
-  [../]
-[]
-
 [Outputs]
   exodus = true
 []
-

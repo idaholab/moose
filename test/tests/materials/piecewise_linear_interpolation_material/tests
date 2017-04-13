@@ -1,0 +1,49 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'piecewise_linear_interpolation_material.i'
+    exodiff = 'piecewise_linear_interpolation_material_out.e'
+  [../]
+  [./test_scale_factor]
+    type = 'Exodiff'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test
+    cli_args = 'Materials/m2/scale_factor='2.0' Materials/m2/y='0 0.5''
+    exodiff = 'piecewise_linear_interpolation_material_out.e'
+  [../]
+  [./test_err1]
+    type = 'RunException'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test_scale_factor
+    cli_args = 'Materials/m2/xy_data='1 2''
+    expect_err = "In PiecewiseLinearInterpolationMaterial m2: Cannot specify 'x', 'y', and 'xy_data' together."
+  [../]
+  [./test_err2]
+    type = 'RunException'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test_err1
+    cli_args = 'Materials/m1/x='1 2 3''
+    expect_err = "In PiecewiseLinearInterpolationMaterial m1: Both 'x' and 'y' must be specified if either one is specified."
+  [../]
+  [./test_err3]
+    type = 'RunException'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test_err2
+    cli_args = 'Materials/m1/x='1 2 3''
+    expect_err = "In PiecewiseLinearInterpolationMaterial m1: Both 'x' and 'y' must be specified if either one is specified."
+  [../]
+  [./test_err4]
+    type = 'RunException'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test_err3
+    cli_args = 'Materials/m2/x='1 2 3''
+    expect_err = "In PiecewiseLinearInterpolationMaterial m2: Vectors are not the same length"
+  [../]
+  [./test_err5]
+    type = 'RunException'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test_err4
+    cli_args = 'Materials/m1/xy_data='1 2 3''
+    expect_err = "In PiecewiseLinearInterpolationMaterial m1: Length of data provided in 'xy_data' must be a multiple of 2."
+  [../]
+[]

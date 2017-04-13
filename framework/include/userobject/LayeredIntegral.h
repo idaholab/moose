@@ -19,14 +19,15 @@
 #include "ElementIntegralVariableUserObject.h"
 #include "LayeredBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class LayeredIntegral;
 
-template<>
+template <>
 InputParameters validParams<LayeredIntegral>();
 
 /**
- * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes volume integrals of a variable storing partial sums for the specified
+ * number of intervals in a direction (x,y,z).c
  */
 class LayeredIntegral : public ElementIntegralVariableUserObject, public LayeredBase
 {
@@ -38,12 +39,12 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  virtual Real spatialValue(const Point & p) const { return integralValue(p); }
+  virtual Real spatialValue(const Point & p) const override { return integralValue(p); }
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 };
 
 #endif

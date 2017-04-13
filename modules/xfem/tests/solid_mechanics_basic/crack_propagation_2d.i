@@ -10,14 +10,6 @@
   output_cut_plane = true
   use_crack_growth_increment = true
   crack_growth_increment = 0.2
-  [./xfem_marker_uo]
-    type = XFEMMaterialTensorMarkerUserObject
-    execute_on = timestep_end
-    tensor = stress
-    quantity = MaxPrincipal
-    threshold = 5e+1
-    average = true
-  [../]
 []
 
 [Mesh]
@@ -31,6 +23,17 @@
   ymax = 1.0
   elem_type = QUAD4
   displacements = 'disp_x disp_y'
+[]
+
+[UserObjects]
+  [./xfem_marker_uo]
+    type = XFEMMaterialTensorMarkerUserObject
+    execute_on = timestep_end
+    tensor = stress
+    quantity = MaxPrincipal
+    threshold = 5e+1
+    average = true
+  [../]
 []
 
 [Variables]
@@ -71,7 +74,7 @@
   [./topx]
     type = PresetBC
     boundary = top
-    variable = disp_y
+    variable = disp_x
     value = 0.0
   [../]
   [./topy]

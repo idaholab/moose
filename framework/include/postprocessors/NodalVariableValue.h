@@ -26,7 +26,7 @@ namespace libMesh
 class Node;
 }
 
-template<>
+template <>
 InputParameters validParams<NodalVariableValue>();
 
 /**
@@ -38,13 +38,9 @@ class NodalVariableValue : public GeneralPostprocessor
 public:
   NodalVariableValue(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
-
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual Real getValue() override;
 
 protected:
   MooseMesh & _mesh;
@@ -53,4 +49,4 @@ protected:
   const Real _scale_factor;
 };
 
-#endif //NODALVARIABLEVALUE_H
+#endif // NODALVARIABLEVALUE_H

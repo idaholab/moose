@@ -17,12 +17,15 @@
 #include "SubProblem.h"
 #include "MaterialData.h"
 #include "Assembly.h"
+#include "Executioner.h"
+#include "Transient.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<Material>()
+template <>
+InputParameters
+validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -31,35 +34,54 @@ InputParameters validParams<Material>()
   params += validParams<RandomInterface>();
   params += validParams<MaterialPropertyInterface>();
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParam<bool>("compute", true, "When false MOOSE will not call compute methods on this material, compute then must be called retrieving the Material object via MaterialPropertyInterface::getMaterial and calling the computeProerties method.");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that "
+                        "in the case this is true but no "
+                        "displacements are provided in the Mesh block "
+                        "the undisplaced mesh will still be used.");
+  params.addParam<bool>("compute",
+                        true,
+                        "When false, MOOSE will not call compute methods on this material. "
+                        "The user must call computeProperties() after retrieving the Material "
+                        "via MaterialPropertyInterface::getMaterial(). "
+                        "Non-computed Materials are not sorted for dependencies.");
+  params.addParam<bool>("constant_on_elem",
+                        false,
+                        "When true, MOOSE will only call computeQpProperties() for the 0th "
+                        "quadrature point, and then copy that value to the other qps.");
 
   // Outputs
   params += validParams<OutputInterface>();
-  params.set<std::vector<OutputName> >("outputs") =  std::vector<OutputName>(1, "none");
-  params.addParam<std::vector<std::string> >("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
+  params.set<std::vector<OutputName>>("outputs") = {"none"};
+  params.addParam<std::vector<std::string>>(
+      "output_properties",
+      "List of material properties, from this material, to output (outputs "
+      "must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh constant_on_elem", "Advanced");
   params.registerBase("Material");
 
   return params;
 }
 
-
-Material::Material(const InputParameters & parameters) :
-    MooseObject(parameters),
+Material::Material(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters, blockIDs()),
+    BoundaryRestrictable(parameters, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     ScalarCoupleable(this),
     FunctionInterface(this),
+    DistributionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
+    VectorPostprocessorInterface(this),
     DependencyResolverInterface(),
     Restartable(parameters, "Materials"),
     ZeroInterface(parameters),
@@ -68,9 +90,12 @@ Material::Material(const InputParameters & parameters) :
     // The false flag disables the automatic call buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
     OutputInterface(parameters, false),
-    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
+    RandomInterface(parameters,
+                    *parameters.get<FEProblemBase *>("_fe_problem_base"),
+                    parameters.get<THREAD_ID>("_tid"),
+                    false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
@@ -86,91 +111,111 @@ Material::Material(const InputParameters & parameters) :
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
+    _constant_on_elem(getParam<bool>("constant_on_elem")),
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
-
 
 void
 Material::initStatefulProperties(unsigned int n_points)
 {
-  if (_has_stateful_property)
-    for (_qp = 0; _qp < n_points; ++_qp)
-      initQpStatefulProperties();
-}
+  for (_qp = 0; _qp < n_points; ++_qp)
+    initQpStatefulProperties();
 
+  // checking for statefulness of properties via this loop is necessary
+  // because owned props might have been promoted to stateful by calls to
+  // getMaterialProperty[Old/Older] from other objects.  In these cases, this
+  // object won't otherwise know that it owns stateful properties.
+  for (auto & prop : _supplied_props)
+    if (_material_data->getMaterialPropertyStorage().isStatefulProp(prop) &&
+        !_overrides_init_stateful_props)
+      mooseError(std::string("Material \"") + name() + "\" provides one or more stateful "
+                                                       "properties but initQpStatefulProperties() "
+                                                       "was not overridden in the derived class.");
+}
 
 void
 Material::initQpStatefulProperties()
 {
-  mooseDoOnce(mooseWarning(std::string("Material \"") + name() + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
+  _overrides_init_stateful_props = false;
 }
 
 void
 Material::checkStatefulSanity() const
 {
-  for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
-  {
-    if (static_cast<int>(it->second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it->second);
-  }
+  for (const auto & it : _props_to_flags)
+    if (static_cast<int>(it.second) % 2 == 0) // Only Stateful properties declared!
+      mooseError("Material '", name(), "' requests undefined stateful property '", it.first, "'");
 }
-
 
 void
 Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_State state)
 {
   if (!is_get)
   {
+    _supplied_props.insert(prop_name);
+    _supplied_prop_ids.insert(_material_data->getPropertyId(prop_name));
+
     _props_to_flags[prop_name] |= static_cast<int>(state);
     if (static_cast<int>(state) % 2 == 0)
       _has_stateful_property = true;
   }
 
   // Store material properties for block ids
-  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-  {
-    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-    if (!is_get)
-      _supplied_props.insert(prop_name);
-    _fe_problem.storeMatPropName(*it, prop_name);
-  }
+  for (const auto & block_id : blockIDs())
+    _fe_problem.storeMatPropName(block_id, prop_name);
 
   // Store material properties for the boundary ids
-  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
-  {
-    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-    if (!is_get)
-      _supplied_props.insert(prop_name);
-    _fe_problem.storeMatPropName(*it, prop_name);
-  }
+  for (const auto & boundary_id : boundaryIDs())
+    _fe_problem.storeMatPropName(boundary_id, prop_name);
 }
-
 
 std::set<OutputName>
 Material::getOutputs()
 {
-  const std::vector<OutputName> & out = getParam<std::vector<OutputName> >("outputs");
+  const std::vector<OutputName> & out = getParam<std::vector<OutputName>>("outputs");
   return std::set<OutputName>(out.begin(), out.end());
 }
 
 void
 Material::computeProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  // If this Material has the _constant_on_elem flag set, we take the
+  // value computed for _qp==0 and use it at all the quadrature points
+  // in the Elem.
+  if (_constant_on_elem)
+  {
+    // Compute MaterialProperty values at the first qp.
+    _qp = 0;
     computeQpProperties();
-}
 
+    // Reference to *all* the MaterialProperties in the MaterialData object, not
+    // just the ones for this Material.
+    MaterialProperties & props = _material_data->props();
+
+    // Now copy the values computed at qp 0 to all the other qps.
+    for (const auto & prop_id : _supplied_prop_ids)
+    {
+      auto nqp = _qrule->n_points();
+      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
+        props[prop_id]->qpCopy(qp, props[prop_id], 0);
+    }
+  }
+  else
+  {
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+      computeQpProperties();
+  }
+}
 
 void
 Material::computeQpProperties()
 {
 }
-
 
 void
 Material::resetProperties()
@@ -179,12 +224,15 @@ Material::resetProperties()
     resetQpProperties();
 }
 
-
 void
 Material::resetQpProperties()
 {
   if (!_compute)
-    mooseDoOnce(mooseWarning("You disabled the computation of this (" << name() << ") material by MOOSE, but have not overridden the 'resetQpProperties' method, this can lead to unintended values being set for material property values."));
+    mooseDoOnce(mooseWarning("You disabled the computation of this (",
+                             name(),
+                             ") material by MOOSE, but have not overridden the 'resetQpProperties' "
+                             "method, this can lead to unintended values being set for material "
+                             "property values."));
 }
 
 void
@@ -192,4 +240,12 @@ Material::computePropertiesAtQp(unsigned int qp)
 {
   _qp = qp;
   computeQpProperties();
+}
+
+void
+Material::checkExecutionStage()
+{
+  if (_fe_problem.startedInitialSetup())
+    mooseError("Material properties must be retrieved during material object construction to "
+               "ensure correct dependency resolution.");
 }

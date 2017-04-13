@@ -23,7 +23,7 @@
 class MaterialPropertyDebugOutput;
 class Material;
 
-template<>
+template <>
 InputParameters validParams<MaterialPropertyDebugOutput>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<MaterialPropertyDebugOutput>();
 class MaterialPropertyDebugOutput : public BasicOutput<Output>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Object input parameters
@@ -42,12 +41,11 @@ public:
   MaterialPropertyDebugOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Perform the debugging output
    * For this object this is empty; the output is preformed in the constructor
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Prints material property information in a format similar to Moose system information
@@ -59,8 +57,8 @@ protected:
    * @param output The output stream to populate
    * @param materials Vector of pointers to the Material objects of interest
    */
-  void printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<Material> > & materials) const;
-
+  void printMaterialProperties(std::stringstream & output,
+                               const std::vector<std::shared_ptr<Material>> & materials) const;
 };
 
 #endif // MATERIALPROPERTYEBUGOUTPUT_H

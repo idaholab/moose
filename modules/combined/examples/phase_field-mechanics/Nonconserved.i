@@ -123,11 +123,13 @@
     block = 0
     displacements = 'disp_x disp_y'
     base_name = phaseb
-    # we use thermal expansion with a constant temperature to achieve a 10% oversize
-    # commenting out the following 3 lines will switch off the oversize effect
-    thermal_expansion_coeff = 0.1
-    temperature_ref = 0
-    temperature = 1
+    eigenstrain_names = eigenstrain
+  [../]
+  [./eigenstrain_b]
+    type = ComputeEigenstrain
+    base_name = phaseb
+    eigen_base = '0.1 0.1 0.1'
+    eigenstrain_name = eigenstrain
   [../]
   [./stress_b]
     type = ComputeLinearElasticStress

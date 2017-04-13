@@ -19,41 +19,40 @@
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
-#include "ParallelUniqueId.h"
 #include "Restartable.h"
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 #include "ZeroInterface.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "libmesh/point.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/elem.h"
 
-//forward declarations
+// forward declarations
 class InitialCondition;
-class FEProblem;
+class FEProblemBase;
 class SystemBase;
 class Assembly;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<InitialCondition>();
 
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class InitialCondition :
-  public MooseObject,
-  public Coupleable,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public BlockRestrictable,
-  public BoundaryRestrictable,
-  public DependencyResolverInterface,
-  public Restartable,
-  public ZeroInterface
+class InitialCondition : public MooseObject,
+                         public Coupleable,
+                         public FunctionInterface,
+                         public UserObjectInterface,
+                         public BlockRestrictable,
+                         public BoundaryRestrictable,
+                         public DependencyResolverInterface,
+                         public Restartable,
+                         public ZeroInterface
 {
 public:
   /**
@@ -92,12 +91,12 @@ public:
    */
   virtual void initialSetup() {}
 
-  virtual const std::set<std::string> & getRequestedItems();
+  virtual const std::set<std::string> & getRequestedItems() override;
 
-  virtual const std::set<std::string> & getSuppliedItems();
+  virtual const std::set<std::string> & getSuppliedItems() override;
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
   THREAD_ID _tid;
 
@@ -113,10 +112,11 @@ protected:
   MooseVariable & _var;
 
   /**
-   * The current element we are on will retrieving values at specific points in the domain. Note that this _IS_
+   * The current element we are on will retrieving values at specific points in the domain. Note
+   * that this _IS_
    * valid even for nodes shared among several elements.
    */
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /**
    * The current node if the point we are evaluating at also happens to be a node.
@@ -131,4 +131,4 @@ protected:
   std::set<std::string> _supplied_vars;
 };
 
-#endif //INITIALCONDITION_H
+#endif // INITIALCONDITION_H

@@ -7,8 +7,9 @@
 #include "ACGBPoly.h"
 #include "Material.h"
 
-template<>
-InputParameters validParams<ACGBPoly>()
+template <>
+InputParameters
+validParams<ACGBPoly>()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Grain-Boundary model concentration dependent residual");
@@ -17,8 +18,8 @@ InputParameters validParams<ACGBPoly>()
   return params;
 }
 
-ACGBPoly::ACGBPoly(const InputParameters & parameters) :
-    ACBulk<Real>(parameters),
+ACGBPoly::ACGBPoly(const InputParameters & parameters)
+  : ACBulk<Real>(parameters),
     _c(coupledValue("c")),
     _c_var(coupled("c")),
     _mu(getMaterialProperty<Real>("mu")),
@@ -30,7 +31,7 @@ ACGBPoly::ACGBPoly(const InputParameters & parameters) :
 Real
 ACGBPoly::computeDFDOP(PFFunctionType type)
 {
-  Real mult = 2.0*_en_ratio*_mu[_qp]*_gamma[_qp];
+  Real mult = 2.0 * _en_ratio * _mu[_qp] * _gamma[_qp];
 
   Real c = _c[_qp];
   if (c < 1.0e-8)
@@ -41,10 +42,10 @@ ACGBPoly::computeDFDOP(PFFunctionType type)
   switch (type)
   {
     case Residual:
-      return mult*_u[_qp]*c*c;
+      return mult * _u[_qp] * c * c;
 
     case Jacobian:
-      return mult*_phi[_j][_qp]*c*c;
+      return mult * _phi[_j][_qp] * c * c;
   }
 
   mooseError("Invalid type passed in");
@@ -64,7 +65,7 @@ ACGBPoly::computeQpOffDiagJacobian(unsigned int jvar)
     Real mult = 2.0 * _en_ratio * _mu[_qp] * _gamma[_qp];
     Real dDFDOP = 2.0 * mult * _u[_qp] * c * _phi[_j][_qp];
 
-    return _L[_qp]*_test[_i][_qp]*dDFDOP;
+    return _L[_qp] * _test[_i][_qp] * dDFDOP;
   }
 
   return 0.0;

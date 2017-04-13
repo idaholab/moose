@@ -11,12 +11,11 @@
 
 class FrictionalContactProblem;
 
-
-template<>
+template <>
 InputParameters validParams<FrictionalContactProblem>();
 
 /**
- * FEProblem derived class for frictional contact-specific callbacks
+ * FEProblemBase derived class for frictional contact-specific callbacks
  */
 class FrictionalContactProblem : public ReferenceResidualProblem
 {
@@ -37,11 +36,13 @@ public:
   virtual void timestepSetup();
 
   virtual bool shouldUpdateSolution();
-  virtual bool updateSolution(NumericVector<Number> & vec_solution, NumericVector<Number>& ghosted_solution);
+  virtual bool updateSolution(NumericVector<Number> & vec_solution,
+                              NumericVector<Number> & ghosted_solution);
 
   virtual void predictorCleanup(NumericVector<Number> & ghosted_solution);
 
-  bool enforceRateConstraint(NumericVector<Number> & vec_solution, NumericVector<Number> & ghosted_solution);
+  bool enforceRateConstraint(NumericVector<Number> & vec_solution,
+                             NumericVector<Number> & ghosted_solution);
 
   bool calculateSlip(const NumericVector<Number> & ghosted_solution,
                      std::vector<SlipData> * iterative_slip);
@@ -78,8 +79,7 @@ public:
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 
-  void updateContactPoints(NumericVector<Number> & ghosted_solution,
-                           bool update_incremental_slip);
+  void updateContactPoints(NumericVector<Number> & ghosted_solution, bool update_incremental_slip);
 
   void updateIncrementalSlip();
 
@@ -119,7 +119,8 @@ protected:
   Real _it_slip_norm;
 
   /// Convenient typedef for frequently used iterator
-  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator PLIterator;
+  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator
+      PLIterator;
 };
 
 struct FrictionalContactProblem::InteractionParams
@@ -131,7 +132,7 @@ struct FrictionalContactProblem::InteractionParams
 
 struct FrictionalContactProblem::SlipData
 {
-  SlipData(const Node* node, unsigned int dof, Real slip);
+  SlipData(const Node * node, unsigned int dof, Real slip);
   SlipData(const SlipData & sd);
   ~SlipData();
 

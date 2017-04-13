@@ -14,8 +14,9 @@
 
 #include "ExampleDiffusion.h"
 
-template<>
-InputParameters validParams<ExampleDiffusion>()
+template <>
+InputParameters
+validParams<ExampleDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
   // Here we will look for a parameter from the input file
@@ -23,20 +24,21 @@ InputParameters validParams<ExampleDiffusion>()
   return params;
 }
 
-ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
-    Diffusion(parameters),
+ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters)
+  : Diffusion(parameters),
     // Initialize our member variable based on a default or input file
     _diffusivity(getParam<Real>("diffusivity"))
-{}
+{
+}
 
 Real
 ExampleDiffusion::computeQpResidual()
 {
-  return _diffusivity*Diffusion::computeQpResidual();
+  return _diffusivity * Diffusion::computeQpResidual();
 }
 
 Real
 ExampleDiffusion::computeQpJacobian()
 {
-  return _diffusivity*Diffusion::computeQpJacobian();
+  return _diffusivity * Diffusion::computeQpJacobian();
 }

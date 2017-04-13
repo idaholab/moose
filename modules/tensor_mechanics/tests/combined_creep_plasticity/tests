@@ -1,0 +1,21 @@
+[Tests]
+  [./combined]
+    type = 'Exodiff'
+    input = 'combined_creep_plasticity.i'
+    exodiff = 'combined_creep_plasticity_out.e'
+    abs_zero = 1e-09
+    method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+  [../]
+  [./stress_prescribed]
+    type = 'Exodiff'
+    input = 'combined_stress_prescribed.i'
+    exodiff = 'combined_stress_prescribed_out.e'
+    abs_zero = 1e-09
+  [../]
+  [./stress_relaxation]
+    type = 'Exodiff'
+    input = 'combined_stress_relaxation.i'
+    exodiff = 'combined_stress_relaxation_out.e'
+    abs_zero = 1e-09
+  [../]
+[]

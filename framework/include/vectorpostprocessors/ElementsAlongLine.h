@@ -17,10 +17,10 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementsAlongLine;
 
-template<>
+template <>
 InputParameters validParams<ElementsAlongLine>();
 
 /**
@@ -31,17 +31,12 @@ class ElementsAlongLine : public GeneralVectorPostprocessor
 public:
   ElementsAlongLine(const InputParameters & parameters);
 
-  virtual ~ElementsAlongLine() {}
+  virtual void initialize() override;
 
   /**
-   * Clear it out.
+   * Find the elements
    */
-  virtual void initialize();
-
-  /**
-   * Find th elements
-   */
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   /// The beginning of the line

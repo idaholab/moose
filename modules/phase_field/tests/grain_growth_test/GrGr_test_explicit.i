@@ -58,7 +58,6 @@
 [Materials]
   [./Copper]
     type = GBEvolution
-    block = 0
     T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
@@ -101,8 +100,4 @@
   csv = true
   interval = 20
   exodus = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = false
 []

@@ -17,11 +17,11 @@
 
 #include "ScalarInitialCondition.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionScalarIC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionScalarIC>();
 
 class FunctionScalarIC : public ScalarInitialCondition
@@ -30,10 +30,10 @@ public:
   FunctionScalarIC(const InputParameters & parameters);
 
 protected:
-  virtual Real value();
+  virtual Real value() override;
 
   unsigned int _ncomp;
   std::vector<Function *> _func;
 };
 
-#endif //FUNCTIONSCALARIC_H
+#endif // FUNCTIONSCALARIC_H

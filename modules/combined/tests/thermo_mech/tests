@@ -1,16 +1,39 @@
 [Tests]
-  [./test]
+  [./youngs_modulus_func_temp]
+    type = Exodiff
+    input = 'youngs_modulus_function_temp.i'
+    exodiff = 'youngs_modulus_function_temp_out.e'
+  [../]
+
+  [./thermomechanics]
     type = 'Exodiff'
-    input = 'thermo_mech_test.i'
-    exodiff = 'out.e'
+    input = 'thermo_mech.i'
+    exodiff = 'thermo_mech_out.e'
     scale_refine = 1
   [../]
 
-  [./testSMP]
+  [./thermomechanics_SMP]
     type = 'Exodiff'
-    input = 'thermo_mech_smp_test.i'
-    exodiff = 'out_smp.e'
-    custom_cmp = 'thermo_mech_test.cmp'
+    input = 'thermo_mech_smp.i'
+    exodiff = 'thermo_mech_smp_out.e'
+    custom_cmp = 'thermo_mech.cmp'
     max_parallel = 1
+  [../]
+
+  [./thermomechanics_sm]
+    type = 'Exodiff'
+    input = 'thermo_mech_sm.i'
+    exodiff = 'thermo_mech_out.e'
+    scale_refine = 1
+    prereq = 'thermomechanics'
+  [../]
+
+  [./thermomechanics_SMP_sm]
+    type = 'Exodiff'
+    input = 'thermo_mech_smp_sm.i'
+    exodiff = 'thermo_mech_smp_out.e'
+    custom_cmp = 'thermo_mech.cmp'
+    max_parallel = 1
+    prereq = 'thermomechanics_SMP'
   [../]
 []

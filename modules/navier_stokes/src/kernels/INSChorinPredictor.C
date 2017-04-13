@@ -8,11 +8,14 @@
 #include "INSChorinPredictor.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSChorinPredictor>()
+template <>
+InputParameters
+validParams<INSChorinPredictor>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the 'Chorin' Predictor equation in "
+                             "fully-discrete (both time and space) form.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
@@ -26,68 +29,69 @@ InputParameters validParams<INSChorinPredictor>()
   // Required parameters
   params.addRequiredParam<Real>("mu", "dynamic viscosity");
   params.addRequiredParam<Real>("rho", "density");
-  params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the Predictor equation");
-  params.addRequiredParam<std::string>("predictor_type", "One of: OLD, NEW, STAR.  Indicates which velocity to use in the predictor.");
+  params.addRequiredParam<unsigned>(
+      "component",
+      "0,1,2 depending on if we are solving the x,y,z component of the Predictor equation");
+  params.addRequiredParam<std::string>(
+      "predictor_type",
+      "One of: OLD, NEW, STAR.  Indicates which velocity to use in the predictor.");
   return params;
 }
 
+INSChorinPredictor::INSChorinPredictor(const InputParameters & parameters)
+  : Kernel(parameters),
 
+    // Current velocities
+    _u_vel(coupledValue("u")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
-INSChorinPredictor::INSChorinPredictor(const InputParameters & parameters) :
-  Kernel(parameters),
+    // Old velocities
+    _u_vel_old(coupledValueOld("u")),
+    _v_vel_old(_mesh.dimension() >= 2 ? coupledValueOld("v") : _zero),
+    _w_vel_old(_mesh.dimension() == 3 ? coupledValueOld("w") : _zero),
 
-  // Current velocities
-  _u_vel(coupledValue("u")),
-  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
-  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+    // Star velocities
+    _u_vel_star(coupledValue("u_star")),
+    _v_vel_star(_mesh.dimension() >= 2 ? coupledValue("v_star") : _zero),
+    _w_vel_star(_mesh.dimension() == 3 ? coupledValue("w_star") : _zero),
 
-  // Old velocities
-  _u_vel_old(coupledValueOld("u")),
-  _v_vel_old(_mesh.dimension() >= 2 ? coupledValueOld("v") : _zero),
-  _w_vel_old(_mesh.dimension() == 3 ? coupledValueOld("w") : _zero),
+    // Velocity Gradients
+    _grad_u_vel(coupledGradient("u")),
+    _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+    _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero),
 
-  // Star velocities
-  _u_vel_star(coupledValue("u_star")),
-  _v_vel_star(_mesh.dimension() >= 2 ? coupledValue("v_star") : _zero),
-  _w_vel_star(_mesh.dimension() == 3 ? coupledValue("w_star") : _zero),
+    // Old Velocity Gradients
+    _grad_u_vel_old(coupledGradientOld("u")),
+    _grad_v_vel_old(_mesh.dimension() >= 2 ? coupledGradientOld("v") : _grad_zero),
+    _grad_w_vel_old(_mesh.dimension() == 3 ? coupledGradientOld("w") : _grad_zero),
 
-  // Velocity Gradients
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
-  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero),
+    // Star Velocity Gradients
+    _grad_u_vel_star(coupledGradient("u_star")),
+    _grad_v_vel_star(_mesh.dimension() >= 2 ? coupledGradient("v_star") : _grad_zero),
+    _grad_w_vel_star(_mesh.dimension() == 3 ? coupledGradient("w_star") : _grad_zero),
 
-  // Old Velocity Gradients
-  _grad_u_vel_old(coupledGradientOld("u")),
-  _grad_v_vel_old(_mesh.dimension() >= 2 ? coupledGradientOld("v") : _grad_zero),
-  _grad_w_vel_old(_mesh.dimension() == 3 ? coupledGradientOld("w") : _grad_zero),
+    // Variable numberings
+    _u_vel_var_number(coupled("u")),
+    _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+    _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
 
-  // Star Velocity Gradients
-  _grad_u_vel_star(coupledGradient("u_star")),
-  _grad_v_vel_star(_mesh.dimension() >= 2 ? coupledGradient("v_star") : _grad_zero),
-  _grad_w_vel_star(_mesh.dimension() == 3 ? coupledGradient("w_star") : _grad_zero),
+    // Star velocity numberings
+    _u_vel_star_var_number(coupled("u_star")),
+    _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
+    _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
 
-  // Variable numberings
-  _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
-  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
-
-  // Star velocity numberings
-  _u_vel_star_var_number(coupled("u_star")),
-  _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
-  _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
-
-  // Required parameters
-  _mu(getParam<Real>("mu")),
-  _rho(getParam<Real>("rho")),
-  _component(getParam<unsigned>("component")),
-  _predictor_type(getParam<std::string>("predictor_type")),
-  _predictor_enum("OLD, NEW, STAR, INVALID", _predictor_type)
+    // Required parameters
+    _mu(getParam<Real>("mu")),
+    _rho(getParam<Real>("rho")),
+    _component(getParam<unsigned>("component")),
+    _predictor_type(getParam<std::string>("predictor_type")),
+    _predictor_enum("OLD, NEW, STAR, INVALID", _predictor_type)
 {
 }
 
-
-
-Real INSChorinPredictor::computeQpResidual()
+Real
+INSChorinPredictor::computeQpResidual()
 {
   // Vector object for test function
   RealVectorValue test;
@@ -95,7 +99,7 @@ Real INSChorinPredictor::computeQpResidual()
 
   // Tensor object for test function gradient
   RealTensorValue grad_test;
-  for (unsigned k=0; k<3; ++k)
+  for (unsigned k = 0; k < 3; ++k)
     grad_test(_component, k) = _grad_test[_i][_qp](k);
 
   // Decide what velocity vector, gradient to use:
@@ -104,29 +108,29 @@ Real INSChorinPredictor::computeQpResidual()
 
   switch (_predictor_enum)
   {
-  case OLD:
-  {
-    U = RealVectorValue(_u_vel_old[_qp], _v_vel_old[_qp], _w_vel_old[_qp]);
-    grad_U = RealTensorValue(_grad_u_vel_old[_qp], _grad_v_vel_old[_qp], _grad_w_vel_old[_qp]);
-    break;
+    case OLD:
+    {
+      U = RealVectorValue(_u_vel_old[_qp], _v_vel_old[_qp], _w_vel_old[_qp]);
+      grad_U = RealTensorValue(_grad_u_vel_old[_qp], _grad_v_vel_old[_qp], _grad_w_vel_old[_qp]);
+      break;
+    }
+    case NEW:
+    {
+      U = RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+      grad_U = RealTensorValue(_grad_u_vel[_qp], _grad_v_vel[_qp], _grad_w_vel[_qp]);
+      break;
+    }
+    case STAR:
+    {
+      // Note: Donea and Huerta's book says you are supposed to use "star" velocity to make Chorin
+      // implicit, not U^{n+1}.
+      U = RealVectorValue(_u_vel_star[_qp], _v_vel_star[_qp], _w_vel_star[_qp]);
+      grad_U = RealTensorValue(_grad_u_vel_star[_qp], _grad_v_vel_star[_qp], _grad_w_vel_star[_qp]);
+      break;
+    }
+    default:
+      mooseError("Unrecognized Chorin predictor type requested.");
   }
-  case NEW:
-  {
-    U = RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    grad_U = RealTensorValue(_grad_u_vel[_qp], _grad_v_vel[_qp], _grad_w_vel[_qp]);
-    break;
-  }
-  case STAR:
-  {
-    // Note: Donea and Huerta's book says you are supposed to use "star" velocity to make Chorin implicit, not U^{n+1}.
-    U = RealVectorValue(_u_vel_star[_qp], _v_vel_star[_qp], _w_vel_star[_qp]);
-    grad_U = RealTensorValue(_grad_u_vel_star[_qp], _grad_v_vel_star[_qp], _grad_w_vel_star[_qp]);
-    break;
-  }
-  default:
-    mooseError("Unrecognized Chorin predictor type requested.");
-  }
-
 
   //
   // Compute the different parts
@@ -141,15 +145,13 @@ Real INSChorinPredictor::computeQpResidual()
 
   // Viscous part - we are using the Laplacian form here for simplicity.
   // Remember to multiply by _dt!
-  Real viscous_part = _dt * (_mu/_rho) * grad_U.contract(grad_test);
+  Real viscous_part = _dt * (_mu / _rho) * grad_U.contract(grad_test);
 
   return symmetric_part + convective_part + viscous_part;
 }
 
-
-
-
-Real INSChorinPredictor::computeQpJacobian()
+Real
+INSChorinPredictor::computeQpJacobian()
 {
   // The mass matrix part is always there.
   Real mass_part = _phi[_j][_qp] * _test[_i][_qp];
@@ -159,117 +161,117 @@ Real INSChorinPredictor::computeQpJacobian()
   Real other_part = 0.;
   switch (_predictor_enum)
   {
-  case OLD:
-  case NEW:
-    break;
-  case STAR:
-  {
-    RealVectorValue U_star(_u_vel_star[_qp], _v_vel_star[_qp], _w_vel_star[_qp]);
-    Real convective_part = _dt * ((U_star*_grad_phi[_j][_qp]) + _phi[_j][_qp]*_grad_u[_qp](_component)) * _test[_i][_qp];
-    Real viscous_part = _dt * ((_mu/_rho) * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]));
-    other_part = convective_part + viscous_part;
-    break;
-  }
-  default:
-    mooseError("Unrecognized Chorin predictor type requested.");
+    case OLD:
+    case NEW:
+      break;
+    case STAR:
+    {
+      RealVectorValue U_star(_u_vel_star[_qp], _v_vel_star[_qp], _w_vel_star[_qp]);
+      Real convective_part =
+          _dt * ((U_star * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
+          _test[_i][_qp];
+      Real viscous_part = _dt * ((_mu / _rho) * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]));
+      other_part = convective_part + viscous_part;
+      break;
+    }
+    default:
+      mooseError("Unrecognized Chorin predictor type requested.");
   }
 
   return mass_part + other_part;
 }
 
-
-
-
-Real INSChorinPredictor::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSChorinPredictor::computeQpOffDiagJacobian(unsigned jvar)
 {
   switch (_predictor_enum)
   {
-  case OLD:
-  {
-    return 0.;
-  }
-
-  case NEW:
-  {
-    if ((jvar == _u_vel_var_number) || (jvar == _v_vel_var_number) || (jvar == _w_vel_var_number))
+    case OLD:
     {
-      // Derivative of grad_U wrt the velocity component
-      RealTensorValue dgrad_U;
-
-      // Initialize to invalid value, then determine correct value.
-      unsigned vel_index = 99;
-
-      // Map jvar into the indices (0,1,2)
-      if (jvar == _u_vel_var_number)
-        vel_index = 0;
-
-      else if (jvar == _v_vel_var_number)
-        vel_index = 1;
-
-      else if (jvar == _w_vel_var_number)
-        vel_index = 2;
-
-      // Fill in the vel_index'th row of dgrad_U with _grad_phi[_j][_qp]
-      for (unsigned k=0; k<3; ++k)
-        dgrad_U(vel_index,k) = _grad_phi[_j][_qp](k);
-
-      // Vector object for test function
-      RealVectorValue test;
-      test(_component) = _test[_i][_qp];
-
-      // Vector object for U
-      RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-      // Tensor object for test function gradient
-      RealTensorValue grad_test;
-      for (unsigned k=0; k<3; ++k)
-        grad_test(_component, k) = _grad_test[_i][_qp](k);
-
-      // Compute the convective part
-      RealVectorValue convective_jac = _phi[_j][_qp] * RealVectorValue(_grad_u_vel[_qp](vel_index),
-                                                                       _grad_v_vel[_qp](vel_index),
-                                                                       _grad_w_vel[_qp](vel_index));
-
-      // Extra contribution in vel_index component
-      convective_jac(vel_index) += U*_grad_phi[_j][_qp];
-
-      // Be sure to scale by _dt!
-      Real convective_part = _dt * (convective_jac * test);
-
-      // Compute the viscous part, be sure to scale by _dt.  Note: the contracted
-      // value should be zero unless vel_index and _component match.
-      Real viscous_part = _dt * (_mu/_rho) * dgrad_U.contract(grad_test);
-
-      // Return the result
-      return convective_part + viscous_part;
-    }
-    else
-      return 0;
-  }
-
-  case STAR:
-  {
-    if (jvar == _u_vel_star_var_number)
-    {
-      return _dt * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
+      return 0.;
     }
 
-    else if (jvar == _v_vel_star_var_number)
+    case NEW:
     {
-      return _dt * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
+      if ((jvar == _u_vel_var_number) || (jvar == _v_vel_var_number) || (jvar == _w_vel_var_number))
+      {
+        // Derivative of grad_U wrt the velocity component
+        RealTensorValue dgrad_U;
+
+        // Initialize to invalid value, then determine correct value.
+        unsigned vel_index = 99;
+
+        // Map jvar into the indices (0,1,2)
+        if (jvar == _u_vel_var_number)
+          vel_index = 0;
+
+        else if (jvar == _v_vel_var_number)
+          vel_index = 1;
+
+        else if (jvar == _w_vel_var_number)
+          vel_index = 2;
+
+        // Fill in the vel_index'th row of dgrad_U with _grad_phi[_j][_qp]
+        for (unsigned k = 0; k < 3; ++k)
+          dgrad_U(vel_index, k) = _grad_phi[_j][_qp](k);
+
+        // Vector object for test function
+        RealVectorValue test;
+        test(_component) = _test[_i][_qp];
+
+        // Vector object for U
+        RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+
+        // Tensor object for test function gradient
+        RealTensorValue grad_test;
+        for (unsigned k = 0; k < 3; ++k)
+          grad_test(_component, k) = _grad_test[_i][_qp](k);
+
+        // Compute the convective part
+        RealVectorValue convective_jac =
+            _phi[_j][_qp] * RealVectorValue(_grad_u_vel[_qp](vel_index),
+                                            _grad_v_vel[_qp](vel_index),
+                                            _grad_w_vel[_qp](vel_index));
+
+        // Extra contribution in vel_index component
+        convective_jac(vel_index) += U * _grad_phi[_j][_qp];
+
+        // Be sure to scale by _dt!
+        Real convective_part = _dt * (convective_jac * test);
+
+        // Compute the viscous part, be sure to scale by _dt.  Note: the contracted
+        // value should be zero unless vel_index and _component match.
+        Real viscous_part = _dt * (_mu / _rho) * dgrad_U.contract(grad_test);
+
+        // Return the result
+        return convective_part + viscous_part;
+      }
+      else
+        return 0;
     }
 
-    else if (jvar == _w_vel_star_var_number)
+    case STAR:
     {
-      return _dt * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
+      if (jvar == _u_vel_star_var_number)
+      {
+        return _dt * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
+      }
+
+      else if (jvar == _v_vel_star_var_number)
+      {
+        return _dt * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
+      }
+
+      else if (jvar == _w_vel_star_var_number)
+      {
+        return _dt * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
+      }
+
+      else
+        return 0;
     }
 
-    else
-      return 0;
-  }
-
-  default:
-    mooseError("Unrecognized Chorin predictor type requested.");
+    default:
+      mooseError("Unrecognized Chorin predictor type requested.");
   }
 }
-

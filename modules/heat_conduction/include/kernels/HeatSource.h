@@ -9,10 +9,10 @@
 
 #include "BodyForce.h"
 
-//Forward Declarations
+// Forward Declarations
 class HeatSource;
 
-template<>
+template <>
 InputParameters validParams<HeatSource>();
 
 class HeatSource : public BodyForce

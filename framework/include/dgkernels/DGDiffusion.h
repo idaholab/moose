@@ -17,10 +17,10 @@
 
 #include "DGKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class DGDiffusion;
 
-template<>
+template <>
 InputParameters validParams<DGDiffusion>();
 
 /**
@@ -39,12 +39,13 @@ public:
   DGDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(Moose::DGResidualType type);
-  virtual Real computeQpJacobian(Moose::DGJacobianType type);
+  virtual Real computeQpResidual(Moose::DGResidualType type) override;
+  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   Real _epsilon;
   Real _sigma;
-  Real _coefficient;
+  const MaterialProperty<Real> & _diff;
+  const MaterialProperty<Real> & _diff_neighbor;
 };
 
 #endif

@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "Function.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoefDiffusion;
 
-template<>
+template <>
 InputParameters validParams<CoefDiffusion>();
 
 class CoefDiffusion : public Kernel
@@ -30,4 +30,4 @@ private:
   Function * const _func;
 };
 
-#endif //COEFDIFFUSION_H
+#endif // COEFDIFFUSION_H

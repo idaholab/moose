@@ -9,7 +9,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -56,12 +56,12 @@
 [Kernels]
   [./mass_sp0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = ppwater
   [../]
   [./mass_sp1]
     type = PorousFlowMassTimeDerivative
-    component_index = 1
+    fluid_component = 1
     variable = sgas
   [../]
 []
@@ -76,28 +76,35 @@
 []
 
 [Materials]
-  [./ppss]
+  [./temperature]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
+  [./ppss_nodal]
     type = PorousFlow2PhasePS_VG
     phase0_porepressure = ppwater
     phase1_saturation = sgas
+    at_nodes = true
     m = 0.5
     p0 = 1
-    pc_max = 10
+    pc_max = -10
     sat_lr = 0.1
-    sat_ls = 0.9
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1.5
     phase = 0
   [../]
   [./dens1]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 0.5
     bulk_modulus = 0.5
     phase = 1
@@ -105,10 +112,12 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
 []
@@ -118,7 +127,6 @@
   [./check]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
   [../]

@@ -22,22 +22,21 @@
 // Forward Declarations
 class NodalPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<NodalPostprocessor>();
 
-class NodalPostprocessor :
-  public NodalUserObject,
-  public Postprocessor
+class NodalPostprocessor : public NodalUserObject, public Postprocessor
 {
 public:
   NodalPostprocessor(const InputParameters & parameters);
 
   /**
-   * Finalize.  This is called _after_ execute() and _after_
-   * threadJoin()!  This is probably where you want to do MPI
-   * communication!
+   * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to
+   * do MPI communication!
+   * Finalize is not required for Postprocessor implementations since work may be done in
+   * getValue().
    */
-  virtual void finalize(){}
+  virtual void finalize() override {}
 };
 
 #endif

@@ -20,7 +20,7 @@
 
 class SideSetsAroundSubdomain;
 
-template<>
+template <>
 InputParameters validParams<SideSetsAroundSubdomain>();
 
 /**
@@ -29,18 +29,15 @@ InputParameters validParams<SideSetsAroundSubdomain>();
  * Optionally, only adds faces that have a normal
  * equal to specified normal up to a tolerance
  */
-class SideSetsAroundSubdomain :
-  public AddSideSetsBase,
-  public BlockRestrictable
+class SideSetsAroundSubdomain : public AddSideSetsBase, public BlockRestrictable
 {
 public:
   SideSetsAroundSubdomain(const InputParameters & parameters);
 
-  virtual ~SideSetsAroundSubdomain();
-
-  virtual void modify();
+  virtual void initialize() override;
 
 protected:
+  virtual void modify() override;
 
   /// names of the sidesets to which the faces will be added
   std::vector<BoundaryName> _boundary_names;
@@ -57,8 +54,6 @@ protected:
 
   /// if specified, then faces are only added if their normal is close to this
   Point _normal;
-
-
 };
 
 #endif /* SIDESETSAROUNDSUBDOMAIN_H */

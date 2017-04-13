@@ -13,11 +13,11 @@ class ThermalContactDiracKernelsAction : public Action
 {
 public:
   ThermalContactDiracKernelsAction(const InputParameters & params);
-  virtual ~ThermalContactDiracKernelsAction(){}
+  virtual ~ThermalContactDiracKernelsAction() {}
   virtual void act();
 };
 
-template<>
+template <>
 InputParameters validParams<ThermalContactDiracKernelsAction>();
 
 #endif

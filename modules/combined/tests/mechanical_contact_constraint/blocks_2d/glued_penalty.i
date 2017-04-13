@@ -1,5 +1,8 @@
 [Mesh]
-  file = blocks_2d.e
+  file = blocks_2d_nogap.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -12,8 +15,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./inc_slip_x]
   [../]
@@ -92,7 +93,7 @@
     variable = disp_x
     boundary = 4
     #Initial gap is 0.01
-    value = -0.02
+    value = -0.01
   [../]
   [./right_y]
     type = FunctionPresetBC
@@ -164,8 +165,6 @@
     system = Constraint
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
     model = glued
     formulation = penalty
     penalty = 1e+7

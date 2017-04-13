@@ -14,26 +14,28 @@
 
 #include "ExampleCoefDiffusion.h"
 
-template<>
-InputParameters validParams<ExampleCoefDiffusion>()
+template <>
+InputParameters
+validParams<ExampleCoefDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-  params.set<Real>("coef")=0.0;
+  params.set<Real>("coef") = 0.0;
   return params;
 }
 
-ExampleCoefDiffusion::ExampleCoefDiffusion(const InputParameters & parameters) :Kernel(parameters),
-   _coef(getParam<Real>("coef"))
-{}
+ExampleCoefDiffusion::ExampleCoefDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getParam<Real>("coef"))
+{
+}
 
 Real
 ExampleCoefDiffusion::computeQpResidual()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
+  return _coef * _grad_test[_i][_qp] * _grad_u[_qp];
 }
 
 Real
 ExampleCoefDiffusion::computeQpJacobian()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
+  return _coef * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }

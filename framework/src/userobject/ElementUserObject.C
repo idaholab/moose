@@ -20,8 +20,9 @@
 // libMesh includes
 #include "libmesh/elem.h"
 
-template<>
-InputParameters validParams<ElementUserObject>()
+template <>
+InputParameters
+validParams<ElementUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
@@ -30,13 +31,12 @@ InputParameters validParams<ElementUserObject>()
   return params;
 }
 
-ElementUserObject::ElementUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
+ElementUserObject::ElementUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
     BlockRestrictable(parameters),
     MaterialPropertyInterface(this, blockIDs()),
     UserObjectInterface(this),
     Coupleable(this, false),
-    ScalarCoupleable(this),
     MooseVariableDependencyInterface(),
     TransientInterface(this),
     PostprocessorInterface(this),
@@ -52,6 +52,6 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }

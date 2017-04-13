@@ -17,20 +17,21 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<NumLinearIterations>()
+template <>
+InputParameters
+validParams<NumLinearIterations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-NumLinearIterations::NumLinearIterations(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
-{}
+NumLinearIterations::NumLinearIterations(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters)
+{
+}
 
 Real
 NumLinearIterations::getValue()
 {
   return _subproblem.nLinearIterations();
 }
-

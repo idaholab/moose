@@ -60,7 +60,6 @@
 [Materials]
   [./Moly_GB]
     type = GBEvolution
-    block = 0
     time_scale = 1.0e-2
     GBMobility = 1.88e-14 #m^4/J*s
     T = 500 # K
@@ -104,8 +103,4 @@
 [Outputs]
   file_base = GBEvolution_mob
   exodus = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = false
 []

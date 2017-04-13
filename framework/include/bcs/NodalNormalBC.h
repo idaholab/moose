@@ -19,7 +19,7 @@
 
 class NodalNormalBC;
 
-template<>
+template <>
 InputParameters validParams<NodalNormalBC>();
 
 /**
@@ -31,9 +31,8 @@ class NodalNormalBC : public NodalBC
 {
 public:
   NodalNormalBC(const InputParameters & parameters);
-  virtual ~NodalNormalBC();
 
-  virtual void computeResidual(NumericVector<Number> & residual);
+  virtual void computeResidual(NumericVector<Number> & residual) override;
 
 protected:
   const VariableValue & _nx;
@@ -42,6 +41,5 @@ protected:
   /// Normal at the node (it is pre-computed by user object subsystem)
   Point _normal;
 };
-
 
 #endif /* NODALNORMALBC_H */

@@ -18,9 +18,7 @@ public:
   ComputeSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
-
-  const MaterialProperty<RankTwoTensor> & _stress_free_strain;
+  virtual void computeProperties() override;
 };
 
-#endif //COMPUTESMALLSTRAIN_H
+#endif // COMPUTESMALLSTRAIN_H

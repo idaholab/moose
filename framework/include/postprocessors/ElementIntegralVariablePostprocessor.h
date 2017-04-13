@@ -18,10 +18,10 @@
 #include "ElementIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementIntegralVariablePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralVariablePostprocessor>();
 
 /**
@@ -30,15 +30,14 @@ InputParameters validParams<ElementIntegralVariablePostprocessor>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class ElementIntegralVariablePostprocessor :
-  public ElementIntegralPostprocessor,
-  public MooseVariableInterface
+class ElementIntegralVariablePostprocessor : public ElementIntegralPostprocessor,
+                                             public MooseVariableInterface
 {
 public:
   ElementIntegralVariablePostprocessor(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;

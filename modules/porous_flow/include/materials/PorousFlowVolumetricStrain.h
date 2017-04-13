@@ -8,31 +8,23 @@
 #ifndef POROUSFLOWVOLUMETRICSTRAIN_H
 #define POROUSFLOWVOLUMETRICSTRAIN_H
 
-#include "DerivativeMaterialInterface.h"
+#include "PorousFlowMaterialVectorBase.h"
 #include "RankTwoTensor.h"
-#include "Material.h"
-
-#include "PorousFlowDictator.h"
 
 /**
  * PorousFlowVolumetricStrain computes volumetric strains, and derivatives thereof
  */
-class PorousFlowVolumetricStrain : public DerivativeMaterialInterface<Material>
+class PorousFlowVolumetricStrain : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowVolumetricStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// If true then the strain rate will include terms that ensure mass is conserved when doing integrals over the displaced mesh
   const bool _consistent;
-
-  /// The dictator UserObject for the Porous-Flow simulation
-  const PorousFlowDictator & _dictator_UO;
-
-  /// number of porous-flow variables
-  const unsigned int _num_var;
 
   /// number of displacements supplied (1 in 1D, 2 in 2D, 3 in 3D)
   const unsigned int _ndisp;
@@ -57,7 +49,7 @@ protected:
    * Since the volumetric strain rate depends on derivatives of the displacement variables,
    * this should be multiplied by _grad_phi in kernels
    */
-  MaterialProperty<std::vector<RealGradient> > & _dvol_strain_rate_qp_dvar;
+  MaterialProperty<std::vector<RealGradient>> & _dvol_strain_rate_qp_dvar;
 
   /// The total volumetric strain at the quadpoints
   MaterialProperty<Real> & _vol_total_strain_qp;
@@ -67,7 +59,7 @@ protected:
    * Since the total volumetric strain depends on derivatives of the displacement variables,
    * this should be multiplied by _grad_phi in kernels
    */
-  MaterialProperty<std::vector<RealGradient> > & _dvol_total_strain_qp_dvar;
+  MaterialProperty<std::vector<RealGradient>> & _dvol_total_strain_qp_dvar;
 };
 
-#endif //POROUSFLOWVOLUMETRICSTRAIN_H
+#endif // POROUSFLOWVOLUMETRICSTRAIN_H

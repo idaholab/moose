@@ -14,26 +14,30 @@
 
 #include "ExampleConvection.h"
 
-template<>
-InputParameters validParams<ExampleConvection>()
+template <>
+InputParameters
+validParams<ExampleConvection>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.addRequiredCoupledVar("some_variable", "The gradient of this variable will be used as the velocity vector.");
+  params.addRequiredCoupledVar(
+      "some_variable", "The gradient of this variable will be used as the velocity vector.");
   return params;
 }
 
-ExampleConvection::ExampleConvection(const InputParameters & parameters) :
-    Kernel(parameters),
-    _grad_some_variable(coupledGradient("some_variable"))
-{}
-
-Real ExampleConvection::computeQpResidual()
+ExampleConvection::ExampleConvection(const InputParameters & parameters)
+  : Kernel(parameters), _grad_some_variable(coupledGradient("some_variable"))
 {
-  return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_u[_qp]);
 }
 
-Real ExampleConvection::computeQpJacobian()
+Real
+ExampleConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_phi[_j][_qp]);
+  return _test[_i][_qp] * (_grad_some_variable[_qp] * _grad_u[_qp]);
+}
+
+Real
+ExampleConvection::computeQpJacobian()
+{
+  return _test[_i][_qp] * (_grad_some_variable[_qp] * _grad_phi[_j][_qp]);
 }

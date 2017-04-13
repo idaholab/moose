@@ -6,22 +6,26 @@
 /****************************************************************/
 #include "CrossTermBarrierFunctionMaterial.h"
 
-template<>
-InputParameters validParams<CrossTermBarrierFunctionMaterial>()
+template <>
+InputParameters
+validParams<CrossTermBarrierFunctionMaterial>()
 {
   InputParameters params = validParams<CrossTermBarrierFunctionBase>();
-  params.addClassDescription("Free energy contribution symmetric across interfaces between arbitrary pairs of phases.");
+  params.addClassDescription(
+      "Free energy contribution symmetric across interfaces between arbitrary pairs of phases.");
   return params;
 }
 
-CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputParameters & parameters) :
-    CrossTermBarrierFunctionBase(parameters)
+CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(
+    const InputParameters & parameters)
+  : CrossTermBarrierFunctionBase(parameters)
 {
   // error out if W_ij is not symmetric
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = 0; j < i; ++j)
       if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta * j + i])
-        mooseError("Please supply a symmetric W_ij matrix for CrossTermBarrierFunctionMaterial " << name());
+        mooseError("Please supply a symmetric W_ij matrix for CrossTermBarrierFunctionMaterial ",
+                   name());
 }
 
 void
@@ -59,7 +63,7 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
           (*_prop_dg[j])[_qp] += 4.0 * Wij * ni;
           // second derivatives (diagonal) vanish
           // second derivatives (off-diagonal)
-          (*_prop_d2g[i][j])[_qp] =  4.0 * Wij;
+          (*_prop_d2g[i][j])[_qp] = 4.0 * Wij;
           break;
 
         default:

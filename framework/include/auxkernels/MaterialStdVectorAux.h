@@ -20,7 +20,7 @@
 // Forward declarations
 class MaterialStdVectorAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialStdVectorAux>();
 
 /**
@@ -29,18 +29,14 @@ InputParameters validParams<MaterialStdVectorAux>();
 class MaterialStdVectorAux : public MaterialStdVectorAuxBase<Real>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this object
    */
   MaterialStdVectorAux(const InputParameters & parameters);
 
-  virtual ~MaterialStdVectorAux();
-
 protected:
-  /// Returns the value of the material property for the given index
-  virtual Real getRealValue();
+  virtual Real getRealValue() override;
 
   /// whether or not selected_qp has been set
   const bool _has_selected_qp;
@@ -49,4 +45,4 @@ protected:
   const unsigned int _selected_qp;
 };
 
-#endif //MATERIALSTDVECTORAUX_H
+#endif // MATERIALSTDVECTORAUX_H

@@ -19,7 +19,7 @@
 
 class PostprocessorFunction;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorFunction>();
 
 class PostprocessorFunction : public Function
@@ -33,4 +33,4 @@ protected:
   const PostprocessorValue & _pp;
 };
 
-#endif //POSTPROCESSORFUNCTION_H
+#endif // POSTPROCESSORFUNCTION_H

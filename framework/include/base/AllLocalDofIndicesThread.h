@@ -16,7 +16,7 @@
 #define ALLLOCALDOFINDICESTHREAD_H
 
 #include "Moose.h"
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // libmesh includes
 #include "libmesh/elem_range.h"
@@ -28,7 +28,6 @@ class System;
 class DofMap;
 }
 
-
 /**
  * Grab all the local dof indices for the variables passed in, in the system passed in.
  */
@@ -39,7 +38,7 @@ public:
   // Splitting Constructor
   AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
 
   void join(const AllLocalDofIndicesThread & y);
 
@@ -53,4 +52,4 @@ protected:
   THREAD_ID _tid;
 };
 
-#endif //ALLLOCALDOFINDICESTHREAD_H
+#endif // ALLLOCALDOFINDICESTHREAD_H

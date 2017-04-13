@@ -43,13 +43,17 @@ class MultiMooseEnum : public MooseEnumBase
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
+   * Constructor that takes a list of enumeration values, and a separate string to set a default for
+   * this instance
    * @param names - a list of names for this enumeration
    * @param default_names - the default value for this enumeration instance
-   * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
+   * @param allow_out_of_range - determines whether this enumeration will accept values outside of
+   * it's range of
    *                       defined values.
    */
-  MultiMooseEnum(std::string names, std::string default_names="", bool allow_out_of_range=false);
+  MultiMooseEnum(std::string names,
+                 std::string default_names = "",
+                 bool allow_out_of_range = false);
 
   /**
    * Copy Constructor
@@ -63,8 +67,6 @@ public:
    * @param other_enum - The other enumeration to copy the validity checking data from
    */
   static MultiMooseEnum withNamesFrom(const MooseEnumBase & other_enum);
-
-  virtual ~MultiMooseEnum();
 
   ///@{
   /**
@@ -148,7 +150,6 @@ public:
   MooseEnumIterator end() const { return _current_names.end(); }
   ///@}
 
-
   /**
    * Clear the MultiMooseEnum
    */
@@ -168,8 +169,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const { return !_current_ids.empty(); }
-
+  virtual bool isValid() const override { return !_current_ids.empty(); }
 
   // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -180,10 +180,9 @@ public:
 
 protected:
   /// Check whether any of the current values are deprecated when called
-  virtual void checkDeprecated() const;
+  virtual void checkDeprecated() const override;
 
 private:
-
   /**
    * Private constructor for use by libmesh::Parameters
    */
@@ -198,13 +197,13 @@ private:
   /**
    * Helper method for all inserts and assignment operators
    */
-  template<typename InputIterator>
+  template <typename InputIterator>
   MultiMooseEnum & assign(InputIterator first, InputIterator last, bool append);
 
   /**
    * Helper method for un-assigning enumeration values
    */
-  template<typename InputIterator>
+  template <typename InputIterator>
   void remove(InputIterator first, InputIterator last);
 
   /// The current id

@@ -19,6 +19,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 
 #dependency on solid_mechanics
 SOLID_MECHANICS    := yes
+SKIP_LOADER        := yes
 include $(MODULE_DIR)/modules.mk
 
 # dep apps

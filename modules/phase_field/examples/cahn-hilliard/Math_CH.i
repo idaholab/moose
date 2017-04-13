@@ -47,7 +47,6 @@
 [Materials]
   [./mat]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M   kappa_c'
     prop_values = '1.0 0.5'
   [../]

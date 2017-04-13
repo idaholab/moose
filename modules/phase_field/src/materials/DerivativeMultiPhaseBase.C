@@ -6,39 +6,46 @@
 /****************************************************************/
 #include "DerivativeMultiPhaseBase.h"
 
-template<>
-InputParameters validParams<DerivativeMultiPhaseBase>()
+template <>
+InputParameters
+validParams<DerivativeMultiPhaseBase>()
 {
   InputParameters params = validParams<DerivativeFunctionMaterialBase>();
 
   // Phase materials 1-n
-  params.addRequiredParam<std::vector<MaterialPropertyName> >("fi_names", "List of free energies for the n phases");
-  params.addParam<std::vector<MaterialPropertyName> >("hi_names", "Switching Function Materials that provide h(eta_i)");
+  params.addRequiredParam<std::vector<MaterialPropertyName>>(
+      "fi_names", "List of free energies for the n phases");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "hi_names", "Switching Function Materials that provide h(eta_i)");
 
   // All arguments of the phase free energies
   params.addCoupledVar("args", "Arguments of the fi free energies - use vector coupling");
-  params.addCoupledVar("displacement_gradients", "Vector of displacement gradient variables (see Modules/PhaseField/DisplacementGradients action)");
+  params.addCoupledVar("displacement_gradients",
+                       "Vector of displacement gradient variables (see "
+                       "Modules/PhaseField/DisplacementGradients "
+                       "action)");
 
   // Barrier
-  params.addParam<MaterialPropertyName>("g", "g", "Barrier Function Material that provides g(eta_i)");
+  params.addParam<MaterialPropertyName>(
+      "g", "g", "Barrier Function Material that provides g(eta_i)");
   params.addParam<Real>("W", 0.0, "Energy barrier for the phase transformation from A to B");
 
   return params;
 }
 
-DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & parameters) :
-    DerivativeFunctionMaterialBase(parameters),
+DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & parameters)
+  : DerivativeFunctionMaterialBase(parameters),
     _eta_index(_nargs, -1),
     _num_etas(coupledComponents("etas")),
     _eta_names(_num_etas),
     _eta_vars(_num_etas),
-    _fi_names(getParam<std::vector<MaterialPropertyName> >("fi_names")),
+    _fi_names(getParam<std::vector<MaterialPropertyName>>("fi_names")),
     _num_fi(_fi_names.size()),
     _prop_Fi(_num_fi),
     _prop_dFi(_num_fi),
     _prop_d2Fi(_num_fi),
     _prop_d3Fi(_num_fi),
-    _hi_names(getParam<std::vector<MaterialPropertyName> >("hi_names")),
+    _hi_names(getParam<std::vector<MaterialPropertyName>>("hi_names")),
     _num_hi(_hi_names.size()),
     _hi(_num_hi),
     _g(getMaterialProperty<Real>("g")),
@@ -49,7 +56,7 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
 {
   // check passed in parameter vectors
   if (_num_fi != _num_hi)
-    mooseError("Need to pass in as many hi_names as fi_names in DerivativeMultiPhaseBase " << name());
+    mooseError("Need to pass in as many hi_names as fi_names in DerivativeMultiPhaseBase ", name());
 
   // get order parameter names and libmesh variable names, set barrier function derivatives
   for (unsigned int i = 0; i < _num_etas; ++i)
@@ -75,7 +82,8 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
       {
         _d3g[i][j].resize(_num_etas);
         for (unsigned int k = 0; k < _num_etas; ++k)
-          _d3g[i][j][k] = &getMaterialPropertyDerivative<Real>("g", _eta_names[i], _eta_names[j], _eta_names[k]);
+          _d3g[i][j][k] = &getMaterialPropertyDerivative<Real>(
+              "g", _eta_names[i], _eta_names[j], _eta_names[k]);
       }
     }
   }
@@ -102,13 +110,16 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
 
       for (unsigned int j = 0; j < _nargs; ++j)
       {
-        _prop_d2Fi[n][i][j] = &getMaterialPropertyDerivative<Real>(_fi_names[n], _arg_names[i], _arg_names[j]);
+        _prop_d2Fi[n][i][j] =
+            &getMaterialPropertyDerivative<Real>(_fi_names[n], _arg_names[i], _arg_names[j]);
 
-        if (_third_derivatives) {
+        if (_third_derivatives)
+        {
           _prop_d3Fi[n][i][j].resize(_nargs);
 
           for (unsigned int k = 0; k < _nargs; ++k)
-            _prop_d3Fi[n][i][j][k] = &getMaterialPropertyDerivative<Real>(_fi_names[n], _arg_names[i], _arg_names[j], _arg_names[k]);
+            _prop_d3Fi[n][i][j][k] = &getMaterialPropertyDerivative<Real>(
+                _fi_names[n], _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
     }

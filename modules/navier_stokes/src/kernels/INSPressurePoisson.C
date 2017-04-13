@@ -8,11 +8,15 @@
 #include "INSPressurePoisson.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSPressurePoisson>()
+template <>
+InputParameters
+validParams<INSPressurePoisson>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the pressure Poisson solve which is part of the "
+                             "'split' scheme used for solving the incompressible Navier-Stokes "
+                             "equations.");
   // Coupled variables
   params.addRequiredCoupledVar("a1", "x-acceleration");
   params.addCoupledVar("a2", "y-acceleration"); // only required in 2D and 3D
@@ -24,29 +28,26 @@ InputParameters validParams<INSPressurePoisson>()
   return params;
 }
 
+INSPressurePoisson::INSPressurePoisson(const InputParameters & parameters)
+  : Kernel(parameters),
 
+    // Gradients
+    _grad_a1(coupledGradient("a1")),
+    _grad_a2(_mesh.dimension() >= 2 ? coupledGradient("a2") : _grad_zero),
+    _grad_a3(_mesh.dimension() == 3 ? coupledGradient("a3") : _grad_zero),
 
-INSPressurePoisson::INSPressurePoisson(const InputParameters & parameters) :
-  Kernel(parameters),
+    // Variable numberings
+    _a1_var_number(coupled("a1")),
+    _a2_var_number(_mesh.dimension() >= 2 ? coupled("a2") : libMesh::invalid_uint),
+    _a3_var_number(_mesh.dimension() == 3 ? coupled("a3") : libMesh::invalid_uint),
 
-  // Gradients
-  _grad_a1(coupledGradient("a1")),
-  _grad_a2(_mesh.dimension() >= 2 ? coupledGradient("a2") : _grad_zero),
-  _grad_a3(_mesh.dimension() == 3 ? coupledGradient("a3") : _grad_zero),
-
-  // Variable numberings
-  _a1_var_number(coupled("a1")),
-  _a2_var_number(_mesh.dimension() >= 2 ? coupled("a2") : libMesh::invalid_uint),
-  _a3_var_number(_mesh.dimension() == 3 ? coupled("a3") : libMesh::invalid_uint),
-
-  // Required parameters
-  _rho(getParam<Real>("rho"))
+    // Required parameters
+    _rho(getParam<Real>("rho"))
 {
 }
 
-
-
-Real INSPressurePoisson::computeQpResidual()
+Real
+INSPressurePoisson::computeQpResidual()
 {
   // Laplacian part
   Real laplacian_part = _grad_u[_qp] * _grad_test[_i][_qp];
@@ -58,18 +59,14 @@ Real INSPressurePoisson::computeQpResidual()
   return laplacian_part + div_part;
 }
 
-
-
-
-Real INSPressurePoisson::computeQpJacobian()
+Real
+INSPressurePoisson::computeQpJacobian()
 {
   return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
 
-
-
-
-Real INSPressurePoisson::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSPressurePoisson::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _a1_var_number)
     return _rho * _grad_phi[_j][_qp](0) * _test[_i][_qp];
@@ -83,4 +80,3 @@ Real INSPressurePoisson::computeQpOffDiagJacobian(unsigned jvar)
   else
     return 0;
 }
-

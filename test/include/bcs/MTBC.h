@@ -17,10 +17,10 @@
 #include "IntegratedBC.h"
 #include "MaterialProperty.h"
 
-//Forward Declarations
+// Forward Declarations
 class MTBC;
 
-template<>
+template <>
 InputParameters validParams<MTBC>();
 
 /**
@@ -45,4 +45,4 @@ private:
   const MaterialProperty<Real> & _mat;
 };
 
-#endif //NEUMANNBC_H
+#endif // NEUMANNBC_H

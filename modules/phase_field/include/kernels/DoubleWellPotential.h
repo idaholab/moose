@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class DoubleWellPotential;
 
-template<>
+template <>
 InputParameters validParams<DoubleWellPotential>();
 
 /**
@@ -27,4 +27,4 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
 };
 
-#endif //DOUBLEWELLPOTENTIAL_H
+#endif // DOUBLEWELLPOTENTIAL_H

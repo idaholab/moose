@@ -19,18 +19,18 @@
 
 class BlockDeleter;
 
-template<>
+template <>
 InputParameters validParams<BlockDeleter>();
 
 class BlockDeleter : public ElementDeleterBase
 {
- public:
+public:
   BlockDeleter(const InputParameters & parameters);
 
-  virtual bool shouldDelete(const Elem * elem);
+protected:
+  virtual bool shouldDelete(const Elem * elem) override;
 
- private:
-
+private:
   ///Defines the block to be removed
   SubdomainID _block_id;
 };

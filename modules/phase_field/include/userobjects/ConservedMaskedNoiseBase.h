@@ -9,10 +9,12 @@
 
 #include "ConservedNoiseInterface.h"
 
-//Forward Declarations
+#include <unordered_map>
+
+// Forward Declarations
 class ConservedMaskedNoiseBase;
 
-template<>
+template <>
 InputParameters validParams<ConservedMaskedNoiseBase>();
 
 /**
@@ -40,10 +42,9 @@ public:
   Real getQpValue(dof_id_type element_id, unsigned int qp) const;
 
 protected:
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<std::pair<Real, Real> > > _random_data;
+  std::unordered_map<dof_id_type, std::vector<std::pair<Real, Real>>> _random_data;
 
   const MaterialProperty<Real> & _mask;
 };
 
-
-#endif //CONSERVEDMASKEDNOISEBASE_H
+#endif // CONSERVEDMASKEDNOISEBASE_H

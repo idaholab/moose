@@ -16,6 +16,7 @@
 #define SUBDOMAINBOUNDINGBOX_H
 
 // MOOSE includes
+#include "MooseEnum.h"
 #include "MeshModifier.h"
 
 // libmesh includes
@@ -24,7 +25,7 @@
 // Forward declerations
 class SubdomainBoundingBox;
 
-template<>
+template <>
 InputParameters validParams<SubdomainBoundingBox>();
 
 /**
@@ -33,25 +34,15 @@ InputParameters validParams<SubdomainBoundingBox>();
 class SubdomainBoundingBox : public MeshModifier
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
    */
   SubdomainBoundingBox(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~SubdomainBoundingBox();
-
-  /**
-   * Perform the actual subdomain modification
-   */
-  virtual void modify();
+  virtual void modify() override;
 
 private:
-
   /// ID location (inside of outside of box)
   MooseEnum _location;
 
@@ -62,4 +53,4 @@ private:
   MeshTools::BoundingBox _bounding_box;
 };
 
-#endif //SUBDOMAINBOUDINGBOX_H
+#endif // SUBDOMAINBOUDINGBOX_H

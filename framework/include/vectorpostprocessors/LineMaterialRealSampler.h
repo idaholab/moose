@@ -21,15 +21,14 @@
 // Forward Declarations
 class LineMaterialRealSampler;
 
-template<>
+template <>
 InputParameters validParams<LineMaterialRealSampler>();
 
 /**
  * This class samples Real material properties for the integration points
  * in all elements that are intersected by a user-defined line.
  */
-class LineMaterialRealSampler :
-  public LineMaterialSamplerBase<Real>
+class LineMaterialRealSampler : public LineMaterialSamplerBase<Real>
 {
 public:
   /**
@@ -39,8 +38,6 @@ public:
    */
   LineMaterialRealSampler(const InputParameters & parameters);
 
-  virtual ~LineMaterialRealSampler() {}
-
   /**
    * Reduce the material property to a scalar for output
    * In this case, the material property is a Real already, so just return it.
@@ -48,7 +45,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(const Real & property, const Point * curr_point);
+  virtual Real getScalarFromProperty(const Real & property, const Point & curr_point) override;
 };
 
 #endif

@@ -13,7 +13,7 @@
 /**
  * Automatically generates all variables to model a polycrystal with op_num orderparameters
  */
-class PolycrystalVariablesAction: public Action
+class PolycrystalVariablesAction : public Action
 {
 public:
   PolycrystalVariablesAction(const InputParameters & params);
@@ -21,13 +21,11 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  unsigned int _op_num;
-  std::string _var_name_base;
+  const unsigned int _op_num;
+  const std::string _var_name_base;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalVariablesAction>();
 
-#endif //POLYCRYSTALVARIABLESACTION_H
+#endif // POLYCRYSTALVARIABLESACTION_H

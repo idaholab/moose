@@ -3,9 +3,8 @@
     type = 'Exodiff'
     input = 'crack_one_elem.i'
     exodiff = 'crack_one_elem_out.e'
-    abs_zero = 1e-08
+    custom_cmp = 'crack_one_elem.cmp'
     scale_refine = 1
-    compiler = 'GCC CLANG'
     allow_warnings = true
   [../]
   [./sent_test]
@@ -15,5 +14,8 @@
     abs_zero = 1e-08
     scale_refine = 1
     compiler = 'GCC CLANG'
+    # This test has been known to timeout in debug mode, so it's
+    # probably just a bit too expensive to be a regression test.
+    method = 'OPT'
   [../]
 []

@@ -21,15 +21,13 @@
 // Forward Declarations
 class LineValueSampler;
 
-template<>
+template <>
 InputParameters validParams<LineValueSampler>();
 
 class LineValueSampler : public PointSamplerBase
 {
 public:
   LineValueSampler(const InputParameters & parameters);
-
-  virtual ~LineValueSampler() {}
 
   /**
    * Helper function to generate the list of points along a line and a unique ID for each point.
@@ -39,7 +37,11 @@ public:
    * @param points The vector of points to fill in
    * @param ids The vector of ids to fill in
    */
-  static void generatePointsAndIDs(const Point & start_point, const Point & end_point, unsigned int num_points, std::vector<Point> & points, std::vector<Real> & ids);
+  static void generatePointsAndIDs(const Point & start_point,
+                                   const Point & end_point,
+                                   unsigned int num_points,
+                                   std::vector<Point> & points,
+                                   std::vector<Real> & ids);
 };
 
 #endif

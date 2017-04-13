@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class LangmuirMaterial;
 
-template<>
+template <>
 InputParameters validParams<LangmuirMaterial>();
 
 /**
@@ -25,13 +25,9 @@ public:
   LangmuirMaterial(const InputParameters & parameters);
 
 protected:
-
-  /// computes mass flow rates and derivatives
-  virtual void computeQpProperties();
-
+  virtual void computeQpProperties() override;
 
 private:
-
   /// reciprocal of desorption time constant
   const VariableValue * _one_over_de_time_const;
 
@@ -39,10 +35,10 @@ private:
   const VariableValue * _one_over_ad_time_const;
 
   /// langmuir density
-  Real _langmuir_dens;
+  const Real _langmuir_dens;
 
   /// langmuir pressure
-  Real _langmuir_p;
+  const Real _langmuir_p;
 
   /// concentration of adsorbed fluid in matrix
   const VariableValue * _conc;
@@ -60,4 +56,4 @@ private:
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif //LANGMUIRMATERIAL_H
+#endif // LANGMUIRMATERIAL_H

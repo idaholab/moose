@@ -8,15 +8,12 @@
 #ifndef POROUSFLOWJOINER_H
 #define POROUSFLOWJOINER_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
+#include "PorousFlowMaterialVectorBase.h"
 
-#include "PorousFlowDictator.h"
-
-//Forward Declarations
+// Forward Declarations
 class PorousFlowJoiner;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowJoiner>();
 
 /**
@@ -37,18 +34,14 @@ InputParameters validParams<PorousFlowJoiner>();
  *
  * Only values at the nodes are used - not at the quadpoints
  */
-class PorousFlowJoiner : public DerivativeMaterialInterface<Material>
+class PorousFlowJoiner : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowJoiner(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
-
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator_UO;
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// Name of (dummy) pressure variable
   const VariableName _pressure_variable_name;
@@ -62,38 +55,26 @@ protected:
   /// Name of (dummy) mass fraction variable
   const VariableName _mass_fraction_variable_name;
 
-  /// Number of phases
-  const unsigned int _num_phases;
-
-  /// Number of porous flow variables
-  const unsigned int _num_var;
-
   /// Name of material property to be joined
   const std::string _pf_prop;
 
   /// Whether to include old variables
   const bool _include_old;
 
-  /// If _at_qps=true then all quantities are computed at quadpoints, otherwise at the nodes
-  const bool _at_qps;
-
   /// Derivatives of porepressure variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
 
   /// Derivatives of saturation variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
 
   /// Derivatives of temperature variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
 
   /// computed property of the phase
-  MaterialProperty<std::vector<Real> > & _property;
-
-  /// old value of property of the phase
-  MaterialProperty<std::vector<Real> > * const _property_old;
+  MaterialProperty<std::vector<Real>> & _property;
 
   /// d(property)/d(PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dproperty_dvar;
+  MaterialProperty<std::vector<std::vector<Real>>> & _dproperty_dvar;
 
   /// property of each phase
   std::vector<const MaterialProperty<Real> *> _phase_property;
@@ -108,4 +89,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dphase_property_dt;
 };
 
-#endif //POROUSFLOWJOINER_H
+#endif // POROUSFLOWJOINER_H

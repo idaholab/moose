@@ -24,13 +24,13 @@
     type = DirichletBC
     variable = pressure
     boundary = left
-    value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm balls.
+    value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm spheres.
   [../]
   [./outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
-    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm balls
+    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
   [../]
 []
 
@@ -39,7 +39,6 @@
     type = GenericConstantMaterial
     prop_values = '0.8451e-9 7.98e-4'
     prop_names = 'permeability viscosity'
-    block = 0
   [../]
 []
 

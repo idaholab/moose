@@ -15,29 +15,23 @@ using namespace libMesh;
 class XFEMGeometricCut3D : public XFEMGeometricCut
 {
 public:
-
   XFEMGeometricCut3D(Real t0, Real t1);
 
   virtual ~XFEMGeometricCut3D();
 
   virtual bool active(Real time);
 
-  virtual bool cutElementByGeometry(const Elem* elem,
-                                    std::vector<CutEdge> & cut_edges,
-                                    Real time);
-  virtual bool cutElementByGeometry(const Elem* elem,
-                                    std::vector<CutFace> & cut_faces,
-                                    Real time);
+  virtual bool cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time);
+  virtual bool cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time);
 
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_edges,
-                                    std::vector<CutEdge> & cut_edges,
-                                    Real time);
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_faces,
-                                    std::vector<CutFace> & cut_faces,
-                                    Real time);
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
+                                     std::vector<CutEdge> & cut_edges,
+                                     Real time);
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
+                                     std::vector<CutFace> & cut_faces,
+                                     Real time);
 
 protected:
-
   Point _center;
   Point _normal;
 
@@ -49,6 +43,5 @@ protected:
 
   Real getRelativePosition(const Point & p1, const Point & p2, const Point & p);
 };
-
 
 #endif

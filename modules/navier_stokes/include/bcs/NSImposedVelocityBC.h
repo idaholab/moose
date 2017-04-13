@@ -10,12 +10,11 @@
 // The base class definition (part of MOOSE)
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSImposedVelocityBC;
 
-
 // Specialization required of all user-level Moose objects
-template<>
+template <>
 InputParameters validParams<NSImposedVelocityBC>();
 
 class NSImposedVelocityBC : public NodalBC
@@ -24,7 +23,6 @@ public:
   NSImposedVelocityBC(const InputParameters & parameters);
 
 protected:
-
   // NodalBC's can (currently) only override the computeQpResidual function,
   // the computeQpJacobian() function automatically assembles a "1" onto the main
   // diagonal for this DoF.

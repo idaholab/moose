@@ -1,0 +1,26 @@
+[Tests]
+  [./random_pps]
+    type = CSVDiff
+    input = random_pps.i
+    csvdiff = random_pps_out.csv
+    group = random_pps
+  [../]
+  [./random_pps_half_transient]
+    type = RunApp
+    input = random_pps.i
+    cli_args = 'Outputs/checkpoint=true --half-transient'
+    recover = false
+    prereq = random_pps
+    group = random_pps
+  [../]
+  [./random_pps_recover]
+    type = CSVDiff
+    input = random_pps.i
+    csvdiff = random_pps_out.csv
+    cli_args = '--recover'
+    recover = false
+    prereq = random_pps_half_transient
+    delete_output_before_running = false
+    group = random_pps
+  [../]
+[]

@@ -14,16 +14,16 @@
 
 #include "BadCachingPointSource.h"
 
-template<>
-InputParameters validParams<BadCachingPointSource>()
+template <>
+InputParameters
+validParams<BadCachingPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   return params;
 }
 
-BadCachingPointSource::BadCachingPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
-    _called(0)
+BadCachingPointSource::BadCachingPointSource(const InputParameters & parameters)
+  : DiracKernel(parameters), _called(0)
 {
 }
 

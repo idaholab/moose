@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "CahnHilliardAniso.h"
 
-template<>
-InputParameters validParams<CahnHilliardAniso>()
+template <>
+InputParameters
+validParams<CahnHilliardAniso>()
 {
   InputParameters params = CahnHilliardBase<RealTensorValue>::validParams();
-  params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and a tensor (anisotropic) mobility");
+  params.addClassDescription("Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and "
+                             "a tensor (anisotropic) mobility");
   return params;
 }
 
-CahnHilliardAniso::CahnHilliardAniso(const InputParameters & parameters) :
-    CahnHilliardBase<RealTensorValue>(parameters)
+CahnHilliardAniso::CahnHilliardAniso(const InputParameters & parameters)
+  : CahnHilliardBase<RealTensorValue>(parameters)
 {
 }

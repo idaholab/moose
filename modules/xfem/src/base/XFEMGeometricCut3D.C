@@ -11,25 +11,17 @@
 #include "XFEMFuncs.h"
 #include "libmesh/string_to_enum.h"
 
-XFEMGeometricCut3D::XFEMGeometricCut3D(Real t0, Real t1) :
-    XFEMGeometricCut(t0,t1),
-    _center(),
-    _normal()
+XFEMGeometricCut3D::XFEMGeometricCut3D(Real t0, Real t1)
+  : XFEMGeometricCut(t0, t1), _center(), _normal()
 {
 }
 
-XFEMGeometricCut3D::~XFEMGeometricCut3D()
-{
-}
+XFEMGeometricCut3D::~XFEMGeometricCut3D() {}
+
+bool XFEMGeometricCut3D::active(Real /*time*/) { return true; }
 
 bool
-XFEMGeometricCut3D::active(Real /*time*/)
-{
-  return true;
-}
-
-bool
-XFEMGeometricCut3D::cutElementByGeometry(const Elem* /*elem*/,
+XFEMGeometricCut3D::cutElementByGeometry(const Elem * /*elem*/,
                                          std::vector<CutEdge> & /*cut_edges*/,
                                          Real /*time*/)
 {
@@ -38,19 +30,20 @@ XFEMGeometricCut3D::cutElementByGeometry(const Elem* /*elem*/,
 }
 
 bool
-XFEMGeometricCut3D::cutElementByGeometry(const Elem* elem,
+XFEMGeometricCut3D::cutElementByGeometry(const Elem * elem,
                                          std::vector<CutFace> & cut_faces,
                                          Real /*time*/)
-//TODO: Time evolving cuts not yet supported in 3D (hence the lack of use of the time variable)
+// TODO: Time evolving cuts not yet supported in 3D (hence the lack of use of the time variable)
 {
   bool cut_elem = false;
 
   for (unsigned int i = 0; i < elem->n_sides(); ++i)
   {
     // This returns the lowest-order type of side.
-    UniquePtr<Elem> curr_side = elem->side(i);
+    std::unique_ptr<Elem> curr_side = elem->side(i);
     if (curr_side->dim() != 2)
-      mooseError("In cutElementByGeometry dimension of side must be 2, but it is " << curr_side->dim());
+      mooseError("In cutElementByGeometry dimension of side must be 2, but it is ",
+                 curr_side->dim());
     unsigned int n_edges = curr_side->n_sides();
 
     std::vector<unsigned int> cut_edges;
@@ -59,10 +52,12 @@ XFEMGeometricCut3D::cutElementByGeometry(const Elem* elem,
     for (unsigned int j = 0; j < n_edges; j++)
     {
       // This returns the lowest-order type of side.
-      UniquePtr<Elem> curr_edge = curr_side->side(j);
+      std::unique_ptr<Elem> curr_edge = curr_side->side(j);
       if (curr_edge->type() != EDGE2)
-        mooseError("In cutElementByGeometry face edge must be EDGE2, but type is: " << libMesh::Utility::enum_to_string(curr_edge->type())
-                   << " base element type is: " << libMesh::Utility::enum_to_string(elem->type()));
+        mooseError("In cutElementByGeometry face edge must be EDGE2, but type is: ",
+                   libMesh::Utility::enum_to_string(curr_edge->type()),
+                   " base element type is: ",
+                   libMesh::Utility::enum_to_string(elem->type()));
       Node * node1 = curr_edge->get_node(0);
       Node * node2 = curr_edge->get_node(1);
 
@@ -91,7 +86,7 @@ XFEMGeometricCut3D::cutElementByGeometry(const Elem* elem,
 }
 
 bool
-XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point> > & /*frag_edges*/,
+XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
                                           std::vector<CutEdge> & /*cut_edges*/,
                                           Real /*time*/)
 {
@@ -99,13 +94,12 @@ XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point> > & /*f
   return false;
 }
 
-
 bool
-XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point> > & /*frag_faces*/,
+XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
                                           std::vector<CutFace> & /*cut_faces*/,
                                           Real /*time*/)
 {
-  //TODO: Need this for branching in 3D
+  // TODO: Need this for branching in 3D
   mooseError("cutFragmentByGeometry not yet implemented for 3D mesh cutting");
   return false;
 }
@@ -118,11 +112,13 @@ XFEMGeometricCut3D::intersectWithEdge(const Point & p1, const Point & p2, Point 
   double plane_normal[3] = {_normal(0), _normal(1), _normal(2)};
   double edge_point1[3] = {p1(0), p1(1), p1(2)};
   double edge_point2[3] = {p2(0), p2(1), p2(2)};
-  double cut_point[3] = {0.0,0.0,0.0};
+  double cut_point[3] = {0.0, 0.0, 0.0};
 
-  if (Xfem::plane_normal_line_exp_int_3d(plane_point, plane_normal, edge_point1, edge_point2, cut_point) == 1) {
+  if (Xfem::plane_normal_line_exp_int_3d(
+          plane_point, plane_normal, edge_point1, edge_point2, cut_point) == 1)
+  {
     Point temp_p(cut_point[0], cut_point[1], cut_point[2]);
-    if ( isInsideCutPlane(temp_p) && isInsideEdge(p1, p2, temp_p) )
+    if (isInsideCutPlane(temp_p) && isInsideEdge(p1, p2, temp_p))
     {
       pint = temp_p;
       has_intersection = true;

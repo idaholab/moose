@@ -21,19 +21,18 @@
 #include "FEProblem.h"
 #include "AuxKernel.h"
 
-
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblem & fe_problem,
-                                                   AuxiliarySystem & sys,
-                                                   const MooseObjectWarehouse<AuxKernel> & storage) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _aux_sys(sys),
+ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
+                                                   const MooseObjectWarehouse<AuxKernel> & storage)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
 }
 
 // Splitting Constructor
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x,
+                                                   Threads::split split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {
@@ -47,9 +46,9 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -58,16 +57,16 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   if (node->processor_id() == _fe_problem.processor_id())
   {
     // Get a map of all active block restricted AuxKernel objects
-    const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > > & kernels = _storage.getActiveBoundaryObjects(_tid);
+    const auto & kernels = _storage.getActiveBoundaryObjects(_tid);
 
     // Operate on the node BoundaryID only
-    const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = kernels.find(boundary_id);
+    const auto iter = kernels.find(boundary_id);
     if (iter != kernels.end())
     {
-          _fe_problem.reinitNodeFace(node, boundary_id, _tid);
+      _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 
-          for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
-            (*aux_it)->compute();
+      for (const auto & aux : iter->second)
+        aux->compute();
     }
   }
 
@@ -75,9 +74,9 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     // update the solution vector
-    for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
+    for (const auto & it : _aux_sys._nodal_vars[_tid])
     {
-      MooseVariable * var = it->second;
+      MooseVariable * var = it.second;
       var->insert(_aux_sys.solution());
     }
   }

@@ -9,11 +9,11 @@
 
 #include "SolidMechanicsMaterial.h"
 
-//Forward Declarations
+// Forward Declarations
 class LinearIsotropicMaterial;
 class SymmElasticityTensor;
 
-template<>
+template <>
 InputParameters validParams<LinearIsotropicMaterial>();
 
 /**
@@ -29,8 +29,7 @@ public:
 protected:
   virtual void computeProperties();
 
-  virtual void computeStress(const SymmTensor & strain,
-                             SymmTensor & stress);
+  virtual void computeStress(const SymmTensor & strain, SymmTensor & stress);
 
   /**
    * Will always be passed to full symmetric strain tensor.
@@ -50,7 +49,6 @@ protected:
 
   Real _pi;
   Real _tol;
-
 };
 
-#endif //LINEARISOTROPICMATERIAL_H
+#endif // LINEARISOTROPICMATERIAL_H

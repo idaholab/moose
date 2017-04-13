@@ -4,14 +4,5 @@
     type = RunException
     input = error.i
     expect_err = "The following material properties are declared on block 10 by multiple materials:"
-    cli_args = "--error"
-  [../]
-
-  [./warning]
-    # Test error when a property is declared on multiple blocks by different matrials.
-    type = RunApp
-    input = warning.i
-    expect_out = "The following material properties are declared on block 0 by multiple materials"
-    allow_warnings = true
   [../]
 []

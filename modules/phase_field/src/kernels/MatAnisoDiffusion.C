@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "MatAnisoDiffusion.h"
 
-template<>
-InputParameters validParams<MatAnisoDiffusion>()
+template <>
+InputParameters
+validParams<MatAnisoDiffusion>()
 {
   InputParameters params = MatDiffusionBase<RealTensorValue>::validParams();
-  params.addClassDescription("Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property");
+  params.addClassDescription(
+      "Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property");
   return params;
 }
 
-MatAnisoDiffusion::MatAnisoDiffusion(const InputParameters & parameters) :
-    MatDiffusionBase<RealTensorValue>(parameters)
+MatAnisoDiffusion::MatAnisoDiffusion(const InputParameters & parameters)
+  : MatDiffusionBase<RealTensorValue>(parameters)
 {
 }

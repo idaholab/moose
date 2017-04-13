@@ -13,7 +13,7 @@
 /**
  * Automatically generates all variables to model a polycrystal with op_num orderparameters
  */
-class Tricrystal2CircleGrainsICAction: public Action
+class Tricrystal2CircleGrainsICAction : public Action
 {
 public:
   Tricrystal2CircleGrainsICAction(const InputParameters & params);
@@ -25,10 +25,9 @@ private:
 
   std::string _var_name_base;
   unsigned int _op_num;
-
 };
 
-template<>
+template <>
 InputParameters validParams<Tricrystal2CircleGrainsICAction>();
 
-#endif //TRICRYSTAL2CIRCLEGRAINSICACTION_H
+#endif // TRICRYSTAL2CIRCLEGRAINSICACTION_H

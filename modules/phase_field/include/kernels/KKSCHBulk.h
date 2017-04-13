@@ -9,10 +9,10 @@
 
 #include "CHBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSCHBulk;
 
-template<>
+template <>
 InputParameters validParams<KKSCHBulk>();
 
 /**
@@ -52,7 +52,7 @@ private:
   std::vector<const MaterialProperty<Real> *> _second_derivatives;
 
   /// Second derivatives of dFa/dca with respect to all coupled variables
-  std::vector<std::vector<const MaterialProperty<Real> *> > _third_derivatives;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _third_derivatives;
 
   /// Derivatives of \f$ d^2Fa/dca^2 \f$ with respect to all coupled variables
   std::vector<const MaterialProperty<Real> *> _third_derivatives_ca;
@@ -70,4 +70,4 @@ private:
   const MaterialProperty<Real> & _second_derivative_Fb;
 };
 
-#endif //KKSCHBULK_H
+#endif // KKSCHBULK_H

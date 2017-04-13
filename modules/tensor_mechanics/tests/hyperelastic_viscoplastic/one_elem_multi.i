@@ -232,7 +232,3 @@
   exodus = true
   csv = false
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]

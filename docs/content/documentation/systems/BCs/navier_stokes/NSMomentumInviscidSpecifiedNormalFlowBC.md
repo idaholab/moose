@@ -1,0 +1,7 @@
+!description /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+
+!parameters /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+
+!inputfiles /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+
+!childobjects /BCs/NSMomentumInviscidSpecifiedNormalFlowBC

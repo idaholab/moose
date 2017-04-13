@@ -446,15 +446,15 @@ def windows_post(opts, pkgs):
 
 ''' Execute Git with the given arguments '''
 def git(*args):
-   return subprocess.check_call(['git'] + list(args))
+    return subprocess.check_call(['git'] + list(args))
 
 ''' Execute the sh command with the given arguments '''
 def executeShellScript(*args):
-   return subprocess.check_call(['sh'] + list(args))
+    return subprocess.check_call(['sh'] + list(args))
 
 ''' Execute make with the given arguments '''
 def executeMake(*args):
-   return subprocess.check_call(['make'] + list(args))
+    return subprocess.check_call(['make'] + list(args))
 
 def main():
     """ Run the full installer. """
@@ -485,10 +485,10 @@ def main():
     # Clone ASIO and kick off a Moose build
     os.chdir(moose_dir+"/framework/contrib/")
     if (not os.path.exists("asio")):
-       git("clone", "https://github.com/chriskohlhoff/asio")
-       os.chdir("asio")
-       subprocess.check_call("mv asio/include .", shell=True)
-       subprocess.check_call("rm -rf asio", shell=True)
+        git("clone", "https://github.com/chriskohlhoff/asio")
+        os.chdir("asio")
+        subprocess.check_call("mv asio/include .", shell=True)
+        subprocess.check_call("rm -rf asio", shell=True)
 
     os.chdir(moose_dir)
     executeShellScript('scripts/update_and_rebuild_libmesh.sh', '--enable-cxx11')

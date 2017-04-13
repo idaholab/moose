@@ -9,8 +9,7 @@
 
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class Function;
 
 /**
@@ -44,10 +43,9 @@ protected:
 
   MaterialProperty<Real> & _specific_heat;
   Function * const _specific_heat_temperature_function;
-
 };
 
-template<>
+template <>
 InputParameters validParams<AnisoHeatConductionMaterial>();
 
-#endif //ANISOHEATCONDUCTIONMATERIAL_H
+#endif // ANISOHEATCONDUCTIONMATERIAL_H

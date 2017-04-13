@@ -15,23 +15,20 @@
 #ifndef LAPLACIANJUMPINDICATOR_H
 #define LAPLACIANJUMPINDICATOR_H
 
-#include "JumpIndicator.h"
+#include "InternalSideIndicator.h"
 
 class LaplacianJumpIndicator;
 
-template<>
+template <>
 InputParameters validParams<LaplacianJumpIndicator>();
 
-class LaplacianJumpIndicator :
-  public JumpIndicator
+class LaplacianJumpIndicator : public InternalSideIndicator
 {
 public:
   LaplacianJumpIndicator(const InputParameters & parameters);
-  virtual ~LaplacianJumpIndicator(){};
 
 protected:
-
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   const VariableSecond & _second_u;
   const VariableSecond & _second_u_neighbor;

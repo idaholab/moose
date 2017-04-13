@@ -1,0 +1,22 @@
+[Tests]
+  [./magnitude]
+    type = ImageDiff
+    command = vector_magnitude.py
+    imagediff = 'vector_magnitude.png'
+    allowed_linux = 0.975
+  [../]
+
+  [./x_component]
+    type = ImageDiff
+    command = vector_x.py
+    imagediff = 'vector_x.png'
+    allowed_linux = 0.965
+  [../]
+
+  [./y_component]
+    type = ImageDiff
+    command = vector_y.py
+    imagediff = 'vector_y.png'
+    allowed_linux = 0.965
+  [../]
+[]

@@ -51,7 +51,6 @@
 [Materials]
   [./multibarrier]
     type = MultiBarrierFunctionMaterial
-    block = 0
     etas = 'eta1 eta2'
     function_name = g
     outputs = exodus

@@ -23,6 +23,10 @@
   [../]
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [AuxVariables]
   [./stress_xx]      # stress aux variables are defined for output; this is a way to get integration point variables to the output file
     order = CONSTANT

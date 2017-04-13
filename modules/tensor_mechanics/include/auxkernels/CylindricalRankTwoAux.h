@@ -18,7 +18,7 @@
  */
 class CylindricalRankTwoAux;
 
-template<>
+template <>
 InputParameters validParams<CylindricalRankTwoAux>();
 
 class CylindricalRankTwoAux : public AuxKernel
@@ -35,4 +35,4 @@ protected:
   const Point _center_point;
 };
 
-#endif //CYLINDRICALRANKTWOAUX_H
+#endif // CYLINDRICALRANKTWOAUX_H

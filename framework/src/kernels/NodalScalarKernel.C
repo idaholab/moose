@@ -13,37 +13,37 @@
 /****************************************************************/
 
 #include "NodalScalarKernel.h"
-#include "SystemBase.h"
-#include "Assembly.h"
 
-template<>
-InputParameters validParams<NodalScalarKernel>()
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariableScalar.h"
+#include "SystemBase.h"
+
+template <>
+InputParameters
+validParams<NodalScalarKernel>()
 {
   InputParameters params = validParams<ScalarKernel>();
-  params.addRequiredParam<std::vector<dof_id_type> >("nodes", "Node ids");
+  params.addRequiredParam<std::vector<dof_id_type>>("nodes", "Node ids");
   return params;
 }
 
-NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters) :
-    ScalarKernel(parameters),
+NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters)
+  : ScalarKernel(parameters),
     Coupleable(this, true),
     MooseVariableDependencyInterface(),
-    _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
+    _node_ids(getParam<std::vector<dof_id_type>>("nodes"))
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
-}
-
-NodalScalarKernel::~NodalScalarKernel()
-{
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
 
 void
 NodalScalarKernel::reinit()
 {
-  _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
+  _subproblem.reinitNodes(_node_ids, _tid); // compute variables at nodes
   _assembly.prepareOffDiagScalar();
 }
 

@@ -9,12 +9,11 @@
 
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSImposedVelocityDirectionBC;
 
-
 // Specialization required of all user-level Moose objects
-template<>
+template <>
 InputParameters validParams<NSImposedVelocityDirectionBC>();
 
 /**

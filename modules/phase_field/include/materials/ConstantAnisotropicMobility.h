@@ -11,7 +11,7 @@
 
 class ConstantAnisotropicMobility;
 
-template<>
+template <>
 InputParameters validParams<ConstantAnisotropicMobility>();
 
 /**
@@ -24,7 +24,7 @@ public:
   ConstantAnisotropicMobility(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties() {};
+  virtual void computeProperties(){};
   virtual void initialSetup();
 
   /// raw tensor values as passed in from the input file
@@ -35,4 +35,4 @@ protected:
   MaterialProperty<RealTensorValue> & _M;
 };
 
-#endif //CONSTANTANISOTROPICMOBILITY_H
+#endif // CONSTANTANISOTROPICMOBILITY_H

@@ -21,13 +21,43 @@
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_2phase.i'
     csvdiff = 'pressure_pulse_1d_2phase.csv'
-    skip = 'Must skip until YaqiHack (Issue #6774)'
+    #skip = 'Must skip until YaqiHack (Issue #6774)'
+    rel_err = 1.0E-5
+  [../]
+  [./pressure_pulse_1d_2phasePS]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_2phasePS.i'
+    csvdiff = 'pressure_pulse_1d_2phasePS_pp_0011.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./pressure_pulse_1d_2phasePSVG]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_2phasePSVG.i'
+    csvdiff = 'pressure_pulse_1d_2phasePSVG_pp_0011.csv'
     rel_err = 1.0E-5
   [../]
   [./pressure_pulse_1d_MD]
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_MD.i'
     csvdiff = 'pressure_pulse_1d_MD.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./pressure_pulse_1d_fully_saturated]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_fully_saturated.i'
+    csvdiff = 'pressure_pulse_1d_fully_saturated.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./pressure_pulse_1d_3comp_fully_saturated]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_3comp_fully_saturated.i'
+    csvdiff = 'pressure_pulse_1d_3comp_fully_saturated.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./pressure_pulse_1d_fully_saturated_2]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_fully_saturated_2.i'
+    csvdiff = 'pressure_pulse_1d_fully_saturated_2.csv'
     rel_err = 1.0E-5
   [../]
 []

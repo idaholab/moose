@@ -18,24 +18,26 @@
 #include <string>
 #include <set>
 #include <map>
+#include <vector>
+#include <list>
 #include <ostream>
 
 // MOOSE includes
 #include "Action.h"
 #include "ConsoleStreamInterface.h"
 
-/// Typedef to hide implementation details
-typedef std::vector<Action *>::iterator ActionIterator;
+/// alias to hide implementation details
+using ActionIterator = std::list<Action *>::iterator;
 
 class MooseMesh;
 class Syntax;
 class ActionFactory;
+class FEProblem;
 
 /**
  * Storage for action instances.
  */
-class ActionWarehouse :
-  public ConsoleStreamInterface
+class ActionWarehouse : public ConsoleStreamInterface
 {
 public:
   ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory);
@@ -60,7 +62,7 @@ public:
   /**
    * This method add an \p Action instance to the warehouse.
    */
-  void addActionBlock(MooseSharedPointer<Action> blk);
+  void addActionBlock(std::shared_ptr<Action> blk);
 
   /**
    * This method checks the actions stored in the warehouse against the list of required registered
@@ -88,15 +90,15 @@ public:
    * Iterators to the Actions in the warehouse.  Iterators should always be used when executing
    * Actions to capture dynamically added Actions (meta-Actions).  Meta-Actions are allowed to
    * create and add additional Actions to the warehouse on the fly.  Those Actions will fire
-   * as long as their associated task occurs after the task that created them.
+   * as long as their associated task hasn't already passed (i.e. matches or is later).
    */
   ActionIterator actionBlocksWithActionBegin(const std::string & task);
   ActionIterator actionBlocksWithActionEnd(const std::string & task);
 
   /**
-   * Retrieve a constant vector of \p Action pointers associated with the passed in task.
+   * Retrieve a constant list of \p Action pointers associated with the passed in task.
    */
-  const std::vector<Action *> & getActionsByName(const std::string & task) const;
+  const std::list<Action *> & getActionListByName(const std::string & task) const;
 
   /**
    * Retrieve an action with its name and the desired type.
@@ -104,39 +106,45 @@ public:
    */
   template <class T>
   const T & getAction(const std::string & name)
+  {
+    T * p = NULL;
+    for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
-      T* p = NULL;
-      for (unsigned int i=0; i<_all_ptrs.size(); ++i)
+      auto act = _all_ptrs[i].get();
+      if (act->name() == name)
       {
-        Action * act = _all_ptrs[i].get();
-        if (act->name() == name)
-        {
-          p = dynamic_cast<T*>(act);
-          if (p)
-            break;
-        }
+        p = dynamic_cast<T *>(act);
+        if (p)
+          break;
       }
-      if (!p)
-        mooseError("Action with name being "+name+" does not exist");
-      return *p;
     }
+    if (!p)
+      mooseError("Action with name being ", name, " does not exist");
+    return *p;
+  }
 
   /**
-   * Retrieve all actions in a specific type.
+   * Retrieve all actions in a specific type ordered by their names.
    */
   template <class T>
-  std::set<const T *> getActions()
+  std::vector<const T *> getActions()
+  {
+    // we need to create the map first to ensure that all actions in the map are unique
+    // and the actions are sorted by their names
+    std::map<std::string, const T *> actions;
+    for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
-      std::set<const T*> actions;
-      for (unsigned int i=0; i<_all_ptrs.size(); i++)
-      {
-        Action * act = _all_ptrs[i].get();
-        T* p = dynamic_cast<T*>(act);
-        if (p)
-          actions.insert(p);
-      }
-      return actions;
+      auto act = _all_ptrs[i].get();
+      T * p = dynamic_cast<T *>(act);
+      if (p)
+        actions.insert(std::pair<std::string, const T *>(act->name(), p));
     }
+    // construct the vector from the map entries
+    std::vector<const T *> action_vector;
+    for (auto & pair : actions)
+      action_vector.push_back(pair.second);
+    return action_vector;
+  }
 
   /**
    * Check if Actions associated with passed in task exist.
@@ -171,11 +179,12 @@ public:
   // shared pointers here, just their memory management capability.
   // Therefore, _mesh is actually being used more like a unique_ptr in
   // this context.  Since full support for unique_ptr is not quite
-  // available yet, we've implemented it as a MooseSharedPointer.
-  MooseSharedPointer<MooseMesh> & mesh() { return _mesh; }
-  MooseSharedPointer<MooseMesh> & displacedMesh() { return _displaced_mesh; }
+  // available yet, we've implemented it as a std::shared_ptr.
+  std::shared_ptr<MooseMesh> & mesh() { return _mesh; }
+  std::shared_ptr<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
-  MooseSharedPointer<FEProblem> & problem() { return _problem; }
+  std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
+  std::shared_ptr<FEProblem> problem();
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
@@ -187,9 +196,9 @@ protected:
    *
    * @param task The name of the task to find and build Actions for.
    */
-  void buildBuildableActions(const std::string &task);
+  void buildBuildableActions(const std::string & task);
 
-  std::vector<MooseSharedPointer<Action> > _all_ptrs;
+  std::vector<std::shared_ptr<Action>> _all_ptrs;
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;
@@ -198,7 +207,9 @@ protected:
   /// The Factory that builds Actions
   ActionFactory & _action_factory;
   /// Pointers to the actual parsed input file blocks
-  std::map<std::string, std::vector<Action *> > _action_blocks;
+  std::map<std::string, std::list<Action *>> _action_blocks;
+  /// Action blocks that have been requested
+  std::map<std::string, std::vector<Action *>> _requested_action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   /// Use to store the current list of unsatisfied dependencies
@@ -224,13 +235,13 @@ protected:
   //
 
   /// Mesh class
-  MooseSharedPointer<MooseMesh> _mesh;
+  std::shared_ptr<MooseMesh> _mesh;
 
   /// Possible mesh for displaced problem
-  MooseSharedPointer<MooseMesh> _displaced_mesh;
+  std::shared_ptr<MooseMesh> _displaced_mesh;
 
   /// Problem class
-  MooseSharedPointer<FEProblem> _problem;
+  std::shared_ptr<FEProblemBase> _problem;
 };
 
 #endif // ACTIONWAREHOUSE_H

@@ -26,19 +26,15 @@
 // AuxKernels
 #include "DarcyVelocity.h"
 
-template<>
-InputParameters validParams<DarcyThermoMechApp>()
+template <>
+InputParameters
+validParams<DarcyThermoMechApp>()
 {
   InputParameters params = validParams<MooseApp>();
-
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
-
   return params;
 }
 
-DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) :
-    MooseApp(parameters)
+DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   ModulesApp::registerObjects(_factory);
@@ -47,10 +43,6 @@ DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) :
   Moose::associateSyntax(_syntax, _action_factory);
   ModulesApp::associateSyntax(_syntax, _action_factory);
   DarcyThermoMechApp::associateSyntax(_syntax, _action_factory);
-}
-
-DarcyThermoMechApp::~DarcyThermoMechApp()
-{
 }
 
 void

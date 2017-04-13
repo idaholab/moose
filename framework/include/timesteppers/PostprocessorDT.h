@@ -20,27 +20,30 @@
 
 class PostprocessorDT;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorDT>();
 
 /**
  * Computes the value of dt based on a postprocessor value
  */
-class PostprocessorDT :
-    public TimeStepper,
-    public PostprocessorInterface
+class PostprocessorDT : public TimeStepper, public PostprocessorInterface
 {
 public:
   PostprocessorDT(const InputParameters & parameters);
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
 
   const PostprocessorValue & _pps_value;
   bool _has_initial_dt;
   Real _initial_dt;
-};
 
+  /// Multiplier applied to the postprocessor value
+  const Real & _scale;
+
+  /// Factor added to the postprocessor value
+  const Real & _factor;
+};
 
 #endif /* POSTPROCESSORDT_H */

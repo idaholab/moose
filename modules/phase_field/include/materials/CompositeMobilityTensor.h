@@ -30,7 +30,7 @@ protected:
   MaterialProperty<RealTensorValue> & _M;
 };
 
-template<>
+template <>
 InputParameters validParams<CompositeMobilityTensor>();
 
-#endif //COMPOSITEMOBILITYTENSOR_H
+#endif // COMPOSITEMOBILITYTENSOR_H

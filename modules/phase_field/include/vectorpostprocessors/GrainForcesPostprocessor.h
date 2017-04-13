@@ -9,25 +9,24 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class GrainForcesPostprocessor;
 class GrainForceAndTorqueInterface;
 
-template<>
+template <>
 InputParameters validParams<GrainForcesPostprocessor>();
 
 /**
  *  GrainForcesPostprocessor is a type of VectorPostprocessor that outputs the
  *  force and torque values calculated in UserObjects.
  */
-class GrainForcesPostprocessor :
-  public GeneralVectorPostprocessor
+class GrainForcesPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   GrainForcesPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainForcesPostprocessor() {}
-  virtual void initialize() {};
+  virtual void initialize();
   virtual void execute();
 
 protected:
@@ -40,12 +39,8 @@ protected:
   const std::vector<RealGradient> & _grain_forces;
   /// Extracting torques from Userobject
   const std::vector<RealGradient> & _grain_torques;
-  /// Extracting derivative of forces from Userobject
-  const std::vector<RealGradient> & _grain_force_derivatives;
-  /// Extracting derivative of torques from Userobject
-  const std::vector<RealGradient> & _grain_torque_derivatives;
-
-  unsigned int _total_grains;
+  /// total no. of grains
+  unsigned int _grain_num;
 };
 
-#endif //GRAINFORCESPOSTPROCESSOR_H
+#endif // GRAINFORCESPOSTPROCESSOR_H

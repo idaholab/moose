@@ -21,16 +21,15 @@
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
-#include "InputParameters.h"
 
 // libMesh includes
-#include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/petsc_macro.h"
 
 // Forward declarations
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
+class NonlinearSystemBase;
 class CommandLine;
+class InputParameters;
 
 namespace Moose
 {
@@ -43,9 +42,7 @@ namespace PetscSupport
 class PetscOptions
 {
 public:
-  PetscOptions() :
-      flags("", "", true)
-  {}
+  PetscOptions() : flags("", "", true) {}
 
   /// Keys for PETSc key-value pairs
   std::vector<std::string> inames;
@@ -63,14 +60,14 @@ public:
 /**
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
  */
-void petscSetOptions(FEProblem & problem);
+void petscSetOptions(FEProblemBase & problem);
 
 /**
  * Sets the default options for PETSc
  */
-void petscSetDefaults(FEProblem & problem);
+void petscSetDefaults(FEProblemBase & problem);
 
-void petscSetupDM(NonlinearSystem & nl);
+void petscSetupDM(NonlinearSystemBase & nl);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 
@@ -82,12 +79,12 @@ void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = fal
 /**
  * Helper function for displaying the linear residual during PETSC solve
  */
-PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr);
+PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void * void_ptr);
 
 /**
  * Stores the PETSc options supplied from the InputParameters with MOOSE
  */
-void storePetscOptions(FEProblem & fe_problem, const InputParameters & params);
+void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
  * Returns the PETSc options that are common between Executioners and Preconditioners
@@ -112,9 +109,22 @@ MultiMooseEnum getCommonPetscKeys();
  */
 void setSinglePetscOption(const std::string & name, const std::string & value = "");
 
+void addPetscOptionsFromCommandline();
+
+/**
+ * This method takes an adjacency matrix, and a desired number of colors and applies
+ * a graph coloring algorithm to produce a coloring. The coloring is returned as a vector
+ * of unsigned integers indicating which color or group each vextex in the adjacency matrix
+ * belongs to.
+ */
+void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
+                          unsigned int size,
+                          unsigned int colors,
+                          std::vector<unsigned int> & vertex_colors,
+                          const char * coloring_algorithm);
 }
 }
 
-#endif //LIBMESH_HAVE_PETSC
+#endif // LIBMESH_HAVE_PETSC
 
-#endif //PETSCSUPPORT_H
+#endif // PETSCSUPPORT_H

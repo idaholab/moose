@@ -5,23 +5,47 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TensorMechanicsPlasticDruckerPrager.h"
-#include <math.h> // for M_PI
+#include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<TensorMechanicsPlasticDruckerPrager>()
+template <>
+InputParameters
+validParams<TensorMechanicsPlasticDruckerPrager>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  MooseEnum mc_interpolation_scheme("outer_tip=0 inner_tip=1 lode_zero=2 inner_edge=3 native=4", "lode_zero");
-  params.addParam<MooseEnum>("mc_interpolation_scheme", mc_interpolation_scheme, "Scheme by which the Drucker-Prager cohesion, friction angle and dilation angle are set from the Mohr-Coulomb parameters mc_cohesion, mc_friction_angle and mc_dilation_angle.  Consider the DP and MC yield surfaces on the devatoric (octahedral) plane.  Outer_tip: the DP circle touches the outer tips of the MC hex.  Inner_tip: the DP circle touches the inner tips of the MC hex.  Lode_zero: the DP circle intersects the MC hex at lode angle=0.  Inner_edge: the DP circle is the largest circle that wholey fits inside the MC hex.  Native: The DP cohesion, friction angle and dilation angle are set equal to the mc_ parameters entered.");
-  params.addRequiredParam<UserObjectName>("mc_cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the Mohr-Coulomb cohesion.  Physically this should not be negative.");
-  params.addRequiredParam<UserObjectName>("mc_friction_angle", "A TensorMechanicsHardening UserObject that defines hardening of the Mohr-Coulomb friction angle (in radians).  Physically this should be between 0 and Pi/2.");
-  params.addRequiredParam<UserObjectName>("mc_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the Mohr-Coulomb dilation angle (in radians).  Usually the dilation angle is not greater than the friction angle, and it is between 0 and Pi/2.");
-  params.addClassDescription("Non-associative Drucker Prager plasticity with no smoothing of the cone tip.");
+  MooseEnum mc_interpolation_scheme("outer_tip=0 inner_tip=1 lode_zero=2 inner_edge=3 native=4",
+                                    "lode_zero");
+  params.addParam<MooseEnum>(
+      "mc_interpolation_scheme",
+      mc_interpolation_scheme,
+      "Scheme by which the Drucker-Prager cohesion, friction angle and dilation angle are set from "
+      "the Mohr-Coulomb parameters mc_cohesion, mc_friction_angle and mc_dilation_angle.  Consider "
+      "the DP and MC yield surfaces on the devatoric (octahedral) plane.  Outer_tip: the DP circle "
+      "touches the outer tips of the MC hex.  Inner_tip: the DP circle touches the inner tips of "
+      "the MC hex.  Lode_zero: the DP circle intersects the MC hex at lode angle=0.  Inner_edge: "
+      "the DP circle is the largest circle that wholey fits inside the MC hex.  Native: The DP "
+      "cohesion, friction angle and dilation angle are set equal to the mc_ parameters entered.");
+  params.addRequiredParam<UserObjectName>(
+      "mc_cohesion",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "Mohr-Coulomb cohesion.  Physically this should not be negative.");
+  params.addRequiredParam<UserObjectName>(
+      "mc_friction_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "Mohr-Coulomb friction angle (in radians).  Physically this should be "
+      "between 0 and Pi/2.");
+  params.addRequiredParam<UserObjectName>(
+      "mc_dilation_angle",
+      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "Mohr-Coulomb dilation angle (in radians).  Usually the dilation angle "
+      "is not greater than the friction angle, and it is between 0 and Pi/2.");
+  params.addClassDescription(
+      "Non-associative Drucker Prager plasticity with no smoothing of the cone tip.");
   return params;
 }
 
-TensorMechanicsPlasticDruckerPrager::TensorMechanicsPlasticDruckerPrager(const InputParameters & parameters) :
-    TensorMechanicsPlasticModel(parameters),
+TensorMechanicsPlasticDruckerPrager::TensorMechanicsPlasticDruckerPrager(
+    const InputParameters & parameters)
+  : TensorMechanicsPlasticModel(parameters),
     _mc_cohesion(getUserObject<TensorMechanicsHardeningModel>("mc_cohesion")),
     _mc_phi(getUserObject<TensorMechanicsHardeningModel>("mc_friction_angle")),
     _mc_psi(getUserObject<TensorMechanicsHardeningModel>("mc_dilation_angle")),
@@ -30,10 +54,13 @@ TensorMechanicsPlasticDruckerPrager::TensorMechanicsPlasticDruckerPrager(const I
     _zero_phi_hardening(_mc_phi.modelName().compare("Constant") == 0),
     _zero_psi_hardening(_mc_psi.modelName().compare("Constant") == 0)
 {
-  if (_mc_phi.value(0.0) < 0.0 || _mc_psi.value(0.0) < 0.0 || _mc_phi.value(0.0) > M_PI/2.0 || _mc_psi.value(0.0) > M_PI/2.0)
-    mooseError("TensorMechanicsPlasticDruckerPrager: MC friction and dilation angles must lie in [0, Pi/2]");
+  if (_mc_phi.value(0.0) < 0.0 || _mc_psi.value(0.0) < 0.0 ||
+      _mc_phi.value(0.0) > libMesh::pi / 2.0 || _mc_psi.value(0.0) > libMesh::pi / 2.0)
+    mooseError("TensorMechanicsPlasticDruckerPrager: MC friction and dilation angles must lie in "
+               "[0, Pi/2]");
   if (_mc_phi.value(0) < _mc_psi.value(0.0))
-    mooseError("TensorMechanicsPlasticDruckerPrager: MC friction angle must not be less than MC dilation angle");
+    mooseError("TensorMechanicsPlasticDruckerPrager: MC friction angle must not be less than MC "
+               "dilation angle");
   if (_mc_cohesion.value(0.0) < 0)
     mooseError("TensorMechanicsPlasticDruckerPrager: MC cohesion should not be negative");
 
@@ -53,11 +80,13 @@ TensorMechanicsPlasticDruckerPrager::yieldFunction(const RankTwoTensor & stress,
 RankTwoTensor
 TensorMechanicsPlasticDruckerPrager::df_dsig(const RankTwoTensor & stress, Real bbb) const
 {
-  return 0.5 * stress.dsecondInvariant()/std::sqrt(stress.secondInvariant()) + stress.dtrace() * bbb;
+  return 0.5 * stress.dsecondInvariant() / std::sqrt(stress.secondInvariant()) +
+         stress.dtrace() * bbb;
 }
 
 RankTwoTensor
-TensorMechanicsPlasticDruckerPrager::dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticDruckerPrager::dyieldFunction_dstress(const RankTwoTensor & stress,
+                                                            Real intnl) const
 {
   Real bbb;
   onlyB(intnl, friction, bbb);
@@ -65,7 +94,8 @@ TensorMechanicsPlasticDruckerPrager::dyieldFunction_dstress(const RankTwoTensor 
 }
 
 Real
-TensorMechanicsPlasticDruckerPrager::dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticDruckerPrager::dyieldFunction_dintnl(const RankTwoTensor & stress,
+                                                           Real intnl) const
 {
   Real daaa;
   Real dbbb;
@@ -82,16 +112,19 @@ TensorMechanicsPlasticDruckerPrager::flowPotential(const RankTwoTensor & stress,
 }
 
 RankFourTensor
-TensorMechanicsPlasticDruckerPrager::dflowPotential_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
+TensorMechanicsPlasticDruckerPrager::dflowPotential_dstress(const RankTwoTensor & stress,
+                                                            Real /*intnl*/) const
 {
   RankFourTensor dr_dstress;
   dr_dstress = 0.5 * stress.d2secondInvariant() / std::sqrt(stress.secondInvariant());
-  dr_dstress += -0.5 * 0.5 * stress.dsecondInvariant().outerProduct(stress.dsecondInvariant()) / std::pow(stress.secondInvariant(), 1.5);
+  dr_dstress += -0.5 * 0.5 * stress.dsecondInvariant().outerProduct(stress.dsecondInvariant()) /
+                std::pow(stress.secondInvariant(), 1.5);
   return dr_dstress;
 }
 
 RankTwoTensor
-TensorMechanicsPlasticDruckerPrager::dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticDruckerPrager::dflowPotential_dintnl(const RankTwoTensor & stress,
+                                                           Real intnl) const
 {
   Real dbbb;
   donlyB(intnl, dilation, dbbb);
@@ -146,25 +179,30 @@ TensorMechanicsPlasticDruckerPrager::donlyB(Real intnl, int fd, Real & dbbb) con
     return;
   }
   const Real s = (fd == friction) ? std::sin(_mc_phi.value(intnl)) : std::sin(_mc_psi.value(intnl));
-  const Real ds = (fd == friction) ? std::cos(_mc_phi.value(intnl)) * _mc_phi.derivative(intnl) : std::cos(_mc_psi.value(intnl)) * _mc_psi.derivative(intnl);
+  const Real ds = (fd == friction) ? std::cos(_mc_phi.value(intnl)) * _mc_phi.derivative(intnl)
+                                   : std::cos(_mc_psi.value(intnl)) * _mc_psi.derivative(intnl);
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      dbbb = 2.0 / std::sqrt(3.0) * (ds / (3.0 - s) + s * ds / std::pow(3.0 - s, 2));
+      dbbb = 2.0 / std::sqrt(3.0) * (ds / (3.0 - s) + s * ds / Utility::pow<2>(3.0 - s));
       break;
     case 1: // inner_tip
-      dbbb = 2.0 / std::sqrt(3.0) * (ds / (3.0 + s) - s * ds / std::pow(3.0 + s, 2));
+      dbbb = 2.0 / std::sqrt(3.0) * (ds / (3.0 + s) - s * ds / Utility::pow<2>(3.0 + s));
       break;
     case 2: // lode_zero
       dbbb = ds / 3.0;
       break;
     case 3: // inner_edge
-      dbbb = ds / std::sqrt(9.0 + 3.0 * std::pow(s, 2)) - 3 * s * s * ds / std::pow(9.0 + 3.0 * std::pow(s, 2), 1.5);
+      dbbb = ds / std::sqrt(9.0 + 3.0 * Utility::pow<2>(s)) -
+             3 * s * s * ds / std::pow(9.0 + 3.0 * Utility::pow<2>(s), 1.5);
       break;
     case 4: // native
-      const Real c = (fd == friction) ? std::cos(_mc_phi.value(intnl)) : std::cos(_mc_psi.value(intnl));
-      const Real dc = (fd == friction) ? -std::sin(_mc_phi.value(intnl)) * _mc_phi.derivative(intnl) : -std::sin(_mc_psi.value(intnl)) * _mc_psi.derivative(intnl);
-      dbbb = ds / c - s * dc / std::pow(c, 2);
+      const Real c =
+          (fd == friction) ? std::cos(_mc_phi.value(intnl)) : std::cos(_mc_psi.value(intnl));
+      const Real dc = (fd == friction)
+                          ? -std::sin(_mc_phi.value(intnl)) * _mc_phi.derivative(intnl)
+                          : -std::sin(_mc_psi.value(intnl)) * _mc_psi.derivative(intnl);
+      dbbb = ds / c - s * dc / Utility::pow<2>(c);
       break;
   }
 }
@@ -188,24 +226,32 @@ TensorMechanicsPlasticDruckerPrager::dbothAB(Real intnl, Real & daaa, Real & dbb
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      daaa = 2.0 * std::sqrt(3.0) * (dC * cosphi / (3.0 - sinphi) + C * dcosphi / (3.0 - sinphi) + C * cosphi * dsinphi / std::pow(3.0 - sinphi, 2));
-      dbbb = 2.0 / std::sqrt(3.0) * (dsinphi / (3.0 - sinphi) + sinphi * dsinphi / std::pow(3.0 - sinphi, 2));
+      daaa = 2.0 * std::sqrt(3.0) * (dC * cosphi / (3.0 - sinphi) + C * dcosphi / (3.0 - sinphi) +
+                                     C * cosphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
+      dbbb = 2.0 / std::sqrt(3.0) *
+             (dsinphi / (3.0 - sinphi) + sinphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
       break;
     case 1: // inner_tip
-      daaa = 2.0 * std::sqrt(3.0) * (dC * cosphi / (3.0 + sinphi) + C * dcosphi / (3.0 + sinphi) - C * cosphi * dsinphi / std::pow(3.0 + sinphi, 2));
-      dbbb = 2.0 / std::sqrt(3.0) * (dsinphi / (3.0 + sinphi) - sinphi * dsinphi / std::pow(3.0 + sinphi, 2));
+      daaa = 2.0 * std::sqrt(3.0) * (dC * cosphi / (3.0 + sinphi) + C * dcosphi / (3.0 + sinphi) -
+                                     C * cosphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
+      dbbb = 2.0 / std::sqrt(3.0) *
+             (dsinphi / (3.0 + sinphi) - sinphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
       break;
     case 2: // lode_zero
       daaa = dC * cosphi + C * dcosphi;
       dbbb = dsinphi / 3.0;
       break;
     case 3: // inner_edge
-      daaa = 3.0 * dC * cosphi / std::sqrt(9.0 + 3.0 * std::pow(sinphi, 2)) + 3.0 * C * dcosphi / std::sqrt(9.0 + 3.0 * std::pow(sinphi, 2)) - 3.0 * C * cosphi * 3.0 * sinphi * dsinphi / std::pow(9.0 + 3.0 * std::pow(sinphi, 2), 1.5);
-      dbbb = dsinphi / std::sqrt(9.0 + 3.0 * std::pow(sinphi, 2)) - 3.0 * sinphi * sinphi * dsinphi / std::pow(9.0 + 3.0 * std::pow(sinphi, 2), 1.5);
+      daaa = 3.0 * dC * cosphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) +
+             3.0 * C * dcosphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) -
+             3.0 * C * cosphi * 3.0 * sinphi * dsinphi /
+                 std::pow(9.0 + 3.0 * Utility::pow<2>(sinphi), 1.5);
+      dbbb = dsinphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi)) -
+             3.0 * sinphi * sinphi * dsinphi / std::pow(9.0 + 3.0 * Utility::pow<2>(sinphi), 1.5);
       break;
     case 4: // native
       daaa = dC;
-      dbbb = dsinphi / cosphi - sinphi * dcosphi / std::pow(cosphi, 2);
+      dbbb = dsinphi / cosphi - sinphi * dcosphi / Utility::pow<2>(cosphi);
       break;
   }
 }
@@ -231,8 +277,8 @@ TensorMechanicsPlasticDruckerPrager::initializeAandB(Real intnl, Real & aaa, Rea
       bbb = sinphi / 3.0;
       break;
     case 3: // inner_edge
-      aaa = 3.0 * C * cosphi / std::sqrt(9.0 + 3.0 * std::pow(sinphi, 2));
-      bbb = sinphi / std::sqrt(9.0 + 3.0 * std::pow(sinphi, 2));
+      aaa = 3.0 * C * cosphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi));
+      bbb = sinphi / std::sqrt(9.0 + 3.0 * Utility::pow<2>(sinphi));
       break;
     case 4: // native
       aaa = C;
@@ -257,10 +303,11 @@ TensorMechanicsPlasticDruckerPrager::initializeB(Real intnl, int fd, Real & bbb)
       bbb = s / 3.0;
       break;
     case 3: // inner_edge
-      bbb = s / std::sqrt(9.0 + 3.0 * std::pow(s, 2));
+      bbb = s / std::sqrt(9.0 + 3.0 * Utility::pow<2>(s));
       break;
     case 4: // native
-      const Real c = (fd == friction) ? std::cos(_mc_phi.value(intnl)) : std::cos(_mc_psi.value(intnl));
+      const Real c =
+          (fd == friction) ? std::cos(_mc_phi.value(intnl)) : std::cos(_mc_psi.value(intnl));
       bbb = s / c;
       break;
   }

@@ -15,16 +15,18 @@
 #include "MatPropUserObjectAux.h"
 #include "MaterialPropertyUserObject.h"
 
-template<>
-InputParameters validParams<MatPropUserObjectAux>()
+template <>
+InputParameters
+validParams<MatPropUserObjectAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("material_user_object", "The MaterialPropertyUserObject to retrieve values from.");
+  params.addRequiredParam<UserObjectName>(
+      "material_user_object", "The MaterialPropertyUserObject to retrieve values from.");
   return params;
 }
 
-MatPropUserObjectAux::MatPropUserObjectAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+MatPropUserObjectAux::MatPropUserObjectAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _mat_uo(getUserObject<MaterialPropertyUserObject>("material_user_object"))
 {
 }

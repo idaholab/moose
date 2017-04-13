@@ -238,7 +238,6 @@
   # be readjusted to the free energy magnitudes.
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M   kappa_c L1 L2 L3  kappa11 kappa12 kappa13 kappa21 kappa22 kappa23 kappa31 kappa32 kappa33'
     prop_values = '0.2 0.75    1  1  1   0.75    0.75    0.75    0.75    0.75    0.75    0.75    0.75    0.75   '
   [../]
@@ -247,7 +246,6 @@
   # (see GlobalParams section above) and can be used to check the constraint enforcement.
   [./etasummat]
     type = ParsedMaterial
-    block = 0
     f_name = etasum
     args = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
@@ -259,21 +257,18 @@
   # to the global free energy density. h is a function that switches smoothly from 0 to 1
   [./switching1]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h1
     eta = eta1
     h_order = SIMPLE
   [../]
   [./switching2]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h2
     eta = eta2
     h_order = SIMPLE
   [../]
   [./switching3]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h3
     eta = eta3
     h_order = SIMPLE
@@ -285,7 +280,6 @@
   # above)
   [./barrier]
     type = MultiBarrierFunctionMaterial
-    block = 0
     etas = 'eta1 eta2 eta3'
   [../]
 
@@ -295,21 +289,18 @@
   # by custom kernels).
   [./phase_free_energy_1]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F1
     function = '(c-1)^2'
     args = 'c'
   [../]
   [./phase_free_energy_2]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F2
     function = '(c-0.5)^2'
     args = 'c'
   [../]
   [./phase_free_energy_3]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F3
     function = 'c^2'
     args = 'c'
@@ -319,7 +310,6 @@
   # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    block = 0
     f_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'F1  F2  F3'

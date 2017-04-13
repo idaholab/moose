@@ -1,0 +1,218 @@
+[Tests]
+  [./1d_square_wave_minmod_limiter]
+    type = 'Exodiff'
+    input = '1d_square_wave_minmod_limiter.i'
+    exodiff = '1d_square_wave_minmod_limiter_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_square_wave_mc_limiter]
+    type = 'Exodiff'
+    input = '1d_square_wave_mc_limiter.i'
+    exodiff = '1d_square_wave_mc_limiter_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_square_wave_superbee_limiter]
+    type = 'Exodiff'
+    input = '1d_square_wave_superbee_limiter.i'
+    exodiff = '1d_square_wave_superbee_limiter_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_sod_shock_tube]
+    type = 'Exodiff'
+    input = '1d_sod_shock_tube.i'
+    exodiff = '1d_sod_shock_tube_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_lax_shock_tube]
+    type = 'Exodiff'
+    input = '1d_lax_shock_tube.i'
+    exodiff = '1d_lax_shock_tube_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_woodward_colella_blast_wave]
+    type = 'Exodiff'
+    input = '1d_woodward_colella_blast_wave.i'
+    exodiff = '1d_woodward_colella_blast_wave_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_sedov_blast_wave]
+    type = 'Exodiff'
+    input = '1d_sedov_blast_wave.i'
+    exodiff = '1d_sedov_blast_wave_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_sedov_blast_wave_dtmin]
+    type = 'Exodiff'
+    input = '1d_sedov_blast_wave_dtmin.i'
+    exodiff = '1d_sedov_blast_wave_dtmin_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_double_rarefaction_wave]
+    type = 'Exodiff'
+    input = '1d_double_rarefaction_wave.i'
+    exodiff = '1d_double_rarefaction_wave_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_expl_lv1]
+    type = 'Exodiff'
+    input = '2d_cyln_expl_lv1.i'
+    exodiff = '2d_cyln_expl_lv1_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_expl_lv2]
+    type = 'Exodiff'
+    input = '2d_cyln_expl_lv2.i'
+    exodiff = '2d_cyln_expl_lv2_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_expl_lv3]
+    type = 'Exodiff'
+    input = '2d_cyln_expl_lv3.i'
+    exodiff = '2d_cyln_expl_lv3_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_expl_lv4]
+    type = 'Exodiff'
+    input = '2d_cyln_expl_lv4.i'
+    exodiff = '2d_cyln_expl_lv4_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_impl_lv1]
+    type = 'Exodiff'
+    input = '2d_cyln_impl_lv1.i'
+    exodiff = '2d_cyln_impl_lv1_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_impl_lv2]
+    type = 'Exodiff'
+    input = '2d_cyln_impl_lv2.i'
+    exodiff = '2d_cyln_impl_lv2_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_impl_lv3]
+    type = 'Exodiff'
+    input = '2d_cyln_impl_lv3.i'
+    exodiff = '2d_cyln_impl_lv3_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_cyln_impl_lv4]
+    type = 'Exodiff'
+    input = '2d_cyln_impl_lv4.i'
+    exodiff = '2d_cyln_impl_lv4_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+    heavy = true
+  [../]
+  [./2d_bump_impl_ref1]
+    type = 'Exodiff'
+    input = '2d_bump_impl_ref1.i'
+    exodiff = '2d_bump_impl_ref1_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_bump_impl_ref2]
+    type = 'Exodiff'
+    input = '2d_bump_impl_ref2.i'
+    exodiff = '2d_bump_impl_ref2_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_bump_impl_ref3]
+    type = 'Exodiff'
+    input = '2d_bump_impl_ref3.i'
+    exodiff = '2d_bump_impl_ref3_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_bump_impl_ref4]
+    type = 'Exodiff'
+    input = '2d_bump_impl_ref4.i'
+    exodiff = '2d_bump_impl_ref4_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+    heavy = true
+  [../]
+  [./2d_bump_impl_ref5]
+    type = 'Exodiff'
+    input = '2d_bump_impl_ref5.i'
+    exodiff = '2d_bump_impl_ref5_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+    heavy = true
+  [../]
+  [./2d_sod_shock_tube]
+    type = 'Exodiff'
+    input = '2d_sod_shock_tube.i'
+    exodiff = '2d_sod_shock_tube_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_lax_shock_tube]
+    type = 'Exodiff'
+    input = '2d_lax_shock_tube.i'
+    exodiff = '2d_lax_shock_tube_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_square_wave_gg_minmax]
+    type = 'Exodiff'
+    input = '2d_square_wave_gg_minmax.i'
+    exodiff = '2d_square_wave_gg_minmax_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_mach3step]
+    type = 'Exodiff'
+    input = '2d_mach3step.i'
+    exodiff = '2d_mach3step_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+    heavy = true
+  [../]
+  [./2d_bowshock_expl_lv0]
+    type = 'Exodiff'
+    input = '2d_bowshock_expl_lv0.i'
+    exodiff = '2d_bowshock_expl_lv0_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_bowshock_expl_lv1]
+    type = 'Exodiff'
+    input = '2d_bowshock_expl_lv1.i'
+    exodiff = '2d_bowshock_expl_lv1_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./2d_bowshock_expl_lv2]
+    type = 'Exodiff'
+    input = '2d_bowshock_expl_lv2.i'
+    exodiff = '2d_bowshock_expl_lv2_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+    heavy = true
+  [../]
+  [./2d_obliqueshock_expl_weno]
+    type = 'Exodiff'
+    input = '2d_obliqueshock_expl_weno.i'
+    exodiff = '2d_obliqueshock_expl_weno_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+    heavy = true
+  [../]
+[]

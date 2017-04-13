@@ -11,7 +11,7 @@
 
 class GradientComponent;
 
-template<>
+template <>
 InputParameters validParams<GradientComponent>();
 
 class GradientComponent : public Kernel
@@ -25,13 +25,13 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Identity of the coupled variable
-  unsigned int _v_var;
+  const unsigned int _v_var;
 
   /// Gradient of the coupled variable
   const VariableGradient & _grad_v;
 
   /// Component of the gradient vector to match
-  unsigned int _component;
+  const unsigned int _component;
 };
 
-#endif //GRADIENTCOMPONENT_H
+#endif // GRADIENTCOMPONENT_H

@@ -15,25 +15,33 @@
 #include "FunctionDT.h"
 #include "FEProblem.h"
 #include "Transient.h"
+#include <limits>
 
-template<>
-InputParameters validParams<FunctionDT>()
+template <>
+InputParameters
+validParams<FunctionDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<std::vector<Real> >("time_t", "The values of t");
-  params.addRequiredParam<std::vector<Real> >("time_dt", "The values of dt");
-  params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.");
+  params.addRequiredParam<std::vector<Real>>("time_t", "The values of t");
+  params.addRequiredParam<std::vector<Real>>("time_dt", "The values of dt");
+  params.addParam<Real>("growth_factor",
+                        std::numeric_limits<Real>::max(),
+                        "Maximum ratio of new to previous timestep sizes following a step that "
+                        "required the time step to be cut due to a failed solve.");
   params.addParam<Real>("min_dt", 0, "The minimal dt to take.");
-  params.addParam<bool>("interpolate", true, "Whether or not to interpolate DT between times.  This is true by default for historical reasons.");
+  params.addParam<bool>("interpolate",
+                        true,
+                        "Whether or not to interpolate DT between times.  "
+                        "This is true by default for historical reasons.");
 
   return params;
 }
 
-FunctionDT::FunctionDT(const InputParameters & parameters) :
-    TimeStepper(parameters),
-    _time_t(getParam<std::vector<Real> >("time_t")),
-    _time_dt(getParam<std::vector<Real> >("time_dt")),
-    _time_ipol(_time_t, getParam<std::vector<Real> >("time_dt")),
+FunctionDT::FunctionDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
+    _time_t(getParam<std::vector<Real>>("time_t")),
+    _time_dt(getParam<std::vector<Real>>("time_dt")),
+    _time_ipol(_time_t, getParam<std::vector<Real>>("time_dt")),
     _growth_factor(getParam<Real>("growth_factor")),
     _cutback_occurred(false),
     _min_dt(getParam<Real>("min_dt")),
@@ -50,7 +58,8 @@ FunctionDT::init()
 void
 FunctionDT::removeOldKnots()
 {
-  while ((_time_knots.size() > 0) && (*_time_knots.begin() <= _time || std::abs(*_time_knots.begin() - _time) < 1e-10))
+  while ((_time_knots.size() > 0) &&
+         (*_time_knots.begin() <= _time || std::abs(*_time_knots.begin() - _time) < 1e-10))
     _time_knots.erase(_time_knots.begin());
 }
 
@@ -102,8 +111,8 @@ FunctionDT::computeDT()
   if (local_dt < _min_dt)
     local_dt = _min_dt;
 
-//  if (_cutback_occurred && (local_dt > _dt * _growth_factor))
-//    local_dt = _dt * _growth_factor;
+  if (_cutback_occurred && (local_dt > _dt * _growth_factor))
+    local_dt = _dt * _growth_factor;
   _cutback_occurred = false;
 
   return local_dt;

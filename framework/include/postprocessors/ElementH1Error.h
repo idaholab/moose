@@ -20,7 +20,7 @@
 // Forward Declarations
 class ElementH1Error;
 
-template<>
+template <>
 InputParameters validParams<ElementH1Error>();
 
 /**
@@ -30,11 +30,10 @@ InputParameters validParams<ElementH1Error>();
  *
  * ||u-f||_{H^1} = sqrt( \int ( |u-f|^2 + |grad u - grad f|^2 ) dx )
  */
-class ElementH1Error :
-  public ElementW1pError
+class ElementH1Error : public ElementW1pError
 {
 public:
   ElementH1Error(const InputParameters & parameters);
 };
 
-#endif //ELEMENTH1ERROR_H
+#endif // ELEMENTH1ERROR_H

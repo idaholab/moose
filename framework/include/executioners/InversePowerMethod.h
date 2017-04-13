@@ -20,17 +20,17 @@
 // Forward Declarations
 class InversePowerMethod;
 
-template<>
+template <>
 InputParameters validParams<InversePowerMethod>();
 
 class InversePowerMethod : public EigenExecutionerBase
 {
 public:
-
   InversePowerMethod(const InputParameters & parameters);
 
-  virtual void init();
-  virtual void execute();
+  virtual void init() override;
+
+  virtual void execute() override;
 
 protected:
   virtual void takeStep();
@@ -53,4 +53,4 @@ protected:
   const bool & _cheb_on;
 };
 
-#endif //INVERSEPOWERMETHOD_H
+#endif // INVERSEPOWERMETHOD_H

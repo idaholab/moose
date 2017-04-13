@@ -56,16 +56,15 @@
 [Materials]
   [./elasticity_tensor_A]
     type = ComputeElasticityTensor
-    block = 0
     base_name = A
     fill_method = symmetric9
     C_ijkl = '1e6 1e5 1e5 1e6 0 1e6 .4e6 .2e6 .5e6'
   [../]
   [./strain_A]
     type = ComputeSmallStrain
-    block = 0
     base_name = A
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress_A]
     type = ComputeLinearElasticStress
@@ -73,24 +72,23 @@
   [../]
   [./eigenstrain_A]
     type = ComputeEigenstrain
-    block = 0
     base_name = A
     eigen_base = '0.1 0.05 0 0 0 0.01'
     prefactor = -1
+    eigenstrain_name = eigenstrain
   [../]
 
   [./elasticity_tensor_B]
     type = ComputeElasticityTensor
-    block = 0
     base_name = B
     fill_method = symmetric9
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
   [../]
   [./strain_B]
     type = ComputeSmallStrain
-    block = 0
     base_name = B
     displacements = 'disp_x disp_y'
+    eigenstrain_names = 'B_eigenstrain'
   [../]
   [./stress_B]
     type = ComputeLinearElasticStress
@@ -98,20 +96,18 @@
   [../]
   [./eigenstrain_B]
     type = ComputeEigenstrain
-    block = 0
     base_name = B
     eigen_base = '0.1 0.05 0 0 0 0.01'
     prefactor = -1
+    eigenstrain_name = 'B_eigenstrain'
   [../]
 
   [./switching]
     type = SwitchingFunctionMaterial
-    block = 0
     eta = eta
   [../]
   [./combined]
     type = TwoPhaseStressMaterial
-    block = 0
     base_A = A
     base_B = B
   [../]

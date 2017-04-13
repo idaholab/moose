@@ -29,16 +29,21 @@ class SideSetupInterfaceCount;
 class InternalSideSetupInterfaceCount;
 class NodalSetupInterfaceCount;
 
-template<> InputParameters validParams<GeneralSetupInterfaceCount>();
-template<> InputParameters validParams<ElementSetupInterfaceCount>();
-template<> InputParameters validParams<SideSetupInterfaceCount>();
-template<> InputParameters validParams<InternalSideSetupInterfaceCount>();
-template<> InputParameters validParams<NodalSetupInterfaceCount>();
+template <>
+InputParameters validParams<GeneralSetupInterfaceCount>();
+template <>
+InputParameters validParams<ElementSetupInterfaceCount>();
+template <>
+InputParameters validParams<SideSetupInterfaceCount>();
+template <>
+InputParameters validParams<InternalSideSetupInterfaceCount>();
+template <>
+InputParameters validParams<NodalSetupInterfaceCount>();
 
 /**
  * A class for testing the number of calls to the various SetupInterface methods.
  */
-template<class T>
+template <class T>
 class SetupInterfaceCount : public T
 {
 public:
@@ -64,7 +69,6 @@ public:
   PostprocessorValue getValue();
 
 private:
-
   /// The type of count to report
   MooseEnum _count_type;
 
@@ -73,16 +77,14 @@ private:
 
   /// Storage for the various counts
   std::map<std::string, unsigned int> & _counts;
-
 };
 
-
-template<class T>
-SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters) :
-    T(parameters),
+template <class T>
+SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters)
+  : T(parameters),
     _count_type(T::template getParam<MooseEnum>("count_type")),
     _execute(0),
-    _counts(T::template declareRestartableData<std::map<std::string, unsigned int> >("counts"))
+    _counts(T::template declareRestartableData<std::map<std::string, unsigned int>>("counts"))
 {
   // Initialize the count storage map
   const std::vector<std::string> & names = _count_type.getNames();
@@ -90,8 +92,7 @@ SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters) 
     _counts[*it] = 0;
 }
 
-
-template<class T>
+template <class T>
 PostprocessorValue
 SetupInterfaceCount<T>::getValue()
 {
@@ -99,8 +100,7 @@ SetupInterfaceCount<T>::getValue()
   return count;
 }
 
-
-template<class T>
+template <class T>
 void
 SetupInterfaceCount<T>::initialize()
 {
@@ -108,8 +108,7 @@ SetupInterfaceCount<T>::initialize()
   _execute = 0;
 }
 
-
-template<class T>
+template <class T>
 void
 SetupInterfaceCount<T>::threadJoin(const UserObject & uo)
 {
@@ -119,8 +118,7 @@ SetupInterfaceCount<T>::threadJoin(const UserObject & uo)
   _counts["threadjoin"]++;
 }
 
-
-template<class T>
+template <class T>
 void
 SetupInterfaceCount<T>::finalize()
 {
@@ -128,7 +126,6 @@ SetupInterfaceCount<T>::finalize()
   _counts["execute"] += _execute;
   _counts["finalize"]++;
 }
-
 
 // Define objects for each of the UserObject base classes
 class GeneralSetupInterfaceCount : public SetupInterfaceCount<GeneralPostprocessor>

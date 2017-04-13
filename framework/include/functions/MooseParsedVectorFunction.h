@@ -21,18 +21,15 @@
 
 // Forward decleratrions
 class MooseParsedVectorFunction;
-class MooseParsedFunctionWrapper;
 
-template<>
+template <>
 InputParameters validParams<MooseParsedVectorFunction>();
 
 /**
  * This class is similar to ParsedFunction except it returns a vector function
  *
  */
-class MooseParsedVectorFunction :
-  public Function,
-  public MooseParsedFunctionBase
+class MooseParsedVectorFunction : public Function, public MooseParsedFunctionBase
 {
 public:
   /**
@@ -41,37 +38,15 @@ public:
    */
   MooseParsedVectorFunction(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~MooseParsedVectorFunction();
+  virtual RealVectorValue vectorValue(Real t, const Point & p) override;
 
-  /**
-   * Returns the vector function evaluation
-   * @param t The time
-   * @param p The current x,y,z location
-   * @return The vector resulting from evaluating the function
-   */
-  virtual RealVectorValue vectorValue(Real t, const Point & p);
+  virtual RealGradient gradient(Real t, const Point & p) override;
 
-  /**
-   * Gradient method is not valid in a vector function
-   * \see ParsedGradFunction
-   */
-  virtual RealGradient gradient(Real t, const Point & p);
-
-  /**
-   * Creates the libMesh::ParsedFunction for returning a vector via the 'vectorValue' method
-   */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
-
   /// Storage for gradient input function(s), in format ready for libMesh
   std::string _vector_value;
-
-  // Pointer to the wrapper object for parsed functions
-  MooseParsedFunctionWrapper * _function_ptr;
 };
 
-#endif //MOOSEPARSEDVECTORFUNCTION_H
+#endif // MOOSEPARSEDVECTORFUNCTION_H

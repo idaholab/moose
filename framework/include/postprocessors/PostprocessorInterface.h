@@ -22,7 +22,7 @@
 #include "MooseTypes.h"
 
 // Forward Declarations
-class FEProblem;
+class FEProblemBase;
 class InputParameters;
 class PostprocessorName;
 class MooseObject;
@@ -103,8 +103,8 @@ private:
   /// PostprocessorInterface Parameters
   const InputParameters & _ppi_params;
 
-  /// Reference the the FEProblem class
-  FEProblem & _pi_feproblem;
+  /// Reference the the FEProblemBase class
+  FEProblemBase & _pi_feproblem;
 };
 
-#endif //POSTPROCESSORINTERFACE_H
+#endif // POSTPROCESSORINTERFACE_H

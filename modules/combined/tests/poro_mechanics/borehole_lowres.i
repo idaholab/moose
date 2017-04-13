@@ -46,6 +46,10 @@
   block = 1
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -701,7 +705,7 @@
   solve_type = Newton
   start_time = 0
   end_time = 0.3
-  dt = 0.15
+  dt = 0.3
   #[./TimeStepper]
   #  type = PostprocessorDT
   #  postprocessor = dt

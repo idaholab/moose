@@ -7,109 +7,115 @@ import subprocess, os, sys, re
 
 
 def shellCommand( command, cwd=None ):
-  # The following line works with Python 2.7+
-  # return subprocess.check_output( command, shell=True, stderr=subprocess.STDOUT, cwd=cwd )
-  p = subprocess.Popen( command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd )
-  p.wait()
-  retcode = p.returncode
-  if retcode != 0:
-    raise Exception()
+    # The following line works with Python 2.7+
+    # return subprocess.check_output( command, shell=True, stderr=subprocess.STDOUT, cwd=cwd )
+    p = subprocess.Popen( command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd )
+    p.wait()
+    retcode = p.returncode
+    if retcode != 0:
+        raise Exception()
 
-  return p.communicate()[0]
+    return p.communicate()[0]
 
 def gitVersionString( cwd=None ):
-  SHA1 = ''
-  date = ''
-  try:
-    # The SHA1 and date should always be available if we have a git repo.
-    SHA1 = shellCommand( 'git show -s --format=%h', cwd ).strip()
-    date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
-  except: # subprocess.CalledProcessError:
-    return None
+    SHA1 = ''
+    date = ''
+    try:
+        # The SHA1 and date should always be available if we have a git repo.
+        SHA1 = shellCommand( 'git show -s --format=%h', cwd ).strip()
+        date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
+    except: # subprocess.CalledProcessError:
+        return None
 
-  # The tag check will always succeed if the repo starts with a v0.0 tag. To find only tags that
-  # were part of the first parent, use --first-parent.
-  tag = ''
-  try:
-    description = shellCommand( 'git describe --tags --long --match "v[0-9]*"', cwd ).rsplit('-',2)
-    tag = description[0] + ', '
-    commitsSinceTag = description[1]
-    if commitsSinceTag != '0':
-      tag = 'derived from ' + tag
-  except: # subprocess.CalledProcessError:
-    pass
-  return tag + "git commit " + SHA1 + " on " + date
+    # The tag check will always succeed if the repo starts with a v0.0 tag. To find only tags that
+    # were part of the first parent, use --first-parent.
+    tag = ''
+    try:
+        description = shellCommand( 'git describe --tags --long --match "v[0-9]*"', cwd ).rsplit('-',2)
+        tag = description[0] + ', '
+        commitsSinceTag = description[1]
+        if commitsSinceTag != '0':
+            tag = 'derived from ' + tag
+    except: # subprocess.CalledProcessError:
+        pass
+    return tag + "git commit " + SHA1 + " on " + date
 
 
 def gitSvnVersionString( cwd=None ):
-  try:
-    date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
-    revision = shellCommand( 'git svn find-rev $(git log --max-count 1 --pretty=format:%H)', cwd ).strip()
-    if len( revision ) > 0 and len( revision ) < 10:
-      return 'svn revision ' + revision + " on " + date
-  except: # subprocess.CalledProcessError:
-    pass
-  return None
+    try:
+        date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
+        revision = shellCommand( 'git svn find-rev $(git log --max-count 1 --pretty=format:%H)', cwd ).strip()
+        if len( revision ) > 0 and len( revision ) < 10:
+            return 'svn revision ' + revision + " on " + date
+    except: # subprocess.CalledProcessError:
+        pass
+    return None
 
 
 def svnVersionString( cwd=None ):
-  try:
-    revisionString = shellCommand( 'svnversion .', cwd )
-    matchingRevision = re.search( r'\d+', revisionString )
-    if matchingRevision is not None:
-      return 'svn revision ' + matchingRevision.group(0)
-  except: # subprocess.CalledProcessError:
-    pass
-  return None
+    try:
+        revisionString = shellCommand( 'svnversion .', cwd )
+        matchingRevision = re.search( r'\d+', revisionString )
+        if matchingRevision is not None:
+            return 'svn revision ' + matchingRevision.group(0)
+    except: # subprocess.CalledProcessError:
+        pass
+    return None
 
 
 def repoVersionString( cwd=None ):
-  version = svnVersionString( cwd )
-  if version is None:
-    version = gitSvnVersionString( cwd )
-  if version is None:
-    version = gitVersionString( cwd )
-  if version is None:
-    version = "unknown"
-  return version
+    version = svnVersionString( cwd )
+    if version is None:
+        version = gitSvnVersionString( cwd )
+    if version is None:
+        version = gitVersionString( cwd )
+    if version is None:
+        version = "unknown"
+    return version
 
 
 def writeRevision( app_name, app_revision, revision_header ):
-  # Use all caps for app name (by convention).
-  app_definition = app_name.upper() + '_REVISION'
+    # Use all caps for app name (by convention).
+    app_definition = app_name.upper() + '_REVISION'
 
-  # see if the revision is different
-  revision_changed = False
-  if os.path.exists(revision_header):
-    f = open(revision_header, "r")
-    buffer = f.read()
+    # see if the revision is different
+    revision_changed = False
+    if os.path.exists(revision_header):
+        f = open(revision_header, "r")
+        buffer = f.read()
 
-    m =  re.search( re.escape( app_definition) + r' "([^"]*)"',buffer )
-    if m is not None and m.group(1) != app_revision:
-      revision_changed = True
+        m =  re.search( re.escape( app_definition) + r' "([^"]*)"',buffer )
+        if m is not None and m.group(1) != app_revision:
+            revision_changed = True
 
-    f.close()
-  else:
-    # Count it as changed if the header does not exist.
-    revision_changed = True
+        f.close()
+    else:
+        # Count it as changed if the header does not exist.
+        revision_changed = True
 
-  if revision_changed:
-    f = open(revision_header, "w")
-    f.write( '/* THIS FILE IS AUTOGENERATED - DO NOT EDIT */\n' \
-             '\n'
-             '#ifndef ' + app_definition + '_H\n'
-             '#define ' + app_definition + '_H\n'
-             '\n'
-             '#define ' + app_definition + ' "' + app_revision + '"\n'
-             '\n'
-             '#endif // ' + app_definition + '_H\n')
-    f.close()
+    if revision_changed:
+        revision_dir = os.path.dirname(revision_header)
+        try:
+            os.stat(revision_dir)
+        except:
+            os.mkdir(revision_dir)
+
+        f = open(revision_header, "w")
+        f.write( '/* THIS FILE IS AUTOGENERATED - DO NOT EDIT */\n' \
+                 '\n'
+                 '#ifndef ' + app_definition + '_H\n'
+                 '#define ' + app_definition + '_H\n'
+                 '\n'
+                 '#define ' + app_definition + ' "' + app_revision + '"\n'
+                 '\n'
+                 '#endif // ' + app_definition + '_H\n')
+        f.close()
 
 # Entry point
 if len(sys.argv) == 4:
-  repo_location = sys.argv[1]
-  header_file = sys.argv[2]
-  app_name = sys.argv[3]
+    repo_location = sys.argv[1]
+    header_file = sys.argv[2]
+    app_name = sys.argv[3]
 
-  revision = repoVersionString( repo_location )
-  writeRevision( app_name, revision, header_file )
+    revision = repoVersionString( repo_location )
+    writeRevision( app_name, revision, header_file )

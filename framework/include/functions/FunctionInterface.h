@@ -15,15 +15,20 @@
 #ifndef FUNCTIONINTERFACE_H
 #define FUNCTIONINTERFACE_H
 
-#include "ParallelUniqueId.h"
-#include "InputParameters.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class Function;
-class FEProblem;
+class FEProblemBase;
 class FunctionInterface;
+class Function;
+class InputParameters;
+class MooseObject;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<FunctionInterface>();
 
 /**
@@ -59,13 +64,13 @@ public:
 
 private:
   /// Parameters of the object with this interface
-  const InputParameters &_fni_params;
+  const InputParameters & _fni_params;
 
-  /// Reference to FEProblem instance
-  FEProblem & _fni_feproblem;
+  /// Reference to FEProblemBase instance
+  FEProblemBase & _fni_feproblem;
 
   /// Thread ID
   THREAD_ID _fni_tid;
 };
 
-#endif //FUNCTIONINTERFACE_H
+#endif // FUNCTIONINTERFACE_H

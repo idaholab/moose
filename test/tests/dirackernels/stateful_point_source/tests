@@ -1,7 +1,0 @@
-[Tests]
-  [./stateful_point_source_test]
-    type = 'RunException'
-    input = 'stateful_point_source.i'
-    expect_err = "Error: Stateful material properties not allowed"
-  [../]
-[]

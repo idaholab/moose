@@ -21,8 +21,8 @@
 // libMesh includes
 #include "libmesh/elem_range.h"
 
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
+class NonlinearSystemBase;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;
@@ -31,9 +31,10 @@ class ProjectMaterialProperties : public ThreadedElementLoop<ConstElemPointerRan
 {
 public:
   ProjectMaterialProperties(bool refine,
-                            FEProblem & fe_problem, NonlinearSystem & sys,
-                            std::vector<MooseSharedPointer<MaterialData> > & material_data,
-                            std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
+                            FEProblemBase & fe_problem,
+                            NonlinearSystemBase & sys,
+                            std::vector<std::shared_ptr<MaterialData>> & material_data,
+                            std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
                             MaterialPropertyStorage & material_props,
                             MaterialPropertyStorage & bnd_material_props,
                             std::vector<Assembly *> & assembly);
@@ -43,24 +44,24 @@ public:
 
   virtual ~ProjectMaterialProperties();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
 
   void join(const ProjectMaterialProperties & /*y*/);
 
 protected:
   /// Whether or not you are projecting refinements.  Set to false for coarsening.
   bool _refine;
-  FEProblem & _fe_problem;
-  NonlinearSystem & _sys;
-  std::vector<MooseSharedPointer<MaterialData> > & _material_data;
-  std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
+  FEProblemBase & _fe_problem;
+  NonlinearSystemBase & _sys;
+  std::vector<std::shared_ptr<MaterialData>> & _material_data;
+  std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;
 };
 
-#endif //PROJECTMATERIALPROPERTIES_H
+#endif // PROJECTMATERIALPROPERTIES_H

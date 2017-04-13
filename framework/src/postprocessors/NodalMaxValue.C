@@ -17,17 +17,18 @@
 #include <algorithm>
 #include <limits>
 
-template<>
-InputParameters validParams<NodalMaxValue>()
+template <>
+InputParameters
+validParams<NodalMaxValue>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   return params;
 }
 
-NodalMaxValue::NodalMaxValue(const InputParameters & parameters) :
-  NodalVariablePostprocessor(parameters),
-  _value(-std::numeric_limits<Real>::max())
-{}
+NodalMaxValue::NodalMaxValue(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters), _value(-std::numeric_limits<Real>::max())
+{
+}
 
 void
 NodalMaxValue::initialize()
@@ -54,4 +55,3 @@ NodalMaxValue::threadJoin(const UserObject & y)
   const NodalMaxValue & pps = static_cast<const NodalMaxValue &>(y);
   _value = std::max(_value, pps._value);
 }
-

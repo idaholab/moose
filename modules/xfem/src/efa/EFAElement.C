@@ -11,8 +11,8 @@
 #include "EFAError.h"
 #include "EFAFuncs.h"
 
-EFAElement::EFAElement(unsigned int eid, unsigned int n_nodes) :
-    _id(eid),
+EFAElement::EFAElement(unsigned int eid, unsigned int n_nodes)
+  : _id(eid),
     _num_nodes(n_nodes),
     _nodes(_num_nodes, NULL),
     _parent(NULL),
@@ -20,9 +20,7 @@ EFAElement::EFAElement(unsigned int eid, unsigned int n_nodes) :
 {
 }
 
-EFAElement::~EFAElement()
-{
-}
+EFAElement::~EFAElement() {}
 
 unsigned int
 EFAElement::id() const
@@ -37,19 +35,19 @@ EFAElement::numNodes() const
 }
 
 void
-EFAElement::setNode(unsigned int node_id, EFANode* node)
+EFAElement::setNode(unsigned int node_id, EFANode * node)
 {
   _nodes[node_id] = node;
 }
 
-EFANode*
+EFANode *
 EFAElement::getNode(unsigned int node_id) const
 {
   return _nodes[node_id];
 }
 
 bool
-EFAElement::containsNode(EFANode* node) const
+EFAElement::containsNode(EFANode * node) const
 {
   for (unsigned int i = 0; i < _nodes.size(); ++i)
     if (_nodes[i] == node)
@@ -58,17 +56,18 @@ EFAElement::containsNode(EFANode* node) const
 }
 
 void
-EFAElement::printNodes(std::ostream &ostream) const
+EFAElement::printNodes(std::ostream & ostream) const
 {
   ostream << "***** nodes for element " << _id << " *****" << std::endl;
   for (unsigned int i = 0; i < _num_nodes; ++i)
-    ostream << "addr " << _nodes[i] << ", ID " << _nodes[i]->idCatString() << ", category " << _nodes[i]->category() << std::endl;
+    ostream << "addr " << _nodes[i] << ", ID " << _nodes[i]->idCatString() << ", category "
+            << _nodes[i]->category() << std::endl;
 }
 
 EFANode *
 EFAElement::createLocalNodeFromGlobalNode(const EFANode * global_node) const
 {
-  //Given a global node, create a new local node
+  // Given a global node, create a new local node
   if (global_node->category() != EFANode::N_CATEGORY_PERMANENT &&
       global_node->category() != EFANode::N_CATEGORY_TEMP)
     EFAError("In createLocalNodeFromGlobalNode node is not global");
@@ -92,7 +91,7 @@ EFAElement::createLocalNodeFromGlobalNode(const EFANode * global_node) const
 EFANode *
 EFAElement::getGlobalNodeFromLocalNode(const EFANode * local_node) const
 {
-  //Given a local node, find the global node corresponding to that node
+  // Given a local node, find the global node corresponding to that node
   if (local_node->category() != EFANode::N_CATEGORY_LOCAL_INDEX)
     EFAError("In getGlobalNodeFromLocalNode node passed in is not local");
 
@@ -122,15 +121,6 @@ EFAElement::getLocalNodeIndex(EFANode * node) const
   if (!found_local_node)
     EFAError("In EFAelement::getLocalNodeIndex, cannot find the given node");
   return local_node_id;
-}
-
-std::vector<EFANode*>
-EFAElement::getCommonNodes(const EFAElement* other_elem) const
-{
-  std::set<EFANode*> e1nodes(_nodes.begin(), _nodes.end());
-  std::set<EFANode*> e2nodes(other_elem->_nodes.begin(), other_elem->_nodes.end());
-  std::vector<EFANode*> common_nodes = Efa::getCommonElems(e1nodes, e2nodes);
-  return common_nodes;
 }
 
 void
@@ -163,8 +153,8 @@ EFAElement::getCrackTipNeighbor(unsigned int index) const
 void
 EFAElement::addCrackTipNeighbor(EFAElement * neighbor_elem)
 {
-  //Find out what side the specified element is on, and add it as a crack tip neighbor
-  //element for that side.
+  // Find out what side the specified element is on, and add it as a crack tip neighbor
+  // element for that side.
   unsigned int neighbor_index = getNeighborIndex(neighbor_elem);
   bool crack_tip_neighbor_exist = false;
   for (unsigned int i = 0; i < _crack_tip_neighbors.size(); ++i)
@@ -179,13 +169,13 @@ EFAElement::addCrackTipNeighbor(EFAElement * neighbor_elem)
     _crack_tip_neighbors.push_back(neighbor_index);
 }
 
-EFAElement*
+EFAElement *
 EFAElement::getParent() const
 {
   return _parent;
 }
 
-EFAElement*
+EFAElement *
 EFAElement::getChild(unsigned int child_id) const
 {
   if (child_id < _children.size())
@@ -195,7 +185,7 @@ EFAElement::getChild(unsigned int child_id) const
 }
 
 void
-EFAElement::setParent(EFAElement* parent)
+EFAElement::setParent(EFAElement * parent)
 {
   _parent = parent;
 }
@@ -207,7 +197,7 @@ EFAElement::numChildren() const
 }
 
 void
-EFAElement::addChild(EFAElement* child)
+EFAElement::addChild(EFAElement * child)
 {
   _children.push_back(child);
 }
@@ -220,26 +210,26 @@ EFAElement::clearParentAndChildren()
 }
 
 void
-EFAElement::findGeneralNeighbors(std::map<EFANode*, std::set<EFAElement*> > &InverseConnectivity)
+EFAElement::findGeneralNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivity)
 {
   _general_neighbors.clear();
-  std::set<EFAElement*> patch_elements;
+  std::set<EFAElement *> patch_elements;
   for (unsigned int inode = 0; inode < _num_nodes; ++inode)
   {
-    std::set<EFAElement*> this_node_connected_elems = InverseConnectivity[_nodes[inode]];
+    std::set<EFAElement *> this_node_connected_elems = InverseConnectivity[_nodes[inode]];
     patch_elements.insert(this_node_connected_elems.begin(), this_node_connected_elems.end());
   }
 
-  std::set<EFAElement*>::iterator eit2;
+  std::set<EFAElement *>::iterator eit2;
   for (eit2 = patch_elements.begin(); eit2 != patch_elements.end(); ++eit2)
   {
-    EFAElement* neigh_elem = *eit2;
+    EFAElement * neigh_elem = *eit2;
     if (neigh_elem != this)
       _general_neighbors.push_back(neigh_elem);
   }
 }
 
-EFAElement*
+EFAElement *
 EFAElement::getGeneralNeighbor(unsigned int index) const
 {
   return _general_neighbors[index];
@@ -252,14 +242,17 @@ EFAElement::numGeneralNeighbors() const
 }
 
 void
-EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAElement* childOfNeighborElem,
-                       std::map<unsigned int, EFANode*> &PermanentNodes, std::map<unsigned int, EFANode*> &TempNodes)
+EFAElement::mergeNodes(EFANode *& childNode,
+                       EFANode *& childOfNeighborNode,
+                       EFAElement * childOfNeighborElem,
+                       std::map<unsigned int, EFANode *> & PermanentNodes,
+                       std::map<unsigned int, EFANode *> & TempNodes)
 {
   // Important: this must be run only on child elements that were just created
   if (!_parent)
-    EFAError("no getParent element for child element " << _id << " in mergeNodes");
+    EFAError("no getParent element for child element ", _id, " in mergeNodes");
 
-  EFAElement* childElem = this;
+  EFAElement * childElem = this;
   if (childNode != childOfNeighborNode)
   {
     if (childNode->category() == EFANode::N_CATEGORY_PERMANENT)
@@ -271,36 +264,44 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
           childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true);
           if (!Efa::deleteFromMap(PermanentNodes, childOfNeighborNode))
           {
-            EFAError("Attempted to delete node: " << childOfNeighborNode->id()
-                     << " from PermanentNodes, but couldn't find it");
+            EFAError("Attempted to delete node: ",
+                     childOfNeighborNode->id(),
+                     " from PermanentNodes, but couldn't find it");
           }
           childOfNeighborNode = childNode;
         }
         else if (childNode->parent() == childOfNeighborNode) // merge into childOfNeighborNode
         {
-        childElem->switchNode(childOfNeighborNode, childNode, true);
+          childElem->switchNode(childOfNeighborNode, childNode, true);
           if (!Efa::deleteFromMap(PermanentNodes, childNode))
           {
-            EFAError("Attempted to delete node: " << childNode->id()
-                     << " from PermanentNodes, but couldn't find it");
+            EFAError("Attempted to delete node: ",
+                     childNode->id(),
+                     " from PermanentNodes, but couldn't find it");
           }
           childNode = childOfNeighborNode;
         }
-        else if (childNode->parent() != NULL && childNode->parent() == childOfNeighborNode->parent())
+        else if (childNode->parent() != NULL &&
+                 childNode->parent() == childOfNeighborNode->parent())
         {
           // merge into childNode if both nodes are child permanent
           childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true);
-          if (!Efa::deleteFromMap(PermanentNodes, childOfNeighborNode)) // delete childOfNeighborNode
+          if (!Efa::deleteFromMap(PermanentNodes,
+                                  childOfNeighborNode)) // delete childOfNeighborNode
           {
-            EFAError("Attempted to delete node: " << childOfNeighborNode->id()
-                     << " from PermanentNodes, but couldn't find it");
+            EFAError("Attempted to delete node: ",
+                     childOfNeighborNode->id(),
+                     " from PermanentNodes, but couldn't find it");
           }
           childOfNeighborNode = childNode;
         }
         else
         {
-          EFAError("Attempting to merge nodes: " << childNode->id() << " and "
-                   << childOfNeighborNode->id() << " but both are permanent themselves");
+          EFAError("Attempting to merge nodes: ",
+                   childNode->id(),
+                   " and ",
+                   childOfNeighborNode->id(),
+                   " but both are permanent themselves");
         }
       }
       else
@@ -308,12 +309,17 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
         if (childOfNeighborNode->parent() != childNode &&
             childOfNeighborNode->parent() != childNode->parent())
         {
-          EFAError("Attempting to merge nodes " << childOfNeighborNode->idCatString() << " and "
-                   << childNode->idCatString() << " but neither the 2nd node nor its parent is parent of the 1st");
+          EFAError("Attempting to merge nodes ",
+                   childOfNeighborNode->idCatString(),
+                   " and ",
+                   childNode->idCatString(),
+                   " but neither the 2nd node nor its parent is parent of the 1st");
         }
         childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true);
         if (!Efa::deleteFromMap(TempNodes, childOfNeighborNode))
-          EFAError("Attempted to delete node: " << childOfNeighborNode->id() << " from TempNodes, but couldn't find it");
+          EFAError("Attempted to delete node: ",
+                   childOfNeighborNode->id(),
+                   " from TempNodes, but couldn't find it");
         childOfNeighborNode = childNode;
       }
     }
@@ -322,33 +328,44 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
       if (childNode->parent() != childOfNeighborNode &&
           childNode->parent() != childOfNeighborNode->parent())
       {
-        EFAError("Attempting to merge nodes " << childNode->id() << " and "
-                 << childOfNeighborNode->id() << " but neither the 2nd node nor its parent is parent of the 1st");
+        EFAError("Attempting to merge nodes ",
+                 childNode->id(),
+                 " and ",
+                 childOfNeighborNode->id(),
+                 " but neither the 2nd node nor its parent is parent of the 1st");
       }
       childElem->switchNode(childOfNeighborNode, childNode, true);
       if (!Efa::deleteFromMap(TempNodes, childNode))
-        EFAError("Attempted to delete node: " << childNode->id() << " from TempNodes, but couldn't find it");
+        EFAError(
+            "Attempted to delete node: ", childNode->id(), " from TempNodes, but couldn't find it");
       childNode = childOfNeighborNode;
     }
-    else //both nodes are temporary -- create new permanent node and delete temporary nodes
+    else // both nodes are temporary -- create new permanent node and delete temporary nodes
     {
       unsigned int new_node_id = Efa::getNewID(PermanentNodes);
-      EFANode* newNode = new EFANode(new_node_id,EFANode::N_CATEGORY_PERMANENT,childNode->parent());
-      PermanentNodes.insert(std::make_pair(new_node_id,newNode));
+      EFANode * newNode =
+          new EFANode(new_node_id, EFANode::N_CATEGORY_PERMANENT, childNode->parent());
+      PermanentNodes.insert(std::make_pair(new_node_id, newNode));
 
       childOfNeighborElem->switchNode(newNode, childOfNeighborNode, true);
       childElem->switchNode(newNode, childNode, true);
 
       if (childNode->parent() != childOfNeighborNode->parent())
       {
-        EFAError("Attempting to merge nodes " << childNode->id() << " and "
-                 << childOfNeighborNode->id() << " but they don't share a common parent");
+        EFAError("Attempting to merge nodes ",
+                 childNode->id(),
+                 " and ",
+                 childOfNeighborNode->id(),
+                 " but they don't share a common parent");
       }
 
       if (!Efa::deleteFromMap(TempNodes, childOfNeighborNode))
-        EFAError("Attempted to delete node: " << childOfNeighborNode->id() << " from TempNodes, but couldn't find it");
+        EFAError("Attempted to delete node: ",
+                 childOfNeighborNode->id(),
+                 " from TempNodes, but couldn't find it");
       if (!Efa::deleteFromMap(TempNodes, childNode))
-        EFAError("Attempted to delete node: " << childNode->id() << " from TempNodes, but couldn't find it");
+        EFAError(
+            "Attempted to delete node: ", childNode->id(), " from TempNodes, but couldn't find it");
       childOfNeighborNode = newNode;
       childNode = newNode;
     }

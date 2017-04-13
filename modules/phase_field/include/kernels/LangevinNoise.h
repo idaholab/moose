@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class LangevinNoise;
 
-template<>
+template <>
 InputParameters validParams<LangevinNoise>();
 
 class LangevinNoise : public Kernel
@@ -28,4 +28,4 @@ protected:
   const MaterialProperty<Real> & _multiplier_prop;
 };
 
-#endif //LANGEVINNOISE_H
+#endif // LANGEVINNOISE_H

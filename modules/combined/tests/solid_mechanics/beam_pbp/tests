@@ -1,9 +1,18 @@
 [Tests]
-  [./test_beam_pbp]
+  [./sm_beam_pbp]
     type = 'Exodiff'
     input = 'beam_pbp_test.i'
     exodiff = 'out.e'
     abs_zero = 1e-07
     scale_refine = 1
+  [../]
+  [./tm_beam_pbp]
+    type = 'Exodiff'
+    input = 'beam_pbp_tm.i'
+    exodiff = 'tm_out.e'
+    abs_zero = 1e-07
+    scale_refine = 1
+    prereq = 'sm_beam_pbp'
+    rel_err = 4e-5
   [../]
 []

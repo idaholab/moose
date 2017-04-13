@@ -19,7 +19,7 @@
 
 class LStableDirk2;
 
-template<>
+template <>
 InputParameters validParams<LStableDirk2>();
 
 /**
@@ -58,7 +58,6 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
   //! Indicates the current stage (1 or 2).
   unsigned int _stage;
 
@@ -71,6 +70,5 @@ protected:
   // The parameter of the method, set at construction time and cannot be changed.
   const Real _alpha;
 };
-
 
 #endif /* LSTABLEDIRK2_H */

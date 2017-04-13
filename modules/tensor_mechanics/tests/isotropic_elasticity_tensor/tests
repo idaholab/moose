@@ -20,4 +20,11 @@
     input = '2D-axisymmetric_rz_test.i'
     exodiff = '2D-axisymmetric_rz_test_out.e'
   [../]
+  [./axisymmetric_rz_Bbar]
+    type = Exodiff
+    input = '2D-axisymmetric_rz_test.i'
+    exodiff = '2D-axisymmetric_rz_test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction = true'
+    prereq = 'axisymmetric_rz'
+  [../]
 []

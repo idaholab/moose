@@ -14,15 +14,13 @@
 
 #include "Ralston.h"
 
-template<>
-InputParameters validParams<Ralston>()
+template <>
+InputParameters
+validParams<Ralston>()
 {
   InputParameters params = validParams<ExplicitRK2>();
 
   return params;
 }
 
-Ralston::Ralston(const InputParameters & parameters) :
-    ExplicitRK2(parameters)
-{
-}
+Ralston::Ralston(const InputParameters & parameters) : ExplicitRK2(parameters) {}

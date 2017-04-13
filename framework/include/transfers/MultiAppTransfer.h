@@ -27,7 +27,7 @@ class MultiAppTransfer;
 class MooseMesh;
 class MultiApp;
 
-template<>
+template <>
 InputParameters validParams<MultiAppTransfer>();
 
 /**
@@ -43,9 +43,8 @@ class MultiAppTransfer : public Transfer
 {
 public:
   MultiAppTransfer(const InputParameters & parameters);
-  virtual ~MultiAppTransfer() {}
 
-  enum
+  enum DIRECTION
   {
     TO_MULTIAPP,
     FROM_MULTIAPP
@@ -63,15 +62,14 @@ public:
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
   /// Return the MultiApp that this transfer belongs to
-  const MooseSharedPointer<MultiApp> getMultiApp() const { return _multi_app; }
+  const std::shared_ptr<MultiApp> getMultiApp() const { return _multi_app; }
 
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
-
 protected:
   /// The MultiApp this Transfer is transferring data to or from
-  MooseSharedPointer<MultiApp> _multi_app;
+  std::shared_ptr<MultiApp> _multi_app;
 
   /// Whether we're transferring to or from the MultiApp
   MooseEnum _direction;
@@ -82,8 +80,8 @@ protected:
    */
   void getAppInfo();
 
-  std::vector<FEProblem *> _to_problems;
-  std::vector<FEProblem *> _from_problems;
+  std::vector<FEProblemBase *> _to_problems;
+  std::vector<FEProblemBase *> _from_problems;
   std::vector<EquationSystems *> _to_es;
   std::vector<EquationSystems *> _from_es;
   std::vector<MooseMesh *> _to_meshes;

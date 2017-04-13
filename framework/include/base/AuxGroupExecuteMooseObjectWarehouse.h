@@ -18,19 +18,17 @@
 
 // MOOSE includes
 #include "ExecuteMooseObjectWarehouse.h"
-#include "Postprocessor.h"
 
 class UserObject;
 
 /**
  * General warehouse for storing MooseObjects based on relation to AuxKernel execution.
  */
-template<typename T>
+template <typename T>
 class AuxGroupExecuteMooseObjectWarehouse : public ExecuteMooseObjectWarehouse<T>
 {
 
 public:
-
   /// Using these from base class
   using MooseObjectWarehouse<T>::checkThreadID;
   using ExecuteMooseObjectWarehouse<T>::_all_objects;
@@ -50,7 +48,7 @@ public:
   /**
    * Call this inorder to separate the stored objects into the various AuxGroup catagories.
    *
-   * @see FEProblem::initialSetup()
+   * @see FEProblemBase::initialSetup()
    */
   void updateDependObjects(const std::set<std::string> & depend_uo, THREAD_ID tid = 0);
 
@@ -62,62 +60,56 @@ public:
   /**
    * Updates the various active lists of objects.
    */
-  virtual void updateActive(THREAD_ID tid = 0);
+  virtual void updateActive(THREAD_ID tid = 0) override;
 
 protected:
-
   /// Storage for the PRE_AUX and POST_AUX group sorted objects (ALL is stored in the base class)
-  std::vector<ExecuteMooseObjectWarehouse<T> > _group_objects;
+  std::vector<ExecuteMooseObjectWarehouse<T>> _group_objects;
 };
 
-
-template<typename T>
-AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(bool threaded) :
-    ExecuteMooseObjectWarehouse<T>(threaded),
-    _group_objects(2) // initialize Pre/Post aux storage
+template <typename T>
+AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(bool threaded)
+  : ExecuteMooseObjectWarehouse<T>(threaded), _group_objects(2) // initialize Pre/Post aux storage
 {
 }
 
-
-template<typename T>
-const ExecuteMooseObjectWarehouse<T> &
-AuxGroupExecuteMooseObjectWarehouse<T>::operator[](Moose::AuxGroup group) const
+template <typename T>
+const ExecuteMooseObjectWarehouse<T> & AuxGroupExecuteMooseObjectWarehouse<T>::
+operator[](Moose::AuxGroup group) const
 {
   if (group == Moose::ALL)
     return *this;
   return _group_objects[group];
 }
 
-
-template<typename T>
+template <typename T>
 void
-AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(const std::set<std::string> & depend_uo, THREAD_ID tid)
+AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(const std::set<std::string> & depend_uo,
+                                                            THREAD_ID tid)
 {
   checkThreadID(tid);
 
-  for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+  for (const auto & object_ptr : _all_objects[tid])
   {
-    if (depend_uo.find((*it)->name()) != depend_uo.end())
-      _group_objects[Moose::PRE_AUX].addObject(*it, tid);
+    if (depend_uo.find(object_ptr->name()) != depend_uo.end())
+      _group_objects[Moose::PRE_AUX].addObject(object_ptr, tid);
     else
-      _group_objects[Moose::POST_AUX].addObject(*it, tid);
+      _group_objects[Moose::POST_AUX].addObject(object_ptr, tid);
   }
 }
 
-
-template<typename T>
+template <typename T>
 void
-AuxGroupExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid/*= 0*/)
+AuxGroupExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid /*= 0*/)
 {
   ExecuteMooseObjectWarehouse<T>::sort(tid);
   _group_objects[Moose::PRE_AUX].sort(tid);
   _group_objects[Moose::POST_AUX].sort(tid);
 }
 
-
-template<typename T>
+template <typename T>
 void
-AuxGroupExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid/*=0*/)
+AuxGroupExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid /*=0*/)
 {
   ExecuteMooseObjectWarehouse<T>::updateActive(tid);
   _group_objects[Moose::PRE_AUX].updateActive(tid);

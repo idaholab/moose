@@ -19,7 +19,7 @@
 
 class CrankNicolson;
 
-template<>
+template <>
 InputParameters validParams<CrankNicolson>();
 
 /**
@@ -46,4 +46,4 @@ protected:
   NumericVector<Number> & _residual_old;
 };
 
-#endif /* CRANKNICOLSON_H_ */
+#endif /* CRANKNICOLSON_H */

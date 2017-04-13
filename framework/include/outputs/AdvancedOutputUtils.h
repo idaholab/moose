@@ -45,7 +45,6 @@ struct OutputData
   std::set<std::string> output;
 };
 
-
 /**
  * In newer versions of Clang calling operator[] on a map with a component that
  * has a default constructor is an error, thus utilizing a map directly to store
@@ -60,7 +59,7 @@ struct OutputData
  *
  * @see OutputOnWarehouse OutputDataWarehouse
  */
-template<typename T>
+template <typename T>
 class OutputMapWrapper
 {
 public:
@@ -77,7 +76,7 @@ public:
     // Locate the map entry, error if it is not found
     typename std::map<std::string, T>::iterator iter = _map.find(name);
     if (iter == _map.end())
-      mooseError("Unknown map key " << name);
+      mooseError("Unknown map key ", name);
     return iter->second;
   }
 
@@ -87,10 +86,16 @@ public:
    */
   typename std::map<std::string, T>::iterator begin() { return _map.begin(); }
   typename std::map<std::string, T>::iterator end() { return _map.end(); }
-  typename std::map<std::string, T>::iterator find(const std::string & name) { return _map.find(name); }
+  typename std::map<std::string, T>::iterator find(const std::string & name)
+  {
+    return _map.find(name);
+  }
   typename std::map<std::string, T>::const_iterator begin() const { return _map.begin(); }
-  typename std::map<std::string, T>::const_iterator end() const { return _map.end(); } const
-  typename std::map<std::string, T>::const_iterator find(const std::string & name) const { return _map.find(name); }
+  typename std::map<std::string, T>::const_iterator end() const { return _map.end(); }
+  const typename std::map<std::string, T>::const_iterator find(const std::string & name) const
+  {
+    return _map.find(name);
+  }
   ///@}
 
   /**
@@ -98,13 +103,10 @@ public:
    */
   bool contains(const std::string & name) { return find(name) != end(); }
 
-
 protected:
-
   /// Data storage
   typename std::map<std::string, T> _map;
 };
-
 
 /**
  * A helper warehouse class for storing the "execute_on" settings for
@@ -128,7 +130,6 @@ protected:
 class OutputOnWarehouse : public OutputMapWrapper<MultiMooseEnum>
 {
 public:
-
   /**
    * Constructor
    * @param execute_on The general "execute_on" settings for the object.
@@ -148,7 +149,6 @@ public:
 class OutputDataWarehouse : public OutputMapWrapper<OutputData>
 {
 public:
-
   /**
    * Populate the OutputData structures for all output types that are 'variable' based
    */
@@ -160,8 +160,7 @@ public:
    * When false everything should output.
    * @see AdvancedOutput::initOutputList
    */
-  bool hasShowList(){ return _has_show_list; }
-
+  bool hasShowList() { return _has_show_list; }
 
   /**
    * Set the show list bool.
@@ -171,13 +170,9 @@ public:
    */
   void setHasShowList(bool value) { _has_show_list = value; }
 
-
 private:
-
   // True when the input file contains a show/hide list
   bool _has_show_list;
-
 };
-
 
 #endif // ADVANCEDOUTPUTUTILS_H

@@ -19,7 +19,7 @@
 // Forward Declaration
 class NanKernel;
 
-template<>
+template <>
 InputParameters validParams<NanKernel>();
 
 /**
@@ -42,4 +42,4 @@ private:
   unsigned int _deprecated_no_default;
 };
 
-#endif //NANKERNEL_H
+#endif // NANKERNEL_H

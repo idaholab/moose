@@ -1,0 +1,17 @@
+[Tests]
+  [./constant_poroperm]
+    type = 'Exodiff'
+    input = 'constant_poroperm.i'
+    exodiff = 'constant_poroperm_out.e'
+  [../]
+  [./constant_poroperm2]
+    type = 'Exodiff'
+    input = 'constant_poroperm2.i'
+    exodiff = 'constant_poroperm2_out.e'
+  [../]
+  [./vol_expansion_poroperm]
+    type = Exodiff
+    input = vol_expansion_poroperm.i
+    exodiff = vol_expansion_poroperm_out.e
+  [../]
+[]

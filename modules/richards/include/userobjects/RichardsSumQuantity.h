@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSUMQUANTITY_H
 #define RICHARDSSUMQUANTITY_H
 
@@ -13,7 +12,7 @@
 
 class RichardsSumQuantity;
 
-template<>
+template <>
 InputParameters validParams<RichardsSumQuantity>();
 
 /**
@@ -51,7 +50,6 @@ public:
   virtual Real getValue() const;
 
 protected:
-
   /// this holds the sum
   Real _total;
 };

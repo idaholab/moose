@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'scalar_coupled_postprocessor_test.i'
+    csvdiff = 'scalar_coupled_postprocessor_test_out.csv'
+  [../]
+[]

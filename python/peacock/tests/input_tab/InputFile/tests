@@ -1,0 +1,7 @@
+[Tests]
+  [./InputFile]
+    type = PythonUnitTest
+    input = test_InputFile.py
+    display_required = True    
+  [../]
+[]

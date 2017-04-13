@@ -6,4 +6,11 @@
     exodiff = 'between_in.e'
     recover = false
   [../]
+  [./vector_test]
+    type = 'Exodiff'
+    input = 'sidesets_between_vectors_of_subdomains.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sidesets_between_vectors_of_subdomains_in.e'
+    recover = false
+  [../]
 []

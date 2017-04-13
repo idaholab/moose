@@ -13,24 +13,30 @@
 /****************************************************************/
 
 #include "ElemElemConstraint.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "ElementPairInfo.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElemElemConstraint>()
+template <>
+InputParameters
+validParams<ElemElemConstraint>()
 {
   InputParameters params = validParams<Constraint>();
   params.addParam<unsigned int>("interface_id", 0, "The id of the interface.");
   return params;
 }
 
-ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters) :
-    Constraint(parameters),
+ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
+  : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
 
     _current_elem(_assembly.elem()),
@@ -57,10 +63,6 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters) :
 {
 }
 
-ElemElemConstraint::~ElemElemConstraint()
-{
-}
-
 void
 ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
 {
@@ -70,13 +72,13 @@ ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
 void
 ElemElemConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
 {
-  _constraint_q_point.resize(element_pair_info._constraint_q_point.size());
-  _constraint_weight.resize(element_pair_info._constraint_JxW.size());
-  std::copy(element_pair_info._constraint_q_point.begin(),
-            element_pair_info._constraint_q_point.end(),
+  _constraint_q_point.resize(element_pair_info._elem1_constraint_q_point.size());
+  _constraint_weight.resize(element_pair_info._elem1_constraint_JxW.size());
+  std::copy(element_pair_info._elem1_constraint_q_point.begin(),
+            element_pair_info._elem1_constraint_q_point.end(),
             _constraint_q_point.begin());
-  std::copy(element_pair_info._constraint_JxW.begin(),
-            element_pair_info._constraint_JxW.end(),
+  std::copy(element_pair_info._elem1_constraint_JxW.begin(),
+            element_pair_info._elem1_constraint_JxW.end(),
             _constraint_weight.begin());
 }
 
@@ -90,11 +92,11 @@ ElemElemConstraint::computeElemNeighResidual(Moose::DGResidualType type)
     is_elem = false;
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
-  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number()) :
-                                       _assembly.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number())
+                                     : _assembly.residualBlockNeighbor(_var.number());
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
-      for (_i = 0; _i< test_space.size(); _i++)
-        re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
+    for (_i = 0; _i < test_space.size(); _i++)
+      re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
 }
 
 void
@@ -110,14 +112,21 @@ ElemElemConstraint::computeResidual()
 void
 ElemElemConstraint::computeElemNeighJacobian(Moose::DGJacobianType type)
 {
-  const VariableTestValue & test_space = ( type == Moose::ElementElement || type == Moose::ElementNeighbor ) ?
-                                         _test : _test_neighbor;
-  const VariableTestValue & loc_phi = ( type == Moose::ElementElement || type == Moose::NeighborElement ) ?
-                                       _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), _var.number()) :
-                              type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number()) :
-                              type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number()) :
-                              _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+  const VariableTestValue & test_space =
+      (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi =
+      (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+  DenseMatrix<Number> & Kxx =
+      type == Moose::ElementElement
+          ? _assembly.jacobianBlock(_var.number(), _var.number())
+          : type == Moose::ElementNeighbor
+                ? _assembly.jacobianBlockNeighbor(
+                      Moose::ElementNeighbor, _var.number(), _var.number())
+                : type == Moose::NeighborElement
+                      ? _assembly.jacobianBlockNeighbor(
+                            Moose::NeighborElement, _var.number(), _var.number())
+                      : _assembly.jacobianBlockNeighbor(
+                            Moose::NeighborNeighbor, _var.number(), _var.number());
 
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)

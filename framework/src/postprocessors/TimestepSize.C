@@ -15,21 +15,21 @@
 #include "TimestepSize.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<TimestepSize>()
+template <>
+InputParameters
+validParams<TimestepSize>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-TimestepSize::TimestepSize(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _feproblem(dynamic_cast<FEProblem &>(_subproblem))
-{}
+TimestepSize::TimestepSize(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _feproblem(dynamic_cast<FEProblemBase &>(_subproblem))
+{
+}
 
 Real
 TimestepSize::getValue()
 {
   return _feproblem.dt();
 }
-

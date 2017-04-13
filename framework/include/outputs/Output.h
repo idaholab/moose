@@ -31,7 +31,7 @@ namespace libMesh
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<Output>();
 
 /**
@@ -42,14 +42,12 @@ InputParameters validParams<Output>();
  *
  * @see Exodus Console CSV
  */
-class Output :
-  public MooseObject,
-  public Restartable,
-  public MeshChangedInterface,
-  public SetupInterface
+class Output : public MooseObject,
+               public Restartable,
+               public MeshChangedInterface,
+               public SetupInterface
 {
 public:
-
   /**
    * Class constructor
    *
@@ -64,16 +62,17 @@ public:
    * Get the output time.
    * @return The output time, which may be different than the simulation time
    *
-   * When the Executioner is steady this utilizes the time_step and when Transient the actual time is used.
+   * When the Executioner is steady this utilizes the time_step and when Transient the actual time
+   * is used.
    */
   virtual Real time();
 
-   /**
-   * Get the old output time.
-   * @return The old output time, which may be different than the simulation time
-   *
-   * @see time()
-   */
+  /**
+  * Get the old output time.
+  * @return The old output time, which may be different than the simulation time
+  *
+  * @see time()
+  */
   virtual Real timeOld();
 
   /**
@@ -130,9 +129,7 @@ public:
    */
   static void addDeprecatedInputParameters(InputParameters & params);
 
-
 protected:
-
   /**
    * A single call to this function should output all the necessary data for a single timestep.
    * @param type The type execution flag (see Moose.h)
@@ -165,8 +162,8 @@ protected:
    */
   virtual void initialSetup();
 
-  /// Pointer the the FEProblem object for output object (use this)
-  FEProblem * _problem_ptr;
+  /// Pointer the the FEProblemBase object for output object (use this)
+  FEProblemBase * _problem_ptr;
 
   /// Transient flag (true = transient)
   bool _transient;

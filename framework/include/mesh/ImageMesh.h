@@ -20,24 +20,21 @@
 
 class ImageMesh;
 
-template<>
+template <>
 InputParameters validParams<ImageMesh>();
 
 /**
  * A 2D GeneratedMesh where xmin, xmax, etc. are determined from an input image file.
  */
-class ImageMesh :
-  public GeneratedMesh,
-  public FileRangeBuilder
+class ImageMesh : public GeneratedMesh, public FileRangeBuilder
 {
 public:
   ImageMesh(const InputParameters & parameters);
   ImageMesh(const ImageMesh & other_mesh);
-  virtual ~ImageMesh();
 
-  virtual MooseMesh & clone() const;
+  virtual MooseMesh & clone() const override;
 
-  virtual void buildMesh();
+  virtual void buildMesh() override;
 
 protected:
   /**

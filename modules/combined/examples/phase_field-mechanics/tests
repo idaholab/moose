@@ -1,0 +1,47 @@
+[Tests]
+  [./Conserved]
+    type = RunApp
+    input = 'Conserved.i'
+    check_input = True
+  [../]
+  [./EBSD_reconstruction_grain_growth_mech]
+    type = RunApp
+    input = 'EBSD_reconstruction_grain_growth_mech.i'
+    check_input = True
+    skip = 'Broken!'
+  [../]
+  [./Nonconserved]
+    type = RunApp
+    input = 'Nonconserved.i'
+    check_input = True
+  [../]
+  [./Pattern1]
+    type = RunApp
+    input = 'Pattern1.i'
+    # Note: we use a smaller mesh, as this does not affect the
+    # --check-input results in any way other than the amount of time
+    # it takes to run.
+    cli_args = 'Mesh/nx=2 Mesh/ny=2'
+    check_input = True
+  [../]
+  [./grain_texture]
+    type = RunApp
+    input = 'grain_texture.i'
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./hex_grain_growth_2D_eldrforce]
+    type = RunApp
+    input = 'hex_grain_growth_2D_eldrforce.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./poly_grain_growth_2D_eldrforce]
+    type = RunApp
+    input = 'poly_grain_growth_2D_eldrforce.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    method = 'OPT'
+    check_input = True
+  [../]
+[]

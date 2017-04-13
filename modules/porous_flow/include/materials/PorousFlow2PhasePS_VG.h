@@ -9,16 +9,16 @@
 #define POROUSFLOW2PHASEPS_VG_H
 
 #include "PorousFlow2PhasePS.h"
-#include "PorousFlowCapillaryPressureVG.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow2PhasePS_VG;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow2PhasePS_VG>();
 
 /**
- * Material designed to calculate fluid-phase porepressures at nodes
+ * Calculates porepressure and saturation at the nodes and qps using a van Genuchten
+ * capillary pressure curve
  */
 class PorousFlow2PhasePS_VG : public PorousFlow2PhasePS
 {
@@ -26,46 +26,18 @@ public:
   PorousFlow2PhasePS_VG(const InputParameters & parameters);
 
 protected:
-  /**
-   * Capillary pressure as a function of saturation.
-   * Default is constant capillary pressure = 0.0.
-   * Over-ride in derived classes to implement other capillary pressure forulations
-   *
-   * @param saturation saturation
-   * @return capillary pressure
-   */
-  virtual Real capillaryPressure(Real saturation) const;
+  virtual Real capillaryPressure(Real seff) const override;
 
-  /**
-   * Derivative of capillary pressure wrt to saturation.
-   * Default = 0 for constant capillary pressure.
-   * Over-ride in derived classes to implement other capillary pressure forulations
-   *
-   * @param saturation saturation (Pa)
-   * @return derivative of capillary pressure wrt saturation
-   */
-  virtual Real dCapillaryPressure_dS(Real pressure) const;
+  virtual Real dCapillaryPressure_dS(Real seff) const override;
 
-  /**
-   * Second derivative of capillary pressure wrt to saturation.
-   * Default = 0 for constant capillary pressure.
-   * Over-ride in derived classes to implement other capillary pressure forulations
-   *
-   * @param saturation saturation (Pa)
-   * @return second derivative of capillary pressure wrt saturation
-   */
-  virtual Real d2CapillaryPressure_dS2(Real pressure) const;
+  virtual Real d2CapillaryPressure_dS2(Real seff) const override;
 
-  /// Liquid residual saturation
-  Real _sat_lr;
-  /// Liquid phase fully saturated saturation
-  Real _sat_ls;
   /// van Genuchten exponent m
-  Real _m;
-  /// Maximum capillary pressure
-  Real _pc_max;
-  /// van Genuchten capillary pressure coefficient
-  Real _p0;
+  const Real _m;
+  /// Maximum capillary pressure (Pa). Note: must be <= 0
+  const Real _pc_max;
+  /// van Genuchten capillary pressure coefficient (inverse of alpha)
+  const Real _p0;
 };
 
-#endif //POROUSFLOW2PHASEPS_VG_H
+#endif // POROUSFLOW2PHASEPS_VG_H

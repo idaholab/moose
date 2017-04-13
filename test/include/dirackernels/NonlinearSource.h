@@ -21,7 +21,7 @@
 // Forward Declarations
 class NonlinearSource;
 
-template<>
+template <>
 InputParameters validParams<NonlinearSource>();
 
 /**

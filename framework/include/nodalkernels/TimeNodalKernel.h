@@ -17,11 +17,11 @@
 
 #include "NodalKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class TimeNodalKernel;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<TimeNodalKernel>();
 
 /**
@@ -36,12 +36,7 @@ public:
   TimeNodalKernel(const InputParameters & parameters);
 
 protected:
-
-  /**
-   * Adds to the "time residual" for any NodalKernel inheriting
-   * from this class
-   */
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 };
 
 #endif

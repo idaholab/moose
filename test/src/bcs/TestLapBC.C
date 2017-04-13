@@ -14,15 +14,16 @@
 
 #include "TestLapBC.h"
 
-template<>
-InputParameters validParams<TestLapBC>()
+template <>
+InputParameters
+validParams<TestLapBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-TestLapBC::TestLapBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+TestLapBC::TestLapBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _second_u(second()),
     _second_phi(secondPhiFace()),
     _second_test(secondTestFace())

@@ -14,23 +14,18 @@
 
 #include "AnisotropicDiffusion.h"
 
-
-template<>
-InputParameters validParams<AnisotropicDiffusion>()
+template <>
+InputParameters
+validParams<AnisotropicDiffusion>()
 {
   InputParameters p = validParams<Kernel>();
-  p.addRequiredParam<RealTensorValue>("tensor_coeff", "The Tensor to multiply the Diffusion operator by");
+  p.addRequiredParam<RealTensorValue>("tensor_coeff",
+                                      "The Tensor to multiply the Diffusion operator by");
   return p;
 }
 
-
-AnisotropicDiffusion::AnisotropicDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _k(getParam<RealTensorValue>("tensor_coeff"))
-{
-}
-
-AnisotropicDiffusion::~AnisotropicDiffusion()
+AnisotropicDiffusion::AnisotropicDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _k(getParam<RealTensorValue>("tensor_coeff"))
 {
 }
 
@@ -45,4 +40,3 @@ AnisotropicDiffusion::computeQpJacobian()
 {
   return (_k * _grad_phi[_j][_qp]) * _grad_test[_i][_qp];
 }
-

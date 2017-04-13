@@ -13,23 +13,24 @@
 /****************************************************************/
 #include "PercentChangePostprocessor.h"
 
-template<>
-InputParameters validParams<PercentChangePostprocessor>()
+template <>
+InputParameters
+validParams<PercentChangePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor used for exit criterion");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "The name of the postprocessor used for exit criterion");
   return params;
 }
 
-PercentChangePostprocessor::PercentChangePostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+PercentChangePostprocessor::PercentChangePostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _postprocessor(getPostprocessorValue("postprocessor")),
     _postprocessor_old(getPostprocessorValueOld("postprocessor"))
 {
-}
-
-PercentChangePostprocessor::~PercentChangePostprocessor()
-{
+  mooseDeprecated("PercentChangePostprocessor is deprecated: instead, ",
+                  "please use ChangeOverTimestepPostprocessor using the parameter ",
+                  "'compute_relative_change' set to 'true'");
 }
 
 void
@@ -45,6 +46,6 @@ PercentChangePostprocessor::execute()
 Real
 PercentChangePostprocessor::getValue()
 {
-  return std::fabs((std::fabs(_postprocessor) - std::fabs(_postprocessor_old)) * std::pow(std::fabs(_postprocessor), -1));
+  return std::fabs((std::fabs(_postprocessor) - std::fabs(_postprocessor_old)) *
+                   std::pow(std::fabs(_postprocessor), -1));
 }
-

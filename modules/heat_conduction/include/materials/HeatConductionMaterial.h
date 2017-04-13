@@ -9,11 +9,11 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class HeatConductionMaterial;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<HeatConductionMaterial>();
 
 /**
@@ -39,7 +39,6 @@ protected:
 
   MaterialProperty<Real> & _specific_heat;
   Function * _specific_heat_temperature_function;
-
 };
 
-#endif //HEATCONDUCTIONMATERIAL_H
+#endif // HEATCONDUCTIONMATERIAL_H

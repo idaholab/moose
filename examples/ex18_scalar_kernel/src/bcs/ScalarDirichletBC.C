@@ -14,8 +14,9 @@
 
 #include "ScalarDirichletBC.h"
 
-template<>
-InputParameters validParams<ScalarDirichletBC>()
+template <>
+InputParameters
+validParams<ScalarDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   // Here we are adding a parameter that will be extracted from the input file by the Parser
@@ -23,18 +24,20 @@ InputParameters validParams<ScalarDirichletBC>()
   return params;
 }
 
-ScalarDirichletBC::ScalarDirichletBC(const InputParameters & parameters) :
-    NodalBC(parameters),
+ScalarDirichletBC::ScalarDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters),
 
     /**
      * Get a reference to the coupled variable's values.
      */
     _scalar_val(coupledScalarValue("scalar_var"))
-{}
+{
+}
 
 Real
 ScalarDirichletBC::computeQpResidual()
 {
-  // We coupled in a first order scalar variable, thus there is only one value in _scalar_val (and it is - big surprise - on index 0)
+  // We coupled in a first order scalar variable, thus there is only one value in _scalar_val (and
+  // it is - big surprise - on index 0)
   return _u[_qp] - _scalar_val[0];
 }

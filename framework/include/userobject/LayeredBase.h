@@ -16,14 +16,24 @@
 #define LAYEREDBASE_H
 
 // MOOSE includes
-#include "InputParameters.h"
+#include "Moose.h"
+#include "MooseEnum.h"
 
 // Forward Declarations
+class InputParameters;
 class LayeredBase;
-class UserObject;
 class SubProblem;
+class UserObject;
 
-template<>
+namespace libMesh
+{
+class Point;
+}
+
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<LayeredBase>();
 
 /**
@@ -35,11 +45,6 @@ class LayeredBase
 {
 public:
   LayeredBase(const InputParameters & parameters);
-
-  /**
-   * Class with virtual methods needs a virtual destructor.
-   */
-  virtual ~LayeredBase() {}
 
   /**
    * Given a Point return the integral value associated with the layer that point falls in.

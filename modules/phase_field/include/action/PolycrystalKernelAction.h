@@ -13,7 +13,7 @@
  * Action that sets up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly
  * kernels.
  */
-class PolycrystalKernelAction: public Action
+class PolycrystalKernelAction : public Action
 {
 public:
   PolycrystalKernelAction(const InputParameters & params);
@@ -22,16 +22,16 @@ public:
 
 protected:
   /// number of grains to create
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   /// base name for the order parameter variables
-  std::string _var_name_base;
+  const std::string _var_name_base;
 
   /// kernels are implicit?
-  bool _implicit;
+  const bool _implicit;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalKernelAction>();
 
-#endif //POLYCRYSTALKERNELACTION_H
+#endif // POLYCRYSTALKERNELACTION_H

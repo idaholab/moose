@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'transient_thermo_mech_test.i'
-    exodiff = 'out.e'
-  [../]
-[]

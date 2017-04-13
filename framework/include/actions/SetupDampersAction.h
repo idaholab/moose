@@ -19,16 +19,15 @@
 
 class SetupDampersAction;
 
-template<>
+template <>
 InputParameters validParams<SetupDampersAction>();
-
 
 class SetupDampersAction : public Action
 {
 public:
   SetupDampersAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // SETUPDAMPERSACTION_H

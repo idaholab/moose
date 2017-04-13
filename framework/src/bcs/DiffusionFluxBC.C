@@ -14,22 +14,16 @@
 
 #include "DiffusionFluxBC.h"
 
-template<>
-InputParameters validParams<DiffusionFluxBC>()
+template <>
+InputParameters
+validParams<DiffusionFluxBC>()
 {
   InputParameters params = validParams<FluxBC>();
 
   return params;
 }
 
-DiffusionFluxBC::DiffusionFluxBC(const InputParameters & parameters) :
-    FluxBC(parameters)
-{
-}
-
-DiffusionFluxBC::~DiffusionFluxBC()
-{
-}
+DiffusionFluxBC::DiffusionFluxBC(const InputParameters & parameters) : FluxBC(parameters) {}
 
 RealGradient
 DiffusionFluxBC::computeQpFluxResidual()
@@ -42,4 +36,3 @@ DiffusionFluxBC::computeQpFluxJacobian()
 {
   return _grad_phi[_j][_qp];
 }
-

@@ -9,14 +9,15 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class TotalFreeEnergyBase;
 
-template<>
+template <>
 InputParameters validParams<TotalFreeEnergyBase>();
 
 /**
- * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined in a material and called f_name
+ * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined
+ * in a material and called f_name
  */
 class TotalFreeEnergyBase : public AuxKernel
 {
@@ -39,4 +40,4 @@ protected:
   const VariableValue & _additional_free_energy;
 };
 
-#endif //TOTALFREEENERGYBASE_H
+#endif // TOTALFREEENERGYBASE_H

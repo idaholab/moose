@@ -1,16 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [AuxVariables]
@@ -20,9 +14,10 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
   [../]
 []
 
@@ -64,18 +59,11 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-    block = 0
-  [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 0
     lambda = 113636
     shear_modulus = 454545
   [../]
@@ -98,4 +86,3 @@
 [Outputs]
   exodus = true
 []
-

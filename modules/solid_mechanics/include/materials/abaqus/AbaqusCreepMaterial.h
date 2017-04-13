@@ -9,16 +9,40 @@
 #ifndef ABAQUSCREEPMATERIAL_H
 #define ABAQUSCREEPMATERIAL_H
 
-typedef void (*creep_t)(Real DECRA[], Real DESWA[], Real STATEV[], Real* SERD, Real EC[], Real ESW[], Real* P, Real* QTILD, Real* TEMP, Real* DTEMP, Real PREDEF[], Real DPRED[], Real TIME[], Real* DTIME, Real* CMNAME, Real* LEXIMP, Real* LEND, Real COORDS[], Real* NSTATV, int* NOEL, int* NPT, int* LAYER, int* KSPT, int* KSTEP, int* KINC);
+typedef void (*creep_t)(Real DECRA[],
+                        Real DESWA[],
+                        Real STATEV[],
+                        Real * SERD,
+                        Real EC[],
+                        Real ESW[],
+                        Real * P,
+                        Real * QTILD,
+                        Real * TEMP,
+                        Real * DTEMP,
+                        Real PREDEF[],
+                        Real DPRED[],
+                        Real TIME[],
+                        Real * DTIME,
+                        Real * CMNAME,
+                        Real * LEXIMP,
+                        Real * LEND,
+                        Real COORDS[],
+                        Real * NSTATV,
+                        int * NOEL,
+                        int * NPT,
+                        int * LAYER,
+                        int * KSPT,
+                        int * KSTEP,
+                        int * KINC);
 
-//Forward Declaration
+// Forward Declaration
 class AbaqusCreepMaterial;
 
-template<>
+template <>
 InputParameters validParams<AbaqusCreepMaterial>();
 
-//class define a property
-//class AbaqusCreepMaterial : public VolumetricModel
+// class define a property
+// class AbaqusCreepMaterial : public VolumetricModel
 class AbaqusCreepMaterial : public SolidModel
 {
 public:
@@ -37,16 +61,16 @@ protected:
   // Function pointer to the dynamically loaded function
   creep_t _creep;
 
-  //CREEP subroutine real scalar values
+  // CREEP subroutine real scalar values
   Real _SERD, _P, _QTILD, _TEMP, _DTEMP, _DTIME, _CMNAME, _LEXIMP, _LEND, _NSTATV;
 
-  //CREEP subroutine arrays
-  Real _DECRA[5], _DESWA[5], * _STATEV, _PREDEF[1], _DPRED[1], _TIME[2], _EC[2], _ESW[2], _COORDS[3];
+  // CREEP subroutine arrays
+  Real _DECRA[5], _DESWA[5], *_STATEV, _PREDEF[1], _DPRED[1], _TIME[2], _EC[2], _ESW[2], _COORDS[3];
 
-  //CREEP subroutine Integer values
+  // CREEP subroutine Integer values
   int _NOEL, _NPT, _LAYER, _KSPT, _KSTEP, _KINC;
 
-  //Elasticity reference
+  // Elasticity reference
   Real _ebulk3, _eg2, _eg, _eg3, _elam, _elasticity_tensor[3], _stress_component[6];
 
   virtual void initStatefulProperties(unsigned n_points);
@@ -56,8 +80,8 @@ protected:
   //                           SymmTensor & dstrain_increment_dT);
   void computeStress();
 
-  MaterialProperty<std::vector<Real> > & _state_var;
-  MaterialProperty<std::vector<Real> > & _state_var_old;
+  MaterialProperty<std::vector<Real>> & _state_var;
+  MaterialProperty<std::vector<Real>> & _state_var_old;
   MaterialProperty<SymmTensor> & _trial_stress;
   MaterialProperty<SymmTensor> & _trial_stress_old;
   MaterialProperty<SymmTensor> & _dev_trial_stress;
@@ -76,4 +100,4 @@ protected:
   MaterialProperty<Real> & _total_swell_old;
 };
 
-#endif //ABAQUSCREEPMATERIAL_H
+#endif // ABAQUSCREEPMATERIAL_H

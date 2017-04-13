@@ -24,6 +24,7 @@
 #include "TransientInterface.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
+#include "VectorPostprocessorInterface.h"
 
 // Forward declarations
 class ScalarKernel;
@@ -34,19 +35,19 @@ class Assembly;
 class MooseVariableScalar;
 class SubProblem;
 
-template<>
+template <>
 InputParameters validParams<ScalarKernel>();
 
-class ScalarKernel :
-  public MooseObject,
-  public ScalarCoupleable,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public PostprocessorInterface,
-  public TransientInterface,
-  public ZeroInterface,
-  public MeshChangedInterface
+class ScalarKernel : public MooseObject,
+                     public ScalarCoupleable,
+                     public SetupInterface,
+                     public FunctionInterface,
+                     public UserObjectInterface,
+                     public PostprocessorInterface,
+                     public TransientInterface,
+                     public ZeroInterface,
+                     public MeshChangedInterface,
+                     protected VectorPostprocessorInterface
 {
 public:
   ScalarKernel(const InputParameters & parameters);

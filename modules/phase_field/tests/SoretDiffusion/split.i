@@ -74,7 +74,6 @@
 [Materials]
   [./Copper]
     type = PFParamsPolyFreeEnergy
-    block = 0
     c = c
     T = T # K
     int_width = 80.0
@@ -87,7 +86,6 @@
   [../]
   [./free_energy]
     type = PolynomialFreeEnergy
-    block = 0
     c = c
     outputs = exodus
     derivative_order = 2

@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "SmoothSuperellipsoidIC.h"
 
-template<>
-InputParameters validParams<SmoothSuperellipsoidIC>()
+template <>
+InputParameters
+validParams<SmoothSuperellipsoidIC>()
 {
   InputParameters params = validParams<SmoothSuperellipsoidBaseIC>();
   params.addClassDescription("Superellipsoid with a smooth interface");
@@ -21,8 +22,8 @@ InputParameters validParams<SmoothSuperellipsoidIC>()
   return params;
 }
 
-SmoothSuperellipsoidIC::SmoothSuperellipsoidIC(const InputParameters & parameters) :
-    SmoothSuperellipsoidBaseIC(parameters),
+SmoothSuperellipsoidIC::SmoothSuperellipsoidIC(const InputParameters & parameters)
+  : SmoothSuperellipsoidBaseIC(parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
     _z1(parameters.get<Real>("z1")),
@@ -37,24 +38,19 @@ SmoothSuperellipsoidIC::SmoothSuperellipsoidIC(const InputParameters & parameter
 void
 SmoothSuperellipsoidIC::computeSuperellipsoidCenters()
 {
-  _centers.resize(1);
-  _centers[0] = _center;
+  _centers = {_center};
 }
 
 void
 SmoothSuperellipsoidIC::computeSuperellipsoidSemiaxes()
 {
-  _as.resize(1);
-  _bs.resize(1);
-  _cs.resize(1);
-  _as[0] = _a;
-  _bs[0] = _b;
-  _cs[0] = _c;
+  _as = {_a};
+  _bs = {_b};
+  _cs = {_c};
 }
 
 void
 SmoothSuperellipsoidIC::computeSuperellipsoidExponents()
 {
-  _ns.resize(1);
-  _ns[0] = _n;
+  _ns = {_n};
 }

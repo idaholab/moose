@@ -15,19 +15,19 @@
 #ifndef PARALLELUNIQUEID_H
 #define PARALLELUNIQUEID_H
 
-#include "MooseTypes.h"  // included for namespace usage and THREAD_ID
+#include "MooseTypes.h" // included for namespace usage and THREAD_ID
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/threads.h"
 
 #ifdef LIBMESH_HAVE_TBB_API
-#  include "tbb/concurrent_queue.h"
-#  include "tbb/tbb_thread.h"
+#include "tbb/concurrent_queue.h"
+#include "tbb/tbb_thread.h"
 #elif LIBMESH_HAVE_OPENMP
-#  include <omp.h>
+#include <omp.h>
 #elif LIBMESH_HAVE_PTHREAD
-#  include <queue>
-#  include "MooseException.h"
+#include <queue>
+#include "MooseException.h"
 #endif
 
 using namespace libMesh;
@@ -35,7 +35,6 @@ using namespace libMesh;
 class ParallelUniqueId
 {
 public:
-
   ParallelUniqueId()
   {
 #ifdef LIBMESH_HAVE_TBB_API
@@ -46,7 +45,8 @@ public:
     Threads::spin_mutex::scoped_lock lock(_pthread_id_mutex);
 
     if (_ids.empty())
-      throw MooseException("No Thread IDs available in ParallelUniqueID. Did you forget to initialize()?");
+      throw MooseException(
+          "No Thread IDs available in ParallelUniqueID. Did you forget to initialize()?");
 
     id = _ids.front();
     _ids.pop();
@@ -77,8 +77,9 @@ public:
     {
       _initialized = true;
 
-#if defined(LIBMESH_HAVE_TBB_API) || (!defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD))
-      for (unsigned int i=0; i<libMesh::n_threads(); ++i)
+#if defined(LIBMESH_HAVE_TBB_API) ||                                                               \
+    (!defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD))
+      for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
         _ids.push(i);
 #endif
     }

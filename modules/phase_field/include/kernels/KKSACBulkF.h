@@ -9,14 +9,14 @@
 
 #include "KKSACBulkBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSACBulkF;
 
-template<>
+template <>
 InputParameters validParams<KKSACBulkF>();
 
 /**
- * KKSACBulkBase child class for the freee energy difference term
+ * KKSACBulkBase child class for the free energy difference term
  * \f$ -\frac{dh}{d\eta}(F_a-F_b)+w\frac{dg}{d\eta} \f$
  * in the the Allen-Cahn bulk residual.
  *
@@ -41,4 +41,4 @@ protected:
   const MaterialProperty<Real> & _prop_d2g;
 };
 
-#endif //KKSACBULKF_H
+#endif // KKSACBULKF_H

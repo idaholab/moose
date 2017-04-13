@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// C POSIX includes
+#include <sys/stat.h>
+
 // MOOSE includes
 #include "FileOutput.h"
 #include "MooseApp.h"
@@ -20,27 +23,38 @@
 #include <unistd.h>
 #include <time.h>
 
-template<>
-InputParameters validParams<FileOutput>()
+template <>
+InputParameters
+validParams<FileOutput>()
 {
   // Create InputParameters object for this stand-alone object
   InputParameters params = validParams<PetscOutput>();
-  params.addParam<std::string>("file_base", "The desired solution output name without an extension");
-  params.addParam<bool>("append_date", false, "When true the date and time are appended to the output filename.");
-  params.addParam<std::string>("append_date_format", "The format of the date/time to append, if not given UTC format used (see http://www.cplusplus.com/reference/ctime/strftime).");
+  params.addParam<std::string>("file_base",
+                               "The desired solution output name without an extension");
+  params.addParam<bool>(
+      "append_date", false, "When true the date and time are appended to the output filename.");
+  params.addParam<std::string>("append_date_format",
+                               "The format of the date/time to append, if not given UTC format "
+                               "used (see http://www.cplusplus.com/reference/ctime/strftime).");
   // Add the padding option and list it as 'Advanced'
-  params.addParam<unsigned int>("padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
-  params.addParam<std::vector<std::string> >("output_if_base_contains", std::vector<std::string>(), "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
+  params.addParam<unsigned int>(
+      "padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
+  params.addParam<std::vector<std::string>>("output_if_base_contains",
+                                            std::vector<std::string>(),
+                                            "If this is supplied then output will only be done in "
+                                            "the case that the output base contains one of these "
+                                            "strings.  This is helpful in outputting only a subset "
+                                            "of outputs when using MultiApps.");
   params.addParamNamesToGroup("padding output_if_base_contains", "Advanced");
 
   return params;
 }
 
-FileOutput::FileOutput(const InputParameters & parameters) :
-    PetscOutput(parameters),
+FileOutput::FileOutput(const InputParameters & parameters)
+  : PetscOutput(parameters),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
-    _output_if_base_contains(parameters.get<std::vector<std::string> >("output_if_base_contains"))
+    _output_if_base_contains(parameters.get<std::vector<std::string>>("output_if_base_contains"))
 {
   // If restarting reset the file number
   if (_app.isRestarting())
@@ -74,16 +88,24 @@ FileOutput::FileOutput(const InputParameters & parameters) :
     _file_base += buffer;
   }
 
-  // Check the file directory of file_base
+  // Check the file directory of file_base and create if needed
   std::string base = "./" + _file_base;
   base = base.substr(0, base.find_last_of('/'));
-  if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + _file_base);
 
-}
-
-FileOutput::~FileOutput()
-{
+  if (_app.processor_id() == 0 && access(base.c_str(), W_OK) == -1)
+  {
+    // Directory does not exist. Loop through incremental directories and create as needed.
+    std::vector<std::string> path_names;
+    MooseUtils::tokenize(base, path_names);
+    std::string inc_path = path_names[0];
+    for (unsigned int i = 1; i < path_names.size(); ++i)
+    {
+      inc_path += '/' + path_names[i];
+      if (access(inc_path.c_str(), W_OK) == -1)
+        if (mkdir(inc_path.c_str(), S_IRWXU | S_IRGRP) == -1)
+          mooseError("Could not create directory: " + inc_path + " for file base: " + _file_base);
+    }
+  }
 }
 
 std::string
@@ -130,10 +152,10 @@ FileOutput::checkFilename()
   bool output = false;
 
   // Loop through each string in the list
-  for (std::vector<std::string>::const_iterator it = _output_if_base_contains.begin(); it != _output_if_base_contains.end(); ++it)
+  for (const auto & search_string : _output_if_base_contains)
   {
     // Search for the string in the file base, if found set the output to true and break the loop
-    if (_file_base.find(*it) != std::string::npos)
+    if (_file_base.find(search_string) != std::string::npos)
     {
       output = true;
       break;

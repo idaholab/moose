@@ -19,17 +19,16 @@
 
 class UniformMarker;
 
-template<>
+template <>
 InputParameters validParams<UniformMarker>();
 
 class UniformMarker : public Marker
 {
 public:
   UniformMarker(const InputParameters & parameters);
-  virtual ~UniformMarker(){};
 
 protected:
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   MarkerValue _mark;
 };

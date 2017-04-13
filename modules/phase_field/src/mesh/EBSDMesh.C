@@ -7,20 +7,22 @@
 #include "EBSDMesh.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<EBSDMesh>()
+template <>
+InputParameters
+validParams<EBSDMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
-  params.addClassDescription("Mesh generated from a specified EBSD data file");
+  params.addClassDescription("Mesh generated from a specified DREAM.3D EBSD data file.");
   params.addRequiredParam<FileName>("filename", "The name of the file containing the EBSD data");
-  params.addParam<unsigned int>("uniform_refine", 0, "Number of coarsening levels available in adaptive mesh refinement.");
+  params.addParam<unsigned int>(
+      "uniform_refine", 0, "Number of coarsening levels available in adaptive mesh refinement.");
 
   // suppress parameters
   params.suppressParameter<MooseEnum>("dim");
   params.set<MooseEnum>("dim") = MooseEnum("1=1 2 3", "1");
-  params.suppressParameter<int>("nx");
-  params.suppressParameter<int>("ny");
-  params.suppressParameter<int>("nz");
+  params.suppressParameter<unsigned int>("nx");
+  params.suppressParameter<unsigned int>("ny");
+  params.suppressParameter<unsigned int>("nz");
   params.suppressParameter<Real>("xmin");
   params.suppressParameter<Real>("ymin");
   params.suppressParameter<Real>("zmin");
@@ -31,17 +33,14 @@ InputParameters validParams<EBSDMesh>()
   return params;
 }
 
-EBSDMesh::EBSDMesh(const InputParameters & parameters) :
-    GeneratedMesh(parameters),
-    _filename(getParam<FileName>("filename"))
+EBSDMesh::EBSDMesh(const InputParameters & parameters)
+  : GeneratedMesh(parameters), _filename(getParam<FileName>("filename"))
 {
-  if (_nx != 1 || _ny != 1 || _nz !=1)
+  if (_nx != 1 || _ny != 1 || _nz != 1)
     mooseWarning("Do not specify mesh geometry information, it is read from the EBSD file.");
 }
 
-EBSDMesh::~EBSDMesh()
-{
-}
+EBSDMesh::~EBSDMesh() {}
 
 void
 EBSDMesh::readEBSDHeader()
@@ -49,19 +48,11 @@ EBSDMesh::readEBSDHeader()
   std::ifstream stream_in(_filename.c_str());
 
   if (!stream_in)
-    mooseError("Can't open EBSD file: " << _filename);
+    mooseError("Can't open EBSD file: ", _filename);
 
   // Labels to look for in the header
-  std::vector<std::string> labels;
-  labels.push_back("x_step"); // 0
-  labels.push_back("x_dim");
-  labels.push_back("y_step"); // 2
-  labels.push_back("y_dim");
-  labels.push_back("z_step"); // 4
-  labels.push_back("z_dim");
-  labels.push_back("x_min");  // 6
-  labels.push_back("y_min");
-  labels.push_back("z_min");
+  std::vector<std::string> labels = {
+      "x_step", "x_dim", "y_step", "y_dim", "z_step", "z_dim", "x_min", "y_min", "z_min"};
 
   // Dimension variables to store once they are found in the header
   // X_step, X_Dim, Y_step, Y_Dim, Z_step, Z_Dim
@@ -81,7 +72,7 @@ EBSDMesh::readEBSDHeader()
       // Process lines that start with a comment character (comments and meta data)
       std::transform(line.begin(), line.end(), line.begin(), ::tolower);
 
-      for (unsigned i=0; i<labels.size(); ++i)
+      for (unsigned i = 0; i < labels.size(); ++i)
         if (line.find(labels[i]) != std::string::npos)
         {
           std::string dummy;
@@ -113,7 +104,8 @@ EBSDMesh::readEBSDHeader()
   unsigned int dim;
 
   // determine mesh dimension
-  for (dim = 3; dim > 0 && _geometry.n[dim-1] == 0; --dim);
+  for (dim = 3; dim > 0 && _geometry.n[dim - 1] == 0; --dim)
+    ;
 
   // check if the data has nonzero stepsizes
   for (unsigned i = 0; i < dim; ++i)
@@ -138,7 +130,7 @@ EBSDMesh::buildMesh()
   unsigned int uniform_refine = getParam<unsigned int>("uniform_refine");
   _dim = (_geometry.dim == 1 ? "1" : (_geometry.dim == 2 ? "2" : "3"));
 
-  unsigned int nr[3];
+  std::array<unsigned int, 3> nr;
   nr[0] = _geometry.n[0];
   nr[1] = _geometry.n[1];
   nr[2] = _geometry.n[2];

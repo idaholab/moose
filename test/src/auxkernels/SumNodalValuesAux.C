@@ -14,8 +14,9 @@
 
 #include "SumNodalValuesAux.h"
 
-template<>
-InputParameters validParams<SumNodalValuesAux>()
+template <>
+InputParameters
+validParams<SumNodalValuesAux>()
 {
   InputParameters params = validParams<AuxNodalScalarKernel>();
   params.addRequiredCoupledVar("sum_var", "Variable to be summed");
@@ -23,25 +24,23 @@ InputParameters validParams<SumNodalValuesAux>()
   return params;
 }
 
-SumNodalValuesAux::SumNodalValuesAux(const InputParameters & parameters) :
-    AuxNodalScalarKernel(parameters),
-    _sum_var(coupledValue("sum_var"))
+SumNodalValuesAux::SumNodalValuesAux(const InputParameters & parameters)
+  : AuxNodalScalarKernel(parameters), _sum_var(coupledValue("sum_var"))
 {
 }
 
-SumNodalValuesAux::~SumNodalValuesAux()
-{
-}
+SumNodalValuesAux::~SumNodalValuesAux() {}
 
 void
 SumNodalValuesAux::compute()
 {
-  _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
+  _subproblem.reinitNodes(_node_ids, _tid); // compute variables at nodes
   for (_i = 0; _i < _var.order(); ++_i)
   {
     Real value = computeValue();
     _communicator.sum(value);
-    _var.setValue(_i, value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+    _var.setValue(_i, value); // update variable data, which is referenced by other kernels, so the
+                              // value is up-to-date
   }
 }
 

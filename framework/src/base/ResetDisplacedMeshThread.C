@@ -18,15 +18,17 @@
 
 #include "SubProblem.h"
 
-ResetDisplacedMeshThread::ResetDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem) :
-    ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
+ResetDisplacedMeshThread::ResetDisplacedMeshThread(FEProblemBase & fe_problem,
+                                                   DisplacedProblem & displaced_problem)
+  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh())
 {
 }
 
-ResetDisplacedMeshThread::ResetDisplacedMeshThread(ResetDisplacedMeshThread & x, Threads::split split) :
-    ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(x, split),
+ResetDisplacedMeshThread::ResetDisplacedMeshThread(ResetDisplacedMeshThread & x,
+                                                   Threads::split split)
+  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(x, split),
     _displaced_problem(x._displaced_problem),
     _ref_mesh(x._ref_mesh)
 {
@@ -41,10 +43,9 @@ ResetDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
   Node & reference_node = _ref_mesh.nodeRef(displaced_node.id());
 
   // Undisplace the node
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     displaced_node(i) = reference_node(i);
 }
-
 
 void
 ResetDisplacedMeshThread::join(const ResetDisplacedMeshThread & /*y*/)

@@ -17,10 +17,10 @@
 
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<CoupledDirichletBC>();
 
 /**
@@ -29,7 +29,6 @@ InputParameters validParams<CoupledDirichletBC>();
 class CoupledDirichletBC : public NodalBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -37,7 +36,7 @@ public:
   CoupledDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
 private:
   /**
@@ -52,4 +51,4 @@ private:
   const VariableValue & _some_var_val;
 };
 
-#endif //COUPLEDDIRICHLETBC_H
+#endif // COUPLEDDIRICHLETBC_H

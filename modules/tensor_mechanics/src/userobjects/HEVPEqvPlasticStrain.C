@@ -6,16 +6,17 @@
 /****************************************************************/
 #include "HEVPEqvPlasticStrain.h"
 
-template<>
-InputParameters validParams<HEVPEqvPlasticStrain>()
+template <>
+InputParameters
+validParams<HEVPEqvPlasticStrain>()
 {
   InputParameters params = validParams<HEVPInternalVarUOBase>();
   params.addClassDescription("User Object to integrate equivalent plastic strain");
   return params;
 }
 
-HEVPEqvPlasticStrain::HEVPEqvPlasticStrain(const InputParameters & parameters) :
-    HEVPInternalVarUOBase(parameters)
+HEVPEqvPlasticStrain::HEVPEqvPlasticStrain(const InputParameters & parameters)
+  : HEVPInternalVarUOBase(parameters)
 {
 }
 
@@ -27,7 +28,10 @@ HEVPEqvPlasticStrain::computeValue(unsigned int qp, Real dt, Real & val) const
 }
 
 bool
-HEVPEqvPlasticStrain::computeDerivative(unsigned int /*qp*/, Real dt, const std::string & coupled_var_name, Real & val) const
+HEVPEqvPlasticStrain::computeDerivative(unsigned int /*qp*/,
+                                        Real dt,
+                                        const std::string & coupled_var_name,
+                                        Real & val) const
 {
   val = 0;
 

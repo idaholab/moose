@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class SelfAux;
 
-template<>
+template <>
 InputParameters validParams<SelfAux>();
 
 /**
@@ -30,17 +29,14 @@ InputParameters validParams<SelfAux>();
 class SelfAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
   SelfAux(const InputParameters & parameters);
 
-  virtual ~SelfAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 };
 
-#endif //SELFAUX_H
+#endif // SELFAUX_H

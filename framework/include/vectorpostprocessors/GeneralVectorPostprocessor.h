@@ -22,7 +22,7 @@
 // Forward Declarations
 class GeneralVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<GeneralVectorPostprocessor>();
 
 /**
@@ -30,21 +30,17 @@ InputParameters validParams<GeneralVectorPostprocessor>();
  * the base class VectorPostprocessor object along with adding
  * MooseObject to the inheritance tree.
  */
-class GeneralVectorPostprocessor :
-  public GeneralUserObject,
-  public VectorPostprocessor
+class GeneralVectorPostprocessor : public GeneralUserObject, public VectorPostprocessor
 {
 public:
   GeneralVectorPostprocessor(const InputParameters & parameters);
-
-  virtual ~GeneralVectorPostprocessor() {}
 
   /**
    * Finalize.  This is called _after_ execute() and _after_
    * threadJoin()!  This is probably where you want to do MPI
    * communication!
    */
-  virtual void finalize(){}
+  virtual void finalize() override {}
 };
 
 #endif

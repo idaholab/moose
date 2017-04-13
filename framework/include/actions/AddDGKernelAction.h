@@ -19,16 +19,15 @@
 
 class AddDGKernelAction;
 
-template<>
+template <>
 InputParameters validParams<AddDGKernelAction>();
-
 
 class AddDGKernelAction : public MooseObjectAction
 {
 public:
   AddDGKernelAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDKERNELACTION_H

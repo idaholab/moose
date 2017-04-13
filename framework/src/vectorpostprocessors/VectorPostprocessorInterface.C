@@ -17,33 +17,40 @@
 #include "VectorPostprocessor.h"
 #include "MooseTypes.h"
 
-VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * moose_object) :
-    _vpi_params(moose_object->parameters()),
+VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * moose_object)
+  : _vpi_params(moose_object->parameters()),
     // TODO: Retrieve using checked pointer method
-    _vpi_feproblem(*_vpi_params.get<FEProblem *>("_fe_problem")),
+    _vpi_feproblem(*_vpi_params.get<FEProblemBase *>("_fe_problem_base")),
     _vpi_tid(_vpi_params.have_parameter<THREAD_ID>("_tid") ? _vpi_params.get<THREAD_ID>("_tid") : 0)
-{}
-
-const VectorPostprocessorValue &
-VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & name, const std::string & vector_name)
 {
-  return _vpi_feproblem.getVectorPostprocessorValue(_vpi_params.get<VectorPostprocessorName>(name), vector_name);
 }
 
 const VectorPostprocessorValue &
-VectorPostprocessorInterface::getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name)
+VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & name,
+                                                          const std::string & vector_name)
+{
+  return _vpi_feproblem.getVectorPostprocessorValue(_vpi_params.get<VectorPostprocessorName>(name),
+                                                    vector_name);
+}
+
+const VectorPostprocessorValue &
+VectorPostprocessorInterface::getVectorPostprocessorValueByName(
+    const VectorPostprocessorName & name, const std::string & vector_name)
 {
   return _vpi_feproblem.getVectorPostprocessorValue(name, vector_name);
 }
 
 const VectorPostprocessorValue &
-VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name)
+VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string & name,
+                                                             const std::string & vector_name)
 {
-  return _vpi_feproblem.getVectorPostprocessorValueOld(_vpi_params.get<VectorPostprocessorName>(name), vector_name);
+  return _vpi_feproblem.getVectorPostprocessorValueOld(
+      _vpi_params.get<VectorPostprocessorName>(name), vector_name);
 }
 
 const VectorPostprocessorValue &
-VectorPostprocessorInterface::getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name, const std::string & vector_name)
+VectorPostprocessorInterface::getVectorPostprocessorValueOldByName(
+    const VectorPostprocessorName & name, const std::string & vector_name)
 {
   return _vpi_feproblem.getVectorPostprocessorValueOld(name, vector_name);
 }
@@ -55,7 +62,8 @@ VectorPostprocessorInterface::hasVectorPostprocessor(const std::string & name) c
 }
 
 bool
-VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostprocessorName & name) const
+VectorPostprocessorInterface::hasVectorPostprocessorByName(
+    const VectorPostprocessorName & name) const
 {
   return _vpi_feproblem.hasVectorPostprocessor(name);
 }

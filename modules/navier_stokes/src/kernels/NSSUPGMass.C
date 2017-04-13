@@ -6,18 +6,18 @@
 /****************************************************************/
 #include "NSSUPGMass.h"
 
-template<>
-InputParameters validParams<NSSUPGMass>()
+template <>
+InputParameters
+validParams<NSSUPGMass>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NSSUPGBase>();
+  params.addClassDescription(
+      "Compute residual and Jacobian terms form the SUPG terms in the mass equation.");
   return params;
 }
 
-NSSUPGMass::NSSUPGMass(const InputParameters & parameters) :
-    NSSUPGBase(parameters)
-{
-}
+NSSUPGMass::NSSUPGMass(const InputParameters & parameters) : NSSUPGBase(parameters) {}
 
 Real
 NSSUPGMass::computeQpResidual()
@@ -28,9 +28,8 @@ NSSUPGMass::computeQpResidual()
   // Note that the momentum equation strong residuals are stored
   // in entries 1,2,3 of the "_strong_residuals" vector, regardless
   // of what dimension we're solving in.
-  RealVectorValue Ru(_strong_residuals[_qp][1],
-                     _strong_residuals[_qp][2],
-                     _strong_residuals[_qp][3]);
+  RealVectorValue Ru(
+      _strong_residuals[_qp][1], _strong_residuals[_qp][2], _strong_residuals[_qp][3]);
 
   // Separate variable just for printing purposes...
   Real result = _taum[_qp] * (Ru * _grad_test[_i][_qp]);
@@ -54,28 +53,35 @@ NSSUPGMass::computeQpOffDiagJacobian(unsigned int jvar)
 Real
 NSSUPGMass::computeJacobianHelper(unsigned var)
 {
-  // Convert the Moose numbering to canonical NS variable numbering.
-  unsigned m = mapVarNumber(var);
-
-  // Time derivative contributions only for momentum
-  Real time_part = 0.;
-
-  // The derivative of "udot" wrt u for each of the momentum variables.
-  // This is always 1/dt unless you are using BDF2...
-  Real d_udot_du[3] = {_d_rhoudot_du[_qp], _d_rhovdot_du[_qp], _d_rhowdot_du[_qp]};
-
-  switch (m)
+  if (isNSVariable(var))
   {
-    case 1:
-    case 2:
-    case 3:
-      // time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp]/_subproblem.parent()->dt());
-      time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp] * d_udot_du[m-1]);
-      break;
+
+    // Convert the Moose numbering to canonical NS variable numbering.
+    unsigned m = mapVarNumber(var);
+
+    // Time derivative contributions only for momentum
+    Real time_part = 0.;
+
+    // The derivative of "udot" wrt u for each of the momentum variables.
+    // This is always 1/dt unless you are using BDF2...
+    Real d_udot_du[3] = {_d_rhoudot_du[_qp], _d_rhovdot_du[_qp], _d_rhowdot_du[_qp]};
+
+    switch (m)
+    {
+      case 1:
+      case 2:
+      case 3:
+        // time_part = _grad_test[_i][_qp](m-1) * (_phi[_j][_qp]/_subproblem.parent()->dt());
+        time_part = _grad_test[_i][_qp](m - 1) * (_phi[_j][_qp] * d_udot_du[m - 1]);
+        break;
+    }
+
+    // Store result so we can print it before returning
+    Real result =
+        _taum[_qp] * (time_part + _grad_test[_i][_qp] * (_calA[_qp][m] * _grad_phi[_j][_qp]));
+
+    return result;
   }
-
-  // Store result so we can print it before returning
-  Real result = _taum[_qp] * (time_part + _grad_test[_i][_qp] * (_calA[_qp][m] * _grad_phi[_j][_qp]));
-
-  return result;
+  else
+    return 0.0;
 }

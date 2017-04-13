@@ -15,11 +15,13 @@
 #ifndef CREATEPROBLEMACTION_H
 #define CREATEPROBLEMACTION_H
 
+// MOOSE includes
 #include "MooseObjectAction.h"
+#include "MultiMooseEnum.h"
 
 class CreateProblemAction;
 
-template<>
+template <>
 InputParameters validParams<CreateProblemAction>();
 
 class CreateProblemAction : public MooseObjectAction
@@ -27,7 +29,7 @@ class CreateProblemAction : public MooseObjectAction
 public:
   CreateProblemAction(InputParameters parameters);
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
   std::vector<SubdomainName> _blocks;

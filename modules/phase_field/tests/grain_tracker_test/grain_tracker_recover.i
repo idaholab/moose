@@ -8,6 +8,9 @@
   ymax = 1000
   zmax = 0
   elem_type = QUAD4
+
+  # Required for use with distributed mesh
+  num_ghosted_layers = 2
 []
 
 [GlobalParams]
@@ -62,21 +65,21 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_end
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = timestep_end
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = timestep_end
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = CENTROID
   [../]
 []
@@ -92,7 +95,6 @@
 [Materials]
   [./CuGrGr]
     type = CuGrGr
-    block = 0
     T = 500 # K
     wGB = 75 # nm
   [../]

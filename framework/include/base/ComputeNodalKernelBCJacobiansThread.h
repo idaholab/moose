@@ -18,29 +18,29 @@
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
-// libMesh includes
-#include "libmesh/node_range.h"
-#include "libmesh/numeric_vector.h"
-
 class AuxiliarySystem;
 class NodalKernel;
 
-class ComputeNodalKernelBCJacobiansThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeNodalKernelBCJacobiansThread
+    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels,  SparseMatrix<Number> & jacobian);
+  ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,
+                                      const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
+                                      SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
-  ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x, Threads::split split);
+  ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x,
+                                      Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalKernelBCJacobiansThread & /*y*/);
 
 protected:
-  AuxiliarySystem & _sys;
+  AuxiliarySystem & _aux_sys;
 
   const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 
@@ -50,4 +50,4 @@ protected:
   unsigned int _num_cached;
 };
 
-#endif //COMPUTENODALKERNELBCJACOBIANSTHREAD_H
+#endif // COMPUTENODALKERNELBCJACOBIANSTHREAD_H

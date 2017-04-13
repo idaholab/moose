@@ -7,16 +7,12 @@
 #ifndef SMOOTHSUPERELLIPSOIDIC_H
 #define SMOOTHSUPERELLIPSOIDIC_H
 
-#include "Kernel.h"
 #include "SmoothSuperellipsoidBaseIC.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class SmoothSuperellipsoidIC;
 
-template<>
+template <>
 InputParameters validParams<SmoothSuperellipsoidIC>();
 
 /**
@@ -30,19 +26,19 @@ class SmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
 public:
   SmoothSuperellipsoidIC(const InputParameters & parameters);
 
+protected:
   virtual void computeSuperellipsoidCenters();
   virtual void computeSuperellipsoidSemiaxes();
   virtual void computeSuperellipsoidExponents();
 
-protected:
-  Real _x1;
-  Real _y1;
-  Real _z1;
-  Real _a;
-  Real _b;
-  Real _c;
-  Real _n;
-  Point _center;
+  const Real _x1;
+  const Real _y1;
+  const Real _z1;
+  const Real _a;
+  const Real _b;
+  const Real _c;
+  const Real _n;
+  const Point _center;
 };
 
-#endif //SMOOTHSUPERELLIPSOIDIC_H
+#endif // SMOOTHSUPERELLIPSOIDIC_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERMAUX_H
 #define RICHARDSRELPERMAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsRelPerm.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsRelPermAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsRelPermAux>();
 
 /**
  * Relative Permeability as a function of effective saturation
  */
-class RichardsRelPermAux: public AuxKernel
+class RichardsRelPermAux : public AuxKernel
 {
 public:
   RichardsRelPermAux(const InputParameters & parameters);

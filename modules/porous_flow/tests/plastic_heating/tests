@@ -1,0 +1,17 @@
+[Tests]
+  [./tensile01]
+    type = 'CSVDiff'
+    input = 'tensile01.i'
+    csvdiff = 'tensile01.csv'
+  [../]
+  [./compressive01]
+    type = 'CSVDiff'
+    input = 'compressive01.i'
+    csvdiff = 'compressive01.csv'
+  [../]
+  [./shear01]
+    type = 'CSVDiff'
+    input = 'shear01.i'
+    csvdiff = 'shear01.csv'
+  [../]
+[]

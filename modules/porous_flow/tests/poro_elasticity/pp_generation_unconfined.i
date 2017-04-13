@@ -5,7 +5,7 @@
 # rise in the top surface, porepressure, and stress are observed.
 #
 # In the standard poromechanics scenario, the Biot Modulus is held
-# fixed and the source has units kg/s.  Then the expected result
+# fixed and the source has units 1/time.  Then the expected result
 # is
 # strain_zz = disp_z = BiotCoefficient*BiotModulus*s*t/((bulk + 4*shear/3) + BiotCoefficient^2*BiotModulus)
 # porepressure = BiotModulus*(s*t - BiotCoefficient*strain_zz)
@@ -36,7 +36,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
   block = 0
 []
 
@@ -119,18 +119,18 @@
   [./poro_vol_exp]
     type = PorousFlowMassVolumetricExpansion
     variable = porepressure
-    component_index = 0
+    fluid_component = 0
   [../]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = porepressure
   [../]
   [./flux]
     type = PorousFlowAdvectiveFlux
     variable = porepressure
     gravity = '0 0 0'
-    component_index = 0
+    fluid_component = 0
   [../]
   [./source]
     type = UserForcingFunction
@@ -214,6 +214,13 @@
 
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
+  [./temperature_qp]
+    type = PorousFlowTemperature
+  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1.5'
@@ -230,6 +237,10 @@
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
   [../]
+  [./eff_fluid_pressure_nodal]
+    type = PorousFlowEffectiveFluidPressure
+    at_nodes = true
+  [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
   [../]
@@ -239,27 +250,44 @@
     al = 1 # unimportant in this fully-saturated test
     m = 0.8   # unimportant in this fully-saturated test
   [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP_VG
+    at_nodes = true
+    porepressure = porepressure
+    al = 1 # unimportant in this fully-saturated test
+    m = 0.8   # unimportant in this fully-saturated test
+  [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 3.3333333333
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
+    at_nodes = true
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./dens0_qp]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1
+    bulk_modulus = 3.3333333333
+    phase = 0
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = false
   [../]
   [./porosity]
     type = PorousFlowPorosityHM
+    at_nodes = true
     porosity_zero = 0.1
     biot_coefficient = 0.3
     solid_bulk = 2
@@ -270,21 +298,25 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 0 # unimportant in this fully-saturated situation
+    at_nodes = true
+    n = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1 # unimportant
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 

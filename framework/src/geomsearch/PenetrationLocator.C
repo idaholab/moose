@@ -23,16 +23,26 @@
 #include "PenetrationThread.h"
 #include "SubProblem.h"
 
-PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchData & /*geom_search_data*/, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node) :
-    Restartable(Moose::stringify(master_id) + "to" + Moose::stringify(slave_id), "PenetrationLocator", subproblem, 0),
+PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
+                                       GeometricSearchData & /*geom_search_data*/,
+                                       MooseMesh & mesh,
+                                       const unsigned int master_id,
+                                       const unsigned int slave_id,
+                                       Order order,
+                                       NearestNodeLocator & nearest_node)
+  : Restartable(Moose::stringify(master_id) + "to" + Moose::stringify(slave_id),
+                "PenetrationLocator",
+                subproblem,
+                0),
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_id),
     _slave_boundary(slave_id),
     _fe_type(order),
     _nearest_node(nearest_node),
-    _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *> >("penetration_info", &_mesh)),
-    _has_penetrated(declareRestartableData<std::set<dof_id_type> >("has_penetrated")),
+    _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *>>(
+        "penetration_info", &_mesh)),
+    _has_penetrated(declareRestartableData<std::set<dof_id_type>>("has_penetrated")),
     _check_whether_reasonable(true),
     _update_location(declareRestartableData<bool>("update_location", true)),
     _tangential_tolerance(0.0),
@@ -40,14 +50,15 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _normal_smoothing_distance(0.0),
     _normal_smoothing_method(NSM_EDGE_BASED)
 {
-  // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional element
+  // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional
+  // element
   // This is a time savings so that the thread objects don't do this themselves multiple times
   _fe.resize(libMesh::n_threads());
-  for (unsigned int i=0; i < libMesh::n_threads(); i++)
+  for (unsigned int i = 0; i < libMesh::n_threads(); i++)
   {
     unsigned int n_dims = _mesh.dimension();
-    _fe[i].resize(n_dims);
-    for (unsigned int dim = 0; dim < n_dims; dim++)
+    _fe[i].resize(n_dims + 1);
+    for (unsigned int dim = 0; dim <= n_dims; ++dim)
       _fe[i][dim] = FEBase::build(dim, _fe_type).release();
   }
 
@@ -57,19 +68,20 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
           (_subproblem.hasVariable("nodal_normal_y")) &&
           (_subproblem.hasVariable("nodal_normal_z"))))
     {
-      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
+      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and "
+                 "nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
     }
   }
 }
 
 PenetrationLocator::~PenetrationLocator()
 {
-  for (unsigned int i=0; i < libMesh::n_threads(); i++)
+  for (unsigned int i = 0; i < libMesh::n_threads(); i++)
     for (unsigned int dim = 0; dim < _fe[i].size(); dim++)
       delete _fe[i][dim];
 
-  for (std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
-    delete it->second;
+  for (auto & it : _penetration_info)
+    delete it.second;
 }
 
 void
@@ -132,11 +144,11 @@ PenetrationLocator::penetrationDistance(dof_id_type node_id)
     return 0;
 }
 
-
 RealVectorValue
 PenetrationLocator::penetrationNormal(dof_id_type node_id)
 {
-  std::map<dof_id_type, PenetrationInfo *>::const_iterator found_it = _penetration_info.find(node_id);
+  std::map<dof_id_type, PenetrationInfo *>::const_iterator found_it =
+      _penetration_info.find(node_id);
 
   if (found_it != _penetration_info.end())
     return found_it->second->_normal;
@@ -151,7 +163,7 @@ PenetrationLocator::setCheckWhetherReasonable(bool state)
 }
 
 void
-PenetrationLocator::setUpdate( bool update )
+PenetrationLocator::setUpdate(bool update)
 {
   _update_location = update;
 }
@@ -178,6 +190,6 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
   else if (nsmString == "nodal_normal_based")
     _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
   else
-    mooseError("Invalid normal_smoothing_method: "<<nsmString);
+    mooseError("Invalid normal_smoothing_method: ", nsmString);
   _do_normal_smoothing = true;
 }

@@ -1,0 +1,15 @@
+[Tests]
+  [./bounding_value_max]
+    type = 'RunException'
+    input = 'bounding_value_max_test.i'
+    expect_out = 'Damping factor: 0.3333'
+    expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+  [../]
+  [./bounding_value_min]
+    type = 'RunException'
+    input = 'bounding_value_max_test.i'
+    cli_args = "Kernels/source/function='-t'"
+    expect_out = 'Damping factor: 0.3333'
+    expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+  [../]
+[]

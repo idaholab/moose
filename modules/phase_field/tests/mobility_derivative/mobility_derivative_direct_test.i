@@ -55,13 +55,11 @@
 [Materials]
   [./kappa]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'kappa_c'
     prop_values = '2.0'
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = M
     args = c
     function = 'if(c<-1,0.1,if(c>1,0.1,1-.9*c^2))'

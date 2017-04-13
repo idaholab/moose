@@ -967,10 +967,10 @@ def ContructContextInfo(lexer):
 
             if t.type in ['LBRACE', 'LPAREN', 'LBRACKET'] :
                 if contextPrediction != None and contextPrediction.IsContextStart(t):
-                        contextStack = contextStack.Copy()
-                        contextStack.Push(contextPrediction)
-                        contextStackStack.Push(contextStack)
-                        contextPrediction = None
+                    contextStack = contextStack.Copy()
+                    contextStack.Push(contextPrediction)
+                    contextStackStack.Push(contextStack)
+                    contextPrediction = None
                 else :
                     mt = lexer.GetNextMatchingToken(True)
                     if mt != None:

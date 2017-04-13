@@ -22,9 +22,9 @@
 
 // Forward Declarations
 class FaceFaceConstraint;
-class FEProblem;
+class FEProblemBase;
 
-template<>
+template <>
 InputParameters validParams<FaceFaceConstraint>();
 
 /**
@@ -42,13 +42,11 @@ InputParameters validParams<FaceFaceConstraint>();
  *         +--------------+-------------+-------------+
  *
  */
-class FaceFaceConstraint :
-  public Constraint,
-  public CoupleableMooseVariableDependencyIntermediateInterface
+class FaceFaceConstraint : public Constraint,
+                           public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   FaceFaceConstraint(const InputParameters & parameters);
-  virtual ~FaceFaceConstraint();
 
   /**
    * Evaluate variables, compute q-points, etc.
@@ -82,7 +80,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   unsigned int _dim;
 
   /// Boundary ID for the slave surface
@@ -90,8 +88,8 @@ protected:
   /// Boundary ID for the master surface
   BoundaryID _master;
 
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
+  const MooseArray<Point> & _q_point;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
@@ -100,10 +98,10 @@ protected:
   /**
    * Current element on the interface (i.e in the mortar space)
    */
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
-  std::vector<std::vector<Real> > _test;
-  std::vector<std::vector<Real> > _phi;
+  std::vector<std::vector<Real>> _test;
+  std::vector<std::vector<Real>> _phi;
 
   MooseVariable & _master_var;
   MooseVariable & _slave_var;
@@ -168,5 +166,4 @@ protected:
   const VariablePhiValue & _phi_slave;
 };
 
-
-#endif /* FACEFACECONSTRAINT_H_ */
+#endif /* FACEFACECONSTRAINT_H */

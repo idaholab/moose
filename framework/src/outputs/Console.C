@@ -24,8 +24,9 @@
 #include "FormattedTable.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<Console>()
+template <>
+InputParameters
+validParams<Console>()
 {
   // Enum for selecting the fit mode for the table when printed to the screen
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
@@ -37,81 +38,132 @@ InputParameters validParams<Console>()
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
   params.addParam<bool>("output_file", false, "Output to the file");
-  params.addParam<bool>("show_multiapp_name", false, "Indent multiapp output using the multiapp name");
+  params.addParam<bool>(
+      "show_multiapp_name", false, "Indent multiapp output using the multiapp name");
 
   // Table fitting options
-  params.addParam<unsigned int>("max_rows", 15, "The maximum number of postprocessor/scalar values displayed on screen during a timestep (set to 0 for unlimited)");
-  params.addParam<MooseEnum>("fit_mode", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
+  params.addParam<unsigned int>("max_rows",
+                                15,
+                                "The maximum number of postprocessor/scalar values "
+                                "displayed on screen during a timestep (set to 0 "
+                                "for unlimited)");
+  params.addParam<MooseEnum>("fit_mode",
+                             pps_fit_mode,
+                             "Specifies the wrapping mode for post-processor tables that are "
+                             "printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for "
+                             "desired width, AUTO: Attempt to determine width automatically "
+                             "(serial only), <n>: Desired width");
 
   // Verbosity
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
 
   // Basic table output controls
-  params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
-  params.addParam<unsigned int>("time_precision", "The number of significant digits that are printed on time related outputs");
+  params.addParam<bool>(
+      "scientific_time", false, "Control the printing of time and dt in scientific notation");
+  params.addParam<unsigned int>(
+      "time_precision",
+      "The number of significant digits that are printed on time related outputs");
 
   // Performance Logging
-  params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
-  params.addParam<unsigned int>("perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
-  params.addDeprecatedParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled if ""perf_log"" is false", "This parameter is being removed due to lack of usage.");
-  params.addDeprecatedParam<bool>("setup_log", "Toggles the printing of the 'Setup Performance' log", "This parameter is being removed due to lack of usage.");
+  params.addParam<bool>("perf_log",
+                        false,
+                        "If true, all performance logs will be printed. The "
+                        "individual log settings will override this option.");
+  params.addParam<unsigned int>(
+      "perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
+  params.addDeprecatedParam<bool>("setup_log_early",
+                                  false,
+                                  "Specifies whether or not the Setup Performance log should be "
+                                  "printed before the first time step.  It will still be printed "
+                                  "at the end if "
+                                  "perf_log"
+                                  " is also enabled and likewise disabled if "
+                                  "perf_log"
+                                  " is false",
+                                  "This parameter is being removed due to lack of usage.");
+  params.addDeprecatedParam<bool>("setup_log",
+                                  "Toggles the printing of the 'Setup Performance' log",
+                                  "This parameter is being removed due to lack of usage.");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
-  params.addParam<bool>("perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
+  params.addParam<bool>(
+      "perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
 
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
-  params.addParam<bool>("libmesh_log", true, "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
-#endif
+  params.addParam<bool>(
+      "libmesh_log",
+      true,
+      "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
 
   // Toggle printing of mesh information on adaptivity steps
-  params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
+  params.addParam<bool>("print_mesh_changed_info",
+                        false,
+                        "When true, each time the mesh is changed the mesh information is printed");
 
   // Toggle for printing variable norms
-  params.addParam<bool>("outlier_variable_norms", true, "If true, outlier variable norms will be printed after each solve");
-  params.addParam<bool>("all_variable_norms", false, "If true, all variable norms will be printed after each solve");
+  params.addParam<bool>("outlier_variable_norms",
+                        true,
+                        "If true, outlier variable norms will be printed after each solve");
+  params.addParam<bool>(
+      "all_variable_norms", false, "If true, all variable norms will be printed after each solve");
 
   // Multipliers for coloring of variable residual norms
   std::vector<Real> multiplier;
   multiplier.push_back(0.8);
   multiplier.push_back(2);
-  params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
+  params.addParam<std::vector<Real>>("outlier_multiplier",
+                                     multiplier,
+                                     "Multiplier utilized to determine if a residual norm is an "
+                                     "outlier. If the variable residual is less than "
+                                     "multiplier[0] times the total residual it is colored red. "
+                                     "If the variable residual is less than multiplier[1] times "
+                                     "the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
-  params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
+  MultiMooseEnum info("framework mesh aux nonlinear execution output",
+                      "framework mesh aux nonlinear execution");
+  params.addParam<MultiMooseEnum>("system_info",
+                                  info,
+                                  "List of information types to display "
+                                  "('framework', 'mesh', 'aux', 'nonlinear', "
+                                  "'execution', 'output')");
 
   // Advanced group
   params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
-  params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Perf Log");
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+  params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header",
+                              "Perf Log");
   params.addParamNamesToGroup("libmesh_log", "Performance Log");
-#endif
 
   // Variable norms group
-  params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Norms");
+  params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier",
+                              "Norms");
 
   /*
-   * The following modifies the default behavior from base class parameters. Notice the extra flag on
+   * The following modifies the default behavior from base class parameters. Notice the extra flag
+   * on
    * the set method. This enables "quiet mode". This is done to allow for the proper detection
    * of user-modified parameters
    */
   // By default set System Information to output on initial
   params.set<MultiMooseEnum>("execute_system_information_on", /*quiet_mode=*/true) = "initial";
 
-  // Change the default behavior of 'execute_on' to included nonlinear iterations and failed timesteps
-  params.set<MultiMooseEnum>("execute_on", /*quiet_mode=*/true).push_back("initial timestep_begin linear nonlinear failed");
+  // Change the default behavior of 'execute_on' to included nonlinear iterations and failed
+  // timesteps
+  params.set<MultiMooseEnum>("execute_on", /*quiet_mode=*/true)
+      .push_back("initial timestep_begin linear nonlinear failed");
 
   // By default postprocessors and scalar are only output at the end of a timestep
-  params.set<MultiMooseEnum>("execute_postprocessors_on", /*quiet_mode=*/true) = "initial timestep_end";
-  params.set<MultiMooseEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) = "initial timestep_end";
+  params.set<MultiMooseEnum>("execute_postprocessors_on", /*quiet_mode=*/true) =
+      "initial timestep_end";
+  params.set<MultiMooseEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) =
+      "initial timestep_end";
   params.set<MultiMooseEnum>("execute_scalars_on", /*quiet_mode=*/true) = "initial timestep_end";
 
   return params;
 }
 
-Console::Console(const InputParameters & parameters) :
-    TableOutput(parameters),
+Console::Console(const InputParameters & parameters)
+  : TableOutput(parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _scientific_time(getParam<bool>("scientific_time")),
@@ -122,14 +174,12 @@ Console::Console(const InputParameters & parameters) :
     _perf_log_interval(getParam<unsigned int>("perf_log_interval")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     _libmesh_log(getParam<bool>("libmesh_log")),
-#endif
     _setup_log_early(getParam<bool>("setup_log_early")),
     _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log),
     _all_variable_norms(getParam<bool>("all_variable_norms")),
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
-    _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
+    _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
@@ -141,7 +191,9 @@ Console::Console(const InputParameters & parameters) :
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
-  Action * common_action = awh.getActionsByName("common_output")[0];
+  const auto & actions = awh.getActionListByName("common_output");
+  mooseAssert(actions.size() == 1, "Should be only one common_output Action");
+  Action * common_action = *actions.begin();
 
   // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user
   if (!parameters.isParamSetByUser("execute_on"))
@@ -159,42 +211,36 @@ Console::Console(const InputParameters & parameters) :
     _setup_log = true;
   }
 
+  if (_app.name() != "main" &&
+      (_pars.isParamSetByUser("perf_log") || _pars.isParamSetByUser("perf_log_interval") ||
+       _pars.isParamSetByUser("setup_log") || _pars.isParamSetByUser("solve_log") ||
+       _pars.isParamSetByUser("perf_header") || _pars.isParamSetByUser("libmesh_log") ||
+       common_action->parameters().isParamSetByUser("print_perf_log")))
+    mooseWarning("Performance logging cannot currently be controlled from a Multiapp, please set "
+                 "all performance options in the main input file");
+
   // Deprecate the setup perf log
   Moose::setup_perf_log.disable_logging();
 
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
   const MultiMooseEnum & common_execute_on = common_action->getParam<MultiMooseEnum>("execute_on");
-  for (MooseEnumIterator it = common_execute_on.begin(); it != common_execute_on.end(); ++it)
-    _execute_on.push_back(*it);
-
-  // If --timing was used from the command-line, do nothing, all logs are enabled
-  if (!_timing)
-  {
-    // Disable performance logging (all log input options must be false)
-    if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
-      Moose::perf_log.disable_logging();
-
-    // Disable libMesh log
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
-    if (!_libmesh_log)
-      libMesh::perflog.disable_logging();
-#endif
-  }
+  for (auto & mme : common_execute_on)
+    _execute_on.push_back(mme);
 
   // If --show-outputs is used, enable it
   if (_app.getParam<bool>("show_outputs"))
     _system_info_flags.push_back("output");
 
   // Set output coloring
-  if (Moose::_color_console)
+  if (Moose::colorConsole())
   {
     char * term_env = getenv("TERM");
     if (term_env)
     {
       std::string term(term_env);
       if (term != "xterm-256color" && term != "xterm")
-        Moose::_color_console = false;
+        Moose::setColorConsole(false);
     }
   }
 }
@@ -210,10 +256,8 @@ Console::~Console()
     write(Moose::perf_log.get_perf_info(), false);
 
   // Write the libMesh log
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
   if (_libmesh_log)
     write(libMesh::perflog.get_perf_info(), false);
-#endif
 
   // Write the file output stream
   writeStreamToFile();
@@ -221,21 +265,34 @@ Console::~Console()
   /* If --timing was not used disable the logging b/c the destructor of these
    * object does the output, if --timing was used do nothing because all other
    * screen related output was disabled above */
-  if (!_timing)
+  if (!_timing && _app.name() == "main")
   {
     /* Disable the logs, without this the logs will be printed
        during the destructors of the logs themselves */
     Moose::perf_log.disable_logging();
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     libMesh::perflog.disable_logging();
-#endif
   }
 }
-
 
 void
 Console::initialSetup()
 {
+  // If --timing was used from the command-line, do nothing, all logs are enabled
+  // Also, only allow the main app to change the perf_log settings.
+  if (!_timing && _app.name() == "main")
+  {
+    if (_perf_log || _setup_log || _solve_log || _perf_header || _setup_log_early)
+      _app.getOutputWarehouse().setLoggingRequested();
+
+    // Disable performance logging if nobody needs logging
+    if (!_app.getOutputWarehouse().getLoggingRequested())
+      Moose::perf_log.disable_logging();
+
+    // Disable libMesh log
+    if (!_libmesh_log)
+      libMesh::perflog.disable_logging();
+  }
+
   // system info flag can be changed only before console initial setup
   _allow_changing_sysinfo_flag = false;
 
@@ -251,14 +308,16 @@ Console::initialSetup()
     writeStreamToFile(false);
 
   // Enable verbose output if Executioner has it enabled
-  if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
+  if (_app.getExecutioner()->isParamValid("verbose") &&
+      _app.getExecutioner()->getParam<bool>("verbose"))
     _verbose = true;
 
   // Display a message to indicate the application is running (useful for MultiApps)
   if (_problem_ptr->hasMultiApps() || _app.multiAppLevel() > 0)
     write(std::string("\nRunning App: ") + _app.name() + "\n");
 
-  // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc., but only
+  // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc.,
+  // but only
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
   if (_execute_on.contains("final"))
   {
@@ -285,7 +344,8 @@ Console::output(const ExecFlagType & type)
     return;
 
   // Output the system information first; this forces this to be the first item to write by default
-  // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
+  // However, 'output_system_information_on' still operates correctly, so it may be changed by the
+  // user
   if (shouldOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
     outputSystemInformation();
 
@@ -294,7 +354,8 @@ Console::output(const ExecFlagType & type)
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
-  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)) || (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL)))
+  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)) ||
+      (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL)))
     writeTimestepInformation();
 
   // Print Non-linear Residual (control with "execute_on")
@@ -303,7 +364,8 @@ Console::output(const ExecFlagType & type)
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
 
-    _console << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
+    _console << std::setw(2) << _nonlinear_iter
+             << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
 
     _old_nonlinear_norm = _norm;
   }
@@ -314,7 +376,8 @@ Console::output(const ExecFlagType & type)
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
 
-    _console << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
+    _console << std::setw(7) << _linear_iter
+             << " Linear |R| = " << outputNorm(_old_linear_norm, _norm) << '\n';
 
     _old_linear_norm = _norm;
   }
@@ -326,7 +389,6 @@ Console::output(const ExecFlagType & type)
       write(Moose::perf_log.get_perf_info(), false);
     writeVariableNorms();
   }
-
 
   // Write Postprocessors and Scalars
   if (shouldOutput("postprocessors", type))
@@ -354,8 +416,9 @@ Console::writeStreamToFile(bool append)
   else
     output.open(filename().c_str(), std::ios::trunc);
 
+  std::string s = _file_output_stream.str();
   // Write contents of file output stream and close the file
-  output << _file_output_stream.str();
+  output << MooseUtils::removeColor(s);
   output.close();
 
   // Clear the file output stream
@@ -383,7 +446,8 @@ Console::writeTimestepInformation()
 
     // Set precision
     if (_precision > 0)
-      oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0') << std::showpoint;
+      oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0')
+          << std::showpoint;
 
     // Show scientific notation
     if (_scientific_time)
@@ -394,10 +458,11 @@ Console::writeTimestepInformation()
 
     // Show old time information, if desired
     if (_verbose)
-      oss << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left << timeOld() << '\n';
+      oss << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left
+          << timeOld() << '\n';
 
     // Show the time delta information
-    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = "<< std::left << dt() << '\n';
+    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = " << std::left << dt() << '\n';
 
     // Show the old time delta information, if desired
     if (_verbose)
@@ -415,6 +480,11 @@ Console::writeVariableNorms()
   if (_all_variable_norms)
     _outlier_variable_norms = true;
 
+  // if we are not priting anything, let's not waste time computing the norms below and just exit
+  // this call
+  if ((_all_variable_norms == false) && (_outlier_variable_norms == false))
+    return;
+
   // Flag set when header prints
   bool header = false;
 
@@ -422,8 +492,8 @@ Console::writeVariableNorms()
   std::ostringstream oss;
 
   // Get a references to the NonlinearSystem and libMesh system
-  NonlinearSystem & nl = _problem_ptr->getNonlinearSystem();
-  TransientNonlinearImplicitSystem & sys = nl.sys();
+  NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystemBase();
+  System & sys = nl.system();
 
   // Storage for norm outputs
   std::map<std::string, Real> other;
@@ -437,12 +507,12 @@ Console::writeVariableNorms()
   for (unsigned int i = 0; i < n_vars; i++)
   {
     // Compute the norm and extract the variable name
-    Real var_norm = sys.calculate_norm(*sys.rhs, i, DISCRETE_L2);
+    Real var_norm = sys.calculate_norm(nl.RHS(), i, DISCRETE_L2);
     var_norm *= var_norm; // use the norm squared
     std::string var_name = sys.variable_name(i);
 
     // Outlier if the variable norm is greater than twice (default) of the average norm
-    if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm) )
+    if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm))
     {
       // Print the header
       if (!header)
@@ -453,11 +523,12 @@ Console::writeVariableNorms()
 
       // Set the color, RED if the variable norm is 0.8 (default) of the total norm
       std::string color = COLOR_YELLOW;
-      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars) )
+      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars))
         color = COLOR_RED;
 
       // Display the residual
-      oss << "  " << var_name << ": " << std::scientific << color << std::sqrt(var_norm) << COLOR_DEFAULT << '\n';
+      oss << "  " << var_name << ": " << std::scientific << color << std::sqrt(var_norm)
+          << COLOR_DEFAULT << '\n';
     }
 
     // GREEN
@@ -469,7 +540,8 @@ Console::writeVariableNorms()
         oss << "\nVariable Residual Norms:\n";
         header = true;
       }
-      oss << "  " << var_name << ": " << std::scientific << COLOR_GREEN << std::sqrt(var_norm) << COLOR_DEFAULT << '\n';
+      oss << "  " << var_name << ": " << std::scientific << COLOR_GREEN << std::sqrt(var_norm)
+          << COLOR_DEFAULT << '\n';
     }
   }
 
@@ -503,7 +575,8 @@ Console::outputInput()
     return;
 
   std::ostringstream oss;
-  oss << "--- " << _app.getInputFileName() << " ------------------------------------------------------";
+  oss << "--- " << _app.getInputFileName()
+      << " ------------------------------------------------------";
   _app.actionWarehouse().printInputFile(oss);
   _console << oss.str() << '\n';
 }
@@ -566,9 +639,6 @@ Console::outputSystemInformation()
   if (_system_info_flags.contains("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
 
-  // Output the legacy flags, these cannot be turned off so they become annoying to people.
-  _console << ConsoleUtils::outputLegacyInformation(_app, *_problem_ptr);
-
   _console << "\n\n";
 }
 
@@ -577,7 +647,7 @@ Console::meshChanged()
 {
   if (_print_mesh_changed_info)
   {
-    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false );
+    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false);
 
     std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
     if (!output.empty())
@@ -622,6 +692,73 @@ Console::mooseConsole(const std::string & message)
 void
 Console::petscSetupOutput()
 {
-  char c[] =  {32,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,13,10,124,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,124,13,10,124,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,124,13,10,32,92,32,32,32,32,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,32,32,32,32,47,13,10,32,32,92,95,95,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,95,95,95,45,45,45,95,95,95,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,95,95,47,13,10,32,32,32,32,32,45,45,45,95,95,95,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,92,32,32,32,32,32,32,32,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,45,95,95,95,32,32,124,32,32,32,32,32,32,32,32,32,124,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,124,32,32,95,32,32,32,95,32,32,124,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,124,111,124,32,124,111,124,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,45,32,32,32,45,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,95,95,95,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,45,45,32,32,32,45,45,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,32,47,92,32,32,32,32,32,47,92,32,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,92,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,47,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,92,32,32,92,95,95,95,95,95,95,95,95,95,95,95,95,32,47,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,92,32,32,32,32,32,39,95,95,95,39,32,32,32,32,32,47,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,47,92,32,32,32,32,32,92,32,45,45,95,95,45,45,45,95,95,45,45,32,47,32,32,32,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,47,32,32,92,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,47,32,32,92,13,10,32,32,32,32,32,32,32,32,47,32,32,32,47,32,32,32,32,32,32,32,77,46,79,46,79,46,83,46,69,32,32,32,32,32,32,32,92,32,32,32,92,13,10,32,32,32,32,32,32,32,47,32,32,32,124,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,92,13,10,32,32,32,32,32,32,124,32,32,32,32,124,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,124,32,32,32,32,124,13,10,32,32,32,32,32,32,32,92,32,32,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,47,13,10,32,32,32,32,32,32,32,32,32,92,92,32,92,95,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,95,47,32,47,47,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,45,45,45,95,95,95,95,95,45,45,45,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,86,32,32,32,32,32,92,32,47,32,32,32,32,86,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,95,124,95,95,95,95,95,124,32,124,95,95,95,95,124,95,95,124};
+  char c[] = {
+      32,  47, 94,  92,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  47, 94,  92,  13,  10,  124, 32,  32,  32,  92,  95,  47,
+      94,  92, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  47,  94,  92,  95,  47,
+      32,  32, 32,  124, 13,  10,  124, 32, 32,  32,  32,  32,  32,  32,  32,  92,  95,  47,  94,
+      92,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  47,  94,  92,  95,  47, 32,  32,  32,  32,  32,  32,  32,  32,  124, 13,  10,
+      32,  92, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  92,  95,  47,  94,  92,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  47,  94,  92,  95,  47,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  47,  13,  10,  32,  32,  92,  95,  95,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  92,  95,  95,  95,  45,  45,  45,
+      95,  95, 95,  47,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  95,
+      95,  47, 13,  10,  32,  32,  32,  32, 32,  45,  45,  45,  95,  95,  95,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  47,  32,  32, 32,  32,  32,  32,  32,  92,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  95,  95,  95,  45, 45,  45,  13,  10,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  45,  45,  45,  95, 95,  95,  32,  32,  124, 32,  32,  32,  32,  32,  32,
+      32,  32, 32,  124, 32,  32,  95,  95, 95,  45,  45,  45,  13,  10,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  45,  45,  124, 32,  32,  95,  32,
+      32,  32, 95,  32,  32,  124, 45,  45, 13,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  124, 32,  32,  124, 111, 124, 32,  124, 111, 124,
+      32,  32, 124, 13,  10,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  47,  32,  32,  32,  32, 45,  32,  32,  32,  45,  32,  32,  32,  32,  92,  13,
+      10,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  124, 32,
+      32,  32, 32,  32,  32,  95,  95,  95, 32,  32,  32,  32,  32,  32,  124, 13,  10,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  47,  32,  32,  32,  32,  32,
+      45,  45, 32,  32,  32,  45,  45,  32, 32,  32,  32,  32,  92,  13,  10,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  47,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  92,  13,  10,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 124, 32,  32,  32,  32,  32,  32,  32,  47,  92,  32,
+      32,  32, 32,  32,  47,  92,  32,  32, 32,  32,  32,  32,  32,  124, 13,  10,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  92,  32,  32,  92,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  47,  32,  32,  47,  13,  10,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  47,  92,  32,  32,  92,  95,  95,  95,  95,
+      95,  95, 95,  95,  95,  95,  95,  95, 32,  47,  32,  32,  47,  92,  13,  10,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  47,  32,  32,  92,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  47,  32,  32,  92,  13,  10,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  47,  32,  32,  32,  32,  92,  32,  32,  32,  32,
+      32,  39, 95,  95,  95,  39,  32,  32, 32,  32,  32,  47,  32,  32,  32,  32,  92,  13,  10,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  47,  92,  32,  32,  32,  32,  32,  92,  32,
+      45,  45, 95,  95,  45,  45,  45,  95, 95,  45,  45,  32,  47,  32,  32,  32,  32,  32,  47,
+      92,  13, 10,  32,  32,  32,  32,  32, 32,  32,  32,  32,  47,  32,  32,  92,  47,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      92,  47, 32,  32,  92,  13,  10,  32, 32,  32,  32,  32,  32,  32,  32,  47,  32,  32,  32,
+      47,  32, 32,  32,  32,  32,  32,  32, 77,  46,  79,  46,  79,  46,  83,  46,  69,  32,  32,
+      32,  32, 32,  32,  32,  92,  32,  32, 32,  92,  13,  10,  32,  32,  32,  32,  32,  32,  32,
+      47,  32, 32,  32,  124, 32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  124, 32,  32,  32,  92,  13,  10,  32,
+      32,  32, 32,  32,  32,  124, 32,  32, 32,  32,  124, 45,  45,  45,  45,  45,  45,  45,  45,
+      45,  45, 45,  45,  45,  45,  45,  45, 45,  45,  45,  45,  45,  45,  45,  45,  45,  124, 32,
+      32,  32, 32,  124, 13,  10,  32,  32, 32,  32,  32,  32,  32,  92,  32,  32,  32,  32,  92,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  47,  32,  32,  32, 32,  47,  13,  10,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 92,  92,  32,  92,  95,  92, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 47,  95,  47,  32,  47,  47,  13,  10,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 45,  45,  32,  32,  92,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  47,  32,  32,  45,  45,  13,  10,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  32,  32,  32,  124, 32,  32,  45,
+      45,  45, 95,  95,  95,  95,  95,  45, 45,  45,  32,  32,  124, 13,  10,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  32,  32,  32,  124, 32,  32,  32,  32,  32,  124,
+      32,  32, 32,  124, 32,  32,  32,  32, 32,  124, 13,  10,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  32,  32,  32, 32,  124, 32,  32,  32,  32,  32,  124, 32,  32,  32,
+      124, 32, 32,  32,  32,  32,  124, 13, 10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  32,  32,  47,  32,  86, 32,  32,  32,  32,  32,  92,  32,  47,  32,  32,  32,
+      32,  86, 32,  32,  92,  13,  10,  32, 32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+      32,  32, 32,  124, 95,  124, 95,  95, 95,  95,  95,  124, 32,  124, 95,  95,  95,  95,  124,
+      95,  95, 124};
   Moose::out << std::string(c) << std::endl << std::endl;
 }

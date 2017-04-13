@@ -1,0 +1,9 @@
+[Tests]
+  [./parsed_subdomain_mm]
+    type = 'Exodiff'
+    input = 'parsed_subdomain_mm.i'
+    exodiff = 'parsed_subdomain_mm_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+  [../]
+[]

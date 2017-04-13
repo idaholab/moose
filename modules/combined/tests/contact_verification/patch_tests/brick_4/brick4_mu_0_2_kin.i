@@ -1,6 +1,11 @@
+[GlobalParams]
+  order = SECOND
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   file = brick4_mesh.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Problem]
@@ -35,16 +40,10 @@
 
 [Variables]
   [./disp_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./disp_z]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
@@ -66,94 +65,78 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./saved_x]
-    order = SECOND
   [../]
   [./saved_y]
-    order = SECOND
   [../]
   [./saved_z]
-    order = SECOND
   [../]
   [./diag_saved_x]
-    order = SECOND
   [../]
   [./diag_saved_y]
-    order = SECOND
   [../]
   [./diag_saved_z]
-    order = SECOND
   [../]
   [./inc_slip_x]
-    order = SECOND
   [../]
   [./inc_slip_y]
-    order = SECOND
   [../]
   [./inc_slip_z]
-    order = SECOND
   [../]
   [./accum_slip_x]
-    order = SECOND
   [../]
   [./accum_slip_y]
-    order = SECOND
   [../]
   [./accum_slip_z]
-    order = SECOND
   [../]
   [./tang_force_x]
-    order = SECOND
   [../]
   [./tang_force_y]
-    order = SECOND
   [../]
   [./tang_force_z]
-    order = SECOND
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-    save_in_disp_z = saved_z
-    diag_save_in_disp_x = diag_saved_x
-    diag_save_in_disp_y = diag_saved_y
-    diag_save_in_disp_z = diag_saved_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
+    save_in = 'saved_x saved_y saved_z'
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./inc_slip_x]
     type = PenetrationAux
@@ -304,30 +287,40 @@
 []
 
 [Materials]
-  [./bot]
-    type = Elastic
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    poissons_ratio = 0.3
+  [./bot_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./top]
-    type = Elastic
-    block = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    poissons_ratio = 0.3
+  [./bot_strain]
+    type = ComputeFiniteStrain
+    displacements = 'disp_x disp_y disp_z'
+    block = '1'
+  [../]
+  [./bot_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+  [./top_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
+  [../]
+  [./top_strain]
+    type = ComputeFiniteStrain
+    displacements = 'disp_x disp_y disp_z'
+    block = '2'
+  [../]
+  [./top_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -342,9 +335,8 @@
   dt = 1.0
   end_time = 1.0
   num_steps = 10
-  dtmin = 0.1
+  dtmin = 1.0
   l_tol = 1e-4
-
 []
 
 [VectorPostprocessors]
@@ -383,7 +375,7 @@
   [./chkfile]
     type = CSV
     file_base = brick4_mu_0_2_kin_check
-    show = 'bot_react_x bot_react_y disp_x59 disp_y59 disp_x64 disp_y64 ref_resid_x ref_resid_y stress_yy stress_zz top_react_x top_react_y x_disp y_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x59 disp_y59 disp_x64 disp_y64 stress_yy stress_zz top_react_x top_react_y x_disp y_disp cont_press'
     execute_vector_postprocessors_on = timestep_end
   [../]
   [./outfile]
@@ -396,11 +388,7 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     master = 4
-    order = SECOND
     system = constraint
     model = coulomb
     normalize_penalty = true

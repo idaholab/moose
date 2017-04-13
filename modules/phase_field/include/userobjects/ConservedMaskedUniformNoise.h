@@ -4,11 +4,12 @@
 #include "ConservedMaskedNoiseBase.h"
 #include "ConservedUniformNoiseVeneer.h"
 
-//Forward delcarations
+// Forward delcarations
 class ConservedMaskedUniformNoise;
 
-template<>
-InputParameters validParams<ConservedMaskedUniformNoise>()
+template <>
+InputParameters
+validParams<ConservedMaskedUniformNoise>()
 {
   return validParams<ConservedMaskedNoiseBase>();
 }
@@ -23,8 +24,10 @@ InputParameters validParams<ConservedMaskedUniformNoise>()
 class ConservedMaskedUniformNoise : public ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>
 {
 public:
-  ConservedMaskedUniformNoise(const InputParameters & parameters) :
-      ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>(parameters) {}
+  ConservedMaskedUniformNoise(const InputParameters & parameters)
+    : ConservedUniformNoiseVeneer<ConservedMaskedNoiseBase>(parameters)
+  {
+  }
 };
 
-#endif //CONSERVEDMASKEDUNIFORMNOISE_H
+#endif // CONSERVEDMASKEDUNIFORMNOISE_H

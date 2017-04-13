@@ -19,20 +19,21 @@
 #include "MoosePreconditioner.h"
 #include "FEProblem.h"
 #include "CreateExecutionerAction.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 unsigned int SetupPreconditionerAction::_count = 0;
 
-template<>
-InputParameters validParams<SetupPreconditionerAction>()
+template <>
+InputParameters
+validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  params += Moose::PetscSupport::getPetscValidParams();
+
   return params;
 }
 
-SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params) :
-    MooseObjectAction(params)
+SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 
@@ -42,15 +43,18 @@ SetupPreconditionerAction::act()
   if (_problem.get() != NULL)
   {
     // build the preconditioner
-    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-    MooseSharedPointer<MoosePreconditioner> pc = _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
+    _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
+    std::shared_ptr<MoosePreconditioner> pc =
+        _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 
-    _problem->getNonlinearSystem().setPreconditioner(pc);
+    _problem->getNonlinearSystemBase().setPreconditioner(pc);
 
-    /**
-     * Go ahead and set common precondition options here.  The child classes will still be called
-     * through the action warehouse
-     */
-    Moose::PetscSupport::storePetscOptions(*_problem, _pars);
+/**
+ * Go ahead and set common precondition options here.  The child classes will still be called
+ * through the action warehouse
+ */
+#if LIBMESH_HAVE_PETSC
+    Moose::PetscSupport::storePetscOptions(*_problem, _moose_object_pars);
+#endif
   }
 }

@@ -14,17 +14,17 @@
 
 #include "ElementSidePP.h"
 
-template<>
-InputParameters validParams<ElementSidePP>()
+template <>
+InputParameters
+validParams<ElementSidePP>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addRequiredParam<PostprocessorName>("side_pp", "Side postprocessor to be passed in");
   return params;
 }
 
-ElementSidePP::ElementSidePP(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters),
-    _sidepp(getPostprocessorValue("side_pp"))
+ElementSidePP::ElementSidePP(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters), _sidepp(getPostprocessorValue("side_pp"))
 {
 }
 

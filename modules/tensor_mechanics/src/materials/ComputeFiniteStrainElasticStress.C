@@ -6,42 +6,47 @@
 /****************************************************************/
 #include "ComputeFiniteStrainElasticStress.h"
 
-template<>
-InputParameters validParams<ComputeFiniteStrainElasticStress>()
+template <>
+InputParameters
+validParams<ComputeFiniteStrainElasticStress>()
 {
   InputParameters params = validParams<ComputeStressBase>();
   params.addClassDescription("Compute stress using elasticity for finite strains");
   return params;
 }
 
-ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(const InputParameters & parameters) :
-    ComputeStressBase(parameters),
+ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
+    const InputParameters & parameters)
+  : ComputeStressBase(parameters),
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
-    _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
+    _rotation_increment(
+        getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress"))
 {
 }
 
 void
-ComputeFiniteStrainElasticStress::initQpStatefulProperties()
+ComputeFiniteStrainElasticStress::initialSetup()
 {
-  ComputeStressBase::initQpStatefulProperties();
-
-    _stress_old[_qp] = _stress[_qp];
+  if (!isElasticityTensorGuaranteedIsotropic())
+    mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
+               "that guarantee isotropic tensors.");
 }
 
 void
 ComputeFiniteStrainElasticStress::computeQpStress()
 {
-  // stress = s_old + C * de
-  RankTwoTensor intermediate_stress = _stress_old[_qp] + _elasticity_tensor[_qp]*_strain_increment[_qp]; //Calculate stress in intermediate configruation
+  // Calculate the stress in the intermediate configuration
+  RankTwoTensor intermediate_stress =
+      _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
 
-  //Rotate the stress to the current configuration
-  _stress[_qp] = _rotation_increment[_qp]*intermediate_stress*_rotation_increment[_qp].transpose();
+  // Rotate the stress state to the current configuration
+  _stress[_qp] =
+      _rotation_increment[_qp] * intermediate_stress * _rotation_increment[_qp].transpose();
 
-  //Assign value for elastic strain, which is equal to the mechanical strain
+  // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];
 
-  //Compute dstress_dstrain
-  _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; //This is NOT the exact jacobian
+  // Compute dstress_dstrain
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; // This is NOT the exact jacobian
 }

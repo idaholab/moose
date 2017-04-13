@@ -12,7 +12,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -51,23 +51,23 @@
 [Kernels]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = ppwater
   [../]
   [./flux0]
     type = PorousFlowAdvectiveFlux
-    component_index = 0
+    fluid_component = 0
     variable = ppwater
     gravity = '-1 0 0'
   [../]
   [./mass1]
     type = PorousFlowMassTimeDerivative
-    component_index = 1
+    fluid_component = 1
     variable = ppgas
   [../]
   [./flux1]
     type = PorousFlowAdvectiveFlux
-    component_index = 1
+    fluid_component = 1
     variable = ppgas
     gravity = '-1 0 0'
   [../]
@@ -93,7 +93,22 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
   [./ppss]
+    type = PorousFlow2PhasePP_VG
+    at_nodes = true
+    phase0_porepressure = ppwater
+    phase1_porepressure = ppgas
+    m = 0.5
+    al = 1
+  [../]
+  [./ppss_qp]
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
@@ -102,16 +117,19 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1.2
     phase = 0
   [../]
   [./dens1]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 0.1
     bulk_modulus = 1
     phase = 1
@@ -119,30 +137,47 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./dens0_qp]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1
+    bulk_modulus = 1.2
+    phase = 0
+  [../]
+  [./dens1_qp]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 0.1
+    bulk_modulus = 1
+    phase = 1
   [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = false
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1
     phase = 0
   [../]
   [./visc1]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 0.5
     phase = 1
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -150,17 +185,34 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 1
+    n = 1
     phase = 0
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 1
+    n = 1
     phase = 1
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    material_property = PorousFlow_relative_permeability_qp
+  [../]
+  [./relperm_water_nodal]
+    type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
+    n = 1
+    phase = 0
+  [../]
+  [./relperm_gas_nodal]
+    type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
+    n = 1
+    phase = 1
+  [../]
+  [./relperm_all_nodal]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
 []
 
@@ -303,7 +355,6 @@
   [./check]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-12 1E-10 10000 test'
   [../]

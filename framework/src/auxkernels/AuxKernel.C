@@ -14,20 +14,21 @@
 
 #include "AuxKernel.h"
 
-//local includes
+// local includes
 #include "FEProblem.h"
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-//libmesh includes
+// libmesh includes
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<AuxKernel>()
+template <>
+InputParameters
+validParams<AuxKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -39,9 +40,16 @@ InputParameters validParams<AuxKernel>()
   // Add the SetupInterface parameter, 'execute_on', the default is 'linear'
   params += validParams<SetupInterface>();
 
-  params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this object applies to");
+  params.addRequiredParam<AuxVariableName>("variable",
+                                           "The name of the variable that this object applies to");
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that "
+                        "in the case this is true but no "
+                        "displacements are provided in the Mesh block "
+                        "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   // This flag is set to true if the AuxKernel is being used on a boundary
@@ -53,23 +61,39 @@ InputParameters validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(const InputParameters & parameters) :
-    MooseObject(parameters),
+AuxKernel::AuxKernel(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters),
+    BoundaryRestrictable(parameters,
+                         parameters.get<AuxiliarySystem *>("_aux_sys")
+                             ->getVariable(parameters.get<THREAD_ID>("_tid"),
+                                           parameters.get<AuxVariableName>("variable"))
+                             .isNodal()),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
+    CoupleableMooseVariableDependencyIntermediateInterface(
+        this,
+        parameters.get<AuxiliarySystem *>("_aux_sys")
+            ->getVariable(parameters.get<THREAD_ID>("_tid"),
+                          parameters.get<AuxVariableName>("variable"))
+            .isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
     DependencyResolverInterface(),
-    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
+    RandomInterface(parameters,
+                    *parameters.get<FEProblemBase *>("_fe_problem_base"),
+                    parameters.get<THREAD_ID>("_tid"),
+                    parameters.get<AuxiliarySystem *>("_aux_sys")
+                        ->getVariable(parameters.get<THREAD_ID>("_tid"),
+                                      parameters.get<AuxVariableName>("variable"))
+                        .isNodal()),
     GeometricSearchInterface(this),
     Restartable(parameters, "AuxKernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
+    VectorPostprocessorInterface(this),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),
@@ -104,15 +128,13 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
-  for (std::map<std::string, std::vector<MooseVariable *> >::iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
-    for (std::vector<MooseVariable *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-      _depend_vars.insert((*it2)->name());
+  std::map<std::string, std::vector<MooseVariable *>> coupled_vars = getCoupledVars();
+  for (const auto & it : coupled_vars)
+    for (const auto & var : it.second)
+      _depend_vars.insert(var->name());
 }
 
-AuxKernel::~AuxKernel()
-{
-}
+AuxKernel::~AuxKernel() {}
 
 const std::set<std::string> &
 AuxKernel::getRequestedItems()
@@ -147,21 +169,38 @@ AuxKernel::getPostprocessorValueByName(const PostprocessorName & name)
   return PostprocessorInterface::getPostprocessorValueByName(name);
 }
 
+const VectorPostprocessorValue &
+AuxKernel::getVectorPostprocessorValue(const std::string & name, const std::string & vector_name)
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
+}
+
+const VectorPostprocessorValue &
+AuxKernel::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                             const std::string & vector_name)
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
+}
+
 void
 AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {
   if (is_old)
   {
-    std::vector<VariableName> var_names = getParam<std::vector<VariableName> >(var_name);
-    for (std::vector<VariableName>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
-      _depend_vars.erase(*it);
+    std::vector<VariableName> var_names = getParam<std::vector<VariableName>>(var_name);
+    for (const auto & name : var_names)
+      _depend_vars.erase(name);
   }
 }
 
 void
 AuxKernel::compute()
 {
-  if (isNodal())           /* nodal variables */
+  precalculateValue();
+
+  if (isNodal()) /* nodal variables */
   {
     if (_var.isNodalDefined())
     {
@@ -171,22 +210,22 @@ AuxKernel::compute()
       _var.setNodalValue(value);
     }
   }
-  else                     /* elemental variables */
+  else /* elemental variables */
   {
     _n_local_dofs = _var.numberOfDofs();
 
-    if (_n_local_dofs==1)  /* p0 */
+    if (_n_local_dofs == 1) /* p0 */
     {
       Real value = 0;
-      for (_qp=0; _qp<_qrule->n_points(); _qp++)
-        value += _JxW[_qp]*_coord[_qp]*computeValue();
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        value += _JxW[_qp] * _coord[_qp] * computeValue();
       value /= (_bnd ? _current_side_volume : _current_elem_volume);
       // update the variable data refernced by other kernels.
       // Note that this will update the values at the quadrature points too
       // (because this is an Elemental variable)
       _var.setNodalValue(value);
     }
-    else                   /* high-order */
+    else /* high-order */
     {
       _local_re.resize(_n_local_dofs);
       _local_re.zero();
@@ -223,7 +262,9 @@ AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError(name() << ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
+    mooseError(
+        name(),
+        ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
 
   return Coupleable::coupledDot(var_name, comp);
 }
@@ -233,7 +274,9 @@ AuxKernel::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError(name() << ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
+    mooseError(
+        name(),
+        ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
 
   return Coupleable::coupledDotDu(var_name, comp);
 }

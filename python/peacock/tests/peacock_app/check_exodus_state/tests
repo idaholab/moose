@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = PythonUnitTest
+    input = test_exodus_state.py
+    platform = "DARWIN"
+  [../]
+[]

@@ -21,41 +21,44 @@
 #include "OversampleOutput.h"
 
 // Define the four possible validParams methods
-template<>
-InputParameters validParams<BasicOutput<OversampleOutput> >()
+template <>
+InputParameters
+validParams<BasicOutput<OversampleOutput>>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<OversampleOutput>();
   return params;
 }
 
-template<>
-InputParameters validParams<BasicOutput<FileOutput> >()
+template <>
+InputParameters
+validParams<BasicOutput<FileOutput>>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
   return params;
 }
 
-template<>
-InputParameters validParams<BasicOutput<PetscOutput> >()
+template <>
+InputParameters
+validParams<BasicOutput<PetscOutput>>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<PetscOutput>();
   return params;
 }
 
-template<>
-InputParameters validParams<BasicOutput<Output> >()
+template <>
+InputParameters
+validParams<BasicOutput<Output>>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<Output>();
   return params;
 }
 
-
 // The generic output method used for Output, PetscOutput, and FileOutput base classes
-template<class OutputBase>
+template <class OutputBase>
 void
 BasicOutput<OutputBase>::outputStep(const ExecFlagType & type)
 {
@@ -77,7 +80,7 @@ BasicOutput<OutputBase>::outputStep(const ExecFlagType & type)
 }
 
 // OversampleOutput template specialization
-template<>
+template <>
 void
 BasicOutput<OversampleOutput>::outputStep(const ExecFlagType & type)
 {
@@ -93,7 +96,8 @@ BasicOutput<OversampleOutput>::outputStep(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
-  // Call the output method (this has the file checking built in b/c OversampleOutput is a FileOutput)
+  // Call the output method (this has the file checking built in b/c OversampleOutput is a
+  // FileOutput)
   if (shouldOutput(type))
   {
     updateOversample();

@@ -19,16 +19,17 @@
 #include "MooseObjectWarehouseBase.h"
 
 /**
- * A storage container for MooseObjects.
+ * A storage container for MooseObjects that inherit from SetupInterface.
  *
- * This container is stores threaded copies and includes automatic storage of block/boundary
- * restricted objects. It also, maintains lists of active objects for use by Controls.
+ * Objects that inherit from SetupInterface have various functions (e.g., initialSetup). This
+ * class provides convenience functions for looping over all active objects stored in the warehouse
+ * and
+ * calling the setup methods.
  */
-template<typename T>
+template <typename T>
 class MooseObjectWarehouse : public MooseObjectWarehouseBase<T>
 {
 public:
-
   using MooseObjectWarehouseBase<T>::checkThreadID;
   using MooseObjectWarehouseBase<T>::_active_objects;
   using MooseObjectWarehouseBase<T>::hasActiveBlockObjects;
@@ -53,79 +54,68 @@ public:
   ///@}
 };
 
-
-template<typename T>
-MooseObjectWarehouse<T>::MooseObjectWarehouse(bool threaded /*=true*/) :
-    MooseObjectWarehouseBase<T>(threaded)
+template <typename T>
+MooseObjectWarehouse<T>::MooseObjectWarehouse(bool threaded /*=true*/)
+  : MooseObjectWarehouseBase<T>(threaded)
 {
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouse<T>::initialSetup(THREAD_ID tid/* = 0*/) const
-{
-  checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->initialSetup();
-}
-
-
-template<typename T>
-void
-MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::initialSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->timestepSetup();
+  for (const auto & object : _active_objects[tid])
+    object->initialSetup();
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid /* = 0*/) const
+{
+  checkThreadID(tid);
+  for (const auto & object : _active_objects[tid])
+    object->timestepSetup();
+}
+
+template <typename T>
+void
+MooseObjectWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   if (hasActiveBlockObjects(id, tid))
   {
-    const std::vector<MooseSharedPointer<T> > & objects = getActiveBlockObjects(id, tid);
-    for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->subdomainSetup();
+    const auto & objects = getActiveBlockObjects(id, tid);
+    for (const auto & object : objects)
+      object->subdomainSetup();
   }
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouse<T>::subdomainSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::subdomainSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->subdomainSetup();
+  for (const auto & object : _active_objects[tid])
+    object->subdomainSetup();
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->jacobianSetup();
+  for (const auto & object : _active_objects[tid])
+    object->jacobianSetup();
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouse<T>::residualSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::residualSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->residualSetup();
+  for (const auto & object : _active_objects[tid])
+    object->residualSetup();
 }
 
 #endif // MOOSEOBJECTWAREHOUSE_H

@@ -1,0 +1,7 @@
+[Tests]
+  [./multiplicity]
+    type = 'CSVDiff'
+    input = 'multiplicity.i'
+    csvdiff = 'multiplicity_out.csv'
+  [../]
+[]

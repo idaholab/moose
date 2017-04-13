@@ -6,16 +6,17 @@
 /****************************************************************/
 #include "ComputeLinearElasticStress.h"
 
-template<>
-InputParameters validParams<ComputeLinearElasticStress>()
+template <>
+InputParameters
+validParams<ComputeLinearElasticStress>()
 {
   InputParameters params = validParams<ComputeStressBase>();
   params.addClassDescription("Compute stress using elasticity for small strains");
   return params;
 }
 
-ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & parameters) :
-    ComputeStressBase(parameters),
+ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & parameters)
+  : ComputeStressBase(parameters),
     _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain"))
 {
 }
@@ -23,8 +24,10 @@ ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & p
 void
 ComputeLinearElasticStress::initialSetup()
 {
-  if (hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
-    mooseError("This linear elastic stress calculation only works for small strains");
+  if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+    mooseError("This linear elastic stress calculation only works for small strains; use "
+               "ComputeFiniteStrainElasticStress for simulations using incremental and finite "
+               "strains.");
 }
 
 void

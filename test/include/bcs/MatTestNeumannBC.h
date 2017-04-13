@@ -19,7 +19,7 @@
 
 class MatTestNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<MatTestNeumannBC>();
 
 /**
@@ -31,7 +31,6 @@ public:
   MatTestNeumannBC(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual();
 
   const std::string _prop_name;

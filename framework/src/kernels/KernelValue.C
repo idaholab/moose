@@ -13,29 +13,25 @@
 /****************************************************************/
 
 #include "KernelValue.h"
+
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "Assembly.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<KernelValue>()
+template <>
+InputParameters
+validParams<KernelValue>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-
-KernelValue::KernelValue(const InputParameters & parameters) :
-    Kernel(parameters)
-{
-}
-
-KernelValue::~KernelValue()
-{
-}
+KernelValue::KernelValue(const InputParameters & parameters) : Kernel(parameters) {}
 
 void
 KernelValue::computeResidual()
@@ -57,8 +53,8 @@ KernelValue::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
-      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+    for (const auto & var : _save_in)
+      var->sys().solution().add_vector(_local_re, var->dofIndices());
   }
 }
 
@@ -85,11 +81,11 @@ KernelValue::computeJacobian()
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++) // target for auto vectorization
-      diag(i) = _local_ke(i,i);
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+    for (const auto & var : _diag_save_in)
+      var->sys().solution().add_vector(diag, var->dofIndices());
   }
 }
 
@@ -120,4 +116,3 @@ KernelValue::precomputeQpJacobian()
 {
   return 0.0;
 }
-

@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'coupled_value_coupled_flux.i'
+    exodiff = 'coupled_value_coupled_flux_out.e'
+    mesh_mode = REPLICATED
+  [../]
+
+  [./jacobian_test]
+    type = AnalyzeJacobian
+    input = coupled_value_coupled_flux.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+    prereq = test
+  []
+[]

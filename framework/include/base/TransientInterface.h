@@ -15,12 +15,18 @@
 #ifndef TRANSIENTINTERFACE_H
 #define TRANSIENTINTERFACE_H
 
-#include "InputParameters.h"
+#include "Moose.h"
 
-class FEProblem;
+// Forward declarations
+class FEProblemBase;
+class InputParameters;
+class MooseObject;
 class TransientInterface;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<TransientInterface>();
 
 /**
@@ -37,11 +43,12 @@ public:
 protected:
   const InputParameters & _ti_params;
 
-  FEProblem & _ti_feproblem;
+  FEProblemBase & _ti_feproblem;
 
   /**
    * If the object is using implicit or explicit form. This does NOT mean time scheme,
-   * but which values are going to be used in the object - either from current time or old time. Note that
+   * but which values are going to be used in the object - either from current time or old time.
+   * Note that
    * even explicit schemes have implicit form (it is the time derivative "kernel")
    */
   bool _is_implicit;

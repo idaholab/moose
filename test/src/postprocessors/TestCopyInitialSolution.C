@@ -15,20 +15,20 @@
 #include "TestCopyInitialSolution.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<TestCopyInitialSolution>()
+template <>
+InputParameters
+validParams<TestCopyInitialSolution>()
 {
-InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-TestCopyInitialSolution::TestCopyInitialSolution(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
-{}
-
-TestCopyInitialSolution::~TestCopyInitialSolution()
+TestCopyInitialSolution::TestCopyInitialSolution(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters)
 {
 }
+
+TestCopyInitialSolution::~TestCopyInitialSolution() {}
 
 void
 TestCopyInitialSolution::initialize()
@@ -39,7 +39,7 @@ void
 TestCopyInitialSolution::execute()
 {
   // Get References to the solution
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   NumericVector<Number> & soln = nl.solution();
   NumericVector<Number> & soln_old = nl.solutionOld();
   NumericVector<Number> & soln_older = nl.solutionOlder();

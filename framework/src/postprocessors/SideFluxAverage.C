@@ -14,17 +14,18 @@
 
 #include "SideFluxAverage.h"
 
-template<>
-InputParameters validParams<SideFluxAverage>()
+template <>
+InputParameters
+validParams<SideFluxAverage>()
 {
   InputParameters params = validParams<SideFluxIntegral>();
   return params;
 }
 
-SideFluxAverage::SideFluxAverage(const InputParameters & parameters) :
-    SideFluxIntegral(parameters),
-    _volume(0)
-{}
+SideFluxAverage::SideFluxAverage(const InputParameters & parameters)
+  : SideFluxIntegral(parameters), _volume(0)
+{
+}
 
 void
 SideFluxAverage::initialize()
@@ -57,4 +58,3 @@ SideFluxAverage::threadJoin(const UserObject & y)
   const SideFluxAverage & pps = static_cast<const SideFluxAverage &>(y);
   _volume += pps._volume;
 }
-

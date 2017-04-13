@@ -3,11 +3,10 @@
 ###############################################################################
 #
 # Required Environment variables (one of the following)
-# PACKAGES_DIR  - Location of the MOOSE redistributable package 
-# CPPUNIT_DIR   - Location of CPPUNIT
+# PACKAGES_DIR  - Location of the MOOSE redistributable package
 #
 # Optional Environment variables
-# MOOSE_DIR     - Root directory of the MOOSE project 
+# MOOSE_DIR     - Root directory of the MOOSE project
 # FRAMEWORK_DIR - Location of the MOOSE framework
 #
 ###############################################################################
@@ -15,21 +14,22 @@ MOOSE_DIR          ?= $(shell dirname `pwd`)
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 ###############################################################################
 
-# Extra stuff for CPPUNIT
-CPPUNIT_DIR 		?= $(PACKAGES_DIR)/cppunit
-ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
-ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit 
+# Extra stuff for GTEST
+ADDITIONAL_INCLUDES	:= -I$(FRAMEWORK_DIR)/contrib/gtest
+ADDITIONAL_LIBS 	:= $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-SOLID_MECHANICS   := yes
-TENSOR_MECHANICS  := yes
-PHASE_FIELD       := yes
-XFEM              := yes
-POROUS_FLOW       := yes
+SOLID_MECHANICS    := yes
+TENSOR_MECHANICS   := yes
+PHASE_FIELD        := yes
+XFEM               := yes
+POROUS_FLOW        := yes
+FLUID_PROPERTIES   := yes
+CHEMICAL_REACTIONS := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
@@ -41,7 +41,7 @@ DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_N
 include $(FRAMEWORK_DIR)/app.mk
 
 # Find all the MOOSE unit test source files and include their dependencies.
-moose_unit_srcfiles := $(shell find $(MOOSE_DIR)/unit -name "*.C")
+moose_unit_srcfiles := $(shell find $(MOOSE_DIR)/unit/src -name "*.C")
 moose_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_unit_srcfiles))
 -include $(moose_unit_deps)
 

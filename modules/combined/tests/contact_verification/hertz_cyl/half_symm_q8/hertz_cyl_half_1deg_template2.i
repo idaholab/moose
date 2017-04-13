@@ -1,6 +1,11 @@
+[GlobalParams]
+  order = SECOND
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = hertz_cyl_half_1deg.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -20,7 +25,7 @@
   inc_slip_y = inc_slip_y
   contact_slip_tolerance_factor = 100
   target_relative_contact_residual = 5.e-3
-  maximum_slip_iterations = 50
+  maximum_slip_iterations = 100
   minimum_slip_iterations = 1
   slip_updates_per_iteration = 3
   solution_variables = 'disp_x disp_y'
@@ -30,12 +35,8 @@
 
 [Variables]
   [./disp_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
@@ -53,79 +54,71 @@
     family = MONOMIAL
   [../]
   [./saved_x]
-    order = SECOND
   [../]
   [./saved_y]
-    order = SECOND
   [../]
   [./diag_saved_x]
-    order = SECOND
   [../]
   [./diag_saved_y]
-    order = SECOND
   [../]
   [./inc_slip_x]
-    order = SECOND
   [../]
   [./inc_slip_y]
-    order = SECOND
   [../]
   [./accum_slip_x]
-    order = SECOND
   [../]
   [./accum_slip_y]
-    order = SECOND
   [../]
   [./tang_force_x]
-    order = SECOND
   [../]
   [./tang_force_y]
-    order = SECOND
   [../]
 []
 
 [Functions]
   [./disp_ramp_vert]
     type = PiecewiseLinear
-    x = '0. 1. 2.'
+    x = '0. 1. 11.'
     y = '0. -0.0020 -0.0020'
   [../]
   [./disp_ramp_horz]
     type = PiecewiseLinear
-    x = '0. 1. 2.'
+    x = '0. 1. 11.'
     y = '0. 0.0 0.0014'
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    save_in_disp_y = saved_y
-    save_in_disp_x = saved_x
-    diag_save_in_disp_y = diag_saved_y
-    diag_save_in_disp_x = diag_saved_x
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
+    save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./inc_slip_x]
     type = PenetrationAux
@@ -198,16 +191,6 @@
     variable = saved_y
     boundary = 4
   [../]
-  [./ref_resid_x]
-    type = NodalL2Norm
-    execute_on = timestep_end
-    variable = saved_x
-  [../]
-  [./ref_resid_y]
-    type = NodalL2Norm
-    execute_on = timestep_end
-    variable = saved_y
-  [../]
   [./disp_x639]
     type = NodalVariableValue
     nodeid = 638
@@ -257,68 +240,108 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff1_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e10
     poissons_ratio = 0.0
   [../]
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff1_strain]
+    type = ComputeFiniteStrain
+    block = '1'
+  [../]
+  [./stuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+  [./stuff2_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff3]
-    type = Elastic
-    block = 3
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff2_strain]
+    type = ComputeFiniteStrain
+    block = '2'
+  [../]
+  [./stuff2_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
+  [../]
+  [./stuff3_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '3'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff4]
-    type = Elastic
-    block = 4
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff3_strain]
+    type = ComputeFiniteStrain
+    block = '3'
+  [../]
+  [./stuff3_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '3'
+  [../]
+  [./stuff4_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '4'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff5]
-    type = Elastic
-    block = 5
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff4_strain]
+    type = ComputeFiniteStrain
+    block = '4'
+  [../]
+  [./stuff4_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '4'
+  [../]
+  [./stuff5_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '5'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff6]
-    type = Elastic
-    block = 6
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff5_strain]
+    type = ComputeFiniteStrain
+    block = '5'
+  [../]
+  [./stuff5_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '5'
+  [../]
+  [./stuff6_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '6'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff7]
-    type = Elastic
-    block = 7
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff6_strain]
+    type = ComputeFiniteStrain
+    block = '6'
+  [../]
+  [./stuff6_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '6'
+  [../]
+  [./stuff7_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '7'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  [../]
+  [./stuff7_strain]
+    type = ComputeFiniteStrain
+    block = '7'
+  [../]
+  [./stuff7_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '7'
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -328,18 +351,14 @@
 
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-5
-  l_max_its = 50
-  nl_max_its = 50
+  l_max_its = 100
+  nl_max_its = 200
 
   start_time = 0.0
-  end_time = 1.1
+  end_time = 2.0
   l_tol = 1e-4
-  [./TimeStepper]
-    type = FunctionDT
-    time_t = ' 0.0 0.9 1.0 2.0'
-    time_dt = '0.1 0.1 0.01 0.01'
-    min_dt = 0.001
-  [../]
+  dt = 0.1
+  dtmin = 0.1
 
   [./Predictor]
     type = SimplePredictor
@@ -396,7 +415,7 @@
   [../]
   [./chkfile2]
     type = CSV
-    show = 'bot_react_x bot_react_y disp_x639 disp_y639 ref_resid_x ref_resid_y top_react_x top_react_y'
+    show = 'bot_react_x bot_react_y disp_x639 disp_y639 top_react_x top_react_y'
     start_time = 0.9
     execute_vector_postprocessors_on = timestep_end
   [../]
@@ -411,9 +430,6 @@
   [./interface]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    order = SECOND
     system = constraint
     model = coulomb
     formulation = kinematic

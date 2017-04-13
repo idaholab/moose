@@ -98,18 +98,15 @@
     type = GenericConstantMaterial
     prop_names  = 'kappa_c'
     prop_values = '2.0'
-    block = 0
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = M
     function = 'c^2+d+0.1'
     args = 'c d'
   [../]
   [./F]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     function = 'c^2'
     args = 'c'

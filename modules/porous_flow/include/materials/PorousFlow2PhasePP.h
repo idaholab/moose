@@ -10,10 +10,10 @@
 
 #include "PorousFlowVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow2PhasePP;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow2PhasePP>();
 
 /**
@@ -28,31 +28,31 @@ public:
   PorousFlow2PhasePP(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
-   * Assemble std::vectors of porepressure, saturation and temperature at the nodes
-   * and quadpoints
+   * Assemble std::vectors of porepressure and saturation at the nodes
+   * and quadpoints, and return the capillary pressure
    */
-  void buildQpPPSS();
+  Real buildQpPPSS();
 
   /**
-   * Effective saturation as a function of porepressure.
+   * Effective saturation as a function of porepressure (a negative quantity).
    * Default is constant saturation = 1.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
-   * @param pressure porepressure (Pa)
+   * @param pressure porepressure (Pa): a negative quantity
    * @return effective saturation
    */
   virtual Real effectiveSaturation(Real pressure) const;
 
   /**
-   * Derivative of effective saturation wrt to porepressure.
+   * Derivative of effective saturation wrt to p.
    * Default = 0 for constant saturation.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
-   * @param pressure porepressure (Pa)
+   * @param pressure porepressure (Pa): a negative quantity
    * @return derivative of effective saturation wrt porepressure
    */
   virtual Real dEffectiveSaturation_dP(Real pressure) const;
@@ -62,16 +62,13 @@ protected:
    * Default = 0 for constant saturation.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
-   * @param pressure porepressure (Pa)
+   * @param pressure porepressure (Pa): a negative quantity
    * @return second derivative of effective saturation wrt porepressure
    */
   virtual Real d2EffectiveSaturation_dP2(Real pressure) const;
 
-  /// Nodal value of porepressure of the zero phase (eg, the water phase)
-  const VariableValue & _phase0_porepressure_nodal;
-
-  /// Quadpoint value of porepressure of the zero phase (eg, the water phase)
-  const VariableValue & _phase0_porepressure_qp;
+  /// Nodal or quadpoint value of porepressure of the zero phase (eg, the water phase)
+  const VariableValue & _phase0_porepressure;
 
   /// Gradient(phase0_porepressure) at the qps
   const VariableGradient & _phase0_gradp_qp;
@@ -82,11 +79,8 @@ protected:
   /// PorousFlow variable number of the phase0 porepressure
   const unsigned int _p0var;
 
-  /// Nodal value of porepressure of the one phase (eg, the gas phase)
-  const VariableValue & _phase1_porepressure_nodal;
-
-  /// Quadpoint value of porepressure of the one phase (eg, the gas phase)
-  const VariableValue & _phase1_porepressure_qp;
+  /// Nodal or quadpoint value of porepressure of the one phase (eg, the gas phase)
+  const VariableValue & _phase1_porepressure;
 
   /// Gradient(phase1_porepressure) at the qps
   const VariableGradient & _phase1_gradp_qp;
@@ -96,9 +90,6 @@ protected:
 
   /// PorousFlow variable number of the phase1 porepressure
   const unsigned int _p1var;
-
-  /// PorousFlow variable number of the temperature
-  const unsigned int _tvar;
 };
 
-#endif //POROUSFLOW2PHASEPP_H
+#endif // POROUSFLOW2PHASEPP_H

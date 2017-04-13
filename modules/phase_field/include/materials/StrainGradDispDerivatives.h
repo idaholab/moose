@@ -13,7 +13,7 @@
 class RankTwoTensor;
 class StrainGradDispDerivatives;
 
-template<>
+template <>
 InputParameters validParams<StrainGradDispDerivatives>();
 
 class StrainGradDispDerivatives : public DerivativeMaterialInterface<Material>
@@ -30,4 +30,4 @@ protected:
   std::vector<MaterialProperty<RankTwoTensor> *> _dstrain;
 };
 
-#endif //STRAINGRADDISPDERIVATIVES_H
+#endif // STRAINGRADDISPDERIVATIVES_H

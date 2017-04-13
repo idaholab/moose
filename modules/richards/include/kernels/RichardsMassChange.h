@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSMASSCHANGE
 #define RICHARDSMASSCHANGE
 
@@ -15,7 +14,7 @@
 // Forward Declarations
 class RichardsMassChange;
 
-template<>
+template <>
 InputParameters validParams<RichardsMassChange>();
 
 /**
@@ -27,7 +26,6 @@ InputParameters validParams<RichardsMassChange>();
 class RichardsMassChange : public TimeDerivative
 {
 public:
-
   RichardsMassChange(const InputParameters & parameters);
 
 protected:
@@ -51,22 +49,22 @@ protected:
   bool _use_supg;
 
   /// fluid mass (or fluid masses in multiphase) at quadpoints
-  const MaterialProperty<std::vector<Real> > & _mass;
+  const MaterialProperty<std::vector<Real>> & _mass;
 
   /// d(fluid mass_i)/d(var_j)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dmass;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dmass;
 
   /// old value of fluid mass (or fluid masses in multiphase) at quadpoints
-  const MaterialProperty<std::vector<Real> > & _mass_old;
+  const MaterialProperty<std::vector<Real>> & _mass_old;
 
   /// tau_SUPG
-  const MaterialProperty<std::vector<RealVectorValue> > & _tauvel_SUPG;
+  const MaterialProperty<std::vector<RealVectorValue>> & _tauvel_SUPG;
 
   /// derivative of tau_SUPG wrt grad(variable)
-  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dtauvel_SUPG_dgradv;
+  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dtauvel_SUPG_dgradv;
 
   /// deriv of tau_SUPG wrt variable
-  const MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dtauvel_SUPG_dv;
+  const MaterialProperty<std::vector<std::vector<RealVectorValue>>> & _dtauvel_SUPG_dv;
 
   /**
    * Derivative of residual with respect to wrt_num Richards variable
@@ -74,7 +72,6 @@ protected:
    * @param wrt_num take the derivative of the residual wrt this Richards variable
    */
   Real computeQpJac(unsigned int wrt_num);
-
 };
 
-#endif //RICHARDSMASSCHANGE
+#endif // RICHARDSMASSCHANGE

@@ -10,25 +10,20 @@
 #include "EFANode.h"
 #include "EFAError.h"
 
-EFAVolumeNode::EFAVolumeNode(EFANode* node, double xi, double eta, double zeta) :
-    _node(node),
-    _xi(xi),
-    _eta(eta),
-    _zeta(zeta)
+EFAVolumeNode::EFAVolumeNode(EFANode * node, double xi, double eta, double zeta)
+  : _node(node), _xi(xi), _eta(eta), _zeta(zeta)
 {
 }
 
-EFAVolumeNode::EFAVolumeNode(const EFAVolumeNode & other_vol_node):
-  _node(other_vol_node._node),
-  _xi(other_vol_node._xi),
-  _eta(other_vol_node._eta),
-  _zeta(other_vol_node._zeta)
+EFAVolumeNode::EFAVolumeNode(const EFAVolumeNode & other_vol_node)
+  : _node(other_vol_node._node),
+    _xi(other_vol_node._xi),
+    _eta(other_vol_node._eta),
+    _zeta(other_vol_node._zeta)
 {
 }
 
-EFAVolumeNode::~EFAVolumeNode()
-{
-}
+EFAVolumeNode::~EFAVolumeNode() {}
 
 EFANode *
 EFAVolumeNode::getNode()
@@ -53,7 +48,7 @@ EFAVolumeNode::getParametricCoordinates(unsigned int i)
 }
 
 void
-EFAVolumeNode::switchNode(EFANode* new_node, EFANode* old_node)
+EFAVolumeNode::switchNode(EFANode * new_node, EFANode * old_node)
 {
   if (_node == old_node)
     _node = new_node;

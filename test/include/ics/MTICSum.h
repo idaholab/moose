@@ -18,7 +18,7 @@
 
 class MTICSum;
 
-template<>
+template <>
 InputParameters validParams<MTICSum>();
 
 /**
@@ -36,6 +36,5 @@ protected:
   const VariableValue & _var1;
   const VariableValue & _var2;
 };
-
 
 #endif /* MTICSUM_H */

@@ -21,11 +21,10 @@
 // Forward Declarations
 class RealControlParameterReporter;
 
-template<>
+template <>
 InputParameters validParams<RealControlParameterReporter>();
 
-class RealControlParameterReporter :
-  public GeneralPostprocessor
+class RealControlParameterReporter : public GeneralPostprocessor
 {
 public:
   RealControlParameterReporter(const InputParameters & parameters);
@@ -49,12 +48,10 @@ public:
   virtual Real getValue();
 
 private:
-
   // Pointer to the parameter to report, a pointer is used because the access
   // of the parameter value must occur in initialSetup because all objects
   // must be created prior to attempting to access the parameter objects
   const Real * _parameter;
-
 };
 
 #endif // REALCONTROLPARAMETERREPORTER_H

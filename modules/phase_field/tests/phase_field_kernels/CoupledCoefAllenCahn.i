@@ -71,7 +71,6 @@
 [Materials]
   [./mobility]
     type = DerivativeParsedMaterial
-    block = 0
     f_name  = L
     args = 'eta w'
     function = '(1.5-eta)^2+(1.5-w)^2'
@@ -79,7 +78,6 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = 'eta'
     function = 'eta^2 * (1-eta)^2'

@@ -17,44 +17,42 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<LStableDirk3>()
+template <>
+InputParameters
+validParams<LStableDirk3>()
 {
   InputParameters params = validParams<TimeIntegrator>();
   return params;
 }
 
-
-LStableDirk3::LStableDirk3(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+LStableDirk3::LStableDirk3(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _stage(1),
-    _gamma(-std::sqrt(2.)*std::cos(std::atan(std::sqrt(2.)/4.)/3.)/2. + std::sqrt(6.)*std::sin(std::atan(std::sqrt(2.)/4.)/3.)/2. + 1.)
+    _gamma(-std::sqrt(2.) * std::cos(std::atan(std::sqrt(2.) / 4.) / 3.) / 2. +
+           std::sqrt(6.) * std::sin(std::atan(std::sqrt(2.) / 4.) / 3.) / 2. + 1.)
 {
   // Name the stage residuals "residual_stage1", "residual_stage2", etc.
-  for (unsigned int stage=0; stage<3; ++stage)
+  for (unsigned int stage = 0; stage < 3; ++stage)
   {
     std::ostringstream oss;
-    oss << "residual_stage" << stage+1;
+    oss << "residual_stage" << stage + 1;
     _stage_residuals[stage] = &(_nl.addVector(oss.str(), false, GHOSTED));
   }
 
   // Initialize parameters
   _c[0] = _gamma;
-  _c[1] = .5*(1+_gamma);
+  _c[1] = .5 * (1 + _gamma);
   _c[2] = 1.0;
 
   _a[0][0] = _gamma;
-  _a[1][0] = .5*(1-_gamma);                          /**/ _a[1][1] = _gamma;
-  _a[2][0] = .25*(-6*_gamma*_gamma + 16*_gamma - 1); /**/ _a[2][1] = .25*( 6*_gamma*_gamma - 20*_gamma + 5); /**/ _a[2][2] = _gamma;
+  _a[1][0] = .5 * (1 - _gamma); /**/
+  _a[1][1] = _gamma;
+  _a[2][0] = .25 * (-6 * _gamma * _gamma + 16 * _gamma - 1); /**/
+  _a[2][1] = .25 * (6 * _gamma * _gamma - 20 * _gamma + 5);  /**/
+  _a[2][2] = _gamma;
 }
 
-
-
-LStableDirk3::~LStableDirk3()
-{
-}
-
-
+LStableDirk3::~LStableDirk3() {}
 
 void
 LStableDirk3::computeTimeDerivatives()
@@ -62,14 +60,12 @@ LStableDirk3::computeTimeDerivatives()
   // We are multiplying by the method coefficients in postStep(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 1. / _dt;
   _u_dot.close();
   _du_dot_du = 1. / _dt;
 }
-
-
 
 void
 LStableDirk3::solve()
@@ -92,14 +88,12 @@ LStableDirk3::solve()
     _console << "Stage " << _stage << "\n";
 
     // Set the time for this stage
-    _fe_problem.time() = time_old + _c[_stage-1]*_dt;
+    _fe_problem.time() = time_old + _c[_stage - 1] * _dt;
 
     // Do the solve
-    _fe_problem.getNonlinearSystem().sys().solve();
+    _fe_problem.getNonlinearSystemBase().system().solve();
   }
 }
-
-
 
 void
 LStableDirk3::postStep(NumericVector<Number> & residual)
@@ -121,11 +115,11 @@ LStableDirk3::postStep(NumericVector<Number> & residual)
 
   // Store this stage's non-time residual.  We are calling operator=
   // here, and that calls close().
-  *_stage_residuals[_stage-1] = _Re_non_time;
+  *_stage_residuals[_stage - 1] = _Re_non_time;
 
   // Build up the residual for this stage.
   residual.add(1., _Re_time);
   for (unsigned int j = 0; j < _stage; ++j)
-    residual.add(_a[_stage-1][j], *_stage_residuals[j]);
+    residual.add(_a[_stage - 1][j], *_stage_residuals[j]);
   residual.close();
 }

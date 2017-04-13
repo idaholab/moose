@@ -12,7 +12,7 @@
 
 class CHSplitConcentration;
 
-template<>
+template <>
 InputParameters validParams<CHSplitConcentration>();
 
 /**
@@ -29,14 +29,14 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
-  ///Mobility property name
+  /// Mobility property name
   MaterialPropertyName _mobility_name;
 
   const MaterialProperty<RealTensorValue> & _mobility;
   const MaterialProperty<RealTensorValue> & _dmobility_dc;
 
-  ///Chemical potential variable
-  unsigned int _mu_var;
+  /// Chemical potential variable
+  const unsigned int _mu_var;
   const VariableGradient & _grad_mu;
 };
 

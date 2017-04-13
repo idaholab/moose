@@ -6,21 +6,26 @@
 /****************************************************************/
 #include "NSMomentumPressureWeakStagnationBC.h"
 
-template<>
-InputParameters validParams<NSMomentumPressureWeakStagnationBC>()
+template <>
+InputParameters
+validParams<NSMomentumPressureWeakStagnationBC>()
 {
-  InputParameters params = validParams<NSWeakStagnationBC>();
-  params.addRequiredParam<unsigned int>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
+  InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("This class implements the pressure term of the momentum equation "
+                             "boundary integral for use in weak stagnation boundary conditions.");
+  params.addRequiredParam<unsigned int>(
+      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 
-NSMomentumPressureWeakStagnationBC::NSMomentumPressureWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBC(parameters),
-    _component(getParam<unsigned int>("component"))
+NSMomentumPressureWeakStagnationBC::NSMomentumPressureWeakStagnationBC(
+    const InputParameters & parameters)
+  : NSWeakStagnationBaseBC(parameters), _component(getParam<unsigned int>("component"))
 {
 }
 
-Real NSMomentumPressureWeakStagnationBC::computeQpResidual()
+Real
+NSMomentumPressureWeakStagnationBC::computeQpResidual()
 {
   // Compute stagnation values
   Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
@@ -30,13 +35,15 @@ Real NSMomentumPressureWeakStagnationBC::computeQpResidual()
   return (p_s * _normals[_qp](_component)) * _test[_i][_qp];
 }
 
-Real NSMomentumPressureWeakStagnationBC::computeQpJacobian()
+Real
+NSMomentumPressureWeakStagnationBC::computeQpJacobian()
 {
   // TODO
   return 0.0;
 }
 
-Real NSMomentumPressureWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
+Real
+NSMomentumPressureWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
   return 0.0;

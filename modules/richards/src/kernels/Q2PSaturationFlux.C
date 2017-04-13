@@ -5,30 +5,41 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "Q2PSaturationFlux.h"
-#include "Assembly.h"
 
-// libmesh includes
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
+
+// libMesh includes
 #include "libmesh/quadrature.h"
 
+// C++ includes
 #include <iostream>
 
-
-template<>
-InputParameters validParams<Q2PSaturationFlux>()
+template <>
+InputParameters
+validParams<Q2PSaturationFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<UserObjectName>("fluid_density", "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
-  params.addRequiredCoupledVar("porepressure_variable", "The variable representing the porepressure");
-  params.addRequiredParam<UserObjectName>("fluid_relperm", "A RichardsRelPerm UserObject (eg RichardsRelPermPowerGas) that defines the fluid relative permeability as a function of the saturation Variable.");
+  params.addRequiredParam<UserObjectName>(
+      "fluid_density",
+      "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
+  params.addRequiredCoupledVar("porepressure_variable",
+                               "The variable representing the porepressure");
+  params.addRequiredParam<UserObjectName>(
+      "fluid_relperm",
+      "A RichardsRelPerm UserObject (eg RichardsRelPermPowerGas) that defines the "
+      "fluid relative permeability as a function of the saturation Variable.");
   params.addRequiredParam<Real>("fluid_viscosity", "The fluid dynamic viscosity");
-  params.addClassDescription("Flux according to Darcy-Richards flow.  The Variable of this Kernel must be the saturation");
+  params.addClassDescription(
+      "Flux according to Darcy-Richards flow.  The Variable of this Kernel must be the saturation");
   return params;
 }
 
-Q2PSaturationFlux::Q2PSaturationFlux(const InputParameters & parameters) :
-    Kernel(parameters),
+Q2PSaturationFlux::Q2PSaturationFlux(const InputParameters & parameters)
+  : Kernel(parameters),
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _pp(coupledValue("porepressure_variable")),
     _grad_pp(coupledGradient("porepressure_variable")),
@@ -45,7 +56,6 @@ Q2PSaturationFlux::Q2PSaturationFlux(const InputParameters & parameters) :
 {
 }
 
-
 void
 Q2PSaturationFlux::prepareNodalValues()
 {
@@ -60,29 +70,29 @@ Q2PSaturationFlux::prepareNodalValues()
   _dmobility_dp.resize(_num_nodes);
   _dmobility_ds.resize(_num_nodes);
 
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
-    density = _density.density(_pp_nodal[nodenum]); // fluid density at the node
+    density = _density.density(_pp_nodal[nodenum]);      // fluid density at the node
     ddensity_dp = _density.ddensity(_pp_nodal[nodenum]); // d(fluid density)/dP at the node
-    relperm = _relperm.relperm(_var.nodalSln()[nodenum]); // relative permeability of the fluid at node nodenum
+    relperm = _relperm.relperm(
+        _var.nodalSln()[nodenum]); // relative permeability of the fluid at node nodenum
     drelperm_ds = _relperm.drelperm(_var.nodalSln()[nodenum]); // d(relperm)/dsat
 
     // calculate the mobility and its derivatives wrt P and S
-    _mobility[nodenum] = density*relperm/_viscosity;
-    _dmobility_dp[nodenum] = ddensity_dp*relperm/_viscosity;
-    _dmobility_ds[nodenum] = density*drelperm_ds/_viscosity;
+    _mobility[nodenum] = density * relperm / _viscosity;
+    _dmobility_dp[nodenum] = ddensity_dp * relperm / _viscosity;
+    _dmobility_ds[nodenum] = density * drelperm_ds / _viscosity;
   }
 }
-
 
 Real
 Q2PSaturationFlux::computeQpResidual()
 {
   // note this is not the complete residual:
   // the upwind mobility parts get added in computeResidual
-  return   _grad_test[_i][_qp]*(_permeability[_qp]*(_grad_pp[_qp] - _density.density(_pp[_qp])*_gravity[_qp]));
+  return _grad_test[_i][_qp] *
+         (_permeability[_qp] * (_grad_pp[_qp] - _density.density(_pp[_qp]) * _gravity[_qp]));
 }
-
 
 void
 Q2PSaturationFlux::computeResidual()
@@ -90,13 +100,11 @@ Q2PSaturationFlux::computeResidual()
   upwind(true, false, 0);
 }
 
-
 void
 Q2PSaturationFlux::computeJacobian()
 {
   upwind(false, true, _var.number());
 }
-
 
 void
 Q2PSaturationFlux::computeOffDiagJacobian(unsigned int jvar)
@@ -104,20 +112,18 @@ Q2PSaturationFlux::computeOffDiagJacobian(unsigned int jvar)
   upwind(false, true, jvar);
 }
 
-
-
 Real
 Q2PSaturationFlux::computeQpJac(unsigned int dvar)
 {
   // this is just the derivative of the flux WITHOUT the upstream mobility terms
   // Those terms get added in during computeJacobian()
   if (dvar == _pp_var)
-    return _grad_test[_i][_qp]*(_permeability[_qp]*(_grad_phi[_j][_qp] - _density.ddensity(_pp[_qp])*_gravity[_qp]*_phi[_j][_qp]));
+    return _grad_test[_i][_qp] *
+           (_permeability[_qp] *
+            (_grad_phi[_j][_qp] - _density.ddensity(_pp[_qp]) * _gravity[_qp] * _phi[_j][_qp]));
   else
     return 0;
 }
-
-
 
 void
 Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
@@ -139,7 +145,6 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   if (compute_jac)
   {
@@ -151,7 +156,6 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJac(jvar);
   }
-
 
   // Now perform the upwinding by multiplying the residuals at the
   // upstream nodes by their mobilities
@@ -176,7 +180,6 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
   // flowing out of node i must be the sum of the masses flowing
   // into the other nodes.
 
-
   // FIRST:
   // this is a dirty way of getting around precision loss problems
   // and problems at steadystate where upwinding oscillates from
@@ -185,7 +188,7 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
   // in cosflow it is necessary.
   // I will code a better algorithm if necessary
   bool reached_steady = true;
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     if (_local_re(nodenum) >= 1E-20)
     {
@@ -210,9 +213,8 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
     dtotal_in.assign(_num_nodes, 0);
   }
 
-
   // PERFORM THE UPWINDING!
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     if (_local_re(nodenum) >= 0 || reached_steady) // upstream node
     {
@@ -222,10 +224,10 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
           _local_ke(nodenum, _j) *= _mobility[nodenum];
         if (jvar == _var.number())
           // deriv wrt S
-          _local_ke(nodenum, nodenum) += _dmobility_ds[nodenum]*_local_re(nodenum);
+          _local_ke(nodenum, nodenum) += _dmobility_ds[nodenum] * _local_re(nodenum);
         else
           // deriv wrt P
-          _local_ke(nodenum, nodenum) += _dmobility_dp[nodenum]*_local_re(nodenum);
+          _local_ke(nodenum, nodenum) += _dmobility_dp[nodenum] * _local_re(nodenum);
         for (_j = 0; _j < _phi.size(); _j++)
           dtotal_mass_out[_j] += _local_ke(nodenum, _j);
       }
@@ -241,23 +243,22 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
     }
   }
 
-
   // CONSERVE MASS
   // proportion the total_mass_out mass to the inflow nodes, weighting by their _local_re values
   if (!reached_steady)
-    for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+    for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
       if (_local_re(nodenum) < 0)
       {
         if (compute_jac)
           for (_j = 0; _j < _phi.size(); _j++)
           {
-            _local_ke(nodenum, _j) *= total_mass_out/total_in;
-            _local_ke(nodenum, _j) += _local_re(nodenum)*(dtotal_mass_out[_j]/total_in - dtotal_in[_j]*total_mass_out/total_in/total_in);
+            _local_ke(nodenum, _j) *= total_mass_out / total_in;
+            _local_ke(nodenum, _j) +=
+                _local_re(nodenum) * (dtotal_mass_out[_j] / total_in -
+                                      dtotal_in[_j] * total_mass_out / total_in / total_in);
           }
-        _local_re(nodenum) *= total_mass_out/total_in;
+        _local_re(nodenum) *= total_mass_out / total_in;
       }
-
-
 
   // ADD RESULTS TO RESIDUAL OR JACOBIAN
   if (compute_res)
@@ -281,13 +282,11 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
       const unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i,i);
+        diag(i) = _local_ke(i, i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }
-
 }
-

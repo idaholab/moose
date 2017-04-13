@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class PoroMechanicsCoupling;
 
-template<>
+template <>
 InputParameters validParams<PoroMechanicsCoupling>();
 
 /**
@@ -21,19 +21,16 @@ InputParameters validParams<PoroMechanicsCoupling>();
 class PoroMechanicsCoupling : public Kernel
 {
 public:
-
   PoroMechanicsCoupling(const InputParameters & parameters);
 
- protected:
-
+protected:
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
- private:
-
+private:
   /// Biot coefficient
   const MaterialProperty<Real> & _coefficient;
 
@@ -44,4 +41,4 @@ public:
   unsigned int _component;
 };
 
-#endif //POROMECHANICSCOUPLING_H
+#endif // POROMECHANICSCOUPLING_H

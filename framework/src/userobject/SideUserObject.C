@@ -17,8 +17,9 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<SideUserObject>()
+template <>
+InputParameters
+validParams<SideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BoundaryRestrictableRequired>();
@@ -26,9 +27,9 @@ InputParameters validParams<SideUserObject>()
   return params;
 }
 
-SideUserObject::SideUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
-    BoundaryRestrictableRequired(parameters),
+SideUserObject::SideUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
+    BoundaryRestrictableRequired(parameters, false), // false for applying to sidesets
     MaterialPropertyInterface(this, boundaryIDs()),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
@@ -49,6 +50,6 @@ SideUserObject::SideUserObject(const InputParameters & parameters) :
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }

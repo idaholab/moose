@@ -35,10 +35,7 @@ public:
 
   virtual ~SymmIsotropicElasticityTensor() {}
 
-  void unsetConstants()
-  {
-    _lambda_set = _mu_set = _E_set = _nu_set = _k_set = false;
-  }
+  void unsetConstants() { _lambda_set = _mu_set = _E_set = _nu_set = _k_set = false; }
 
   /**
    * Set the first Lame Coefficient.
@@ -90,12 +87,12 @@ public:
                          const RealGradient & test,
                          const RealGradient & phi) const;
 
-  virtual void multiply( const SymmTensor & x, SymmTensor & b ) const;
+  virtual void multiply(const SymmTensor & x, SymmTensor & b) const;
 
-  virtual void adjustForCracking( const RealVectorValue & crack_flags );
+  virtual void adjustForCracking(const RealVectorValue & crack_flags);
+  virtual void adjustForCrackingWithShearRetention(const RealVectorValue & crack_flags);
 
 protected:
-
   bool _lambda_set, _mu_set, _E_set, _nu_set, _k_set;
 
   Real _lambda, _mu, _E, _nu, _k;
@@ -112,7 +109,6 @@ protected:
    * These are based on Michael Tonks's's notes
    */
   void calculateLameCoefficients();
-
 };
 
-#endif //ISOTROPICELASTICITYTENSOR_H
+#endif // ISOTROPICELASTICITYTENSOR_H

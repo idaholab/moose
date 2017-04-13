@@ -1,0 +1,7 @@
+[Tests]
+  [./ExecuteSettings]
+    type = PythonUnitTest
+    input = test_ExecuteSettings.py
+    display_required = True    
+  [../]
+[]

@@ -14,21 +14,17 @@
 
 #include "UniqueIDAux.h"
 
-template<>
-InputParameters validParams<UniqueIDAux>()
+template <>
+InputParameters
+validParams<UniqueIDAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-UniqueIDAux::UniqueIDAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
-{
-}
+UniqueIDAux::UniqueIDAux(const InputParameters & parameters) : AuxKernel(parameters) {}
 
-UniqueIDAux::~UniqueIDAux()
-{
-}
+UniqueIDAux::~UniqueIDAux() {}
 
 Real
 UniqueIDAux::computeValue()
@@ -41,4 +37,3 @@ UniqueIDAux::computeValue()
 #endif
   return 0;
 }
-

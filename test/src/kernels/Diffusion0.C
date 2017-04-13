@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "Diffusion0.h"
 
-template<>
-InputParameters validParams<Diffusion0>()
+template <>
+InputParameters
+validParams<Diffusion0>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -25,8 +26,7 @@ InputParameters validParams<Diffusion0>()
   return params;
 }
 
-Diffusion0::Diffusion0(const InputParameters & parameters) :
-    Kernel(parameters)
+Diffusion0::Diffusion0(const InputParameters & parameters) : Kernel(parameters)
 {
   _Ak = getParam<Real>("Ak");
   _Bk = getParam<Real>("Bk");

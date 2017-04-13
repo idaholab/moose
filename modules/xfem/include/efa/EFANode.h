@@ -13,7 +13,6 @@
 class EFANode
 {
 public:
-
   enum N_CATEGORY
   {
     N_CATEGORY_PERMANENT,
@@ -22,22 +21,19 @@ public:
     N_CATEGORY_LOCAL_INDEX
   };
 
-  EFANode(unsigned int nid, N_CATEGORY ncat, EFANode* nparent=NULL);
+  EFANode(unsigned int nid, N_CATEGORY ncat, EFANode * nparent = NULL);
 
 private:
-
   N_CATEGORY _category;
   unsigned int _id;
-  EFANode* _parent;
+  EFANode * _parent;
 
 public:
-
   std::string idCatString();
   unsigned int id() const;
   N_CATEGORY category() const;
-  EFANode* parent() const;
+  EFANode * parent() const;
   void removeParent();
 };
-
 
 #endif

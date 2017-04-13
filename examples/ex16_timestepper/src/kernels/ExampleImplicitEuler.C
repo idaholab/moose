@@ -16,26 +16,27 @@
 
 #include "Material.h"
 
-template<>
-InputParameters validParams<ExampleImplicitEuler>()
+template <>
+InputParameters
+validParams<ExampleImplicitEuler>()
 {
   InputParameters params = validParams<TimeDerivative>();
   return params;
 }
 
-ExampleImplicitEuler::ExampleImplicitEuler(const InputParameters & parameters) :
-    TimeDerivative(parameters),
-    _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
-{}
+ExampleImplicitEuler::ExampleImplicitEuler(const InputParameters & parameters)
+  : TimeDerivative(parameters), _time_coefficient(getMaterialProperty<Real>("time_coefficient"))
+{
+}
 
 Real
 ExampleImplicitEuler::computeQpResidual()
 {
-  return _time_coefficient[_qp]*TimeDerivative::computeQpResidual();
+  return _time_coefficient[_qp] * TimeDerivative::computeQpResidual();
 }
 
 Real
 ExampleImplicitEuler::computeQpJacobian()
 {
-  return _time_coefficient[_qp]*TimeDerivative::computeQpJacobian();
+  return _time_coefficient[_qp] * TimeDerivative::computeQpJacobian();
 }

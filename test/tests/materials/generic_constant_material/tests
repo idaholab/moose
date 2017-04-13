@@ -4,4 +4,14 @@
     input = 'generic_constant_material_test.i'
     exodiff = 'out.e'
   [../]
+  # Run this test after the main test, setting the constant_on_elem
+  # flag to true for one of the Materials.  There should be no
+  # difference between this version and the original gold file.
+  [./test_constant_on_elem]
+    type = 'Exodiff'
+    input = 'generic_constant_material_test.i'
+    exodiff = 'out.e'
+    prereq = test
+    cli_args = 'Materials/dm1/constant_on_elem=true'
+  [../]
 []

@@ -11,9 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE Includes
 #include "ExampleApp.h"
-#include "Moose.h"
-#include "Factory.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
@@ -22,18 +22,15 @@
 #include "ExampleConvection.h"
 #include "ExampleMaterial.h"
 
-template<>
-InputParameters validParams<ExampleApp>()
+template <>
+InputParameters
+validParams<ExampleApp>()
 {
   InputParameters params = validParams<MooseApp>();
-
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-ExampleApp::ExampleApp(InputParameters parameters) :
-    MooseApp(parameters)
+ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -42,10 +39,6 @@ ExampleApp::ExampleApp(InputParameters parameters) :
 
   Moose::associateSyntax(_syntax, _action_factory);
   ExampleApp::associateSyntax(_syntax, _action_factory);
-}
-
-ExampleApp::~ExampleApp()
-{
 }
 
 void
@@ -67,6 +60,6 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax& /*syntax*/, ActionFactory & /*action_factory*/)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

@@ -60,7 +60,6 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 1.0'
-    block = 0
   [../]
 []
 

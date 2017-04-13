@@ -1,0 +1,13 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:            0.05 @ t6
+
+GLOBAL VARIABLES relative 1.e-6 floor 0.0
+	vel_x_L2_error
+	vel_y_L2_error
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-12
+	p      absolute 1.e-9
+	vel_x
+	vel_y
+

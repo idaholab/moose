@@ -1,8 +1,35 @@
 [Tests]
-  [./findvalueonline]
+  [./find_value_on_line]
     type = 'CSVDiff'
     input = 'findvalueonline.i'
     csvdiff = 'findvalueonline_out.csv'
-    rel_err = 1.0E-5
+  [../]
+
+  [./below_min]
+    type = 'RunException'
+    input = 'findvalueonline.i'
+    cli_args = 'Postprocessors/pos/target=-2 Outputs/csv=false'
+    expect_err = "Target value \S+ is less than the minimum sampled value"
+  [../]
+
+  [./above_max]
+    type = 'RunException'
+    input = 'findvalueonline.i'
+    cli_args = 'Postprocessors/pos/target=1.1 Outputs/csv=false'
+    expect_err = "Target value \S+ is greater than the maximum sampled value"
+  [../]
+
+  [./line_out_of_bounds]
+    type = 'RunException'
+    input = 'findvalueonline.i'
+    cli_args = "Postprocessors/pos/end_point='11 0 0' Outputs/csv=false"
+    expect_err = "No element found at the current search point."
+  [../]
+
+  [./depth_exceeded]
+    type = 'RunException'
+    input = 'findvalueonline.i'
+    cli_args = 'Postprocessors/pos/depth=20 Outputs/csv=false'
+    expect_err = "Target value \S+ not found on line within tolerance"
   [../]
 []

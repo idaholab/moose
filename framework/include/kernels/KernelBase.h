@@ -23,6 +23,7 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "RandomInterface.h"
 #include "GeometricSearchInterface.h"
@@ -36,28 +37,28 @@ class KernelBase;
 class Assembly;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<KernelBase>();
 
 /**
  * This is the common base class for the two main
  * kernel types implemented in MOOSE, EigenKernel and Kernel.
  */
-class KernelBase :
-  public MooseObject,
-  public BlockRestrictable,
-  public SetupInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public MaterialPropertyInterface,
-  public RandomInterface,
-  protected GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class KernelBase : public MooseObject,
+                   public BlockRestrictable,
+                   public SetupInterface,
+                   public CoupleableMooseVariableDependencyIntermediateInterface,
+                   public FunctionInterface,
+                   public UserObjectInterface,
+                   public TransientInterface,
+                   public PostprocessorInterface,
+                   public VectorPostprocessorInterface,
+                   public MaterialPropertyInterface,
+                   public RandomInterface,
+                   protected GeometricSearchInterface,
+                   public Restartable,
+                   public ZeroInterface,
+                   public MeshChangedInterface
 {
 public:
   KernelBase(const InputParameters & parameters);
@@ -79,18 +80,32 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) = 0;
 
+  /**
+   * Compute this Kernel's contribution to the diagonal Jacobian entries
+   * corresponding to nonlocal dofs of the variable
+   */
+  virtual void computeNonlocalJacobian() {}
+
+  /**
+   * Computes d-residual / d-jvar... corresponding to nonlocal dofs of the jvar
+   * and stores the result in nonlocal ke
+   */
+  virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
+
   /// Returns the variable number that this Kernel operates on.
   MooseVariable & variable();
 
   /// Returns a reference to the SubProblem for which this Kernel is active
   SubProblem & subProblem();
 
+  virtual bool isEigenKernel() const { return _eigen_kernel; }
+
 protected:
   /// Reference to this kernel's SubProblem
   SubProblem & _subproblem;
 
-  /// Reference to this kernel's FEProblem
-  FEProblem & _fe_problem;
+  /// Reference to this kernel's FEProblemBase
+  FEProblemBase & _fe_problem;
 
   /// Reference to the EquationSystem object
   SystemBase & _sys;
@@ -107,7 +122,7 @@ protected:
   /// Reference to this Kernel's mesh object
   MooseMesh & _mesh;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /// Volume of the current element
   const Real & _current_elem_volume;
@@ -116,10 +131,10 @@ protected:
   unsigned int _qp;
 
   /// The physical location of the element's quadrature Points, indexed by _qp
-  const MooseArray< Point > & _q_point;
+  const MooseArray<Point> & _q_point;
 
   /// active quadrature rule
-  QBase * & _qrule;
+  QBase *& _qrule;
 
   /// The current quadrature point weight value
   const MooseArray<Real> & _JxW;
@@ -153,13 +168,15 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable*> _save_in;
+  std::vector<MooseVariable *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable*> _diag_save_in;
+  std::vector<MooseVariable *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
+
+  bool _eigen_kernel;
 };
 
 #endif /* KERNELBASE_H */

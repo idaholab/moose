@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "EulerAngleFileReader.h"
 
-template<>
-InputParameters validParams<EulerAngleFileReader>()
+template <>
+InputParameters
+validParams<EulerAngleFileReader>()
 {
   InputParameters params = validParams<EulerAngleProvider>();
   params.addClassDescription("Read Euler angle data from a file and provide it to other objects.");
@@ -15,9 +16,8 @@ InputParameters validParams<EulerAngleFileReader>()
   return params;
 }
 
-EulerAngleFileReader::EulerAngleFileReader(const InputParameters & params) :
-    EulerAngleProvider(params),
-    _file_name(getParam<FileName>("file_name"))
+EulerAngleFileReader::EulerAngleFileReader(const InputParameters & params)
+  : EulerAngleProvider(params), _file_name(getParam<FileName>("file_name"))
 {
   readFile();
 }
@@ -41,7 +41,7 @@ EulerAngleFileReader::readFile()
   // Read in Euler angles from _file_name
   std::ifstream inFile(_file_name.c_str());
   if (!inFile)
-    mooseError("Can't open " << _file_name);
+    mooseError("Can't open ", _file_name);
 
   // Skip first 4 lines
   for (unsigned int i = 0; i < 4; ++i)

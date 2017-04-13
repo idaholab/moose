@@ -9,140 +9,70 @@
 #define POROUSFLOWBRINE_H
 
 #include "PorousFlowFluidPropertiesBase.h"
-#include "PorousFlowWater.h"
+#include "BrineFluidProperties.h"
 
 class PorousFlowBrine;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowBrine>();
 
 /**
  * Fluid properties of Brine.
- * Provides density, viscosity, derivatives wrt pressure and temperature
+ * Provides density, viscosity, derivatives wrt pressure and temperature at the quadpoints or nodes
  */
-class PorousFlowBrine : public PorousFlowWater
+class PorousFlowBrine : public PorousFlowFluidPropertiesBase
 {
 public:
   PorousFlowBrine(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
-  virtual void computeQpProperties();
+  /// Fluid phase density at the qps or nodes
+  MaterialProperty<Real> & _density;
 
-  /**
-   * Density of brine.
-   * From Driesner, The system H2o-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
-   * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
-   *
-   * @param pressure brine pressure (Pa)
-   * @param temperature brine temperature (C)
-   * @param xnacl salt mass fraction (-)
-   * @return water density (kg/m^3)
-   */
-  Real density(Real pressure, Real temperature, Real xnacl) const;
+  /// Derivative of fluid density wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _ddensity_dp;
 
-  /**
-   * Derivative of brine density with respect to presure.
-   *
-   * @param pressure brine pressure (Pa)
-   * @param temperature brine temperature (C)
-   * @param xnacl salt mass fraction (-)
-   * @return derivative of brine density wrt pressure (kg/m^3/Pa)
-   */
-  Real dDensity_dP(Real pressure, Real temperature, Real xnacl) const;
+  /// Derivative of fluid density wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _ddensity_dT;
 
-  /**
-   * Derivative of brine density with respect to temperature
-   *
-   * @param pressure brine pressure (Pa)
-   * @param temperature brine temperature (C)
-   * @param xnacl salt mass fraction (-)
-   * @return derivative of brine density wrt temperature (kg/m^3/C)
-   */
-  Real dDensity_dT(Real pressure, Real temperature, Real xnacl) const;
+  /// Fluid phase viscosity at the nodes or qps
+  MaterialProperty<Real> & _viscosity;
 
-  /**
-   * Viscosity of brine.
-   * From Phillips et al, A technical databook for geothermal energy utilization,
-   * LbL-12810 (1981).
-   *
-   * @param temperature brine temperature (C)
-   * @param water_density water density (kg/m^3)
-   * @param xnacl salt mass fraction (-)
-   * @return viscosity (Pa.s)
-   */
-  Real viscosity(Real temperature, Real water_density, Real xnacl) const;
+  /// Derivative of fluid phase viscosity wrt pressure at the nodes or qps
+  MaterialProperty<Real> & _dviscosity_dp;
 
-  /**
-   * Derivative of viscosity with respect to density. Derived from
-   * Eq. (10) from Release on the IAPWS Formulation 2008 for the
-   * Viscosity of Ordinary Brine Substance.
-   *
-   * @param temperature water temperature (C)
-   * @param water_density water density (kg/m^3)
-   * @param xnacl salt mass fraction (-)
-   * @return derivative of water viscosity wrt density
-   */
-  Real dViscosity_dT(Real temperature, Real water_density, Real xnacl) const;
+  /// Derivative of fluid phase viscosity wrt temperature at the nodes or qps
+  MaterialProperty<Real> & _dviscosity_dT;
 
-  /**
-   * Brine vapour pressure
-   * From Haas, Physical properties of the coexisting phases and thermochemical
-   * properties of the H20 component in boiling NaCl solutions, Geological Survey
-   * Bulletin, 1421-A (1976).
-   *
-   * @param temperature brine temperature (C)
-   * @param xnacl salt mass fraction (-)
-   * @return brine vapour pressure (Pa)
-   */
-  Real pSat(Real temperature, Real xnacl) const;
+  /// Fluid phase internal_energy at the qps or nodes
+  MaterialProperty<Real> & _internal_energy;
 
-  /**
-   * Derivative of brine viscosity with respect to density
-   *
-   * @param temperature brine temperature (C)
-   * @param water_density water density (kg/m^3)
-   * @param xnacl salt mass fraction (-)
-   * @return derivative of brine viscosity wrt density
-   */
-  Real dViscosity_dDensity(Real temperature, Real water_density, Real xnacl) const;
+  /// Derivative of fluid internal_energy wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _dinternal_energy_dp;
 
-  /**
-   * Density of halite (solid NaCl)
-   * From Driesner, The system H2o-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
-   * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
-   *
-   * @param pressure pressure (Pa)
-   * @param temperature halite temperature (C)
-   * @return density (kg/m^3)
-   */
-  Real haliteDensity(Real pressure, Real temperature) const;
+  /// Derivative of fluid internal_energy wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _dinternal_energy_dT;
 
-  /**
-   * Halite solubility
-   * Originally from Potter et al., A new method for determining the solubility
-   * of salts in aqueous solutions at elevated temperatures, J. Res. U.S. Geol.
-   * Surv., 5, 389-395 (1977). Equation describing halite solubility is repeated
-   * in Chou, Phase relations in the system NaCI-KCI-H20. III: Solubilities of
-   * halite in vapor-saturated liquids above 445°C and redetermination of phase
-   * equilibrium properties in the system NaCI-HzO to 1000°C and 1500 bars,
-   * Geochimica et Cosmochimica Acta 51, 1965-1975 (1987).
-   *
-   * @param temperature temperature (C)
-   * @return halite solubility (kg/kg)
-   *
-   * This correlation is valid for 0 <= T << 424.5 C
-   */
-  Real haliteSolubility(Real temperature) const;
+  /// Fluid phase enthalpy at the qps or nodes
+  MaterialProperty<Real> & _enthalpy;
 
-  /// Molar mass of NaCl
-  const Real _Mnacl;
+  /// Derivative of fluid enthalpy wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _denthalpy_dp;
 
-  /// Mass fraction of NaCl
-  const Real _xnacl;
+  /// Derivative of fluid enthalpy wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _denthalpy_dT;
+
+  /// Brine Fluid properties UserObject
+  const BrineFluidProperties * _brine_fp;
+
+  /// Water Fluid properties UserObject
+  const SinglePhaseFluidPropertiesPT * _water_fp;
+
+  /// NaCl mass fraction at the qps or nodes
+  const VariableValue & _xnacl;
 };
 
-#endif //POROUSFLOWBRINE_H
+#endif // POROUSFLOWBRINE_H

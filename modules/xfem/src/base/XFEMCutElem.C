@@ -17,20 +17,15 @@
 #include "EFANode.h"
 #include "EFAElement.h"
 
-XFEMCutElem::XFEMCutElem(Elem* elem, unsigned int n_qpoints) :
-    _n_nodes(elem->n_nodes()),
-    _n_qpoints(n_qpoints),
-    _nodes(_n_nodes,NULL),
-    _have_weights(false)
+XFEMCutElem::XFEMCutElem(Elem * elem, unsigned int n_qpoints)
+  : _n_nodes(elem->n_nodes()), _n_qpoints(n_qpoints), _nodes(_n_nodes, NULL), _have_weights(false)
 {
   for (unsigned int i = 0; i < _n_nodes; ++i)
     _nodes[i] = elem->get_node(i);
   _elem_volume = elem->volume();
 }
 
-XFEMCutElem::~XFEMCutElem()
-{
-}
+XFEMCutElem::~XFEMCutElem() {}
 
 Real
 XFEMCutElem::getPhysicalVolumeFraction() const
@@ -39,18 +34,23 @@ XFEMCutElem::getPhysicalVolumeFraction() const
 }
 
 void
-XFEMCutElem::getWeightMultipliers(MooseArray<Real> & weights, QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, const MooseArray<Point> & q_points)
+XFEMCutElem::getWeightMultipliers(MooseArray<Real> & weights,
+                                  QBase * qrule,
+                                  Xfem::XFEM_QRULE xfem_qrule,
+                                  const MooseArray<Point> & q_points)
 {
   if (!_have_weights)
     computeXFEMWeights(qrule, xfem_qrule, q_points);
 
   weights.resize(_new_weights.size());
-  for (unsigned int qp=0; qp<_new_weights.size(); ++qp)
+  for (unsigned int qp = 0; qp < _new_weights.size(); ++qp)
     weights[qp] = _new_weights[qp];
 }
 
 void
-XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, const MooseArray<Point> &q_points)
+XFEMCutElem::computeXFEMWeights(QBase * qrule,
+                                Xfem::XFEM_QRULE xfem_qrule,
+                                const MooseArray<Point> & q_points)
 {
   _new_weights.clear();
 
@@ -63,25 +63,41 @@ XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, cons
       computePhysicalVolumeFraction();
       Real volfrac = getPhysicalVolumeFraction();
       for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
-      {
         _new_weights[qp] = volfrac;
-      }
       break;
     }
     case Xfem::MOMENT_FITTING:
     {
-      //These are the coordinates in parametric coordinates
+      // These are the coordinates in parametric coordinates
       _qp_points = qrule->get_points();
       _qp_weights = qrule->get_weights();
 
       computeMomentFittingWeights();
-      // As a temporary solution for negative terms on the Jacobian diagonal,
-      // set the weights for integration points to zero if they are negative.
-      // TODO: A better solution for this is in the works.
-      for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
+
+      // Blend weights from moment fitting and volume fraction to avoid negative weights
+      Real alpha = 1.0;
+      if (*std::min_element(_new_weights.begin(), _new_weights.end()) < 0.0)
       {
-        if (_new_weights[qp] < 0)
-          _new_weights[qp] = 0;
+        // One or more of the weights computed by moment fitting is negative.
+        // Blend moment and volume fraction weights to keep them nonnegative.
+        // Find the largest value of alpha that will keep all of the weights nonnegative.
+        for (unsigned int i = 0; i < _n_qpoints; ++i)
+        {
+          const Real denominator = _physical_volfrac - _new_weights[i];
+          if (denominator > 0.0) // Negative values would give a negative value for alpha, which
+                                 // must be between 0 and 1.
+          {
+            const Real alpha_i = _physical_volfrac / denominator;
+            if (alpha_i < alpha)
+              alpha = alpha_i;
+          }
+        }
+        for (unsigned int i = 0; i < _n_qpoints; ++i)
+        {
+          _new_weights[i] = alpha * _new_weights[i] + (1.0 - alpha) * _physical_volfrac;
+          if (_new_weights[i] < 0.0) // We can end up with small (roundoff) negative weights
+            _new_weights[i] = 0.0;
+        }
       }
       break;
     }
@@ -90,7 +106,7 @@ XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, cons
       bool nonzero = false;
       for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
       {
-        //q_points contains quadrature point locations in physical coordinates
+        // q_points contains quadrature point locations in physical coordinates
         if (isPointPhysical(q_points[qp]))
         {
           nonzero = true;
@@ -101,9 +117,9 @@ XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, cons
       }
       if (!nonzero)
       {
-        //Set the weights to a small value (1e-3) to avoid having DOFs
-        //with zeros on the diagonal, which occurs for nodes that are
-        //connected to no physical material.
+        // Set the weights to a small value (1e-3) to avoid having DOFs
+        // with zeros on the diagonal, which occurs for nodes that are
+        // connected to no physical material.
         for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
           _new_weights[qp] = 1e-3;
       }
@@ -126,7 +142,7 @@ XFEMCutElem::isPointPhysical(const Point & p) const
     Point origin = getCutPlaneOrigin(plane_id);
     Point normal = getCutPlaneNormal(plane_id);
     Point origin2qp = p - origin;
-    if (origin2qp*normal > 0.0)
+    if (origin2qp * normal > 0.0)
     {
       physical_flag = false; // Point outside pysical domain
       break;
@@ -134,4 +150,3 @@ XFEMCutElem::isPointPhysical(const Point & p) const
   }
   return physical_flag;
 }
-

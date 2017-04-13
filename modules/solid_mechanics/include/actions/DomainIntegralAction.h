@@ -7,13 +7,17 @@
 #ifndef DOMAININTEGRALACTION_H
 #define DOMAININTEGRALACTION_H
 
+// MOOSE includes
 #include "Action.h"
+#include "MooseEnum.h"
 #include "MooseTypes.h"
+
+// libMesh includes
 #include "libmesh/vector_value.h"
 
 class DomainIntegralAction;
 
-template<>
+template <>
 InputParameters validParams<DomainIntegralAction>();
 
 class DomainIntegralAction : public Action
@@ -24,6 +28,7 @@ public:
   ~DomainIntegralAction();
 
   virtual void act();
+
 protected:
   enum INTEGRAL
   {
@@ -70,6 +75,7 @@ protected:
   VariableName _disp_x;
   VariableName _disp_y;
   VariableName _disp_z;
+  VariableName _temp;
   bool _convert_J_to_K;
   bool _has_symmetry_plane;
   unsigned int _symmetry_plane;
@@ -80,4 +86,4 @@ protected:
   std::vector<unsigned int> _ring_vec;
 };
 
-#endif //DOMAININTEGRALACTION_H
+#endif // DOMAININTEGRALACTION_H

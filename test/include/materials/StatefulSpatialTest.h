@@ -16,11 +16,10 @@
 
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class StatefulSpatialTest;
 
-template<>
+template <>
 InputParameters validParams<StatefulSpatialTest>();
 
 /**
@@ -36,7 +35,7 @@ protected:
   virtual void initQpStatefulProperties();
 
   MaterialProperty<Real> & _thermal_conductivity;
-  MaterialProperty<Real> & _thermal_conductivity_old;
+  const MaterialProperty<Real> & _thermal_conductivity_old;
 };
 
-#endif //STATEFULSPATIALTEST_H
+#endif // STATEFULSPATIALTEST_H

@@ -20,7 +20,7 @@
 class PeriodicDistanceAux;
 class GeneratedMesh;
 
-template<>
+template <>
 InputParameters validParams<PeriodicDistanceAux>();
 
 /**
@@ -38,6 +38,5 @@ protected:
   /// A point of interest in the domain
   Point _point;
 };
-
 
 #endif /* PERIODICDISTANCEAUX_H */

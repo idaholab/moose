@@ -11,9 +11,8 @@
 
 class AddPrimarySpeciesAction;
 
-template<>
+template <>
 InputParameters validParams<AddPrimarySpeciesAction>();
-
 
 class AddPrimarySpeciesAction : public Action
 {
@@ -22,6 +21,8 @@ public:
 
   virtual void act();
 
+private:
+  const std::vector<NonlinearVariableName> _vars;
 };
 
 #endif // ADDPRIMARYSPECIESACTION_H

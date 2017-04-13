@@ -16,12 +16,12 @@
 #define MOOSEVARIABLESCALAR_H
 
 #include "MooseVariableBase.h"
-#include "ParallelUniqueId.h"
 
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -30,12 +30,16 @@ template <typename T> class NumericVector;
 class MooseVariableScalar : public MooseVariableBase
 {
 public:
-  MooseVariableScalar(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableScalar(unsigned int var_num,
+                      const FEType & fe_type,
+                      SystemBase & sys,
+                      Assembly & assembly,
+                      Moose::VarKindType var_kind);
   virtual ~MooseVariableScalar();
 
   void reinit();
 
-  virtual bool isNodal() const;
+  virtual bool isNodal() const override;
 
   //
   VariableValue & sln() { return _u; }

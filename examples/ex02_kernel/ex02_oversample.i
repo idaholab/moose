@@ -15,7 +15,6 @@
 []
 
 [Kernels]
-  active = 'diff'
   [./diff]
     type = Diffusion
     variable = diffused
@@ -32,7 +31,6 @@
 []
 
 [BCs]
-  active = 'all'
   [./all]
     type = DirichletBC
     variable = diffused

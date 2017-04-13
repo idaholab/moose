@@ -17,20 +17,21 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<TimeIntegrator>()
+template <>
+InputParameters
+validParams<TimeIntegrator>()
 {
   InputParameters params = validParams<MooseObject>();
   params.registerBase("TimeIntegrator");
   return params;
 }
 
-TimeIntegrator::TimeIntegrator(const InputParameters & parameters) :
-    MooseObject(parameters),
+TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
+  : MooseObject(parameters),
     Restartable(parameters, "TimeIntegrators"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
-    _nl(_fe_problem.getNonlinearSystem()),
+    _nl(_fe_problem.getNonlinearSystemBase()),
     _u_dot(_sys.solutionUDot()),
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
@@ -44,13 +45,10 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters) :
 {
 }
 
-TimeIntegrator::~TimeIntegrator()
-{
-}
+TimeIntegrator::~TimeIntegrator() {}
 
 void
 TimeIntegrator::solve()
 {
-  _nl.sys().solve();
+  _nl.system().solve();
 }
-

@@ -15,42 +15,42 @@
 #include "MMSReaction.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MMSReaction>()
+template <>
+InputParameters
+validParams<MMSReaction>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-MMSReaction::MMSReaction(const InputParameters & parameters) :
-    Kernel(parameters),
-    _mesh_dimension(_mesh.dimension())
+MMSReaction::MMSReaction(const InputParameters & parameters)
+  : Kernel(parameters), _mesh_dimension(_mesh.dimension())
 {
 }
 
 Real
 MMSReaction::computeQpResidual()
+{
+  Real a = libMesh::pi;
+  Real x = _q_point[_qp](0);
+  Real y = _q_point[_qp](1);
+  Real t = _t;
+  if (_mesh_dimension == 3)
   {
-    Real a = libMesh::pi;
-    Real x = _q_point[_qp](0);
-    Real y = _q_point[_qp](1);
-    Real t = _t;
-    if (_mesh_dimension == 3)
-    {
-      Real z = _q_point[_qp](2);
-      Real u = std::sin(a*x*y*z*t);
-      return _test[_i][_qp]*2*u*u;
-    }
-    else
-    {
-      Real z = 1.0;
-      Real u = std::sin(a*x*y*z*t);
-      return _test[_i][_qp]*2*u*u;
-    }
+    Real z = _q_point[_qp](2);
+    Real u = std::sin(a * x * y * z * t);
+    return _test[_i][_qp] * 2 * u * u;
   }
+  else
+  {
+    Real z = 1.0;
+    Real u = std::sin(a * x * y * z * t);
+    return _test[_i][_qp] * 2 * u * u;
+  }
+}
 
 Real
 MMSReaction::computeQpJacobian()
-  {
-    return 0; //We have no grad u.
-  }
+{
+  return 0; // We have no grad u.
+}

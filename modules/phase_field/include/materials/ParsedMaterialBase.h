@@ -12,7 +12,7 @@
 // Forward Declarations
 class ParsedMaterialBase;
 
-template<>
+template <>
 InputParameters validParams<ParsedMaterialBase>();
 
 /**
@@ -37,4 +37,4 @@ protected:
   std::vector<Real> _tol_values;
 };
 
-#endif //PARSEDMATERIALBASE_H
+#endif // PARSEDMATERIALBASE_H

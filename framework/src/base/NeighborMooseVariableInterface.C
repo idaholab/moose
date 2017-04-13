@@ -13,20 +13,21 @@
 /****************************************************************/
 
 #include "NeighborMooseVariableInterface.h"
+
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+#include "MooseTypes.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "MooseTypes.h"
-#include "Assembly.h"
 
-
-NeighborMooseVariableInterface::NeighborMooseVariableInterface(const MooseObject * moose_object, bool nodal) :
-    MooseVariableInterface(moose_object, nodal)
+NeighborMooseVariableInterface::NeighborMooseVariableInterface(const MooseObject * moose_object,
+                                                               bool nodal)
+  : MooseVariableInterface(moose_object, nodal)
 {
 }
 
-NeighborMooseVariableInterface::~NeighborMooseVariableInterface()
-{
-}
+NeighborMooseVariableInterface::~NeighborMooseVariableInterface() {}
 
 const VariableValue &
 NeighborMooseVariableInterface::neighborValue()

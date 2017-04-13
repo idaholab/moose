@@ -3,6 +3,7 @@
 #
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
 
 #
 # pcre
@@ -16,19 +17,19 @@ pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 # dependency files
 pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
                   $(patsubst %.c, %.$(obj-suffix).d, $(pcre_csrcfiles))
-
 #
-# ice_updater
+# gtest
 #
-ice_updater_DIR       := $(FRAMEWORK_DIR)/contrib/ice_updater
-ice_updater_srcfiles  := $(shell find $(ice_updater_DIR) -name "*.cpp")
-ice_updater_objects   := $(patsubst %.cpp, %.$(obj-suffix), $(ice_updater_srcfiles))
-ice_updater_LIB       :=  $(ice_updater_DIR)/libice_updater-$(METHOD).la
+gtest_DIR       := $(FRAMEWORK_DIR)/contrib/gtest
+gtest_srcfiles  := $(gtest_DIR)/gtest-all.cc
+gtest_objects   := $(patsubst %.cc, %.$(obj-suffix), $(gtest_srcfiles))
+gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
-ice_updater_deps      := $(patsubst %.cpp, %.$(obj-suffix).d, $(ice_updater_srcfiles))
+gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 
 moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
+moose_INC_DIRS += "$(gtest_DIR)"
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
@@ -36,7 +37,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
-moose_LIBS := $(moose_LIB) $(pcre_LIB) $(ice_updater_LIB)
+moose_LIBS := $(moose_LIB) $(pcre_LIB)
 
 # source files
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
@@ -67,7 +68,7 @@ moose_revision:
 	  $(moose_revision_header) MOOSE)
 
 # libmesh submodule status
-libmesh_status := $(shell git -C $(MOOSE_DIR) submodule status 2>/dev/null)
+libmesh_status := $(shell git -C $(MOOSE_DIR) submodule status 2>/dev/null | grep libmesh | cut -c1)
 ifneq (,$(findstring +,$(libmesh_status)))
   ifneq ($(origin MOOSE_DIR),environment)
     libmesh_message = "\n***WARNING***\nYour libmesh is out of date.\nYou need to run update_and_rebuild_libmesh.sh in the scripts directory.\n\n"
@@ -86,16 +87,16 @@ $(pcre_LIB): $(pcre_objects)
 	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(pcre_LIB) $(pcre_DIR)
 
-$(ice_updater_LIB): $(ice_updater_objects)
+$(gtest_LIB): $(gtest_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(ice_updater_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(ice_updater_DIR)
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(ice_updater_LIB) $(ice_updater_DIR)
+	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(gtest_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(gtest_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(gtest_LIB) $(gtest_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(ice_updater_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(ice_updater_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ## Clang static analyzer
@@ -105,8 +106,9 @@ sa:: $(moose_analyzer)
 -include $(moose_deps)
 
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/jsoncpp/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
--include $(wildcard $(FRAMEWORK_DIR)/contrib/ice_updater/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
 
 #
 # exodiff
@@ -139,9 +141,9 @@ $(exodiff_APP): $(exodiff_objects)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(ice_updater_LIB)
-app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(ice_updater_objects)
-app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(ice_updater_deps)
+app_LIB  := $(moose_LIBS) $(pcre_LIB)
+app_objects := $(moose_objects) $(exodiff_objects)
+app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps)
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:
@@ -194,13 +196,22 @@ clobberall:: clobber
         done
 
 # clang_complete builds a clang configuration file for various clang-based autocompletion plugins
-clang_complete:
+.clang_complete::
 	@echo "Building .clang_complete file"
 	@echo "-xc++" > .clang_complete
 	@echo "-std=c++11" >> .clang_complete
 	@for item in $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES); do \
           echo $$item >> .clang_complete;  \
         done
+
+compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
+compile_commands.json::
+	@echo $(CURDIR) > .compile_commands.json
+	@echo $(libmesh_CXX) >> .compile_commands.json
+	@echo $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES) >> .compile_commands.json
+	@echo $(compile_commands_all_srcfiles) >> .compile_commands.json
+	@ $(FRAMEWORK_DIR)/scripts/compile_commands.py < .compile_commands.json > compile_commands.json
+	@rm .compile_commands.json
 
 # Debugging stuff
 echo_include:

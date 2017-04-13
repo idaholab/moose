@@ -27,6 +27,11 @@
     input = 'output_block.i'
     exodiff = 'output_block_out.e'
   [../]
+  [./block_displaced]
+    type = 'Exodiff'
+    input = 'output_block_displaced.i'
+    exodiff = 'output_block_displaced_exodus.e'
+  [../]
   [./boundary]
     type = 'Exodiff'
     input = 'output_boundary.i'

@@ -13,7 +13,7 @@
 // Forward Declarations
 class ThirdPhaseSuppressionMaterial;
 
-template<>
+template <>
 InputParameters validParams<ThirdPhaseSuppressionMaterial>();
 
 /**
@@ -41,7 +41,7 @@ protected:
   std::vector<MaterialProperty<Real> *> _prop_dg;
 
   /// Material properties to store the second derivatives.
-  std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2g;
+  std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2g;
 };
 
-#endif //THIRDPHASESUPPRESSIONMATERIAL_H
+#endif // THIRDPHASESUPPRESSIONMATERIAL_H

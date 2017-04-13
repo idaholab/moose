@@ -20,7 +20,7 @@
 // Forward declarations
 class MultiAppVariableValueSamplePostprocessorTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
 
 /**
@@ -28,14 +28,12 @@ InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
  * the MultiApp is.  Copies that value into a postprocessor in the
  * MultiApp.
  */
-class MultiAppVariableValueSamplePostprocessorTransfer :
-  public MultiAppTransfer
+class MultiAppVariableValueSamplePostprocessorTransfer : public MultiAppTransfer
 {
 public:
   MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
-  virtual ~MultiAppVariableValueSamplePostprocessorTransfer() {}
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   AuxVariableName _postprocessor_name;

@@ -6,17 +6,16 @@
 /****************************************************************/
 #include "NSMassInviscidFlux.h"
 
-template<>
-InputParameters validParams<NSMassInviscidFlux>()
+template <>
+InputParameters
+validParams<NSMassInviscidFlux>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("This class computes the inviscid flux in the mass equation.");
   return params;
 }
 
-NSMassInviscidFlux::NSMassInviscidFlux(const InputParameters & parameters) :
-    NSKernel(parameters)
-{
-}
+NSMassInviscidFlux::NSMassInviscidFlux(const InputParameters & parameters) : NSKernel(parameters) {}
 
 Real
 NSMassInviscidFlux::computeQpResidual()
@@ -50,24 +49,29 @@ NSMassInviscidFlux::computeQpJacobian()
 Real
 NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things.
-  unsigned int m = mapVarNumber(jvar);
-
-  switch ( m )
+  if (isNSVariable(jvar))
   {
-    // Don't handle the on-diagonal case here
-    // case 0: // density
-    case 1:
-    case 2:
-    case 3: // momentums
-      return -_phi[_j][_qp] * _grad_test[_i][_qp](m-1);
+    // Map jvar into the variable m for our problem, regardless of
+    // how Moose has numbered things.
+    unsigned int m = mapVarNumber(jvar);
 
-    case 4: // energy
-      return 0.0;
+    switch (m)
+    {
+      // Don't handle the on-diagonal case here
+      // case 0: // density
+      case 1:
+      case 2:
+      case 3: // momentums
+        return -_phi[_j][_qp] * _grad_test[_i][_qp](m - 1);
 
-    default:
-      mooseError("Should not get here!");
-      break;
+      case 4: // energy
+        return 0.0;
+
+      default:
+        mooseError("Should not get here!");
+        break;
+    }
   }
+  else
+    return 0.0;
 }

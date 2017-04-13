@@ -14,6 +14,13 @@
     scale_refine = 5
   [../]
 
+  [./testbodyforce]
+    type = 'Exodiff'
+    input = '2d_diffusion_bodyforce_test.i'
+    exodiff = 'bodyforce_out.e'
+    scale_refine = 5
+  [../]
+
   [./test_jacobian]
     type = 'PetscJacobianTester'
     input = '2d_diffusion_test.i'

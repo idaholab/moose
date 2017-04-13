@@ -7,6 +7,7 @@
 #ifndef COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
 #define COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
 
+#include "ColumnMajorMatrix.h"
 #include "ComputeStressBase.h"
 #include "Function.h"
 
@@ -27,6 +28,8 @@ public:
     CR_UNKNOWN
   };
 
+  virtual void initialSetup();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -35,7 +38,8 @@ protected:
   void updateElasticityTensor();
 
   virtual void crackingStressRotation();
-  virtual Real computeCrackFactor(int i, Real & sigma, Real & flag_value, const Real & cracking_stress);
+  virtual Real
+  computeCrackFactor(int i, Real & sigma, Real & flag_value, const Real & cracking_stress);
 
   virtual unsigned int getNumKnownCrackDirs() const;
   void computeCrackStrainAndOrientation(ColumnMajorMatrix & principal_strain);
@@ -44,7 +48,7 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
 
-  const bool _is_finite_strain;
+  bool _is_finite_strain;
 
   ///@{ Material properties related to stress and strain
   const MaterialProperty<RankTwoTensor> & _strain_increment;
@@ -80,7 +84,7 @@ protected:
   //@{ Variables used by multiple methods within the calculation for a single material point
   RealVectorValue _crack_flags_local;
   ColumnMajorMatrix _principal_strain;
-  RankFourTensor  _local_elasticity_tensor;
+  RankFourTensor _local_elasticity_tensor;
   Real _youngs_modulus;
   ///@}
 };

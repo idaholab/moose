@@ -15,7 +15,6 @@ class PenetrationLocator;
 class ContactPressureAux : public AuxKernel
 {
 public:
-
   ContactPressureAux(const InputParameters & parameters);
 
   virtual ~ContactPressureAux();
@@ -27,7 +26,7 @@ protected:
   const PenetrationLocator & _penetration_locator;
 };
 
-template<>
+template <>
 InputParameters validParams<ContactPressureAux>();
 
 #endif

@@ -19,18 +19,17 @@
 
 class SetupMeshCompleteAction;
 
-template<>
+template <>
 InputParameters validParams<SetupMeshCompleteAction>();
-
 
 class SetupMeshCompleteAction : public Action
 {
 public:
   SetupMeshCompleteAction(InputParameters params);
 
-  bool completeSetup(MooseMesh *mesh);
+  bool completeSetup(MooseMesh * mesh);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // SETUPMESHCOMPLETEACTION_H

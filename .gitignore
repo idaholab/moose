@@ -71,13 +71,21 @@ temp_print_trace.*
 *.pvtu
 .depend
 *.png
+*.gif
 *.tif
+*.jpg
+*.tiff
+*.ps
+*.bmp
 *.html
 *.xyz
 *Revision.h
 *.json
 *.bak
+*.processor.*
 .clang_complete
+.failed_tests
+compile_commands.json
 
 # Allow certain files in gold directories
 !**/gold/*.e
@@ -160,5 +168,34 @@ framework/contrib/asio/
 # phase_field/tests/solution_rasterizer
 out.xyz
 
-#Jit output
+# JIT and automatic differentiation cache files
+.jitcache/
 .jitdir/
+
+# Do not store ipython notebook checkpoints
+*-checkpoint.ipynb*
+
+# Documentation Generation
+site
+*.moose.md
+*.moose.yml
+*.moose.svg
+docs/.moosedocs
+!docs/templates/*.html
+!docs/media/**/*.png
+!docs/media/**/*.gif
+!docs/tests/**/gold/*.html
+
+# Chigger
+!python/chigger/tests/**/gold/*.png
+!python/chigger/tests/input/*.e*
+!python/chigger/logos/*.png
+!python/chigger/contrib/*.xml
+
+# Peacock
+python/peacock/tests/exodus_tab/TestOutputPlugin_repr.py
+python/peacock/tests/input_tab/InputFileEditor/fsp_test.i
+python/peacock/tests/postprocessor_tab/TestPostprocessorPluginManager_test_script.py
+!python/peacock/tests/**/gold/*.png
+!python/peacock/icons/**/*.*
+!python/peacock/tests/**/input/*.*

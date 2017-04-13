@@ -42,7 +42,6 @@
 class BilinearInterpolation
 {
 public:
-
   /**
    *  Constructor, Takes two vectors of points for which to apply the
    * fit.  One should be of the independent variable while the other
@@ -53,8 +52,7 @@ public:
                         const std::vector<Real> & YAXIS,
                         const ColumnMajorMatrix & ZSURFACE);
 
-  virtual ~BilinearInterpolation()
-    {}
+  virtual ~BilinearInterpolation() = default;
 
   /**
    * This function will take an independent variable input and will
@@ -62,7 +60,7 @@ public:
    */
   Real sample(Real xcoord, Real ycoord);
 
-  void getNeighborIndices(const std::vector<Real> & inArr, Real x ,int& lowerX ,int& upperX );
+  void getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX);
 
 private:
   std::vector<Real> _xAxis;
@@ -71,4 +69,4 @@ private:
   static int _file_number;
 };
 
-#endif //BILINEARINTERPOLATION_H
+#endif // BILINEARINTERPOLATION_H

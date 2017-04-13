@@ -20,7 +20,7 @@
 // Forward Declarations
 class TestLapBC;
 
-template<>
+template <>
 InputParameters validParams<TestLapBC>();
 
 /**

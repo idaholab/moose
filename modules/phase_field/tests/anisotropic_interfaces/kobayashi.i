@@ -18,7 +18,6 @@
   [./wIC]
     type = SmoothCircleIC
     variable = w
-    block = 0
     int_width = 0.1
     x1 = 0.35
     y1 = 0.35
@@ -69,7 +68,6 @@
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fbulk
     args = 'w T'
     constant_names = 'alpha gamma T_e pi'
@@ -80,12 +78,10 @@
   [../]
   [./material]
     type = InterfaceOrientationMaterial
-    block = 0
     op = w
   [../]
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M'
     prop_values = '3333.333'
   [../]

@@ -7,22 +7,35 @@
 #include "DynamicStressDivergenceTensors.h"
 #include "ElasticityTensorTools.h"
 
-template<>
-InputParameters validParams<DynamicStressDivergenceTensors>()
+template <>
+InputParameters
+validParams<DynamicStressDivergenceTensors>()
 {
   InputParameters params = validParams<StressDivergenceTensors>();
-  params.addClassDescription("Residual due to stress related Rayleigh damping and HHT time integration terms ");
-  params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
+  params.addClassDescription(
+      "Residual due to stress related Rayleigh damping and HHT time integration terms ");
+  params.addParam<MaterialPropertyName>("zeta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the zeta parameter for the "
+                                        "Rayleigh damping.");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
+  params.addParam<bool>("static_initialization",
+                        false,
+                        "Set to true to get the system to "
+                        "equillibrium under gravity by running a "
+                        "quasi-static analysis (by solving Ku = F) "
+                        "in the first time step");
   return params;
 }
 
-DynamicStressDivergenceTensors::DynamicStressDivergenceTensors(const InputParameters & parameters) :
-    StressDivergenceTensors(parameters),
+DynamicStressDivergenceTensors::DynamicStressDivergenceTensors(const InputParameters & parameters)
+  : StressDivergenceTensors(parameters),
     _stress_older(getMaterialPropertyOlderByName<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
-    _zeta(getParam<Real>("zeta")),
-    _alpha(getParam<Real>("alpha"))
+    _zeta(getMaterialProperty<Real>("zeta")),
+    _alpha(getParam<Real>("alpha")),
+    _static_initialization(getParam<bool>("static_initialization"))
 {
 }
 
@@ -35,48 +48,74 @@ DynamicStressDivergenceTensors::computeQpResidual()
   * parameter _zeta or HHT parameter _alpha, respectively.
   *
   * The residual of _zeta*K*[(1+_alpha)vel-_alpha vel_old]+ alpha K [ u - uold] + K u is required
-  * = _zeta*[(1+_alpha)d/dt (Div sigma)-alpha d/dt(Div sigma_old)] +alpha [Div sigma - Div sigma_old]+ Div sigma
+  * = _zeta*[(1+_alpha)d/dt (Div sigma)-alpha d/dt(Div sigma_old)] +alpha [Div sigma - Div
+  *sigma_old]+ Div sigma
   * = _zeta*[(1+alpha)(Div sigma - Div sigma_old)/dt - alpha (Div sigma_old - Div sigma_older)/dt]
   *   + alpha [Div sigma - Div sigma_old] +Div sigma
-  * = [(1+_alpha)*_zeta/dt +_alpha+1]* Div sigma - [(1+2_alpha)*_zeta/dt + _alpha] Div sigma_old + _alpha*_zeta/dt Div sigma_older
+  * = [(1+_alpha)*_zeta/dt +_alpha+1]* Div sigma - [(1+2_alpha)*_zeta/dt + _alpha] Div sigma_old +
+  *_alpha*_zeta/dt Div sigma_older
   */
-  if ((_dt > 0))
-    return _stress[_qp].row(_component) * _grad_test[_i][_qp]*(1+_alpha+(1+_alpha)*_zeta/_dt)
-      -(_alpha+(1+2*_alpha)*_zeta/_dt)*_stress_old[_qp].row(_component)* _grad_test[_i][_qp]
-      + (_alpha*_zeta/_dt)*_stress_older[_qp].row(_component)*_grad_test[_i][_qp];
-  else
-    return 0;
+
+  Real residual = 0.0;
+  if (_static_initialization && _t == _dt)
+  {
+    // If static inialization is true, then in the first step residual is only Ku which is
+    // stress.grad(test).
+    residual += _stress[_qp].row(_component) * _grad_test[_i][_qp];
+
+    if (_volumetric_locking_correction)
+      residual += _stress[_qp].trace() / 3.0 *
+                  (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component));
+  }
+  else if (_dt > 0)
+  {
+    residual +=
+        _stress[_qp].row(_component) * _grad_test[_i][_qp] *
+            (1.0 + _alpha + (1.0 + _alpha) * _zeta[_qp] / _dt) -
+        (_alpha + (1.0 + 2.0 * _alpha) * _zeta[_qp] / _dt) * _stress_old[_qp].row(_component) *
+            _grad_test[_i][_qp] +
+        (_alpha * _zeta[_qp] / _dt) * _stress_older[_qp].row(_component) * _grad_test[_i][_qp];
+
+    if (_volumetric_locking_correction)
+      residual += (_stress[_qp].trace() * (1.0 + _alpha + (1.0 + _alpha) * _zeta[_qp] / _dt) -
+                   (_alpha + (1.0 + 2.0 * _alpha) * _zeta[_qp] / _dt) * _stress_old[_qp].trace() +
+                   (_alpha * _zeta[_qp] / _dt) * _stress_older[_qp].trace()) /
+                  3.0 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component));
+  }
+
+  return residual;
 }
 
 Real
 DynamicStressDivergenceTensors::computeQpJacobian()
 {
-  if (_dt > 0)
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
+  if (_static_initialization && _t == _dt)
+    return StressDivergenceTensors::computeQpJacobian();
+  else if (_dt > 0)
+    return StressDivergenceTensors::computeQpJacobian() * (1.0 + _alpha + _zeta[_qp] / _dt);
   else
-    return 0;
+    return 0.0;
 }
 
 Real
 DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int coupled_component = 0;
   bool active = true;
 
   for (unsigned int i = 0; i < _ndisp; ++i)
     if (jvar == _disp_var[i])
-    {
-      coupled_component = i;
       active = true;
-    }
 
   if (active)
   {
-    if (_dt > 0)
-      return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
+    if (_static_initialization && _t == _dt)
+      return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
+    else if (_dt > 0)
+      return StressDivergenceTensors::computeQpOffDiagJacobian(jvar) *
+             (1.0 + _alpha + _zeta[_qp] / _dt);
     else
-      return 0;
-   }
+      return 0.0;
+  }
   if (_temp_coupled && jvar == _temp_var)
     return 0.0;
 

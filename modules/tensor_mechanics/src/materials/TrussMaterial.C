@@ -6,33 +6,43 @@
 /****************************************************************/
 
 #include "TrussMaterial.h"
+
+// MOOSE includes
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
-//libmesh includes
+// libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<TrussMaterial>()
+template <>
+InputParameters
+validParams<TrussMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
+  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
   params.addCoupledVar("youngs_modulus", "Variable containing Young's modulus");
   return params;
 }
 
-TrussMaterial::TrussMaterial(const InputParameters & parameters) :
-    Material(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+TrussMaterial::TrussMaterial(const InputParameters & parameters)
+  : Material(parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _youngs_modulus(coupledValue("youngs_modulus")),
     _total_stretch(declareProperty<Real>(_base_name + "total_stretch")),
     _elastic_stretch(declareProperty<Real>(_base_name + "elastic_stretch")),
     _axial_stress(declareProperty<Real>(_base_name + "axial_stress")),
     _e_over_l(declareProperty<Real>(_base_name + "e_over_l"))
 {
-  const std::vector<NonlinearVariableName> & nl_vnames(getParam<std::vector<NonlinearVariableName> >("displacements"));
+  const std::vector<NonlinearVariableName> & nl_vnames(
+      getParam<std::vector<NonlinearVariableName>>("displacements"));
   _ndisp = nl_vnames.size();
 
   // fetch nonlinear variables
@@ -40,7 +50,7 @@ TrussMaterial::TrussMaterial(const InputParameters & parameters) :
     _disp_var.push_back(&_fe_problem.getVariable(_tid, nl_vnames[i]));
 }
 
- void
+void
 TrussMaterial::initQpStatefulProperties()
 {
   _axial_stress[_qp] = 0.0;
@@ -66,8 +76,8 @@ TrussMaterial::computeProperties()
   _origin_length = dxyz.norm();
 
   // fetch the solution for the two end nodes
-  NonlinearSystem& nonlinear_sys = _fe_problem.getNonlinearSystem();
-  const NumericVector<Number> &sol = *nonlinear_sys.currentSolution();
+  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
+  const NumericVector<Number> & sol = *nonlinear_sys.currentSolution();
 
   std::vector<Real> disp0, disp1;
   for (unsigned int i = 0; i < _ndisp; ++i)

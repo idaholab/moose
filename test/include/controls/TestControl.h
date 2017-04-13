@@ -21,7 +21,7 @@
 // Forward declarations
 class TestControl;
 
-template<>
+template <>
 InputParameters validParams<TestControl>();
 
 /**
@@ -35,10 +35,8 @@ public:
   virtual void execute();
 
 private:
-
   /// The type of test to perform
   MooseEnum _test_type;
-
 };
 
-#endif //TESTCONTROL_H
+#endif // TESTCONTROL_H

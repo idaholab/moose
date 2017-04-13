@@ -8,26 +8,33 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<HomogenizedThermalConductivity>()
+template <>
+InputParameters
+validParams<HomogenizedThermalConductivity>()
 {
   InputParameters params = validParams<ElementAverageValue>();
   params.addRequiredCoupledVar("temp_x", "solution in x");
   params.addCoupledVar("temp_y", "solution in y");
   params.addCoupledVar("temp_z", "solution in z");
-  params.addRequiredRangeCheckedParam<unsigned int>("component", "component < 3", "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component < 3",
+      "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
   params.addParam<Real>("scale_factor", 1, "Scale factor");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient_name","thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity)");
+  params.addParam<MaterialPropertyName>(
+      "diffusion_coefficient",
+      "thermal_conductivity",
+      "Property name of the diffusivity (Default: thermal_conductivity)");
   return params;
 }
 
-HomogenizedThermalConductivity::HomogenizedThermalConductivity(const InputParameters & parameters) :
-    ElementAverageValue(parameters),
+HomogenizedThermalConductivity::HomogenizedThermalConductivity(const InputParameters & parameters)
+  : ElementAverageValue(parameters),
     _grad_temp_x(coupledGradient("temp_x")),
     _grad_temp_y(_subproblem.mesh().dimension() >= 2 ? coupledGradient("temp_y") : _grad_zero),
     _grad_temp_z(_subproblem.mesh().dimension() == 3 ? coupledGradient("temp_z") : _grad_zero),
     _component(getParam<unsigned int>("component")),
-    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
+    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient")),
     _scale(getParam<Real>("scale_factor"))
 {
 }
@@ -52,13 +59,14 @@ HomogenizedThermalConductivity::getValue()
   gatherSum(_integral_value);
   gatherSum(_volume);
 
-  return (_integral_value/_volume);
+  return (_integral_value / _volume);
 }
 
 void
 HomogenizedThermalConductivity::threadJoin(const UserObject & y)
 {
-  const HomogenizedThermalConductivity & pps = dynamic_cast<const HomogenizedThermalConductivity &>(y);
+  const HomogenizedThermalConductivity & pps =
+      dynamic_cast<const HomogenizedThermalConductivity &>(y);
 
   _integral_value += pps._integral_value;
   _volume += pps._volume;

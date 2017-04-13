@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSTemperatureL2;
 
-template<>
+template <>
 InputParameters validParams<NSTemperatureL2>();
 
 /**
@@ -31,11 +31,11 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _p_var;
-  const VariableValue & _p;
+  unsigned int _rho_var;
+  const VariableValue & _rho;
 
-  unsigned int _pe_var;
-  const VariableValue & _pe;
+  unsigned int _rhoe_var;
+  const VariableValue & _rhoe;
 
   unsigned int _u_vel_var;
   const VariableValue & _u_vel;
@@ -49,4 +49,4 @@ protected:
   const MaterialProperty<Real> & _c_v;
 };
 
-#endif //NSTEMPERATUREL2_H
+#endif // NSTEMPERATUREL2_H

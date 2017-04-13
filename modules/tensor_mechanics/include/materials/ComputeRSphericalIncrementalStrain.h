@@ -21,14 +21,14 @@ public:
   ComputeRSphericalIncrementalStrain(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /// Computes the current and old deformation gradients with the assumptions for
   /// 1D spherical symmetry geometries: \f$ \epsilon_{\theta} = \epsilon_{\phi} = \frac{u_r}{r} \f$
-  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
+  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
 
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };
 
-#endif //COMPUTERSPHERICALINCREMENTALSTRAIN_H
+#endif // COMPUTERSPHERICALINCREMENTALSTRAIN_H

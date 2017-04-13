@@ -1,0 +1,93 @@
+[Tests]
+  [./small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small7]
+    type = 'CSVDiff'
+    input = 'small_deform7.i'
+    csvdiff = 'small_deform7.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./random01]
+    type = 'CSVDiff'
+    input = 'random01.i'
+    csvdiff = 'random01.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random02]
+    type = 'CSVDiff'
+    input = 'random02.i'
+    csvdiff = 'random02.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random03]
+    type = 'CSVDiff'
+    input = 'random03.i'
+    csvdiff = 'random03.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random04]
+    type = 'CSVDiff'
+    input = 'random04.i'
+    csvdiff = 'random04.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random_heavy]
+    type = 'CSVDiff'
+    input = 'random04.i'
+    csvdiff = 'random04.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=40 Mesh/ny=40 Mesh/xmax=40 Mesh/ymax=40'
+    heavy = true
+  [../]
+[]

@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "MooseTypes.h"
 #include "RestartableData.h"
-#include "ParallelUniqueId.h"
 
 // Forward declarations
 class PostprocessorData;
@@ -36,29 +35,36 @@ public:
    * Class constructor
    * Populates the SubProblem and MooseMesh pointers
    * @param parameters The InputParameters for the object.
-   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
-   * @param subproblem An optional method for inputting the SubProblem object, this is used by FEProblem, othersize
+   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly
+   * correspond to the section in the input file so errors are easy to understand.
+   * @param subproblem An optional method for inputting the SubProblem object, this is used by
+   * FEProblemBase, othersize
    * the SubProblem comes from the parameters
    */
-  Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem = NULL);
+  Restartable(const InputParameters & parameters,
+              std::string system_name,
+              SubProblem * subproblem = NULL);
 
   /**
    * Constructor for objects that don't have "parameters"
    *
    * @param name The name of the object
-   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
+   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly
+   * correspond to the section in the input file so errors are easy to understand.
    * @param subproblem A reference to the subproblem for this object
    * @param tid Optional thread id (will default to zero)
    */
-  Restartable(const std::string & name, std::string system_name, SubProblem & subproblem, THREAD_ID tid = 0);
+  Restartable(const std::string & name,
+              std::string system_name,
+              SubProblem & subproblem,
+              THREAD_ID tid = 0);
 
   /**
    * Emtpy destructor
    */
-  virtual ~Restartable();
+  virtual ~Restartable() = default;
 
 protected:
-
   /**
    * Declare a piece of data as "restartable".
    * This means that in the event of a restart this piece of data
@@ -68,7 +74,7 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableData(std::string data_name);
 
   /**
@@ -81,7 +87,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param init_value The initial value of the data
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableData(std::string data_name, const T & init_value);
 
   /**
@@ -94,7 +100,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param context Context pointer that will be passed to the load and store functions
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableDataWithContext(std::string data_name, void * context);
 
   /**
@@ -108,9 +114,9 @@ protected:
    * @param init_value The initial value of the data
    * @param context Context pointer that will be passed to the load and store functions
    */
-  template<typename T>
-  T & declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context);
-
+  template <typename T>
+  T &
+  declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context);
 
 private:
   /**
@@ -125,7 +131,7 @@ private:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param object_name A supplied name for the object that is declaring this data.
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
 
   /**
@@ -141,8 +147,10 @@ private:
    * @param object_name A supplied name for the object that is declaring this data.
    * @param context Context pointer that will be passed to the load and store functions
    */
-  template<typename T>
-  T & declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context);
+  template <typename T>
+  T & declareRestartableDataWithObjectNameWithContext(std::string data_name,
+                                                      std::string object_name,
+                                                      void * context);
 
   /**
    * NOTE: These are used internally in MOOSE.  NOT FOR PUBLIC CONSUMPTION!
@@ -157,7 +165,7 @@ private:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
-  template<typename T>
+  template <typename T>
   T & declareRecoverableData(std::string data_name);
 
   /**
@@ -174,11 +182,12 @@ private:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param init_value The initial value of the data
    */
-  template<typename T>
+  template <typename T>
   T & declareRecoverableData(std::string data_name, const T & init_value);
 
   /// Helper function so we don't have to include SubProblem in the header
-  void registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  void
+  registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   /// Helper function so we don't have to include SubProblem in the header
   void registerRecoverableDataOnSubProblem(std::string name);
@@ -204,32 +213,32 @@ private:
   friend class NearestNodeLocator;
   friend class ReportableData;
   friend class FileOutput;
-  friend class FEProblem;
+  friend class FEProblemBase;
   friend class Transient;
   friend class TableOutput;
   friend class TransientMultiApp;
 };
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableData(std::string data_name)
 {
   return declareRestartableDataWithContext<T>(data_name, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableData(std::string data_name, const T & init_value)
 {
   return declareRestartableDataWithContext<T>(data_name, init_value, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
@@ -239,12 +248,14 @@ Restartable::declareRestartableDataWithContext(std::string data_name, void * con
   return data_ptr->get();
 }
 
-template<typename T>
+template <typename T>
 T &
-Restartable::declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context)
+Restartable::declareRestartableDataWithContext(std::string data_name,
+                                               const T & init_value,
+                                               void * context)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
@@ -256,16 +267,18 @@ Restartable::declareRestartableDataWithContext(std::string data_name, const T & 
   return data_ptr->get();
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name)
 {
   return declareRestartableDataWithObjectNameWithContext<T>(data_name, object_name, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
-Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context)
+Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_name,
+                                                             std::string object_name,
+                                                             void * context)
 {
   std::string old_name = _restartable_name;
 
@@ -278,12 +291,12 @@ Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_na
   return value;
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRecoverableData(std::string data_name)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
@@ -292,12 +305,12 @@ Restartable::declareRecoverableData(std::string data_name)
   return declareRestartableDataWithContext<T>(data_name, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
@@ -305,6 +318,5 @@ Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 
   return declareRestartableDataWithContext<T>(data_name, init_value, NULL);
 }
-
 
 #endif // RESTARTABLE

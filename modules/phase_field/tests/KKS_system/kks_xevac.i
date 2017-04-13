@@ -48,7 +48,6 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 0.75
-    block = 0
   [../]
   [./cg]
     variable = cg
@@ -59,7 +58,6 @@
     invalue = 0.7
     outvalue = 0.0
     int_width = 0.75
-    block = 0
   [../]
 []
 
@@ -80,7 +78,6 @@
     f_name = fm
     cmg = cg
     cmv = cv
-    block = 0
     T = 300
     outputs = exodus
     derivative_order = 2

@@ -3,11 +3,7 @@
 []
 
 [Variables]
-  active = 'diffused'
-
   [./diffused]
-    # Note that we do not have the 'active' parameter here.  Since it
-    # is missing we will automatically pickup all nested blocks
     order = FIRST
     family = LAGRANGE
 
@@ -33,8 +29,6 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = diffused

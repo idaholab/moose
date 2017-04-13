@@ -3,10 +3,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFParamsPolyFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<PFParamsPolyFreeEnergy>();
 
 /**
@@ -48,4 +48,4 @@ protected:
   const Real _kb;
 };
 
-#endif //PFPARAMSPOLYFREEENERGY_H
+#endif // PFPARAMSPOLYFREEENERGY_H

@@ -1,6 +1,6 @@
 [Mesh]
   file = out_part1_cp/0005_mesh.cpr
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Functions]

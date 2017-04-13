@@ -1,0 +1,24 @@
+[Tests]
+  [./waterncg_liquid]
+    type = 'Exodiff'
+    input = 'waterncg.i'
+    exodiff = 'waterncg_liquid.e'
+  [../]
+  [./waterncg_twophase]
+    type = 'Exodiff'
+    input = 'waterncg.i'
+    exodiff = 'waterncg_twophase.e'
+    cli_args = 'Variables/z/initial_condition=0.25 Outputs/file_base=waterncg_twophase'
+  [../]
+  [./waterncg_gas]
+    type = 'Exodiff'
+    input = 'waterncg.i'
+    exodiff = 'waterncg_gas.e'
+    cli_args = 'Variables/z/initial_condition=0.999 Outputs/file_base=waterncg_gas'
+  [../]
+  [./theis]
+    type = 'CSVDiff'
+    input = 'theis.i'
+    csvdiff = "theis_csvout.csv"
+  [../]
+[]

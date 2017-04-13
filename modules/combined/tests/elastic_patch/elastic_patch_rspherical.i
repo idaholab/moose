@@ -10,104 +10,66 @@
 # Stress xx, yy, zz = E/(1+nu)/(1-2nu)*strain*((1-nu) + nu + nu) = 6000
 #
 
+[GlobalParams]
+  displacements = 'disp_x'
+  temperature = temp
+[]
+
 [Problem]
   coord_type = RSPHERICAL
 []
 
-[Mesh]#Comment
+[Mesh]
   file = elastic_patch_rspherical.e
-  displacements = 'disp_x'
-[] # Mesh
+[]
 
 [Functions]
   [./ur]
     type = ParsedFunction
     value = '3e-3*x'
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 100.0
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./density]
     order = CONSTANT
     family = MONOMIAL
   [../]
+[]
 
-[] # AuxVariables
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    temp = temp
-  [../]
+[Modules/TensorMechanics/Master/All]
+  strain = SMALL
+  incremental = true
+  eigenstrain_names = eigenstrain
+  add_variables = true
+  generate_output = 'stress_xx stress_yy stress_zz'
 []
 
 [Kernels]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
+[]
 
 [AuxKernels]
-
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
   [./density]
     type = MaterialRealAux
     property = density
     variable = density
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./ur]
     type = FunctionDirichletBC
     variable = disp_x
@@ -121,67 +83,45 @@
     boundary = 1
     value = 117.56
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
-    block = '1 2 3'
-
-    disp_r = disp_x
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-
-    temp = temp
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    stress_free_temperature = 117.56
+    thermal_expansion_coeff = 0.0
+    incremental_form = true
+    eigenstrain_name = eigenstrain
+  [../]
+  [./stress]
+    type = ComputeStrainIncrementBasedStress
   [../]
 
   [./heat]
     type = HeatConductionMaterial
-    block = '1 2 3'
-
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
     type = Density
-    block = '1 2 3'
     density = 0.283
-    disp_r = disp_x
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-  line_search = 'none'
-
-
-  nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-11
-
-
-  l_max_its = 20
-
   start_time = 0.0
-  dt = 1.0
-  num_steps = 1
   end_time = 1.0
-[] # Executioner
+[]
 
 [Outputs]
   exodus = true
-[] # Outputs
+[]

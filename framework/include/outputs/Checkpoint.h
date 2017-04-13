@@ -26,7 +26,7 @@
 class Checkpoint;
 class MaterialPropertyStorage;
 
-template<>
+template <>
 InputParameters validParams<Checkpoint>();
 
 /**
@@ -50,7 +50,6 @@ struct CheckpointFileNames
 class Checkpoint : public BasicOutput<FileOutput>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters
@@ -58,20 +57,15 @@ public:
   Checkpoint(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Checkpoint();
-
-  /**
    * Outputs a checkpoint file.
    * Each call to this function creates various files associated with
    */
-  void output(const ExecFlagType & type);
+  void output(const ExecFlagType & type) override;
 
   /**
    * Returns the base filename for the checkpoint files
    */
-  std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Retrieve the checkpoint output directory
@@ -80,11 +74,9 @@ public:
   std::string directory();
 
 protected:
-
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
 private:
-
   /// Max no. of output files to store
   unsigned int _num_files;
 
@@ -116,4 +108,4 @@ private:
   std::deque<CheckpointFileNames> _file_names;
 };
 
-#endif //CHECKPOINT_H
+#endif // CHECKPOINT_H

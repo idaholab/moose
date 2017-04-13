@@ -40,7 +40,7 @@
     type = Exodiff
     input = cracking_rz_exponential.i
     exodiff = cracking_rz_exponential_out.e
-    abs_zero = 1e-4
+    abs_zero = 5e-4
     scale_refine = 0
     max_parallel = 1
   [../]
@@ -50,6 +50,15 @@
     input = cracking_xyz.i
     exodiff = cracking_xyz_out.e
     custom_cmp = cracking_xyz.exodiff
+    abs_zero = 1e-4
+    scale_refine = 0
+    max_parallel = 1
+  [../]
+
+  [./plane_stress]
+    type = Exodiff
+    input = cracking_plane_stress.i
+    exodiff = cracking_plane_stress_out.e
     abs_zero = 1e-4
     scale_refine = 0
     max_parallel = 1

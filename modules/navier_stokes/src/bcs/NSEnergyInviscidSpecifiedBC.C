@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "NSEnergyInviscidSpecifiedBC.h"
 
-template<>
-InputParameters validParams<NSEnergyInviscidSpecifiedBC>()
+template <>
+InputParameters
+validParams<NSEnergyInviscidSpecifiedBC>()
 {
   InputParameters params = validParams<NSEnergyInviscidBC>();
   params.addRequiredParam<Real>("specified_pressure", "The specified pressure for this boundary");
@@ -15,29 +16,36 @@ InputParameters validParams<NSEnergyInviscidSpecifiedBC>()
   return params;
 }
 
-NSEnergyInviscidSpecifiedBC::NSEnergyInviscidSpecifiedBC(const InputParameters & parameters) :
-    NSEnergyInviscidBC(parameters),
+NSEnergyInviscidSpecifiedBC::NSEnergyInviscidSpecifiedBC(const InputParameters & parameters)
+  : NSEnergyInviscidBC(parameters),
     _specified_pressure(getParam<Real>("specified_pressure")),
     _un(getParam<Real>("un"))
 {
 }
 
-Real NSEnergyInviscidSpecifiedBC::computeQpResidual()
+Real
+NSEnergyInviscidSpecifiedBC::computeQpResidual()
 {
   return qpResidualHelper(_specified_pressure, _un);
 }
 
-Real NSEnergyInviscidSpecifiedBC::computeQpJacobian()
+Real
+NSEnergyInviscidSpecifiedBC::computeQpJacobian()
 {
   return this->computeJacobianHelper(/*on-diagonal variable is energy=*/4);
 }
 
-Real NSEnergyInviscidSpecifiedBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSEnergyInviscidSpecifiedBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->computeJacobianHelper(mapVarNumber(jvar));
+  if (isNSVariable(jvar))
+    return computeJacobianHelper(mapVarNumber(jvar));
+  else
+    return 0.0;
 }
 
-Real NSEnergyInviscidSpecifiedBC::computeJacobianHelper(unsigned var_number)
+Real
+NSEnergyInviscidSpecifiedBC::computeJacobianHelper(unsigned var_number)
 {
   // When both pressure and u.n are specified, only term B of the Jacobian is non-zero.
   return qpJacobianTermB(var_number, _un);

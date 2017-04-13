@@ -1,0 +1,7 @@
+[Tests]
+  [./change_over_timestep]
+    type = 'CSVDiff'
+    input = 'change_over_timestep.i'
+    csvdiff = 'change_over_timestep_out.csv'
+  [../]
+[]

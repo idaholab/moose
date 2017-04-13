@@ -19,16 +19,15 @@
 
 class AddUserObjectAction;
 
-template<>
+template <>
 InputParameters validParams<AddUserObjectAction>();
-
 
 class AddUserObjectAction : public MooseObjectAction
 {
 public:
   AddUserObjectAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDUSEROBJECTACTION_H

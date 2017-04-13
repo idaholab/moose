@@ -17,10 +17,10 @@
 #ifndef EXAMPLEMATERIAL_H
 #define EXAMPLEMATERIAL_H
 
-//Forward Declarations
+// Forward Declarations
 class ExampleMaterial;
 
-template<>
+template <>
 InputParameters validParams<ExampleMaterial>();
 
 /**
@@ -32,8 +32,8 @@ public:
   ExampleMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
 private:
   Real _initial_diffusivity;
@@ -43,7 +43,7 @@ private:
    * and previous material properties respectively
    */
   MaterialProperty<Real> & _diffusivity;
-  MaterialProperty<Real> & _diffusivity_old;
+  const MaterialProperty<Real> & _diffusivity_old;
 };
 
-#endif //EXAMPLEMATERIAL_H
+#endif // EXAMPLEMATERIAL_H

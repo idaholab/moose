@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class ProcessorIDAux;
 
-template<>
+template <>
 InputParameters validParams<ProcessorIDAux>();
 
 /**
@@ -31,17 +30,14 @@ InputParameters validParams<ProcessorIDAux>();
 class ProcessorIDAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
   ProcessorIDAux(const InputParameters & parameters);
 
-  virtual ~ProcessorIDAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 };
 
-#endif //PROCESSORIDAUX_H
+#endif // PROCESSORIDAUX_H

@@ -1,37 +1,83 @@
 [Tests]
   [./plane_strain]
     type = Exodiff
-    input = 'planestrain_test.i'
-    exodiff = 'planestrain_test_out.e'
+    input = 'planestrain.i'
+    exodiff = 'planestrain_out.e'
     abs_zero = 1e-7
     compiler = 'CLANG GCC'
   [../]
+  [./plane_strain_Bbar]
+    type = Exodiff
+    input = 'planestrain.i'
+    exodiff = 'planestrain_out.e'
+    abs_zero = 5e-6
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'plane_strain'
+  [../]
   [./finite_planestrain]
     type = Exodiff
-    input = 'finite_planestrain_test.i'
-    exodiff = 'finite_planestrain_test_out.e'
+    input = 'finite_planestrain.i'
+    exodiff = 'finite_planestrain_out.e'
     abs_zero = 1e-9
     compiler = 'CLANG GCC'
+  [../]
+  [./finite_planestrain_Bbar]
+    type = Exodiff
+    input = 'finite_planestrain.i'
+    exodiff = 'finite_planestrain_out.e'
+    abs_zero = 1e-9
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'finite_planestrain'
   [../]
   [./axisym_smallstrain]
     type = Exodiff
     input = '2D-RZ_test.i'
     exodiff = '2D-RZ_test_out.e'
-    cli_args = 'Materials/strain/type=ComputeAxisymmetricRZSmallStrain
-    Materials/stress/type=ComputeLinearElasticStress'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Materials/stress/type=ComputeLinearElasticStress'
+  [../]
+  [./axisym_smallstrain_Bbar]
+    type = Exodiff
+    input = '2D-RZ_test.i'
+    exodiff = '2D-RZ_test_out.e'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeLinearElasticStress'
+    rel_err = 5E-4
+    prereq = 'axisym_smallstrain'
   [../]
   [./axisym_incremental_strain]
     type = Exodiff
     input = '2D-RZ_test.i'
     exodiff = '2D-RZ_test_out.e'
-    cli_args = 'Materials/strain/type=ComputeAxisymmetricRZIncrementalStrain
-    Materials/stress/type=ComputeFiniteStrainElasticStress'
-    prereq = 'axisym_smallstrain'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    prereq = 'axisym_smallstrain_Bbar'
+  [../]
+  [./axisym_incremental_strain_Bbar]
+    type = Exodiff
+    input = '2D-RZ_test.i'
+    exodiff = '2D-RZ_test_out.e'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    prereq = 'axisym_incremental_strain'
+    rel_err = 5E-4
   [../]
   [./axisym_finitestrain]
     type = Exodiff
     input = '2D-RZ_finiteStrain_test.i'
     exodiff = '2D-RZ_finiteStrain_test_out.e'
+    rel_err = 5E-4
+  [../]
+  [./axisym_finitestrain_Bbar]
+    type = Exodiff
+    input = '2D-RZ_finiteStrain_test.i'
+    exodiff = '2D-RZ_finiteStrain_test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'axisym_finitestrain'
   [../]
   [./3D_RZ_finitestrain]
     type = Exodiff
@@ -39,6 +85,17 @@
     exodiff = '3D-RZ_finiteStrain_test_out.e'
     valgrind = 'HEAVY'
     heavy = true
+    abs_zero = 1e-5
+    rel_err = 3E-3
+  [../]
+  [./3D_RZ_finitestrain_Bbar]
+    type = Exodiff
+    input = '3D-RZ_finiteStrain_test.i'
+    exodiff = '3D-RZ_finiteStrain_test_out.e'
+    valgrind = 'HEAVY'
+    heavy = true
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = '3D_RZ_finitestrain'
   [../]
   [./axisym_resid]
     type = Exodiff
@@ -47,5 +104,15 @@
     use_old_floor = true
     abs_zero = 1e-8
     compiler = 'GCC CLANG'
+  [../]
+  [./axisym_resid_Bbar]
+    type = Exodiff
+    input = '2D-RZ_finiteStrain_resid.i'
+    exodiff = '2D-RZ_finiteStrain_resid_out.e'
+    use_old_floor = true
+    abs_zero = 1e-8
+    compiler = 'GCC CLANG'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'axisym_resid'
   [../]
 []

@@ -6,11 +6,13 @@
 /****************************************************************/
 #include "CHSplitFlux.h"
 
-template<>
-InputParameters validParams<CHSplitFlux>()
+template <>
+InputParameters
+validParams<CHSplitFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Computes flux as nodal variable - flux = -mobility * grad(chemical_potenstial)");
+  params.addClassDescription(
+      "Computes flux as nodal variable - flux = -mobility * grad(chemical_potential)");
   params.addRequiredParam<unsigned int>("component", "Flux component");
   params.addRequiredParam<MaterialPropertyName>("mobility_name", "Mobility property name");
   params.addRequiredCoupledVar("mu", "Chemical Potential");
@@ -18,17 +20,19 @@ InputParameters validParams<CHSplitFlux>()
   return params;
 }
 
-CHSplitFlux::CHSplitFlux(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Kernel>(parameters),
+CHSplitFlux::CHSplitFlux(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _component(getParam<unsigned int>("component")),
     _mu_var(coupled("mu")),
     _grad_mu(coupledGradient("mu")),
     _mobility(getMaterialProperty<RealTensorValue>("mobility_name")),
-    _c_var(coupled("c")),
-    _has_coupled_c(isCoupled("c"))
+    _has_coupled_c(isCoupled("c")),
+    _c_var(_has_coupled_c ? coupled("c") : 0),
+    _dmobility_dc(_has_coupled_c
+                      ? &getMaterialPropertyDerivative<RealTensorValue>("mobility_name",
+                                                                        getVar("c", 0)->name())
+                      : NULL)
 {
-  if (_has_coupled_c)
-    _dmobility_dc = &getMaterialPropertyDerivative<RealTensorValue>("mobility_name", getVar("c", 0)->name());
 }
 
 Real

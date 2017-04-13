@@ -14,15 +14,15 @@
 
 #include "CachingPointSource.h"
 
-template<>
-InputParameters validParams<CachingPointSource>()
+template <>
+InputParameters
+validParams<CachingPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   return params;
 }
 
-CachingPointSource::CachingPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters)
+CachingPointSource::CachingPointSource(const InputParameters & parameters) : DiracKernel(parameters)
 {
 }
 
@@ -47,11 +47,10 @@ CachingPointSource::computeQpResidual()
 
   // If looking up the ID failed, we can't continue.
   if (id == libMesh::invalid_uint)
-    mooseError("User id for point " << _current_point << " is " << id);
+    mooseError("User id for point ", _current_point, " is ", id);
 
   // This is negative because it's a forcing function that has been
   // brought over to the left side.  The value of the forcing is equal
   // to the ID of the point in this simple example.
   return -_test[_i][_qp] * static_cast<Real>(id);
 }
-

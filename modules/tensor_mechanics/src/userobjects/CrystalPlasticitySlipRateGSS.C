@@ -6,22 +6,28 @@
 /****************************************************************/
 #include "CrystalPlasticitySlipRateGSS.h"
 
-template<>
-InputParameters validParams<CrystalPlasticitySlipRateGSS>()
+template <>
+InputParameters
+validParams<CrystalPlasticitySlipRateGSS>()
 {
   InputParameters params = validParams<CrystalPlasticitySlipRate>();
-  params.addParam<std::string>("uo_state_var_name", "Name of state variable property: Same as state variable user object specified in input file.");
-  params.addClassDescription("Phenomenological constitutive model slip rate class.  Override the virtual functions in your class");
+  params.addParam<std::string>("uo_state_var_name",
+                               "Name of state variable property: Same as "
+                               "state variable user object specified in input "
+                               "file.");
+  params.addClassDescription("Phenomenological constitutive model slip rate class.  Override the "
+                             "virtual functions in your class");
   return params;
 }
 
-CrystalPlasticitySlipRateGSS::CrystalPlasticitySlipRateGSS(const InputParameters & parameters) :
-    CrystalPlasticitySlipRate(parameters),
-    _mat_prop_state_var(getMaterialProperty<std::vector<Real> >(parameters.get<std::string>("uo_state_var_name"))),
+CrystalPlasticitySlipRateGSS::CrystalPlasticitySlipRateGSS(const InputParameters & parameters)
+  : CrystalPlasticitySlipRate(parameters),
+    _mat_prop_state_var(
+        getMaterialProperty<std::vector<Real>>(parameters.get<std::string>("uo_state_var_name"))),
     _pk2(getMaterialPropertyByName<RankTwoTensor>("pk2")),
     _a0(_variable_size),
     _xm(_variable_size),
-    _flow_direction(getMaterialProperty<std::vector<RankTwoTensor> >(_name + "_flow_direction"))
+    _flow_direction(getMaterialProperty<std::vector<RankTwoTensor>>(_name + "_flow_direction"))
 {
   if (_slip_sys_flow_prop_file_name.length() != 0)
     readFileFlowRateParams();
@@ -44,10 +50,11 @@ CrystalPlasticitySlipRateGSS::readFileFlowRateParams()
   {
     for (unsigned int j = 0; j < _num_slip_sys_flowrate_props; ++j)
       if (!(file >> vec[j]))
-        mooseError("Error CrystalPlasticitySlipRateGSS: Premature end of slip_sys_flow_rate_param file");
+        mooseError(
+            "Error CrystalPlasticitySlipRateGSS: Premature end of slip_sys_flow_rate_param file");
 
-    _a0(i)=vec[0];
-    _xm(i)=vec[1];
+    _a0(i) = vec[0];
+    _xm(i) = vec[1];
   }
 
   file.close();
@@ -57,37 +64,49 @@ void
 CrystalPlasticitySlipRateGSS::getFlowRateParams()
 {
   if (_flowprops.size() <= 0)
-    mooseError("CrystalPlasticitySlipRateGSS: Error in reading flow rate  properties: Specify input in .i file or a slip_sys_flow_prop_file_name");
+    mooseError("CrystalPlasticitySlipRateGSS: Error in reading flow rate  properties: Specify "
+               "input in .i file or a slip_sys_flow_prop_file_name");
 
   _a0.resize(_variable_size);
   _xm.resize(_variable_size);
 
-  unsigned int num_data_grp = 2 + _num_slip_sys_flowrate_props; //Number of data per group e.g. start_slip_sys, end_slip_sys, value1, value2, ..
+  unsigned int num_data_grp = 2 + _num_slip_sys_flowrate_props; // Number of data per group e.g.
+                                                                // start_slip_sys, end_slip_sys,
+                                                                // value1, value2, ..
 
   for (unsigned int i = 0; i < _flowprops.size() / num_data_grp; ++i)
   {
-    Real vs,ve;
+    Real vs, ve;
     unsigned int is, ie;
 
     vs = _flowprops[i * num_data_grp];
     ve = _flowprops[i * num_data_grp + 1];
 
     if (vs <= 0 || ve <= 0)
-      mooseError("CrystalPlasticitySlipRateGSS: Indices in flow rate parameter read must be positive integers: is = " << vs << " ie = " << ve );
+      mooseError("CrystalPlasticitySlipRateGSS: Indices in flow rate parameter read must be "
+                 "positive integers: is = ",
+                 vs,
+                 " ie = ",
+                 ve);
 
     if (vs != std::floor(vs) || ve != std::floor(ve))
-      mooseError("CrystalPlasticitySlipRateGSS: Error in reading flow props: Values specifying start and end number of slip system groups should be integer");
+      mooseError("CrystalPlasticitySlipRateGSS: Error in reading flow props: Values specifying "
+                 "start and end number of slip system groups should be integer");
 
     is = static_cast<unsigned int>(vs);
     ie = static_cast<unsigned int>(ve);
 
     if (is > ie)
-      mooseError("CrystalPlasticitySlipRateGSS: Start index is = " << is << " should be greater than end index ie = " << ie << " in flow rate parameter read");
+      mooseError("CrystalPlasticitySlipRateGSS: Start index is = ",
+                 is,
+                 " should be greater than end index ie = ",
+                 ie,
+                 " in flow rate parameter read");
 
     for (unsigned int j = is; j <= ie; ++j)
     {
-      _a0(j-1) = _flowprops[i * num_data_grp + 2];
-      _xm(j-1) = _flowprops[i * num_data_grp + 3];
+      _a0(j - 1) = _flowprops[i * num_data_grp + 2];
+      _xm(j - 1) = _flowprops[i * num_data_grp + 3];
     }
   }
 
@@ -95,32 +114,36 @@ CrystalPlasticitySlipRateGSS::getFlowRateParams()
   {
     if (!(_a0(i) > 0.0 && _xm(i) > 0.0))
     {
-      mooseWarning( "CrystalPlasticitySlipRateGSS: Non-positive flow rate parameters " << _a0(i) << "," << _xm(i) );
+      mooseWarning(
+          "CrystalPlasticitySlipRateGSS: Non-positive flow rate parameters ", _a0(i), ",", _xm(i));
       break;
     }
   }
 }
 
 void
-CrystalPlasticitySlipRateGSS::calcFlowDirection(unsigned int qp, std::vector<RankTwoTensor> & flow_direction) const
+CrystalPlasticitySlipRateGSS::calcFlowDirection(unsigned int qp,
+                                                std::vector<RankTwoTensor> & flow_direction) const
 {
-  DenseVector<Real> mo(LIBMESH_DIM*_variable_size),no(LIBMESH_DIM*_variable_size);
+  DenseVector<Real> mo(LIBMESH_DIM * _variable_size), no(LIBMESH_DIM * _variable_size);
 
   // Update slip direction and normal with crystal orientation
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     {
-      mo(i*LIBMESH_DIM+j) = 0.0;
+      mo(i * LIBMESH_DIM + j) = 0.0;
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        mo(i*LIBMESH_DIM+j) = mo(i*LIBMESH_DIM+j) + _crysrot[qp](j,k) * _mo(i*LIBMESH_DIM+k);
+        mo(i * LIBMESH_DIM + j) =
+            mo(i * LIBMESH_DIM + j) + _crysrot[qp](j, k) * _mo(i * LIBMESH_DIM + k);
     }
 
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     {
-      no(i*LIBMESH_DIM+j) = 0.0;
+      no(i * LIBMESH_DIM + j) = 0.0;
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        no(i*LIBMESH_DIM+j) = no(i*LIBMESH_DIM+j) + _crysrot[qp](j,k) * _no(i*LIBMESH_DIM+k);
+        no(i * LIBMESH_DIM + j) =
+            no(i * LIBMESH_DIM + j) + _crysrot[qp](j, k) * _no(i * LIBMESH_DIM + k);
     }
   }
 
@@ -128,7 +151,7 @@ CrystalPlasticitySlipRateGSS::calcFlowDirection(unsigned int qp, std::vector<Ran
   for (unsigned int i = 0; i < _variable_size; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        flow_direction[i](j,k) = mo(i*LIBMESH_DIM+j) * no(i*LIBMESH_DIM+k);
+        flow_direction[i](j, k) = mo(i * LIBMESH_DIM + j) * no(i * LIBMESH_DIM + k);
 }
 
 bool
@@ -141,11 +164,12 @@ CrystalPlasticitySlipRateGSS::calcSlipRate(unsigned int qp, Real dt, std::vector
 
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
-    val[i] = _a0(i) * std::pow(std::abs(tau(i) / _mat_prop_state_var[qp][i]), 1.0 / _xm(i)) * copysign(1.0, tau(i));
+    val[i] = _a0(i) * std::pow(std::abs(tau(i) / _mat_prop_state_var[qp][i]), 1.0 / _xm(i)) *
+             copysign(1.0, tau(i));
     if (std::abs(val[i] * dt) > _slip_incr_tol)
     {
 #ifdef DEBUG
-      mooseWarning("Maximum allowable slip increment exceeded " << std::abs(val[i])*dt);
+      mooseWarning("Maximum allowable slip increment exceeded ", std::abs(val[i]) * dt);
 #endif
       return false;
     }
@@ -155,7 +179,9 @@ CrystalPlasticitySlipRateGSS::calcSlipRate(unsigned int qp, Real dt, std::vector
 }
 
 bool
-CrystalPlasticitySlipRateGSS::calcSlipRateDerivative(unsigned int qp, Real /*dt*/, std::vector<Real> & val) const
+CrystalPlasticitySlipRateGSS::calcSlipRateDerivative(unsigned int qp,
+                                                     Real /*dt*/,
+                                                     std::vector<Real> & val) const
 {
   DenseVector<Real> tau(_variable_size);
 
@@ -163,7 +189,9 @@ CrystalPlasticitySlipRateGSS::calcSlipRateDerivative(unsigned int qp, Real /*dt*
     tau(i) = _pk2[qp].doubleContraction(_flow_direction[qp][i]);
 
   for (unsigned int i = 0; i < _variable_size; ++i)
-    val[i] = _a0(i) / _xm(i) * std::pow(std::abs(tau(i) / _mat_prop_state_var[qp][i]), 1.0 / _xm(i) - 1.0) / _mat_prop_state_var[qp][i];
+    val[i] = _a0(i) / _xm(i) *
+             std::pow(std::abs(tau(i) / _mat_prop_state_var[qp][i]), 1.0 / _xm(i) - 1.0) /
+             _mat_prop_state_var[qp][i];
 
   return true;
 }

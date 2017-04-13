@@ -14,25 +14,17 @@
 
 #include "FDDiffusion.h"
 
-
-template<>
-InputParameters validParams<FDDiffusion>()
+template <>
+InputParameters
+validParams<FDDiffusion>()
 {
   InputParameters p = validParams<FDKernel>();
   return p;
 }
 
+FDDiffusion::FDDiffusion(const InputParameters & parameters) : FDKernel(parameters) {}
 
-FDDiffusion::FDDiffusion(const InputParameters & parameters) :
-    FDKernel(parameters)
-{
-
-}
-
-FDDiffusion::~FDDiffusion()
-{
-
-}
+FDDiffusion::~FDDiffusion() {}
 
 Real
 FDDiffusion::computeQpResidual()

@@ -16,35 +16,36 @@
 #define SPLIT_H
 
 // MOOSE includes
-#include "Restartable.h"
+#include "MooseEnum.h"
 #include "MooseObject.h"
 #include "PetscSupport.h"
+#include "Restartable.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * Base class for split-based preconditioners.
  */
-class Split :
-  public MooseObject,
-  public Restartable
+class Split : public MooseObject, public Restartable
 {
- public:
+public:
   Split(const InputParameters & parameters);
-  virtual void setup(const std::string& prefix = "-");
+  virtual ~Split() = default;
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
- protected:
+  virtual void setup(const std::string & prefix = "-");
+
+protected:
   /// Which splitting to use
-  enum SplittingType {
+  enum SplittingType
+  {
     SplittingTypeAdditive,
     SplittingTypeMultiplicative,
     SplittingTypeSymmetricMultiplicative,
     SplittingTypeSchur
   };
 
-  FEProblem& _fe_problem;
+  FEProblemBase & _fe_problem;
 
   /// "Variables Split operates on
   std::vector<NonlinearVariableName> _vars;
@@ -68,10 +69,7 @@ class Split :
   ///@}
 
   /// Additional PETSc options
-  Moose::PetscSupport::PetscOptions & _petsc_options;
-
-#endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+  Moose::PetscSupport::PetscOptions _petsc_options;
 };
 
-
-#endif /* SPLIT_H */
+#endif // SPLIT_H

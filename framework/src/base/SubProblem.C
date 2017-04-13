@@ -21,8 +21,9 @@
 #include "MooseVariable.h"
 #include "MooseArray.h"
 
-template<>
-InputParameters validParams<SubProblem>()
+template <>
+InputParameters
+validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
   return params;
@@ -30,25 +31,30 @@ InputParameters validParams<SubProblem>()
 
 // SubProblem /////
 
-SubProblem::SubProblem(const InputParameters & parameters) :
-    Problem(parameters),
+SubProblem::SubProblem(const InputParameters & parameters)
+  : Problem(parameters),
     _factory(_app.getFactory()),
+    _nonlocal_cm(),
+    _requires_nonlocal_coupling(false),
     _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
+  _active_material_property_ids.resize(n_threads);
 }
 
-SubProblem::~SubProblem()
-{
-}
+SubProblem::~SubProblem() {}
 
 void
-SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
+SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
+                                             THREAD_ID tid)
 {
-  _has_active_elemental_moose_variables[tid] = 1;
-  _active_elemental_moose_variables[tid] = moose_vars;
+  if (!moose_vars.empty())
+  {
+    _has_active_elemental_moose_variables[tid] = 1;
+    _active_elemental_moose_variables[tid] = moose_vars;
+  }
 }
 
 const std::set<MooseVariable *> &
@@ -70,19 +76,42 @@ SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
   _active_elemental_moose_variables[tid].clear();
 }
 
+void
+SubProblem::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid)
+{
+  if (!mat_prop_ids.empty())
+    _active_material_property_ids[tid] = mat_prop_ids;
+}
+
+const std::set<unsigned int> &
+SubProblem::getActiveMaterialProperties(THREAD_ID tid)
+{
+  return _active_material_property_ids[tid];
+}
+
+bool
+SubProblem::hasActiveMaterialProperties(THREAD_ID tid)
+{
+  return !_active_material_property_ids[tid].empty();
+}
+
+void
+SubProblem::clearActiveMaterialProperties(THREAD_ID tid)
+{
+  _active_material_property_ids[tid].clear();
+}
+
 std::set<SubdomainID>
 SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
 {
   std::set<SubdomainID> blocks;
 
-  for (std::map<SubdomainID, std::set<std::string> >::iterator it = _map_block_material_props.begin();
-      it != _map_block_material_props.end();
-      ++it)
+  for (const auto & it : _map_block_material_props)
   {
-    std::set<std::string> & prop_names = it->second;
+    const std::set<std::string> & prop_names = it.second;
     std::set<std::string>::iterator name_it = prop_names.find(prop_name);
     if (name_it != prop_names.end())
-      blocks.insert(it->first);
+      blocks.insert(it.first);
   }
 
   return blocks;
@@ -94,18 +123,18 @@ SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
   std::set<SubdomainID> blocks = getMaterialPropertyBlocks(prop_name);
   std::vector<SubdomainName> block_names;
   block_names.reserve(blocks.size());
-  for (std::set<SubdomainID>::iterator it = blocks.begin(); it != blocks.end(); ++it)
+  for (const auto & block_id : blocks)
   {
     SubdomainName name;
-    if (*it == Moose::ANY_BLOCK_ID)
+    if (block_id == Moose::ANY_BLOCK_ID)
       name = "ANY_BLOCK_ID";
     else
     {
-      name = mesh().getMesh().subdomain_name(*it);
+      name = mesh().getMesh().subdomain_name(block_id);
       if (name.empty())
       {
         std::ostringstream oss;
-        oss << *it;
+        oss << block_id;
         name = oss.str();
       }
     }
@@ -121,14 +150,12 @@ SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
 {
   std::set<BoundaryID> boundaries;
 
-  for (std::map<BoundaryID, std::set<std::string> >::iterator it = _map_boundary_material_props.begin();
-      it != _map_boundary_material_props.end();
-      ++it)
+  for (const auto & it : _map_boundary_material_props)
   {
-    std::set<std::string> & prop_names = it->second;
+    const std::set<std::string> & prop_names = it.second;
     std::set<std::string>::iterator name_it = prop_names.find(prop_name);
     if (name_it != prop_names.end())
-      boundaries.insert(it->first);
+      boundaries.insert(it.first);
   }
 
   return boundaries;
@@ -142,18 +169,18 @@ SubProblem::getMaterialPropertyBoundaryNames(const std::string & prop_name)
   boundary_names.reserve(boundaries.size());
   const BoundaryInfo & boundary_info = mesh().getMesh().get_boundary_info();
 
-  for (std::set<BoundaryID>::iterator it = boundaries.begin(); it != boundaries.end(); ++it)
+  for (const auto & bnd_id : boundaries)
   {
     BoundaryName name;
-    if (*it == Moose::ANY_BOUNDARY_ID)
+    if (bnd_id == Moose::ANY_BOUNDARY_ID)
       name = "ANY_BOUNDARY_ID";
     else
     {
-      name = boundary_info.get_sideset_name(*it);
+      name = boundary_info.get_sideset_name(bnd_id);
       if (name.empty())
       {
         std::ostringstream oss;
-        oss << *it;
+        oss << bnd_id;
         name = oss.str();
       }
     }
@@ -188,13 +215,17 @@ SubProblem::storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName 
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(const std::string & requestor, SubdomainID block_id, const std::string & name)
+SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
+                                     SubdomainID block_id,
+                                     const std::string & name)
 {
   _map_block_material_props_check[block_id].insert(std::make_pair(requestor, name));
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(const std::string & requestor, BoundaryID boundary_id, const std::string & name)
+SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
+                                     BoundaryID boundary_id,
+                                     const std::string & name)
 {
   _map_boundary_material_props_check[boundary_id].insert(std::make_pair(requestor, name));
 }
@@ -202,13 +233,16 @@ SubProblem::storeDelayedCheckMatProp(const std::string & requestor, BoundaryID b
 void
 SubProblem::checkBlockMatProps()
 {
-  checkMatProps(_map_block_material_props, _map_block_material_props_check, _zero_block_material_props);
+  checkMatProps(
+      _map_block_material_props, _map_block_material_props_check, _zero_block_material_props);
 }
 
 void
 SubProblem::checkBoundaryMatProps()
 {
-  checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, _zero_boundary_material_props);
+  checkMatProps(_map_boundary_material_props,
+                _map_boundary_material_props_check,
+                _zero_boundary_material_props);
 }
 
 void
@@ -286,9 +320,9 @@ SubProblem::restrictionCheckName(BoundaryID check_id)
 
 template <typename T>
 void
-SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
-                          std::map<T, std::multimap<std::string, std::string> > & check_props,
-                          std::map<T, std::set<MaterialPropertyName> > & zero_props)
+SubProblem::checkMatProps(std::map<T, std::set<std::string>> & props,
+                          std::map<T, std::multimap<std::string, std::string>> & check_props,
+                          std::map<T, std::set<MaterialPropertyName>> & zero_props)
 {
   // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
   T any_id = mesh().getAnyID<T>();
@@ -297,54 +331,44 @@ SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
   std::set<T> all_ids(mesh().getBlockOrBoundaryIDs<T>());
 
   // Loop through the properties to check
-  for (typename std::map<T, std::multimap<std::string, std::string> >::const_iterator check_it = check_props.begin();
-       check_it != check_props.end(); ++check_it)
+  for (const auto & check_it : check_props)
   {
     // The current id for the property being checked (BoundaryID || BlockID)
-    T check_id = check_it->first;
-
-    // Get the name of the block/boundary (for error reporting)
-    std::string check_name = restrictionCheckName(check_id);
-
-    // Create a name if it doesn't exist
-    if (check_name.empty())
-    {
-      std::ostringstream ss;
-      ss << check_id;
-      check_name = ss.str();
-    }
+    T check_id = check_it.first;
 
     // In the case when the material being checked has an ID is set to ANY, then loop through all
     // the possible ids and verify that the material property is defined.
+    std::set<T> check_ids = {check_id};
     if (check_id == any_id)
+      check_ids = all_ids;
+
+    // Loop through all the block/boundary ids
+    for (const auto & id : check_ids)
     {
-      // Loop through all the block/boundary ids
-      for (typename std::set<T>::const_iterator all_it = all_ids.begin(); all_it != all_ids.end(); ++all_it)
+      // Loop through all the stored properties
+      for (const auto & prop_it : check_it.second)
       {
-        // Loop through all the stored properties
-        for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
+        // Produce an error if the material property is not defined on the current block/boundary
+        // and any block/boundary
+        // and not is not a zero material property.
+        if (props[id].count(prop_it.second) == 0 && props[any_id].count(prop_it.second) == 0 &&
+            zero_props[id].count(prop_it.second) == 0 &&
+            zero_props[any_id].count(prop_it.second) == 0)
         {
-          // Produce an error if the material property is not defined on the current block/boundary and any block/boundary
-          // and not is not a zero material property.
-          if (props[*all_it].find(prop_it->second) == props[*all_it].end() && props[any_id].find(prop_it->second) == props[any_id].end() &&
-              zero_props[*all_it].find(prop_it->second) == zero_props[*all_it].end() && zero_props[any_id].find(prop_it->second) == zero_props[any_id].end())
-            mooseError("Material property '" << prop_it->second << "', requested by '" << prop_it->first << "' is not defined on " << restrictionTypeName<T>() << " " << *all_it);
+          std::string check_name = restrictionCheckName(id);
+          if (check_name.empty())
+            check_name = std::to_string(id);
+          mooseError("Material property '",
+                     prop_it.second,
+                     "', requested by '",
+                     prop_it.first,
+                     "' is not defined on ",
+                     restrictionTypeName<T>(),
+                     " ",
+                     check_name);
         }
       }
     }
-
-    // If the property is contained in the map of properties, loop over the stored names for the current id and
-    // check that the property is defined
-    else if (props.find(check_id) != props.end())
-      for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
-      {
-        // Check if the name is contained in the map and skip over the id if it is Moose::ANY_BLOCK_ID/ANY_BOUNDARY_ID
-        if (props[check_id].find(prop_it->second) == props[check_id].end() &&
-            zero_props[check_id].find(prop_it->second) == zero_props[check_id].end() && check_id != any_id)
-          mooseError("Material property '" + prop_it->second + "', requested by '" + prop_it->first + "' is not defined on " + restrictionTypeName<T>() + " " + check_name);
-      }
-    else
-      mooseError("No material defined on " + restrictionTypeName<T>() + " " + check_name);
   }
 }
 
@@ -356,7 +380,6 @@ SubProblem::getAxisymmetricRadialCoord()
   else
     return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
 }
-
 
 void
 SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)

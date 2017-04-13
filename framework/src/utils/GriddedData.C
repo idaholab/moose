@@ -12,9 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "GriddedData.h"
+
 // MOOSE includes
 #include "MooseError.h"
-#include "GriddedData.h"
+
+// C++ includes
+#include <fstream>
 
 /**
  * Creates a GriddedData object by reading info from file_name
@@ -61,7 +65,6 @@ GriddedData::GriddedData(std::string file_name)
   parse(_dim, _axes, _grid, _fcn, _step, file_name);
 }
 
-
 /**
  * Returns the dimensionality of the grid.
  * This may have nothing to do with the dimensionality of
@@ -94,7 +97,7 @@ GriddedData::getAxes(std::vector<int> & axes)
  * grid[i] = a vector of Reals that define the i_th axis of the grid
  */
 void
-GriddedData::getGrid(std::vector<std::vector<Real> > & grid)
+GriddedData::getGrid(std::vector<std::vector<Real>> & grid)
 {
   grid.resize(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
@@ -118,22 +121,26 @@ GriddedData::getFcn(std::vector<Real> & fcn)
 
 /**
  * Evaluates the function at a given grid point
- * for instance evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on a 2D grid
+ * for instance evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on a
+ * 2D grid
  */
 Real
 GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
 {
   if (ijk.size() != _dim)
-    mooseError("Gridded data evaluateFcn called with " << ijk.size() << " arguments, but expected " << _dim);
+    mooseError(
+        "Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
   unsigned int index = ijk[0];
   for (unsigned int i = 1; i < _dim; ++i)
     index += ijk[i] * _step[i];
   if (index >= _fcn.size())
-    mooseError("Gridded data evaluateFcn attempted to access index " << index << " of function, but it contains only " << _fcn.size() << " entries");
+    mooseError("Gridded data evaluateFcn attempted to access index ",
+               index,
+               " of function, but it contains only ",
+               _fcn.size(),
+               " entries");
   return _fcn[index];
 }
-
-
 
 /**
  * parse the file_name extracting information.
@@ -162,7 +169,12 @@ GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
  * # end of file
  */
 void
-GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real> > & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name)
+GriddedData::parse(unsigned int & dim,
+                   std::vector<int> & axes,
+                   std::vector<std::vector<Real>> & grid,
+                   std::vector<Real> & f,
+                   std::vector<unsigned int> & step,
+                   std::string file_name)
 {
   // initialize
   dim = 0;
@@ -179,7 +191,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   bool reading_value_data = false;
 
   // read file line-by-line extracting data
-  while (getSignificantLine (file, line))
+  while (getSignificantLine(file, line))
   {
     // look for AXIS keywords
     reading_grid_data = false;
@@ -212,7 +224,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
     if (reading_grid_data)
     {
       grid.resize(dim); // add another dimension to the grid
-      grid[dim-1].resize(0);
+      grid[dim - 1].resize(0);
       if (getSignificantLine(file, line))
         splitToRealVec(line, grid[dim - 1]);
       continue; // read next line from file
@@ -239,20 +251,21 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   for (unsigned int i = 1; i < dim; ++i)
     step[i] = step[i - 1] * grid[i - 1].size();
 
-
   // perform some checks
   unsigned int num_data_points = 1;
   for (unsigned int i = 0; i < dim; ++i)
   {
     if (grid[i].size() == 0)
-      mooseError("Axis " << i << " in your GriddedData has zero size");
+      mooseError("Axis ", i, " in your GriddedData has zero size");
     num_data_points *= grid[i].size();
   }
   if (num_data_points != f.size())
-    mooseError("According to AXIS statements in GriddedData, number of data points is " << num_data_points << " but " << f.size() << " function values were read from file");
-
+    mooseError("According to AXIS statements in GriddedData, number of data points is ",
+               num_data_points,
+               " but ",
+               f.size(),
+               " function values were read from file");
 }
-
 
 /**
  * Extracts the next line from file_stream that is:
@@ -277,8 +290,6 @@ GriddedData::getSignificantLine(std::ifstream & file_stream, std::string & line)
   return false;
 }
 
-
-
 /**
  * Splits an input_string using space as the separator
  * Converts the resulting items to Real, and adds these
@@ -297,7 +308,3 @@ GriddedData::splitToRealVec(const std::string & input_string, std::vector<Real> 
     output_vec.push_back(d);
   }
 }
-
-
-
-

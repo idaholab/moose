@@ -19,7 +19,7 @@
 
 class DeprecatedBlockAction;
 
-template<>
+template <>
 InputParameters validParams<DeprecatedBlockAction>();
 
 /**
@@ -29,12 +29,8 @@ class DeprecatedBlockAction : public Action
 {
 public:
   DeprecatedBlockAction(InputParameters parameters);
-  virtual ~DeprecatedBlockAction();
 
-  void act();
-
-protected:
-
+  void act() override;
 };
 
 #endif // DEPRECATEDBLOCKACTION_H

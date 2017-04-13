@@ -6,20 +6,30 @@
 /****************************************************************/
 #include "CylindricalRankTwoAux.h"
 
-template<>
-InputParameters validParams<CylindricalRankTwoAux>()
+template <>
+InputParameters
+validParams<CylindricalRankTwoAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Takes RankTwoTensor material and outputs component in cylindrical coordinates");
-  params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
-  params.addRequiredRangeCheckedParam<unsigned int>("index_i", "index_i >= 0 & index_i <= 2", "The index i of ij for the tensor to output (0, 1, 2)");
-  params.addRequiredRangeCheckedParam<unsigned int>("index_j", "index_j >= 0 & index_j <= 2", "The index j of ij for the tensor to output (0, 1, 2)");
-  params.addRequiredParam<Point>("center_point","Location of the center point of the cylindrical coordinates");
+  params.addClassDescription(
+      "Takes RankTwoTensor material and outputs component in cylindrical coordinates");
+  params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
+                                                "The rank two material tensor name");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "index_i",
+      "index_i >= 0 & index_i <= 2",
+      "The index i of ij for the tensor to output (0, 1, 2)");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "index_j",
+      "index_j >= 0 & index_j <= 2",
+      "The index j of ij for the tensor to output (0, 1, 2)");
+  params.addRequiredParam<Point>("center_point",
+                                 "Location of the center point of the cylindrical coordinates");
   return params;
 }
 
-CylindricalRankTwoAux::CylindricalRankTwoAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+CylindricalRankTwoAux::CylindricalRankTwoAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j")),
@@ -34,10 +44,10 @@ CylindricalRankTwoAux::computeValue()
 
   Real theta = std::atan2(loc_from_center(1), loc_from_center(0));
   RankTwoTensor R;
-  R(0,0) = std::cos(theta);
-  R(0,1) = std::sin(theta);
-  R(1,0) = -std::sin(theta);
-  R(1,1) = std::cos(theta);
+  R(0, 0) = std::cos(theta);
+  R(0, 1) = std::sin(theta);
+  R(1, 0) = -std::sin(theta);
+  R(1, 1) = std::cos(theta);
 
   RankTwoTensor rotated_tensor = R * _tensor[_qp] * R.transpose();
 

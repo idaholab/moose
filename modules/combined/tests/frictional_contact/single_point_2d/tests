@@ -28,4 +28,11 @@
     superlu = true
     max_parallel = 1
   [../]
+  [./tangential_penalty]
+    type = 'Exodiff'
+    input = 'single_point_2d_tp.i'
+    exodiff = 'single_point_2d_tp_out.e'
+    custom_cmp = 'single_point_2d.cmp'
+    superlu = true
+  [../]
 []

@@ -1,0 +1,170 @@
+[Tests]
+  [./except1]
+    type = 'RunException'
+    input = 'except1.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
+  [../]
+  [./except2]
+    type = 'RunException'
+    input = 'except2.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
+  [../]
+  [./except3]
+    type = 'RunException'
+    input = 'except3.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle'
+  [../]
+  [./except4]
+    type = 'RunException'
+    input = 'except4.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative'
+  [../]
+  [./except5]
+    type = 'RunException'
+    input = 'except5.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol'
+  [../]
+  [./except6]
+    type = 'RunException'
+    input = 'except6.i'
+    expect_err = 'ComputeCappedWeakInclinedPlaneStress: normal_vector must not have zero length'
+  [../]
+  [./small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+  [../]
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+  [../]
+  [./small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+  [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+  [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+  [../]
+  [./small7]
+    type = 'CSVDiff'
+    input = 'small_deform7.i'
+    csvdiff = 'small_deform7.csv'
+  [../]
+  [./small8]
+    type = 'CSVDiff'
+    input = 'small_deform8.i'
+    csvdiff = 'small_deform8.csv'
+  [../]
+  [./small9]
+    type = 'CSVDiff'
+    input = 'small_deform9.i'
+    csvdiff = 'small_deform9.csv'
+  [../]
+  [./small10]
+    type = 'CSVDiff'
+    input = 'small_deform10.i'
+    csvdiff = 'small_deform10.csv'
+  [../]
+  [./small11]
+    type = 'CSVDiff'
+    input = 'small_deform11.i'
+    csvdiff = 'small_deform11.csv'
+  [../]
+
+  [./pull_push]
+    type = Exodiff
+    input = 'pull_push.i'
+    exodiff = 'pull_push.e'
+    abs_zero = 1E-4
+  [../]
+  [./pull_push_h]
+    type = Exodiff
+    input = 'pull_push_h.i'
+    exodiff = 'pull_push_h.e'
+    abs_zero = 1E-4
+  [../]
+
+  [./cwp_beam]
+    type = Exodiff
+    input = 'beam.i'
+    exodiff = 'beam.e'
+    #heavy = true  # uncomment if this test takes too long on INL computers
+    abs_zero = 1E-4
+  [../]
+
+  [./pull_and_shear_1step]
+    type = Exodiff
+    input = 'pull_and_shear_1step.i'
+    exodiff = 'pull_and_shear_1step.e'
+  [../]
+  [./pull_and_shear]
+    type = Exodiff
+    input = 'pull_and_shear.i'
+    exodiff = 'pull_and_shear.e'
+    #heavy = true  # uncomment if this test takes too long on INL computers
+    abs_zero = 1E-4
+  [../]
+  [./push_and_shear]
+    type = Exodiff
+    input = 'push_and_shear.i'
+    exodiff = 'push_and_shear.e'
+    abs_zero = 1E-4
+  [../]
+  [./throw_test]
+    type = 'RunException'
+    input = 'throw_test.i'
+    expect_err = "Solve failed and timestep already at or below dtmin"
+    recover = false
+  [../]
+
+  [./small_inclined2]
+    type = 'CSVDiff'
+    input = 'small_deform_inclined2.i'
+    csvdiff = 'small_deform_inclined2.csv'
+  [../]
+  [./small_inclined3]
+    type = 'CSVDiff'
+    input = 'small_deform_inclined3.i'
+    csvdiff = 'small_deform_inclined3.csv'
+  [../]
+  [./small_inclined5]
+    type = 'CSVDiff'
+    input = 'small_deform_inclined5.i'
+    csvdiff = 'small_deform_inclined5.csv'
+  [../]
+
+  [./small_cosserat1]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat1.i'
+    csvdiff = 'small_deform_cosserat1.csv'
+  [../]
+  [./small_cosserat2]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat2.i'
+    csvdiff = 'small_deform_cosserat2.csv'
+  [../]
+  [./small_cosserat3]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat3.i'
+    csvdiff = 'small_deform_cosserat3.csv'
+  [../]
+  [./small_cosserat4]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat4.i'
+    csvdiff = 'small_deform_cosserat4.csv'
+  [../]
+[]

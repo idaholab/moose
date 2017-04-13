@@ -6,18 +6,20 @@
 /****************************************************************/
 #include "CHSplitConcentration.h"
 
-template<>
-InputParameters validParams<CHSplitConcentration>()
+template <>
+InputParameters
+validParams<CHSplitConcentration>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Concentration kernel in Split Cahn-Hilliard that solves chemical potential in a weak form");
+  params.addClassDescription(
+      "Concentration kernel in Split Cahn-Hilliard that solves chemical potential in a weak form");
   params.addRequiredParam<MaterialPropertyName>("mobility", "Mobility property name");
   params.addRequiredCoupledVar("chemical_potential_var", "Chemical potential variable");
   return params;
 }
 
-CHSplitConcentration::CHSplitConcentration(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Kernel>(parameters),
+CHSplitConcentration::CHSplitConcentration(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _mobility_name(getParam<MaterialPropertyName>("mobility")),
     _mobility(getMaterialProperty<RealTensorValue>(_mobility_name)),
     _dmobility_dc(getMaterialPropertyDerivative<RealTensorValue>(_mobility_name, name())),
@@ -29,14 +31,14 @@ CHSplitConcentration::CHSplitConcentration(const InputParameters & parameters) :
 Real
 CHSplitConcentration::computeQpResidual()
 {
-  RealVectorValue a = _mobility[_qp] * _grad_mu[_qp];
-  return _grad_test[_i][_qp] * a ;
+  const RealVectorValue a = _mobility[_qp] * _grad_mu[_qp];
+  return _grad_test[_i][_qp] * a;
 }
 
 Real
 CHSplitConcentration::computeQpJacobian()
 {
-  RealVectorValue a = _dmobility_dc[_qp] * _grad_mu[_qp];
+  const RealVectorValue a = _dmobility_dc[_qp] * _grad_mu[_qp];
   return _grad_test[_i][_qp] * a * _phi[_j][_qp];
 }
 
@@ -45,7 +47,7 @@ CHSplitConcentration::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _mu_var)
   {
-    RealVectorValue a = _mobility[_qp] * _grad_phi[_j][_qp];
+    const RealVectorValue a = _mobility[_qp] * _grad_phi[_j][_qp];
     return _grad_test[_i][_qp] * a;
   }
   else

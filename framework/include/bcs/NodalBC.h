@@ -25,19 +25,19 @@ class NodalBC;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<NodalBC>();
 
 /**
  * Base class for deriving any boundary condition that works at nodes
  */
-class NodalBC :
-  public BoundaryCondition,
-  public RandomInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface
+class NodalBC : public BoundaryCondition,
+                public RandomInterface,
+                public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodalBC(const InputParameters & parameters);
@@ -48,7 +48,7 @@ public:
 
 protected:
   /// current node being processed
-  const Node * & _current_node;
+  const Node *& _current_node;
 
   /// Quadrature point index
   unsigned int _qp;
@@ -57,12 +57,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable*> _save_in;
+  std::vector<MooseVariable *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable*> _diag_save_in;
+  std::vector<MooseVariable *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   virtual Real computeQpResidual() = 0;

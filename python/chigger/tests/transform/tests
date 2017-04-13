@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = scale.py
+    imagediff = 'scale.png'
+  [../]
+  [./test_2d]
+    type = ImageDiff
+    command = scale_2d.py
+    imagediff = 'scale_2d.png'
+  [../]
+[]

@@ -12,13 +12,14 @@
 
 class CHSplitChemicalPotential;
 
-template<>
+template <>
 InputParameters validParams<CHSplitChemicalPotential>();
 
 /**
  * Solves chemical potential in a weak sense (mu-mu_prop=0)
  * Can be coupled to Cahn-Hilliard equation to solve species diffusion
- * Allows spatial derivative of chemical potential when coupled to material state such as stress, etc.
+ * Allows spatial derivative of chemical potential when coupled to material state such as stress,
+ *etc.
  * Can be used to model species diffusion mediated creep
  **/
 class CHSplitChemicalPotential : public DerivativeMaterialInterface<Kernel>

@@ -14,27 +14,34 @@
 
 #include "BoxMarker.h"
 
-template<>
-InputParameters validParams<BoxMarker>()
+template <>
+InputParameters
+validParams<BoxMarker>()
 {
   InputParameters params = validParams<Marker>();
-  params.addRequiredParam<RealVectorValue>("bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addRequiredParam<RealVectorValue>("top_right", "The bottom left point (in x,y,z with spaces in-between).");
+  params.addRequiredParam<RealVectorValue>(
+      "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
+  params.addRequiredParam<RealVectorValue>(
+      "top_right", "The bottom left point (in x,y,z with spaces in-between).");
 
   MooseEnum marker_states = Marker::markerStates();
 
-  params.addRequiredParam<MooseEnum>("inside", marker_states, "How to mark elements inside the box.");
-  params.addRequiredParam<MooseEnum>("outside", marker_states, "How to mark elements outside the box.");
+  params.addRequiredParam<MooseEnum>(
+      "inside", marker_states, "How to mark elements inside the box.");
+  params.addRequiredParam<MooseEnum>(
+      "outside", marker_states, "How to mark elements outside the box.");
 
+  params.addClassDescription(
+      "Marks the region inside and outside of a 'box' domain for refinement or coarsening.");
   return params;
 }
 
-
-BoxMarker::BoxMarker(const InputParameters & parameters) :
-    Marker(parameters),
+BoxMarker::BoxMarker(const InputParameters & parameters)
+  : Marker(parameters),
     _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
     _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
-    _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))
+    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
+                  parameters.get<RealVectorValue>("top_right"))
 {
 }
 
@@ -48,5 +55,3 @@ BoxMarker::computeElementMarker()
 
   return _outside;
 }
-
-

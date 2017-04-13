@@ -6,31 +6,39 @@
 /****************************************************************/
 
 #include "RichardsMultiphaseProblem.h"
-#include "NonlinearSystem.h"
-#include "MooseMesh.h"
 
-template<>
-InputParameters validParams<RichardsMultiphaseProblem>()
+// MOOSE includes
+#include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
+
+template <>
+InputParameters
+validParams<RichardsMultiphaseProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
-  params.addRequiredParam<NonlinearVariableName>("bounded_var", "Variable whose value will be constrained to be greater than lower_var");
-  params.addRequiredParam<NonlinearVariableName>("lower_var", "Variable that acts as a lower bound to bounded_var.  It will not be constrained during the solution procedure");
+  InputParameters params = validParams<FEProblemBase>();
+  params.addRequiredParam<NonlinearVariableName>(
+      "bounded_var", "Variable whose value will be constrained to be greater than lower_var");
+  params.addRequiredParam<NonlinearVariableName>(
+      "lower_var",
+      "Variable that acts as a lower bound to bounded_var.  It will not be "
+      "constrained during the solution procedure");
   return params;
 }
 
-
-RichardsMultiphaseProblem::RichardsMultiphaseProblem(const InputParameters & params) :
-    FEProblem(params),
-    // in the following have to get the names of the variables, and then find their numbers in initialSetup,
+RichardsMultiphaseProblem::RichardsMultiphaseProblem(const InputParameters & params)
+  : FEProblem(params),
+    // in the following have to get the names of the variables, and then find their numbers in
+    // initialSetup,
     // as their numbers won't be defined at the moment of instantiation of this class
     _bounded_var_name(params.get<NonlinearVariableName>("bounded_var")),
     _lower_var_name(params.get<NonlinearVariableName>("lower_var")),
     _bounded_var_num(0),
     _lower_var_num(0)
-{}
+{
+}
 
-RichardsMultiphaseProblem::~RichardsMultiphaseProblem()
-{}
+RichardsMultiphaseProblem::~RichardsMultiphaseProblem() {}
 
 void
 RichardsMultiphaseProblem::initialSetup()
@@ -42,19 +50,21 @@ RichardsMultiphaseProblem::initialSetup()
 
   // some checks
   if (!bounded.isNodal() || !lower.isNodal())
-    mooseError("Both the bounded and lower variables must be nodal variables in RichardsMultiphaseProblem");
+    mooseError("Both the bounded and lower variables must be nodal variables in "
+               "RichardsMultiphaseProblem");
   if (bounded.feType().family != lower.feType().family)
-    mooseError("Both the bounded and lower variables must belong to the same element family, eg LAGRANGE, in RichardsMultiphaseProblem");
+    mooseError("Both the bounded and lower variables must belong to the same element family, eg "
+               "LAGRANGE, in RichardsMultiphaseProblem");
   if (bounded.feType().order != lower.feType().order)
-    mooseError("Both the bounded and lower variables must have the same order, eg FIRST, in RichardsMultiphaseProblem");
+    mooseError("Both the bounded and lower variables must have the same order, eg FIRST, in "
+               "RichardsMultiphaseProblem");
 
   // extract the required info
   _bounded_var_num = bounded.number();
   _lower_var_num = lower.number();
 
-  FEProblem::initialSetup();
+  FEProblemBase::initialSetup();
 }
-
 
 bool
 RichardsMultiphaseProblem::shouldUpdateSolution()
@@ -63,18 +73,21 @@ RichardsMultiphaseProblem::shouldUpdateSolution()
 }
 
 bool
-RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution)
+RichardsMultiphaseProblem::updateSolution(NumericVector<Number> & vec_solution,
+                                          NumericVector<Number> & ghosted_solution)
 {
-  bool updatedSolution = false;  // this gets set to true if we needed to enforce the bound at any node
+  bool updatedSolution =
+      false; // this gets set to true if we needed to enforce the bound at any node
 
-  unsigned int sys_num = getNonlinearSystem().number();
+  unsigned int sys_num = getNonlinearSystemBase().number();
 
   // For parallel procs i believe that i have to use local_nodes_begin, rather than just nodes_begin
-  // _mesh comes from SystemBase (_mesh = getNonlinearSystem().subproblem().mesh(), and subproblem is this object)
+  // _mesh comes from SystemBase (_mesh = getNonlinearSystemBase().subproblem().mesh(), and
+  // subproblem is this object)
   MeshBase::node_iterator nit = _mesh.getMesh().local_nodes_begin();
   const MeshBase::node_iterator nend = _mesh.getMesh().local_nodes_end();
 
-  for ( ; nit != nend; ++nit)
+  for (; nit != nend; ++nit)
   {
     const Node & node = *(*nit);
 
@@ -95,7 +108,6 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
       vec_solution.set(dofs[0], soln[1]); // set the bounded variable equal to the lower value
       updatedSolution = true;
     }
-
   }
 
   // The above vec_solution.set calls potentially added "set" commands to a queue
@@ -113,5 +125,4 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
   }
 
   return updatedSolution;
-
 }

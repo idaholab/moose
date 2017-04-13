@@ -12,21 +12,15 @@
 
 class CavityPressureAction;
 
-template<>
+template <>
 InputParameters validParams<CavityPressureAction>();
 
-class CavityPressureAction: public Action
+class CavityPressureAction : public Action
 {
 public:
   CavityPressureAction(const InputParameters & params);
 
-  virtual void act();
-
-private:
-  const std::vector<BoundaryName> _boundary;
-
-protected:
-  bool _use_displaced_mesh;
+  virtual void act() override;
 };
 
 #endif // CAVITYPRESSUREACTION_H

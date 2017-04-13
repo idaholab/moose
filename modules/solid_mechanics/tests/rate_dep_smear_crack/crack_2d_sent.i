@@ -205,9 +205,9 @@
   petsc_options_value = 'asm      31                  preonly       lu           1'
 
   line_search = 'none'
-  nl_max_its = 10
+  nl_max_its = 20
   nl_rel_tol = 1e-15
-
+  l_tol = 1e-1
   dt = 0.05
   dtmin = 0.05
   num_steps = 2

@@ -17,22 +17,21 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleCoefDiffusion;
 
-template<>
+template <>
 InputParameters validParams<ExampleCoefDiffusion>();
 
 class ExampleCoefDiffusion : public Kernel
 {
 public:
-
   ExampleCoefDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
 private:
   Real _coef;

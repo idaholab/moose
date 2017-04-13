@@ -25,13 +25,14 @@ class ExodusII_IO;
 class EquationSystems;
 class System;
 class MeshFunction;
-template<class T> class NumericVector;
+template <class T>
+class NumericVector;
 }
 
 // Forward declarations
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<SolutionUserObject>();
 
 /**
@@ -42,16 +43,12 @@ class SolutionUserObject : public GeneralUserObject
 {
 public:
   SolutionUserObject(const InputParameters & parameters);
-
-  /**
-   * Empty desctructor
-   */
-  virtual ~SolutionUserObject();
+  virtual ~SolutionUserObject(); // empty dtor required for unique_ptr with forward declarations
 
   /**
    * When reading ExodusII files, this will update the interpolation times
    */
-  virtual void timestepSetup();
+  virtual void timestepSetup() override;
 
   /**
    * Returns the local index for a given variable name
@@ -61,22 +58,130 @@ public:
   unsigned int getLocalVarIndex(const std::string & var_name) const;
 
   /**
-   * Returns a value at a specific location and variable (see SolutionFunction)
-   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * Returns a value at a specific location and variable checking for multiple values and weighting
+   * these values to
+   * obtain a single unique value (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+  Real pointValueWrapper(Real t,
+                         const Point & p,
+                         const std::string & var_name,
+                         const MooseEnum & weighting_type = weightingType()) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
-   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
    * @param p The location at which to return a value
    * @param local_var_index The local index of the variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
+  Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
+
+  /**
+   * Returns a value at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns a value at a specific location and variable for cases where the solution is
+   * multivalued at element faces
+   * Use pointValue for continuous shape functions or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, Real>
+  discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const;
+
+  /**
+   * Returns a value at a specific location and variable for cases where the solution is
+   * multivalued at element faces
+   * Use pointValue for continuous shape functions or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, Real>
+  discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable checking for multiple values and
+   * weighting these values to
+   * obtain a single unique value (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  RealGradient pointValueGradientWrapper(Real t,
+                                         const Point & p,
+                                         const std::string & var_name,
+                                         const MooseEnum & weighting_type = weightingType()) const;
+
+  /**
+   * Returns the gradient at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  RealGradient pointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  RealGradient pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
+
+  /**
+   * Returns the gradient at a specific location and variable for cases where the gradient is
+   * multivalued (e.g. at element faces)
+   * Use pointValueGradient for continuous gradients or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, RealGradient>
+  discontinuousPointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable for cases where the gradient is
+   * multivalued (e.g. at element faces)
+   * Use pointValueGradient for continuous gradients or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the
+   * data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, RealGradient>
+  discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
 
   /**
    * Return a value directly from a Node
@@ -95,22 +200,26 @@ public:
   Real directValue(const Elem * elem, const std::string & var_name) const;
 
   // Required pure virtual function (not used)
-  virtual void initialize();
+  virtual void initialize() override;
 
   // Required pure virtual function (not used)
-  virtual void finalize();
+  virtual void finalize() override;
 
   // Required pure virtual function (not used)
-  virtual void execute();
+  virtual void execute() override;
 
   /// Initialize the System and Mesh objects for the solution being read
-  virtual void initialSetup();
-
+  virtual void initialSetup() override;
 
   const std::vector<std::string> & variableNames() const;
 
   bool isVariableNodal(const std::string & var_name) const;
 
+  static MooseEnum weightingType()
+  {
+    return MooseEnum("found_first=1 average=2 smallest_element_id=4 largest_element_id=8",
+                     "found_first");
+  }
 
 protected:
   /**
@@ -159,7 +268,41 @@ protected:
    * @param local_var_index The local index of the variable to extract data from
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
-  Real evalMeshFunction(const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
+  Real evalMeshFunction(const Point & p,
+                        const unsigned int local_var_index,
+                        unsigned int func_num) const;
+
+  /**
+   * A wrapper method for calling the various MeshFunctions that calls the mesh function
+   * functionality for evaluating discontinuous shape functions near a face (where it's multivalued)
+   * @param p The location at which data is desired
+   * @param local_var_index The local index of the variable to extract data from
+   * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
+   */
+  std::map<const Elem *, Real> evalMultiValuedMeshFunction(const Point & p,
+                                                           const unsigned int local_var_index,
+                                                           unsigned int func_num) const;
+
+  /**
+   * A wrapper method interfacing with the libMesh mesh function for evaluating the gradient
+   * @param p The location at which data is desired
+   * @param local_var_index The local index of the variable to extract data from
+   * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
+   */
+  RealGradient evalMeshFunctionGradient(const Point & p,
+                                        const unsigned int local_var_index,
+                                        unsigned int func_num) const;
+
+  /**
+   * A wrapper method interfacing with the libMesh mesh function that calls the gradient
+   * functionality for evaluating potentially discontinuous gradients at element's faces (where it's
+   * multivalued)
+   * @param p The location at which data is desired
+   * @param local_var_index The local index of the variable to extract data from
+   * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
+   */
+  std::map<const Elem *, RealGradient> evalMultiValuedMeshFunctionGradient(
+      const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
 
   /// File type to read (0 = xda; 1 = ExodusII)
   MooseEnum _file_type;
@@ -189,34 +332,34 @@ protected:
   bool _interpolate_times;
 
   /// Pointer the libmesh::mesh object
-  MeshBase * _mesh;
+  std::unique_ptr<MeshBase> _mesh;
 
   /// Pointer to the libmesh::EquationSystems object
-  EquationSystems * _es;
+  std::unique_ptr<EquationSystems> _es;
 
   /// Pointer libMesh::System class storing the read solution
   System * _system;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored
-  MeshFunction * _mesh_function;
+  std::unique_ptr<MeshFunction> _mesh_function;
 
   /// Pointer to the libMesh::ExodusII used to read the files
-  ExodusII_IO *_exodusII_io;
+  std::unique_ptr<ExodusII_IO> _exodusII_io;
 
   /// Pointer to the serial solution vector
-  NumericVector<Number> * _serialized_solution;
+  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
   /// Pointer to second libMesh::EquationSystems object, used for interpolation
-  EquationSystems * _es2;
+  std::unique_ptr<EquationSystems> _es2;
 
   /// Pointer to a second libMesh::System object, used for interpolation
   System * _system2;
 
   /// Pointer to second libMesh::MeshFuntion, used for interpolation
-  MeshFunction * _mesh_function2;
+  std::unique_ptr<MeshFunction> _mesh_function2;
 
   /// Pointer to second serial solution, used for interpolation
-  NumericVector<Number> * _serialized_solution2;
+  std::unique_ptr<NumericVector<Number>> _serialized_solution2;
 
   /// Interpolation time
   Real _interpolation_time;
@@ -243,7 +386,7 @@ protected:
   std::vector<Real> _translation;
 
   /// vector about which to rotate
-  RealVectorValue  _rotation0_vector;
+  RealVectorValue _rotation0_vector;
 
   /// angle (in degrees) which to rotate through about vector _rotation0_vector
   Real _rotation0_angle;
@@ -252,7 +395,7 @@ protected:
   RealTensorValue _r0;
 
   /// vector about which to rotate
-  RealVectorValue  _rotation1_vector;
+  RealVectorValue _rotation1_vector;
 
   /// angle (in degrees) which to rotate through about vector _rotation1_vector
   Real _rotation1_angle;
@@ -265,6 +408,9 @@ protected:
 
   /// True if initial_setup has executed
   bool _initialized;
+
+private:
+  static Threads::spin_mutex _solution_user_object_mutex;
 };
 
-#endif //SOLUTIONUSEROBJECT_H
+#endif // SOLUTIONUSEROBJECT_H

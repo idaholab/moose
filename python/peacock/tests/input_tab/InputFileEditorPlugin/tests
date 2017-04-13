@@ -1,0 +1,7 @@
+[Tests]
+  [./InputFileEditorPlugin]
+    type = PythonUnitTest
+    input = test_InputFileEditorPlugin.py
+    display_required = True
+  [../]
+[]

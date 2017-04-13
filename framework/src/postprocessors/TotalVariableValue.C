@@ -14,24 +14,21 @@
 
 #include "TotalVariableValue.h"
 
-template<>
-InputParameters validParams<TotalVariableValue>()
+template <>
+InputParameters
+validParams<TotalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addParam<PostprocessorName>("value", "The name of the postprocessor");
   return params;
 }
 
-TotalVariableValue::TotalVariableValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+TotalVariableValue::TotalVariableValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _value(0),
     _value_old(getPostprocessorValueOldByName(name())),
     _pps_value(getPostprocessorValue("value")),
     _pps_value_old(getPostprocessorValueOld("value"))
-{
-}
-
-TotalVariableValue::~TotalVariableValue()
 {
 }
 
@@ -43,7 +40,7 @@ TotalVariableValue::initialize()
 void
 TotalVariableValue::execute()
 {
-  _value = _value_old  + 0.5 * (_pps_value + _pps_value_old) * _dt;
+  _value = _value_old + 0.5 * (_pps_value + _pps_value_old) * _dt;
 }
 
 Real
@@ -51,4 +48,3 @@ TotalVariableValue::getValue()
 {
   return _value;
 }
-

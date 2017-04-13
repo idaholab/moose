@@ -13,49 +13,41 @@
 /****************************************************************/
 
 #include "LStableDirk4.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<LStableDirk4>()
+template <>
+InputParameters
+validParams<LStableDirk4>()
 {
   InputParameters params = validParams<TimeIntegrator>();
   return params;
 }
 
 // Initialize static data
-const Real LStableDirk4::_c[LStableDirk4::_n_stages] =
-{.25, 0., .5, 1., 1.};
+const Real LStableDirk4::_c[LStableDirk4::_n_stages] = {.25, 0., .5, 1., 1.};
 
-const Real LStableDirk4::_a[LStableDirk4::_n_stages][LStableDirk4::_n_stages] =
-{{ .25,    0,    0,      0,   0},
- {-.25,  .25,    0,      0,   0},
- {.125, .125,  .25,      0,   0},
- {-1.5,  .75,  1.5,    .25,   0},
- {   0, 1./6, 2./3, -1./12, .25}};
+const Real LStableDirk4::_a[LStableDirk4::_n_stages][LStableDirk4::_n_stages] = {
+    {.25, 0, 0, 0, 0},
+    {-.25, .25, 0, 0, 0},
+    {.125, .125, .25, 0, 0},
+    {-1.5, .75, 1.5, .25, 0},
+    {0, 1. / 6, 2. / 3, -1. / 12, .25}};
 
-
-LStableDirk4::LStableDirk4(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
-    _stage(1)
+LStableDirk4::LStableDirk4(const InputParameters & parameters)
+  : TimeIntegrator(parameters), _stage(1)
 {
   // Name the stage residuals "residual_stage1", "residual_stage2", etc.
-  for (unsigned int stage=0; stage<_n_stages; ++stage)
+  for (unsigned int stage = 0; stage < _n_stages; ++stage)
   {
     std::ostringstream oss;
-    oss << "residual_stage" << stage+1;
+    oss << "residual_stage" << stage + 1;
     _stage_residuals[stage] = &(_nl.addVector(oss.str(), false, GHOSTED));
   }
 }
 
-
-
-LStableDirk4::~LStableDirk4()
-{
-}
-
-
+LStableDirk4::~LStableDirk4() {}
 
 void
 LStableDirk4::computeTimeDerivatives()
@@ -63,14 +55,12 @@ LStableDirk4::computeTimeDerivatives()
   // We are multiplying by the method coefficients in postStep(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 1. / _dt;
   _u_dot.close();
   _du_dot_du = 1. / _dt;
 }
-
-
 
 void
 LStableDirk4::solve()
@@ -93,21 +83,23 @@ LStableDirk4::solve()
     _console << "Stage " << _stage << "\n";
 
     // Set the time for this stage
-    _fe_problem.time() = time_old + _c[_stage-1]*_dt;
+    _fe_problem.time() = time_old + _c[_stage - 1] * _dt;
 
     // Do the solve
-    _fe_problem.getNonlinearSystem().sys().solve();
+    _fe_problem.getNonlinearSystemBase().system().solve();
   }
 }
-
-
 
 void
 LStableDirk4::postStep(NumericVector<Number> & residual)
 {
   // Error if _stage got messed up somehow.
   if (_stage > _n_stages)
-    mooseError("LStableDirk4::postStep(): Member variable _stage can only have values 1-" << _n_stages << ".");
+    // the explicit cast prevents strange compiler weirdness with the static
+    // const variable and the variadic mooseError function
+    mooseError("LStableDirk4::postStep(): Member variable _stage can only have values 1-",
+               (unsigned int)_n_stages,
+               ".");
 
   // In the standard RK notation, the residual of stage 1 of s is given by:
   //
@@ -122,11 +114,11 @@ LStableDirk4::postStep(NumericVector<Number> & residual)
 
   // Store this stage's non-time residual.  We are calling operator=
   // here, and that calls close().
-  *_stage_residuals[_stage-1] = _Re_non_time;
+  *_stage_residuals[_stage - 1] = _Re_non_time;
 
   // Build up the residual for this stage.
   residual.add(1., _Re_time);
   for (unsigned int j = 0; j < _stage; ++j)
-    residual.add(_a[_stage-1][j], *_stage_residuals[j]);
+    residual.add(_a[_stage - 1][j], *_stage_residuals[j]);
   residual.close();
 }

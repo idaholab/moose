@@ -19,7 +19,7 @@
 #include "Output.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class InputParameters;
 
 /**
@@ -28,7 +28,6 @@ class InputParameters;
 class OutputWarehouse
 {
 public:
-
   /**
    * Class constructor
    */
@@ -46,7 +45,7 @@ public:
    * It is the responsibility of the OutputWarehouse to delete the output objects
    * add using this method
    */
-  void addOutput(MooseSharedPointer<Output> & output);
+  void addOutput(std::shared_ptr<Output> & output);
 
   /**
    * Get a complete set of all output object names
@@ -131,7 +130,7 @@ public:
    * @param name The name of the output object
    * @return A pointer to the output object
    */
-  template<typename T>
+  template <typename T>
   T * getOutput(const OutputName & name);
 
   /**
@@ -140,7 +139,7 @@ public:
    * @param names A vector of names of the output object
    * @return A pointer to the output object
    */
-  template<typename T>
+  template <typename T>
   std::vector<T *> getOutputs(const std::vector<OutputName> & names);
 
   /**
@@ -148,7 +147,7 @@ public:
    * @tparam T The Output object type to return
    * @return A pointer to the output object
    */
-  template<typename T>
+  template <typename T>
   std::vector<T *> getOutputs() const;
 
   /**
@@ -156,7 +155,7 @@ public:
    * @tparam T The output object type
    * @return A vector of names
    */
-  template<typename T>
+  template <typename T>
   std::vector<OutputName> getOutputNames();
 
   /**
@@ -187,41 +186,49 @@ public:
    * Set if the outputs to Console before its construction are to be buffered or to screen directly
    * @param buffer Ture to buffer
    */
-  void bufferConsoleOutputsBeforeConstruction(bool buffer) { _buffer_action_console_outputs = buffer; }
+  void bufferConsoleOutputsBeforeConstruction(bool buffer)
+  {
+    _buffer_action_console_outputs = buffer;
+  }
+
+  /// Sets a Boolean indicating that at least one object is requesting performance logging in this application
+  void setLoggingRequested() { _logging_requested = true; }
+
+  /// Returns a Boolean indicating whether performance logging is requested in this application
+  bool getLoggingRequested() const { return _logging_requested; }
 
 private:
-
   /**
    * Calls the outputStep method for each output object
    * @param type The type execution flag (see Moose.h)
    *
-   * This is private, users should utilize FEProblem::outputStep()
+   * This is private, users should utilize FEProblemBase::outputStep()
    */
   void outputStep(ExecFlagType type);
 
   ///@{
   /**
    * Ability to enable/disable output calls
-   * This is private, users should utilize FEProblem::allowOutput()
-   * @see FEProblem::allowOutput()
+   * This is private, users should utilize FEProblemBase::allowOutput()
+   * @see FEProblemBase::allowOutput()
    */
   void allowOutput(bool state);
-  template <typename T> void allowOutput(bool state);
+  template <typename T>
+  void allowOutput(bool state);
   ///@}
-
 
   /**
    * Indicates that the next call to outputStep should be forced
-   * This is private, users should utilize FEProblem::forceOutput()
-   * @see FEProblem::forceOutput()
+   * This is private, users should utilize FEProblemBase::forceOutput()
+   * @see FEProblemBase::forceOutput()
    */
   void forceOutput();
 
   /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * We are using std::shared_ptr to handle the cleanup of the pointers at the end of execution.
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
-  std::vector<MooseSharedPointer<Output> > _all_ptrs;
+  std::vector<std::shared_ptr<Output>> _all_ptrs;
 
   /**
    * Adds the file name to the list of filenames being output
@@ -233,37 +240,37 @@ private:
 
   /**
    * Calls the initialSetup function for each of the output objects
-   * @see FEProblem::initialSetup()
+   * @see FEProblemBase::initialSetup()
    */
   void initialSetup();
 
   /**
    * Calls the timestepSetup function for each of the output objects
-   * @see FEProblem::timestepSetup()
+   * @see FEProblemBase::timestepSetup()
    */
   void timestepSetup();
 
   /**
    * Calls the timestepSetup function for each of the output objects
-   * @see FEProblem::solve()
+   * @see FEProblemBase::solve()
    */
   void solveSetup();
 
   /**
    * Calls the jacobianSetup function for each of the output objects
-   * @see FEProblem::computeJacobian
+   * @see FEProblemBase::computeJacobian
    */
   void jacobianSetup();
 
   /**
    * Calls the residualSetup function for each of the output objects
-   * @see FEProblem::computeResidualTyp
+   * @see FEProblemBase::computeResidualTyp
    */
   void residualSetup();
 
   /**
    * Calls the subdomainSetup function for each of the output objects
-   * @see FEProblem::setupSubdomain
+   * @see FEProblemBase::setupSubdomain
    */
   void subdomainSetup();
 
@@ -275,12 +282,13 @@ private:
    * This is a private method used by the OutputInterface system, it is not intended for any
    * other purpose.
    */
-  void addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names);
+  void addInterfaceHideVariables(const std::string & output_name,
+                                 const std::set<std::string> & variable_names);
 
   /**
    * Sets the execution flag type
    *
-   * This is a private method used by FEProblem, it is not intended for any other purpose
+   * This is a private method used by FEProblemBase, it is not intended for any other purpose
    */
   void setOutputExecutionType(ExecFlagType type);
 
@@ -319,7 +327,7 @@ private:
   std::string _input_file_name;
 
   /// Map of output name and AuxVariable names to be output (used by auto Material output)
-  std::map<OutputName, std::set<AuxVariableName> > _material_output_map;
+  std::map<OutputName, std::set<AuxVariableName>> _material_output_map;
 
   /// List of all variable created by auto material output
   std::set<AuxVariableName> _all_material_output_variables;
@@ -331,7 +339,7 @@ private:
   std::ostringstream _console_buffer;
 
   /// Storage for variables to hide as prescribed by the object via the OutputInterface
-  std::map<std::string, std::set<std::string> > _interface_map;
+  std::map<std::string, std::set<std::string>> _interface_map;
 
   /// The current output execution flag
   ExecFlagType _output_exec_flag;
@@ -339,9 +347,12 @@ private:
   /// Flag indicating that next call to outputStep is forced
   bool _force_output;
 
+  /// Indicates that performance logging has been requested by the console or some object (PerformanceData)
+  bool _logging_requested;
+
   // Allow complete access:
-  // FEProblem for calling initial, timestepSetup, outputStep, etc. methods
-  friend class FEProblem;
+  // FEProblemBase for calling initial, timestepSetup, outputStep, etc. methods
+  friend class FEProblemBase;
 
   // MaterialOutputAction for calling addInterfaceHideVariables
   friend class MaterialOutputAction;
@@ -353,26 +364,26 @@ private:
   friend class PetscOutput;
 };
 
-template<typename T>
+template <typename T>
 T *
 OutputWarehouse::getOutput(const OutputName & name)
 {
   // Check that the object exists
   if (!hasOutput(name))
-    mooseError("An output object with the name '" << name << "' does not exist.");
+    mooseError("An output object with the name '", name, "' does not exist.");
 
   // Attempt to cast the object to the correct type
-  T * output = dynamic_cast<T*>(_object_map[name]);
+  T * output = dynamic_cast<T *>(_object_map[name]);
 
   // Error if the cast fails
   if (output == NULL)
-    mooseError("An output object with the name '" << name << "' for the specified type does not exist");
+    mooseError("An output object with the name '", name, "' for the specified type does not exist");
 
   // Return the object
   return output;
 }
 
-template<typename T>
+template <typename T>
 std::vector<T *>
 OutputWarehouse::getOutputs(const std::vector<OutputName> & names)
 {
@@ -387,7 +398,7 @@ OutputWarehouse::getOutputs(const std::vector<OutputName> & names)
   return outputs;
 }
 
-template<typename T>
+template <typename T>
 std::vector<T *>
 OutputWarehouse::getOutputs() const
 {
@@ -395,9 +406,11 @@ OutputWarehouse::getOutputs() const
   std::vector<T *> outputs;
 
   // Populate the vector
-  for (std::map<OutputName, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<OutputName, Output *>::const_iterator it = _object_map.begin();
+       it != _object_map.end();
+       ++it)
   {
-    T * output = dynamic_cast<T*>(it->second);
+    T * output = dynamic_cast<T *>(it->second);
     if (output != NULL)
       outputs.push_back(output);
   }
@@ -406,7 +419,7 @@ OutputWarehouse::getOutputs() const
   return outputs;
 }
 
-template<typename T>
+template <typename T>
 std::vector<OutputName>
 OutputWarehouse::getOutputNames()
 {
@@ -414,9 +427,11 @@ OutputWarehouse::getOutputNames()
   std::vector<OutputName> names;
 
   // Loop through the objects and store the name if the type cast succeeds
-  for (std::map<OutputName, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<OutputName, Output *>::const_iterator it = _object_map.begin();
+       it != _object_map.end();
+       ++it)
   {
-    T * output = dynamic_cast<T*>(it->second);
+    T * output = dynamic_cast<T *>(it->second);
     if (output != NULL)
       names.push_back(it->first);
   }
@@ -425,7 +440,7 @@ OutputWarehouse::getOutputNames()
   return names;
 }
 
-template<typename T>
+template <typename T>
 void
 OutputWarehouse::allowOutput(bool state)
 {

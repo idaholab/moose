@@ -6,19 +6,25 @@
 /****************************************************************/
 #include "NSEnergyWeakStagnationBC.h"
 
-template<>
-InputParameters validParams<NSEnergyWeakStagnationBC>()
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+template <>
+InputParameters
+validParams<NSEnergyWeakStagnationBC>()
 {
-  InputParameters params = validParams<NSWeakStagnationBC>();
+  InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("The inviscid energy BC term with specified normal flow.");
   return params;
 }
 
-NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBC(parameters)
+NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters)
+  : NSWeakStagnationBaseBC(parameters)
 {
 }
 
-Real NSEnergyWeakStagnationBC::computeQpResidual()
+Real
+NSEnergyWeakStagnationBC::computeQpResidual()
 {
   // Compute stagnation values
   Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
@@ -28,8 +34,7 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
   Real velmag2 = this->velmag2();
 
   // Compute static total energy, E_s
-  Real cv = _R / (_gamma - 1.0);
-  Real E_s = cv*T_s + 0.5 * velmag2;
+  Real E_s = _fp.cv() * T_s + 0.5 * velmag2;
 
   // Compute the product rho_s * H_s (H_s = static enthalpy)
   Real rhoH_s = rho_s * E_s + p_s;
@@ -38,13 +43,15 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
   return rhoH_s * std::sqrt(velmag2) * this->sdotn() * _test[_i][_qp];
 }
 
-Real NSEnergyWeakStagnationBC::computeQpJacobian()
+Real
+NSEnergyWeakStagnationBC::computeQpJacobian()
 {
   // TODO
   return 0.0;
 }
 
-Real NSEnergyWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
+Real
+NSEnergyWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
   return 0.0;

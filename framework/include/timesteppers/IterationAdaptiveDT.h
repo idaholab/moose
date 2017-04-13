@@ -23,7 +23,8 @@ class Piecewise;
 
 /**
  * Adjust the timestep based on the number of iterations.
- * The user can specitfy an optimal_iterations number of non-linear iterations and an iteration_window.
+ * The user can specitfy an optimal_iterations number of non-linear iterations and an
+ * iteration_window.
  * The time stepper attempts to increase the time step if the non-linear iteration count is below
  * optimal_iterations - iteration_window and it attempts to reduce the time step if the non-linear
  * iteration count is above optimal_iterations + iteration_window. Similar rules apply to the number
@@ -32,25 +33,24 @@ class Piecewise;
  * This time stepper allows the user to specify a function that limits the maximal time step change.
  * This time stepper allows the user to specify a limiting time step length through a postprocessor.
  */
-class IterationAdaptiveDT :
-  public TimeStepper,
-  public PostprocessorInterface
+class IterationAdaptiveDT : public TimeStepper, public PostprocessorInterface
 {
 public:
   IterationAdaptiveDT(const InputParameters & parameters);
-  virtual ~IterationAdaptiveDT();
 
-  virtual void init();
-  virtual void preExecute();
+  virtual void init() override;
+  virtual void preExecute() override;
 
-  virtual void rejectStep();
-  virtual void acceptStep();
+  virtual void rejectStep() override;
+  virtual void acceptStep() override;
+
+  virtual bool constrainStep(Real & dt) override;
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
-  virtual bool constrainStep(Real &dt);
-  virtual Real computeFailedDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
+  virtual Real computeFailedDT() override;
+
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
   Real computeInterpolationDT();
   void limitDTByFunction(Real & limitedDT);
@@ -106,7 +106,7 @@ protected:
   bool _at_function_point;
 };
 
-template<>
+template <>
 InputParameters validParams<IterationAdaptiveDT>();
 
 #endif /* ITERATIONADAPTIVEDT_H */

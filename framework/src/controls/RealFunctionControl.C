@@ -16,19 +16,23 @@
 #include "RealFunctionControl.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<RealFunctionControl>()
+template <>
+InputParameters
+validParams<RealFunctionControl>()
 {
   InputParameters params = validParams<Control>();
 
-  params.addRequiredParam<FunctionName>("function", "The function to use for controlling the specified parameter.");
-  params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
+  params.addRequiredParam<FunctionName>(
+      "function", "The function to use for controlling the specified parameter.");
+  params.addRequiredParam<std::string>(
+      "parameter",
+      "The input parameter(s) to control. Specify a single parameter name and all "
+      "parameters in all objects matching the name will be updated");
   return params;
 }
 
-RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
-    Control(parameters),
-    _function(getFunction("function"))
+RealFunctionControl::RealFunctionControl(const InputParameters & parameters)
+  : Control(parameters), _function(getFunction("function"))
 {
 }
 

@@ -16,24 +16,27 @@
 #define STEADY_H
 
 #include "Executioner.h"
-#include "InputParameters.h"
 
 // System includes
 #include <string>
 
+// Forward declarations
+class InputParameters;
 class Steady;
-class FEProblem;
+class FEProblemBase;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<Steady>();
 
 /**
  * Steady executioners usually only call "solve()" on the NonlinearSystem once.
  */
-class Steady: public Executioner
+class Steady : public Executioner
 {
 public:
-
   /**
    * Constructor
    *
@@ -42,22 +45,17 @@ public:
    */
   Steady(const InputParameters & parameters);
 
-  virtual ~Steady();
+  virtual void init() override;
 
-  virtual void init();
-
-  /**
-   * This will call solve() on the NonlinearSystem.
-   */
-  virtual void execute();
+  virtual void execute() override;
 
   virtual void checkIntegrity();
 
 protected:
-  FEProblem & _problem;
+  FEProblemBase & _problem;
 
   int & _time_step;
   Real & _time;
 };
 
-#endif //STEADY_H
+#endif // STEADY_H

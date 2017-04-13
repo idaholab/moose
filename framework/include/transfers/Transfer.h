@@ -16,14 +16,15 @@
 #define TRANSFER_H
 
 // Moose
-#include "ParallelUniqueId.h"
 #include "MooseObject.h"
+#include "MooseTypes.h"
 #include "SetupInterface.h"
 #include "Restartable.h"
 
 // Forward declarations
 class Transfer;
 class SubProblem;
+class FEProblemBase;
 class FEProblem;
 class SystemBase;
 
@@ -33,7 +34,7 @@ class System;
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<Transfer>();
 
 /**
@@ -42,14 +43,11 @@ InputParameters validParams<Transfer>();
  * Transfers are objects that take values from one Application
  * or System and put them in another Application or System.
  */
-class Transfer :
-  public MooseObject,
-  public SetupInterface,
-  public Restartable
+class Transfer : public MooseObject, public SetupInterface, public Restartable
 {
 public:
   Transfer(const InputParameters & parameters);
-  virtual ~Transfer() {}
+  virtual ~Transfer() = default;
 
   /**
    * Execute the transfer.
@@ -73,9 +71,8 @@ public:
   static System * find_sys(EquationSystems & es, const std::string & var_name);
 
 protected:
-
   SubProblem & _subproblem;
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

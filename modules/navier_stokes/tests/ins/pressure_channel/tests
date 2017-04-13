@@ -1,0 +1,14 @@
+[Tests]
+  [./open_bc_pressure_BC]
+    type = 'Exodiff'
+    input = 'open_bc_pressure_BC.i'
+    exodiff = 'open_bc_out_pressure_BC.e'
+    custom_cmp = open_bc_out_pressure_BC.cmp
+  [../]
+  [./open_bc_pressure_BC_fieldSplit]
+    type = 'Exodiff'
+    input = 'open_bc_pressure_BC_fieldSplit.i'
+    exodiff = 'open_bc_out_pressure_BC_fieldSplit.e'
+    custom_cmp = open_bc_out_pressure_BC_fieldSplit.cmp
+  [../]
+[]

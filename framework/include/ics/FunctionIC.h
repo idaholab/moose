@@ -16,15 +16,18 @@
 #define FUNCTIONIC_H
 
 #include "InitialCondition.h"
-#include "InputParameters.h"
 
 #include <string>
 
-//Forward Declarations
+// Forward Declarations
 class FunctionIC;
 class Function;
+class InputParameters;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<FunctionIC>();
 
 /**
@@ -45,14 +48,14 @@ protected:
   /**
    * The value of the variable at a point.
    */
-  virtual Real value(const Point &p);
+  virtual Real value(const Point & p) override;
 
   /**
    * The value of the gradient at a point.
    */
-  virtual RealGradient gradient(const Point &p);
+  virtual RealGradient gradient(const Point & p) override;
 
   Function & _func;
 };
 
-#endif //FUNCTIONIC_H
+#endif // FUNCTIONIC_H

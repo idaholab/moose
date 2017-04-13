@@ -14,7 +14,6 @@
 #include "Density.h"
 #include "InternalVolume.h"
 #include "RobinBC.h"
-#include "JouleHeating.h"
 #include "CoefTimeDerivative.h"
 #include "GaussContForcing.h"
 #include "SharpInterfaceForcing.h"
@@ -24,17 +23,15 @@
 #include "CInterfacePosition.h"
 #include "ThermoDiffusion.h"
 
-template<>
-InputParameters validParams<MiscApp>()
+template <>
+InputParameters
+validParams<MiscApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-MiscApp::MiscApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+MiscApp::MiscApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   MiscApp::registerObjects(_factory);
@@ -43,12 +40,14 @@ MiscApp::MiscApp(const InputParameters & parameters) :
   MiscApp::associateSyntax(_syntax, _action_factory);
 }
 
-MiscApp::~MiscApp()
-{
-}
+MiscApp::~MiscApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void MiscApp__registerApps() { MiscApp::registerApps(); }
+extern "C" void
+MiscApp__registerApps()
+{
+  MiscApp::registerApps();
+}
 void
 MiscApp::registerApps()
 {
@@ -56,7 +55,11 @@ MiscApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void MiscApp__registerObjects(Factory & factory) { MiscApp::registerObjects(factory); }
+extern "C" void
+MiscApp__registerObjects(Factory & factory)
+{
+  MiscApp::registerObjects(factory);
+}
 void
 MiscApp::registerObjects(Factory & factory)
 {
@@ -66,7 +69,6 @@ MiscApp::registerObjects(Factory & factory)
 
   registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
-  registerKernel(JouleHeating);
   registerKernel(CoefTimeDerivative);
   registerKernel(GaussContForcing);
   registerKernel(ThermoDiffusion);
@@ -83,7 +85,11 @@ MiscApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { MiscApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  MiscApp::associateSyntax(syntax, action_factory);
+}
 void
 MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

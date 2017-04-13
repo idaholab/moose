@@ -4,21 +4,24 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "NSVelocityAux.h"
 
-template<>
-InputParameters validParams<NSVelocityAux>()
+// Navier-Stokes includes
+#include "NSVelocityAux.h"
+#include "NS.h"
+
+template <>
+InputParameters
+validParams<NSVelocityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredCoupledVar("rho", "Density (conserved form)");
+  params.addClassDescription("Velocity auxiliary value.");
+  params.addRequiredCoupledVar(NS::density, "Density (conserved form)");
   params.addRequiredCoupledVar("momentum", "Momentum (conserved form)");
   return params;
 }
 
-NSVelocityAux::NSVelocityAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _rho(coupledValue("rho")),
-    _momentum(coupledValue("momentum"))
+NSVelocityAux::NSVelocityAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _rho(coupledValue(NS::density)), _momentum(coupledValue("momentum"))
 {
 }
 
@@ -27,4 +30,3 @@ NSVelocityAux::computeValue()
 {
   return _momentum[_qp] / _rho[_qp];
 }
-

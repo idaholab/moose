@@ -13,17 +13,17 @@
 /****************************************************************/
 #include "CoefReaction.h"
 
-template<>
-InputParameters validParams<CoefReaction>()
+template <>
+InputParameters
+validParams<CoefReaction>()
 {
   InputParameters params = validParams<Reaction>();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;
 }
 
-CoefReaction::CoefReaction(const InputParameters & parameters) :
-    Reaction(parameters),
-    _coef(getParam<Real>("coefficient"))
+CoefReaction::CoefReaction(const InputParameters & parameters)
+  : Reaction(parameters), _coef(getParam<Real>("coefficient"))
 {
 }
 

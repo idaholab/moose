@@ -15,11 +15,13 @@
 #ifndef SUBPROBLEM_H
 #define SUBPROBLEM_H
 
-#include "ParallelUniqueId.h"
 #include "Problem.h"
 #include "DiracKernelInfo.h"
 #include "GeometricSearchData.h"
-#include "MooseVariableBase.h" // VariableValue
+#include "MooseTypes.h"
+
+// libMesh includes
+#include "libmesh/coupling_matrix.h"
 
 class MooseMesh;
 class SubProblem;
@@ -34,11 +36,14 @@ namespace libMesh
 {
 class EquationSystems;
 class DofMap;
-template <typename T> class SparseMatrix;
-template <typename T> class NumericVector;
+class CouplingMatrix;
+template <typename T>
+class SparseMatrix;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<SubProblem>();
 
 /**
@@ -53,6 +58,8 @@ public:
 
   virtual EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
+
+  virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -81,7 +88,8 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
+                                                THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
@@ -98,12 +106,46 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
 
   /**
-   * Clear the active elemental MooseVariable.  If there are no active variables then they will all be reinited.
+   * Clear the active elemental MooseVariable.  If there are no active variables then they will all
+   * be reinited.
    * Call this after finishing the computation that was using a restricted set of MooseVariables
    *
    * @param tid The thread id
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
+
+  /**
+   * Record and set the material properties required by the current computing thread.
+   * @param mat_prop_ids The set of material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
+                                           THREAD_ID tid);
+
+  /**
+   * Get the material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid);
+
+  /**
+   * Method to check whether or not a list of active material roperties has been set. This method
+   * is called by reinitMaterials to determine whether Material computeProperties methods need to be
+   * called. If the return is False, this check prevents unnecessary material property computation
+   * @param tid The thread id
+   *
+   * @return True if there has been a list of active material properties set, False otherwise
+   */
+  virtual bool hasActiveMaterialProperties(THREAD_ID tid);
+
+  /**
+   * Clear the active material properties. Should be called at the end of every computing thread
+   *
+   * @param tid The thread id
+   */
+  virtual void clearActiveMaterialProperties(THREAD_ID tid);
 
   virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -134,8 +176,19 @@ public:
 
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
-  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices, THREAD_ID tid) = 0;
+  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
+                                unsigned int ivar,
+                                unsigned int jvar,
+                                const DofMap & dof_map,
+                                std::vector<dof_id_type> & dof_indices,
+                                THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
+                                   unsigned int ivar,
+                                   unsigned int jvar,
+                                   const DofMap & dof_map,
+                                   std::vector<dof_id_type> & dof_indices,
+                                   std::vector<dof_id_type> & neighbor_dof_indices,
+                                   THREAD_ID tid) = 0;
 
   virtual void cacheJacobian(THREAD_ID tid) = 0;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
@@ -143,21 +196,33 @@ public:
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem,
+                       unsigned int ivar,
+                       unsigned int jvar,
+                       const std::vector<dof_id_type> & dof_indices,
+                       THREAD_ID tid) = 0;
   virtual void prepareAssembly(THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid) = 0;
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  virtual void
+  reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid) = 0;
+  virtual void
+  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
   virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
-  virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
-  virtual void reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
+  virtual void reinitNeighborPhys(const Elem * neighbor,
+                                  unsigned int neighbor_side,
+                                  const std::vector<Point> & physical_points,
+                                  THREAD_ID tid) = 0;
+  virtual void reinitNeighborPhys(const Elem * neighbor,
+                                  const std::vector<Point> & physical_points,
+                                  THREAD_ID tid) = 0;
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitScalars(THREAD_ID tid) = 0;
+  virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.
@@ -168,12 +233,14 @@ public:
    */
   virtual void getDiracElements(std::set<const Elem *> & elems) = 0;
   /**
-   * Gets called before Dirac Kernels are asked to add the points they are supposed to be evaluated in
+   * Gets called before Dirac Kernels are asked to add the points they are supposed to be evaluated
+   * in
    */
   virtual void clearDiracInfo() = 0;
 
   // Geom Search
-  virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) = 0;
+  virtual void
+  updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) = 0;
 
   virtual GeometricSearchData & geomSearchData() = 0;
 
@@ -225,7 +292,9 @@ public:
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeDelayedCheckMatProp(const std::string & requestor, SubdomainID block_id, const std::string & name);
+  virtual void storeDelayedCheckMatProp(const std::string & requestor,
+                                        SubdomainID block_id,
+                                        const std::string & name);
 
   /**
    * Adds to a map based on boundary ids of material properties to validate
@@ -234,19 +303,21 @@ public:
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeDelayedCheckMatProp(const std::string & requestor, BoundaryID boundary_id, const std::string & name);
+  virtual void storeDelayedCheckMatProp(const std::string & requestor,
+                                        BoundaryID boundary_id,
+                                        const std::string & name);
 
   /**
    * Checks block material properties integrity
    *
-   * \see FEProblem::checkProblemIntegrity
+   * \see FEProblemBase::checkProblemIntegrity
    */
   virtual void checkBlockMatProps();
 
   /**
    * Checks boundary material properties integrity
    *
-   * \see FEProblem::checkProblemIntegrity
+   * \see FEProblemBase::checkProblemIntegrity
    */
   virtual void checkBoundaryMatProps();
 
@@ -315,11 +386,17 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  virtual void
+  registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+
+  std::map<std::string, std::vector<dof_id_type>> _var_dof_map;
+  const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
 
 protected:
   /// The Factory for building objects
   Factory & _factory;
+
+  CouplingMatrix _nonlocal_cm; /// nonlocal coupling matrix;
 
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
@@ -327,14 +404,14 @@ protected:
   DiracKernelInfo _dirac_kernel_info;
 
   /// Map of material properties (block_id -> list of properties)
-  std::map<SubdomainID, std::set<std::string> > _map_block_material_props;
+  std::map<SubdomainID, std::set<std::string>> _map_block_material_props;
 
   /// Map for boundary material properties (boundary_id -> list of properties)
-  std::map<BoundaryID, std::set<std::string> > _map_boundary_material_props;
+  std::map<BoundaryID, std::set<std::string>> _map_boundary_material_props;
 
   /// Set of properties returned as zero properties
-  std::map<SubdomainID, std::set<MaterialPropertyName> > _zero_block_material_props;
-  std::map<BoundaryID, std::set<MaterialPropertyName> > _zero_boundary_material_props;
+  std::map<SubdomainID, std::set<MaterialPropertyName>> _zero_block_material_props;
+  std::map<BoundaryID, std::set<MaterialPropertyName>> _zero_boundary_material_props;
 
   /// set containing all material property names that have been requested by getMaterialProperty*
   std::set<std::string> _material_property_requested;
@@ -345,16 +422,22 @@ protected:
    * from boudnary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
-  std::map<SubdomainID, std::multimap<std::string, std::string> > _map_block_material_props_check;
-  std::map<BoundaryID, std::multimap<std::string, std::string> > _map_boundary_material_props_check;
+  std::map<SubdomainID, std::multimap<std::string, std::string>> _map_block_material_props_check;
+  std::map<BoundaryID, std::multimap<std::string, std::string>> _map_boundary_material_props_check;
   ///@}
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
-  std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
+  std::vector<std::set<MooseVariable *>> _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
+
+  /// Set of material property ids that determine whether materials get reinited
+  std::vector<std::set<unsigned int>> _active_material_property_ids;
+
+  /// nonlocal coupling requirement flag
+  bool _requires_nonlocal_coupling;
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<dof_id_type> _ghosted_elems;
@@ -363,7 +446,6 @@ protected:
   unsigned int _rz_coord_axis;
 
 private:
-
   /**
    * Helper method for performing material property checks
    * @param props Reference to the map of properties known
@@ -373,9 +455,9 @@ private:
    * \see checkBoundaryMatProps
    */
   template <typename T>
-  void checkMatProps(std::map<T, std::set<std::string> > & props,
-                     std::map<T, std::multimap<std::string, std::string> > & check_props,
-                     std::map<T, std::set<MaterialPropertyName> > & zero_props);
+  void checkMatProps(std::map<T, std::set<std::string>> & props,
+                     std::map<T, std::multimap<std::string, std::string>> & check_props,
+                     std::map<T, std::set<MaterialPropertyName>> & zero_props);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!

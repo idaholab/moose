@@ -11,9 +11,8 @@
 
 class AddCoupledEqSpeciesAuxKernelsAction;
 
-template<>
+template <>
 InputParameters validParams<AddCoupledEqSpeciesAuxKernelsAction>();
-
 
 class AddCoupledEqSpeciesAuxKernelsAction : public Action
 {
@@ -22,6 +21,9 @@ public:
 
   virtual void act();
 
+private:
+  const std::string _reactions;
+  const std::vector<std::string> _secondary_species;
 };
 
 #endif // ADDCOUPLEDEQSPECIESAUXKERNELSACTION_H

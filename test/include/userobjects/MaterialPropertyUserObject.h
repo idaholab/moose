@@ -12,22 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef MATERIALPROPERTYUSEROBJECT_H
 #define MATERIALPROPERTYUSEROBJECT_H
 
 #include "ElementIntegralUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaterialPropertyUserObject;
 
-template<>
+template <>
 InputParameters validParams<MaterialPropertyUserObject>();
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class MaterialPropertyUserObject :
-  public ElementIntegralUserObject
+class MaterialPropertyUserObject : public ElementIntegralUserObject
 {
 public:
   MaterialPropertyUserObject(const InputParameters & parameters);
@@ -44,7 +42,6 @@ public:
   Real getElementalValue(unsigned int elem_id) const;
 
 protected:
-
   const MaterialProperty<Real> & _mat_prop;
 
   std::vector<Real> _elem_integrals;

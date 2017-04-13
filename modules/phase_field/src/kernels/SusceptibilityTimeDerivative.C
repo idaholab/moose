@@ -6,18 +6,21 @@
 /****************************************************************/
 #include "SusceptibilityTimeDerivative.h"
 
-template<>
-InputParameters validParams<SusceptibilityTimeDerivative>()
+template <>
+InputParameters
+validParams<SusceptibilityTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  params.addClassDescription("A modified time derivative Kernel that multiply the time derivative of a variable by a generalized susceptibility");
-  params.addRequiredParam<MaterialPropertyName>("f_name", "Base name of the susceptibility function F defined in a DerivativeParsedMaterial");
+  params.addClassDescription("A modified time derivative Kernel that multiply the time derivative "
+                             "of a variable by a generalized susceptibility");
+  params.addRequiredParam<MaterialPropertyName>(
+      "f_name", "Base name of the susceptibility function F defined in a DerivativeParsedMaterial");
   params.addCoupledVar("args", "Vector of arguments of the susceptibility");
   return params;
 }
 
-SusceptibilityTimeDerivative::SusceptibilityTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<TimeDerivative> >(parameters),
+SusceptibilityTimeDerivative::SusceptibilityTimeDerivative(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>(parameters),
     _Chi(getMaterialProperty<Real>("f_name")),
     _dChidu(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _dChidarg(_coupled_moose_vars.size())
@@ -42,16 +45,15 @@ SusceptibilityTimeDerivative::computeQpResidual()
 Real
 SusceptibilityTimeDerivative::computeQpJacobian()
 {
-  return TimeDerivative::computeQpJacobian() * _Chi[_qp] + TimeDerivative::computeQpResidual() * _dChidu[_qp] * _phi[_j][_qp];
+  return TimeDerivative::computeQpJacobian() * _Chi[_qp] +
+         TimeDerivative::computeQpResidual() * _dChidu[_qp] * _phi[_j][_qp];
 }
 
 Real
 SusceptibilityTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return TimeDerivative::computeQpResidual() * (*_dChidarg[cvar])[_qp] * _phi[_j][_qp];
 }

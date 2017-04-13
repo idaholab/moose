@@ -26,4 +26,4 @@ private:
   Real _thermal_expansion_coeff;
 };
 
-#endif //LINEARELASTICTRUSS_H
+#endif // LINEARELASTICTRUSS_H

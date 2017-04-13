@@ -31,4 +31,4 @@ private:
   Real _c0;
 };
 
-#endif //SIMPLEEIGENSTRAINMATERIAL_H
+#endif // SIMPLEEIGENSTRAINMATERIAL_H

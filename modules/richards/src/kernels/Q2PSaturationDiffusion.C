@@ -5,25 +5,31 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "Q2PSaturationDiffusion.h"
 
-
-template<>
-InputParameters validParams<Q2PSaturationDiffusion>()
+template <>
+InputParameters
+validParams<Q2PSaturationDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<UserObjectName>("fluid_density", "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
-  params.addRequiredParam<UserObjectName>("fluid_relperm", "A RichardsRelPerm UserObject that defines the fluid relative permeability as a function of water saturation (eg RichardsRelPermPower)");
-  params.addRequiredCoupledVar("porepressure_variable", "The variable representing the porepressure");
+  params.addRequiredParam<UserObjectName>(
+      "fluid_density",
+      "A RichardsDensity UserObject that defines the fluid density as a function of pressure.");
+  params.addRequiredParam<UserObjectName>(
+      "fluid_relperm",
+      "A RichardsRelPerm UserObject that defines the fluid relative permeability "
+      "as a function of water saturation (eg RichardsRelPermPower)");
+  params.addRequiredCoupledVar("porepressure_variable",
+                               "The variable representing the porepressure");
   params.addRequiredParam<Real>("fluid_viscosity", "The fluid dynamic viscosity");
   params.addRequiredParam<Real>("diffusivity", "Diffusivity as a function of S");
-  params.addClassDescription("Diffusion part of the Flux according to Darcy-Richards flow.  The Variable of this Kernel must be the saturation.");
+  params.addClassDescription("Diffusion part of the Flux according to Darcy-Richards flow.  The "
+                             "Variable of this Kernel must be the saturation.");
   return params;
 }
 
-Q2PSaturationDiffusion::Q2PSaturationDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+Q2PSaturationDiffusion::Q2PSaturationDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _relperm(getUserObject<RichardsRelPerm>("fluid_relperm")),
     _pp(coupledValue("porepressure_variable")),
@@ -34,29 +40,27 @@ Q2PSaturationDiffusion::Q2PSaturationDiffusion(const InputParameters & parameter
 {
 }
 
-
 Real
 Q2PSaturationDiffusion::computeQpResidual()
 {
-  Real coef = _diffusivity*_relperm.relperm(_u[_qp])*_density.density(_pp[_qp])/_viscosity;
-  return coef*_grad_test[_i][_qp]*(_permeability[_qp]*_grad_u[_qp]);
+  Real coef = _diffusivity * _relperm.relperm(_u[_qp]) * _density.density(_pp[_qp]) / _viscosity;
+  return coef * _grad_test[_i][_qp] * (_permeability[_qp] * _grad_u[_qp]);
 }
-
 
 Real
 Q2PSaturationDiffusion::computeQpJacobian()
 {
-  Real coef = _diffusivity*_relperm.relperm(_u[_qp])*_density.density(_pp[_qp])/_viscosity;
-  Real coefp = _diffusivity*_relperm.drelperm(_u[_qp])*_density.density(_pp[_qp])/_viscosity;
-  return coefp*_phi[_j][_qp]*_grad_test[_i][_qp]*(_permeability[_qp]*_grad_u[_qp]) + coef*_grad_test[_i][_qp]*(_permeability[_qp]*_grad_phi[_j][_qp]);
+  Real coef = _diffusivity * _relperm.relperm(_u[_qp]) * _density.density(_pp[_qp]) / _viscosity;
+  Real coefp = _diffusivity * _relperm.drelperm(_u[_qp]) * _density.density(_pp[_qp]) / _viscosity;
+  return coefp * _phi[_j][_qp] * _grad_test[_i][_qp] * (_permeability[_qp] * _grad_u[_qp]) +
+         coef * _grad_test[_i][_qp] * (_permeability[_qp] * _grad_phi[_j][_qp]);
 }
-
 
 Real
 Q2PSaturationDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar != _pp_var_num)
     return 0.0;
-  Real coefp = _diffusivity*_relperm.relperm(_u[_qp])*_density.ddensity(_pp[_qp])/_viscosity;
-  return coefp*_phi[_j][_qp]*(_grad_test[_i][_qp]*(_permeability[_qp]*_grad_u[_qp]));
+  Real coefp = _diffusivity * _relperm.relperm(_u[_qp]) * _density.ddensity(_pp[_qp]) / _viscosity;
+  return coefp * _phi[_j][_qp] * (_grad_test[_i][_qp] * (_permeability[_qp] * _grad_u[_qp]));
 }

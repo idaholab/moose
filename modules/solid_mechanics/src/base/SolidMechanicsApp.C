@@ -15,15 +15,13 @@
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
 #include "CombinedCreepPlasticity.h"
-#include "DashpotBC.h"
 #include "Elastic.h"
 #include "ElasticModel.h"
-#include "ElasticEnergyAux.h"
-#include "ElementsOnLineAux.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
 #include "IsotropicPlasticity.h"
 #include "IsotropicPowerLawHardening.h"
+#include "IsotropicTempDepHardening.h"
 #include "LinearAnisotropicMaterial.h"
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
@@ -37,19 +35,15 @@
 #include "MixedModeEquivalentK.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
-#include "MaterialTensorOnLine.h"
-#include "MaterialVectorAux.h"
-#include "AccumulateAux.h"
 #include "DomainIntegralQFunction.h"
 #include "DomainIntegralTopologicalQFunction.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-#include "LineMaterialSymmTensorSampler.h"
-#include "PresetVelocity.h"
 #include "InteractionIntegralBenchmarkBC.h"
-#include "MaterialTensorIntegral.h"
+#include "MaterialTensorIntegralSM.h"
 #include "CrackDataSampler.h"
+#include "LineMaterialSymmTensorSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
 #include "SolidMechImplicitEuler.h"
@@ -61,18 +55,15 @@
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
 
-
-template<>
-InputParameters validParams<SolidMechanicsApp>()
+template <>
+InputParameters
+validParams<SolidMechanicsApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
@@ -83,12 +74,14 @@ SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) :
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
 }
 
-SolidMechanicsApp::~SolidMechanicsApp()
-{
-}
+SolidMechanicsApp::~SolidMechanicsApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void SolidMechanicsApp__registerApps() { SolidMechanicsApp::registerApps(); }
+extern "C" void
+SolidMechanicsApp__registerApps()
+{
+  SolidMechanicsApp::registerApps();
+}
 void
 SolidMechanicsApp::registerApps()
 {
@@ -96,21 +89,19 @@ SolidMechanicsApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void SolidMechanicsApp__registerObjects(Factory & factory) { SolidMechanicsApp::registerObjects(factory); }
+extern "C" void
+SolidMechanicsApp__registerObjects(Factory & factory)
+{
+  SolidMechanicsApp::registerObjects(factory);
+}
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
-  registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
-  registerAux(MaterialVectorAux);
-  registerAux(AccumulateAux);
   registerAux(DomainIntegralQFunction);
   registerAux(DomainIntegralTopologicalQFunction);
-  registerAux(ElementsOnLineAux);
 
-  registerBoundaryCondition(DashpotBC);
-  registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
   registerMaterial(AbaqusCreepMaterial);
@@ -123,6 +114,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(InteractionIntegralAuxFields);
   registerMaterial(IsotropicPlasticity);
   registerMaterial(IsotropicPowerLawHardening);
+  registerMaterial(IsotropicTempDepHardening);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearGeneralAnisotropicMaterial);
   registerMaterial(LinearIsotropicMaterial);
@@ -146,29 +138,32 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
   registerPostprocessor(InteractionIntegral);
-  registerPostprocessor(MaterialTensorIntegral);
+  registerPostprocessor(MaterialTensorIntegralSM);
   registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(CrackDataSampler);
   registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
-  registerUserObject(MaterialTensorOnLine);
   registerUserObject(CrackFrontDefinition);
 }
 
 // External entry point for dynamic syntax association
-extern "C" void SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { SolidMechanicsApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  SolidMechanicsApp::associateSyntax(syntax, action_factory);
+}
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
+  registerSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_user_object");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_variable");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_kernel");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_postprocessor");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_vector_postprocessor");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_user_object");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_kernel");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_postprocessor");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_vector_postprocessor");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_material");
 
   registerAction(SolidMechanicsAction, "add_kernel");
   registerAction(DomainIntegralAction, "add_user_object");

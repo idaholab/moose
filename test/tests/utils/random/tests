@@ -33,7 +33,7 @@
     exodiff = 'parallel_mesh_out.e'
     min_parallel = 2
     max_parallel = 2
-    cli_args = 'Mesh/distribution=PARALLEL Outputs/file_base=parallel_mesh_out'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=parallel_mesh_out'
     prereq = 'threads_verification'
   [../]
 
@@ -69,7 +69,7 @@
     exodiff = 'parallel_mesh_uo_out.e'
     min_parallel = 2
     max_parallel = 2
-    cli_args = 'Mesh/distribution=PARALLEL Outputs/file_base=parallel_mesh_uo_out'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=parallel_mesh_uo_out'
     prereq = 'threads_verification_uo'
   [../]
 

@@ -15,12 +15,15 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
-template<>
-InputParameters validParams<MaterialAuxBase<> >()
+template <>
+InputParameters
+validParams<MaterialAuxBase<>>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");
-  params.addParam<Real>("factor", 1, "The factor by which to multiply your material property for visualization");
-  params.addParam<Real>("offset", 0, "The offset to add to your material property for visualization");
+  params.addParam<Real>(
+      "factor", 1, "The factor by which to multiply your material property for visualization");
+  params.addParam<Real>(
+      "offset", 0, "The offset to add to your material property for visualization");
   return params;
 }

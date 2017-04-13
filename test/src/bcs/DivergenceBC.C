@@ -14,27 +14,24 @@
 
 #include "DivergenceBC.h"
 
-template<>
-InputParameters validParams<DivergenceBC>()
+template <>
+InputParameters
+validParams<DivergenceBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-DivergenceBC::DivergenceBC(const InputParameters & parameters) :
-  IntegratedBC(parameters)
-{
-}
+DivergenceBC::DivergenceBC(const InputParameters & parameters) : IntegratedBC(parameters) {}
 
 Real
 DivergenceBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*(_grad_u[_qp]*_normals[_qp]);
+  return -_test[_i][_qp] * (_grad_u[_qp] * _normals[_qp]);
 }
 
 Real
 DivergenceBC::computeQpJacobian()
 {
-  return -_test[_i][_qp]*(_grad_phi[_j][_qp]*_normals[_qp]);
+  return -_test[_i][_qp] * (_grad_phi[_j][_qp] * _normals[_qp]);
 }
-

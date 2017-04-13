@@ -15,26 +15,27 @@
 #ifndef COMPUTEREINITIALCONDITIONTHREAD_H
 #define COMPUTEREINITIALCONDITIONTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // libmesh
 #include "libmesh/elem_range.h"
+#include "libmesh/threads.h"
 
-class FEProblem;
+class FEProblemBase;
 
 class ComputeInitialConditionThread
 {
 public:
-  ComputeInitialConditionThread(FEProblem & fe_problem);
+  ComputeInitialConditionThread(FEProblemBase & fe_problem);
   // Splitting Constructor
   ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
   void join(const ComputeInitialConditionThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   THREAD_ID _tid;
 };
 
-#endif //COMPUTEINITIALCONDITIONTHREAD_H
+#endif // COMPUTEINITIALCONDITIONTHREAD_H

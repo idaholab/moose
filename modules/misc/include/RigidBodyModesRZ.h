@@ -5,20 +5,18 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RIGIDBODYMODESRZ_H
 #define RIGIDBODYMODESRZ_H
 
 #include "NodalUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class RigidBodyModesRZ;
 
-template<>
+template <>
 InputParameters validParams<RigidBodyModesRZ>();
 
-class RigidBodyModesRZ :
-  public NodalUserObject
+class RigidBodyModesRZ : public NodalUserObject
 {
 public:
   RigidBodyModesRZ(const InputParameters & parameters);
@@ -29,11 +27,11 @@ public:
   virtual void execute();
 
   virtual void initialize(){};
-  virtual void threadJoin(const UserObject&){};
+  virtual void threadJoin(const UserObject &){};
   virtual void finalize();
 
 protected:
-  std::string               _subspace_name;
+  std::string _subspace_name;
   std::vector<unsigned int> _subspace_indices;
   unsigned int _disp_r_i;
   unsigned int _disp_z_i;

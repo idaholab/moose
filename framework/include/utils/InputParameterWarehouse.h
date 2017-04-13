@@ -16,7 +16,6 @@
 #define INPUTPARAMETERWAREHOUSE_H
 
 // MOOSE includes
-#include "ParallelUniqueId.h"
 #include "MooseObjectName.h"
 #include "MooseTypes.h"
 #include "ControllableParameter.h"
@@ -34,7 +33,6 @@ class InputParameters;
 class InputParameterWarehouse
 {
 public:
-
   /**
    * Class constructor
    */
@@ -43,48 +41,55 @@ public:
   /**
    * Destruction
    */
-  virtual ~InputParameterWarehouse();
+  virtual ~InputParameterWarehouse() = default;
 
   ///@{
   /**
    * Return a const reference to the InputParameters for the named object
    * @param tag The tag of the object (e.g., 'Kernel')
-   * @param name The name of the parameters object, including the tag (name only input) or MooseObjectName object
+   * @param name The name of the parameters object, including the tag (name only input) or
+   * MooseObjectName object
    * @param tid The thread id
    * @return A const reference to the warehouse copy of the InputParameters
    */
-  const InputParameters & getInputParametersObject(const std::string & name, THREAD_ID tid = 0) const;
-  const InputParameters & getInputParametersObject(const std::string & tag, const std::string & name, THREAD_ID tid = 0 ) const;
-  const InputParameters & getInputParametersObject(const MooseObjectName & object_name, THREAD_ID tid = 0 ) const;
+  const InputParameters & getInputParametersObject(const std::string & name,
+                                                   THREAD_ID tid = 0) const;
+  const InputParameters & getInputParametersObject(const std::string & tag,
+                                                   const std::string & name,
+                                                   THREAD_ID tid = 0) const;
+  const InputParameters & getInputParametersObject(const MooseObjectName & object_name,
+                                                   THREAD_ID tid = 0) const;
   ///@{
   /**
    * Return const reference to the map containing the InputParameter objects
    */
-  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & getInputParameters(THREAD_ID tid = 0) const;
+  const std::multimap<MooseObjectName, std::shared_ptr<InputParameters>> &
+  getInputParameters(THREAD_ID tid = 0) const;
 
   /**
    * Returns a ControllableParameter object
    * @see Control
    */
-  template<typename T>
-  ControllableParameter<T> getControllableParameter(const MooseObjectParameterName & desired, bool mark_as_controlled = false);
+  template <typename T>
+  ControllableParameter<T> getControllableParameter(const MooseObjectParameterName & desired,
+                                                    bool mark_as_controlled = false);
 
   /**
    * Method for linking control parameters of different names
    */
-  void addControllableParameterConnection(const MooseObjectParameterName & master, const MooseObjectParameterName & slave);
-
+  void addControllableParameterConnection(const MooseObjectParameterName & master,
+                                          const MooseObjectParameterName & slave);
 
 private:
-
   /// Storage for the InputParameters objects
-  std::vector<std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > > _input_parameters;
+  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
 
   /// InputParameter links
-  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> > _input_parameter_links;
+  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName>> _input_parameter_links;
 
   /// A list of parameters that were controlled (only used for output)
-  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > _controlled_parameters;
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName>>
+      _controlled_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -99,13 +104,15 @@ private:
    * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
-  InputParameters & addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+  InputParameters &
+  addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   ///@{
   /**
    * Return a reference to the InputParameters for the named object
    * @param tag The tag of the object (e.g., 'Kernel')
-   * @param name The name of the parameters object, including the tag (name only input) or MooseObjectName object
+   * @param name The name of the parameters object, including the tag (name only input) or
+   * MooseObjectName object
    * @param tid The thread id
    * @return A reference to the warehouse copy of the InputParameters
    *
@@ -114,15 +121,21 @@ private:
    * Only change parameters if you know what you are doing. Hence, this is private for a reason.
    */
   InputParameters & getInputParameters(const std::string & name, THREAD_ID tid = 0) const;
-  InputParameters & getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0 ) const;
-  InputParameters & getInputParameters(const MooseObjectName & object_name, THREAD_ID tid = 0 ) const;
+  InputParameters &
+  getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0) const;
+  InputParameters & getInputParameters(const MooseObjectName & object_name,
+                                       THREAD_ID tid = 0) const;
   ///@{
 
   /**
    * Return the list of controlled parameters (used for output)
    * @see ControlOutput
    */
-  const std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > & getControlledParameters() { return _controlled_parameters; }
+  const std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName>> &
+  getControlledParameters()
+  {
+    return _controlled_parameters;
+  }
   void clearControlledParameters() { _controlled_parameters.clear(); }
 
   friend class Factory;
@@ -132,14 +145,12 @@ private:
 
   // RELAP-7 Control Logic (This will go away when the MOOSE system is created)
   friend class Component;
-  friend class R7SetupOutputAction;
-  friend class SolidMaterialProperties;
 };
 
-
-template<typename T>
+template <typename T>
 ControllableParameter<T>
-InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input, bool mark_as_controlled /*=false*/)
+InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input,
+                                                  bool mark_as_controlled /*=false*/)
 {
 
   // The ControllableParameter object to return
@@ -147,40 +158,38 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
 
   // Vector of desired parameters
   std::vector<MooseObjectParameterName> params(1, input);
-  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> >::const_iterator link_it = _input_parameter_links.find(input);
+  const auto link_it = _input_parameter_links.find(input);
   if (link_it != _input_parameter_links.end())
     params.insert(params.end(), link_it->second.begin(), link_it->second.end());
-
-  // Parameter object iterator
-  std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter;
 
   // Loop over all threads
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // Loop over all InputParameter objects
-    for (iter = _input_parameters[tid].begin(); iter != _input_parameters[tid].end(); ++iter)
+    for (const auto & param_pair : _input_parameters[tid])
     {
       // Loop of all desired params
-      for (std::vector<MooseObjectParameterName>::iterator it = params.begin(); it != params.end(); ++it)
+      for (const auto & param : params)
       {
         // If the desired object name does not match the current object name, move on
-        MooseObjectParameterName desired = *it;
+        MooseObjectParameterName desired = param;
 
-        if (desired != iter->first)
+        if (desired != param_pair.first)
           continue;
 
-        // If the parameter is valid and controllable update the output vector with a pointer to the parameter
-        if (iter->second->libMesh::Parameters::have_parameter<T>(desired.parameter()))
+        // If the parameter is valid and controllable update the output vector with a pointer to the
+        // parameter
+        if (param_pair.second->libMesh::Parameters::have_parameter<T>(desired.parameter()))
         {
           // Do not allow non-controllable types to be controlled
-          if (!iter->second->isControllable(desired.parameter()))
-            mooseError("The desired parameter is not controllable: " << desired);
+          if (!param_pair.second->isControllable(desired.parameter()))
+            mooseError("The desired parameter is not controllable: ", desired);
 
           // Store pointer to the writable parameter
-          output.insert(desired, iter->second);
+          output.insert(desired, param_pair.second);
 
           if (mark_as_controlled && tid == 0)
-            _controlled_parameters[iter->second].insert(desired);
+            _controlled_parameters[param_pair.second].insert(desired);
         }
       }
     }
@@ -188,7 +197,7 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
 
   // Error if nothing was found
   if (output.size() == 0)
-    mooseError("The controlled parameter was not found: " << input);
+    mooseError("The controlled parameter was not found: ", input);
 
   return output;
 }

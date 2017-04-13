@@ -17,30 +17,24 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<LStableDirk2>()
+template <>
+InputParameters
+validParams<LStableDirk2>()
 {
   InputParameters params = validParams<TimeIntegrator>();
   return params;
 }
 
-
-LStableDirk2::LStableDirk2(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+LStableDirk2::LStableDirk2(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _stage(1),
     _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED)),
     _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
-    _alpha(1. - 0.5*std::sqrt(2))
+    _alpha(1. - 0.5 * std::sqrt(2))
 {
 }
 
-
-
-LStableDirk2::~LStableDirk2()
-{
-}
-
-
+LStableDirk2::~LStableDirk2() {}
 
 void
 LStableDirk2::computeTimeDerivatives()
@@ -48,14 +42,12 @@ LStableDirk2::computeTimeDerivatives()
   // We are multiplying by the method coefficients in postStep(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 1. / _dt;
   _u_dot.close();
   _du_dot_du = 1. / _dt;
 }
-
-
 
 void
 LStableDirk2::solve()
@@ -67,28 +59,26 @@ LStableDirk2::solve()
   Real time_old = _fe_problem.timeOld();
 
   // Time at stage 1
-  Real time_stage1 = time_old + _alpha*_dt;
+  Real time_stage1 = time_old + _alpha * _dt;
 
   // Compute first stage
   _fe_problem.initPetscOutput();
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_stage1;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Compute second stage
   _fe_problem.initPetscOutput();
   _console << "2nd stage\n";
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;
-  _fe_problem.time()    = time_new;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.time() = time_new;
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;
 }
-
-
 
 void
 LStableDirk2::postStep(NumericVector<Number> & residual)
@@ -131,7 +121,7 @@ LStableDirk2::postStep(NumericVector<Number> & residual)
     _residual_stage2.close();
 
     residual.add(1., _Re_time);
-    residual.add(1.-_alpha, _residual_stage1);
+    residual.add(1. - _alpha, _residual_stage1);
     residual.add(_alpha, _residual_stage2);
     residual.close();
   }

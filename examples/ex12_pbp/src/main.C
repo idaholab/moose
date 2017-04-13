@@ -27,8 +27,9 @@
 // Create a performance log
 PerfLog Moose::perf_log("Example");
 
- // Begin the main program.
-int main(int argc, char *argv[])
+// Begin the main program.
+int
+main(int argc, char * argv[])
 {
   // Initialize MPI, solvers and MOOSE
   MooseInit init(argc, argv);

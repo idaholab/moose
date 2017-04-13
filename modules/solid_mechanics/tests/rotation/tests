@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'rotation_test.i'
     exodiff = 'out.e'
-    abs_zero = 1e-07
+    rel_err = 1e-04
+    abs_zero = 5e-07
   [../]
 []

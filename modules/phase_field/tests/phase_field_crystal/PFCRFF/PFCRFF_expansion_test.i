@@ -44,7 +44,6 @@
 [Materials]
   [./PFC]
     type = PFCRFFMaterial
-    block = 0
   [../]
 []
 
@@ -89,4 +88,3 @@
 [Outputs]
   exodus = true
 []
-

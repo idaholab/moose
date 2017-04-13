@@ -15,18 +15,19 @@
 #include "BlockDeleter.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<BlockDeleter>()
+template <>
+InputParameters
+validParams<BlockDeleter>()
 {
   InputParameters params = validParams<ElementDeleterBase>();
   params.addRequiredParam<SubdomainID>("block_id", "The block to be deleted");
   return params;
 }
 
-BlockDeleter::BlockDeleter(const InputParameters & parameters) :
-  ElementDeleterBase(parameters),
-  _block_id(getParam<SubdomainID>("block_id"))
-{}
+BlockDeleter::BlockDeleter(const InputParameters & parameters)
+  : ElementDeleterBase(parameters), _block_id(getParam<SubdomainID>("block_id"))
+{
+}
 
 bool
 BlockDeleter::shouldDelete(const Elem * elem)

@@ -156,14 +156,12 @@
 [Materials]
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'Fx  L1 L2 L3  kappa11 kappa12 kappa13 kappa21 kappa22 kappa23 kappa31 kappa32 kappa33'
     prop_values = '0   1  1  1   1       1       1       1       1       1       1       1       1      '
   [../]
 
   [./etasummat]
     type = ParsedMaterial
-    block = 0
     f_name = etasum
     args = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
@@ -172,21 +170,18 @@
 
   [./switching1]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h1
     eta = eta1
     h_order = SIMPLE
   [../]
   [./switching2]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h2
     eta = eta2
     h_order = SIMPLE
   [../]
   [./switching3]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h3
     eta = eta3
     h_order = SIMPLE
@@ -194,13 +189,11 @@
 
   [./barrier]
     type = MultiBarrierFunctionMaterial
-    block = 0
     etas = 'eta1 eta2 eta3'
   [../]
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    block = 0
     f_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'Fx  Fx  Fx'

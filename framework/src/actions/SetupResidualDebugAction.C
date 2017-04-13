@@ -12,28 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "SetupResidualDebugAction.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "ActionWarehouse.h"
 #include "Factory.h"
-#include "NonlinearSystem.h"
+#include "FEProblem.h"
+#include "MooseVariable.h"
+#include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<SetupResidualDebugAction>()
+template <>
+InputParameters
+validParams<SetupResidualDebugAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<NonlinearVariableName> >("show_var_residual", "Variables for which residuals will be sent to the output file");
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "show_var_residual", "Variables for which residuals will be sent to the output file");
   return params;
 }
 
-SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters) :
-    Action(parameters),
-    _show_var_residual(getParam<std::vector<NonlinearVariableName> >("show_var_residual"))
-{
-}
-
-SetupResidualDebugAction::~SetupResidualDebugAction()
+SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters)
+  : Action(parameters),
+    _show_var_residual(getParam<std::vector<NonlinearVariableName>>("show_var_residual"))
 {
 }
 
@@ -43,13 +43,11 @@ SetupResidualDebugAction::act()
   if (_problem.get() == NULL)
     return;
 
-  _problem->getNonlinearSystem().debuggingResiduals(true);
+  _problem->getNonlinearSystemBase().debuggingResiduals(true);
 
   // debug variable residuals
-  for (std::vector<NonlinearVariableName>::const_iterator it = _show_var_residual.begin(); it != _show_var_residual.end(); ++it)
+  for (const auto & var_name : _show_var_residual)
   {
-    NonlinearVariableName var_name = *it;
-
     // add aux-variable
     MooseVariable & var = _problem->getVariable(0, var_name);
     const std::set<SubdomainID> & subdomains = var.activeSubdomains();
@@ -75,4 +73,3 @@ SetupResidualDebugAction::act()
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
   }
 }
-

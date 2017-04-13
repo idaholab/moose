@@ -15,13 +15,12 @@
 #ifndef IMPLICITODEX_H
 #define IMPLICITODEX_H
 
-
 #include "ODEKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ImplicitODEx;
 
-template<>
+template <>
 InputParameters validParams<ImplicitODEx>();
 
 /**
@@ -41,6 +40,5 @@ protected:
   unsigned int _y_var;
   VariableValue & _y;
 };
-
 
 #endif /* IMPLICITODEX_H */

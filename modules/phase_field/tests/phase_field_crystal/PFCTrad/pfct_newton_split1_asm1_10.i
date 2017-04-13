@@ -49,7 +49,7 @@
     variable = u
   [../]
   [./u_gradn]
-    type = CHSplitVar
+    type = LaplacianSplit
     variable = u
     c = n
   [../]
@@ -58,7 +58,7 @@
     variable = v
   [../]
   [./v_gradu]
-    type = CHSplitVar
+    type = LaplacianSplit
     variable = v
     c = u
   [../]
@@ -75,7 +75,6 @@
 [Materials]
   [./PFCTrad]
     type = PFCTradMaterial
-    block = 0
     order = 4
   [../]
 []
@@ -127,5 +126,3 @@
   file_base = pfct_newton_split1_asm1_10_out
   exodus = true
 []
-
-

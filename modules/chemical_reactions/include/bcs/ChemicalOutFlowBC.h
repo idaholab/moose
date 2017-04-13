@@ -9,10 +9,10 @@
 
 #include "IntegratedBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class ChemicalOutFlowBC;
 
-template<>
+template <>
 InputParameters validParams<ChemicalOutFlowBC>();
 
 /**
@@ -25,15 +25,14 @@ public:
   ChemicalOutFlowBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
 private:
-  /**
-   * Vector to dot with the normal.
-   */
+  /// Diffusivity
   const MaterialProperty<Real> & _diff;
+  /// Porosity
   const MaterialProperty<Real> & _porosity;
 };
 
-#endif //CHEMICALOUTFLOWBC_H
+#endif // CHEMICALOUTFLOWBC_H

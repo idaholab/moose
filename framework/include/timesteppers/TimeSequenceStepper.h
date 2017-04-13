@@ -19,7 +19,7 @@
 
 class TimeSequenceStepper;
 
-template<>
+template <>
 InputParameters validParams<TimeSequenceStepper>();
 
 /**
@@ -30,6 +30,8 @@ class TimeSequenceStepper : public TimeSequenceStepperBase
 {
 public:
   TimeSequenceStepper(const InputParameters & parameters);
+
+  virtual void init() override;
 };
 
-#endif //TIMESEQUENCESTEPPER_H
+#endif // TIMESEQUENCESTEPPER_H

@@ -19,4 +19,9 @@
     input = 'composite.i'
     exodiff = 'composite_out.e'
   [../]
+  [./inclusion]
+    type = 'Exodiff'
+    input = 'inclusion.i'
+    exodiff = 'inclusion_out.e'
+  [../]
 []

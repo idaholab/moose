@@ -14,13 +14,12 @@
 
 #include "RotationMatrix.h"
 
-
 RealTensorValue
 RotationMatrix::rotVecToZ(RealVectorValue vec)
 // provides a rotation matrix that will rotate the vector vec to the z axis (the "2" direction)
 {
   // ensure that vec is normalised
-  vec /= std::sqrt(vec*vec);
+  vec /= std::sqrt(vec * vec);
 
   // construct v0 and v1 to be orthonormal to vec
   // and form a RH basis, that is, so v1 x vec = v0
@@ -29,33 +28,29 @@ RotationMatrix::rotVecToZ(RealVectorValue vec)
   RealVectorValue v1;
   // Need a prototype for v1 first, and this is done by looking at the smallest component of vec
   RealVectorValue w(std::abs(vec(0)), std::abs(vec(1)), std::abs(vec(2)));
-  if ( (w(2) >= w(1) && w(1) >= w(0)) || (w(1) >= w(2) && w(2) >= w(0)) )
+  if ((w(2) >= w(1) && w(1) >= w(0)) || (w(1) >= w(2) && w(2) >= w(0)))
     // vec(0) is the smallest component
     v1(0) = 1;
-  else if ( (w(2) >= w(0) && w(0) >= w(1)) || (w(0) >= w(2) && w(2) >= w(1)) )
+  else if ((w(2) >= w(0) && w(0) >= w(1)) || (w(0) >= w(2) && w(2) >= w(1)))
     // vec(1) is the smallest component
     v1(1) = 1;
   else
     // vec(2) is the smallest component
     v1(2) = 1;
   // now Gram-Schmidt
-  v1 -= (v1*vec)*vec;
-  v1 /= std::sqrt(v1*v1);
+  v1 -= (v1 * vec) * vec;
+  v1 /= std::sqrt(v1 * v1);
 
   // now use v0 = v1 x vec
   RealVectorValue v0;
-  v0(0) = v1(1)*vec(2) - v1(2)*vec(1);
-  v0(1) = v1(2)*vec(0) - v1(0)*vec(2);
-  v0(2) = v1(0)*vec(1) - v1(1)*vec(0);
+  v0(0) = v1(1) * vec(2) - v1(2) * vec(1);
+  v0(1) = v1(2) * vec(0) - v1(0) * vec(2);
+  v0(2) = v1(0) * vec(1) - v1(1) * vec(0);
 
   // the desired rotation matrix is just
-  RealTensorValue rot(v0(0), v0(1), v0(2),
-                      v1(0), v1(1), v1(2),
-                      vec(0), vec(1), vec(2));
+  RealTensorValue rot(v0(0), v0(1), v0(2), v1(0), v1(1), v1(2), vec(0), vec(1), vec(2));
   return rot;
 }
-
-
 
 RealTensorValue
 RotationMatrix::rotVec1ToVec2(RealVectorValue vec1, RealVectorValue vec2)
@@ -63,5 +58,5 @@ RotationMatrix::rotVec1ToVec2(RealVectorValue vec1, RealVectorValue vec2)
 {
   RealTensorValue rot1_to_z = rotVecToZ(vec1);
   RealTensorValue rot2_to_z = rotVecToZ(vec2);
-  return rot2_to_z.transpose()*rot1_to_z;
+  return rot2_to_z.transpose() * rot1_to_z;
 }

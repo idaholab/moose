@@ -15,9 +15,7 @@
 #ifndef NEIGHBORCOUPLEABLE_H
 #define NEIGHBORCOUPLEABLE_H
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InputParameters.h"
+#include "MooseVariableBase.h"
 #include "Coupleable.h"
 
 /**
@@ -37,15 +35,22 @@ public:
   virtual ~NeighborCoupleable();
 
   // neighbor
-  virtual const VariableValue & coupledNeighborValue(const std::string & var_name, unsigned int comp = 0);
-  virtual const VariableValue & coupledNeighborValueOld(const std::string & var_name, unsigned int comp = 0);
-  virtual const VariableValue & coupledNeighborValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValue(const std::string & var_name,
+                                                     unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValueOld(const std::string & var_name,
+                                                        unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValueOlder(const std::string & var_name,
+                                                          unsigned int comp = 0);
 
-  virtual const VariableGradient & coupledNeighborGradient(const std::string & var_name, unsigned int comp = 0);
-  virtual const VariableGradient & coupledNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
-  virtual const VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableGradient & coupledNeighborGradient(const std::string & var_name,
+                                                           unsigned int comp = 0);
+  virtual const VariableGradient & coupledNeighborGradientOld(const std::string & var_name,
+                                                              unsigned int comp = 0);
+  virtual const VariableGradient & coupledNeighborGradientOlder(const std::string & var_name,
+                                                                unsigned int comp = 0);
 
-  virtual const VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
+  virtual const VariableSecond & coupledNeighborSecond(const std::string & var_name,
+                                                       unsigned int i = 0);
 
 protected:
   bool _neighbor_nodal;

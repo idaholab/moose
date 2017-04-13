@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "NSMassWeakStagnationBC.h"
 
-template<>
-InputParameters validParams<NSMassWeakStagnationBC>()
+template <>
+InputParameters
+validParams<NSMassWeakStagnationBC>()
 {
-  InputParameters params = validParams<NSWeakStagnationBC>();
+  InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("The inviscid energy BC term with specified normal flow.");
   return params;
 }
 
-NSMassWeakStagnationBC::NSMassWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBC(parameters)
+NSMassWeakStagnationBC::NSMassWeakStagnationBC(const InputParameters & parameters)
+  : NSWeakStagnationBaseBC(parameters)
 {
 }
 

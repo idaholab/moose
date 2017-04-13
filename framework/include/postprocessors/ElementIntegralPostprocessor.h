@@ -17,10 +17,10 @@
 
 #include "ElementPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementIntegralPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralPostprocessor>();
 
 /**
@@ -34,10 +34,10 @@ class ElementIntegralPostprocessor : public ElementPostprocessor
 public:
   ElementIntegralPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & y);
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual Real getValue() override;
 
 protected:
   virtual Real computeQpIntegral() = 0;

@@ -6,21 +6,23 @@
 /****************************************************************/
 
 #include "FiniteStrainCPSlipRateRes.h"
+#include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<FiniteStrainCPSlipRateRes>()
+template <>
+InputParameters
+validParams<FiniteStrainCPSlipRateRes>()
 {
   InputParameters params = validParams<FiniteStrainCrystalPlasticity>();
   return params;
 }
 
-FiniteStrainCPSlipRateRes::FiniteStrainCPSlipRateRes(const InputParameters & parameters) :
-  FiniteStrainCrystalPlasticity(parameters),
-  _resid(_nss),
-  _slip_rate(_nss),
-  _dsliprate_dgss(_nss),
-  _jacob(_nss, _nss),
-  _dsliprate_dsliprate(_nss,_nss)
+FiniteStrainCPSlipRateRes::FiniteStrainCPSlipRateRes(const InputParameters & parameters)
+  : FiniteStrainCrystalPlasticity(parameters),
+    _resid(_nss),
+    _slip_rate(_nss),
+    _dsliprate_dgss(_nss),
+    _jacob(_nss, _nss),
+    _dsliprate_dsliprate(_nss, _nss)
 {
 }
 
@@ -48,7 +50,7 @@ FiniteStrainCPSlipRateRes::solveStress()
   unsigned int iter = 0;
 
 #ifdef DEBUG
-  std::vector<Real> rnormst(_maxiter+1), slipratest(_maxiter+1);//Use for Debugging
+  std::vector<Real> rnormst(_maxiter + 1), slipratest(_maxiter + 1); // Use for Debugging
 #endif
 
   calcResidJacobSlipRate();
@@ -108,7 +110,7 @@ FiniteStrainCPSlipRateRes::solveStress()
   if (iter == _maxiter)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainCPSlipRateRes: NR exceeds maximum iteration " << iter << " " << rnorm);
+    mooseWarning("FiniteStrainCPSlipRateRes: NR exceeds maximum iteration ", iter, " ", rnorm);
 #endif
     _err_tol = true;
     return;
@@ -158,7 +160,6 @@ FiniteStrainCPSlipRateRes::calcResidualSlipRate()
 
   for (unsigned int i = 0; i < _nss; ++i)
     _resid(i) = _slip_rate(i) - _slip_incr(i) / _dt;
-
 }
 
 void
@@ -171,9 +172,10 @@ FiniteStrainCPSlipRateRes::calcJacobianSlipRate()
   for (unsigned int i = 0; i < _nss; ++i)
     for (unsigned int j = 0; j < _nss; ++j)
     {
-      _jacob(i,j) = 0.0;
-      if (i == j) _jacob(i,j) += 1.0;
-      _jacob(i,j) -= _dsliprate_dsliprate(i,j);
+      _jacob(i, j) = 0.0;
+      if (i == j)
+        _jacob(i, j) += 1.0;
+      _jacob(i, j) -= _dsliprate_dsliprate(i, j);
     }
 }
 
@@ -186,20 +188,20 @@ FiniteStrainCPSlipRateRes::calcDtauDsliprate()
   for (unsigned int i = 0; i < _nss; ++i)
   {
     dtaudpk2[i] = _s0[i];
-    dfpinvdsliprate[i] = - _fp_old_inv * _s0[i] * _dt;
+    dfpinvdsliprate[i] = -_fp_old_inv * _s0[i] * _dt;
   }
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        dfedfpinv(i,j,k,j) = _dfgrd_tmp(i,k);
+        dfedfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
       {
-        deedfe(i,j,k,i) = deedfe(i,j,k,i) + _fe(k,j) * 0.5;
-        deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
+        deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
+        deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
       }
 
   RankFourTensor dpk2dfpinv;
@@ -208,7 +210,8 @@ FiniteStrainCPSlipRateRes::calcDtauDsliprate()
 
   for (unsigned int i = 0; i < _nss; ++i)
     for (unsigned int j = 0; j < _nss; ++j)
-      _dsliprate_dsliprate(i,j) = _dslipdtau(i) * dtaudpk2[i].doubleContraction(dpk2dfpinv * dfpinvdsliprate[j]);
+      _dsliprate_dsliprate(i, j) =
+          _dslipdtau(i) * dtaudpk2[i].doubleContraction(dpk2dfpinv * dfpinvdsliprate[j]);
 }
 
 void
@@ -216,7 +219,7 @@ FiniteStrainCPSlipRateRes::calcDgssDsliprate()
 {
   for (unsigned int i = 0; i < _nss; ++i)
     for (unsigned int j = 0; j < _nss; ++j)
-      _dsliprate_dsliprate(i,j) += _dsliprate_dgss(i) * _dgss_dsliprate(i,j);
+      _dsliprate_dsliprate(i, j) += _dsliprate_dgss(i) * _dgss_dsliprate(i, j);
 }
 
 void
@@ -227,10 +230,12 @@ FiniteStrainCPSlipRateRes::getSlipIncrements()
   if (_err_tol)
     return;
 
-  _dslipdtau *= 1.0/_dt;
+  _dslipdtau *= 1.0 / _dt;
 
   for (unsigned int i = 0; i < _nss; ++i)
-    _dsliprate_dgss(i) = - _a0(i) / _xm(i) * std::pow(std::abs(_tau(i) / _gss_tmp[i]), 1.0 / _xm(i) - 1.0 ) * _tau(i) / std::pow(_gss_tmp[i], 2.0);
+    _dsliprate_dgss(i) = -_a0(i) / _xm(i) *
+                         std::pow(std::abs(_tau(i) / _gss_tmp[i]), 1.0 / _xm(i) - 1.0) * _tau(i) /
+                         std::pow(_gss_tmp[i], 2.0);
 }
 
 void
@@ -252,14 +257,15 @@ FiniteStrainCPSlipRateRes::calcResidNorm()
 {
   Real rnorm = 0.0;
   for (unsigned int i = 0; i < _nss; ++i)
-    rnorm += std::pow(_resid(i), 2.0);
-  rnorm = std::pow(rnorm, 0.5) / _nss;
+    rnorm += Utility::pow<2>(_resid(i));
+  rnorm = std::sqrt(rnorm) / _nss;
 
   return rnorm;
 }
 
 bool
-FiniteStrainCPSlipRateRes::lineSearchUpdateSlipRate(const Real rnorm_prev, const DenseVector<Real> & update)
+FiniteStrainCPSlipRateRes::lineSearchUpdateSlipRate(const Real rnorm_prev,
+                                                    const DenseVector<Real> & update)
 {
   if (_lsrch_method == "CUT_HALF")
   {
@@ -279,8 +285,7 @@ FiniteStrainCPSlipRateRes::lineSearchUpdateSlipRate(const Real rnorm_prev, const
       if (_err_tol)
         return false;
       rnorm = calcResidNorm();
-    }
-    while (rnorm > rnorm_prev && step > _min_lsrch_step);
+    } while (rnorm > rnorm_prev && step > _min_lsrch_step);
 
     if (rnorm > rnorm_prev && step <= _min_lsrch_step)
       return false;
@@ -309,17 +314,19 @@ FiniteStrainCPSlipRateRes::lineSearchUpdateSlipRate(const Real rnorm_prev, const
     for (unsigned int i = 0; i < update.size(); ++i)
       _slip_rate(i) -= update(i);
 
-    if ((rnorm1/rnorm0) < _lsrch_tol || s_a*s_b > 0){
+    if ((rnorm1 / rnorm0) < _lsrch_tol || s_a * s_b > 0)
+    {
       calcResidualSlipRate();
       return true;
     }
 
-    while ((rnorm/rnorm0) > _lsrch_tol && count < _lsrch_max_iter){
+    while ((rnorm / rnorm0) > _lsrch_tol && count < _lsrch_max_iter)
+    {
 
       for (unsigned int i = 0; i < update.size(); ++i)
         _slip_rate(i) += step * update(i);
 
-      step = 0.5*(step_a + step_b);
+      step = 0.5 * (step_a + step_b);
 
       for (unsigned int i = 0; i < update.size(); ++i)
         _slip_rate(i) -= step * update(i);
@@ -328,30 +335,33 @@ FiniteStrainCPSlipRateRes::lineSearchUpdateSlipRate(const Real rnorm_prev, const
       s_m = calcResidDotProdUpdate(update);
       rnorm = calcResidNorm();
 
-      if (s_m*s_a < 0.0){
+      if (s_m * s_a < 0.0)
+      {
         step_b = step;
         s_b = s_m;
       }
-      if (s_m*s_b < 0.0){
+      if (s_m * s_b < 0.0)
+      {
         step_a = step;
         s_a = s_m;
       }
       count++;
     }
 
-    if ((rnorm/rnorm0) < _lsrch_tol && count < _lsrch_max_iter)
+    if ((rnorm / rnorm0) < _lsrch_tol && count < _lsrch_max_iter)
       return true;
 
     return false;
   }
-  else{
+  else
+  {
     mooseError("Line search meothod is not provided.");
     return false;
   }
 }
 
 Real
-FiniteStrainCPSlipRateRes::calcResidDotProdUpdate(const DenseVector<Real>& update)
+FiniteStrainCPSlipRateRes::calcResidDotProdUpdate(const DenseVector<Real> & update)
 {
   Real dotprod = 0.0;
   for (unsigned int i = 0; i < _nss; ++i)

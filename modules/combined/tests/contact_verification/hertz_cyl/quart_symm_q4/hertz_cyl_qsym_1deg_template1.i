@@ -1,6 +1,10 @@
+[GlobalParams]
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = hertz_cyl_qsym_1deg_q4.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -11,12 +15,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -68,35 +68,37 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    save_in_disp_y = saved_y
-    save_in_disp_x = saved_x
-    diag_save_in_disp_y = diag_saved_y
-    diag_save_in_disp_x = diag_saved_x
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
+    save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./inc_slip_x]
     type = PenetrationAux
@@ -217,44 +219,66 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff1_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e10
     poissons_ratio = 0.0
   [../]
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff1_strain]
+    type = ComputeFiniteStrain
+    block = '1'
+  [../]
+  [./stuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+  [./stuff2_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff3]
-    type = Elastic
-    block = 3
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff2_strain]
+    type = ComputeFiniteStrain
+    block = '2'
+  [../]
+  [./stuff2_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
+  [../]
+  [./stuff3_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '3'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./stiffStuff4]
-    type = Elastic
-    block = 4
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff3_strain]
+    type = ComputeFiniteStrain
+    block = '3'
+  [../]
+  [./stuff3_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '3'
+  [../]
+  [./stuff4_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '4'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  [../]
+  [./stuff4_strain]
+    type = ComputeFiniteStrain
+    block = '4'
+  [../]
+  [./stuff4_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '4'
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -309,7 +333,7 @@
   [../]
   [./chkfile]
     type = CSV
-    show = 'bot_react_x bot_react_y disp_x281 ref_resid_x ref_resid_y top_react_x top_react_y x_disp y_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x281 top_react_x top_react_y x_disp y_disp cont_press'
     start_time = 0.9
     execute_vector_postprocessors_on = timestep_end
   [../]
@@ -324,8 +348,6 @@
   [./interface]
     master = 3
     slave = 4
-    disp_x = disp_x
-    disp_y = disp_y
     system = constraint
     model = glued
     formulation = kinematic

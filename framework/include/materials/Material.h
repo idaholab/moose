@@ -24,10 +24,12 @@
 #include "MooseVariableDependencyInterface.h"
 #include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
+#include "DistributionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
@@ -42,37 +44,34 @@ class MooseMesh;
 class MaterialData;
 class SubProblem;
 
-template<>
+template <>
 InputParameters validParams<Material>();
 
 /**
  * Materials compute MaterialProperties.
  */
-class Material :
-    public MooseObject,
-    public BlockRestrictable,
-    public BoundaryRestrictable,
-    public SetupInterface,
-    public Coupleable,
-    public MooseVariableDependencyInterface,
-    public ScalarCoupleable,
-    public FunctionInterface,
-    public UserObjectInterface,
-    public TransientInterface,
-    public MaterialPropertyInterface,
-    public PostprocessorInterface,
-    public DependencyResolverInterface,
-    public Restartable,
-    public ZeroInterface,
-    public MeshChangedInterface,
-    public OutputInterface,
-    public RandomInterface
+class Material : public MooseObject,
+                 public BlockRestrictable,
+                 public BoundaryRestrictable,
+                 public SetupInterface,
+                 public Coupleable,
+                 public MooseVariableDependencyInterface,
+                 public ScalarCoupleable,
+                 public FunctionInterface,
+                 public DistributionInterface,
+                 public UserObjectInterface,
+                 public TransientInterface,
+                 public MaterialPropertyInterface,
+                 public PostprocessorInterface,
+                 public VectorPostprocessorInterface,
+                 public DependencyResolverInterface,
+                 public Restartable,
+                 public ZeroInterface,
+                 public MeshChangedInterface,
+                 public OutputInterface,
+                 public RandomInterface
 {
 public:
-
-  /**
-   * Constructor
-   */
   Material(const InputParameters & parameters);
 
   /**
@@ -86,7 +85,8 @@ public:
   virtual void computeProperties();
 
   /**
-   * Resets the properties at each quadrature point (see resetQpProperties), only called if 'compute = false'.
+   * Resets the properties at each quadrature point (see resetQpProperties), only called if 'compute
+   * = false'.
    *
    * This method is called internally by MOOSE, you probably don't want to mess with this.
    */
@@ -96,7 +96,8 @@ public:
    * A method for (re)computing the properties of a Material.
    *
    * This is intended to be called from other objects, by first calling
-   * MaterialPropertyInterface::getMaterial and then calling this method on the Material object returned.
+   * MaterialPropertyInterface::getMaterial and then calling this method on the Material object
+   * returned.
    */
   virtual void computePropertiesAtQp(unsigned int qp);
 
@@ -105,11 +106,11 @@ public:
    * Retrieve the property through a given input parameter key with a fallback
    * to getting it by name
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
   ///@}
 
@@ -117,11 +118,11 @@ public:
   /**
    * Retrieve the property named "name"
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
@@ -129,11 +130,11 @@ public:
   /**
    * Declare the property named "name"
    */
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
   ///@}
 
@@ -141,24 +142,20 @@ public:
    * Return a material property that is initialized to zero by default and does
    * not need to (but can) be declared by another material.
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getZeroMaterialProperty(const std::string & prop_name);
 
   /**
    * Return a set of properties accessed with getMaterialProperty
    * @return A reference to the set of properties with calls to getMaterialProperty
    */
-  virtual
-  const std::set<std::string> &
-  getRequestedItems() { return _requested_props; }
+  virtual const std::set<std::string> & getRequestedItems() override { return _requested_props; }
 
   /**
    * Return a set of properties accessed with declareProperty
    * @return A reference to the set of properties with calls to declareProperty
    */
-  virtual
-  const std::set<std::string> &
-  getSuppliedItems() { return _supplied_props; }
+  virtual const std::set<std::string> & getSuppliedItems() override { return _supplied_props; }
 
   void checkStatefulSanity() const;
 
@@ -171,34 +168,39 @@ public:
   /**
    * Returns true of the MaterialData type is not associated with volume data
    */
-  bool isBoundaryMaterial() { return _bnd; }
+  bool isBoundaryMaterial() const { return _bnd; }
 
 protected:
-
   /**
    * Users must override this method.
    */
   virtual void computeQpProperties();
 
   /**
-   * Resets the properties prior to calculation of traditional materials (only if 'compute = false').
+   * Resets the properties prior to calculation of traditional materials (only if 'compute =
+   * false').
    *
-   * This method must be overridden in your class. This is called just prior to the re-calculation of
-   * traditional material properties to ensure that the properties are in a proper state for calculation.
+   * This method must be overridden in your class. This is called just prior to the re-calculation
+   * of
+   * traditional material properties to ensure that the properties are in a proper state for
+   * calculation.
    */
   virtual void resetQpProperties();
 
   /**
-   * Initialize stateful properties at quadrature points.  Note when using this function you only need to address
-   * the "current" material properties not the old ones directly, i.e. if you have a property named "_diffusivity"
-   * and an older property named "_diffusivity_old".  You only need to initialize diffusivity.  MOOSE will use
+   * Initialize stateful properties at quadrature points.  Note when using this function you only
+   * need to address
+   * the "current" material properties not the old ones directly, i.e. if you have a property named
+   * "_diffusivity"
+   * and an older property named "_diffusivity_old".  You only need to initialize diffusivity.
+   * MOOSE will use
    * copy that initial value to the old and older values as necessary.
    */
   virtual void initQpStatefulProperties();
 
   SubProblem & _subproblem;
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   THREAD_ID _tid;
   Assembly & _assembly;
 
@@ -207,14 +209,14 @@ protected:
 
   unsigned int _qp;
 
-  QBase * & _qrule;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _q_point;
   /// normals at quadrature points (valid only in boundary materials)
   const MooseArray<Point> & _normals;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /// current side of the current element
   unsigned int & _current_side;
@@ -230,10 +232,25 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
-  /// If False MOOSE does not compute this property
-  bool _compute;
+  /// The ids of the supplied properties, i.e. the indices where they
+  /// are stored in the _material_data->props().  Note: these ids ARE
+  /// NOT IN THE SAME ORDER AS THE _supplied_props set, which is
+  /// ordered alphabetically by name.  The intention of this container
+  /// is to allow rapid copying of MaterialProperty values in
+  /// Material::computeProperties() without looking up the ids from
+  /// the name strings each time.
+  std::set<unsigned int> _supplied_prop_ids;
 
-  enum QP_Data_Type {
+  /// If False MOOSE does not compute this property
+  const bool _compute;
+
+  /// False by default.  If true, MOOSE will only call
+  /// computeQpProperties() for the 0th qp and then copy
+  /// that value around to all the qps.
+  const bool _constant_on_elem;
+
+  enum QP_Data_Type
+  {
     CURR,
     PREV
   };
@@ -246,17 +263,19 @@ protected:
   };
   std::map<std::string, int> _props_to_flags;
 
-
 private:
-  /**
-   * Small helper function to call storeMatPropName
-   */
+  /// Small helper function to call storeMatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
 
+  /// Check and throw an error if the execution has progerssed past the construction stage
+  void checkExecutionStage();
+
   bool _has_stateful_property;
+
+  bool _overrides_init_stateful_props = true;
 };
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
@@ -271,7 +290,7 @@ Material::getMaterialProperty(const std::string & name)
   return getMaterialPropertyByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
@@ -286,7 +305,7 @@ Material::getMaterialPropertyOld(const std::string & name)
   return getMaterialPropertyOldByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & name)
 {
@@ -301,39 +320,35 @@ Material::getMaterialPropertyOlder(const std::string & name)
   return getMaterialPropertyOlderByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyByName(const std::string & prop_name)
 {
-  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
+  checkExecutionStage();
+  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
+  // same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
-  _fe_problem.markMatPropRequested(prop_name);
-  return _material_data->getProperty<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOldByName(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
-  _fe_problem.markMatPropRequested(prop_name);
-  return _material_data->getPropertyOld<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
-  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
-  _fe_problem.markMatPropRequested(prop_name);
-  return _material_data->getPropertyOlder<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
 }
 
-
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
@@ -341,7 +356,7 @@ Material::declareProperty(const std::string & prop_name)
   return _material_data->declareProperty<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
@@ -349,7 +364,7 @@ Material::declarePropertyOld(const std::string & prop_name)
   return _material_data->declarePropertyOld<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
@@ -357,20 +372,23 @@ Material::declarePropertyOlder(const std::string & prop_name)
   return _material_data->declarePropertyOlder<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getZeroMaterialProperty(const std::string & prop_name)
 {
+  checkExecutionStage();
   MaterialProperty<T> & preload_with_zero = _material_data->getProperty<T>(prop_name);
 
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
   _fe_problem.markMatPropRequested(prop_name);
 
-  // Register this material on these blocks and boundaries as a zero property with relaxed consistency checking
+  // Register this material on these blocks and boundaries as a zero property with relaxed
+  // consistency checking
   for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
     _fe_problem.storeZeroMatProp(*it, prop_name);
-  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
+  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end();
+       ++it)
     _fe_problem.storeZeroMatProp(*it, prop_name);
 
   // set values for all qpoints to zero

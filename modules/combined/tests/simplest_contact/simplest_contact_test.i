@@ -1,28 +1,24 @@
 [Mesh]
   file = simplest_contact.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -48,8 +44,6 @@
     component = 0
     slave = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e6
   [../]
 
@@ -60,8 +54,6 @@
     component = 1
     slave = 2
     master = 3
-    disp_x = disp_x
-    disp_y = disp_y
     penalty = 1e6
   [../]
 []

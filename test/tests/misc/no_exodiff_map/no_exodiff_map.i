@@ -1,7 +1,7 @@
 [Mesh]
   type = FileMesh
   file = double_square.e
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

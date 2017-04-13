@@ -14,8 +14,9 @@
 
 #include "MultipleUpdateElemAux.h"
 
-template<>
-InputParameters validParams<MultipleUpdateElemAux>()
+template <>
+InputParameters
+validParams<MultipleUpdateElemAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -24,21 +25,20 @@ InputParameters validParams<MultipleUpdateElemAux>()
   return params;
 }
 
-MultipleUpdateElemAux::MultipleUpdateElemAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _n_vars(coupledComponents("vars"))
+MultipleUpdateElemAux::MultipleUpdateElemAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _n_vars(coupledComponents("vars"))
 {
-  for (unsigned int i=0; i<_n_vars; i++)
+  for (unsigned int i = 0; i < _n_vars; i++)
   {
     _vars.push_back(getVar("vars", i));
-    if (_vars[i]->isNodal()) mooseError("variables have to be elemental");
+    if (_vars[i]->isNodal())
+      mooseError("variables have to be elemental");
   }
-  if (isNodal()) mooseError("variable have to be elemental");
+  if (isNodal())
+    mooseError("variable have to be elemental");
 }
 
-MultipleUpdateElemAux::~MultipleUpdateElemAux()
-{
-}
+MultipleUpdateElemAux::~MultipleUpdateElemAux() {}
 
 void
 MultipleUpdateElemAux::compute()
@@ -47,7 +47,7 @@ MultipleUpdateElemAux::compute()
 
   computeVarValues(values);
 
-  for (unsigned int i=0; i<_n_vars; i++)
+  for (unsigned int i = 0; i < _n_vars; i++)
     _vars[i]->setNodalValue(values[i]);
 
   _var.setNodalValue(0.0);
@@ -62,6 +62,6 @@ MultipleUpdateElemAux::computeValue()
 void
 MultipleUpdateElemAux::computeVarValues(std::vector<Real> & values)
 {
-  for (unsigned int i=0; i<values.size(); i++)
-    values[i] = 100+i;
+  for (unsigned int i = 0; i < values.size(); i++)
+    values[i] = 100 + i;
 }

@@ -4,10 +4,10 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward declarations
+// Forward declarations
 class DefaultMatPropConsumerKernel;
 
-template<>
+template <>
 InputParameters validParams<DefaultMatPropConsumerKernel>();
 
 class DefaultMatPropConsumerKernel : public DerivativeMaterialInterface<Kernel>
@@ -21,4 +21,4 @@ protected:
   const MaterialProperty<Real> & _prop;
 };
 
-#endif //DEFAULTMATPROPCONSUMERKERNEL_H
+#endif // DEFAULTMATPROPCONSUMERKERNEL_H

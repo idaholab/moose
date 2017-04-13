@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# There are no executable tests in this directory.
+# This directory is a module for creating the correct
+# statically compiled registration interface for your
+# application based on the modules enabled through
+# your Makefile. This file must exist for the
+# "make test_subs" target in the modules directory.
+
+exit 0

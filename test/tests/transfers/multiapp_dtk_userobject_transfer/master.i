@@ -4,7 +4,7 @@
   nx = 20
   ny = 20
   nz = 20
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

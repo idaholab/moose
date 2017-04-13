@@ -14,7 +14,7 @@
 
 class PorousFlowDictator;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDictator>();
 
 /**
@@ -30,17 +30,14 @@ InputParameters validParams<PorousFlowDictator>();
  * (in practice they may be lazy and not compute
  * all derivatives).
  */
-class PorousFlowDictator :
-  public GeneralUserObject,
-  public Coupleable,
-  public ZeroInterface
+class PorousFlowDictator : public GeneralUserObject, public Coupleable, public ZeroInterface
 {
- public:
+public:
   PorousFlowDictator(const InputParameters & parameters);
 
-  void initialize() {};
-  void execute() {};
-  void finalize() {};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
   /**
    * The number of PorousFlow variables.  Materials
@@ -106,7 +103,7 @@ class PorousFlowDictator :
    */
   const VariableName massFractionVariableNameDummy() const;
 
- protected:
+protected:
   /// number of porousflow variables
   const unsigned int _num_variables;
 
@@ -116,7 +113,7 @@ class PorousFlowDictator :
   /// number of fluid components
   const unsigned int _num_components;
 
- private:
+private:
   /// _moose_var_num[i] = the moose variable number corresponding to porous flow variable i
   std::vector<unsigned int> _moose_var_num;
 

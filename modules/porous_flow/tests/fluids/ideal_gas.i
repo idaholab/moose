@@ -12,7 +12,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [UserObjects]
@@ -39,18 +39,22 @@
 
 [AuxVariables]
   [./temp]
-    initial_condition = 50
+    initial_condition = 50.0
   [../]
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    temperature = temp
+  [../]
   [./ppss]
     type = PorousFlow1PhaseP
-    temperature = temp
     porepressure = pp
   [../]
   [./dens0]
     type = PorousFlowIdealGas
+    temperature_unit = Celsius
     molar_mass = 5e-3
     phase = 0
   [../]
@@ -72,15 +76,15 @@
   [../]
   [./density]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_fluid_phase_density0'
+    mat_prop = 'PorousFlow_fluid_phase_density_qp0'
   [../]
   [./ddensity_dp]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dpressure_variable_dummy'
+    mat_prop = 'dPorousFlow_fluid_phase_density_qp0/dpressure_variable_dummy'
   [../]
   [./ddensity_dt]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dtemperature_variable_dummy'
+    mat_prop = 'dPorousFlow_fluid_phase_density_qp0/dtemperature_variable_dummy'
   [../]
 []
 

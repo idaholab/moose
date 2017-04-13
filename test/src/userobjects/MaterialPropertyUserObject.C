@@ -15,17 +15,18 @@
 #include "MaterialPropertyUserObject.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MaterialPropertyUserObject>()
+template <>
+InputParameters
+validParams<MaterialPropertyUserObject>()
 {
   InputParameters params = validParams<ElementIntegralUserObject>();
-  params.addRequiredParam<MaterialPropertyName>("mat_prop", "the name of the material property we are going to use");
+  params.addRequiredParam<MaterialPropertyName>(
+      "mat_prop", "the name of the material property we are going to use");
   return params;
 }
 
-MaterialPropertyUserObject::MaterialPropertyUserObject(const InputParameters & parameters) :
-    ElementIntegralUserObject(parameters),
-    _mat_prop(getMaterialProperty<Real>("mat_prop"))
+MaterialPropertyUserObject::MaterialPropertyUserObject(const InputParameters & parameters)
+  : ElementIntegralUserObject(parameters), _mat_prop(getMaterialProperty<Real>("mat_prop"))
 {
 }
 
@@ -57,7 +58,7 @@ MaterialPropertyUserObject::threadJoin(const UserObject & y)
 {
   ElementIntegralUserObject::threadJoin(y);
   const MaterialPropertyUserObject & mat_uo = dynamic_cast<const MaterialPropertyUserObject &>(y);
-  for (unsigned int i=0; i<_elem_integrals.size(); i++)
+  for (unsigned int i = 0; i < _elem_integrals.size(); i++)
     _elem_integrals[i] += mat_uo._elem_integrals[i];
 }
 

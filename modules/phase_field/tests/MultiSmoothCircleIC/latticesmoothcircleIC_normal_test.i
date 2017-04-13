@@ -64,7 +64,6 @@ active = 'Dv'
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
-    block = 0
   [../]
 []
 
@@ -75,6 +74,7 @@ active = 'Dv'
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'
+    flood_entity_type = NODAL
   [../]
 []
 

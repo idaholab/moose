@@ -10,10 +10,10 @@
 
 #include "PorousFlowVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow1PhaseP;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow1PhaseP>();
 
 /**
@@ -29,18 +29,18 @@ public:
   PorousFlow1PhaseP(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
-   * Assemble std::vectors of porepressure, saturation and temperature at the nodes
-   * and quadpoints
+   * Assemble std::vectors of porepressure, saturation and temperature at the quadpoints
    */
   void buildQpPPSS();
 
   /**
    * Effective saturation as a function of porepressure.
    * Default is constant saturation = 1.
+   * If porepressure < 0 then saturation < 1.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
    * @param pressure porepressure (Pa)
@@ -68,11 +68,8 @@ protected:
    */
   virtual Real d2EffectiveSaturation_dP2(Real pressure) const;
 
-  /// Nodal value of porepressure of the fluid phase
-  const VariableValue & _porepressure_nodal_var;
-
-  /// Quadpoint value of porepressure of the fluid phase
-  const VariableValue & _porepressure_qp_var;
+  /// Nodal or quadpoint value of porepressure of the fluid phase
+  const VariableValue & _porepressure_var;
 
   /// Gradient(_porepressure at quadpoints)
   const VariableGradient & _gradp_qp_var;
@@ -82,9 +79,6 @@ protected:
 
   /// the PorousFlow variable number of the porepressure
   const unsigned int _p_var_num;
-
-  /// the PorousFlow variable number of the temperature
-  const unsigned int _t_var_num;
 };
 
-#endif //POROUSFLOW1PHASEP_H
+#endif // POROUSFLOW1PHASEP_H

@@ -19,16 +19,15 @@
 
 class AddPostprocessorAction;
 
-template<>
+template <>
 InputParameters validParams<AddPostprocessorAction>();
 
-
-class AddPostprocessorAction: public MooseObjectAction
+class AddPostprocessorAction : public MooseObjectAction
 {
 public:
   AddPostprocessorAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
-#endif //ADDPOSTPROCESSORACTION_H
+#endif // ADDPOSTPROCESSORACTION_H

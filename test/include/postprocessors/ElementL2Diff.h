@@ -17,20 +17,18 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementL2Diff;
 
-template<>
+template <>
 InputParameters validParams<ElementL2Diff>();
 
-class ElementL2Diff :
-  public ElementIntegralVariablePostprocessor
+class ElementL2Diff : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementL2Diff(const InputParameters & parameters);
 
 protected:
-
   /**
    * Get the L2 Error.
    */
@@ -41,4 +39,4 @@ protected:
   const VariableValue & _u_old;
 };
 
-#endif //ELEMENTL2DIFF_H
+#endif // ELEMENTL2DIFF_H

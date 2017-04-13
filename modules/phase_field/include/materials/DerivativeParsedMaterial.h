@@ -13,7 +13,7 @@
 // Forward Declarations
 class DerivativeParsedMaterial;
 
-template<>
+template <>
 InputParameters validParams<DerivativeParsedMaterial>();
 
 /**

@@ -43,31 +43,24 @@
 # These stresses are a precise match to the simulation result.
 #
 
-[Mesh]#Comment
-  file = gravity_2D.e
+[GlobalParams]
   displacements = 'disp_x disp_y'
-[] # Mesh
+  order = SECOND
+  family = LAGRANGE
+[]
+
+[Mesh]
+  file = gravity_2D.e
+[]
 
 [Variables]
-
   [./disp_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
-
-
-[] # Variables
+[]
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./stress_xx_qp_0]
     order = CONSTANT
     family = MONOMIAL
@@ -104,122 +97,100 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+[]
 
-[] # AuxVariables
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-  [../]
+[Modules/TensorMechanics/Master/All]
+  volumetric_locking_correction = true
+  strain = FINITE
+  #incremental = true
+  add_variables = true
+  generate_output = 'stress_xx'
 []
 
 [Kernels]
-
   [./gravity]
     type = Gravity
     variable = disp_x
     value = 20
   [../]
-
-[] # Kernels
+[]
 
 [AuxKernels]
-
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
   [./stress_xx_qp_0]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_0
-    index = 0
-    qp_select = 0
+    index_i = 0
+    index_j = 0
+    selected_qp = 0
   [../]
   [./stress_xx_qp_1]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_1
-    index = 0
-    qp_select = 1
+    index_i = 0
+    index_j = 0
+    selected_qp = 1
   [../]
   [./stress_xx_qp_2]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_2
-    index = 0
-    qp_select = 2
+    index_i = 0
+    index_j = 0
+    selected_qp = 2
   [../]
   [./stress_xx_qp_3]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_3
-    index = 0
-    qp_select = 3
+    index_i = 0
+    index_j = 0
+    selected_qp = 3
   [../]
   [./stress_xx_qp_4]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_4
-    index = 0
-    qp_select = 4
+    index_i = 0
+    index_j = 0
+    selected_qp = 4
   [../]
   [./stress_xx_qp_5]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_5
-    index = 0
-    qp_select = 5
+    index_i = 0
+    index_j = 0
+    selected_qp = 5
   [../]
   [./stress_xx_qp_6]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_6
-    index = 0
-    qp_select = 6
+    index_i = 0
+    index_j = 0
+    selected_qp = 6
   [../]
   [./stress_xx_qp_7]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_7
-    index = 0
-    qp_select = 7
+    index_i = 0
+    index_j = 0
+    selected_qp = 7
   [../]
   [./stress_xx_qp_8]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx_qp_8
-    index = 0
-    qp_select = 8
+    index_i = 0
+    index_j = 0
+    selected_qp = 8
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -232,31 +203,23 @@
     boundary = 5
     value = 0.0
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     bulk_modulus = 0.333333333333333e6
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 
   [./density]
     type = Density
-    block = 1
     density = 2
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
-
-[] # Materials
+[]
 
 [Preconditioning]
   [./SMP]
@@ -266,41 +229,17 @@
 []
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-
-  line_search = 'none'
-
-
-  nl_abs_tol = 1e-12
-  nl_rel_tol = 1e-12
-
-  l_max_its = 30
-
   start_time = 0.0
-  dt = 1.0
-  num_steps = 1
   end_time = 1.0
-
-#  [./Quadrature]
-#    order = FIFTH
-#  [../]
-
-[] # Executioner
+[]
 
 [Outputs]
-  file_base = out_qp_select
+  file_base = gravity_qp_select_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]
-[] # Outputs
+[]

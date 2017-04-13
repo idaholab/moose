@@ -19,7 +19,7 @@
 
 class ExampleFunction;
 
-template<>
+template <>
 InputParameters validParams<ExampleFunction>();
 
 class ExampleFunction : public Function
@@ -27,10 +27,10 @@ class ExampleFunction : public Function
 public:
   ExampleFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 
 protected:
   Real _alpha;
 };
 
-#endif //EXAMPLEFUNCTION_H
+#endif // EXAMPLEFUNCTION_H

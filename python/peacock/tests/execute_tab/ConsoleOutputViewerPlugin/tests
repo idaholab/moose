@@ -1,0 +1,7 @@
+[Tests]
+  [./ConsoleOutputViewerPlugin]
+    type = PythonUnitTest
+    input= test_ConsoleOutputViewerPlugin.py
+    display_required = True
+  [../]
+[]

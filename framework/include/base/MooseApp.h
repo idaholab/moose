@@ -37,13 +37,13 @@
 class Executioner;
 class MooseApp;
 class Backup;
-class FEProblem;
+class FEProblemBase;
 class MeshModifier;
 class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 
-template<>
+template <>
 InputParameters validParams<MooseApp>();
 
 /**
@@ -56,9 +56,7 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp :
-  public ConsoleStreamInterface,
-  public libMesh::ParallelObject
+class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -94,7 +92,7 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
   /**
    * Run the application
@@ -120,7 +118,7 @@ public:
   /**
    * Returns the input file name that was set with setInputFileName
    */
-  std::string getInputFileName(){ return _input_filename; }
+  std::string getInputFileName() { return _input_filename; }
 
   /**
    * Override the selection of the output file base name.
@@ -207,16 +205,6 @@ public:
   void disableCheckUnusedFlag();
 
   /**
-   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
-   */
-  bool & legacyUoAuxComputationDefault();
-
-  /**
-   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
-   */
-  bool & legacyUoInitializationDefault();
-
-  /**
    * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() { return _executioner.get(); }
@@ -224,7 +212,7 @@ public:
   /**
    * Retrieve the Executioner shared pointer for this App
    */
-  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
+  std::shared_ptr<Executioner> & executioner() { return _executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -246,7 +234,7 @@ public:
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  MooseSharedPointer<CommandLine> commandLine() { return _command_line; }
+  std::shared_ptr<CommandLine> commandLine() { return _command_line; }
 
   /**
    * This method is here so we can determine whether or not we need to
@@ -265,10 +253,21 @@ public:
   virtual void executeExecutioner();
 
   /**
-   * Returns true if the user specified --parallel-mesh on the command line and false
-   * otherwise.
+   * Returns true if the user specified --distributed-mesh (or
+   * --parallel-mesh, for backwards compatibility) on the command line
+   * and false otherwise.
    */
-  bool getParallelMeshOnCommandLine() const { return _parallel_mesh_on_command_line; }
+  bool getDistributedMeshOnCommandLine() const { return _distributed_mesh_on_command_line; }
+
+  /**
+   * Deprecated.  Call getDistributedMeshOnCommandLine() instead.
+   */
+  bool getParallelMeshOnCommandLine() const
+  {
+    mooseDeprecated("getParallelMeshOnCommandLine() is deprecated, call "
+                    "getDistributedMeshOnCommandLine() instead.");
+    return getDistributedMeshOnCommandLine();
+  }
 
   /**
    * Whether or not this is a "recover" calculation.
@@ -296,18 +295,33 @@ public:
   void setRecoverFileBase(std::string recover_base) { _recover_base = recover_base; }
 
   /**
-   *  Whether or not this simulation should only run half its transient (useful for testing recovery)
+   * The suffix for the recovery file.
+   */
+  std::string getRecoverFileSuffix() { return _recover_suffix; }
+
+  /**
+   * mutator for recover_suffix
+   */
+  void setRecoverFileSuffix(std::string recover_suffix) { _recover_suffix = recover_suffix; }
+
+  /**
+   *  Whether or not this simulation should only run half its transient (useful for testing
+   * recovery)
    */
   bool halfTransient() { return _half_transient; }
 
   /**
    * Store a map of outputter names and file numbers
-   * The MultiApp system requires this to get the file numbering to propagate down through the Multiapps.
+   * The MultiApp system requires this to get the file numbering to propagate down through the
+   * Multiapps.
    * @param numbers Map of outputter names and file numbers
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
    */
-  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers) { _output_file_numbers = numbers; }
+  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers)
+  {
+    _output_file_numbers = numbers;
+  }
 
   /**
    * Store a map of outputter names and file numbers
@@ -321,7 +335,7 @@ public:
   /**
    * Return true if the output position has been set
    */
-  bool hasOutputWarehouse(){ return _output_position_set; }
+  bool hasOutputWarehouse() { return _output_position_set; }
 
   /**
    * Get the OutputWarehouse objects
@@ -332,7 +346,7 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  SystemInfo * getSystemInfo() { return _sys_info.get(); }
+  const SystemInfo * getSystemInfo() const { return _sys_info.get(); }
 
   ///@{
   /**
@@ -340,9 +354,14 @@ public:
    * attempts to load a dynamic library and register it when it is needed. Throws an error if
    * no suitable library is found that contains the app_name in question.
    */
-  void dynamicObjectRegistration(const std::string & app_name, Factory * factory, std::string library_path);
+  void dynamicObjectRegistration(const std::string & app_name,
+                                 Factory * factory,
+                                 std::string library_path);
   void dynamicAppRegistration(const std::string & app_name, std::string library_path);
-  void dynamicSyntaxAssociation(const std::string & app_name, Syntax * syntax, ActionFactory * action_factory, std::string library_path);
+  void dynamicSyntaxAssociation(const std::string & app_name,
+                                Syntax * syntax,
+                                ActionFactory * action_factory,
+                                std::string library_path);
   ///@}
 
   /**
@@ -376,7 +395,8 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  virtual void
+  registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   /**
    * Return reference to the restatable data object
@@ -394,15 +414,16 @@ public:
    * Create a Backup from the current App.  A Backup contains all the data necessary to be able
    * to restore the state of an App.
    */
-  MooseSharedPointer<Backup> backup();
+  std::shared_ptr<Backup> backup();
 
   /**
    * Restore a Backup.  This sets the App's state.
    *
    * @param backup The Backup holding the data for the app
-   * @param for_restart Whether this restoration is explicitly for the first restoration of restart data
+   * @param for_restart Whether this restoration is explicitly for the first restoration of restart
+   * data
    */
-  void restore(MooseSharedPointer<Backup> backup, bool for_restart = false);
+  void restore(std::shared_ptr<Backup> backup, bool for_restart = false);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -429,7 +450,9 @@ public:
   /**
    * Add a mesh modifier that will act on the meshes in the system
    */
-  void addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters);
+  void addMeshModifier(const std::string & modifier_name,
+                       const std::string & name,
+                       InputParameters parameters);
 
   /**
    * Get a mesh modifer with its name
@@ -455,6 +478,10 @@ public:
   void setRecover(const bool & value);
   ///@}
 
+  /// Returns whether the Application is running in check input mode
+  bool checkInput() const { return _check_input; }
+
+protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
@@ -504,7 +531,7 @@ public:
   const std::string _type;
 
   /// The MPI communicator this App is going to use
-  const MooseSharedPointer<Parallel::Communicator> _comm;
+  const std::shared_ptr<Parallel::Communicator> _comm;
 
   /// Input file name used
   std::string _input_filename;
@@ -528,7 +555,7 @@ public:
   Real _global_time_offset;
 
   /// Command line object
-  MooseSharedPointer<CommandLine> _command_line;
+  std::shared_ptr<CommandLine> _command_line;
 
   /// Syntax of the input file
   Syntax _syntax;
@@ -549,19 +576,23 @@ public:
   Parser _parser;
 
   /// Pointer to the executioner of this run (typically build by actions)
-  MooseSharedPointer<Executioner> _executioner;
+  std::shared_ptr<Executioner> _executioner;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;
 
   /// System Information
-  MooseSharedPointer<SystemInfo> _sys_info;
+  std::shared_ptr<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
-  enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
+  enum UNUSED_CHECK
+  {
+    OFF,
+    WARN_UNUSED,
+    ERROR_UNUSED
+  } _enable_unused_check;
 
   Factory _factory;
-
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
@@ -570,8 +601,8 @@ public:
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
 
-  /// This variable indicates that ParallelMesh should be used for the libMesh mesh underlying MooseMesh.
-  bool _parallel_mesh_on_command_line;
+  /// This variable indicates that DistributedMesh should be used for the libMesh mesh underlying MooseMesh.
+  bool _distributed_mesh_on_command_line;
 
   /// Whether or not this is a recovery run
   bool _recover;
@@ -582,17 +613,14 @@ public:
   /// The base name to recover from.  If blank then we will find the newest recovery file.
   std::string _recover_base;
 
+  /// The file suffix to recover from.  If blank then we will use "cpr" for binary CheckpointIO.
+  std::string _recover_suffix;
+
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
-
-  /// Legacy Uo Aux computation flag
-  bool _legacy_uo_aux_computation_default;
-
-  /// Legacy Uo Initialization flag
-  bool _legacy_uo_initialization_default;
 
   /// true if we want to just check the input file
   bool _check_input;
@@ -601,7 +629,6 @@ public:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
-
   /** Method for creating the minimum required actions for an application (no input file)
    *
    * Mimics the following input file:
@@ -635,26 +662,26 @@ private:
   std::set<std::string> _recoverable_data;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
-  enum RegistrationType { APPLICATION, OBJECT, SYNTAX };
+  enum RegistrationType
+  {
+    APPLICATION,
+    OBJECT,
+    SYNTAX
+  };
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
   unsigned int _multiapp_level;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
-  std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
+  std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
 
   /// Cache for a Backup to use for restart / recovery
-  MooseSharedPointer<Backup> _cached_backup;
+  std::shared_ptr<Backup> _cached_backup;
 
-  // Allow FEProblem to set the recover/restart state, so make it a friend
-  friend class FEProblem;
+  // Allow FEProblemBase to set the recover/restart state, so make it a friend
+  friend class FEProblemBase;
   friend class Restartable;
   friend class SubProblem;
-
-  /// Helper functions used for C++11 compatibility stuff.  These will
-  /// eventually go away...
-  void printYesNo(std::stringstream & oss, const std::string & feature, bool defined);
-  bool setBool(const std::string & value);
 };
 
 template <typename T>

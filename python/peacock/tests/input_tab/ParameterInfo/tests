@@ -1,0 +1,7 @@
+[Tests]
+  [./ParameterInfo]
+    type = PythonUnitTest
+    input = test_ParameterInfo.py
+    display_required = True    
+  [../]
+[]

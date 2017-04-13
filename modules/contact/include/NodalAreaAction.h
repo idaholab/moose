@@ -11,16 +11,15 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-class NodalAreaAction: public MooseObjectAction
+class NodalAreaAction : public MooseObjectAction
 {
 public:
   NodalAreaAction(const InputParameters & params);
 
   virtual void act();
-
 };
 
-template<>
+template <>
 InputParameters validParams<NodalAreaAction>();
 
 #endif

@@ -4,6 +4,7 @@
     input = 'cavity_pressure.i'
     exodiff = 'cavity_pressure_out.e'
     abs_zero = 1e-10
+    rel_err = 1e-5
   [../]
 
   [./test_init_temp]
@@ -11,6 +12,7 @@
     input = 'cavity_pressure_init_temp.i'
     exodiff = 'cavity_pressure_init_temp_out.e'
     abs_zero = 1e-10
+    rel_err = 1e-5
   [../]
 
   [./test_rz]

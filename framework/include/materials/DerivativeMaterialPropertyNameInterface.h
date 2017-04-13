@@ -23,28 +23,32 @@ public:
    * Helper functions to generate the material property names for the
    * arbitrary derivatives.
    */
-  const MaterialPropertyName propertyName(const MaterialPropertyName &base, const std::vector<VariableName> &c) const;
+  const MaterialPropertyName propertyName(const MaterialPropertyName & base,
+                                          const std::vector<VariableName> & c) const;
 
   /**
    * Helper functions to generate the material property names for the
    * first derivatives.
    */
-  const MaterialPropertyName propertyNameFirst(const MaterialPropertyName &base,
-    const VariableName &c1) const;
+  const MaterialPropertyName propertyNameFirst(const MaterialPropertyName & base,
+                                               const VariableName & c1) const;
 
   /**
    * Helper functions to generate the material property names for the
    * second derivatives.
    */
-  const MaterialPropertyName propertyNameSecond(const MaterialPropertyName &base,
-    const VariableName &c1, const VariableName &c2) const;
+  const MaterialPropertyName propertyNameSecond(const MaterialPropertyName & base,
+                                                const VariableName & c1,
+                                                const VariableName & c2) const;
 
   /**
    * Helper functions to generate the material property names for the
    * third derivatives.
    */
-  const MaterialPropertyName propertyNameThird(const MaterialPropertyName &base,
-    const VariableName &c1, const VariableName &c2, const VariableName &c3) const;
+  const MaterialPropertyName propertyNameThird(const MaterialPropertyName & base,
+                                               const VariableName & c1,
+                                               const VariableName & c2,
+                                               const VariableName & c3) const;
 };
 
 #endif // DERIVATIVEMATERIALPROPERTYNAMEINTERFACE_H

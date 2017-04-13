@@ -18,7 +18,7 @@
 
 class DifferencePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<DifferencePostprocessor>();
 
 /**
@@ -30,17 +30,15 @@ class DifferencePostprocessor : public GeneralPostprocessor
 {
 public:
   DifferencePostprocessor(const InputParameters & parameters);
-  virtual ~DifferencePostprocessor();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual PostprocessorValue getValue();
-  virtual void threadJoin(const UserObject & uo);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual PostprocessorValue getValue() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
 protected:
   const PostprocessorValue & _value1;
   const PostprocessorValue & _value2;
 };
-
 
 #endif /* DIFFERENCEPOSTPROCESSOR_H */

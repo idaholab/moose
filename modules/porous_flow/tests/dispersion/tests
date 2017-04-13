@@ -1,0 +1,20 @@
+[Tests]
+  [./diff01]
+    type = 'CSVDiff'
+    input = 'diff01.i'
+    csvdiff = 'diff01_out_xmass_0021.csv'
+  [../]
+  [./disp01]
+    type = 'CSVDiff'
+    input = 'disp01.i'
+    csvdiff = 'disp01_out_xmass_0029.csv'
+    rel_err = 1E-5
+  [../]
+  [./disp01_heavy]
+    type = 'CSVDiff'
+    input = 'disp01_heavy.i'
+    csvdiff = 'disp01_heavy_out_xmass_0105.csv'
+    rel_err = 1E-5
+    heavy = true
+  [../]
+[]

@@ -17,11 +17,11 @@
 
 #include "NodalVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<NodalExtremeValue>();
 
 /// A postprocessor for collecting the nodal min or max value
@@ -40,10 +40,10 @@ public:
    * @param parameters The input parameters
    */
   NodalExtremeValue(const InputParameters & parameters);
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// The extreme value type ("min" or "max")

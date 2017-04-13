@@ -13,12 +13,10 @@
 class XFEMEllipseCut : public XFEMGeometricCut3D
 {
 public:
-
   XFEMEllipseCut(std::vector<Real> square_nodes);
   ~XFEMEllipseCut();
 
 private:
-
   std::vector<Point> _vertices;
   Point _unit_vec1;
   Point _unit_vec2;

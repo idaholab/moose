@@ -17,7 +17,8 @@ enum ContactModel
   CM_FRICTIONLESS,
   CM_GLUED,
   CM_COULOMB,
-  CM_COULOMB_MP // Coulomb contact enforced with a "model problem" strategy where slip is computed after the nonlinear solve is converged
+  CM_COULOMB_MP // Coulomb contact enforced with a "model problem" strategy where slip is computed
+                // after the nonlinear solve is converged
 };
 
 enum ContactFormulation
@@ -26,7 +27,8 @@ enum ContactFormulation
   CF_DEFAULT,
   CF_KINEMATIC = CF_DEFAULT,
   CF_PENALTY,
-  CF_AUGMENTED_LAGRANGE
+  CF_AUGMENTED_LAGRANGE,
+  CF_TANGENTIAL_PENALTY
 };
 
 class ContactMaster : public DiracKernel
@@ -44,8 +46,10 @@ public:
 
   virtual void updateContactSet(bool beginning_of_step = false);
 
-protected:
+  static ContactFormulation contactFormulation(std::string name);
+  static ContactModel contactModel(std::string name);
 
+protected:
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
 
@@ -65,13 +69,9 @@ protected:
 
   std::map<Point, PenetrationInfo *> _point_to_info;
 
-  unsigned int _x_var;
-  unsigned int _y_var;
-  unsigned int _z_var;
-
   const unsigned int _mesh_dimension;
 
-  VectorValue<unsigned> _vars;
+  std::vector<unsigned int> _vars;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
@@ -81,7 +81,7 @@ protected:
 ContactModel contactModel(const std::string & the_name);
 ContactFormulation contactFormulation(const std::string & the_name);
 
-template<>
+template <>
 InputParameters validParams<ContactMaster>();
 
-#endif //CONTACTMASTER_H
+#endif // CONTACTMASTER_H

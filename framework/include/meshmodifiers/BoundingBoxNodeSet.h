@@ -15,15 +15,17 @@
 #ifndef BOUNDINGBOXNODESET_H
 #define BOUNDINGBOXNODESET_H
 
+// MOOSE includes
 #include "MeshModifier.h"
+#include "MooseEnum.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/mesh_tools.h"
 
-//Forward Declaration
+// Forward Declaration
 class BoundingBoxNodeSet;
 
-template<>
+template <>
 InputParameters validParams<BoundingBoxNodeSet>();
 
 /**
@@ -31,22 +33,19 @@ InputParameters validParams<BoundingBoxNodeSet>();
  * the bounding box specified. Can select nodes "inside" or "outside"
  * the bounding box.
  */
-class BoundingBoxNodeSet :
-  public MeshModifier
+class BoundingBoxNodeSet : public MeshModifier
 {
 public:
   BoundingBoxNodeSet(const InputParameters & parameters);
 
-  virtual void modify();
+protected:
+  virtual void modify() override;
 
 private:
-
-  /// ID location (inside of outside of box)
+  /// Select nodes on the 'inside' or the 'outside' of the bounding box
   MooseEnum _location;
 
   /// Bounding box for testing element centroids against. Note that
-  /// the box includes nodes based on the element centroids and not
-  /// the actual nodes itself.
   MeshTools::BoundingBox _bounding_box;
 };
 

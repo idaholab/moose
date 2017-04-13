@@ -11,7 +11,7 @@
 
 class PoroMechanicsAction;
 
-template<>
+template <>
 InputParameters validParams<PoroMechanicsAction>();
 
 class PoroMechanicsAction : public TensorMechanicsAction
@@ -22,4 +22,4 @@ public:
   virtual void act();
 };
 
-#endif //POROMECHANICSACTION_H
+#endif // POROMECHANICSACTION_H

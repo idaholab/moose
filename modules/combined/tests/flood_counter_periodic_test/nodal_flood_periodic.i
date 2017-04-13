@@ -87,6 +87,7 @@
     variable = u
     threshold = 0.3
     execute_on = timestep_end
+    flood_entity_type = NODAL
   [../]
 []
 

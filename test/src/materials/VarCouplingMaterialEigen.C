@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "VarCouplingMaterialEigen.h"
 
-template<>
-InputParameters validParams<VarCouplingMaterialEigen>()
+template <>
+InputParameters
+validParams<VarCouplingMaterialEigen>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("var", "The variable to be coupled in");
@@ -22,13 +23,13 @@ InputParameters validParams<VarCouplingMaterialEigen>()
   return params;
 }
 
-VarCouplingMaterialEigen::VarCouplingMaterialEigen(const InputParameters & parameters) :
-    Material(parameters),
+VarCouplingMaterialEigen::VarCouplingMaterialEigen(const InputParameters & parameters)
+  : Material(parameters),
     _var(coupledValue("var")),
     _var_old(coupledValueOld("var")),
     _propname(getParam<std::string>("material_prop_name")),
     _mat(declareProperty<Real>(_propname)),
-    _mat_old(declareProperty<Real>(_propname+"_old"))
+    _mat_old(declareProperty<Real>(_propname + "_old"))
 {
 }
 

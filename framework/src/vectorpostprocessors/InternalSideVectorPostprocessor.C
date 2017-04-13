@@ -14,17 +14,16 @@
 
 #include "InternalSideVectorPostprocessor.h"
 
-template<>
-InputParameters validParams<InternalSideVectorPostprocessor>()
+template <>
+InputParameters
+validParams<InternalSideVectorPostprocessor>()
 {
   InputParameters params = validParams<InternalSideUserObject>();
   params += validParams<VectorPostprocessor>();
   return params;
 }
 
-InternalSideVectorPostprocessor::InternalSideVectorPostprocessor(const InputParameters & parameters) :
-    InternalSideUserObject(parameters),
-    VectorPostprocessor(parameters)
+InternalSideVectorPostprocessor::InternalSideVectorPostprocessor(const InputParameters & parameters)
+  : InternalSideUserObject(parameters), VectorPostprocessor(parameters)
 {
 }
-

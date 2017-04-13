@@ -6,25 +6,21 @@
 
 [GlobalParams]
   order = SECOND
-  family = LAGRANGE
+  displacements = 'disp_x disp_y disp_z'
 []
-
 
 [Mesh]
   file = ring_contact.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
   [./disp_x]
   [../]
-
   [./disp_y]
   [../]
-
   [./disp_z]
   [../]
-[] # Variables
+[]
 
 [Functions]
   [./ring_y]
@@ -97,11 +93,9 @@
     boundary = 4
     function = ring_y
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -124,7 +118,7 @@
     youngs_modulus = 1e3
     poissons_ratio = 0.3
   [../]
-[] # Materials
+[]
 
 [Preconditioning]
   [./SMP]
@@ -135,8 +129,6 @@
 
 [Executioner]
   type = Transient
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
@@ -152,10 +144,9 @@
   [./Quadrature]
     order = THIRD
   [../]
-
-[] # Executioner
+[]
 
 [Outputs]
   file_base = out
   exodus = true
-[] # Outputs
+[]

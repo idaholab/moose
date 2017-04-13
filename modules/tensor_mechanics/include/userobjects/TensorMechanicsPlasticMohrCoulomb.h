@@ -10,79 +10,43 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticMohrCoulomb;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
 
 /**
  * Mohr-Coulomb plasticity, nonassociative with hardening/softening.
  *
  * For 'hyperbolic' smoothing, the smoothing of the tip of the yield-surface cone is described in
- * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp 179-190.
+ * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock
+ * mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp
+ * 179-190.
  * For 'cap' smoothing, additional smoothing is performed.
  * The smoothing of the edges of the cone is described in
- * AJ Abbo, AV Lyamin, SW Sloan, JP Hambleton "A C2 continuous approximation to the Mohr-Coulomb yield surface" International Journal of Solids and Structures 48 (2011) 3001-3010
+ * AJ Abbo, AV Lyamin, SW Sloan, JP Hambleton "A C2 continuous approximation to the Mohr-Coulomb
+ * yield surface" International Journal of Solids and Structures 48 (2011) 3001-3010
  *
  */
 class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticMohrCoulomb(const InputParameters & parameters);
 
-  /// Returns the model name (MohrCoulomb)
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
- protected:
-  /**
-   * The yield function
-   * @param stress the stress at which to calculate the yield function
-   * @param intnl internal parameter
-   * @return the yield function
-   */
-  Real yieldFunction(const RankTwoTensor & stress, Real intnl) const;
+protected:
+  Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
-  /**
-   * The derivative of yield function with respect to stress
-   * @param stress the stress at which to calculate the yield function
-   * @param intnl internal parameter
-   * @return df_dstress(i, j) = dyieldFunction/dstress(i, j)
-   */
-  RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const;
+  RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const override;
 
-  /**
-   * The derivative of yield function with respect to the internal parameter
-   * @param stress the stress at which to calculate the yield function
-   * @param intnl internal parameter
-   * @return the derivative
-   */
-  Real dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const;
+  Real dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const override;
 
-  /**
-   * The flow potential
-   * @param stress the stress at which to calculate the flow potential
-   * @param intnl internal parameter
-   * @return the flow potential
-   */
-  RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const;
+  RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const override;
 
-  /**
-   * The derivative of the flow potential with respect to stress
-   * @param stress the stress at which to calculate the flow potential
-   * @param intnl internal parameter
-   * @return dr_dstress(i, j, k, l) = dr(i, j)/dstress(k, l)
-   */
-  RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const;
+  RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const override;
 
-  /**
-   * The derivative of the flow potential with respect to the internal parameter
-   * @param stress the stress at which to calculate the flow potential
-   * @param intnl internal parameter
-   * @return dr_dintnl(i, j) = dr(i, j)/dintnl
-   */
-  RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const;
+  RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const override;
 
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _cohesion;
@@ -163,11 +127,12 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
   /// d(psi)/d(internal_param);
   virtual Real dpsi(const Real internal_param) const;
 
- private:
+private:
   /**
    * Computes Abbo et al's A, B and C parameters
    * @param sin3lode sin(3*(lode angle))
-   * @param sin_angle sin(friction_angle) (for yield function), or sin(dilation_angle) (for potential function)
+   * @param sin_angle sin(friction_angle) (for yield function), or sin(dilation_angle) (for
+   * potential function)
    * @param[out] aaa Abbo's A
    * @param[out] bbb Abbo's B
    * @param[out] ccc Abbo's C
@@ -177,15 +142,18 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
   /**
    * Computes derivatives of Abbo et al's A, B and C parameters wrt sin_angle
    * @param sin3lode sin(3*(lode angle))
-   * @param sin_angle sin(friction_angle) (for yield function), or sin(dilation_angle) (for potential function)
+   * @param sin_angle sin(friction_angle) (for yield function), or sin(dilation_angle) (for
+   * potential function)
    * @param[out] daaa d(Abbo's A)/d(sin_angle)
    * @param[out] dbbb d(Abbo's B)/d(sin_angle)
    * @param[out] dccc d(Abbo's C)/d(sin_angle)
    */
-  void dabbo(const Real sin3lode, const Real sin_angle, Real & daaa, Real & dbbb, Real & dccc) const;
+  void
+  dabbo(const Real sin3lode, const Real sin_angle, Real & daaa, Real & dbbb, Real & dccc) const;
 
   /**
-   * d(yieldFunction)/d(stress), but with the ability to put friction or dilation angle into the result
+   * d(yieldFunction)/d(stress), but with the ability to put friction or dilation angle into the
+   * result
    * @param stress the stress at which to calculate
    * @param sin_angle either sin(friction angle) or sin(dilation angle)
    */

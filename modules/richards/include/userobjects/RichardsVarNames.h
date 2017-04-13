@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSVARNAMES_H
 #define RICHARDSVARNAMES_H
 
@@ -15,8 +14,7 @@
 
 class RichardsVarNames;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsVarNames>();
 
 /**
@@ -24,12 +22,9 @@ InputParameters validParams<RichardsVarNames>();
  * used in RichardsMaterial and kernels, etc, and the
  * variable number used internally by MOOSE
  */
-class RichardsVarNames :
-  public GeneralUserObject,
-  public Coupleable,
-  public ZeroInterface
+class RichardsVarNames : public GeneralUserObject, public Coupleable, public ZeroInterface
 {
- public:
+public:
   RichardsVarNames(const InputParameters & parameters);
 
   void initialize();
@@ -107,9 +102,7 @@ class RichardsVarNames :
   /// return the _var_types string
   std::string var_types() const;
 
-
- protected:
-
+protected:
   /// number of richards variables
   unsigned int _num_v;
 
@@ -123,13 +116,15 @@ class RichardsVarNames :
   std::vector<unsigned int> _ps_var_num;
 
   /// moose_var_value[i] = values of richards variable i
-  std::vector<const VariableValue *> _moose_var_value; // this is a vector of pointers to VariableValues
+  std::vector<const VariableValue *>
+      _moose_var_value; // this is a vector of pointers to VariableValues
 
   /// moose_var_value_old[i] = old values of richards variable i
   std::vector<const VariableValue *> _moose_var_value_old;
 
   /// moose_var_value[i] = values of richards variable i
-  std::vector<const VariableValue *> _moose_nodal_var_value; // this is a vector of pointers to VariableValues
+  std::vector<const VariableValue *>
+      _moose_nodal_var_value; // this is a vector of pointers to VariableValues
 
   /// moose_var_value_old[i] = old values of richards variable i
   std::vector<const VariableValue *> _moose_nodal_var_value_old;

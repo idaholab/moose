@@ -17,33 +17,30 @@
 
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerBase.h"
-#include "Function.h"
 
-//Forward Declarations
+// Forward Declarations
+class Function;
 class LineFunctionSampler;
 
-template<>
+template <>
 InputParameters validParams<LineFunctionSampler>();
 
-class LineFunctionSampler :
-  public GeneralVectorPostprocessor,
-  protected SamplerBase
+class LineFunctionSampler : public GeneralVectorPostprocessor, protected SamplerBase
 {
 public:
   LineFunctionSampler(const InputParameters & parameters);
 
-  virtual ~LineFunctionSampler() {}
-
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
   // Let the SamplerBase version of threadJoin() take part in the
   // overload resolution process, otherwise we get warnings about
   // overloaded virtual functions and "hiding" in debug mode.
   using SamplerBase::threadJoin;
 
-  virtual void threadJoin(const UserObject & y);
+  // TODO: Is this even called (threadJoin on a general object)?
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Beginning of the line

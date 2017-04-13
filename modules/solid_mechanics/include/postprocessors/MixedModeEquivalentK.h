@@ -5,16 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef MIXEDMODEEQUIVALENTK_H
 #define MIXEDMODEEQUIVALENTK_H
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class MixedModeEquivalentK;
 
-template<>
+template <>
 InputParameters validParams<MixedModeEquivalentK>();
 
 class MixedModeEquivalentK : public GeneralPostprocessor
@@ -37,4 +36,4 @@ protected:
   Real _poissons_ratio;
 };
 
-#endif //MIXEDMODEEQUIVALENTK_H
+#endif // MIXEDMODEEQUIVALENTK_H

@@ -14,23 +14,23 @@
 
 #include "PostprocessorDirichletBC.h"
 
-template<>
-InputParameters validParams<PostprocessorDirichletBC>()
+template <>
+InputParameters
+validParams<PostprocessorDirichletBC>()
 {
   InputParameters p = validParams<NodalBC>();
-  p.addRequiredParam<PostprocessorName>("postprocessor", "The postprocessor to set the value to on the boundary.");
+  p.addRequiredParam<PostprocessorName>("postprocessor",
+                                        "The postprocessor to set the value to on the boundary.");
   return p;
 }
 
-
-PostprocessorDirichletBC::PostprocessorDirichletBC(const InputParameters & parameters) :
-  NodalBC(parameters),
-  _postprocessor_value(getPostprocessorValue("postprocessor"))
-{}
+PostprocessorDirichletBC::PostprocessorDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters), _postprocessor_value(getPostprocessorValue("postprocessor"))
+{
+}
 
 Real
 PostprocessorDirichletBC::computeQpResidual()
 {
   return _u[_qp] - _postprocessor_value;
 }
-

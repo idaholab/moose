@@ -1,0 +1,17 @@
+[Tests]
+  [./testA]
+    type = RunApp
+    input = foo.i
+    prereq = testC
+  [../]
+  [./testB]
+    type = RunApp
+    input = foo.i
+    prereq = testA
+  [../]
+  [./testC]
+    type = RunApp
+    input = foo.i
+    prereq = testB
+  [../]
+[]

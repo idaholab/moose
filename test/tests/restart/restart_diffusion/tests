@@ -56,7 +56,7 @@
   [./restart_use_end_error_check]
     type = 'RunException'
     input = 'restart_diffusion_from_end_part2.i'
-    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "LATEST" or a valid integer less than \d+, received \d+'
+    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "LATEST" or a valid integer between \d+ and \d+ inclusive, received \d+'
 
     cli_args = 'Variables/u/initial_from_file_timestep=8'
     prereq = 'restart_use_end_part2'

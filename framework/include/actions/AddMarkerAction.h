@@ -19,19 +19,15 @@
 
 class AddMarkerAction;
 
-template<>
+template <>
 InputParameters validParams<AddMarkerAction>();
-
 
 class AddMarkerAction : public MooseObjectAction
 {
 public:
   AddMarkerAction(InputParameters params);
 
-  virtual void act();
-
-private:
-
+  virtual void act() override;
 };
 
 #endif // ADDMARKERACTION_H

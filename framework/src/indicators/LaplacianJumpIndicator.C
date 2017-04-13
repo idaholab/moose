@@ -13,31 +13,24 @@
 /****************************************************************/
 
 #include "LaplacianJumpIndicator.h"
-#include "MooseMesh.h"
 
-template<>
-InputParameters validParams<LaplacianJumpIndicator>()
+template <>
+InputParameters
+validParams<LaplacianJumpIndicator>()
 {
-  InputParameters params = validParams<JumpIndicator>();
+  InputParameters params = validParams<InternalSideIndicator>();
   return params;
 }
 
-
-LaplacianJumpIndicator::LaplacianJumpIndicator(const InputParameters & parameters) :
-    JumpIndicator(parameters),
-    _second_u(second()),
-    _second_u_neighbor(neighborSecond())
+LaplacianJumpIndicator::LaplacianJumpIndicator(const InputParameters & parameters)
+  : InternalSideIndicator(parameters), _second_u(second()), _second_u_neighbor(neighborSecond())
 {
-  _mesh.errorIfParallelDistribution("LaplacianJumpIndicator");
 }
-
 
 Real
 LaplacianJumpIndicator::computeQpIntegral()
 {
   Real jump = (_second_u[_qp].tr() - _second_u_neighbor[_qp].tr());
 
-  return jump*jump;
+  return jump * jump;
 }
-
-

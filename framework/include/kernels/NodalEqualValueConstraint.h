@@ -19,7 +19,7 @@
 
 class NodalEqualValueConstraint;
 
-template<>
+template <>
 InputParameters validParams<NodalEqualValueConstraint>();
 
 /**
@@ -34,15 +34,13 @@ class NodalEqualValueConstraint : public NodalScalarKernel
 {
 public:
   NodalEqualValueConstraint(const InputParameters & parameters);
-  virtual ~NodalEqualValueConstraint();
 
-  virtual void computeResidual();
-  virtual void computeJacobian();
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
 
 protected:
   std::vector<unsigned int> _val_number;
   std::vector<const VariableValue *> _value;
 };
-
 
 #endif /* NODALEQUALVALUECONSTRAINT_H */

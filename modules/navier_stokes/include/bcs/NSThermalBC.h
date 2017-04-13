@@ -11,8 +11,9 @@
 
 // Forward Declarations
 class NSThermalBC;
+class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSThermalBC>();
 
 class NSThermalBC : public NodalBC
@@ -32,10 +33,8 @@ protected:
   Real _final;
   Real _duration;
 
-  // Specific heat at constant volume, treated as a single
-  // constant value.
-  const Real _R;
-  const Real _gamma;
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 };
 
-#endif //NSTHERMALBC_H
+#endif // NSTHERMALBC_H

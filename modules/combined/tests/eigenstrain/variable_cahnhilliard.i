@@ -131,11 +131,13 @@
     eigen_base = '1 1 1 0 0 0'
     prefactor = var_dep
     args = 'c'
+    eigenstrain_name = eigenstrain
   [../]
   [./strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial

@@ -13,8 +13,9 @@
 
 static unsigned int counter = 0;
 
-template<>
-InputParameters validParams<ContactPenetrationAuxAction>()
+template <>
+InputParameters
+validParams<ContactPenetrationAuxAction>()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
@@ -25,11 +26,11 @@ InputParameters validParams<ContactPenetrationAuxAction>()
   return params;
 }
 
-ContactPenetrationAuxAction::ContactPenetrationAuxAction(const InputParameters & params) :
-  Action(params),
-  _master(getParam<BoundaryName>("master")),
-  _slave(getParam<BoundaryName>("slave")),
-  _order(getParam<MooseEnum>("order"))
+ContactPenetrationAuxAction::ContactPenetrationAuxAction(const InputParameters & params)
+  : Action(params),
+    _master(getParam<BoundaryName>("master")),
+    _slave(getParam<BoundaryName>("slave")),
+    _order(getParam<MooseEnum>("order"))
 {
 }
 
@@ -38,17 +39,22 @@ ContactPenetrationAuxAction::act()
 {
   if (!_problem->getDisplacedProblem())
   {
-    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
+    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
+               "Mesh block.");
   }
 
   {
     InputParameters params = _factory.getValidParams("PenetrationAux");
 
+    MultiMooseEnum execute_options = SetupInterface::getExecuteOptions();
+    execute_options = "initial linear";
+    params.set<MultiMooseEnum>("execute_on") = execute_options;
+
     // Extract global params
     if (isParamValid("parser_syntax"))
       _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
-    params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
+    params.set<std::vector<BoundaryName>>("boundary") = {_slave};
     params.set<BoundaryName>("paired_boundary") = _master;
     params.set<AuxVariableName>("variable") = "penetration";
     params.set<MooseEnum>("order") = _order;

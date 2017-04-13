@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "InternalSideIndicator.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "ParallelUniqueId.h"
 
 // libMesh includes
 #include "libmesh/dof_map.h"
@@ -29,20 +32,26 @@
 
 const BoundaryID InternalSideIndicator::InternalBndId = 12345;
 
-template<>
-InputParameters validParams<InternalSideIndicator>()
+template <>
+InputParameters
+validParams<InternalSideIndicator>()
 {
   InputParameters params = validParams<Indicator>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this side indicator applies to");
-  params.addParam<bool>("scale_by_flux_faces", false, "Whether or not to scale the error values by the number of flux faces.  This attempts to not penalize elements on boundaries for having less neighbors.");
+  params.addRequiredParam<VariableName>(
+      "variable", "The name of the variable that this side indicator applies to");
+  params.addParam<bool>("scale_by_flux_faces",
+                        false,
+                        "Whether or not to scale the error values by "
+                        "the number of flux faces.  This attempts to "
+                        "not penalize elements on boundaries for "
+                        "having less neighbors.");
 
   params.addPrivateParam<BoundaryID>("_boundary_id", InternalSideIndicator::InternalBndId);
   return params;
 }
 
-
-InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters) :
-    Indicator(parameters),
+InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
+  : Indicator(parameters),
     NeighborCoupleable(this, false, false),
     ScalarCoupleable(this),
     NeighborMooseVariableInterface(this, false),
@@ -74,14 +83,10 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 
   addMooseVariableDependency(mooseVariable());
-}
-
-InternalSideIndicator::~InternalSideIndicator()
-{
 }
 
 void
@@ -89,14 +94,14 @@ InternalSideIndicator::computeIndicator()
 {
   Real sum = 0;
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    _solution.add(_field_var.nodalDofIndex(), sum*_current_elem->hmax());
-    _solution.add(_field_var.nodalDofIndexNeighbor(), sum*_neighbor_elem->hmax());
+    _solution.add(_field_var.nodalDofIndex(), sum * _current_elem->hmax());
+    _solution.add(_field_var.nodalDofIndexNeighbor(), sum * _neighbor_elem->hmax());
   }
 }
 
@@ -109,8 +114,8 @@ InternalSideIndicator::finalize()
   {
     // Figure out the total number of sides contributing to the error.
     // We'll scale by this so boundary elements are less penalized
-    for (unsigned int side=0; side<_current_elem->n_sides(); side++)
-      if (_current_elem->neighbor(side) != NULL)
+    for (unsigned int side = 0; side < _current_elem->n_sides(); side++)
+      if (_current_elem->neighbor_ptr(side) != nullptr)
         n_flux_faces++;
   }
   else
@@ -121,6 +126,6 @@ InternalSideIndicator::finalize()
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/static_cast<Real>(n_flux_faces));
+    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value) / static_cast<Real>(n_flux_faces));
   }
 }

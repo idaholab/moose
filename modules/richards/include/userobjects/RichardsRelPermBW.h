@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERMBW_H
 #define RICHARDSRELPERMBW_H
 
@@ -13,13 +12,13 @@
 
 class RichardsRelPermBW;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsRelPermBW>();
 
 /**
  * "Broadbridge-White" form of relative permeability as a function of effective saturation
- * P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
+ * P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1.
+ * Analytic Solution'', Water Resources Research 24 (1988) 145-154)
  */
 class RichardsRelPermBW : public RichardsRelPerm
 {
@@ -45,7 +44,6 @@ public:
   Real d2relperm(Real seff) const;
 
 protected:
-
   // BW's initial saturation
   Real _sn;
 
@@ -63,7 +61,6 @@ protected:
 
   // (_ks - _kn)*(_c - 1)
   Real _coef;
-
 };
 
 #endif // RICHARDSRELPERMBW_H

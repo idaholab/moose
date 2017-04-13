@@ -22,7 +22,7 @@
 
 class TableOutput;
 
-template<>
+template <>
 InputParameters validParams<TableOutput>();
 
 /**
@@ -39,31 +39,29 @@ InputParameters validParams<TableOutput>();
 class TableOutput : public AdvancedOutput<FileOutput>
 {
 public:
-
   /**
    * Class constructor.
    */
   TableOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Populates the tables with scalar aux variables
    *
    * If an aux variable contains multiple components the output name for the
    * variable is appended with the component number (e.g., aux_0, aux_1, ...)
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Populates the tables with postprocessor values
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Populates the tables with VectorPostprocessor values
    */
-  virtual void outputVectorPostprocessors();
+  virtual void outputVectorPostprocessors() override;
 
   /// Flag for allowing all table data to become restartable
   bool _tables_restartable;
@@ -86,6 +84,8 @@ protected:
   /// Enable/disable VecptorPostprocessor time data file.
   bool _time_data;
 
+  /// Enable/disable output of time column for Postprocessors
+  bool _time_column;
 };
 
 #endif /* TABLEOUTPUT_H */

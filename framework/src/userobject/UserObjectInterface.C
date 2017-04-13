@@ -17,9 +17,9 @@
 #include "DiscreteElementUserObject.h"
 #include "InputParameters.h"
 
-UserObjectInterface::UserObjectInterface(const MooseObject * moose_object) :
-    _uoi_params(moose_object->parameters()),
-    _uoi_feproblem(*_uoi_params.get<FEProblem *>("_fe_problem")),
+UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
+  : _uoi_params(moose_object->parameters()),
+    _uoi_feproblem(*_uoi_params.get<FEProblemBase *>("_fe_problem_base")),
     _uoi_tid(_uoi_params.have_parameter<THREAD_ID>("_tid") ? _uoi_params.get<THREAD_ID>("_tid") : 0)
 {
 }

@@ -6,33 +6,38 @@
 /****************************************************************/
 
 #include "ACMultiInterface.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<ACMultiInterface>()
+template <>
+InputParameters
+validParams<ACMultiInterface>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Gradient energy Allen-Cahn Kernel with cross terms");
   params.addRequiredCoupledVar("etas", "All eta_i order parameters of the multiphase problem");
-  params.addRequiredParam<std::vector<MaterialPropertyName> >("kappa_names", "The kappa used with the kernel");
+  params.addRequiredParam<std::vector<MaterialPropertyName>>("kappa_names",
+                                                             "The kappa used with the kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   return params;
 }
 
-ACMultiInterface::ACMultiInterface(const InputParameters & parameters) :
-    Kernel(parameters),
+ACMultiInterface::ACMultiInterface(const InputParameters & parameters)
+  : Kernel(parameters),
     _num_etas(coupledComponents("etas")),
     _eta(_num_etas),
     _grad_eta(_num_etas),
-    _eta_vars(_fe_problem.getNonlinearSystem().nVariables(), -1),
-    _kappa_names(getParam<std::vector<MaterialPropertyName> >("kappa_names")),
+    _eta_vars(_fe_problem.getNonlinearSystemBase().nVariables(), -1),
+    _kappa_names(getParam<std::vector<MaterialPropertyName>>("kappa_names")),
     _kappa(_num_etas),
     _L(getMaterialProperty<Real>("mob_name"))
 {
   if (_num_etas != _kappa_names.size())
     mooseError("Supply the same nummber of etas and kappa_names.");
 
-  unsigned int nvariables = _fe_problem.getNonlinearSystem().nVariables();
+  unsigned int nvariables = _fe_problem.getNonlinearSystemBase().nVariables();
 
   int a = -1;
   for (unsigned int i = 0; i < _num_etas; ++i)
@@ -55,7 +60,7 @@ ACMultiInterface::ACMultiInterface(const InputParameters & parameters) :
   }
 
   if (a < 0)
-    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel " << name());
+    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel ", name());
   else
     _a = a;
 }
@@ -70,20 +75,24 @@ ACMultiInterface::computeQpResidual()
   for (unsigned int b = 0; b < _num_etas; ++b)
   {
     // skip the diagonal term (does not contribute)
-    if (b == _a) continue;
+    if (b == _a)
+      continue;
 
-    sum += (*_kappa[b])[_qp] * (
+    sum += (*_kappa[b])[_qp] *
+           (
                // order 1 terms
-               2.0 * _test[_i][_qp] * (_eta_a[_qp] * (*_grad_eta[b])[_qp] - (*_eta[b])[_qp] * _grad_eta_a[_qp]) * (*_grad_eta[b])[_qp]
+               2.0 * _test[_i][_qp] *
+                   (_eta_a[_qp] * (*_grad_eta[b])[_qp] - (*_eta[b])[_qp] * _grad_eta_a[_qp]) *
+                   (*_grad_eta[b])[_qp]
                // volume terms
-             + ( - (   _eta_a[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp]
-                     + _test[_i][_qp] * (*_eta[b])[_qp] * _grad_eta_a[_qp]
-                     + _test[_i][_qp] * _eta_a[_qp] * (*_grad_eta[b])[_qp]
-                   ) * (*_grad_eta[b])[_qp])
-             - ( - (   (*_eta[b])[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp]
-                     + 2.0 * _test[_i][_qp] * (*_eta[b])[_qp] * (*_grad_eta[b])[_qp]
-                   ) * _grad_eta_a[_qp])
-           );
+               +
+               (-(_eta_a[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp] +
+                  _test[_i][_qp] * (*_eta[b])[_qp] * _grad_eta_a[_qp] +
+                  _test[_i][_qp] * _eta_a[_qp] * (*_grad_eta[b])[_qp]) *
+                (*_grad_eta[b])[_qp]) -
+               (-((*_eta[b])[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp] +
+                  2.0 * _test[_i][_qp] * (*_eta[b])[_qp] * (*_grad_eta[b])[_qp]) *
+                _grad_eta_a[_qp]));
   }
 
   return _L[_qp] * sum;
@@ -96,20 +105,19 @@ ACMultiInterface::computeQpJacobian()
   for (unsigned int b = 0; b < _num_etas; ++b)
   {
     // skip the diagonal term (does not contribute)
-    if (b == _a) continue;
+    if (b == _a)
+      continue;
 
-    sum += (*_kappa[b])[_qp] * (
-         2.0 * _test[_i][_qp] * ( (_phi[_j][_qp] * (*_grad_eta[b])[_qp] - (*_eta[b])[_qp] * _grad_phi[_j][_qp]) * (*_grad_eta[b])[_qp] )
-      + ( - (   _phi[_j][_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp]
-              + _test[_i][_qp] * (*_eta[b])[_qp] * _grad_phi[_j][_qp]
-              + _test[_i][_qp] * _phi[_j][_qp] * (*_grad_eta[b])[_qp]
-            ) * (*_grad_eta[b])[_qp]
-        )
-      - ( - (   (*_eta[b])[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp]
-              + 2.0 * _test[_i][_qp] * (*_eta[b])[_qp] * (*_grad_eta[b])[_qp]
-            ) * _grad_phi[_j][_qp]
-        )
-    );
+    sum += (*_kappa[b])[_qp] * (2.0 * _test[_i][_qp] * ((_phi[_j][_qp] * (*_grad_eta[b])[_qp] -
+                                                         (*_eta[b])[_qp] * _grad_phi[_j][_qp]) *
+                                                        (*_grad_eta[b])[_qp]) +
+                                (-(_phi[_j][_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp] +
+                                   _test[_i][_qp] * (*_eta[b])[_qp] * _grad_phi[_j][_qp] +
+                                   _test[_i][_qp] * _phi[_j][_qp] * (*_grad_eta[b])[_qp]) *
+                                 (*_grad_eta[b])[_qp]) -
+                                (-((*_eta[b])[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp] +
+                                   2.0 * _test[_i][_qp] * (*_eta[b])[_qp] * (*_grad_eta[b])[_qp]) *
+                                 _grad_phi[_j][_qp]));
   }
 
   return _L[_qp] * sum;
@@ -122,25 +130,25 @@ ACMultiInterface::computeQpOffDiagJacobian(unsigned int jvar)
   const VariableGradient & _grad_eta_a = _grad_u;
 
   const int b = _eta_vars[jvar];
-  if (b < 0) return 0.0;
+  if (b < 0)
+    return 0.0;
 
-  return _L[_qp] * (*_kappa[b])[_qp] * (
-             2.0 * _test[_i][_qp] * (
-                 (_eta_a[_qp] * _grad_phi[_j][_qp] - _phi[_j][_qp] * _grad_eta_a[_qp]) * (*_grad_eta[b])[_qp]
-               + (_eta_a[_qp] * (*_grad_eta[b])[_qp] - (*_eta[b])[_qp] * _grad_eta_a[_qp]) * _grad_phi[_j][_qp]
-             )
-           + ( - (   _eta_a[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp]
-                   + _test[_i][_qp] * _phi[_j][_qp] * _grad_eta_a[_qp]
-                   + _test[_i][_qp] * _eta_a[_qp] * _grad_phi[_j][_qp]
-                 ) * (*_grad_eta[b])[_qp]
-               - (   _eta_a[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp]
-                   + _test[_i][_qp] * (*_eta[b])[_qp] * _grad_eta_a[_qp]
-                   + _test[_i][_qp] * _eta_a[_qp] * (*_grad_eta[b])[_qp]
-                 ) * _grad_phi[_j][_qp]
-             )
-           - ( - (   2.0 * (*_eta[b])[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp]
-                   + 2.0 * _test[_i][_qp] * (_phi[_j][_qp] * (*_grad_eta[b])[_qp] + (*_eta[b])[_qp] * _grad_phi[_j][_qp])
-                 ) * _grad_eta_a[_qp])
-         );
+  return _L[_qp] * (*_kappa[b])[_qp] *
+         (2.0 * _test[_i][_qp] *
+              ((_eta_a[_qp] * _grad_phi[_j][_qp] - _phi[_j][_qp] * _grad_eta_a[_qp]) *
+                   (*_grad_eta[b])[_qp] +
+               (_eta_a[_qp] * (*_grad_eta[b])[_qp] - (*_eta[b])[_qp] * _grad_eta_a[_qp]) *
+                   _grad_phi[_j][_qp]) +
+          (-(_eta_a[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp] +
+             _test[_i][_qp] * _phi[_j][_qp] * _grad_eta_a[_qp] +
+             _test[_i][_qp] * _eta_a[_qp] * _grad_phi[_j][_qp]) *
+               (*_grad_eta[b])[_qp] -
+           (_eta_a[_qp] * (*_eta[b])[_qp] * _grad_test[_i][_qp] +
+            _test[_i][_qp] * (*_eta[b])[_qp] * _grad_eta_a[_qp] +
+            _test[_i][_qp] * _eta_a[_qp] * (*_grad_eta[b])[_qp]) *
+               _grad_phi[_j][_qp]) -
+          (-(2.0 * (*_eta[b])[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp] +
+             2.0 * _test[_i][_qp] *
+                 (_phi[_j][_qp] * (*_grad_eta[b])[_qp] + (*_eta[b])[_qp] * _grad_phi[_j][_qp])) *
+           _grad_eta_a[_qp]));
 }
-

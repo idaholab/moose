@@ -7,6 +7,7 @@
 #ifndef COMPUTEELASTICITYTENSORBASE_H
 #define COMPUTEELASTICITYTENSORBASE_H
 
+#include "DerivativeMaterialInterface.h"
 #include "Material.h"
 #include "RankFourTensor.h"
 
@@ -17,6 +18,9 @@ class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>
 {
 public:
   ComputeElasticityTensorBase(const InputParameters & parameters);
+
+  /// is the elasticity tensor provided by this material guaranteed to be isotropic
+  virtual bool isGuaranteedIsotropic() const { return false; }
 
 protected:
   virtual void computeQpProperties();
@@ -31,4 +35,4 @@ protected:
   Function * const _prefactor_function;
 };
 
-#endif //COMPUTEELASTICITYTENSORBASE_H
+#endif // COMPUTEELASTICITYTENSORBASE_H

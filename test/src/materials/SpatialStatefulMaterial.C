@@ -13,16 +13,17 @@
 /****************************************************************/
 #include "SpatialStatefulMaterial.h"
 
-template<>
-InputParameters validParams<SpatialStatefulMaterial>()
+template <>
+InputParameters
+validParams<SpatialStatefulMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
   return params;
 }
 
-SpatialStatefulMaterial::SpatialStatefulMaterial(const InputParameters & parameters) :
-    Material(parameters),
+SpatialStatefulMaterial::SpatialStatefulMaterial(const InputParameters & parameters)
+  : Material(parameters),
 
     // Get a parameter value for the diffusivity
     _initial_diffusivity(getParam<Real>("initial_diffusivity")),
@@ -31,10 +32,9 @@ SpatialStatefulMaterial::SpatialStatefulMaterial(const InputParameters & paramet
     // valued property named "diffusivity" that Kernels can use.
     _diffusivity(declareProperty<Real>("diffusivity")),
 
-    // Declare that we are going to have an old value of diffusivity
-    // Note: this is _expensive_ and currently means that you can't
-    // use adaptivity!  Only do this if you REALLY need it!
-    _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
+    // Retrieve/use an old value of diffusivity.
+    // Note: this is _expensive_ - only do this if you REALLY need it!
+    _diffusivity_old(getMaterialPropertyOld<Real>("diffusivity"))
 {
 }
 

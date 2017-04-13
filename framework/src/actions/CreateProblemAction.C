@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<CreateProblemAction>()
+template <>
+InputParameters
+validParams<CreateProblemAction>()
 {
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
@@ -26,27 +27,35 @@ InputParameters validParams<CreateProblemAction>()
   InputParameters params = validParams<MooseObjectAction>();
   params.set<std::string>("type") = "FEProblem";
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
-  params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
-  params.addParam<MultiMooseEnum>("coord_type", coord_types, "Type of the coordinate system per block param");
-  params.addParam<MooseEnum>("rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  params.addParam<MultiMooseEnum>(
+      "coord_type", coord_types, "Type of the coordinate system per block param");
+  params.addParam<MooseEnum>(
+      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
 
-  params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
+  params.addParam<bool>("fe_cache",
+                        false,
+                        "Whether or not to turn on the finite element shape "
+                        "function caching system.  This can increase speed with "
+                        "an associated memory cost.");
 
-  params.addParam<bool>("kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
-  params.addParam<bool>("material_coverage_check", true, "Set to false to disable material->subdomain coverage check");
+  params.addParam<bool>(
+      "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
+  params.addParam<bool>("material_coverage_check",
+                        true,
+                        "Set to false to disable material->subdomain coverage check");
 
-  params.addParam<FileNameNoExtension>("restart_file_base", "File base name used for restart (e.g. <path>/<filebase> or <path>/LATEST to grab the latest file available)");
-
-  params.addParam<bool>("use_legacy_uo_aux_computation", "Set to true to have MOOSE recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavior is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
-  params.addParam<bool>("use_legacy_uo_initialization", "Set to true to have MOOSE compute all UserObjects and Postprocessors during the initial setup phase of the problem recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavior is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+  params.addParam<FileNameNoExtension>("restart_file_base",
+                                       "File base name used for restart (e.g. "
+                                       "<path>/<filebase> or <path>/LATEST to "
+                                       "grab the latest file available)");
 
   return params;
 }
 
-
-CreateProblemAction::CreateProblemAction(InputParameters parameters) :
-    MooseObjectAction(parameters),
-    _blocks(getParam<std::vector<SubdomainName> >("block")),
+CreateProblemAction::CreateProblemAction(InputParameters parameters)
+  : MooseObjectAction(parameters),
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
     _coord_sys(getParam<MultiMooseEnum>("coord_type")),
     _fe_cache(getParam<bool>("fe_cache"))
 {
@@ -65,12 +74,13 @@ CreateProblemAction::act()
 #ifdef LIBMESH_HAVE_PETSC
       // put in empty arrays for PETSc options
       _moose_object_pars.set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-      _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
-      _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
+      _moose_object_pars.set<std::vector<std::string>>("petsc_inames") = std::vector<std::string>();
+      _moose_object_pars.set<std::vector<std::string>>("petsc_values") = std::vector<std::string>();
 #endif
-      _problem = _factory.create<FEProblem>(_type, getParam<std::string>("name"), _moose_object_pars);
+      _problem =
+          _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())
-        mooseError("Problem has to be of a FEProblem type");
+        mooseError("Problem has to be of a FEProblemBase type");
     }
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);
@@ -104,11 +114,5 @@ CreateProblemAction::act()
       _console << "\nUsing " << restart_file_base << " for restart.\n\n";
       _problem->setRestartFile(restart_file_base);
     }
-
-    // input file specific legacy overrides (takes precedence over application level settings)
-    _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ?
-      getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();
-    _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ?
-      getParam<bool>("use_legacy_uo_initialization") : _app.legacyUoInitializationDefault();
   }
 }

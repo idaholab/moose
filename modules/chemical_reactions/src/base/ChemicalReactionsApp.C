@@ -36,17 +36,16 @@
 #include "LangmuirMaterial.h"
 #include "MollifiedLangmuirMaterial.h"
 
-template<>
-InputParameters validParams<ChemicalReactionsApp>()
+template <>
+InputParameters
+validParams<ChemicalReactionsApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   ChemicalReactionsApp::registerObjects(_factory);
@@ -55,12 +54,14 @@ ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters) :
   ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
 }
 
-ChemicalReactionsApp::~ChemicalReactionsApp()
-{
-}
+ChemicalReactionsApp::~ChemicalReactionsApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void ChemicalReactionsApp__registerApps() { ChemicalReactionsApp::registerApps(); }
+extern "C" void
+ChemicalReactionsApp__registerApps()
+{
+  ChemicalReactionsApp::registerApps();
+}
 void
 ChemicalReactionsApp::registerApps()
 {
@@ -68,7 +69,11 @@ ChemicalReactionsApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void ChemicalReactionsApp__registerObjects(Factory & factory) { ChemicalReactionsApp::registerObjects(factory); }
+extern "C" void
+ChemicalReactionsApp__registerObjects(Factory & factory)
+{
+  ChemicalReactionsApp::registerObjects(factory);
+}
 void
 ChemicalReactionsApp::registerObjects(Factory & factory)
 {
@@ -93,17 +98,23 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ChemicalReactionsApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
+}
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
-  syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
-  syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
-  syntax.registerActionSyntax("AddCoupledEqSpeciesKernelsAction", "ReactionNetwork/AqueousEquilibriumReactions");
-  syntax.registerActionSyntax("AddCoupledEqSpeciesAuxKernelsAction", "ReactionNetwork/AqueousEquilibriumReactions");
-  syntax.registerActionSyntax("AddCoupledSolidKinSpeciesKernelsAction", "ReactionNetwork/SolidKineticReactions");
-  syntax.registerActionSyntax("AddCoupledSolidKinSpeciesAuxKernelsAction", "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
+  registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddCoupledEqSpeciesKernelsAction", "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddCoupledEqSpeciesAuxKernelsAction",
+                 "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddCoupledSolidKinSpeciesKernelsAction", "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddCoupledSolidKinSpeciesAuxKernelsAction",
+                 "ReactionNetwork/SolidKineticReactions");
   registerAction(AddPrimarySpeciesAction, "add_variable");
   registerAction(AddSecondarySpeciesAction, "add_aux_variable");
   registerAction(AddCoupledEqSpeciesKernelsAction, "add_kernel");

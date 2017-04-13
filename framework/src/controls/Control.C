@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "Control.h"
 
-template<>
-InputParameters validParams<Control>()
+template <>
+InputParameters
+validParams<Control>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
@@ -29,15 +30,15 @@ InputParameters validParams<Control>()
   return params;
 }
 
-Control::Control(const InputParameters & parameters) :
-    MooseObject(parameters),
+Control::Control(const InputParameters & parameters)
+  : MooseObject(parameters),
     TransientInterface(this),
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {
 }
@@ -45,5 +46,7 @@ Control::Control(const InputParameters & parameters) :
 MultiMooseEnum
 Control::getExecuteOptions()
 {
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 custom=0x100 subdomain=0x200", "initial timestep_end");
+  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
+                        "timestep_begin=0x10 custom=0x100 subdomain=0x200",
+                        "initial timestep_end");
 }

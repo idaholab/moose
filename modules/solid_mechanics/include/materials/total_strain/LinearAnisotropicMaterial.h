@@ -9,11 +9,11 @@
 
 #include "LinearIsotropicMaterial.h"
 
-//Forward Declarations
+// Forward Declarations
 class LinearAnisotropicMaterial;
 class ElasticityTensor;
 
-template<>
+template <>
 InputParameters validParams<LinearAnisotropicMaterial>();
 
 /**
@@ -25,14 +25,12 @@ public:
   LinearAnisotropicMaterial(const InputParameters & parameters);
 
 protected:
-
   Real _material_constant_c11;
   Real _material_constant_c12;
   Real _material_constant_c44;
   Real _euler_angle_1;
   Real _euler_angle_2;
   Real _euler_angle_3;
-
 };
 
-#endif //LINEARANISOTROPICMATERIAL_H
+#endif // LINEARANISOTROPICMATERIAL_H

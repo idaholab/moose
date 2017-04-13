@@ -72,21 +72,21 @@
     type = FeatureFloodCountAux
     variable = features
     execute_on = 'initial timestep_end'
-    bubble_object = features
+    flood_counter = features
   [../]
   [./ghosts]
     type = FeatureFloodCountAux
     variable = ghosts
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
-    bubble_object = features
+    flood_counter = features
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
     execute_on = 'initial timestep_end'
-    bubble_object = features
+    flood_counter = features
   [../]
   [./proc_id]
     type = ProcessorIDAux

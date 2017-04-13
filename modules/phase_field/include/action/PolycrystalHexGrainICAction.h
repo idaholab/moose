@@ -11,9 +11,10 @@
 #include "Action.h"
 
 /**
- * Automatically generates ic for polycrystal hexagonal grain structure. Must have squared number of grains and periodic BCs.
+ * Automatically generates ic for polycrystal hexagonal grain structure. Must
+ * have squared number of grains and periodic BCs.
  */
-class PolycrystalHexGrainICAction: public Action
+class PolycrystalHexGrainICAction : public Action
 {
 public:
   PolycrystalHexGrainICAction(const InputParameters & params);
@@ -21,17 +22,15 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
+  const std::string _var_name_base;
+  const unsigned int _op_num;
+  const unsigned int _grain_num;
 
-  std::string _var_name_base;
-  unsigned int _op_num;
-  unsigned int _grain_num;
-
-  Real _x_offset;
-  Real _perturbation_percent;
+  const Real _x_offset;
+  const Real _perturbation_percent;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalHexGrainICAction>();
 
-#endif //POLYCRYSTALHEXGRAINICACTION_H
+#endif // POLYCRYSTALHEXGRAINICACTION_H

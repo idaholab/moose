@@ -14,14 +14,14 @@
 
 #include "LinearInterpolation.h"
 
-#include <stdexcept>
 #include <cassert>
+#include <fstream>
+#include <stdexcept>
 
 int LinearInterpolation::_file_number = 0;
 
-LinearInterpolation::LinearInterpolation(const std::vector<Real> & x, const std::vector<Real> & y) :
-    _x(x),
-    _y(y)
+LinearInterpolation::LinearInterpolation(const std::vector<Real> & x, const std::vector<Real> & y)
+  : _x(x), _y(y)
 {
   errorCheck();
 }
@@ -33,10 +33,11 @@ LinearInterpolation::errorCheck()
     throw std::domain_error("Vectors are not the same length");
 
   for (unsigned int i = 0; i + 1 < _x.size(); ++i)
-    if (_x[i] >= _x[i+1])
+    if (_x[i] >= _x[i + 1])
     {
       std::ostringstream oss;
-      oss << "x-values are not strictly increasing: x[" << i << "]: " << _x[i] << " x[" << i + 1 << "]: " << _x[i + 1];
+      oss << "x-values are not strictly increasing: x[" << i << "]: " << _x[i] << " x[" << i + 1
+          << "]: " << _x[i + 1];
       throw std::domain_error(oss.str());
     }
 }
@@ -55,8 +56,8 @@ LinearInterpolation::sample(Real x) const
     return _y.back();
 
   for (unsigned int i = 0; i + 1 < _x.size(); ++i)
-    if (x >= _x[i]  && x < _x[i+1])
-      return _y[i] + (_y[i+1]-_y[i])*(x-_x[i])/(_x[i+1]-_x[i]);
+    if (x >= _x[i] && x < _x[i + 1])
+      return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
 
   throw std::out_of_range("Unreachable");
   return 0;
@@ -68,12 +69,12 @@ LinearInterpolation::sampleDerivative(Real x) const
   // endpoint cases
   if (x < _x[0])
     return 0.0;
-  if (x >= _x[_x.size()-1])
+  if (x >= _x[_x.size() - 1])
     return 0.0;
 
   for (unsigned int i = 0; i + 1 < _x.size(); ++i)
-    if (x >= _x[i]  && x < _x[i+1])
-      return (_y[i+1]-_y[i])/(_x[i+1]-_x[i]);
+    if (x >= _x[i] && x < _x[i + 1])
+      return (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]);
 
   throw std::out_of_range("Unreachable");
   return 0;
@@ -82,11 +83,9 @@ LinearInterpolation::sampleDerivative(Real x) const
 Real
 LinearInterpolation::integrate()
 {
-  Real answer(0);
-  for (unsigned int i(1); i < _x.size(); ++i)
-  {
-    answer += 0.5*(_y[i]+_y[i-1])*(_x[i]-_x[i-1]);
-  }
+  Real answer = 0;
+  for (unsigned int i = 1; i < _x.size(); ++i)
+    answer += 0.5 * (_y[i] + _y[i - 1]) * (_x[i] - _x[i - 1]);
 
   return answer;
 }
@@ -104,7 +103,13 @@ LinearInterpolation::range(int i) const
 }
 
 void
-LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, std::string y_label, Real xmin, Real xmax, Real ymin, Real ymax)
+LinearInterpolation::dumpSampleFile(std::string base_name,
+                                    std::string x_label,
+                                    std::string y_label,
+                                    Real xmin,
+                                    Real xmax,
+                                    Real ymin,
+                                    Real ymax)
 {
   std::stringstream filename, filename_pts;
   const unsigned char fill_character = '0';
@@ -138,14 +143,14 @@ LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
   out << "set key left top\n"
       << "f(x)=";
 
-   for (unsigned int i=1; i<_x.size(); ++i)
-   {
-     Real m = (_y[i] - _y[i-1])/(_x[i] - _x[i-1]);
-     Real b = (_y[i] - m*_x[i]);
+  for (unsigned int i = 1; i < _x.size(); ++i)
+  {
+    Real m = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+    Real b = (_y[i] - m * _x[i]);
 
-     out << _x[i-1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
-   }
-   out << " 1/0\n";
+    out << _x[i - 1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
+  }
+  out << " 1/0\n";
 
   out << "\nplot f(x) with lines, '" << filename_pts.str() << "' using 1:2 title \"Points\"\n";
   out.close();
@@ -154,7 +159,7 @@ LinearInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
 
   out.open(filename_pts.str().c_str());
   /* Next dump the data points into a separate file */
-  for (unsigned int i = 0; i<_x.size(); ++i)
+  for (unsigned int i = 0; i < _x.size(); ++i)
     out << _x[i] << " " << _y[i] << "\n";
   out << std::endl;
 

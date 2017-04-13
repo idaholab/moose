@@ -17,7 +17,6 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #endif
-#include "cppunit/extensions/HelperMacros.h"
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

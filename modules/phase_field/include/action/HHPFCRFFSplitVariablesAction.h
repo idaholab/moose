@@ -4,16 +4,16 @@
 #include "InputParameters.h"
 #include "Action.h"
 
-//Forward Declarations
+// Forward Declarations
 class HHPFCRFFSplitVariablesAction;
 
-template<>
+template <>
 InputParameters validParams<HHPFCRFFSplitVariablesAction>();
 
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */
-class HHPFCRFFSplitVariablesAction: public Action
+class HHPFCRFFSplitVariablesAction : public Action
 {
 public:
   HHPFCRFFSplitVariablesAction(const InputParameters & params);
@@ -21,10 +21,8 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  unsigned int _num_L;
-  std::string _L_name_base;
+  const unsigned int _num_L;
+  const std::string _L_name_base;
 };
 
-#endif //HHPFCRFFSPLITVARIABLESACTION_H
+#endif // HHPFCRFFSPLITVARIABLESACTION_H

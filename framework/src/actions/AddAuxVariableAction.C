@@ -15,8 +15,9 @@
 #include "AddAuxVariableAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddAuxVariableAction>()
+template <>
+InputParameters
+validParams<AddAuxVariableAction>()
 {
   MooseEnum families(AddAuxVariableAction::getAuxVariableFamilies());
   MooseEnum orders(AddAuxVariableAction::getAuxVariableOrders());
@@ -24,18 +25,20 @@ InputParameters validParams<AddAuxVariableAction>()
   InputParameters params = validParams<Action>();
   params += validParams<OutputInterface>();
 
-  params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
+  params.addParam<MooseEnum>(
+      "family", families, "Specifies the family of FE shape functions to use for this variable");
+  params.addParam<MooseEnum>("order",
+                             orders,
+                             "Specifies the order of the FE shape function to use "
+                             "for this variable (additional orders not listed are "
+                             "allowed)");
   params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
+  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
 
   return params;
 }
 
-AddAuxVariableAction::AddAuxVariableAction(InputParameters params) :
-    AddVariableAction(params)
-{
-}
+AddAuxVariableAction::AddAuxVariableAction(InputParameters params) : AddVariableAction(params) {}
 
 MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()
@@ -46,7 +49,8 @@ AddAuxVariableAction::getAuxVariableFamilies()
 MooseEnum
 AddAuxVariableAction::getAuxVariableOrders()
 {
-  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
+  return MooseEnum(
+      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
 }
 
 void
@@ -67,7 +71,10 @@ AddAuxVariableAction::act()
   {
     // Check that the order is valid (CONSTANT, FIRST, or SECOND)
     if (_fe_type.order > 9)
-      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH or NINTH order (" << _fe_type.order << " supplied)");
+      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, "
+                 "SIXTH, SEVENTH, EIGHTH or NINTH order (",
+                 _fe_type.order,
+                 " supplied)");
 
     if (blocks.empty())
       _problem->addAuxVariable(var_name, _fe_type);

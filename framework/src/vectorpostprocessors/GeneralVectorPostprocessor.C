@@ -14,16 +14,16 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-template<>
-InputParameters validParams<GeneralVectorPostprocessor>()
+template <>
+InputParameters
+validParams<GeneralVectorPostprocessor>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params += validParams<VectorPostprocessor>();
   return params;
 }
 
-GeneralVectorPostprocessor::GeneralVectorPostprocessor(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
-    VectorPostprocessor(parameters)
-{}
-
+GeneralVectorPostprocessor::GeneralVectorPostprocessor(const InputParameters & parameters)
+  : GeneralUserObject(parameters), VectorPostprocessor(parameters)
+{
+}

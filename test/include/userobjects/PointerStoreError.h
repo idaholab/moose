@@ -19,7 +19,7 @@
 
 class PointerStoreError;
 
-template<>
+template <>
 InputParameters validParams<PointerStoreError>();
 
 class TypeWithNoStore
@@ -37,13 +37,12 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize() {};
+  virtual void initialize(){};
   virtual void execute();
-  virtual void finalize() {};
+  virtual void finalize(){};
 
 protected:
-  TypeWithNoStore * & _pointer_data;
+  TypeWithNoStore *& _pointer_data;
 };
-
 
 #endif /* POINTERSTOREERROR_H */

@@ -14,17 +14,18 @@
 
 #include "SideAverageValue.h"
 
-template<>
-InputParameters validParams<SideAverageValue>()
+template <>
+InputParameters
+validParams<SideAverageValue>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
   return params;
 }
 
-SideAverageValue::SideAverageValue(const InputParameters & parameters) :
-    SideIntegralVariablePostprocessor(parameters),
-    _volume(0)
-{}
+SideAverageValue::SideAverageValue(const InputParameters & parameters)
+  : SideIntegralVariablePostprocessor(parameters), _volume(0)
+{
+}
 
 void
 SideAverageValue::initialize()
@@ -37,7 +38,7 @@ void
 SideAverageValue::execute()
 {
   SideIntegralVariablePostprocessor::execute();
-  _volume += _current_side_volume;
+  _volume += volume();
 }
 
 Real
@@ -48,6 +49,11 @@ SideAverageValue::getValue()
   return integral / _volume;
 }
 
+Real
+SideAverageValue::volume()
+{
+  return _current_side_volume;
+}
 
 void
 SideAverageValue::threadJoin(const UserObject & y)

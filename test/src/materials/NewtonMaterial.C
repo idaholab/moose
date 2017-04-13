@@ -16,22 +16,28 @@
 #include "NewtonMaterial.h"
 #include "Material.h"
 
-
-template<>
-InputParameters validParams<NewtonMaterial>()
+template <>
+InputParameters
+validParams<NewtonMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<std::string>("f_name", "The name of the property that holds the value of the function for which the root is being computed");
-  params.addRequiredParam<std::string>("f_prime_name", "The name of the property that holds the value to of the derivative of the function");
-  params.addRequiredParam<std::string>("p_name", "The name of the independent variable for the function");
+  params.addRequiredParam<std::string>("f_name",
+                                       "The name of the property that holds the value of "
+                                       "the function for which the root is being "
+                                       "computed");
+  params.addRequiredParam<std::string>(
+      "f_prime_name",
+      "The name of the property that holds the value to of the derivative of the function");
+  params.addRequiredParam<std::string>("p_name",
+                                       "The name of the independent variable for the function");
   params.addParam<Real>("tol", 1e-12, "Newton solution tolerance.");
   params.addParam<unsigned int>("max_iterations", 42, "The maximum number of Newton iterations.");
   params.addRequiredParam<MaterialName>("material", "The material object to recompute.");
   return params;
 }
 
-NewtonMaterial::NewtonMaterial(const InputParameters & parameters) :
-    Material(parameters),
+NewtonMaterial::NewtonMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _tol(getParam<Real>("tol")),
     _f(getMaterialProperty<Real>(getParam<std::string>("f_name"))),
     _f_prime(getMaterialProperty<Real>(getParam<std::string>("f_prime_name"))),

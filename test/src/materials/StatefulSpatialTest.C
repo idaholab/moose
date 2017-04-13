@@ -13,18 +13,20 @@
 /****************************************************************/
 #include "StatefulSpatialTest.h"
 
-template<>
-InputParameters validParams<StatefulSpatialTest>()
+template <>
+InputParameters
+validParams<StatefulSpatialTest>()
 {
   InputParameters params = validParams<Material>();
   return params;
 }
 
-StatefulSpatialTest::StatefulSpatialTest(const InputParameters & parameters) :
-    Material(parameters),
+StatefulSpatialTest::StatefulSpatialTest(const InputParameters & parameters)
+  : Material(parameters),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-    _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
-{}
+    _thermal_conductivity_old(getMaterialPropertyOld<Real>("thermal_conductivity"))
+{
+}
 
 void
 StatefulSpatialTest::computeQpProperties()

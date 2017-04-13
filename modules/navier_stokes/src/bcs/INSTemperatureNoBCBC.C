@@ -6,48 +6,43 @@
 /****************************************************************/
 #include "INSTemperatureNoBCBC.h"
 
-template<>
-InputParameters validParams<INSTemperatureNoBCBC>()
+template <>
+InputParameters
+validParams<INSTemperatureNoBCBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
+  params.addClassDescription("This class implements the 'No BC' boundary condition discussed by "
+                             "Griffiths, Papanastiou, and others.");
   // Required parameters
   params.addRequiredParam<Real>("k", "thermal conductivity");
 
   return params;
 }
 
-
-
-INSTemperatureNoBCBC::INSTemperatureNoBCBC(const InputParameters & parameters) :
-  IntegratedBC(parameters),
-  // Required parameters
-  _k(getParam<Real>("k"))
+INSTemperatureNoBCBC::INSTemperatureNoBCBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
+    // Required parameters
+    _k(getParam<Real>("k"))
 {
 }
 
-
-
-Real INSTemperatureNoBCBC::computeQpResidual()
+Real
+INSTemperatureNoBCBC::computeQpResidual()
 {
   // k * (grad_T.n) * test
   return _k * _grad_u[_qp] * _normals[_qp] * _test[_i][_qp];
 }
 
-
-
-
-Real INSTemperatureNoBCBC::computeQpJacobian()
+Real
+INSTemperatureNoBCBC::computeQpJacobian()
 {
-  return _k * (_grad_phi[_j][_qp]*_normals[_qp]) * _test[_i][_qp];
+  return _k * (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
 }
 
-
-
-
-Real INSTemperatureNoBCBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
+Real
+INSTemperatureNoBCBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // off-diagonal derivatives are all zero.
   return 0.;
 }
-

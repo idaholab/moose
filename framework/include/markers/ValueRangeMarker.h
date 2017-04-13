@@ -19,17 +19,16 @@
 
 class ValueRangeMarker;
 
-template<>
+template <>
 InputParameters validParams<ValueRangeMarker>();
 
 class ValueRangeMarker : public QuadraturePointMarker
 {
 public:
   ValueRangeMarker(const InputParameters & parameters);
-  virtual ~ValueRangeMarker(){};
 
 protected:
-  virtual MarkerValue computeQpMarker();
+  virtual MarkerValue computeQpMarker() override;
 
   Real _lower_bound;
   Real _upper_bound;

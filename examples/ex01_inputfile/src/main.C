@@ -19,7 +19,7 @@
  */
 
 #include "ExampleApp.h"
-//Moose Includes
+// Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
 #include "MooseApp.h"
@@ -29,7 +29,8 @@
 PerfLog Moose::perf_log("Example");
 
 // Begin the main program.
-int main(int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
   // Initialize MPI, solvers and MOOSE
   MooseInit init(argc, argv);

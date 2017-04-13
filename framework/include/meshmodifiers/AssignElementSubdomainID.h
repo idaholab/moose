@@ -21,7 +21,7 @@
 // Forward declerations
 class AssignElementSubdomainID;
 
-template<>
+template <>
 InputParameters validParams<AssignElementSubdomainID>();
 
 /**
@@ -30,22 +30,14 @@ InputParameters validParams<AssignElementSubdomainID>();
 class AssignElementSubdomainID : public MeshModifier
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
    */
   AssignElementSubdomainID(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~AssignElementSubdomainID();
-
-  /**
-   * Perform the actual element subdomain ID assignment
-   */
-  virtual void modify();
+protected:
+  virtual void modify() override;
 };
 
-#endif //ASSIGNELEMENTSUBDOMAINID_H
+#endif // ASSIGNELEMENTSUBDOMAINID_H

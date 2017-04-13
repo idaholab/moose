@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumNodes;
 
-template<>
+template <>
 InputParameters validParams<NumNodes>();
 
 class NumNodes : public GeneralPostprocessor
@@ -28,13 +28,13 @@ class NumNodes : public GeneralPostprocessor
 public:
   NumNodes(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
   /**
    * This will return the number of nodes in the system
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 };
 
 #endif // NUMNODES_H

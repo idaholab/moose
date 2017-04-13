@@ -6,16 +6,20 @@
 /****************************************************************/
 #include "NSMomentumInviscidBC.h"
 
-template<>
-InputParameters validParams<NSMomentumInviscidBC>()
+template <>
+InputParameters
+validParams<NSMomentumInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
+  params.addClassDescription("his class corresponds to the inviscid part of the 'natural' boundary "
+                             "condition for the momentum equations.");
+  params.addRequiredParam<unsigned>(
+      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 
-NSMomentumInviscidBC::NSMomentumInviscidBC(const InputParameters & parameters) :
-    NSIntegratedBC(parameters),
+NSMomentumInviscidBC::NSMomentumInviscidBC(const InputParameters & parameters)
+  : NSIntegratedBC(parameters),
     _component(getParam<unsigned>("component")),
     // Object for computing deriviatives of pressure
     _pressure_derivs(*this)
@@ -37,7 +41,8 @@ NSMomentumInviscidBC::pressureQpResidualHelper(Real pressure)
 Real
 NSMomentumInviscidBC::pressureQpJacobianHelper(unsigned var_number)
 {
-  return _normals[_qp](_component) * _pressure_derivs.get_grad(var_number) * _phi[_j][_qp] * _test[_i][_qp];
+  return _normals[_qp](_component) * _pressure_derivs.get_grad(var_number) * _phi[_j][_qp] *
+         _test[_i][_qp];
 }
 
 Real
@@ -72,13 +77,15 @@ NSMomentumInviscidBC::convectiveQpJacobianHelper(unsigned var_number)
 
     case 1:
     case 2:
-    case 3:  // momentums
-      if (var_number-1 == _component)
+    case 3: // momentums
+      if (var_number - 1 == _component)
         // See Eqn. (68) from the notes for the inviscid boundary terms
-        conv_term = ((vel * _normals[_qp]) + vel(_component)*_normals[_qp](_component)) * _phi[_j][_qp] * _test[_i][_qp];
+        conv_term = ((vel * _normals[_qp]) + vel(_component) * _normals[_qp](_component)) *
+                    _phi[_j][_qp] * _test[_i][_qp];
       else
         // off-diagonal
-        conv_term = vel(_component) * _normals[_qp](var_number-1) * _phi[_j][_qp] * _test[_i][_qp];
+        conv_term =
+            vel(_component) * _normals[_qp](var_number - 1) * _phi[_j][_qp] * _test[_i][_qp];
       break;
 
     case 4: // energy

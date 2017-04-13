@@ -18,22 +18,19 @@
 
 unsigned int ActionFactory::_unique_id = 0;
 
-ActionFactory::ActionFactory(MooseApp & app):
-    _app(app)
-{
-}
+ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 
-ActionFactory::~ActionFactory()
-{
-}
+ActionFactory::~ActionFactory() {}
 
-MooseSharedPointer<Action>
-ActionFactory::create(const std::string & action, const std::string & action_name, InputParameters parameters)
+std::shared_ptr<Action>
+ActionFactory::create(const std::string & action,
+                      const std::string & action_name,
+                      InputParameters parameters)
 {
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
-  BuildInfo *build_info = NULL;
+  BuildInfo * build_info = NULL;
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams(action_name);
@@ -45,23 +42,27 @@ ActionFactory::create(const std::string & action, const std::string & action_nam
   for (ActionFactory::iterator it = iters.first; it != iters.second; ++it)
   {
     ++count;
-    if (parameters.have_parameter<unsigned int>("unique_id") && it->second._unique_id == parameters.get<unsigned int>("unique_id"))
+    if (parameters.have_parameter<unsigned int>("unique_id") &&
+        it->second._unique_id == parameters.get<unsigned int>("unique_id"))
     {
       build_info = &(it->second);
       break;
     }
   }
-  // For backwards compatibility - If there is only one Action registered but it doesn't contain a unique_id that
+  // For backwards compatibility - If there is only one Action registered but it doesn't contain a
+  // unique_id that
   // matches, then surely it must still be the correct one
   if (count == 1 && !build_info)
     build_info = &(iters.first->second);
 
   if (!build_info)
-    mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + action_name);
+    mooseError(
+        std::string("Unable to find buildable Action from supplied InputParameters Object for ") +
+        action_name);
 
   // Add the name to the parameters and create the object
   parameters.set<std::string>("_action_name") = action_name;
-  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(parameters);
+  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(parameters);
 
   if (parameters.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
@@ -102,27 +103,32 @@ ActionFactory::getTaskName(const std::string & action)
     return "";
 }
 
-ActionFactory::iterator ActionFactory::begin()
+ActionFactory::iterator
+ActionFactory::begin()
 {
   return _name_to_build_info.begin();
 }
 
-ActionFactory::const_iterator ActionFactory::begin() const
+ActionFactory::const_iterator
+ActionFactory::begin() const
 {
   return _name_to_build_info.begin();
 }
 
-ActionFactory::iterator ActionFactory::end()
+ActionFactory::iterator
+ActionFactory::end()
 {
   return _name_to_build_info.end();
 }
 
-ActionFactory::const_iterator ActionFactory::end() const
+ActionFactory::const_iterator
+ActionFactory::end() const
 {
   return _name_to_build_info.end();
 }
 
-std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator>
+std::pair<std::multimap<std::string, std::string>::const_iterator,
+          std::multimap<std::string, std::string>::const_iterator>
 ActionFactory::getActionsByTask(const std::string & task) const
 {
   return _task_to_action_map.equal_range(task);
@@ -133,10 +139,18 @@ ActionFactory::getTasksByAction(const std::string & action) const
 {
   std::set<std::string> tasks;
 
-  std::pair<std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator, std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator>
-    iters = _name_to_build_info.equal_range(action);
-  for (std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator it = iters.first; it != iters.second; ++it)
+  std::pair<std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator,
+            std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator>
+      iters = _name_to_build_info.equal_range(action);
+  for (std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator it = iters.first;
+       it != iters.second;
+       ++it)
     tasks.insert(it->second._task);
 
   return tasks;
+}
+FileLineInfo
+ActionFactory::getLineInfo(const std::string & name, const std::string & task) const
+{
+  return _name_to_line.getInfo(name, task);
 }

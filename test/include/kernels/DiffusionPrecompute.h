@@ -18,9 +18,8 @@
 
 class DiffusionPrecompute;
 
-template<>
+template <>
 InputParameters validParams<DiffusionPrecompute>();
-
 
 class DiffusionPrecompute : public KernelGrad
 {
@@ -32,6 +31,5 @@ protected:
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
 };
-
 
 #endif /* DIFFUSIONPRECOMPUTE_H */

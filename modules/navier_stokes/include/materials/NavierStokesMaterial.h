@@ -9,10 +9,11 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class NavierStokesMaterial;
+class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NavierStokesMaterial>();
 
 /**
@@ -48,33 +49,27 @@ protected:
   const VariableGradient & _grad_w;
 
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
-  MaterialProperty<Real> &            _thermal_conductivity;
-  MaterialProperty<Real> &            _dynamic_viscosity;
+  MaterialProperty<Real> & _thermal_conductivity;
+  MaterialProperty<Real> & _dynamic_viscosity;
 
   // Also store the "cal A" matrices at each quadrature point as material
   // poperties.  These are defined in the compns notes and are needed for
   // computing strong and weak residual values and Jacobian entries, so it's
   // good if we reuse them...
-  MaterialProperty<std::vector<RealTensorValue> > & _calA;
+  MaterialProperty<std::vector<RealTensorValue>> & _calA;
 
   // The "velocity column" matrices.  _calC[_qp][k] is a tensor with the
   // velocity vector in the k'th column.  See notes for additional details.
-  MaterialProperty<std::vector<RealTensorValue> > & _calC;
+  MaterialProperty<std::vector<RealTensorValue>> & _calC;
 
   // The energy equation inviscid flux matrix components.  There are n_vars of
   // these for each dimension, so in 3D, 3*5=15 different matrices.
   // See notes for additional details.
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _calE;
+  MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _calE;
 
   // Convenient storage for all of the velocity gradient components so
   // we can refer to them in a loop.
   std::vector<const VariableGradient *> _vel_grads;
-
-  // Specific heat at constant volume, treated as single
-  // constant values.
-  Real _R;
-  Real _gamma;
-  Real _Pr;
 
   // Coupled values needed to compute strong form residuals
   // for SUPG stabilization...
@@ -93,21 +88,21 @@ protected:
   const VariableValue & _rho_u;
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
-  const VariableValue & _rho_e;
+  const VariableValue & _rho_E;
 
   // Time derivative values for dependent variables
   const VariableValue & _drho_dt;
   const VariableValue & _drhou_dt;
   const VariableValue & _drhov_dt;
   const VariableValue & _drhow_dt;
-  const VariableValue & _drhoe_dt;
+  const VariableValue & _drhoE_dt;
 
   // Gradients
   const VariableGradient & _grad_rho;
   const VariableGradient & _grad_rho_u;
   const VariableGradient & _grad_rho_v;
   const VariableGradient & _grad_rho_w;
-  const VariableGradient & _grad_rho_e;
+  const VariableGradient & _grad_rho_E;
 
   // The real-valued material properties representing the element stabilization
   // parameters for each of the equations.
@@ -118,7 +113,10 @@ protected:
 
   // The (vector-valued) material property which is the strong-form
   // residual at each quadrature point.
-  MaterialProperty<std::vector<Real> > & _strong_residuals;
+  MaterialProperty<std::vector<Real>> & _strong_residuals;
+
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 
 private:
   // To be called from computeProperties() function to compute _hsupg
@@ -131,4 +129,4 @@ private:
   void computeStrongResiduals(unsigned int qp);
 };
 
-#endif //NAVIERSTOKESMATERIAL_H
+#endif // NAVIERSTOKESMATERIAL_H

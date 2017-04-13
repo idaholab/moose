@@ -19,12 +19,12 @@
 
 class BadAddKernelAction;
 
-template<>
+template <>
 InputParameters validParams<BadAddKernelAction>();
 
 /**
  * This class is for testing an error condition. It is registered
- * to add kernels but is calling the wrong method on FEProblem
+ * to add kernels but is calling the wrong method on FEProblemBase
  * to actually add the object. DO NOT COPY!
  */
 class BadAddKernelAction : public MooseObjectAction

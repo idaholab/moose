@@ -25,21 +25,21 @@
 class MooseApp;
 class MooseObject;
 
-template<>
+template <>
 InputParameters validParams<MooseObject>();
 
+// needed to avoid #include cycle with MooseApp and MooseObject
+[[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject :
-  public ConsoleStreamInterface,
-  public libMesh::ParallelObject
+class MooseObject : public ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   MooseObject(const InputParameters & parameters);
 
-  virtual ~MooseObject() { }
+  virtual ~MooseObject() = default;
 
   /**
    * Get the name of the object
@@ -65,7 +65,7 @@ public:
    * Test if the supplied parameter is valid
    * @param name The name of the parameter to test
    */
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
   /**
    * Get the MooseApp this object is associated with.
@@ -77,9 +77,34 @@ public:
    */
   virtual bool enabled() { return _enabled; }
 
+  template <typename... Args>
+  [[noreturn]] void mooseError(Args &&... args) const
+  {
+    std::ostringstream oss;
+    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+    std::string msg = oss.str();
+    callMooseErrorRaw(msg, &_app);
+  }
+
+  template <typename... Args>
+  void mooseWarning(Args &&... args) const
+  {
+    moose::internal::mooseWarningStream(_console, std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
+  void mooseDeprecated(Args &&... args) const
+  {
+    moose::internal::mooseDeprecatedStream(_console, std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
+  void mooseInfo(Args &&... args) const
+  {
+    moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...);
+  }
 
 protected:
-
   /// The MooseApp this object is associated with
   MooseApp & _app;
 
@@ -91,7 +116,6 @@ protected:
 
   /// Reference to the "enable" InputParaemters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
-
 };
 
 template <typename T>
@@ -100,6 +124,5 @@ MooseObject::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
-
 
 #endif /* MOOSEOBJECT_H*/

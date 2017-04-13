@@ -19,18 +19,16 @@
 
 class AnalyticalIndicator;
 
-template<>
+template <>
 InputParameters validParams<AnalyticalIndicator>();
 
-class AnalyticalIndicator :
-  public ElementIntegralIndicator
+class AnalyticalIndicator : public ElementIntegralIndicator
 {
 public:
   AnalyticalIndicator(const InputParameters & parameters);
-  virtual ~AnalyticalIndicator(){};
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   Function & _func;
 };

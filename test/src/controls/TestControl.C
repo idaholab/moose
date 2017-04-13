@@ -15,21 +15,25 @@
 #include "TestControl.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<TestControl>()
+template <>
+InputParameters
+validParams<TestControl>()
 {
   InputParameters params = validParams<Control>();
 
   MooseEnum test_type("real variable point tid_warehouse_error disable_executioner");
-  params.addRequiredParam<MooseEnum>("test_type", test_type, "Indicates the type of test to perform");
-  params.addRequiredParam<std::string>("parameter", "The input parameter(s) to control. Specify a single parameter name and all parameters in all objects matching the name will be updated");
+  params.addRequiredParam<MooseEnum>(
+      "test_type", test_type, "Indicates the type of test to perform");
+  params.addRequiredParam<std::string>(
+      "parameter",
+      "The input parameter(s) to control. Specify a single parameter name and all "
+      "parameters in all objects matching the name will be updated");
 
   return params;
 }
 
-TestControl::TestControl(const InputParameters & parameters) :
-    Control(parameters),
-    _test_type(getParam<MooseEnum>("test_type"))
+TestControl::TestControl(const InputParameters & parameters)
+  : Control(parameters), _test_type(getParam<MooseEnum>("test_type"))
 {
   if (_test_type == "real")
     getControllableValue<Real>("parameter");

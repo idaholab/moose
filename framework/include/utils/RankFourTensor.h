@@ -7,32 +7,27 @@
 #ifndef RANKFOURTENSOR_H
 #define RANKFOURTENSOR_H
 
-// Forward declaration of RankTwoTensor
-class RankTwoTensor;
-class RankFourTensor;
-
 // MOOSE includes
-#include "Moose.h"
-#include "PermutationTensor.h"
-#include "MooseEnum.h"
-#include "DerivativeMaterialInterface.h"
+#include "DataIO.h"
 
 // libMesh includes
 #include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 
-#include "petscsys.h"
-#include "petscblaslapack.h"
+// Forward declarations
+class MooseEnum;
+class RankTwoTensor;
+class RankFourTensor;
 
-// system includes
-#include <vector>
+template <typename T>
+void mooseSetToZero(T & v);
 
 /**
  * Helper function template specialization to set an object to zero.
  * Needed by DerivativeMaterialInterface
  */
-template<>
+template <>
 void mooseSetToZero<RankFourTensor>(RankFourTensor & v);
 
 /**
@@ -104,43 +99,43 @@ public:
   void print(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
-  RankFourTensor & operator= (const RankFourTensor & a);
+  RankFourTensor & operator=(const RankFourTensor & a);
 
   /// C_ijkl*a_kl
-  RankTwoTensor operator* (const RankTwoTensor & a) const;
+  RankTwoTensor operator*(const RankTwoTensor & a) const;
 
   /// C_ijkl*a_kl
-  RealTensorValue operator* (const RealTensorValue & a) const;
+  RealTensorValue operator*(const RealTensorValue & a) const;
 
   /// C_ijkl*a
-  RankFourTensor operator* (const Real a) const;
+  RankFourTensor operator*(const Real a) const;
 
   /// C_ijkl *= a
-  RankFourTensor & operator*= (const Real a);
+  RankFourTensor & operator*=(const Real a);
 
   /// C_ijkl/a
-  RankFourTensor operator/ (const Real a) const;
+  RankFourTensor operator/(const Real a) const;
 
   /// C_ijkl /= a  for all i, j, k, l
-  RankFourTensor & operator/= (const Real a);
+  RankFourTensor & operator/=(const Real a);
 
   /// C_ijkl += a_ijkl  for all i, j, k, l
-  RankFourTensor & operator+= (const RankFourTensor & a);
+  RankFourTensor & operator+=(const RankFourTensor & a);
 
   /// C_ijkl + a_ijkl
-  RankFourTensor operator+ (const RankFourTensor & a) const;
+  RankFourTensor operator+(const RankFourTensor & a) const;
 
   /// C_ijkl -= a_ijkl
-  RankFourTensor & operator-= (const RankFourTensor & a);
+  RankFourTensor & operator-=(const RankFourTensor & a);
 
   /// C_ijkl - a_ijkl
-  RankFourTensor operator- (const RankFourTensor & a) const;
+  RankFourTensor operator-(const RankFourTensor & a) const;
 
   /// -C_ijkl
-  RankFourTensor operator- () const;
+  RankFourTensor operator-() const;
 
   /// C_ijpq*a_pqkl
-  RankFourTensor operator* (const RankFourTensor & a) const;
+  RankFourTensor operator*(const RankFourTensor & a) const;
 
   /// sqrt(C_ijkl*C_ijkl)
   Real L2norm() const;
@@ -156,13 +151,13 @@ public:
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
   template <class T>
-  void rotate(T & R);
+  void rotate(const T & R);
 
   /**
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
-  void rotate(RealTensorValue & R);
+  void rotate(const RealTensorValue & R);
 
   /**
    * Rotate the tensor using
@@ -177,9 +172,11 @@ public:
   RankFourTensor transposeMajor() const;
 
   /**
-   * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l = 3).
+   * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
+   * 3).
    * Fill method depends on size of input
-   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0] - input[1])/2,
+   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0]
+   * - input[1])/2,
    *                  and C_ijkl = C_jikl = C_ijlk = C_klij, and C_1211 = C_1222 = 0.
    * Input size = 9.  Then C_1111 = input[0], C_1112 = input[1], C_1122 = input[3],
    *                       C_1212 = input[4], C_1222 = input[5], C_1211 = input[6]
@@ -208,16 +205,20 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
-  /**
-   * Inverts the dense matrix A using LAPACK routines
-   * @param A upon input this is a row vector representing an n-by-n matrix.  Upon output it is the inverse (as a row-vector)
-   * @param n size of A
-   * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
-   */
-  int matrixInversion(std::vector<PetscScalar> & A, int n) const;
-
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensor innerProductTranspose(const RankTwoTensor &) const;
+
+  /// Calculates the sum of Ciijj for i and j varying from 0 to 2
+  Real sum3x3() const;
+
+  /// Calculates the vector a[i] = sum over j Ciijj for i and j varying from 0 to 2
+  RealGradient sum3x1() const;
+
+  /// checks if the tensor is symmetric
+  bool isSymmetric() const;
+
+  /// checks if the tensor is isotropic
+  bool isIsotropic() const;
 
 protected:
   /// Dimensionality of rank-four tensor
@@ -232,10 +233,12 @@ protected:
   * C_ijkl = C_ijlk, C_ijkl = C_jikl
   * @param input If all==true then this is
   *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
-  *                In the isotropic case this is (la is first Lame constant, mu is second (shear) Lame constant)
+  *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
+  * Lame constant)
   *                la+2mu la la la+2mu la la+2mu mu mu mu
   *              If all==false then this is
-  *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323 C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
+  *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
+  * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
   * @param all Determines the compoinents passed in vis the input parameter
   */
   void fillSymmetricFromInputVector(const std::vector<Real> & input, bool all);
@@ -306,24 +309,24 @@ protected:
    */
 
   void fillPrincipalFromInputVector(const std::vector<Real> & input);
-  template<class T>
+  template <class T>
   friend void dataStore(std::ostream &, T &, void *);
 
-  template<class T>
+  template <class T>
   friend void dataLoad(std::istream &, T &, void *);
 };
 
-template<>
+template <>
 void dataStore(std::ostream &, RankFourTensor &, void *);
 
-template<>
+template <>
 void dataLoad(std::istream &, RankFourTensor &, void *);
 
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
 
-template<class T>
+template <class T>
 void
-RankFourTensor::rotate(T & R)
+RankFourTensor::rotate(const T & R)
 {
   RankFourTensor old = *this;
 
@@ -337,10 +340,10 @@ RankFourTensor::rotate(T & R)
             for (unsigned int n = 0; n < N; ++n)
               for (unsigned int o = 0; o < N; ++o)
                 for (unsigned int p = 0; p < N; ++p)
-                  sum += R(i,m) * R(j,n) * R(k,o) * R(l,p) * old(m,n,o,p);
+                  sum += R(i, m) * R(j, n) * R(k, o) * R(l, p) * old(m, n, o, p);
 
           _vals[i][j][k][l] = sum;
         }
 }
 
-#endif //RANKFOURTENSOR_H
+#endif // RANKFOURTENSOR_H

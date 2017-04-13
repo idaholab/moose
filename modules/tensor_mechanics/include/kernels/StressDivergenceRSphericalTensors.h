@@ -4,15 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef StressDivergenceRSphericalTensors_H
-#define StressDivergenceRSphericalTensors_H
+#ifndef STRESSDIVERGENCERSPHERICALTENSORS_H
+#define STRESSDIVERGENCERSPHERICALTENSORS_H
 
 #include "StressDivergenceTensors.h"
 
-//Forward Declarations
+// Forward Declarations
 class StressDivergenceRSphericalTensors;
 
-template<>
+template <>
 InputParameters validParams<StressDivergenceRSphericalTensors>();
 
 /**
@@ -35,11 +35,13 @@ public:
   StressDivergenceRSphericalTensors(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual void initialSetup() override;
 
-  Real calculateJacobian (unsigned int ivar, unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 };
 
-#endif //StressDivergenceRSphericalTensors_H
+#endif // STRESSDIVERGENCERSPHERICALTENSORS_H

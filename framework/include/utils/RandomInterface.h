@@ -15,16 +15,20 @@
 #ifndef RANDOMINTERFACE_H
 #define RANDOMINTERFACE_H
 
-#include "InputParameters.h"
-#include "FEProblem.h"
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
-class RandomInterface;
+// Forward declarations
 class Assembly;
-class RandomData;
+class FEProblemBase;
+class InputParameters;
 class MooseRandom;
+class RandomData;
+class RandomInterface;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<RandomInterface>();
 
 /**
@@ -34,7 +38,10 @@ InputParameters validParams<RandomInterface>();
 class RandomInterface
 {
 public:
-  RandomInterface(const InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal);
+  RandomInterface(const InputParameters & parameters,
+                  FEProblemBase & problem,
+                  THREAD_ID tid,
+                  bool is_nodal);
 
   ~RandomInterface();
 
@@ -68,23 +75,24 @@ public:
   bool isNodal() const { return _is_nodal; }
   ExecFlagType getResetOnTime() const { return _reset_on; }
 
-  void setRandomDataPointer(RandomData *random_data);
+  void setRandomDataPointer(RandomData * random_data);
 
 private:
-  RandomData *_random_data;
-  mutable MooseRandom *_generator;
+  RandomData * _random_data;
+  mutable MooseRandom * _generator;
 
-  FEProblem & _ri_problem;
+  FEProblemBase & _ri_problem;
   const std::string _ri_name;
 
   unsigned int _master_seed;
   bool _is_nodal;
   ExecFlagType _reset_on;
 
-  const Node * & _curr_node;
-  const Elem * & _curr_element;
+  const Node *& _curr_node;
+  const Elem *& _curr_element;
 
-//  friend void FEProblem::registerRandomInterface(RandomInterface *random_interface, const std::string & name, ExecFlagType exec_flag);
+  //  friend void FEProblemBase::registerRandomInterface(RandomInterface *random_interface, const
+  //  std::string & name, ExecFlagType exec_flag);
 };
 
 #endif /* RANDOMINTERFACE_H */

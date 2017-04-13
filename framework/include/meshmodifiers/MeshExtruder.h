@@ -20,7 +20,7 @@
 
 class MeshExtruder;
 
-template<>
+template <>
 InputParameters validParams<MeshExtruder>();
 
 class MeshExtruder : public MeshModifier
@@ -28,16 +28,18 @@ class MeshExtruder : public MeshModifier
 public:
   MeshExtruder(const InputParameters & parameters);
 
-  virtual ~MeshExtruder();
-
-  virtual void modify();
-
 protected:
-  const unsigned int _num_layers;
+  virtual void modify() override;
+
   const RealVectorValue _extrusion_vector;
+  unsigned int _num_layers;
+  std::vector<SubdomainID> _existing_subdomains;
+  std::vector<unsigned int> _layers;
+  std::vector<unsigned int> _new_ids;
 
   /**
-   * This class is used during the mesh construction (extrusion) to set element ids as they are created.
+   * This class is used during the mesh construction (extrusion) to set element ids as they are
+   * created.
    */
   class QueryElemSubdomainID : public MeshTools::Generation::QueryElemSubdomainIDBase
   {
@@ -52,17 +54,17 @@ protected:
 
   private:
     /// Data structure for holding the old -> new id mapping based on the layer number
-    std::map<unsigned int, std::map<SubdomainID, unsigned int> > _layer_data;
+    std::map<unsigned int, std::map<SubdomainID, unsigned int>> _layer_data;
 
-    /// The total number of layers in the extrusion
+/// The total number of layers in the extrusion.  This is
+/// currently only used for a sanity check in dbg mode.
+#ifndef NDEBUG
     unsigned int _num_layers;
+#endif
   };
 
 private:
   void changeID(const std::vector<BoundaryName> & names, BoundaryID old_id);
-
-//  MooseSharedPointer<QueryElemSubdomainID> _elem_subdomain_id;
-  bool _map_custom_ids;
 };
 
 #endif /* MESHEXTRUDER_H */

@@ -20,6 +20,7 @@
     type = 'Exodiff'
     input = 'disp_about_axis_axial_motion.i'
     exodiff = 'disp_about_axis_axial_motion_out.e'
+    rel_err = 1E-5
   [../]
   [./disp_about_axis_error1]
     type = 'RunException'

@@ -18,10 +18,10 @@
 // local includes
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class KernelGrad;
 
-template<>
+template <>
 InputParameters validParams<KernelGrad>();
 
 /**
@@ -36,26 +36,16 @@ public:
   /**
    * Factory constructor initializes all internal references needed for residual computation.
    *
-   * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
+   * @param parameters The parameters object for holding additional parameters for kernels and
+   * derived kernels
    */
   KernelGrad(const InputParameters & parameters);
 
-  virtual ~KernelGrad();
+  virtual void computeResidual() override;
 
-  /**
-   * Computes the residual for the current element.
-   */
-  virtual void computeResidual();
+  virtual void computeJacobian() override;
 
-  /**
-   * Computes the jacobian for the current element.
-   */
-  virtual void computeJacobian();
-
-  /**
-   * Computes d-residual / d-jvar...
-   */
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   /**
@@ -67,7 +57,8 @@ protected:
    * Called before forming the jacobian for an element
    */
   virtual RealGradient precomputeQpJacobian();
-  virtual Real computeQpResidual();
+
+  virtual Real computeQpResidual() override;
 };
 
-#endif //KERNELGRAD_H
+#endif // KERNELGRAD_H

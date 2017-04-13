@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumResidualEvaluations;
 
-template<>
+template <>
 InputParameters validParams<NumResidualEvaluations>();
 
 /**
@@ -31,13 +31,10 @@ class NumResidualEvaluations : public GeneralPostprocessor
 public:
   NumResidualEvaluations(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
-  /**
-   * This will return the final nonlinear residual.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 };
 
-#endif //NUMRESIDUALEVALUATIONS_H
+#endif // NUMRESIDUALEVALUATIONS_H

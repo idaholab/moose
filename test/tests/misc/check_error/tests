@@ -305,14 +305,14 @@
   [./bad_stateful_material_only_old]
     type = 'RunException'
     input = 'bad_stateful_material.i'
-    expect_err = "Material '\S+' has stateful properties declared but not associated"
+    expect_err = "One or more Material Properties were not supplied on block"
   [../]
 
   [./bad_stateful_material_only_older]
     type = 'RunException'
     input = 'bad_stateful_material.i'
-    expect_err = "Material '\S+' has stateful properties declared but not associated"
-    cli_args = 'Materials/stateful_mat/declare_only_older=true'
+    expect_err = "One or more Material Properties were not supplied on block"
+    cli_args = 'Materials/stateful_mat/get_older=true'
   [../]
 
   [./missing_mesh_test]
@@ -349,6 +349,7 @@
     type = 'RunException'
     input = 'multi_precond_test.i'
     expect_err = "More than one active Preconditioner detected"
+    max_parallel = 1
   [../]
 
   [./nan_test]
@@ -380,12 +381,6 @@
     # Right now we don't check for the PETSc converged reason after the solve
     # we only do this in the monitor callbacks, thus we don't get a PETSc
     # error on newer versions of PETSc.
-  [../]
-
-  [./no_output_dir_test]
-    type = 'RunException'
-    input = 'no_output_dir_test.i'
-    expect_err = "Can not write to directory: \S+ for file base: \S+"
   [../]
 
   [./nodal_material_test]
@@ -540,5 +535,20 @@
     type = 'RunException'
     input = wrong_displacement_order.i
     expect_err = "Error: mesh has SECOND order elements, so all displacement variables must be SECOND order."
+  [../]
+
+  [./perf_log_control_from_multiapp_sub]
+    type = 'RunException'
+    input = 'multi_master.i'
+    expect_err = "Performance logging cannot currently be controlled from a Multiapp"
+    max_parallel = 1
+  [../]
+
+  [./function_conflict]
+    # Check to see if a warning is produced when a function name could evaluate to a ParsedFunction
+    type = 'RunApp'
+    input = 'function_conflict.i'
+    expect_out = "Function name 'x' could evaluate as a ParsedFunction"
+    allow_warnings = true
   [../]
 []

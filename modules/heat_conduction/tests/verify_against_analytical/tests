@@ -4,4 +4,10 @@
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
   [../]
+
+  [./2D_steady_state]
+    type = 'Exodiff'
+    input = '2d_steady_state_final_prob.i'
+    exodiff = '2d_steady_state_final_prob_out.e'
+  [../]
 []

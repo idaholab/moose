@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSMULTIPHASEPROBLEM_H
 #define RICHARDSMULTIPHASEPROBLEM_H
 
@@ -13,7 +12,7 @@
 
 class RichardsMultiphaseProblem;
 
-template<>
+template <>
 InputParameters validParams<RichardsMultiphaseProblem>();
 
 /**
@@ -41,11 +40,10 @@ public:
    * @param ghosted_solution is a ghosted version of vec_solution.
    * @return true if vec_solution was changed at a node in order to respect the bounds
    */
-  virtual bool updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
-
+  virtual bool updateSolution(NumericVector<Number> & vec_solution,
+                              NumericVector<Number> & ghosted_solution);
 
 protected:
-
   /// name of the bounded variable (this is the variable that gets altered to respect bounded_var > lower_var)
   NonlinearVariableName _bounded_var_name;
 
@@ -57,7 +55,6 @@ protected:
 
   /// internal moose variable number associated with _lower_var
   unsigned int _lower_var_num;
-
 };
 
 #endif /* RICHARDSMULTIPHASEPROBLEM_H */

@@ -9,17 +9,18 @@
 
 #include "ReturnMappingModel.h"
 
-
 /**
  */
 
 class PowerLawCreepModel : public ReturnMappingModel
 {
 public:
-  PowerLawCreepModel( const InputParameters & parameters);
+  PowerLawCreepModel(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
+  virtual void computeStressInitialize(unsigned qp,
+                                       Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor);
   virtual void computeStressFinalize(unsigned qp, const SymmTensor & plasticStrainIncrement);
 
   virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar);
@@ -40,10 +41,9 @@ protected:
   MaterialProperty<SymmTensor> & _creep_strain_old;
 
 private:
-
 };
 
-template<>
+template <>
 InputParameters validParams<PowerLawCreepModel>();
 
 #endif // POWERLAWCREEPMODEL_H

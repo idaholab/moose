@@ -17,7 +17,7 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumDOFs;
 
 // libMesh forward declarations
@@ -27,7 +27,7 @@ class System;
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<NumDOFs>();
 
 class NumDOFs : public GeneralPostprocessor
@@ -35,14 +35,9 @@ class NumDOFs : public GeneralPostprocessor
 public:
   NumDOFs(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
-
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
-
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual Real getValue() override;
 
 protected:
   enum SystemEnum
@@ -58,4 +53,4 @@ protected:
   const EquationSystems * _es_pointer;
 };
 
-#endif //NUMDOFS_H
+#endif // NUMDOFS_H

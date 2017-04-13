@@ -18,17 +18,16 @@ int BilinearInterpolation::_file_number = 0;
 
 BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x,
                                              const std::vector<Real> & y,
-                                             const ColumnMajorMatrix & z) :
-    _xAxis(x),
-    _yAxis(y),
-    _zSurface(z)
+                                             const ColumnMajorMatrix & z)
+  : _xAxis(x), _yAxis(y), _zSurface(z)
 {
 }
 
-void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
-                                               Real x,
-                                               int & lowerX,
-                                               int & upperX)
+void
+BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
+                                          Real x,
+                                          int & lowerX,
+                                          int & upperX)
 {
   int N = inArr.size();
   if (x <= inArr[0])
@@ -36,16 +35,16 @@ void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
     lowerX = 0;
     upperX = 0;
   }
-  else if (x >= inArr[N-1] )
+  else if (x >= inArr[N - 1])
   {
-    lowerX = N-1;
-    upperX = N-1;
+    lowerX = N - 1;
+    upperX = N - 1;
   }
   else
   {
     for (int i = 1; i < N; ++i)
     {
-      if (x < inArr[i] )
+      if (x < inArr[i])
       {
         lowerX = i - 1;
         upperX = i;
@@ -61,7 +60,8 @@ void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
   }
 }
 
-Real BilinearInterpolation::sample(Real xcoord, Real ycoord)
+Real
+BilinearInterpolation::sample(Real xcoord, Real ycoord)
 {
   // first find 4 neighboring points
   int lx = 0; // index of x coordinate of adjacent grid point to left of P

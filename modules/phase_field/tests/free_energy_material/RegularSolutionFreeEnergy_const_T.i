@@ -41,7 +41,6 @@
 [Materials]
   [./free_energy]
     type = RegularSolutionFreeEnergy
-    block = 0
     f_name = F
     c = c
     outputs = out

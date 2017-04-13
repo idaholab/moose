@@ -7,16 +7,12 @@
 #ifndef SMOOTHCIRCLEIC_H
 #define SMOOTHCIRCLEIC_H
 
-#include "Kernel.h"
 #include "SmoothCircleBaseIC.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class SmoothCircleIC;
 
-template<>
+template <>
 InputParameters validParams<SmoothCircleIC>();
 
 /**
@@ -27,23 +23,12 @@ InputParameters validParams<SmoothCircleIC>();
 class SmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   SmoothCircleIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   *
-   * This must be overriden by derived classes.
-   */
+protected:
   virtual void computeCircleRadii();
-
   virtual void computeCircleCenters();
 
-protected:
   Real _x1;
   Real _y1;
   Real _z1;
@@ -51,4 +36,4 @@ protected:
   Point _center;
 };
 
-#endif //SMOOTHCIRCLEIC_H
+#endif // SMOOTHCIRCLEIC_H

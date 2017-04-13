@@ -10,11 +10,10 @@
 #include "NSIntegratedBC.h"
 #include "NSViscStressTensorDerivs.h"
 
-
 // Forward Declarations
 class NSMomentumViscousBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumViscousBC>();
 
 /**

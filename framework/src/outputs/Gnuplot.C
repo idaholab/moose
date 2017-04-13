@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "Gnuplot.h"
 
-template<>
-InputParameters validParams<Gnuplot>()
+template <>
+InputParameters
+validParams<Gnuplot>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
@@ -28,9 +29,8 @@ InputParameters validParams<Gnuplot>()
   return params;
 }
 
-Gnuplot::Gnuplot(const InputParameters & parameters) :
-    TableOutput(parameters),
-    _extension(getParam<MooseEnum>("extension"))
+Gnuplot::Gnuplot(const InputParameters & parameters)
+  : TableOutput(parameters), _extension(getParam<MooseEnum>("extension"))
 {
 }
 

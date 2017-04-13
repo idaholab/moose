@@ -1,0 +1,7 @@
+[Tests]
+  [./DerivativeMultiPhaseMaterial]
+    type = RunApp
+    input = 'DerivativeMultiPhaseMaterial.i'
+    check_input = True
+  [../]
+[]

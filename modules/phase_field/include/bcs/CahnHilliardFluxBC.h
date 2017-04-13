@@ -11,7 +11,7 @@
 
 class CahnHilliardFluxBC;
 
-template<>
+template <>
 InputParameters validParams<CahnHilliardFluxBC>();
 
 /**
@@ -23,5 +23,4 @@ public:
   CahnHilliardFluxBC(const InputParameters & parameters);
 };
 
-
-#endif //CAHNHILLIARDFLUXBC_H
+#endif // CAHNHILLIARDFLUXBC_H

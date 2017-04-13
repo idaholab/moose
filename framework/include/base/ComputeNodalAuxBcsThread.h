@@ -16,17 +16,25 @@
 #define COMPUTENODALAUXBCSTHREAD_H
 
 // MOOSE includes
+#include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
-class ComputeNodalAuxBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+// Forward declarations
+template <typename T>
+class MooseObjectWarehouse;
+class AuxKernel;
+
+class ComputeNodalAuxBcsThread
+    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
+  ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
+                           const MooseObjectWarehouse<AuxKernel> & storage);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 
@@ -37,4 +45,4 @@ protected:
   const MooseObjectWarehouse<AuxKernel> & _storage;
 };
 
-#endif //COMPUTENODALAUXBCSTHREAD_H
+#endif // COMPUTENODALAUXBCSTHREAD_H

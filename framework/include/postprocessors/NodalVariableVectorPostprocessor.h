@@ -20,7 +20,7 @@
 // Forward Declarations
 class NodalVariableVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<NodalVariableVectorPostprocessor>();
 
 /**

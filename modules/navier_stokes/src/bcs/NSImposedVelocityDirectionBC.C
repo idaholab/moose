@@ -4,21 +4,29 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSImposedVelocityDirectionBC.h"
+#include "NS.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 
 // Full specialization of the validParams function for this object
-template<>
-InputParameters validParams<NSImposedVelocityDirectionBC>()
+template <>
+InputParameters
+validParams<NSImposedVelocityDirectionBC>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NodalBC>();
 
+  params.addClassDescription("This class imposes a velocity direction component as a Dirichlet "
+                             "condition on the appropriate momentum equation.");
   // Coupled variables
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // only required in 3D
+  params.addRequiredCoupledVar(NS::density, "density");
+  params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
+  params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in >= 2D
+  params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D
 
   // Coupled parameters
   params.addRequiredParam<Real>("desired_unit_velocity_component", "");
@@ -26,17 +34,18 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
   return params;
 }
 
-NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters) :
-    NodalBC(parameters),
-    _rho(coupledValue("rho")),
-    _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
-    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters)
+  : NodalBC(parameters),
+    _rho(coupledValue(NS::density)),
+    _u_vel(coupledValue(NS::velocity_x)),
+    _v_vel(_mesh.dimension() == 2 ? coupledValue(NS::velocity_y) : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
     _desired_unit_velocity_component(getParam<Real>("desired_unit_velocity_component"))
 {
 }
 
-Real NSImposedVelocityDirectionBC::computeQpResidual()
+Real
+NSImposedVelocityDirectionBC::computeQpResidual()
 {
   // The velocity vector
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);

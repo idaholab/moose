@@ -14,31 +14,30 @@
 
 // MOOSE includes
 #include "RestartableDataIO.h"
-#include "MooseUtils.h"
-#include "RestartableData.h"
+
+#include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "MooseUtils.h"
 #include "NonlinearSystem.h"
+#include "RestartableData.h"
 
 #include <stdio.h>
 
-RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
-    _fe_problem(fe_problem)
+RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem) : _fe_problem(fe_problem)
 {
   _in_file_handles.resize(libMesh::n_threads());
 }
 
-RestartableDataIO::~RestartableDataIO()
-{
-}
-
 void
-RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & /*_recoverable_data*/)
+RestartableDataIO::writeRestartableData(std::string base_file_name,
+                                        const RestartableDatas & restartable_datas,
+                                        std::set<std::string> & /*_recoverable_data*/)
 {
   unsigned int n_threads = libMesh::n_threads();
   processor_id_type proc_id = _fe_problem.processor_id();
 
-  for (unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid = 0; tid < n_threads; tid++)
   {
     std::ofstream out;
 
@@ -60,7 +59,8 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
 }
 
 void
-RestartableDataIO::serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::ostream & stream)
+RestartableDataIO::serializeRestartableData(
+    const std::map<std::string, RestartableDataValue *> & restartable_data, std::ostream & stream)
 {
   unsigned int n_threads = libMesh::n_threads();
   processor_id_type n_procs = _fe_problem.n_processors();
@@ -82,36 +82,32 @@ RestartableDataIO::serializeRestartableData(const std::map<std::string, Restarta
 
     // number of RestartableData
     unsigned int n_data = restartable_data.size();
-    stream.write((const char *) &n_data, sizeof(n_data));
+    stream.write((const char *)&n_data, sizeof(n_data));
 
     // data names
-    for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-         it != restartable_data.end();
-         ++it)
+    for (const auto & it : restartable_data)
     {
-      std::string name = it->first;
+      std::string name = it.first;
       stream.write(name.c_str(), name.length() + 1); // trailing 0!
     }
   }
   {
     std::ostringstream data_blk;
 
-    for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-         it != restartable_data.end();
-         ++it)
+    for (const auto & it : restartable_data)
     {
       std::ostringstream data;
-      it->second->store(data);
+      it.second->store(data);
 
       // Store the size of the data then the data
       unsigned int data_size = static_cast<unsigned int>(data.tellp());
-      data_blk.write((const char *) &data_size, sizeof(data_size));
+      data_blk.write((const char *)&data_size, sizeof(data_size));
       data_blk << data.str();
     }
 
     // Write out this proc's block size
     unsigned int data_blk_size = static_cast<unsigned int>(data_blk.tellp());
-    stream.write((const char *) &data_blk_size, sizeof(data_blk_size));
+    stream.write((const char *)&data_blk_size, sizeof(data_blk_size));
 
     // Write out the values
     stream << data_blk.str();
@@ -119,7 +115,10 @@ RestartableDataIO::serializeRestartableData(const std::map<std::string, Restarta
 }
 
 void
-RestartableDataIO::deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::istream & stream, const std::set<std::string> & recoverable_data)
+RestartableDataIO::deserializeRestartableData(
+    const std::map<std::string, RestartableDataValue *> & restartable_data,
+    std::istream & stream,
+    const std::set<std::string> & recoverable_data)
 {
   bool recovering = _fe_problem.getMooseApp().isRecovering();
 
@@ -127,16 +126,17 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
 
   // number of data
   unsigned int n_data = 0;
-  stream.read((char *) &n_data, sizeof(n_data));
+  stream.read((char *)&n_data, sizeof(n_data));
 
   // data names
   std::vector<std::string> data_names(n_data);
 
-  for (unsigned int i=0; i < n_data; i++)
+  for (unsigned int i = 0; i < n_data; i++)
   {
     std::string data_name;
     char ch = 0;
-    do {
+    do
+    {
       stream.read(&ch, 1);
       if (ch != '\0')
         data_name += ch;
@@ -146,20 +146,22 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
 
   // Grab this processor's block size
   unsigned int data_blk_size = 0;
-  stream.read((char *) &data_blk_size, sizeof(data_blk_size));
+  stream.read((char *)&data_blk_size, sizeof(data_blk_size));
 
-  for (unsigned int i=0; i < n_data; i++)
+  for (unsigned int i = 0; i < n_data; i++)
   {
     std::string current_name = data_names[i];
 
     unsigned int data_size = 0;
-    stream.read((char *) &data_size, sizeof(data_size));
+    stream.read((char *)&data_size, sizeof(data_size));
 
     // Determine if the current data is recoverable
     bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
     bool is_data_recoverable = recoverable_data.find(current_name) != recoverable_data.end();
     if (is_data_restartable // Only restore values if they're currently being used
-        && (recovering || !is_data_recoverable)) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
+        &&
+        (recovering || !is_data_recoverable)) // Only read this value if we're either recovering or
+                                              // this hasn't been specified to be recovery only data
 
     {
       // Moose::out<<"Loading "<<current_name<<std::endl;
@@ -169,9 +171,9 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
         RestartableDataValue * current_data = restartable_data.at(current_name);
         current_data->load(stream);
       }
-      catch(...)
+      catch (...)
       {
-        mooseError("restartable_data missing " << current_name << std::endl);
+        mooseError("restartable_data missing ", current_name, "\n");
       }
     }
     else
@@ -180,33 +182,35 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
       stream.seekg(data_size, std::ios_base::cur);
       if (recovering && !is_data_recoverable)
         ignored_data.push_back(current_name);
-
     }
   }
 
   // Produce a warning if restarting and restart data is being skipped
-  // Do not produce the warning with recovery b/c in cases the parent defines a something as recoverable,
-  // but only certain child classes use the value in recovery (i.e., FileOutput::_num_files is needed by Exodus but not Checkpoint)
+  // Do not produce the warning with recovery b/c in cases the parent defines a something as
+  // recoverable,
+  // but only certain child classes use the value in recovery (i.e., FileOutput::_num_files is
+  // needed by Exodus but not Checkpoint)
   if (ignored_data.size() && !recovering)
   {
     std::ostringstream names;
-    for (unsigned int i=0; i<ignored_data.size(); i++)
+    for (unsigned int i = 0; i < ignored_data.size(); i++)
       names << ignored_data[i] << "\n";
-    mooseWarning("The following RestartableData was found in restart file but is being ignored:\n" << names.str());
+    mooseWarning("The following RestartableData was found in restart file but is being ignored:\n",
+                 names.str());
   }
 }
 
 void
 RestartableDataIO::serializeSystems(std::ostream & stream)
 {
-  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystem()), NULL);
+  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase()), NULL);
   storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), NULL);
 }
 
 void
 RestartableDataIO::deserializeSystems(std::istream & stream)
 {
-  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystem()), NULL);
+  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase()), NULL);
   loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), NULL);
 }
 
@@ -217,7 +221,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
   processor_id_type n_procs = _fe_problem.n_processors();
   processor_id_type proc_id = _fe_problem.processor_id();
 
-  for (unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid = 0; tid < n_threads; tid++)
   {
     std::ostringstream file_name_stream;
     file_name_stream << base_file_name;
@@ -232,7 +236,8 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 
     const unsigned int file_version = 2;
 
-    _in_file_handles[tid] = MooseSharedPointer<std::ifstream>(new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary));
+    _in_file_handles[tid] =
+        std::make_shared<std::ifstream>(file_name.c_str(), std::ios::in | std::ios::binary);
 
     // header
     char id[2];
@@ -256,7 +261,8 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
       mooseError("Trying to restart from a newer file version - you need to update MOOSE");
 
     if (this_file_version < file_version)
-      mooseError("Trying to restart from an older file version - you need to checkout an older version of MOOSE.");
+      mooseError("Trying to restart from an older file version - you need to checkout an older "
+                 "version of MOOSE.");
 
     if (this_n_procs != n_procs)
       mooseError("Cannot restart using a different number of processors!");
@@ -267,17 +273,19 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 }
 
 void
-RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & recoverable_data)
+RestartableDataIO::readRestartableData(const RestartableDatas & restartable_datas,
+                                       const std::set<std::string> & recoverable_data)
 {
   unsigned int n_threads = libMesh::n_threads();
   std::vector<std::string> ignored_data;
 
-  for (unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid = 0; tid < n_threads; tid++)
   {
     const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
     if (!_in_file_handles[tid].get() || !_in_file_handles[tid]->is_open())
-      mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
+      mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "
+                 "readRestartableData()");
 
     deserializeRestartableData(restartable_data, *_in_file_handles[tid], recoverable_data);
 
@@ -285,10 +293,10 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
   }
 }
 
-MooseSharedPointer<Backup>
+std::shared_ptr<Backup>
 RestartableDataIO::createBackup()
 {
-  MooseSharedPointer<Backup> backup(new Backup);
+  std::shared_ptr<Backup> backup = std::make_shared<Backup>();
 
   serializeSystems(backup->_system_data);
 
@@ -298,27 +306,27 @@ RestartableDataIO::createBackup()
 
   backup->_restartable_data.resize(n_threads);
 
-  for (unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid = 0; tid < n_threads; tid++)
     serializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid]);
 
   return backup;
 }
 
 void
-RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup, bool for_restart)
+RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restart)
 {
   unsigned int n_threads = libMesh::n_threads();
 
   // Make sure we read from the beginning
   backup->_system_data.seekg(0);
-  for (unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid = 0; tid < n_threads; tid++)
     backup->_restartable_data[tid]->seekg(0);
 
   deserializeSystems(backup->_system_data);
 
   const RestartableDatas & restartable_datas = _fe_problem.getMooseApp().getRestartableData();
 
-  for (unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid = 0; tid < n_threads; tid++)
   {
     // header
     char id[2];
@@ -335,9 +343,12 @@ RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup, bool for_res
 
     std::set<std::string> & recoverable_data = _fe_problem.getMooseApp().getRecoverableData();
 
-    if (for_restart) // When doing restart - make sure we don't read data that is only for recovery...
-      deserializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid], recoverable_data);
+    if (for_restart) // When doing restart - make sure we don't read data that is only for
+                     // recovery...
+      deserializeRestartableData(
+          restartable_datas[tid], *backup->_restartable_data[tid], recoverable_data);
     else
-      deserializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
+      deserializeRestartableData(
+          restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
   }
 }

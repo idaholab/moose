@@ -14,16 +14,19 @@
 
 #include "LayeredSideFluxAverage.h"
 
-template<>
-InputParameters validParams<LayeredSideFluxAverage>()
+template <>
+InputParameters
+validParams<LayeredSideFluxAverage>()
 {
   InputParameters params = validParams<LayeredSideIntegral>();
-  params.addRequiredParam<std::string>("diffusivity", "The name of the diffusivity material property that will be used in the flux computation.");
+  params.addRequiredParam<std::string>(
+      "diffusivity",
+      "The name of the diffusivity material property that will be used in the flux computation.");
   return params;
 }
 
-LayeredSideFluxAverage::LayeredSideFluxAverage(const InputParameters & parameters) :
-    LayeredSideAverage(parameters),
+LayeredSideFluxAverage::LayeredSideFluxAverage(const InputParameters & parameters)
+  : LayeredSideAverage(parameters),
     _diffusivity(parameters.get<std::string>("diffusivity")),
     _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
 {
@@ -32,6 +35,5 @@ LayeredSideFluxAverage::LayeredSideFluxAverage(const InputParameters & parameter
 Real
 LayeredSideFluxAverage::computeQpIntegral()
 {
-  return -_diffusion_coef[_qp]*_grad_u[_qp]*_normals[_qp];
+  return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
 }
-

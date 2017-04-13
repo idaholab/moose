@@ -1,0 +1,15 @@
+[Tests]
+  [./wedge_dirichlet]
+    type = 'Exodiff'
+    input = 'wedge_dirichlet.i'
+    exodiff = 'wedge_dirichlet_out.e'
+    # This test pins the pressure to zero, so it can experience some
+    # spurious diffs around p=0 if we are use relative tolerances.
+    custom_cmp = 'wedge_dirichlet.cmp'
+  [../]
+  [./wedge_natural]
+    type = 'Exodiff'
+    input = 'wedge_natural.i'
+    exodiff = 'wedge_natural_out.e'
+  [../]
+[]

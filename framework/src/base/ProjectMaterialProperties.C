@@ -26,13 +26,16 @@
 #include "libmesh/threads.h"
 #include "libmesh/elem.h"
 
-ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
-                                                     FEProblem & fe_problem, NonlinearSystem & sys,
-                                                     std::vector<MooseSharedPointer<MaterialData> > & material_data,
-                                                     std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
-                                                     MaterialPropertyStorage & material_props,
-                                                     MaterialPropertyStorage & bnd_material_props, std::vector<Assembly *> & assembly) :
-    ThreadedElementLoop<ConstElemPointerRange>(fe_problem, sys),
+ProjectMaterialProperties::ProjectMaterialProperties(
+    bool refine,
+    FEProblemBase & fe_problem,
+    NonlinearSystemBase & sys,
+    std::vector<std::shared_ptr<MaterialData>> & material_data,
+    std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
+    MaterialPropertyStorage & material_props,
+    MaterialPropertyStorage & bnd_material_props,
+    std::vector<Assembly *> & assembly)
+  : ThreadedElementLoop<ConstElemPointerRange>(fe_problem),
     _refine(refine),
     _fe_problem(fe_problem),
     _sys(sys),
@@ -46,8 +49,9 @@ ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
 }
 
 // Splitting Constructor
-ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemPointerRange>(x, split),
+ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties & x,
+                                                     Threads::split split)
+  : ThreadedElementLoop<ConstElemPointerRange>(x, split),
     _refine(x._refine),
     _fe_problem(x._fe_problem),
     _sys(x._sys),
@@ -60,9 +64,7 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
 {
 }
 
-ProjectMaterialProperties::~ProjectMaterialProperties()
-{
-}
+ProjectMaterialProperties::~ProjectMaterialProperties() {}
 
 void
 ProjectMaterialProperties::subdomainChanged()
@@ -71,25 +73,30 @@ ProjectMaterialProperties::subdomainChanged()
 }
 
 void
-ProjectMaterialProperties::onElement(const Elem *elem)
+ProjectMaterialProperties::onElement(const Elem * elem)
 {
   _assembly[_tid]->reinit(elem);
 
   if (_refine)
   {
-    const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, -1, -1);
+    const std::vector<std::vector<QpMap>> & refinement_map =
+        _mesh.getRefinementMap(*elem, -1, -1, -1);
 
-    _material_props.prolongStatefulProps(refinement_map,
-                                         *_assembly[_tid]->qRule(),
-                                         *_assembly[_tid]->qRuleFace(),
-                                         _material_props, // Passing in the same properties to do volume to volume projection
-                                         *_material_data[_tid],
-                                         *elem,
-                                          -1,-1,-1); // Gets us volume projection
+    _material_props.prolongStatefulProps(
+        refinement_map,
+        *_assembly[_tid]->qRule(),
+        *_assembly[_tid]->qRuleFace(),
+        _material_props, // Passing in the same properties to do volume to volume projection
+        *_material_data[_tid],
+        *elem,
+        -1,
+        -1,
+        -1); // Gets us volume projection
   }
   else
   {
-    const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map = _mesh.getCoarseningMap(*elem, -1);
+    const std::vector<std::pair<unsigned int, QpMap>> & coarsening_map =
+        _mesh.getCoarseningMap(*elem, -1);
 
     _material_props.restrictStatefulProps(coarsening_map,
                                           _mesh.coarsenedElementChildren(elem),
@@ -102,7 +109,7 @@ ProjectMaterialProperties::onElement(const Elem *elem)
 }
 
 void
-ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ProjectMaterialProperties::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
   {
@@ -113,56 +120,66 @@ ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, Bound
 
     if (_refine)
     {
-      const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
+      const std::vector<std::vector<QpMap>> & refinement_map =
+          _mesh.getRefinementMap(*elem, side, -1, side);
 
-      _bnd_material_props.prolongStatefulProps(refinement_map,
-                                               *_assembly[_tid]->qRule(),
-                                               *_assembly[_tid]->qRuleFace(),
-                                               _bnd_material_props, // Passing in the same properties to do side_to_side projection
-                                               *_bnd_material_data[_tid],
-                                               *elem,
-                                               side,-1,side); // Gets us side to side projection
+      _bnd_material_props.prolongStatefulProps(
+          refinement_map,
+          *_assembly[_tid]->qRule(),
+          *_assembly[_tid]->qRuleFace(),
+          _bnd_material_props, // Passing in the same properties to do side_to_side projection
+          *_bnd_material_data[_tid],
+          *elem,
+          side,
+          -1,
+          side); // Gets us side to side projection
     }
     else
     {
-      const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map = _mesh.getCoarseningMap(*elem, side);
+      const std::vector<std::pair<unsigned int, QpMap>> & coarsening_map =
+          _mesh.getCoarseningMap(*elem, side);
 
       _bnd_material_props.restrictStatefulProps(coarsening_map,
                                                 _mesh.coarsenedElementChildren(elem),
                                                 *_assembly[_tid]->qRule(),
                                                 *_assembly[_tid]->qRuleFace(),
                                                 *_material_data[_tid],
-                                                *elem, side);
+                                                *elem,
+                                                side);
     }
 
     // Set the active boundary id to invalid
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
-
   }
 }
 
 void
-ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*/)
+ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side*/)
 {
-  if (_need_internal_side_material && _refine) // If we're refining then we need to also project "internal" child sides.
+  if (_need_internal_side_material &&
+      _refine) // If we're refining then we need to also project "internal" child sides.
   {
-    for (unsigned int child=0; child<elem->n_children(); child++)
+    for (unsigned int child = 0; child < elem->n_children(); child++)
     {
       Elem * child_elem = elem->child(child);
 
-      for (unsigned int side=0; side<child_elem->n_sides(); side++)
+      for (unsigned int side = 0; side < child_elem->n_sides(); side++)
       {
         if (!elem->is_child_on_side(child, side)) // Otherwise we already projected it
         {
-          const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, child, side);
+          const std::vector<std::vector<QpMap>> & refinement_map =
+              _mesh.getRefinementMap(*elem, -1, child, side);
 
-          _bnd_material_props.prolongStatefulProps(refinement_map,
-                                                   *_assembly[_tid]->qRule(),
-                                                   *_assembly[_tid]->qRuleFace(),
-                                                   _material_props, // Passing in the same properties to do side_to_side projection
-                                                   *_bnd_material_data[_tid],
-                                                   *elem,
-                                                   -1,child,side); // Gets us volume to side projection
+          _bnd_material_props.prolongStatefulProps(
+              refinement_map,
+              *_assembly[_tid]->qRule(),
+              *_assembly[_tid]->qRuleFace(),
+              _material_props, // Passing in the same properties to do side_to_side projection
+              *_bnd_material_data[_tid],
+              *elem,
+              -1,
+              child,
+              side); // Gets us volume to side projection
         }
       }
     }

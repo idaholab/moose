@@ -85,7 +85,6 @@
     # Define constant values kappa_c and M. Eventually M will be replaced with
     # an equation rather than a constant.
     type = GenericFunctionMaterial
-    block = 0
     prop_names = 'kappa_c M'
     prop_values = '8.125e-16*6.24150934e+18*1e+09^2*1e-27
                    2.2841e-26*1e+09^2/6.24150934e+18/1e-27'
@@ -96,7 +95,6 @@
     # Defines the function for the local free energy density as given in the
     # problem, then converts units and adds scaling factor.
     type = DerivativeParsedMaterial
-    block = 0
     f_name = f_loc
     args = c
     constant_names = 'A   B   C   D   E   F   G  eV_J  d'

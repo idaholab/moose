@@ -1,8 +1,0 @@
-[tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'PowerLawHardening.i'
-    exodiff = 'PowerLawHardening_out.e'
-    abs_zero = 1e-09
-  [../]
-[]

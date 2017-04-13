@@ -6,6 +6,11 @@
     abs_zero = 1e-09
     use_old_floor = True
   [../]
+  [./crack2d_aniso]
+    type = 'Exodiff'
+    input = 'crack2d_aniso.i'
+    exodiff = 'crack2d_aniso_out.e'
+  [../]
   [./void2d]
     type = 'Exodiff'
     input = 'void2d.i'

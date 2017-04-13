@@ -20,13 +20,17 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 
-Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
-    _c_parameters(moose_object->parameters()),
-    _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
+  : _c_parameters(moose_object->parameters()),
+    _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _nodal(nodal),
-    _c_is_implicit(_c_parameters.have_parameter<bool>("implicit") ? _c_parameters.get<bool>("implicit") : true),
+    _c_is_implicit(_c_parameters.have_parameter<bool>("implicit")
+                       ? _c_parameters.get<bool>("implicit")
+                       : true),
     _coupleable_params(_c_parameters),
-    _coupleable_neighbor(_c_parameters.have_parameter<bool>("_neighbor") ? _c_parameters.get<bool>("_neighbor") : false),
+    _coupleable_neighbor(_c_parameters.have_parameter<bool>("_neighbor")
+                             ? _c_parameters.get<bool>("_neighbor")
+                             : false),
     _coupleable_max_qps(_c_fe_problem.getMaxQps())
 {
   SubProblem & problem = *_c_parameters.get<SubProblem *>("_subproblem");
@@ -42,9 +46,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
     if (_c_parameters.getVecMooseType(name) != std::vector<std::string>())
     {
       std::vector<std::string> vars = _c_parameters.getVecMooseType(*iter);
-      for (unsigned int i = 0; i < vars.size(); i++)
+      for (const auto & coupled_var_name : vars)
       {
-        std::string coupled_var_name = vars[i];
         if (problem.hasVariable(coupled_var_name))
         {
           MooseVariable * moose_var = &problem.getVariable(tid, coupled_var_name);
@@ -58,7 +61,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
       }
     }
     else // This means it was optional coupling.  Let's assign a unique id to this variable
-      _optional_var_index[name] = std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
+      _optional_var_index[name] =
+          std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
   }
 
   _default_value_zero.resize(_coupleable_max_qps);
@@ -68,10 +72,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
 
 Coupleable::~Coupleable()
 {
-  for (std::map<std::string, VariableValue *>::iterator it = _default_value.begin(); it != _default_value.end(); ++it)
+  for (auto & it : _default_value)
   {
-    it->second->release();
-    delete it->second;
+    it.second->release();
+    delete it.second;
   }
   _default_value_zero.release();
   _default_gradient.release();
@@ -86,14 +90,18 @@ Coupleable::coupledCallback(const std::string & /*var_name*/, bool /*is_old*/)
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariable *> >::iterator it = _coupled_vars.find(var_name);
+  std::map<std::string, std::vector<MooseVariable *>>::iterator it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
   {
     // Make sure the user originally requested this value in the InputParameter syntax
     if (!_coupleable_params.hasCoupledValue(var_name))
-      mooseError("The coupled variable \"" << var_name << "\" was never added to this objects's InputParameters, please double-check your spelling");
+      mooseError("The coupled variable \"",
+                 var_name,
+                 "\" was never added to this objects's "
+                 "InputParameters, please double-check your "
+                 "spelling");
 
     return false;
   }
@@ -147,7 +155,8 @@ Coupleable::getDefaultValue(const std::string & var_name)
   std::map<std::string, VariableValue *>::iterator default_value_it = _default_value.find(var_name);
   if (default_value_it == _default_value.end())
   {
-    VariableValue * value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+    VariableValue * value =
+        new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
     default_value_it = _default_value.insert(std::make_pair(var_name, value)).first;
   }
 
@@ -255,7 +264,32 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
         mooseError("Older values not available for explicit schemes");
     }
   }
+}
 
+const VariableValue &
+Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_nodal)
+      return var->nodalSlnPreviousNL();
+    else
+      return var->slnPreviousNL();
+  }
+  else
+  {
+    if (_nodal)
+      return var->nodalSlnPreviousNLNeighbor();
+    else
+      return var->slnPreviousNLNeighbor();
+  }
 }
 
 const VariableValue &
@@ -265,7 +299,6 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
     return _default_value_zero;
 
   MooseVariable * var = getVar(var_name, comp);
-
 
   if (!_coupleable_neighbor)
   {
@@ -306,7 +339,6 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
       return var->duDotDu();
   }
 }
-
 
 const VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
@@ -369,6 +401,25 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
     mooseError("Older values not available for explicit schemes");
 }
 
+const VariableGradient &
+Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_gradient;
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return var->gradSlnPreviousNL();
+  else
+    return var->gradSlnPreviousNLNeighbor();
+}
+
 const VariableSecond &
 Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 {
@@ -428,6 +479,24 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
     mooseError("Older values not available for explicit schemes");
 }
 
+const VariableSecond &
+Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_second;
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  MooseVariable * var = getVar(var_name, comp);
+  if (!_coupleable_neighbor)
+    return var->secondSlnPreviousNL();
+  else
+    return var->secondSlnPreviousNLNeighbor();
+}
+
 const VariableValue &
 Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 {
@@ -480,6 +549,22 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
 }
 
 const VariableValue &
+Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return var->nodalValuePreviousNL();
+  else
+    return var->nodalValuePreviousNLNeighbor();
+}
+
+const VariableValue &
 Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name)) // Return default 0
@@ -498,5 +583,7 @@ void
 Coupleable::validateExecutionerType(const std::string & name) const
 {
   if (!_c_fe_problem.isTransient())
-    mooseError("You may not couple in old or older values of \"" << name << "\" when using a \"Steady\" executioner.");
+    mooseError("You may not couple in old or older values of \"",
+               name,
+               "\" when using a \"Steady\" executioner.");
 }

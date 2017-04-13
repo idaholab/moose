@@ -1,6 +1,11 @@
+[GlobalParams]
+  order = SECOND
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = cyl4_mesh.e
-  displacements = 'disp_x disp_y'
 []
 
 [Problem]
@@ -30,12 +35,8 @@
 
 [Variables]
   [./disp_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
@@ -57,68 +58,68 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./saved_x]
-    order = SECOND
   [../]
   [./saved_y]
-    order = SECOND
   [../]
   [./diag_saved_x]
-    order = SECOND
   [../]
   [./diag_saved_y]
-    order = SECOND
   [../]
   [./inc_slip_x]
-    order = SECOND
   [../]
   [./inc_slip_y]
-    order = SECOND
   [../]
   [./accum_slip_x]
-    order = SECOND
   [../]
   [./accum_slip_y]
-    order = SECOND
   [../]
   [./tang_force_x]
-    order = SECOND
   [../]
   [./tang_force_y]
-    order = SECOND
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
-    save_in_disp_r = saved_x
-    save_in_disp_z = saved_y
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
+    save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
+  [../]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./inc_slip_x]
     type = PenetrationAux
@@ -263,28 +264,38 @@
 []
 
 [Materials]
-  [./bot]
-    type = Elastic
-    block = 1
-    disp_z = disp_y
-    disp_r = disp_x
-    poissons_ratio = 0.3
+  [./bot_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./top]
-    type = Elastic
-    block = 2
-    disp_z = disp_y
-    disp_r = disp_x
-    poissons_ratio = 0.3
+  [./bot_strain]
+    type = ComputeAxisymmetricRZIncrementalStrain
+    block = '1'
+  [../]
+  [./bot_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+  [./top_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
+  [../]
+  [./top_strain]
+    type = ComputeAxisymmetricRZIncrementalStrain
+    block = '2'
+  [../]
+  [./top_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -299,9 +310,8 @@
   dt = 1.0
   end_time = 1.0
   num_steps = 10
-  dtmin = 0.1
+  dtmin = 1.0
   l_tol = 1e-3
-
 []
 
 [VectorPostprocessors]
@@ -314,7 +324,7 @@
   [./cont_press]
     type = NodalValueSampler
     variable = contact_pressure
-    boundary = '3'
+    boundary = 3
     sort_by = x
   [../]
 []
@@ -334,7 +344,7 @@
   [./chkfile]
     type = CSV
     file_base = cyl4_mu_0_2_kin_check
-    show = 'bot_react_x bot_react_y disp_x9 disp_y9 disp_x16 disp_y16 ref_resid_x ref_resid_y stress_yy stress_zz top_react_x top_react_y x_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x9 disp_y9 disp_x16 disp_y16 stress_yy stress_zz top_react_x top_react_y x_disp cont_press'
     execute_vector_postprocessors_on = timestep_end
   [../]
   [./outfile]
@@ -347,14 +357,9 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 4
-    order = SECOND
     system = constraint
     model = glued
-#    model = coulomb
-#    formulation = kinematic
     tangential_tolerance = 1e-3
     penalty = 1e+9
   [../]

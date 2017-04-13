@@ -1,7 +1,12 @@
 [Tests]
-  [./test]
+  [./1D_test]
     type = 'Exodiff'
-    input = 'dg_block_restrict.i'
-    exodiff = 'dg_block_restrict_out.e'
+    input = '1d_dg_block_restrict.i'
+    exodiff = '1d_dg_block_restrict_out.e'
+  [../]
+  [./2D_test]
+    type = 'Exodiff'
+    input = '2d_dg_diffusion_block_restrict.i'
+    exodiff = '2d_dg_diffusion_block_restrict_out.e'
   [../]
 []

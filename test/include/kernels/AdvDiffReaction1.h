@@ -17,10 +17,10 @@
 #include "Kernel.h"
 #include "UsrFunc.h"
 
-//Forward Declarations
+// Forward Declarations
 class AdvDiffReaction1;
 
-template<>
+template <>
 InputParameters validParams<AdvDiffReaction1>();
 
 class AdvDiffReaction1 : public Kernel
@@ -33,10 +33,10 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
- /**
-  *   Parameters for the manufactured solution used.
-  */
+  /**
+   *   Parameters for the manufactured solution used.
+   */
   Real _A0, _B0, _C0, _Au, _Bu, _Cu, _Av, _Bv, _Cv, _Ak, _Bk, _Ck, _omega0;
 };
 
-#endif //ADVDIFFREACTION1_H
+#endif // ADVDIFFREACTION1_H

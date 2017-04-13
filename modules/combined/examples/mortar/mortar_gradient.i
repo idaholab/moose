@@ -9,17 +9,18 @@
   dim = 2
   nx = 40
   ny = 40
+  periodic_directions = 'x y'
 
   [./MortarInterfaces]
     [./left_right]
       master = 1
       slave = 3
-      subdomain = 1
+      subdomain = 10
     [../]
     [./up_down]
       master = 0
       slave = 2
-      subdomain = 2
+      subdomain = 11
     [../]
   [../]
 []
@@ -71,28 +72,28 @@
     [../]
   [../]
 
-  # Lagrange multipliers for gradient component in the vertical directon
-  [./lm_up_down_x]
-    order = FIRST
-    family = LAGRANGE
-    block = 2
-  [../]
-  [./lm_up_down_y]
-    order = FIRST
-    family = LAGRANGE
-    block = 2
-  [../]
-
   # Lagrange multipliers for gradient component in the horizontal directon
   [./lm_left_right_x]
     order = FIRST
     family = LAGRANGE
-    block = 1
+    block = 10
   [../]
   [./lm_left_right_y]
     order = FIRST
     family = LAGRANGE
-    block = 1
+    block = 10
+  [../]
+
+  # Lagrange multipliers for gradient component in the vertical directon
+  [./lm_up_down_x]
+    order = FIRST
+    family = LAGRANGE
+    block = 11
+  [../]
+  [./lm_up_down_y]
+    order = FIRST
+    family = LAGRANGE
+    block = 11
   [../]
 []
 

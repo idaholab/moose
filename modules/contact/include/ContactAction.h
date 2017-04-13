@@ -13,7 +13,7 @@
 
 class ContactAction;
 
-template<>
+template <>
 InputParameters validParams<ContactAction>();
 
 class ContactAction : public Action
@@ -21,22 +21,14 @@ class ContactAction : public Action
 public:
   ContactAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
-private:
+protected:
   const BoundaryName _master;
   const BoundaryName _slave;
-  const NonlinearVariableName _disp_x;
-  const NonlinearVariableName _disp_y;
-  const NonlinearVariableName _disp_z;
-  const Real _penalty;
-  const Real _friction_coefficient;
-  const Real _tension_release;
   const std::string _model;
   const std::string _formulation;
-  const MooseEnum _order;
   const MooseEnum _system;
 };
-
 
 #endif // CONTACTACTION_H

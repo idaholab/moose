@@ -6,13 +6,13 @@
 import os, sys, inspect
 
 def activate_module(module):
-  base_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-  module_dir = os.path.join(base_dir, module)
+    base_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    module_dir = os.path.join(base_dir, module)
 
-  if not os.path.exists(module_dir):
-    print '"' + module_dir + '" is not a valid module'
-    sys.exit(1)
+    if not os.path.exists(module_dir):
+        print '"' + module_dir + '" is not a valid module'
+        sys.exit(1)
 
-  # Add all directories within the requested module to the system path
-  for dirpath, dirnames, filenames in os.walk(module_dir):
-    sys.path.append(dirpath)
+    # Add all directories within the requested module to the system path
+    for dirpath, dirnames, filenames in os.walk(module_dir):
+        sys.path.append(dirpath)

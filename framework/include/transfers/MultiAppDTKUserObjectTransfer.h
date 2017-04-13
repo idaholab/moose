@@ -27,6 +27,9 @@
 // libMesh includes
 #include "libmesh/dtk_adapter.h"
 
+// Ignore warnings coming from DTK/Trilinos headers
+#include "libmesh/ignore_warnings.h"
+
 // DTK includes
 #include <DTK_VolumeSourceMap.hpp>
 #include <DTK_MeshManager.hpp>
@@ -49,48 +52,52 @@
 #include <Teuchos_GlobalMPISession.hpp>
 #include <Teuchos_Ptr.hpp>
 
+// Restore the warnings.
+#include "libmesh/restore_warnings.h"
+
 // Forward declarations
 class MultiAppDTKUserObjectTransfer;
 class DTKInterpolationAdapter;
 
-template<>
+template <>
 InputParameters validParams<MultiAppDTKUserObjectTransfer>();
 
 /**
  * Transfers from spatially varying UserObjects in a MultiApp to the "master" system.
  */
-class MultiAppDTKUserObjectTransfer :
-  public MultiAppTransfer,
-  public MooseVariableInterface
+class MultiAppDTKUserObjectTransfer : public MultiAppTransfer, public MooseVariableInterface
 {
 public:
   MultiAppDTKUserObjectTransfer(const InputParameters & parameters);
-  virtual ~MultiAppDTKUserObjectTransfer() {}
 
   typedef long unsigned int GlobalOrdinal;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   std::string _user_object_name;
 
   bool _setup;
 
-  Teuchos::RCP<const Teuchos::MpiComm<int> > _comm_default;
+  Teuchos::RCP<const Teuchos::MpiComm<int>> _comm_default;
 
   Teuchos::RCP<MultiAppDTKUserObjectEvaluator> _multi_app_user_object_evaluator;
 
-  Teuchos::RCP<DataTransferKit::FieldEvaluator<GlobalOrdinal, DataTransferKit::FieldContainer<double> > > _field_evaluator;
+  Teuchos::RCP<
+      DataTransferKit::FieldEvaluator<GlobalOrdinal, DataTransferKit::FieldContainer<double>>>
+      _field_evaluator;
 
-  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal> > _multi_app_geom;
+  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box, GlobalOrdinal>>
+      _multi_app_geom;
 
   DTKInterpolationAdapter * _to_adapter;
 
-  DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> > * _src_to_tgt_map;
+  DataTransferKit::VolumeSourceMap<DataTransferKit::Box,
+                                   GlobalOrdinal,
+                                   DataTransferKit::MeshContainer<GlobalOrdinal>> * _src_to_tgt_map;
 
-  Teuchos::RCP<DataTransferKit::FieldManager<DTKAdapter::FieldContainerType> > _to_values;
+  Teuchos::RCP<DataTransferKit::FieldManager<DTKAdapter::FieldContainerType>> _to_values;
 };
-
 
 #endif // LIBMESH_TRILINOS_HAVE_DTK
 #endif // MULTIAPPDTKUSEROBJECTTRANSFER_H

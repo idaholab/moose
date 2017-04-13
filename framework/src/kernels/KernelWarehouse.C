@@ -12,20 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "KernelWarehouse.h"
-#include "TimeDerivative.h"
+
+// MOOSE includes
 #include "KernelBase.h"
+#include "MooseVariable.h"
+#include "TimeDerivative.h"
 #include "TimeKernel.h"
 
-KernelWarehouse::KernelWarehouse() :
-    MooseObjectWarehouse<KernelBase>()
-{
-}
-
+KernelWarehouse::KernelWarehouse() : MooseObjectWarehouse<KernelBase>() {}
 
 void
-KernelWarehouse::addObject(MooseSharedPointer<KernelBase> object, THREAD_ID tid)
+KernelWarehouse::addObject(std::shared_ptr<KernelBase> object, THREAD_ID tid)
 {
   // Add object to the general storage
   MooseObjectWarehouse<KernelBase>::addObject(object, tid);
@@ -34,32 +32,36 @@ KernelWarehouse::addObject(MooseSharedPointer<KernelBase> object, THREAD_ID tid)
   _variable_kernel_storage[object->variable().number()].addObject(object, tid);
 }
 
-
 bool
-KernelWarehouse::hasActiveVariableBlockObjects(unsigned int variable_id, SubdomainID block_id, THREAD_ID tid) const
+KernelWarehouse::hasActiveVariableBlockObjects(unsigned int variable_id,
+                                               SubdomainID block_id,
+                                               THREAD_ID tid) const
 {
   checkThreadID(tid);
-  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::const_iterator iter = _variable_kernel_storage.find(variable_id);
-  return (iter != _variable_kernel_storage.end() && iter->second.hasActiveBlockObjects(block_id, tid));
+  std::map<unsigned int, MooseObjectWarehouse<KernelBase>>::const_iterator iter =
+      _variable_kernel_storage.find(variable_id);
+  return (iter != _variable_kernel_storage.end() &&
+          iter->second.hasActiveBlockObjects(block_id, tid));
 }
 
-
-const std::vector<MooseSharedPointer<KernelBase> > &
-KernelWarehouse::getActiveVariableBlockObjects(unsigned int variable_id, SubdomainID block_id, THREAD_ID tid) const
+const std::vector<std::shared_ptr<KernelBase>> &
+KernelWarehouse::getActiveVariableBlockObjects(unsigned int variable_id,
+                                               SubdomainID block_id,
+                                               THREAD_ID tid) const
 {
   checkThreadID(tid);
-  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::const_iterator iter = _variable_kernel_storage.find(variable_id);
-  mooseAssert(iter != _variable_kernel_storage.end(), "Unable to located variable kernels for the given variable id: " << variable_id << ".");
+  const auto iter = _variable_kernel_storage.find(variable_id);
+  mooseAssert(iter != _variable_kernel_storage.end(),
+              "Unable to located variable kernels for the given variable id: " << variable_id
+                                                                               << ".");
   return iter->second.getActiveBlockObjects(block_id, tid);
 }
-
 
 void
 KernelWarehouse::updateActive(THREAD_ID tid)
 {
   MooseObjectWarehouse<KernelBase>::updateActive(tid);
 
-  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::iterator it;
-  for (it = _variable_kernel_storage.begin(); it != _variable_kernel_storage.end(); ++it)
-    it->second.updateActive(tid);
+  for (auto & it : _variable_kernel_storage)
+    it.second.updateActive(tid);
 }

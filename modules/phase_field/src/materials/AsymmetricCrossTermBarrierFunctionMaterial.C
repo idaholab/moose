@@ -6,25 +6,29 @@
 /****************************************************************/
 #include "AsymmetricCrossTermBarrierFunctionMaterial.h"
 
-template<>
-InputParameters validParams<AsymmetricCrossTermBarrierFunctionMaterial>()
+template <>
+InputParameters
+validParams<AsymmetricCrossTermBarrierFunctionMaterial>()
 {
   InputParameters params = validParams<CrossTermBarrierFunctionBase>();
-  params.addClassDescription("Free energy contribution asymmetric across interfaces between arbitrary pairs of phases.");
-  params.addParam<std::vector<MaterialPropertyName> >("hi_names", "Switching Function Materials that provide h(eta_i)");
+  params.addClassDescription(
+      "Free energy contribution asymmetric across interfaces between arbitrary pairs of phases.");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "hi_names", "Switching Function Materials that provide h(eta_i)");
   return params;
 }
 
-AsymmetricCrossTermBarrierFunctionMaterial::AsymmetricCrossTermBarrierFunctionMaterial(const InputParameters & parameters) :
-    CrossTermBarrierFunctionBase(parameters),
-    _h(_num_eta),
-    _dh(_num_eta),
-    _d2h(_num_eta)
+AsymmetricCrossTermBarrierFunctionMaterial::AsymmetricCrossTermBarrierFunctionMaterial(
+    const InputParameters & parameters)
+  : CrossTermBarrierFunctionBase(parameters), _h(_num_eta), _dh(_num_eta), _d2h(_num_eta)
 {
   // switching functions
-  const std::vector<MaterialPropertyName> & hi_names = getParam<std::vector<MaterialPropertyName> >("hi_names");
+  const std::vector<MaterialPropertyName> & hi_names =
+      getParam<std::vector<MaterialPropertyName>>("hi_names");
   if (hi_names.size() != _num_eta)
-    mooseError("The number of coupled etas must be equal to the number of hi_names in AsymmetricCrossTermBarrierFunctionMaterial " << name());
+    mooseError("The number of coupled etas must be equal to the number of hi_names in "
+               "AsymmetricCrossTermBarrierFunctionMaterial ",
+               name());
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
@@ -89,9 +93,12 @@ AsymmetricCrossTermBarrierFunctionMaterial::computeQpProperties()
       (*_prop_dg[i])[_qp] += (Wij * hi + Wji * hj) * dBi + (Wij * dhi) * B;
       (*_prop_dg[j])[_qp] += (Wij * hi + Wji * hj) * dBj + (Wji * dhj) * B;
       // second derivatives (diagonal)
-      (*_prop_d2g[i][i])[_qp] += (Wij * hi + Wji * hj) * d2Bii + 2 * (Wij * dhi) * dBi + (Wij * d2hi) * B;
-      (*_prop_d2g[j][j])[_qp] += (Wij * hi + Wji * hj) * d2Bjj + 2 * (Wji * dhj) * dBj + (Wji * d2hj) * B;
+      (*_prop_d2g[i][i])[_qp] +=
+          (Wij * hi + Wji * hj) * d2Bii + 2 * (Wij * dhi) * dBi + (Wij * d2hi) * B;
+      (*_prop_d2g[j][j])[_qp] +=
+          (Wij * hi + Wji * hj) * d2Bjj + 2 * (Wji * dhj) * dBj + (Wji * d2hj) * B;
       // second derivatives (off-diagonal)
-      (*_prop_d2g[i][j])[_qp] = (Wij * hi + Wji * hj) * (d2Bij) + (Wji * dhj) * dBi + (Wij * dhi) * dBj;
+      (*_prop_d2g[i][j])[_qp] =
+          (Wij * hi + Wji * hj) * (d2Bij) + (Wji * dhj) * dBi + (Wij * dhi) * dBj;
     }
 }

@@ -5,31 +5,32 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 //  Base class for Richards SUPG
 //
 #include "RichardsSUPG.h"
 
-template<>
-InputParameters validParams<RichardsSUPG>()
+template <>
+InputParameters
+validParams<RichardsSUPG>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("Richards SUPG base class.  Override tauSUPG, etc");
   return params;
 }
 
-RichardsSUPG::RichardsSUPG(const InputParameters & parameters) :
-    GeneralUserObject(parameters)
-{}
+RichardsSUPG::RichardsSUPG(const InputParameters & parameters) : GeneralUserObject(parameters) {}
 
 void
 RichardsSUPG::initialize()
-{}
+{
+}
 
 void
 RichardsSUPG::execute()
-{}
+{
+}
 
-void RichardsSUPG::finalize()
-{}
-
+void
+RichardsSUPG::finalize()
+{
+}

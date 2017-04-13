@@ -9,10 +9,10 @@
 
 #include "StressDivergenceTensors.h"
 
-//Forward Declarations
+// Forward Declarations
 class StressDivergenceRZTensors;
 
-template<>
+template <>
 InputParameters validParams<StressDivergenceRZTensors>();
 
 /**
@@ -32,11 +32,16 @@ public:
   StressDivergenceRZTensors(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual void initialSetup() override;
 
-  Real calculateJacobian (unsigned int ivar, unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  virtual void computeAverageGradientTest() override;
+  virtual void computeAverageGradientPhi() override;
+
+  Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 };
 
-#endif //STRESSDIVERGENCERZTENSORS_H
+#endif // STRESSDIVERGENCERZTENSORS_H

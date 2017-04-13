@@ -6,18 +6,22 @@
 /****************************************************************/
 #include "CoefDiffusion.h"
 
-template<>
-InputParameters validParams<CoefDiffusion>()
+template <>
+InputParameters
+validParams<CoefDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("coef", 0.0, "Diffusion coefficient");
-  params.addParam<FunctionName>("function", "If provided, the diffusion coefficient will be coef + this function.  This is useful for temporally or spatially varying diffusivities");
+  params.addParam<FunctionName>("function",
+                                "If provided, the diffusion coefficient will be coef + "
+                                "this function.  This is useful for temporally or "
+                                "spatially varying diffusivities");
   params.addClassDescription("Kernel for diffusion with diffusivity = coef + function");
   return params;
 }
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+CoefDiffusion::CoefDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _coef(getParam<Real>("coef")),
     _func(parameters.isParamValid("function") ? &getFunction("function") : NULL)
 {

@@ -19,7 +19,7 @@
 
 class TEJumpFFN;
 
-template<>
+template <>
 InputParameters validParams<TEJumpFFN>();
 
 class TEJumpFFN : public Kernel
@@ -36,4 +36,4 @@ protected:
   Real _slope;
 };
 
-#endif //TEJUMPFFN_H
+#endif // TEJUMPFFN_H

@@ -29,56 +29,98 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-template<>
-InputParameters validParams<CommonOutputAction>()
+template <>
+InputParameters
+validParams<CommonOutputAction>()
 {
-   InputParameters params = validParams<Action>();
+  InputParameters params = validParams<Action>();
 
-   // Short-cut methods for typical output objects
-   params.addParam<bool>("exodus", false, "Output the results using the default settings for Exodus output");
-   params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
-   params.addParam<bool>("console", true, "Output the results using the default settings for Console output");
-   params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
-   params.addParam<bool>("vtk", false, "Output the results using the default settings for VTKOutput output");
-   params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
-   params.addParam<bool>("xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
-   params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
-   params.addParam<bool>("gmv", false, "Output the results using the default settings for GMV output");
-   params.addParam<bool>("tecplot", false, "Output the results using the default settings for Tecplot output");
-   params.addParam<bool>("gnuplot", false, "Output the scalar and postprocessor results using the default settings for GNUPlot output");
-   params.addParam<bool>("solution_history", false, "Print a solution history file (.slh) using the default settings");
-   params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
-   params.addParam<bool>("controls", false, "Enable the screen output of Control systems.");
+  // Short-cut methods for typical output objects
+  params.addParam<bool>(
+      "exodus", false, "Output the results using the default settings for Exodus output");
+  params.addParam<bool>(
+      "nemesis", false, "Output the results using the default settings for Nemesis output");
+  params.addParam<bool>(
+      "console", true, "Output the results using the default settings for Console output");
+  params.addParam<bool>("csv",
+                        false,
+                        "Output the scalar variable and postprocessors to a *.csv "
+                        "file using the default CSV output.");
+  params.addParam<bool>(
+      "vtk", false, "Output the results using the default settings for VTKOutput output");
+  params.addParam<bool>(
+      "xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
+  params.addParam<bool>(
+      "xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
+  params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
+  params.addParam<bool>(
+      "gmv", false, "Output the results using the default settings for GMV output");
+  params.addParam<bool>(
+      "tecplot", false, "Output the results using the default settings for Tecplot output");
+  params.addParam<bool>(
+      "gnuplot",
+      false,
+      "Output the scalar and postprocessor results using the default settings for GNUPlot output");
+  params.addParam<bool>(
+      "solution_history", false, "Print a solution history file (.slh) using the default settings");
+  params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
+  params.addParam<bool>("controls", false, "Enable the screen output of Control systems.");
 
-   // Common parameters
+  // Common parameters
 
-   // Note: Be sure that objects that share these parameters utilize the same defaults
-   params.addParam<bool>("color", true, "Set to false to turn off all coloring in all outputs");
-   params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
-   params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
-   params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
-   params.addParam<std::vector<Real> >("sync_times", std::vector<Real>(), "Times at which the output and solution is forced to occur");
-   params.addParam<bool>("append_date", false, "When true the date and time are appended to the output filename.");
-   params.addParam<std::string>("append_date_format", "The format of the date/time to append (see http://www.cplusplus.com/reference/ctime/strftime).");
+  // Note: Be sure that objects that share these parameters utilize the same defaults
+  params.addParam<bool>("color", true, "Set to false to turn off all coloring in all outputs");
+  params.addParam<std::string>("file_base",
+                               "Common file base name to be utilized with all output objects");
+  params.addParam<std::vector<std::string>>("output_if_base_contains",
+                                            "If this is supplied then output will only be done in "
+                                            "the case that the output base contains one of these "
+                                            "strings.  This is helpful in outputting only a subset "
+                                            "of outputs when using MultiApps.");
+  params.addParam<unsigned int>(
+      "interval", 1, "The interval at which timesteps are output to the solution file");
+  params.addParam<std::vector<Real>>("sync_times",
+                                     std::vector<Real>(),
+                                     "Times at which the output and solution is forced to occur");
+  params.addParam<bool>(
+      "append_date", false, "When true the date and time are appended to the output filename.");
+  params.addParam<std::string>("append_date_format",
+                               "The format of the date/time to append (see "
+                               "http://www.cplusplus.com/reference/ctime/"
+                               "strftime).");
 
-   params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
-   params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
+  params.addParam<std::vector<VariableName>>(
+      "hide",
+      "A list of the variables and postprocessors that should NOT be output to the Exodus "
+      "file (may include Variables, ScalarVariables, and Postprocessor names).");
+  params.addParam<std::vector<VariableName>>(
+      "show",
+      "A list of the variables and postprocessors that should be output to the Exodus file "
+      "(may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Add the 'execute_on' input parameter
-  params.addParam<MultiMooseEnum>("execute_on", Output::getExecuteOptions("initial timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: 'initial timestep_end')");
+  params.addParam<MultiMooseEnum>(
+      "execute_on",
+      Output::getExecuteOptions("initial timestep_end"),
+      "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to "
+      "execute only at that moment (default: 'initial timestep_end')");
 
   // Add special Console flags
-  params.addParam<bool>("print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
-  params.addParam<bool>("print_mesh_changed_info", false, "When true, each time the mesh is changed the mesh information is printed");
-  params.addParam<bool>("print_linear_residuals", true, "Enable printing of linear residuals to the screen (Console)");
+  params.addParam<bool>(
+      "print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
+  params.addParam<bool>("print_mesh_changed_info",
+                        false,
+                        "When true, each time the mesh is changed the mesh information is printed");
+  params.addParam<bool>("print_linear_residuals",
+                        true,
+                        "Enable printing of linear residuals to the screen (Console)");
 
   // Return object
   return params;
 }
 
-CommonOutputAction::CommonOutputAction(InputParameters params) :
-    Action(params),
-    _action_params(_action_factory.getValidParams("AddOutputAction"))
+CommonOutputAction::CommonOutputAction(InputParameters params)
+  : Action(params), _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
 }
 
@@ -88,7 +130,7 @@ CommonOutputAction::act()
   // Store the common output parameters in the OutputWarehouse
   _app.getOutputWarehouse().setCommonParameters(&_pars);
 
-  // Create the actions for the short-cut methods
+// Create the actions for the short-cut methods
 #ifdef LIBMESH_HAVE_EXODUS_API
   if (getParam<bool>("exodus"))
     create("Exodus");
@@ -150,7 +192,7 @@ CommonOutputAction::act()
     create("ControlOutput");
 
   if (!getParam<bool>("color"))
-    Moose::_color_console = false;
+    Moose::setColorConsole(false);
 }
 
 void
@@ -163,7 +205,8 @@ CommonOutputAction::create(std::string object_type)
   std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", object_type, _action_params));
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+      _action_factory.create("AddOutputAction", object_type, _action_params));
 
   // Set flag indicating that the object to be created was created with short-cut syntax
   action->getObjectParams().set<bool>("_built_by_moose") = true;
@@ -177,7 +220,9 @@ CommonOutputAction::hasConsole()
 {
 
   // Loop through all of the actions for adding output objects
-  for (ActionIterator it = _awh.actionBlocksWithActionBegin("add_output"); it != _awh.actionBlocksWithActionEnd("add_output"); it++)
+  for (ActionIterator it = _awh.actionBlocksWithActionBegin("add_output");
+       it != _awh.actionBlocksWithActionEnd("add_output");
+       it++)
   {
     MooseObjectAction * moa = static_cast<MooseObjectAction *>(*it);
     const std::string & type = moa->getMooseObjectType();

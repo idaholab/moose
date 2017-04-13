@@ -44,4 +44,10 @@
     exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
     cli_args = Materials/free_energy/T=300
   [../]
+
+  [./RegularSolutionFreeEnergy_plog]
+    type = 'Exodiff'
+    input = 'RegularSolutionFreeEnergy_plog.i'
+    exodiff = 'RegularSolutionFreeEnergy_plog_out.e'
+  [../]
 []

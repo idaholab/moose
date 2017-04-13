@@ -15,16 +15,20 @@
 #include "MooseApp.h"
 #include "Executioner.h"
 
-template<>
-InputParameters validParams<Terminator>()
+template <>
+InputParameters
+validParams<Terminator>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<std::string>("expression", "FParser expression to process Postprocessor values into a boolean value. Termination of the simulation occurs when this returns true.");
+  params.addRequiredParam<std::string>(
+      "expression",
+      "FParser expression to process Postprocessor values into a boolean value. "
+      "Termination of the simulation occurs when this returns true.");
   return params;
 }
 
-Terminator::Terminator(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
+Terminator::Terminator(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),
@@ -32,7 +36,8 @@ Terminator::Terminator(const InputParameters & parameters) :
 {
   // build the expression object
   if (_fp.ParseAndDeduceVariables(_expression, _pp_names) >= 0)
-     mooseError(std::string("Invalid function\n" + _expression + "\nin Terminator.\n") + _fp.ErrorMsg());
+    mooseError(std::string("Invalid function\n" + _expression + "\nin Terminator.\n") +
+               _fp.ErrorMsg());
 
   _pp_num = _pp_names.size();
   _pp_values.resize(_pp_num);
@@ -44,10 +49,7 @@ Terminator::Terminator(const InputParameters & parameters) :
   _params = new Real[_pp_num];
 }
 
-Terminator::~Terminator()
-{
-  delete[] _params;
-}
+Terminator::~Terminator() { delete[] _params; }
 
 void
 Terminator::execute()
@@ -60,4 +62,3 @@ Terminator::execute()
   if (_fp.Eval(_params) != 0)
     _fe_problem.terminateSolve();
 }
-

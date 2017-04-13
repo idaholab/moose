@@ -87,11 +87,9 @@ active = 'SMP'
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 2.0'
-    block = 0
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    block = 0
     f_name = F
     c = c
   [../]

@@ -1,32 +1,22 @@
-
 [Mesh]
   file = twoBlocksContactDiceSlave2OffsetGap.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 100.0
   [../]
-
-[] # Variables
+[]
 
 [Functions]
   [./pressure]
@@ -41,8 +31,7 @@
     x = '0. 3.'
     y = '100.0 440.0'
   [../]
-
-[] # Functions
+[]
 
 [SolidMechanics]
   [./solid]
@@ -54,14 +43,11 @@
 []
 
 [Kernels]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
-
+[]
 
 [BCs]
   [./left_x]
@@ -112,22 +98,17 @@
     boundary = '2 3'
     function = tempFunc
   [../]
-
-[] # BCs
+[]
 
 [Contact]
   [./dummy_name]
     master = 2
     slave = 3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     penalty = 1e6
   [../]
 []
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -173,12 +154,9 @@
     disp_y = disp_y
     disp_z = disp_z
   [../]
-
-[] # Materials
+[]
 
 [Preconditioning]
-  active = 'FDP'
-
   [./FDP]
     type = FDP
     full = true
@@ -188,11 +166,7 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
   petsc_options_value = 'lu       1e-8                 ds'
@@ -203,9 +177,9 @@
   nl_max_its = 3
   dt = 1.0e-1
   num_steps = 10
-[] # Executioner
+[]
 
 [Outputs]
   file_base = out
   exodus = true
-[] # Outputs
+[]

@@ -74,6 +74,7 @@
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
@@ -93,6 +94,7 @@
     eigen_base = '1'
     args = c
     prefactor = prefactor
+    eigenstrain_name = eigenstrain
   [../]
 
   [./elasticenergy]

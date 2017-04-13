@@ -13,7 +13,7 @@
 // Forward Declarations
 class FunctionMaterialBase;
 
-template<>
+template <>
 InputParameters validParams<FunctionMaterialBase>();
 
 /**
@@ -26,21 +26,25 @@ public:
   FunctionMaterialBase(const InputParameters & parameters);
 
 protected:
-
   /**
-   * FunctionMaterialBase keeps an internal list of all the variables the derivatives are taken w.r.t.
-   * We provide the MOOSE variable bames in _arg_names, the libMesh variable numbers in _arg_numbers, and the
+   * FunctionMaterialBase keeps an internal list of all the variables the derivatives are taken
+   * w.r.t.
+   * We provide the MOOSE variable bames in _arg_names, the libMesh variable numbers in
+   * _arg_numbers, and the
    * input file parameter names in _arg_param_names. All are indexed by the argument index.
    * This method returns the argument index for a given the libMesh variable number.
    *
-   * This mapping is necessary for internal classes which maintain lists of derivatives indexed by argument index
-   * and need to pull from those lists from the computeDF, computeD2F, and computeD3F methods, which receive
+   * This mapping is necessary for internal classes which maintain lists of derivatives indexed by
+   * argument index
+   * and need to pull from those lists from the computeDF, computeD2F, and computeD3F methods, which
+   * receive
    * libMesh variable numbers as parameters.
    */
   unsigned int argIndex(unsigned int i_var) const
   {
     const unsigned int idx = libMeshVarNumberRemap(i_var);
-    mooseAssert(idx < _arg_index.size() && _arg_numbers[_arg_index[idx]] == i_var, "Requesting argIndex() for a derivative w.r.t. a variable not coupled to.");
+    mooseAssert(idx < _arg_index.size() && _arg_numbers[_arg_index[idx]] == i_var,
+                "Requesting argIndex() for a derivative w.r.t. a variable not coupled to.");
     return _arg_index[idx];
   }
 
@@ -82,11 +86,11 @@ private:
   unsigned int libMeshVarNumberRemap(unsigned int var) const
   {
     const int b = static_cast<int>(var);
-    return b >= 0 ? b<<1 : (-b<<1)-1;
+    return b >= 0 ? b << 1 : (-b << 1) - 1;
   }
 
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
   std::vector<unsigned int> _arg_index;
 };
 
-#endif //FUNCTIONMATERIALBASE_H
+#endif // FUNCTIONMATERIALBASE_H

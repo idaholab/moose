@@ -15,21 +15,20 @@
 #ifndef RANDOMDATA_H
 #define RANDOMDATA_H
 
-//MOOSE includes
-#include "MooseTypes.h"
+// MOOSE includes
 #include "MooseRandom.h"
+#include "MooseTypes.h"
 
-#include "libmesh/libmesh_config.h"
-#include LIBMESH_INCLUDE_UNORDERED_MAP
+#include <unordered_map>
 
-class FEProblem;
+class FEProblemBase;
 class MooseMesh;
 class RandomInterface;
 
 class RandomData
 {
 public:
-  RandomData(FEProblem & problem, const RandomInterface & random_interface);
+  RandomData(FEProblemBase & problem, const RandomInterface & random_interface);
 
   /**
    * This method is called to reset or update the seeds based on the reset_on
@@ -52,10 +51,10 @@ public:
 private:
   void updateGenerators();
 
-  template<typename T>
+  template <typename T>
   void updateGeneratorHelper(T it, T end_it);
 
-  FEProblem & _rd_problem;
+  FEProblemBase & _rd_problem;
   MooseMesh & _rd_mesh;
 
   MooseRandom _generator;
@@ -66,7 +65,7 @@ private:
   unsigned int _current_master_seed;
   unsigned int _new_seed;
 
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int> _seeds;
+  std::unordered_map<dof_id_type, unsigned int> _seeds;
 };
 
-#endif //RANDOMDATA_H
+#endif // RANDOMDATA_H

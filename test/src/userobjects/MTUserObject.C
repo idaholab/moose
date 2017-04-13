@@ -14,30 +14,27 @@
 
 #include "MTUserObject.h"
 
-template<>
-InputParameters validParams<MTUserObject>()
+template <>
+InputParameters
+validParams<MTUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addParam<Real>("scalar", 0, "A scalar value");
-  params.addParam<std::vector<Real> >("vector", std::vector<Real>(), "A vector value");
+  params.addParam<std::vector<Real>>("vector", std::vector<Real>(), "A vector value");
   return params;
 }
 
-
-MTUserObject::MTUserObject(const InputParameters & params) :
-    GeneralUserObject(params),
+MTUserObject::MTUserObject(const InputParameters & params)
+  : GeneralUserObject(params),
     _scalar(getParam<Real>("scalar")),
-    _vector(getParam<std::vector<Real> >("vector")),
+    _vector(getParam<std::vector<Real>>("vector")),
     _dyn_memory(NULL)
 {
   // allocate some memory
   _dyn_memory = new Real[NUM];
 }
 
-MTUserObject::~MTUserObject()
-{
-  delete [] _dyn_memory;
-}
+MTUserObject::~MTUserObject() { delete[] _dyn_memory; }
 
 Real
 MTUserObject::doSomething() const
@@ -46,15 +43,14 @@ MTUserObject::doSomething() const
   return -2.;
 }
 
-
 void
 MTUserObject::load(std::ifstream & stream)
 {
-  stream.read((char *) & _scalar, sizeof(_scalar));
+  stream.read((char *)&_scalar, sizeof(_scalar));
 }
 
 void
 MTUserObject::store(std::ofstream & stream)
 {
-  stream.write((const char *) & _scalar, sizeof(_scalar));
+  stream.write((const char *)&_scalar, sizeof(_scalar));
 }

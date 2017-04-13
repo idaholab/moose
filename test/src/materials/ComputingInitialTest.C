@@ -13,17 +13,17 @@
 /****************************************************************/
 #include "ComputingInitialTest.h"
 
-template<>
-InputParameters validParams<ComputingInitialTest>()
+template <>
+InputParameters
+validParams<ComputingInitialTest>()
 {
-  InputParameters params = validParams<Material>();
-  return params;
+  return validParams<Material>();
 }
 
-ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters) :
-    Material(parameters),
+ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters)
+  : Material(parameters),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-    _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
+    _thermal_conductivity_old(getMaterialPropertyOld<Real>("thermal_conductivity"))
 {
 }
 

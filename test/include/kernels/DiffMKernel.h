@@ -20,9 +20,8 @@
 // Forward Declaration
 class DiffMKernel;
 
-template<>
+template <>
 InputParameters validParams<DiffMKernel>();
-
 
 class DiffMKernel : public Kernel
 {
@@ -36,4 +35,4 @@ protected:
   const MaterialProperty<Real> & _diff;
   Real _offset;
 };
-#endif //DIFFMKERNEL_H
+#endif // DIFFMKERNEL_H

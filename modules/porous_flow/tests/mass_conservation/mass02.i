@@ -9,7 +9,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -35,12 +35,12 @@
 [Kernels]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = pp
   [../]
   [./mass1]
     type = PorousFlowMassTimeDerivative
-    component_index = 1
+    fluid_component = 1
     variable = mass_frac_comp0
   [../]
 []
@@ -55,29 +55,38 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
+    at_nodes = true
     porepressure = pp
     al = 1
     m = 0.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
     mass_fraction_vars = 'mass_frac_comp0'
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
+    at_nodes = true
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
 []
@@ -85,12 +94,10 @@
 [Postprocessors]
   [./total_mass_0]
     type = PorousFlowFluidMass
-    variable = pp
   [../]
   [./total_mass_1]
     type = PorousFlowFluidMass
-    variable = pp
-    fluid_component_index = 1
+    fluid_component = 1
   [../]
 []
 

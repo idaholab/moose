@@ -21,7 +21,7 @@
 // Forward declerations
 class TestBoundaryRestrictableAssert;
 
-template<>
+template <>
 InputParameters validParams<TestBoundaryRestrictableAssert>();
 
 /**
@@ -30,14 +30,12 @@ InputParameters validParams<TestBoundaryRestrictableAssert>();
 class TestBoundaryRestrictableAssert : public SideUserObject
 {
 public:
-
   TestBoundaryRestrictableAssert(const InputParameters & parameters);
-  virtual ~TestBoundaryRestrictableAssert(){}
+  virtual ~TestBoundaryRestrictableAssert() {}
   virtual void execute();
-  virtual void threadJoin(const UserObject & /*uo*/){}
-  virtual void initialize(){}
-  virtual void finalize(){}
-
+  virtual void threadJoin(const UserObject & /*uo*/) {}
+  virtual void initialize() {}
+  virtual void finalize() {}
 };
 
-#endif //TESTBOUNDARYRESTRICTABLEASSERT_H
+#endif // TESTBOUNDARYRESTRICTABLEASSERT_H

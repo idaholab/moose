@@ -19,7 +19,7 @@
 
 class ExplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<ExplicitEuler>();
 
 /**
@@ -38,6 +38,5 @@ public:
 
 protected:
 };
-
 
 #endif /* EXPLICITEULER_H */

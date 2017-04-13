@@ -23,17 +23,20 @@
 #include "MultiApp.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MultiAppDTKInterpolationTransfer>()
+template <>
+InputParameters
+validParams<MultiAppDTKInterpolationTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
+  params.addRequiredParam<AuxVariableName>(
+      "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }
 
-MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(
+    const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _from_var_name(getParam<VariableName>("source_variable")),
     _to_var_name(getParam<AuxVariableName>("variable"))
 {
@@ -42,49 +45,61 @@ MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(const InputPa
 void
 MultiAppDTKInterpolationTransfer::execute()
 {
-  // Every processor has to be involved with every transfer because the "master" domain is on all processors
-  // However, each processor might or might not have the particular multiapp on it.  When that happens
+  // Every processor has to be involved with every transfer because the "master" domain is on all
+  // processors
+  // However, each processor might or might not have the particular multiapp on it.  When that
+  // happens
   // we need to pass NULL in for the variable and the MPI_Comm for that piece of the transfer
-  for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
   {
     switch (_direction)
     {
       case TO_MULTIAPP:
       {
-        System * from_sys = find_sys(_multi_app->problem().es(), _from_var_name);
+        System * from_sys = find_sys(_multi_app->problemBase().es(), _from_var_name);
         System * to_sys = NULL;
 
         if (_multi_app->hasLocalApp(i))
-          to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
+          to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
-        _helper.transferWithOffset(0, i, &from_sys->variable(from_sys->variable_number(_from_var_name)),
-                                   to_sys ? &to_sys->variable(to_sys->variable_number(_to_var_name)) : NULL,
-                                   _master_position, _multi_app->position(i),
-                                   const_cast<libMesh::Parallel::communicator*>(&_communicator.get()), to_sys ? &_multi_app->comm() : NULL);
+        _helper.transferWithOffset(
+            0,
+            i,
+            &from_sys->variable(from_sys->variable_number(_from_var_name)),
+            to_sys ? &to_sys->variable(to_sys->variable_number(_to_var_name)) : NULL,
+            _master_position,
+            _multi_app->position(i),
+            const_cast<libMesh::Parallel::communicator *>(&_communicator.get()),
+            to_sys ? &_multi_app->comm() : NULL);
         break;
       }
 
       case FROM_MULTIAPP:
       {
         System * from_sys = NULL;
-        System * to_sys = find_sys(_multi_app->problem().es(), _to_var_name);
+        System * to_sys = find_sys(_multi_app->problemBase().es(), _to_var_name);
 
         if (_multi_app->hasLocalApp(i))
-          from_sys = find_sys(_multi_app->appProblem(i).es(), _from_var_name);
+          from_sys = find_sys(_multi_app->appProblemBase(i).es(), _from_var_name);
 
-        _helper.transferWithOffset(i, 0, from_sys ? &from_sys->variable(from_sys->variable_number(_from_var_name)) : NULL,
-                                   &to_sys->variable(to_sys->variable_number(_to_var_name)),
-                                   _multi_app->position(i), _master_position,
-                                   from_sys ? &_multi_app->comm() : NULL, const_cast<libMesh::Parallel::communicator*>(&_communicator.get()));
+        _helper.transferWithOffset(
+            i,
+            0,
+            from_sys ? &from_sys->variable(from_sys->variable_number(_from_var_name)) : NULL,
+            &to_sys->variable(to_sys->variable_number(_to_var_name)),
+            _multi_app->position(i),
+            _master_position,
+            from_sys ? &_multi_app->comm() : NULL,
+            const_cast<libMesh::Parallel::communicator *>(&_communicator.get()));
         break;
       }
 
-      _multi_app->problem().es().update();
+        _multi_app->problemBase().es().update();
 
-      if (_multi_app->hasLocalApp(i))
-        _multi_app->appProblem(i).es().update();
+        if (_multi_app->hasLocalApp(i))
+          _multi_app->appProblemBase(i).es().update();
     }
   }
 }
 
-#endif //LIBMESH_TRILINOS_HAVE_DTK
+#endif // LIBMESH_TRILINOS_HAVE_DTK

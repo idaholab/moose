@@ -21,6 +21,7 @@
     value = (1-x*x)*(1-y*y)
     grad_x = 2*(x*y*y-x)
     grad_y = 2*(x*x*y-y)
+  [../]
 []
 
 [Variables]

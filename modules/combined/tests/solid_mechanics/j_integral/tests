@@ -23,11 +23,13 @@
    type = 'Exodiff'
    input = 'j_integral_3d_as_2d.i'
    exodiff = 'j_integral_3d_as_2d_out.e'
+   rel_err = 5e-5
  [../]
  [./j_3d_as_2d_topo_q]
    type = 'Exodiff'
    input = 'j_integral_3d_as_2d_topo_q_func.i'
    exodiff = 'j_integral_3d_as_2d_topo_q_func_out.e'
+   rel_err = 5e-5
  [../]
  [./j_3d]
    type = 'Exodiff'

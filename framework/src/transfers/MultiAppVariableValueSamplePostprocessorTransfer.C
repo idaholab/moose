@@ -12,28 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppVariableValueSamplePostprocessorTransfer.h"
-#include "MooseTypes.h"
+
+// MOOSE includes
 #include "FEProblem.h"
-#include "MultiApp.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
+#include "MultiApp.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
+template <>
+InputParameters
+validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor in the MultiApp to transfer the value to.  This should most likely be a Reporter Postprocessor.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor",
+      "The name of the postprocessor in the MultiApp to transfer the value to.  "
+      "This should most likely be a Reporter Postprocessor.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }
 
-MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(
+    const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -48,16 +56,18 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblem & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problemBase();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
       SystemBase & from_system_base = from_var.sys();
       SubProblem & from_sub_problem = from_system_base.subproblem();
 
       MooseMesh & from_mesh = from_problem.mesh();
 
-      UniquePtr<PointLocatorBase> pl = from_mesh.getMesh().sub_point_locator();
+      std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      pl->enable_out_of_mesh_mode();
+
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
@@ -82,14 +92,15 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
         }
 
         if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblem(i).getPostprocessorValue(_postprocessor_name) = value;
+          _multi_app->appProblemBase(i).getPostprocessorValue(_postprocessor_name) = value;
       }
 
       break;
     }
     case FROM_MULTIAPP:
     {
-      mooseError("Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
+      mooseError(
+          "Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
       break;
     }
   }

@@ -13,11 +13,15 @@
 /****************************************************************/
 
 #include "ScalarL2Error.h"
+
+// MOOSE includes
 #include "Function.h"
+#include "MooseVariableScalar.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<ScalarL2Error>()
+template <>
+InputParameters
+validParams<ScalarL2Error>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The name of the scalar variable");
@@ -25,8 +29,8 @@ InputParameters validParams<ScalarL2Error>()
   return params;
 }
 
-ScalarL2Error::ScalarL2Error(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+ScalarL2Error::ScalarL2Error(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
     _func(getFunction("function"))
 {
@@ -48,6 +52,5 @@ ScalarL2Error::getValue()
   _var.reinit();
   Point p;
   Real diff = (_var.sln()[0] - _func.value(_t, p));
-  return std::sqrt(diff*diff);
+  return std::sqrt(diff * diff);
 }
-

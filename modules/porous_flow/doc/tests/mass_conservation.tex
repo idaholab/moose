@@ -47,6 +47,7 @@
 The total fluid mass of species $\species$ within a volume $V$ is
 \begin{equation}
 \int_{V} \phi\sum_{\phase}\rho_{\phase} S_{\phase}\massfrac_{\phase}^{\species} \ .
+\label{eq:mass}
 \end{equation}
 It must be checked that MOOSE calculates this correctly in order that
 mass-balances be correct, and also because this quantity is used in a
@@ -123,6 +124,26 @@ $x$ & $p$ & Density & Saturation & $\massfrac_{\phase=0}^{\species=0}$
 \end{center}
 
 MOOSE produces the expected answer.
+
+\section{Two-phase, two-components}
+
+A 1D model with two elements from $0 \leq x \leq 1$ is created, with two phases (0 and 1), and two fluid components (0 and 1). The phase densities are calculated using a constant bulk modulus fluid with bulk modulus of 1 Pa. The density at zero pressure is 1 kg m${-3}$ for phase 0, and 0.1 kg m$^{-3}$ for phase 1. The porepressure of phase 0 is held fixed at 1 Pa, and a constant capillary pressure of 0 is specified so that the pressure of phase 1 is also 1 Pa. This results in phase densities of $e = 2.71812818...$ kg m$^{-3}$ for phase 0, and $0.271812818...$ kg m$^{-3}$ for phase 1.
+
+Saturation of phase 1 varies linearly as $1 - x$, while porosity is 0.1 throughout. The mass fraction of species 0 in fluid phase 0 is specified as 0.3, while the mass fraction of species 0 in phase 1 is 0.55. It is simple to calculate the total mass of each component in each phase using Eq. (\ref{eq:mass}), the results of which are
+
+\begin{center}
+\begin{tabular}{|cccc|}
+\hline
+Species & Phase & Total mass (Eq. (\ref{eq:mass})) & Total mass (MOOSE) \\
+0 & 0 & 0.04077423 & 0.04077423 \\
+0 & 1 & 0.007475275 & 0.007475275 \\
+0 & all & 0.04824950 &  0.04824950\\
+1 & 0 & 0.09513986 & 0.09513986\\
+1 & 1 & 0.006116134 & 0.006116134\\
+1 & all & 0.10125560 & 0.1012560\\
+\hline
+\end{tabular}
+\end{center}
 
 
 \end{document}

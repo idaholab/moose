@@ -19,56 +19,55 @@
 #include "InputParameterWarehouse.h"
 #include "ConsoleUtils.h"
 
-template<>
-InputParameters validParams<ControlOutput>()
+template <>
+InputParameters
+validParams<ControlOutput>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<Output> >();
+  InputParameters params = validParams<BasicOutput<Output>>();
   params.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
-  params.addParam<bool>("clear_after_output", true, "Clear the active control display after each output.");
+  params.addParam<bool>(
+      "clear_after_output", true, "Clear the active control display after each output.");
   params.addParam<bool>("show_active_objects", true, "List active MooseObjects.");
 
   // Return the InputParameters
   return params;
 }
 
-
-ControlOutput::ControlOutput(const InputParameters & parameters) :
-    BasicOutput<Output>(parameters),
+ControlOutput::ControlOutput(const InputParameters & parameters)
+  : BasicOutput<Output>(parameters),
     _clear_after_output(getParam<bool>("clear_after_output")),
     _show_active_objects(getParam<bool>("show_active_objects"))
 {
 }
-
 
 void
 ControlOutput::output(const ExecFlagType & type)
 {
   switch (type)
   {
-  case EXEC_INITIAL:
-    outputControls();
-    break;
-  default:
-    outputChangedControls();
+    case EXEC_INITIAL:
+      outputControls();
+      break;
+    default:
+      outputChangedControls();
   }
 
   if (_show_active_objects)
     outputActiveObjects();
 }
 
-
 void
 ControlOutput::outputActiveObjects()
 {
   // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & params = wh.getInputParameters();
+  const auto & params = wh.getInputParameters();
 
   // Populate a map based on unique InputParameter objects
-  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> > objects;
-  for (std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter = params.begin(); iter != params.end(); ++iter)
-    objects[iter->second].insert(iter->first);
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectName>> objects;
+  for (const auto & iter : params)
+    objects[iter.second].insert(iter.first);
 
   // The stream to build
   std::stringstream oss;
@@ -76,17 +75,22 @@ ControlOutput::outputActiveObjects()
 
   // Loop through unique objects
   oss << "Active Objects:\n" << COLOR_DEFAULT;
-  for (std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> >::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+  for (const auto & iter : objects)
   {
-    MooseSharedPointer<InputParameters> ptr = iter->first;
+    std::shared_ptr<InputParameters> ptr = iter.first;
     if (ptr->get<bool>("enable"))
     {
-      for (std::set<MooseObjectName>::const_iterator it = iter->second.begin(); it != iter->second.end(); ++it)
+      // We print slightly differently in the first iteration of the loop.
+      bool first_iteration = true;
+      for (const auto & obj_name : iter.second)
       {
-        if (it == iter->second.begin())
-          oss << ConsoleUtils::indent(2) << COLOR_YELLOW << *it << COLOR_DEFAULT << '\n';
+        if (first_iteration)
+        {
+          oss << ConsoleUtils::indent(2) << COLOR_YELLOW << obj_name << COLOR_DEFAULT << '\n';
+          first_iteration = false;
+        }
         else
-          oss << ConsoleUtils::indent(4) << *it << '\n';
+          oss << ConsoleUtils::indent(4) << obj_name << '\n';
       }
     }
   }
@@ -100,61 +104,62 @@ ControlOutput::outputControls()
 
   // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & params = wh.getInputParameters();
+  const auto & params = wh.getInputParameters();
 
   // The stream to build
   std::stringstream oss;
   oss << std::left;
 
   // Populate a map based on unique InputParameter objects
-  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> > objects;
-  for (std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter = params.begin(); iter != params.end(); ++iter)
-    objects[iter->second].insert(iter->first);
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectName>> objects;
+  for (const auto & iter : params)
+    objects[iter.second].insert(iter.first);
 
   // Produce the control information
   oss << "Controls:\n";
-  for (std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> >::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+  for (const auto & iter : objects)
   {
-    MooseSharedPointer<InputParameters> ptr = iter->first;
+    std::shared_ptr<InputParameters> ptr = iter.first;
 
     const std::set<std::string> & names = ptr->getControllableParameters();
 
     if (!names.empty())
     {
-      oss << ConsoleUtils::indent(2) << COLOR_YELLOW << ptr->get<std::string>("_object_name") << COLOR_DEFAULT << '\n';
+      oss << ConsoleUtils::indent(2) << COLOR_YELLOW << ptr->get<std::string>("_object_name")
+          << COLOR_DEFAULT << '\n';
 
       // Full names(s)
       oss << ConsoleUtils::indent(4) << "Name(s): ";
-      for (std::set<MooseObjectName>::const_iterator it = iter->second.begin(); it != iter->second.end(); ++it)
-        oss << (*it) << " ";
+      for (const auto & obj_name : iter.second)
+        oss << obj_name << " ";
       oss << '\n';
 
       // Tag(s)
-      const std::vector<std::string> & tags = ptr->get<std::vector<std::string> >("control_tags");
+      const std::vector<std::string> & tags = ptr->get<std::vector<std::string>>("control_tags");
       if (!tags.empty())
       {
         oss << ConsoleUtils::indent(4) << "Tag(s): ";
-        for (std::vector<std::string>::const_iterator it = tags.begin(); it != tags.end(); ++it)
-          oss << *it << " ";
+        for (const auto & tag_name : tags)
+          oss << tag_name << " ";
         oss << '\n';
       }
 
-      oss <<  ConsoleUtils::indent(4) << "Parameter(s):\n";
-      for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
-        oss << ConsoleUtils::indent(6) << std::setw(ConsoleUtils::console_field_width) << *it << ptr->type(*it) << '\n';
+      oss << ConsoleUtils::indent(4) << "Parameter(s):\n";
+      for (const auto & param_name : names)
+        oss << ConsoleUtils::indent(6) << std::setw(ConsoleUtils::console_field_width) << param_name
+            << ptr->type(param_name) << '\n';
     }
   }
 
   _console << oss.str() << std::endl;
 }
 
-
 void
 ControlOutput::outputChangedControls()
 {
   // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-  const std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > & controls = wh.getControlledParameters();
+  const auto & controls = wh.getControlledParameters();
 
   // The stream to build
   std::stringstream oss;
@@ -165,24 +170,25 @@ ControlOutput::outputChangedControls()
     oss << "Active Controls:\n";
 
   // Loop over the controlled parameters
-  for (std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> >::const_iterator iter = controls.begin(); iter != controls.end(); ++iter)
+  for (const auto & iter : controls)
   {
-    const MooseSharedPointer<InputParameters> ptr = iter->first;
+    const auto ptr = iter.first;
     oss << "  " << COLOR_YELLOW << ptr->get<std::string>("_object_name") << COLOR_DEFAULT << '\n';
 
     // Tag(s)
-    const std::vector<std::string> & tags = ptr->get<std::vector<std::string> >("control_tags");
+    const std::vector<std::string> & tags = ptr->get<std::vector<std::string>>("control_tags");
     if (!tags.empty())
     {
       oss << ConsoleUtils::indent(4) << "Tag(s): ";
-      for (std::vector<std::string>::const_iterator it = tags.begin(); it != tags.end(); ++it)
-        oss << *it << " ";
+      for (const auto & tag_name : tags)
+        oss << tag_name << " ";
       oss << '\n';
     }
 
     oss << ConsoleUtils::indent(4) << "Parameter(s):\n";
-    for (std::set<MooseObjectParameterName>::const_iterator it = iter->second.begin(); it != iter->second.end(); ++it)
-      oss << ConsoleUtils::indent(6) << std::setw(ConsoleUtils::console_field_width) << it->parameter() << ptr->type(it->parameter()) << '\n';
+    for (const auto & param_name : iter.second)
+      oss << ConsoleUtils::indent(6) << std::setw(ConsoleUtils::console_field_width)
+          << param_name.parameter() << ptr->type(param_name.parameter()) << '\n';
   }
 
   _console << oss.str() << std::endl;

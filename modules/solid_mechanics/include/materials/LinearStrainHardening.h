@@ -12,12 +12,11 @@
 class LinearStrainHardening : public SolidModel
 {
 public:
-  LinearStrainHardening( const InputParameters & parameters);
+  LinearStrainHardening(const InputParameters & parameters);
   virtual ~LinearStrainHardening() {}
-
 };
 
-template<>
+template <>
 InputParameters validParams<LinearStrainHardening>();
 
-#endif //LINEARSTRAINHARDENING_H
+#endif // LINEARSTRAINHARDENING_H

@@ -18,17 +18,16 @@
 #include "Kernel.h"
 #include "Function.h"
 
-//Forward Declarations
+// Forward Declarations
 class FuncCoefDiffusion;
 
-template<>
+template <>
 InputParameters validParams<FuncCoefDiffusion>();
 
 /**
  * A kernel for testing the MooseParsedFunctionInterface
  */
-class FuncCoefDiffusion :
-  public Kernel
+class FuncCoefDiffusion : public Kernel
 {
 public:
   FuncCoefDiffusion(const InputParameters & parameters);
@@ -36,7 +35,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  Function &  _function;
+  Function & _function;
 };
 
-#endif //FUNCCOEFDIFFUSION_H
+#endif // FUNCCOEFDIFFUSION_H

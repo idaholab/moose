@@ -1,0 +1,8 @@
+[Tests]
+  [./snow]
+    type = RunApp
+    input = 'snow.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    check_input = True
+  [../]
+[]

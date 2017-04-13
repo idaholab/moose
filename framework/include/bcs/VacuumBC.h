@@ -17,11 +17,10 @@
 
 #include "IntegratedBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class VacuumBC;
 
-template<>
+template <>
 InputParameters validParams<VacuumBC>();
 
 /**
@@ -33,7 +32,6 @@ InputParameters validParams<VacuumBC>();
 class VacuumBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -41,12 +39,12 @@ public:
   VacuumBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   /// Ratio of u to du/dn
   Real _alpha;
 };
 
-#endif //VACUUMBC_H
+#endif // VACUUMBC_H

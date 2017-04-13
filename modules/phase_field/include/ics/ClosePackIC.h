@@ -13,7 +13,7 @@
 // Forward declarations
 class ClosePackIC;
 
-template<>
+template <>
 InputParameters validParams<ClosePackIC>();
 
 /**
@@ -22,34 +22,17 @@ InputParameters validParams<ClosePackIC>();
 class ClosePackIC : public SmoothCircleBaseIC
 {
 public:
-
-  /**
-   * Class constructor
-   * @param parameters Input parameters for this object
-   */
   ClosePackIC(const InputParameters & parameters);
-  /**
-   * Destructor
-   */
-  virtual ~ClosePackIC(){};
-
-  /**
-   * Does nothing, but required by the base class
-   *
-   * The radius are populated in the computeCircleCenters
-   */
-  virtual void computeCircleRadii();
-
-  /**
-   * Compute the close packed centers and radii
-   */
-  virtual void computeCircleCenters();
-
 
 protected:
+  /// The radius are populated in the computeCircleCenters
+  virtual void computeCircleRadii() {}
+
+  /// Compute the close packed centers and radii
+  virtual void computeCircleCenters();
 
   /// User-supplied circle radius
-  Real _radius;
+  const Real _radius;
 };
 
-#endif //CLOSEPACKIC_H
+#endif // CLOSEPACKIC_H

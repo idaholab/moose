@@ -17,8 +17,9 @@
 #include "NearestNodeLocator.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NearestNodeDistanceAux>()
+template <>
+InputParameters
+validParams<NearestNodeDistanceAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to find the distance to.");
@@ -26,16 +27,15 @@ InputParameters validParams<NearestNodeDistanceAux>()
   return params;
 }
 
-NearestNodeDistanceAux::NearestNodeDistanceAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _nearest_node(_nodal ? getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]) : getQuadratureNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]))
+NearestNodeDistanceAux::NearestNodeDistanceAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _nearest_node(_nodal ? getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
+                                                 boundaryNames()[0])
+                         : getQuadratureNearestNodeLocator(
+                               parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]))
 {
   if (boundaryNames().size() > 1)
     mooseError("NearestNodeDistanceAux can only be used with one boundary at a time!");
-}
-
-NearestNodeDistanceAux::~NearestNodeDistanceAux()
-{
 }
 
 Real
@@ -48,4 +48,3 @@ NearestNodeDistanceAux::computeValue()
 
   return _nearest_node.distance(qnode->id());
 }
-

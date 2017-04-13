@@ -248,14 +248,6 @@
   [./_dt]
     type = TimestepSize
   [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
 []
 
 

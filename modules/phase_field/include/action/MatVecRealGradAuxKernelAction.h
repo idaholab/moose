@@ -9,20 +9,20 @@
 
 #include "Action.h"
 
-class MatVecRealGradAuxKernelAction: public Action
+class MatVecRealGradAuxKernelAction : public Action
 {
 public:
   MatVecRealGradAuxKernelAction(const InputParameters & params);
 
   virtual void act();
 
-private:
-  unsigned int _op_num;
-  std::string _var_name_base;
-  bool _implicit;
+protected:
+  const AuxVariableName _div_var;
+  const std::vector<MaterialPropertyName> _prop;
+  const MaterialPropertyName _div_prop;
 };
 
-template<>
+template <>
 InputParameters validParams<MatVecRealGradAuxKernelAction>();
 
-#endif //MATVECREALGRADAUXKERNELACTION_H
+#endif // MATVECREALGRADAUXKERNELACTION_H

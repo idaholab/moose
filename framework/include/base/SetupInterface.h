@@ -15,14 +15,18 @@
 #ifndef SETUPINTERFACE_H
 #define SETUPINTERFACE_H
 
-#include "ExecStore.h"
-#include "MooseEnum.h"
-#include "InputParameters.h"
+#include "MooseTypes.h"
+#include "MultiMooseEnum.h"
 
 // Forward declarations
+class InputParameters;
+class MooseObject;
 class SetupInterface;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<SetupInterface>();
 
 class SetupInterface
@@ -52,7 +56,8 @@ public:
   virtual void residualSetup();
 
   /**
-   * Gets called when the subdomain changes (i.e. in a Jacobian or residual loop) and before this object is asked to do its job
+   * Gets called when the subdomain changes (i.e. in a Jacobian or residual loop) and before this
+   * object is asked to do its job
    */
   virtual void subdomainSetup();
 
@@ -76,11 +81,11 @@ protected:
   /// execution flag (when is the object executed/evaluated)
   std::vector<ExecFlagType> _exec_flags;
 
-  /// Reference to FEProblem
+  /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;
 
-  // FEProblem::addMultiApp needs to reset the execution flags
-  friend class FEProblem;
+  // FEProblemBase::addMultiApp needs to reset the execution flags
+  friend class FEProblemBase;
 };
 
 #endif /* SETUPINTERFACE_H */

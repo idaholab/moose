@@ -5,7 +5,7 @@
   ny = 10
   xmax = 0.2
   ymax = 0.2
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

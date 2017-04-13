@@ -22,7 +22,7 @@
 // Forward declerations
 class SolutionHistory;
 
-template<>
+template <>
 InputParameters validParams<SolutionHistory>();
 
 /**
@@ -33,7 +33,6 @@ InputParameters validParams<SolutionHistory>();
 class SolutionHistory : public BasicOutput<FileOutput>
 {
 public:
-
   /**
    * Class constructor
    *
@@ -47,13 +46,13 @@ public:
   /**
    * Output the data to *.slh file
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * The filename for the output file
    * @return A string of output file including the extension
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 };
 
 #endif /* SOLUTIONHISTORY_H */

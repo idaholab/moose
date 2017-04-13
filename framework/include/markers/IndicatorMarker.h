@@ -19,14 +19,13 @@
 
 class IndicatorMarker;
 
-template<>
+template <>
 InputParameters validParams<IndicatorMarker>();
 
 class IndicatorMarker : public Marker
 {
 public:
   IndicatorMarker(const InputParameters & parameters);
-  virtual ~IndicatorMarker(){};
 
 protected:
   ErrorVector & _error_vector;

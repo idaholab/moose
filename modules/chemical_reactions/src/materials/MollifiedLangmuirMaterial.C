@@ -6,26 +6,44 @@
 /****************************************************************/
 #include "MollifiedLangmuirMaterial.h"
 
-
-template<>
-InputParameters validParams<MollifiedLangmuirMaterial>()
+template <>
+InputParameters
+validParams<MollifiedLangmuirMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredCoupledVar("one_over_desorption_time_const", "Time constant for Langmuir desorption (gas moving from matrix to porespace).  Units [s]");
-  params.addRequiredCoupledVar("one_over_adsorption_time_const", "Time constant for Langmuir adsorption (gas moving from porespace to matrix).  Units [s].");
-  params.addRequiredParam<Real>("langmuir_density", "This is (Langmuir volume)*(density of gas at standard temp and pressure).  Langmuir volume is measured in (gas volume)/(matrix volume).  (Methane density(101kPa, 20degC) = 0.655kg/m^3.  Methane density(101kPa, 0degC) = 0.715kg/m^3.)  Units [kg/m^3]");
+  params.addRequiredCoupledVar(
+      "one_over_desorption_time_const",
+      "Time constant for Langmuir desorption (gas moving from matrix to porespace).  Units [s]");
+  params.addRequiredCoupledVar(
+      "one_over_adsorption_time_const",
+      "Time constant for Langmuir adsorption (gas moving from porespace to matrix).  Units [s].");
+  params.addRequiredParam<Real>("langmuir_density",
+                                "This is (Langmuir volume)*(density of gas at standard temp and "
+                                "pressure).  Langmuir volume is measured in (gas volume)/(matrix "
+                                "volume).  (Methane density(101kPa, 20degC) = 0.655kg/m^3.  "
+                                "Methane density(101kPa, 0degC) = 0.715kg/m^3.)  Units [kg/m^3]");
   params.addRequiredParam<Real>("langmuir_pressure", "Langmuir pressure.  Units Pa");
   params.addRequiredCoupledVar("conc_var", "The concentration of gas variable");
   params.addRequiredCoupledVar("pressure_var", "The gas porepressure variable");
-  params.addRangeCheckedParam<Real>("mollifier", 0.1, "mollifier > 0", "The reciprocal of time constants will be one_over_time_const*tanh( |conc_var - equilib_conc|/(mollifier*langmuir_density)).  So for mollifier very small you will get a stepchange between desorption and adsorption, but for mollifier bigger you will be a gradual change");
-  params.addClassDescription("Material type that holds info regarding MollifiedLangmuir desorption from matrix to porespace and viceversa");
+  params.addRangeCheckedParam<Real>("mollifier",
+                                    0.1,
+                                    "mollifier > 0",
+                                    "The reciprocal of time constants will be "
+                                    "one_over_time_const*tanh( |conc_var - "
+                                    "equilib_conc|/(mollifier*langmuir_density)).  So for "
+                                    "mollifier very small you will get a stepchange between "
+                                    "desorption and adsorption, but for mollifier bigger you "
+                                    "will be a gradual change");
+  params.addClassDescription("Material type that holds info regarding MollifiedLangmuir desorption "
+                             "from matrix to porespace and viceversa");
   return params;
 }
 
-MollifiedLangmuirMaterial::MollifiedLangmuirMaterial(const InputParameters & parameters) :
-    Material(parameters),
-    // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
+MollifiedLangmuirMaterial::MollifiedLangmuirMaterial(const InputParameters & parameters)
+  : Material(parameters),
+    // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a
+    // pointer
     _one_over_de_time_const(&coupledValue("one_over_desorption_time_const")),
     _one_over_ad_time_const(&coupledValue("one_over_adsorption_time_const")),
 
@@ -43,34 +61,39 @@ MollifiedLangmuirMaterial::MollifiedLangmuirMaterial(const InputParameters & par
 {
 }
 
-
 void
 MollifiedLangmuirMaterial::computeQpProperties()
 {
-  Real equilib_conc = _langmuir_dens*((*_pressure)[_qp])/(_langmuir_p + (*_pressure)[_qp]);
-  Real dequilib_conc_dp = _langmuir_dens/(_langmuir_p + (*_pressure)[_qp]) - _langmuir_dens*((*_pressure)[_qp])/std::pow(_langmuir_p + (*_pressure)[_qp], 2);
+  Real equilib_conc = _langmuir_dens * ((*_pressure)[_qp]) / (_langmuir_p + (*_pressure)[_qp]);
+  Real dequilib_conc_dp =
+      _langmuir_dens / (_langmuir_p + (*_pressure)[_qp]) -
+      _langmuir_dens * ((*_pressure)[_qp]) / std::pow(_langmuir_p + (*_pressure)[_qp], 2);
 
-  Real mol = std::tanh( std::abs((*_conc)[_qp] - equilib_conc)/(_mollifier*_langmuir_dens));
-  Real deriv_tanh = 1 - std::pow(std::tanh(((*_conc)[_qp] - equilib_conc)/(_mollifier*_langmuir_dens)), 2);
+  Real mol = std::tanh(std::abs((*_conc)[_qp] - equilib_conc) / (_mollifier * _langmuir_dens));
+  Real deriv_tanh =
+      1 - std::pow(std::tanh(((*_conc)[_qp] - equilib_conc) / (_mollifier * _langmuir_dens)), 2);
   if ((*_conc)[_qp] < equilib_conc)
     deriv_tanh *= -1;
-  Real dmol_dC = deriv_tanh/(_mollifier*_langmuir_dens);
-  Real dmol_dp = -dmol_dC*dequilib_conc_dp;
+  Real dmol_dC = deriv_tanh / (_mollifier * _langmuir_dens);
+  Real dmol_dp = -dmol_dC * dequilib_conc_dp;
 
   /*
   Real de_plus_ad = (*_one_over_de_time_const)[_qp] + (*_one_over_ad_time_const)[_qp];
   Real de_minus_ad = (*_one_over_de_time_const)[_qp] - (*_one_over_ad_time_const)[_qp];
 
-  Real one_over_tau = 0.5*de_plus_ad + 0.5*de_minus_ad*std::tanh( ((*_conc)[_qp] - equilib_conc)/(_mollifier*_langmuir_dens));
-  Real deriv_tanh = 1 - std::pow(std::tanh(((*_conc)[_qp] - equilib_conc)/(_mollifier*_langmuir_dens)), 2);
+  Real one_over_tau = 0.5*de_plus_ad + 0.5*de_minus_ad*std::tanh( ((*_conc)[_qp] -
+  equilib_conc)/(_mollifier*_langmuir_dens));
+  Real deriv_tanh = 1 - std::pow(std::tanh(((*_conc)[_qp] -
+  equilib_conc)/(_mollifier*_langmuir_dens)), 2);
   Real d_one_over_tau_dC = 0.5*de_minus_ad*deriv_tanh/(_mollifier*_langmuir_dens);
   Real d_one_over_tau_dp = -0.5*de_minus_ad*dequilib_conc_dp*deriv_tanh/(_mollifier*_langmuir_dens);
   */
 
   // form the base rate and derivs without the appropriate time const
-  _mass_rate_from_matrix[_qp] = ((*_conc)[_qp] - equilib_conc)*mol;
-  _dmass_rate_from_matrix_dC[_qp] = mol + ((*_conc)[_qp] - equilib_conc)*dmol_dC;
-  _dmass_rate_from_matrix_dp[_qp] = -dequilib_conc_dp*mol + ((*_conc)[_qp] - equilib_conc)*dmol_dp;
+  _mass_rate_from_matrix[_qp] = ((*_conc)[_qp] - equilib_conc) * mol;
+  _dmass_rate_from_matrix_dC[_qp] = mol + ((*_conc)[_qp] - equilib_conc) * dmol_dC;
+  _dmass_rate_from_matrix_dp[_qp] =
+      -dequilib_conc_dp * mol + ((*_conc)[_qp] - equilib_conc) * dmol_dp;
 
   // multiply by the appropriate time const
   if ((*_conc)[_qp] > equilib_conc)
@@ -86,4 +109,3 @@ MollifiedLangmuirMaterial::computeQpProperties()
     _dmass_rate_from_matrix_dp[_qp] *= (*_one_over_ad_time_const)[_qp];
   }
 }
-

@@ -1,0 +1,45 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'ipm.i'
+    csvdiff = 'ipm_out_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+  [./gipm_test]
+    type = 'CSVDiff'
+    input = 'gipm.i'
+    csvdiff = 'gipm_out_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+
+  [./wrong_dirichlet_value_eigen]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'BCs/homogeneous/value=1'
+    expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
+    slepc = true
+  [../]
+
+  [./wrong_boundary_type_eigen]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'BCs/homogeneous/type=NeumannBC'
+    expect_err = "Can.t set an inhomogeneous integrated boundary condition for eigenvalue problems."
+    slepc = true
+  [../]
+
+  [./wrong_NodalBC_type_eigen]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
+    expect_err = "Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet."
+    slepc = true
+  [../]
+
+  [./no_slepc]
+    type = 'RunException'
+    input = 'gipm.i'
+    expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
+    slepc = false
+  [../]
+[]

@@ -1,0 +1,19 @@
+[Tests]
+  [./break_all]
+    type = 'Exodiff'
+    input = 'break_boundary_on_subdomain.i'
+    exodiff = 'break_boundary_on_subdomain_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
+
+  [./break_bottom]
+    type = 'Exodiff'
+    input = 'break_bottom_interface_on_subdomain.i'
+    exodiff = 'break_bottom_interface_on_subdomain_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
+[]

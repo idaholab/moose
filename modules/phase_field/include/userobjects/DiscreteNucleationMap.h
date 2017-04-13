@@ -12,7 +12,7 @@
 
 class DiscreteNucleationMap;
 
-template<>
+template <>
 InputParameters validParams<DiscreteNucleationMap>();
 
 /**
@@ -64,9 +64,9 @@ protected:
 
   ///@{
   /// Per element list with 0/1 flags indicating the presence of a nucleus
-  typedef LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<Real> > NucleusMap;
+  using NucleusMap = std::unordered_map<dof_id_type, std::vector<Real>>;
   NucleusMap _nucleus_map;
   ///@}
 };
 
-#endif //DISCRETENUCLEATIONMAP_H
+#endif // DISCRETENUCLEATIONMAP_H

@@ -17,8 +17,9 @@
 #include <algorithm>
 #include <limits>
 
-template<>
-InputParameters validParams<ElementExtremeValue>()
+template <>
+InputParameters
+validParams<ElementExtremeValue>()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1", "max");
@@ -26,16 +27,21 @@ InputParameters validParams<ElementExtremeValue>()
   // Define the parameters
   InputParameters params = validParams<ElementVariablePostprocessor>();
 
-  params.addParam<MooseEnum>("value_type", type_options, "Type of extreme value to return. 'max' returns the maximum value. 'min' returns the minimum value.");
+  params.addParam<MooseEnum>("value_type",
+                             type_options,
+                             "Type of extreme value to return. 'max' "
+                             "returns the maximum value. 'min' returns "
+                             "the minimum value.");
 
   return params;
 }
 
-ElementExtremeValue::ElementExtremeValue(const InputParameters & parameters) :
-  ElementVariablePostprocessor(parameters),
-  _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
-  _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
-{}
+ElementExtremeValue::ElementExtremeValue(const InputParameters & parameters)
+  : ElementVariablePostprocessor(parameters),
+    _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
+    _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
+{
+}
 
 void
 ElementExtremeValue::initialize()
@@ -98,4 +104,3 @@ ElementExtremeValue::threadJoin(const UserObject & y)
       break;
   }
 }
-

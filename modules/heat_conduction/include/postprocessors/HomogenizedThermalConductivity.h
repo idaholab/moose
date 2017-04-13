@@ -38,7 +38,7 @@ private:
   const Real _scale;
 };
 
-template<>
+template <>
 InputParameters validParams<HomogenizedThermalConductivity>();
 
-#endif //HOMOGENIZEDTHERMALCONDUCTIVITY_H
+#endif // HOMOGENIZEDTHERMALCONDUCTIVITY_H

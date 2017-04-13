@@ -4,4 +4,11 @@
     input = 'pressure_test.i'
     exodiff = 'pressure_test_out.e'
   [../]
+  [./3D_Bbar]
+    type = Exodiff
+    input = 'pressure_test.i'
+    exodiff = 'pressure_test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction = true'
+    prereq = '3D'
+  [../]
 []

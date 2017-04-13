@@ -21,15 +21,13 @@
 // Forward Declarations
 class PointValueSampler;
 
-template<>
+template <>
 InputParameters validParams<PointValueSampler>();
 
 class PointValueSampler : public PointSamplerBase
 {
 public:
   PointValueSampler(const InputParameters & parameters);
-
-  virtual ~PointValueSampler() {}
 };
 
 #endif

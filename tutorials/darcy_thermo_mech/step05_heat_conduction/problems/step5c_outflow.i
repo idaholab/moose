@@ -8,7 +8,7 @@
 []
 
 [Variables]
-  [./temp]
+  [./temperature]
     initial_condition = 300 # Start at room temperature
   [../]
 []
@@ -16,24 +16,24 @@
 [Kernels]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
   [./heat_conduction_time_derivative]
     type = HeatConductionTimeDerivative
-    variable = temp
+    variable = temperature
   [../]
 []
 
 [BCs]
   [./inlet_temperature]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
     value = 350 # (K)
   [../]
   [./outlet_temperature]
     type = HeatConductionOutflow
-    variable = temp
+    variable = temperature
     boundary = right
   [../]
 []
@@ -41,7 +41,6 @@
 [Materials]
   [./steel]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '18 466 8000' # W/m*K, J/kg-K, kg/m^3 @ 296K
   [../]

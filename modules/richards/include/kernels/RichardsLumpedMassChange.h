@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSLUMPEDMASSCHANGE
 #define RICHARDSLUMPEDMASSCHANGE
 
@@ -19,7 +18,7 @@
 // Forward Declarations
 class RichardsLumpedMassChange;
 
-template<>
+template <>
 InputParameters validParams<RichardsLumpedMassChange>();
 
 /**
@@ -31,11 +30,9 @@ InputParameters validParams<RichardsLumpedMassChange>();
 class RichardsLumpedMassChange : public TimeKernel
 {
 public:
-
   RichardsLumpedMassChange(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
@@ -61,10 +58,10 @@ protected:
   unsigned int _pvar;
 
   /// current value of the porosity
-  const MaterialProperty<Real> &_porosity;
+  const MaterialProperty<Real> & _porosity;
 
   /// value of the porosity at the start of the timestep
-  const MaterialProperty<Real> &_porosity_old;
+  const MaterialProperty<Real> & _porosity_old;
 
   /// The userobject that computes effective saturation (as a function of porepressure(s)) for this variable
   const RichardsSeff * _seff_UO;
@@ -90,4 +87,4 @@ protected:
   std::vector<Real> _dseff;
 };
 
-#endif //RICHARDSLUMPEDMASSCHANGE
+#endif // RICHARDSLUMPEDMASSCHANGE

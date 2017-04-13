@@ -16,18 +16,18 @@
 
 #include "RandomHitUserObject.h"
 
-template<>
-InputParameters validParams<RandomHitMarker>()
+template <>
+InputParameters
+validParams<RandomHitMarker>()
 {
   InputParameters params = validParams<Marker>();
-  params.addRequiredParam<UserObjectName>("random_hits", "The name of the UserObject to use for the positions of the random hits");
+  params.addRequiredParam<UserObjectName>(
+      "random_hits", "The name of the UserObject to use for the positions of the random hits");
   return params;
 }
 
-
-RandomHitMarker::RandomHitMarker(const InputParameters & parameters) :
-    Marker(parameters),
-    _random_hits(getUserObject<RandomHitUserObject>("random_hits"))
+RandomHitMarker::RandomHitMarker(const InputParameters & parameters)
+  : Marker(parameters), _random_hits(getUserObject<RandomHitUserObject>("random_hits"))
 {
 }
 
@@ -39,4 +39,3 @@ RandomHitMarker::computeElementMarker()
 
   return DONT_MARK;
 }
-

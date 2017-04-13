@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "CoefDiffusion.h"
 
-template<>
-InputParameters validParams<CoefDiffusion>()
+template <>
+InputParameters
+validParams<CoefDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
@@ -26,20 +27,19 @@ InputParameters validParams<CoefDiffusion>()
   return params;
 }
 
-CoefDiffusion::CoefDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _coef(getParam<Real>("coef"))
+CoefDiffusion::CoefDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getParam<Real>("coef"))
 {
 }
 
 Real
 CoefDiffusion::computeQpResidual()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_u[_qp];
+  return _coef * _grad_test[_i][_qp] * _grad_u[_qp];
 }
 
 Real
 CoefDiffusion::computeQpJacobian()
 {
-  return _coef*_grad_test[_i][_qp]*_grad_phi[_j][_qp];
+  return _coef * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }

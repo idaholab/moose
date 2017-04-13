@@ -68,7 +68,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
   block = 0
 []
 
@@ -163,23 +163,30 @@
   [./poro_vol_exp]
     type = PorousFlowMassVolumetricExpansion
     variable = porepressure
-    component_index = 0
+    fluid_component = 0
   [../]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = porepressure
   [../]
   [./flux]
     type = PorousFlowAdvectiveFlux
     variable = porepressure
     gravity = '0 0 0'
-    component_index = 0
+    fluid_component = 0
   [../]
 []
 
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '2 3'
@@ -194,6 +201,10 @@
   [../]
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
+    at_nodes = true
+  [../]
+  [./eff_fluid_pressure_qp]
+    type = PorousFlowEffectiveFluidPressure
   [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
@@ -204,11 +215,20 @@
     al = 1 # unimportant in this fully-saturated test
     m = 0.8   # unimportant in this fully-saturated test
   [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP_VG
+    at_nodes = true
+    porepressure = porepressure
+    al = 1 # unimportant in this fully-saturated test
+    m = 0.8   # unimportant in this fully-saturated test
+  [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 8
     phase = 0
@@ -216,15 +236,24 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./dens0_qp]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1
+    bulk_modulus = 8
+    phase = 0
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = false
   [../]
   [./porosity]
     type = PorousFlowPorosityHM
+    ensure_positive = false
+    at_nodes = true
     porosity_zero = 0.1
     biot_coefficient = 0.6
     solid_bulk = 4
@@ -235,21 +264,25 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 0 # unimportant in this fully-saturated situation
+    at_nodes = true
+    n = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 0.96
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 

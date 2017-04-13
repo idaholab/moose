@@ -17,11 +17,15 @@
 
 #include "MooseMesh.h"
 
-#include "libmesh/serial_mesh.h"
-
+// Forward declarations
 class PatternedMesh;
 
-template<>
+namespace libMesh
+{
+class ReplicatedMesh;
+}
+
+template <>
 InputParameters validParams<PatternedMesh>();
 
 /**
@@ -39,24 +43,27 @@ class PatternedMesh : public MooseMesh
 public:
   PatternedMesh(const InputParameters & parameters);
   PatternedMesh(const PatternedMesh & other_mesh);
-  ~PatternedMesh();
+  virtual ~PatternedMesh();
 
-  virtual MooseMesh & clone() const;
+  virtual MooseMesh & clone() const override;
 
-  virtual void buildMesh();
+  virtual void buildMesh() override;
 
 protected:
   // The mesh files to read
   const std::vector<MeshFileName> & _files;
 
   // The pattern, starting with the upper left corner
-  const std::vector<std::vector<unsigned int> > & _pattern;
+  const std::vector<std::vector<unsigned int>> & _pattern;
+
+  // Pointer to the original "row" mesh to be repeated and stitched
+  ReplicatedMesh * _original_mesh;
 
   // Holds the pointers to the meshes
-  std::vector<SerialMesh *> _meshes;
+  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 
   // Holds a mesh for each row, these will be stitched together in the end
-  std::vector<SerialMesh *> _row_meshes;
+  std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
 
   const Real _x_width;
   const Real _y_width;

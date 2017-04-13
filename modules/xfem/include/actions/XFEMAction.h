@@ -12,11 +12,10 @@
 
 class XFEMAction;
 
-template<>
+template <>
 InputParameters validParams<XFEMAction>();
 
-
-class XFEMAction: public Action
+class XFEMAction : public Action
 {
 public:
   XFEMAction(InputParameters params);
@@ -36,4 +35,4 @@ protected:
   Real _xfem_crack_growth_increment;
 };
 
-#endif //XFEMACTION_H
+#endif // XFEMACTION_H

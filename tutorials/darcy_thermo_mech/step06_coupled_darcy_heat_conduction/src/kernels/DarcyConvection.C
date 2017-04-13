@@ -14,8 +14,9 @@
 
 #include "DarcyConvection.h"
 
-template<>
-InputParameters validParams<DarcyConvection>()
+template <>
+InputParameters
+validParams<DarcyConvection>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -24,8 +25,8 @@ InputParameters validParams<DarcyConvection>()
   return params;
 }
 
-DarcyConvection::DarcyConvection(const InputParameters & parameters) :
-    Kernel(parameters),
+DarcyConvection::DarcyConvection(const InputParameters & parameters)
+  : Kernel(parameters),
 
     // Couple to the gradient of the pressure
     _pressure_gradient(coupledGradient("darcy_pressure")),
@@ -54,7 +55,7 @@ DarcyConvection::computeQpResidual()
 
   // http://en.wikipedia.org/wiki/Superficial_velocity
   RealVectorValue superficial_velocity =
-    _porosity[_qp] * -(_permeability[_qp]/_viscosity[_qp]) * _pressure_gradient[_qp];
+      _porosity[_qp] * -(_permeability[_qp] / _viscosity[_qp]) * _pressure_gradient[_qp];
 
   return _heat_capacity[_qp] * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
 }
@@ -63,7 +64,7 @@ Real
 DarcyConvection::computeQpJacobian()
 {
   RealVectorValue superficial_velocity =
-    _porosity[_qp] * -(_permeability[_qp]/_viscosity[_qp]) * _pressure_gradient[_qp];
+      _porosity[_qp] * -(_permeability[_qp] / _viscosity[_qp]) * _pressure_gradient[_qp];
 
   return _heat_capacity[_qp] * superficial_velocity * _grad_phi[_j][_qp] * _test[_i][_qp];
 }
@@ -74,7 +75,7 @@ DarcyConvection::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _pressure_var)
   {
     RealVectorValue superficial_velocity =
-      _porosity[_qp] * -(_permeability[_qp]/_viscosity[_qp]) * _grad_phi[_j][_qp];
+        _porosity[_qp] * -(_permeability[_qp] / _viscosity[_qp]) * _grad_phi[_j][_qp];
     return _heat_capacity[_qp] * superficial_velocity * _grad_u[_qp] * _test[_i][_qp];
   }
 

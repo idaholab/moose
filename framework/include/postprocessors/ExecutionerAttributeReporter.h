@@ -21,7 +21,7 @@
 // Forward declarations
 class ExecutionerAttributeReporter;
 
-template<>
+template <>
 InputParameters validParams<ExecutionerAttributeReporter>();
 
 /**
@@ -34,38 +34,29 @@ InputParameters validParams<ExecutionerAttributeReporter>();
 class ExecutionerAttributeReporter : public GeneralPostprocessor
 {
 public:
-
   /**
    * Class constructor
-   * @param
    * @param parameters
    */
   ExecutionerAttributeReporter(const InputParameters & parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~ExecutionerAttributeReporter(){}
 
   ///@{
   /**
    * These methods are intentionally empty
    */
-  virtual void execute(){};
-  virtual void finalize(){};
-  virtual void initialize(){}
+  virtual void execute() override {}
+  virtual void initialize() override {}
   ///@}
 
   /**
    * Returns the value of the eigen value as computed
    * by an EigenExecutionerBase object.
    */
-  virtual PostprocessorValue getValue();
+  virtual PostprocessorValue getValue() override;
 
 private:
-
   /// Pointer to the attribute to report, this is assigned via the "value" parameter
   Real * _value;
 };
 
-#endif //EIGENVALUEREPORTER_H
+#endif // EIGENVALUEREPORTER_H

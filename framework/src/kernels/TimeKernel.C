@@ -13,26 +13,24 @@
 /****************************************************************/
 
 #include "TimeKernel.h"
-#include "Assembly.h"
 
-// libmesh includes
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
+
+// libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<TimeKernel>()
+template <>
+InputParameters
+validParams<TimeKernel>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-TimeKernel::TimeKernel(const InputParameters & parameters) :
-    Kernel(parameters)
-{
-}
-
-TimeKernel::~TimeKernel()
-{
-}
+TimeKernel::TimeKernel(const InputParameters & parameters) : Kernel(parameters) {}
 
 void
 TimeKernel::computeResidual()
@@ -51,8 +49,7 @@ TimeKernel::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
-

@@ -1,0 +1,12 @@
+[Tests]
+  [./RZ_cone_no_parts]
+    type = 'Exodiff'
+    input = 'RZ_cone_no_parts.i'
+    exodiff = 'RZ_cone_no_parts_out.e'
+  [../]
+  [./RZ_cone_by_parts]
+    type = 'Exodiff'
+    input = 'RZ_cone_by_parts.i'
+    exodiff = 'RZ_cone_by_parts_out.e'
+  [../]
+[]

@@ -12,7 +12,7 @@
 
 class HEVPStrengthUOBase;
 
-template<>
+template <>
 InputParameters validParams<HEVPStrengthUOBase>();
 
 /**

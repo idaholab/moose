@@ -17,10 +17,10 @@
 
 #include "AuxKernel.h"
 
-//forward declarations
+// forward declarations
 class VariableTimeIntegrationAux;
 
-template<>
+template <>
 InputParameters validParams<VariableTimeIntegrationAux>();
 
 /**
@@ -28,20 +28,19 @@ InputParameters validParams<VariableTimeIntegrationAux>();
  * using a variety of different integration methods.  The result is
  * stored in another field variable.
  */
-class VariableTimeIntegrationAux :  public AuxKernel
+class VariableTimeIntegrationAux : public AuxKernel
 {
 public:
   VariableTimeIntegrationAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
   Real getIntegralValue();
 
-  std::vector<const VariableValue *>  _coupled_vars;
+  std::vector<const VariableValue *> _coupled_vars;
   Real _coef;
   unsigned int _order;
   std::vector<Real> _integration_coef;
 };
 
 #endif // VARIABLETIMEINTEGRATIONAUX_H
-

@@ -17,11 +17,11 @@
 
 #include "NodalKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class UserForcingFunctionNodalKernel;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<UserForcingFunctionNodalKernel>();
 
 /**
@@ -36,10 +36,7 @@ public:
   UserForcingFunctionNodalKernel(const InputParameters & parameters);
 
 protected:
-  /**
-   * Implement -f
-   */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   Function & _func;
 };

@@ -18,49 +18,9 @@
   file = 1x1x1cube.e
 []
 
-
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
-
-
-[Variables]
-  [./disp_x]
-  [../]
-
-  [./disp_y]
-  [../]
-
-  [./disp_z]
-  [../]
-[]
-
-
-[AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-[]
-
 
 [Functions]
   [./top_pull]
@@ -74,47 +34,13 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
   [../]
 []
-
-
-[AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_yy
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-
-  [./plastic_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_zz
-    index_i = 2
-    index_j = 2
-  [../]
-[]
-
 
 [BCs]
   [./y_pull_function]
@@ -146,38 +72,25 @@
   [../]
 []
 
-
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 1
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_strain]
-    type = ComputeFiniteStrain
-    block = 1
-  [../]
-
-  [./isotropic_plasticity_recompute]
-    type = RecomputeRadialReturnIsotropicPlasticity
-    block = 1
+  [./isotropic_plasticity]
+    type = IsotropicPlasticityStressUpdate
     yield_stress = 50.0
     hardening_function = hf
     relative_tolerance = 1e-10
     absolute_tolerance = 1e-12
     max_iterations = 50
-    # output_iteration_info_on_error = true
-    compute = false # make this material "discrete"
   [../]
-
   [./radial_return_stress]
     type = ComputeReturnMappingStress
-    block = 1
-    return_mapping_stress_model = 'isotropic_plasticity_recompute'
+    return_mapping_models = 'isotropic_plasticity'
   [../]
 []
-
 
 [Executioner]
   type = Transient
@@ -202,7 +115,6 @@
   dt = 0.00125
   dtmin = 0.0001
 []
-
 
 [Outputs]
   [./out]

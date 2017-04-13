@@ -24,7 +24,8 @@
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -33,33 +34,34 @@ template <typename T> class NumericVector;
 class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeUserObjectsThread(FEProblem & problem,
-                           SystemBase & sys,
-                           const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
-                           const MooseObjectWarehouse<SideUserObject> & side_user_objects,
-                           const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
+  ComputeUserObjectsThread(
+      FEProblemBase & problem,
+      SystemBase & sys,
+      const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
+      const MooseObjectWarehouse<SideUserObject> & side_user_objects,
+      const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
   virtual ~ComputeUserObjectsThread();
 
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void post();
-  virtual void subdomainChanged();
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void post() override;
+  virtual void subdomainChanged() override;
 
   void join(const ComputeUserObjectsThread & /*y*/);
 
 protected:
-  const NumericVector<Number>& _soln;
+  const NumericVector<Number> & _soln;
 
   ///@{
-  /// Storage for UserObjects (see FEProblem::computeUserObjects)
+  /// Storage for UserObjects (see FEProblemBase::computeUserObjects)
   const MooseObjectWarehouse<ElementUserObject> & _elemental_user_objects;
   const MooseObjectWarehouse<SideUserObject> & _side_user_objects;
   const MooseObjectWarehouse<InternalSideUserObject> & _internal_side_user_objects;
   ///@}
 };
 
-#endif //COMPUTEUSEROBJECTSTHREAD_H
+#endif // COMPUTEUSEROBJECTSTHREAD_H

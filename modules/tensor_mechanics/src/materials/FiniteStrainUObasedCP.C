@@ -12,39 +12,60 @@
 #include "CrystalPlasticityStateVariable.h"
 #include "CrystalPlasticityStateVarRateComponent.h"
 
-template<>
-InputParameters validParams<FiniteStrainUObasedCP>()
+template <>
+InputParameters
+validParams<FiniteStrainUObasedCP>()
 {
   InputParameters params = validParams<ComputeStressBase>();
-  params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
+  params.addClassDescription(
+      "Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addParam<Real>("rtol", 1e-6, "Constitutive stress residue relative tolerance");
   params.addParam<Real>("abs_tol", 1e-6, "Constitutive stress residue absolute tolerance");
-  params.addParam<Real>("stol", 1e-2, "Constitutive slip system resistance relative residual tolerance");
-  params.addParam<Real>("zero_tol", 1e-12, "Tolerance for residual check when variable value is zero");
-  params.addParam<unsigned int>("maxiter", 100 , "Maximum number of iterations for stress update");
-  params.addParam<unsigned int>("maxiter_state_variable", 100 , "Maximum number of iterations for state variable update");
-  MooseEnum tan_mod_options("exact none","none");// Type of read
-  params.addParam<MooseEnum>("tan_mod_type", tan_mod_options, "Type of tangent moduli for preconditioner: default elastic");
-  params.addParam<unsigned int>("maximum_substep_iteration", 1, "Maximum number of substep iteration");
+  params.addParam<Real>(
+      "stol", 1e-2, "Constitutive slip system resistance relative residual tolerance");
+  params.addParam<Real>(
+      "zero_tol", 1e-12, "Tolerance for residual check when variable value is zero");
+  params.addParam<unsigned int>("maxiter", 100, "Maximum number of iterations for stress update");
+  params.addParam<unsigned int>(
+      "maxiter_state_variable", 100, "Maximum number of iterations for state variable update");
+  MooseEnum tan_mod_options("exact none", "none"); // Type of read
+  params.addParam<MooseEnum>("tan_mod_type",
+                             tan_mod_options,
+                             "Type of tangent moduli for preconditioner: default elastic");
+  params.addParam<unsigned int>(
+      "maximum_substep_iteration", 1, "Maximum number of substep iteration");
   params.addParam<bool>("use_line_search", false, "Use line search in constitutive update");
   params.addParam<Real>("min_line_search_step_size", 0.01, "Minimum line search step size");
-  params.addParam<Real>("line_search_tol",0.5,"Line search bisection method tolerance");
-  params.addParam<unsigned int>("line_search_maxiter",20,"Line search bisection method maximum number of iteration");
-  MooseEnum line_search_method("CUT_HALF BISECTION","CUT_HALF");
-  params.addParam<MooseEnum>("line_search_method",line_search_method,"The method used in line search");
-  params.addRequiredParam<std::vector<UserObjectName> >("uo_slip_rates", "List of names of user objects that define the slip rates for this material.");
-  params.addRequiredParam<std::vector<UserObjectName> >("uo_slip_resistances", "List of names of user objects that define the slip resistances for this material.");
-  params.addRequiredParam<std::vector<UserObjectName> >("uo_state_vars", "List of names of user objects that define the state variable for this material.");
-  params.addRequiredParam<std::vector<UserObjectName> >("uo_state_var_evol_rate_comps", "List of names of user objects that define the state variable evolution rate components for this material.");
+  params.addParam<Real>("line_search_tol", 0.5, "Line search bisection method tolerance");
+  params.addParam<unsigned int>(
+      "line_search_maxiter", 20, "Line search bisection method maximum number of iteration");
+  MooseEnum line_search_method("CUT_HALF BISECTION", "CUT_HALF");
+  params.addParam<MooseEnum>(
+      "line_search_method", line_search_method, "The method used in line search");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "uo_slip_rates",
+      "List of names of user objects that define the slip rates for this material.");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "uo_slip_resistances",
+      "List of names of user objects that define the slip resistances for this material.");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "uo_state_vars",
+      "List of names of user objects that define the state variable for this material.");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "uo_state_var_evol_rate_comps",
+      "List of names of user objects that define the state "
+      "variable evolution rate components for this material.");
   return params;
 }
 
-FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters) :
-    ComputeStressBase(parameters),
-    _num_uo_slip_rates(parameters.get<std::vector<UserObjectName> >("uo_slip_rates").size()),
-    _num_uo_slip_resistances(parameters.get<std::vector<UserObjectName> >("uo_slip_resistances").size()),
-    _num_uo_state_vars(parameters.get<std::vector<UserObjectName> >("uo_state_vars").size()),
-    _num_uo_state_var_evol_rate_comps(parameters.get<std::vector<UserObjectName> >("uo_state_var_evol_rate_comps").size()),
+FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
+  : ComputeStressBase(parameters),
+    _num_uo_slip_rates(parameters.get<std::vector<UserObjectName>>("uo_slip_rates").size()),
+    _num_uo_slip_resistances(
+        parameters.get<std::vector<UserObjectName>>("uo_slip_resistances").size()),
+    _num_uo_state_vars(parameters.get<std::vector<UserObjectName>>("uo_state_vars").size()),
+    _num_uo_state_var_evol_rate_comps(
+        parameters.get<std::vector<UserObjectName>>("uo_state_var_evol_rate_comps").size()),
     _rtol(getParam<Real>("rtol")),
     _abs_tol(getParam<Real>("abs_tol")),
     _stol(getParam<Real>("stol")),
@@ -59,11 +80,14 @@ FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
     _lsrch_max_iter(getParam<unsigned int>("line_search_maxiter")),
     _lsrch_method(getParam<MooseEnum>("line_search_method")),
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
-    _fp_old(declarePropertyOld<RankTwoTensor>("fp")), // Plastic deformation gradient of previous increment
+    _fp_old(declarePropertyOld<RankTwoTensor>(
+        "fp")), // Plastic deformation gradient of previous increment
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
-    _pk2_old(declarePropertyOld<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress of previous increment
+    _pk2_old(declarePropertyOld<RankTwoTensor>(
+        "pk2")), // 2nd Piola Kirchoff Stress of previous increment
     _lag_e(declareProperty<RankTwoTensor>("lage")), // Lagrangian strain
-    _update_rot(declareProperty<RankTwoTensor>("update_rot")), // Rotation tensor considering material rotation and crystal orientation
+    _update_rot(declareProperty<RankTwoTensor>(
+        "update_rot")), // Rotation tensor considering material rotation and crystal orientation
     _update_rot_old(declarePropertyOld<RankTwoTensor>("update_rot")),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
     _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
@@ -96,32 +120,43 @@ FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
   // assign the user objects
   for (unsigned int i = 0; i < _num_uo_slip_rates; ++i)
   {
-    _uo_slip_rates[i] = &getUserObjectByName<CrystalPlasticitySlipRate>(parameters.get<std::vector<UserObjectName> >("uo_slip_rates")[i]);
-    _mat_prop_slip_rates[i] = &declareProperty< std::vector<Real> >(parameters.get<std::vector<UserObjectName> >("uo_slip_rates")[i]);
-    _flow_direction[i] = &declareProperty< std::vector<RankTwoTensor> >(parameters.get<std::vector<UserObjectName> >("uo_slip_rates")[i] + "_flow_direction");
+    _uo_slip_rates[i] = &getUserObjectByName<CrystalPlasticitySlipRate>(
+        parameters.get<std::vector<UserObjectName>>("uo_slip_rates")[i]);
+    _mat_prop_slip_rates[i] = &declareProperty<std::vector<Real>>(
+        parameters.get<std::vector<UserObjectName>>("uo_slip_rates")[i]);
+    _flow_direction[i] = &declareProperty<std::vector<RankTwoTensor>>(
+        parameters.get<std::vector<UserObjectName>>("uo_slip_rates")[i] + "_flow_direction");
   }
 
   for (unsigned int i = 0; i < _num_uo_slip_resistances; ++i)
   {
-    _uo_slip_resistances[i] = &getUserObjectByName<CrystalPlasticitySlipResistance>(parameters.get<std::vector<UserObjectName> >("uo_slip_resistances")[i]);
-    _mat_prop_slip_resistances[i] = &declareProperty< std::vector<Real> >(parameters.get<std::vector<UserObjectName> >("uo_slip_resistances")[i]);
+    _uo_slip_resistances[i] = &getUserObjectByName<CrystalPlasticitySlipResistance>(
+        parameters.get<std::vector<UserObjectName>>("uo_slip_resistances")[i]);
+    _mat_prop_slip_resistances[i] = &declareProperty<std::vector<Real>>(
+        parameters.get<std::vector<UserObjectName>>("uo_slip_resistances")[i]);
   }
 
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
-    _uo_state_vars[i] = &getUserObjectByName<CrystalPlasticityStateVariable>(parameters.get<std::vector<UserObjectName> >("uo_state_vars")[i]);
-    _mat_prop_state_vars[i] = &declareProperty< std::vector<Real> >(parameters.get<std::vector<UserObjectName> >("uo_state_vars")[i]);
-    _mat_prop_state_vars_old[i] = &declarePropertyOld< std::vector<Real> >(parameters.get<std::vector<UserObjectName> >("uo_state_vars")[i]);
+    _uo_state_vars[i] = &getUserObjectByName<CrystalPlasticityStateVariable>(
+        parameters.get<std::vector<UserObjectName>>("uo_state_vars")[i]);
+    _mat_prop_state_vars[i] = &declareProperty<std::vector<Real>>(
+        parameters.get<std::vector<UserObjectName>>("uo_state_vars")[i]);
+    _mat_prop_state_vars_old[i] = &declarePropertyOld<std::vector<Real>>(
+        parameters.get<std::vector<UserObjectName>>("uo_state_vars")[i]);
   }
 
   for (unsigned int i = 0; i < _num_uo_state_var_evol_rate_comps; ++i)
   {
-    _uo_state_var_evol_rate_comps[i] = &getUserObjectByName<CrystalPlasticityStateVarRateComponent>(parameters.get<std::vector<UserObjectName> >("uo_state_var_evol_rate_comps")[i]);
-    _mat_prop_state_var_evol_rate_comps[i] = &declareProperty< std::vector<Real> >(parameters.get<std::vector<UserObjectName> >("uo_state_var_evol_rate_comps")[i]);
+    _uo_state_var_evol_rate_comps[i] = &getUserObjectByName<CrystalPlasticityStateVarRateComponent>(
+        parameters.get<std::vector<UserObjectName>>("uo_state_var_evol_rate_comps")[i]);
+    _mat_prop_state_var_evol_rate_comps[i] = &declareProperty<std::vector<Real>>(
+        parameters.get<std::vector<UserObjectName>>("uo_state_var_evol_rate_comps")[i]);
   }
 }
 
-void FiniteStrainUObasedCP::initQpStatefulProperties()
+void
+FiniteStrainUObasedCP::initQpStatefulProperties()
 {
   for (unsigned int i = 0; i < _num_uo_slip_rates; ++i)
   {
@@ -141,7 +176,8 @@ void FiniteStrainUObasedCP::initQpStatefulProperties()
   }
 
   for (unsigned int i = 0; i < _num_uo_state_var_evol_rate_comps; ++i)
-    (*_mat_prop_state_var_evol_rate_comps[i])[_qp].resize(_uo_state_var_evol_rate_comps[i]->variableSize());
+    (*_mat_prop_state_var_evol_rate_comps[i])[_qp].resize(
+        _uo_state_var_evol_rate_comps[i]->variableSize());
 
   _stress[_qp].zero();
 
@@ -158,7 +194,7 @@ void FiniteStrainUObasedCP::initQpStatefulProperties()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
     // Initializes slip system related properties
-    _uo_state_vars[i]->initSlipSysProps((*_mat_prop_state_vars[i])[_qp]);
+    _uo_state_vars[i]->initSlipSysProps((*_mat_prop_state_vars[i])[_qp], _q_point[_qp]);
     (*_mat_prop_state_vars_old[i])[_qp] = (*_mat_prop_state_vars[i])[_qp];
   }
 }
@@ -167,9 +203,11 @@ void FiniteStrainUObasedCP::initQpStatefulProperties()
  * Solves stress residual equation using NR.
  * Updates slip system resistances iteratively.
  */
-void FiniteStrainUObasedCP::computeQpStress()
+void
+FiniteStrainUObasedCP::computeQpStress()
 {
-  // Userobject based crystal plasticity does not support face/boundary material property calculation.
+  // Userobject based crystal plasticity does not support face/boundary material property
+  // calculation.
   if (isBoundaryMaterial())
     return;
   // Depth of substepping; Limited to maximum substep iteration
@@ -198,11 +236,11 @@ void FiniteStrainUObasedCP::computeQpStress()
 
     preSolveQp();
 
-    _dt = dt_original/num_substep;
+    _dt = dt_original / num_substep;
 
     for (unsigned int istep = 0; istep < num_substep; ++istep)
     {
-      _dfgrd_tmp =  (static_cast<Real>(istep) + 1) / num_substep * _delta_dfgrd + _dfgrd_tmp_old;
+      _dfgrd_tmp = (static_cast<Real>(istep) + 1) / num_substep * _delta_dfgrd + _dfgrd_tmp_old;
 
       solveQp();
 
@@ -215,8 +253,7 @@ void FiniteStrainUObasedCP::computeQpStress()
     }
     if (substep_iter > _max_substep_iter && _err_tol)
       mooseError("FiniteStrainUObasedCP: Constitutive failure");
-  }
-  while (_err_tol);
+  } while (_err_tol);
 
   _dt = dt_original;
 
@@ -250,7 +287,7 @@ FiniteStrainUObasedCP::postSolveQp()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
     (*_mat_prop_state_vars_old[i])[_qp] = _state_vars_old[i];
 
-  _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose()/_fe.det();
+  _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose() / _fe.det();
 
   // Calculate jacobian for preconditioner
   calcTangentModuli();
@@ -324,10 +361,12 @@ FiniteStrainUObasedCP::isStateVariablesConverged()
     unsigned int n = (*_mat_prop_state_vars[i])[_qp].size();
     for (unsigned j = 0; j < n; j++)
     {
-      diff = std::abs((*_mat_prop_state_vars[i])[_qp][j] - _state_vars_prev[i][j]);// Calculate increment size
+      diff = std::abs((*_mat_prop_state_vars[i])[_qp][j] -
+                      _state_vars_prev[i][j]); // Calculate increment size
       if (std::abs((*_mat_prop_state_vars_old[i])[_qp][j]) < _zero_tol && diff > _zero_tol)
         return true;
-      if (std::abs((*_mat_prop_state_vars_old[i])[_qp][j]) >  _zero_tol && diff > _stol * std::abs((*_mat_prop_state_vars_old[i])[_qp][j]))
+      if (std::abs((*_mat_prop_state_vars_old[i])[_qp][j]) > _zero_tol &&
+          diff > _stol * std::abs((*_mat_prop_state_vars_old[i])[_qp][j]))
         return true;
     }
   }
@@ -360,7 +399,10 @@ FiniteStrainUObasedCP::solveStress()
   if (_err_tol)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp);
+    mooseWarning("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number ",
+                 _current_elem->id(),
+                 " Gauss point = ",
+                 _qp);
 #endif
     return;
   }
@@ -369,17 +411,20 @@ FiniteStrainUObasedCP::solveStress()
   rnorm0 = rnorm;
 
   // Check for stress residual tolerance
-  while (rnorm > _rtol * rnorm0 && rnorm0 > _abs_tol && iter <  _maxiter)
+  while (rnorm > _rtol * rnorm0 && rnorm0 > _abs_tol && iter < _maxiter)
   {
     // Calculate stress increment
-    dpk2 = - _jac.invSymm() * _resid;
+    dpk2 = -_jac.invSymm() * _resid;
     _pk2[_qp] = _pk2[_qp] + dpk2;
     calcResidJacob();
 
     if (_err_tol)
     {
 #ifdef DEBUG
-      mooseWarning("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp);
+      mooseWarning("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number ",
+                   _current_elem->id(),
+                   " Gauss point = ",
+                   _qp);
 #endif
       return;
     }
@@ -405,7 +450,7 @@ FiniteStrainUObasedCP::solveStress()
   if (iter >= _maxiter)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainUObasedCP: Stress Integration error rmax = " << rnorm);
+    mooseWarning("FiniteStrainUObasedCP: Stress Integration error rmax = ", rnorm);
 #endif
     _err_tol = true;
   }
@@ -424,7 +469,8 @@ FiniteStrainUObasedCP::updateSlipSystemResistanceAndStateVariable()
     _state_vars_prev[i] = (*_mat_prop_state_vars[i])[_qp];
 
   for (unsigned int i = 0; i < _num_uo_state_var_evol_rate_comps; ++i)
-    _uo_state_var_evol_rate_comps[i]->calcStateVariableEvolutionRateComponent(_qp, (*_mat_prop_state_var_evol_rate_comps[i])[_qp]);
+    _uo_state_var_evol_rate_comps[i]->calcStateVariableEvolutionRateComponent(
+        _qp, (*_mat_prop_state_var_evol_rate_comps[i])[_qp]);
 
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
@@ -499,14 +545,14 @@ FiniteStrainUObasedCP::calcJacobian()
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        dfedfpinv(i,j,k,j) = _dfgrd_tmp(i,k);
+        dfedfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
       {
-        deedfe(i,j,k,i) = deedfe(i,j,k,i) + _fe(k,j) * 0.5;
-        deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
+        deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
+        deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
       }
 
   for (unsigned int i = 0; i < _num_uo_slip_rates; ++i)
@@ -519,13 +565,14 @@ FiniteStrainUObasedCP::calcJacobian()
     for (unsigned int j = 0; j < nss; j++)
     {
       dtaudpk2[j] = (*_flow_direction[i])[_qp][j];
-      dfpinvdslip[j] = - _fp_old_inv * (*_flow_direction[i])[_qp][j];
+      dfpinvdslip[j] = -_fp_old_inv * (*_flow_direction[i])[_qp][j];
     }
 
     for (unsigned int j = 0; j < nss; j++)
       dfpinvdpk2 += (dfpinvdslip[j] * dslipdtau[j] * _dt).outerProduct(dtaudpk2[j]);
   }
-  _jac = RankFourTensor::IdentityFour() - (_elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2);
+  _jac =
+      RankFourTensor::IdentityFour() - (_elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2);
 }
 
 void
@@ -553,8 +600,8 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
       {
-        deedfe(i,j,k,i) = deedfe(i,j,k,i) + _fe(k,j) * 0.5;
-        deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
+        deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
+        deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
       }
 
   dsigdpk2dfe = _fe.mixedProductIkJl(_fe) * _elasticity_tensor[_qp] * deedfe;
@@ -566,8 +613,8 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
       {
-        tan_mod(i,j,i,l) += pk2fet(l,j);
-        tan_mod(i,j,j,l) += fepk2(i,l);
+        tan_mod(i, j, i, l) += pk2fet(l, j);
+        tan_mod(i, j, j, l) += fepk2(i, l);
       }
 
   tan_mod += dsigdpk2dfe;
@@ -579,8 +626,7 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-        dfedf(i,j,i,l) =  _fp_inv(l,j);
-
+        dfedf(i, j, i, l) = _fp_inv(l, j);
 
   _Jacobian_mult[_qp] = tan_mod * dfedf;
 }
@@ -589,7 +635,7 @@ void
 FiniteStrainUObasedCP::elasticTangentModuli()
 {
   // update jacobian_mult
- _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
 
 bool
@@ -610,8 +656,7 @@ FiniteStrainUObasedCP::lineSearchUpdate(const Real rnorm_prev, const RankTwoTens
 
         calcResidual();
         rnorm = _resid.L2norm();
-      }
-      while (rnorm > rnorm_prev && step > _min_lsrch_step);
+      } while (rnorm > rnorm_prev && step > _min_lsrch_step);
 
       // has norm improved or is the step still above minumum search step size?
       return (rnorm <= rnorm_prev || step > _min_lsrch_step);
@@ -635,25 +680,28 @@ FiniteStrainUObasedCP::lineSearchUpdate(const Real rnorm_prev, const RankTwoTens
       Real rnorm0 = _resid.L2norm();
       _pk2[_qp] = _pk2[_qp] + dpk2;
 
-      if ((rnorm1/rnorm0) < _lsrch_tol || s_a*s_b > 0){
+      if ((rnorm1 / rnorm0) < _lsrch_tol || s_a * s_b > 0)
+      {
         calcResidual();
         return true;
       }
 
-      while ((rnorm/rnorm0) > _lsrch_tol && count < _lsrch_max_iter)
+      while ((rnorm / rnorm0) > _lsrch_tol && count < _lsrch_max_iter)
       {
-        _pk2[_qp] = _pk2[_qp] - step*dpk2;
+        _pk2[_qp] = _pk2[_qp] - step * dpk2;
         step = 0.5 * (step_b + step_a);
-        _pk2[_qp] = _pk2[_qp] + step*dpk2;
+        _pk2[_qp] = _pk2[_qp] + step * dpk2;
         calcResidual();
         s_m = _resid.doubleContraction(dpk2);
         rnorm = _resid.L2norm();
 
-        if (s_m*s_a < 0.0){
+        if (s_m * s_a < 0.0)
+        {
           step_b = step;
           s_b = s_m;
         }
-        if (s_m*s_b < 0.0){
+        if (s_m * s_b < 0.0)
+        {
           step_a = step;
           s_a = s_m;
         }
@@ -661,7 +709,7 @@ FiniteStrainUObasedCP::lineSearchUpdate(const Real rnorm_prev, const RankTwoTens
       }
 
       // below tolerance and max iterations?
-      return  ((rnorm/rnorm0) < _lsrch_tol && count < _lsrch_max_iter);
+      return ((rnorm / rnorm0) < _lsrch_tol && count < _lsrch_max_iter);
     }
 
     default:

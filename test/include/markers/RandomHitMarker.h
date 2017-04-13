@@ -20,7 +20,7 @@
 class RandomHitUserObject;
 
 class RandomHitMarker;
-template<>
+template <>
 InputParameters validParams<RandomHitMarker>();
 
 class RandomHitMarker : public Marker

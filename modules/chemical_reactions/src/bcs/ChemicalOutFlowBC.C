@@ -5,17 +5,17 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ChemicalOutFlowBC.h"
-#include "Material.h"
 
-template<>
-InputParameters validParams<ChemicalOutFlowBC>()
+template <>
+InputParameters
+validParams<ChemicalOutFlowBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-ChemicalOutFlowBC::ChemicalOutFlowBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+ChemicalOutFlowBC::ChemicalOutFlowBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _diff(getMaterialProperty<Real>("diffusivity")),
     _porosity(getMaterialProperty<Real>("porosity"))
 {
@@ -26,7 +26,6 @@ ChemicalOutFlowBC::computeQpResidual()
 {
   return -_test[_i][_qp] * _porosity[_qp] * _diff[_qp] * _grad_u[_qp] * _normals[_qp];
 }
-
 
 Real
 ChemicalOutFlowBC::computeQpJacobian()

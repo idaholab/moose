@@ -6,17 +6,19 @@
 /****************************************************************/
 #include "NSMassSpecifiedNormalFlowBC.h"
 
-template<>
-InputParameters validParams<NSMassSpecifiedNormalFlowBC>()
+template <>
+InputParameters
+validParams<NSMassSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMassBC>();
+  params.addClassDescription("This class implements the mass equation boundary term with a "
+                             "specified value of rho*(u.n) imposed weakly.");
   params.addRequiredParam<Real>("rhoun", "The specified value of rho*(u.n) for this boundary");
   return params;
 }
 
-NSMassSpecifiedNormalFlowBC::NSMassSpecifiedNormalFlowBC(const InputParameters & parameters) :
-    NSMassBC(parameters),
-    _rhoun(getParam<Real>("rhoun"))
+NSMassSpecifiedNormalFlowBC::NSMassSpecifiedNormalFlowBC(const InputParameters & parameters)
+  : NSMassBC(parameters), _rhoun(getParam<Real>("rhoun"))
 {
 }
 

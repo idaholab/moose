@@ -16,41 +16,39 @@
 #define VECTORPOSTPROCESSOR_H
 
 // MOOSE includes
-#include "InputParameters.h"
 #include "MooseTypes.h"
+#include "OutputInterface.h"
 
 // libMesh
 #include "libmesh/parallel.h"
 
 // Forward declarations
+class FEProblemBase;
+class InputParameters;
 class SamplerBase;
 class VectorPostprocessor;
 class VectorPostprocessorData;
-class FEProblem;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<VectorPostprocessor>();
 
 /**
  * Base class for Postprocessors that produce a vector of values.
  */
-class VectorPostprocessor
+class VectorPostprocessor : public OutputInterface
 {
 public:
   VectorPostprocessor(const InputParameters & parameters);
 
-  virtual ~VectorPostprocessor(){}
+  virtual ~VectorPostprocessor() = default;
 
   /**
    * This will get called to actually grab the final value the VectorPostprocessor has calculated.
    */
   virtual VectorPostprocessorValue & getVector(const std::string & vector_name);
-
-  /**
-   * Get the list of output objects that this class is restricted
-   * @return A vector of OutputNames
-   */
-  std::set<OutputName> getOutputs(){ return std::set<OutputName>(_outputs.begin(), _outputs.end()); }
 
   /**
    * Returns the name of the VectorPostprocessor.
@@ -66,13 +64,15 @@ protected:
   /// The name of the VectorPostprocessor
   std::string _vpp_name;
 
-  /// Vector of output names
-  std::vector<OutputName> _outputs;
-
-  /// Pointer to FEProblem
-  FEProblem * _vpp_fe_problem;
+  /// Pointer to FEProblemBase
+  FEProblemBase * _vpp_fe_problem;
 
   friend class SamplerBase;
+
+private:
+  THREAD_ID _vpp_tid;
+
+  std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
 };
 
 #endif

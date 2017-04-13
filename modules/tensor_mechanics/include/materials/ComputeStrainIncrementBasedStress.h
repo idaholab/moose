@@ -33,4 +33,4 @@ protected:
   unsigned int _num_property;
 };
 
-#endif
+#endif // COMPUTESTRAININCREMENTBASEDSTRESS_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PNODALMASS
 #define Q2PNODALMASS
 
@@ -16,7 +15,7 @@
 // Forward Declarations
 class Q2PNodalMass;
 
-template<>
+template <>
 InputParameters validParams<Q2PNodalMass>();
 
 /**
@@ -25,11 +24,9 @@ InputParameters validParams<Q2PNodalMass>();
 class Q2PNodalMass : public TimeKernel
 {
 public:
-
   Q2PNodalMass(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
@@ -51,4 +48,4 @@ protected:
   const MaterialProperty<Real> & _porosity;
 };
 
-#endif //Q2PNODALMASS
+#endif // Q2PNODALMASS

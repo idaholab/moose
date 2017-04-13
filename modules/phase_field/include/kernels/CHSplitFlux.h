@@ -13,7 +13,7 @@
 
 class CHSplitFlux;
 
-template<>
+template <>
 InputParameters validParams<CHSplitFlux>();
 
 /**
@@ -32,12 +32,14 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const unsigned int _component;
-  unsigned int _mu_var;
+  const unsigned int _mu_var;
   const VariableGradient & _grad_mu;
   const MaterialProperty<RealTensorValue> & _mobility;
+
+  const bool _has_coupled_c;
+  const unsigned int _c_var;
+
   const MaterialProperty<RealTensorValue> * _dmobility_dc;
-  unsigned int _c_var;
-  bool _has_coupled_c;
 };
 
 #endif

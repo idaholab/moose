@@ -6,57 +6,64 @@
 /****************************************************************/
 
 #include "PorousFlowJoiner.h"
-
 #include "Conversion.h"
 
-template<>
-InputParameters validParams<PorousFlowJoiner>()
+template <>
+InputParameters
+validParams<PorousFlowJoiner>()
 {
-  InputParameters params = validParams<Material>();
-
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addRequiredParam<std::string>("material_property", "The property that you want joined into a std::vector");
-  params.addParam<bool>("at_qps", false, "If true then join quadpoint properties, otherwise join nodal properties");
-  params.addParam<bool>("include_old", false, "Join old properties into vectors as well as the current properties");
-  params.addClassDescription("This Material forms a std::vector of properties, old properties (optionally), and derivatives, out of the individual phase properties");
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  params.addRequiredParam<std::string>("material_property",
+                                       "The property that you want joined into a std::vector");
+  params.addParam<bool>(
+      "include_old", false, "Join old properties into vectors as well as the current properties");
+  params.addClassDescription("This Material forms a std::vector of properties, old properties "
+                             "(optionally), and derivatives, out of the individual phase "
+                             "properties");
   return params;
 }
 
-PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters)
+  : PorousFlowMaterialVectorBase(parameters),
 
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _pressure_variable_name(_dictator_UO.pressureVariableNameDummy()),
-    _saturation_variable_name(_dictator_UO.saturationVariableNameDummy()),
-    _temperature_variable_name(_dictator_UO.temperatureVariableNameDummy()),
-    _mass_fraction_variable_name(_dictator_UO.massFractionVariableNameDummy()),
-    _num_phases(_dictator_UO.numPhases()),
-    _num_var(_dictator_UO.numVariables()),
+    _pressure_variable_name(_dictator.pressureVariableNameDummy()),
+    _saturation_variable_name(_dictator.saturationVariableNameDummy()),
+    _temperature_variable_name(_dictator.temperatureVariableNameDummy()),
+    _mass_fraction_variable_name(_dictator.massFractionVariableNameDummy()),
     _pf_prop(getParam<std::string>("material_property")),
     _include_old(getParam<bool>("include_old")),
-    _at_qps(getParam<bool>("at_qps")),
 
-    _dporepressure_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
-    _dsaturation_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
-    _dtemperature_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_nodal_dvar")),
+    _dporepressure_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real>>>(
+                                               "dPorousFlow_porepressure_qp_dvar")
+                                         : getMaterialProperty<std::vector<std::vector<Real>>>(
+                                               "dPorousFlow_porepressure_nodal_dvar")),
+    _dsaturation_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real>>>(
+                                             "dPorousFlow_saturation_qp_dvar")
+                                       : getMaterialProperty<std::vector<std::vector<Real>>>(
+                                             "dPorousFlow_saturation_nodal_dvar")),
+    _dtemperature_dvar(
+        !_nodal_material
+            ? getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
+            : getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
 
-    _property(declareProperty<std::vector<Real> >(_pf_prop)),
-    _property_old(_include_old ? &declarePropertyOld<std::vector<Real> >(_pf_prop) : NULL),
-    _dproperty_dvar(declareProperty<std::vector<std::vector<Real> > >("d" + _pf_prop + "_dvar"))
+    _property(declareProperty<std::vector<Real>>(_pf_prop)),
+    _dproperty_dvar(declareProperty<std::vector<std::vector<Real>>>("d" + _pf_prop + "_dvar"))
 {
   _phase_property.resize(_num_phases);
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
-    _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + Moose::stringify(ph));
-
-    _dphase_property_dp.resize(_num_phases);
-    _dphase_property_ds.resize(_num_phases);
-    _dphase_property_dt.resize(_num_phases);
+  _dphase_property_dp.resize(_num_phases);
+  _dphase_property_ds.resize(_num_phases);
+  _dphase_property_dt.resize(_num_phases);
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _dphase_property_dp[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _pressure_variable_name);
-    _dphase_property_ds[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _saturation_variable_name);
-    _dphase_property_dt[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _temperature_variable_name);
+    std::string phase = Moose::stringify(ph);
+    _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + phase);
+    _dphase_property_dp[ph] =
+        &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _pressure_variable_name);
+    _dphase_property_ds[ph] =
+        &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _saturation_variable_name);
+    _dphase_property_dt[ph] =
+        &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _temperature_variable_name);
   }
 }
 
@@ -64,28 +71,36 @@ void
 PorousFlowJoiner::initQpStatefulProperties()
 {
   _property[_qp].resize(_num_phases);
+
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     _property[_qp][ph] = (*_phase_property[ph])[_qp];
-
-  _dproperty_dvar[_qp].resize(_num_phases);
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
-    _dproperty_dvar[_qp][ph].resize(_num_var);
 }
 
 void
 PorousFlowJoiner::computeQpProperties()
 {
-  if (!_include_old)
-    initQpStatefulProperties();
+  initQpStatefulProperties();
 
+  _dproperty_dvar[_qp].resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _property[_qp][ph] = (*_phase_property[ph])[_qp];
+    _dproperty_dvar[_qp][ph].resize(_num_var);
     for (unsigned v = 0; v < _num_var; ++v)
     {
-      _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
-      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
-      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][ph][v];
+      // the "if" conditions in the following are because a nodal_material's derivatives might
+      // not have been defined.  If that is the case, then DerivativeMaterial passes back a
+      // MaterialProperty with zeroes (for the derivatives), but that property will be sized
+      // by the number of quadpoints in the element, which may be smaller than the number of
+      // nodes!
+      _dproperty_dvar[_qp][ph][v] = 0.0;
+      if ((*_dphase_property_dp[ph]).size() > _qp)
+        _dproperty_dvar[_qp][ph][v] +=
+            (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
+      if ((*_dphase_property_ds[ph]).size() > _qp)
+        _dproperty_dvar[_qp][ph][v] +=
+            (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
+      if ((*_dphase_property_dt[ph]).size() > _qp)
+        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][v];
     }
   }
 }

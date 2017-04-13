@@ -14,23 +14,21 @@
 
 #include "PostprocessorAux.h"
 
-template<>
-InputParameters validParams<PostprocessorAux>()
+template <>
+InputParameters
+validParams<PostprocessorAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<PostprocessorName>("pp", "The Postprocessor to use as the value");
   return params;
 }
 
-PostprocessorAux::PostprocessorAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _pp_val(getPostprocessorValue("pp"))
+PostprocessorAux::PostprocessorAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _pp_val(getPostprocessorValue("pp"))
 {
 }
 
-PostprocessorAux::~PostprocessorAux()
-{
-}
+PostprocessorAux::~PostprocessorAux() {}
 
 Real
 PostprocessorAux::computeValue()

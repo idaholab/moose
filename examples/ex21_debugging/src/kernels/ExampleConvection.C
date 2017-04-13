@@ -14,27 +14,31 @@
 
 #include "ExampleConvection.h"
 
-template<>
-InputParameters validParams<ExampleConvection>()
+template <>
+InputParameters
+validParams<ExampleConvection>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-ExampleConvection::ExampleConvection(const InputParameters & parameters) :
-    Kernel(parameters),
+ExampleConvection::ExampleConvection(const InputParameters & parameters)
+  : Kernel(parameters),
 
     // Retrieve a gradient material property to use for the convection
     // velocity
     _velocity(getMaterialProperty<RealGradient>("convection_velocity"))
-{}
-
-Real ExampleConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_velocity[_qp]*_grad_u[_qp]);
 }
 
-Real ExampleConvection::computeQpJacobian()
+Real
+ExampleConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_velocity[_qp]*_grad_phi[_j][_qp]);
+  return _test[_i][_qp] * (_velocity[_qp] * _grad_u[_qp]);
+}
+
+Real
+ExampleConvection::computeQpJacobian()
+{
+  return _test[_i][_qp] * (_velocity[_qp] * _grad_phi[_j][_qp]);
 }

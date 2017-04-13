@@ -1,0 +1,47 @@
+\documentclass[++fontsize++]{++documentclass++}
+\usepackage[paper=++paper++, top=++margin++, bottom=++margin++, left=++margin++, right=++margin++]{geometry}
+\usepackage[T1]{fontenc}
+\catcode`\_=12
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=++linkcolor++, citecolor=++linkcolor++, filecolor=++linkcolor++, urlcolor=++linkcolor++}
+
+\usepackage[parfill]{parskip}
+
+++preamble++
+
+\begin{document}
+@+ if title +@
+\newgeometry{top=2in}
+\begin{titlepage}
+  \begin{center}
+    \rule{\linewidth}{2pt}\par
+    \bigskip
+        {\huge \textbf{++title++}}
+    \smallskip
+    \rule{\linewidth}{1pt}\par
+    @+ if subtitle +@
+    \medskip
+    {\LARGE ++subtitle++}\par
+    @+ endif +@
+    @+ if author +@
+    \vfill
+    ++author++\par
+    @+ endif +@
+    \vfill
+    @+ if institution +@
+    ++institution++\par
+    \medskip
+    @+ endif +@
+    @+ if today +@
+    \today\par
+    \smallskip
+    @+ endif +@
+    \end{center}
+\end{titlepage}
+@+ endif +@
+@+ if tableofcontents +@
+\tableofcontents\newpage
+@+ endif +@
+++content++
+\end{document}

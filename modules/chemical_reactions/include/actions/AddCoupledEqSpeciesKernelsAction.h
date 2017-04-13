@@ -11,9 +11,8 @@
 
 class AddCoupledEqSpeciesKernelsAction;
 
-template<>
+template <>
 InputParameters validParams<AddCoupledEqSpeciesKernelsAction>();
-
 
 class AddCoupledEqSpeciesKernelsAction : public Action
 {
@@ -21,7 +20,6 @@ public:
   AddCoupledEqSpeciesKernelsAction(const InputParameters & params);
 
   virtual void act();
-
 };
 
 #endif // ADDCOUPLEDEQSPECIESKERNELSACTION_H

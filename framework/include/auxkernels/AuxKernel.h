@@ -16,6 +16,7 @@
 #define AUXKERNEL_H
 
 #include "MooseObject.h"
+#include "MooseVariable.h" // for name() in mooseError calls
 #include "SetupInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -31,38 +32,39 @@
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
+#include "VectorPostprocessorInterface.h"
 
-//forward declarations
+// forward declarations
 class SubProblem;
 class AuxKernel;
 class AuxiliarySystem;
 class SystemBase;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<AuxKernel>();
 
 /**
  * Base class for creating new auxiliary kernels and auxiliary boundary conditions.
  *
  */
-class AuxKernel :
-  public MooseObject,
-  public BlockRestrictable,
-  public BoundaryRestrictable,
-  public SetupInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  public MaterialPropertyInterface,
-  public PostprocessorInterface,
-  public DependencyResolverInterface,
-  public RandomInterface,
-  protected GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class AuxKernel : public MooseObject,
+                  public BlockRestrictable,
+                  public BoundaryRestrictable,
+                  public SetupInterface,
+                  public CoupleableMooseVariableDependencyIntermediateInterface,
+                  public FunctionInterface,
+                  public UserObjectInterface,
+                  public TransientInterface,
+                  public MaterialPropertyInterface,
+                  public PostprocessorInterface,
+                  public DependencyResolverInterface,
+                  public RandomInterface,
+                  protected GeometricSearchInterface,
+                  public Restartable,
+                  public ZeroInterface,
+                  public MeshChangedInterface,
+                  protected VectorPostprocessorInterface
 {
 public:
   AuxKernel(const InputParameters & parameters);
@@ -88,37 +90,49 @@ public:
 
   const std::set<std::string> & getDependObjects() const { return _depend_uo; }
 
-  void coupledCallback(const std::string & var_name, bool is_old);
+  void coupledCallback(const std::string & var_name, bool is_old) override;
 
-  virtual const std::set<std::string> & getRequestedItems();
+  virtual const std::set<std::string> & getRequestedItems() override;
 
-  virtual const std::set<std::string> & getSuppliedItems();
+  virtual const std::set<std::string> & getSuppliedItems() override;
 
   /**
    * Override functions from MaterialPropertyInterface for error checking
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
-  template<typename T>
+  template <typename T>
   const T & getUserObject(const std::string & name);
+  template <typename T>
+  const T & getUserObjectByName(const UserObjectName & name);
 
   const UserObject & getUserObjectBase(const std::string & name);
-
 
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
-protected:
-  virtual const VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) override;
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName &,
+                                    const std::string & vector_name) override;
 
-  virtual const VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
+protected:
+  virtual const VariableValue & coupledDot(const std::string & var_name,
+                                           unsigned int comp = 0) override;
+
+  virtual const VariableValue & coupledDotDu(const std::string & var_name,
+                                             unsigned int comp = 0) override;
 
   virtual Real computeValue() = 0;
+
+  /// This callback is used for AuxKernels that need to perform a per-element calculation
+  virtual void precalculateValue() {}
 
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;
@@ -139,12 +153,12 @@ protected:
   /// Mesh this kernel is active on
   MooseMesh & _mesh;
   /// Dimension of the problem being solved
-//  unsigned int _dim;
+  //  unsigned int _dim;
 
   /// Active quadrature points
-  const MooseArray< Point > & _q_point;
+  const MooseArray<Point> & _q_point;
   /// Quadrature rule being used
-  QBase * & _qrule;
+  QBase *& _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
@@ -159,7 +173,7 @@ protected:
   const VariableTestValue & _test;
 
   /// Current element (valid only for elemental kernels)
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
   /// current side of the current element
   unsigned int & _current_side;
 
@@ -169,7 +183,7 @@ protected:
   const Real & _current_side_volume;
 
   /// Current node (valid only for nodal kernels)
-  const Node * & _current_node;
+  const Node *& _current_node;
 
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
@@ -195,37 +209,55 @@ protected:
   DenseMatrix<Number> _local_ke;
 };
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 AuxKernel::getMaterialProperty(const std::string & name)
 {
   if (isNodal())
-    mooseError("Nodal AuxKernel '" << AuxKernel::name() << "' attempted to reference material property '" << name << "'\nConsider using an elemental auxiliary variable for '" << _var.name() << "'.");
+    mooseError("Nodal AuxKernel '",
+               AuxKernel::name(),
+               "' attempted to reference material property '",
+               name,
+               "'\nConsider using an elemental auxiliary variable for '",
+               _var.name(),
+               "'.");
 
   return MaterialPropertyInterface::getMaterialProperty<T>(name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOld(const std::string & name)
 {
   if (isNodal())
-    mooseError("Nodal AuxKernel '" << AuxKernel::name() << "' attempted to reference material property '" << name << "'\nConsider using an elemental auxiliary variable for '" << _var.name() << "'.");
+    mooseError("Nodal AuxKernel '",
+               AuxKernel::name(),
+               "' attempted to reference material property '",
+               name,
+               "'\nConsider using an elemental auxiliary variable for '",
+               _var.name(),
+               "'.");
 
   return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOlder(const std::string & name)
 {
   if (isNodal())
-    mooseError("Nodal AuxKernel '" << AuxKernel::name() << "' attempted to reference material property '" << name << "'\nConsider using an elemental auxiliary variable for '" << _var.name() << "'.");
+    mooseError("Nodal AuxKernel '",
+               AuxKernel::name(),
+               "' attempted to reference material property '",
+               name,
+               "'\nConsider using an elemental auxiliary variable for '",
+               _var.name(),
+               "'.");
 
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }
 
-template<typename T>
+template <typename T>
 const T &
 AuxKernel::getUserObject(const std::string & name)
 {
@@ -233,4 +265,12 @@ AuxKernel::getUserObject(const std::string & name)
   return UserObjectInterface::getUserObject<T>(name);
 }
 
-#endif //AUXKERNEL_H
+template <typename T>
+const T &
+AuxKernel::getUserObjectByName(const UserObjectName & name)
+{
+  _depend_uo.insert(name);
+  return UserObjectInterface::getUserObjectByName<T>(name);
+}
+
+#endif // AUXKERNEL_H

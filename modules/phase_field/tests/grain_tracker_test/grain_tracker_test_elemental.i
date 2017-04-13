@@ -8,6 +8,9 @@
   ymax = 1000
   zmax = 0
   elem_type = QUAD4
+
+  # Required for use with distributed mesh
+  num_ghosted_layers = 2
 []
 
 [GlobalParams]
@@ -57,13 +60,13 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
 []
@@ -79,7 +82,6 @@
 [Materials]
   [./CuGrGr]
     type = GBEvolution
-    block = 0
     T = 500 # K
     wGB = 100 # nm
     GBmob0 = 2.5e-6
@@ -93,7 +95,6 @@
   [./grain_tracker]
     type = GrainTracker
     flood_entity_type = ELEMENTAL
-    bubble_volume_file = grain_volumes.csv
   [../]
   [./DOFs]
     type = NumDOFs

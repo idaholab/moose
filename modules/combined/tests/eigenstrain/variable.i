@@ -63,7 +63,7 @@
   [./eigen_strain00]
     type = RankTwoAux
     variable = eigen_strain00
-    rank_two_tensor = stress_free_strain
+    rank_two_tensor = eigenstrain
     index_j = 0
     index_i = 0
   [../]
@@ -91,17 +91,19 @@
     enable_jit = true
     derivative_order = 2
   [../]
-  [./eigen_strain]
+  [./eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
     eigen_base = '1 1 1 0 0 0'
     prefactor = var_dep
     args = c
+    eigenstrain_name = eigenstrain
   [../]
   [./strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
 []
 

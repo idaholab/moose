@@ -19,7 +19,7 @@
 
 class DotCouplingAux;
 
-template<>
+template <>
 InputParameters validParams<DotCouplingAux>();
 
 /**

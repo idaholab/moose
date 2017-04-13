@@ -19,27 +19,23 @@
 
 class Function;
 
-//Forward Declarations
+// Forward Declarations
 class ElementL2Error;
 
-template<>
+template <>
 InputParameters validParams<ElementL2Error>();
 
-class ElementL2Error :
-  public ElementIntegralVariablePostprocessor
+class ElementL2Error : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementL2Error(const InputParameters & parameters);
 
-  /**
-   * Get the L2 Error.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   Function & _func;
 };
 
-#endif //ELEMENTL2ERROR_H
+#endif // ELEMENTL2ERROR_H

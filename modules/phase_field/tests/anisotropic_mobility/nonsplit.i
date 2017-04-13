@@ -44,13 +44,11 @@
 [Materials]
   [./kappa]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'kappa_c'
     prop_values = '2.0'
   [../]
   [./mob]
     type = ConstantAnisotropicMobility
-    block = 0
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
@@ -58,7 +56,6 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    block = 0
     f_name = F
     c = c
   [../]

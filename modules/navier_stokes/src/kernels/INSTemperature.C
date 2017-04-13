@@ -8,11 +8,14 @@
 #include "INSTemperature.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSTemperature>()
+template <>
+InputParameters
+validParams<INSTemperature>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the residual and Jacobian contributions for the "
+                             "incompressible Navier-Stokes temperature (energy) equation.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
@@ -26,38 +29,35 @@ InputParameters validParams<INSTemperature>()
   return params;
 }
 
+INSTemperature::INSTemperature(const InputParameters & parameters)
+  : Kernel(parameters),
 
+    // Coupled variables
+    _u_vel(coupledValue("u")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
-INSTemperature::INSTemperature(const InputParameters & parameters) :
-  Kernel(parameters),
+    // Variable numberings
+    _u_vel_var_number(coupled("u")),
+    _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+    _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
 
-  // Coupled variables
-  _u_vel(coupledValue("u")),
-  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
-  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-
-  // Variable numberings
-  _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
-  _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
-
-  // Required parameters
-  _rho(getParam<Real>("rho")),
-  _k(getParam<Real>("k")),
-  _cp(getParam<Real>("cp"))
+    // Required parameters
+    _rho(getParam<Real>("rho")),
+    _k(getParam<Real>("k")),
+    _cp(getParam<Real>("cp"))
 {
 }
 
-
-
-Real INSTemperature::computeQpResidual()
+Real
+INSTemperature::computeQpResidual()
 {
   // The convection part, rho * cp u.grad(T) * v.
   // Note: _u is the temperature variable, _grad_u is its gradient.
   Real convective_part = _rho * _cp *
-    (_u_vel[_qp]*_grad_u[_qp](0) +
-     _v_vel[_qp]*_grad_u[_qp](1) +
-     _w_vel[_qp]*_grad_u[_qp](2)) * _test[_i][_qp];
+                         (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
+                          _w_vel[_qp] * _grad_u[_qp](2)) *
+                         _test[_i][_qp];
 
   // Thermal conduction part, k * grad(T) * grad(v)
   Real conduction_part = _k * _grad_u[_qp] * _grad_test[_i][_qp];
@@ -65,10 +65,8 @@ Real INSTemperature::computeQpResidual()
   return convective_part + conduction_part;
 }
 
-
-
-
-Real INSTemperature::computeQpJacobian()
+Real
+INSTemperature::computeQpJacobian()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
@@ -78,10 +76,8 @@ Real INSTemperature::computeQpJacobian()
   return convective_part + conduction_part;
 }
 
-
-
-
-Real INSTemperature::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSTemperature::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
   {
@@ -103,4 +99,3 @@ Real INSTemperature::computeQpOffDiagJacobian(unsigned jvar)
   else
     return 0;
 }
-

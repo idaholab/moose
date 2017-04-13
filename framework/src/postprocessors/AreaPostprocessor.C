@@ -14,19 +14,21 @@
 
 #include "AreaPostprocessor.h"
 
-template<>
-InputParameters validParams<AreaPostprocessor>()
+template <>
+InputParameters
+validParams<AreaPostprocessor>()
 {
-InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = validParams<SideIntegralPostprocessor>();
   return params;
 }
 
-AreaPostprocessor::AreaPostprocessor(const InputParameters & parameters) :
-    SideIntegralPostprocessor(parameters)
-{}
+AreaPostprocessor::AreaPostprocessor(const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters)
+{
+}
 
 void
-AreaPostprocessor::threadJoin(const UserObject &y)
+AreaPostprocessor::threadJoin(const UserObject & y)
 {
   const AreaPostprocessor & pps = static_cast<const AreaPostprocessor &>(y);
   _integral_value += pps._integral_value;
@@ -37,4 +39,3 @@ AreaPostprocessor::computeQpIntegral()
 {
   return 1.0;
 }
-

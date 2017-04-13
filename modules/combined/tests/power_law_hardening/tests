@@ -1,0 +1,15 @@
+[tests]
+  [./powerlaw_hardening_solidmech]
+    type = 'Exodiff'
+    input = 'PowerLawHardening-SM.i'
+    exodiff = 'PowerLawHardening_out.e'
+    abs_zero = 1e-09
+  [../]
+  [./powerlaw_hardening_tensormech]
+    type = 'Exodiff'
+    input = 'PowerLawHardening-TM.i'
+    exodiff = 'PowerLawHardening_out.e'
+    abs_zero = 1e-09
+    prereq = 'powerlaw_hardening_solidmech'
+  [../]
+[]

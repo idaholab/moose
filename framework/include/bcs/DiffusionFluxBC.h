@@ -19,7 +19,7 @@
 
 class DiffusionFluxBC;
 
-template<>
+template <>
 InputParameters validParams<DiffusionFluxBC>();
 
 /**
@@ -29,11 +29,10 @@ class DiffusionFluxBC : public FluxBC
 {
 public:
   DiffusionFluxBC(const InputParameters & parameters);
-  virtual ~DiffusionFluxBC();
 
 protected:
-  virtual RealGradient computeQpFluxResidual();
-  virtual RealGradient computeQpFluxJacobian();
+  virtual RealGradient computeQpFluxResidual() override;
+  virtual RealGradient computeQpFluxJacobian() override;
 };
 
 #endif /* DIFFUSIONFLUXBC_H */

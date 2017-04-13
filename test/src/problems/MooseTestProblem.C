@@ -14,21 +14,18 @@
 
 #include "MooseTestProblem.h"
 
-template<>
-InputParameters validParams<MooseTestProblem>()
+template <>
+InputParameters
+validParams<MooseTestProblem>()
 {
   InputParameters params = validParams<FEProblem>();
   return params;
 }
 
-
-MooseTestProblem::MooseTestProblem(const InputParameters & params) :
-    FEProblem(params)
+MooseTestProblem::MooseTestProblem(const InputParameters & params) : FEProblem(params)
 {
-  _console << "Hello, I am your FEProblem-derived class and my name is '" << this->name() << "'" << std::endl;
+  _console << "Hello, I am your FEProblemBase-derived class and my name is '" << this->name() << "'"
+           << std::endl;
 }
 
-MooseTestProblem::~MooseTestProblem()
-{
-  _console << "Goodbye!" << std::endl;
-}
+MooseTestProblem::~MooseTestProblem() { _console << "Goodbye!" << std::endl; }

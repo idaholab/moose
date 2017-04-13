@@ -1,0 +1,8 @@
+[Tests]
+  [./test_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'material_derivatives_test.i'
+    ratio_tol = 4e-7
+    difference_tol = 7e-7
+  [../]
+[]

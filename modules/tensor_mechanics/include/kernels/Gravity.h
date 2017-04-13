@@ -12,16 +12,16 @@
 class Function;
 class Gravity;
 
-template<>
+template <>
 InputParameters validParams<Gravity>();
 
 /**
- * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the density
+ * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the
+ * density
  */
 class Gravity : public Kernel
 {
 public:
-
   Gravity(const InputParameters & parameters);
 
   virtual ~Gravity() {}
@@ -37,4 +37,4 @@ protected:
   const Real _alpha;
 };
 
-#endif //GRAVITY_H
+#endif // GRAVITY_H

@@ -30,27 +30,31 @@ class DofMap;
 class Variable;
 }
 
-typedef MooseArray<Real>               VariableValue;
-typedef MooseArray<RealGradient>       VariableGradient;
-typedef MooseArray<RealTensor>         VariableSecond;
+typedef MooseArray<Real> VariableValue;
+typedef MooseArray<RealGradient> VariableGradient;
+typedef MooseArray<RealTensor> VariableSecond;
 
-typedef MooseArray<std::vector<Real> >         VariableTestValue;
-typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
+typedef MooseArray<std::vector<Real>> VariableTestValue;
+typedef MooseArray<std::vector<RealGradient>> VariableTestGradient;
+typedef MooseArray<std::vector<RealTensor>> VariableTestSecond;
 
-typedef MooseArray<std::vector<Real> >         VariablePhiValue;
-typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariablePhiSecond;
+typedef MooseArray<std::vector<Real>> VariablePhiValue;
+typedef MooseArray<std::vector<RealGradient>> VariablePhiGradient;
+typedef MooseArray<std::vector<RealTensor>> VariablePhiSecond;
 
 class Assembly;
 class SubProblem;
 class SystemBase;
-
+class MooseMesh;
 
 class MooseVariableBase
 {
 public:
-  MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableBase(unsigned int var_num,
+                    const FEType & fe_type,
+                    SystemBase & sys,
+                    Assembly & assembly,
+                    Moose::VarKindType var_kind);
   virtual ~MooseVariableBase();
 
   /**
@@ -70,9 +74,15 @@ public:
   SystemBase & sys() { return _sys; }
 
   /**
-   * Get the variable number
+   * Get the variable name
    */
   const std::string & name() const;
+
+  /**
+   * Get all global dofindices for the variable
+   */
+  const std::vector<dof_id_type> & allDofIndices() const;
+  unsigned int totalVarDofs() { return allDofIndices().size(); }
 
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
@@ -132,6 +142,9 @@ protected:
   const DofMap & _dof_map;
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
+
+  /// mesh the variable is active in
+  MooseMesh & _mesh;
 
   /// scaling factor for this variable
   Real _scaling_factor;

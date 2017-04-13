@@ -8,7 +8,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -33,25 +33,25 @@
 [Kernels]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = ppwater
   [../]
   [./flux0]
     type = PorousFlowAdvectiveFlux
     variable = ppwater
     gravity = '0 0 0'
-    component_index = 0
+    fluid_component = 0
   [../]
   [./mass1]
     type = PorousFlowMassTimeDerivative
-    component_index = 1
+    fluid_component = 1
     variable = ppgas
   [../]
   [./flux1]
     type = PorousFlowAdvectiveFlux
     variable = ppgas
     gravity = '0 0 0'
-    component_index = 1
+    fluid_component = 1
   [../]
 []
 
@@ -65,7 +65,22 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
+  [./temperature_qp]
+    type = PorousFlowTemperature
+  [../]
   [./ppss]
+    type = PorousFlow2PhasePP_VG
+    at_nodes = true
+    phase0_porepressure = ppwater
+    phase1_porepressure = ppgas
+    m = 0.5
+    al = 1
+  [../]
+  [./ppss_qp]
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
@@ -74,16 +89,19 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1000
     bulk_modulus = 2E9
     phase = 0
   [../]
   [./dens1] # this is irrelevant - there is no gas
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 2E6
     phase = 1
@@ -91,15 +109,29 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./dens0_qp]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1000
+    bulk_modulus = 2E9
+    phase = 0
+  [../]
+  [./dens1_qp] # this is irrelevant - there is no gas
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1
+    bulk_modulus = 2E6
+    phase = 1
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = false
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
   [./permeability]
@@ -108,31 +140,37 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 1
+    at_nodes = true
+    n = 1
     phase = 0
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 1
+    at_nodes = true
+    n = 1
     phase = 1
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1E-3
     phase = 0
   [../]
   [./visc1] # this is irrelevant - there is no gas
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1E-5
     phase = 1
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 
@@ -155,8 +193,9 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-20 10000'
+    petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it'
+    petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-15       1E-20 20'
   [../]
 []
 
@@ -239,7 +278,5 @@
 [Outputs]
   file_base = pressure_pulse_1d_2phase
   print_linear_residuals = false
-  [./csv]
-    type = CSV
-  [../]
+  csv = true
 []

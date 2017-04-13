@@ -16,10 +16,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BlkResTestDiffusion;
 
-template<>
+template <>
 InputParameters validParams<BlkResTestDiffusion>();
 
 InputParameters & modifyParams(InputParameters & params);
@@ -34,4 +34,4 @@ protected:
   virtual Real computeQpJacobian();
 };
 
-#endif //BLKRESTESTDIFFUSION_H
+#endif // BLKRESTESTDIFFUSION_H

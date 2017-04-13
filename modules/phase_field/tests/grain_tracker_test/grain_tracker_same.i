@@ -8,10 +8,12 @@
   ymax = 1000
   zmax = 0
   elem_type = QUAD4
+
+  parallel_type = replicated # required for advanced_op_assignment
 []
 
 [GlobalParams]
-  op_num = 12
+  op_num = 10
   var_name_base = gr
 []
 
@@ -23,8 +25,9 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 8675
-      grain_num = 12
+      rand_seed = 1
+      grain_num = 10
+      coloring_algorithm = bt
     [../]
   [../]
 []
@@ -57,32 +60,25 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
-      auto_direction = 'x y'
-    [../]
-  [../]
 []
 
 [Materials]
   [./CuGrGr]
     type = GBEvolution
-    block = 0
     T = 500 # K
     wGB = 100 # nm
-
     GBmob0 = 2.5e-6
     Q = 0.23
     GBenergy = 0.708
@@ -93,6 +89,11 @@
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
+    threshold = 0.5
+    connecting_threshold = 0.2
+    # Note: This is here for demonstration purposes
+    # use elemental for most simulations
+    flood_entity_type = NODAL
   [../]
   [./DOFs]
     type = NumDOFs
@@ -101,12 +102,10 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   scheme = bdf2
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   l_tol = 1.0e-4

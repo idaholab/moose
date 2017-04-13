@@ -9,22 +9,25 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ColumnMajorMatrix;
 class StressDivergence;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template<>
+template <>
 InputParameters validParams<StressDivergence>();
 
 class StressDivergence : public Kernel
 {
 public:
-
   StressDivergence(const InputParameters & parameters);
 
 protected:
+  virtual void computeResidual();
+  virtual void computeJacobian();
+  virtual void computeOffDiagJacobian(unsigned int jvar);
+
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
@@ -51,5 +54,8 @@ private:
   const unsigned int _temp_var;
   const Real _zeta;
   const Real _alpha;
+  std::vector<std::vector<Real>> _avg_grad_test;
+  std::vector<std::vector<Real>> _avg_grad_phi;
+  bool _volumetric_locking_correction;
 };
-#endif //STRESSDIVERGENCE_H
+#endif // STRESSDIVERGENCE_H

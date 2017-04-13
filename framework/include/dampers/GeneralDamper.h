@@ -18,21 +18,20 @@
 // Moose Includes
 #include "Damper.h"
 
-//Forward Declarations
+// Forward Declarations
 class GeneralDamper;
 class SubProblem;
 class SystemBase;
 class MooseVariable;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<GeneralDamper>();
 
 /**
  * Base class for deriving general dampers
  */
-class GeneralDamper :
-  public Damper
+class GeneralDamper : public Damper
 {
 public:
   GeneralDamper(const InputParameters & parameters);
@@ -44,4 +43,4 @@ public:
                               const NumericVector<Number> & update) = 0;
 };
 
-#endif //GENERALDAMPER_H
+#endif // GENERALDAMPER_H

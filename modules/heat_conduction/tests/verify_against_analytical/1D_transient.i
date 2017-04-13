@@ -21,7 +21,7 @@
   [./T_IC]
     type = FunctionIC
     variable = T
-    function = '100*sin(3.14159*x/80)'
+    function = '100*sin(pi*x/80)'
   [../]
 []
 
@@ -75,7 +75,7 @@
 [Postprocessors]
   [./error]
     type = NodalL2Error
-    function = '100*sin(3.14159*x/80)*exp(-0.95/(0.092*8.92)*3.14159^2/80^2*t)' #T(x,t) = 100sin(pix/L)exp(-rho/(cp k) pi^2/L^2 t)
+    function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T
   [../]
 []

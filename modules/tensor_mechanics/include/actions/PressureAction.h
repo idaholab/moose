@@ -9,31 +9,19 @@
 
 #include "Action.h"
 
-class PressureAction: public Action
+class PressureAction : public Action
 {
 public:
   PressureAction(const InputParameters & params);
 
-  virtual void act();
-
-private:
-  const std::vector<BoundaryName> _boundary;
-  const std::string _disp_x;
-  const std::string _disp_y;
-  const std::string _disp_z;
-  std::vector<std::vector<AuxVariableName> > _save_in_vars;
-  std::vector<bool> _has_save_in_vars;
-
-  const Real _factor;
-  const Real _alpha;
-  const std::string _postprocessor;
+  virtual void act() override;
 
 protected:
-  std::string _kernel_name;
-  bool _use_displaced_mesh;
+  std::vector<std::vector<AuxVariableName>> _save_in_vars;
+  std::vector<bool> _has_save_in_vars;
 };
 
-template<>
+template <>
 InputParameters validParams<PressureAction>();
 
-#endif //PRESSUREACTION_H
+#endif // PRESSUREACTION_H

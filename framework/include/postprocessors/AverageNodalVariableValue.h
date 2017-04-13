@@ -20,7 +20,7 @@
 // Forward Declarations
 class AverageNodalVariableValue;
 
-template<>
+template <>
 InputParameters validParams<AverageNodalVariableValue>();
 
 class AverageNodalVariableValue : public NodalVariablePostprocessor
@@ -28,19 +28,16 @@ class AverageNodalVariableValue : public NodalVariablePostprocessor
 public:
   AverageNodalVariableValue(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
-  void threadJoin(const UserObject & y);
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   Real _avg;
   unsigned int _n;
 };
 
-#endif //AVERAGENODALVARIABLEVALUE_H
+#endif // AVERAGENODALVARIABLEVALUE_H

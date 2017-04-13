@@ -21,21 +21,22 @@
 // Forward Declarations
 class LayeredSideAverage;
 
-template<>
+template <>
 InputParameters validParams<LayeredSideAverage>();
 
 /**
- * This UserObject computes side averages of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes side averages of a variable storing partial sums for the specified
+ * number of intervals in a direction (x,y,z).c
  */
 class LayeredSideAverage : public LayeredSideIntegral
 {
 public:
   LayeredSideAverage(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Value of the volume for each layer

@@ -171,8 +171,8 @@
 
    l_max_its = 50
    nl_max_its = 20
-   nl_abs_tol = 1e-5
-   nl_rel_tol = 1e-8
+   nl_abs_tol = 1e-9
+   nl_rel_tol = 1e-12
    l_tol = 1e-2
 
    start_time = 0.0
@@ -182,22 +182,6 @@
    num_steps = 1
 
 []
-
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
-
-[]
-
 
 [Outputs]
   file_base = t_stress_crack_infinite_plate_out

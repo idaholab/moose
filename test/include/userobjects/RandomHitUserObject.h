@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef RANDOMHITUSEROBJECT_H
 #define RANDOMHITUSEROBJECT_H
 
@@ -20,14 +19,13 @@
 
 #include "MooseRandom.h"
 
-//Forward Declarations
+// Forward Declarations
 class RandomHitUserObject;
 
-template<>
+template <>
 InputParameters validParams<RandomHitUserObject>();
 
-class RandomHitUserObject :
-  public GeneralUserObject
+class RandomHitUserObject : public GeneralUserObject
 {
 public:
   RandomHitUserObject(const InputParameters & parameters);
@@ -48,14 +46,14 @@ public:
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
-  virtual void initialize(){}
+  virtual void initialize() {}
 
   /**
    * Compute the hit positions for this timestep
    */
   virtual void execute();
 
-  virtual void finalize(){}
+  virtual void finalize() {}
 
 protected:
   unsigned int _num_hits;

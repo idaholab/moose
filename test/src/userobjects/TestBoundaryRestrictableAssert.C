@@ -14,16 +14,18 @@
 
 #include "TestBoundaryRestrictableAssert.h"
 
-template<>
-InputParameters validParams<TestBoundaryRestrictableAssert>()
+template <>
+InputParameters
+validParams<TestBoundaryRestrictableAssert>()
 {
   InputParameters params = validParams<SideUserObject>();
-  params.addParam<bool>("test_invalid", false, "Set to true for test for the Moose::INVALID_BOUNDARY_ID");
+  params.addParam<bool>(
+      "test_invalid", false, "Set to true for test for the Moose::INVALID_BOUNDARY_ID");
   return params;
 }
 
-TestBoundaryRestrictableAssert::TestBoundaryRestrictableAssert(const InputParameters & parameters) :
-  SideUserObject(parameters)
+TestBoundaryRestrictableAssert::TestBoundaryRestrictableAssert(const InputParameters & parameters)
+  : SideUserObject(parameters)
 {
   if (getParam<bool>("test_invalid"))
   {
@@ -33,7 +35,6 @@ TestBoundaryRestrictableAssert::TestBoundaryRestrictableAssert(const InputParame
       mooseError("Invalid boundary id test failed");
   }
 }
-
 
 void
 TestBoundaryRestrictableAssert::execute()

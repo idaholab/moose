@@ -9,26 +9,21 @@
 
 #include "Material.h"
 
-
 /**
  * Compute density, which may changed based on a deforming mesh.
  */
 class Density : public Material
 {
 public:
-  Density( const InputParameters & params);
-
-  virtual void initStatefulProperties(unsigned n_points);
+  Density(const InputParameters & params);
 
 protected:
-  virtual void computeProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
-  const bool _is_coupled;
-  const bool _is_RZ;
-  const bool _is_SphericalR;
-  const VariableGradient & _grad_disp_x;
-  const VariableGradient & _grad_disp_y;
-  const VariableGradient & _grad_disp_z;
+  bool _is_coupled;
+  Moose::CoordinateSystemType _coord_system;
+  std::vector<const VariableGradient *> _grad_disp;
   const VariableValue & _disp_r;
 
   const Real _orig_density;
@@ -36,7 +31,7 @@ protected:
   MaterialProperty<Real> & _density_old;
 };
 
-template<>
+template <>
 InputParameters validParams<Density>();
 
 #endif // DENSITY_H

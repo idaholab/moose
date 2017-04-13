@@ -17,11 +17,11 @@
 
 #include "ElementVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<ElementExtremeValue>();
 
 /// A postprocessor for collecting the nodal min or max value
@@ -41,13 +41,13 @@ public:
    */
   ElementExtremeValue(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual Real getValue() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Get the extreme value at each quadrature point
-  virtual void computeQpValue();
+  virtual void computeQpValue() override;
 
   /// The extreme value type
   ExtremeType _type;

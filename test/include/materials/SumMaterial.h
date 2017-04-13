@@ -18,7 +18,7 @@
 
 class SumMaterial;
 
-template<>
+template <>
 InputParameters validParams<SumMaterial>();
 
 /**

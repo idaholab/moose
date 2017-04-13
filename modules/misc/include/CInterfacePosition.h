@@ -5,17 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef CINTERFACEPOSITION_H
 #define CINTERFACEPOSITION_H
 
 #include "NodalProxyMaxValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class CInterfacePosition;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<CInterfacePosition>();
 
 class CInterfacePosition : public NodalProxyMaxValue
@@ -30,7 +29,6 @@ protected:
   Real _RefVal;
   unsigned int _direction_index;
   MooseMesh & _mesh;
-
 };
 
-#endif //CINTERFACEPOSITION_H
+#endif // CINTERFACEPOSITION_H

@@ -10,10 +10,10 @@
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
 
-//Forward Declarations
+// Forward Declarations
 class RegularSolutionFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<RegularSolutionFreeEnergy>();
 
 /**
@@ -21,8 +21,7 @@ InputParameters validParams<RegularSolutionFreeEnergy>();
  * and uses automatic differentiation to get the derivatives
  * \f$ F = \frac14 \omega c(1 - c) + k_bT (c\log c + (1 - c)\log(1 - c))\f$.
  */
-class RegularSolutionFreeEnergy : public DerivativeParsedMaterialHelper,
-                                  public ExpressionBuilder
+class RegularSolutionFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
   RegularSolutionFreeEnergy(const InputParameters & parameters);
@@ -41,4 +40,4 @@ protected:
   const Real _kB;
 };
 
-#endif //REGULARSOLUTIONFREEENERGY_H
+#endif // REGULARSOLUTIONFREEENERGY_H

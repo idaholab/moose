@@ -16,8 +16,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -29,8 +27,6 @@
 []
 
 [Kernels]
-  active = 'td diff ffn'
-
   [./td]
     type = TimeDerivative
     variable = u
@@ -48,8 +44,6 @@
 []
 
 [BCs]
-  active = 'all'
-
   [./all]
     type = TEJumpBC
     variable = u
@@ -57,33 +51,25 @@
   [../]
 []
 
-[Postprocessors]
-  active = ''
-
-  [./dt]
-    type = TimestepSize
-  [../]
-[]
-
 [Executioner]
   type = Transient
+
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 0.15
+    dt = 0.5
   [../]
-
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_abs_tol = 1e-15
-#  l_tol = 1e-5
 
   start_time = 0.0
   end_time = 5
   num_steps = 500000
 
-  dtmax = 0.25
+  dtmin = 0.4
+  dtmax = 0.9
 []
 
 [Outputs]

@@ -14,21 +14,23 @@
 
 #include "ExampleFunction.h"
 
-template<>
-InputParameters validParams<ExampleFunction>()
+template <>
+InputParameters
+validParams<ExampleFunction>()
 {
   InputParameters params = validParams<Function>();
   params.addParam<Real>("alpha", 1.0, "The value of alpha");
   return params;
 }
 
-ExampleFunction::ExampleFunction(const InputParameters & parameters) :
-    Function(parameters),
-    _alpha(getParam<Real>("alpha"))
-{}
+ExampleFunction::ExampleFunction(const InputParameters & parameters)
+  : Function(parameters), _alpha(getParam<Real>("alpha"))
+{
+}
 
 Real
 ExampleFunction::value(Real /*t*/, const Point & p)
 {
-  return _alpha*_alpha*libMesh::pi*libMesh::pi*std::sin(_alpha*libMesh::pi*p(0));  // p(0) == x
+  return _alpha * _alpha * libMesh::pi * libMesh::pi *
+         std::sin(_alpha * libMesh::pi * p(0)); // p(0) == x
 }

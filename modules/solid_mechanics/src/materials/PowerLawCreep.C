@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "PowerLawCreep.h"
 
-template<>
-InputParameters validParams<PowerLawCreep>()
+template <>
+InputParameters
+validParams<PowerLawCreep>()
 {
   InputParameters params = validParams<SolidModel>();
 
@@ -20,20 +21,22 @@ InputParameters validParams<PowerLawCreep>()
   params.addParam<Real>("start_time", 0, "Start time (if not zero)");
 
   //  Sub-Newton Iteration control parameters
-  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
-  params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
+  params.addParam<Real>(
+      "relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
+  params.addParam<Real>(
+      "absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
   params.addParam<unsigned int>("max_its", 10, "Maximum number of sub-newton iterations");
-  params.addParam<bool>("output_iteration_info", false, "Set true to output sub-newton iteration information");
-  params.addParam<bool>("output_iteration_info_on_error", false, "Set true to output sub-newton iteration information when a step fails");
+  params.addParam<bool>(
+      "output_iteration_info", false, "Set true to output sub-newton iteration information");
+  params.addParam<bool>("output_iteration_info_on_error",
+                        false,
+                        "Set true to output sub-newton iteration information when a step fails");
 
   return params;
 }
 
-
-PowerLawCreep::PowerLawCreep( const InputParameters & parameters)
-  :SolidModel(parameters)
+PowerLawCreep::PowerLawCreep(const InputParameters & parameters) : SolidModel(parameters)
 {
 
   createConstitutiveModel("PowerLawCreepModel");
-
 }

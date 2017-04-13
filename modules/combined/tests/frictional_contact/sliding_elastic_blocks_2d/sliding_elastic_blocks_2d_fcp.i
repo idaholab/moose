@@ -1,5 +1,8 @@
 [Mesh]
   file = sliding_elastic_blocks_2d.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
@@ -19,7 +22,7 @@
   inc_slip_x = inc_slip_x
   inc_slip_y = inc_slip_y
   contact_slip_tolerance_factor = 100
-  target_relative_contact_residual = 1.e-4
+  target_relative_contact_residual = 1.e-6
   maximum_slip_iterations = 500
   minimum_slip_iterations = 1
   slip_updates_per_iteration = 5
@@ -36,8 +39,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -171,25 +172,20 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
 
-
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
   l_max_its = 100
   nl_max_its = 1000
   dt = 0.01
   end_time = 0.05
   num_steps = 1000
-  nl_rel_tol = 1e-4
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-7
   dtmin = 0.01
   l_tol = 1e-3
 
@@ -214,8 +210,6 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 2
     model = glued
     penalty = 1e+6

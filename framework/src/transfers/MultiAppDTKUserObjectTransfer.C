@@ -23,18 +23,24 @@
 // Moose Includes
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "MooseVariable.h"
 
-template<>
-InputParameters validParams<MultiAppDTKUserObjectTransfer>()
+template <>
+InputParameters
+validParams<MultiAppDTKUserObjectTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<UserObjectName>("user_object", "The UserObject you want to transfer values from.  Note: This might be a UserObject from your MultiApp's input file!");
+  params.addRequiredParam<AuxVariableName>(
+      "variable", "The auxiliary variable to store the transferred values in.");
+  params.addRequiredParam<UserObjectName>(
+      "user_object",
+      "The UserObject you want to transfer values from.  Note: This might be a "
+      "UserObject from your MultiApp's input file!");
   return params;
 }
 
-MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     MooseVariableInterface(this, true),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _setup(false)
@@ -48,17 +54,24 @@ MultiAppDTKUserObjectTransfer::execute()
   {
     _setup = true;
 
-    _comm_default = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(_communicator.get()))));
+    _comm_default = Teuchos::rcp(new Teuchos::MpiComm<int>(
+        Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(_communicator.get()))));
 
-    _multi_app_user_object_evaluator = Teuchos::rcp(new MultiAppDTKUserObjectEvaluator(*_multi_app, _user_object_name));
+    _multi_app_user_object_evaluator =
+        Teuchos::rcp(new MultiAppDTKUserObjectEvaluator(*_multi_app, _user_object_name));
 
     _field_evaluator = _multi_app_user_object_evaluator;
 
     _multi_app_geom = _multi_app_user_object_evaluator->createSourceGeometry(_comm_default);
 
-    _to_adapter = new DTKInterpolationAdapter(_comm_default, _multi_app->problem().es(), Point(), 3);
+    _to_adapter =
+        new DTKInterpolationAdapter(_comm_default, _multi_app->problemBase().es(), Point(), 3);
 
-    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> >(_comm_default, 3, true);
+    _src_to_tgt_map =
+        new DataTransferKit::VolumeSourceMap<DataTransferKit::Box,
+                                             GlobalOrdinal,
+                                             DataTransferKit::MeshContainer<GlobalOrdinal>>(
+            _comm_default, 3, true);
 
     _console << "--Setting Up Transfer--" << std::endl;
     if (_variable->isNodal())
@@ -69,7 +82,6 @@ MultiAppDTKUserObjectTransfer::execute()
     _console << "--Transfer Setup Complete--" << std::endl;
 
     _to_values = _to_adapter->get_values_to_fill(_variable->name());
-
   }
 
   _console << "--Mapping Values--" << std::endl;
@@ -77,7 +89,7 @@ MultiAppDTKUserObjectTransfer::execute()
   _console << "--Finished Mapping--" << std::endl;
 
   _to_adapter->update_variable_values(_variable->name(), _src_to_tgt_map->getMissedTargetPoints());
-  _multi_app->problem().es().update();
+  _multi_app->problemBase().es().update();
 }
 
-#endif //LIBMESH_TRILINOS_HAVE_DTK
+#endif // LIBMESH_TRILINOS_HAVE_DTK

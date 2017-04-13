@@ -16,8 +16,7 @@ functional forms of the calphad expressions.
 
 To install and/or upgrade these prerequisites use pip:
 ```
-pip install --upgrade sympy
-pip install --upgrade pycalphad
+sudo -H pip install --upgrade pycalphad
 ```
 
 

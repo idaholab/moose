@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'axisymmetric_centerline_average_value_test.i'
+    exodiff = 'out.e'
+  [../]
+[]

@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class CoupledAux;
 
-template<>
+template <>
 InputParameters validParams<CoupledAux>();
 
 /**
@@ -30,7 +29,6 @@ InputParameters validParams<CoupledAux>();
 class CoupledAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -42,11 +40,11 @@ public:
 protected:
   virtual Real computeValue();
 
-  Real _value;                                  ///< The value being set for this kernel
-  MooseEnum _operator;                          ///< Operator being applied on this variable and coupled variable
+  Real _value;         ///< The value being set for this kernel
+  MooseEnum _operator; ///< Operator being applied on this variable and coupled variable
 
-  int _coupled;                                 ///< The number of the coupled variable
-  const VariableValue & _coupled_val;           ///< Coupled variable
+  int _coupled;                       ///< The number of the coupled variable
+  const VariableValue & _coupled_val; ///< Coupled variable
 };
 
-#endif //COUPLEDAUX_H
+#endif // COUPLEDAUX_H

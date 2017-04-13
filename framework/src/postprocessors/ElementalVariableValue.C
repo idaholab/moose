@@ -13,11 +13,15 @@
 /****************************************************************/
 
 #include "ElementalVariableValue.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<ElementalVariableValue>()
+template <>
+InputParameters
+validParams<ElementalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
@@ -25,15 +29,15 @@ InputParameters validParams<ElementalVariableValue>()
   return params;
 }
 
-ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
 {
-  // This class only works with SerialMesh, since it relies on a
-  // specific element numbering that we can't guarantee with ParallelMesh
-  _mesh.errorIfParallelDistribution("ElementalVariableValue");
+  // This class only works with ReplicatedMesh, since it relies on a
+  // specific element numbering that we can't guarantee with DistributedMesh
+  _mesh.errorIfDistributedMesh("ElementalVariableValue");
 }
 
 Real
@@ -58,4 +62,3 @@ ElementalVariableValue::getValue()
 
   return value;
 }
-

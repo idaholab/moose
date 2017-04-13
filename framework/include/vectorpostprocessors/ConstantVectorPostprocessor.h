@@ -17,10 +17,10 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConstantVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ConstantVectorPostprocessor>();
 
 class ConstantVectorPostprocessor : public GeneralVectorPostprocessor
@@ -28,10 +28,8 @@ class ConstantVectorPostprocessor : public GeneralVectorPostprocessor
 public:
   ConstantVectorPostprocessor(const InputParameters & parameters);
 
-  virtual ~ConstantVectorPostprocessor() {}
-
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
 
 protected:
   VectorPostprocessorValue & _value;

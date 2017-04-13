@@ -16,7 +16,6 @@
 []
 
 [GlobalParams]
-  block = 0
   derivative_order = 0
   outputs = exodus
 []

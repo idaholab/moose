@@ -1,76 +1,50 @@
 [Mesh]
   file = nodal_area_Hex20.e
+[]
+
+[GlobalParams]
+  order = SECOND
   displacements = 'displ_x displ_y displ_z'
 []
 
 [Functions]
-
   [./disp]
     type = PiecewiseLinear
     x = '0     1'
     y = '0  20e-6'
   [../]
-
 []
 
 [Variables]
   [./displ_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
-
   [./displ_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
-
   [./displ_z]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./react_x]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./react_y]
-    order = SECOND
-    family = LAGRANGE
   [../]
   [./react_z]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
-    save_in_disp_x = react_x
-    save_in_disp_y = react_y
-    save_in_disp_z = react_z
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
+[Modules/TensorMechanics/Master]
+  [./all]
+    volumetric_locking_correction = true
+    incremental = true
+    save_in = 'react_x react_y react_z'
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_xx'
   [../]
 []
 
 [BCs]
-
   [./move_right]
     type = FunctionPresetBC
     boundary = '1'
@@ -98,44 +72,35 @@
     variable = displ_z
     value = 0
   [../]
-
 []
 
 [Contact]
   [./dummy_name]
     master = 3
     slave = 2
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
     penalty = 1e7
-    order = SECOND
     tangential_tolerance = 1e-5
   [../]
 []
 
-
 [Materials]
-
-  [./dummy]
-    type = Elastic
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     block = '1 2'
-
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
-
     youngs_modulus = 1e6
-    poissons_ratio = 0
+    poissons_ratio = 0.0
   [../]
 
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
+  [../]
 []
 
 [Executioner]
   type = Transient
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
 

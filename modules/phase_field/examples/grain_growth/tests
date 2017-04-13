@@ -1,0 +1,49 @@
+[Tests]
+  [./grain_growth_2D_graintracker]
+    type = RunApp
+    input = 'grain_growth_2D_graintracker.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./grain_growth_2D_random]
+    type = RunApp
+    input = 'grain_growth_2D_random.i'
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./grain_growth_2D_voronoi]
+    type = RunApp
+    input = 'grain_growth_2D_voronoi.i'
+    cli_args = 'Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./grain_growth_2D_voronoi_newadapt]
+    type = RunApp
+    input = 'grain_growth_2D_voronoi_newadapt.i'
+    cli_args = 'Adaptivity/max_h_level=0'
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./grain_growth_3D]
+    type = RunApp
+    input = 'grain_growth_3D.i'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = 'OPT'
+    check_input = True
+  [../]
+  [./really_small_problem]
+    type = RunApp
+    input = 'really_small_problem.i'
+    check_input = True
+  [../]
+  [./test_problem]
+    type = RunApp
+    input = 'test_problem.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    method = 'OPT'
+    check_input = True
+  [../]
+[]

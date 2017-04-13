@@ -3,10 +3,14 @@
   file = void2d_mesh.xda
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Variables]
-  [./u]
+  [./disp_x]
   [../]
-  [./v]
+  [./disp_y]
   [../]
   [./c]
   [../]
@@ -38,27 +42,25 @@
     variable = c
     l = 0.01
     beta = b
-    visco =1e-1
+    visco = 1e-1
     gc_prop_var = 'gc_prop'
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
-    disp_x = u
-    disp_y = v
+  [../]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y'
+    save_in = 'resid_x resid_y'
   [../]
   [./solid_x]
-    type = StressDivergencePFFracTensors
-    variable = u
-    displacements = 'u v'
+    type = PhaseFieldFractureMechanicsOffDiag
+    variable = disp_x
     component = 0
-    save_in = resid_x
     c = c
   [../]
   [./solid_y]
-    type = StressDivergencePFFracTensors
-    variable = v
-    displacements = 'u v'
+    type = PhaseFieldFractureMechanicsOffDiag
+    variable = disp_y
     component = 1
-    save_in = resid_y
     c = c
   [../]
   [./dcdt]
@@ -66,7 +68,7 @@
     variable = c
   [../]
   [./pfintvar]
-    type = PFFracIntVar
+    type = Reaction
     variable = b
   [../]
   [./pfintcoupled]
@@ -90,19 +92,19 @@
 [BCs]
   [./ydisp]
     type = FunctionPresetBC
-    variable = v
+    variable = disp_y
     boundary = top
     function = tfunc
   [../]
   [./yfix]
     type = PresetBC
-    variable = v
+    variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./xfix]
     type = PresetBC
-    variable = u
+    variable = disp_x
     boundary = left
     value = 0
   [../]
@@ -141,7 +143,7 @@
   [./strain]
     type = ComputeSmallStrain
     block = 0
-    displacements = 'u v'
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -159,7 +161,6 @@
 []
 
 [Preconditioning]
-  active = 'smp'
   [./smp]
     type = SMP
     full = true
@@ -168,17 +169,17 @@
 
 [Executioner]
   type = Transient
-
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm      31                  preonly       lu           1'
 
-  nl_rel_tol = 1e-8
-  l_max_its = 10
+  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm      lu           1'
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-12
+  l_max_its = 15
   nl_max_its = 10
 
   dt = 1e-4
-  dtmin = 1e-4
   num_steps = 2
 []
 

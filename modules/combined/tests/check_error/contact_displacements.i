@@ -1,37 +1,23 @@
-[Mesh]#Comment
+[Mesh]
   file = cube.e
-#  displacements = 'disp_x disp_y disp_z'
-[] # Mesh
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
+[]
 
-[] # Variables
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
 [BCs]
-
   [./2_x]
     type = DirichletBC
     variable = disp_x
@@ -50,44 +36,34 @@
     boundary = 2
     value = 0.0
   [../]
-
-[] # BCs
+[]
 
 [Contact]
   [./fred]
     master = 1
     slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
 [Materials]
-
-  [./goo]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-
   [../]
-
-[] # Materials
+  [./strain]
+    type = ComputeSmallStrain
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+  [../]
+[]
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
 
   nl_abs_tol = 1e-10
 
@@ -97,9 +73,9 @@
   dt = 1.0
   num_steps = 2
   end_time = 2.0
-[] # Executioner
+[]
 
 [Outputs]
   file_base = out
   exodus = true
-[] # Outputs
+[]

@@ -45,7 +45,6 @@
 [Materials]
   [./consts]
     type = DerivativeParsedMaterial
-    block = 0
     f_name  = L
     function = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
     args = 'op'
@@ -55,7 +54,6 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = 'op'
     function = '2*op^2*(1-op)^2 - 0.2*op'

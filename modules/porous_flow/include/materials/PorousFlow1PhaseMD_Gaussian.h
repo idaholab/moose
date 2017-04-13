@@ -10,10 +10,10 @@
 
 #include "PorousFlowVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow1PhaseMD_Gaussian;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow1PhaseMD_Gaussian>();
 
 /**
@@ -28,9 +28,8 @@ public:
   PorousFlow1PhaseMD_Gaussian(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// Gaussian parameter: saturation = exp(-(al*p)^2)
   const Real _al;
@@ -50,11 +49,8 @@ protected:
   /// (1/_bulk)^2
   const Real _recip_bulk2;
 
-  /// Nodal value of mass-density of the fluid phase
-  const VariableValue & _md_nodal_var;
-
-  /// Quadpoint value of mass-density of the fluid phase
-  const VariableValue & _md_qp_var;
+  /// Nodal or quadpoint value of mass-density of the fluid phase
+  const VariableValue & _md_var;
 
   /// Gradient(_mass-density at quadpoints)
   const VariableGradient & _gradmd_qp_var;
@@ -68,4 +64,4 @@ protected:
   virtual void buildPS();
 };
 
-#endif //POROUSFLOW1PHASEMD_GAUSSIAN_H
+#endif // POROUSFLOW1PHASEMD_GAUSSIAN_H

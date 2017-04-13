@@ -17,23 +17,25 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 
-template<>
-InputParameters validParams<ScalarInitialCondition>()
+template <>
+InputParameters
+validParams<ScalarInitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
+  params.addParam<VariableName>(
+      "variable", "The variable this initial condition is supposed to provide values for.");
 
   params.registerBase("ScalarInitialCondition");
 
   return params;
 }
 
-ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters) :
-    MooseObject(parameters),
+ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters)
+  : MooseObject(parameters),
     ScalarCoupleable(this),
     FunctionInterface(this),
     DependencyResolverInterface(),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_fe_problem.assembly(_tid)),
@@ -43,13 +45,11 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
   const std::vector<MooseVariableScalar *> & coupled_vars = getCoupledMooseScalarVars();
-  for (std::vector<MooseVariableScalar *>::const_iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
-    _depend_vars.insert((*it)->name());
+  for (const auto & var : coupled_vars)
+    _depend_vars.insert(var->name());
 }
 
-ScalarInitialCondition::~ScalarInitialCondition()
-{
-}
+ScalarInitialCondition::~ScalarInitialCondition() {}
 
 const std::set<std::string> &
 ScalarInitialCondition::getRequestedItems()

@@ -6,18 +6,19 @@
 /****************************************************************/
 #include "MathEBFreeEnergy.h"
 
-template<>
-InputParameters validParams<MathEBFreeEnergy>()
+template <>
+InputParameters
+validParams<MathEBFreeEnergy>()
 {
   InputParameters params = validParams<DerivativeParsedMaterialHelper>();
-  params.addClassDescription("Material that implements the math free energy using the expression builder and automatric differentiation");
+  params.addClassDescription("Material that implements the math free energy using the expression "
+                             "builder and automatric differentiation");
   params.addRequiredCoupledVar("c", "Concentration variable");
   return params;
 }
 
-MathEBFreeEnergy::MathEBFreeEnergy(const InputParameters & parameters) :
-    DerivativeParsedMaterialHelper(parameters),
-    _c("c")
+MathEBFreeEnergy::MathEBFreeEnergy(const InputParameters & parameters)
+  : DerivativeParsedMaterialHelper(parameters), _c("c")
 {
   EBFunction free_energy;
   // Definition of the free energy for the expression builder

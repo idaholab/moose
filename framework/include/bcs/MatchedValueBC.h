@@ -17,10 +17,10 @@
 
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class MatchedValueBC;
 
-template<>
+template <>
 InputParameters validParams<MatchedValueBC>();
 
 /**
@@ -32,8 +32,8 @@ public:
   MatchedValueBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   const VariableValue & _v;
 
@@ -41,4 +41,4 @@ protected:
   unsigned int _v_num;
 };
 
-#endif //MATCHEDVALUEBC_H
+#endif // MATCHEDVALUEBC_H

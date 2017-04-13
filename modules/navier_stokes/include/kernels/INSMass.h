@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMass;
 
-template<>
+template <>
 InputParameters validParams<INSMass>();
 
 /**
@@ -25,7 +25,7 @@ class INSMass : public Kernel
 public:
   INSMass(const InputParameters & parameters);
 
-  virtual ~INSMass(){}
+  virtual ~INSMass() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -43,6 +43,5 @@ protected:
   unsigned _w_vel_var_number;
   unsigned _p_var_number;
 };
-
 
 #endif // INSMASS_H

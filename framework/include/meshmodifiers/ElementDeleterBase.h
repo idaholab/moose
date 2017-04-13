@@ -19,7 +19,7 @@
 
 class ElementDeleterBase;
 
-template<>
+template <>
 InputParameters validParams<ElementDeleterBase>();
 
 /**
@@ -34,7 +34,8 @@ class ElementDeleterBase : public MeshModifier
 public:
   ElementDeleterBase(const InputParameters & parameters);
 
-  virtual void modify();
+protected:
+  virtual void modify() override;
 
   /**
    * Method that returns a Boolean indicating whether an

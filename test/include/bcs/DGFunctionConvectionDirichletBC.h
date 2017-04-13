@@ -19,7 +19,7 @@
 class DGFunctionConvectionDirichletBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<DGFunctionConvectionDirichletBC>();
 
 /**
@@ -38,11 +38,11 @@ InputParameters validParams<DGFunctionConvectionDirichletBC>();
 class DGFunctionConvectionDirichletBC : public IntegratedBC
 {
 public:
-
   /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
    */
-  DGFunctionConvectionDirichletBC( const InputParameters & parameters);
+  DGFunctionConvectionDirichletBC(const InputParameters & parameters);
 
   virtual ~DGFunctionConvectionDirichletBC() {}
 
@@ -52,7 +52,6 @@ protected:
 
 private:
   Function & _func;
-
 
   RealVectorValue _velocity;
 

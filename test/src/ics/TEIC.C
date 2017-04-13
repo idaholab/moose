@@ -14,8 +14,9 @@
 
 #include "TEIC.h"
 
-template<>
-InputParameters validParams<TEIC>()
+template <>
+InputParameters
+validParams<TEIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addParam<double>("t_jump", 1.0, "Time when the jump occurs");
@@ -23,10 +24,8 @@ InputParameters validParams<TEIC>()
   return params;
 }
 
-TEIC::TEIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
-    _t_jump(getParam<Real>("t_jump")),
-    _slope(getParam<Real>("slope"))
+TEIC::TEIC(const InputParameters & parameters)
+  : InitialCondition(parameters), _t_jump(getParam<Real>("t_jump")), _slope(getParam<Real>("slope"))
 {
 }
 
@@ -34,10 +33,5 @@ Real
 TEIC::value(const Point & /*p*/)
 {
   Real t = 0.0;
-  return atan((t - _t_jump)*libMesh::pi * _slope);
+  return atan((t - _t_jump) * libMesh::pi * _slope);
 }
-
-
-
-
-

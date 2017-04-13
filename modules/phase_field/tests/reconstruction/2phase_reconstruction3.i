@@ -48,7 +48,7 @@
     type = EBSDReaderPointDataAux
     variable = GRAIN
     ebsd_reader = ebsd
-    data_name = 'grain'
+    data_name = 'feature_id'
     execute_on = 'initial'
   [../]
 []

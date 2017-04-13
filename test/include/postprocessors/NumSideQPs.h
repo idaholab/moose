@@ -21,7 +21,7 @@
 // Forward declerations
 class NumSideQPs;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralPostprocessor>();
 
 /**
@@ -37,4 +37,4 @@ public:
   virtual Real computeQpIntegral();
 };
 
-#endif //NUMSIDEQPS_H
+#endif // NUMSIDEQPS_H

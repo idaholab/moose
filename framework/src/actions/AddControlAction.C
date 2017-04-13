@@ -18,22 +18,20 @@
 #include "Factory.h"
 #include "Control.h"
 
-template<>
-InputParameters validParams<AddControlAction>()
+template <>
+InputParameters
+validParams<AddControlAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddControlAction::AddControlAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
-{
-}
+AddControlAction::AddControlAction(InputParameters parameters) : MooseObjectAction(parameters) {}
 
 void
 AddControlAction::act()
 {
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
-  MooseSharedPointer<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
+  _moose_object_pars.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
+  std::shared_ptr<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
   _problem->getControlWarehouse().addObject(control);
 }

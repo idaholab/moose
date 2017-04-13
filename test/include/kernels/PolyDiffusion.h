@@ -18,9 +18,8 @@
 
 class PolyDiffusion;
 
-template<>
+template <>
 InputParameters validParams<PolyDiffusion>();
-
 
 class PolyDiffusion : public Kernel
 {
@@ -30,7 +29,6 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
 };
 
-#endif //POLYDIFFUSION_H
+#endif // POLYDIFFUSION_H

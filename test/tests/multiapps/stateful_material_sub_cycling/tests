@@ -1,0 +1,7 @@
+[Tests]
+  [./test_stateful_subcycle]
+    type = 'CSVDiff'
+    input = 'material_sub_app_test_master.i'
+    csvdiff = 'material_sub_app_test_master_out_sub0.csv'
+  [../]
+[]

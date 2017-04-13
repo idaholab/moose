@@ -19,7 +19,7 @@
 
 class SumNodalValuesAux;
 
-template<>
+template <>
 InputParameters validParams<SumNodalValuesAux>();
 
 /**

@@ -15,17 +15,12 @@
 #include "MaterialData.h"
 #include "Material.h"
 
-MaterialData::MaterialData(MaterialPropertyStorage & storage) :
-    _storage(storage),
-    _n_qpoints(0),
-    _swapped(false)
+MaterialData::MaterialData(MaterialPropertyStorage & storage)
+  : _storage(storage), _n_qpoints(0), _swapped(false)
 {
 }
 
-MaterialData::~MaterialData()
-{
-  release();
-}
+MaterialData::~MaterialData() { release(); }
 
 void
 MaterialData::release()
@@ -36,18 +31,18 @@ MaterialData::release()
 }
 
 void
-MaterialData::size(unsigned int n_qpoints)
+MaterialData::resize(unsigned int n_qpoints)
 {
+  if (n_qpoints == _n_qpoints)
+    return;
+
   _props.resizeItems(n_qpoints);
   // if there are stateful material properties in the system, also resize
   // storage for old and older material properties
   if (_storage.hasStatefulProperties())
-  {
     _props_old.resizeItems(n_qpoints);
-
-    if (_storage.hasOlderProperties())
-      _props_older.resizeItems(n_qpoints);
-  }
+  if (_storage.hasOlderProperties())
+    _props_older.resizeItems(n_qpoints);
   _n_qpoints = n_qpoints;
 }
 
@@ -64,31 +59,31 @@ MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int si
 }
 
 void
-MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 {
-  if (_storage.hasStatefulProperties())
-  {
-    _storage.swap(*this, elem, side);
-    _swapped = true;
-  }
+  if (!_storage.hasStatefulProperties() || _swapped)
+    return;
+
+  _storage.swap(*this, elem, side);
+  _swapped = true;
 }
 
 void
-MaterialData::reinit(const std::vector<MooseSharedPointer<Material> > & mats)
+MaterialData::reinit(const std::vector<std::shared_ptr<Material>> & mats)
 {
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->computeProperties();
+  for (const auto & mat : mats)
+    mat->computeProperties();
 }
 
 void
-MaterialData::reset(const std::vector<MooseSharedPointer<Material> > & mats)
+MaterialData::reset(const std::vector<std::shared_ptr<Material>> & mats)
 {
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->resetProperties();
+  for (const auto & mat : mats)
+    mat->resetProperties();
 }
 
 void
-MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
 {
   if (_swapped && _storage.hasStatefulProperties())
   {

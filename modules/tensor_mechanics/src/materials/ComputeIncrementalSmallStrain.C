@@ -5,50 +5,29 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ComputeIncrementalSmallStrain.h"
-
+#include "Assembly.h"
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ComputeIncrementalSmallStrain>()
+template <>
+InputParameters
+validParams<ComputeIncrementalSmallStrain>()
 {
-  InputParameters params = validParams<ComputeSmallStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for small strains.");
-  params.set<bool>("stateful_displacements") = true;
+  InputParameters params = validParams<ComputeIncrementalStrainBase>();
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for small strains.");
   return params;
 }
 
-ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters) :
-    ComputeSmallStrain(parameters),
-    _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
-    _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _mechanical_strain_old(declarePropertyOld<RankTwoTensor>("mechanical_strain")),
-    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
-    _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
-    _T_old(coupledValueOld("temperature"))
+ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters)
+  : ComputeIncrementalStrainBase(parameters)
 {
 }
-
-void
-ComputeIncrementalSmallStrain::initQpStatefulProperties()
-{
-  ComputeSmallStrain::initQpStatefulProperties();
-
-  _strain_rate[_qp].zero();
-  _strain_increment[_qp].zero();
-  _rotation_increment[_qp].zero();
-  _rotation_increment[_qp].addIa(1.0); // this remains constant
-  _deformation_gradient[_qp].zero();
-  _mechanical_strain_old[_qp] = _mechanical_strain[_qp];
-  _total_strain_old[_qp] = _total_strain[_qp];
-}
-
 
 void
 ComputeIncrementalSmallStrain::computeProperties()
 {
+  Real volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     RankTwoTensor total_strain_increment;
@@ -56,30 +35,50 @@ ComputeIncrementalSmallStrain::computeProperties()
 
     _strain_increment[_qp] = total_strain_increment;
 
-    //Remove thermal expansion
-    _strain_increment[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T_old[_qp]));
+    if (_volumetric_locking_correction)
+      volumetric_strain += total_strain_increment.trace() * _JxW[_qp] * _coord[_qp];
+  }
+  if (_volumetric_locking_correction)
+    volumetric_strain /= _current_elem_volume;
 
-    //Remove the Eigen strain increment
-    _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    Real trace = _strain_increment[_qp].trace();
+    if (_volumetric_locking_correction)
+    {
+      _strain_increment[_qp](0, 0) += (volumetric_strain - trace) / 3.0;
+      _strain_increment[_qp](1, 1) += (volumetric_strain - trace) / 3.0;
+      _strain_increment[_qp](2, 2) += (volumetric_strain - trace) / 3.0;
+    }
+
+    _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+    // Remove the Eigen strain increment
+    subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
     // strain rate
-    _strain_rate[_qp] = _strain_increment[_qp]/_dt;
+    if (_dt > 0)
+      _strain_rate[_qp] = _strain_increment[_qp] / _dt;
+    else
+      _strain_rate[_qp].zero();
 
-    //Update strain in intermediate configuration: rotations are not needed
+    // Update strain in intermediate configuration: rotations are not needed
     _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
-    _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
   }
 }
 
 void
 ComputeIncrementalSmallStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
 {
-  //Deformation gradient
-  RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
-  RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
+  // Deformation gradient
+  RankTwoTensor A(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); // Deformation gradient
+  RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
+                     (*_grad_disp_old[1])[_qp],
+                     (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
 
   _deformation_gradient[_qp] = A;
-  _deformation_gradient[_qp].addIa(1.0); //Gauss point deformation gradient
+  _deformation_gradient[_qp].addIa(1.0);
 
   A -= Fbar; // A = grad_disp - grad_disp_old
 

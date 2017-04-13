@@ -11,29 +11,26 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "Moose.h"
+
+// MOOSE Includes
 #include "ExampleApp.h"
 #include "AppFactory.h"
-#include "ActionFactory.h"  // <- Actions are special (they have their own factory)
-#include "Syntax.h"
+#include "ActionFactory.h" // <- Actions are special (they have their own factory)
 #include "MooseSyntax.h"
 
 // Example 15 Includes
 #include "ExampleConvection.h"
 #include "ConvectionDiffusionAction.h"
 
-template<>
-InputParameters validParams<ExampleApp>()
+template <>
+InputParameters
+validParams<ExampleApp>()
 {
   InputParameters params = validParams<MooseApp>();
-
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-ExampleApp::ExampleApp(InputParameters parameters) :
-    MooseApp(parameters)
+ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -43,11 +40,6 @@ ExampleApp::ExampleApp(InputParameters parameters) :
   Moose::associateSyntax(_syntax, _action_factory);
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
-
-ExampleApp::~ExampleApp()
-{
-}
-
 
 void
 ExampleApp::registerApps()
@@ -81,5 +73,5 @@ ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    * contain a leading slash.  Wildcard characters can be used to replace a piece of the
    * path.
    */
-  syntax.registerActionSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
+  registerSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
 }

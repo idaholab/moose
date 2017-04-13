@@ -15,15 +15,15 @@
 #include "Moose.h"
 #include "MooseSyntax.h"
 
-template<>
-InputParameters validParams<MooseUnitApp>()
+template <>
+InputParameters
+validParams<MooseUnitApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-MooseUnitApp::MooseUnitApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+MooseUnitApp::MooseUnitApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -31,6 +31,4 @@ MooseUnitApp::MooseUnitApp(const InputParameters & parameters) :
   Moose::associateSyntax(_syntax, _action_factory);
 }
 
-MooseUnitApp::~MooseUnitApp()
-{
-}
+MooseUnitApp::~MooseUnitApp() {}

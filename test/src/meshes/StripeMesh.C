@@ -14,8 +14,9 @@
 
 #include "StripeMesh.h"
 
-template<>
-InputParameters validParams<StripeMesh>()
+template <>
+InputParameters
+validParams<StripeMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
 
@@ -24,23 +25,19 @@ InputParameters validParams<StripeMesh>()
   return params;
 }
 
-StripeMesh::StripeMesh(const InputParameters & parameters) :
-    GeneratedMesh(parameters),
-    _n_stripes(getParam<unsigned int>("stripes"))
+StripeMesh::StripeMesh(const InputParameters & parameters)
+  : GeneratedMesh(parameters), _n_stripes(getParam<unsigned int>("stripes"))
 {
-  // The StripeMesh class only works with SerialMesh
-  errorIfParallelDistribution("StripeMesh");
+  // The StripeMesh class only works with ReplicatedMesh
+  errorIfDistributedMesh("StripeMesh");
 }
 
-StripeMesh::StripeMesh(const StripeMesh & other_mesh) :
-    GeneratedMesh(other_mesh),
-    _n_stripes(other_mesh._n_stripes)
+StripeMesh::StripeMesh(const StripeMesh & other_mesh)
+  : GeneratedMesh(other_mesh), _n_stripes(other_mesh._n_stripes)
 {
 }
 
-StripeMesh::~StripeMesh()
-{
-}
+StripeMesh::~StripeMesh() {}
 
 MooseMesh &
 StripeMesh::clone() const
@@ -53,7 +50,7 @@ StripeMesh::buildMesh()
 {
   GeneratedMesh::buildMesh();
 
-  Real h = (getParam<Real>("xmax") - getParam<Real>("xmin")) / _n_stripes;  // width of the stripe
+  Real h = (getParam<Real>("xmax") - getParam<Real>("xmin")) / _n_stripes; // width of the stripe
 
   for (unsigned int en = 0; en < nElem(); en++)
   {
@@ -62,14 +59,14 @@ StripeMesh::buildMesh()
 
     if (!e)
     {
-      mooseError("Error getting element " << en << ". StripeMesh only works with SerialMesh...");
+      mooseError("Error getting element ", en, ". StripeMesh only works with ReplicatedMesh...");
     }
     else
     {
-    Point centroid = e->centroid();                             // get its centroid
-    subdomain_id_type sid = floor((centroid(0) - getParam<Real>("xmin")) / h);   // figure out the subdomain ID
-    e->subdomain_id() = sid;
+      Point centroid = e->centroid(); // get its centroid
+      subdomain_id_type sid =
+          floor((centroid(0) - getParam<Real>("xmin")) / h); // figure out the subdomain ID
+      e->subdomain_id() = sid;
     }
   }
 }
-

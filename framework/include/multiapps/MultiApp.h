@@ -20,6 +20,7 @@
 
 class MultiApp;
 class UserObject;
+class FEProblemBase;
 class FEProblem;
 class Executioner;
 class MooseApp;
@@ -28,18 +29,23 @@ class Backup;
 // libMesh forward declarations
 namespace libMesh
 {
-namespace MeshTools { class BoundingBox; }
-template <typename T> class NumericVector;
+namespace MeshTools
+{
+class BoundingBox;
+}
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<MultiApp>();
 
 /**
  * Helper class for holding Sub-app backups
  */
-class SubAppBackups : public std::vector<MooseSharedPointer<Backup> >
-{};
+class SubAppBackups : public std::vector<std::shared_ptr<Backup>>
+{
+};
 
 /**
  * A MultiApp represents one or more MOOSE applications that are running simultaneously.
@@ -49,17 +55,13 @@ class SubAppBackups : public std::vector<MooseSharedPointer<Backup> >
  * path using "MOOSE_LIBRARY_PATH" or by specifying a single input file library path
  * in Multiapps InputParameters object.
  */
-class MultiApp :
-  public MooseObject,
-  public SetupInterface,
-  public Restartable
+class MultiApp : public MooseObject, public SetupInterface, public Restartable
 {
 public:
   MultiApp(const InputParameters & parameters);
-
   virtual ~MultiApp();
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp
@@ -77,9 +79,10 @@ public:
    * Note that auto_advance=false might not be compatible with
    * the options for the MultiApp
    *
-   * @return Whether or not all of the solves were successful (i.e. all solves made it to the target_time)
+   * @return Whether or not all of the solves were successful (i.e. all solves made it to the
+   * target_time)
    */
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) = 0;
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) = 0;
 
   /**
    * Actually advances time and causes output.
@@ -127,9 +130,20 @@ public:
   virtual MeshTools::BoundingBox getBoundingBox(unsigned int app);
 
   /**
+   * Get the FEProblemBase this MultiApp is part of.
+   */
+  FEProblemBase & problemBase() { return _fe_problem; }
+
+  /**
    * Get the FEProblem this MultiApp is part of.
    */
-  FEProblem & problem() { return _fe_problem; }
+  FEProblem & problem();
+
+  /**
+   * Get the FEProblemBase for the global app is part of.
+   * @param app The global app number
+   */
+  FEProblemBase & appProblemBase(unsigned int app);
 
   /**
    * Get the FEProblem for the global app is part of.
@@ -210,7 +224,8 @@ public:
    * by a "new" piece of material.
    *
    * @param global_app The global app number to reset.
-   * @param time The time to set as the the time for the new app, this should really be the time the old app was at.
+   * @param time The time to set as the the time for the new app, this should really be the time the
+   * old app was at.
    */
   virtual void resetApp(unsigned int global_app, Real time = 0.0);
 
@@ -273,8 +288,8 @@ protected:
   /// call back executed right before app->runInputFile()
   virtual void preRunInputFile();
 
-  /// The FEProblem this MultiApp is part of
-  FEProblem & _fe_problem;
+  /// The FEProblemBase this MultiApp is part of
+  FEProblemBase & _fe_problem;
 
   /// The type of application to build
   std::string _app_type;
@@ -355,7 +370,7 @@ protected:
   SubAppBackups & _backups;
 };
 
-template<>
+template <>
 inline void
 dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 {
@@ -366,11 +381,11 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
   if (!multi_app)
     mooseError("Error storing std::vector<Backup*>");
 
-  for (unsigned int i=0; i<backups.size(); i++)
+  for (unsigned int i = 0; i < backups.size(); i++)
     dataStore(stream, backups[i], context);
 }
 
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
 {
@@ -379,7 +394,7 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   if (!multi_app)
     mooseError("Error loading std::vector<Backup*>");
 
-  for (unsigned int i=0; i<backups.size(); i++)
+  for (unsigned int i = 0; i < backups.size(); i++)
     dataLoad(stream, backups[i], context);
 
   multi_app->restore();

@@ -12,8 +12,11 @@
 
 [Mesh]
   file = sliding_elastic_blocks_2d.e
-  displacements = 'disp_x disp_y'
   patch_size = 80
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -25,8 +28,6 @@
 
 [AuxVariables]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./inc_slip_x]
   [../]
@@ -154,17 +155,19 @@
   [../]
 []
 
+[Preconditioning]
+  [./smp]
+     type = SMP
+     full = true
+  [../]
+[]
+
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
   petsc_options_value = 'asm     lu    20    101'
-
 
   line_search = 'none'
 
@@ -185,7 +188,6 @@
 []
 
 [Outputs]
-  # csv = true
   file_base = frictionless_penalty_out
   interval = 10
   [./exodus]
@@ -201,8 +203,6 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
     master = 2
     model = frictionless
     penalty = 1e+7

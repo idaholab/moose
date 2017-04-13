@@ -23,17 +23,12 @@ public:
   virtual ~ComputeStrainBase() {}
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initQpStatefulProperties() override;
 
   /// Coupled displacement variables
   unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
-  std::vector<const VariableGradient *> _grad_disp_old;
-
-  const VariableValue & _T;
-  const Real _T0;
-  const Real _thermal_expansion_coeff;
 
   std::string _base_name;
 
@@ -41,7 +36,11 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _total_strain;
 
-  const bool _stateful_displacements;
+  std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
+
+  bool _volumetric_locking_correction;
+  const Real & _current_elem_volume;
 };
 
-#endif //COMPUTESTRAINBASE_H
+#endif // COMPUTESTRAINBASE_H

@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppUserObjectTransfer.h"
-#include "MooseTypes.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "DisplacedProblem.h"
-#include "MultiApp.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
+#include "MultiApp.h"
 #include "UserObject.h"
 
 // libMesh
@@ -27,26 +29,33 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<MultiAppUserObjectTransfer>()
+template <>
+InputParameters
+validParams<MultiAppUserObjectTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<UserObjectName>("user_object", "The UserObject you want to transfer values from.  Note: This might be a UserObject from your MultiApp's input file!");
+  params.addRequiredParam<AuxVariableName>(
+      "variable", "The auxiliary variable to store the transferred values in.");
+  params.addRequiredParam<UserObjectName>(
+      "user_object",
+      "The UserObject you want to transfer values from.  Note: This might be a "
+      "UserObject from your MultiApp's input file!");
 
-  params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
+  params.addParam<bool>("displaced_target_mesh",
+                        false,
+                        "Whether or not to use the displaced mesh for the target mesh.");
 
   return params;
 }
 
-MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
-  // This transfer does not work with ParallelMesh
-  _fe_problem.mesh().errorIfParallelDistribution("MultiAppUserObjectTransfer");
+  // This transfer does not work with DistributedMesh
+  _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer");
 }
 
 void
@@ -65,14 +74,14 @@ MultiAppUserObjectTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
+          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
@@ -81,16 +90,17 @@ MultiAppUserObjectTransfer::execute()
 
           MeshBase * mesh = NULL;
 
-          if (_displaced_target_mesh && _multi_app->appProblem(i).getDisplacedProblem())
+          if (_displaced_target_mesh && _multi_app->appProblemBase(i).getDisplacedProblem())
           {
-            mesh = &_multi_app->appProblem(i).getDisplacedProblem()->mesh().getMesh();
+            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh().getMesh();
           }
           else
-            mesh = &_multi_app->appProblem(i).mesh().getMesh();
+            mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
 
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
-          const UserObject & user_object = _multi_app->problem().getUserObjectBase(_user_object_name);
+          const UserObject & user_object =
+              _multi_app->problemBase().getUserObjectBase(_user_object_name);
 
           if (is_nodal)
           {
@@ -108,7 +118,7 @@ MultiAppUserObjectTransfer::execute()
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
-                Real from_value = user_object.spatialValue(*node+_multi_app->position(i));
+                Real from_value = user_object.spatialValue(*node + _multi_app->position(i));
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -134,7 +144,7 @@ MultiAppUserObjectTransfer::execute()
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
-                Real from_value = user_object.spatialValue(centroid+_multi_app->position(i));
+                Real from_value = user_object.spatialValue(centroid + _multi_app->position(i));
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -155,7 +165,7 @@ MultiAppUserObjectTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblem & to_problem = _multi_app->problem();
+      FEProblemBase & to_problem = _multi_app->problemBase();
       MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
       SystemBase & to_system_base = to_var.sys();
 
@@ -164,7 +174,8 @@ MultiAppUserObjectTransfer::execute()
       unsigned int to_sys_num = to_sys.number();
 
       // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppUserObjectTransfer only works with SerialMesh!");
+      mooseAssert(to_sys.get_mesh().is_serial(),
+                  "MultiAppUserObjectTransfer only works with ReplicatedMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
@@ -172,7 +183,7 @@ MultiAppUserObjectTransfer::execute()
 
       // EquationSystems & to_es = to_sys.get_equation_systems();
 
-      //Create a serialized version of the solution vector
+      // Create a serialized version of the solution vector
       NumericVector<Number> * to_solution = to_sys.solution.get();
 
       MeshBase * to_mesh = NULL;
@@ -184,7 +195,7 @@ MultiAppUserObjectTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (!_multi_app->hasLocalApp(i))
           continue;
@@ -210,7 +221,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = user_object.spatialValue(*node-app_position);
+                Real from_value = user_object.spatialValue(*node - app_position);
                 Moose::swapLibMeshComm(swapped);
 
                 to_solution->set(dof, from_value);
@@ -237,7 +248,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = user_object.spatialValue(centroid-app_position);
+                Real from_value = user_object.spatialValue(centroid - app_position);
                 Moose::swapLibMeshComm(swapped);
 
                 to_solution->set(dof, from_value);

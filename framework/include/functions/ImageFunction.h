@@ -22,18 +22,15 @@
 // Forward declarations
 class ImageFunction;
 
-template<>
+template <>
 InputParameters validParams<ImageFunction>();
 
 /**
  * A function for extracting data from an image or stack of images
  */
-class ImageFunction :
-  public ImageSampler,
-  public Function
+class ImageFunction : public ImageSampler, public Function
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The parameters object holding data for the class to use.
@@ -48,15 +45,14 @@ public:
   /**
    * Initialize the ImageSampler
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Return the pixel value for the given point
    * @param t Time (unused)
    * @param p The point at which to extract pixel data
    */
-  virtual Real value(Real t, const Point & p);
-
+  virtual Real value(Real t, const Point & p) override;
 };
 
 #endif // IMAGEFUNCTION_H

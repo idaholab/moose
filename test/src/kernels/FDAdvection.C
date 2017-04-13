@@ -14,23 +14,24 @@
 
 #include "FDAdvection.h"
 
-template<>
-InputParameters validParams<FDAdvection>()
+template <>
+InputParameters
+validParams<FDAdvection>()
 {
   InputParameters params = validParams<FDKernel>();
 
-  params.addRequiredCoupledVar("advector", "The gradient of this variable will be used as the velocity vector.");
+  params.addRequiredCoupledVar(
+      "advector", "The gradient of this variable will be used as the velocity vector.");
   return params;
 }
 
-FDAdvection::FDAdvection(const InputParameters & parameters) :
-    FDKernel(parameters),
-    _grad_advector(coupledGradient("advector"))
-{}
-
-Real FDAdvection::computeQpResidual()
+FDAdvection::FDAdvection(const InputParameters & parameters)
+  : FDKernel(parameters), _grad_advector(coupledGradient("advector"))
 {
-  return _test[_i][_qp]*(_grad_advector[_qp]*_grad_u[_qp]);
 }
 
-
+Real
+FDAdvection::computeQpResidual()
+{
+  return _test[_i][_qp] * (_grad_advector[_qp] * _grad_u[_qp]);
+}

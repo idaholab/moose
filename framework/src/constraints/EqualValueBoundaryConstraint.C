@@ -16,27 +16,79 @@
 #include "EqualValueBoundaryConstraint.h"
 #include "MooseMesh.h"
 
+// libMesh includes
+#include "libmesh/mesh_inserter_iterator.h"
+#include "libmesh/parallel.h"
+#include "libmesh/parallel_elem.h"
+#include "libmesh/parallel_node.h"
+
 // C++ includes
 #include <limits.h>
 
-template<>
-InputParameters validParams<EqualValueBoundaryConstraint>()
+namespace // Anonymous namespace for helpers
+{
+/**
+ * Specific weak ordering for Elem *'s to be used in a set.
+ * We use the id, but first sort by level.  This guarantees
+ * when traversing the set from beginning to end the lower
+ * level (parent) elements are encountered first.
+ *
+ * This was swiped from libMesh mesh_communication.C, and ought to be
+ * replaced with libMesh::CompareElemIdsByLevel just as soon as I refactor to
+ * create that - @roystgnr
+ */
+struct CompareElemsByLevel
+{
+  bool operator()(const Elem * a, const Elem * b) const
+  {
+    libmesh_assert(a);
+    libmesh_assert(b);
+    const unsigned int al = a->level(), bl = b->level();
+    const dof_id_type aid = a->id(), bid = b->id();
+
+    return (al == bl) ? aid < bid : al < bl;
+  }
+};
+
+} // anonymous namespace
+
+template <>
+InputParameters
+validParams<EqualValueBoundaryConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
-  params.addParam<unsigned int>("master", std::numeric_limits<unsigned int>::max(), "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
-  params.addParam<std::vector<unsigned int> >("slave_node_ids", "The IDs of the slave node");
+  params.addParam<unsigned int>(
+      "master",
+      std::numeric_limits<unsigned int>::max(),
+      "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
+  params.addParam<std::vector<unsigned int>>("slave_node_ids", "The IDs of the slave node");
   params.addParam<BoundaryName>("slave", "NaN", "The boundary ID associated with the slave side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
 
-EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters) :
-    NodalConstraint(parameters),
+EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
+  : NodalConstraint(parameters),
     _master_node_id(getParam<unsigned int>("master")),
-    _slave_node_ids(getParam<std::vector<unsigned int> >("slave_node_ids")),
+    _slave_node_ids(getParam<std::vector<unsigned int>>("slave_node_ids")),
     _slave_node_set_id(getParam<BoundaryName>("slave")),
     _penalty(getParam<Real>("penalty"))
 {
+  updateConstrainedNodes();
+}
+
+void
+EqualValueBoundaryConstraint::meshChanged()
+{
+  updateConstrainedNodes();
+}
+
+void
+EqualValueBoundaryConstraint::updateConstrainedNodes()
+{
+  _master_node_vector.clear();
+  _connected_nodes.clear();
+
   if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
     mooseError("Please specify slave node ids or boundary id.");
   else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
@@ -44,43 +96,104 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
     std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
-    //Setting master node to first node of the slave node set if no master node id is pprovided
+    // Set master node to first node of the slave node set if no master node id is provided
+    //_master_node_vector defines master nodes in the base class
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
     {
-      in = nodelist.begin();
-      _master_node_id = *in;
+      in = std::min_element(nodelist.begin(), nodelist.end());
+      dof_id_type node_id = (in == nodelist.end()) ? DofObject::invalid_id : *in;
+      _communicator.min(node_id);
+      _master_node_vector.push_back(node_id);
     }
-    _master_node_vector.push_back(_master_node_id); //_master_node_vector defines master nodes in the base class
+    else
+      _master_node_vector.push_back(_master_node_id);
 
+    // Fill in _connected_nodes, which defines slave nodes in the base class
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _master_node_id) && (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
-        _connected_nodes.push_back(*in); //_connected_nodes defines slave nodes in the base class
+      if ((*in != _master_node_vector[0]) &&
+          (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
+        _connected_nodes.push_back(*in);
     }
   }
   else if ((_slave_node_ids.size() != 0) && (_slave_node_set_id == "NaN"))
   {
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
-      _master_node_id = _slave_node_ids[0];
+      _master_node_vector.push_back(
+          _slave_node_ids[0]); //_master_node_vector defines master nodes in the base class
 
-    _master_node_vector.push_back(_master_node_id); //_master_node_vector defines master nodes in the base class
-
-    std::vector<unsigned int>::iterator its;
-    for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
+    // Fill in _connected_nodes, which defines slave nodes in the base class
+    for (const auto & dof : _slave_node_ids)
     {
-      if ((_mesh.nodeRef(*its).processor_id() == _subproblem.processor_id()) && (*its != _master_node_id))
-        _connected_nodes.push_back(*its);
+      if (_mesh.queryNodePtr(dof) &&
+          (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) &&
+          (dof != _master_node_vector[0]))
+        _connected_nodes.push_back(dof);
     }
   }
 
-  // Add elements connected to master node to Ghosted Elements
-  std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_id];
-  for (unsigned int i = 0; i < elems.size(); i++)
-    _subproblem.addGhostedElem(elems[i]);
-}
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
 
-EqualValueBoundaryConstraint::~EqualValueBoundaryConstraint()
-{
+  bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
+
+  // Add elements connected to master node to Ghosted Elements.
+
+  // On a distributed mesh, these elements might have already been
+  // remoted, in which case we need to gather them back first.
+  if (!_mesh.getMesh().is_serial())
+  {
+#ifndef NDEBUG
+    bool someone_found_elems = found_elems;
+    _mesh.getMesh().comm().max(someone_found_elems);
+    mooseAssert(someone_found_elems, "Missing entry in node to elem map");
+#endif
+
+    std::set<Elem *, CompareElemsByLevel> master_elems_to_ghost;
+    std::set<Node *> nodes_to_ghost;
+    if (found_elems)
+    {
+      for (dof_id_type id : node_to_elem_pair->second)
+      {
+        Elem * elem = _mesh.queryElemPtr(id);
+        if (elem)
+        {
+          master_elems_to_ghost.insert(elem);
+
+          const unsigned int n_nodes = elem->n_nodes();
+          for (unsigned int n = 0; n != n_nodes; ++n)
+            nodes_to_ghost.insert(elem->node_ptr(n));
+        }
+      }
+    }
+
+    // Send nodes first since elements need them
+    _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
+                                                  nodes_to_ghost.begin(),
+                                                  nodes_to_ghost.end(),
+                                                  mesh_inserter_iterator<Node>(_mesh.getMesh()));
+
+    _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
+                                                  master_elems_to_ghost.begin(),
+                                                  master_elems_to_ghost.end(),
+                                                  mesh_inserter_iterator<Elem>(_mesh.getMesh()));
+
+    _mesh.update(); // Rebuild node_to_elem_map
+
+    // Find elems again now that we know they're there
+    const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
+    node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
+    found_elems = (node_to_elem_pair != new_node_to_elem_map.end());
+  }
+
+  if (!found_elems)
+    mooseError("Couldn't find any elements connected to master node");
+
+  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+
+  if (elems.size() == 0)
+    mooseError("Couldn't find any elements connected to master node");
+  _subproblem.addGhostedElem(elems[0]);
 }
 
 Real

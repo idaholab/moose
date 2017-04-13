@@ -18,34 +18,33 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-NearestNodeThread::NearestNodeThread(const MooseMesh & mesh,
-                                     std::map<dof_id_type, std::vector<dof_id_type> > & neighbor_nodes) :
-  _max_patch_percentage(0.0),
-  _mesh(mesh),
-  _neighbor_nodes(neighbor_nodes)
+#include <cmath>
+
+NearestNodeThread::NearestNodeThread(
+    const MooseMesh & mesh, std::map<dof_id_type, std::vector<dof_id_type>> & neighbor_nodes)
+  : _max_patch_percentage(0.0), _mesh(mesh), _neighbor_nodes(neighbor_nodes)
 {
 }
 
 // Splitting Constructor
-NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*split*/) :
-  _max_patch_percentage(x._max_patch_percentage),
-  _mesh(x._mesh),
-  _neighbor_nodes(x._neighbor_nodes)
+NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*split*/)
+  : _max_patch_percentage(x._max_patch_percentage),
+    _mesh(x._mesh),
+    _neighbor_nodes(x._neighbor_nodes)
 {
 }
 
 /**
  * Save a patch of nodes that are close to each of the slave nodes to speed the search algorithm
- * TODO: This needs to be updated at some point in time.  If the hits into this data structure approach "the end"
+ * TODO: This needs to be updated at some point in time.  If the hits into this data structure
+ * approach "the end"
  * then it may be time to update
  */
 void
-NearestNodeThread::operator() (const NodeIdRange & range)
+NearestNodeThread::operator()(const NodeIdRange & range)
 {
-  for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
+  for (const auto & node_id : range)
   {
-    dof_id_type node_id = *nd;
-
     const Node & node = _mesh.nodeRef(node_id);
 
     const Node * closest_node = NULL;
@@ -55,7 +54,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
 
     unsigned int n_neighbor_nodes = neighbor_nodes.size();
 
-    for (unsigned int k=0; k<n_neighbor_nodes; k++)
+    for (unsigned int k = 0; k < n_neighbor_nodes; k++)
     {
       const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
       Real distance = ((*cur_node) - node).norm();
@@ -74,7 +73,15 @@ NearestNodeThread::operator() (const NodeIdRange & range)
     }
 
     if (closest_distance == std::numeric_limits<Real>::max())
+    {
+      for (unsigned int k = 0; k < n_neighbor_nodes; k++)
+      {
+        const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
+        if (std::isnan((*cur_node)(0)) || std::isnan((*cur_node)(1)) || std::isnan((*cur_node)(2)))
+          mooseError("Failure in NearestNodeThread because solution contans not-a-number entries");
+      }
       mooseError("Unable to find nearest node!");
+    }
 
     NearestNodeLocator::NearestNodeInfo & info = _nearest_node_info[node.id()];
 

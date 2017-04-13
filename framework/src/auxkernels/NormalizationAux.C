@@ -14,8 +14,9 @@
 
 #include "NormalizationAux.h"
 
-template<>
-InputParameters validParams<NormalizationAux>()
+template <>
+InputParameters
+validParams<NormalizationAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("source_variable", "The variable to be normalized");
@@ -24,16 +25,16 @@ InputParameters validParams<NormalizationAux>()
   return params;
 }
 
-NormalizationAux::NormalizationAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+NormalizationAux::NormalizationAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _src(coupledValue("source_variable")),
     _pp_on_source(getPostprocessorValue("normalization")),
     _normal_factor(getParam<Real>("normal_factor"))
-{}
+{
+}
 
 Real
 NormalizationAux::computeValue()
 {
   return _src[_qp] * _normal_factor / _pp_on_source;
 }
-

@@ -21,7 +21,7 @@
 class FunctionSideIntegral;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionSideIntegral>();
 
 /**
@@ -31,13 +31,14 @@ class FunctionSideIntegral : public SideIntegralPostprocessor
 {
 public:
   FunctionSideIntegral(const InputParameters & parameters);
-  virtual void threadJoin(const UserObject & y);
+
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// The function
   Function & _func;
 };
 
-#endif //FUNCTIONSIDEINTEGRAL_H
+#endif // FUNCTIONSIDEINTEGRAL_H

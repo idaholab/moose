@@ -10,15 +10,18 @@
 #include "ComputeElasticityTensorBase.h"
 
 /**
- * ComputeElasticityTensor defines an elasticity tensor material for isi.
+ * ComputeIsotropicElasticityTensor defines an elasticity tensor material for
+ * isotropic materials.
  */
 class ComputeIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
   ComputeIsotropicElasticityTensor(const InputParameters & parameters);
 
+  virtual bool isGuaranteedIsotropic() const override { return true; }
+
 protected:
-  virtual void computeQpElasticityTensor();
+  virtual void computeQpElasticityTensor() override;
 
   /// Elastic constants
   bool _bulk_modulus_set;
@@ -37,4 +40,4 @@ protected:
   RankFourTensor _Cijkl;
 };
 
-#endif //COMPUTEISOTROPICELASTICITYTENSOR_H
+#endif // COMPUTEISOTROPICELASTICITYTENSOR_H

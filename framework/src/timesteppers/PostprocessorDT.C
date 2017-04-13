@@ -14,21 +14,27 @@
 
 #include "PostprocessorDT.h"
 
-template<>
-InputParameters validParams<PostprocessorDT>()
+template <>
+InputParameters
+validParams<PostprocessorDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor that computes the dt");
+  params.addRequiredParam<PostprocessorName>("postprocessor",
+                                             "The name of the postprocessor that computes the dt");
   params.addParam<Real>("dt", "Initial value of dt");
+  params.addParam<Real>("scale", 1, "Multiple scale and supplied postprocessor value.");
+  params.addParam<Real>("factor", 0, "Add a factor to the supplied postprocessor value.");
   return params;
 }
 
-PostprocessorDT::PostprocessorDT(const InputParameters & parameters) :
-    TimeStepper(parameters),
+PostprocessorDT::PostprocessorDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
     PostprocessorInterface(this),
     _pps_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),
-    _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.)
+    _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.),
+    _scale(getParam<Real>("scale")),
+    _factor(getParam<Real>("factor"))
 {
 }
 
@@ -44,5 +50,5 @@ PostprocessorDT::computeInitialDT()
 Real
 PostprocessorDT::computeDT()
 {
-  return _pps_value;
+  return _scale * _pps_value + _factor;
 }

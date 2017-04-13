@@ -26,18 +26,19 @@ class Adaptivity;
 class UpdateErrorVectorsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  UpdateErrorVectorsThread(FEProblem & fe_problem, std::map<std::string, ErrorVector *> indicator_field_to_error_vector);
+  UpdateErrorVectorsThread(
+      FEProblemBase & fe_problem,
+      const std::map<std::string, std::unique_ptr<ErrorVector>> & indicator_field_to_error_vector);
 
   // Splitting Constructor
   UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split);
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem) override;
 
   void join(const UpdateErrorVectorsThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
-  std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;
+  const std::map<std::string, std::unique_ptr<ErrorVector>> & _indicator_field_to_error_vector;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;
@@ -46,4 +47,4 @@ protected:
   std::map<unsigned int, ErrorVector *> _indicator_field_number_to_error_vector;
 };
 
-#endif //UPDATEERRORVECTORSTHREAD_H
+#endif // UPDATEERRORVECTORSTHREAD_H

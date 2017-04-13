@@ -16,15 +16,16 @@
 
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<MeshChangedInterface>()
+template <>
+InputParameters
+validParams<MeshChangedInterface>()
 {
   InputParameters params = emptyInputParameters();
   return params;
 }
 
-MeshChangedInterface::MeshChangedInterface(const InputParameters & params) :
-    _mci_feproblem(*params.get<FEProblem *>("_fe_problem"))
+MeshChangedInterface::MeshChangedInterface(const InputParameters & params)
+  : _mci_feproblem(*params.get<FEProblemBase *>("_fe_problem_base"))
 {
   _mci_feproblem.notifyWhenMeshChanges(this);
 }

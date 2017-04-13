@@ -16,19 +16,24 @@
 #include "ExecutionerAttributeReporter.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<ExecutionerAttributeReporter>()
+template <>
+InputParameters
+validParams<ExecutionerAttributeReporter>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
-  // Parameter for passing in a pointer the attribute being reported (see Executioner::addAttributeReporter)
+  // Parameter for passing in a pointer the attribute being reported (see
+  // Executioner::addAttributeReporter)
   params.addPrivateParam<Real *>("value", NULL);
   return params;
 }
 
-ExecutionerAttributeReporter::ExecutionerAttributeReporter(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _value(parameters.getCheckedPointerParam<Real *>("value", "Invalid pointer to an attribute, this object should only be created via Executioner::addAttributeReporter"))
+ExecutionerAttributeReporter::ExecutionerAttributeReporter(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
+    _value(parameters.getCheckedPointerParam<Real *>(
+        "value",
+        "Invalid pointer to an attribute, this object should only be created via "
+        "Executioner::addAttributeReporter"))
 {
 }
 

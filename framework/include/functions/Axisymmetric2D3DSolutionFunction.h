@@ -21,7 +21,7 @@
 class Axisymmetric2D3DSolutionFunction;
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<Axisymmetric2D3DSolutionFunction>();
 
 /**
@@ -34,27 +34,13 @@ InputParameters validParams<Axisymmetric2D3DSolutionFunction>();
 class Axisymmetric2D3DSolutionFunction : public Function
 {
 public:
-
   /**
    * Constructor
    * @param parameters The input parameters for the function
    */
   Axisymmetric2D3DSolutionFunction(const InputParameters & parameters);
 
-  /**
-   * Empty destructor
-   */
-  virtual ~Axisymmetric2D3DSolutionFunction();
-
-  /**
-   * Extract a value from the solution
-   * @param t Time at which to extract
-   * @param p Spatial location of desired data
-   * @return The value at t and p
-   */
-  virtual Real value(Real t, const Point & p);
-
-  // virtual RealGradient gradient(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 
   /**
    * Setup the function for use
@@ -62,10 +48,9 @@ public:
    * was read. A pointer is required because Functions are created prior to UserObjects,
    * see Moose.C.
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
-
   /// Pointer to SolutionUserObject containing the solution of interest
   const SolutionUserObject * _solution_object_ptr;
 
@@ -105,4 +90,4 @@ protected:
   std::vector<unsigned int> _solution_object_var_indices;
 };
 
-#endif //AXISYMMETRIC2D3DSOLUTIONFUNCTION_H
+#endif // AXISYMMETRIC2D3DSOLUTIONFUNCTION_H

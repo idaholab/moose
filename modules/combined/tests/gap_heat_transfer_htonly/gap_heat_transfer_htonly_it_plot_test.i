@@ -152,6 +152,7 @@
     boundary = 3
     diffusivity = thermal_conductivity
   [../]
+[]
 
 
 [Outputs]

@@ -19,21 +19,20 @@
 
 class ExampleImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<ExampleImplicitEuler>();
 
 class ExampleImplicitEuler : public TimeDerivative
 {
 public:
-
   ExampleImplicitEuler(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   const MaterialProperty<Real> & _time_coefficient;
 };
 
-#endif //EXAMPLEIMPLICITEULER
+#endif // EXAMPLEIMPLICITEULER

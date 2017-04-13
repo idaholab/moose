@@ -9,16 +9,18 @@
 #define POROUSFLOW2PHASEPP_VG_H
 
 #include "PorousFlow2PhasePP.h"
-#include "PorousFlowEffectiveSaturationVG.h"
+#include "PorousFlowVanGenuchten.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow2PhasePP_VG;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow2PhasePP_VG>();
 
 /**
- * Material designed to calculate fluid-phase porepressures and saturations at nodes and quadpoints
+ * Material designed to calculate 2-phase porepressures and saturations at nodes and quadpoints
+ * assuming the independent variables are the 2 porepressure, and
+ * using a van-Genuchten expression
  */
 class PorousFlow2PhasePP_VG : public PorousFlow2PhasePP
 {
@@ -26,35 +28,17 @@ public:
   PorousFlow2PhasePP_VG(const InputParameters & parameters);
 
 protected:
-  /**
-   * Effective saturation as a function of porepressure using van Genuchten
-   * formulation.
-   *
-   * @param pressure porepressure (Pa)
-   * @return effective saturation
-   */
-  Real effectiveSaturation(Real pressure) const;
+  Real effectiveSaturation(Real pressure) const override;
 
-  /**
-   * Derivative of effective saturation wrt to porepressure.
-   *
-   * @param pressure porepressure (Pa)
-   * @return derivative of effective saturation wrt porepressure
-   */
-  Real dEffectiveSaturation_dP(Real pressure) const;
+  Real dEffectiveSaturation_dP(Real pressure) const override;
 
-  /**
-   * Second derivative of effective saturation wrt to porepressure.
-   *
-   * @param pressure porepressure (Pa)
-   * @return second derivative of effective saturation wrt porepressure
-   */
-  Real d2EffectiveSaturation_dP2(Real pressure) const;
+  Real d2EffectiveSaturation_dP2(Real pressure) const override;
 
-  /// vanGenuchten alpha
+  /// van Genuchten parameter alpha
   const Real _al;
-  /// vanGenuchten m
+
+  /// van Genuchten exponent m
   const Real _m;
 };
 
-#endif //POROUSFLOW2PHASEPP_VG_H
+#endif // POROUSFLOW2PHASEPP_VG_H

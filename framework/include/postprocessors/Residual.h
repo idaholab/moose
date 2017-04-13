@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class Residual;
 
-template<>
+template <>
 InputParameters validParams<Residual>();
 
 class Residual : public GeneralPostprocessor
@@ -28,13 +28,13 @@ class Residual : public GeneralPostprocessor
 public:
   Residual(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
   /**
    * This will return the final nonlinear residual.
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
   MooseEnum _residual_type;

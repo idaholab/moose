@@ -14,28 +14,29 @@
 
 #include "MatTestNeumannBC.h"
 
-template<>
-InputParameters validParams<MatTestNeumannBC>()
+template <>
+InputParameters
+validParams<MatTestNeumannBC>()
 {
   InputParameters p = validParams<NeumannBC>();
-  p.addRequiredParam<std::string>("mat_prop", "The material property that gives the value of the BC");
+  p.addRequiredParam<std::string>("mat_prop",
+                                  "The material property that gives the value of the BC");
   return p;
 }
 
-
-MatTestNeumannBC::MatTestNeumannBC(const InputParameters & parameters) :
-    NeumannBC(parameters),
-    _prop_name(getParam<std::string>("mat_prop"))
+MatTestNeumannBC::MatTestNeumannBC(const InputParameters & parameters)
+  : NeumannBC(parameters), _prop_name(getParam<std::string>("mat_prop"))
 {
   if (hasBoundaryMaterialProperty<Real>(_prop_name))
     _value = &getMaterialPropertyByName<Real>(_prop_name);
 
   else
-    mooseError("The material property " << _prop_name << " is not defined on all boundaries of this object");
+    mooseError(
+        "The material property ", _prop_name, " is not defined on all boundaries of this object");
 }
 
 Real
 MatTestNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*(*_value)[_qp];
+  return -_test[_i][_qp] * (*_value)[_qp];
 }

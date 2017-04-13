@@ -31,4 +31,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _post_deform_grad;
 };
 
-#endif //COMPUTEVOLUMETRICDEFORMGARD_H
+#endif // COMPUTEVOLUMETRICDEFORMGARD_H

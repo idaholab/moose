@@ -19,7 +19,7 @@
 
 class BndTestDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<BndTestDirichletBC>();
 
 /**

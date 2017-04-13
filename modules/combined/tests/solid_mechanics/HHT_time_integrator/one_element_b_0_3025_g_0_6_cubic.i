@@ -250,8 +250,6 @@
 #  [../]
 []
 
-[]
-
 [Functions]
   [./pull]
     type = PiecewiseLinear

@@ -20,7 +20,7 @@
 // Forward Declarations
 class TransientHalf;
 
-template<>
+template <>
 InputParameters validParams<TransientHalf>();
 
 /**
@@ -30,17 +30,16 @@ InputParameters validParams<TransientHalf>();
 class TransientHalf : public TimeStepper
 {
 public:
-
   TransientHalf(const InputParameters & parameters);
 
 protected:
-  virtual Real computeInitialDT();
+  virtual Real computeInitialDT() override;
 
-  virtual Real computeDT();
+  virtual Real computeDT() override;
 
 private:
   Real _ratio;
   Real _min_dt;
 };
 
-#endif //TRANSIENTHALF_H
+#endif // TRANSIENTHALF_H

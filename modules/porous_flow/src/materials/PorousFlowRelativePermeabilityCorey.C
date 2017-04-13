@@ -7,29 +7,31 @@
 
 #include "PorousFlowRelativePermeabilityCorey.h"
 
-#include "Conversion.h"
-
-template<>
-InputParameters validParams<PorousFlowRelativePermeabilityCorey>()
+template <>
+InputParameters
+validParams<PorousFlowRelativePermeabilityCorey>()
 {
-  InputParameters params = validParams<PorousFlowRelativePermeabilityUnity>();
-
-  params.addRequiredParam<Real>("n_j", "The Corey exponent of phase j.");
-  params.addRequiredParam<unsigned int>("phase", "The phase number j");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addClassDescription("This Material calculates relative permeability of either phase Sj, using the simple Corey model (Sj-Sjr)^n/(1-S1r-S2r)");
+  InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
+  params.addRequiredParam<Real>("n", "The Corey exponent of the phase.");
+  params.addClassDescription("This Material calculates relative permeability of the fluid phase, "
+                             "using the simple Corey model ((S-S_res)/(1-sum(S_res)))^n");
   return params;
 }
 
-PorousFlowRelativePermeabilityCorey::PorousFlowRelativePermeabilityCorey(const InputParameters & parameters) :
-    PorousFlowRelativePermeabilityUnity(parameters),
-    _n(getParam<Real>("n_j"))
+PorousFlowRelativePermeabilityCorey::PorousFlowRelativePermeabilityCorey(
+    const InputParameters & parameters)
+  : PorousFlowRelativePermeabilityBase(parameters), _n(getParam<Real>("n"))
 {
 }
 
-void
-PorousFlowRelativePermeabilityCorey::computeQpProperties()
+Real
+PorousFlowRelativePermeabilityCorey::relativePermeability(Real seff) const
 {
-  _relative_permeability[_qp] = std::pow(_saturation_nodal[_qp][_phase_num], _n);
-  _drelative_permeability_ds[_qp] = _n * std::pow(_saturation_nodal[_qp][_phase_num], _n - 1.0);
+  return std::pow(seff, _n);
+}
+
+Real
+PorousFlowRelativePermeabilityCorey::dRelativePermeability(Real seff) const
+{
+  return _n * std::pow(seff, _n - 1.0);
 }

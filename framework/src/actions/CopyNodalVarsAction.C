@@ -14,31 +14,36 @@
 
 // MOOSE includes
 #include "CopyNodalVarsAction.h"
-#include "FEProblem.h"
+
 #include "ActionWarehouse.h"
+#include "AuxiliarySystem.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 #include <map>
 
-template<>
-InputParameters validParams<CopyNodalVarsAction>()
+template <>
+InputParameters
+validParams<CopyNodalVarsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::string>("initial_from_file_timestep", "LATEST", "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
-                               "for a given variable. (Default: LATEST)");
-  params.addParam<std::string>("initial_from_file_var", "Gives the name of a variable for which to read an initial condition from a mesh file");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
+      "for a given variable. (Default: LATEST)");
+  params.addParam<std::string>(
+      "initial_from_file_var",
+      "Gives the name of a variable for which to read an initial condition from a mesh file");
 
-  params.addParamNamesToGroup("initial_from_file_timestep initial_from_file_var", "Initial From File");
-
+  params.addParamNamesToGroup("initial_from_file_timestep initial_from_file_var",
+                              "Initial From File");
 
   return params;
 }
 
-CopyNodalVarsAction::CopyNodalVarsAction(InputParameters params) :
-    Action(params)
-{
-}
+CopyNodalVarsAction::CopyNodalVarsAction(InputParameters params) : Action(params) {}
 
 void
 CopyNodalVarsAction::act()
@@ -54,11 +59,13 @@ CopyNodalVarsAction::act()
     {
       // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
       if (_current_task == "copy_nodal_vars")
-        system = &_problem->getNonlinearSystem();
+        system = &_problem->getNonlinearSystemBase();
       else
         system = &_problem->getAuxiliarySystem();
 
-      system->addVariableToCopy(name(), getParam<std::string>("initial_from_file_var"), getParam<std::string>("initial_from_file_timestep"));
+      system->addVariableToCopy(name(),
+                                getParam<std::string>("initial_from_file_var"),
+                                getParam<std::string>("initial_from_file_timestep"));
     }
   }
 }

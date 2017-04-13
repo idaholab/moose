@@ -17,11 +17,11 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class UserForcingFunction;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<UserForcingFunction>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<UserForcingFunction>();
 class UserForcingFunction : public Kernel
 {
 public:
-
   UserForcingFunction(const InputParameters & parameters);
 
 protected:
@@ -44,9 +43,9 @@ protected:
   /**
    * Computes test function * forcing function.
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   Function & _func;
 };
 
-#endif //USERFORCINGFUNCTION_H
+#endif // USERFORCINGFUNCTION_H
