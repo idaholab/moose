@@ -117,13 +117,19 @@ BicubicSplineInterpolation::constructColumnSplineSecondDerivativeTable()
   auto n = _x2.size();
   _y2_columns.resize(n);
 
+  // transpose the _y values so the columns can be easily iterated over
+  std::vector<std::vector<Real>> y_trans(_y[0].size(), std::vector<Real>(_y.size()));
+  for (decltype(n) i = 0; i < _y.size(); ++i)
+    for (decltype(n) j = 0; j < _y[0].size(); ++j)
+      y_trans[j][i] = _y[i][j];
+
   if (_yx11.empty())
     for (decltype(n) j = 0; j < n; ++j)
-      spline(_x1, _y[j], _y2_columns[j]);
+      spline(_x1, y_trans[j], _y2_columns[j]);
 
   else
     for (decltype(n) j = 0; j < n; ++j)
-      spline(_x1, _y[j], _y2_columns[j], _yx11[j], _yx1n[j]);
+      spline(_x1, y_trans[j], _y2_columns[j], _yx11[j], _yx1n[j]);
 }
 
 void
@@ -161,10 +167,11 @@ BicubicSplineInterpolation::sampleDerivative(Real x1,
                                              Real yp1 /* = _deriv_bound*/,
                                              Real ypn /* = _deriv_bound*/)
 {
+  auto m = _x1.size();
+
   // Take derivative along x1 axis
   if (deriv_var == 1)
   {
-    auto m = _x1.size();
     std::vector<Real> column_spline_second_derivs(m), row_spline_eval(m);
 
     // Evaluate m row-splines to get y-values for column spline construction
@@ -188,7 +195,12 @@ BicubicSplineInterpolation::sampleDerivative(Real x1,
 
     // Evaluate n column-splines to get y-values for row spline construction
     for (decltype(n) j = 0; j < n; ++j)
-      column_spline_eval[j] = SplineInterpolationBase::sample(_x1, _y[j], _y2_columns[j], x1);
+    {
+      std::vector<Real> temp_y(m);
+      for (decltype(m) k = 0; k < m; ++k)
+        temp_y[k] = _y[k][j];
+      column_spline_eval[j] = SplineInterpolationBase::sample(_x1, temp_y, _y2_columns[j], x1);
+    }
 
     // Construct single row spline; get back the second derivatives wrt x2 coord on the x2 grid
     // points
@@ -213,10 +225,11 @@ BicubicSplineInterpolation::sample2ndDerivative(Real x1,
                                                 Real yp1 /* = _deriv_bound*/,
                                                 Real ypn /* = _deriv_bound*/)
 {
+  auto m = _x1.size();
+
   // Take second derivative along x1 axis
   if (deriv_var == 1)
   {
-    auto m = _x1.size();
     std::vector<Real> column_spline_second_derivs(m), row_spline_eval(m);
 
     // Evaluate m row-splines to get y-values for column spline construction
@@ -228,7 +241,7 @@ BicubicSplineInterpolation::sample2ndDerivative(Real x1,
     spline(_x1, row_spline_eval, column_spline_second_derivs, yp1, ypn);
 
     // Evaluate second derivative wrt x1 of newly constructed column spline
-    return SplineInterpolationBase::sampleDerivative(
+    return SplineInterpolationBase::sample2ndDerivative(
         _x1, row_spline_eval, column_spline_second_derivs, x1);
   }
 
@@ -240,14 +253,19 @@ BicubicSplineInterpolation::sample2ndDerivative(Real x1,
 
     // Evaluate n column-splines to get y-values for row spline construction
     for (decltype(n) j = 0; j < n; ++j)
-      column_spline_eval[j] = SplineInterpolationBase::sample(_x1, _y[j], _y2_columns[j], x1);
+    {
+      std::vector<Real> temp_y(m);
+      for (decltype(m) k = 0; k < m; ++k)
+        temp_y[k] = _y[k][j];
+      column_spline_eval[j] = SplineInterpolationBase::sample(_x1, temp_y, _y2_columns[j], x1);
+    }
 
     // Construct single row spline; get back the second derivatives wrt x2 coord on the x2 grid
     // points
     spline(_x2, column_spline_eval, row_spline_second_derivs, yp1, ypn);
 
     // Evaluate second derivative wrt x2 of newly constructed row spline
-    return SplineInterpolationBase::sampleDerivative(
+    return SplineInterpolationBase::sample2ndDerivative(
         _x2, column_spline_eval, row_spline_second_derivs, x2);
   }
 
