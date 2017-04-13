@@ -290,14 +290,10 @@ class TestHarness:
                         else:
                             # Override command with the qsub command needed to launch a PBS job
                             command = self.createQsubFile(command, dirpath, tester)
-
                     # This method spawns another process and allows this loop to continue looking for tests
                     # RunParallel will call self.testOutputAndFinish when the test has completed running
                     # This method will block when the maximum allowed parallel processes are running
-                    if self.options.dry_run:
-                        self.handleTestStatus(tester, command)
-                    else:
-                        self.runner.run(tester, command)
+                    self.runner.run(tester, command)
                 else: # This job is skipped - notify the runner
                     status = tester.getStatus()
                     if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
@@ -332,11 +328,13 @@ class TestHarness:
         specs['place'] = 'free'
         specs['no_copy'] = self.options.input_file_name
 
-        # Some gold files are located outside 'gold' and are specified with the gold_dir spec
+        # Include any additional files needed for the test
+        if 'pbs_copy_files' in tester.specs:
+            specs['copy_files'] = tester.specs['pbs_copy_files']
+
+        # Some tests specify a different gold directory
         if 'gold_dir' in tester.specs:
-            specs['copy_files'] = tester.specs['gold_dir']
-        else:
-            specs['copy_files'] = 'gold'
+            specs['copy_files'] = specs['copy_files'] + ' ' + tester.specs['gold_dir']
 
         # Convert MAX_TIME to hours:minutes for walltime use
         hours = int(int(specs['max_time']) / 3600)
@@ -642,7 +640,7 @@ class TestHarness:
                     # to go muddling around changing specs like this.
                     tester.specs['test_dir'] = self.pbs_data[job_id.group(1)]['test_dir']
                     output = tester.processResults(tester.specs['moose_dir'], exit_code, self.options, outfile)
-                    self.testOutputAndFinish(tester, exit_code, outfile)
+                    self.testOutputAndFinish(tester, exit_code, output)
                     return
                 else:
                     # I ran into this scenario when the cluster went down, but launched/completed my job :)
