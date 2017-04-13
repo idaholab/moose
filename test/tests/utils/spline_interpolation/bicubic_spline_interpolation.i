@@ -19,12 +19,12 @@
   [./spline_fn]
     type = BicubicSplineFunction
     x1 = '0 2 4'
-    x2 = '0 2 4'
-    y = '0 16 128 8 24 136 64 80 192'
-    yx11 = '0 0 0'
-    yx1n = '48 48 48'
+    x2 = '0 2 4 6'
+    y = '0 16 128 432 8 24 136 440 64 80 192 496'
+    yx11 = '0 0 0 0'
+    yx1n = '48 48 48 48'
     yx21 = '0 0 0'
-    yx2n = '96 96 96'
+    yx2n = '216 216 216'
     yx1 = 'yx1'
     yx2 = 'yx2'
   [../]
@@ -48,6 +48,14 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./x_deriv]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./y_deriv]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
@@ -55,6 +63,18 @@
     type = FunctionAux
     variable = bi_func_value
     function = spline_fn
+  [../]
+  [./deriv_1]
+    type = FunctionDerivativeAux
+    function = spline_fn
+    variable = x_deriv
+    component = 1
+  [../]
+  [./deriv_2]
+    type = FunctionDerivativeAux
+    function = spline_fn
+    variable = y_deriv
+    component = 2
   [../]
 []
 
@@ -90,6 +110,18 @@
     type = NodalL2Error
     variable = u
     function = u_func
+    execute_on = 'initial timestep_end'
+  [../]
+  [./x_deriv_err_analytic]
+    type = NodalL2Error
+    variable = x_deriv
+    function = yx1
+    execute_on = 'initial timestep_end'
+  [../]
+  [./y_deriv_err_analytic]
+    type = NodalL2Error
+    variable = y_deriv
+    function = yx2
     execute_on = 'initial timestep_end'
   [../]
 []

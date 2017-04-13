@@ -48,7 +48,9 @@ class AnalyzeJacobian(Tester):
         if not specs['off_diagonal'] :
             mesh_options += ' -D'
 
-        command += mesh_options + ' ' + specs['input'] + ' -e ' + specs['executable'] + ' ' + ' '.join(specs['cli_args'])
+        command += mesh_options + ' ' + specs['input'] + ' -e ' + specs['executable'] + ' '
+        if len(specs['cli_args']):
+            command += '--cli-args "' + (' '.join(specs['cli_args']) + '"')
 
         return command
 

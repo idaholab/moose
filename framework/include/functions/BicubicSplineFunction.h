@@ -35,6 +35,7 @@ public:
   virtual Real value(Real t, const Point & p) override;
 
   virtual Real derivative(const Point & p, unsigned int deriv_var);
+  virtual RealGradient gradient(Real t, const Point & p) override;
   virtual Real secondDerivative(const Point & p, unsigned int deriv_var);
 
 protected:
