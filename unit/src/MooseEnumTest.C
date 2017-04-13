@@ -275,117 +275,131 @@ TEST(MooseEnum, testErrors)
         << "failed with unexpected error: " << msg;
   }
 
-  // Same name
+  // Duplicate IDs
   try
   {
-    MultiMooseEnum error_check("one two one");
-    CPPUNIT_ASSERT(false); // Unreachable
+    MultiMooseEnum error_check("one=1 two=1");
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("The name ONE already exists in the enumeration.") !=
-                   std::string::npos);
+    ASSERT_NE(msg.find("The id 1 already exists in the enumeration."), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
-  // Same id
+  // Duplicate name
   try
   {
-    MultiMooseEnum error_check("one=0 two three=0");
-    CPPUNIT_ASSERT(false); // Unreachable
+    MultiMooseEnum error_check("one=1 two=2 one=3");
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    CPPUNIT_ASSERT(msg.find("The id 0 already exists in the enumeration.") !=
-                   std::string::npos);
+    ASSERT_NE(msg.find("The name ONE already exists in the enumeration."), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 }
 
-void
-MooseEnumTest::testExecuteEnum()
+TEST(MultiMooseEnum, testExecuteOn)
 {
   // Create an enum with added and removed flags
-  MultiMooseEnum exec_enum = MooseUtils::createExecuteOnEnum("initial", "final=42 failed", "LINEAR");
+  MultiMooseEnum exec_enum =
+      MooseUtils::createExecuteOnEnum({EXEC_INITIAL}, {EXEC_FINAL, EXEC_FAILED}, {EXEC_LINEAR});
 
-  // Check that added names show up
-  std::cout << exec_enum.getRawNames() << std::endl;
-  CPPUNIT_ASSERT(exec_enum.getRawNames() == "NONE INITIAL NONLINEAR TIMESTEP_END TIMESTEP_BEGIN CUSTOM SUBDOMAIN final failed");
-  std::vector<std::string> opts = {"NONE", "INITIAL", "NONLINEAR", "TIMESTEP_END", "TIMESTEP_BEGIN", "CUSTOM", "SUBDOMAIN", "FINAL", "FAILED"};
-  CPPUNIT_ASSERT(exec_enum.getNames() == opts);
+  // Chech that names are added and removed
+  EXPECT_EQ(exec_enum.getRawNames(),
+            "NONE INITIAL NONLINEAR TIMESTEP_END TIMESTEP_BEGIN CUSTOM SUBDOMAIN FINAL FAILED");
+  std::vector<std::string> opts = {"NONE",
+                                   "INITIAL",
+                                   "NONLINEAR",
+                                   "TIMESTEP_END",
+                                   "TIMESTEP_BEGIN",
+                                   "CUSTOM",
+                                   "SUBDOMAIN",
+                                   "FINAL",
+                                   "FAILED"};
+  EXPECT_EQ(exec_enum.getNames(), opts);
 
   // Check that added names can be used
-  CPPUNIT_ASSERT(exec_enum.contains("initial"));
+  EXPECT_TRUE(exec_enum.contains("initial"));
   exec_enum = "final";
-  CPPUNIT_ASSERT(exec_enum.contains("final"));
-  CPPUNIT_ASSERT(exec_enum.contains(42));
-  CPPUNIT_ASSERT(exec_enum.size() == 1);
-  CPPUNIT_ASSERT(exec_enum[0] == "final");
-  CPPUNIT_ASSERT(exec_enum.get(0) == 42);
-  CPPUNIT_ASSERT(exec_enum.id("final") == 42);
+  EXPECT_TRUE(exec_enum.contains("final"));
+  EXPECT_TRUE(exec_enum.contains(EXEC_FINAL));
+  EXPECT_EQ(exec_enum.size(), 1);
+  EXPECT_EQ(exec_enum[0], "final");
+  EXPECT_EQ(exec_enum.get(0), EXEC_FINAL);
+  EXPECT_EQ(exec_enum.id("final"), EXEC_FINAL);
+  EXPECT_EQ(exec_enum.name(EXEC_FINAL), "FINAL");
 
   // Error when bad name provided to id
   try
   {
     exec_enum.id("wrong");
-    CPPUNIT_ASSERT(false); // Unreachable
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    std::cout << msg << std::endl;
-    CPPUNIT_ASSERT(msg.find("The name WRONG is not a possible enumeration value.") != std::string::npos);
+    ASSERT_NE(msg.find("The name WRONG is not a possible enumeration value."), std::string::npos);
   }
 
   // Error when bad name is removed
   try
   {
     exec_enum.removeEnumerationName("wrong");
-    CPPUNIT_ASSERT(false); // Unreachable
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    std::cout << msg << std::endl;
-    CPPUNIT_ASSERT(msg.find("The name WRONG is not a possible enumeration value, thus can not be removed.") != std::string::npos);
+    ASSERT_NE(
+        msg.find("The name WRONG is not a possible enumeration value, thus can not be removed."),
+        std::string::npos);
   }
 
   // Error when current name is remove
   try
   {
     exec_enum.removeEnumerationName("final");
-    CPPUNIT_ASSERT(false); // Unreachable
+    FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    std::cout << msg << std::endl;
-    CPPUNIT_ASSERT(msg.find("A current enumeration value of FINAL cannot be removed.") != std::string::npos);
-  }
-
-  // MooseEnum add/remove
-  MooseEnum m("one two");
-  m.addEnumerationNames("three=42");
-  m.removeEnumerationNames("two");
-  m = "three";
-  std::cout << m.getRawNames() << std::endl;
-  CPPUNIT_ASSERT(m.getRawNames() == "one three");
-  CPPUNIT_ASSERT(m == "three");
-  CPPUNIT_ASSERT(m == 42);
-
-  try
-  {
-    m.removeEnumerationNames("three");
-    CPPUNIT_ASSERT(false); // Unreachable
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    std::cout << msg << std::endl;
-    CPPUNIT_ASSERT(msg.find("The current enumeration value of THREE cannot be removed.") != std::string::npos);
+    ASSERT_NE(msg.find("A current enumeration value of FINAL cannot be removed."),
+              std::string::npos);
   }
 
   // MultiMooseEnum doc string generation
   std::string doc = MooseUtils::getExecuteOnEnumDocString(exec_enum);
-  CPPUNIT_ASSERT(doc == "The list of flag(s) indicating when this object should be executed, the available optoins include 'NONE', 'INITIAL', 'NONLINEAR', 'TIMESTEP_END', 'TIMESTEP_BEGIN', 'CUSTOM', 'SUBDOMAIN', 'FINAL', 'FAILED').");
+  EXPECT_EQ(doc,
+            "The list of flag(s) indicating when this object should be executed, the "
+            "available optoins include 'NONE', 'INITIAL', 'NONLINEAR', 'TIMESTEP_END', "
+            "'TIMESTEP_BEGIN', 'CUSTOM', 'SUBDOMAIN', 'FINAL', 'FAILED').");
+}
+
+TEST(MooseEnum, testAddRemove)
+{
+  // MooseEnumBase add/remove
+  MooseEnum m("one two");
+  m.addEnumerationNames("three=42");
+  m.removeEnumerationNames("two");
+  m = "three";
+  EXPECT_EQ(m.getRawNames(), "one three");
+  EXPECT_EQ(m, "three");
+  EXPECT_EQ(m, 42);
+
+  try
+  {
+    m.removeEnumerationNames("three");
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("The current enumeration value of THREE cannot be removed."),
+              std::string::npos);
+  }
 }
