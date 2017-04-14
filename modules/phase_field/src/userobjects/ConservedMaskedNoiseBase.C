@@ -15,7 +15,7 @@ InputParameters
 validParams<ConservedMaskedNoiseBase>()
 {
   InputParameters params = validParams<ElementUserObject>();
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_TIMESTEP_BEGIN);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_TIMESTEP_BEGIN});
   params.addParam<MaterialPropertyName>("mask",
                                         "Material property to multiply the random numbers with");
   return params;

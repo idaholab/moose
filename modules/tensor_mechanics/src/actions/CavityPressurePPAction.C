@@ -27,7 +27,7 @@ CavityPressurePPAction::act()
   std::string uo_name = _name + "UserObject";
 
   InputParameters params = _factory.getValidParams("CavityPressurePostprocessor");
-  MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_LINEAR);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_LINEAR});
   params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
   params.set<std::string>("quantity") = "cavity_pressure";
 

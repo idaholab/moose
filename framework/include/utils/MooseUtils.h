@@ -390,20 +390,24 @@ tokenizeAndConvert(const std::string & str,
  * Returns the default execute_on MultiMooseEnum.
  * @param default_names Space separated list to set the default execute flags.
  */
-MultiMooseEnum createExecuteOnEnum(int n = 0, ...);
+MultiMooseEnum createExecuteOnEnum(const std::set<ExecFlagType> & set_flags = {},
+                                   const std::set<ExecFlagType> & add_flags = {},
+                                   const std::set<ExecFlagType> & remove_flags = {});
 
 ///@
 /**
  * Add/removes/sets the given execute flags to the InputParameters or MultiMooseEnum object.
- * @param params/exec_enum The InputParameters of MultiMooseEnum object to modify.
- * @param n The number of ExecFlagType flags provided.
- * @param ... Comma separated list of ExecFlagType to append as possible values.
+ * @param params/exec_enum The InputParameters or MultiMooseEnum object to modify.
+ * @param flags A set of ExecFlagType to append as possible values.
  *
  * The add/remove methods also automatically update the doc string for the "execute_on" parameter.
  */
-void addExecuteOnFlags(InputParameters & params, int n, ...);
-void removeExecuteOnFlags(InputParameters & params, int n, ...);
-void setExecuteOnFlags(InputParameters & params, int n, ...);
+void addExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags);
+void addExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags);
+void removeExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags);
+void removeExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags);
+void setExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags);
+void setExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags);
 ///@}
 
 /**

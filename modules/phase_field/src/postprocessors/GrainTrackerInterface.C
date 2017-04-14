@@ -46,7 +46,7 @@ validParams<GrainTrackerInterface>()
   params.set<bool>("enable_var_coloring") =
       true; // Generally we need to see the variable (OP) indices
 
-  MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_TIMESTEP_END);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_TIMESTEP_END});
   return params;
 }
 

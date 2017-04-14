@@ -554,7 +554,9 @@ wildCardMatch(std::string name, std::string search_string)
 }
 
 MultiMooseEnum
-createExecuteOnEnum(int n, ...)
+createExecuteOnEnum(const std::set<ExecFlagType> & set_flags,
+                    const std::set<ExecFlagType> & add_flags,
+                    const std::set<ExecFlagType> & remove_flags)
 {
   // Define the default execute_on flags
   MultiMooseEnum exec_enum;
@@ -566,25 +568,10 @@ createExecuteOnEnum(int n, ...)
                                   EXEC_TIMESTEP_BEGIN,
                                   EXEC_CUSTOM,
                                   EXEC_SUBDOMAIN};
-  for (const ExecFlagType & flag : flags)
-  {
-    auto iter = getExecuteOnFlag(flag);
-    exec_enum.addEnumerationName(iter->second, iter->first);
-  }
-
-  // Add the default flags
-  va_list args;
-  va_start(args, n);
-  for (int i = 0; i < n; i++)
-  {
-    const ExecFlagType & flag = va_arg(args, ExecFlagType);
-    const auto iter = Moose::execute_flags.find(flag);
-    if (iter == Moose::execute_flags.end())
-      mooseError("Unknown flag value of ", flag, ", the flag is likely not registered.");
-    exec_enum.push_back(iter->second);
-  }
-  va_end(args);
-
+  addExecuteOnFlags(exec_enum, flags);
+  addExecuteOnFlags(exec_enum, add_flags);
+  removeExecuteOnFlags(exec_enum, remove_flags);
+  setExecuteOnFlags(exec_enum, set_flags);
   return exec_enum;
 }
 
@@ -601,51 +588,60 @@ getExecuteOnEnumDocString(const MultiMooseEnum & exec_enum)
 }
 
 void
-addExecuteOnFlags(InputParameters & params, int n, ...)
+addExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags)
 {
   MultiMooseEnum & exec_enum = getExecuteOnEnum(params);
-  va_list args;
-  va_start(args, n);
-  for (int i = 0; i < n; i++)
+  addExecuteOnFlags(exec_enum, flags);
+  params.setDocString("execute_on", getExecuteOnEnumDocString(exec_enum));
+}
+
+void
+addExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags)
+{
+  for (const auto & flag : flags)
   {
-    const auto iter = getExecuteOnFlag(va_arg(args, ExecFlagType));
+    const auto iter = getExecuteOnFlag(flag);
     exec_enum.addEnumerationName(iter->second, iter->first);
   }
-  va_end(args);
+}
+
+void
+removeExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags)
+{
+  MultiMooseEnum & exec_enum = getExecuteOnEnum(params);
+  removeExecuteOnFlags(exec_enum, flags);
   params.setDocString("execute_on", getExecuteOnEnumDocString(exec_enum));
 }
 
 void
-removeExecuteOnFlags(InputParameters & params, int n, ...)
+removeExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags)
 {
-  MultiMooseEnum & exec_enum = getExecuteOnEnum(params);
-  va_list args;
-  va_start(args, n);
-  for (int i = 0; i < n; i++)
+  for (const auto & flag : flags)
   {
-    const auto iter = getExecuteOnFlag(va_arg(args, ExecFlagType));
+    const auto iter = getExecuteOnFlag(flag);
     exec_enum.removeEnumerationName(iter->second);
   }
-  va_end(args);
-  params.setDocString("execute_on", getExecuteOnEnumDocString(exec_enum));
 }
 
 void
-setExecuteOnFlags(InputParameters & params, int n, ...)
+setExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags)
 {
   MultiMooseEnum & exec_enum = getExecuteOnEnum(params);
-  exec_enum.clear();
-  va_list args;
-  va_start(args, n);
-  for (int i = 0; i < n; i++)
-  {
-    const auto & iter = getExecuteOnFlag(va_arg(args, ExecFlagType));
-    exec_enum.push_back(iter->second);
-  }
-  va_end(args);
+  setExecuteOnFlags(exec_enum, flags);
 
   // Re-apply the parameter to maintain the "set by user" status
   params.addParam<MultiMooseEnum>("execute_on", exec_enum, getExecuteOnEnumDocString(exec_enum));
+}
+
+void
+setExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags)
+{
+  exec_enum.clear();
+  for (const auto & flag : flags)
+  {
+    const auto & iter = getExecuteOnFlag(flag);
+    exec_enum.push_back(iter->second);
+  }
 }
 
 std::map<ExecFlagType, std::string>::const_iterator

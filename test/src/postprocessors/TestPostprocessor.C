@@ -25,7 +25,7 @@ validParams<TestPostprocessor>()
   params.addRequiredParam<MooseEnum>("test_type", test_type, "The type of test to perform");
   params.addParam<PostprocessorName>("report_name",
                                      "The name of the postprocessor value to report");
-  MooseUtils::addExecuteOnFlags(params, 1, EXEC_JUST_GO);
+  MooseUtils::addExecuteOnFlags(params, {EXEC_JUST_GO});
   return params;
 }
 

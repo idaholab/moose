@@ -24,7 +24,7 @@ validParams<LevelSetMeshRefinementTransfer>()
   params.set<MooseEnum>("direction") = "TO_MULTIAPP";
   params.suppressParameter<MooseEnum>("direction");
 
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_CUSTOM);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_CUSTOM});
   params.set<bool>("check_multiapp_execute_on") = false;
   params.suppressParameter<MultiMooseEnum>("execute_on");
 

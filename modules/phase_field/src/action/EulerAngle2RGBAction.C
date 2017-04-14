@@ -72,7 +72,7 @@ EulerAngle2RGBAction::act()
       params.set<UserObjectName>("euler_angle_provider") =
           getParam<UserObjectName>("euler_angle_provider");
       params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
-      MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_TIMESTEP_END);
+      MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_TIMESTEP_END});
       params.set<Point>("no_grain_color") = getParam<Point>("no_grain_color");
       _problem->addAuxKernel("EulerAngleProvider2RGBAux", var_name, params);
     }

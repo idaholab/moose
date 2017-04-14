@@ -22,7 +22,7 @@ validParams<DiscreteNucleationInserter>()
       "probability", "Probability density for inserting a discrete nucleus");
   params.addRequiredParam<Real>("hold_time", "Time to keep each nucleus active");
   params.addParam<Point>("test", "Insert a fixed nucleus at a point in the simulation cell");
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_TIMESTEP_END);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_TIMESTEP_END});
   return params;
 }
 

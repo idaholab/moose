@@ -103,7 +103,7 @@ GeneralizedPlaneStrainAction::act()
     InputParameters params = _factory.getValidParams(uo_type);
 
     params.applyParameters(parameters());
-    MooseUtils::setExecuteOnFlags(params, 1, EXEC_LINEAR);
+    MooseUtils::setExecuteOnFlags(params, {EXEC_LINEAR});
 
     _problem->addUserObject(uo_type, uo_name, params);
   }

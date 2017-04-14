@@ -23,7 +23,7 @@ validParams<Control>()
   params += validParams<TransientInterface>();
   params += validParams<SetupInterface>();
   params += validParams<FunctionInterface>();
-  MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_TIMESTEP_END);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_TIMESTEP_END});
   params.registerBase("Control");
   return params;
 }
@@ -47,5 +47,5 @@ Control::getExecuteOptions()
   ::mooseDeprecated("The 'getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum "
                     "because MOOSE was updated to use a MultiMooseEnum for the execute flags and "
                     "the new function provides additional arguments for modification of the enum.");
-  return MooseUtils::createExecuteOnEnum(2, EXEC_INITIAL, EXEC_TIMESTEP_END);
+  return MooseUtils::createExecuteOnEnum({EXEC_INITIAL, EXEC_TIMESTEP_END});
 }

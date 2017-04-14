@@ -45,7 +45,7 @@ ContactPenetrationAuxAction::act()
 
   {
     InputParameters params = _factory.getValidParams("PenetrationAux");
-    MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_LINEAR);
+    MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_LINEAR});
 
     // Extract global params
     if (isParamValid("parser_syntax"))

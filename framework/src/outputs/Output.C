@@ -52,8 +52,8 @@ validParams<Output>()
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
   // Update the 'execute_on' input parameter for output
-  MooseUtils::addExecuteOnFlags(params, 2, EXEC_FINAL, EXEC_FAILED);
-  MooseUtils::setExecuteOnFlags(params, 2, EXEC_INITIAL, EXEC_TIMESTEP_END);
+  MooseUtils::addExecuteOnFlags(params, {EXEC_FINAL, EXEC_FAILED});
+  MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_TIMESTEP_END});
 
   // Add ability to append to the 'execute_on' list
   MultiMooseEnum exec_enum(params.get<MultiMooseEnum>("execute_on"));
@@ -79,7 +79,7 @@ validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
-  ::mooseDeprecated("The 'getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum.");
+  ::mooseDeprecated("The 'getExecuteOptions' was replaced by Output::createExecuteOnEnum.");
   MultiMooseEnum exec_enum = MooseUtils::createExecuteOnEnum();
   exec_enum = default_type;
   return exec_enum;

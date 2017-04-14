@@ -18,7 +18,7 @@ validParams<ContactPressureAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_NONLINEAR);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_NONLINEAR});
   return params;
 }
 

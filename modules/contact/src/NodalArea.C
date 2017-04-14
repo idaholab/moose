@@ -20,7 +20,7 @@ InputParameters
 validParams<NodalArea>()
 {
   InputParameters params = validParams<SideIntegralVariableUserObject>();
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_LINEAR);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_LINEAR});
   return params;
 }
 

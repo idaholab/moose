@@ -66,7 +66,7 @@ ContactPressureAuxAction::act()
     name << counter++;
 
     MultiMooseEnum execute_options =
-        MooseUtils::createExecuteOnEnum(3, EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN);
+        MooseUtils::createExecuteOnEnum({EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN});
     params.set<MultiMooseEnum>("execute_on") = execute_options;
     _problem->addAuxKernel("ContactPressureAux", name.str(), params);
   }

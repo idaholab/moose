@@ -19,7 +19,7 @@ InputParameters
 validParams<RandomElementalUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_TIMESTEP_BEGIN);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_TIMESTEP_BEGIN});
   return params;
 }
 

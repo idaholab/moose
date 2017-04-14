@@ -99,9 +99,9 @@ validParams<CommonOutputAction>()
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Add the 'execute_on' input parameter
-  MultiMooseEnum exec_enum(MooseUtils::createExecuteOnEnum(2, EXEC_INITIAL, EXEC_TIMESTEP_END));
+  MultiMooseEnum exec_enum(MooseUtils::createExecuteOnEnum({EXEC_INITIAL, EXEC_TIMESTEP_END},
+                                                           {EXEC_FINAL, EXEC_FAILED}));
   params.addParam<MultiMooseEnum>("execute_on", exec_enum, "Updated by setExecuteOnFlags below.");
-  MooseUtils::addExecuteOnFlags(params, 2, EXEC_FINAL, EXEC_FAILED);
 
   // Add special Console flags
   params.addParam<bool>(

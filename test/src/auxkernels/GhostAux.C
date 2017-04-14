@@ -22,7 +22,7 @@ validParams<GhostAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addParam<UserObjectName>("ghost_user_object",
                                   "The GhostUserObject where this Aux pulls values from");
-  MooseUtils::setExecuteOnFlags(params, 1, EXEC_TIMESTEP_BEGIN);
+  MooseUtils::setExecuteOnFlags(params, {EXEC_TIMESTEP_BEGIN});
   params.addClassDescription("Aux Kernel to display ghosted elements from a single processor or "
                              "the union on all processors");
   return params;

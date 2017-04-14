@@ -23,7 +23,7 @@ validParams<SetupInterface>()
   InputParameters params = emptyInputParameters();
 
   // Add the 'execute_on' input parameter for users to set
-  MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum(1, EXEC_LINEAR));
+  MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum({EXEC_LINEAR}));
   params.addParam<MultiMooseEnum>("execute_on",
                                   execute_options,
                                   MooseUtils::getExecuteOnEnumDocString(execute_options));
