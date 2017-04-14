@@ -16,6 +16,8 @@ class MooseTextFile(MooseTextPatternBase):
         self._settings['line'] =  None
         self._settings['start'] =  None
         self._settings['end'] =  None
+        self._settings['re_start'] =  None
+        self._settings['re_end'] =  None
         self._settings['include_end'] = False
 
     def handleMatch(self, match):
@@ -33,6 +35,9 @@ class MooseTextFile(MooseTextPatternBase):
             return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
         if settings['line']:
             content = self.extractLine(filename, settings["line"])
+
+        elif settings['re_start'] or settings['re_end']:
+            content = self.extractRegexRange(filename, settings['re_start'], settings['re_end'], settings['include_end'])
 
         elif settings['start'] or settings['end']:
             content = self.extractLineRange(filename, settings['start'], settings['end'], settings['include_end'])
@@ -99,3 +104,34 @@ class MooseTextFile(MooseTextPatternBase):
                     break
 
         return ''.join(lines[start_idx:end_idx])
+
+    def extractRegexRange(self, filename, start, end, include_end):
+        """
+        Function for extracting content between start/end strings.
+
+        Args:
+          filename[str]: The name of the file to examine.
+          start[str|None]: The starting line (when None is provided the beginning is used).
+          end[str|None]: The ending line (when None is provided the end is used).
+          include_end[bool]: If True then the end string is included
+        """
+
+        # Read the lines
+        with open(filename) as fid:
+            content = fid.read()
+
+        # The default start/end positions
+        start_idx = 0
+        end_idx = len(content)
+
+        if start:
+            match = re.search(start, content, flags=re.MULTILINE)
+            if match:
+                start_idx = match.start()
+
+        if end:
+            match = re.search(end, content, flags=re.MULTILINE)
+            if match:
+                end_idx = match.end() if include_end else match.start()
+
+        return content[start_idx:end_idx]

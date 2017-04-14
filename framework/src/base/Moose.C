@@ -1204,17 +1204,17 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 void
 registerExecFlags()
 {
-  registerExecFlag(EXEC_NONE, "NONE");                     // 0
-  registerExecFlag(EXEC_INITIAL, "INITIAL");               // 1
-  registerExecFlag(EXEC_LINEAR, "LINEAR");                 // 2
-  registerExecFlag(EXEC_NONLINEAR, "NONLINEAR");           // 4
-  registerExecFlag(EXEC_TIMESTEP_END, "TIMESTEP_END");     // 8
-  registerExecFlag(EXEC_TIMESTEP_BEGIN, "TIMESTEP_BEGIN"); // 16
-  registerExecFlag(EXEC_FINAL, "FINAL");                   // 32
-  registerExecFlag(EXEC_FORCED, "FORCED");                 // 64
-  registerExecFlag(EXEC_FAILED, "FAILED");                 // 128
-  registerExecFlag(EXEC_CUSTOM, "CUSTOM");                 // 256
-  registerExecFlag(EXEC_SUBDOMAIN, "SUBDOMAIN");           // 512
+  registerExecFlag(EXEC_NONE, "NONE");
+  registerExecFlag(EXEC_INITIAL, "INITIAL");
+  registerExecFlag(EXEC_LINEAR, "LINEAR");
+  registerExecFlag(EXEC_NONLINEAR, "NONLINEAR");
+  registerExecFlag(EXEC_TIMESTEP_END, "TIMESTEP_END");
+  registerExecFlag(EXEC_TIMESTEP_BEGIN, "TIMESTEP_BEGIN");
+  registerExecFlag(EXEC_FINAL, "FINAL");
+  registerExecFlag(EXEC_FORCED, "FORCED");
+  registerExecFlag(EXEC_FAILED, "FAILED");
+  registerExecFlag(EXEC_CUSTOM, "CUSTOM");
+  registerExecFlag(EXEC_SUBDOMAIN, "SUBDOMAIN");
   registerExecFlag(EXEC_SAME_AS_MULTIAPP, "SAME_AS_MULTIAPP");
 }
 
