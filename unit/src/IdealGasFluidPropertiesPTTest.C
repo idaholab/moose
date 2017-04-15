@@ -27,7 +27,7 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
   const Real entropy = 6850.0;
   const Real viscosity = 18.23e-6;
   const Real henry = 0.0;
-  const Real R = 8.3144621;
+  const Real R = 8.3144598;
 
   const Real tol = 1.0e-8;
 

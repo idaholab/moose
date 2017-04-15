@@ -29,7 +29,7 @@ PorousFlowFluidPropertiesBase::PorousFlowFluidPropertiesBase(const InputParamete
     _pressure_variable_name(_dictator.pressureVariableNameDummy()),
     _temperature_variable_name(_dictator.temperatureVariableNameDummy()),
     _t_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
-    _R(8.3144621)
+    _R(8.3144598)
 {
 }
 
