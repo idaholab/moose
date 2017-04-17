@@ -6,6 +6,7 @@
     allow_warnings = true
     library_mode = 'DYNAMIC'
     recover = false # See #5207
+    pbs = false # misc_master.i incudes relative path: library_path = '../../../../phase_field/lib'
   [../]
 
   [./dynamic_load_error_check]
