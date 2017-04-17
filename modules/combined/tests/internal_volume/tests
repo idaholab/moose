@@ -16,6 +16,7 @@
     type = 'CSVDiff'
     input = 'rz.i'
     csvdiff = 'rz_out.csv'
+    pbs_copy_files = 'meshes'
   [../]
 
   [./rz2]
@@ -37,18 +38,21 @@
     type = 'CSVDiff'
     input = 'hex20.i'
     csvdiff = 'hex20_out.csv'
+    pbs_copy_files = 'meshes'
   [../]
 
   [./rz_quad8]
     type = 'CSVDiff'
     input = 'rz_quad8.i'
     csvdiff = 'rz_quad8_out.csv'
+    pbs_copy_files = 'meshes'
   [../]
 
   [./rz_cone]
     type = 'CSVDiff'
     input = 'rz_cone.i'
     csvdiff = 'rz_cone_out.csv'
+    pbs_copy_files = 'meshes'
   [../]
 
   [./hex8]
@@ -61,11 +65,13 @@
     type = 'CSVDiff'
     input = 'rz_displaced.i'
     csvdiff = 'rz_displaced_out.csv'
+    pbs_copy_files = 'meshes'
   [../]
 
   [./rz_displaced_quad8]
     type = 'CSVDiff'
     input = 'rz_displaced_quad8.i'
     csvdiff = 'rz_displaced_quad8_out.csv'
+    pbs_copy_files = 'meshes'
   [../]
 []
