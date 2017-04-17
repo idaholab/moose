@@ -28,91 +28,69 @@
 class ColumnMajorMatrixTest : public ::testing::Test
 {
 protected:
+  /**
+   * Initialize the various test objects to the right size.
+   */
+  ColumnMajorMatrixTest()
+    : a(3, 3), t(3, 2), two_mat(2, 2), add(3, 2), add_solution(3, 2), sub(3, 2), sub_solution(3, 2)
+  {
+  }
+
   void SetUp()
   {
     // Define commonly used matrices for testing
-    a = new ColumnMajorMatrix(3, 3);
-    ColumnMajorMatrix & a_ref = *a;
+    a(0, 0) = 1;
+    a(1, 0) = 2;
+    a(2, 0) = 3;
+    a(0, 1) = 4;
+    a(1, 1) = 5;
+    a(2, 1) = 6;
+    a(0, 2) = 7;
+    a(1, 2) = 8;
+    a(2, 2) = 9;
 
-    a_ref(0, 0) = 1;
-    a_ref(1, 0) = 2;
-    a_ref(2, 0) = 3;
-    a_ref(0, 1) = 4;
-    a_ref(1, 1) = 5;
-    a_ref(2, 1) = 6;
-    a_ref(0, 2) = 7;
-    a_ref(1, 2) = 8;
-    a_ref(2, 2) = 9;
+    t(0, 0) = 1;
+    t(1, 0) = 2;
+    t(2, 0) = 3;
+    t(0, 1) = 4;
+    t(1, 1) = 5;
+    t(2, 1) = 6;
 
-    t = new ColumnMajorMatrix(3, 2);
-    ColumnMajorMatrix & t_ref = *t;
+    two_mat(0, 0) = 1;
+    two_mat(1, 0) = 2;
+    two_mat(0, 1) = 3;
+    two_mat(1, 1) = 4;
 
-    t_ref(0, 0) = 1;
-    t_ref(1, 0) = 2;
-    t_ref(2, 0) = 3;
-    t_ref(0, 1) = 4;
-    t_ref(1, 1) = 5;
-    t_ref(2, 1) = 6;
+    add(0, 0) = 6;
+    add(1, 0) = 5;
+    add(2, 0) = 4;
+    add(0, 1) = 1;
+    add(1, 1) = 1;
+    add(2, 1) = 1;
 
-    two_mat = new ColumnMajorMatrix(2, 2);
-    ColumnMajorMatrix & mat = *two_mat;
+    add_solution(0, 0) = 7;
+    add_solution(1, 0) = 7;
+    add_solution(2, 0) = 7;
+    add_solution(0, 1) = 5;
+    add_solution(1, 1) = 6;
+    add_solution(2, 1) = 7;
 
-    mat(0, 0) = 1;
-    mat(1, 0) = 2;
-    mat(0, 1) = 3;
-    mat(1, 1) = 4;
+    sub(0, 0) = 0;
+    sub(1, 0) = 1;
+    sub(2, 0) = 2;
+    sub(0, 1) = 1;
+    sub(1, 1) = 1;
+    sub(2, 1) = 1;
 
-    add = new ColumnMajorMatrix(3, 2);
-    add_solution = new ColumnMajorMatrix(3, 2);
-    ColumnMajorMatrix & add_ref = *add;
-    ColumnMajorMatrix & a_sol_ref = *add_solution;
-
-    add_ref(0, 0) = 6;
-    a_sol_ref(0, 0) = 7;
-    add_ref(1, 0) = 5;
-    a_sol_ref(1, 0) = 7;
-    add_ref(2, 0) = 4;
-    a_sol_ref(2, 0) = 7;
-    add_ref(0, 1) = 1;
-    a_sol_ref(0, 1) = 5;
-    add_ref(1, 1) = 1;
-    a_sol_ref(1, 1) = 6;
-    add_ref(2, 1) = 1;
-    a_sol_ref(2, 1) = 7;
-
-    sub = new ColumnMajorMatrix(3, 2);
-    sub_solution = new ColumnMajorMatrix(3, 2);
-    ColumnMajorMatrix & sub_ref = *sub;
-    ColumnMajorMatrix & s_sol_ref = *sub_solution;
-
-    sub_ref(0, 0) = 0;
-    s_sol_ref(0, 0) = 1;
-    sub_ref(1, 0) = 1;
-    s_sol_ref(1, 0) = 1;
-    sub_ref(2, 0) = 2;
-    s_sol_ref(2, 0) = 1;
-    sub_ref(0, 1) = 1;
-    s_sol_ref(0, 1) = 3;
-    sub_ref(1, 1) = 1;
-    s_sol_ref(1, 1) = 4;
-    sub_ref(2, 1) = 1;
-    s_sol_ref(2, 1) = 5;
+    sub_solution(0, 0) = 1;
+    sub_solution(1, 0) = 1;
+    sub_solution(2, 0) = 1;
+    sub_solution(0, 1) = 3;
+    sub_solution(1, 1) = 4;
+    sub_solution(2, 1) = 5;
   }
 
-  void TearDown()
-  {
-    delete a;
-    delete t;
-    delete add;
-    delete add_solution;
-    delete sub;
-    delete sub_solution;
-    delete two_mat;
-  }
-
-  ColumnMajorMatrix *a, *t, *two_mat;
-  ColumnMajorMatrix *add, *add_solution;
-  ColumnMajorMatrix *sub, *sub_solution;
+  ColumnMajorMatrix a, t, two_mat, add, add_solution, sub, sub_solution;
 };
 
 #endif // COLUMNMAJORMATRIXTEST_H
