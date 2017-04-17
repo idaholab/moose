@@ -7,6 +7,7 @@
     # real bridge.e mesh, just to make the checks run faster.
     cli_args = 'Mesh/file=../../../tensor_mechanics/examples/bridge/fake_bridge.e'
     check_input = True
+    pbs = false # bridge.i includes relative path locations
   [../]
   [./bridge_large_strain]
     type = RunApp
@@ -16,5 +17,6 @@
     # real bridge.e mesh, just to make the checks run faster.
     cli_args = 'Mesh/file=../../../tensor_mechanics/examples/bridge/fake_bridge.e'
     check_input = True
+    pbs = false # bridge_large_strain.i includes relative path location
   [../]
 []
