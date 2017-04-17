@@ -34,7 +34,8 @@ ComputeEigenstrainBase::ComputeEigenstrainBase(const InputParameters & parameter
     _incremental_form(getParam<bool>("incremental_form")),
     _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
     _eigenstrain_old(_incremental_form ? &declarePropertyOld<RankTwoTensor>(_eigenstrain_name)
-                                       : NULL)
+                                       : NULL),
+    _step_zero(declareRestartableData<bool>("step_zero", true))
 {
 }
 
@@ -48,7 +49,14 @@ ComputeEigenstrainBase::initQpStatefulProperties()
 void
 ComputeEigenstrainBase::computeQpProperties()
 {
-  computeQpEigenstrain();
+  if (_t_step >= 1)
+    _step_zero = false;
+
+  // Skip the eigenstrain calculation in step zero because no solution is computed during
+  // the zeroth step, hence computing the eigenstrain in the zeroth step would result in
+  // an incorrect calculation of mechanical_strain, which is stateful.
+  if (!_step_zero)
+    computeQpEigenstrain();
 }
 
 Real

@@ -5,6 +5,26 @@
   ny = 5
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
+[Variables]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+  [../]
+[]
+
 [AuxVariables]
   [./c]
     [./InitialCondition]
@@ -33,7 +53,6 @@
 [AuxKernels]
   [./s11]
     type = RankTwoAux
-    execute_on = initial
     variable = s11
     rank_two_tensor = eigenstrain
     index_i = 0
@@ -41,7 +60,6 @@
   [../]
   [./s22]
     type = RankTwoAux
-    execute_on = initial
     variable = s22
     rank_two_tensor = eigenstrain
     index_i = 1
@@ -49,7 +67,6 @@
   [../]
   [./ds11]
     type = RankTwoAux
-    execute_on = initial
     variable = ds11
     rank_two_tensor = delastic_strain/dc
     index_i = 0
@@ -57,7 +74,6 @@
   [../]
   [./ds22]
     type = RankTwoAux
-    execute_on = initial
     variable = ds22
     rank_two_tensor = delastic_strain/dc
     index_i = 1
@@ -66,6 +82,19 @@
 []
 
 [Materials]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    C_ijkl = '1 1'
+    fill_method = symmetric_isotropic
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+  [../]
+  [./strain]
+    type = ComputeSmallStrain
+    displacements = 'disp_x disp_y'
+    eigenstrain_names = 'eigenstrain'
+  [../]
   [./eigen1]
     type = GenericConstantRankTwoTensor
     tensor_values = '1 -1 0 0 0 0'
@@ -94,14 +123,23 @@
     tensors = 'eigen1  eigen2'
     weights = 'weight1 weight2'
     args = c
-    block = 0
     eigenstrain_name = eigenstrain
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = false
-  solve = false
+[BCs]
+  [./bottom_y]
+    type = PresetBC
+    variable = disp_y
+    boundary = bottom
+    value = 0
+  [../]
+  [./left_x]
+    type = PresetBC
+    variable = disp_x
+    boundary = left
+    value = 0
+  [../]
 []
 
 [Executioner]
