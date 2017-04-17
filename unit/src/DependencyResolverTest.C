@@ -38,30 +38,26 @@ TEST_F(DependencyResolverTest, ptrTest)
 {
   DependencyResolver<int *> resolver;
 
-  int * mat3 = new int;
-  int * mat1 = new int;
-  int * mat2 = new int;
+  int mat3;
+  int mat1;
+  int mat2;
 
-  resolver.insertDependency(mat2, mat1);
-  resolver.insertDependency(mat3, mat1);
-  resolver.insertDependency(mat3, mat2);
+  resolver.insertDependency(&mat2, &mat1);
+  resolver.insertDependency(&mat3, &mat1);
+  resolver.insertDependency(&mat3, &mat2);
 
   std::vector<int *> sorted(3);
-  sorted[0] = mat1;
-  sorted[1] = mat2;
-  sorted[2] = mat3;
+  sorted[0] = &mat1;
+  sorted[1] = &mat2;
+  sorted[2] = &mat3;
 
   /*const std::vector<std::set<int *> > & sets =*/
   resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
-  EXPECT_EQ(sorted[0], mat1);
-  EXPECT_EQ(sorted[1], mat2);
-  EXPECT_EQ(sorted[2], mat3);
-
-  delete mat1;
-  delete mat2;
-  delete mat3;
+  EXPECT_EQ(sorted[0], &mat1);
+  EXPECT_EQ(sorted[1], &mat2);
+  EXPECT_EQ(sorted[2], &mat3);
 }
 
 TEST_F(DependencyResolverTest, simpleTest)
