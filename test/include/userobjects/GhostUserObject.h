@@ -36,7 +36,7 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-  unsigned long getElementalValue(unsigned int element_id) const;
+  unsigned long getElementalValue(dof_id_type element_id) const;
 
 protected:
   std::set<dof_id_type> _ghost_data;

@@ -37,6 +37,12 @@ public:
    */
   void addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid);
 
+  /**
+   * Get a list of dependent UserObjects for this exec type
+   * @return a set of dependent user objects
+   */
+  std::set<std::string> getDependObjects() const;
+
 protected:
   ///@{
   /// Variable name to block/boundary IDs for error checking

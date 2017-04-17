@@ -466,24 +466,25 @@ FEProblemBase::initialSetup()
   unsigned int n_threads = libMesh::n_threads();
 
   // UserObject initialSetup
-  std::set<std::string> depend_objects = _aux->getDependObjects();
+  std::set<std::string> depend_objects_ic = _ics.getDependObjects();
+  std::set<std::string> depend_objects_aux = _aux->getDependObjects();
 
-  _general_user_objects.updateDependObjects(depend_objects);
+  _general_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux);
   _general_user_objects.initialSetup();
   _general_user_objects.sort();
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _nodal_user_objects.updateDependObjects(depend_objects, tid);
+    _nodal_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _nodal_user_objects.initialSetup(tid);
 
-    _elemental_user_objects.updateDependObjects(depend_objects, tid);
+    _elemental_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _elemental_user_objects.initialSetup(tid);
 
-    _side_user_objects.updateDependObjects(depend_objects, tid);
+    _side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _side_user_objects.initialSetup(tid);
 
-    _internal_side_user_objects.updateDependObjects(depend_objects, tid);
+    _internal_side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _internal_side_user_objects.initialSetup(tid);
   }
 
@@ -505,6 +506,8 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
+    computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
+
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       _ics.initialSetup(tid);
     _scalar_ics.sort();
