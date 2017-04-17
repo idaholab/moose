@@ -2397,8 +2397,10 @@ MooseMesh::getPatchUpdateStrategy() const
 MeshTools::BoundingBox
 MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
 {
-  // Grab a bounding box to speed things up
-  MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(getMesh(), processor_id());
+  // Grab a bounding box to speed things up.  Note that
+  // local_bounding_box is *not* equivalent to processor_bounding_box
+  // with processor_id() except in serial.
+  BoundingBox bbox = MeshTools::create_local_bounding_box(getMesh());
 
   // Inflate the bbox just a bit to deal with roundoff
   // Adding 1% of the diagonal size in each direction on each end
