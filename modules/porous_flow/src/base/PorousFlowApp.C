@@ -6,6 +6,11 @@
 #include "FluidPropertiesApp.h"
 #include "ChemicalReactionsApp.h"
 
+// Actions
+#include "PorousFlowUnsaturated.h"
+#include "PorousFlowFullySaturated.h"
+#include "PorousFlowBasicTHM.h"
+
 // UserObjects
 #include "PorousFlowDictator.h"
 #include "PorousFlowSumQuantity.h"
@@ -246,6 +251,42 @@ PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   PorousFlowApp::associateSyntax(syntax, action_factory);
 }
 void
-PorousFlowApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_user_object");
+  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_kernel");
+  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_material");
+  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_aux_variable");
+  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_aux_kernel");
+  registerAction(PorousFlowUnsaturated, "add_user_object");
+  registerAction(PorousFlowUnsaturated, "add_kernel");
+  registerAction(PorousFlowUnsaturated, "add_material");
+  registerAction(PorousFlowUnsaturated, "add_aux_variable");
+  registerAction(PorousFlowUnsaturated, "add_aux_kernel");
+
+  syntax.registerActionSyntax(
+      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_user_object");
+  syntax.registerActionSyntax("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_kernel");
+  syntax.registerActionSyntax(
+      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_material");
+  syntax.registerActionSyntax(
+      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_aux_variable");
+  syntax.registerActionSyntax(
+      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_aux_kernel");
+  registerAction(PorousFlowFullySaturated, "add_user_object");
+  registerAction(PorousFlowFullySaturated, "add_kernel");
+  registerAction(PorousFlowFullySaturated, "add_material");
+  registerAction(PorousFlowFullySaturated, "add_aux_variable");
+  registerAction(PorousFlowFullySaturated, "add_aux_kernel");
+
+  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_user_object");
+  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_kernel");
+  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_material");
+  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_variable");
+  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_kernel");
+  registerAction(PorousFlowBasicTHM, "add_user_object");
+  registerAction(PorousFlowBasicTHM, "add_kernel");
+  registerAction(PorousFlowBasicTHM, "add_material");
+  registerAction(PorousFlowBasicTHM, "add_aux_variable");
+  registerAction(PorousFlowBasicTHM, "add_aux_kernel");
 }

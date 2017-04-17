@@ -93,30 +93,32 @@ PorousFlowDarcyBase::computeQpResidual()
 void
 PorousFlowDarcyBase::computeResidual()
 {
-  upwind(CALCULATE_RESIDUAL, 0.0);
+  upwind(JacRes::CALCULATE_RESIDUAL, 0.0);
 }
 
 void
 PorousFlowDarcyBase::computeJacobian()
 {
-  upwind(CALCULATE_JACOBIAN, _var.number());
+  upwind(JacRes::CALCULATE_JACOBIAN, _var.number());
 }
 
 void
 PorousFlowDarcyBase::computeOffDiagJacobian(unsigned int jvar)
 {
-  upwind(CALCULATE_JACOBIAN, jvar);
+  upwind(JacRes::CALCULATE_JACOBIAN, jvar);
 }
 
 void
 PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
 {
-  if ((res_or_jac == CALCULATE_JACOBIAN) && _porousflow_dictator.notPorousFlowVariable(jvar))
+  if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) &&
+      _porousflow_dictator.notPorousFlowVariable(jvar))
     return;
 
   /// The PorousFlow variable index corresponding to the variable number jvar
   const unsigned int pvar =
-      ((res_or_jac == CALCULATE_JACOBIAN) ? _porousflow_dictator.porousFlowVariableNum(jvar) : 0);
+      ((res_or_jac == JacRes::CALCULATE_JACOBIAN) ? _porousflow_dictator.porousFlowVariableNum(jvar)
+                                                  : 0);
 
   /// The number of nodes in the element
   const unsigned int num_nodes = _test.size();
@@ -134,13 +136,14 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
   }
 
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
-  if ((ke.n() == 0) && (res_or_jac == CALCULATE_JACOBIAN)) // this removes a problem encountered in
-                                                           // the initial timestep when
-                                                           // use_displaced_mesh=true
+  if ((ke.n() == 0) &&
+      (res_or_jac == JacRes::CALCULATE_JACOBIAN)) // this removes a problem encountered in
+                                                  // the initial timestep when
+                                                  // use_displaced_mesh=true
     return;
 
   std::vector<std::vector<std::vector<Real>>> component_ke;
-  if (res_or_jac == CALCULATE_JACOBIAN)
+  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
   {
     component_ke.resize(ke.m());
     for (_i = 0; _i < _test.size(); _i++)
@@ -236,7 +239,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
     /// The following holds derivatives of these
     std::vector<Real> dtotal_mass_out;
     std::vector<Real> dtotal_in;
-    if (res_or_jac == CALCULATE_JACOBIAN)
+    if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
     {
       dtotal_mass_out.resize(num_nodes);
       dtotal_in.resize(num_nodes);
@@ -257,7 +260,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
         upwind_node[n] = true;
         /// The mobility at the upstream node
         mob = mobility(n, ph);
-        if (res_or_jac == CALCULATE_JACOBIAN)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
         {
           /// The derivative of the mobility wrt the PorousFlow variable
           dmob = dmobility(n, ph, pvar);
@@ -286,7 +289,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
       {
         upwind_node[n] = false;
         total_in -= component_re[n][ph]; /// note the -= means the result is positive
-        if (res_or_jac == CALCULATE_JACOBIAN)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
           for (_j = 0; _j < _phi.size(); _j++)
             dtotal_in[_j] -= component_ke[n][_j][ph];
       }
@@ -299,7 +302,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
       {
         if (!upwind_node[n]) // downstream node
         {
-          if (res_or_jac == CALCULATE_JACOBIAN)
+          if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
             for (_j = 0; _j < _phi.size(); _j++)
             {
               component_ke[n][_j][ph] *= total_mass_out / total_in;
@@ -314,7 +317,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
   }
 
   /// Add results to the Residual or Jacobian
-  if (res_or_jac == CALCULATE_RESIDUAL)
+  if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
   {
     DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
@@ -334,7 +337,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
     }
   }
 
-  if (res_or_jac == CALCULATE_JACOBIAN)
+  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
   {
     _local_ke.resize(ke.m(), ke.n());
     _local_ke.zero();

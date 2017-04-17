@@ -14,7 +14,7 @@
 # Finally, the effective stress must be exactly zero (as there is
 # no strain).
 #
-# Let's assume that
+# Let us assume that
 # fluid_density = dens0 * exp(P / fluid_bulk - fluid_thermal_exp * T)
 # Then the conservation of fluid mass means
 # porosity = por0 * exp(- P / fluid_bulk + fluid_thermal_exp * T)

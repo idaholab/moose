@@ -2193,6 +2193,7 @@ to the fluid equation) would be appropriate.  Similarly, a scaling of
 around $10^{3}$ on the temperature variable would be appropriate.
 
 \section{Fully saturated formulations}
+\label{sec.full.sat}
 
 In fully-saturated, single-phase simulations the upwinding described
 in \hyperref[upwinding.sec]{Section~\ref*{upwinding.sec}} is typically
@@ -2384,6 +2385,92 @@ However, this means additional care must be taken.
   to {\tt false} in the {\tt PorousFlowVolumetricStrain} Material.
 \end{enumerate}
 
+
+\chapter{Actions}
+
+The Material system used by PorousFlow is highly modularised and
+flexible.  However, typical input files require numerous Materials,
+many of them depending on other Materials, and it is not clear why
+some Materials are even needed (for instance all the ``Joiner''
+Materials).  PorousFlow therefore offers some Actions, which aim to
+help users build minimal input files easily.
+
+The PorousFlow Actions attempt to add only a minimal number of
+Materials and Kernels that are needed to solve a particular type of
+problem.  It is therefore very likely that you will have to add extra
+Materials if you add extra Kernels, AuxKernels or Postprocessors into
+your input file.
+
+The remainder of this Chapter describes the Actions that are currently
+available.
+
+\section{PorousFlowUnsaturated}
+
+This Action adds Kernels and Materials necessary to solve
+single-phase, multi-component, saturated-unsaturated physics.
+(A single fluid component may also be modelled.)  The
+physics may be optionally coupled to heat and mechanics, in which case
+Kernels and Materials for those physics are also added.  Auxillary
+Variables for saturation, effective stress and Darcy velocity are also
+optionally added.
+
+This Action employs the standard mass lumping and full upwinding
+described elsewhere in this document.  The saturation is computed
+using van Genuchten's expression.
+
+No Kernels for diffusion and dispersion of fluid components are
+added.  To run a simulation, you will also need to provide other
+Materials for each mesh block, depending on your simulation type, viz:
+permeability; porosity, elasticity tensor, strain calculator, stress
+calculator, matrix internal energy, thermal conductivity and
+diffusivity.
+
+\section{PorousFlowFullySaturated}
+
+This Action adds Kernels and Materials necessary to solve
+single-phase, multi-component, saturated physics.  (A single fluid
+component may also be modelled.)  The physics may be optionally
+coupled to heat and mechanics, in which case Kernels and Materials for
+those physics are also added.  Auxillary Variables for effective
+stress and Darcy velocity are also optionally added.
+
+This Action employs mass lumping, but no upwinding of fluid flow is
+performed.  As described in
+\hyperref[sec.full.sat]{Section~\ref*{sec.full.sat}}, this means that
+the results will be slightly different from using the
+PorousFlowUnsaturated Action.
+
+No Kernels for diffusion and dispersion of fluid components are
+added.  To run a simulation, you will also need to provide other
+Materials for each mesh block, depending on your simulation type, viz:
+permeability; porosity, elasticity tensor, strain calculator, stress
+calculator, matrix internal energy, thermal conductivity and
+diffusivity.
+
+\section{PorousFlowBasicTHM}
+
+This Action adds Kernels and Materials necessary to solve
+single-phase, single-component, saturated physics.  The
+physics may be optionally coupled to heat and mechanics, in which case
+Kernels and Materials for those physics are also added.  Auxillary
+Variables for effective stress and Darcy velocity are also
+optionally added.
+
+This Action employs no mass lumping, and does no upwinding of fluid
+flow.  As described in
+\hyperref[sec.full.sat]{Section~\ref*{sec.full.sat}}, this means that
+the results will be slightly different from using the
+PorousFlowUnsaturated Action.  The Action also allows optional
+multiplication of the fluid equation by the fluid density.  Without
+the multiplication the fluid equations are usually essentially linear
+(depending on the fluid properties) but care must be taken when using
+other PorousFlow objects that assume the multiplication has occured.
+
+To run a simulation, you will also need to provide other
+Materials for each mesh block, depending on your simulation type, viz:
+permeability; porosity, elasticity tensor, strain calculator, stress
+calculator, matrix internal energy, cthermal conductivity, diffusivity,
+constant Biot Modulus, constant thermal expansion coefficient.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

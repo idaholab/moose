@@ -48,40 +48,40 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
   // Only get material properties required by this instance of the AuxKernel
   switch (_property_enum)
   {
-    case PRESSURE:
+    case PropertyEnum::PRESSURE:
       _pressure = &getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp");
       break;
 
-    case SATURATION:
+    case PropertyEnum::SATURATION:
       _saturation = &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp");
       break;
 
-    case TEMPERATURE:
+    case PropertyEnum::TEMPERATURE:
       _temperature = &getMaterialProperty<Real>("PorousFlow_temperature_qp");
       break;
 
-    case DENSITY:
+    case PropertyEnum::DENSITY:
       _fluid_density = &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp");
       break;
 
-    case VISCOSITY:
+    case PropertyEnum::VISCOSITY:
       _fluid_viscosity = &getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp");
       break;
 
-    case MASS_FRACTION:
+    case PropertyEnum::MASS_FRACTION:
       _mass_fractions =
           &getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp");
       break;
 
-    case RELPERM:
+    case PropertyEnum::RELPERM:
       _relative_permeability =
           &getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp");
       break;
 
-    case ENTHALPY:
+    case PropertyEnum::ENTHALPY:
       _enthalpy = &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp");
 
-    case INTERNAL_ENERGY:
+    case PropertyEnum::INTERNAL_ENERGY:
       _internal_energy =
           &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_internal_energy_qp");
   }
@@ -94,39 +94,39 @@ PorousFlowPropertyAux::computeValue()
 
   switch (_property_enum)
   {
-    case PRESSURE:
+    case PropertyEnum::PRESSURE:
       property = (*_pressure)[_qp][_phase];
       break;
 
-    case SATURATION:
+    case PropertyEnum::SATURATION:
       property = (*_saturation)[_qp][_phase];
       break;
 
-    case TEMPERATURE:
+    case PropertyEnum::TEMPERATURE:
       property = (*_temperature)[_qp];
       break;
 
-    case DENSITY:
+    case PropertyEnum::DENSITY:
       property = (*_fluid_density)[_qp][_phase];
       break;
 
-    case VISCOSITY:
+    case PropertyEnum::VISCOSITY:
       property = (*_fluid_viscosity)[_qp][_phase];
       break;
 
-    case MASS_FRACTION:
+    case PropertyEnum::MASS_FRACTION:
       property = (*_mass_fractions)[_qp][_phase][_fluid_component];
       break;
 
-    case RELPERM:
+    case PropertyEnum::RELPERM:
       property = (*_relative_permeability)[_qp][_phase];
       break;
 
-    case ENTHALPY:
+    case PropertyEnum::ENTHALPY:
       property = (*_enthalpy)[_qp][_phase];
       break;
 
-    case INTERNAL_ENERGY:
+    case PropertyEnum::INTERNAL_ENERGY:
       property = (*_internal_energy)[_qp][_phase];
       break;
   }

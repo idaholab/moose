@@ -4,6 +4,11 @@
     input = 'diff01.i'
     csvdiff = 'diff01_out_xmass_0021.csv'
   [../]
+  [./diff01_action]
+    type = 'CSVDiff'
+    input = 'diff01_action.i'
+    csvdiff = 'diff01_action_out_xmass_0021.csv'
+  [../]
   [./disp01]
     type = 'CSVDiff'
     input = 'disp01.i'

@@ -14,6 +14,16 @@
     input = pp_generation.i
     csvdiff = pp_generation.csv
   [../]
+  [./pp_generation_action]
+    type = CSVDiff
+    input = pp_generation_action.i
+    csvdiff = pp_generation_action.csv
+  [../]
+  [./pp_generation_fullysat_action]
+    type = CSVDiff
+    input = pp_generation_fullysat_action.i
+    csvdiff = pp_generation_fullysat_action.csv
+  [../]
   [./pp_generation_unconfined]
     type = CSVDiff
     input = pp_generation_unconfined.i
@@ -33,6 +43,11 @@
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated_volume.i
     csvdiff = pp_generation_unconfined_fully_saturated_volume.csv
+  [../]
+  [./pp_generation_unconfined_basicthm]
+    type = CSVDiff
+    input = pp_generation_unconfined_basicthm.i
+    csvdiff = pp_generation_unconfined_basicthm.csv
   [../]
   [./mandel]
     type = CSVDiff
@@ -54,6 +69,11 @@
     input = mandel_fully_saturated_volume.i
     csvdiff = mandel_fully_saturated_volume.csv
   [../]
+  [./mandel_basicthm]
+    type = CSVDiff
+    input = mandel_basicthm.i
+    csvdiff = mandel_basicthm.csv
+  [../]
   [./terzaghi]
     type = CSVDiff
     input = terzaghi.i
@@ -68,6 +88,11 @@
     type = CSVDiff
     input = terzaghi_fully_saturated_volume.i
     csvdiff = terzaghi_fully_saturated_volume.csv
+  [../]
+  [./terzaghi_basicthm]
+    type = CSVDiff
+    input = terzaghi_basicthm.i
+    csvdiff = terzaghi_basicthm.csv
   [../]
   [./vol_expansion_poroperm]
     type = CSVDiff

@@ -52,7 +52,7 @@ protected:
    */
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const;
 
-  enum JacRes
+  enum class JacRes
   {
     CALCULATE_RESIDUAL = 0,
     CALCULATE_JACOBIAN = 1

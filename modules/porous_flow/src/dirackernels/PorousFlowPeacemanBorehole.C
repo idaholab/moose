@@ -72,18 +72,19 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
         hasMaterialProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp") &&
         hasMaterialProperty<std::vector<RealTensorValue>>(
             "dPorousFlow_thermal_conductivity_qp_dvar")),
-    _perm_or_cond(_p_or_t == pressure
+    _perm_or_cond(_p_or_t == PorTchoice::pressure
                       ? getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")
                       : getMaterialProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp")),
-    _dperm_or_cond_dvar(_p_or_t == pressure ? getMaterialProperty<std::vector<RealTensorValue>>(
-                                                  "dPorousFlow_permeability_qp_dvar")
-                                            : getMaterialProperty<std::vector<RealTensorValue>>(
-                                                  "dPorousFlow_thermal_conductivity_qp_dvar"))
+    _dperm_or_cond_dvar(
+        _p_or_t == PorTchoice::pressure
+            ? getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")
+            : getMaterialProperty<std::vector<RealTensorValue>>(
+                  "dPorousFlow_thermal_conductivity_qp_dvar"))
 {
-  if (_p_or_t == pressure && !_has_permeability)
+  if (_p_or_t == PorTchoice::pressure && !_has_permeability)
     mooseError("PorousFlowPeacemanBorehole: You have specified function_of=porepressure, but you "
                "do not have a quadpoint permeability material");
-  if (_p_or_t == temperature && !_has_thermal_conductivity)
+  if (_p_or_t == PorTchoice::temperature && !_has_thermal_conductivity)
     mooseError("PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do "
                "not have a quadpoint thermal_conductivity material");
 
