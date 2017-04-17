@@ -554,12 +554,6 @@ MooseApp::executeExecutioner()
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
 #endif
     _executioner->init();
-    if (_check_input)
-    {
-      // Output to stderr, so it is easier for peacock to get the result
-      Moose::err << "Syntax OK" << std::endl;
-      return;
-    }
     _executioner->execute();
   }
   else
@@ -699,7 +693,12 @@ MooseApp::run()
   runInputFile();
   Moose::perf_log.pop("Application Setup", "Setup");
 
-  executeExecutioner();
+  if (!_check_input)
+    executeExecutioner();
+  else
+    // Output to stderr, so it is easier for peacock to get the result
+    Moose::err << "Syntax OK" << std::endl;
+
   Moose::perf_log.pop("Full Runtime", "Application");
 }
 
