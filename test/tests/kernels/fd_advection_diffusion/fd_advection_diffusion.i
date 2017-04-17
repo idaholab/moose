@@ -76,8 +76,8 @@
   type = Steady
   solve_type = 'PJFNK'
   petsc_options = '-snes_view'
-  petsc_options_iname = '-ksp_type -ksp_pc_side -pc_type'
-  petsc_options_value = '    gmres         left       lu'
+  petsc_options_iname = '-ksp_type -ksp_pc_side -pc_type -ksp_norm_type'
+  petsc_options_value = '    gmres         left       lu  preconditioned'
 []
 
 [Outputs]

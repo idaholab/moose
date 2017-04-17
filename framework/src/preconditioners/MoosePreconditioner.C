@@ -28,8 +28,11 @@ validParams<MoosePreconditioner>()
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
 
-  MooseEnum pc_side("left right symmetric", "right");
+  MooseEnum pc_side("left right symmetric default", "default");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
+  MooseEnum ksp_norm("none preconditioned unpreconditioned natural default", "unpreconditioned");
+  params.addParam<MooseEnum>(
+      "ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
   params.registerBase("MoosePreconditioner");
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -45,6 +48,8 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
     _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
   _fe_problem.getNonlinearSystemBase().setPCSide(getParam<MooseEnum>("pc_side"));
+
+  _fe_problem.getNonlinearSystemBase().setMooseKSPNormType(getParam<MooseEnum>("ksp_norm"));
 }
 
 void

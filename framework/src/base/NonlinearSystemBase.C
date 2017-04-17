@@ -123,7 +123,8 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _sln_diff(addVector("sln_diff", false, PARALLEL)),
-    _pc_side(Moose::PCS_RIGHT),
+    _pc_side(Moose::PCS_DEFAULT),
+    _ksp_norm(Moose::KSPN_UNPRECONDITIONED),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
     _use_field_split_preconditioner(false),
@@ -2462,8 +2463,27 @@ NonlinearSystemBase::setPCSide(MooseEnum pcs)
     _pc_side = Moose::PCS_RIGHT;
   else if (pcs == "symmetric")
     _pc_side = Moose::PCS_SYMMETRIC;
+  else if (pcs == "default")
+    _pc_side = Moose::PCS_DEFAULT;
   else
     mooseError("Unknown PC side specified.");
+}
+
+void
+NonlinearSystemBase::setMooseKSPNormType(MooseEnum kspnorm)
+{
+  if (kspnorm == "none")
+    _ksp_norm = Moose::KSPN_NONE;
+  else if (kspnorm == "preconditioned")
+    _ksp_norm = Moose::KSPN_PRECONDITIONED;
+  else if (kspnorm == "unpreconditioned")
+    _ksp_norm = Moose::KSPN_UNPRECONDITIONED;
+  else if (kspnorm == "natural")
+    _ksp_norm = Moose::KSPN_NATURAL;
+  else if (kspnorm == "default")
+    _ksp_norm = Moose::KSPN_DEFAULT;
+  else
+    mooseError("Unknown ksp norm type specified.");
 }
 
 bool

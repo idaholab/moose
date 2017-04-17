@@ -476,6 +476,62 @@ getPetscPCSide(Moose::PCSideType pcs)
   }
 }
 
+KSPNormType
+getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
+{
+  switch (kspnorm)
+  {
+    case Moose::KSPN_NONE:
+      return KSP_NORM_NONE;
+    case Moose::KSPN_PRECONDITIONED:
+      return KSP_NORM_PRECONDITIONED;
+    case Moose::KSPN_UNPRECONDITIONED:
+      return KSP_NORM_UNPRECONDITIONED;
+    case Moose::KSPN_NATURAL:
+      return KSP_NORM_NATURAL;
+    case Moose::KSPN_DEFAULT:
+      return KSP_NORM_DEFAULT;
+    default:
+      mooseError("Unknown KSP norm type requested.");
+      break;
+  }
+}
+
+void
+petscSetDefaultKSPNormType(FEProblemBase & problem)
+{
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+  PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+  SNES snes = petsc_solver->snes();
+  KSP ksp;
+  SNESGetKSP(snes, &ksp);
+  KSPSetNormType(ksp, getPetscKSPNormType(nl.getMooseKSPNormType()));
+}
+
+void
+petscSetDefaultPCSide(FEProblemBase & problem)
+{
+  // dig out Petsc solver
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+  PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+  SNES snes = petsc_solver->snes();
+  KSP ksp;
+  SNESGetKSP(snes, &ksp);
+
+#if PETSC_VERSION_LESS_THAN(3, 2, 0)
+  // pc_side is NOT set, PETSc will make the decision
+  // PETSc 3.1.x-
+  if (nl.getPCSide() != Moose::PCS_DEFAULT)
+    KSPSetPreconditionerSide(ksp, getPetscPCSide(nl.getPCSide()));
+#else
+  // PETSc 3.2.x+
+  if (nl.getPCSide() != Moose::PCS_DEFAULT)
+    KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
+#endif
+}
+
 void
 petscSetDefaults(FEProblemBase & problem)
 {
@@ -486,14 +542,7 @@ petscSetDefaults(FEProblemBase & problem)
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
-  PCSide pcside = getPetscPCSide(nl.getPCSide());
-#if PETSC_VERSION_LESS_THAN(3, 2, 0)
-  // PETSc 3.1.x-
-  KSPSetPreconditionerSide(ksp, pcside);
-#else
-  // PETSc 3.2.x+
-  KSPSetPCSide(ksp, pcside);
-#endif
+
   SNESSetMaxLinearSolveFailures(snes, 1000000);
 
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
@@ -515,6 +564,10 @@ petscSetDefaults(FEProblemBase & problem)
     CHKERRABORT(nl.comm().get(), ierr);
   }
 #endif
+
+  petscSetDefaultPCSide(problem);
+
+  petscSetDefaultKSPNormType(problem);
 }
 
 void
