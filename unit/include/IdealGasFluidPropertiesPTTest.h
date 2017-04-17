@@ -29,21 +29,13 @@ class IdealGasFluidPropertiesPTTest : public ::testing::Test
 protected:
   void SetUp()
   {
-    char str[] = "foo";
-    char * argv[] = {str, NULL};
+    const char * argv[] = {"foo", NULL};
 
-    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _app.reset(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
     _factory = &_app->getFactory();
 
     registerObjects(*_factory);
     buildObjects();
-  }
-
-  void TearDown()
-  {
-    delete _fe_problem;
-    delete _mesh;
-    delete _app;
   }
 
   void registerObjects(Factory & factory) { registerUserObject(IdealGasFluidPropertiesPT); }
@@ -54,23 +46,23 @@ protected:
     mesh_params.set<MooseEnum>("dim") = "3";
     mesh_params.set<std::string>("name") = "mesh";
     mesh_params.set<std::string>("_object_name") = "name1";
-    _mesh = new GeneratedMesh(mesh_params);
+    _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
-    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<MooseMesh *>("mesh") = _mesh.get();
     problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = new FEProblem(problem_params);
+    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
 
     InputParameters uo_pars = _factory->getValidParams("IdealGasFluidPropertiesPT");
     _fe_problem->addUserObject("IdealGasFluidPropertiesPT", "fp", uo_pars);
     _fp = &_fe_problem->getUserObject<IdealGasFluidPropertiesPT>("fp");
   }
 
-  MooseApp * _app;
+  std::unique_ptr<MooseApp> _app;
+  std::unique_ptr<MooseMesh> _mesh;
+  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
-  MooseMesh * _mesh;
-  FEProblem * _fe_problem;
   const SinglePhaseFluidPropertiesPT * _fp;
 };
 
