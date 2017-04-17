@@ -11,25 +11,20 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// Tutorial Includes
 #include "DarcyThermoMechApp.h"
-#include "Moose.h"
+#include "DarcyPressure.h"
+#include "DarcyConvection.h"
+#include "HeatConductionOutflow.h"
+#include "PackedColumn.h"
+#include "DarcyVelocity.h"
+#include "RandomCorrosion.h"
+
+// Moose Includes
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
-
-// Kernels
-#include "DarcyPressure.h"
-#include "DarcyConvection.h"
-
-// BCs
-#include "HeatConductionOutflow.h"
-
-// Materials
-#include "PackedColumn.h"
-
-// AuxKernels
-#include "DarcyVelocity.h"
-#include "RandomCorrosion.h"
 
 template <>
 InputParameters

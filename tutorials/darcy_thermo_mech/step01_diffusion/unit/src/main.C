@@ -12,22 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// Tutorial Includes
+#include "DarcyThermoMechApp.h"
+
+// Moose Includes
+#include "Moose.h"
+#include "MooseInit.h"
+#include "Factory.h"
+#include "AppFactory.h"
+
 // CPPUnit includes
 #include "cppunit/XmlOutputter.h"
 #include "cppunit/CompilerOutputter.h"
 #include "cppunit/ui/text/TestRunner.h"
 #include "cppunit/extensions/TestFactoryRegistry.h"
-
-// Moose includes
-#include "Moose.h"
-#include "MooseInit.h"
-
-#include "Factory.h"
-#include "AppFactory.h"
-#include "DarcyThermoMechApp.h"
-
-#include <fstream>
-#include <string>
 
 PerfLog Moose::perf_log("CppUnit");
 
