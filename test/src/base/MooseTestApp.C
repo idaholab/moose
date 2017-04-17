@@ -128,6 +128,7 @@
 #include "MTICSum.h"
 #include "MTICMult.h"
 #include "DataStructIC.h"
+#include "GhostUserObjectIC.h"
 
 // Materials
 #include "IncrementMaterial.h"
@@ -434,6 +435,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerInitialCondition(MTICSum);
   registerInitialCondition(MTICMult);
   registerInitialCondition(DataStructIC);
+  registerInitialCondition(GhostUserObjectIC);
 
   // Materials
   registerMaterial(MTMaterial);
