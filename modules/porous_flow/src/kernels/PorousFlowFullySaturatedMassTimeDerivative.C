@@ -15,9 +15,9 @@ InputParameters
 validParams<PorousFlowFullySaturatedMassTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
-  MooseEnum simulation_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
-  params.addParam<MooseEnum>("simulation_type",
-                             simulation_type,
+  MooseEnum coupling_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
+  params.addParam<MooseEnum>("coupling_type",
+                             coupling_type,
                              "The type of simulation.  For simulations involving Mechanical "
                              "deformations, you will need to supply the correct Biot coefficient.  "
                              "For simulations involving Thermal flows, you will need an associated "
@@ -42,10 +42,11 @@ PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDeri
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _var_is_porflow_var(_dictator.isPorousFlowVariable(_var.number())),
     _multiply_by_density(getParam<bool>("multiply_by_density")),
-    _simulation_type(getParam<MooseEnum>("simulation_type").getEnum<SimulationTypeEnum>()),
-    _includes_thermal(_simulation_type == ThermoHydro || _simulation_type == ThermoHydroMechanical),
-    _includes_mechanical(_simulation_type == HydroMechanical ||
-                         _simulation_type == ThermoHydroMechanical),
+    _coupling_type(getParam<MooseEnum>("coupling_type").getEnum<CouplingTypeEnum>()),
+    _includes_thermal(_coupling_type == CouplingTypeEnum::ThermoHydro ||
+                      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
+    _includes_mechanical(_coupling_type == CouplingTypeEnum::HydroMechanical ||
+                         _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _biot_modulus(getMaterialProperty<Real>("PorousFlow_constant_biot_modulus_qp")),
     _thermal_coeff(

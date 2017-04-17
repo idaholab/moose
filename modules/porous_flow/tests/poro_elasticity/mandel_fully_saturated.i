@@ -194,7 +194,7 @@
   [./mass0]
     type = PorousFlowFullySaturatedMassTimeDerivative
     biot_coefficient = 0.6
-    simulation_type = HydroMechanical
+    coupling_type = HydroMechanical
     variable = porepressure
   [../]
   [./flux]

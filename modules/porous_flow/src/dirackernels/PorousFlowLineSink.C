@@ -94,18 +94,18 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters)
     _ph(getParam<unsigned int>("fluid_phase")),
     _sp(_use_mass_fraction ? getParam<unsigned int>("mass_fraction_component") : 0),
 
-    _pp((_p_or_t == pressure && _has_porepressure)
+    _pp((_p_or_t == PorTchoice::pressure && _has_porepressure)
             ? &getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")
             : nullptr),
-    _dpp_dvar((_p_or_t == pressure && _has_porepressure)
+    _dpp_dvar((_p_or_t == PorTchoice::pressure && _has_porepressure)
                   ? &getMaterialProperty<std::vector<std::vector<Real>>>(
                         "dPorousFlow_porepressure_qp_dvar")
                   : nullptr),
-    _temperature((_p_or_t == temperature && _has_temperature)
+    _temperature((_p_or_t == PorTchoice::temperature && _has_temperature)
                      ? &getMaterialProperty<Real>("PorousFlow_temperature_qp")
                      : nullptr),
     _dtemperature_dvar(
-        (_p_or_t == temperature && _has_temperature)
+        (_p_or_t == PorTchoice::temperature && _has_temperature)
             ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
             : nullptr),
     _fluid_density_node(
@@ -173,10 +173,10 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters)
                ", but you have set the mass_fraction_component to ",
                _sp,
                ".  Please be assured that the Dictator has noted your error.");
-  if (_p_or_t == pressure && !_has_porepressure)
+  if (_p_or_t == PorTchoice::pressure && !_has_porepressure)
     mooseError("PorousFlowLineSink: You have specified function_of=porepressure, but you do not "
                "have a quadpoint porepressure material");
-  if (_p_or_t == temperature && !_has_temperature)
+  if (_p_or_t == PorTchoice::temperature && !_has_temperature)
     mooseError("PorousFlowLineSink: You have specified function_of=temperature, but you do not "
                "have a quadpoint temperature material");
   if (_use_mass_fraction && !_has_mass_fraction)
@@ -322,11 +322,12 @@ PorousFlowLineSink::jac(unsigned int jvar)
 Real
 PorousFlowLineSink::ptqp() const
 {
-  return (_p_or_t == pressure ? (*_pp)[_qp][_ph] : (*_temperature)[_qp]);
+  return (_p_or_t == PorTchoice::pressure ? (*_pp)[_qp][_ph] : (*_temperature)[_qp]);
 }
 
 Real
 PorousFlowLineSink::dptqp(unsigned pvar) const
 {
-  return (_p_or_t == pressure ? (*_dpp_dvar)[_qp][_ph][pvar] : (*_dtemperature_dvar)[_qp][pvar]);
+  return (_p_or_t == PorTchoice::pressure ? (*_dpp_dvar)[_qp][_ph][pvar]
+                                          : (*_dtemperature_dvar)[_qp][pvar]);
 }
