@@ -141,6 +141,18 @@ initLineSearchType()
 }
 
 template <>
+ExecFlagType
+stringToEnum(const std::string & s)
+{
+  std::string upper(s);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  for (auto map_item : Moose::execute_flags)
+    if (map_item.second == upper)
+      return map_item.first;
+  return EXEC_NONE;
+}
+
+template <>
 QuadratureType
 stringToEnum<QuadratureType>(const std::string & s)
 {
