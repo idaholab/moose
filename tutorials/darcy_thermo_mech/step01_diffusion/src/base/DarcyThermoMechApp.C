@@ -11,8 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// Tutorial Includes
 #include "DarcyThermoMechApp.h"
-#include "Moose.h"
+
+// MOOSE Includes
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 #include "ModulesApp.h"

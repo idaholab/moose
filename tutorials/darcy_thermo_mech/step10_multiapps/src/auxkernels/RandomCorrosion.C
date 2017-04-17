@@ -50,7 +50,7 @@ validParams<RandomCorrosion>()
 
 RandomCorrosion::RandomCorrosion(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _box(MeshTools::bounding_box(_mesh)),
+    _box(MeshTools::create_bounding_box(_mesh)),
     _nodal_tol(getParam<Real>("tolerance")),
     _num_points(getParam<unsigned int>("num_points")),
     _ref_temperature(getParam<Real>("reference_temperature")),
