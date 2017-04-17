@@ -57,87 +57,38 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
 
-# Check that we have Asio installed.
-ASIO_FILE := $(MOOSE_DIR)/framework/contrib/asio/include/asio.hpp
-ifneq ("$(wildcard $(ASIO_FILE))","")
-libmeshConfigHeader := $(LIBMESH_DIR)/include/libmesh/libmesh_config.h
-cxx11Enabled := $(shell grep 'define LIBMESH_HAVE_CXX11 ' $(libmeshConfigHeader) | tail -c 2)
-# If it is installed, make sure this is a
-# build using C++11, if so, then turn on Asio Networking
-ifeq (1,$(strip $(cxx11Enabled)))
-	ADDITIONAL_CPPFLAGS += "-DASIO_STANDALONE"
-endif
-endif
-
-MOOSE_PRECOMPILED ?= false
-PCH_FLAGS=
-PCH_MODE=
-PCH_DEP=
-
-# Check if using precompiled headers is possible
-# cxx compiler could be used to define which compiler is being used
-# so that different compiler options are usable. Libmesh only
-# appears to check if GCC is used
-ifeq ($(MOOSE_PRECOMPILED), true)
-  ifneq (,$(filter $(cxx_compiler), g++))
-	  PRECOMPILED = true
-  endif
-endif
-
 all::
-ifdef PRECOMPILED
-#
-# Precompiled Header Rules
-#
-
-# [JWP] - Libtool does not seem to have support for PCH yet, so for
-# now just use the compiler directly, and depend on the user to
-# disable precompiled header support if it is not available on his
-# system.
-%.h.gch/$(METHOD).h.gch : %.h
-	@echo "MOOSE Pre-Compiling Header (in "$(METHOD)" mode) "$<"..."
-	@mkdir -p $(FRAMEWORK_DIR)/include/base/Precompiled.h.gch
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
-
-#
-# add dependency - all object files depend on the precompiled header file.
-#
-PCH_DEP=$(FRAMEWORK_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
-
-PCH_FLAGS=-DPRECOMPILED -include Precompiled.h
-PCH_MODE="with PCH "
-endif
 
 #
 # C++ rules
 #
-pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+pcre%.$(obj-suffix) : pcre%.cc
+	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.cc $(PCH_DEP)
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+%.$(obj-suffix) : %.cc
+	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 define CXX_RULE_TEMPLATE
-%$(1).$(obj-suffix) : %.C $(PCH_DEP)
+%$(1).$(obj-suffix) : %.C
 ifeq ($(1),)
-	@echo "MOOSE Compiling C++ $$(PCH_MODE)(in "$$(METHOD)" mode) "$$<"..."
+	@echo "MOOSE Compiling C++ (in "$$(METHOD)" mode) "$$<"..."
 else
-	@echo "MOOSE Compiling C++ with suffix $$(PCH_MODE)(in "$$(METHOD)" mode) "$$<"..."
+	@echo "MOOSE Compiling C++ with suffix (in "$$(METHOD)" mode) "$$<"..."
 endif
 	@$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $$(libmesh_CXX) $$(libmesh_CPPFLAGS) $$(ADDITIONAL_CPPFLAGS) $$(libmesh_CXXFLAGS) $$(PCH_FLAGS) $$(app_INCLUDES) $$(libmesh_INCLUDE) -MMD -MP -MF $$@.d -MT $$@ -c $$< -o $$@
+	  $$(libmesh_CXX) $$(libmesh_CPPFLAGS) $$(ADDITIONAL_CPPFLAGS) $$(libmesh_CXXFLAGS) $$(app_INCLUDES) $$(libmesh_INCLUDE) -MMD -MP -MF $$@.d -MT $$@ -c $$< -o $$@
 endef
 # Instantiate Rules
 $(eval $(call CXX_RULE_TEMPLATE,))
 
-%.$(obj-suffix) : %.cpp $(PCH_DEP)
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+%.$(obj-suffix) : %.cpp
+	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 #
 # Static Analysis

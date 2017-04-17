@@ -4,14 +4,17 @@
     input = 'constant_expansion_coeff.i'
     exodiff = 'constant_thermal_expan_only.e'
   [../]
-
   [./const_thermal_expansion_restart]
     type = 'Exodiff'
     input = 'constant_expansion_coeff_restart.i'
     exodiff = 'constant_thermal_expan_restart.e'
     prereq = 'const_thermal_expansion'
   [../]
-
+  [./const_thermal_expansion_stress_free_temperature]
+    type = 'Exodiff'
+    input = 'constant_expansion_stress_free_temp.i'
+    exodiff = 'constant_expansion_stress_free_temp_out.e'
+  [../]
   [./multiple_thermal_eigenstrains]
     type = 'Exodiff'
     input = 'multiple_thermal_eigenstrains.i'
