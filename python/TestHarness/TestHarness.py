@@ -290,7 +290,6 @@ class TestHarness:
                         else:
                             # Override command with the qsub command needed to launch a PBS job
                             command = self.createQsubFile(command, dirpath, tester)
-
                     # This method spawns another process and allows this loop to continue looking for tests
                     # RunParallel will call self.testOutputAndFinish when the test has completed running
                     # This method will block when the maximum allowed parallel processes are running
@@ -641,7 +640,7 @@ class TestHarness:
                     # to go muddling around changing specs like this.
                     tester.specs['test_dir'] = self.pbs_data[job_id.group(1)]['test_dir']
                     output = tester.processResults(tester.specs['moose_dir'], exit_code, self.options, outfile)
-                    self.testOutputAndFinish(tester, exit_code, outfile)
+                    self.testOutputAndFinish(tester, exit_code, output)
                     return
                 else:
                     # I ran into this scenario when the cluster went down, but launched/completed my job :)
