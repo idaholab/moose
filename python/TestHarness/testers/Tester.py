@@ -55,7 +55,7 @@ class Tester(MooseObject):
         params.addParam('check_input',    False, "Check for correct input file syntax")
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('pbs',            True,    "A test that only runs if --pbs is used")
-        params.addParam('pbs_copy_files', 'gold',  "A flat list of files/directories to copy when using --pbs")
+        params.addParam('pbs_copy_files', '',      "A flat list of files/directories to copy when using --pbs")
 
         return params
 

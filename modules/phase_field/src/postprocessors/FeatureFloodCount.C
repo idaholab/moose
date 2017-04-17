@@ -35,6 +35,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
    */
   storeHelper(stream, feature._ghosted_ids, context);
   storeHelper(stream, feature._halo_ids, context);
+  storeHelper(stream, feature._disjoint_halo_ids, context);
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_index, context);
   storeHelper(stream, feature._id, context);
@@ -65,6 +66,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
    */
   loadHelper(stream, feature._ghosted_ids, context);
   loadHelper(stream, feature._halo_ids, context);
+  loadHelper(stream, feature._disjoint_halo_ids, context);
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_index, context);
   loadHelper(stream, feature._id, context);
@@ -84,6 +86,13 @@ dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);
 }
+
+// Utility routines
+void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node);
+void updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem);
+bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
+                           const std::list<dof_id_type> & elem_list2,
+                           MeshBase & mesh);
 
 template <>
 InputParameters
@@ -247,6 +256,8 @@ FeatureFloodCount::clearDataStructures()
 void
 FeatureFloodCount::meshChanged()
 {
+  _point_locator = _mesh.getMesh().sub_point_locator();
+
   _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
 
   // Build a new node to element map
@@ -710,8 +721,18 @@ FeatureFloodCount::prepareDataForTransfer()
   std::set<dof_id_type> local_ids_no_ghost, set_difference;
 
   for (auto & list_ref : _partial_feature_sets)
+  {
     for (auto & feature : list_ref)
     {
+      // Now extend the bounding box by the halo region
+      if (_is_elemental)
+        feature.updateBBoxExtremes(mesh);
+      else
+      {
+        for (auto & halo_id : feature._halo_ids)
+          updateBBoxExtremesHelper(feature._bboxes[0], mesh.node(halo_id));
+      }
+
       /**
        * We need to adjust the halo markings before sending. We need to discard all of the
        * local cell information but not any of the stitch region information. To do that
@@ -743,32 +764,10 @@ FeatureFloodCount::prepareDataForTransfer()
        */
       feature._min_entity_id = *feature._local_ids.begin();
 
-      for (auto & entity_id : feature._local_ids)
-      {
-        /**
-         * Update the bounding box.
-         *
-         * Note: There will always be one and only one bbox while we are building up our
-         * data structures because we haven't started to stitch together any regions yet.
-         */
-        if (_is_elemental)
-          feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(entity_id));
-        else
-          feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(entity_id));
-      }
-
-      // Now extend the bounding box by the halo region
-      for (auto & halo_id : feature._halo_ids)
-      {
-        if (_is_elemental)
-          feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(halo_id));
-        else
-          feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(halo_id));
-      }
-
       // Periodic node ids
       appendPeriodicNeighborNodes(feature);
     }
+  }
 }
 
 void
@@ -841,16 +840,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
            it2 != _partial_feature_sets[map_num].end();
            ++it2)
       {
-        // clang-format off
-        if (it1 != it2 &&                            // iters aren't pointing at the same item and
-            it1->_var_index ==  it2->_var_index &&   // the sets have matching variable indices and
-            ((it1->boundingBoxesIntersect(*it2) &&   //  (if the feature's bboxes intersect and
-              it1->ghostedIntersect(*it2))           //   the ghosted entities also intersect)
-              ||                                     //   or
-             (use_periodic_boundary_info &&          //  (if merging across periodic nodes and
-              it1->periodicBoundariesIntersect(*it2) //   those node sets intersect)
-            )))
-        // clang-format on
+        if (it1 != it2 && it1->mergeable(*it2, use_periodic_boundary_info))
         {
           it2->merge(std::move(*it1));
 
@@ -1082,7 +1072,8 @@ FeatureFloodCount::flood(const DofObject * dof_object,
     visitElementalNeighbors(static_cast<const Elem *>(dof_object),
                             current_index,
                             feature,
-                            /*expand_halos_only =*/false);
+                            /*expand_halos_only =*/false,
+                            /*disjoint_only =*/false);
   else
     visitNodalNeighbors(static_cast<const Node *>(dof_object),
                         current_index,
@@ -1151,25 +1142,61 @@ void
 FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
                                            std::size_t current_index,
                                            FeatureData * feature,
-                                           bool expand_halos_only)
+                                           bool expand_halos_only,
+                                           bool disjoint_only)
 {
   mooseAssert(elem, "Elem is NULL");
 
   std::vector<const Elem *> all_active_neighbors;
+  MeshBase & mesh = _mesh.getMesh();
 
+  // Loop over all neighbors (at the the same level as the current element)
   // Loop over all neighbors (at the the same level as the current element)
   for (auto i = decltype(elem->n_neighbors())(0); i < elem->n_neighbors(); ++i)
   {
-    const Elem * neighbor_ancestor = elem->neighbor(i);
-    if (neighbor_ancestor)
-      /**
-       * Retrieve only the active neighbors for each side of this element, append them to the list
-       * of active neighbors
-       */
-      neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
-  }
+    const Elem * neighbor_ancestor = nullptr;
+    bool topological_neighbor = false;
 
-  visitNeighborsHelper(elem, all_active_neighbors, current_index, feature, expand_halos_only);
+    /**
+     * Retrieve only the active neighbors for each side of this element, append them to the list
+     * of active neighbors
+     */
+    neighbor_ancestor = elem->neighbor(i);
+    if (neighbor_ancestor)
+      neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+    else // if (expand_halos_only /*&& feature->_periodic_nodes.empty()*/)
+    {
+      neighbor_ancestor = elem->topological_neighbor(i, mesh, *_point_locator, _pbs);
+
+      /**
+       * If the current element (passed into this method) doesn't have a connected neighbor but
+       * does have a topological neighbor, this might be a new disjoint region that we'll
+       * need to represent with a separate bounding box. To find out for sure, we'll need
+       * see if the new neighbors are present in any of the halo or disjoint halo sets. If
+       * they are not present, this is a new region.
+       */
+      if (neighbor_ancestor)
+      {
+        neighbor_ancestor->active_family_tree_by_topological_neighbor(
+            all_active_neighbors, elem, mesh, *_point_locator, _pbs, false);
+
+        topological_neighbor = true;
+
+        //        for (const auto neighbor : all_active_neighbors)
+        //          feature->_disjoint_halo_ids.insert(neighbor->id());
+      }
+    }
+
+    visitNeighborsHelper(elem,
+                         all_active_neighbors,
+                         current_index,
+                         feature,
+                         expand_halos_only,
+                         topological_neighbor,
+                         disjoint_only);
+
+    all_active_neighbors.clear();
+  }
 }
 
 void
@@ -1183,7 +1210,8 @@ FeatureFloodCount::visitNodalNeighbors(const Node * node,
   std::vector<const Node *> all_active_neighbors;
   MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, all_active_neighbors);
 
-  visitNeighborsHelper(node, all_active_neighbors, current_index, feature, expand_halos_only);
+  visitNeighborsHelper(
+      node, all_active_neighbors, current_index, feature, expand_halos_only, false, false);
 }
 
 template <typename T>
@@ -1192,7 +1220,9 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
                                         std::vector<const T *> neighbor_entities,
                                         std::size_t current_index,
                                         FeatureData * feature,
-                                        bool expand_halos_only)
+                                        bool expand_halos_only,
+                                        bool topological_neighbor,
+                                        bool disjoint_only)
 {
   // Loop over all active element neighbors
   for (const auto neighbor : neighbor_entities)
@@ -1200,18 +1230,27 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
     if (neighbor)
     {
       if (expand_halos_only)
-        feature->_halo_ids.insert(neighbor->id());
-
+      {
+        if (topological_neighbor || disjoint_only)
+          feature->_disjoint_halo_ids.insert(neighbor->id());
+        else
+          feature->_halo_ids.insert(neighbor->id());
+      }
       else
       {
         auto my_processor_id = processor_id();
 
-        if (neighbor->processor_id() != my_processor_id)
+        if (!topological_neighbor && neighbor->processor_id() != my_processor_id)
           feature->_ghosted_ids.insert(curr_entity->id());
 
         /**
-         * Only recurse where we own this entity. We might step outside of the
-         * ghosted region if we recurse where we don't own the current entity.
+         * Only recurse where we own this entity and it's a topologically connected entity. We
+         * shouldn't even attempt to flood to the periodic boundary because we won't have solution
+         * information and if we are using DistributedMesh we probably won't have geometric
+         * information either.
+         *
+         * When we only recurse on entities we own, we can never get more than one away from
+         * a local entity which should be in the ghosted zone.
          */
         if (curr_entity->processor_id() == my_processor_id)
         {
@@ -1221,9 +1260,14 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
            * We will not update the _entities_visited data structure
            * here.
            */
-          feature->_halo_ids.insert(neighbor->id());
+          if (topological_neighbor || disjoint_only)
+            feature->_disjoint_halo_ids.insert(neighbor->id());
+          else
+          {
+            feature->_halo_ids.insert(neighbor->id());
 
-          flood(neighbor, current_index, feature);
+            flood(neighbor, current_index, feature);
+          }
         }
       }
     }
@@ -1231,11 +1275,11 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
 }
 
 void
-FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
+FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
 {
   if (_is_elemental)
   {
-    for (auto entity : data._local_ids)
+    for (auto entity : feature._local_ids)
     {
       Elem * elem = _mesh.elemPtr(entity);
 
@@ -1245,43 +1289,98 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
 
         for (auto it = iters.first; it != iters.second; ++it)
         {
-          data._periodic_nodes.insert(it->first);
-          data._periodic_nodes.insert(it->second);
+          feature._periodic_nodes.insert(it->first);
+          feature._periodic_nodes.insert(it->second);
         }
       }
     }
   }
   else
   {
-    for (auto entity : data._local_ids)
+    for (auto entity : feature._local_ids)
     {
       auto iters = _periodic_node_map.equal_range(entity);
 
       for (auto it = iters.first; it != iters.second; ++it)
       {
-        data._periodic_nodes.insert(it->first);
-        data._periodic_nodes.insert(it->second);
+        feature._periodic_nodes.insert(it->first);
+        feature._periodic_nodes.insert(it->second);
       }
     }
   }
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox,
-                                                   const Point & node)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-  {
-    bbox.min()(i) = std::min(bbox.min()(i), node(i));
-    bbox.max()(i) = std::max(bbox.max()(i), node(i));
-  }
-}
+  // First update the primary bounding box (all topologically connected)
+  for (auto & halo_id : _halo_ids)
+    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(halo_id));
 
-void
-FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem)
-{
-  for (auto node_n = decltype(elem.n_nodes())(0); node_n < elem.n_nodes(); ++node_n)
-    updateBBoxExtremes(bbox, *(elem.get_node(node_n)));
+  // Remove all of the IDs that are in the primary region
+  std::list<dof_id_type> disjoint_elem_id_list;
+  std::set_difference(_disjoint_halo_ids.begin(),
+                      _disjoint_halo_ids.end(),
+                      _halo_ids.begin(),
+                      _halo_ids.end(),
+                      std::insert_iterator<std::list<dof_id_type>>(disjoint_elem_id_list,
+                                                                   disjoint_elem_id_list.begin()));
+
+  if (!disjoint_elem_id_list.empty())
+  {
+    /**
+     * Now we need to find how many distinct topologically disconnected sets of elements we have.
+     * We've already removed elements that are part of the primary halo, we'll start by assuming
+     * that element left is part of the same disjoint set. For each element, we'll see if it is a
+     * neighbor of any other element in the current set. If it's not, then it must be part of yet
+     * another set. The process repeats until every element is processed and put in the right
+     * bucket.
+     */
+    std::list<std::list<dof_id_type>> disjoint_regions;
+    for (auto elem_id : _disjoint_halo_ids)
+    {
+      disjoint_regions.emplace_back(std::list<dof_id_type>({elem_id}));
+    }
+
+    for (auto it1 = disjoint_regions.begin(); it1 != disjoint_regions.end(); /* No increment */)
+    {
+      bool merge_occured = false;
+      for (auto it2 = disjoint_regions.begin(); it2 != disjoint_regions.end(); ++it2)
+      {
+        if (it1 != it2 && areElemListsMergeable(*it1, *it2, mesh))
+        {
+          it2->splice(it2->begin(), *it1);
+
+          disjoint_regions.emplace_back(std::move(*it2));
+          disjoint_regions.erase(it2);
+          it1 = disjoint_regions.erase(it1);
+
+          merge_occured = true;
+
+          break;
+        }
+      }
+
+      if (!merge_occured)
+        ++it1;
+    }
+
+    // Finally create new bounding boxes for each disjoint region
+    auto num_regions = disjoint_regions.size();
+    // We have num_regions *new* bounding boxes plus the existing bounding box
+    _bboxes.resize(num_regions + 1);
+
+    decltype(num_regions) region = 1;
+    for (const auto list_ref : disjoint_regions)
+    {
+      for (const auto elem_id : list_ref)
+        updateBBoxExtremesHelper(_bboxes[region], *mesh.elem_ptr(elem_id));
+
+      _halo_ids.insert(_disjoint_halo_ids.begin(), _disjoint_halo_ids.end());
+      _disjoint_halo_ids.clear();
+      ++region;
+    }
+  }
 }
 
 void
@@ -1330,6 +1429,17 @@ FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
       _ghosted_ids.begin(), _ghosted_ids.end(), rhs._ghosted_ids.begin(), rhs._ghosted_ids.end());
 }
 
+bool
+FeatureFloodCount::FeatureData::mergeable(const FeatureData & rhs, bool use_pb) const
+{
+  return (_var_index == rhs._var_index &&        // the sets have matching variable indices and
+          ((boundingBoxesIntersect(rhs) &&       //  (if the feature's bboxes intersect and
+            ghostedIntersect(rhs))               //   the ghosted entities also intersect)
+           ||                                    //   or
+           (use_pb &&                            //  (if merging across periodic nodes and
+            periodicBoundariesIntersect(rhs)))); //   those node sets intersect)
+}
+
 void
 FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 {
@@ -1361,14 +1471,6 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   _local_ids.swap(set_union);
 
   set_union.clear();
-  std::set_union(_halo_ids.begin(),
-                 _halo_ids.end(),
-                 rhs._halo_ids.begin(),
-                 rhs._halo_ids.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
-  _halo_ids.swap(set_union);
-
-  set_union.clear();
   std::set_union(_ghosted_ids.begin(),
                  _ghosted_ids.end(),
                  rhs._ghosted_ids.begin(),
@@ -1386,7 +1488,43 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   if (physical_intersection)
     expandBBox(rhs);
   else
+  {
+    //    set_union.clear();
+    //    std::set_difference(_halo_ids.begin(),
+    //                        _halo_ids.end(),
+    //                        _disjoint_halo_ids.begin(),
+    //                        _disjoint_halo_ids.end(),
+    //                        std::insert_iterator<std::set<dof_id_type>>(set_union,
+    //                        set_union.begin()));
+    //    _halo_ids.swap(set_union);
+    //
+    //    set_union.clear();
+    //    std::set_difference(rhs._halo_ids.begin(),
+    //                        rhs._halo_ids.end(),
+    //                        rhs._disjoint_halo_ids.begin(),
+    //                        rhs._disjoint_halo_ids.end(),
+    //                        std::insert_iterator<std::set<dof_id_type>>(set_union,
+    //                        set_union.begin()));
+    //    rhs._halo_ids.swap(set_union);
+
     std::move(rhs._bboxes.begin(), rhs._bboxes.end(), std::back_inserter(_bboxes));
+  }
+
+  set_union.clear();
+  std::set_union(_disjoint_halo_ids.begin(),
+                 _disjoint_halo_ids.end(),
+                 rhs._disjoint_halo_ids.begin(),
+                 rhs._disjoint_halo_ids.end(),
+                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+  _disjoint_halo_ids.swap(set_union);
+
+  set_union.clear();
+  std::set_union(_halo_ids.begin(),
+                 _halo_ids.end(),
+                 rhs._halo_ids.begin(),
+                 rhs._halo_ids.end(),
+                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+  _halo_ids.swap(set_union);
 
   // Keep track of the original ids so we can notify other processors of the local to global mapping
   _orig_ids.splice(_orig_ids.end(), std::move(rhs._orig_ids));
@@ -1415,6 +1553,7 @@ FeatureFloodCount::FeatureData::clear()
   _local_ids.clear();
   _periodic_nodes.clear();
   _halo_ids.clear();
+  _disjoint_halo_ids.clear();
   _ghosted_ids.clear();
   _bboxes.clear();
   _orig_ids.clear();
@@ -1521,5 +1660,45 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
   return out;
 }
 
+/*****************************************************************************************
+ ******************************* Utility Routines ****************************************
+ *****************************************************************************************
+ */
+void
+updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    bbox.min()(i) = std::min(bbox.min()(i), node(i));
+    bbox.max()(i) = std::max(bbox.max()(i), node(i));
+  }
+}
+
+void
+updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
+{
+  for (auto node_n = decltype(elem.n_nodes())(0); node_n < elem.n_nodes(); ++node_n)
+    updateBBoxExtremesHelper(bbox, *(elem.get_node(node_n)));
+}
+
+bool
+areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
+                      const std::list<dof_id_type> & elem_list2,
+                      MeshBase & mesh)
+{
+  for (const auto elem_id1 : elem_list1)
+  {
+    const auto * elem1 = mesh.elem_ptr(elem_id1);
+    for (const auto elem_id2 : elem_list2)
+    {
+      const auto * elem2 = mesh.elem_ptr(elem_id2);
+      if (elem1->has_neighbor(elem2))
+        return true;
+    }
+  }
+  return false;
+}
+
+// Constants
 const std::size_t FeatureFloodCount::invalid_size_t = std::numeric_limits<std::size_t>::max();
 const unsigned int FeatureFloodCount::invalid_id = std::numeric_limits<unsigned int>::max();

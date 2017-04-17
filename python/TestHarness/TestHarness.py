@@ -294,10 +294,7 @@ class TestHarness:
                     # This method spawns another process and allows this loop to continue looking for tests
                     # RunParallel will call self.testOutputAndFinish when the test has completed running
                     # This method will block when the maximum allowed parallel processes are running
-                    if self.options.dry_run:
-                        self.handleTestStatus(tester, command)
-                    else:
-                        self.runner.run(tester, command)
+                    self.runner.run(tester, command)
                 else: # This job is skipped - notify the runner
                     status = tester.getStatus()
                     if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
@@ -336,7 +333,7 @@ class TestHarness:
         if 'pbs_copy_files' in tester.specs:
             specs['copy_files'] = tester.specs['pbs_copy_files']
 
-        # Some tests files specify a different gold directory
+        # Some tests specify a different gold directory
         if 'gold_dir' in tester.specs:
             specs['copy_files'] = specs['copy_files'] + ' ' + tester.specs['gold_dir']
 
