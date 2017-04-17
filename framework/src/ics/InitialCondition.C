@@ -86,6 +86,13 @@ InitialCondition::getSuppliedItems()
   return _supplied_vars;
 }
 
+const UserObject &
+InitialCondition::getUserObjectBase(const std::string & name)
+{
+  _depend_uo.insert(_pars.get<UserObjectName>(name));
+  return UserObjectInterface::getUserObjectBase(name);
+}
+
 void
 InitialCondition::compute()
 {

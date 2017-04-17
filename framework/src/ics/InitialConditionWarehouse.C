@@ -87,3 +87,18 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object, T
   // Add the IC to the storage
   MooseObjectWarehouseBase<InitialCondition>::addObject(object, tid);
 }
+
+std::set<std::string>
+InitialConditionWarehouse::getDependObjects() const
+{
+  std::set<std::string> depend_objects;
+
+  const auto & ics = getActiveObjects();
+  for (const auto & ic : ics)
+  {
+    const auto & uo = ic->getDependObjects();
+    depend_objects.insert(uo.begin(), uo.end());
+  }
+
+  return depend_objects;
+}
