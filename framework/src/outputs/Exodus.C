@@ -75,7 +75,6 @@ Exodus::Exodus(const InputParameters & parameters)
                                        : _use_displaced ? true : false),
     _overwrite(getParam<bool>("overwrite"))
 {
-
 }
 
 void

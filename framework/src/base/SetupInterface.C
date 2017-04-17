@@ -24,9 +24,8 @@ validParams<SetupInterface>()
 
   // Add the 'execute_on' input parameter for users to set
   MultiMooseEnum execute_options(MooseUtils::createExecuteOnEnum({EXEC_LINEAR}));
-  params.addParam<MultiMooseEnum>("execute_on",
-                                  execute_options,
-                                  MooseUtils::getExecuteOnEnumDocString(execute_options));
+  params.addParam<MultiMooseEnum>(
+      "execute_on", execute_options, MooseUtils::getExecuteOnEnumDocString(execute_options));
   return params;
 }
 
@@ -83,7 +82,6 @@ SetupInterface::execFlags() const
                   "getExecuteOnEnum() method.");
   return _exec_flags;
 }
-
 
 ExecFlagType
 SetupInterface::execBitFlags() const

@@ -84,16 +84,11 @@ public:
    */
   static MultiMooseEnum getExecuteOptions();
 
-
-
 private:
-
   MultiMooseEnum _empty_execute_enum;
 
 protected:
-
   const MultiMooseEnum & _execute_enum;
-
 
   /// execution flag (when is the object executed/evaluated) (deprecated)
   const std::vector<ExecFlagType> _exec_flags;

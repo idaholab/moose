@@ -31,7 +31,6 @@
 class MooseEnumBase
 {
 public:
-
   /**
    * Constructor that takes a list of enumeration values, and a
    * separate string to set a default for this instance.
@@ -127,7 +126,6 @@ protected:
    * @param names - a space separated list of names used to populate the internal names vector
    */
   void fillNames(std::string names, std::string option_delim = " ");
-
 
   // The method that must be implemented to check derived class values against the _deprecated_names
   // list

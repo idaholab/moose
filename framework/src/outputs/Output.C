@@ -57,9 +57,8 @@ validParams<Output>()
 
   // Add ability to append to the 'execute_on' list
   MultiMooseEnum exec_enum(params.get<MultiMooseEnum>("execute_on"));
-  params.addParam<MultiMooseEnum>("additional_execute_on",
-                                  exec_enum,
-                                  MooseUtils::getExecuteOnEnumDocString(exec_enum));
+  params.addParam<MultiMooseEnum>(
+      "additional_execute_on", exec_enum, MooseUtils::getExecuteOnEnumDocString(exec_enum));
   params.set<MultiMooseEnum>("additional_execute_on").clear();
 
   // 'Timing' group

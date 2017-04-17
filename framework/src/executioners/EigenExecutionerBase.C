@@ -110,9 +110,8 @@ EigenExecutionerBase::init()
                " requires execute_on = 'linear'");
 
   if (isParamValid("normalization"))
-    _norm_exec =
-        &_problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization"))
-            .getExecuteOnEnum();
+    _norm_exec = &_problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization"))
+                      .getExecuteOnEnum();
   else
     _norm_exec = &bx_exec;
 
@@ -197,7 +196,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   if (xdiff != "")
   {
     solution_diff = &getPostprocessorValueByName(xdiff);
-    const MultiMooseEnum & xdiff_exec = _problem.getUserObject<UserObject>(xdiff).getExecuteOnEnum();
+    const MultiMooseEnum & xdiff_exec =
+        _problem.getUserObject<UserObject>(xdiff).getExecuteOnEnum();
     if (!xdiff_exec.contains(EXEC_LINEAR))
       mooseError("Postprocessor " + xdiff + " requires execute_on = 'linear'");
   }

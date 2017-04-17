@@ -49,7 +49,6 @@ typedef std::set<std::string>::const_iterator MooseEnumIterator;
 class MultiMooseEnum : public MooseEnumBase
 {
 public:
-
   /**
    * Constructor that takes a list or vector of enumeration values, and a separate string to set a
    * default for this instance

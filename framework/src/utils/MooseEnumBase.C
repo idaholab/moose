@@ -110,8 +110,7 @@ void
 MooseEnumBase::addEnumerationName(const std::string & raw_name)
 {
   // Make sure the option is not malformed
-  if (raw_name.find_first_of('=') == 0 ||
-      raw_name.find_last_of('=') == raw_name.length() - 1)
+  if (raw_name.find_first_of('=') == 0 || raw_name.find_last_of('=') == raw_name.length() - 1)
     mooseError("You cannot place whitespace around the '=' character in MooseEnumBase");
 
   // Split on equals sign
