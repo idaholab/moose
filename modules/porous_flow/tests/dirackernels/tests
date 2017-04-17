@@ -154,6 +154,11 @@
     cli_args = 'ICs/pp/function="if((x>1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_21'
     csvdiff = 'pls03_21.csv'
   [../]
+  [./pls03_action]
+    type = 'CSVDiff'
+    input = 'pls03_action.i'
+    csvdiff = 'pls03_action.csv'
+  [../]
 
   [./bh02]
     type = 'CSVDiff'
