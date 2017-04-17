@@ -126,14 +126,12 @@ TEST_F(ExpressionBuilderTest, test)
     // substitution list
     EBTerm w = conditional(x < y, x * y, x / y);
     EBSubstitutionRuleList s(2);
-    s[0] = new EBTermSubstitution(x, y);
-    s[1] = new EBTermSubstitution(y, a);
+    EBTermSubstitution s0(x, y), s1(y, a);
+    s[0] = &s0;
+    s[1] = &s1;
     w.substitute(s);
     EXPECT_EQ(std::string(w),
               "if"
               "(y<1,y*1,y/1)");
-
-    delete s[0];
-    delete s[1];
   }
 }
