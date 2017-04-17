@@ -18,9 +18,25 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-HEAT_CONDUCTION   := yes
-NAVIER_STOKES     := yes
-MISC              := yes
+ALL_MODULES               := no
+
+CHEMICAL_REACTIONS        := no
+CONTACT                   := no
+FLUID_PROPERTIES          := no
+# heat_conduction is required by Steps 5+
+HEAT_CONDUCTION           := yes
+LINEAR_ELASTICITY         := no
+MISC                      := no
+NAVIER_STOKES             := no
+# phase_field is required by Step 10.
+PHASE_FIELD               := yes
+POROUS_FLOW               := no
+RICHARDS                  := no
+SOLID_MECHANICS           := no
+# tensor_mechanics is required by Steps 9-10.
+TENSOR_MECHANICS          := yes
+WATER_STEAM_EOS           := no
+XFEM                      := no
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 

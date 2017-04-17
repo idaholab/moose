@@ -104,8 +104,8 @@
 
 [Executioner]
   type = SteadyWithNull
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_pc_side -snes_type'
-  petsc_options_value = 'hypre boomeramg  left ksponly'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_pc_side -snes_type -ksp_norm_type'
+  petsc_options_value = 'hypre boomeramg  left ksponly preconditioned'
   nl_rel_tol = 1.0e-14
   nl_abs_tol = 1.0e-14
 []

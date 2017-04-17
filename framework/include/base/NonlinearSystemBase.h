@@ -457,6 +457,10 @@ public:
 
   Moose::PCSideType getPCSide() { return _pc_side; }
 
+  void setMooseKSPNormType(MooseEnum kspnorm);
+
+  Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
+
   /**
    * Indicated whether this system needs material properties on boundaries.
    * @return Boolean if IntegratedBCs are active
@@ -642,6 +646,8 @@ protected:
   std::shared_ptr<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
   Moose::PCSideType _pc_side;
+  /// KSP norm type
+  Moose::MooseKSPNormType _ksp_norm;
 
   /// Whether or not to use a finite differenced preconditioner
   bool _use_finite_differenced_preconditioner;

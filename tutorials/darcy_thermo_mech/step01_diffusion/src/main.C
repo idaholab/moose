@@ -11,9 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "DarcyThermoMechApp.h"
+
+// Moose Includes
 #include "MooseInit.h"
-#include "Moose.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
 
@@ -30,14 +32,11 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   DarcyThermoMechApp::registerApps();
 
-  // This creates dynamic memory that we're responsible for deleting
-  MooseApp * app = AppFactory::createApp("DarcyThermoMechApp", argc, argv);
+  // The unique_ptr will automatically free memory allocated by the AppFactory.
+  std::unique_ptr<MooseApp> app(AppFactory::createApp("DarcyThermoMechApp", argc, argv));
 
   // Execute the application
   app->run();
-
-  // Free up the memory we created earlier
-  delete app;
 
   return 0;
 }

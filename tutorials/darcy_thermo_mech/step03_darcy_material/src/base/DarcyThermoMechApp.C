@@ -11,17 +11,16 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// Tutorial Includes
 #include "DarcyThermoMechApp.h"
-#include "Moose.h"
+#include "DarcyPressure.h"
+#include "PackedColumn.h"
+
+// Moose Includes
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
-
-// Kernels
-#include "DarcyPressure.h"
-
-// Materials
-#include "PackedColumn.h"
 
 template <>
 InputParameters
