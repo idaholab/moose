@@ -21,11 +21,10 @@
 TEST(MinimalApp, create)
 {
   const char * argv[1] = {"\0"};
-  MooseApp * app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+  std::unique_ptr<MooseApp> app(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
   app->parameters().set<bool>("minimal") = true;
   app->run();
   EXPECT_EQ(app->executioner()->name(), "Executioner");
   EXPECT_EQ(app->executioner()->feProblem().name(), "MOOSE Problem");
   EXPECT_EQ(app->executioner()->feProblem().mesh().nElem(), 1);
-  delete app;
 }
