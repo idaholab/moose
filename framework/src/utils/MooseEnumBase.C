@@ -186,7 +186,7 @@ void
 MooseEnumBase::removeEnumerationName(std::string name)
 {
   std::transform(name.begin(), name.end(), name.begin(), ::toupper);
-  std::vector<std::string>::const_iterator iter = std::find(_names.begin(), _names.end(), name);
+  std::vector<std::string>::iterator iter = std::find(_names.begin(), _names.end(), name);
   if (iter == _names.end())
     mooseError("The name ", name, " is not a possible enumeration value, thus can not be removed.");
   else
