@@ -41,6 +41,7 @@ protected:
 
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _pres;
+  const MaterialProperty<Real> & _gamma;
 };
 
 #endif

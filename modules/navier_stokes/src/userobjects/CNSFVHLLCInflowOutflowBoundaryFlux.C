@@ -55,7 +55,6 @@ CNSFVHLLCInflowOutflowBoundaryFlux::calcFlux(unsigned int iside,
                                              std::vector<Real> & flux) const
 {
   Real eps = 1e-6;
-  Real gamma = _fp.gamma(0., 0.);
 
   /// pass the inputs to local
 
@@ -83,6 +82,7 @@ CNSFVHLLCInflowOutflowBoundaryFlux::calcFlux(unsigned int iside,
   Real eint1 = rhoe1 * rhom1 - 0.5 * vdov1;
   Real pres1 = _fp.pressure(rhom1, eint1);
   Real csou1 = _fp.c(rhom1, eint1);
+  Real gamma = _fp.gamma(rhom1, eint1);
   Real mach1 = std::sqrt(vdov1) / csou1;
 
   if (mach1 > -1. && mach1 < 0.)
@@ -383,9 +383,6 @@ CNSFVHLLCInflowOutflowBoundaryFlux::calcJacobian(unsigned int iside,
                                                  DenseMatrix<Real> & jac1) const
 {
   Real eps = 1e-6;
-  Real gamma = _fp.gamma(0., 0.);
-  Real gamm1 = gamma - 1.;
-  Real gamm2 = 2. - gamma;
 
   /// pass the inputs to local
 
@@ -413,6 +410,9 @@ CNSFVHLLCInflowOutflowBoundaryFlux::calcJacobian(unsigned int iside,
   Real eint1 = rhoe1 * rhom1 - 0.5 * vdov1;
   Real pres1 = _fp.pressure(rhom1, eint1);
   Real csou1 = _fp.c(rhom1, eint1);
+  Real gamma = _fp.gamma(rhom1, eint1);
+  Real gamm1 = gamma - 1.;
+  Real gamm2 = 2. - gamma;
   Real rq051 = 0.5 * gamm1 * vdov1;
   Real mach1 = std::sqrt(vdov1) / csou1;
 
