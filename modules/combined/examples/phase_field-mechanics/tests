@@ -27,21 +27,21 @@
   [./grain_texture]
     type = RunApp
     input = 'grain_texture.i'
-    method = 'OPT'
+    method = '!DBG'
     check_input = True
   [../]
   [./hex_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'hex_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
-    method = 'OPT'
+    method = '!DBG'
     check_input = True
   [../]
   [./poly_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'poly_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
-    method = 'OPT'
+    method = '!DBG'
     check_input = True
   [../]
 []
