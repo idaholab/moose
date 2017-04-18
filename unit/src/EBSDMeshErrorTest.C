@@ -18,14 +18,14 @@ TEST_F(EBSDMeshErrorTest, fileDoesNotExist)
 {
   // generate input parameter set
   InputParameters params = validParams<EBSDMesh>();
-  params.addPrivateParam("_moose_app", _app);
+  params.addPrivateParam("_moose_app", _app.get());
   params.set<std::string>("_object_name", "EBSD");
 
   // set filename
   params.set<FileName>("filename") = "FILEDOESNOTEXIST";
 
   // construct mesh object
-  std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
+  std::unique_ptr<EBSDMesh> mesh = libmesh_make_unique<EBSDMesh>(params);
 
   try
   {
@@ -60,7 +60,7 @@ TEST_F(EBSDMeshErrorTest, headerError)
 
     // generate input parameter set
     InputParameters params = validParams<EBSDMesh>();
-    params.addPrivateParam("_moose_app", _app);
+    params.addPrivateParam("_moose_app", _app.get());
     params.set<std::string>("_object_name") = filename; // use the filename to define a unique name
 
     // set filename
@@ -68,7 +68,7 @@ TEST_F(EBSDMeshErrorTest, headerError)
     params.set<unsigned int>("uniform_refine") = 2;
 
     // construct mesh object
-    std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
+    std::unique_ptr<EBSDMesh> mesh = libmesh_make_unique<EBSDMesh>(params);
 
     try
     {

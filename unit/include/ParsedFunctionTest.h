@@ -32,18 +32,18 @@ protected:
   {
     const char * argv[2] = {"foo", "\0"};
 
-    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _app.reset(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
     _factory = &_app->getFactory();
 
     InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
     mesh_params.set<MooseEnum>("dim") = "3";
     mesh_params.set<std::string>("_object_name") = "mesh";
-    _mesh = new GeneratedMesh(mesh_params);
+    _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
-    problem_params.set<MooseMesh *>("mesh") = _mesh;
+    problem_params.set<MooseMesh *>("mesh") = _mesh.get();
     problem_params.set<std::string>("_object_name") = "FEProblem";
-    _fe_problem = new FEProblem(problem_params);
+    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
   }
 
   ParsedFunction<Real> * fptr(MooseParsedFunction & f)
@@ -51,17 +51,10 @@ protected:
     return f._function_ptr->_function_ptr.get();
   }
 
-  void TearDown()
-  {
-    delete _fe_problem;
-    delete _mesh;
-    delete _app;
-  }
-
-  MooseApp * _app;
+  std::unique_ptr<MooseApp> _app;
+  std::unique_ptr<MooseMesh> _mesh;
+  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
-  MooseMesh * _mesh;
-  FEProblem * _fe_problem;
 };
 
 #endif // USERFUNCTIONTEST_H

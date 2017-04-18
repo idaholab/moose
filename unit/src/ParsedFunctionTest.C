@@ -18,9 +18,9 @@ TEST_F(ParsedFunctionTest, basicConstructor)
 {
   InputParameters params = _factory->getValidParams("ParsedFunction");
   // test constructor with no additional variables
-  params.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params.set<SubProblem *>("_subproblem") = _fe_problem;
+  params.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
   params.set<std::string>("_object_name") = "test";
   MooseParsedFunction f(params);
@@ -36,9 +36,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
 
   InputParameters params = _factory->getValidParams("ParsedFunction");
 
-  params.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params.set<SubProblem *>("_subproblem") = _fe_problem;
+  params.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string>>("vars") = one_var;
   params.set<std::vector<std::string>>("vals") =
@@ -59,9 +59,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   three_vars[2] = "r";
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
-  params2.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params2.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params2.set<SubProblem *>("_subproblem") = _fe_problem;
+  params2.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params2.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params2.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string>>("vars") = three_vars;
   params2.set<std::vector<std::string>>("vals") =
@@ -80,9 +80,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   one_val[0] = "2.5";
 
   InputParameters params3 = _factory->getValidParams("ParsedFunction");
-  params3.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params3.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params3.set<SubProblem *>("_subproblem") = _fe_problem;
+  params3.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params3.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params3.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params3.set<std::string>("value") = "q*x";
   params3.set<std::vector<std::string>>("vars") = one_var;
   params3.set<std::vector<std::string>>("vals") = one_val;
@@ -99,9 +99,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   three_vals[2] = "0";
 
   InputParameters params4 = _factory->getValidParams("ParsedFunction");
-  params4.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params4.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params4.set<SubProblem *>("_subproblem") = _fe_problem;
+  params4.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params4.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params4.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params4.set<std::string>("value") = "q*x + y/r + w";
   params4.set<std::vector<std::string>>("vars") = three_vars;
   params4.set<std::vector<std::string>>("vals") = three_vals;
@@ -123,9 +123,9 @@ TEST_F(ParsedFunctionTest, testVariables)
   one_var[0] = "q";
 
   InputParameters params = _factory->getValidParams("ParsedFunction");
-  params.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params.set<SubProblem *>("_subproblem") = _fe_problem;
+  params.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params.set<std::string>("value") = "x + y + q";
   params.set<std::vector<std::string>>("vars") = one_var;
   params.set<std::vector<std::string>>("vals") =
@@ -149,9 +149,9 @@ TEST_F(ParsedFunctionTest, testVariables)
   three_vars[2] = "r";
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
-  params2.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params2.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params2.set<SubProblem *>("_subproblem") = _fe_problem;
+  params2.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params2.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params2.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params2.set<std::string>("value") = "r*x + y/w + q";
   params2.set<std::vector<std::string>>("vars") = three_vars;
   params2.set<std::vector<std::string>>("vals") =
@@ -183,9 +183,9 @@ TEST_F(ParsedFunctionTest, testConstants)
   // it also tests built in functions of the function parser
   InputParameters params = _factory->getValidParams("ParsedFunction");
   params.set<std::string>("_object_name") = "test1";
-  params.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params.set<SubProblem *>("_subproblem") = _fe_problem;
+  params.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params.set<std::string>("value") = "log(e) + x";
 
   MooseParsedFunction f(params);
@@ -194,9 +194,9 @@ TEST_F(ParsedFunctionTest, testConstants)
 
   InputParameters params2 = _factory->getValidParams("ParsedFunction");
   params2.set<std::string>("_object_name") = "test2";
-  params2.set<FEProblem *>("_fe_problem") = _fe_problem;
-  params2.set<FEProblemBase *>("_fe_problem_base") = _fe_problem;
-  params2.set<SubProblem *>("_subproblem") = _fe_problem;
+  params2.set<FEProblem *>("_fe_problem") = _fe_problem.get();
+  params2.set<FEProblemBase *>("_fe_problem_base") = _fe_problem.get();
+  params2.set<SubProblem *>("_subproblem") = _fe_problem.get();
   params2.set<std::string>("value") = "sin(pi*x)";
 
   MooseParsedFunction f2(params2);
