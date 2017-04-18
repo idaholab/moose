@@ -162,20 +162,6 @@ protected:
                               std::vector<MeshTools::BoundingBox> & bboxes2) const;
 
   /**
-   * This method takes all of the partial features and expands the local, ghosted, and halo sets
-   * around those regions to account for the diffuse interface. Rather than using any kind of
-   * recursion here, we simply expand the region by all "point" neighbors from the actual
-   * grain cells since all point neighbors will contain contributions to the region.
-   */
-  void expandEBSDGrains();
-
-  /**
-   * This method colors neighbors of halo entries to expand the halo as desired for a given
-   * simulation.
-   */
-  void expandHalos(unsigned int num_layers_to_expand);
-
-  /**
    * Retrieve the next unique grain number if a new grain is detected during trackGrains. This
    * method handles reserve order parameter indices properly. Direct access to the next index
    * should be avoided.

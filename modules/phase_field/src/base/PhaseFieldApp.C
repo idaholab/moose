@@ -91,6 +91,7 @@
 #include "MultiSmoothCircleIC.h"
 #include "MultiSmoothSuperellipsoidIC.h"
 #include "PFCFreezingIC.h"
+#include "PolycrystalColoringIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
 #include "PolycrystalVoronoiVoidIC.h"
@@ -215,6 +216,7 @@
 #include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
+#include "PolycrystalVoronoi.h"
 #include "RandomEulerAngleProvider.h"
 
 #include "EBSDReader.h"
@@ -244,6 +246,7 @@
 #include "MultiAuxVariablesAction.h"
 #include "PFCRFFKernelAction.h"
 #include "PFCRFFVariablesAction.h"
+#include "PolycrystalColoringICAction.h"
 #include "PolycrystalElasticDrivingForceAction.h"
 #include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalKernelAction.h"
@@ -380,6 +383,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(MultiSmoothCircleIC);
   registerInitialCondition(MultiSmoothSuperellipsoidIC);
   registerInitialCondition(PFCFreezingIC);
+  registerInitialCondition(PolycrystalColoringIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
   registerInitialCondition(PolycrystalVoronoiVoidIC);
@@ -453,6 +457,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
+  registerPostprocessor(PolycrystalVoronoi);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
@@ -519,6 +524,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("MultiAuxVariablesAction", "AuxVariables/MultiAuxVariables");
   registerSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
   registerSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
+  registerSyntax("PolycrystalColoringICAction", "ICs/PolycrystalICs/PolycrystalColoringIC");
   registerSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
   registerSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
   registerSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
@@ -552,6 +558,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PFCRFFKernelAction, "add_kernel");
   registerAction(PFCRFFVariablesAction, "add_variable");
   registerAction(PolycrystalElasticDrivingForceAction, "add_kernel");
+  registerAction(PolycrystalColoringICAction, "add_ic");
   registerAction(PolycrystalHexGrainICAction, "add_ic");
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
