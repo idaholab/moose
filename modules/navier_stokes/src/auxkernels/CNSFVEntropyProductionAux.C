@@ -30,6 +30,7 @@ CNSFVEntropyProductionAux::CNSFVEntropyProductionAux(const InputParameters & par
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties")),
     _rho(getMaterialProperty<Real>("rho")),
     _pres(getMaterialProperty<Real>("pressure")),
+    _gamma(getMaterialProperty<Real>("gamma")),
     _inf_rho(getParam<Real>("infinity_density")),
     _inf_pres(getParam<Real>("infinity_pressure"))
 {
@@ -38,5 +39,5 @@ CNSFVEntropyProductionAux::CNSFVEntropyProductionAux(const InputParameters & par
 Real
 CNSFVEntropyProductionAux::computeValue()
 {
-  return (_pres[_qp] / _inf_pres) * std::pow(_inf_rho / _rho[_qp], _fp.gamma(0., 0.)) - 1.;
+  return (_pres[_qp] / _inf_pres) * std::pow(_inf_rho / _rho[_qp], _gamma[_qp]) - 1.;
 }

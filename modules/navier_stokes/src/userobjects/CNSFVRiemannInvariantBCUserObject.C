@@ -74,6 +74,8 @@ CNSFVRiemannInvariantBCUserObject::getGhostCellValue(unsigned int iside,
   Real vdov1 = uadv1 * uadv1 + vadv1 * vadv1 + wadv1 * wadv1;
   Real eint1 = rhoe1 * rhom1 - 0.5 * vdov1;
   Real csou1 = _fp.c(rhom1, eint1);
+  Real gamma = _fp.gamma(rhom1, eint1);
+  Real gamm1 = gamma - 1.;
   Real mach1 = std::sqrt(vdov1) / csou1;
 
   /// calc the ghost state according to local Mach number
@@ -93,9 +95,6 @@ CNSFVRiemannInvariantBCUserObject::getGhostCellValue(unsigned int iside,
   else if (mach1 > -1. && mach1 <= 0.)
   {
     /// subsonic inflow
-
-    Real gamma = _fp.gamma(0., 0.);
-    Real gamm1 = gamma - 1.;
 
     Real inf_eint = _fp.e(_inf_pres, _inf_rho);
     Real inf_csou = _fp.c(1. / _inf_rho, inf_eint);
@@ -130,9 +129,6 @@ CNSFVRiemannInvariantBCUserObject::getGhostCellValue(unsigned int iside,
   else if (mach1 > 0. && mach1 < 1.)
   {
     /// subsonic outflow
-
-    Real gamma = _fp.gamma(0., 0.);
-    Real gamm1 = gamma - 1.;
 
     Real inf_eint = _fp.e(_inf_pres, _inf_rho);
     Real inf_csou = _fp.c(1. / _inf_rho, inf_eint);

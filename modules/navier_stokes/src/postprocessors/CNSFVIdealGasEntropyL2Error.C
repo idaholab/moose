@@ -32,7 +32,8 @@ CNSFVIdealGasEntropyL2Error::CNSFVIdealGasEntropyL2Error(const InputParameters &
     _inf_rho(getParam<Real>("infinity_density")),
     _inf_pres(getParam<Real>("infinity_pressure")),
     _rho(getMaterialProperty<Real>("rho")),
-    _pres(getMaterialProperty<Real>("pressure"))
+    _pres(getMaterialProperty<Real>("pressure")),
+    _gamma(getMaterialProperty<Real>("gamma"))
 {
 }
 
@@ -45,7 +46,7 @@ CNSFVIdealGasEntropyL2Error::getValue()
 Real
 CNSFVIdealGasEntropyL2Error::computeQpIntegral()
 {
-  Real diff = (_pres[_qp] / _inf_pres) * std::pow(_inf_rho / _rho[_qp], _fp.gamma(0., 0.)) - 1.;
+  Real diff = (_pres[_qp] / _inf_pres) * std::pow(_inf_rho / _rho[_qp], _gamma[_qp]) - 1.;
 
   return diff * diff;
 }
