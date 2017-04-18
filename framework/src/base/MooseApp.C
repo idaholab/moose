@@ -250,14 +250,6 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (getParam<bool>("error_deprecated") && getParam<bool>("allow_deprecated"))
     mooseError("Both error deprecated and allowed deprecated were set.");
-
-  if (Moose::execute_flags.empty())
-  {
-    mooseDeprecated("MOOSE has been updated to include a Moose::registerExecFlags() function, "
-                    "which should be added to the application constructor. It is also possible to "
-                    "add additional flags, see the MooseTestApp.C/h for an example.");
-    Moose::registerExecFlags();
-  }
 }
 
 MooseApp::~MooseApp()
@@ -277,6 +269,16 @@ MooseApp::~MooseApp()
 void
 MooseApp::setupOptions()
 {
+  // The registerExecFlags should be called in the constructor of the derived applications, but
+  // in the case of an older app this will not of happend.
+  if (Moose::execute_flags.empty())
+  {
+    mooseDeprecated("MOOSE has been updated to include a Moose::registerExecFlags() function, "
+                    "which should be added to the application constructor. It is also possible to "
+                    "add additional flags, see the MooseTestApp.C/h for an example.");
+    Moose::registerExecFlags();
+  }
+
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
   if (multiAppLevel() > 0)
