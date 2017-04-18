@@ -193,7 +193,7 @@ public:
      *  Optimization: We may use the bounding boxes as a coarse-level check before checking
      *  halo intersection.
      */
-    bool mergeable(const FeatureData & rhs, bool use_pb) const;
+    bool mergeable(const FeatureData & rhs) const;
 
     ///@{
     /**
@@ -389,7 +389,14 @@ protected:
    * This routine is called on the master rank only and stitches together the partial
    * feature pieces seen on any processor.
    */
-  void mergeSets(bool use_periodic_boundary_info);
+  void mergeSets();
+
+  /**
+   * Method for determining whether two features are mergeable. This routine exists because
+   * derived classes may need to override this function rather than use the mergeable method
+   * in the FeatureData object.
+   */
+  virtual bool areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const;
 
   /**
    * This routine handles all of the serialization, communication and deserialization of the data

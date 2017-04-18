@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
+#include "PolycrystalUserObjectBase.h"
 
 // libMesh includes
 #include "libmesh/periodic_boundary_base.h"
@@ -70,9 +71,13 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _ebsd_op_var(_ebsd_reader
                      ? &_fe_problem.getVariable(0, getParam<std::string>("var_name_base") + "_op")
                      : nullptr),
+    _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
+                    ? &getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo")
+                    : nullptr),
     _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : 0),
     _consider_phase(isParamValid("phase")),
-    _first_time(true),
+    _execution_mode(_poly_ic_uo ? ExecutionMode::ASSIGNING_OPS
+                                : ExecutionMode::INITIAL_GRAIN_DISCOVERY),
     _error_on_grain_creation(getParam<bool>("error_on_grain_creation")),
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
@@ -164,11 +169,11 @@ GrainTracker::initialize()
     return;
 
   /**
-   * If we are passed the first time, we need to save the existing
+   * If we in normal tracking mode, we need to save the existing
    * grains before beginning the tracking on the current step. We'll do that
    * with a swap since the _feature_sets contents will be cleared anyway.
    */
-  if (!_first_time)
+  if (_execution_mode == ExecutionMode::GRAIN_TRACKING)
     _feature_sets_old.swap(_feature_sets);
 
   FeatureFloodCount::initialize();
@@ -199,6 +204,15 @@ GrainTracker::getThreshold(std::size_t var_index) const
 }
 
 bool
+GrainTracker::areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const
+{
+  if (_execution_mode == ExecutionMode::ASSIGNING_OPS)
+    return f1._id == f2._id;
+  else
+    return f1.mergeable(f2);
+}
+
+bool
 GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
                                             std::size_t current_index,
                                             FeatureData *& feature,
@@ -212,7 +226,7 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
    * EBSD data. Instead, we'll use the EBSD Reader data directly the first time this
    * object runs. Using EBSD data is only valid if we begin tracking in the zeroeth step
    */
-  if (_ebsd_reader && _first_time)
+  if (_ebsd_reader && _execution_mode == ExecutionMode::INITIAL_GRAIN_DISCOVERY)
   {
     mooseAssert(_t_step == 0, "EBSD only works if we begin in the initial condition");
     mooseAssert(_is_elemental, "EBSD only works with elemental grain tracker");
@@ -266,6 +280,30 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
       return feature->_id == (_consider_phase ? local_id : global_id);
     }
   }
+  else if (_poly_ic_uo && _execution_mode == ExecutionMode::ASSIGNING_OPS)
+  {
+    mooseAssert(_t_step == 0, "PolyIC only works if we begin in the initial condition");
+    mooseAssert(_is_elemental, "PolyIC only works with elemental grain tracker");
+
+    /**
+     * When generating ICs we aren't looking at the op index at all. We need to return
+     * false on all non-zero ops so we don't count each grain multiple times.
+     */
+    if (current_index != 0)
+      return false;
+
+    auto grain_id = _poly_ic_uo->getGrainID(dof_object->id());
+
+    if (!feature)
+    {
+      new_id = grain_id;
+      status &= ~Status::INACTIVE;
+
+      return true;
+    }
+    else
+      return feature->_id == grain_id;
+  }
   else
     // Just use normal variable inspection on subsequent steps
     return FeatureFloodCount::isNewFeatureOrConnectedRegion(
@@ -291,7 +329,8 @@ GrainTracker::finalize()
                              ? _halo_level - 1
                              : 0; // The first level of halos already exists so subtract one
 
-  if (_ebsd_reader && _first_time)
+  if ((_execution_mode == ExecutionMode::INITIAL_GRAIN_DISCOVERY && _ebsd_reader) ||
+      (_execution_mode == ExecutionMode::ASSIGNING_OPS && _poly_ic_uo))
   {
     expandEBSDGrains();
 
@@ -307,11 +346,28 @@ GrainTracker::finalize()
   communicateAndMerge();
 
   /**
+   * Determine full grain adjacencies for the purpose of assigning an IC
+   */
+  if (_execution_mode == ExecutionMode::ASSIGNING_OPS && _poly_ic_uo)
+  {
+    std::cout << "PRE_IC in GrainTracker" << std::endl;
+
+    buildGrainAdjacencyMatrix();
+    _execution_mode = ExecutionMode::INITIAL_GRAIN_DISCOVERY;
+    return;
+  }
+  std::cout << "After poly IC in GrainTracker" << std::endl;
+
+  /**
    * Assign or Track Grains
    */
+  mooseAssert(_execution_mode != ExecutionMode::ASSIGNING_OPS, "Wrong execution mode");
   Moose::perf_log.push("trackGrains()", "GrainTracker");
-  if (_first_time)
+  if (_execution_mode == ExecutionMode::INITIAL_GRAIN_DISCOVERY)
+  {
     assignGrains();
+    _execution_mode = ExecutionMode::GRAIN_TRACKING;
+  }
   else
     trackGrains();
   Moose::perf_log.pop("trackGrains()", "GrainTracker");
@@ -332,11 +388,6 @@ GrainTracker::finalize()
 
   updateFieldInfo();
   _console << "Finished inside of updateFieldInfo" << std::endl;
-
-  // Set the first time flag false here (after all methods of finalize() have completed)
-  _first_time = false;
-
-  // TODO: Release non essential memory
 
   _console << "Finished inside of GrainTracker" << std::endl;
   Moose::perf_log.pop("finalize()", "GrainTracker");
@@ -526,7 +577,8 @@ GrainTracker::expandEBSDGrains()
 void
 GrainTracker::assignGrains()
 {
-  mooseAssert(_first_time, "assignGrains may only be called on the first tracking step");
+  mooseAssert(_execution_mode == ExecutionMode::INITIAL_GRAIN_DISCOVERY,
+              "assignGrains may only be called on the first tracking step");
 
   /**
    * When using the EBSD reader, the grain IDs will already be assigned. We'll
@@ -578,7 +630,8 @@ GrainTracker::assignGrains()
 void
 GrainTracker::trackGrains()
 {
-  mooseAssert(!_first_time, "Track grains may only be called when _tracking_step > _t_step");
+  mooseAssert(_execution_mode == ExecutionMode::GRAIN_TRACKING,
+              "Track grains may only be called when _tracking_step > _t_step");
 
   // Used to track indices for which to trigger the new grain callback on (used on all ranks)
   auto _old_max_grain_id = _max_curr_grain_id;
@@ -753,9 +806,6 @@ GrainTracker::trackGrains()
       // New Grain
       if (grain._status == Status::CLEAR)
       {
-        mooseAssert(!_ebsd_reader || !_first_time,
-                    "Can't create new grains in initial EBSD step, logic error");
-
         /**
          * Now we need to figure out what kind of "new" grain this is. Is it a nucleating grain that
          * we're just barely seeing for the first time or is it a "splitting" grain. A grain that
@@ -852,7 +902,7 @@ GrainTracker::trackGrains()
       if (new_id >= _reserve_grain_first_index + _n_reserve_ops)
       {
         // See if we've been instructed to terminate with an error
-        if (!_first_time && _error_on_grain_creation)
+        if (_error_on_grain_creation && _execution_mode == ExecutionMode::GRAIN_TRACKING)
           mooseError(
               "Error: New grain detected and \"error_on_new_grain_creation\" is set to true");
         else
@@ -865,7 +915,7 @@ GrainTracker::trackGrains()
 void
 GrainTracker::newGrainCreated(unsigned int new_grain_id)
 {
-  if (!_first_time && _is_master)
+  if (_is_master && _execution_mode == ExecutionMode::GRAIN_TRACKING)
   {
     mooseAssert(new_grain_id < _feature_id_to_local_index.size(), "new_grain_id is out of bounds");
     auto grain_index = _feature_id_to_local_index[new_grain_id];
@@ -1507,7 +1557,7 @@ GrainTracker::updateFieldInfo()
       {
         const Elem * elem = mesh.elem(entity);
         std::vector<Point> centroid(1, elem->centroid());
-        if (_ebsd_reader && _first_time)
+        if (_ebsd_reader && _execution_mode == ExecutionMode::INITIAL_GRAIN_DISCOVERY)
         {
           const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader->getData(centroid[0]);
           const auto phase = d._phase;
@@ -1720,6 +1770,56 @@ GrainTracker::getNextUniqueID()
                                 _reserve_grain_first_index + _n_reserve_ops /* no +1 here!*/);
 
   return _max_curr_grain_id;
+}
+
+void
+GrainTracker::buildGrainAdjacencyMatrix()
+{
+  _grain_to_op.resize(_feature_count);
+
+  if (_is_master)
+  {
+    std::cout << "Feature Count: " << _feature_count << '\n';
+    _adjacency_matrix = libmesh_make_unique<DenseMatrix<Real>>(_feature_count, _feature_count);
+
+    for (auto & grain1 : _feature_sets)
+    {
+      for (auto & grain2 : _feature_sets)
+      {
+        if (&grain1 == &grain2)
+          continue;
+
+        if (grain1.boundingBoxesIntersect(grain2) && grain1.halosIntersect(grain2))
+        {
+          (*_adjacency_matrix)(grain1._id, grain2._id) = 1.;
+          (*_adjacency_matrix)(grain1._id, grain2._id) = 1.;
+        }
+      }
+    }
+
+    mooseAssert(_poly_ic_uo, "PolycrystalIC object is NULL");
+    auto coloring_algorithm = _poly_ic_uo->getColoringAlgorithm();
+    _grain_to_op = PolycrystalUserObjectBase::assignOpsToGrains(
+        *_adjacency_matrix, _feature_sets.size(), _vars.size(), coloring_algorithm);
+
+    // DEBUG
+    std::cout << "Grain Adjacency Matrix:\n";
+    for (unsigned int i = 0; i < _adjacency_matrix->m(); i++)
+    {
+      for (unsigned int j = 0; j < _adjacency_matrix->n(); j++)
+        std::cout << _adjacency_matrix->el(i, j) << "  ";
+      std::cout << '\n';
+    }
+  }
+
+  // Communicate the coloring with all ranks
+  _communicator.broadcast(_grain_to_op);
+
+  // DEBUG
+  std::cout << "Grain to OP assignments:\n";
+  for (auto op : _grain_to_op)
+    std::cout << op << "  ";
+  std::cout << std::endl;
 }
 
 /*************************************************

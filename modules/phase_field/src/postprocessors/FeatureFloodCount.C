@@ -350,7 +350,7 @@ FeatureFloodCount::communicateAndMerge()
     deserialize(recv_buffers);
     recv_buffers.clear();
 
-    mergeSets(true);
+    mergeSets();
   }
 
   // Make sure that feature count is communicated to all ranks
@@ -821,7 +821,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
 }
 
 void
-FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
+FeatureFloodCount::mergeSets()
 {
   Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
 
@@ -840,7 +840,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
            it2 != _partial_feature_sets[map_num].end();
            ++it2)
       {
-        if (it1 != it2 && it1->mergeable(*it2, use_periodic_boundary_info))
+        if (it1 != it2 && areFeaturesMergeable(*it1, *it2))
         {
           it2->merge(std::move(*it1));
 
@@ -923,6 +923,12 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
    */
 
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
+}
+
+bool
+FeatureFloodCount::areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const
+{
+  return f1.mergeable(f2);
 }
 
 void
@@ -1430,14 +1436,13 @@ FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
 }
 
 bool
-FeatureFloodCount::FeatureData::mergeable(const FeatureData & rhs, bool use_pb) const
+FeatureFloodCount::FeatureData::mergeable(const FeatureData & rhs) const
 {
-  return (_var_index == rhs._var_index &&        // the sets have matching variable indices and
-          ((boundingBoxesIntersect(rhs) &&       //  (if the feature's bboxes intersect and
-            ghostedIntersect(rhs))               //   the ghosted entities also intersect)
-           ||                                    //   or
-           (use_pb &&                            //  (if merging across periodic nodes and
-            periodicBoundariesIntersect(rhs)))); //   those node sets intersect)
+  return (_var_index == rhs._var_index &&      // the sets have matching variable indices and
+          ((boundingBoxesIntersect(rhs) &&     //  (if the feature's bboxes intersect and
+            ghostedIntersect(rhs))             //   the ghosted entities also intersect)
+           ||                                  //   or
+           periodicBoundariesIntersect(rhs))); //   periodic node sets intersect)
 }
 
 void
