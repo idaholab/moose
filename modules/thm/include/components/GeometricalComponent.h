@@ -22,7 +22,7 @@ public:
   GeometricalComponent(const InputParameters & parameters);
   virtual ~GeometricalComponent();
 
-  virtual void doBuildMesh();
+  virtual void setupMesh();
   virtual void displaceMesh();
 
   virtual Point getPosition() const { return _position; }
@@ -36,6 +36,7 @@ public:
   virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
 
 protected:
+  virtual void buildMesh() = 0;
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
   /// Node IDs

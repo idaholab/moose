@@ -37,13 +37,6 @@ FlowJunction::FlowJunction(const InputParameters & params)
 FlowJunction::~FlowJunction() {}
 
 void
-FlowJunction::init()
-{
-  const FluidProperties & fp = _sim.getUserObject<FluidProperties>(getParam<UserObjectName>("fp"));
-  _model_type = FlowModel::getType(fp);
-}
-
-void
 FlowJunction::addVariables()
 {
   std::vector<unsigned int> connected_subdomains;

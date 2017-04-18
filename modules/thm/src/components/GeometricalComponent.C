@@ -75,11 +75,11 @@ GeometricalComponent::computeNumberOfNodes(unsigned int n_elems)
 }
 
 void
-GeometricalComponent::doBuildMesh()
+GeometricalComponent::setupMesh()
 {
   generateNodeLocations();
   _first_node_id = _mesh.nNodes();
-  Component::doBuildMesh();
+  buildMesh();
   _last_node_id = _mesh.nNodes();
 
   // shift the component in z-direction so they do not overlap

@@ -18,12 +18,10 @@ public:
   FlowJunction(const InputParameters & params);
   virtual ~FlowJunction();
 
-  virtual void init();
   virtual void addVariables();
   virtual void addMooseObjects();
 
 protected:
-  FlowModel::EModelType _model_type;
   std::string _lm_name;
   std::vector<Real> _K;
   Real _scaling_factor;
