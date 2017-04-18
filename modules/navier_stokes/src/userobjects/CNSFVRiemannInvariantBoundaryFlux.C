@@ -66,6 +66,8 @@ CNSFVRiemannInvariantBoundaryFlux::calcFlux(unsigned int iside,
   Real eint1 = rhoe1 * rhom1 - 0.5 * vdov1;
   Real pres1 = _fp.pressure(rhom1, eint1);
   Real csou1 = _fp.c(rhom1, eint1);
+  Real gamma = _fp.gamma(rhom1, eint1);
+  Real gamm1 = gamma - 1.;
   Real mach1 = std::sqrt(vdov1) / csou1;
 
   /// calc the flux vector according to local Mach number
@@ -73,9 +75,6 @@ CNSFVRiemannInvariantBoundaryFlux::calcFlux(unsigned int iside,
   if (std::abs(mach1) < 1.)
   {
     /// subsonic
-
-    Real gamma = _fp.gamma(0., 0.);
-    Real gamm1 = gamma - 1.;
 
     std::vector<Real> U2(5, 0.);
 
@@ -238,6 +237,9 @@ CNSFVRiemannInvariantBoundaryFlux::calcJacobian(unsigned int iside,
   Real eint1 = rhoe1 * rhom1 - 0.5 * vdov1;
   Real pres1 = _fp.pressure(rhom1, eint1);
   Real csou1 = _fp.c(rhom1, eint1);
+  Real gamma = _fp.gamma(rhom1, eint1);
+  Real gamm1 = gamma - 1.;
+  Real gamm2 = 2. - gamma;
   Real mach1 = std::sqrt(vdov1) / csou1;
 
   /// calc the flux Jacobian matrix according to local Mach number
@@ -245,9 +247,6 @@ CNSFVRiemannInvariantBoundaryFlux::calcJacobian(unsigned int iside,
   if (std::abs(mach1) < 1.)
   {
     /// subsonic
-
-    Real gamma = _fp.gamma(0., 0.);
-    Real gamm1 = gamma - 1.;
 
     std::vector<Real> U2(5, 0.);
 
@@ -604,10 +603,6 @@ CNSFVRiemannInvariantBoundaryFlux::calcJacobian(unsigned int iside,
   else if (mach1 >= 1.)
   {
     /// supersonic outflow
-
-    Real gamma = _fp.gamma(0., 0.);
-    Real gamm1 = gamma - 1.;
-    Real gamm2 = 2. - gamma;
 
     Real rq051 = 0.5 * gamm1 * vdov1;
     Real vdon1 = uadv1 * nx + vadv1 * ny + wadv1 * nz;

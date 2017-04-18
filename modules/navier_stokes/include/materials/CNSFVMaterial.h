@@ -98,6 +98,8 @@ protected:
   MaterialProperty<Real> & _vadv;
   /// z-velocity
   MaterialProperty<Real> & _wadv;
+  /// gamma
+  MaterialProperty<Real> & _gamma;
 };
 
 #endif

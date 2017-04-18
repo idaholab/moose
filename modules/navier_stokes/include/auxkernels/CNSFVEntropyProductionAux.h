@@ -32,6 +32,7 @@ protected:
 
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _pres;
+  const MaterialProperty<Real> & _gamma;
 
   Real _inf_rho;
   Real _inf_pres;

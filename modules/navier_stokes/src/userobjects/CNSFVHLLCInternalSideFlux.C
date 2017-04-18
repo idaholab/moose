@@ -40,7 +40,6 @@ CNSFVHLLCInternalSideFlux::calcFlux(unsigned int iside,
                                     std::vector<Real> & flux) const
 {
   Real eps = 1e-6;
-  Real gamma = _fp.gamma(0., 0.);
 
   /// pass the inputs to local
 
@@ -73,6 +72,7 @@ CNSFVHLLCInternalSideFlux::calcFlux(unsigned int iside,
   Real e1 = rhoe1 / rho1 - 0.5 * (uadv1 * uadv1 + vadv1 * vadv1 + wadv1 * wadv1);
   Real pres1 = _fp.pressure(v1, e1);
   Real csou1 = _fp.c(v1, e1);
+  Real gamma = _fp.gamma(v1, e1);
   Real enth1 = (rhoe1 + pres1) / rho1;
 
   /// derived variables on the right
@@ -285,9 +285,6 @@ CNSFVHLLCInternalSideFlux::calcJacobian(unsigned int iside,
                                         DenseMatrix<Real> & jac2) const
 {
   Real eps = 1e-6;
-  Real gamma = _fp.gamma(0., 0.);
-  Real gamm1 = gamma - 1.;
-  Real gamm2 = 2. - gamma;
 
   /// pass the inputs to local
 
@@ -322,6 +319,9 @@ CNSFVHLLCInternalSideFlux::calcJacobian(unsigned int iside,
   Real e1 = rhoe1 / rho1 - 0.5 * vdov1;
   Real pres1 = _fp.pressure(v1, e1);
   Real csou1 = _fp.c(v1, e1);
+  Real gamma = _fp.gamma(v1, e1);
+  Real gamm1 = gamma - 1.;
+  Real gamm2 = 2. - gamma;
   Real enth1 = (rhoe1 + pres1) / rho1;
   Real rq051 = 0.5 * gamm1 * vdov1;
 

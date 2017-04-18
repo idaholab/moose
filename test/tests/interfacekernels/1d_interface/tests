@@ -10,13 +10,13 @@
     input = coupled_value_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    prereq = test
-  []
+    cli_args = 'Outputs/exodus=false'
+  [../]
 
   [./single_variable_jacobian_test]
     type = AnalyzeJacobian
     input = single_variable_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-  []
+  [../]
 []
