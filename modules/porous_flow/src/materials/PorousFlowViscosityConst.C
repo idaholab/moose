@@ -24,6 +24,9 @@ PorousFlowViscosityConst::PorousFlowViscosityConst(const InputParameters & param
     _viscosity(_nodal_material ? declareProperty<Real>("PorousFlow_viscosity_nodal" + _phase)
                                : declareProperty<Real>("PorousFlow_viscosity_qp" + _phase))
 {
+  mooseDeprecated("PorousFlowViscosityConst is deprecated. Please use one of the UserObjects with "
+                  "constant viscosity in the fluid_properties module. See "
+                  "porous_flow/tests/fluids/ for examples");
 }
 
 void
