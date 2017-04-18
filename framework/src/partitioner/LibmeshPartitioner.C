@@ -28,7 +28,8 @@ InputParameters
 validParams<LibmeshPartitioner>()
 {
   InputParameters params = validParams<MoosePartitioner>();
-  MooseEnum partitioning("metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc");
+  MooseEnum partitioning(
+      "metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc subdomain_partitioner");
   params.addRequiredParam<MooseEnum>(
       "partitioner",
       partitioning,
