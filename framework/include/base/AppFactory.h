@@ -28,19 +28,26 @@ class InputParameters;
 #define registerApp(name) AppFactory::instance().reg<name>(#name)
 
 /**
- * Typedef for function to build objects
+ * alias to wrap shared pointer type
+ * TODO: Convert to shared pointer by default in the future
+ * using MooseAppPtr = std::shared_ptr<MooseApp>;
  */
-typedef MooseApp * (*appBuildPtr)(const InputParameters & parameters);
+using MooseAppPtr = MooseApp *;
 
 /**
- * Typedef for validParams
+ * alias for validParams function
  */
-typedef InputParameters (*paramsPtr)();
+using paramsPtr = InputParameters (*)();
 
 /**
- * Typedef for registered Object iterator
+ * alias for method to build objects
  */
-typedef std::map<std::string, paramsPtr>::iterator registeredMooseAppIterator;
+using appBuildPtr = MooseAppPtr (*)(const InputParameters & parameters);
+
+/**
+ * alias for registered Object iterator
+ */
+using registeredMooseAppIterator = std::map<std::string, paramsPtr>::iterator;
 
 /**
  * Build an object of type T
@@ -50,6 +57,12 @@ MooseApp *
 buildApp(const InputParameters & parameters)
 {
   return new T(parameters);
+}
+template <class T>
+MooseApp *
+buildAppSharedPtr(const InputParameters & parameters)
+{
+  return std::make_shared<T>(parameters);
 }
 
 /**
@@ -70,6 +83,8 @@ public:
    * Helper function for creating a MooseApp from command-line arguments.
    */
   static MooseApp * createApp(std::string app_type, int argc, char ** argv);
+  static std::shared_ptr<MooseApp>
+  createAppShared(const std::string & app_type, int argc, char ** argv);
 
   /**
    * Register a new object

@@ -23,17 +23,14 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   MiscApp::registerApps();
 
-  // This creates dynamic memory that we're responsible for deleting
-  MooseApp * app = AppFactory::createApp("MiscApp", argc, argv);
+  // Create an instance of the application and store it in a smart pointer for easy cleanup
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("MiscApp", argc, argv);
 
   app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
 
   // Execute the application
   app->run();
-
-  // Free up the memory we created earlier
-  delete app;
 
   return 0;
 }
