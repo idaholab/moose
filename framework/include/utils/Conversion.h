@@ -71,10 +71,6 @@ stringify(const T & t)
 template <>
 std::string stringify(const SolveType & t);
 
-/// Convert execute flags type into human readable string
-template <>
-std::string stringify(const ExecFlagType & t);
-
 /**
  * Stringify Reals with enough precision to guarantee lossless
  * Real -> string -> Real roundtrips.

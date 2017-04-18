@@ -661,4 +661,11 @@ getExecuteOnEnum(InputParameters & parameters)
   return parameters.template set<MultiMooseEnum>("execute_on");
 }
 
+const std::string &
+getExecuteOnFlagName(const ExecFlagType & flag)
+{
+  auto iter = getExecuteOnFlag(flag);
+  return iter->second;
+}
+
 } // MooseUtils namespace

@@ -301,16 +301,6 @@ stringify(const SolveType & t)
   return "";
 }
 
-template <>
-std::string
-stringify(const ExecFlagType & t)
-{
-  const auto iter = Moose::execute_flags.find(t);
-  if (iter != Moose::execute_flags.end())
-    return iter->second;
-  return Moose::execute_flags[EXEC_NONE];
-}
-
 std::string
 stringifyExact(Real t)
 {

@@ -411,10 +411,13 @@ void setExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> 
 ///@}
 
 /**
+ * Returns iterator to the map entry for the given flag.
+ * @params flag The flag to retreive.
  */
 std::map<ExecFlagType, std::string>::const_iterator getExecuteOnFlag(const ExecFlagType & flag);
 
 /**
+ * Extract the "execute_on" MultiMooseEnum from a parameters object.
  */
 MultiMooseEnum & getExecuteOnEnum(InputParameters & parameters);
 
@@ -422,6 +425,11 @@ MultiMooseEnum & getExecuteOnEnum(InputParameters & parameters);
  * Return a documentation string with the available and default execute_on options.
  */
 std::string getExecuteOnEnumDocString(const MultiMooseEnum & exec_enum);
+
+/**
+ * Return the name an ExecFlagType.
+ */
+const std::string & getExecuteOnFlagName(const ExecFlagType & flag);
 }
 
 #endif // MOOSEUTILS_H

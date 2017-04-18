@@ -61,7 +61,7 @@ TestPostprocessor::getValue()
 
   else if (_test_type == "custom_execute_on")
   {
-    _console << "Flag Name: " << Moose::stringify(EXEC_JUST_GO) << std::endl;
+    _console << "Flag Name: " << MooseUtils::getExecuteOnFlagName(EXEC_JUST_GO) << std::endl;
     return _execute_count++;
   }
   // This should not be attainable
