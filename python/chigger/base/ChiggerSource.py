@@ -38,6 +38,7 @@ class ChiggerSource(ChiggerFilterSourceBase):
         opt.add('edges', False, "Enable/disable display of object edges.")
         opt.add('edge_color', [1, 1, 1], "Set the edge color.")
         opt.add('edge_width', "The edge width.", vtype=int)
+        opt.add('point_size', "The point size.", vtype=float)
         opt.add('opacity', 1, "The object opacity.", vtype=float)
         opt.add('color', "The color of the object.", vtype=list)
         return opt
@@ -74,6 +75,10 @@ class ChiggerSource(ChiggerFilterSourceBase):
         if self.isOptionValid('edge_width') and \
            hasattr(self._vtkactor.GetProperty(), 'SetLineWidth'):
             self._vtkactor.GetProperty().SetLineWidth(self.getOption('edge_width'))
+
+        if self.isOptionValid('point_size') and \
+           hasattr(self._vtkactor.GetProperty(), 'SetPointSize'):
+            self._vtkactor.GetProperty().SetPointSize(self.getOption('point_size'))
 
         if self.isOptionValid('opacity'):
             self._vtkactor.GetProperty().SetOpacity(self.getOption('opacity'))
