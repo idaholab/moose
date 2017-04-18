@@ -42,6 +42,10 @@ PorousFlowInternalEnergyIdeal::PorousFlowInternalEnergyIdeal(const InputParamete
             : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase,
                                               _temperature_variable_name))
 {
+  mooseDeprecated(
+      "PorousFlowInternalEnergyIdeal is deprecated. Please use the IdealGasFluidProptertiesPT "
+      "UserObject in the fluid_properties module. See "
+      "porous_flow/tests/fluids/ideal_gas.i for an example");
 }
 
 void
