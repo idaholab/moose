@@ -291,6 +291,7 @@ if __name__ == '__main__':
     parser.add_option("-n", "--no-auto-options", dest="noauto", action="store_true", help="Do not add automatic options to the invocation of the moose based application. Requres a specially prepared input file for debugging.")
     parser.add_option("--rel-tol", dest="rel_tol", default=1e-4, type="float", help="The relative tolerance on the Jacobian elements between the hand-coded and those evaluated with finite difference.")
     parser.add_option("--abs-tol", dest="abs_tol", default=1e-12, type="float", help="The absolute tolerance on the Jacobian elements between the hand-coded and those evaluated with finite difference.")
+    parser.add_option('--cli-args', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
 
     (options, args) = parser.parse_args()
 
@@ -318,6 +319,8 @@ if __name__ == '__main__':
     if not options.noauto :
         mooseparams = moosebaseparams[:]
         mooseparams.extend(['Problem/solve=false', 'BCs/active=', 'Outputs/' + dofoutname+ '/type=DOFMap', 'Outputs/active=' + dofoutname, 'Outputs/file_base=' + basename + '_' + dofoutname])
+        if options.cli_args != None:
+            mooseparams.extend([options.cli_args])
         if options.debug :
             print("Running\n%s\n" % " ".join(mooseparams))
         try:
@@ -382,6 +385,8 @@ if __name__ == '__main__':
     mooseparams = moosebaseparams[:]
     if not options.noauto :
         mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active='])
+    if options.cli_args != None:
+        mooseparams.extend([options.cli_args])
 
     if options.debug :
         print("Running\n%s\n" % " ".join(mooseparams))
