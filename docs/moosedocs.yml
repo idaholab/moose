@@ -200,6 +200,9 @@ markdown_extensions:
                       - /BCs
                       - /DiracKernels
                       - /Functions
+                      - /PorousFlowFullySaturated
+                      - /PorousFlowUnsaturated
+                      - /PorousFlowBasicTHM
               - stochastic_tools:
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
