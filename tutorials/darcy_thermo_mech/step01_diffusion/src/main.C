@@ -33,7 +33,7 @@ main(int argc, char * argv[])
   DarcyThermoMechApp::registerApps();
 
   // The unique_ptr will automatically free memory allocated by the AppFactory.
-  std::unique_ptr<MooseApp> app(AppFactory::createApp("DarcyThermoMechApp", argc, argv));
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("DarcyThermoMechApp", argc, argv);
 
   // Execute the application
   app->run();

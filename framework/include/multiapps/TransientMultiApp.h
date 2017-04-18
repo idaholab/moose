@@ -33,8 +33,6 @@ class TransientMultiApp : public MultiApp
 public:
   TransientMultiApp(const InputParameters & parameters);
 
-  virtual ~TransientMultiApp();
-
   virtual NumericVector<Number> & appTransferVector(unsigned int app,
                                                     std::string var_name) override;
 
