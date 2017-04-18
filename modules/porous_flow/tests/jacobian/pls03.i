@@ -106,6 +106,25 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid0]
+      type = SimpleFluidProperties
+      bulk_modulus = 1.5
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1
+    [../]
+    [./simple_fluid1]
+      type = SimpleFluidProperties
+      bulk_modulus = 0.5
+      density0 = 0.5
+      thermal_expansion = 0
+      viscosity = 1.4
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -132,18 +151,16 @@
     at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph0_sp1 massfrac_ph1_sp0 massfrac_ph1_sp1'
   [../]
-  [./dens0_nodal]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
     at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 1.5
     phase = 0
   [../]
-  [./dens1_nodal]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
     at_nodes = true
-    density_P0 = 0.5
-    bulk_modulus = 0.5
     phase = 1
   [../]
   [./dens_all]
@@ -151,18 +168,6 @@
     include_old = false
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1
-    phase = 0
-  [../]
-  [./visc1]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1.4
-    phase = 1
   [../]
   [./visc_all]
     type = PorousFlowJoiner
@@ -265,7 +270,6 @@
     flux_function = '-0.5*x*y'
   [../]
 []
-
 
 [Preconditioning]
   [./check]

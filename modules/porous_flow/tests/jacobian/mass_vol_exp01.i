@@ -106,7 +106,6 @@
   [../]
 []
 
-
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -123,6 +122,18 @@
     internal_constraint_tolerance = 1.0E-9
   [../]
 []
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1.5
+      density0 = 1
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -155,11 +166,10 @@
     type = PorousFlowMassFraction
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 1.5
     phase = 0
   [../]
   [./dens_all]

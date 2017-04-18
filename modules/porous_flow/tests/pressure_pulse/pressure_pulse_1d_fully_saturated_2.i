@@ -40,6 +40,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e9
+      density0 = 1000
+      thermal_expansion = 0
+      viscosity = 1e-3
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature_qp]
     type = PorousFlowTemperature
@@ -51,16 +63,19 @@
   [./massfrac]
     type = PorousFlowMassFraction
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1000
-    bulk_modulus = 2E9
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_qp
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
@@ -73,15 +88,6 @@
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0 0 1E-15 0 0 0 1E-15'
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1E-3
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
   [../]
 []
 

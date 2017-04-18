@@ -44,7 +44,6 @@
   [../]
 []
 
-
 [Kernels]
   [./dummy_pgas]
     type = Diffusion
@@ -70,6 +69,27 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid0]
+      type = SimpleFluidProperties
+      bulk_modulus = 0.5
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1
+      cv = 1.1
+    [../]
+    [./simple_fluid1]
+      type = SimpleFluidProperties
+      bulk_modulus = 0.8
+      density0 = 0.7
+      thermal_expansion = 0
+      viscosity = 1.3
+      cv = 1.6
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -80,23 +100,6 @@
     type = PorousFlowTemperature
     at_nodes = true
     temperature = temp
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1
-    phase = 0
-  [../]
-  [./visc1]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1.3
-    phase = 1
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -136,32 +139,26 @@
     m = 0.5
     al = 1
   [../]
-  [./fluid_density0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = false
-    density_P0 = 1.1
-    bulk_modulus = 0.5
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
+    at_nodes = true
     phase = 0
   [../]
-  [./fluid_density1]
-    type = PorousFlowDensityConstBulk
-    at_nodes = false
-    density_P0 = 0.7
-    bulk_modulus = 0.8
+  [./simple_fluid0_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
+    phase = 0
+  [../]
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
+    at_nodes = true
     phase = 1
   [../]
-  [./fluid_density0_nodal]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 1.1
-    bulk_modulus = 0.5
-    phase = 0
-  [../]
-  [./fluid_density1_nodal]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 0.7
-    bulk_modulus = 0.8
+  [./simple_fluid1_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
     phase = 1
   [../]
   [./dens_all]
@@ -174,32 +171,15 @@
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
   [../]
-  [./fluid_energy0_nodal]
-    type = PorousFlowInternalEnergyIdeal
+  [./visc_all]
+    type = PorousFlowJoiner
     at_nodes = true
-    specific_heat_capacity = 1.1
-    phase = 0
-  [../]
-  [./fluid_energy1_nodal]
-    type = PorousFlowInternalEnergyIdeal
-    at_nodes = true
-    specific_heat_capacity = 1.6
-    phase = 1
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./energy_all]
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
-  [../]
-  [./fluid_enthalpy0]
-    type = PorousFlowEnthalpy
-    at_nodes = true
-    phase = 0
-  [../]
-  [./fluid_enthalpy1]
-    type = PorousFlowEnthalpy
-    at_nodes = true
-    phase = 1
   [../]
   [./enthalpy_all]
     type = PorousFlowJoiner
