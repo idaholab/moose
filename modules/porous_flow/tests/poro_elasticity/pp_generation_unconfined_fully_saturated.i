@@ -92,7 +92,6 @@
   [../]
 []
 
-
 [Kernels]
   [./grad_stress_x]
     type = StressDivergenceTensors
@@ -212,7 +211,16 @@
   [../]
 []
 
-
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 3.3333333333
+      density0 = 1
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
 
 [Materials]
   [./temperature_qp]
@@ -242,10 +250,9 @@
     type = PorousFlow1PhaseP
     porepressure = porepressure
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 3.3333333333
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all_at_quadpoints]
@@ -333,7 +340,6 @@
     vals = 'p0 zdisp'
   [../]
 []
-
 
 [Preconditioning]
   [./andy]

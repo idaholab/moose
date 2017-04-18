@@ -78,6 +78,25 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid0]
+      type = SimpleFluidProperties
+      bulk_modulus = 1e7
+      density0 = 10
+      thermal_expansion = 0
+      viscosity = 1
+    [../]
+    [./simple_fluid1]
+      type = SimpleFluidProperties
+      bulk_modulus = 1e7
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 0.1
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temp]
     type = PorousFlowTemperature
@@ -94,23 +113,26 @@
     at_nodes = false
     mass_fraction_vars = 'massfrac0 massfrac1'
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
     at_nodes = false
-    density_P0 = 10
-    bulk_modulus = 1e7
     phase = 0
   [../]
-  [./dens1]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
     at_nodes = false
-    density_P0 = 1
-    bulk_modulus = 1e7
     phase = 1
   [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+    at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_qp
     at_nodes = false
   [../]
   [./poro]
@@ -122,23 +144,6 @@
     type = PorousFlowDiffusivityConst
      diffusion_coeff = '1e-2 1e-1 1e-2 1e-1'
      tortuosity = '0.1 0.2'
-    at_nodes = false
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1
-    phase = 0
-    at_nodes = false
-  [../]
-  [./visc1]
-    type = PorousFlowViscosityConst
-    viscosity = 0.1
-    phase = 1
-    at_nodes = false
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
     at_nodes = false
   [../]
   [./permeability]

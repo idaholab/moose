@@ -126,13 +126,23 @@
   [../]
 []
 
-
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure disp_x disp_y disp_z conc'
     number_fluid_phases = 1
     number_fluid_components = 1
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1.5
+      density0 = 1
+      thermal_expansion = 0
+    [../]
   [../]
 []
 
@@ -174,12 +184,11 @@
     type = PorousFlowMassFraction
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 1.5
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
+    at_nodes = true
   [../]
   [./dens_all]
     type = PorousFlowJoiner

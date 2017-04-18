@@ -125,7 +125,6 @@
   [../]
 []
 
-
 [Kernels]
   [./grad_stress_x]
     type = StressDivergenceTensors
@@ -178,6 +177,17 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 8
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 0.96
+    [../]
+  [../]
+[]
 
 [Materials]
   [./temperature]
@@ -226,11 +236,15 @@
     type = PorousFlowMassFraction
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 0
     at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 8
+  [../]
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all]
@@ -239,16 +253,15 @@
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 8
-    phase = 0
-  [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityHM
@@ -272,17 +285,6 @@
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 0.96
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 
@@ -377,7 +379,6 @@
     function = if(0.5*t<0.1,0.5*t,0.1)
   [../]
 []
-
 
 [Preconditioning]
   [./andy]

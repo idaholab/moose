@@ -24,6 +24,25 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./water]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e9
+      density0 = 10
+      thermal_expansion = 0
+      viscosity = 1e-3
+    [../]
+    [./oil]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e9
+      density0 = 20
+      thermal_expansion = 0
+      viscosity = 2e-3
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -54,19 +73,35 @@
     at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
-  [./densWater]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 10
-    bulk_modulus = 2E9
+  [./water]
+    type = PorousFlowSingleComponentFluid
+    fp = water
     phase = 0
-  [../]
-  [./densOil]
-    type = PorousFlowDensityConstBulk
     at_nodes = true
-    density_P0 = 20
-    bulk_modulus = 2E9
+    compute_enthalpy = false
+    compute_internal_energy = false
+  [../]
+  [./oil]
+    type = PorousFlowSingleComponentFluid
+    fp = oil
     phase = 1
+    at_nodes = true
+    compute_enthalpy = false
+    compute_internal_energy = false
+  [../]
+  [./water_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = water
+    phase = 0
+    compute_enthalpy = false
+    compute_internal_energy = false
+  [../]
+  [./oil_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = oil
+    phase = 1
+    compute_enthalpy = false
+    compute_internal_energy = false
   [../]
   [./dens_all]
     type = PorousFlowJoiner
@@ -74,22 +109,15 @@
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./densWater_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 10
-    bulk_modulus = 2E9
-    phase = 0
-  [../]
-  [./densOil_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 20
-    bulk_modulus = 2E9
-    phase = 1
-  [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
@@ -112,23 +140,6 @@
     type = PorousFlowPorosityConst
     at_nodes = true
     porosity = 0.25
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1E-3
-    phase = 0
-  [../]
-  [./visc1]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 2E-3
-    phase = 1
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -179,7 +190,6 @@
   [../]
 []
 
-
 [AuxVariables]
   [./SWater]
     family = MONOMIAL
@@ -197,7 +207,6 @@
   [../]
 []
 
-
 [AuxKernels]
   [./SWater]
     type = MaterialStdVectorAux
@@ -212,7 +221,6 @@
     variable = SOil
   [../]
 []
-
 
 [BCs]
 # we are pumping water into a system that has virtually incompressible fluids, hence the pressures rise enormously.  this adversely affects convergence because of almost-overflows and precision-loss problems.  The fixed things help keep pressures low and so prevent these awful behaviours.   the movement of the saturation front is the same regardless of the fixed things.
@@ -236,8 +244,6 @@
     value = 15
   [../]
 []
-
-
 
 [Preconditioning]
   [./andy]
@@ -273,7 +279,6 @@
     time_t = '0 1 5'
   [../]
 []
-
 
 [Outputs]
   file_base = rsc01

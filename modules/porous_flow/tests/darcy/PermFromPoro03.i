@@ -137,6 +137,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 2.2e9
+      viscosity = 1e-3
+      density0 = 1000
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
 [Materials]
   # Permeability
   [./permeability]
@@ -176,12 +188,16 @@
     m = 0.8   # unimportant in this fully-saturated test
   [../]
 
-  # Fluid density
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  # Fluid properties
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 0
     at_nodes = true
-    density_P0 = 1000
-    bulk_modulus = 2.2E9
+  [../]
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all]
@@ -189,15 +205,14 @@
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1000
-    bulk_modulus = 2.2E9
-    phase = 0
-  [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 
   # Porosity
@@ -217,19 +232,6 @@
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
-  [../]
-
-  # Fluid viscosity (assumed constant)
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1E-3
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 

@@ -36,7 +36,6 @@
   [../]
 []
 
-
 [Kernels]
   [./pp]
     type = TimeDerivative
@@ -58,19 +57,23 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 0.5
+      density0 = 1.1
+      thermal_expansion = 0
+      viscosity = 1
+      cv = 1.1
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -81,32 +84,26 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./fluid_density]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1.1
-    bulk_modulus = 0.5
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
   [../]
-  [./fluid_energy_nodal]
-    type = PorousFlowInternalEnergyIdeal
-    specific_heat_capacity = 1.1
-    phase = 0
-  [../]
   [./energy_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_internal_energy_qp
   [../]
-  [./fluid_enthalpy]
-    type = PorousFlowEnthalpy
-    phase = 0
-  [../]
   [./enthalpy_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_enthalpy_qp
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_qp
   [../]
 []
 

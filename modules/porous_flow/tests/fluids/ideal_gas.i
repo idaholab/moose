@@ -1,9 +1,16 @@
-# Test the density calculated by the ideal gas Material
-# Pressure 10 MPa
-# molar_mass = 5e-3
-# Density should equal 18.60937 kg/m^3
-# dDensity_dPressure should equal 1.860937e-06
-# dDensity_dTemperature should equal -5.758741e-02
+# Example of using the IdealGasFluidPropertiesPT userobject to provide fluid
+# properties for an ideal gas. Use values for hydrogen (H2) at 1 MPa and 50 C.
+#
+# Input values:
+# Cv = 10260 J/kg/K
+# Cp = 14400 J/kg/K
+# M = 2.01588e-3 kg/mol
+# viscosity = 9.4393e-6 Pa.s
+#
+# Expected output:
+# density = 750.2854 kg/m^3
+# internal energy = 3315.52e3 J/kg
+# enthalpy = 4653.36e3 J/kg
 
 [Mesh]
   type = GeneratedMesh
@@ -26,7 +33,7 @@
 
 [Variables]
   [./pp]
-    initial_condition = 10e6
+    initial_condition = 1e6
   [../]
 []
 
@@ -43,6 +50,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./idealgas]
+      type = IdealGasFluidPropertiesPT
+      molar_mass = 2.01588e-3
+      cv = 10260
+      cp = 14400
+      viscosity = 9.4393e-6
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -52,10 +71,10 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./dens0]
-    type = PorousFlowIdealGas
+  [./idealgass]
+    type = PorousFlowSingleComponentFluid
     temperature_unit = Celsius
-    molar_mass = 5e-3
+    fp = idealgas
     phase = 0
   [../]
 []
@@ -78,13 +97,17 @@
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_density_qp0'
   [../]
-  [./ddensity_dp]
+  [./viscosity]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density_qp0/dpressure_variable_dummy'
+    mat_prop = 'PorousFlow_viscosity_qp0'
   [../]
-  [./ddensity_dt]
+  [./internal_energy]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density_qp0/dtemperature_variable_dummy'
+    mat_prop = 'PorousFlow_fluid_phase_internal_energy_qp0'
+  [../]
+  [./enthalpy]
+    type = ElementIntegralMaterialProperty
+    mat_prop = 'PorousFlow_fluid_phase_enthalpy_qp0'
   [../]
 []
 

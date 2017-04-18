@@ -76,6 +76,17 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e7
+      density0 = 100
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -98,12 +109,11 @@
     type = PorousFlowMassFraction
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 100
-    bulk_modulus = 2E7
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
+    at_nodes = true
   [../]
   [./dens_all]
     type = PorousFlowJoiner
@@ -131,7 +141,6 @@
   [../]
 []
 
-
 [DiracKernels]
   [./pls]
     type = PorousFlowPolyLineSink
@@ -145,7 +154,6 @@
     fluxes = '1 1'
   [../]
 []
-
 
 [Postprocessors]
   [./pls_report]
@@ -195,7 +203,6 @@
   [../]
 []
 
-
 [Functions]
   [./mass_bal_fcn]
     type = ParsedFunction
@@ -214,7 +221,6 @@
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
   [../]
 []
-
 
 [Executioner]
   type = Transient
