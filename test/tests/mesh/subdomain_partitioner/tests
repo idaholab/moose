@@ -7,4 +7,13 @@
     min_parallel = 4
     max_parallel = 4
   [../]
+  [./subdomain_partitioner_linux]
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out_linux.e'
+    cli_args = 'Outputs/file_base=subdomain_partitioner_out_linux'
+    platform = LINUX
+    min_parallel = 4
+    max_parallel = 4
+  [../]
 []
