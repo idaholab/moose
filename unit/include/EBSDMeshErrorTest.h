@@ -31,11 +31,9 @@ protected:
   void SetUp()
   {
     const char * argv[2] = {"foo", "\0"};
-    _app = AppFactory::createApp("MooseUnitApp", 1, (char **)argv);
+    _app.reset(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
     _factory = &_app->getFactory();
   }
-
-  void TearDown() { delete _app; }
 
   template <typename T>
   void testParam(unsigned int nparam, const char ** param_list, std::string name)
@@ -48,7 +46,7 @@ protected:
 
       // generate input parameter set
       InputParameters params = validParams<EBSDMesh>();
-      params.addPrivateParam("_moose_app", _app);
+      params.addPrivateParam("_moose_app", _app.get());
       params.set<std::string>("_object_name") = oss.str();
 
       // set a single parameter
@@ -60,7 +58,7 @@ protected:
       try
       {
         // construct mesh object
-        std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
+        std::unique_ptr<EBSDMesh> mesh = libmesh_make_unique<EBSDMesh>(params);
         // TODO: fix and uncomment this - it was missing before.
         // FAIL() << "mesh construction should have failed but didn't";
       }
@@ -75,9 +73,8 @@ protected:
     }
   }
 
-  MooseApp * _app;
+  std::unique_ptr<MooseApp> _app;
   Factory * _factory;
-
 };
 
 #endif // EBSDMESHERRORTEST_H

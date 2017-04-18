@@ -16,19 +16,19 @@
 
 TEST_F(ColumnMajorMatrixTest, addMatrixScalar)
 {
-  ColumnMajorMatrix add_solution(3, 3);
+  ColumnMajorMatrix as(3, 3);
 
-  add_solution(0, 0) = 11;
-  add_solution(1, 0) = 12;
-  add_solution(2, 0) = 13;
-  add_solution(0, 1) = 14;
-  add_solution(1, 1) = 15;
-  add_solution(2, 1) = 16;
-  add_solution(0, 2) = 17;
-  add_solution(1, 2) = 18;
-  add_solution(2, 2) = 19;
+  as(0, 0) = 11;
+  as(1, 0) = 12;
+  as(2, 0) = 13;
+  as(0, 1) = 14;
+  as(1, 1) = 15;
+  as(2, 1) = 16;
+  as(0, 2) = 17;
+  as(1, 2) = 18;
+  as(2, 2) = 19;
 
-  EXPECT_EQ(add_solution, *a + 10);
+  EXPECT_EQ(as, a + 10);
 }
 
 TEST_F(ColumnMajorMatrixTest, divideMatrixScalarEquals)
@@ -49,21 +49,21 @@ TEST_F(ColumnMajorMatrixTest, divideMatrixScalarEquals)
 
 TEST_F(ColumnMajorMatrixTest, addMatrixScalarEquals)
 {
-  ColumnMajorMatrix add_solution(3, 3);
+  ColumnMajorMatrix as(3, 3);
 
-  add_solution(0, 0) = 11;
-  add_solution(1, 0) = 12;
-  add_solution(2, 0) = 13;
-  add_solution(0, 1) = 14;
-  add_solution(1, 1) = 15;
-  add_solution(2, 1) = 16;
-  add_solution(0, 2) = 17;
-  add_solution(1, 2) = 18;
-  add_solution(2, 2) = 19;
+  as(0, 0) = 11;
+  as(1, 0) = 12;
+  as(2, 0) = 13;
+  as(0, 1) = 14;
+  as(1, 1) = 15;
+  as(2, 1) = 16;
+  as(0, 2) = 17;
+  as(1, 2) = 18;
+  as(2, 2) = 19;
 
   // Scalar add and update
-  *a += 10;
-  EXPECT_EQ(add_solution, *a);
+  a += 10;
+  EXPECT_EQ(as, a);
 }
 
 TEST_F(ColumnMajorMatrixTest, multMatrixScalar)
@@ -80,7 +80,7 @@ TEST_F(ColumnMajorMatrixTest, multMatrixScalar)
   mult_solution(1, 2) = 16;
   mult_solution(2, 2) = 18;
 
-  EXPECT_EQ(mult_solution, *a * 2);
+  EXPECT_EQ(mult_solution, a * 2);
 }
 
 TEST_F(ColumnMajorMatrixTest, multMatrixScalarEquals)
@@ -98,9 +98,9 @@ TEST_F(ColumnMajorMatrixTest, multMatrixScalarEquals)
   mult_solution(2, 2) = 18;
 
   // Scalar multiply and update
-  *a *= 2;
+  a *= 2;
 
-  EXPECT_EQ(mult_solution, *a);
+  EXPECT_EQ(mult_solution, a);
 }
 
 TEST_F(ColumnMajorMatrixTest, multMatrixMatrix)
@@ -117,7 +117,7 @@ TEST_F(ColumnMajorMatrixTest, multMatrixMatrix)
   mult_solution(1, 2) = 126;
   mult_solution(2, 2) = 150;
 
-  EXPECT_EQ(mult_solution, *a * *a);
+  EXPECT_EQ(mult_solution, a * a);
 }
 
 TEST_F(ColumnMajorMatrixTest, multMatrixVec)
@@ -132,7 +132,7 @@ TEST_F(ColumnMajorMatrixTest, multMatrixVec)
   mult_solution(1, 0) = 36;
   mult_solution(2, 0) = 42;
 
-  EXPECT_EQ(mult_solution, *a * vec);
+  EXPECT_EQ(mult_solution, a * vec);
 }
 
 TEST_F(ColumnMajorMatrixTest, reshapeMatrix)
@@ -169,7 +169,7 @@ TEST_F(ColumnMajorMatrixTest, reshapeMatrix)
 
 TEST_F(ColumnMajorMatrixTest, setDiagMatrix)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   mat.setDiag(9);
 
   EXPECT_EQ(mat(0, 0), 9);
@@ -180,13 +180,13 @@ TEST_F(ColumnMajorMatrixTest, setDiagMatrix)
 
 TEST_F(ColumnMajorMatrixTest, trMatrix)
 {
-  EXPECT_EQ(a->tr(), 15);
-  EXPECT_EQ(two_mat->tr(), 5);
+  EXPECT_EQ(a.tr(), 15);
+  EXPECT_EQ(two_mat.tr(), 5);
 }
 
 TEST_F(ColumnMajorMatrixTest, zeroMatrix)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   mat.zero();
 
   EXPECT_EQ(mat(0, 0), 0);
@@ -197,7 +197,7 @@ TEST_F(ColumnMajorMatrixTest, zeroMatrix)
 
 TEST_F(ColumnMajorMatrixTest, identityMatrix)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   mat.identity();
 
   EXPECT_EQ(mat(0, 0), 1);
@@ -208,7 +208,7 @@ TEST_F(ColumnMajorMatrixTest, identityMatrix)
 
 TEST_F(ColumnMajorMatrixTest, contractionMatrix)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   ColumnMajorMatrix sec(2, 2);
 
   sec(0, 0) = 4;
@@ -232,7 +232,7 @@ TEST_F(ColumnMajorMatrixTest, normMatrix)
 
 TEST_F(ColumnMajorMatrixTest, transposeMatrix)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   ColumnMajorMatrix test = mat.transpose();
 
   EXPECT_EQ(test(0, 0), 1);
@@ -243,7 +243,7 @@ TEST_F(ColumnMajorMatrixTest, transposeMatrix)
 
 TEST_F(ColumnMajorMatrixTest, rowColConstructor)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
 
   EXPECT_EQ(mat(0, 0), 1);
   EXPECT_EQ(mat(1, 0), 2);
@@ -253,7 +253,7 @@ TEST_F(ColumnMajorMatrixTest, rowColConstructor)
 
 TEST_F(ColumnMajorMatrixTest, copyConstructor)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   ColumnMajorMatrix test = mat;
   test(1, 1) = 9;
 
@@ -271,7 +271,7 @@ TEST_F(ColumnMajorMatrixTest, tensorConstructor)
   TensorValue<Real> tensor(1, 4, 7, 2, 5, 8, 3, 6, 9);
   ColumnMajorMatrix test(tensor);
 
-  EXPECT_EQ(test, *a);
+  EXPECT_EQ(test, a);
   EXPECT_EQ(test.numEntries(), 9);
 }
 
@@ -283,7 +283,7 @@ TEST_F(ColumnMajorMatrixTest, ThreeColConstructor)
 
   ColumnMajorMatrix test(col1, col2, col3);
 
-  EXPECT_EQ(test, *a);
+  EXPECT_EQ(test, a);
   EXPECT_EQ(test.numEntries(), 9);
 }
 
@@ -291,7 +291,7 @@ TEST_F(ColumnMajorMatrixTest, numEntries)
 {
   // numEntries is tested in other functions, like after different
   // constructors to make sure the number of entries copied over correctly
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   ColumnMajorMatrix mat2(3, 4);
 
   EXPECT_EQ(mat.numEntries(), 4);
@@ -301,7 +301,7 @@ TEST_F(ColumnMajorMatrixTest, numEntries)
 TEST_F(ColumnMajorMatrixTest, accessMatrix)
 {
   // tests operator()
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
 
   EXPECT_EQ(mat(0, 0), 1);
   EXPECT_EQ(mat(1, 0), 2);
@@ -317,7 +317,7 @@ TEST_F(ColumnMajorMatrixTest, print)
 TEST_F(ColumnMajorMatrixTest, fillMatrix)
 {
   TensorValue<Real> tensor(0, 0, 0, 0, 0, 0, 0, 0, 0);
-  ColumnMajorMatrix & a_ref = *a;
+  ColumnMajorMatrix & a_ref = a;
   a_ref.fill(tensor);
 
   EXPECT_EQ(tensor(0, 0), a_ref(0, 0));
@@ -337,13 +337,13 @@ TEST_F(ColumnMajorMatrixTest, tensorAssignOperator)
   TensorValue<Real> tensor(1, 4, 7, 2, 5, 8, 3, 6, 9);
   test = tensor;
 
-  EXPECT_EQ(test, *a);
+  EXPECT_EQ(test, a);
   EXPECT_EQ(test.numEntries(), 9);
 }
 
 TEST_F(ColumnMajorMatrixTest, matrixAssignOperator)
 {
-  ColumnMajorMatrix mat = *two_mat;
+  ColumnMajorMatrix mat = two_mat;
   ColumnMajorMatrix test(1, 2);
 
   test = mat;
@@ -358,22 +358,22 @@ TEST_F(ColumnMajorMatrixTest, matrixAssignOperator)
   EXPECT_EQ(test.numEntries(), 4);
 }
 
-TEST_F(ColumnMajorMatrixTest, addMatrixMatrix) { EXPECT_EQ(*t + *add, *add_solution); }
+TEST_F(ColumnMajorMatrixTest, addMatrixMatrix) { EXPECT_EQ(t + add, add_solution); }
 
 TEST_F(ColumnMajorMatrixTest, addMatrixMatrixEquals)
 {
-  ColumnMajorMatrix mat = *t;
-  mat += *add;
+  ColumnMajorMatrix mat = t;
+  mat += add;
 
-  EXPECT_EQ(mat, *add_solution);
+  EXPECT_EQ(mat, add_solution);
 }
 
 TEST_F(ColumnMajorMatrixTest, subMatrixMatrixEquals)
 {
-  ColumnMajorMatrix mat = *t;
-  mat -= *sub;
+  ColumnMajorMatrix mat = t;
+  mat -= sub;
 
-  EXPECT_EQ(mat, *sub_solution);
+  EXPECT_EQ(mat, sub_solution);
 }
 
 TEST_F(ColumnMajorMatrixTest, equalMatrix)
@@ -384,7 +384,7 @@ TEST_F(ColumnMajorMatrixTest, equalMatrix)
   mat(0, 0) = 2;
   mat1(0, 0) = 2;
 
-  ASSERT_NE(*a, *t);
+  ASSERT_NE(a, t);
   EXPECT_EQ(mat, mat1);
 }
 
@@ -396,7 +396,7 @@ TEST_F(ColumnMajorMatrixTest, notEqualMatrix)
   mat(0, 0) = 2;
   mat1(0, 0) = 2;
 
-  ASSERT_NE(*a, *t);
+  ASSERT_NE(a, t);
   EXPECT_EQ(mat, mat1);
 }
 
