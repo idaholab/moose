@@ -32,7 +32,7 @@ and prior to each timestep to guarantee that the damper is enabled when desired.
 Depending on the system these options or others will be available, since as discussed in [Creating Custom Execute Flags](#creating-custom-execute-flags) custom flags may be added. The complete list
 of execution flags is provided by MOOSE are listed in the "resisterExecFlags" function.
 
-!text framework/src/base/Moose.C re_start=void\nregisterExecFlags re_end=void\nsetSolverDefaults
+!text framework/src/base/MooseApp.C re_start=void\nMooseApp::registerExecFlags\(\) re_end=void\nMooseApp::registerExecFlag\(
 
 ## Modifying Execute On
 When creating objects that inherit from SetupInterface it is possible to set, add, or remove available execute flags using the following MooseUtil functions.
@@ -81,10 +81,8 @@ This new global must be defined, which occurs in the corresponding source file.
 !text test/src/base/MooseTestAppTypes.C
 
 ### 2. Register the Execute Flag
-After the new flag(s) are defined and defined, it must be registered with MOOSE. The registration
-works similar to registering objects. In your application there is a static function named
-"registerExecFlags" that has a definition in the application header and a definition in the corresponding source file. Within the definition (C-file) the flag should be registered by calling
-registerExecFlag. For example, the MooseTestApp contains the following.
+After the new flag(s) are defined and defined, it must be registered with MOOSE. In the MooseApp object there is a virtual method, `registerExecFlags` that must be overridden. Within this
+method the base class method should be called to register any existing flags (i.e., MOOSE execute flags) and then the `registerExecFlag` method should be called for each of the new flags being created for an application. For example, the MooseTestApp contains the following.
 
 !text test/include/base/MooseTestApp.h line=registerExecFlags strip-leading-whitespace=True
 

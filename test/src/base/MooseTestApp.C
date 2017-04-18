@@ -291,9 +291,6 @@ MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parame
 
   Moose::associateSyntax(_syntax, _action_factory);
   MooseTestApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  MooseTestApp::registerExecFlags();
 }
 
 MooseTestApp::~MooseTestApp() {}
@@ -610,5 +607,6 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 MooseTestApp::registerExecFlags()
 {
+  MooseApp::registerExecFlags();
   registerExecFlag(EXEC_JUST_GO, "just_go");
 }

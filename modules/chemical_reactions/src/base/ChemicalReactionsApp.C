@@ -52,9 +52,6 @@ ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  ChemicalReactionsApp::registerExecFlags();
 }
 
 ChemicalReactionsApp::~ChemicalReactionsApp() {}
@@ -124,9 +121,4 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
   registerAction(AddCoupledEqSpeciesAuxKernelsAction, "add_aux_kernel");
   registerAction(AddCoupledSolidKinSpeciesKernelsAction, "add_kernel");
   registerAction(AddCoupledSolidKinSpeciesAuxKernelsAction, "add_aux_kernel");
-}
-
-void
-ChemicalReactionsApp::registerExecFlags()
-{
 }

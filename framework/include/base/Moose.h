@@ -147,7 +147,6 @@ using libMesh::err;
 void registerObjects(Factory & factory);
 void addActionTypes(Syntax & syntax);
 void registerActions(Syntax & syntax, ActionFactory & action_factory);
-void registerExecFlags();
 
 void setSolverDefaults(FEProblemBase & problem);
 
@@ -164,10 +163,5 @@ void enableFPE(bool on = true);
 #endif
 
 } // namespace Moose
-
-/**
- * Function to mimic object registration macros.
- */
-void registerExecFlag(const ExecFlagType & flag, const std::string & str);
 
 #endif /* MOOSE_H */

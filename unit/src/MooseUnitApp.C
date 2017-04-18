@@ -29,7 +29,6 @@ MooseUnitApp::MooseUnitApp(const InputParameters & parameters) : MooseApp(parame
 
   Moose::registerObjects(_factory);
   Moose::associateSyntax(_syntax, _action_factory);
-  Moose::registerExecFlags();
 }
 
 MooseUnitApp::~MooseUnitApp() {}
