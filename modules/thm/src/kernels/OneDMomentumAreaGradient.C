@@ -6,9 +6,9 @@ validParams<OneDMomentumAreaGradient>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<bool>("is_liquid", false, "True for liquid phase, false for vapor");
-  params.addRequiredCoupledVar("alpha_rho_A", "The density of the kth phase");
-  params.addRequiredCoupledVar("alpha_rhou_A", "The momentum of the kth phase");
-  params.addCoupledVar("alpha_rhoE_A", "The total energy of the kth phase");
+  params.addRequiredCoupledVar("arhoA", "The density of the kth phase");
+  params.addRequiredCoupledVar("arhouA", "The momentum of the kth phase");
+  params.addCoupledVar("arhoEA", "The total energy of the kth phase");
   params.addRequiredCoupledVar("area", "Cross-sectional area");
   params.addCoupledVar("alpha", 1, "The volume fraction of the kth phase");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
@@ -27,15 +27,14 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
     _pressure(getMaterialProperty<Real>("pressure")),
     _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta")
                                 : NULL),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "alpha_rho_A")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "alpha_rhou_A")),
-    _dp_darhoEA(isCoupled("alpha_rhoE_A")
-                    ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "alpha_rhoE_A")
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhouA")),
+    _dp_darhoEA(isCoupled("arhoEA")
+                    ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoEA")
                     : nullptr),
     _daL_dbeta(isCoupled("beta") ? &getMaterialProperty<Real>("daL_dbeta") : nullptr),
-    _alpha_rhoA_var_number(coupled("alpha_rho_A")),
-    _alpha_rhoE_var_number(isCoupled("alpha_rhoE_A") ? coupled("alpha_rhoE_A")
-                                                     : libMesh::invalid_uint),
+    _alpha_rhoA_var_number(coupled("arhoA")),
+    _alpha_rhoE_var_number(isCoupled("arhoEA") ? coupled("arhoEA") : libMesh::invalid_uint),
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint)
 {
 }
