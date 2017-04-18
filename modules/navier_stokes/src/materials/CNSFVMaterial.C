@@ -59,7 +59,8 @@ CNSFVMaterial::CNSFVMaterial(const InputParameters & parameters)
     _mach(declareProperty<Real>("mach_number")),
     _uadv(declareProperty<Real>("vel_x")),
     _vadv(declareProperty<Real>("vel_y")),
-    _wadv(declareProperty<Real>("vel_z"))
+    _wadv(declareProperty<Real>("vel_z")),
+    _gamma(declareProperty<Real>("gamma"))
 {
 }
 
@@ -87,6 +88,7 @@ CNSFVMaterial::computeQpProperties()
 
   _pres[_qp] = _fp.pressure(v, e);
   _temp[_qp] = _fp.temperature(v, e);
+  _gamma[_qp] = _fp.gamma(v, e);
 
   /// interpolate variable values at face center
   if (_bnd)

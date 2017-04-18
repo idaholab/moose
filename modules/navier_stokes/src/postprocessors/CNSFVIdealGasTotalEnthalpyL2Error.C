@@ -43,7 +43,8 @@ CNSFVIdealGasTotalEnthalpyL2Error::CNSFVIdealGasTotalEnthalpyL2Error(
     _inf_wadv(getParam<Real>("infinity_z_velocity")),
     _inf_pres(getParam<Real>("infinity_pressure")),
     _rho(getMaterialProperty<Real>("rho")),
-    _enth(getMaterialProperty<Real>("enthalpy"))
+    _enth(getMaterialProperty<Real>("enthalpy")),
+    _gamma(getMaterialProperty<Real>("gamma"))
 {
 }
 
@@ -56,10 +57,8 @@ CNSFVIdealGasTotalEnthalpyL2Error::getValue()
 Real
 CNSFVIdealGasTotalEnthalpyL2Error::computeQpIntegral()
 {
-  Real gamma = _fp.gamma(0., 0.);
-
   Real diff =
-      _rho[_qp] * _enth[_qp] - gamma / (gamma - 1.) * _inf_pres -
+      _rho[_qp] * _enth[_qp] - _gamma[_qp] / (_gamma[_qp] - 1.) * _inf_pres -
       0.5 * _inf_rho * (_inf_uadv * _inf_uadv + _inf_vadv * _inf_vadv + _inf_wadv * _inf_wadv);
 
   return diff * diff;
