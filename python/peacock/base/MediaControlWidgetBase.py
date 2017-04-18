@@ -165,6 +165,7 @@ class MediaControlWidgetBase(object):
         self.TimeSlider.setEnabled(False)
 
         self._playing = True
+        self._callbackFramerateDisplay()
         self.start()
 
     def _callbackPauseButton(self):
