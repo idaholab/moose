@@ -116,24 +116,6 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters)
                " sub_cycling and catch_up cannot both be set to true simultaneously.");
 }
 
-TransientMultiApp::~TransientMultiApp()
-{
-  if (!_has_an_app)
-    return;
-
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-
-  for (unsigned int i = 0; i < _my_num_apps; i++)
-  {
-    Transient * ex = _transient_executioners[i];
-
-    ex->postExecute();
-  }
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
-}
-
 NumericVector<Number> &
 TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
 {
@@ -536,7 +518,7 @@ void TransientMultiApp::resetApp(
 
 void TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
 {
-  MooseApp * app = _apps[i];
+  auto & app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
   if (!ex)
     mooseError("MultiApp ", name(), " is not using a Transient Executioner!");

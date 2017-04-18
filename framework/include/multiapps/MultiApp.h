@@ -59,7 +59,6 @@ class MultiApp : public MooseObject, public SetupInterface, public Restartable
 {
 public:
   MultiApp(const InputParameters & parameters);
-  virtual ~MultiApp();
 
   virtual void initialSetup() override;
 
@@ -331,7 +330,7 @@ protected:
   int _my_rank;
 
   /// Pointers to each of the Apps
-  std::vector<MooseApp *> _apps;
+  std::vector<std::shared_ptr<MooseApp>> _apps;
 
   /// Relative bounding box inflation
   Real _inflation;

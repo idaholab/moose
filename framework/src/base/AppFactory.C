@@ -40,6 +40,12 @@ AppFactory::createApp(std::string app_type, int argc, char ** argv)
   return app;
 }
 
+std::shared_ptr<MooseApp>
+AppFactory::createAppShared(const std::string & app_type, int argc, char ** argv)
+{
+  return std::shared_ptr<MooseApp>(createApp(app_type, argc, argv));
+}
+
 InputParameters
 AppFactory::getValidParams(const std::string & name)
 {
