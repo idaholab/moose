@@ -189,19 +189,6 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _backups.emplace_back(std::make_shared<Backup>());
 }
 
-MultiApp::~MultiApp()
-{
-  if (!_has_an_app)
-    return;
-
-  for (unsigned int i = 0; i < _my_num_apps; i++)
-  {
-    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-    delete _apps[i];
-    Moose::swapLibMeshComm(swapped);
-  }
-}
-
 void
 MultiApp::initialSetup()
 {
@@ -475,7 +462,7 @@ MultiApp::hasLocalApp(unsigned int global_app)
 MooseApp *
 MultiApp::localApp(unsigned int local_app)
 {
-  return _apps[local_app];
+  return _apps[local_app].get();
 }
 
 void
@@ -490,8 +477,6 @@ MultiApp::resetApp(unsigned int global_app, Real time)
     // Extract the file numbers from the output, so that the numbering is maintained after reset
     std::map<std::string, unsigned int> m = _apps[local_app]->getOutputWarehouse().getFileNumbers();
 
-    // Delete and create a new App
-    delete _apps[local_app];
     createApp(local_app, time);
 
     // Reset the file numbers of the newly reset apps
@@ -544,8 +529,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
-  MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
-  _apps[i] = app;
+  _apps[i].reset(AppFactory::instance().create(_app_type, full_name, app_params, _my_comm));
+  auto & app = _apps[i];
 
   std::string input_file = "";
   if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves

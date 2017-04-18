@@ -8,7 +8,8 @@
 PerfLog Moose::perf_log("Stork");
 
 // Begin the main program.
-int main(int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
   // Initialize MPI, solvers and MOOSE
   MooseInit init(argc, argv);
@@ -16,14 +17,11 @@ int main(int argc, char *argv[])
   // Register this application's MooseApp and any it depends on
   StorkApp::registerApps();
 
-  // This creates dynamic memory that we're responsible for deleting
-  MooseApp * app = AppFactory::createApp("StorkApp", argc, argv);
+  // Create an instance of the application and store it in a smart pointer for easy cleanup
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("StorkApp", argc, argv);
 
   // Execute the application
   app->run();
-
-  // Free up the memory we created earlier
-  delete app;
 
   return 0;
 }

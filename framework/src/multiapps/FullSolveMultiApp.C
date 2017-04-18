@@ -46,7 +46,7 @@ FullSolveMultiApp::initialSetup()
     // Grab Executioner from each app
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      MooseApp * app = _apps[i];
+      auto & app = _apps[i];
       Executioner * ex = app->getExecutioner();
 
       if (!ex)
