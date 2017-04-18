@@ -79,17 +79,18 @@ GeneralizedPlaneStrainAction::act()
     }
 
     // add temperature kernel only if temperature is a nonlinear variable (and not an auxvariable)
-    if (isParamValid("temperature") &&
-        _problem->getNonlinearSystemBase().hasVariable("temperature"))
+    if (isParamValid("temperature"))
     {
-      params.set<NonlinearVariableName>("temperature") =
-          getParam<NonlinearVariableName>("temperature");
+      NonlinearVariableName temp = getParam<NonlinearVariableName>("temperature");
+      if (_problem->getNonlinearSystemBase().hasVariable(temp))
+      {
+        params.set<NonlinearVariableName>("temperature") = temp;
 
-      std::string k_name = _name + "_GeneralizedPlaneStrainOffDiag_temp";
-      params.set<NonlinearVariableName>("variable") =
-          getParam<NonlinearVariableName>("temperature");
+        std::string k_name = _name + "_GeneralizedPlaneStrainOffDiag_temp";
+        params.set<NonlinearVariableName>("variable") = temp;
 
-      _problem->addKernel(k_type, k_name, params);
+        _problem->addKernel(k_type, k_name, params);
+      }
     }
   }
 
