@@ -27,5 +27,6 @@ public:
   virtual void computeJacobian();
 
   const GeneralizedPlaneStrainUserObject & _gps;
+  const unsigned int _scalar_var_id;
 };
 #endif // GENERALIZEDPLANESTRAIN_H

@@ -8,6 +8,7 @@
 #define COMPUTEAXISYMMETRIC1DFINITESTRAIN_H
 
 #include "Compute1DFiniteStrain.h"
+#include "ScalarVariableIndexProvider.h"
 
 /**
  * ComputeAxisymmetric1DFiniteStrain defines a strain increment for finite strains
@@ -38,13 +39,16 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 
-  bool _out_of_plane_strain_coupled;
+  const ScalarVariableIndexProvider * _scalar_var_id_provider;
+
+  bool _has_out_of_plane_strain;
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
 
-  bool _scalar_out_of_plane_strain_coupled;
-  const VariableValue & _scalar_out_of_plane_strain;
-  const VariableValue & _scalar_out_of_plane_strain_old;
+  bool _has_scalar_out_of_plane_strain;
+  const unsigned int _nscalar_strains;
+  std::vector<const VariableValue *> _scalar_out_of_plane_strain;
+  std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
 };
 
 #endif // COMPUTEAXISYMMETRIC1DFINITESTRAIN_H

@@ -23,6 +23,10 @@ validParams<GeneralizedPlaneStrainAction>()
                                                  "Scalar variable for the out-of-plane strain (in "
                                                  "y direction for 1D Axisymmetric or in z "
                                                  "direction for 2D Cartesian problems)");
+  params.addParam<unsigned int>(
+      "scalar_variable_index",
+      0,
+      "An integer corresponding to the scalar variable this kernel acts on");
   params.addParam<NonlinearVariableName>("temperature", "The temperature variable");
   params.addParam<FunctionName>("out_of_plane_pressure",
                                 "0",
@@ -68,6 +72,8 @@ GeneralizedPlaneStrainAction::act()
     params.applyParameters(parameters(), {"scalar_out_of_plane_strain"});
     params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
         getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
+    params.set<unsigned int>("scalar_variable_index") =
+        getParam<unsigned int>("scalar_variable_index");
 
     // add off-diagonal jacobian kernels for the displacements
     for (unsigned int i = 0; i < _ndisp; ++i)
@@ -118,6 +124,8 @@ GeneralizedPlaneStrainAction::act()
 
     params.set<NonlinearVariableName>("variable") =
         getParam<NonlinearVariableName>("scalar_out_of_plane_strain");
+    params.set<unsigned int>("scalar_variable_index") =
+        getParam<unsigned int>("scalar_variable_index");
 
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = uo_name;

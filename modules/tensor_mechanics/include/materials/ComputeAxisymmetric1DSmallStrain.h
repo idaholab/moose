@@ -8,6 +8,7 @@
 #define COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H
 
 #include "Compute1DSmallStrain.h"
+#include "ScalarVariableIndexProvider.h"
 
 /**
  * ComputeAxisymmetric1DSmallStrain defines small strains in an Axisymmetric 1D problem.
@@ -28,11 +29,14 @@ protected:
   ///  \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
   Real computeStrainZZ() override;
 
-  const bool _scalar_out_of_plane_strain_coupled;
-  const VariableValue & _scalar_out_of_plane_strain;
+  const ScalarVariableIndexProvider * _scalar_var_id_provider;
 
-  const bool _out_of_plane_strain_coupled;
+  const bool _has_out_of_plane_strain;
   const VariableValue & _out_of_plane_strain;
+
+  const bool _has_scalar_out_of_plane_strain;
+  const unsigned int _nscalar_strains;
+  std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
 
 #endif // COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H

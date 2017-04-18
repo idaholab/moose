@@ -8,6 +8,7 @@
 #define GENERALIZEDPLANESTRAINUSEROBJECT_H
 
 #include "ElementUserObject.h"
+#include "ScalarVariableIndexProvider.h"
 
 class GeneralizedPlaneStrainUserObject;
 class RankTwoTensor;
@@ -26,8 +27,8 @@ public:
   void execute() override;
   void threadJoin(const UserObject & uo) override;
   void finalize() override;
-  virtual Real returnResidual() const;
-  virtual Real returnJacobian() const;
+  virtual Real returnResidual(unsigned int scalar_var_id = 0) const;
+  virtual Real returnJacobian(unsigned int scalar_var_id = 0) const;
 
 protected:
   std::string _base_name;
@@ -35,13 +36,14 @@ protected:
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
+  const ScalarVariableIndexProvider * _scalar_var_id_provider;
+  const unsigned int _total_scalar_vars;
+
   Function & _out_of_plane_pressure;
   const Real _factor;
-
-private:
   unsigned int _scalar_out_of_plane_strain_direction;
-  Real _residual;
-  Real _jacobian;
+  std::vector<Real> _residual;
+  std::vector<Real> _jacobian;
 };
 
 #endif // GENERALIZEDPLANESTRAINUSEROBJECT_H

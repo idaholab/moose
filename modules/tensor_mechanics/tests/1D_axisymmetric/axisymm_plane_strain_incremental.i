@@ -32,6 +32,7 @@
   [./strain_yy]
     order = CONSTANT
     family = MONOMIAL
+    initial_condition = 0.0
   [../]
   [./strain_zz]
     order = CONSTANT
@@ -79,14 +80,6 @@
     variable = strain_xx
     index_i = 0
     index_j = 0
-    execute_on = timestep_end
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
     execute_on = timestep_end
   [../]
   [./strain_zz]
@@ -153,6 +146,7 @@
 
   [./strain]
     type = ComputeAxisymmetric1DIncrementalStrain
+    out_of_plane_strain = strain_yy
     eigenstrain_names = eigenstrain
   [../]
 
