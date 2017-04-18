@@ -144,6 +144,19 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         for i in range(len(state)):
             self.ListWidget.item(i).setCheckState(state[i])
+        self.clicked.emit()
+
+    def setAllChecked(self, on=True):
+        """
+        Set all items to the same check state
+        """
+        state = QtCore.Qt.Checked
+        if not on:
+            state = QtCore.Qt.Unchecked
+        self.ListHeader.setCheckState(state)
+        for i in range(self.ListWidget.count()):
+            self.ListWidget.item(i).setCheckState(state)
+        self.clicked.emit()
 
 # Update the store/load methods for this class
 peacock.utils.WidgetUtils.WIDGET_SETTINGS_CACHE[BlockSelectorWidget] = [('checkState', 'setCheckState')]
