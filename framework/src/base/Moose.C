@@ -1208,23 +1208,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-registerExecFlags()
-{
-  registerExecFlag(EXEC_NONE, "NONE");
-  registerExecFlag(EXEC_INITIAL, "INITIAL");
-  registerExecFlag(EXEC_LINEAR, "LINEAR");
-  registerExecFlag(EXEC_NONLINEAR, "NONLINEAR");
-  registerExecFlag(EXEC_TIMESTEP_END, "TIMESTEP_END");
-  registerExecFlag(EXEC_TIMESTEP_BEGIN, "TIMESTEP_BEGIN");
-  registerExecFlag(EXEC_FINAL, "FINAL");
-  registerExecFlag(EXEC_FORCED, "FORCED");
-  registerExecFlag(EXEC_FAILED, "FAILED");
-  registerExecFlag(EXEC_CUSTOM, "CUSTOM");
-  registerExecFlag(EXEC_SUBDOMAIN, "SUBDOMAIN");
-  registerExecFlag(EXEC_SAME_AS_MULTIAPP, "SAME_AS_MULTIAPP");
-}
-
-void
 setSolverDefaults(FEProblemBase & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
@@ -1285,11 +1268,3 @@ bool _throw_on_error = false;
 std::map<ExecFlagType, std::string> execute_flags = std::map<ExecFlagType, std::string>();
 
 } // namespace Moose
-
-// This is outside of the MOOSE names space so that it works without Moose::, like the other
-// registration macros.
-void
-registerExecFlag(const ExecFlagType & flag, const std::string & str)
-{
-  Moose::execute_flags[flag] = str;
-}

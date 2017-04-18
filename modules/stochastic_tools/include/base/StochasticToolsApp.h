@@ -17,7 +17,6 @@ public:
   static void registerApps();
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  static void registerExecFlags();
 };
 
 #endif /* STOCHASTIC_TOOLSAPP_H */

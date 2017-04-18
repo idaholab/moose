@@ -72,9 +72,6 @@ SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : Moose
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  SolidMechanicsApp::registerExecFlags();
 }
 
 SolidMechanicsApp::~SolidMechanicsApp() {}
@@ -174,9 +171,4 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(DomainIntegralAction, "add_aux_kernel");
   registerAction(DomainIntegralAction, "add_postprocessor");
   registerAction(DomainIntegralAction, "add_material");
-}
-
-void
-SolidMechanicsApp::registerExecFlags()
-{
 }

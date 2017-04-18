@@ -46,9 +46,6 @@ ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters
 
   Moose::associateSyntax(_syntax, _action_factory);
   ContactApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  ContactApp::registerExecFlags();
 }
 
 ContactApp::~ContactApp() {}
@@ -125,9 +122,4 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(NodalAreaAction, "add_user_object");
   registerAction(NodalAreaVarAction, "add_aux_variable");
-}
-
-void
-ContactApp::registerExecFlags()
-{
 }

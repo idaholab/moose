@@ -40,9 +40,6 @@ RdgApp::RdgApp(InputParameters parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   RdgApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  RdgApp::registerExecFlags();
 }
 
 RdgApp::~RdgApp() {}
@@ -92,10 +89,5 @@ RdgApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 RdgApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-}
-
-void
-RdgApp::registerExecFlags()
 {
 }

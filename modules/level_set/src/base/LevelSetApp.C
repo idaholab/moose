@@ -55,9 +55,6 @@ LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   LevelSetApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  LevelSetApp::registerExecFlags();
 }
 
 void
@@ -98,10 +95,5 @@ LevelSetApp::registerObjects(Factory & factory)
 
 void
 LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-}
-
-void
-LevelSetApp::registerExecFlags()
 {
 }

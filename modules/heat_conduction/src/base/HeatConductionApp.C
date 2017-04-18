@@ -51,9 +51,6 @@ HeatConductionApp::HeatConductionApp(const InputParameters & parameters) : Moose
 
   Moose::associateSyntax(_syntax, _action_factory);
   HeatConductionApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  HeatConductionApp::registerExecFlags();
 }
 
 HeatConductionApp::~HeatConductionApp() {}
@@ -134,9 +131,4 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(ThermalContactBCsAction, "add_bc");
   registerAction(ThermalContactDiracKernelsAction, "add_dirac_kernel");
   registerAction(ThermalContactMaterialsAction, "add_material");
-}
-
-void
-HeatConductionApp::registerExecFlags()
-{
 }

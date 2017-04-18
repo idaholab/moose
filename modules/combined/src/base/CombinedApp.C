@@ -43,9 +43,6 @@ CombinedApp::CombinedApp(const InputParameters & parameters) : MooseApp(paramete
 
   Moose::associateSyntax(_syntax, _action_factory);
   CombinedApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags();
-  CombinedApp::registerExecFlags();
 }
 
 CombinedApp::~CombinedApp() {}
@@ -114,9 +111,4 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   PorousFlowApp::associateSyntax(syntax, action_factory);
   RdgApp::associateSyntax(syntax, action_factory);
   LevelSetApp::associateSyntax(syntax, action_factory);
-}
-
-void
-CombinedApp::registerExecFlags()
-{
 }

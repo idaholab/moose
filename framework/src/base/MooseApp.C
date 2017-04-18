@@ -269,16 +269,6 @@ MooseApp::~MooseApp()
 void
 MooseApp::setupOptions()
 {
-  // The registerExecFlags should be called in the constructor of the derived applications, but
-  // in the case of an older app this will not of happend.
-  if (Moose::execute_flags.empty())
-  {
-    mooseDeprecated("MOOSE has been updated to include a Moose::registerExecFlags() function, "
-                    "which should be added to the application constructor. It is also possible to "
-                    "add additional flags, see the MooseTestApp.C/h for an example.");
-    Moose::registerExecFlags();
-  }
-
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
   if (multiAppLevel() > 0)
@@ -699,6 +689,7 @@ MooseApp::run()
   Moose::perf_log.push("Full Runtime", "Application");
 
   Moose::perf_log.push("Application Setup", "Setup");
+  registerExecFlags();
   setupOptions();
   runInputFile();
   Moose::perf_log.pop("Application Setup", "Setup");
@@ -1262,4 +1253,27 @@ MooseApp::createMinimalApp()
   }
 
   _action_warehouse.build();
+}
+
+void
+MooseApp::registerExecFlags()
+{
+  registerExecFlag(EXEC_NONE, "NONE");
+  registerExecFlag(EXEC_INITIAL, "INITIAL");
+  registerExecFlag(EXEC_LINEAR, "LINEAR");
+  registerExecFlag(EXEC_NONLINEAR, "NONLINEAR");
+  registerExecFlag(EXEC_TIMESTEP_END, "TIMESTEP_END");
+  registerExecFlag(EXEC_TIMESTEP_BEGIN, "TIMESTEP_BEGIN");
+  registerExecFlag(EXEC_FINAL, "FINAL");
+  registerExecFlag(EXEC_FORCED, "FORCED");
+  registerExecFlag(EXEC_FAILED, "FAILED");
+  registerExecFlag(EXEC_CUSTOM, "CUSTOM");
+  registerExecFlag(EXEC_SUBDOMAIN, "SUBDOMAIN");
+  registerExecFlag(EXEC_SAME_AS_MULTIAPP, "SAME_AS_MULTIAPP");
+}
+
+void
+MooseApp::registerExecFlag(const ExecFlagType & flag, const std::string & str)
+{
+  Moose::execute_flags[flag] = str;
 }
