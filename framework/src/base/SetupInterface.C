@@ -76,21 +76,25 @@ SetupInterface::getExecuteOnEnum() const
 const std::vector<ExecFlagType> &
 SetupInterface::execFlags() const
 {
+  /* TODO: When apps are updated this should be uncommented
   mooseDeprecated("The execFlags() methos is being removed because MOOSE has been updated to use a "
                   "MultiMooseEnum for execute flags. The current flags should be retrieved from "
                   "the \"exeucte_on\" parameters of your object or by using the \"_execute_enum\" "
                   "reference to the parameter or the getExecuteOnEnum() method.");
+  */
   return _exec_flags;
 }
 
 ExecFlagType
 SetupInterface::execBitFlags() const
 {
+  /* TODO: When apps are updated this should be uncommented
   mooseDeprecated("The execBitFlags method is beeing removed because MOOSE was updated to use a "
                   "MultiMooseEnum for execute flags. This method maintains the behavior of the "
                   "original method but the use of this method should be removed from your "
                   "application. The MultiMooseEnum should be inspected directly via the "
                   "getExecuteOnEnum() method.");
+  */
   unsigned int exec_bit_field = EXEC_NONE;
   for (unsigned int i = 0; i < _exec_flags.size(); ++i)
     exec_bit_field |= _exec_flags[i];
@@ -100,8 +104,10 @@ SetupInterface::execBitFlags() const
 MultiMooseEnum
 SetupInterface::getExecuteOptions()
 {
+  /* TODO: When apps are updated this should be uncommented
   mooseDeprecated("The getExecuteOptions' was replaced by MooseUtils::createExecuteOnEnum because "
                   "MOOSE was updated to use a MultiMooseEnum for the execute flags and the "
                   "new function provides additional arguments for modification of the enum.");
+  */
   return MooseUtils::createExecuteOnEnum();
 }
