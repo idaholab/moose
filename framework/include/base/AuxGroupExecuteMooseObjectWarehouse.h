@@ -93,14 +93,24 @@ AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(
 {
   checkThreadID(tid);
 
+  constexpr std::uint16_t initial_flag_mask = static_cast<std::uint16_t>(EXEC_INITIAL);
+  constexpr std::uint16_t not_initial_flag_mask = ~static_cast<std::uint16_t>(EXEC_INITIAL);
+  constexpr std::uint16_t all_flags = std::numeric_limits<std::uint16_t>::max();
+
   for (const auto & object_ptr : _all_objects[tid])
   {
+    bool already_added = false;
     if (depend_ic.find(object_ptr->name()) != depend_ic.end())
-      _group_objects[Moose::PRE_IC].addObject(object_ptr, tid);
-    else if (depend_aux.find(object_ptr->name()) != depend_aux.end())
-      _group_objects[Moose::PRE_AUX].addObject(object_ptr, tid);
+    {
+      _group_objects[Moose::PRE_IC].addObjectMask(object_ptr, tid, initial_flag_mask);
+      already_added = true;
+    }
+
+    std::uint16_t remaining_flags = already_added ? not_initial_flag_mask : all_flags;
+    if (depend_aux.find(object_ptr->name()) != depend_aux.end())
+      _group_objects[Moose::PRE_AUX].addObjectMask(object_ptr, tid, remaining_flags);
     else
-      _group_objects[Moose::POST_AUX].addObject(object_ptr, tid);
+      _group_objects[Moose::POST_AUX].addObjectMask(object_ptr, tid, remaining_flags);
   }
 }
 
