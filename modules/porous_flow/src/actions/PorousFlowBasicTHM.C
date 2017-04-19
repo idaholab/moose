@@ -47,7 +47,7 @@ PorousFlowBasicTHM::PorousFlowBasicTHM(const InputParameters & params)
     _objects_to_add.push_back("PorousFlowFullySaturatedMassTimeDerivative");
   if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
-    _objects_to_add.push_back("PorousflowFullySaturatedHeatAdvection");
+    _objects_to_add.push_back("PorousFlowFullySaturatedHeatAdvection");
 }
 
 void

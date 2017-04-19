@@ -33,7 +33,7 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowFullySaturatedDarcyFlow", "PorousFlowMassFraction_qp");
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection",
                          "PorousFlowFullySaturatedDarcyBase");
-  _deps.insertDependency("PorousFlowFullySaturatedDarcyFlow", "PorousFlowEnthalpy_qp");
+  _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection", "PorousFlowEnthalpy_qp");
   _deps.insertDependency("PorousFlowFullySaturatedMassTimeDerivative",
                          "PorousFlowConstantBiotModulus_qp");
   _deps.insertDependency("PorousFlowFullySaturatedMassTimeDerivative",
