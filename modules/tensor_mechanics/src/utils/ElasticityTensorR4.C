@@ -45,9 +45,13 @@ ElasticityTensorR4::elasticJacobian(const unsigned int i,
 {
   // d(stress_ij*d(test)/dx_j)/du_k = d(C_ijmn*du_m/dx_n dtest/dx_j)/du_k (which is nonzero for m=k)
   Real the_sum = 0.0;
+  const unsigned int ik1 = i * N * N * N + k * N;
   for (unsigned int j = 0; j < N; ++j)
+  {
+    const unsigned int j1 = j * N * N;
     for (unsigned int l = 0; l < N; ++l)
-      the_sum += _vals[i][j][k][l] * grad_phi(l) * grad_test(j);
+      the_sum += _vals[ik1 + j1 + l] * grad_phi(l) * grad_test(j);
+  }
   return the_sum;
 }
 
@@ -59,10 +63,14 @@ ElasticityTensorR4::elasticJacobianwc(const unsigned int i,
 {
   // d(stress_ij*d(test)/dx_j)/dw_k = d(C_ijmn*eps_mnp*w_p*dtest/dx_j)/dw_k (only nonzero for p=k)
   Real the_sum = 0.0;
+  unsigned int ij1 = i * N * N * N;
   for (unsigned int j = 0; j < N; ++j)
+  {
     for (unsigned int m = 0; m < N; ++m)
       for (unsigned int n = 0; n < N; ++n)
-        the_sum += _vals[i][j][m][n] * PermutationTensor::eps(m, n, k) * grad_test(j);
+        the_sum += _vals[ij1 + m * N + n] * PermutationTensor::eps(m, n, k) * grad_test(j);
+    ij1 += N * N;
+  }
   return the_sum * phi;
 }
 
@@ -78,7 +86,7 @@ ElasticityTensorR4::momentJacobian(const unsigned int i,
   for (unsigned int j = 0; j < N; ++j)
     for (unsigned int m = 0; m < N; ++m)
       for (unsigned int n = 0; n < N; ++n)
-        the_sum += PermutationTensor::eps(i, j, m) * _vals[j][m][k][n] * grad_phi(n);
+        the_sum += PermutationTensor::eps(i, j, m) * (*this)(j, m, k, n) * grad_phi(n);
   return test * the_sum;
 }
 
@@ -95,7 +103,7 @@ ElasticityTensorR4::momentJacobianwc(const unsigned int i,
     for (unsigned int l = 0; l < N; ++l)
       for (unsigned int m = 0; m < N; ++m)
         for (unsigned int n = 0; n < N; ++n)
-          the_sum +=
-              PermutationTensor::eps(i, j, m) * _vals[j][m][l][n] * PermutationTensor::eps(l, n, k);
+          the_sum += PermutationTensor::eps(i, j, m) * (*this)(j, m, l, n) *
+                     PermutationTensor::eps(l, n, k);
   return test * phi * the_sum;
 }
