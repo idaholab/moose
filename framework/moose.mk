@@ -141,8 +141,8 @@ $(exodiff_APP): $(exodiff_objects)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB)
-app_objects := $(moose_objects) $(exodiff_objects)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB)
+app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps)
 
 # The clean target removes everything we can remove "easily",
