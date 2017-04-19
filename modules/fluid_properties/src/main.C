@@ -11,7 +11,7 @@
 #include "AppFactory.h"
 
 // Create a performance log
-PerfLog Moose::perf_log("HeatConduction");
+PerfLog Moose::perf_log("FluidProperties");
 
 // Begin the main program.
 int
