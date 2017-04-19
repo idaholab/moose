@@ -196,7 +196,7 @@ class Tester(MooseObject):
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"
     def checkRunnableBase(self, options, checks, test_list=None):
-        reason = ''
+        reasons = {}
 
         # If --dry-run set the test status to pass and DO NOT return.
         # This will allow additional checks to perform and report tests
@@ -230,59 +230,44 @@ class Tester(MooseObject):
             self.setStatus('silent', self.bucket_silent)
             return False
 
+        # Short circuit method and run this test if we are ignoring all caveats
+        if options.ignored_caveats == 'all':
+            # Still, we should abide by the derived classes
+            return self.checkRunnable(options)
+
         # Check for deleted tests
         if self.specs.isValid('deleted'):
-            if options.extra_info:
-                # We might want to trim the string so it formats nicely
-                if len(self.specs['deleted']) >= util.TERM_COLS - (len(self.specs['test_name'])+21):
-                    test_reason = (self.specs['deleted'])[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
-                else:
-                    test_reason = self.specs['deleted']
-                reason = 'deleted (' + test_reason + ')'
-            self.setStatus(reason, self.bucket_deleted)
-            return False
+            reasons['deleted'] = 'deleted (' + self.specs['deleted'] + ')'
 
         # Check for skipped tests
         if self.specs.type('skip') is bool and self.specs['skip']:
             # Backwards compatible (no reason)
-            self.setStatus('no reason', self.bucket_skip)
-            return False
+            reasons['skip'] = 'no reason'
         elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
-            skip_message = self.specs['skip']
-            # We might want to trim the string so it formats nicely
-            if len(skip_message) >= util.TERM_COLS - (len(self.specs['test_name'])+21):
-                reason = (skip_message)[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
-            else:
-                reason = skip_message
-            self.setStatus(reason, self.bucket_skip)
-            return False
+            reasons['skip'] = self.specs['skip']
         # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
         elif (options.store_time or options.scaling) and self.specs['scale_refine'] == 0:
             self.setStatus('silent', self.bucket_silent)
             return False
         # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
         elif options.valgrind_mode != '':
+            tmp_reason = ''
             if self.specs['valgrind'].upper() == 'NONE':
-                reason = 'Valgrind==NONE'
+                tmp_reason = 'Valgrind==NONE'
             elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
-                reason = 'Valgrind==HEAVY'
+                tmp_reason = 'Valgrind==HEAVY'
             elif self.specs['min_parallel'] > 1 or self.specs['min_threads'] > 1:
-                reason = 'Valgrind requires serial'
-            if reason != '':
-                self.setStatus(reason, self.bucket_skip)
-                return False
+                tmp_reason = 'Valgrind requires serial'
+            if tmp_reason != '':
+                reasons['valgrind'] = tmp_reason
         # If we're running in recover mode skip tests that have recover = false
         elif options.enable_recover and self.specs['recover'] == False:
-            reason = 'NO RECOVER'
-            self.setStatus(reason, self.bucket_skip)
-            return False
+            reasons['recover'] = 'NO RECOVER'
 
         # Check for PETSc versions
         (petsc_status, logic_reason, petsc_version) = util.checkPetscVersion(checks, self.specs)
         if not petsc_status:
-            reason = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version
-            self.setStatus(reason, self.bucket_skip)
-            return False
+            reasons['petsc_version'] = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version
 
         # PETSc is being explicitly checked above
         local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot', \
@@ -294,75 +279,79 @@ class Tester(MooseObject):
             for x in self.specs[check]:
                 if x[0] == '!':
                     if inverse_set:
-                        reason = 'Multiple Negation Unsupported'
-                        self.setStatus(reason, self.bucket_skip)
-                        return False
+                        reasons[check] = 'Multiple Negation Unsupported'
                     inverse_set = True
                     operator_display = '=='
                     x = x[1:] # Strip off the !
                 x_upper = x.upper()
                 if x_upper in test_platforms:
-                    reason = 'Duplicate Entry or Negative of Existing Entry'
-                    self.setStatus(reason, self.bucket_skip)
-                    return False
+                    reasons[x_upper] = 'Duplicate Entry or Negative of Existing Entry'
                 test_platforms.add(x.upper())
 
             match_found = len(test_platforms.intersection(checks[check])) > 0
             # Either we didn't find the match when we were using normal "include" logic
             # or we did find the match when we wanted to exclude it
             if inverse_set == match_found:
-                reason = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
-                self.setStatus(reason, self.bucket_skip)
-                return False
+                reasons[check] = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
 
         # Check for heavy tests
         if options.all_tests or options.heavy_tests:
             if not self.specs['heavy'] and options.heavy_tests:
-                reason = 'NOT HEAVY'
-                self.setStatus(reason, self.bucket_silent)
-                return False
+                reasons['heavy'] = 'NOT HEAVY'
         elif self.specs['heavy']:
-            reason = 'HEAVY'
-            self.setStatus(reason, self.bucket_skip)
-            return False
+            reasons['heavy'] = 'HEAVY'
 
         # Check for positive scale refine values when using store timing options
         if self.specs['scale_refine'] == 0 and options.store_time:
-            self.setStatus('scale_refine==0 store_time=True', self.bucket_skip)
-            return False
+            reasons['scale_refine'] = 'scale_refine==0 store_time=True'
 
         # There should only be one entry in self.specs['dof_id_bytes']
         for x in self.specs['dof_id_bytes']:
             if x != 'ALL' and not x in checks['dof_id_bytes']:
-                reason = '--with-dof-id-bytes!=' + x
-                self.setStatus(reason, self.bucket_skip)
-                return False
+                reasons['dof_id_bytes'] = '--with-dof-id-bytes!=' + x
 
         # Check to make sure depend files exist
         for file in self.specs['depend_files']:
             if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
-                reason = 'DEPEND FILES'
-                self.setStatus(reason, self.bucket_skip)
-                return False
+                reasons['depend_files'] = 'DEPEND FILES'
 
         # Check to make sure required submodules are initialized
         for var in self.specs['required_submodule']:
             if var not in checks["submodules"]:
-                reason = '%s submodule not initialized' % var
-                self.setStatus(reason, self.bucket_skip)
-                return False
+                reasons['required_submodule'] = '%s submodule not initialized' % var
 
         # Check to make sure environment variable exists
         for var in self.specs['env_vars']:
             if not os.environ.has_key(var):
-                reason = 'ENV VAR NOT SET'
-                self.setStatus(reason, self.bucket_skip)
-                return False
+                reasons['env_vars'] = 'ENV VAR NOT SET'
 
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
-            reason = 'NO DISPLAY'
-            self.setStatus(reason, self.bucket_skip)
+            reasons['display_required'] = 'NO DISPLAY'
+
+        # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
+        # would normally produce a skipped test.
+        caveat_list = set()
+        if options.ignored_caveats:
+            caveat_list = set([x.lower() for x in options.ignored_caveats.split()])
+
+        if len(set(reasons.keys()) - caveat_list) > 0:
+            tmp_reason = []
+            for key, value in reasons.iteritems():
+                if key.lower() not in caveat_list:
+                    tmp_reason.append(value)
+
+            # Format joined reason to better fit on the screen
+            if len(', '.join(tmp_reason)) >= util.TERM_COLS - (len(self.specs['test_name'])+21):
+                flat_reason = (', '.join(tmp_reason))[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
+            else:
+                flat_reason = ', '.join(tmp_reason)
+
+            # If the test is deleted we still need to treat this differently
+            if 'deleted' in reasons.keys():
+                self.setStatus(flat_reason, self.bucket_deleted)
+            else:
+                self.setStatus(flat_reason, self.bucket_skip)
             return False
 
         # Check the return values of the derived classes
