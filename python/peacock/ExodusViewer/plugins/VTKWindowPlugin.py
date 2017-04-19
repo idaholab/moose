@@ -318,7 +318,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         if block or boundary or nodeset:
             self._highlight.setOptions(block=block, boundary=boundary, nodeset=nodeset)
-            self._highlight.setOptions(edges=True, edge_width=3, edge_color=[1,0,0])
+            self._highlight.setOptions(edges=True, edge_width=3, edge_color=[1,0,0], point_size=5)
             self.onAppendResult(self._highlight)
         else:
             self._highlight.reset()
