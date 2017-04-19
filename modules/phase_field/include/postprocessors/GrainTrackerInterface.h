@@ -77,6 +77,8 @@ public:
    */
   virtual bool doesFeatureIntersectBoundary(unsigned int grain_id) const = 0;
 
+  virtual const std::vector<unsigned int> & getGrainToOps() const = 0;
+
   /**
    * This method returns all of the new ids generated in an invocation of the GrainTracker.
    */

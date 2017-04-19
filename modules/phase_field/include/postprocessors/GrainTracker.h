@@ -35,6 +35,8 @@ public:
 
   virtual std::size_t getTotalFeatureCount() const override;
 
+  virtual const std::vector<unsigned int> & getGrainToOps() const override { return _grain_to_op; }
+
   // Struct used to transfer minimal data to all ranks
   struct PartialFeatureData
   {

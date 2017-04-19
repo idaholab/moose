@@ -215,6 +215,7 @@
 #include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
+#include "PolycrystalVoronoi.h"
 #include "RandomEulerAngleProvider.h"
 
 #include "EBSDReader.h"
@@ -482,6 +483,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(EulerAngleUpdater);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
+  registerUserObject(PolycrystalVoronoi);
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
