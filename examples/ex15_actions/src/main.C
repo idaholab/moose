@@ -20,11 +20,12 @@
  * It also shows how to inherit from MooseApp and use it.
  */
 
+#include "ExampleApp.h"
+
+// Moose Includes
 #include "MooseInit.h"
-#include "Moose.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
-#include "ExampleApp.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Example");

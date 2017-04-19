@@ -19,9 +19,9 @@
  */
 
 #include "ExampleApp.h"
+
 // Moose Includes
 #include "MooseInit.h"
-#include "Moose.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
 
