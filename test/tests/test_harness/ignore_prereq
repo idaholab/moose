@@ -1,0 +1,12 @@
+[Tests]
+  [./always_skipped]
+    type = RunApp
+    input = good.i
+    skip = "always skipped"
+  [../]
+  [./ignore_skipped_dependency]
+    type = RunApp
+    input = good.i
+    prereq = always_skipped
+  [../]
+[]

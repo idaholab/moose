@@ -1,0 +1,7 @@
+[Tests]
+  [./ignore_platform]
+    type = RunApp
+    input = good.i
+    platform = non_existent
+  [../]
+[]

@@ -1,0 +1,15 @@
+[Tests]
+  [./always_skipped]
+    type = RunApp
+    input = good.i
+    skip = "always skipped"
+  [../]
+  [./ignore_multi_prereq_dependency]
+    type = RunApp
+    input = good.i
+    heavy = true
+    compiler = non_existent
+    platform = non_existent
+    prereq = always_skipped
+  [../]
+[]
