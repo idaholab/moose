@@ -38,6 +38,8 @@ typedef struct {
   PetscBool      eps_composed; /* compose eps */
   PetscBool      initialed; /* initialize snes */
   PetscReal      dvalue;
+  PetscInt       iterrefine;
+  PetscInt       n_free_power;
 } EPS_MONOLITH;
 
 #undef __FUNCT__
@@ -88,6 +90,12 @@ PetscErrorCode EPSSetUp_Monolith(EPS eps)
   eps->st->transform = PETSC_FALSE;
   monolith->dvalue = 0.0;
   ierr = PetscOptionsGetReal(PETSC_NULL,"","-adjutable_jacobian_coeffient",&monolith->dvalue,NULL);CHKERRQ(ierr);
+  /* need to a refinement of the solver? */
+  monolith->iterrefine = 1;
+  ierr = PetscOptionsGetInt(PETSC_NULL,"","-monolith_newton_iterative_refine",&monolith->iterrefine,NULL);CHKERRQ(ierr);
+  /* The number of free power iterations  */
+  monolith->n_free_power = 5;
+  ierr = PetscOptionsGetInt(PETSC_NULL,"","-monolith_n_free_power",&monolith->n_free_power,NULL);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
@@ -101,6 +109,23 @@ PetscErrorCode SNESLineSearchPreCheckFunction_Monolith(SNESLineSearch snes,Vec x
 
   ierr = VecNormalize(x, PETSC_NULL);CHKERRQ(ierr);
   *changed = PETSC_TRUE;
+  PetscFunctionReturn(0);
+}
+
+
+#undef __FUNCT__
+#define __FUNCT__ "EPSSNESMonitor_Monolith"
+/*
+ A monitor to display eigenvalue
+*/
+PetscErrorCode EPSSNESMonitor_Monolith(SNES snes,PetscInt its,PetscReal fnorm,void *ctx)
+{
+  PetscErrorCode ierr;
+  EPS             eps;
+
+  PetscFunctionBegin;
+  ierr = PetscObjectQuery((PetscObject)snes, "eps", (PetscObject *)&eps);CHKERRQ(ierr);
+  ierr = PetscPrintf(PetscObjectComm((PetscObject)snes),"%3D Eigenvalue[%D] %14.12e \n",its,eps->nconv,eps->eigr[eps->nconv]);
   PetscFunctionReturn(0);
 }
 
@@ -176,9 +201,11 @@ PetscErrorCode EPSSNESInit_Monolith(EPS eps, Vec x, Vec y)
 {
   PetscErrorCode ierr;
   Mat A, B;
-  EPS_MONOLITH *nlpower = (EPS_MONOLITH *)eps->data;
+  EPS_MONOLITH   *nlpower = (EPS_MONOLITH *)eps->data;
   SNESLineSearch linesearch;
+  KSP            ksp;
   PetscContainer container;
+  const char     *prefix;
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(eps, EPS_CLASSID, 1);
@@ -221,11 +248,18 @@ PetscErrorCode EPSSNESInit_Monolith(EPS eps, Vec x, Vec y)
   }
   ierr = SNESSetFunction(nlpower->snes, nlpower->res, FormFunction_Monolith, nlpower->functionctxA);CHKERRQ(ierr);
   ierr = SNESSetJacobian(nlpower->snes, A, A, FormJacobian_Monolith,nlpower->jacobianctxA);CHKERRQ(ierr);
-
-  ierr = SNESSetFromOptions(nlpower->snes);CHKERRQ(ierr);
-  ierr = SNESSetUp(nlpower->snes);CHKERRQ(ierr);
+  ierr = SNESMonitorSet(nlpower->snes, EPSSNESMonitor_Monolith, NULL, NULL);CHKERRQ(ierr);
+  ierr = SNESSetTolerances(nlpower->snes,1e-50,1e-6,1e-6,100,10000);CHKERRQ(ierr);
+  ierr = SNESGetKSP(nlpower->snes,&ksp);CHKERRQ(ierr);
+  ierr = KSPSetTolerances(ksp, 1e-4, 1e-50, 1e+2,1000);CHKERRQ(ierr);
+  ierr = EPSGetOptionsPrefix(eps,&prefix);CHKERRQ(ierr);
+  ierr = SNESSetOptionsPrefix(nlpower->snes, prefix);CHKERRQ(ierr);
   ierr = SNESGetLineSearch(nlpower->snes, &linesearch);CHKERRQ(ierr);
   ierr = SNESLineSearchSetPreCheck(linesearch, SNESLineSearchPreCheckFunction_Monolith, nlpower->jacobianctxA);CHKERRQ(ierr);
+  ierr = SNESLineSearchSetType(linesearch, "basic");CHKERRQ(ierr);
+  ierr = SNESSetFromOptions(nlpower->snes);CHKERRQ(ierr);
+  ierr = SNESSetUp(nlpower->snes);CHKERRQ(ierr);
+
   nlpower->initialed = PETSC_TRUE;
   PetscFunctionReturn(0);
 }
@@ -256,6 +290,42 @@ PetscErrorCode EPSSNESSolve_Monolith(EPS eps, Vec x, Vec y)
 }
 
 #undef __FUNCT__
+#define __FUNCT__ "EPSComputeInitialGuess_Monolith"
+/*
+ Use a nonlinear inverse power to compute an intial guess
+*/
+PetscErrorCode EPSComputeInitialGuess_Monolith(EPS eps)
+{
+  EPS            powereps;
+  Mat            A,B;
+  EPS_MONOLITH   *monolith = (EPS_MONOLITH *)eps->data;
+  Vec            power_v, monolith_v;
+  PetscErrorCode ierr;
+
+  PetscFunctionBegin;
+  ierr = EPSCreate(PetscObjectComm((PetscObject)eps), &powereps);CHKERRQ(ierr);
+  ierr = EPSGetOperators_Moose(eps, &A, &B);CHKERRQ(ierr);
+  ierr = EPSSetType(powereps, "nlpower");CHKERRQ(ierr);
+  ierr = EPSSetOperators(powereps, A, B);CHKERRQ(ierr);
+  ierr = EPSSetTolerances(powereps, 1e-6, monolith->n_free_power);CHKERRQ(ierr);
+  ierr = EPSSetOptionsPrefix(powereps, "initial_");CHKERRQ(ierr);
+  ierr = EPSSetProblemType(powereps, EPS_GNHEP);CHKERRQ(ierr);
+  ierr = EPSSetWhichEigenpairs(powereps, EPS_SMALLEST_MAGNITUDE);CHKERRQ(ierr);
+  ierr = EPSSetFromOptions(powereps);CHKERRQ(ierr);
+  ierr = EPSSolve(powereps);CHKERRQ(ierr);
+  eps->eigr[0] = powereps->eigr[0];
+  ierr = BVGetColumn(eps->V, 0, &monolith_v);CHKERRQ(ierr);
+  ierr = BVGetColumn(powereps->V, 0, &power_v);CHKERRQ(ierr);
+  ierr = VecCopy(power_v,monolith_v);CHKERRQ(ierr);
+  ierr = VecNormalize(monolith_v, NULL);CHKERRQ(ierr);
+  ierr = BVRestoreColumn(eps->V, 0, &monolith_v);CHKERRQ(ierr);
+  ierr = BVRestoreColumn(powereps->V, 0, &power_v);CHKERRQ(ierr);
+  ierr = EPSDestroy(&powereps);CHKERRQ(ierr);
+  PetscFunctionReturn(0);
+}
+
+
+#undef __FUNCT__
 #define __FUNCT__ "EPSSolve_Monolith"
 PetscErrorCode EPSSolve_Monolith(EPS eps)
 {
@@ -272,8 +342,10 @@ PetscErrorCode EPSSolve_Monolith(EPS eps)
   e = eps->work[0];
 
   ierr = EPSGetStartVector_Moose(eps, 0, NULL);CHKERRQ(ierr);
+  /* compute an intial guess */
+  ierr = EPSComputeInitialGuess_Monolith(eps);CHKERRQ(ierr);
 
-  while (eps->reason == EPS_CONVERGED_ITERATING) {
+  while (eps->reason == EPS_CONVERGED_ITERATING || eps->its < monolith->iterrefine) {
     eps->its++;
     k = eps->nconv;
 

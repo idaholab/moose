@@ -103,6 +103,8 @@ PetscErrorCode EPSSNESInit_NLPower(EPS eps, Vec x, Vec y) {
   Mat A, B;
   EPS_NLPOWER *nlpower = (EPS_NLPOWER *)eps->data;
   PetscContainer container;
+  const char     *prefix;
+  KSP            ksp;
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(eps, EPS_CLASSID, 1);
@@ -141,6 +143,11 @@ PetscErrorCode EPSSNESInit_NLPower(EPS eps, Vec x, Vec y) {
     ierr = SNESSetFunction(nlpower->snes, nlpower->res, nlpower->formFunctionA, nlpower->functionctxA);CHKERRQ(ierr);
     ierr = SNESSetJacobian(nlpower->snes, A, A, nlpower->formJacobianA, nlpower->jacobianctxA);CHKERRQ(ierr);
   } else SETERRQ(PetscObjectComm((PetscObject)eps), PETSC_ERR_ARG_NULL, "did not set functions for evaluating Jacobian and residual \n");
+  ierr = SNESSetTolerances(nlpower->snes,1e-50,1e-6,1e-6,100,10000);CHKERRQ(ierr);
+  ierr = SNESGetKSP(nlpower->snes,&ksp);CHKERRQ(ierr);
+  ierr = KSPSetTolerances(ksp, 1e-4, 1e-50, 1e+2,1000);CHKERRQ(ierr);
+  ierr = EPSGetOptionsPrefix(eps,&prefix);CHKERRQ(ierr);
+  ierr = SNESSetOptionsPrefix(nlpower->snes, prefix);CHKERRQ(ierr);
   ierr = SNESSetFromOptions(nlpower->snes);CHKERRQ(ierr);
   ierr = SNESSetUp(nlpower->snes);CHKERRQ(ierr);
   nlpower->initialized = PETSC_TRUE;
@@ -191,8 +198,6 @@ PetscErrorCode EPSSolve_NLPower(EPS eps)
   ierr = STGetShift(eps->st, &sigma);CHKERRQ(ierr); /* original shift */
   rho = sigma;
 
-  ierr = PetscPrintf(PETSC_COMM_WORLD, "EPSSolve_NLPower \n");CHKERRQ(ierr);
-
   while (eps->reason == EPS_CONVERGED_ITERATING) {
     eps->its++;
     k = eps->nconv;
@@ -210,7 +215,7 @@ PetscErrorCode EPSSolve_NLPower(EPS eps)
     if (power->shift_type == EPS_POWER_SHIFT_CONSTANT) { /* direct & inverse iteration */
 
       /* approximate eigenvalue is the Rayleigh quotient */
-      eps->eigr[eps->nconv] = theta;
+      eps->eigr[eps->nconv] = 1.0/theta;
 
       /* compute relative error as ||y-theta v||_2/|theta| */
       ierr = VecCopy(y, e);CHKERRQ(ierr);

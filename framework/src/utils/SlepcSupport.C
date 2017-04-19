@@ -250,7 +250,6 @@ setEigenSolverOptions(SolverParams & solver_params)
 
     case Moose::EST_NONLINEAR_POWER:
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "nlpower");
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
       break;
 
     case Moose::EST_MONOLITH_NEWTON:
