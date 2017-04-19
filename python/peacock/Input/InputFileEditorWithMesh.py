@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from peacock.ExodusViewer.plugins.MeshPlugin import MeshPlugin
 from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
-from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
+from BlockHighlighterPlugin import BlockHighlighterPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
 from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
@@ -37,7 +37,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
                        lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
                        lambda: MeshPlugin(layout='BottomLayout'),
                        lambda: BackgroundPlugin(values=False, layout='BottomLayout'),
-                       lambda: BlockPlugin(layout='RightLayout', collapsible_layout=QVBoxLayout)]
+                       lambda: BlockHighlighterPlugin(layout='RightLayout', collapsible_layout=QVBoxLayout)]
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
         # The layouts for this widget
         self.exe_info = None
@@ -159,7 +159,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
             enabled[bool]: Whether to set them enabled or disabled
         """
         self.MeshPlugin.setEnabled(enabled)
-        self.BlockPlugin.setEnabled(enabled)
+        self.BlockHighlighterPlugin.setEnabled(enabled)
         self.BackgroundPlugin.setEnabled(enabled)
 
     def onWorkingDirChanged(self, path):
