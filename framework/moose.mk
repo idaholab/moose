@@ -141,8 +141,8 @@ $(exodiff_APP): $(exodiff_objects)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB)
-app_objects := $(moose_objects) $(exodiff_objects)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB)
+app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps)
 
 # The clean target removes everything we can remove "easily",
@@ -172,12 +172,7 @@ clean::
 #    dependency and object files when you upgrade OSX versions or as
 #    source files are deleted over time.
 clobber:: clean
-	$(shell find $(CURDIR) \( -path $(CURDIR)/moose -or -path $(CURDIR)/.git -or -path $(CURDIR)/.svn \) -prune -or \
-          \( -name "*~" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.so*" -or -name "*.a" \
-          -or -name "*-opt" -or -name "*-dbg" -or -name "*-oprof" \
-          -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.plist" \
-          -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.gch" -or -name .libs -or -path "*/.libs/*" \) \
-          -delete)
+	@$(MOOSE_DIR)/scripts/clobber.py -v $(CURDIR)
 
 # cleanall runs 'make clean' in all dependent application directories
 cleanall:: clean
