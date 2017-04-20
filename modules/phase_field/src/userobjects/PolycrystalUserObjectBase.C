@@ -79,7 +79,10 @@ PolycrystalUserObjectBase::execute()
 void
 PolycrystalUserObjectBase::finalize()
 {
-  // TODO expand halo levels
+  // TODO: Possibly retrieve the halo thickness from the active GrainTracker object?
+  constexpr unsigned int halo_thickness = 2;
+  expandPointHalos();
+  expandEdgeHalos(halo_thickness - 1);
 
   communicateAndMerge();
 

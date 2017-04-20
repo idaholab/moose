@@ -331,6 +331,20 @@ protected:
                                              Status & status,
                                              unsigned int & new_id);
 
+  /**
+   * This method takes all of the partial features and expands the local, ghosted, and halo sets
+   * around those regions to account for the diffuse interface. Rather than using any kind of
+   * recursion here, we simply expand the region by all "point" neighbors from the actual
+   * grain cells since all point neighbors will contain contributions to the region.
+   */
+  void expandPointHalos();
+
+  /**
+   * This method expands the existing halo set by some width determined by the passed in value.
+   * This method does NOT mask off any local IDs.
+   */
+  void expandEdgeHalos(unsigned int num_layers_to_expand);
+
   ///@{
   /**
    * These two routines are utility routines used by the flood routine and by derived classes for
