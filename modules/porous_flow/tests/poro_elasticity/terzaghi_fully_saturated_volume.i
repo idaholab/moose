@@ -121,7 +121,6 @@
   [../]
 []
 
-
 [Kernels]
   [./grad_stress_x]
     type = StressDivergenceTensors
@@ -171,6 +170,17 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 8
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 0.96
+    [../]
+  [../]
+[]
 
 [Materials]
   [./temperature]
@@ -202,16 +212,19 @@
   [./massfrac]
     type = PorousFlowMassFraction
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 8
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_qp
   [../]
   [./porosity]
     type = PorousFlowPorosityConst # only the initial value of this is used
@@ -226,15 +239,6 @@
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.5 0 0   0 1.5 0   0 0 1.5'
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 0.96
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
   [../]
 []
 
@@ -329,7 +333,6 @@
     function = if(0.5*t<0.1,0.5*t,0.1)
   [../]
 []
-
 
 [Preconditioning]
   [./andy]

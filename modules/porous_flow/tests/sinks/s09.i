@@ -81,6 +81,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1e10 # need large in order for constant-velocity advection
+      density0 = 1 # almost irrelevant, except that the ability of the right BC to keep P fixed at zero is related to density_P0
+      thermal_expansion = 0
+      viscosity = 11
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature_nodal]
     type = PorousFlowTemperature
@@ -111,29 +123,35 @@
     type = PorousFlowMassFraction
     mass_fraction_vars = frac
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 0
     at_nodes = true
-    density_P0 = 1 # almost irrelevant, except that the ability of the right BC to keep P fixed at zero is related to density_P0
-    bulk_modulus = 1E10 # need large in order for constant-velocity advection
+  [../]
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
-    at_nodes = true
     include_old = true
+    at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1 # almost irrelevant, except that the ability of the right BC to keep P fixed at zero is related to density_P0
-    bulk_modulus = 1E10 # need large in order for constant-velocity advection
-    phase = 0
   [../]
   [./dens_all_qp]
     type = PorousFlowJoiner
-    at_nodes = false
     material_property = PorousFlow_fluid_phase_density_qp
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
+  [../]
+  [./visc_all_qp]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_qp
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
@@ -168,26 +186,6 @@
   [./relperm_all_qp]
     type = PorousFlowJoiner
     material_property = PorousFlow_relative_permeability_qp
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 11 #
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
-  [./visc0_qp]
-    type = PorousFlowViscosityConst
-    viscosity = 11 #
-    phase = 0
-  [../]
-  [./visc_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
   [../]
 []
 

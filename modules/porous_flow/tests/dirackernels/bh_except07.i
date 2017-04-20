@@ -42,6 +42,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e9
+      viscosity = 1e-3
+      density0 = 1000
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -64,18 +76,22 @@
     type = PorousFlowMassFraction
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 1000
-    bulk_modulus = 2E9
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
+    at_nodes = true
   [../]
   [./dens_all]
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
     include_old = true
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
@@ -86,19 +102,7 @@
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0 0 1E-12 0 0 0 1E-12'
   [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1E-3
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
 []
-
 
 [DiracKernels]
   [./bh]
@@ -113,7 +117,6 @@
     character = 1
   [../]
 []
-
 
 [Postprocessors]
   [./bh_report]
@@ -145,7 +148,6 @@
   [../]
 []
 
-
 [Functions]
   [./mass_bal_fcn]
     type = ParsedFunction
@@ -164,7 +166,6 @@
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
   [../]
 []
-
 
 [Executioner]
   type = Transient

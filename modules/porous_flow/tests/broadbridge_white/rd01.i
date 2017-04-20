@@ -22,6 +22,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e7
+      viscosity = 1.01e-3
+      density0 = 1000
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
 [Materials]
   [./massfrac]
     type = PorousFlowMassFraction
@@ -34,11 +46,15 @@
     type = PorousFlowTemperature
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 0
     at_nodes = true
-    density_P0 = 1E3
-    bulk_modulus = 2E7
+  [../]
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all]
@@ -47,16 +63,15 @@
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1E3
-    bulk_modulus = 2E7
-    phase = 0
-  [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
@@ -92,27 +107,13 @@
     type = PorousFlowPermeabilityConst
     permeability = '0.295E-12 0 0  0 0.295E-12 0  0 0 0.295E-12'
   [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1.01E-3
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
 []
-
-
 
 [Variables]
   [./pressure]
     initial_condition = -72620.4
   [../]
 []
-
 
 [Kernels]
   [./mass0]
@@ -128,14 +129,12 @@
   [../]
 []
 
-
 [AuxVariables]
   [./SWater]
     family = MONOMIAL
     order = CONSTANT
   [../]
 []
-
 
 [AuxKernels]
   [./SWater]
@@ -145,7 +144,6 @@
     variable = SWater
   [../]
 []
-
 
 [BCs]
   [./base]
@@ -190,7 +188,6 @@
     time_t = '0 10 100 1000 10000 100000'
   [../]
 []
-
 
 [Outputs]
   file_base = rd01

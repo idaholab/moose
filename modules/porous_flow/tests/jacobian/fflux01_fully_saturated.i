@@ -44,7 +44,6 @@
   [../]
 []
 
-
 [Kernels]
   [./flux0]
     type = PorousFlowFullySaturatedDarcyFlow
@@ -75,6 +74,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1.5
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -87,20 +98,15 @@
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac0 massfrac1'
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 1.5
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    at_nodes = false
     phase = 0
   [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1
-    phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner

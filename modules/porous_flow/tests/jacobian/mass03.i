@@ -42,7 +42,6 @@
   [../]
 []
 
-
 [Kernels]
   [./mass_comp0]
     type = PorousFlowMassTimeDerivative
@@ -61,13 +60,24 @@
   [../]
 []
 
-
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp mass_frac_comp0 mass_frac_comp1'
     number_fluid_phases = 1
     number_fluid_components = 3
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1.5
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1
+    [../]
   [../]
 []
 
@@ -88,11 +98,10 @@
     at_nodes = true
     mass_fraction_vars = 'mass_frac_comp0 mass_frac_comp1'
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 1.5
     phase = 0
   [../]
   [./dens_all]

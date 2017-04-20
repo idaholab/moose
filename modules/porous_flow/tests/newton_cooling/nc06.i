@@ -58,6 +58,19 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1e6
+      density0 = 1000
+      thermal_expansion = 0
+      viscosity = 1e-3
+      cv = 1e6
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -85,11 +98,15 @@
     type = PorousFlowMassFraction
     at_nodes = true
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     at_nodes = true
-    density_P0 = 1000
-    bulk_modulus = 1.0E6
+    phase = 0
+  [../]
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all]
@@ -98,16 +115,25 @@
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1000
-    bulk_modulus = 1.0E6
-    phase = 0
-  [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
+  [../]
+  [./enthalpy_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_enthalpy_nodal
+  [../]
+  [./energy_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -123,39 +149,6 @@
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1E-3
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
-  [./enthalpy0]
-    type = PorousFlowEnthalpy
-    at_nodes = true
-    phase = 0
-    porepressure_coefficient = 0.0
-  [../]
-  [./enthalpy_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_enthalpy_nodal
-  [../]
-  [./fluid_energy0]
-    type = PorousFlowInternalEnergyIdeal
-    at_nodes = true
-    specific_heat_capacity = 1.0E6
-    phase = 0
-  [../]
-  [./energy_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
 []
 

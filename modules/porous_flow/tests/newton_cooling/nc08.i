@@ -58,6 +58,17 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./idealgas]
+      type = IdealGasFluidPropertiesPT
+      molar_mass = 1.4
+      viscosity = 1.2
+      cv = 1.3
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -86,9 +97,9 @@
     at_nodes = true
   [../]
   [./dens0]
-    type = PorousFlowIdealGas
+    type = PorousFlowSingleComponentFluid
+    fp = idealgas
     at_nodes = true
-    molar_mass = 1.4
     phase = 0
   [../]
   [./dens_all]
@@ -98,8 +109,8 @@
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./dens0_qp]
-    type = PorousFlowIdealGas
-    molar_mass = 1.4
+    type = PorousFlowSingleComponentFluid
+    fp = idealgas
     phase = 0
   [../]
   [./dens_all_at_quadpoints]
@@ -122,32 +133,15 @@
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
   [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1.2
-    phase = 0
-  [../]
   [./visc_all]
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_viscosity_nodal
   [../]
-  [./enthalpy0]
-    type = PorousFlowEnthalpy
-    at_nodes = true
-    phase = 0
-  [../]
   [./enthalpy_all]
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_fluid_phase_enthalpy_nodal
-  [../]
-  [./fluid_energy0]
-    type = PorousFlowInternalEnergyIdeal
-    at_nodes = true
-    specific_heat_capacity = 1.3
-    phase = 0
   [../]
   [./energy_all]
     type = PorousFlowJoiner

@@ -19,11 +19,11 @@ InputParameters validParams<SimpleFluidProperties>();
  * Fluid properties of a simple, idealised fluid
  * density=density0 * exp(P / bulk_modulus - thermal_expansion * T)
  * internal_energy = cv * T
- * enthalpy = cp * T
+ * enthalpy = cv * T + P / density
  * The following parameters are constant:
  * thermal expansion
- * Cv
- * Cp
+ * cv
+ * cp
  * bulk modulus
  * thermal conductivity
  * specific entropy

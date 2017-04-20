@@ -44,6 +44,18 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1.1
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature_nodal]
     type = PorousFlowTemperature
@@ -56,17 +68,21 @@
     al = 1
     m = 0.5
   [../]
-  [./dens0_nodal]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 1
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_nodal
+    at_nodes = true
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -81,17 +97,6 @@
   [./relperm_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_relative_permeability_nodal
-    at_nodes = true
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1.1
-    phase = 0
-    at_nodes = true
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_nodal
     at_nodes = true
   [../]
 []
@@ -109,7 +114,6 @@
     flux_function = 'x*y'
   [../]
 []
-
 
 [Preconditioning]
   [./check]

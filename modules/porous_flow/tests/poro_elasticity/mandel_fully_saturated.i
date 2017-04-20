@@ -64,7 +64,6 @@
   block = 0
 []
 
-
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -126,7 +125,6 @@
   [../]
 []
 
-
 [AuxVariables]
   [./stress_yy]
     order = CONSTANT
@@ -154,8 +152,6 @@
     function = '-stress_yy+0.6*porepressure'
   [../]
 []
-
-
 
 [Kernels]
   [./grad_stress_x]
@@ -204,6 +200,17 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 8
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1
+    [../]
+  [../]
+[]
 
 [Materials]
   [./temperature]
@@ -235,15 +242,18 @@
   [./massfrac]
     type = PorousFlowMassFraction
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 8
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
     phase = 0
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_viscosity_qp
   [../]
   [./porosity]
     type = PorousFlowPorosityConst # only the initial value of this is ever used
@@ -258,15 +268,6 @@
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.5 0 0   0 1.5 0   0 0 1.5'
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
   [../]
 []
 
@@ -360,7 +361,6 @@
     function = if(0.15*t<0.01,0.15*t,0.01)
   [../]
 []
-
 
 [Preconditioning]
   [./andy]
