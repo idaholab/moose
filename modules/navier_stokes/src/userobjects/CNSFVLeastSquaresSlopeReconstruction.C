@@ -128,7 +128,7 @@ CNSFVLeastSquaresSlopeReconstruction::reconstructElementSlope()
 
     /// for internal side
 
-    if (elem->neighbor(is) != NULL)
+    if (elem->neighbor(is) != NULL && hasBlocks(elem->neighbor(is)->subdomain_id()))
     {
       const Elem * neig = elem->neighbor(is);
       dof_id_type neigID = neig->id();
