@@ -5,7 +5,7 @@ def highlightBlock(block, vtkwindow):
         block[BlockInfo]: This block will be a child of /BCs
         vtkwindow[VTKWindowPlugin]: The vtk window to set the highlights on
     """
-    if not vtkwindow.isVisible():
+    if not vtkwindow.isVisible() or not vtkwindow.isEnabled():
         return
 
     if not block.path.startswith("/BCs/"):

@@ -43,6 +43,8 @@ class MeshViewerPlugin(VTKWindowPlugin):
         # if we aren't writing out the mesh node then don't show it
         mesh_node = tree.getBlockInfo("/Mesh")
         if not mesh_node or not mesh_node.included:
+            self.onFileChanged()
+            self.setLoadingMessage("Mesh block not included")
             return
         exe_path = tree.app_info.path
         self._removeFileNoError(self.current_temp_mesh_file)
@@ -58,13 +60,11 @@ class MeshViewerPlugin(VTKWindowPlugin):
             self.onFileChanged(self.current_temp_mesh_file)
         except Exception:
             self.meshEnabled.emit(False)
+            self.onFileChanged()
+            self.setLoadingMessage("Error producing mesh")
             self._removeFileNoError(self.current_temp_mesh_file)
 
         self._removeFileNoError(input_file) # we need the mesh file since it is in use but not the input file
-
-    def onBlockChanged(self, block, tree):
-        if block.path == "/Mesh" or block.path.startswith("/Mesh/"):
-            self.meshChanged(tree)
 
     def closing(self):
         self._removeFileNoError(self.temp_input_file)
