@@ -12,28 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Tutorial Includes
-#include "DarcyThermoMechApp.h"
-
-// Moose Includes
-#include "MooseInit.h"
-#include "Factory.h"
-#include "AppFactory.h"
-
-// Google Test includes
 #include "gtest/gtest.h"
 
-PerfLog Moose::perf_log("gtest");
-
-GTEST_API_ int
-main(int argc, char ** argv)
+TEST(MySampleTests, descriptiveTestName)
 {
-  // gtest removes (only) its args from argc and argv - so this must be before MooseInit
-  testing::InitGoogleTest(&argc, argv);
+  // compare equality
+  EXPECT_EQ(2, 1 + 1);
+  EXPECT_DOUBLE_EQ(2 * 3.5, 1.0 * 8 - 1);
 
-  MooseInit init(argc, argv);
-  registerApp(DarcyThermoMechApp);
-  Moose::_throw_on_error = true;
+  // compare equality and immediately terminate this test if it fails
+  // ASSERT_EQ(2, 1);
 
-  return RUN_ALL_TESTS();
+  // this won't run if you uncomment the above test because above assert will fail
+  ASSERT_NO_THROW(1 + 1);
+
+  // for a complete list of assertions and for more unit testing documentation see:
+  // https://github.com/google/googletest/blob/master/googletest/docs/Primer.md
+}
+
+TEST(MySampleTests, anotherTest)
+{
+  EXPECT_LE(1, 2);
+  // ...
 }
