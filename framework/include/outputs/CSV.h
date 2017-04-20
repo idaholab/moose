@@ -91,6 +91,9 @@ private:
 
   /// Flag for writting vector postprocessor data
   bool _write_vector_table;
+
+  /// Flag for sorting column names
+  const bool _sort_columns;
 };
 
 #endif /* CSV_H */

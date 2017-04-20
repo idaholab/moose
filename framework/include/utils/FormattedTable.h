@@ -111,6 +111,11 @@ public:
    */
   void setPrecision(unsigned int precision) { _csv_precision = precision; }
 
+  /**
+   * Sorts columns alphabetically.
+   */
+  void sortColumns() { std::sort(_column_names.begin(), _column_names.end()); }
+
 protected:
   void printTablePiece(std::ostream & out,
                        unsigned int last_n_entries,

@@ -73,6 +73,7 @@ TableOutput::TableOutput(const InputParameters & parameters)
                                         : declareRecoverableData<FormattedTable>("all_data_table")),
     _time_data(getParam<bool>("time_data")),
     _time_column(getParam<bool>("time_column"))
+
 {
 }
 

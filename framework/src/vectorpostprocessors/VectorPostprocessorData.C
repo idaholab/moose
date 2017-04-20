@@ -67,12 +67,12 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   };
 
   // Search for the vector, if it is not located create the entry in the storage
-  auto iter = std::find_if(vec_storage.begin(), vec_storage.end(), comp);
-  if (iter == vec_storage.end())
+  auto iter = std::find_if(vec_storage.rbegin(), vec_storage.rend(), comp);
+  if (iter == vec_storage.rend())
   {
     vec_storage.emplace_back(
         std::pair<std::string, VectorPostprocessorState>(vector_name, VectorPostprocessorState()));
-    iter = vec_storage.end() - 1; // can't use rbegin() because we need a forward iterator
+    iter = vec_storage.rbegin();
   }
 
   auto & vec_struct = iter->second;
