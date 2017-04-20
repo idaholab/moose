@@ -44,7 +44,6 @@ public:
   virtual std::size_t getTotalFeatureCount() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
-  virtual const std::vector<unsigned int> & getGrainToOps() const override;
 
 private:
   /// The mapping of entities to grains, in this case always the order parameter

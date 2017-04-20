@@ -21,11 +21,8 @@ public:
   PolycrystalVoronoi(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void initialize() override {}
-  virtual void execute() override;
-  virtual void finalize() override {}
+  virtual void generateGrainToElemMap() override;
 
-  virtual unsigned int getGrainID(dof_id_type elem_id) const override;
   virtual unsigned int getGrainBasedOnPoint(const Point & point) const override;
 
 protected:

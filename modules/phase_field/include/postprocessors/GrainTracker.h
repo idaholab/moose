@@ -13,11 +13,9 @@
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
-#include "libmesh/dense_matrix.h"
 
 class GrainTracker;
 class EBSDReader;
-class PolycrystalUserObjectBase;
 struct GrainDistance;
 
 template <>
@@ -34,8 +32,6 @@ public:
   virtual void finalize() override;
 
   virtual std::size_t getTotalFeatureCount() const override;
-
-  virtual const std::vector<unsigned int> & getGrainToOps() const override { return _grain_to_op; }
 
   // Struct used to transfer minimal data to all ranks
   struct PartialFeatureData
@@ -60,13 +56,6 @@ public:
     BYPASS
   };
 
-  enum class ExecutionMode
-  {
-    ASSIGNING_OPS,
-    INITIAL_GRAIN_DISCOVERY,
-    GRAIN_TRACKING
-  };
-
   // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type node_id,
                               FieldType field_type,
@@ -87,7 +76,6 @@ protected:
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id) override;
-  virtual bool areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const override;
 
   void communicateHaloMap();
 
@@ -108,8 +96,6 @@ protected:
    * This method should only be called on the root processor
    */
   void trackGrains();
-
-  void buildGrainAdjacencyMatrix();
 
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to
@@ -237,9 +223,6 @@ protected:
   /// Optional EBSD OP variable pointer (required if EBSD is supplied)
   MooseVariable * _ebsd_op_var;
 
-  /// Optional Polycrystal IC object
-  const PolycrystalUserObjectBase * _poly_ic_uo;
-
   /// The phase to retrieve EBSD information from
   const unsigned int _phase;
 
@@ -247,14 +230,10 @@ protected:
   const bool _consider_phase;
 
   /**
-   * Enum instance indicating the execution mode of the GrainTracker:
-   * When a polycrystal UO is coupled in, it sets the mode of execution to ASSIGNING_OPS.
-   * After that stage has finished, the GrainTracker moves automatically to the next mode
-   * (INITIAL_GRAIN_DISCOVERY), then to the final mode (GRAIN_TRACKING).
-   *
-   * If the optional UO is not coupled in, we begin in the discovery mode.
+   * Boolean to indicate the first time this object executes.
+   * Note: _tracking_step isn't enough if people skip initial or execute more than once per step.
    */
-  ExecutionMode _execution_mode;
+  bool _first_time;
 
   /**
    * Boolean to terminate with an error if a new grain is created during the simulation.
@@ -262,10 +241,6 @@ protected:
    * the initial callback to newGrainCreated() nor does it get triggered for splitting grains.
    */
   bool _error_on_grain_creation;
-
-  std::unique_ptr<DenseMatrix<Real>> _adjacency_matrix;
-
-  std::vector<unsigned int> _grain_to_op;
 
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)

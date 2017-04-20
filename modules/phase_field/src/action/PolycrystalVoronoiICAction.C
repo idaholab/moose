@@ -18,7 +18,6 @@ validParams<PolycrystalVoronoiICAction>()
   params.addClassDescription("Random Voronoi tesselation polycrystal action");
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  params.addRequiredParam<UserObjectName>("grain_tracker", "Optional: TODO");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "Optional: TODO");
 
   return params;
@@ -41,7 +40,6 @@ PolycrystalVoronoiICAction::act()
     InputParameters poly_params = _factory.getValidParams("PolycrystalReducedIC");
     poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
     poly_params.set<unsigned int>("op_index") = op;
-    poly_params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
     poly_params.set<UserObjectName>("polycrystal_ic_uo") =
         getParam<UserObjectName>("polycrystal_ic_uo");
 

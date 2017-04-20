@@ -273,9 +273,3 @@ FauxGrainTracker::doesFeatureIntersectBoundary(unsigned int /*feature_id*/) cons
 
   return false;
 }
-
-const std::vector<unsigned int> &
-FauxGrainTracker::getGrainToOps() const
-{
-  return _op_to_grains;
-}

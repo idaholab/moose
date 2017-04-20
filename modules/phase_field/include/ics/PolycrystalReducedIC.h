@@ -34,7 +34,6 @@ public:
 
 protected:
   unsigned int _op_index;
-  const GrainTrackerInterface & _grain_tracker;
   const PolycrystalUserObjectBase & _poly_ic_uo;
 };
 

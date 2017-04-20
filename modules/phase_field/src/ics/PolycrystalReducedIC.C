@@ -21,7 +21,6 @@ validParams<PolycrystalReducedIC>()
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiICAction)");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
-  params.addRequiredParam<UserObjectName>("grain_tracker", "TODO");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "TODO");
 
   return params;
@@ -30,7 +29,6 @@ validParams<PolycrystalReducedIC>()
 PolycrystalReducedIC::PolycrystalReducedIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _op_index(getParam<unsigned int>("op_index")),
-    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _poly_ic_uo(getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo"))
 {
 }
@@ -39,7 +37,7 @@ Real
 PolycrystalReducedIC::value(const Point & p)
 {
   // const auto elem_to_grain = _poly_ic_uo.getElemToGrainMap();
-  const auto grain_to_op = _grain_tracker.getGrainToOps();
+  const auto grain_to_op = _poly_ic_uo.getGrainToOps();
 
   //  mooseAssert(_current_elem, "Current element is NULL");
 

@@ -44,15 +44,6 @@ PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
 }
 
 unsigned int
-PolycrystalVoronoi::getGrainID(dof_id_type elem_id) const
-{
-  auto el_it = _elem_to_grain.find(elem_id);
-  mooseAssert(el_it != _elem_to_grain.end(), "Element ID not found in map");
-
-  return el_it->second;
-}
-
-unsigned int
 PolycrystalVoronoi::getGrainBasedOnPoint(const Point & point) const
 {
   auto n_grains = _centerpoints.size();
@@ -86,12 +77,13 @@ PolycrystalVoronoi::initialSetup()
     _top_right(i) = _mesh.getMaxInDimension(i);
   }
   _range = _top_right - _bottom_left;
+
+  PolycrystalUserObjectBase::initialSetup();
 }
 
 void
-PolycrystalVoronoi::execute()
+PolycrystalVoronoi::generateGrainToElemMap()
 {
-
   // Randomly generate the centers of the individual grains represented by the Voronoi tessellation
   _centerpoints.resize(_grain_num);
   std::vector<Real> distances(_grain_num);

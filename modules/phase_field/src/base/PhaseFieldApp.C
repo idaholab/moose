@@ -454,6 +454,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
+  registerPostprocessor(PolycrystalVoronoi);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
@@ -483,7 +484,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(EulerAngleUpdater);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
-  registerUserObject(PolycrystalVoronoi);
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 

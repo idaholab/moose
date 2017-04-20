@@ -39,7 +39,7 @@
     grain_num = 12 # Number of grains
     coloring_algorithm = jp
     rand_seed = 10
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial'
   [../]
   [./grain_tracker]
     type = GrainTracker
@@ -56,7 +56,6 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_tracker = grain_tracker
       polycrystal_ic_uo = voronoi
     [../]
   [../]
