@@ -45,7 +45,7 @@ PetscErrorCode EPSGetOperators_Moose(EPS eps,Mat *A,Mat *B)
 #undef __FUNCT__
 #define __FUNCT__ "EPSGetStartVector_Moose"
 /*
-  This function is copied over from SLEEP because SLEPc claims this as a n internal subroutine
+  This function is copied over from SLEPc because SLEPc claims this as an internal subroutine
 */
 PetscErrorCode EPSGetStartVector_Moose(EPS eps,PetscInt i,PetscBool *breakdown)
 {
@@ -84,4 +84,33 @@ PetscErrorCode EPSGetStartVector_Moose(EPS eps,PetscInt i,PetscBool *breakdown)
   PetscFunctionReturn(0);
 }
 
+#undef __FUNCT__
+#define __FUNCT__ "EPSCreateSubIS"
+
+/*
+   This is a toy function,
+
+   TODO: a better  way to compute indices
+*/
+PetscErrorCode EPSCreateSubIS(Vec vec, IS *sub_is)
+{
+  PetscErrorCode ierr;
+  PetscInt       localsize, low, high, i, is_local_size;
+  PetscInt       *sub_indices;
+
+
+  PetscFunctionBegin;
+
+  ierr = VecGetLocalSize(vec, &localsize);CHKERRQ(ierr);
+  ierr = VecGetOwnershipRange(vec, &low, &high);CHKERRQ(ierr);
+  is_local_size = localsize/2;
+  ierr = PetscCalloc1(is_local_size,&sub_indices);CHKERRQ(ierr);
+
+  for (i=0; i<localsize; i+=2)
+  {
+    sub_indices[i/2] = low+i;
+  }
+  ierr = ISCreateGeneral(PetscObjectComm((PetscObject)vec),is_local_size,sub_indices,PETSC_OWN_POINTER,sub_is);CHKERRQ(ierr);
+  PetscFunctionReturn(0);
+}
 #endif

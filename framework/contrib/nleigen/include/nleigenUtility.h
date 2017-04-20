@@ -21,6 +21,7 @@
 
 PETSC_EXTERN PetscErrorCode EPSGetOperators_Moose(EPS,Mat*,Mat*);
 PETSC_EXTERN PetscErrorCode EPSGetStartVector_Moose(EPS,PetscInt,PetscBool*);
+PETSC_EXTERN PetscErrorCode EPSCreateSubIS(Vec vec, IS *sub_is);
 
 #endif
 #endif

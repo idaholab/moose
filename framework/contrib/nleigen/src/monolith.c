@@ -40,6 +40,8 @@ typedef struct {
   PetscReal      dvalue;
   PetscInt       iterrefine;
   PetscInt       n_free_power;
+  IS             eigen_sub_is;
+  PetscBool      set_sub_eigen;
 } EPS_MONOLITH;
 
 #undef __FUNCT__
@@ -96,22 +98,11 @@ PetscErrorCode EPSSetUp_Monolith(EPS eps)
   /* The number of free power iterations  */
   monolith->n_free_power = 5;
   ierr = PetscOptionsGetInt(PETSC_NULL,"","-monolith_n_free_power",&monolith->n_free_power,NULL);CHKERRQ(ierr);
+  /* rank deficient system   */
+  monolith->set_sub_eigen = PETSC_FALSE;
+  ierr = PetscOptionsGetBool(PETSC_NULL,"","-monolith_set_sub_eigen",&monolith->set_sub_eigen,NULL);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
-
-#undef __FUNCT__
-#define __FUNCT__ "SNESLineSearchPreCheckFunction_Monolith"
-
-PetscErrorCode SNESLineSearchPreCheckFunction_Monolith(SNESLineSearch snes,Vec x, Vec y, PetscBool *changed, void * ctx)
-{
-  PetscErrorCode ierr;
-  PetscFunctionBegin;
-
-  ierr = VecNormalize(x, PETSC_NULL);CHKERRQ(ierr);
-  *changed = PETSC_TRUE;
-  PetscFunctionReturn(0);
-}
-
 
 #undef __FUNCT__
 #define __FUNCT__ "EPSSNESMonitor_Monolith"
@@ -137,7 +128,8 @@ PetscErrorCode FormFunction_Monolith(SNES snes, Vec x, Vec y, void *ctx)
   PetscErrorCode ierr;
   EPS eps;
   EPS_MONOLITH *monolith = 0;
-  PetscScalar lambda_right = 0, lambda_left = 0;
+  PetscScalar lambda_right = 0;
+  Vec sub_eigen_vec;
 
   PetscFunctionBegin;
   ierr = PetscObjectQuery((PetscObject)snes, "eps", (PetscObject *)&eps);CHKERRQ(ierr);
@@ -148,14 +140,22 @@ PetscErrorCode FormFunction_Monolith(SNES snes, Vec x, Vec y, void *ctx)
   ierr = VecSet(monolith->y_tmp, 0.0);CHKERRQ(ierr);
 
   ierr = monolith->formFunctionB(monolith->snes, x, monolith->y_tmp, monolith->functionctxB);CHKERRQ(ierr);
-  ierr = VecDot(x, monolith->y_tmp, &lambda_right);CHKERRQ(ierr);
 
   ierr = monolith->formFunctionA(monolith->snes, x, y, monolith->functionctxA);CHKERRQ(ierr);
-  ierr = VecDot(x, y, &lambda_left);CHKERRQ(ierr);
 
-  ierr = VecAXPY(y, -1.0 * lambda_left / lambda_right, monolith->y_tmp);CHKERRQ(ierr);
+  if (monolith->set_sub_eigen) {
+    ierr = VecGetSubVector(monolith->y_tmp,  monolith->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
+    ierr = VecNorm(sub_eigen_vec, NORM_2, &lambda_right);CHKERRQ(ierr);
+    eps->eigr[eps->nconv] = 1.0 / lambda_right;
+    ierr = VecScale(sub_eigen_vec, eps->eigr[eps->nconv]);CHKERRQ(ierr);
+    ierr = VecRestoreSubVector(monolith->y_tmp, monolith->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
+  } else {
+    ierr = VecNorm(monolith->y_tmp, NORM_2, &lambda_right);CHKERRQ(ierr);
+    eps->eigr[eps->nconv] = 1.0 / lambda_right;
+    ierr = VecScale(monolith->y_tmp, eps->eigr[eps->nconv]);CHKERRQ(ierr);
+  }
 
-  eps->eigr[eps->nconv] = lambda_left / lambda_right;
+  ierr = VecAXPY(y, -1.0, monolith->y_tmp);CHKERRQ(ierr);
 
   ierr = VecNorm(y, NORM_2, &lambda_right);CHKERRQ(ierr);
   eps->errest[eps->nconv] = lambda_right;
@@ -246,6 +246,9 @@ PetscErrorCode EPSSNESInit_Monolith(EPS eps, Vec x, Vec y)
     ierr = PetscObjectCompose((PetscObject)nlpower->snes, "eps", (PetscObject)eps);CHKERRQ(ierr);
     nlpower->eps_composed = PETSC_TRUE;
   }
+  if (!nlpower->eigen_sub_is && nlpower->set_sub_eigen) {
+    ierr = EPSCreateSubIS(nlpower->y_tmp,&nlpower->eigen_sub_is);CHKERRQ(ierr);
+  }
   ierr = SNESSetFunction(nlpower->snes, nlpower->res, FormFunction_Monolith, nlpower->functionctxA);CHKERRQ(ierr);
   ierr = SNESSetJacobian(nlpower->snes, A, A, FormJacobian_Monolith,nlpower->jacobianctxA);CHKERRQ(ierr);
   ierr = SNESMonitorSet(nlpower->snes, EPSSNESMonitor_Monolith, NULL, NULL);CHKERRQ(ierr);
@@ -255,7 +258,6 @@ PetscErrorCode EPSSNESInit_Monolith(EPS eps, Vec x, Vec y)
   ierr = EPSGetOptionsPrefix(eps,&prefix);CHKERRQ(ierr);
   ierr = SNESSetOptionsPrefix(nlpower->snes, prefix);CHKERRQ(ierr);
   ierr = SNESGetLineSearch(nlpower->snes, &linesearch);CHKERRQ(ierr);
-  ierr = SNESLineSearchSetPreCheck(linesearch, SNESLineSearchPreCheckFunction_Monolith, nlpower->jacobianctxA);CHKERRQ(ierr);
   ierr = SNESLineSearchSetType(linesearch, "basic");CHKERRQ(ierr);
   ierr = SNESSetFromOptions(nlpower->snes);CHKERRQ(ierr);
   ierr = SNESSetUp(nlpower->snes);CHKERRQ(ierr);
@@ -360,9 +362,6 @@ PetscErrorCode EPSSolve_Monolith(EPS eps)
 
     /* purge previously converged eigenvectors */
     ierr = BVInsertVec(eps->V, k, y);CHKERRQ(ierr);
-    ierr = BVOrthogonalizeColumn(eps->V, k, NULL, &norm, NULL);CHKERRQ(ierr);
-    ierr = BVScaleColumn(eps->V, k, 1.0 / norm);CHKERRQ(ierr);
-
     /* if relerr<tol, accept eigenpair */
     if (relerr < eps->tol) {
       eps->nconv = eps->nconv + 1;
@@ -461,6 +460,9 @@ PetscErrorCode EPSDestroy_Monolith(EPS eps)
   }
   if (monolith->y_tmp) {
     ierr = VecDestroy(&monolith->y_tmp);CHKERRQ(ierr);
+  }
+  if (monolith->eigen_sub_is) {
+    ierr = ISDestroy(&monolith->eigen_sub_is);CHKERRQ(ierr);
   }
   ierr = PetscFree(eps->data);CHKERRQ(ierr);
   ierr = PetscObjectComposeFunction((PetscObject)eps, "EPSPowerSetShiftType_C", NULL);CHKERRQ(ierr);

@@ -36,6 +36,8 @@ typedef struct {
   PetscErrorCode (*formFunctionB)(SNES, Vec, Vec, void *);
   PetscErrorCode (*formJacobianB)(SNES, Vec, Mat, Mat, void *);
   PetscBool initialized;
+  IS             eigen_sub_is;
+  PetscBool      set_sub_eigen;
 } EPS_NLPOWER;
 
 #undef __FUNCT__
@@ -92,6 +94,9 @@ PetscErrorCode EPSSetUp_NLPower(EPS eps)
   if (eps->st->P) eps->st->P = NULL;
   /* do not do any transform */
   eps->st->transform = PETSC_FALSE;
+  /* rank deficient eigenvalue system   */
+  power->set_sub_eigen = PETSC_FALSE;
+  ierr = PetscOptionsGetBool(PETSC_NULL,"","-nlpower_set_sub_eigen",&power->set_sub_eigen,NULL);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
@@ -143,6 +148,9 @@ PetscErrorCode EPSSNESInit_NLPower(EPS eps, Vec x, Vec y) {
     ierr = SNESSetFunction(nlpower->snes, nlpower->res, nlpower->formFunctionA, nlpower->functionctxA);CHKERRQ(ierr);
     ierr = SNESSetJacobian(nlpower->snes, A, A, nlpower->formJacobianA, nlpower->jacobianctxA);CHKERRQ(ierr);
   } else SETERRQ(PetscObjectComm((PetscObject)eps), PETSC_ERR_ARG_NULL, "did not set functions for evaluating Jacobian and residual \n");
+  if (!nlpower->eigen_sub_is && nlpower->set_sub_eigen) {
+    ierr = EPSCreateSubIS(nlpower->y_tmp,&nlpower->eigen_sub_is);CHKERRQ(ierr);
+  }
   ierr = SNESSetTolerances(nlpower->snes,1e-50,1e-6,1e-6,100,10000);CHKERRQ(ierr);
   ierr = SNESGetKSP(nlpower->snes,&ksp);CHKERRQ(ierr);
   ierr = KSPSetTolerances(ksp, 1e-4, 1e-50, 1e+2,1000);CHKERRQ(ierr);
@@ -161,6 +169,8 @@ PetscErrorCode EPSSNESSolve_NLPower(EPS eps, Vec x, Vec y)
 {
   PetscErrorCode ierr;
   EPS_NLPOWER *nlpower = (EPS_NLPOWER *)eps->data;
+  Vec  sub_eigen_vec;
+  PetscScalar norm;
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(eps, EPS_CLASSID, 1);
@@ -173,6 +183,14 @@ PetscErrorCode EPSSNESSolve_NLPower(EPS eps, Vec x, Vec y)
   // Evaluate B*x
   ierr = nlpower->formFunctionB(nlpower->snes, x, nlpower->y_tmp, nlpower->functionctxB);CHKERRQ(ierr);
   ierr = VecCopy(x, y);CHKERRQ(ierr);
+
+  if (nlpower->set_sub_eigen) {
+    ierr = VecGetSubVector(nlpower->y_tmp,  nlpower->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
+    ierr = VecScale(sub_eigen_vec, eps->eigr[eps->nconv] );CHKERRQ(ierr);
+    ierr = VecRestoreSubVector(nlpower->y_tmp, nlpower->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
+  } else {
+    ierr = VecScale(nlpower->y_tmp, eps->eigr[eps->nconv]);CHKERRQ(ierr);
+  }
   ierr = SNESSolve(nlpower->snes, nlpower->y_tmp, y);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -189,6 +207,7 @@ PetscErrorCode EPSSolve_NLPower(EPS eps)
   PetscScalar theta, rho, sigma;
   PetscBool breakdown;
   ST st;
+  Vec   sub_eigen_vec;
 
   PetscFunctionBegin;
   y = eps->work[1];
@@ -197,7 +216,7 @@ PetscErrorCode EPSSolve_NLPower(EPS eps)
   ierr = EPSGetStartVector_Moose(eps, 0, NULL);CHKERRQ(ierr);
   ierr = STGetShift(eps->st, &sigma);CHKERRQ(ierr); /* original shift */
   rho = sigma;
-
+  eps->eigr[eps->nconv] = 1.0;
   while (eps->reason == EPS_CONVERGED_ITERATING) {
     eps->its++;
     k = eps->nconv;
@@ -210,17 +229,27 @@ PetscErrorCode EPSSolve_NLPower(EPS eps)
 
     /* theta = (v,y)_B */
     ierr = BVSetActiveColumns(eps->V, k, k + 1);CHKERRQ(ierr);
-    ierr = BVDotVec(eps->V, y, &theta);CHKERRQ(ierr);
+    if (power->set_sub_eigen) {
+      ierr = power->formFunctionB(power->snes, y, power->y_tmp, power->functionctxB);CHKERRQ(ierr);
+      ierr = VecGetSubVector(power->y_tmp,  power->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
+      ierr = VecNorm(sub_eigen_vec, NORM_2, &theta);CHKERRQ(ierr);
+      ierr = VecRestoreSubVector(power->y_tmp, power->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
+    } else {
+      ierr = power->formFunctionB(power->snes, y, power->y_tmp, power->functionctxB);CHKERRQ(ierr);
+      ierr = VecNorm(power->y_tmp, NORM_2, &theta);CHKERRQ(ierr);
+    }
+
+    theta = 1.0/theta;
 
     if (power->shift_type == EPS_POWER_SHIFT_CONSTANT) { /* direct & inverse iteration */
 
       /* approximate eigenvalue is the Rayleigh quotient */
-      eps->eigr[eps->nconv] = 1.0/theta;
+      eps->eigr[eps->nconv] = theta;
 
       /* compute relative error as ||y-theta v||_2/|theta| */
       ierr = VecCopy(y, e);CHKERRQ(ierr);
       ierr = BVGetColumn(eps->V, k, &v);CHKERRQ(ierr);
-      ierr = VecAXPY(e, -theta, v);CHKERRQ(ierr);
+      ierr = VecAXPY(e, -1.0, v);CHKERRQ(ierr);
       ierr = BVRestoreColumn(eps->V, k, &v);CHKERRQ(ierr);
       ierr = VecNorm(e, NORM_2, &norm);CHKERRQ(ierr);
       relerr = norm / PetscAbsScalar(theta);
@@ -231,12 +260,9 @@ PetscErrorCode EPSSolve_NLPower(EPS eps)
     eps->errest[eps->nconv] = relerr;
 
     /* purge previously converged eigenvectors */
-    ierr = BVInsertVec(eps->V, k, y);
-    CHKERRQ(ierr);
-    ierr = BVOrthogonalizeColumn(eps->V, k, NULL, &norm, NULL);
-    CHKERRQ(ierr);
-    ierr = BVScaleColumn(eps->V, k, 1.0 / norm);
-    CHKERRQ(ierr);
+    ierr = BVInsertVec(eps->V, k, y);CHKERRQ(ierr);
+    ierr = BVOrthogonalizeColumn(eps->V, k, NULL, &norm, NULL);CHKERRQ(ierr);
+    /* ierr = BVScaleColumn(eps->V, k, 1.0 / norm);CHKERRQ(ierr); */
 
     /* if relerr<tol, accept eigenpair */
     if (relerr < eps->tol) {
