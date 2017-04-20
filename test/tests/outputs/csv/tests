@@ -52,4 +52,11 @@
     input = csv_align.i
     csvdiff = 'csv_align_out.csv'
   [../]
+  [./sort]
+    # Tests that csv output can be sorted
+    type = CheckFiles
+    input = 'csv_sort.i'
+    check_files = csv_sort_out.csv
+    file_expect_out = "time,aux0_0,aux0_1,aux1,aux2,num_aux,num_vars"
+  [../]
 []

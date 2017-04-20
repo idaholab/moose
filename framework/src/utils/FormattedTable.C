@@ -294,6 +294,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
   {
     // Set the initial width to the names of the columns
     width["time"] = 4;
+
     for (const auto & col_name : _column_names)
       width[col_name] = col_name.size();
 
