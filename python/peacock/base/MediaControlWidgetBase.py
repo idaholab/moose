@@ -47,8 +47,8 @@ class MediaControlWidgetBase(object):
         # TimeStep display/edit
         self.__addEditBox('TimeStepDisplay', 'Timestep:', "Set the simulation timestep.", True)
         self.__addEditBox('TimeDisplay', 'Time:', "Set the simulation time.")
-        self.__addEditBox('FramerateDisplay', 'Framerate:', "Set the framerate of playback, in milliseconds.", True)
-        self.FramerateDisplay.setText("100")
+        self.__addEditBox('FrameDelayDisplay', 'Frame delay:', "Set the delay of playback, in milliseconds.", True)
+        self.FrameDelayDisplay.setText("100")
 
         # Slider
         self.TimeSlider = QtWidgets.QSlider()
@@ -165,7 +165,7 @@ class MediaControlWidgetBase(object):
         self.TimeSlider.setEnabled(False)
 
         self._playing = True
-        self._callbackFramerateDisplay()
+        self._callbackFrameDelayDisplay()
         self.start()
 
     def _callbackPauseButton(self):
@@ -205,8 +205,8 @@ class MediaControlWidgetBase(object):
         self._callbackPauseButton()
         self.updateControls(time=float(self.TimeDisplay.text()), timestep=None)
 
-    def _callbackFramerateDisplay(self):
-        self.Timer.setInterval(int(self.FramerateDisplay.text()))
+    def _callbackFrameDelayDisplay(self):
+        self.Timer.setInterval(int(self.FrameDelayDisplay.text()))
 
     def _setupTimeSlider(self, qobject):
         qobject.setOrientation(QtCore.Qt.Horizontal)
