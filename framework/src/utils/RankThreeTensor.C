@@ -44,8 +44,8 @@ dataLoad(std::istream & stream, RankThreeTensor & rtht, void * context)
   dataLoad(stream, rtht._vals, context);
 }
 
-MooseEnum
-RankThreeTensor::fillMethodEnum()   //TODO: Need new fillMethodEnum() -- for now we will just use general (at most 18 components)
+MooseEnum RankThreeTensor::fillMethodEnum() // TODO: Need new fillMethodEnum() -- for now we will
+                                            // just use general (at most 18 components)
 {
   return MooseEnum("general");
 }
@@ -57,7 +57,7 @@ RankThreeTensor::RankThreeTensor()
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] = 0.0;
+        _vals[i][j][k] = 0.0;
 }
 
 RankThreeTensor::RankThreeTensor(const InitMethod init)
@@ -95,7 +95,7 @@ RankThreeTensor::zero()
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] = 0.0;
+        _vals[i][j][k] = 0.0;
 }
 
 RankThreeTensor &
@@ -104,12 +104,13 @@ RankThreeTensor::operator=(const RankThreeTensor & a)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] = a(i, j, k);
+        _vals[i][j][k] = a(i, j, k);
 
   return *this;
 }
 
-//RankTwoTensor RankFourTensor::operator*(const RankTwoTensor & b) const TODO: Need contraction of RealVectorValue on RankThreetensor
+// RankTwoTensor RankFourTensor::operator*(const RankTwoTensor & b) const TODO: Need contraction of
+// RealVectorValue on RankThreetensor
 
 RankThreeTensor RankThreeTensor::operator*(const Real b) const
 {
@@ -119,7 +120,7 @@ RankThreeTensor RankThreeTensor::operator*(const Real b) const
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          result(i, j, k) = a(i, j, k) * b;
+        result(i, j, k) = a(i, j, k) * b;
 
   return result;
 }
@@ -130,7 +131,7 @@ RankThreeTensor::operator*=(const Real a)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] *= a;
+        _vals[i][j][k] *= a;
 
   return *this;
 }
@@ -144,7 +145,7 @@ RankThreeTensor::operator/(const Real b) const
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          result(i, j, k) = a(i, j, k) / b;
+        result(i, j, k) = a(i, j, k) / b;
 
   return result;
 }
@@ -155,7 +156,7 @@ RankThreeTensor::operator/=(const Real a)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] /= a;
+        _vals[i][j][k] /= a;
 
   return *this;
 }
@@ -166,7 +167,7 @@ RankThreeTensor::operator+=(const RankThreeTensor & a)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] += a(i, j, k);
+        _vals[i][j][k] += a(i, j, k);
 
   return *this;
 }
@@ -180,7 +181,7 @@ RankThreeTensor::operator+(const RankThreeTensor & b) const
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          result(i, j, k) = a(i, j, k) + b(i, j, k);
+        result(i, j, k) = a(i, j, k) + b(i, j, k);
 
   return result;
 }
@@ -191,7 +192,7 @@ RankThreeTensor::operator-=(const RankThreeTensor & a)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          _vals[i][j][k] -= a(i, j, k);
+        _vals[i][j][k] -= a(i, j, k);
 
   return *this;
 }
@@ -205,7 +206,7 @@ RankThreeTensor::operator-(const RankThreeTensor & b) const
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          result(i, j, k) = a(i, j, k) - b(i, j, k);
+        result(i, j, k) = a(i, j, k) - b(i, j, k);
 
   return result;
 }
@@ -219,7 +220,7 @@ RankThreeTensor::operator-() const
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          result(i, j, k) = -a(i, j, k);
+        result(i, j, k) = -a(i, j, k);
 
   return result;
 }
@@ -248,7 +249,7 @@ RankThreeTensor::L2norm() const
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-          l2 += Utility::pow<2>(a(i, j, k));
+        l2 += Utility::pow<2>(a(i, j, k));
 
   return std::sqrt(l2);
 }
@@ -268,8 +269,6 @@ RankThreeTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod
   }
 }
 
-
-
 void
 RankThreeTensor::rotate(const RealTensorValue & R)
 {
@@ -278,15 +277,15 @@ RankThreeTensor::rotate(const RealTensorValue & R)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-        {
-          Real sum = 0.0;
-          for (unsigned int m = 0; m < N; ++m)
-            for (unsigned int n = 0; n < N; ++n)
-              for (unsigned int o = 0; o < N; ++o)
-                  sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
+      {
+        Real sum = 0.0;
+        for (unsigned int m = 0; m < N; ++m)
+          for (unsigned int n = 0; n < N; ++n)
+            for (unsigned int o = 0; o < N; ++o)
+              sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
 
-          _vals[i][j][k] = sum;
-        }
+        _vals[i][j][k] = sum;
+      }
 }
 
 void
@@ -297,15 +296,15 @@ RankThreeTensor::rotate(const RankTwoTensor & R)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-        {
-          Real sum = 0.0;
-          for (unsigned int m = 0; m < N; ++m)
-            for (unsigned int n = 0; n < N; ++n)
-              for (unsigned int o = 0; o < N; ++o)
-                  sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
+      {
+        Real sum = 0.0;
+        for (unsigned int m = 0; m < N; ++m)
+          for (unsigned int n = 0; n < N; ++n)
+            for (unsigned int o = 0; o < N; ++o)
+              sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
 
-          _vals[i][j][k] = sum;
-        }
+        _vals[i][j][k] = sum;
+      }
 }
 
 void
@@ -319,8 +318,8 @@ RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-        {
-          ind = i * N * N + j * N + k;
-          _vals[i][j][k] = input[ind];
-        }
+      {
+        ind = i * N * N + j * N + k;
+        _vals[i][j][k] = input[ind];
+      }
 }
