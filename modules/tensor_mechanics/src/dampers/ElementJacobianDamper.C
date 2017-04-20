@@ -26,11 +26,13 @@ InputParameters
 validParams<ElementJacobianDamper>()
 {
   InputParameters params = validParams<GeneralDamper>();
+  params.addClassDescription("Damper that limits the change in element Jacobians");
   params.addParam<std::vector<NonlinearVariableName>>("displacements",
                                                       "The nonlinear displacement variables");
-  params.addParam<Real>("max_increment",
-                        0.1,
-                        "The maximum permissible increment in the Jacobian per Newton iteration");
+  params.addParam<Real>(
+      "max_increment",
+      0.1,
+      "The maximum permissible relative increment in the Jacobian per Newton iteration");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -72,25 +74,26 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
 {
   // Maximum difference in the Jacobian for this Newton iteration
   Real max_difference = 0.0;
-  Real max_JxW;
   MooseArray<Real> JxW_displaced;
+
+  // Vector for storing node coordinates before displacing them
+  std::vector<Point> node_copies;
 
   // Loop over elements in the mesh
   const MeshBase::element_iterator end = _mesh->getMesh().active_local_elements_end();
-  MeshBase::element_iterator el = _mesh->getMesh().active_local_elements_begin();
-  for (; el != end; ++el)
+  for (auto el = _mesh->getMesh().active_local_elements_begin(); el != end; ++el)
   {
     Elem * current_elem = *el;
 
-    // Vector for storing node coordinates before displacing them
-    std::vector<Point> node_copies(current_elem->n_nodes());
+    node_copies.clear();
+    node_copies.reserve(current_elem->n_nodes());
 
     // Displace nodes with current Newton increment
     for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
     {
       Node & displaced_node = current_elem->node_ref(i);
 
-      node_copies[i] = displaced_node;
+      node_copies.push_back(displaced_node);
 
       for (unsigned int j = 0; j < _ndisp; ++j)
       {
@@ -120,10 +123,7 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
     {
       Real diff = std::abs(JxW_displaced[qp] - _JxW[qp]) / _JxW[qp];
       if (diff > max_difference)
-      {
         max_difference = diff;
-        max_JxW = JxW_displaced[qp];
-      }
     }
   }
 
