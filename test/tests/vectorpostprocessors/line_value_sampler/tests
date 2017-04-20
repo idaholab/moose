@@ -18,6 +18,6 @@
     type = 'CheckFiles'
     input = 'csv_delimiter.i'
     check_files = 'csv_delimiter_csv_line_sample_0001.csv'
-    file_expect_out = 'id u v x y z\n0 0 1\.2346 0 0\.5 0\n0\.1 0\.1 1\.2346 0\.1 0\.5 0\n0\.2 0.2 1\.2346 0\.2 0.5 0'
+    file_expect_out = "x y z id u v\n0 0.5 0 0 0 1.2346\n0.1 0.5 0 0.1 0.1 1.2346"
   [../]
 []

@@ -98,6 +98,10 @@ private:
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
+
+  /// Lambda for looking at names in the std::pair of _values
+  // std::function< auto _compare_lambda = [&name](const std::pair<std::string,
+  // VectorPostprocessorState> & pair){ return pair.first == name; };
 };
 
 #endif // VECTORPOSTPROCESSORDATA_H

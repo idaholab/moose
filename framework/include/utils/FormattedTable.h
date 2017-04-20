@@ -115,24 +115,24 @@ protected:
   void printTablePiece(std::ostream & out,
                        unsigned int last_n_entries,
                        std::map<std::string, unsigned short> & col_widths,
-                       std::set<std::string>::iterator & col_begin,
-                       std::set<std::string>::iterator & col_end);
+                       std::vector<std::string>::iterator & col_begin,
+                       std::vector<std::string>::iterator & col_end);
 
   void printOmittedRow(std::ostream & out,
                        std::map<std::string, unsigned short> & col_widths,
-                       std::set<std::string>::iterator & col_begin,
-                       std::set<std::string>::iterator & col_end) const;
+                       std::vector<std::string>::iterator & col_begin,
+                       std::vector<std::string>::iterator & col_end) const;
   void printRowDivider(std::ostream & out,
                        std::map<std::string, unsigned short> & col_widths,
-                       std::set<std::string>::iterator & col_begin,
-                       std::set<std::string>::iterator & col_end) const;
+                       std::vector<std::string>::iterator & col_begin,
+                       std::vector<std::string>::iterator & col_end) const;
 
   void printNoDataRow(char intersect_char,
                       char fill_char,
                       std::ostream & out,
                       std::map<std::string, unsigned short> & col_widths,
-                      std::set<std::string>::iterator & col_begin,
-                      std::set<std::string>::iterator & col_end) const;
+                      std::vector<std::string>::iterator & col_begin,
+                      std::vector<std::string>::iterator & col_end) const;
 
   /**
    * Returns the width of the terminal using sys/ioctl
@@ -147,7 +147,7 @@ protected:
   std::map<Real, std::map<std::string, Real>> _data;
 
   /// The set of column names updated when data is inserted through the setter methods
-  std::set<std::string> _column_names;
+  std::vector<std::string> _column_names;
 
   /// The single cell width used for all columns in the table
   static const unsigned short _column_width;
