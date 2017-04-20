@@ -39,6 +39,9 @@ PorousFlowDensityConstBulk::PorousFlowDensityConstBulk(const InputParameters & p
             : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
                                               _temperature_variable_name))
 {
+  mooseDeprecated("PorousFlowDensityConstBulk is deprecated. Please use the SimpleFluidPropterties "
+                  "UserObject in the fluid_properties module. See "
+                  "porous_flow/tests/fluids/simple_fluid.i for an example");
 }
 
 void

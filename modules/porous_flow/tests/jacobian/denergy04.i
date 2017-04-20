@@ -69,7 +69,6 @@
   [../]
 []
 
-
 [Kernels]
   [./grad_stress_x]
     type = StressDivergenceTensors
@@ -106,6 +105,25 @@
     porous_flow_vars = 'pgas temp pwater disp_x disp_y disp_z'
     number_fluid_phases = 2
     number_fluid_components = 1
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid0]
+      type = SimpleFluidProperties
+      bulk_modulus = 1.5
+      density0 = 1
+      thermal_expansion = 0
+      cv = 1.3
+    [../]
+    [./simple_fluid1]
+      type = SimpleFluidProperties
+      bulk_modulus = 0.5
+      density0 = 0.5
+      thermal_expansion = 0
+      cv = 0.7
+    [../]
   [../]
 []
 
@@ -156,37 +174,23 @@
     m = 0.5
     al = 1
   [../]
-  [./water_heat]
-    type = PorousFlowInternalEnergyIdeal
-    at_nodes = true
-    specific_heat_capacity = 1.3
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
     phase = 0
-  [../]
-  [./gas_heat]
-    type = PorousFlowInternalEnergyIdeal
     at_nodes = true
-    specific_heat_capacity = 0.7
+  [../]
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
     phase = 1
+    at_nodes = true
   [../]
   [./internal_energy_fluids]
     type = PorousFlowJoiner
     include_old = true
     at_nodes = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
-  [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 1.5
-    phase = 0
-  [../]
-  [./dens1]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 0.5
-    bulk_modulus = 0.5
-    phase = 1
   [../]
   [./dens_all]
     type = PorousFlowJoiner

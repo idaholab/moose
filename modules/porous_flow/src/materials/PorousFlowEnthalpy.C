@@ -73,6 +73,9 @@ PorousFlowEnthalpy::PorousFlowEnthalpy(const InputParameters & parameters)
             : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase,
                                               _temperature_variable_name))
 {
+  mooseDeprecated("PorousFlowEnthalpy is deprecated. Please use a UserObject from the "
+                  "fluid_properties module to provide enthalpy. See "
+                  "porous_flow/tests/fluids/ for examples");
 }
 
 void

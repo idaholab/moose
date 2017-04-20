@@ -29,7 +29,6 @@
   [../]
 []
 
-
 [Kernels]
   [./mass0]
     type = PorousFlowMassTimeDerivative
@@ -64,6 +63,25 @@
   [../]
 []
 
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid0]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e9
+      density0 = 1000
+      thermal_expansion = 0
+      viscosity = 1e-3
+    [../]
+    [./simple_fluid1]
+      type = SimpleFluidProperties
+      bulk_modulus = 2e6
+      density0 = 1
+      thermal_expansion = 0
+      viscosity = 1e-5
+    [../]
+  [../]
+[]
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -92,18 +110,26 @@
     at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
+    phase = 0
     at_nodes = true
-    density_P0 = 1000
-    bulk_modulus = 2E9
+  [../]
+  [./simple_fluid0_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
     phase = 0
   [../]
-  [./dens1] # this is irrelevant - there is no gas
-    type = PorousFlowDensityConstBulk
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
+    phase = 1
     at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 2E6
+  [../]
+  [./simple_fluid1_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
     phase = 1
   [../]
   [./dens_all]
@@ -112,22 +138,15 @@
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1000
-    bulk_modulus = 2E9
-    phase = 0
-  [../]
-  [./dens1_qp] # this is irrelevant - there is no gas
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 2E6
-    phase = 1
-  [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
+  [../]
+  [./visc_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
@@ -154,23 +173,6 @@
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1E-3
-    phase = 0
-  [../]
-  [./visc1] # this is irrelevant - there is no gas
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1E-5
-    phase = 1
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 
