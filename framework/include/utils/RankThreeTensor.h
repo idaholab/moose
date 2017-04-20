@@ -37,7 +37,7 @@ void mooseSetToZero<RankThreeTensor>(RankThreeTensor & v);
 class RankThreeTensor
 {
 public:
- /// Initialization method
+  /// Initialization method
   enum InitMethod
   {
     initNone
@@ -63,8 +63,8 @@ public:
   RankThreeTensor(const std::vector<Real> &, FillMethod);
 
   // Named constructors
-//  static RankThreeTensor Identity() { return RankThreeTensor(initIdentity); }
-//  static RankThreeTensor IdentityFour() { return RankThreeTensor(initIdentityFour); };
+  //  static RankThreeTensor Identity() { return RankThreeTensor(initIdentity); }
+  //  static RankThreeTensor IdentityFour() { return RankThreeTensor(initIdentityFour); };
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j, unsigned int k);
@@ -85,10 +85,10 @@ public:
   RankThreeTensor & operator=(const RankThreeTensor & a);
 
   /// r_ijk*a_kl
-  //RankTwoTensor operator*(const RankTwoTensor & a) const;
+  // RankTwoTensor operator*(const RankTwoTensor & a) const;
 
   /// r_ijk*a_kl
-  //RealTensorValue operator*(const RealTensorValue & a) const;
+  // RealTensorValue operator*(const RealTensorValue & a) const;
 
   /// r_ijk*a
   RankThreeTensor operator*(const Real a) const;
@@ -117,10 +117,8 @@ public:
   /// -r_ijk
   RankThreeTensor operator-() const;
 
-
   /// sqrt(C_ijkl*C_ijkl)
   Real L2norm() const;
-
 
   /**
    * Rotate the tensor using
@@ -201,15 +199,15 @@ RankThreeTensor::rotate(const T & R)
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
-        {
-          Real sum = 0.0;
-          for (unsigned int m = 0; m < N; ++m)
-            for (unsigned int n = 0; n < N; ++n)
-              for (unsigned int o = 0; o < N; ++o)
-                  sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
+      {
+        Real sum = 0.0;
+        for (unsigned int m = 0; m < N; ++m)
+          for (unsigned int n = 0; n < N; ++n)
+            for (unsigned int o = 0; o < N; ++o)
+              sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
 
-          _vals[i][j][k] = sum;
-        }
+        _vals[i][j][k] = sum;
+      }
 }
 
 #endif // RANKTHREETENSOR_H
