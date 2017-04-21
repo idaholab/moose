@@ -109,9 +109,6 @@ RankThreeTensor::operator=(const RankThreeTensor & a)
   return *this;
 }
 
-// RankTwoTensor RankFourTensor::operator*(const RankTwoTensor & b) const TODO: Need contraction of
-// RealVectorValue on RankThreetensor
-
 RankThreeTensor RankThreeTensor::operator*(const Real b) const
 {
   RankThreeTensor result;
@@ -224,21 +221,6 @@ RankThreeTensor::operator-() const
 
   return result;
 }
-
-// RankThreeTensor RankThreeTensor::operator*(const RankFourTensor & b) const
-// {
-//   RankThreeTensor result;
-//   const RankThreeTensor & a = *this;
-//
-//   for (unsigned int i = 0; i < N; ++i)
-//     for (unsigned int j = 0; j < N; ++j)
-//       for (unsigned int k = 0; k < N; ++k)
-//           for (unsigned int p = 0; p < N; ++p)
-//             for (unsigned int q = 0; q < N; ++q)
-//               result(i, j, k) += a(i, j, p, q) * b(p, q, k, l);
-//
-//   return result;
-// }
 
 Real
 RankThreeTensor::L2norm() const
