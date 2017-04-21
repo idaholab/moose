@@ -292,8 +292,8 @@ RankThreeTensor::rotate(const RankTwoTensor & R)
 void
 RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
-  if (input.size() != 18)
-    mooseError("To use fillGeneralFromInputVector, your input must have size 18. Yours has size ",
+  if (input.size() != 27)
+    mooseError("To use fillGeneralFromInputVector, your input must have size 27. Yours has size ",
                input.size());
 
   int ind;
