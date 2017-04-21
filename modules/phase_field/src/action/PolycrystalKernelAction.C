@@ -16,8 +16,10 @@ validParams<PolycrystalKernelAction>()
   InputParameters params = validParams<Action>();
   params.addClassDescription(
       "Set up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly kernels");
+  params.addParam<unsigned int>(
+      "phase_num", 1, "specifies the total number of phases in the model");
   params.addRequiredParam<unsigned int>(
-      "op_num", "specifies the total number of grains (deformed + recrystallized) to create");
+      "op_num", "specifies the total number of grains/variants (in all phases) to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
@@ -31,6 +33,7 @@ validParams<PolycrystalKernelAction>()
 
 PolycrystalKernelAction::PolycrystalKernelAction(const InputParameters & params)
   : Action(params),
+    _phase_num(getParam<unsigned int>("phase_num")),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
     _implicit(getParam<bool>("implicit"))
@@ -40,6 +43,13 @@ PolycrystalKernelAction::PolycrystalKernelAction(const InputParameters & params)
 void
 PolycrystalKernelAction::act()
 {
+  std::string kernel_type;
+  if (_phase_num == 1)
+    kernel_type = "ACGrGrPoly";
+  else if (_phase_num == 2)
+    kernel_type = "TwoPhaseACGrGrPoly";
+  else
+    mooseError("Number of phases must be one or two");
   for (unsigned int op = 0; op < _op_num; ++op)
   {
     //
@@ -60,16 +70,18 @@ PolycrystalKernelAction::act()
     //
 
     {
-      InputParameters params = _factory.getValidParams("ACGrGrPoly");
+      InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<std::vector<VariableName>>("v") = v;
       params.set<bool>("implicit") = _implicit;
       params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
       if (isParamValid("T"))
         params.set<std::vector<VariableName>>("T") = {getParam<VariableName>("T")};
+      if (_phase_num == 2)
+        params.set<unsigned int>("op_index") = op;
 
       std::string kernel_name = "ACBulk_" + var_name;
-      _problem->addKernel("ACGrGrPoly", kernel_name, params);
+      _problem->addKernel(kernel_type, kernel_name, params);
     }
 
     //

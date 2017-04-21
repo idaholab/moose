@@ -74,6 +74,7 @@
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
 #include "SwitchingFunctionPenalty.h"
+#include "TwoPhaseACGrGrPoly.h"
 
 // Remove this once the PFFracIntVar -> Reaction deprecation is expired:
 #include "Reaction.h"
@@ -249,6 +250,7 @@
 #include "PolycrystalKernelAction.h"
 #include "PolycrystalRandomICAction.h"
 #include "PolycrystalStoredEnergyAction.h"
+#include "PolycrystalTwoPhaseKernelAction.h"
 #include "PolycrystalVariablesAction.h"
 #include "PolycrystalVoronoiICAction.h"
 #include "PolycrystalVoronoiVoidICAction.h"
@@ -368,6 +370,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
+  registerKernel(TwoPhaseACGrGrPoly);
   registerDeprecatedObjectName(LaplacianSplit, "CHSplitVar", "07/01/2017 00:00");
 
   registerInitialCondition(BimodalInverseSuperellipsoidsIC);
@@ -556,6 +559,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
   registerAction(PolycrystalStoredEnergyAction, "add_kernel");
+  registerAction(PolycrystalTwoPhaseKernelAction, "add_kernel");
   registerAction(PolycrystalVariablesAction, "add_variable");
   registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(PolycrystalVoronoiVoidICAction, "add_ic");

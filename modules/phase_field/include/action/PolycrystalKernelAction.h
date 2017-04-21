@@ -21,6 +21,9 @@ public:
   virtual void act();
 
 protected:
+  /// number of phases
+  unsigned int _phase_num;
+
   /// number of grains to create
   const unsigned int _op_num;
 
