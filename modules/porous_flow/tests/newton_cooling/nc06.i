@@ -67,6 +67,7 @@
       thermal_expansion = 0
       viscosity = 1e-3
       cv = 1e6
+      porepressure_coefficient = 0
     [../]
   [../]
 []

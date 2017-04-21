@@ -26,6 +26,11 @@ validParams<SimpleFluidProperties>()
   params.addParam<Real>("viscosity", 1.0E-3, "Constant dynamic viscosity (Pa.s)");
   params.addParam<Real>("density0", 1000.0, "Density at zero pressure and zero temperature");
   params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
+  params.addParam<Real>("porepressure_coefficient",
+                        1.0,
+                        "The enthalpy is internal_energy + P / density * "
+                        "porepressure_coefficient.  Physically this should be 1.0, "
+                        "but analytic solutions are simplified when it is zero");
   params.addClassDescription("Fluid properties for a simple fluid.  density=density0 * exp(P / "
                              "bulk_modulus - thermal_expansion * T), internal_energy = cv * T, "
                              "enthalpy = cp * T");
@@ -43,7 +48,8 @@ SimpleFluidProperties::SimpleFluidProperties(const InputParameters & parameters)
     _specific_entropy(getParam<Real>("specific_entropy")),
     _viscosity(getParam<Real>("viscosity")),
     _density0(getParam<Real>("density0")),
-    _henry_constant(getParam<Real>("henry_constant"))
+    _henry_constant(getParam<Real>("henry_constant")),
+    _pp_coeff(getParam<Real>("porepressure_coefficient"))
 {
 }
 
@@ -147,7 +153,7 @@ SimpleFluidProperties::mu_drhoT(
 Real
 SimpleFluidProperties::h(Real pressure, Real temperature) const
 {
-  return e(pressure, temperature) + pressure / rho(pressure, temperature);
+  return e(pressure, temperature) + _pp_coeff * pressure / rho(pressure, temperature);
 }
 
 void
@@ -159,8 +165,8 @@ SimpleFluidProperties::h_dpT(
   Real density, ddensity_dp, ddensity_dT;
   rho_dpT(pressure, temperature, density, ddensity_dp, ddensity_dT);
 
-  dh_dp = 1.0 / density - pressure * ddensity_dp / density / density;
-  dh_dT = _cv - pressure * ddensity_dT / density / density;
+  dh_dp = _pp_coeff / density - _pp_coeff * pressure * ddensity_dp / density / density;
+  dh_dT = _cv - _pp_coeff * pressure * ddensity_dT / density / density;
 }
 
 Real SimpleFluidProperties::henryConstant(Real /*temperature*/) const { return _henry_constant; }
