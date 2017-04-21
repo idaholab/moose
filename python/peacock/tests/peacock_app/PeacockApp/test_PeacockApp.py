@@ -148,5 +148,36 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.result.tabName())
         self.check_result()
 
+    def testBadMesh(self):
+        self.create_app(["../../common/bad_mesh.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
+        tabs = self.app.main_widget.tab_plugin
+        t = self.input.InputFileEditorPlugin.tree
+        self.check_current_tab(tabs, self.input.tabName())
+        self.assertEqual(self.input.vtkwin.isEnabled(), False)
+
+        # make sure highlighting doesn't crash peacock
+        bc = t.getBlockInfo("/BCs/left")
+        self.input.highlightChanged(bc)
+
+        # Disable the mesh block
+        mesh = t.getBlockInfo("/Mesh")
+        mesh.included = False
+        self.input.blockChanged(mesh)
+        self.assertEqual(self.input.vtkwin.isEnabled(), False) # still disabled
+
+        mesh.included = True
+        self.input.blockChanged(mesh)
+        self.assertEqual(self.input.vtkwin.isEnabled(), False) # still disabled
+
+        p = mesh.getParamInfo("dim")
+        p.value = '2'
+        self.input.blockChanged(mesh)
+        self.assertEqual(self.input.vtkwin.isEnabled(), True) # Mesh should be good now
+
+        # Disabling the mesh block should disable the mesh view
+        mesh.included = False
+        self.input.blockChanged(mesh)
+        self.assertEqual(self.input.vtkwin.isEnabled(), False)
+
 if __name__ == '__main__':
     Testing.run_tests()
