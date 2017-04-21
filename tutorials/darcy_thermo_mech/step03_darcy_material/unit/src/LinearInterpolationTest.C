@@ -12,28 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Tutorial Includes
-#include "DarcyThermoMechApp.h"
-
-// Moose Includes
-#include "MooseInit.h"
-#include "Factory.h"
-#include "AppFactory.h"
+// MOOSE Includes
+#include "LinearInterpolation.h"
 
 // Google Test includes
 #include "gtest/gtest.h"
 
-PerfLog Moose::perf_log("gtest");
-
-GTEST_API_ int
-main(int argc, char ** argv)
+TEST(LinearInterpolationTest, verifyLinearInterpolationObject)
 {
-  // gtest removes (only) its args from argc and argv - so this must be before MooseInit
-  testing::InitGoogleTest(&argc, argv);
+  // Verify that the LinearInterpolation object in MOOSE works
+  // correctly for the parameter range of interest in this problem.
+  std::vector<double> x = {1, 3};
+  std::vector<double> y = {0.8451e-9, 8.968e-9};
+  LinearInterpolation interp(x, y);
 
-  MooseInit init(argc, argv);
-  registerApp(DarcyThermoMechApp);
-  Moose::_throw_on_error = true;
+  // Make sure the number of samples matches.
+  ASSERT_EQ(interp.getSampleSize(), x.size());
 
-  return RUN_ALL_TESTS();
+  // The linear interpolation should match at the endpoints.
+  EXPECT_DOUBLE_EQ(interp.sample(1.), 0.8451e-9);
+  EXPECT_DOUBLE_EQ(interp.sample(3.), 8.968e-9);
+
+  // Verify that the midpoint value is correct. This verification
+  // value is something we computed independently and are checking
+  // here.
+  EXPECT_DOUBLE_EQ(interp.sample(2), 4.90655e-09);
 }
