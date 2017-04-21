@@ -6,6 +6,5 @@ This damper limits the change in the Jacobians of elements. The damper becomes a
 !parameters /Dampers/ElementJacobianDamper
 
 !inputfiles /Dampers/ElementJacobianDamper
-moose/modules/tensor_mechanics/tests/jacobian_damper/cube_load.i
 
 !childobjects /Dampers/ElementJacobianDamper

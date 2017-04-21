@@ -76,8 +76,8 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
   Real max_difference = 0.0;
   MooseArray<Real> JxW_displaced;
 
-  // Vector for storing node coordinates before displacing them
-  std::vector<Point> node_copies;
+  // Vector for storing the original node coordinates
+  std::vector<Point> point_copies;
 
   // Loop over elements in the mesh
   const MeshBase::element_iterator end = _mesh->getMesh().active_local_elements_end();
@@ -85,15 +85,15 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
   {
     Elem * current_elem = *el;
 
-    node_copies.clear();
-    node_copies.reserve(current_elem->n_nodes());
+    point_copies.clear();
+    point_copies.reserve(current_elem->n_nodes());
 
     // Displace nodes with current Newton increment
     for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
     {
       Node & displaced_node = current_elem->node_ref(i);
 
-      node_copies.push_back(displaced_node);
+      point_copies.push_back(displaced_node);
 
       for (unsigned int j = 0; j < _ndisp; ++j)
       {
@@ -113,7 +113,7 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
       Node & displaced_node = current_elem->node_ref(i);
 
       for (unsigned int j = 0; j < _ndisp; ++j)
-        displaced_node(j) = node_copies[i](j);
+        displaced_node(j) = point_copies[i](j);
     }
 
     // Reinit element to compute Jacobian before displacement
