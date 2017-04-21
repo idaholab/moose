@@ -40,10 +40,9 @@ XFEM                      := no
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
-# Extra stuff for CPPUNIT
-CPPUNIT_DIR 		?= $(PACKAGES_DIR)/cppunit
-ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
-ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit
+# Extra stuff for GTEST
+ADDITIONAL_INCLUDES	:= -I$(FRAMEWORK_DIR)/contrib/gtest
+ADDITIONAL_LIBS 	:= $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # dep apps
 APPLICATION_DIR    := $(CURRENT_DIR)/..
