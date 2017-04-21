@@ -147,13 +147,13 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
             a = entry.persons['author']
             n = len(a)
             if n > 2:
-                author = '{} et al.'.format(' '.join(a[0].last_names))
+                author = '{} et al.'.format(' '.join(a[0].last_names).strip("{}"))
             elif n == 2:
-                a0 = ' '.join(a[0].last_names)
-                a1 = ' '.join(a[1].last_names)
+                a0 = ' '.join(a[0].last_names).strip("{}")
+                a1 = ' '.join(a[1].last_names).strip("{}")
                 author = '{} and {}'.format(a0, a1)
             else:
-                author = ' '.join(a[0].last_names)
+                author = ' '.join(a[0].last_names).strip("{}")
 
             if cmd == 'citep':
                 a = '<a href="#{}">{}, {}</a>'.format(key, author, entry.fields['year'])
