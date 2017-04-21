@@ -62,10 +62,6 @@ public:
   /// Fill from vector
   RankThreeTensor(const std::vector<Real> &, FillMethod);
 
-  // Named constructors
-  //  static RankThreeTensor Identity() { return RankThreeTensor(initIdentity); }
-  //  static RankThreeTensor IdentityFour() { return RankThreeTensor(initIdentityFour); };
-
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j, unsigned int k);
 
@@ -78,7 +74,7 @@ public:
   /// Zeros out the tensor.
   void zero();
 
-  /// Print the rank four tensor
+  /// Print the rank three tensor
   void print(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
@@ -117,7 +113,7 @@ public:
   /// -r_ijk
   RankThreeTensor operator-() const;
 
-  /// sqrt(C_ijkl*C_ijkl)
+  /// \sqrt(r_ijk*r_ijk)
   Real L2norm() const;
 
   /**
@@ -144,35 +140,21 @@ public:
 
   /**
    * fillFromInputVector takes some number of inputs to fill
-   * the Rank-4 tensor.
+   * the Rank-3 tensor.
    * @param input the numbers that will be placed in the tensor
    * @param fill_method this can be:
-   *             antisymmetric (use fillAntisymmetricFromInputVector)
-   *             symmetric9 (use fillSymmetricFromInputVector with all=false)
-   *             symmetric21 (use fillSymmetricFromInputVector with all=true)
-   *             general_isotropic (use fillGeneralIsotropicFrominputVector)
-   *             symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
-   *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
-   *             axisymmetric_rz (use fillAxisymmetricRZFromInputVector)
    *             general (use fillGeneralFromInputVector)
-   *             principal (use fillPrincipalFromInputVector)
+   *             more fill_methods to be implemented soon!
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
 protected:
-  /// Dimensionality of rank-four tensor
+  /// Dimensionality of rank-three tensor
   static const unsigned int N = LIBMESH_DIM;
 
   /// The values of the rank-three tensor
   Real _vals[N][N][N];
 
-  /**
-   * fillAxisymmetricRZFromInputVector takes 5 inputs to fill the axisymmetric
-   * Rank-4 tensor with the appropriate symmetries maintatined for use with
-   * axisymmetric problems using coord_type = RZ.
-   * I.e. C1111 = C2222, C1133 = C2233, C2323 = C3131 and C1212 = 0.5*(C1111-C1122)
-   * @param input this is C1111, C1122, C1133, C3333, C2323.
-   */
   void fillGeneralFromInputVector(const std::vector<Real> & input);
 
   template <class T>
