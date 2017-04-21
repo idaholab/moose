@@ -130,6 +130,9 @@ protected:
 
   /// Henry constant
   const Real _henry_constant;
+
+  /// Porepressure coefficient: enthalpy = internal_energy + porepressure / density * _pp_coeff
+  const Real _pp_coeff;
 };
 
 #endif /* SIMPLEFLUIDPROPERTIES_H */
