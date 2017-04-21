@@ -8,13 +8,13 @@
   dim = 1
   nx = 200
   xmax = 10
-  compute_enthalpy = false
-  compute_internal_energy = false
 []
 
 [GlobalParams]
   PorousFlowDictator = dictator
   gravity = '0 0 0'
+  compute_enthalpy = false
+  compute_internal_energy = false
 []
 
 [Variables]
