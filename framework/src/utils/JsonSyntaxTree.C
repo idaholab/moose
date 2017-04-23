@@ -29,21 +29,14 @@ JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(sear
 std::vector<std::string>
 JsonSyntaxTree::splitPath(const std::string & path)
 {
-  std::string s;
-  std::istringstream f(path);
-  std::vector<std::string> paths;
-  while (std::getline(f, s, '/'))
-    if (s.size() > 0)
-      paths.push_back(s);
+  std::string s; std::istringstream f(path); std::vector<std::string> paths; while (std::getline(f, s, '/')) if (s.size() > 0) paths.push_back(s);
   return paths;
 }
 
 moosecontrib::Json::Value &
 JsonSyntaxTree::getJson(const std::string & path)
 {
-  auto paths = splitPath(path);
-  mooseAssert(paths.size() > 0, "path is empty");
-  moosecontrib::Json::Value * next = &_root[paths[0]];
+  auto paths = splitPath(path); mooseAssert(paths.size() > 0, "path is empty"); moosecontrib::Json::Value * next = &_root[paths[0]];
 
   for (auto pit = paths.begin() + 1; pit != paths.end(); ++pit)
   {
@@ -61,40 +54,15 @@ JsonSyntaxTree::getJson(const std::string & path)
 moosecontrib::Json::Value &
 JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bool is_type)
 {
-  if (parent.empty())
-  {
-    auto & j = getJson(path);
-    if (path.back() == '*' && !j.isMember("subblock_types"))
-      j["subblock_types"] = moosecontrib::Json::Value();
-    else if (path.back() != '*' && !j.isMember("types"))
-      j["types"] = moosecontrib::Json::Value();
-    return j["actions"];
-  }
+  if (parent.empty()) { auto & j = getJson(path); if (path.back() == '*' && !j.isMember("subblock_types")) j["subblock_types"] = moosecontrib::Json::Value(); else if (path.back() != '*' && !j.isMember("types")) j["types"] = moosecontrib::Json::Value(); return j["actions"]; }
 
-  auto & parent_json = getJson(parent);
-  auto paths = splitPath(path);
-  std::string key = "subblock_types";
-  if (is_type)
-    key = "types";
-  auto & val = parent_json[key][paths.back()];
-  return val;
+  auto & parent_json = getJson(parent); auto paths = splitPath(path); std::string key = "subblock_types"; if (is_type) key = "types"; auto & val = parent_json[key][paths.back()]; return val;
 }
 
 bool
-JsonSyntaxTree::addParameters(const std::string & parent,
-                              const std::string & path,
-                              bool is_type,
-                              const std::string & action,
-                              bool is_action,
-                              InputParameters * params,
-                              const FileLineInfo & lineinfo)
+JsonSyntaxTree::addParameters(const std::string & parent, const std::string & path, bool is_type, const std::string & action, bool is_action, InputParameters * params, const FileLineInfo & lineinfo)
 {
-  moosecontrib::Json::Value all_params;
-  if (action == "EmptyAction")
-    return false;
-
-  size_t count = 0;
-  for (auto & iter : *params)
+  moosecontrib::Json::Value all_params; if (action == "EmptyAction") return false; size_t count = 0; for (auto & iter : *params)
   {
     // Make sure we want to see this parameter
     if (params->isPrivate(iter.first) ||
@@ -112,22 +80,9 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     param_json["required"] = required;
 
     // Only output default if it has one
-    if (params->isParamValid(iter.first))
-      param_json["default"] = buildOutputString(iter);
-    else if (params->hasDefaultCoupledValue(iter.first))
-      param_json["default"] = params->defaultCoupledValue(iter.first);
+    if (params->isParamValid(iter.first)) param_json["default"] = buildOutputString(iter); else if (params->hasDefaultCoupledValue(iter.first)) param_json["default"] = params->defaultCoupledValue(iter.first);
 
-    param_json["options"] = buildOptions(iter);
-    std::string t = prettyCppType(params->type(iter.first));
-    param_json["cpp_type"] = t;
-    param_json["basic_type"] = basicCppType(t);
-    param_json["group_name"] = params->getGroupName(iter.first);
-    param_json["name"] = iter.first;
-
-    std::string doc = params->getDocString(iter.first);
-    MooseUtils::escape(doc);
-    param_json["description"] = doc;
-    all_params[iter.first] = param_json;
+    param_json["options"] = buildOptions(iter); std::string t = prettyCppType(params->type(iter.first)); param_json["cpp_type"] = t; param_json["basic_type"] = basicCppType(t); param_json["group_name"] = params->getGroupName(iter.first); param_json["name"] = iter.first; std::string doc = params->getDocString(iter.first); MooseUtils::escape(doc); param_json["description"] = doc; all_params[iter.first] = param_json;
   }
   if (_search != "" && count == 0)
     // no parameters that matched the search string
@@ -263,7 +218,6 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
     s = "Real";
   else if (cpp_type == "bool")
     s = "Boolean";
-
   return s;
 }
 
