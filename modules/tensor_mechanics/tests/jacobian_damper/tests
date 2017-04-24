@@ -1,0 +1,13 @@
+[Tests]
+ [./damper_exodus]
+   type = 'Exodiff'
+   input = 'cube_load.i'
+   exodiff = 'cube_load_out.e'
+ [../]
+ [./damper_verify]
+   type = 'RunApp'
+   input = 'cube_load.i'
+   expect_out = '9 Nonlinear'
+   prereq = 'damper_exodus'
+ [../]
+[]

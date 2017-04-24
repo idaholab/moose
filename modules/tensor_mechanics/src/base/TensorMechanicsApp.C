@@ -176,6 +176,8 @@
 
 #include "GeneralizedPlaneStrainUserObject.h"
 
+#include "ElementJacobianDamper.h"
+
 template <>
 InputParameters
 validParams<TensorMechanicsApp>()
@@ -370,6 +372,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 
   registerVectorPostprocessor(LineMaterialRankTwoSampler);
   registerVectorPostprocessor(LineMaterialRankTwoScalarSampler);
+
+  registerDamper(ElementJacobianDamper);
 }
 
 // External entry point for dynamic syntax association
