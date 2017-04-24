@@ -91,7 +91,8 @@ FormattedTable::FormattedTable(const FormattedTable & o)
     _last_key(o._last_key),
     _output_time(o._output_time),
     _csv_delimiter(","),
-    _csv_precision(14)
+    _csv_precision(14),
+    _column_names_unsorted(o._column_names_unsorted)
 {
   if (_stream_open)
     mooseError("Copying a FormattedTable with an open stream is not supported");
@@ -115,6 +116,7 @@ FormattedTable::addData(const std::string & name, Real value, Real time)
   if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
     _column_names.push_back(name);
   _last_key = time;
+  _column_names_unsorted = true;
 }
 
 Real &
@@ -539,4 +541,14 @@ MooseEnum
 FormattedTable::getWidthModes()
 {
   return MooseEnum("ENVIRONMENT=-1 AUTO=0 80=80 120=120 160=160", "ENVIRONMENT", true);
+}
+
+void
+FormattedTable::sortColumns()
+{
+  if (_column_names_unsorted)
+  {
+    std::sort(_column_names.begin(), _column_names.end());
+    _column_names_unsorted = false;
+  }
 }
