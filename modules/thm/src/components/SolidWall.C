@@ -57,7 +57,7 @@ SolidWall::addMooseObjects2Phase()
 void
 SolidWall::addMooseObjects()
 {
-  if (_model_type == FlowModel::EQ_MODEL_2 || _model_type == FlowModel::EQ_MODEL_3)
+  if (_model_type == FlowModel::EQ_MODEL_3)
     addMooseObjects1Phase();
   else if (_model_type == FlowModel::EQ_MODEL_7)
     addMooseObjects2Phase();
