@@ -36,7 +36,6 @@ class PeacockApp(object):
 
         self.main_widget = PeacockMainWindow()
         self.main_widget.initialize(parsed_args)
-        self.main_widget.setWindowTitle("Peacock")
         self.main_widget.show()
         self.main_widget.raise_()
 

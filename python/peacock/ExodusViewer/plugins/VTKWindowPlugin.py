@@ -188,6 +188,13 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._window.update()
             self.setEnabled(False)
 
+    def setLoadingMessage(self, msg):
+        """
+        Set the text shown when there isn't a file.
+        """
+        self._peacock_text.update(text=msg)
+        self._window.update()
+
     def onInputFileChanged(self, *args):
         """
         Force window to reset on the next update b/c the input file has changed.
