@@ -10,10 +10,12 @@
 # The internal volume is scaled by two and adjusted by negative seven.  Thus,
 #   the net result is seven.
 #
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
 
 [Mesh]
   file = meshes/hex8.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -42,11 +44,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Modules/TensorMechanics/Master]
+  [./all]
+    volumetric_locking_correction = true
+    incremental = true
+    strain = FINITE
   [../]
 []
 
@@ -66,7 +68,7 @@
   [../]
 
   [./prescribed_z]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     variable = disp_z
     boundary = 100
     function = step
@@ -74,32 +76,16 @@
 []
 
 [Materials]
-  [./stiffStuff]
-    type = LinearIsotropicMaterial
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    thermal_expansion = 1e-5
-    t_ref = 400.
   [../]
 
-  [./stiffStuff2]
-    type = LinearIsotropicMaterial
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
-    thermal_expansion = 1e-5
-    t_ref = 400.
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
