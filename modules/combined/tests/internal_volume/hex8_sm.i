@@ -7,13 +7,13 @@
 # The mesh is composed of one block (1) with an interior cavity of volume 8.
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total volume
 #   is 7.
+# The internal volume is scaled by two and adjusted by negative seven.  Thus,
+#   the net result is seven.
 #
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
 
 [Mesh]
-  file = meshes/hex20.e
+  file = meshes/hex8.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -27,26 +27,26 @@
 
 [Variables]
   [./disp_x]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
   [./disp_z]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = true
-    incremental = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -66,7 +66,7 @@
   [../]
 
   [./prescribed_z]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = 100
     function = step
@@ -74,43 +74,50 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    block = '1 2'
+  [./stiffStuff]
+    type = LinearIsotropicMaterial
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    thermal_expansion = 1e-5
+    t_ref = 400.
   [../]
 
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 2'
-  [../]
-[]
+  [./stiffStuff2]
+    type = LinearIsotropicMaterial
+    block = 2
 
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
-  []
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
+    youngs_modulus = 1e6
+    poissons_ratio = 0.3
+    thermal_expansion = 1e-5
+    t_ref = 400.
+  [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = PJFNK
+  solve_type = 'PJFNK'
 
   start_time = 0.0
   dt = 1.0
   end_time = 3.0
-
-  [./Quadrature]
-    order = THIRD
-  [../]
 []
 
 [Postprocessors]
   [./internalVolume]
     type = InternalVolume
     boundary = 100
+    scale_factor = 2
+    addition = -7
     execute_on = 'initial timestep_end'
   [../]
 

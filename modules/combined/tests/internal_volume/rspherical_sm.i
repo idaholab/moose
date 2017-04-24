@@ -8,9 +8,6 @@
 #   The volume of each of the blocks is also 3.  The volume of the entire sphere
 #   is 9.
 #
-[GlobalParams]
-  displacements = 'disp_x'
-[]
 
 [Problem]
   coord_type = RSPHERICAL
@@ -37,10 +34,9 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    incremental = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
   [../]
 []
 
@@ -54,16 +50,24 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    block = '1 3'
+  [./stiffStuff]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
 
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 3'
+  [./stiffStuff3]
+    type = Elastic
+    block = 3
+
+    disp_r = disp_x
+
+    youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
 []
 
