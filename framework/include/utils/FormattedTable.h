@@ -114,7 +114,7 @@ public:
   /**
    * Sorts columns alphabetically.
    */
-  void sortColumns() { std::sort(_column_names.begin(), _column_names.end()); }
+  void sortColumns();
 
 protected:
   void printTablePiece(std::ostream & out,
@@ -184,6 +184,9 @@ private:
 
   /// *.csv file precision, defaults to 14
   unsigned int _csv_precision;
+
+  /// Flag indicating that sorting is necessary (used by sortColumns method).
+  bool _column_names_unsorted = true;
 
   friend void
   dataStore<FormattedTable>(std::ostream & stream, FormattedTable & table, void * context);
