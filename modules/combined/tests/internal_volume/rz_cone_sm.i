@@ -7,10 +7,6 @@
 #   is 1.  Thus, the volume is 1/3*pi*r^2*h = 1.
 #
 
-[GlobalParams]
-  displacements = 'disp_x disp_y'
-[]
-
 [Problem]
   coord_type = RZ
 []
@@ -40,11 +36,10 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = true
-    incremental = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
   [../]
 []
 
@@ -74,14 +69,15 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+    disp_z = disp_y
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
   [../]
 []
 

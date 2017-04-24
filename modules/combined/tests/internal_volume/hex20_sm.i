@@ -8,12 +8,10 @@
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total volume
 #   is 7.
 #
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
 
 [Mesh]
   file = meshes/hex20.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -42,11 +40,11 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = true
-    incremental = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -74,16 +72,32 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    block = '1 2'
+  [./stiffStuff]
+    type = LinearIsotropicMaterial
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    thermal_expansion = 1e-5
+    t_ref = 400.
   [../]
 
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1 2'
+  [./stiffStuff2]
+    type = LinearIsotropicMaterial
+    block = 2
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
+    youngs_modulus = 1e6
+    poissons_ratio = 0.3
+    thermal_expansion = 1e-5
+    t_ref = 400.
   [../]
 []
 
