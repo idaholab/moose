@@ -8,6 +8,9 @@
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total volume
 #   is 7.
 #
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
 
 [Problem]
   coord_type = RZ
@@ -38,10 +41,11 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    volumetric_locking_correction = true
+    incremental = true
+    strain = FINITE
   [../]
 []
 
@@ -71,26 +75,16 @@
 []
 
 [Materials]
-  [./stiffStuff]
-    type = Elastic
-    block = 1
-
-    disp_r = disp_x
-    disp_z = disp_y
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
 
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_r = disp_x
-    disp_z = disp_y
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2'
   [../]
 []
 
