@@ -45,11 +45,6 @@ FlowJunction::addVariables()
   // add scalar variable (i.e. Lagrange multiplier)
   switch (_model_type)
   {
-    case FlowModel::EQ_MODEL_2:
-      _sim.addVariable(
-          true, _lm_name, FEType(SECOND, SCALAR), connected_subdomains, _scaling_factor);
-      break;
-
     case FlowModel::EQ_MODEL_3:
       _sim.addVariable(
           true, _lm_name, FEType(THIRD, SCALAR), connected_subdomains, _scaling_factor);
@@ -108,9 +103,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("u") = cv_u;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
-
-      if (_model_type == FlowModel::EQ_MODEL_3)
-        params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
+      params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
 
       _sim.addBoundaryCondition("OneDFreeMassBC", genName(name(), _bnd_id[i], "mass_bc"), params);
     }
@@ -128,18 +121,13 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("pressure") = cv_pressure;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
-
-      if (_model_type == FlowModel::EQ_MODEL_3)
-      {
-        params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
-        params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
-      }
+      params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
+      params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
 
       _sim.addBoundaryCondition(
           "OneDFreeMomentumBC", genName(name(), _bnd_id[i], "mom_bc"), params);
     }
     // energy
-    if (_model_type == FlowModel::EQ_MODEL_3)
     {
       InputParameters params = _factory.getValidParams("OneDFreeEnergyBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOEA;
@@ -177,11 +165,8 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<VariableName>>("u") = cv_u;
     params.set<std::vector<VariableName>>("p") = cv_pressure;
     params.set<std::vector<VariableName>>("area") = cv_area;
-    if (_model_type == FlowModel::EQ_MODEL_3)
-    {
-      params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
-      params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
-    }
+    params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
+    params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
 
     _sim.addScalarKernel("FlowConstraint", genName(name(), "flow_c0"), params);
   }
