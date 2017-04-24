@@ -111,12 +111,14 @@ PetscErrorCode EPSSetUp_Monolith(EPS eps)
 */
 PetscErrorCode EPSSNESMonitor_Monolith(SNES snes,PetscInt its,PetscReal fnorm,void *ctx)
 {
-  PetscErrorCode ierr;
+  PetscErrorCode  ierr;
   EPS             eps;
+  EPS_MONOLITH    *monolith = 0;
 
   PetscFunctionBegin;
   ierr = PetscObjectQuery((PetscObject)snes, "eps", (PetscObject *)&eps);CHKERRQ(ierr);
-  ierr = PetscPrintf(PetscObjectComm((PetscObject)snes),"%3D Eigenvalue[%D] %14.12e \n",its,eps->nconv,eps->eigr[eps->nconv]);
+  monolith = (EPS_MONOLITH *)eps->data;
+  ierr = PetscPrintf(PetscObjectComm((PetscObject)snes),"%3D Eigenvalue[%D] %14.12e\n",its,eps->nconv,eps->eigr[eps->nconv]);
   PetscFunctionReturn(0);
 }
 
@@ -139,9 +141,9 @@ PetscErrorCode FormFunction_Monolith(SNES snes, Vec x, Vec y, void *ctx)
   }
   ierr = VecSet(monolith->y_tmp, 0.0);CHKERRQ(ierr);
 
-  ierr = monolith->formFunctionB(monolith->snes, x, monolith->y_tmp, monolith->functionctxB);CHKERRQ(ierr);
+  ierr = VecNorm(x, NORM_2, &lambda_right);CHKERRQ(ierr);
 
-  ierr = monolith->formFunctionA(monolith->snes, x, y, monolith->functionctxA);CHKERRQ(ierr);
+  ierr = monolith->formFunctionB(monolith->snes, x, monolith->y_tmp, monolith->functionctxB);CHKERRQ(ierr);
 
   if (monolith->set_sub_eigen) {
     ierr = VecGetSubVector(monolith->y_tmp,  monolith->eigen_sub_is, &sub_eigen_vec);CHKERRQ(ierr);
@@ -154,6 +156,8 @@ PetscErrorCode FormFunction_Monolith(SNES snes, Vec x, Vec y, void *ctx)
     eps->eigr[eps->nconv] = 1.0 / lambda_right;
     ierr = VecScale(monolith->y_tmp, eps->eigr[eps->nconv]);CHKERRQ(ierr);
   }
+
+  ierr = monolith->formFunctionA(monolith->snes, x, y, monolith->functionctxA);CHKERRQ(ierr);
 
   ierr = VecAXPY(y, -1.0, monolith->y_tmp);CHKERRQ(ierr);
 
@@ -344,8 +348,12 @@ PetscErrorCode EPSSolve_Monolith(EPS eps)
   e = eps->work[0];
 
   ierr = EPSGetStartVector_Moose(eps, 0, NULL);CHKERRQ(ierr);
+  ierr = BVGetColumn(eps->V, 0, &v);CHKERRQ(ierr);
+  ierr = BVRestoreColumn(eps->V,0,&v);CHKERRQ(ierr);
   /* compute an intial guess */
   ierr = EPSComputeInitialGuess_Monolith(eps);CHKERRQ(ierr);
+  ierr = BVGetColumn(eps->V, 0, &v);CHKERRQ(ierr);
+  ierr = BVRestoreColumn(eps->V,0, &v);CHKERRQ(ierr);
 
   while (eps->reason == EPS_CONVERGED_ITERATING || eps->its < monolith->iterrefine) {
     eps->its++;

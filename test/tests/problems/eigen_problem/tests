@@ -66,4 +66,11 @@
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
     slepc = true
   [../]
+
+  [./real_nonlinear_eigenvalue]
+    type = 'CSVDiff'
+    input = 'ane.i'
+    csvdiff = 'ane_eigenvalues_0001.csv'
+    slepc = true
+  [../]
 []
