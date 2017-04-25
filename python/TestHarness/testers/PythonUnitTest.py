@@ -14,6 +14,7 @@ class PythonUnitTest(RunApp):
         params['errors'] = []
         params['valgrind'] = 'NONE'
         params['recover'] = False
+        params['pbs'] = False
         return params
 
     def __init__(self, name, params):

@@ -16,5 +16,6 @@
     # Splits require PETSc >= 3.3.0
     petsc_version = '>=3.3.0'
     vtk = true
+    pbs = false
   [../]
 []

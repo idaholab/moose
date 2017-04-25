@@ -9,12 +9,14 @@
     type = RunException
     input = two_ics_on_same_block.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+    pbs = false
   [../]
 
   [./ics_on_same_block_both_global]
     type = RunException
     input = two_ics_on_same_block_global.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+    pbs = false
   [../]
 
   [./ics_on_same_block_first_global]
@@ -22,6 +24,7 @@
     input = two_ics_on_same_block_global.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
     cli_args = 'ICs/block/block=2'
+    pbs = false
   [../]
 
   [./ics_on_same_block_second_global]
@@ -29,5 +32,6 @@
     input = two_ics_on_same_block_global.i
     expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
     cli_args = 'ICs/block2/block=2'
+    pbs = false
   [../]
 []
