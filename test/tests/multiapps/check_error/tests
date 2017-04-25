@@ -23,21 +23,21 @@
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Number of input_files for MultiApp'
-    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions_file="position1"'
+    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions_file="position1.txt"'
   [../]
 
   [./both_positions]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
-    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/positions_file="position1"'
+    cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/positions_file="position1.txt"'
   [../]
 
   [./bad_positions]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Number of entries in \'positions_file\''
-    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions"'
+    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions.txt"'
   [../]
 
   [./sub_cycling_and_catch_up]
