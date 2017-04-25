@@ -657,8 +657,12 @@ public:
   const T & getUserObject(const std::string & name, unsigned int tid = 0)
   {
     if (_all_user_objects.hasActiveObject(name, tid))
-      return *(std::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid)));
-
+    {
+      auto uo_ptr = std::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid));
+      if (uo_ptr == nullptr)
+        mooseError("User object with name '" + name + "' is of wrong type");
+      return *uo_ptr;
+    }
     mooseError("Unable to find user object with name '" + name + "'");
   }
   /**
