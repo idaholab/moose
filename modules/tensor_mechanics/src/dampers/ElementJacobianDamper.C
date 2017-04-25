@@ -125,6 +125,8 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
       if (diff > max_difference)
         max_difference = diff;
     }
+
+    JxW_displaced.release();
   }
 
   _communicator.max(max_difference);
