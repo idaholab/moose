@@ -25,6 +25,7 @@
 #include <list>
 
 // Forward Declarations
+class InputParameters;
 namespace libMesh
 {
 class Elem;
@@ -33,6 +34,7 @@ namespace Parallel
 class Communicator;
 }
 }
+class MultiMooseEnum;
 
 namespace MooseUtils
 {
@@ -383,6 +385,51 @@ tokenizeAndConvert(const std::string & str,
   }
   return true;
 }
+
+/**
+ * Returns the default execute_on MultiMooseEnum.
+ * @param default_names Space separated list to set the default execute flags.
+ */
+MultiMooseEnum createExecuteOnEnum(const std::set<ExecFlagType> & set_flags = {},
+                                   const std::set<ExecFlagType> & add_flags = {},
+                                   const std::set<ExecFlagType> & remove_flags = {});
+
+///@
+/**
+ * Add/removes/sets the given execute flags to the InputParameters or MultiMooseEnum object.
+ * @param params/exec_enum The InputParameters or MultiMooseEnum object to modify.
+ * @param flags A set of ExecFlagType to append as possible values.
+ *
+ * The add/remove methods also automatically update the doc string for the "execute_on" parameter.
+ */
+void addExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags);
+void addExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags);
+void removeExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags);
+void removeExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags);
+void setExecuteOnFlags(InputParameters & params, const std::set<ExecFlagType> & flags);
+void setExecuteOnFlags(MultiMooseEnum & exec_enum, const std::set<ExecFlagType> & flags);
+///@}
+
+/**
+ * Returns iterator to the map entry for the given flag.
+ * @params flag The flag to retreive.
+ */
+std::map<ExecFlagType, std::string>::const_iterator getExecuteOnFlag(const ExecFlagType & flag);
+
+/**
+ * Extract the "execute_on" MultiMooseEnum from a parameters object.
+ */
+MultiMooseEnum & getExecuteOnEnum(InputParameters & parameters);
+
+/**
+ * Return a documentation string with the available and default execute_on options.
+ */
+std::string getExecuteOnEnumDocString(const MultiMooseEnum & exec_enum);
+
+/**
+ * Return the name an ExecFlagType.
+ */
+const std::string & getExecuteOnFlagName(const ExecFlagType & flag);
 }
 
 #endif // MOOSEUTILS_H

@@ -21,6 +21,7 @@
 #include "XTermConstants.h"
 
 #include <string>
+#include <utility>
 
 using namespace libMesh;
 
@@ -59,6 +60,22 @@ class Factory;
 class Syntax;
 class FEProblemBase;
 
+// Define MOOSE execution flags, this cannot be done in MooseTypes because the registration calls
+// must be in Moose.C to remain consistent with other registration calls.
+typedef int ExecFlagType;
+extern const ExecFlagType EXEC_NONE;
+extern const ExecFlagType EXEC_INITIAL;
+extern const ExecFlagType EXEC_LINEAR;
+extern const ExecFlagType EXEC_NONLINEAR;
+extern const ExecFlagType EXEC_TIMESTEP_END;
+extern const ExecFlagType EXEC_TIMESTEP_BEGIN;
+extern const ExecFlagType EXEC_FINAL;
+extern const ExecFlagType EXEC_FORCED;
+extern const ExecFlagType EXEC_FAILED;
+extern const ExecFlagType EXEC_CUSTOM;
+extern const ExecFlagType EXEC_SUBDOMAIN;
+extern const ExecFlagType EXEC_SAME_AS_MULTIAPP;
+
 namespace Moose
 {
 
@@ -92,6 +109,11 @@ extern bool _deprecated_is_error;
  * only be used with MOOSE unit.
  */
 extern bool _throw_on_error;
+
+/**
+ * Storage for execute flags.
+ */
+extern std::map<ExecFlagType, std::string> execute_flags;
 
 /**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)

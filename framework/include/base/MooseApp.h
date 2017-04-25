@@ -481,7 +481,17 @@ public:
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
 
+  /**
+   * Register the execute flags.
+   */
+  virtual void registerExecFlags();
+
 protected:
+  /**
+   * Register individual flag.
+   */
+  static void registerExecFlag(const ExecFlagType & flag, const std::string & str);
+
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */

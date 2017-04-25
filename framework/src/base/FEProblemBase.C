@@ -2723,32 +2723,28 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   Moose::perf_log.push(compute_uo_tag, "Execution");
 
   // Perform Residual/Jacobian setups
-  switch (type)
+  if (type == EXEC_LINEAR)
   {
-    case EXEC_LINEAR:
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      {
-        elemental.residualSetup(tid);
-        side.residualSetup(tid);
-        internal_side.residualSetup(tid);
-        nodal.residualSetup(tid);
-      }
-      general.residualSetup();
-      break;
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      elemental.residualSetup(tid);
+      side.residualSetup(tid);
+      internal_side.residualSetup(tid);
+      nodal.residualSetup(tid);
+    }
+    general.residualSetup();
+  }
 
-    case EXEC_NONLINEAR:
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      {
-        elemental.jacobianSetup(tid);
-        side.jacobianSetup(tid);
-        internal_side.jacobianSetup(tid);
-        nodal.jacobianSetup(tid);
-      }
-      general.jacobianSetup();
-      break;
-
-    default:
-      break;
+  else if (type == EXEC_NONLINEAR)
+  {
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      elemental.jacobianSetup(tid);
+      side.jacobianSetup(tid);
+      internal_side.jacobianSetup(tid);
+      nodal.jacobianSetup(tid);
+    }
+    general.jacobianSetup();
   }
 
   // Initialize Elemental/Side/InternalSideUserObjects
@@ -3219,6 +3215,16 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _aux;
+  }
+
+  // Handle the "SAME_AS_MULTIAPP" execute option, the parameter is re-added to maintain "set by
+  // user" status which is important for output
+  MultiMooseEnum & exec_enum = parameters.set<MultiMooseEnum>("execute_on");
+  if (exec_enum.contains(EXEC_SAME_AS_MULTIAPP))
+  {
+    std::shared_ptr<MultiApp> multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
+    parameters.addParam<MultiMooseEnum>(
+        "execute_on", multiapp->getExecuteOnEnum(), parameters.getDocString("execute_on"));
   }
 
   // Create the Transfer objects

@@ -113,7 +113,7 @@ public:
   virtual const OutputOnWarehouse & advancedExecuteOn() const;
 
   /**
-   * Return the support output execution times
+   * (DEPRECATED) Return the support output execution times
    * @param default_type The default MultiMooseEnum option
    */
   static MultiMooseEnum getExecuteOptions(std::string default_type = "");

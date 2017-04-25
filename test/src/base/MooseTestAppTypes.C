@@ -11,27 +11,6 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef MOOSETESTAPP_H
-#define MOOSETESTAPP_H
 
-#include "MooseApp.h"
-
-class MooseTestApp;
-
-template <>
-InputParameters validParams<MooseTestApp>();
-
-class MooseTestApp : public MooseApp
-{
-public:
-  MooseTestApp(const InputParameters & parameters);
-
-  virtual ~MooseTestApp();
-
-  static void registerApps();
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  virtual void registerExecFlags() override;
-};
-
-#endif /* MOOSETESTAPP_H */
+#include "MooseTestAppTypes.h"
+const ExecFlagType EXEC_JUST_GO = 12345;

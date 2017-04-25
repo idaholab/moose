@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = CSVDiff
+    input = arbitrary_execute.i
+    csvdiff = arbitrary_execute_out.csv
+    expect_out = "Flag\sName:\sjust_go"
+  [../]
+[]
