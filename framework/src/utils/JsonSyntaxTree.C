@@ -106,10 +106,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     ++count;
     moosecontrib::Json::Value param_json;
 
-    // Block params may be required and will have a doc string
-    std::string required = params->isParamRequired(iter.first) ? "Yes" : "No";
-
-    param_json["required"] = required;
+    param_json["required"] = params->isParamRequired(iter.first);
 
     // Only output default if it has one
     if (params->isParamValid(iter.first))
