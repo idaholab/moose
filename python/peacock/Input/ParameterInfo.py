@@ -34,7 +34,7 @@ class ParameterInfo(object):
         self.group_name = data["group_name"]
         if not self.group_name:
             self.group_name = "Main"
-        self.required = data["required"] == "Yes"
+        self.required = data["required"]
         self.name = data["name"]
         self.options = data.get("options", "")
         if self.options:

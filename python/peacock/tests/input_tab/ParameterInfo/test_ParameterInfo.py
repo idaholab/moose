@@ -11,7 +11,7 @@ class Tests(Testing.PeacockTester):
             basic_type="String",
             description="",
             group_name="",
-            required="Yes",
+            required=True,
             options="",
             ):
         return {"name": name,
@@ -48,7 +48,7 @@ class Tests(Testing.PeacockTester):
 
     def testBasic(self):
         p = ParameterInfo(None, "p0")
-        y = self.createData("p1", default="foo", cpp_type="some type", description="description", group_name="group", required="Yes")
+        y = self.createData("p1", default="foo", cpp_type="some type", description="description", group_name="group", required=True)
         p.setFromData(y)
         y["default"] = "foo"
         self.checkParameter(p, "p1", value="foo", default="foo", cpp_type="some type", description="description", group_name="group", required=True)

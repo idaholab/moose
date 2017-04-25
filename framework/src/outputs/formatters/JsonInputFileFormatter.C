@@ -160,7 +160,7 @@ JsonInputFileFormatter::addParameters(const moosecontrib::Json::Value & params)
       def = "'" + def + "'";
     std::string indent(max_name - name.size(), ' ');
     std::string required;
-    if (param["required"].asString() == "Yes")
+    if (param["required"].asBool())
       required = "(required)";
     std::string l = name + indent + " = " + def + required;
     if (l.size() > max_len)
