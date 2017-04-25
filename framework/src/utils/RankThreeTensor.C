@@ -45,7 +45,7 @@ dataLoad(std::istream & stream, RankThreeTensor & rtht, void * context)
 }
 
 MooseEnum RankThreeTensor::fillMethodEnum() // TODO: Need new fillMethodEnum() -- for now we will
-                                            // just use general (at most 18 components)
+                                            // just use general (at most 27 components)
 {
   return MooseEnum("general");
 }

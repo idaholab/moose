@@ -44,7 +44,7 @@ public:
   };
 
   /**
-   * To fill up the 18 entries in the 3rd-order tensor, fillFromInputVector
+   * To fill up the 27 entries in the 3rd-order tensor, fillFromInputVector
    * is called with one of the following fill_methods.
    * See the fill*FromInputVector functions for more details
    */
