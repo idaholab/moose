@@ -20,8 +20,7 @@ class PolycrystalVoronoi : public PolycrystalUserObjectBase
 public:
   PolycrystalVoronoi(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-  virtual void generateGrainToElemMap() override;
+  virtual void precomputeGrainStructure() override;
 
   virtual unsigned int getGrainBasedOnPoint(const Point & point) const override;
 

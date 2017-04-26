@@ -22,6 +22,10 @@ validParams<PolycrystalUserObjectBase>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
   params.addClassDescription("TODO");
+
+  params.addRequiredCoupledVarWithAutoBuild(
+      "variable", "var_name_base", "op_num", "Array of coupled variables");
+
   params.addRequiredParam<unsigned int>(
       "grain_num", "Number of grains being represented by the order parameters");
   params.addParam<MooseEnum>("coloring_algorithm",
@@ -71,7 +75,7 @@ PolycrystalUserObjectBase::initialSetup()
 void
 PolycrystalUserObjectBase::execute()
 {
-  generateGrainToElemMap();
+  precomputeGrainStructure();
 
   FeatureFloodCount::execute();
 }
@@ -129,10 +133,11 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
   if (current_index != 0)
     return false;
 
-  auto el_it = _elem_to_grain.find(dof_object->id());
-  mooseAssert(el_it != _elem_to_grain.end(), "Element ID not found in map");
-
-  auto grain_id = el_it->second;
+  unsigned int grain_id;
+  if (_is_elemental)
+    grain_id = getGrainBasedOnElem(*static_cast<const Elem *>(dof_object));
+  else
+    grain_id = getGrainBasedOnPoint(*static_cast<const Node *>(dof_object));
 
   if (!feature)
   {

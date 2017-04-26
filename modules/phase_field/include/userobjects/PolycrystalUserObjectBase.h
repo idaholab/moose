@@ -22,7 +22,13 @@ class PolycrystalUserObjectBase : public FeatureFloodCount
 public:
   PolycrystalUserObjectBase(const InputParameters & parameters);
 
-  virtual void generateGrainToElemMap() = 0;
+  virtual void precomputeGrainStructure() {}
+
+  virtual unsigned int getGrainBasedOnPoint(const Point & point) const = 0;
+  virtual unsigned int getGrainBasedOnElem(const Elem & elem) const
+  {
+    return getGrainBasedOnPoint(elem.centroid());
+  }
 
   virtual void initialSetup() override;
   virtual void execute() override;
@@ -47,8 +53,6 @@ public:
    * used to retrieve grain values for each element in the mesh.
    */
   //  virtual unsigned int getGrainID(dof_id_type elem_id) const = 0;
-
-  virtual unsigned int getGrainBasedOnPoint(const Point & /*point*/) const { return 0; }
 
   static MooseEnum coloringAlgorithms();
 
@@ -79,7 +83,7 @@ protected:
   static const unsigned int INVALID_COLOR;
   static const unsigned int HALO_THICKNESS;
 
-  std::map<dof_id_type, unsigned int> _elem_to_grain;
+  //  std::map<dof_id_type, unsigned int> _elem_to_grain;
 };
 
 #endif // POLYCRYSTALUSEROBJECTBASE_H
