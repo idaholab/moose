@@ -138,9 +138,10 @@ enum MaterialDataType
  */
 enum AuxGroup
 {
-  PRE_AUX = 0,
-  POST_AUX = 1,
-  ALL = 2
+  PRE_IC = 0,
+  PRE_AUX = 1,
+  POST_AUX = 2,
+  ALL = 3
 };
 
 /**

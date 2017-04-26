@@ -11,36 +11,34 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef GHOSTUSEROBJECTIC_H
+#define GHOSTUSEROBJECTIC_H
 
-#ifndef GHOSTUSEROBJECT_H
-#define GHOSTUSEROBJECT_H
+#include "InitialCondition.h"
+#include "MooseMesh.h"
 
-#include "GeneralUserObject.h"
-
-// Forward Declarations
+class GhostUserObjectIC;
 class GhostUserObject;
 
 template <>
-InputParameters validParams<GhostUserObject>();
+InputParameters validParams<GhostUserObjectIC>();
 
 /**
- * User object to calculate ghosted elements on a single processor or the union across all
- * processors.
+ * This initial condition builds a data structure that is queried
+ * for initial condition information
  */
-class GhostUserObject : public GeneralUserObject
+class GhostUserObjectIC : public InitialCondition
 {
 public:
-  GhostUserObject(const InputParameters & parameters);
+  GhostUserObjectIC(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
+  virtual Real value(const Point & /*p*/);
 
-  unsigned long getElementalValue(dof_id_type element_id) const;
+private:
+  MooseMesh & _mesh;
+  std::map<dof_id_type, Real> _data;
 
-protected:
-  std::set<dof_id_type> _ghost_data;
-  dof_id_type _rank;
+  const GhostUserObject & _ghost_uo;
 };
 
-#endif // GHOSTUSEROBJECT_H
+#endif /* GHOSTUSEROBJECTIC_H */

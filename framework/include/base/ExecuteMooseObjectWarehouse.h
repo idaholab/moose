@@ -49,6 +49,9 @@ public:
    * @param object A shared pointer to the object being added
    */
   virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0);
+  void addObjectMask(std::shared_ptr<T> object,
+                     THREAD_ID tid = 0,
+                     std::uint16_t flag_mask = std::numeric_limits<std::uint16_t>::max());
 
   ///@{
   /**
@@ -207,7 +210,17 @@ ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid /* =
 
 template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid /*=0*/)
+ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid)
+
+{
+  addObjectMask(object, tid, 0xFFFF);
+}
+
+template <typename T>
+void
+ExecuteMooseObjectWarehouse<T>::addObjectMask(std::shared_ptr<T> object,
+                                              THREAD_ID tid,
+                                              std::uint16_t flag_mask)
 {
   // Update list of all objects
   MooseObjectWarehouse<T>::addObject(object, tid);
@@ -217,8 +230,12 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
   if (ptr)
   {
     const std::vector<ExecFlagType> flags = ptr->execFlags();
-    for (std::vector<ExecFlagType>::const_iterator it = flags.begin(); it != flags.end(); ++it)
-      _execute_objects[*it].addObject(object, tid);
+    for (auto flag : flags)
+    {
+      auto masked_flag = static_cast<std::uint16_t>(flag) & flag_mask;
+      if (masked_flag != 0)
+        _execute_objects[flag].addObject(object, tid);
+    }
   }
   else
     mooseError("The object being added (",

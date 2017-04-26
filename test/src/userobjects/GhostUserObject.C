@@ -74,7 +74,7 @@ GhostUserObject::finalize()
 }
 
 unsigned long
-GhostUserObject::getElementalValue(unsigned int element_id) const
+GhostUserObject::getElementalValue(dof_id_type element_id) const
 {
   return _ghost_data.find(element_id) != _ghost_data.end();
 }
