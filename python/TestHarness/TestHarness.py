@@ -801,6 +801,7 @@ class TestHarness:
         parser.add_argument('--devel', action='store_const', dest='method', const='devel', help='test the app_name-devel binary')
         parser.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
         parser.add_argument('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
+        parser.add_argument('--ignore', nargs='?', action='store', metavar='caveat', dest='ignored_caveats', const='all', type=str, help='ignore specified caveats when checking if a test should run: (--ignore "method compiler") Using --ignore with out a conditional will ignore all caveats')
         parser.add_argument('-j', '--jobs', nargs='?', metavar='int', action='store', type=int, dest='jobs', const=1, help='run test binaries in parallel')
         parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
         parser.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')

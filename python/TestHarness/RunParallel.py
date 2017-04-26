@@ -75,6 +75,17 @@ class RunParallel:
         # Reporting timer which resets when ever data is printed to the screen.
         self.reported_timer = clock()
 
+    def unsatisfiedPrereqs(self, tester):
+        if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs):
+            if self.options.pbs is None and self.options.ignored_caveats is None:
+                return True
+            else:
+                if self.options.ignored_caveats:
+                    caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
+                    if 'all' not in self.options.ignored_caveats and 'prereq' not in self.options.ignored_caveats:
+                        return True
+        return False
+
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
     def run(self, tester, command, recurse=True, slot_check=True):
         # First see if any of the queued jobs can be run but only if recursion is allowed on this run
@@ -95,7 +106,7 @@ class RunParallel:
             return
 
         # Now make sure that this job doesn't have an unsatisfied prereq
-        if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs) and self.options.pbs is None:
+        if self.unsatisfiedPrereqs(tester):
             self.queue.append([tester, command, os.getcwd()])
             return
 

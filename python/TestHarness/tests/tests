@@ -39,4 +39,8 @@
     type = PythonUnitTest
     input = test_DisplayRequired.py
   [../]
+  [./ignore]
+    type = PythonUnitTest
+    input = test_Ignore.py
+  [../]
 []

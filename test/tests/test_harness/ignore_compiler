@@ -1,0 +1,7 @@
+[Tests]
+  [./ignore_compiler]
+    type = RunApp
+    input = good.i
+    compiler = non_existent
+  [../]
+[]
