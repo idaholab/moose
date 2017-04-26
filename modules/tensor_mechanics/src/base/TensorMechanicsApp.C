@@ -39,10 +39,10 @@
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainCPSlipRateRes.h"
 #include "FiniteStrainUObasedCP.h"
-#include "ComputeCappedWeakPlaneStress.h"
-#include "ComputeCappedWeakInclinedPlaneStress.h"
-#include "ComputeCappedWeakPlaneCosseratStress.h"
-#include "ComputeCappedDruckerPragerStress.h"
+#include "CappedWeakPlaneStressUpdate.h"
+#include "CappedWeakInclinedPlaneStressUpdate.h"
+#include "CappedWeakPlaneCosseratStressUpdate.h"
+#include "CappedDruckerPragerStressUpdate.h"
 #include "ComputeMultiPlasticityStress.h"
 #include "ComputeCosseratLinearElasticStress.h"
 #include "ComputeCosseratSmallStrain.h"
@@ -88,7 +88,7 @@
 #include "ComputeVolumetricDeformGrad.h"
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
-#include "ComputeAdmissibleState.h"
+#include "ComputeMultipleInelasticStress.h"
 #include "RadialReturnStressUpdate.h"
 #include "IsotropicPlasticityStressUpdate.h"
 #include "IsotropicPowerLawHardeningStressUpdate.h"
@@ -241,10 +241,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainCPSlipRateRes);
   registerMaterial(FiniteStrainUObasedCP);
-  registerMaterial(ComputeCappedWeakPlaneStress);
-  registerMaterial(ComputeCappedWeakInclinedPlaneStress);
-  registerMaterial(ComputeCappedWeakPlaneCosseratStress);
-  registerMaterial(ComputeCappedDruckerPragerStress);
+  registerMaterial(CappedWeakPlaneStressUpdate);
+  registerMaterial(CappedWeakInclinedPlaneStressUpdate);
+  registerMaterial(CappedWeakPlaneCosseratStressUpdate);
+  registerMaterial(CappedDruckerPragerStressUpdate);
   registerMaterial(ComputeMultiPlasticityStress);
   registerMaterial(ComputeCosseratLinearElasticStress);
   registerMaterial(ComputeCosseratSmallStrain);
@@ -290,7 +290,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeVolumetricDeformGrad);
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
-  registerMaterial(ComputeAdmissibleState);
+  registerMaterial(ComputeMultipleInelasticStress);
   registerMaterial(RadialReturnStressUpdate);
   registerMaterial(IsotropicPlasticityStressUpdate);
   registerMaterial(IsotropicPowerLawHardeningStressUpdate);

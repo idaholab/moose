@@ -4,18 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
-#define COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
+#ifndef CAPPEDWEAKINCLINEDPLANESTRESSUPDATE_H
+#define CAPPEDWEAKINCLINEDPLANESTRESSUPDATE_H
 
-#include "ComputeCappedWeakPlaneStress.h"
+#include "CappedWeakPlaneStressUpdate.h"
 
-class ComputeCappedWeakInclinedPlaneStress;
+class CappedWeakInclinedPlaneStressUpdate;
 
 template <>
-InputParameters validParams<ComputeCappedWeakInclinedPlaneStress>();
+InputParameters validParams<CappedWeakInclinedPlaneStressUpdate>();
 
 /**
- * ComputeCappedWeakInclinedPlaneStress performs the return-map
+ * CappedWeakInclinedPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
  * models that describe capped weak-plane plasticity
  *
@@ -25,10 +25,10 @@ InputParameters validParams<ComputeCappedWeakInclinedPlaneStress>();
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedWeakInclinedPlaneStress : public ComputeCappedWeakPlaneStress
+class CappedWeakInclinedPlaneStressUpdate : public CappedWeakPlaneStressUpdate
 {
 public:
-  ComputeCappedWeakInclinedPlaneStress(const InputParameters & parameters);
+  CappedWeakInclinedPlaneStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -55,7 +55,7 @@ protected:
   RankFourTensor _rotated_Eijkl;
 
   virtual void initialiseReturnProcess() override;
-  virtual void finaliseReturnProcess(const RankTwoTensor & rotation_increment) override;
+  virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
@@ -96,4 +96,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
+#endif // CAPPEDWEAKINCLINEDPLANESTRESSUPDATE_H

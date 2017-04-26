@@ -4,13 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ComputeAdmissibleState.h"
+#include "ComputeMultipleInelasticStress.h"
 
-#include "StateUpdateBase.h"
+#include "StressUpdateBase.h"
+#include "MooseException.h"
 
 template <>
 InputParameters
-validParams<ComputeAdmissibleState>()
+validParams<ComputeMultipleInelasticStress>()
 {
   InputParameters params = validParams<ComputeFiniteStrainElasticStress>();
   params.addClassDescription("Compute state (stress and internal parameters such as plastic "
@@ -62,9 +63,9 @@ validParams<ComputeAdmissibleState>()
   return params;
 }
 
-ComputeAdmissibleState::ComputeAdmissibleState(const InputParameters & parameters)
+ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParameters & parameters)
   : ComputeFiniteStrainElasticStress(parameters),
-    _max_its(parameters.get<unsigned int>("max_iterations")),
+    _max_iterations(parameters.get<unsigned int>("max_iterations")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
@@ -80,44 +81,41 @@ ComputeAdmissibleState::ComputeAdmissibleState(const InputParameters & parameter
     _inelastic_weights(isParamValid("combined_inelastic_strain_weights")
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
-    _cto(_num_models)
+    _consistent_tangent_operator(_num_models)
 {
   if (_inelastic_weights.size() != _num_models)
-    mooseError("ComputeAdmissibleState: combined_inelastic_strain_weights must contain the same "
-               "number of entries as inelastic_models ",
-               _inelastic_weights.size(),
-               " ",
-               _num_models);
+    mooseError(
+        "ComputeMultipleInelasticStress: combined_inelastic_strain_weights must contain the same "
+        "number of entries as inelastic_models ",
+        _inelastic_weights.size(),
+        " ",
+        _num_models);
 }
 
 void
-ComputeAdmissibleState::initQpStatefulProperties()
+ComputeMultipleInelasticStress::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
   _inelastic_strain[_qp].zero();
 }
 
 void
-ComputeAdmissibleState::initialSetup()
+ComputeMultipleInelasticStress::initialSetup()
 {
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
   for (unsigned int i = 0; i < _num_models; ++i)
   {
-    StateUpdateBase * rrr = dynamic_cast<StateUpdateBase *>(&getMaterialByName(models[i]));
+    StressUpdateBase * rrr = dynamic_cast<StressUpdateBase *>(&getMaterialByName(models[i]));
     if (rrr)
       _models.push_back(rrr);
     else
-      mooseError("Model " + models[i] + " is not compatible with ComputeAdmissibleState");
+      mooseError("Model " + models[i] + " is not compatible with ComputeMultipleInelasticStress");
   }
 }
 
 void
-ComputeAdmissibleState::computeQpStress()
+ComputeMultipleInelasticStress::computeQpStress()
 {
-  // Nothing to update during the first time step
-  // ComputeQpStress is not called during the zeroth time step, so no need to guard against _t_step
-  // == 0
-
   RankTwoTensor elastic_strain_increment;
   RankTwoTensor combined_inelastic_strain_increment;
 
@@ -143,13 +141,13 @@ ComputeAdmissibleState::computeQpStress()
 }
 
 void
-ComputeAdmissibleState::updateQpState(RankTwoTensor & elastic_strain_increment,
-                                      RankTwoTensor & combined_inelastic_strain_increment)
+ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_increment,
+                                              RankTwoTensor & combined_inelastic_strain_increment)
 {
   if (_output_iteration_info == true)
   {
     _console << std::endl
-             << "iteration output for ComputeAdmissibleState solve:"
+             << "iteration output for ComputeMultipleInelasticStress solve:"
              << " time=" << _t << " int_pt=" << _qp << std::endl;
   }
 
@@ -193,7 +191,7 @@ ComputeAdmissibleState::updateQpState(RankTwoTensor & elastic_strain_increment,
                                   _elasticity_tensor[_qp],
                                   _elastic_strain_old[_qp],
                                   _tangent_operator_type == TangentOperatorEnum::nonlinear,
-                                  _cto[i_rmm]);
+                                  _consistent_tangent_operator[i_rmm]);
 
       if (i_rmm == 0)
       {
@@ -232,16 +230,16 @@ ComputeAdmissibleState::updateQpState(RankTwoTensor & elastic_strain_increment,
                << "\n"
                << " stress convergence relative tolerance = " << _relative_tolerance << "\n"
                << " absolute l2 norm delta stress = " << l2norm_delta_stress << "\n"
-               << " stress converengen absolute tolerance = " << _absolute_tolerance << std::endl;
+               << " stress convergence absolute tolerance = " << _absolute_tolerance << std::endl;
     }
     ++counter;
-  } while (counter < _max_its && l2norm_delta_stress > _absolute_tolerance &&
+  } while (counter < _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
            (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance &&
            _num_models != 1);
 
-  if (counter == _max_its && l2norm_delta_stress > _absolute_tolerance &&
+  if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
-    mooseError("Max stress iteration hit during ComputeAdmissibleState solve!");
+    throw MooseException("Max stress iteration hit during ComputeMultipleInelasticStress solve!");
 
   combined_inelastic_strain_increment.zero();
   for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
@@ -253,14 +251,14 @@ ComputeAdmissibleState::updateQpState(RankTwoTensor & elastic_strain_increment,
   else
   {
     const RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
-    _Jacobian_mult[_qp] = _cto[0];
+    _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
     for (unsigned i_rmm = 1; i_rmm < _num_models; ++i_rmm)
-      _Jacobian_mult[_qp] = _cto[i_rmm] * E_inv * _Jacobian_mult[_qp];
+      _Jacobian_mult[_qp] = _consistent_tangent_operator[i_rmm] * E_inv * _Jacobian_mult[_qp];
   }
 }
 
 void
-ComputeAdmissibleState::updateQpStateSingleModel(
+ComputeMultipleInelasticStress::updateQpStateSingleModel(
     RankTwoTensor & elastic_strain_increment, RankTwoTensor & combined_inelastic_strain_increment)
 {
   _models[0]->setQp(_qp);

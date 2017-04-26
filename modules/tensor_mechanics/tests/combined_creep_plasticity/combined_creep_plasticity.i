@@ -122,11 +122,13 @@
     poissons_ratio = 0.3
   [../]
   [./creep_plas]
-    type = ComputeReturnMappingStress
+    type = ComputeMultipleInelasticStress
     block = 0
-    return_mapping_models = 'creep plas'
+    tangent_operator = elastic
+    inelastic_models = 'creep plas'
     max_iterations = 50
     absolute_tolerance = 1e-05
+    combined_inelastic_strain_weights = '0.0 1.0'
   [../]
   [./creep]
     type = PowerLawCreepStressUpdate

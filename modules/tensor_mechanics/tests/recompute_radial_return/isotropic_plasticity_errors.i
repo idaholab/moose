@@ -80,8 +80,9 @@
     absolute_tolerance = 1e-5
   [../]
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    return_mapping_models = 'isotropic_plasticity'
+    type = ComputeMultipleInelasticStress
+    tangent_operator = elastic
+    inelastic_models = 'isotropic_plasticity'
   [../]
 []
 

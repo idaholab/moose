@@ -4,20 +4,20 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
-#define COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
+#ifndef CAPPEDDRUCKERPRAGERSTRESSUPDATE_H
+#define CAPPEDDRUCKERPRAGERSTRESSUPDATE_H
 
-#include "TwoParameterPlasticity.h"
+#include "TwoParameterPlasticityStressUpdate.h"
 #include "TensorMechanicsHardeningModel.h"
 #include "TensorMechanicsPlasticDruckerPrager.h"
 
-class ComputeCappedDruckerPragerStress;
+class CappedDruckerPragerStressUpdate;
 
 template <>
-InputParameters validParams<ComputeCappedDruckerPragerStress>();
+InputParameters validParams<CappedDruckerPragerStressUpdate>();
 
 /**
- * ComputeCappedDruckerPragerStress performs the return-map
+ * CappedDruckerPragerStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
  * models that describe capped Drucker-Prager plasticity.
  *
@@ -55,10 +55,10 @@ InputParameters validParams<ComputeCappedDruckerPragerStress>();
  * ComputeMultiPlasticityStress with DruckerPrager and MeanCap(s)
  * user objects.
  */
-class ComputeCappedDruckerPragerStress : public TwoParameterPlasticity
+class CappedDruckerPragerStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
-  ComputeCappedDruckerPragerStress(const InputParameters & parameters);
+  CappedDruckerPragerStressUpdate(const InputParameters & parameters);
 
 protected:
   /// Hardening model for cohesion, friction and dilation angles
@@ -149,7 +149,7 @@ protected:
 
   virtual void initialiseReturnProcess() override;
 
-  virtual void finaliseReturnProcess(const RankTwoTensor & rotation_increment) override;
+  virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
 
@@ -183,4 +183,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
+#endif // CAPPEDDRUCKERPRAGERSTRESSUPDATE_H

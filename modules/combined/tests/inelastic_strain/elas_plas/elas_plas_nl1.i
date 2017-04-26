@@ -277,8 +277,8 @@
     block = 1
   [../]
   [./stress]
-    type = ComputeReturnMappingStress
-    return_mapping_models = 'isoplas'
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'isoplas'
     block = 1
   [../]
   [./isoplas]

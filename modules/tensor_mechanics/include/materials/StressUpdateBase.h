@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef STATEUPDATEBASE_H
-#define STATEUPDATEBASE_H
+#ifndef STRESSUPDATEBASE_H
+#define STRESSUPDATEBASE_H
 
 #include "Conversion.h"
 #include "InputParameters.h"
@@ -14,13 +14,13 @@
 #include "RankTwoTensor.h"
 
 // Forward declaration
-class StateUpdateBase;
+class StressUpdateBase;
 
 template <>
-InputParameters validParams<StateUpdateBase>();
+InputParameters validParams<StressUpdateBase>();
 
 /**
- * StateUpdateBase is a material that is not called by MOOSE because
+ * StressUpdateBase is a material that is not called by MOOSE because
  * of the compute=false flag set in the parameter list.  This class is a base class
  * for materials that perform some internal computational
  * procedure (such as an iterative return-mapping procedure) to compute an
@@ -29,12 +29,12 @@ InputParameters validParams<StateUpdateBase>();
  * plastic strains).  The computational procedure must return the admissible stress
  * and a decomposition of the applied strain into elastic and inelastic components.
  * All materials inheriting from this class must be called by a separate material,
- * such as ComputeAdmissibleState
+ * such as ComputeMultipleInelasticStress
  */
-class StateUpdateBase : public Material
+class StressUpdateBase : public Material
 {
 public:
-  StateUpdateBase(const InputParameters & parameters);
+  StressUpdateBase(const InputParameters & parameters);
 
   /**
    * Given a strain increment that results in a trial stress, perform some
@@ -43,7 +43,7 @@ public:
    * strain increment, as well as d(stress)/d(strain) (or some approximation
    * to it).
    *
-   * This method is called by ComputeAdmissibleState.
+   * This method is called by ComputeMultipleInelasticStress.
    * This method is pure virutal: all inheriting classes must overwrite this method.
    *
    * @param strain_increment Upon input: the strain increment.  Upon output: the elastic strain
@@ -79,4 +79,4 @@ public:
   ///@}
 };
 
-#endif // STATEUPDATEBASE_H
+#endif // STRESSUPDATEBASE_H

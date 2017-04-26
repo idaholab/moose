@@ -4,33 +4,33 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTEADMISSIBLESTATE_H
-#define COMPUTEADMISSIBLESTATE_H
+#ifndef COMPUTEMULTIPLEINELASTICSTRESS_H
+#define COMPUTEMULTIPLEINELASTICSTRESS_H
 
 #include "ComputeFiniteStrainElasticStress.h"
 
-class StateUpdateBase;
+class StressUpdateBase;
 
 /**
- * ComputeAdmissibleState computes the stress, the consistent tangent
+ * ComputeMultipleInelasticStress computes the stress, the consistent tangent
  * operator (or an approximation to it), and a decomposition of the strain
- * into elastic and inelastic parts.  Finite strains are used by default.
+ * into elastic and inelastic parts.  By default finite strains are assumed.
  *
  * The elastic strain is calculated by subtracting the computed inelastic strain
  * increment tensor from the mechanical strain tensor.  Mechanical strain is
  * considered as the sum of the elastic and inelastic (plastic, creep, ect) strains.
  *
  * This material is used to call the recompute iterative materials of a number
- * of specified inelastic models that inherit from StateUpdateBase.  It iterates
+ * of specified inelastic models that inherit from StressUpdateBase.  It iterates
  * over the specified inelastic models until the change in stress is within
  * a user-specified tolerance, in order to produce the stress, the consistent
  * tangent operator and the elastic and inelastic strains for the time increment.
  */
 
-class ComputeAdmissibleState : public ComputeFiniteStrainElasticStress
+class ComputeMultipleInelasticStress : public ComputeFiniteStrainElasticStress
 {
 public:
-  ComputeAdmissibleState(const InputParameters & parameters);
+  ComputeMultipleInelasticStress(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -66,7 +66,7 @@ protected:
                                         RankTwoTensor & combined_inelastic_strain_increment);
 
   ///@{Input parameters associated with the recompute iteration to return the stress state to the yield surface
-  const unsigned int _max_its;
+  const unsigned int _max_iterations;
   const Real _relative_tolerance;
   const Real _absolute_tolerance;
   const bool _output_iteration_info;
@@ -97,7 +97,7 @@ protected:
   const std::vector<Real> _inelastic_weights;
 
   /// the consistent tangent operators computed by each plastic model
-  std::vector<RankFourTensor> _cto;
+  std::vector<RankFourTensor> _consistent_tangent_operator;
 
   /**
    * The user supplied list of inelastic models to use in the simulation
@@ -106,7 +106,7 @@ protected:
    * models last to allow for the case when a creep model relaxes the stress state
    * inside of the yield surface in an iteration.
    */
-  std::vector<StateUpdateBase *> _models;
+  std::vector<StressUpdateBase *> _models;
 };
 
-#endif // COMPUTEADMISSIBLESTATE_H
+#endif // COMPUTEMULTIPLEINELASTICSTRESS_H

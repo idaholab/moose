@@ -75,8 +75,9 @@
     absolute_tolerance = 1e-5
   [../]
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    return_mapping_models = 'viscoplasticity'
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'viscoplasticity'
+    tangent_operator = elastic
   [../]
 []
 

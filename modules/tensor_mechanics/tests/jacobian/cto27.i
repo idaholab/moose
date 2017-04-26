@@ -1,4 +1,5 @@
-# CappedDruckerPrager
+# CappedDruckerPrager and CappedWeakPlane, both with all parameters softening/hardening.
+# With large tolerance in ComputeMultipleInelasticStress so that only 1 iteration is performed
 
 [Mesh]
   type = GeneratedMesh
@@ -74,6 +75,37 @@
     yield_function_tolerance = 1E-11     # irrelevant here
     internal_constraint_tolerance = 1E-9 # irrelevant here
   [../]
+  [./wp_ts]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 100
+    value_residual = 100
+    rate = 1
+  [../]
+  [./wp_cs]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 1
+    value_residual = 0
+    internal_0 = -2
+    internal_limit = 0
+  [../]
+  [./wp_coh]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 1
+    value_residual = 2
+    rate = 1
+  [../]
+  [./wp_tanphi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 1.0
+    value_residual = 0.5
+    rate = 2
+  [../]
+  [./wp_tanpsi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 0.1
+    value_residual = 0.05
+    rate = 3
+  [../]
 []
 
 [Materials]
@@ -89,17 +121,33 @@
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
-    inelastic_models = dp
+    inelastic_models = 'dp wp'
     initial_stress = '6 5 4  5 7 2  4 2 2'
+    relative_tolerance = 1E4
+    absolute_tolerance = 2
+    tangent_operator = nonlinear
   [../]
   [./dp]
     type = CappedDruckerPragerStressUpdate
+    name_prepender = cdp
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs
     yield_function_tol = 1E-11
     tip_smoother = 1
     smoothing_tol = 1
+  [../]
+  [./wp]
+    type = CappedWeakPlaneStressUpdate
+    name_prepender = cwp
+    cohesion = wp_coh
+    tan_friction_angle = wp_tanphi
+    tan_dilation_angle = wp_tanpsi
+    tensile_strength = wp_ts
+    compressive_strength = wp_cs
+    tip_smoother = 0
+    smoothing_tol = 1
+    yield_function_tol = 1E-11
   [../]
 []
 

@@ -4,21 +4,21 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTECAPPEDWEAKPLANESTRESS_H
-#define COMPUTECAPPEDWEAKPLANESTRESS_H
+#ifndef CAPPEDWEAKPLANESTRESSUPDATE_H
+#define CAPPEDWEAKPLANESTRESSUPDATE_H
 
-#include "TwoParameterPlasticity.h"
+#include "TwoParameterPlasticityStressUpdate.h"
 #include "TensorMechanicsHardeningModel.h"
 
 #include <array>
 
-class ComputeCappedWeakPlaneStress;
+class CappedWeakPlaneStressUpdate;
 
 template <>
-InputParameters validParams<ComputeCappedWeakPlaneStress>();
+InputParameters validParams<CappedWeakPlaneStressUpdate>();
 
 /**
- * ComputeCappedWeakPlaneStress performs the return-map
+ * CappedWeakPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
  * models that describe capped weak-plane plasticity
  *
@@ -26,10 +26,10 @@ InputParameters validParams<ComputeCappedWeakPlaneStress>();
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedWeakPlaneStress : public TwoParameterPlasticity
+class CappedWeakPlaneStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
-  ComputeCappedWeakPlaneStress(const InputParameters & parameters);
+  CappedWeakPlaneStressUpdate(const InputParameters & parameters);
 
 protected:
   /// Hardening model for cohesion
@@ -146,7 +146,7 @@ protected:
 
   virtual void initialiseReturnProcess() override;
 
-  virtual void finaliseReturnProcess(const RankTwoTensor & rotation_increment) override;
+  virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
 
@@ -159,4 +159,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // COMPUTECAPPEDWEAKPLANESTRESS_H
+#endif // CAPPEDWEAKPLANESTRESSUPDATE_H

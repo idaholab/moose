@@ -7,7 +7,7 @@
 #ifndef RECOMPUTERADIALRETURN_H
 #define RECOMPUTERADIALRETURN_H
 
-#include "StateUpdateBase.h"
+#include "StressUpdateBase.h"
 
 // Forward declaration
 class RadialReturnStressUpdate;
@@ -28,7 +28,7 @@ InputParameters validParams<RadialReturnStressUpdate>();
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
  */
 
-class RadialReturnStressUpdate : public StateUpdateBase
+class RadialReturnStressUpdate : public StressUpdateBase
 {
 public:
   RadialReturnStressUpdate(const InputParameters & parameters,

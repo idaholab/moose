@@ -4,22 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ComputeCappedWeakPlaneCosseratStress.h"
+#include "CappedWeakPlaneCosseratStressUpdate.h"
 
 #include "libmesh/utility.h"
 
 template <>
 InputParameters
-validParams<ComputeCappedWeakPlaneCosseratStress>()
+validParams<CappedWeakPlaneCosseratStressUpdate>()
 {
-  InputParameters params = validParams<ComputeCappedWeakPlaneStress>();
+  InputParameters params = validParams<CappedWeakPlaneStressUpdate>();
   params.addClassDescription("Capped weak-plane plasticity Cosserat stress calculator");
   return params;
 }
 
-ComputeCappedWeakPlaneCosseratStress::ComputeCappedWeakPlaneCosseratStress(
+CappedWeakPlaneCosseratStressUpdate::CappedWeakPlaneCosseratStressUpdate(
     const InputParameters & parameters)
-  : ComputeCappedWeakPlaneStress(parameters),
+  : CappedWeakPlaneStressUpdate(parameters),
     _curvature(getMaterialPropertyByName<RankTwoTensor>("curvature")),
     _elastic_flexural_rigidity_tensor(
         getMaterialPropertyByName<RankFourTensor>("elastic_flexural_rigidity_tensor")),
@@ -30,30 +30,30 @@ ComputeCappedWeakPlaneCosseratStress::ComputeCappedWeakPlaneCosseratStress(
 }
 
 void
-ComputeCappedWeakPlaneCosseratStress::initQpStatefulProperties()
+CappedWeakPlaneCosseratStressUpdate::initQpStatefulProperties()
 {
-  ComputeCappedWeakPlaneStress::initQpStatefulProperties();
+  CappedWeakPlaneStressUpdate::initQpStatefulProperties();
   _couple_stress[_qp].zero();
 }
 
 void
-ComputeCappedWeakPlaneCosseratStress::initialiseReturnProcess()
+CappedWeakPlaneCosseratStressUpdate::initialiseReturnProcess()
 {
-  ComputeCappedWeakPlaneStress::initialiseReturnProcess();
+  CappedWeakPlaneStressUpdate::initialiseReturnProcess();
   _couple_stress[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];
   if (_fe_problem.currentlyComputingJacobian())
     _Jacobian_mult_couple[_qp] = _elastic_flexural_rigidity_tensor[_qp];
 }
 
 void
-ComputeCappedWeakPlaneCosseratStress::setStressAfterReturn(const RankTwoTensor & stress_trial,
-                                                           Real p_ok,
-                                                           Real q_ok,
-                                                           Real gaE,
-                                                           const std::vector<Real> & /*intnl*/,
-                                                           const f_and_derivs & smoothed_q,
-                                                           const RankFourTensor & Eijkl,
-                                                           RankTwoTensor & stress) const
+CappedWeakPlaneCosseratStressUpdate::setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                                          Real p_ok,
+                                                          Real q_ok,
+                                                          Real gaE,
+                                                          const std::vector<Real> & /*intnl*/,
+                                                          const f_and_derivs & smoothed_q,
+                                                          const RankFourTensor & Eijkl,
+                                                          RankTwoTensor & stress) const
 {
   stress = stress_trial;
   stress(2, 2) = p_ok;
@@ -71,7 +71,7 @@ ComputeCappedWeakPlaneCosseratStress::setStressAfterReturn(const RankTwoTensor &
 }
 
 void
-ComputeCappedWeakPlaneCosseratStress::consistentTangentOperator(
+CappedWeakPlaneCosseratStressUpdate::consistentTangentOperator(
     const RankTwoTensor & /*stress_trial*/,
     Real /*p_trial*/,
     Real q_trial,
@@ -177,7 +177,7 @@ ComputeCappedWeakPlaneCosseratStress::consistentTangentOperator(
 }
 
 RankTwoTensor
-ComputeCappedWeakPlaneCosseratStress::dqdstress(const RankTwoTensor & stress) const
+CappedWeakPlaneCosseratStressUpdate::dqdstress(const RankTwoTensor & stress) const
 {
   RankTwoTensor deriv = RankTwoTensor();
   const Real q = std::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
@@ -196,7 +196,7 @@ ComputeCappedWeakPlaneCosseratStress::dqdstress(const RankTwoTensor & stress) co
 }
 
 RankFourTensor
-ComputeCappedWeakPlaneCosseratStress::d2qdstress2(const RankTwoTensor & stress) const
+CappedWeakPlaneCosseratStressUpdate::d2qdstress2(const RankTwoTensor & stress) const
 {
   RankFourTensor d2 = RankFourTensor();
 

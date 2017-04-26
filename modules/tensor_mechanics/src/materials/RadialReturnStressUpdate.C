@@ -12,7 +12,7 @@ template <>
 InputParameters
 validParams<RadialReturnStressUpdate>()
 {
-  InputParameters params = validParams<StateUpdateBase>();
+  InputParameters params = validParams<StressUpdateBase>();
   params.addClassDescription("Calculates the effective inelastic strain increment required to "
                              "return the isotropic stress state to a J2 yield surface.  This class "
                              "is intended to be a parent class for classes with specific "
@@ -41,7 +41,7 @@ validParams<RadialReturnStressUpdate>()
 
 RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters,
                                                    const std::string inelastic_strain_name)
-  : StateUpdateBase(parameters),
+  : StressUpdateBase(parameters),
     _max_its(parameters.get<unsigned int>("max_iterations")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),

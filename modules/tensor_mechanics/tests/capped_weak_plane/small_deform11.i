@@ -534,8 +534,14 @@
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = stress
+    initial_stress = '0 0 2 0 0 4 2 4 6'
+    perform_finite_strain_rotations = false
+  [../]
   [./stress]
-    type = ComputeCappedWeakPlaneStress
+    type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi
@@ -545,7 +551,6 @@
     tip_smoother = 0
     smoothing_tol = 1
     yield_function_tol = 1E-3
-    initial_stress = '0 0 2 0 0 4 2 4 6'
     perfect_guess = false
   [../]
 []

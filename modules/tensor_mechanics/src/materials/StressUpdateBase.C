@@ -4,13 +4,13 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "StateUpdateBase.h"
+#include "StressUpdateBase.h"
 
 #include "MooseMesh.h"
 
 template <>
 InputParameters
-validParams<StateUpdateBase>()
+validParams<StressUpdateBase>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Calculates an admissible state (stress that lies on or within the "
@@ -24,10 +24,10 @@ validParams<StateUpdateBase>()
   return params;
 }
 
-StateUpdateBase::StateUpdateBase(const InputParameters & parameters) : Material(parameters) {}
+StressUpdateBase::StressUpdateBase(const InputParameters & parameters) : Material(parameters) {}
 
 void
-StateUpdateBase::setQp(unsigned int qp)
+StressUpdateBase::setQp(unsigned int qp)
 {
   _qp = qp;
 }

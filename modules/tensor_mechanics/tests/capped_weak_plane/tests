@@ -2,32 +2,32 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
+    expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
   [../]
   [./except2]
     type = 'RunException'
     input = 'except2.i'
-    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
+    expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
   [../]
   [./except3]
     type = 'RunException'
     input = 'except3.i'
-    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle'
+    expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane friction angle must not be less than dilation angle'
   [../]
   [./except4]
     type = 'RunException'
     input = 'except4.i'
-    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative'
+    expect_err = 'CappedWeakPlaneStressUpdate: Weak-plane cohesion must not be negative'
   [../]
   [./except5]
     type = 'RunException'
     input = 'except5.i'
-    expect_err = 'ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol'
+    expect_err = 'CappedWeakPlaneStressUpdate: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol'
   [../]
   [./except6]
     type = 'RunException'
     input = 'except6.i'
-    expect_err = 'ComputeCappedWeakInclinedPlaneStress: normal_vector must not have zero length'
+    expect_err = 'CappedWeakInclinedPlaneStressUpdate: normal_vector must not have zero length'
   [../]
   [./small1]
     type = 'CSVDiff'

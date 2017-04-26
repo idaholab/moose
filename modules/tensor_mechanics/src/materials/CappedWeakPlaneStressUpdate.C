@@ -4,15 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ComputeCappedWeakPlaneStress.h"
+#include "CappedWeakPlaneStressUpdate.h"
 
 #include "libmesh/utility.h"
 
 template <>
 InputParameters
-validParams<ComputeCappedWeakPlaneStress>()
+validParams<CappedWeakPlaneStressUpdate>()
 {
-  InputParameters params = validParams<TwoParameterPlasticity>();
+  InputParameters params = validParams<TwoParameterPlasticityStressUpdate>();
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "cohesion",
@@ -50,8 +50,8 @@ validParams<ComputeCappedWeakPlaneStress>()
   return params;
 }
 
-ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters & parameters)
-  : TwoParameterPlasticity(parameters, 3, 2),
+CappedWeakPlaneStressUpdate::CappedWeakPlaneStressUpdate(const InputParameters & parameters)
+  : TwoParameterPlasticityStressUpdate(parameters, 3, 2),
     _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
     _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
     _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
@@ -67,37 +67,37 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
   // With arbitary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
   if (_tan_phi.value(0) < 0 || _tan_psi.value(0) < 0)
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in "
+    mooseError("CappedWeakPlaneStressUpdate: Weak-plane friction and dilation angles must lie in "
                "[0, Pi/2]");
   if (_tan_phi.value(0) < _tan_psi.value(0))
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than "
+    mooseError("CappedWeakPlaneStressUpdate: Weak-plane friction angle must not be less than "
                "dilation angle");
   if (_cohesion.value(0) < 0)
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative");
+    mooseError("CappedWeakPlaneStressUpdate: Weak-plane cohesion must not be negative");
   if (_tstrength.value(0) + _cstrength.value(0) <= _smoothing_tol)
-    mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive "
+    mooseError("CappedWeakPlaneStressUpdate: Weak plane tensile strength plus compressive "
                "strength must be greater than smoothing_tol");
 }
 
 void
-ComputeCappedWeakPlaneStress::initialiseReturnProcess()
+CappedWeakPlaneStressUpdate::initialiseReturnProcess()
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
 
 void
-ComputeCappedWeakPlaneStress::finaliseReturnProcess(const RankTwoTensor & /*rotation_increment*/)
+CappedWeakPlaneStressUpdate::finalizeReturnProcess(const RankTwoTensor & /*rotation_increment*/)
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
 
 void
-ComputeCappedWeakPlaneStress::preReturnMap(Real /*p_trial*/,
-                                           Real q_trial,
-                                           const RankTwoTensor & stress_trial,
-                                           const std::vector<Real> & /*intnl_old*/,
-                                           const std::vector<Real> & yf,
-                                           const RankFourTensor & /*Eijkl*/)
+CappedWeakPlaneStressUpdate::preReturnMap(Real /*p_trial*/,
+                                          Real q_trial,
+                                          const RankTwoTensor & stress_trial,
+                                          const std::vector<Real> & /*intnl_old*/,
+                                          const std::vector<Real> & yf,
+                                          const RankFourTensor & /*Eijkl*/)
 {
   // If it's obvious, then simplify the return-type
   if (yf[1] >= 0)
@@ -112,7 +112,7 @@ ComputeCappedWeakPlaneStress::preReturnMap(Real /*p_trial*/,
 }
 
 void
-ComputeCappedWeakPlaneStress::computePQ(const RankTwoTensor & stress, Real & p, Real & q) const
+CappedWeakPlaneStressUpdate::computePQ(const RankTwoTensor & stress, Real & p, Real & q) const
 {
   p = stress(2, 2);
   // Because the following is not explicitly symmeterised, it is useful for the Cosserat case too
@@ -120,21 +120,21 @@ ComputeCappedWeakPlaneStress::computePQ(const RankTwoTensor & stress, Real & p, 
 }
 
 void
-ComputeCappedWeakPlaneStress::setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const
+CappedWeakPlaneStressUpdate::setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const
 {
   Epp = Eijkl(2, 2, 2, 2);
   Eqq = Eijkl(0, 2, 0, 2);
 }
 
 void
-ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_trial,
-                                                   Real p_ok,
-                                                   Real q_ok,
-                                                   Real gaE,
-                                                   const std::vector<Real> & /*intnl*/,
-                                                   const f_and_derivs & smoothed_q,
-                                                   const RankFourTensor & Eijkl,
-                                                   RankTwoTensor & stress) const
+CappedWeakPlaneStressUpdate::setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                                  Real p_ok,
+                                                  Real q_ok,
+                                                  Real gaE,
+                                                  const std::vector<Real> & /*intnl*/,
+                                                  const f_and_derivs & smoothed_q,
+                                                  const RankFourTensor & Eijkl,
+                                                  RankTwoTensor & stress) const
 {
   stress = stress_trial;
   stress(2, 2) = p_ok;
@@ -152,12 +152,12 @@ ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_
 }
 
 void
-ComputeCappedWeakPlaneStress::setIntnlDerivatives(Real /*p_trial*/,
-                                                  Real q_trial,
-                                                  Real /*p*/,
-                                                  Real q,
-                                                  const std::vector<Real> & intnl,
-                                                  std::vector<std::vector<Real>> & dintnl) const
+CappedWeakPlaneStressUpdate::setIntnlDerivatives(Real /*p_trial*/,
+                                                 Real q_trial,
+                                                 Real /*p*/,
+                                                 Real q,
+                                                 const std::vector<Real> & intnl,
+                                                 std::vector<std::vector<Real>> & dintnl) const
 {
   const Real tanpsi = _tan_psi.value(intnl[0]);
   dintnl[0][0] = 0.0;
@@ -168,17 +168,17 @@ ComputeCappedWeakPlaneStress::setIntnlDerivatives(Real /*p_trial*/,
 }
 
 void
-ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*stress_trial*/,
-                                                        Real /*p_trial*/,
-                                                        Real q_trial,
-                                                        const RankTwoTensor & /*stress*/,
-                                                        Real /*p*/,
-                                                        Real q,
-                                                        Real gaE,
-                                                        const f_and_derivs & smoothed_q,
-                                                        const RankFourTensor & Eijkl,
-                                                        bool compute_full_tangent_operator,
-                                                        RankFourTensor & cto) const
+CappedWeakPlaneStressUpdate::consistentTangentOperator(const RankTwoTensor & /*stress_trial*/,
+                                                       Real /*p_trial*/,
+                                                       Real q_trial,
+                                                       const RankTwoTensor & /*stress*/,
+                                                       Real /*p*/,
+                                                       Real q,
+                                                       Real gaE,
+                                                       const f_and_derivs & smoothed_q,
+                                                       const RankFourTensor & Eijkl,
+                                                       bool compute_full_tangent_operator,
+                                                       RankFourTensor & cto) const
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
@@ -257,10 +257,10 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
 }
 
 void
-ComputeCappedWeakPlaneStress::yieldFunctionValues(Real p,
-                                                  Real q,
-                                                  const std::vector<Real> & intnl,
-                                                  std::vector<Real> & yf) const
+CappedWeakPlaneStressUpdate::yieldFunctionValues(Real p,
+                                                 Real q,
+                                                 const std::vector<Real> & intnl,
+                                                 std::vector<Real> & yf) const
 {
   yf[0] = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
           _cohesion.value(intnl[0]);
@@ -277,10 +277,10 @@ ComputeCappedWeakPlaneStress::yieldFunctionValues(Real p,
 }
 
 void
-ComputeCappedWeakPlaneStress::computeAllQ(Real p,
-                                          Real q,
-                                          const std::vector<Real> & intnl,
-                                          std::vector<f_and_derivs> & all_q) const
+CappedWeakPlaneStressUpdate::computeAllQ(Real p,
+                                         Real q,
+                                         const std::vector<Real> & intnl,
+                                         std::vector<f_and_derivs> & all_q) const
 {
   // yield function values
   all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -
@@ -372,13 +372,13 @@ ComputeCappedWeakPlaneStress::computeAllQ(Real p,
 }
 
 void
-ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial,
-                                             Real q_trial,
-                                             const std::vector<Real> & intnl_old,
-                                             Real & p,
-                                             Real & q,
-                                             Real & gaE,
-                                             std::vector<Real> & intnl) const
+CappedWeakPlaneStressUpdate::initialiseVars(Real p_trial,
+                                            Real q_trial,
+                                            const std::vector<Real> & intnl_old,
+                                            Real & p,
+                                            Real & q,
+                                            Real & gaE,
+                                            std::vector<Real> & intnl) const
 {
   const Real tanpsi = _tan_psi.value(intnl_old[0]);
 
@@ -467,12 +467,12 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial,
 }
 
 void
-ComputeCappedWeakPlaneStress::setIntnlValues(Real p_trial,
-                                             Real q_trial,
-                                             Real p,
-                                             Real q,
-                                             const std::vector<Real> & intnl_old,
-                                             std::vector<Real> & intnl) const
+CappedWeakPlaneStressUpdate::setIntnlValues(Real p_trial,
+                                            Real q_trial,
+                                            Real p,
+                                            Real q,
+                                            const std::vector<Real> & intnl_old,
+                                            std::vector<Real> & intnl) const
 {
   intnl[0] = intnl_old[0] + (q_trial - q) / _Eqq;
   const Real tanpsi = _tan_psi.value(intnl[0]);
@@ -480,7 +480,7 @@ ComputeCappedWeakPlaneStress::setIntnlValues(Real p_trial,
 }
 
 RankTwoTensor
-ComputeCappedWeakPlaneStress::dpdstress(const RankTwoTensor & /*stress*/) const
+CappedWeakPlaneStressUpdate::dpdstress(const RankTwoTensor & /*stress*/) const
 {
   RankTwoTensor deriv = RankTwoTensor();
   deriv(2, 2) = 1.0;
@@ -488,13 +488,13 @@ ComputeCappedWeakPlaneStress::dpdstress(const RankTwoTensor & /*stress*/) const
 }
 
 RankFourTensor
-ComputeCappedWeakPlaneStress::d2pdstress2(const RankTwoTensor & /*stress*/) const
+CappedWeakPlaneStressUpdate::d2pdstress2(const RankTwoTensor & /*stress*/) const
 {
   return RankFourTensor();
 }
 
 RankTwoTensor
-ComputeCappedWeakPlaneStress::dqdstress(const RankTwoTensor & stress) const
+CappedWeakPlaneStressUpdate::dqdstress(const RankTwoTensor & stress) const
 {
   RankTwoTensor deriv = RankTwoTensor();
   const Real q = std::sqrt(Utility::pow<2>(stress(2, 0)) + Utility::pow<2>(stress(2, 1)));
@@ -513,7 +513,7 @@ ComputeCappedWeakPlaneStress::dqdstress(const RankTwoTensor & stress) const
 }
 
 RankFourTensor
-ComputeCappedWeakPlaneStress::d2qdstress2(const RankTwoTensor & stress) const
+CappedWeakPlaneStressUpdate::d2qdstress2(const RankTwoTensor & stress) const
 {
   RankFourTensor d2 = RankFourTensor();
 

@@ -884,8 +884,13 @@
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = stress
+    perform_finite_strain_rotations = false
+  [../]
   [./stress]
-    type = ComputeCappedWeakPlaneCosseratStress
+    type = CappedWeakPlaneCosseratStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi

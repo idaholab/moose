@@ -1,5 +1,23 @@
-# apply repeated stretches in x, y and z directions, so that mean_stress = 0
-# This maps out the yield surface in the octahedral plane for zero mean stress
+# Use ComputeMultipleInelasticStress with two inelastic models: CappedDruckerPrager and CappedWeakPlane.
+# The relative_tolerance and absolute_tolerance parameters are set small so that many
+# Picard iterations need to be performed.
+#
+# The CappedDruckerPrager has tensile strength 3E2 and large cohesion,
+# and the return-map sets stress = trial_stress - diag(d, d, d), for
+# some d to be determined
+# The CappedWeakPlane has tensile strength zero and large cohesion,
+# and the return-map sets stress = diag(t - v*w/(1-v), t - v*w/(1-v), t - w)
+# where t is trial stress, v is Poisson's ratio, and w is to be determined
+#
+# d and w are determined by demanding that the final stress shouldn't depend
+# on the order of return-mapping (DP first then WP, or WP first then DP).
+#
+# Let the initial_stress = diag(I, I, I).
+# The returned stress is diag(I - d - v*w/(1-v), I - d - v*w/(1-v), I - d - w).  This
+# must obey Tr(stress) <= dp_tensile_strength, and I-d-w <= wp_tensile_strength.
+#
+# For I = 1E3, and v = 0.2, the solution is d = 800 and w = 200, with
+# stress = diag(150, 150, 0)
 
 [Mesh]
   type = GeneratedMesh
@@ -37,19 +55,19 @@
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '-1.5E-6*x+2E-6*x*sin(t)'
+    function = 0
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '2E-6*y*sin(2*t)'
+    function = 0
   [../]
   [./z]
     type = FunctionPresetBC
     variable = disp_z
     boundary = 'front back'
-    function = '-2E-6*z*(sin(t)+sin(2*t))'
+    function = 0
   [../]
 []
 
@@ -78,7 +96,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./yield_fcn]
+  [./yield_fcn_dp]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn_wp]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -127,11 +149,17 @@
     index_i = 2
     index_j = 2
   [../]
-  [./yield_fcn_auxk]
+  [./yield_fcn_dp_auxk]
     type = MaterialStdVectorAux
-    index = 0
-    property = plastic_yield_function
-    variable = yield_fcn
+    index = 1    # this is the tensile yield function - it should be zero
+    property = cdp_plastic_yield_function
+    variable = yield_fcn_dp
+  [../]
+  [./yield_fcn_wp_auxk]
+    type = MaterialStdVectorAux
+    index = 1    # this is the tensile yield function - it should be zero
+    property = cwp_plastic_yield_function
+    variable = yield_fcn_wp
   [../]
 []
 
@@ -166,35 +194,30 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./f]
+  [./f_dp]
     type = PointValue
     point = '0 0 0'
-    variable = yield_fcn
+    variable = yield_fcn_dp
   [../]
-  [./f0]
+  [./f_wp]
     type = PointValue
     point = '0 0 0'
-    variable = yield_fcn
-  [../]
-  [./f1]
-    type = PointValue
-    point = '0 0 0'
-    variable = yield_fcn
+    variable = yield_fcn_wp
   [../]
 []
 
 [UserObjects]
   [./ts]
     type = TensorMechanicsHardeningConstant
-    value = 1000
+    value = 300
   [../]
   [./cs]
     type = TensorMechanicsHardeningConstant
-    value = 1000
+    value = 1E4
   [../]
   [./mc_coh]
     type = TensorMechanicsHardeningConstant
-    value = 10
+    value = 1E4
   [../]
   [./mc_phi]
     type = TensorMechanicsHardeningConstant
@@ -210,18 +233,36 @@
     mc_cohesion = mc_coh
     mc_friction_angle = mc_phi
     mc_dilation_angle = mc_psi
-    mc_interpolation_scheme = lode_zero
     internal_constraint_tolerance = 1 # irrelevant here
     yield_function_tolerance = 1      # irrelevant here
+  [../]
+  [./wp_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 1E4
+  [../]
+  [./wp_tanphi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.5
+  [../]
+  [./wp_tanpsi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.1111077
+  [../]
+  [./wp_t_strength]
+    type = TensorMechanicsHardeningConstant
+    value = 0
+  [../]
+  [./wp_c_strength]
+    type = TensorMechanicsHardeningConstant
+    value = 1E4
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    block = 0
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 1E7'
+    type = ComputeIsotropicElasticityTensor
+    poissons_ratio = 0.2
+    youngs_modulus = 1E7
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
@@ -230,32 +271,44 @@
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
-    inelastic_models = cdp
+    relative_tolerance = 1E-8
+    inelastic_models = 'cdp cwp'
     perform_finite_strain_rotations = false
+    initial_stress = '1E3 0 0  0 1E3 0  0 0 1E3'
   [../]
   [./cdp]
     type = CappedDruckerPragerStressUpdate
+    name_prepender = cdp
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs
     yield_function_tol = 1E-5
-    tip_smoother = 4
-    smoothing_tol = 1E-5
+    tip_smoother = 1E3
+    smoothing_tol = 1E3
+  [../]
+  [./cwp]
+    type = CappedWeakPlaneStressUpdate
+    name_prepender = cwp
+    cohesion = wp_coh
+    tan_friction_angle = wp_tanphi
+    tan_dilation_angle = wp_tanpsi
+    tensile_strength = wp_t_strength
+    compressive_strength = wp_c_strength
+    tip_smoother = 1E3
+    smoothing_tol = 1E3
+    yield_function_tol = 1E-5
   [../]
 []
 
 
 [Executioner]
-  end_time = 100
+  end_time = 1
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = small_deform2_lode_zero
-  exodus = false
-  [./csv]
-    type = CSV
-  [../]
+  file_base = dp_and_wp
+  csv = true
 []
