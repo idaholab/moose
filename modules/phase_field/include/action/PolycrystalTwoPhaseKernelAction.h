@@ -1,4 +1,4 @@
-/****************************************************************/
+
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
 /*          All contents are licensed under LGPL V2.1           */
@@ -20,8 +20,9 @@ public:
   PolycrystalTwoPhaseKernelAction(const InputParameters & params);
 
 protected:
-  /// number of phases (here is 2)
-  const unsigned int _phase_num;
+  void setupACBulkKernel(InputParameters params, std::string var_name) override;
+  std::string getACBulkName() override { return "ACTwoPhaseGrGrPoly"; }
+
   /// number of grains/variants of second phase
   unsigned int _second_phase_op_num;
   /// Ratio of surface energy to GB energy, e.g., interphase energy

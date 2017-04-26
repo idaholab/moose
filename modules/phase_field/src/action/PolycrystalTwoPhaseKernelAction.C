@@ -15,8 +15,10 @@ validParams<PolycrystalTwoPhaseKernelAction>()
 {
   InputParameters params = validParams<PolycrystalKernelAction>();
   params.addClassDescription("Set up Two-Phase polycrystal kernels");
-  params.addRequiredParam<unsigned int>(
-      "second_phase_op_num", "specifies the total number of grains/variants of the second phase");
+  params.addParam<unsigned int>(
+      "second_phase_op_num",
+      1,
+      "specifies the total number of grains/variants of the second phase");
   params.addParam<Real>(
       "en_ratio", 1.0, "Ratio of surface energy to GB energy, e.g., interphase energy");
   params.addParam<Real>(
@@ -27,10 +29,17 @@ validParams<PolycrystalTwoPhaseKernelAction>()
 
 PolycrystalTwoPhaseKernelAction::PolycrystalTwoPhaseKernelAction(const InputParameters & params)
   : PolycrystalKernelAction(params),
-    _phase_num(2),
     _second_phase_op_num(getParam<unsigned int>("second_phase_op_num")),
     _en_ratio(getParam<Real>("en_ratio")),
     _second_phase_en_ratio(getParam<Real>("second_phase_en_ratio")),
     _mob_ratio(getParam<Real>("mob_ratio"))
 {
+}
+
+void
+PolycrystalTwoPhaseKernelAction::setupACBulkKernel(InputParameters params, std::string var_name)
+{
+  params.set<unsigned int>("op_index") = _op;
+
+  PolycrystalKernelAction::setupACBulkKernel(params, var_name);
 }
