@@ -1,6 +1,9 @@
 [Mesh]
   type = FileMesh
   file = constraints.e
+  # NearestNodeLocator, which is needed by TiedValueConstraint,
+  # only works with ReplicatedMesh currently
+  parallel_type = replicated
 [../]
 
 [Variables]

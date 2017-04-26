@@ -1,6 +1,9 @@
 [Mesh]
   type = FileMesh
   file = split_blocks.e
+  # NearestNodeLocator, which is needed by CoupledTiedValueConstraint,
+  # only works with ReplicatedMesh currently
+  parallel_type = replicated
 []
 
 [Variables]
