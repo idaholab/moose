@@ -1,6 +1,7 @@
 from time import sleep
 from timeit import default_timer as clock
 from collections import deque
+from MooseObject import MooseObject
 
 import os, sys
 
@@ -10,9 +11,19 @@ import os, sys
 # options. When the test is finished running it will call harness.testOutputAndFinish
 # to complete the test. Be sure to call join() to make sure all the tests are finished.
 #
-class Scheduler:
+class Scheduler(MooseObject):
 
-    def __init__(self, harness, max_processes=None, average_load=64.0):
+    @staticmethod
+    def validParams():
+        params = MooseObject.validParams()
+        params.addRequiredParam('average_load',          64.0, "Average load to allow")
+        params.addRequiredParam('max_processes',         None, "Hard limit of maxium processes to use")
+
+        return params
+
+    def __init__(self, harness, params):
+        MooseObject.__init__(self, harness, params)
+
         ## The test harness to run callbacks on
         self.harness = harness
 
@@ -24,12 +35,12 @@ class Scheduler:
         # If however a max_processes  is passed we'll treat it as a hard limit.
         # The difference is whether or not we allow single jobs to exceed
         # the number of slots.
-        if max_processes == None:
+        if params['max_processes'] == None:
             self.soft_limit = True
             self.job_slots = 1
         else:
             self.soft_limit = False
-            self.job_slots = max_processes # hard limit
+            self.job_slots = params['max_processes'] # hard limit
 
         # Current slots in use
         self.slots_in_use = 0
@@ -39,7 +50,7 @@ class Scheduler:
         self.jobs = [None] * self.job_slots
 
         # Requested average load level to stay below
-        self.average_load = average_load
+        self.average_load = params['average_load']
 
         # queue for jobs needing a prereq
         self.queue = deque()

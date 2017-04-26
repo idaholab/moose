@@ -8,7 +8,6 @@ from ParseGetPot import ParseGetPot
 from socket import gethostname
 #from options import *
 from util import *
-from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from XMLDiffer import XMLDiffer
 from Tester import Tester
@@ -770,8 +769,20 @@ class TestHarness:
             self.writeFailedTest.close()
 
     def initialize(self, argv, app_name):
-        # Initialize the scheduler
-        self.scheduler = RunParallel(self, self.options.jobs, self.options.load)
+        # Load the scheduler plugins
+        self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
+
+        # Populate the scheduler params
+        if not self.options.pbs:
+            scheduler_params = self.factory.validParams('RunParallel')
+        else:
+            # Net yet built
+            scheduler_params = self.factory.validParams('PBS')
+
+        # Set max jobs to allow
+        scheduler_params['max_processes'] = self.options.jobs
+
+        self.scheduler = self.factory.create(scheduler_params['scheduler'], self, scheduler_params)
 
         ## Save executable-under-test name to self.executable
         self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method

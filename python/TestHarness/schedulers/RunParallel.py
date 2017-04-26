@@ -6,6 +6,7 @@ from tempfile import TemporaryFile
 from Tester import Tester
 from signal import SIGTERM
 from Scheduler import Scheduler
+from MooseObject import MooseObject
 import platform
 
 import os
@@ -17,12 +18,18 @@ import os
 # to complete the test. Be sure to call join() to make sure all the tests are finished.
 #
 class RunParallel(Scheduler):
+    @staticmethod
+    def validParams():
+        params = Scheduler.validParams()
+        params.addRequiredParam('scheduler',    'RunParallel', "The type of scheduler.")
+
+        return params
 
     ## Return this return code if the process must be killed because of timeout
     TIMEOUT = -999999
 
-    def __init__(self, harness, max_processes=None, average_load=64.0):
-        Scheduler.__init__(self, harness, max_processes, average_load)
+    def __init__(self, harness, params):
+        Scheduler.__init__(self, harness, params)
 
     def unsatisfiedPrereqs(self, tester):
         if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs):
