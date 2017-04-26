@@ -67,6 +67,8 @@ protected:
   std::vector<Real> _x1;
   std::vector<Real> _x2;
   std::vector<std::vector<Real>> _y;
+  /// Transpose of _y
+  std::vector<std::vector<Real>> _y_trans;
 
   /**
    * Boundary conditions. The first index indicates the coordinate
