@@ -590,6 +590,7 @@ Console::outputPostprocessors()
   {
     std::stringstream oss;
     oss << "\nPostprocessor Values:\n";
+    _postprocessor_table.sortColumns();
     _postprocessor_table.printTable(oss, _max_rows, _fit_mode);
     _console << oss.str() << '\n';
   }
@@ -605,7 +606,10 @@ Console::outputScalarVariables()
     std::stringstream oss;
     oss << "\nScalar Variable Values:\n";
     if (processor_id() == 0)
+    {
+      _scalar_table.sortColumns();
       _scalar_table.printTable(oss, _max_rows, _fit_mode);
+    }
     _console << oss.str() << '\n';
   }
 }
