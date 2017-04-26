@@ -11,36 +11,31 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#ifndef GHOSTUSEROBJECT_H
-#define GHOSTUSEROBJECT_H
-
-#include "GeneralUserObject.h"
-
-// Forward Declarations
-class GhostUserObject;
+#include "GhostUserObjectIC.h"
+#include "GhostUserObject.h"
 
 template <>
-InputParameters validParams<GhostUserObject>();
-
-/**
- * User object to calculate ghosted elements on a single processor or the union across all
- * processors.
- */
-class GhostUserObject : public GeneralUserObject
+InputParameters
+validParams<GhostUserObjectIC>()
 {
-public:
-  GhostUserObject(const InputParameters & parameters);
+  InputParameters params = validParams<InitialCondition>();
+  params.addRequiredParam<UserObjectName>("ghost_uo",
+                                          "The GhostUserObject to be coupled into this IC");
+  return params;
+}
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
+GhostUserObjectIC::GhostUserObjectIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
+    _mesh(_fe_problem.mesh()),
+    _ghost_uo(getUserObject<GhostUserObject>("ghost_uo"))
+{
+}
 
-  unsigned long getElementalValue(dof_id_type element_id) const;
+Real
+GhostUserObjectIC::value(const Point & /*p*/)
+{
+  if (_current_elem == NULL)
+    return -1.0;
 
-protected:
-  std::set<dof_id_type> _ghost_data;
-  dof_id_type _rank;
-};
-
-#endif // GHOSTUSEROBJECT_H
+  return _ghost_uo.getElementalValue(_current_elem->id());
+}

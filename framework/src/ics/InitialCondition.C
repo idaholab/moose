@@ -30,8 +30,16 @@ validParams<InitialCondition>()
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
 
-  params.addRequiredParam<VariableName>(
-      "variable", "The variable this initial condition is supposed to provide values for.");
+  params.addRequiredParam<VariableName>("variable",
+                                        "The variable this initial condition is "
+                                        "supposed to provide values for.");
+  params.addParam<bool>("ignore_uo_dependency",
+                        false,
+                        "When set to true, a UserObject retrieved "
+                        "by this IC will not be executed before the "
+                        "this IC");
+
+  params.addParamNamesToGroup("ignore_uo_dependency", "Advanced");
 
   params.registerBase("InitialCondition");
 
@@ -62,7 +70,8 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
 
     _current_elem(_var.currentElem()),
     _current_node(NULL),
-    _qp(0)
+    _qp(0),
+    _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency"))
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
@@ -84,6 +93,14 @@ const std::set<std::string> &
 InitialCondition::getSuppliedItems()
 {
   return _supplied_vars;
+}
+
+const UserObject &
+InitialCondition::getUserObjectBase(const std::string & name)
+{
+  if (!_ignore_uo_dependency)
+    _depend_uo.insert(_pars.get<UserObjectName>(name));
+  return UserObjectInterface::getUserObjectBase(name);
 }
 
 void
