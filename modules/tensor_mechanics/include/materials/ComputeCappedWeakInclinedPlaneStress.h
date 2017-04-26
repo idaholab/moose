@@ -32,7 +32,6 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeQpStress() override;
 
   /// User-input value of the normal vector to the weak plane
   RealVectorValue _n_input;
@@ -56,12 +55,14 @@ protected:
   RankFourTensor _rotated_Eijkl;
 
   virtual void initialiseReturnProcess() override;
+  virtual void finaliseReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
                             const RankTwoTensor & stress_trial,
                             const std::vector<Real> & intnl_old,
-                            const std::vector<Real> & yf) override;
+                            const std::vector<Real> & yf,
+                            const RankFourTensor & Eijkl) override;
 
   virtual void computePQ(const RankTwoTensor & stress, Real & p, Real & q) const override;
 
@@ -73,6 +74,7 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
   virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
@@ -83,6 +85,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 
   virtual RankTwoTensor dpdstress(const RankTwoTensor & stress) const override;

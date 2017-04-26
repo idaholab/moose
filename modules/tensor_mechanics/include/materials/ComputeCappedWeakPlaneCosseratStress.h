@@ -56,6 +56,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 
   virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
@@ -64,6 +66,7 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
   virtual RankTwoTensor dqdstress(const RankTwoTensor & stress) const override;

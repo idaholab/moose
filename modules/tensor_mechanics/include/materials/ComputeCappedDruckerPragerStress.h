@@ -7,7 +7,7 @@
 #ifndef COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
 #define COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
 
-#include "PQPlasticModel.h"
+#include "TwoParameterPlasticity.h"
 #include "TensorMechanicsHardeningModel.h"
 #include "TensorMechanicsPlasticDruckerPrager.h"
 
@@ -55,7 +55,7 @@ InputParameters validParams<ComputeCappedDruckerPragerStress>();
  * ComputeMultiPlasticityStress with DruckerPrager and MeanCap(s)
  * user objects.
  */
-class ComputeCappedDruckerPragerStress : public PQPlasticModel
+class ComputeCappedDruckerPragerStress : public TwoParameterPlasticity
 {
 public:
   ComputeCappedDruckerPragerStress(const InputParameters & parameters);
@@ -120,7 +120,8 @@ protected:
                             Real q_trial,
                             const RankTwoTensor & stress_trial,
                             const std::vector<Real> & intnl_old,
-                            const std::vector<Real> & yf) override;
+                            const std::vector<Real> & yf,
+                            const RankFourTensor & Eijkl) override;
 
   virtual void initialiseVars(Real p_trial,
                               Real q_trial,
@@ -148,7 +149,7 @@ protected:
 
   virtual void initialiseReturnProcess() override;
 
-  virtual void finaliseReturnProcess() override;
+  virtual void finaliseReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
 
@@ -158,6 +159,7 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
   virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
@@ -168,6 +170,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 
   virtual RankTwoTensor dpdstress(const RankTwoTensor & stress) const override;

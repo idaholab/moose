@@ -7,7 +7,7 @@
 #ifndef COMPUTECAPPEDWEAKPLANESTRESS_H
 #define COMPUTECAPPEDWEAKPLANESTRESS_H
 
-#include "PQPlasticModel.h"
+#include "TwoParameterPlasticity.h"
 #include "TensorMechanicsHardeningModel.h"
 
 #include <array>
@@ -26,7 +26,7 @@ InputParameters validParams<ComputeCappedWeakPlaneStress>();
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedWeakPlaneStress : public PQPlasticModel
+class ComputeCappedWeakPlaneStress : public TwoParameterPlasticity
 {
 public:
   ComputeCappedWeakPlaneStress(const InputParameters & parameters);
@@ -100,6 +100,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 
   virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
@@ -108,13 +110,15 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
                             const RankTwoTensor & stress_trial,
                             const std::vector<Real> & intnl_old,
-                            const std::vector<Real> & yf) override;
+                            const std::vector<Real> & yf,
+                            const RankFourTensor & Eijkl) override;
 
   virtual void initialiseVars(Real p_trial,
                               Real q_trial,
@@ -142,7 +146,7 @@ protected:
 
   virtual void initialiseReturnProcess() override;
 
-  virtual void finaliseReturnProcess() override;
+  virtual void finaliseReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
 

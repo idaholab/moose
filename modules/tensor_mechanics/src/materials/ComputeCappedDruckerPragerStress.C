@@ -12,7 +12,7 @@ template <>
 InputParameters
 validParams<ComputeCappedDruckerPragerStress>()
 {
-  InputParameters params = validParams<PQPlasticModel>();
+  InputParameters params = validParams<TwoParameterPlasticity>();
   params.addClassDescription("Capped Drucker-Prager plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "DP_model",
@@ -49,7 +49,7 @@ validParams<ComputeCappedDruckerPragerStress>()
 
 ComputeCappedDruckerPragerStress::ComputeCappedDruckerPragerStress(
     const InputParameters & parameters)
-  : PQPlasticModel(parameters, 3, 2),
+  : TwoParameterPlasticity(parameters, 3, 2),
     _dp(getUserObject<TensorMechanicsPlasticDruckerPrager>("DP_model")),
     _tstrength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
     _cstrength(getUserObject<TensorMechanicsHardeningModel>("compressive_strength")),
@@ -73,7 +73,8 @@ ComputeCappedDruckerPragerStress::initialiseReturnProcess()
 }
 
 void
-ComputeCappedDruckerPragerStress::finaliseReturnProcess()
+ComputeCappedDruckerPragerStress::finaliseReturnProcess(
+    const RankTwoTensor & /*rotation_increment*/)
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
@@ -83,7 +84,8 @@ ComputeCappedDruckerPragerStress::preReturnMap(Real /*p_trial*/,
                                                Real q_trial,
                                                const RankTwoTensor & /*stress_trial*/,
                                                const std::vector<Real> & /*intnl_old*/,
-                                               const std::vector<Real> & yf)
+                                               const std::vector<Real> & yf,
+                                               const RankFourTensor & /*Eijkl*/)
 {
   // If it's obvious, then simplify the return-type
   if (yf[2] >= 0)
@@ -372,6 +374,7 @@ ComputeCappedDruckerPragerStress::setStressAfterReturn(const RankTwoTensor & str
                                                        Real /*gaE*/,
                                                        const std::vector<Real> & /*intnl*/,
                                                        const f_and_derivs & /*smoothed_q*/,
+                                                       const RankFourTensor & /*Eijkl*/,
                                                        RankTwoTensor & stress) const
 {
   // stress = s_ij + de_ij tr(stress) / 3 = q / q_trial * s_ij^trial + de_ij p / 3 = q / q_trial *
@@ -425,13 +428,15 @@ ComputeCappedDruckerPragerStress::consistentTangentOperator(const RankTwoTensor 
                                                             Real q,
                                                             Real gaE,
                                                             const f_and_derivs & smoothed_q,
+                                                            const RankFourTensor & Eijkl,
+                                                            bool compute_full_tangent_operator,
                                                             RankFourTensor & cto) const
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
 
-  cto = _elasticity_tensor[_qp];
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  cto = Eijkl;
+  if (!compute_full_tangent_operator)
     return;
 
   const RankTwoTensor s_over_q =
@@ -451,8 +456,7 @@ ComputeCappedDruckerPragerStress::consistentTangentOperator(const RankTwoTensor 
 
   if (smoothed_q.dg[1] != 0.0)
   {
-    const RankFourTensor Tijab =
-        _elasticity_tensor[_qp] * (gaE / _Epp) * smoothed_q.dg[1] * d2qdstress2(stress);
+    const RankFourTensor Tijab = Eijkl * (gaE / _Epp) * smoothed_q.dg[1] * d2qdstress2(stress);
     RankFourTensor inv = RankFourTensor(RankFourTensor::initIdentityFour) + Tijab;
     try
     {

@@ -46,16 +46,16 @@ ComputeCappedWeakInclinedPlaneStress::initQpStatefulProperties()
 }
 
 void
-ComputeCappedWeakInclinedPlaneStress::computeQpStress()
+ComputeCappedWeakInclinedPlaneStress::finaliseReturnProcess(
+    const RankTwoTensor & rotation_increment)
 {
-  ComputeCappedWeakPlaneStress::computeQpStress();
-
+  ComputeCappedWeakPlaneStress::finaliseReturnProcess(rotation_increment);
   if (_perform_finite_strain_rotations)
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       _n[_qp](i) = 0.0;
       for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-        _n[_qp](i) += _rotation_increment[_qp](i, j) * _n_old[_qp](j);
+        _n[_qp](i) += rotation_increment(i, j) * _n_old[_qp](j);
     }
 }
 
@@ -75,7 +75,8 @@ ComputeCappedWeakInclinedPlaneStress::preReturnMap(Real /*p_trial*/,
                                                    Real q_trial,
                                                    const RankTwoTensor & stress_trial,
                                                    const std::vector<Real> & /*intnl_old*/,
-                                                   const std::vector<Real> & yf)
+                                                   const std::vector<Real> & yf,
+                                                   const RankFourTensor & Eijkl)
 {
   // If it's obvious, then simplify the return-type
   if (yf[1] >= 0)
@@ -89,7 +90,7 @@ ComputeCappedWeakInclinedPlaneStress::preReturnMap(Real /*p_trial*/,
   _in_trial12 = _rotated_trial(1, 2);
   _in_q_trial = q_trial;
 
-  _rotated_Eijkl = _elasticity_tensor[_qp];
+  _rotated_Eijkl = Eijkl;
   _rotated_Eijkl.rotate(_rot_n_to_z);
 }
 
@@ -120,6 +121,7 @@ ComputeCappedWeakInclinedPlaneStress::setStressAfterReturn(const RankTwoTensor &
                                                            Real gaE,
                                                            const std::vector<Real> & /*intnl*/,
                                                            const f_and_derivs & smoothed_q,
+                                                           const RankFourTensor & /*Eijkl*/,
                                                            RankTwoTensor & stress) const
 {
   // first get stress in the frame where _n points along "z"
@@ -150,10 +152,21 @@ ComputeCappedWeakInclinedPlaneStress::consistentTangentOperator(const RankTwoTen
                                                                 Real q,
                                                                 Real gaE,
                                                                 const f_and_derivs & smoothed_q,
+                                                                const RankFourTensor & Eijkl,
+                                                                bool compute_full_tangent_operator,
                                                                 RankFourTensor & cto) const
 {
-  PQPlasticModel::consistentTangentOperator(
-      stress_trial, p_trial, q_trial, stress, p, q, gaE, smoothed_q, cto);
+  TwoParameterPlasticity::consistentTangentOperator(stress_trial,
+                                                    p_trial,
+                                                    q_trial,
+                                                    stress,
+                                                    p,
+                                                    q,
+                                                    gaE,
+                                                    smoothed_q,
+                                                    Eijkl,
+                                                    compute_full_tangent_operator,
+                                                    cto);
 }
 
 RankTwoTensor

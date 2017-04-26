@@ -12,7 +12,7 @@ template <>
 InputParameters
 validParams<ComputeCappedWeakPlaneStress>()
 {
-  InputParameters params = validParams<PQPlasticModel>();
+  InputParameters params = validParams<TwoParameterPlasticity>();
   params.addClassDescription("Capped weak-plane plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "cohesion",
@@ -51,7 +51,7 @@ validParams<ComputeCappedWeakPlaneStress>()
 }
 
 ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters & parameters)
-  : PQPlasticModel(parameters, 3, 2),
+  : TwoParameterPlasticity(parameters, 3, 2),
     _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
     _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
     _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
@@ -86,7 +86,7 @@ ComputeCappedWeakPlaneStress::initialiseReturnProcess()
 }
 
 void
-ComputeCappedWeakPlaneStress::finaliseReturnProcess()
+ComputeCappedWeakPlaneStress::finaliseReturnProcess(const RankTwoTensor & /*rotation_increment*/)
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
@@ -96,7 +96,8 @@ ComputeCappedWeakPlaneStress::preReturnMap(Real /*p_trial*/,
                                            Real q_trial,
                                            const RankTwoTensor & stress_trial,
                                            const std::vector<Real> & /*intnl_old*/,
-                                           const std::vector<Real> & yf)
+                                           const std::vector<Real> & yf,
+                                           const RankFourTensor & /*Eijkl*/)
 {
   // If it's obvious, then simplify the return-type
   if (yf[1] >= 0)
@@ -132,14 +133,15 @@ ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_
                                                    Real gaE,
                                                    const std::vector<Real> & /*intnl*/,
                                                    const f_and_derivs & smoothed_q,
+                                                   const RankFourTensor & Eijkl,
                                                    RankTwoTensor & stress) const
 {
   stress = stress_trial;
   stress(2, 2) = p_ok;
   // stress_xx and stress_yy are sitting at their trial-stress values
   // so need to bring them back via Poisson's ratio
-  stress(0, 0) -= _elasticity_tensor[_qp](2, 2, 0, 0) * gaE / _Epp * smoothed_q.dg[0];
-  stress(1, 1) -= _elasticity_tensor[_qp](2, 2, 1, 1) * gaE / _Epp * smoothed_q.dg[0];
+  stress(0, 0) -= Eijkl(2, 2, 0, 0) * gaE / _Epp * smoothed_q.dg[0];
+  stress(1, 1) -= Eijkl(2, 2, 1, 1) * gaE / _Epp * smoothed_q.dg[0];
   if (_in_q_trial == 0.0)
     stress(2, 0) = stress(2, 1) = stress(0, 2) = stress(1, 2) = 0.0;
   else
@@ -174,17 +176,19 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
                                                         Real q,
                                                         Real gaE,
                                                         const f_and_derivs & smoothed_q,
+                                                        const RankFourTensor & Eijkl,
+                                                        bool compute_full_tangent_operator,
                                                         RankFourTensor & cto) const
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
 
-  cto = _elasticity_tensor[_qp];
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  cto = Eijkl;
+  if (!compute_full_tangent_operator)
     return;
 
-  const Real Ezzzz = _elasticity_tensor[_qp](2, 2, 2, 2);
-  const Real Ezxzx = _elasticity_tensor[_qp](2, 0, 2, 0);
+  const Real Ezzzz = Eijkl(2, 2, 2, 2);
+  const Real Ezxzx = Eijkl(2, 0, 2, 0);
   const Real tanpsi = _tan_psi.value(_intnl[_qp][0]);
   const Real dintnl0_dq = -1.0 / Ezxzx;
   const Real dintnl0_dqt = 1.0 / Ezxzx;
@@ -197,10 +201,10 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
 
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
   {
-    const Real dpt_depii = _elasticity_tensor[_qp](2, 2, i, i);
+    const Real dpt_depii = Eijkl(2, 2, i, i);
     cto(2, 2, i, i) = _dp_dpt * dpt_depii;
     const Real poisson_effect =
-        _elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz *
+        Eijkl(2, 2, 0, 0) / Ezzzz *
         (_dgaE_dpt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dpt +
          gaE * smoothed_q.d2g[0][1] * _dq_dpt +
          gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dq * _dq_dpt) +
@@ -217,14 +221,13 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
   }
 
   const Real poisson_effect =
-      -_elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz *
+      -Eijkl(2, 2, 0, 0) / Ezzzz *
       (_dgaE_dqt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dqt +
        gaE * smoothed_q.d2g[0][1] * _dq_dqt +
        gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dqt + dintnl0_dq * _dq_dqt) +
        gaE * smoothed_q.d2g_di[0][1] * (dintnl1_dqt + dintnl1_dp * _dp_dqt + dintnl1_dq * _dq_dqt));
 
-  const Real dqt_dep20 =
-      (q_trial == 0.0 ? 1.0 : _in_trial02 / q_trial) * _elasticity_tensor[_qp](2, 0, 2, 0);
+  const Real dqt_dep20 = (q_trial == 0.0 ? 1.0 : _in_trial02 / q_trial) * Eijkl(2, 0, 2, 0);
   cto(2, 2, 2, 0) = cto(2, 2, 0, 2) = _dp_dqt * dqt_dep20;
   cto(0, 0, 2, 0) = cto(0, 0, 0, 2) = cto(1, 1, 2, 0) = cto(1, 1, 0, 2) =
       poisson_effect * dqt_dep20;
@@ -232,14 +235,13 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
   {
     // for q_trial=0, Jacobian_mult is just given by the elastic case
     cto(0, 2, 0, 2) = cto(2, 0, 0, 2) = cto(0, 2, 2, 0) = cto(2, 0, 2, 0) =
-        _elasticity_tensor[_qp](2, 0, 2, 0) * q / q_trial +
+        Eijkl(2, 0, 2, 0) * q / q_trial +
         _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
     cto(1, 2, 0, 2) = cto(2, 1, 0, 2) = cto(1, 2, 2, 0) = cto(2, 1, 2, 0) =
         _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
   }
 
-  const Real dqt_dep21 =
-      (q_trial == 0.0 ? 1.0 : _in_trial12 / q_trial) * _elasticity_tensor[_qp](2, 1, 2, 1);
+  const Real dqt_dep21 = (q_trial == 0.0 ? 1.0 : _in_trial12 / q_trial) * Eijkl(2, 1, 2, 1);
   cto(2, 2, 2, 1) = cto(2, 2, 1, 2) = _dp_dqt * dqt_dep21;
   cto(0, 0, 2, 1) = cto(0, 0, 1, 2) = cto(1, 1, 2, 1) = cto(1, 1, 1, 2) =
       poisson_effect * dqt_dep21;
@@ -249,7 +251,7 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
     cto(0, 2, 1, 2) = cto(2, 0, 1, 2) = cto(0, 2, 2, 1) = cto(2, 0, 2, 1) =
         _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
     cto(1, 2, 1, 2) = cto(2, 1, 1, 2) = cto(1, 2, 2, 1) = cto(2, 1, 2, 1) =
-        _elasticity_tensor[_qp](2, 1, 2, 1) * q / q_trial +
+        Eijkl(2, 1, 2, 1) * q / q_trial +
         _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
   }
 }
