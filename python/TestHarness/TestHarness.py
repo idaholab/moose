@@ -8,7 +8,6 @@ from ParseGetPot import ParseGetPot
 from socket import gethostname
 #from options import *
 from util import *
-from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from XMLDiffer import XMLDiffer
 from Tester import Tester
@@ -17,6 +16,7 @@ from InputParameters import InputParameters
 from Factory import Factory
 from Parser import Parser
 from Warehouse import Warehouse
+from Scheduler import Scheduler
 
 import argparse
 from optparse import OptionParser, OptionGroup, Values
@@ -203,7 +203,7 @@ class TestHarness:
             print '\nExiting due to keyboard interrupt...'
             sys.exit(0)
 
-        self.runner.join()
+        self.scheduler.join()
         # Wait for all tests to finish
         if self.options.pbs and self.options.processingPBS == False:
             print '\n< checking batch status >\n'
@@ -240,7 +240,7 @@ class TestHarness:
             (tester, command) = self.createClusterLauncher(dirpath, testers)
             if command is not None:
                 tester.setStatus('LAUNCHED', tester.bucket_pbs)
-                self.runner.run(tester, command)
+                self.scheduler.run(tester, command)
         else:
             # Go through the Testers and run them
             for tester in testers:
@@ -268,8 +268,8 @@ class TestHarness:
                         # This method spawns another process and allows this loop to continue looking for tests
                         # RunParallel will call self.testOutputAndFinish when the test has completed running
                         # This method will block when the maximum allowed parallel processes are running
-                        self.runner.run(tester, command)
-                    else: # This job is skipped - notify the runner
+                        self.scheduler.run(tester, command)
+                    else: # This job is skipped - notify the scheduler
                         status = tester.getStatus()
                         if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
                             if (self.options.report_skipped and status == tester.bucket_skip) \
@@ -277,7 +277,7 @@ class TestHarness:
                                 self.handleTestStatus(tester)
                             elif status == tester.bucket_deleted and self.options.extra_info:
                                 self.handleTestStatus(tester)
-                        self.runner.jobSkipped(tester.parameters()['test_name'])
+                        self.scheduler.jobSkipped(tester.parameters()['test_name'])
 
     def createClusterLauncher(self, dirpath, testers):
         self.options.test_serial_number = 0
@@ -297,14 +297,14 @@ class TestHarness:
                 command = tester.getCommand(self.options)
                 self.options.cluster_handle.write('[]\n')
                 self.options.test_serial_number += 1
-            else: # This job is skipped - notify the runner
+            else: # This job is skipped - notify the scheduler
                 status = tester.getStatus()
                 if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
                     if (self.options.report_skipped and status == tester.bucket_skip) or status == tester.bucket_skip:
                         self.handleTestStatus(tester)
                     elif status == tester.bucket_deleted and self.options.extra_info:
                         self.handleTestStatus(tester)
-                self.runner.jobSkipped(tester.parameters()['test_name'])
+                self.scheduler.jobSkipped(tester.parameters()['test_name'])
 
         # Close the tests.cluster file
         if self.options.cluster_handle is not None:
@@ -769,8 +769,20 @@ class TestHarness:
             self.writeFailedTest.close()
 
     def initialize(self, argv, app_name):
-        # Initialize the parallel runner with how many tests to run in parallel
-        self.runner = RunParallel(self, self.options.jobs, self.options.load)
+        # Load the scheduler plugins
+        self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
+
+        # Populate the scheduler params
+        if not self.options.pbs:
+            scheduler_params = self.factory.validParams('RunParallel')
+        else:
+            # Net yet built
+            scheduler_params = self.factory.validParams('PBS')
+
+        # Set max jobs to allow
+        scheduler_params['max_processes'] = self.options.jobs
+
+        self.scheduler = self.factory.create(scheduler_params['scheduler'], self, scheduler_params)
 
         ## Save executable-under-test name to self.executable
         self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
