@@ -141,13 +141,17 @@ protected:
 
   /// Depend UserObjects
   std::set<std::string> _depend_uo;
+
+  /// If set, UOs retrieved by this IC will not be executed before this IC
+  const bool _ignore_uo_dependency;
 };
 
 template <typename T>
 const T &
 InitialCondition::getUserObject(const std::string & name)
 {
-  _depend_uo.insert(_pars.get<UserObjectName>(name));
+  if (!_ignore_uo_dependency)
+    _depend_uo.insert(_pars.get<UserObjectName>(name));
   return UserObjectInterface::getUserObject<T>(name);
 }
 
@@ -155,7 +159,8 @@ template <typename T>
 const T &
 InitialCondition::getUserObjectByName(const UserObjectName & name)
 {
-  _depend_uo.insert(name);
+  if (!_ignore_uo_dependency)
+    _depend_uo.insert(name);
   return UserObjectInterface::getUserObjectByName<T>(name);
 }
 
