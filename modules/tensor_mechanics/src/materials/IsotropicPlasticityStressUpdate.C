@@ -26,12 +26,15 @@ validParams<IsotropicPlasticityStressUpdate>()
                                 "True stress as a function of plastic strain");
   params.addParam<Real>("hardening_constant", 0.0, "Hardening slope");
   params.addCoupledVar("temperature", 0.0, "Coupled Temperature");
+  params.addParam<std::string>(
+      "plastic_prepend", "", "String that is prepended to the plastic_strain Material Property");
 
   return params;
 }
 
 IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputParameters & parameters)
   : RadialReturnStressUpdate(parameters, "plastic"),
+    _plastic_prepend(getParam<std::string>("plastic_prepend")),
     _yield_stress_function(
         isParamValid("yield_stress_function") ? &getFunction("yield_stress_function") : NULL),
     _yield_stress(getParam<Real>("yield_stress")),
@@ -40,8 +43,8 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
                                                            : NULL),
     _shear_modulus(0.0),
 
-    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+    _plastic_strain(declareProperty<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
@@ -74,10 +77,11 @@ IsotropicPlasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
-IsotropicPlasticityStressUpdate::computeStressInitialize(Real effectiveTrialStress)
+IsotropicPlasticityStressUpdate::computeStressInitialize(Real effectiveTrialStress,
+                                                         const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus();
-  computeYieldStress();
+  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
+  computeYieldStress(elasticity_tensor);
 
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
@@ -156,7 +160,7 @@ Real IsotropicPlasticityStressUpdate::computeHardeningDerivative(Real /*scalar*/
 }
 
 void
-IsotropicPlasticityStressUpdate::computeYieldStress()
+IsotropicPlasticityStressUpdate::computeYieldStress(const RankFourTensor & /*elasticity_tensor*/)
 {
   if (_yield_stress_function)
   {

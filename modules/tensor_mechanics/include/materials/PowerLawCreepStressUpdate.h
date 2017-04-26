@@ -30,11 +30,15 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(Real effectiveTrialStress) override;
+  virtual void computeStressInitialize(Real effectiveTrialStress,
+                                       const RankFourTensor & elasticity_tensor) override;
   virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement) override;
 
   virtual Real computeResidual(Real effectiveTrialStress, Real scalar) override;
   virtual Real computeDerivative(Real effectiveTrialStress, Real scalar) override;
+
+  /// String that is prepended to the creep_strain Material Property
+  const std::string _creep_prepend;
 
   const Real _coefficient;
   const Real _n_exponent;

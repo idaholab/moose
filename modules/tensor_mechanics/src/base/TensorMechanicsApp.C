@@ -88,7 +88,7 @@
 #include "ComputeVolumetricDeformGrad.h"
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
-#include "ComputeReturnMappingStress.h"
+#include "ComputeAdmissibleState.h"
 #include "RadialReturnStressUpdate.h"
 #include "IsotropicPlasticityStressUpdate.h"
 #include "IsotropicPowerLawHardeningStressUpdate.h"
@@ -290,7 +290,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeVolumetricDeformGrad);
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
-  registerMaterial(ComputeReturnMappingStress);
+  registerMaterial(ComputeAdmissibleState);
   registerMaterial(RadialReturnStressUpdate);
   registerMaterial(IsotropicPlasticityStressUpdate);
   registerMaterial(IsotropicPowerLawHardeningStressUpdate);
