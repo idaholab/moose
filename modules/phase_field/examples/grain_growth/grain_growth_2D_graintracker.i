@@ -54,7 +54,6 @@
   [../]
 []
 
-
 [AuxVariables]
   # Dependent variables
   [./bnds]

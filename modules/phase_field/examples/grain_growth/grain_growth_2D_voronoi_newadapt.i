@@ -33,10 +33,18 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 15 # Number of grains
+    execute_on = 'initial'
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 15
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []

@@ -21,10 +21,19 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 137
+    grain_num = 4
+    execute_on = 'initial'
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 4
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []

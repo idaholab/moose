@@ -19,6 +19,7 @@ validParams<PolycrystalVoronoi>()
   InputParameters params = validParams<PolycrystalUserObjectBase>();
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiAction)");
+
   params.addParam<unsigned int>("rand_seed", 0, "The random seed");
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");

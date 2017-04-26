@@ -30,9 +30,28 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 42
+    execute_on = 'initial'
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.2
+    connecting_threshold = 0.08
+    flood_entity_type = ELEMENTAL
+  [../]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_8_rand_2D.tex
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -105,19 +124,6 @@
     T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # nm    #Width of the diffuse GB
     outputs = exodus
-  [../]
-[]
-
-[UserObjects]
-  [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.2
-    connecting_threshold = 0.08
-    flood_entity_type = ELEMENTAL
-  [../]
-  [./euler_angle_file]
-    type = EulerAngleFileReader
-    file_name = grn_8_rand_2D.tex
   [../]
 []
 

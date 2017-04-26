@@ -37,11 +37,4 @@
     input = 'really_small_problem.i'
     check_input = True
   [../]
-  [./test_problem]
-    type = RunApp
-    input = 'test_problem.i'
-    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
-    method = '!DBG'
-    check_input = True
-  [../]
 []

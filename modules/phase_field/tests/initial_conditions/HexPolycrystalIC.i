@@ -11,6 +11,14 @@
   grain_num = 36
 []
 
+[UserObjects]
+  [./hex]
+    type = PolycrystalHex
+    rand_seed = 215
+    execute_on = 'initial'
+  [../]
+[]
+
 [Variables]
   [./PolycrystalVariables]
   [../]
@@ -18,7 +26,8 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalHexGrainIC]
+    [./PolycrystalVoronoiIC]
+      polycrystal_uo_ic = hex
     [../]
   [../]
 []

@@ -36,18 +36,8 @@ PolycrystalReducedIC::PolycrystalReducedIC(const InputParameters & parameters)
 Real
 PolycrystalReducedIC::value(const Point & p)
 {
-  // const auto elem_to_grain = _poly_ic_uo.getElemToGrainMap();
   const auto grain_to_op = _poly_ic_uo.getGrainToOps();
-
-  //  mooseAssert(_current_elem, "Current element is NULL");
-
-  unsigned int grain_id;
-  // auto grain_id_pair = elem_to_grain.find(_current_elem->id());
-  // if (grain_id_pair != elem_to_grain.end())
-  //   grain_id = grain_id_pair->second;
-  // else
-  grain_id = _poly_ic_uo.getGrainBasedOnPoint(p);
-
+  auto grain_id = _poly_ic_uo.getGrainBasedOnPoint(p);
   auto assigned_op = grain_to_op[grain_id];
 
   return (assigned_op == _op_index) ? 1.0 : 0.0;

@@ -22,12 +22,26 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 17 # Number of grains
+    rand_seed = 2
+    coloring_algorithm = bt
+    execute_on = 'initial'
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.5
+    connecting_threshold = 0.5
+    remap_grains = false
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 1
-      grain_num = 40
-      coloring_algorithm = bt
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -93,13 +107,6 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.5
-    connecting_threshold = 0.5
-    remap_grains = false
-    halo_level = 0
-  [../]
   [./DOFs]
     type = NumDOFs
     execute_on = 'initial timestep_end'

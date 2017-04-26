@@ -16,6 +16,15 @@
   var_name_base = gr
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 262
+    grain_num = 4
+    execute_on = 'initial'
+  [../]
+[]
+
 [Variables]
   [./PolycrystalVariables]
   [../]
@@ -24,7 +33,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 4
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []

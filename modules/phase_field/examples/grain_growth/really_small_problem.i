@@ -27,12 +27,20 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 12 # Number of grains
+    coloring_algorithm = bt
+    rand_seed = 10
+    execute_on = 'initial'
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 12 # Number of grains
-      coloring_algorithm = bt
-      rand_seed = 10
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -223,7 +231,7 @@
   nl_max_its = 40 # Max number of nonlinear iterations
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
   start_time = 0.0
-  end_time = 4000
+  num_steps = 5
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 25 # Initial time step.  In this simulation it changes.
