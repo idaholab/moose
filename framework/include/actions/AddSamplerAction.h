@@ -24,6 +24,10 @@ InputParameters validParams<AddSamplerAction>();
 
 /**
  * This class adds a Sampler object.
+ * The Sampler contains different sampling strategies and is used to provide
+ * random values for sampled parameters using associated distributions. The
+ * sampled parameters can be material properties, boundary conditions, initial
+ * conditions etc.
  */
 class AddSamplerAction : public MooseObjectAction
 {

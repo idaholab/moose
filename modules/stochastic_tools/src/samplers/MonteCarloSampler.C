@@ -48,7 +48,12 @@ MonteCarloSampler::generateSamples()
     }
     Real val = _var_dist_map[var_name]->getRandomNumber();
     _var_value_map[var_name] = val;
-    _var_value_hist.at(var_name).push_back(val);
+    if (_var_value_hist.find(var_name) != _var_value_hist.end())
+      _var_value_hist[var_name].push_back(val);
+    else
+      mooseError("The variable: ",
+                 var_name,
+                 " is not found in the predetermined map, i.e. _var_value_hist");
   }
   /// The probability weight for Monte Carlo sampler is constant
   /// This should be normalized before any data analysis of outputs

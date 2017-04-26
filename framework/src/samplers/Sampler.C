@@ -22,15 +22,11 @@ validParams<Sampler>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<RandomInterface>();
-  params.addParam<unsigned int>(
-      "max", std::numeric_limits<unsigned int>::max(), "Maximum number of samples");
   params.addParam<bool>("reseed", false, "Reseed for each new sample if this value is true");
-  params.addParam<std::vector<std::string>>("perturb_parameters",
-                                            std::vector<std::string>(),
-                                            "The names of the parameters that you want to perturb");
-  params.addParam<std::vector<std::string>>(
+  params.addRequiredParam<std::vector<std::string>>(
+      "perturb_parameters", "The names of the parameters that you want to perturb");
+  params.addRequiredParam<std::vector<DistributionName>>(
       "distributions",
-      std::vector<std::string>(),
       "The names of distributions that you want to use to perturb the given parameters");
   params.registerBase("Sampler");
   return params;
@@ -45,9 +41,8 @@ Sampler::Sampler(const InputParameters & parameters)
     DistributionInterface(this),
     Restartable(parameters, "Samplers"),
     _tid(getParam<THREAD_ID>("_tid")),
-    _max_samples(getParam<unsigned int>("max")),
     _reseed_for_new_sample(getParam<bool>("reseed")),
-    _dist_names(getParam<std::vector<std::string>>("distributions")),
+    _dist_names(getParam<std::vector<DistributionName>>("distributions")),
     _var_names(getParam<std::vector<std::string>>("perturb_parameters")),
     _current_sample(0),
     _failed_runs(true)
@@ -65,9 +60,9 @@ Sampler::Sampler(const InputParameters & parameters)
   {
     for (unsigned int i = 0; i < _var_names.size(); ++i)
     {
-      _var_dist_map[_var_names.at(i)] = &getDistributionByName(_dist_names.at(i));
-      _var_value_map[_var_names.at(i)] = 0.0;
-      _var_value_hist[_var_names.at(i)] = std::vector<Real>();
+      _var_dist_map[_var_names[i]] = &getDistributionByName(_dist_names[i]);
+      _var_value_map[_var_names[i]] = 0.0;
+      _var_value_hist[_var_names[i]] = std::vector<Real>();
     }
   }
 }

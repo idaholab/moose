@@ -197,3 +197,5 @@ locations:
             - /Modules
             - /UserObjects
             - /Postprocessors
+            - /Kernels
+            - /Materials

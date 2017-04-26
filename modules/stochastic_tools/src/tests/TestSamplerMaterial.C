@@ -41,7 +41,7 @@ TestSamplerMaterial::TestSamplerMaterial(const InputParameters & parameters)
     {
       perturbed_prop.clear();
       perturbed_prop.push_back(_prop_names[i]);
-      _prop_values[i] *= _sampler.getSampledValues(perturbed_prop).at(0);
+      _prop_values[i] *= _sampler.getSampledValues(perturbed_prop)[0];
     }
   }
 }

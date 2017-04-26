@@ -25,21 +25,21 @@ validParams<SamplerInterface>()
 }
 
 SamplerInterface::SamplerInterface(const MooseObject * moose_object)
-  : _fni_params(moose_object->parameters()),
-    _fni_feproblem(*_fni_params.get<FEProblemBase *>("_fe_problem_base")),
-    _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
+  : _smi_params(moose_object->parameters()),
+    _smi_feproblem(*_smi_params.get<FEProblemBase *>("_fe_problem_base")),
+    _smi_tid(_smi_params.have_parameter<THREAD_ID>("_tid") ? _smi_params.get<THREAD_ID>("_tid") : 0)
 {
 }
 
 Sampler &
 SamplerInterface::getSampler(const std::string & name)
 {
-  SamplerName dist_name = _fni_params.get<SamplerName>(name);
-  return _fni_feproblem.getSampler(dist_name, _fni_tid);
+  SamplerName dist_name = _smi_params.get<SamplerName>(name);
+  return _smi_feproblem.getSampler(dist_name, _smi_tid);
 }
 
 Sampler &
 SamplerInterface::getSamplerByName(const SamplerName & name)
 {
-  return _fni_feproblem.getSampler(name, _fni_tid);
+  return _smi_feproblem.getSampler(name, _smi_tid);
 }

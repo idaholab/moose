@@ -27,8 +27,7 @@ template <>
 InputParameters validParams<Sampler>();
 
 /**
- * This is the base class for Samplers and
- * all Samplers should inherit from this class
+ * This is the base class for Samplers and all Samplers should inherit from this class
  */
 class Sampler : public MooseObject,
                 public RandomInterface,
@@ -64,14 +63,12 @@ public:
 
 protected:
   THREAD_ID _tid;
-  /// maximum limit of samples, this can be set by the user
-  const unsigned int _max_samples;
   /// control whether the user wants to reseed the distributions at each new sample or not
   const bool _reseed_for_new_sample;
   /// vector of distributions names
-  std::vector<std::string> _dist_names;
+  const std::vector<DistributionName> & _dist_names;
   /// vector of perturbed parameters names
-  std::vector<std::string> _var_names;
+  const std::vector<std::string> & _var_names;
   /// counter used to record the index of current samples
   unsigned int _current_sample;
   /// map used to store the perturbed parameters names and values of current samples

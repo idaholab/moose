@@ -1133,6 +1133,10 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           MaterialPropertyName, it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractVector(
           MaterialName, it.second, full_name, it.first, in_global, global_params_block);
+      dynamicCastAndExtractVector(
+          DistributionName, it.second, full_name, it.first, in_global, global_params_block);
+      dynamicCastAndExtractVector(
+          SamplerName, it.second, full_name, it.first, in_global, global_params_block);
 
       /**
        * Double indexed types
@@ -1191,6 +1195,10 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           OutputName, it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractDoubleIndex(
           MaterialPropertyName, it.second, full_name, it.first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(
+          DistributionName, it.second, full_name, it.first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(
+          SamplerName, it.second, full_name, it.first, in_global, global_params_block);
     }
   }
 

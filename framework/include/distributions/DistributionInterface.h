@@ -59,13 +59,13 @@ public:
 
 private:
   /// Parameters of the object with this interface
-  const InputParameters & _fni_params;
+  const InputParameters & _dni_params;
 
   /// Reference to FEProblemBase instance
-  FEProblemBase & _fni_feproblem;
+  FEProblemBase & _dni_feproblem;
 
   /// Thread ID
-  THREAD_ID _fni_tid;
+  THREAD_ID _dni_tid;
 };
 
 #endif /* DISTRIBUTIONINTERFACE_H */

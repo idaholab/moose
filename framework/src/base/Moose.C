@@ -893,7 +893,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);
   registerMooseObjectTask("add_distribution",             Distribution,           false);
-  registerMooseObjectTask("add_sampler",                  Sampler,           false);
+  registerMooseObjectTask("add_sampler",                  Sampler,                false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
@@ -1023,7 +1023,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_quadrature)"
                            "(add_function)"
                            "(add_distribution)"
-                           "(add_sampler"
+                           "(add_sampler)"
                            "(add_periodic_bc)"
                            "(add_user_object)"
                            "(setup_function_complete)"
