@@ -72,12 +72,6 @@ public:
                                  const std::string & vector_name);
 
   /**
-   * Get the map of names -> VectorPostprocessor values. Exposed for error checking.
-   */
-  //  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values()
-  //  const { return _values; }
-
-  /**
    * Check to see if a VPP has any vectors at all
    */
   bool hasVectors(const std::string & vpp_name) const;
@@ -86,7 +80,7 @@ public:
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
-  const std::map<std::string, VectorPostprocessorState> &
+  const std::vector<std::pair<std::string, VectorPostprocessorState>> &
   vectors(const std::string & vpp_name) const;
 
   /**
@@ -100,7 +94,7 @@ private:
                                                           bool get_current);
 
   /// Values of the vector post-processor
-  std::map<std::string, std::map<std::string, VectorPostprocessorState>> _values;
+  std::map<std::string, std::vector<std::pair<std::string, VectorPostprocessorState>>> _values;
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;

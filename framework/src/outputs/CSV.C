@@ -24,6 +24,8 @@ validParams<CSV>()
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
 
+  params.addParam<bool>("sort_columns", false, "Toggle the sorting of columns alphabetically.");
+
   // Options for aligning csv output with whitespace padding
   params.addParam<bool>(
       "align",
@@ -48,7 +50,8 @@ CSV::CSV(const InputParameters & parameters)
     _set_delimiter(isParamValid("delimiter")),
     _delimiter(_set_delimiter ? getParam<std::string>("delimiter") : ""),
     _write_all_table(false),
-    _write_vector_table(false)
+    _write_vector_table(false),
+    _sort_columns(getParam<bool>("sort_columns"))
 {
 }
 
@@ -104,7 +107,11 @@ CSV::output(const ExecFlagType & type)
 
   // Print the table containing all the data to a file
   if (_write_all_table && !_all_data_table.empty() && processor_id() == 0)
+  {
+    if (_sort_columns)
+      _all_data_table.sortColumns();
     _all_data_table.printCSV(filename(), 1, _align);
+  }
 
   // Output each VectorPostprocessor's data to a file
   if (_write_vector_table && processor_id() == 0)
@@ -119,6 +126,8 @@ CSV::output(const ExecFlagType & type)
       if (_set_delimiter)
         it.second.setDelimiter(_delimiter);
       it.second.setPrecision(_precision);
+      if (_sort_columns)
+        it.second.sortColumns();
       it.second.printCSV(output.str(), 1, _align);
 
       if (_time_data)

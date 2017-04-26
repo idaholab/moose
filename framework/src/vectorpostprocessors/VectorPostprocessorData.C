@@ -58,9 +58,24 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
                                                       const std::string & vector_name,
                                                       bool get_current)
 {
-  // Intentional use of RHS brackets on a std::map to do a multilevel retrieve or insert
-  auto & vec_struct = _values[vpp_name][vector_name];
+  // Intentional use of RHS brackets on a std::map to do a retrieve or insert
+  auto & vec_storage = _values[vpp_name];
 
+  // lambda for doing compairison on name (i.e., first item in pair)
+  auto comp = [&vector_name](std::pair<std::string, VectorPostprocessorState> & pair) {
+    return pair.first == vector_name;
+  };
+
+  // Search for the vector, if it is not located create the entry in the storage
+  auto iter = std::find_if(vec_storage.rbegin(), vec_storage.rend(), comp);
+  if (iter == vec_storage.rend())
+  {
+    vec_storage.emplace_back(
+        std::pair<std::string, VectorPostprocessorState>(vector_name, VectorPostprocessorState()));
+    iter = vec_storage.rbegin();
+  }
+
+  auto & vec_struct = iter->second;
   if (!vec_struct.current)
   {
     mooseAssert(!vec_struct.old, "Uninitialized pointers in VectorPostprocessor Data");
@@ -79,7 +94,7 @@ VectorPostprocessorData::hasVectors(const std::string & vpp_name) const
   return _values.find(vpp_name) != _values.end();
 }
 
-const std::map<std::string, VectorPostprocessorData::VectorPostprocessorState> &
+const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
 VectorPostprocessorData::vectors(const std::string & vpp_name) const
 {
   auto vec_pair = _values.find(vpp_name);
