@@ -60,6 +60,8 @@ NodalNormalsPreprocessor::initialize()
   _aux.system().zero_variable(sln, _aux.getVariable(_tid, "nodal_normal_x").number());
   _aux.system().zero_variable(sln, _aux.getVariable(_tid, "nodal_normal_y").number());
   _aux.system().zero_variable(sln, _aux.getVariable(_tid, "nodal_normal_z").number());
+  // After zero variables, we should close the solution
+  sln.close();
 }
 
 void
