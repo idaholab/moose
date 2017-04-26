@@ -121,6 +121,8 @@ protected:
   /// Check whether the current value is deprecated when called
   virtual void checkDeprecated() const override;
 
+  void removeEnumerationName(std::string name) final override;
+
 private:
   /**
    * Private constructor for use by libmesh::Parameters

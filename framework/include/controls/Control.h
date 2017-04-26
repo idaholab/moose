@@ -66,7 +66,7 @@ public:
   virtual void execute() = 0;
 
   /**
-   * Return the valid "execute_on" options for Control objects
+   * (DEPRECATED) Return the valid "execute_on" options for Control objects
    */
   static MultiMooseEnum getExecuteOptions();
 
@@ -79,8 +79,7 @@ protected:
    * Obtain the value of a controllable parameter given input file syntax or actual name.
    * @param name The name of the parameter to retrieve a value.
    * @param warn_when_values_diff When true, produce a warning if multiple controllable values share
-   * the given
-   *                              name but have varying values.
+   *                              the given name but have varying values.
    * @return A constant reference to the first parameter that matches the given name.
    */
   template <typename T>

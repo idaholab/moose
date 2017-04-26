@@ -22,9 +22,16 @@
 #include <set>
 
 // Forward declarations
+class MultiMooseEnum;
 namespace libMesh
 {
 class Parameters;
+}
+namespace MooseUtils
+{
+MultiMooseEnum createExecuteOnEnum(const std::set<ExecFlagType> &,
+                                   const std::set<ExecFlagType> &,
+                                   const std::set<ExecFlagType> &);
 }
 
 typedef std::set<std::string>::const_iterator MooseEnumIterator;
@@ -43,13 +50,12 @@ class MultiMooseEnum : public MooseEnumBase
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values, and a separate string to set a default for
-   * this instance
+   * Constructor that takes a list or vector of enumeration values, and a separate string to set a
+   * default for this instance
    * @param names - a list of names for this enumeration
    * @param default_names - the default value for this enumeration instance
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   * it's range of
-   *                       defined values.
+   * it's range of defined values.
    */
   MultiMooseEnum(std::string names,
                  std::string default_names = "",
@@ -151,6 +157,16 @@ public:
   ///@}
 
   /**
+   * Get a list of the current valid enumeration.s
+   */
+  const std::set<std::string> & getCurrentNames() const { return _current_names; }
+
+  /**
+   * Get a list of the current valid enumeration.s
+   */
+  const std::vector<int> & getCurrentIDs() const { return _current_ids; }
+
+  /**
    * Clear the MultiMooseEnum
    */
   void clear();
@@ -171,9 +187,17 @@ public:
    */
   virtual bool isValid() const override { return !_current_ids.empty(); }
 
+  void removeEnumerationName(std::string name) final override;
+
   // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
   friend class libMesh::Parameters;
+
+  // The create function can build an empty MultiMooseEnums for the execution flags.
+  friend MultiMooseEnum MooseUtils::createExecuteOnEnum(const std::set<ExecFlagType> &,
+                                                        const std::set<ExecFlagType> &,
+                                                        const std::set<ExecFlagType> &);
+  friend class SetupInterface;
 
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);

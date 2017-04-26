@@ -86,7 +86,7 @@ public:
    */
   void jacobianSetup(THREAD_ID tid = 0) const;
   void residualSetup(THREAD_ID tid = 0) const;
-  void setup(ExecFlagType exec_flag, THREAD_ID tid = 0) const;
+  void setup(const ExecFlagType & exec_flag, THREAD_ID tid = 0) const;
   ///@}
 
   /**
@@ -110,8 +110,8 @@ ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(bool threaded)
   : MooseObjectWarehouse<T>(threaded)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
-  for (const auto & exec_type : Moose::exec_types)
-    _execute_objects.insert(std::make_pair(exec_type, MooseObjectWarehouse<T>(threaded)));
+  for (const auto & flag : Moose::execute_flags)
+    _execute_objects.insert(std::make_pair(flag.first, MooseObjectWarehouse<T>(threaded)));
 }
 
 template <typename T>
@@ -127,8 +127,8 @@ operator[](ExecFlagType exec_flag) const
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters "
-               "is likely out-of-date.");
+    mooseError("Unable to locate the desired execute flag, the supplied execution flag was likely "
+               "not registered.");
 
   return iter->second;
 }
@@ -140,8 +140,8 @@ MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagTyp
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters "
-               "is likely out-of-date.");
+    mooseError("Unable to locate the desired execute flag, the supplied execution flag was likely "
+               "not registered.");
 
   return iter->second;
 }
@@ -180,29 +180,19 @@ ExecuteMooseObjectWarehouse<T>::residualSetup(THREAD_ID tid /* = 0*/) const
 
 template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid /* = 0*/) const
+ExecuteMooseObjectWarehouse<T>::setup(const ExecFlagType & exec_flag, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  switch (exec_flag)
-  {
-    case EXEC_INITIAL:
-      initialSetup(tid);
-      break;
-    case EXEC_TIMESTEP_BEGIN:
-      timestepSetup(tid);
-      break;
-    case EXEC_SUBDOMAIN:
-      subdomainSetup(tid);
-      break;
-    case EXEC_NONLINEAR:
-      jacobianSetup(tid);
-      break;
-    case EXEC_LINEAR:
-      residualSetup(tid);
-      break;
-    default:
-      break;
-  }
+  if (exec_flag == EXEC_INITIAL)
+    initialSetup(tid);
+  else if (exec_flag == EXEC_TIMESTEP_BEGIN)
+    timestepSetup(tid);
+  else if (exec_flag == EXEC_SUBDOMAIN)
+    subdomainSetup(tid);
+  else if (exec_flag == EXEC_NONLINEAR)
+    jacobianSetup(tid);
+  else if (exec_flag == EXEC_LINEAR)
+    residualSetup(tid);
 }
 
 template <typename T>
@@ -216,9 +206,8 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
   std::shared_ptr<SetupInterface> ptr = std::dynamic_pointer_cast<SetupInterface>(object);
   if (ptr)
   {
-    const std::vector<ExecFlagType> flags = ptr->execFlags();
-    for (std::vector<ExecFlagType>::const_iterator it = flags.begin(); it != flags.end(); ++it)
-      _execute_objects[*it].addObject(object, tid);
+    for (const ExecFlagType & flag : ptr->getExecuteOnEnum().getCurrentIDs())
+      _execute_objects[flag].addObject(object, tid);
   }
   else
     mooseError("The object being added (",

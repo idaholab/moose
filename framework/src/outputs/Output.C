@@ -34,6 +34,7 @@ validParams<Output>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
+  params += validParams<SetupInterface>();
 
   // Displaced Mesh options
   params.addParam<bool>(
@@ -50,19 +51,15 @@ validParams<Output>()
   params.addParam<Real>(
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
-  // Add the 'execute_on' input parameter for users to set
-  params.addParam<MultiMooseEnum>("execute_on",
-                                  Output::getExecuteOptions("initial timestep_end"),
-                                  "Set to "
-                                  "(none|initial|linear|nonlinear|timestep_end|timestep_begin|"
-                                  "final|failed|custom) to execute only at that moment");
+  // Update the 'execute_on' input parameter for output
+  MooseUtils::addExecuteOnFlags(params, {EXEC_FINAL, EXEC_FAILED});
+  MooseUtils::setExecuteOnFlags(params, {EXEC_INITIAL, EXEC_TIMESTEP_END});
 
   // Add ability to append to the 'execute_on' list
-  params.addParam<MultiMooseEnum>("additional_execute_on",
-                                  Output::getExecuteOptions(),
-                                  "This list of output flags is added to the existing flags "
-                                  "(initial|linear|nonlinear|timestep_end|timestep_begin|final|"
-                                  "failed|custom) to execute only at that moment");
+  MultiMooseEnum exec_enum(params.get<MultiMooseEnum>("execute_on"));
+  params.addParam<MultiMooseEnum>(
+      "additional_execute_on", exec_enum, MooseUtils::getExecuteOnEnumDocString(exec_enum));
+  params.set<MultiMooseEnum>("additional_execute_on").clear();
 
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time ",
@@ -81,12 +78,10 @@ validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
-  // Build the string of options
-  std::string options = "none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
-                        "timestep_begin=0x10 final=0x20 failed=0x80";
-
-  // The numbers associated must be in sync with the ExecFlagType in Moose.h
-  return MultiMooseEnum(options, default_type);
+  ::mooseDeprecated("The 'getExecuteOptions' was replaced by Output::createExecuteOnEnum.");
+  MultiMooseEnum exec_enum = MooseUtils::createExecuteOnEnum();
+  exec_enum = default_type;
+  return exec_enum;
 }
 
 Output::Output(const InputParameters & parameters)

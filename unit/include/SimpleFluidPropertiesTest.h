@@ -33,7 +33,7 @@ protected:
 
     _app.reset(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
     _factory = &_app->getFactory();
-
+    _app->registerExecFlags();
     registerObjects(*_factory);
     buildObjects();
   }

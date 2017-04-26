@@ -2,13 +2,19 @@ html {
     font-family: GillSans, Calibri, Trebuchet, sans-serif;
     line-height: 1.75rem;
     color: rgba(0,0,0,1.0);
-    font-size: large;
+    font-size: x-large;
     text-align: justify;
 }
 
 /* make inline code snippets have a non-white background */
 code {
   background: #f5f2f0;
+  font-size: smaller;
+}
+
+code[class*="language-"], pre[class*="language-"]
+{
+  line-height: 1;
 }
 
 html, body {

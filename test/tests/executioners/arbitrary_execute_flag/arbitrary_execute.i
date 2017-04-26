@@ -10,12 +10,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./aux]
-    initial_condition = 5
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = Diffusion
@@ -31,30 +25,31 @@
     value = 0
   [../]
   [./right]
-    type = PostprocessorNeumannBC
+    type = DirichletBC
     variable = u
     boundary = right
-    postprocessor = right_pp
+    value = 1
   [../]
 []
 
 [Postprocessors]
-  [./right_pp]
-    type = PointValue
-    point = '0.5 0.5 0'
-    variable = aux
-    execute_on = 'initial'
+  [./arbitrary]
+    type = TestPostprocessor
+    test_type = custom_execute_on
+    execute_on = 'INITIAL JUST_GO'
   [../]
 []
 
 [Executioner]
-  type = Steady
+  type = TestSteady
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  execute_on = 'TIMESTEP_END'
-  exodus = true
+  [./out]
+    type = CSV
+    execute_on = 'INITIAL TIMESTEP_END'
+  [../]
 []
