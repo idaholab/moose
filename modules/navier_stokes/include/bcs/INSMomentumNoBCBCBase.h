@@ -50,12 +50,12 @@ protected:
   unsigned _w_vel_var_number;
   unsigned _p_var_number;
 
-  const MaterialProperty<Real> & _mu;
-  const MaterialProperty<Real> & _rho;
   RealVectorValue _gravity;
-
   unsigned _component;
   bool _integrate_p_by_parts;
+
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif

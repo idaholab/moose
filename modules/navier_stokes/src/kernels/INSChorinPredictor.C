@@ -27,14 +27,17 @@ validParams<INSChorinPredictor>()
   params.addCoupledVar("w_star", "star z-velocity"); // only required in 3D
 
   // Required parameters
-  params.addRequiredParam<Real>("mu", "dynamic viscosity");
-  params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<unsigned>(
       "component",
       "0,1,2 depending on if we are solving the x,y,z component of the Predictor equation");
   params.addRequiredParam<std::string>(
       "predictor_type",
       "One of: OLD, NEW, STAR.  Indicates which velocity to use in the predictor.");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+
   return params;
 }
 
@@ -82,11 +85,13 @@ INSChorinPredictor::INSChorinPredictor(const InputParameters & parameters)
     _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
 
     // Required parameters
-    _mu(getParam<Real>("mu")),
-    _rho(getParam<Real>("rho")),
     _component(getParam<unsigned>("component")),
     _predictor_type(getParam<std::string>("predictor_type")),
-    _predictor_enum("OLD, NEW, STAR, INVALID", _predictor_type)
+    _predictor_enum("OLD, NEW, STAR, INVALID", _predictor_type),
+
+    // Material properties
+    _mu(getMaterialProperty<Real>("mu_name")),
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -145,7 +150,7 @@ INSChorinPredictor::computeQpResidual()
 
   // Viscous part - we are using the Laplacian form here for simplicity.
   // Remember to multiply by _dt!
-  Real viscous_part = _dt * (_mu / _rho) * grad_U.contract(grad_test);
+  Real viscous_part = _dt * (_mu[_qp] / _rho[_qp]) * grad_U.contract(grad_test);
 
   return symmetric_part + convective_part + viscous_part;
 }
@@ -170,7 +175,8 @@ INSChorinPredictor::computeQpJacobian()
       Real convective_part =
           _dt * ((U_star * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
           _test[_i][_qp];
-      Real viscous_part = _dt * ((_mu / _rho) * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]));
+      Real viscous_part =
+          _dt * ((_mu[_qp] / _rho[_qp]) * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]));
       other_part = convective_part + viscous_part;
       break;
     }
@@ -241,7 +247,7 @@ INSChorinPredictor::computeQpOffDiagJacobian(unsigned jvar)
 
         // Compute the viscous part, be sure to scale by _dt.  Note: the contracted
         // value should be zero unless vel_index and _component match.
-        Real viscous_part = _dt * (_mu / _rho) * dgrad_U.contract(grad_test);
+        Real viscous_part = _dt * (_mu[_qp] / _rho[_qp]) * dgrad_U.contract(grad_test);
 
         // Return the result
         return convective_part + viscous_part;

@@ -23,10 +23,12 @@ validParams<INSProjection>()
   params.addRequiredCoupledVar("p", "pressure");
 
   // Required parameters
-  params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<unsigned>(
       "component",
       "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "density name");
 
   return params;
 }
@@ -49,8 +51,10 @@ INSProjection::INSProjection(const InputParameters & parameters)
     _p_var_number(coupled("p")),
 
     // Required parameters
-    _rho(getParam<Real>("rho")),
-    _component(getParam<unsigned>("component"))
+    _component(getParam<unsigned>("component")),
+
+    // Material properties
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -67,8 +71,8 @@ INSProjection::computeQpResidual()
   // "Symmetric" part, -a.test
   Real symmetric_part = -a(_component) * _test[_i][_qp];
 
-  // The pressure part, (1/_rho) * (grad(p).v)
-  Real pressure_part = (1. / _rho) * (_grad_p[_qp] * test);
+  // The pressure part, (1/_rho[_qp]) * (grad(p).v)
+  Real pressure_part = (1. / _rho[_qp]) * (_grad_p[_qp] * test);
 
   // Return the result
   return symmetric_part + pressure_part;
@@ -95,7 +99,7 @@ INSProjection::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _p_var_number)
   {
-    return (1. / _rho) * (_grad_phi[_j][_qp](_component) * _test[_i][_qp]);
+    return (1. / _rho[_qp]) * (_grad_phi[_j][_qp](_component) * _test[_i][_qp]);
   }
 
   else
