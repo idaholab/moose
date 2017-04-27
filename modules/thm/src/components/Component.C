@@ -87,6 +87,7 @@ Component::Component(const InputParameters & parameters)
     _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent")
                                                               : NULL),
     _sim(*getParam<Simulation *>("_sim")),
+    _app(dynamic_cast<RELAP7App &>(MooseObject::_app)),
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
     _phys_mesh(_sim.physicalMesh()),
@@ -98,6 +99,11 @@ Component::~Component() {}
 
 void
 Component::init()
+{
+}
+
+void
+Component::check()
 {
 }
 

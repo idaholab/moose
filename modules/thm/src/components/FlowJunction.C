@@ -37,23 +37,20 @@ FlowJunction::FlowJunction(const InputParameters & params)
 FlowJunction::~FlowJunction() {}
 
 void
+FlowJunction::check()
+{
+  if (_model_type == FlowModel::EQ_MODEL_7)
+    logError("Cannot be used with 7-equation model: not implemented yet.");
+}
+
+void
 FlowJunction::addVariables()
 {
   std::vector<unsigned int> connected_subdomains;
   this->getConnectedSubdomains(connected_subdomains);
 
   // add scalar variable (i.e. Lagrange multiplier)
-  switch (_model_type)
-  {
-    case FlowModel::EQ_MODEL_3:
-      _sim.addVariable(
-          true, _lm_name, FEType(THIRD, SCALAR), connected_subdomains, _scaling_factor);
-      break;
-
-    default:
-      mooseError(name(), ": Not implemented yet.");
-      break;
-  }
+  _sim.addVariable(true, _lm_name, FEType(THIRD, SCALAR), connected_subdomains, _scaling_factor);
 }
 
 void

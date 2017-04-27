@@ -82,7 +82,7 @@ protected:
   std::map<RELAP7::EEndType, std::vector<RELAP7::Connection>> _connections;
 
 private:
-  unsigned int validateNSectionsConsistent(int n_lengths, int n_n_elems);
+  void validateNSectionsConsistent(int n_lengths, int n_n_elems);
   void generateNodeLocations();
   unsigned int computeNumberOfNodes(unsigned int n_elems);
   std::vector<Real> getUniformNodeLocations(Real length, unsigned int n_nodes);

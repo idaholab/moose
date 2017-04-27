@@ -18,6 +18,7 @@ public:
   FlowJunction(const InputParameters & params);
   virtual ~FlowJunction();
 
+  virtual void check() override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 

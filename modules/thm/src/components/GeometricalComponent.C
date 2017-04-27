@@ -32,7 +32,8 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _lengths(getParam<std::vector<Real>>("length")),
     _n_elems(getParam<std::vector<unsigned int>>("n_elems"))
 {
-  _n_sections = validateNSectionsConsistent(_lengths.size(), _n_elems.size());
+  validateNSectionsConsistent(_lengths.size(), _n_elems.size());
+  _n_sections = _lengths.size();
   _length = std::accumulate(_lengths.begin(), _lengths.end(), 0.0);
   _n_elem = std::accumulate(_n_elems.begin(), _n_elems.end(), 0);
   _n_nodes = computeNumberOfNodes(_n_elem);
@@ -40,7 +41,7 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
 
 GeometricalComponent::~GeometricalComponent() {}
 
-unsigned int
+void
 GeometricalComponent::validateNSectionsConsistent(int n_lengths, int n_n_elems)
 {
   bool specified_lengths = n_lengths > 0;
@@ -50,22 +51,16 @@ GeometricalComponent::validateNSectionsConsistent(int n_lengths, int n_n_elems)
 
   if (!valid_inputs)
   {
-    std::string error = name() + ": Invalid input specification for GeometricalComponent:";
-
     if (!agreeing_inputs)
-      error += "\n  * The number of entries in the parameter 'length' does not equal the number of "
-               "entries in the parameter 'n_elems'.";
+      logError("The number of entries in the parameter 'length' does not equal the number of "
+               "entries in the parameter 'n_elems'.");
 
     if (!specified_lengths)
-      error += "\n  * There are zero entries for the parameter 'length'.";
+      logError("There are zero entries for the parameter 'length'.");
 
     if (!specified_n_elems)
-      error += "\n  * There are zero entries for the parameter 'n_elems'.";
-
-    mooseError(error);
+      logError("There are zero entries for the parameter 'n_elems'.");
   }
-
-  return n_lengths;
 }
 
 unsigned int

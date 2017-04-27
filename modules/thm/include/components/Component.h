@@ -7,6 +7,7 @@
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
+#include "MooseError.h"
 
 class Component;
 class FEProblem;
@@ -67,6 +68,11 @@ public:
   virtual void init();
 
   /**
+   * Check the component integrity
+   */
+  virtual void check();
+
+  /**
    * Displace the reference mesh into 3D space
    */
   virtual void displaceMesh() = 0;
@@ -80,15 +86,6 @@ public:
   virtual const std::vector<unsigned int> & getSubdomainIds() const { return _subdomains; }
 
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() { return _coord_sys; }
-
-  /**
-   * Check that the component exists and has type T
-   * @tparam T the type of the component we are requesting
-   * @param name The parameter name that has the component name
-   * @return true if the component exists and has type T, false otherwise
-   */
-  template <typename T>
-  bool hasComponentByName(const std::string & name) const;
 
   /**
    * Return a reference to a component via a parameter name
@@ -105,6 +102,24 @@ public:
    */
   template <typename T>
   const T & getComponentByName(const std::string & cname) const;
+
+  /**
+   * Check the existence and type of a component via a parameter name
+   * @tparam T the type of the component we are requesting
+   * @param name The parameter name that has the component name
+   * @return true if the component with given name and type exists, otherwise false
+   */
+  template <typename T>
+  bool hasComponent(const std::string & name, bool log_errors = true) const;
+
+  /**
+   * Check the existence and type of a component given its name
+   * @tparam T the type of the component we are requesting
+   * @param cname The name of the component
+   * @return true if the component with given name and type exists, otherwise false
+   */
+  template <typename T>
+  bool hasComponentByName(const std::string & cname, bool log_errors = true) const;
 
   /**
    * Get the ids associated with the component.  These can either be subdomain ids or boundary ids
@@ -206,6 +221,8 @@ protected:
   /// Simulation this component is part of
   Simulation & _sim;
 
+  /// RELAP7 App (hides _app from MooseObject)
+  RELAP7App & _app;
   /// The Factory associated with the MooseApp
   Factory & _factory;
 
@@ -235,6 +252,24 @@ protected:
                                        Moose::CoordinateSystemType coord_type);
 
   /**
+   * Logs an error
+   */
+  template <typename... Args>
+  void logError(Args &&... args) const
+  {
+    _app.log().add(Logger::ERROR, name(), ": ", std::forward<Args>(args)...);
+  }
+
+  /**
+   * Logs a warning
+   */
+  template <typename... Args>
+  void logWarning(Args &&... args) const
+  {
+    _app.log().add(Logger::WARNING, name(), ": ", std::forward<Args>(args)...);
+  }
+
+  /**
    * Split the control logic name into "section name" and "property name"
    * @param rname
    * @return
@@ -248,16 +283,6 @@ private:
 };
 
 template <typename T>
-bool
-Component::hasComponentByName(const std::string & name) const
-{
-  if (_sim.hasComponent(name))
-    return _sim.hasComponentOfType<T>(name);
-  else
-    return false;
-}
-
-template <typename T>
 const T &
 Component::getComponent(const std::string & pname) const
 {
@@ -269,20 +294,42 @@ template <typename T>
 const T &
 Component::getComponentByName(const std::string & comp_name) const
 {
+  return _sim.getComponentByName<T>(comp_name);
+}
+
+template <typename T>
+bool
+Component::hasComponent(const std::string & pname, bool log_errors) const
+{
+  const std::string & comp_name = getParam<std::string>(pname);
+  return hasComponentByName<T>(comp_name, log_errors);
+}
+
+template <typename T>
+bool
+Component::hasComponentByName(const std::string & comp_name, bool log_errors) const
+{
   if (_sim.hasComponent(comp_name))
   {
     if (_sim.hasComponentOfType<T>(comp_name))
-      return _sim.getComponentByName<T>(comp_name);
+      return true;
     else
-      mooseError(name(),
-                 ": Requested component (",
+    {
+      if (log_errors)
+        logError("Requested component '",
                  comp_name,
-                 ") have to be of type ",
+                 "' has to be of type ",
                  demangle(typeid(T).name()),
                  ".");
+      return false;
+    }
   }
   else
-    mooseError(name(), ": Requesting a non-existing component (", comp_name, "). Typo?");
+  {
+    if (log_errors)
+      logError("Requesting a non-existing component '", comp_name, "'. Typo?");
+    return false;
+  }
 }
 
 template <typename T>
