@@ -21,10 +21,10 @@ validParams<INSTemperature>()
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", "z-velocity"); // only required in 3D
 
-  // Required parameters
-  params.addRequiredParam<Real>("rho", "density");
-  params.addRequiredParam<Real>("k", "thermal conductivity");
-  params.addRequiredParam<Real>("cp", "specific heat");
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "density name");
+  params.addParam<MaterialPropertyName>("k_name", "k", "thermal conductivity name");
+  params.addParam<MaterialPropertyName>("cp_name", "cp", "specific heat name");
 
   return params;
 }
@@ -42,10 +42,10 @@ INSTemperature::INSTemperature(const InputParameters & parameters)
     _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
     _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
 
-    // Required parameters
-    _rho(getParam<Real>("rho")),
-    _k(getParam<Real>("k")),
-    _cp(getParam<Real>("cp"))
+    // Material Properties
+    _rho(getMaterialProperty<Real>("rho_name")),
+    _k(getMaterialProperty<Real>("k_name")),
+    _cp(getMaterialProperty<Real>("cp_name"))
 {
 }
 
@@ -54,13 +54,13 @@ INSTemperature::computeQpResidual()
 {
   // The convection part, rho * cp u.grad(T) * v.
   // Note: _u is the temperature variable, _grad_u is its gradient.
-  Real convective_part = _rho * _cp *
+  Real convective_part = _rho[_qp] * _cp[_qp] *
                          (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
                           _w_vel[_qp] * _grad_u[_qp](2)) *
                          _test[_i][_qp];
 
   // Thermal conduction part, k * grad(T) * grad(v)
-  Real conduction_part = _k * _grad_u[_qp] * _grad_test[_i][_qp];
+  Real conduction_part = _k[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 
   return convective_part + conduction_part;
 }
@@ -70,8 +70,8 @@ INSTemperature::computeQpJacobian()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
-  Real convective_part = _rho * _cp * (U * _grad_phi[_j][_qp]) * _test[_i][_qp];
-  Real conduction_part = _k * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]);
+  Real convective_part = _rho[_qp] * _cp[_qp] * (U * _grad_phi[_j][_qp]) * _test[_i][_qp];
+  Real conduction_part = _k[_qp] * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]);
 
   return convective_part + conduction_part;
 }

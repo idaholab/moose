@@ -22,8 +22,8 @@ validParams<INSChorinPressurePoisson>()
   params.addCoupledVar("v_star", "star y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w_star", "star z-velocity"); // only required in 3D
 
-  // Required parameters
-  params.addRequiredParam<Real>("rho", "density");
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "density_name");
 
   return params;
 }
@@ -41,8 +41,8 @@ INSChorinPressurePoisson::INSChorinPressurePoisson(const InputParameters & param
     _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
     _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
 
-    // Required parameters
-    _rho(getParam<Real>("rho"))
+    // Material properties
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -53,7 +53,7 @@ INSChorinPressurePoisson::computeQpResidual()
   Real laplacian_part = _grad_u[_qp] * _grad_test[_i][_qp];
 
   // Divergence part, don't forget to *divide* by _dt
-  Real div_part = (_rho / _dt) *
+  Real div_part = (_rho[_qp] / _dt) *
                   (_grad_u_star[_qp](0) + _grad_v_star[_qp](1) + _grad_w_star[_qp](2)) *
                   _test[_i][_qp];
 
@@ -71,13 +71,13 @@ Real
 INSChorinPressurePoisson::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_star_var_number)
-    return (_rho / _dt) * _grad_phi[_j][_qp](0) * _test[_i][_qp];
+    return (_rho[_qp] / _dt) * _grad_phi[_j][_qp](0) * _test[_i][_qp];
 
   else if (jvar == _v_vel_star_var_number)
-    return (_rho / _dt) * _grad_phi[_j][_qp](1) * _test[_i][_qp];
+    return (_rho[_qp] / _dt) * _grad_phi[_j][_qp](1) * _test[_i][_qp];
 
   else if (jvar == _w_vel_star_var_number)
-    return (_rho / _dt) * _grad_phi[_j][_qp](2) * _test[_i][_qp];
+    return (_rho[_qp] / _dt) * _grad_phi[_j][_qp](2) * _test[_i][_qp];
 
   else
     return 0;

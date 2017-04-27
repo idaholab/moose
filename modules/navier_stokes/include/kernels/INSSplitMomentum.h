@@ -61,13 +61,13 @@ protected:
   unsigned _a2_var_number;
   unsigned _a3_var_number;
 
-  // Material properties
-  Real _mu;
-  Real _rho;
-  RealVectorValue _gravity;
-
   // Parameters
+  RealVectorValue _gravity;
   unsigned _component;
+
+  // Material properties
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif // INSSPLITMOMENTUM_H

@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  Real _k;
+  const MaterialProperty<Real> & _k;
 };
 
 #endif // INSTEMPERATURENOBCBC_H

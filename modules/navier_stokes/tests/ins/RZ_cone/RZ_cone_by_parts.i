@@ -4,8 +4,6 @@
 # .) Integrating the pressure by parts.
 # .) Natural boundary condition at the outlet.
 [GlobalParams]
-  rho = 1
-  mu = 1
   gravity = '0 0 0'
 []
 
@@ -130,6 +128,15 @@
     v = vel_y
     p = p
     component = 1
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu'
+    prop_values = '1  1'
   [../]
 []
 

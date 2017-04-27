@@ -1,8 +1,6 @@
 # This input file tests Dirichlet pressure in/outflow boundary conditions for the incompressible NS equations.
 [GlobalParams]
   gravity = '0 0 0'
-  rho = 1
-  mu = 1
 []
 
 [Mesh]
@@ -84,6 +82,15 @@
     variable = p
     boundary = right
     value = 0.0
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu'
+    prop_values = '1  1'
   [../]
 []
 
