@@ -33,7 +33,7 @@ INSMomentumTractionFormRZ::computeQpResidual()
     const Real r = _q_point[_qp](0);
 
     // If this is the radial component of momentum, there is an extra term for RZ.
-    res_base += 2. * _mu * _u_vel[_qp] / (r * r) * _test[_i][_qp];
+    res_base += 2. * _mu[_qp] * _u_vel[_qp] / (r * r) * _test[_i][_qp];
 
     // If the pressure is also integrated by parts, there is an extra term in RZ.
     if (_integrate_p_by_parts)
@@ -53,7 +53,7 @@ INSMomentumTractionFormRZ::computeQpJacobian()
   if (_component == 0)
   {
     const Real r = _q_point[_qp](0);
-    jac_base += 2. * _mu * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
+    jac_base += 2. * _mu[_qp] * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
   }
 
   return jac_base;

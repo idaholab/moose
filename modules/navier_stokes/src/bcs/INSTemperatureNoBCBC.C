@@ -15,15 +15,15 @@ validParams<INSTemperatureNoBCBC>()
   params.addClassDescription("This class implements the 'No BC' boundary condition discussed by "
                              "Griffiths, Papanastiou, and others.");
   // Required parameters
-  params.addRequiredParam<Real>("k", "thermal conductivity");
+  params.addParam<MaterialPropertyName>("k_name", "k", "thermal conductivity_name");
 
   return params;
 }
 
 INSTemperatureNoBCBC::INSTemperatureNoBCBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    // Required parameters
-    _k(getParam<Real>("k"))
+    // Material property
+    _k(getMaterialProperty<Real>("k_name"))
 {
 }
 
@@ -31,13 +31,13 @@ Real
 INSTemperatureNoBCBC::computeQpResidual()
 {
   // k * (grad_T.n) * test
-  return _k * _grad_u[_qp] * _normals[_qp] * _test[_i][_qp];
+  return _k[_qp] * _grad_u[_qp] * _normals[_qp] * _test[_i][_qp];
 }
 
 Real
 INSTemperatureNoBCBC::computeQpJacobian()
 {
-  return _k * (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
+  return _k[_qp] * (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
 }
 
 Real

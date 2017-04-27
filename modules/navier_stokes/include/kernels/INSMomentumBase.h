@@ -63,15 +63,14 @@ protected:
   unsigned _w_vel_var_number;
   unsigned _p_var_number;
 
-  // Material properties
-  // MaterialProperty<Real> & _dynamic_viscosity;
-  const MaterialProperty<Real> & _mu;
-  const MaterialProperty<Real> & _rho;
-  RealVectorValue _gravity;
-
   // Parameters
+  RealVectorValue _gravity;
   unsigned _component;
   bool _integrate_p_by_parts;
+
+  // Material properties
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif
