@@ -65,8 +65,8 @@ protected:
 
   // Material properties
   // MaterialProperty<Real> & _dynamic_viscosity;
-  Real _mu;
-  Real _rho;
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
   RealVectorValue _gravity;
 
   // Parameters

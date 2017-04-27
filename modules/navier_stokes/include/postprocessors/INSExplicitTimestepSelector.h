@@ -38,8 +38,8 @@ protected:
 
   /// Material properties:  the explicit time scheme limit for the viscous
   /// problem also depends on the kinematic viscosity.
-  Real _mu;
-  Real _rho;
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
 
   /// We can compute maximum stable timesteps based on the linearized
   /// theory, but even those timesteps are sometimes still too large

@@ -33,8 +33,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Parameters
-  Real _rho;
-  Real _cp;
+  const MaterialProperty<Real> & _rho;
+  const MaterialProperty<Real> & _cp;
 };
 
 #endif // INSTEMPERATURETIMEDERIVATIVE_H
