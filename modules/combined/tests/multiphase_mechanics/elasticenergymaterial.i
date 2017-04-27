@@ -16,16 +16,10 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./c]
-    order = FIRST
-    family = LAGRANGE
     [./InitialCondition]
       type = SmoothCircleIC
       x1 = 125.0
@@ -43,13 +37,13 @@
     type = PresetBC
     boundary = bottom
     variable = disp_y
-    value = 0.
+    value = 0.0
   [../]
   [./left]
     type = PresetBC
     boundary = left
     variable = disp_x
-    value = 0.
+    value = 0.0
   [../]
 []
 
@@ -66,23 +60,18 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric9
     C_ijkl = '3 1 1 3 1 3 1 1 1 '
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
   [./prefactor]
     type = DerivativeParsedMaterial
-    block = 0
     args = c
     f_name = prefactor
     constant_names       = 'epsilon0 c0'
@@ -99,7 +88,6 @@
 
   [./elasticenergy]
     type = ElasticEnergyMaterial
-    block = 0
     args = 'c'
     outputs = exodus
   [../]

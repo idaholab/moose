@@ -75,7 +75,6 @@
   [./strain_A]
     type = ComputeSmallStrain
     base_name = A
-    displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]
   [./stress_A]
@@ -99,7 +98,6 @@
   [./strain_B]
     type = ComputeSmallStrain
     base_name = B
-    displacements = 'disp_x disp_y'
     eigenstrain_names = 'B_eigenstrain'
   [../]
   [./stress_B]
@@ -123,7 +121,6 @@
   [./strain_C]
     type = ComputeSmallStrain
     base_name = C
-    displacements = 'disp_x disp_y'
     eigenstrain_names = 'C_eigenstrain'
   [../]
   [./stress_C]

@@ -25,10 +25,12 @@ class ElasticEnergyMaterial : public DerivativeFunctionMaterialBase
 public:
   ElasticEnergyMaterial(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
-  virtual Real computeF();
-  virtual Real computeDF(unsigned int i_var);
-  virtual Real computeD2F(unsigned int i_var, unsigned int j_var);
+  virtual Real computeF() override;
+  virtual Real computeDF(unsigned int i_var) override;
+  virtual Real computeD2F(unsigned int i_var, unsigned int j_var) override;
 
   std::string _base_name;
 
