@@ -17,10 +17,11 @@ namespace RankTwoScalarTools
 MooseEnum
 scalarOptions()
 {
-  return MooseEnum("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm MaxPrincipal "
-                   "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
-                   "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
-                   "Direction");
+  return MooseEnum(
+      "VonMisesStress EquivalentPlasticStrain EffectiveStrain Hydrostatic L2norm MaxPrincipal "
+      "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
+      "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
+      "Direction");
 }
 
 Real
@@ -43,45 +44,48 @@ getQuantity(const RankTwoTensor & tensor,
       val = equivalentPlasticStrain(tensor);
       break;
     case 2:
-      val = hydrostatic(tensor);
+      val = effectiveStrain(tensor);
       break;
     case 3:
-      val = L2norm(tensor);
+      val = hydrostatic(tensor);
       break;
     case 4:
-      val = maxPrinciple(tensor);
+      val = L2norm(tensor);
       break;
     case 5:
-      val = midPrinciple(tensor);
+      val = maxPrinciple(tensor);
       break;
     case 6:
-      val = minPrinciple(tensor);
+      val = midPrinciple(tensor);
       break;
     case 7:
-      val = volumetricStrain(tensor);
+      val = minPrinciple(tensor);
       break;
     case 8:
-      val = firstInvariant(tensor);
+      val = volumetricStrain(tensor);
       break;
     case 9:
-      val = secondInvariant(tensor);
+      val = firstInvariant(tensor);
       break;
     case 10:
-      val = thirdInvariant(tensor);
+      val = secondInvariant(tensor);
       break;
     case 11:
-      val = axialStress(tensor, point1, point2, direction);
+      val = thirdInvariant(tensor);
       break;
     case 12:
-      val = hoopStress(tensor, point1, point2, curr_point, direction);
+      val = axialStress(tensor, point1, point2, direction);
       break;
     case 13:
-      val = radialStress(tensor, point1, point2, curr_point, direction);
+      val = hoopStress(tensor, point1, point2, curr_point, direction);
       break;
     case 14:
-      val = triaxialityStress(tensor);
+      val = radialStress(tensor, point1, point2, curr_point, direction);
       break;
     case 15:
+      val = triaxialityStress(tensor);
+      break;
+    case 16:
       val = directionValueTensor(tensor, direction);
       break;
     default:
@@ -123,6 +127,12 @@ vonMisesStress(const RankTwoTensor & stress)
 
 Real
 equivalentPlasticStrain(const RankTwoTensor & strain)
+{
+  return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
+}
+
+Real
+effectiveStrain(const RankTwoTensor & strain)
 {
   return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
 }
@@ -184,6 +194,24 @@ thirdInvariant(const RankTwoTensor & r2tensor)
         r2tensor(0, 2) * r2tensor(1, 1) * r2tensor(2, 0);
 
   return val;
+}
+
+Real
+maxPrincipal(const RankTwoTensor & r2tensor)
+{
+  return calcEigenValues(r2tensor, (LIBMESH_DIM - 1));
+}
+
+Real
+midPrincipal(const RankTwoTensor & r2tensor)
+{
+  return calcEigenValues(r2tensor, 1);
+}
+
+Real
+minPrincipal(const RankTwoTensor & r2tensor)
+{
+  return calcEigenValues(r2tensor, 0);
 }
 
 Real

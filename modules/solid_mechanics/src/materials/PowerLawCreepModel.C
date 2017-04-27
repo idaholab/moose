@@ -27,7 +27,7 @@ validParams<PowerLawCreepModel>()
 }
 
 PowerLawCreepModel::PowerLawCreepModel(const InputParameters & parameters)
-  : ReturnMappingModel(parameters),
+  : ReturnMappingModel(parameters, "creep"),
     _coefficient(parameters.get<Real>("coefficient")),
     _n_exponent(parameters.get<Real>("n_exponent")),
     _m_exponent(parameters.get<Real>("m_exponent")),
