@@ -534,6 +534,9 @@ class TestHarness:
             print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code )
 
+            if self.queue_file:
+                print '\nYour Queue batch file:', self.queue_file.name
+
         if self.file:
             self.file.close()
 
@@ -541,15 +544,21 @@ class TestHarness:
         if self.writeFailedTest != None:
             self.writeFailedTest.close()
 
+        # Close the queue file
+        if self.queue_file:
+            self.queue_file.close()
+
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
 
-        # Populate the params
-        scheduler_params = self.factory.validParams('RunParallel')
-
-        # Set max jobs to allow
-        scheduler_params['max_processes'] = self.options.jobs
+        # Populate params based on options
+        if self.options.pbs:
+            scheduler_params = self.factory.validParams('RunPBS')
+        elif self.options.slurm:
+            scheduler_params = self.factory.validParams('RunSlurm')
+        else:
+            scheduler_params = self.factory.validParams('RunParallel')
 
         # Create the scheduler
         self.scheduler = self.factory.create(scheduler_params['scheduler'], self, scheduler_params)
@@ -637,6 +646,13 @@ class TestHarness:
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
 
+        queue_group = parser.add_argument_group('Queuing Options', 'The following options select the type of queuing system to launch jobs with and saves results to specified file (json format). If the supplied file exists, the TestHarness will instead check results of each test that was launched, as specified in the json file.')
+        queue_group.add_argument('--pbs', nargs='?', metavar='json file', dest='pbs', const='generate', help='Enable launching tests via PBS')
+        queue_group.add_argument('--slurm', nargs='?', metavar='json file', dest='slurm', const='generate', help='Enable launching tests via Slurm')
+        queue_group.add_argument('--queue-cleanup', nargs='?', metavar='json file', help='Clean up directories/files created by this queue')
+        queue_group.add_argument('--queue', nargs='?', metavar='job queue', help='Use specified job queue')
+        queue_group.add_argument('--project', nargs='?', metavar='project', help='Use specified project')
+
         code = True
         if self.code.decode('hex') in argv:
             del argv[argv.index(self.code.decode('hex'))]
@@ -703,6 +719,63 @@ class TestHarness:
         if opts.heavy_tests:
             self.options.report_skipped = False
 
+        # Can't use multiple queueing options
+        if opts.pbs and opts.slurm:
+            print 'ERROR: options --pbs %s and --slurm %s can not be used simultaneously' % (opts.pbs, opts.slurm)
+            sys.exit(1)
+
+        # normalize pbs/slurm options
+        if opts.pbs:
+            self.queue_file = opts.pbs
+        elif opts.slurm:
+            self.queue_file = opts.slurm
+        else:
+            self.queue_file = None
+
+        # Set initial Queue globals
+        self.options.processingQueue = False
+
+        # Initialize PBS options if supplied
+        if self.queue_file:
+            # PBS arguments supplied and file exists
+            if os.path.exists(self.queue_file):
+                try:
+                    with open(self.queue_file, 'r') as q_file:
+                        self.queue_data = json.load(q_file)
+                except ValueError:
+                    print 'PBS file specified not json format:', self.queue_file
+                    sys.exit(1)
+                opts.processingQueue = True
+
+            # PBS arguments supplied and file does not exist
+            else:
+                # PBS arguments supplied with no file
+                if self.queue_file == 'generate':
+                    largest_serial_num = 0
+                    for name in os.listdir('.'):
+                        m = re.search('queue_(\d{3})', name)
+                        if m != None and int(m.group(1)) > largest_serial_num:
+                            largest_serial_num = int(m.group(1))
+                    self.queue_file = "queue_" +  str(largest_serial_num+1).zfill(3)
+
+                # Set the pbs_file handler
+                self.queue_file = open(self.queue_file, 'w')
+                self.queue_data = {}
+
+        # Delete old pbs files
+        if opts.queue_cleanup:
+            # Populate pbs_data file if it exists
+            if os.path.exists(opts.queue_cleanup):
+                try:
+                    with open(opts.queue_cleanup, 'r') as q_file:
+                        self.queue_data = json.load(q_file)
+                except ValueError:
+                    print 'PBS file specified not json format:', opts.queue_cleanup
+                    sys.exit(1)
+            else:
+                print 'Specified PBS file not found'
+                sys.exit(1)
+
     def checkForRaceConditionOutputs(self, testers, dirpath):
         d = DependencyResolver()
 
@@ -756,6 +829,9 @@ class TestHarness:
 
     def getOptions(self):
         return self.options
+
+    def getQueueFile(self):
+        return self.queue_file
 
 #################################################################################################################################
 # The TestTimer TestHarness

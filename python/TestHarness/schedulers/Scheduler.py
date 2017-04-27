@@ -29,6 +29,10 @@ class Scheduler(MooseObject):
         # Retrieve and store the TestHarness options for use in this object
         self.options = harness.getOptions()
 
+        # Set max jobs to allow
+        params['max_processes'] = self.options.jobs
+        params['average_load'] = self.options.load
+
         # For backwards compatibitliy the RunParallel class can be initialized
         # with no "max_processes" argument and it'll default to a soft limit.
         # If however a max_processes  is passed we'll treat it as a hard limit.
