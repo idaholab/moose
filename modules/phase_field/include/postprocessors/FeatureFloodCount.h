@@ -193,7 +193,7 @@ public:
      *  Optimization: We may use the bounding boxes as a coarse-level check before checking
      *  halo intersection.
      */
-    bool mergeable(const FeatureData & rhs, bool use_pb) const;
+    bool mergeable(const FeatureData & rhs) const;
 
     ///@{
     /**
@@ -331,6 +331,20 @@ protected:
                                              Status & status,
                                              unsigned int & new_id);
 
+  /**
+   * This method takes all of the partial features and expands the local, ghosted, and halo sets
+   * around those regions to account for the diffuse interface. Rather than using any kind of
+   * recursion here, we simply expand the region by all "point" neighbors from the actual
+   * grain cells since all point neighbors will contain contributions to the region.
+   */
+  void expandPointHalos();
+
+  /**
+   * This method expands the existing halo set by some width determined by the passed in value.
+   * This method does NOT mask off any local IDs.
+   */
+  void expandEdgeHalos(unsigned int num_layers_to_expand);
+
   ///@{
   /**
    * These two routines are utility routines used by the flood routine and by derived classes for
@@ -389,7 +403,14 @@ protected:
    * This routine is called on the master rank only and stitches together the partial
    * feature pieces seen on any processor.
    */
-  void mergeSets(bool use_periodic_boundary_info);
+  void mergeSets();
+
+  /**
+   * Method for determining whether two features are mergeable. This routine exists because
+   * derived classes may need to override this function rather than use the mergeable method
+   * in the FeatureData object.
+   */
+  virtual bool areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const;
 
   /**
    * This routine handles all of the serialization, communication and deserialization of the data
