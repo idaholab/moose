@@ -21,7 +21,7 @@ class RunParallel(Scheduler):
     @staticmethod
     def validParams():
         params = Scheduler.validParams()
-        params.addRequiredParam('scheduler',    'RunParallel', "The type of scheduler.")
+        params.addRequiredParam('scheduler',    'RunParallel', "The name of this scheduler")
 
         return params
 
@@ -30,17 +30,6 @@ class RunParallel(Scheduler):
 
     def __init__(self, harness, params):
         Scheduler.__init__(self, harness, params)
-
-    def unsatisfiedPrereqs(self, tester):
-        if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs):
-            if self.options.pbs is None and self.options.ignored_caveats is None:
-                return True
-            else:
-                if self.options.ignored_caveats:
-                    caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
-                    if 'all' not in self.options.ignored_caveats and 'prereq' not in self.options.ignored_caveats:
-                        return True
-        return False
 
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
     def run(self, tester, command, recurse=True, slot_check=True):
@@ -171,30 +160,21 @@ class RunParallel(Scheduler):
                 pgid = os.getpgid(p.pid)
                 os.killpg(pgid, SIGTERM)
 
-            if self.options.pbs and not self.options.processingPBS:
-                self.harness.handleTestStatus(tester, output)
-            else:
-                self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock())
+            self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock())
         else:
             f.close()
 
-            # PBS jobs
-            if self.options.pbs and not self.options.processingPBS:
-                self.harness.handleTestStatus(tester, output)
+            if tester in self.reported_jobs:
+                tester.specs.addParam('caveats', ['FINISHED'], "")
 
-            # All other jobs
-            else:
-                if tester in self.reported_jobs:
-                    tester.specs.addParam('caveats', ['FINISHED'], "")
+            if self.options.dry_run:
+                # Set the successful message for DRY_RUN
+                tester.success_message = 'DRY RUN'
+                output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
+            elif tester.getStatus() != 'FAIL': # Still haven't processed results!
+                output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
 
-                if self.options.dry_run:
-                    # Set the successful message for DRY_RUN
-                    tester.success_message = 'DRY RUN'
-                    output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
-                elif tester.getStatus() != 'FAIL': # Still haven't processed results!
-                    output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
-
-                self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
+            self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
         if tester.didPass():
             self.finished_jobs.add(tester.specs['test_name'])

@@ -5,12 +5,11 @@ from MooseObject import MooseObject
 
 import os, sys
 
-## This class provides an interface to run commands in parallel
+## Base class for handling how jobs are launched
 #
 # To use this class, call the .run() method with the command and the test
 # options. When the test is finished running it will call harness.testOutputAndFinish
 # to complete the test. Be sure to call join() to make sure all the tests are finished.
-#
 class Scheduler(MooseObject):
 
     @staticmethod
@@ -58,7 +57,7 @@ class Scheduler(MooseObject):
         # queue for jobs that are always too big (can run at the end if we have soft limits)
         self.big_queue = deque()
 
-        # Jobs that have been finished
+        # Jobs that have finished
         self.finished_jobs = set()
 
         # List of skipped jobs to resolve prereq issues for tests that never run
@@ -83,6 +82,18 @@ class Scheduler(MooseObject):
     ## Return control to the test harness by finalizing the test output and calling the callback
     def returnToTestHarness(self, job_index):
         return
+
+    ## Returns False if all pre-preqs have been satisfied
+    def unsatisfiedPrereqs(self, tester):
+        if tester.specs['prereq'] != [] and len(set(tester.specs['prereq']) - self.finished_jobs):
+            if self.options.ignored_caveats is None:
+                return True
+            else:
+                if self.options.ignored_caveats:
+                    caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
+                    if 'all' not in self.options.ignored_caveats and 'prereq' not in self.options.ignored_caveats:
+                        return True
+        return False
 
     ## Attempt to launch jobs that can be launched
     def startReadyJobs(self, slot_check):

@@ -68,7 +68,6 @@ class Tester(MooseObject):
         self.bucket_success = self.status.bucket_success
         self.bucket_fail    = self.status.bucket_fail
         self.bucket_diff    = self.status.bucket_diff
-        self.bucket_pbs     = self.status.bucket_pbs
         self.bucket_pending = self.status.bucket_pending
         self.bucket_deleted = self.status.bucket_deleted
         self.bucket_skip    = self.status.bucket_skip
