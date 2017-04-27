@@ -99,19 +99,16 @@
 [Materials]
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M  kappa_c'
     prop_values = '1  0.1'
   [../]
   [./straingradderiv]
     type = StrainGradDispDerivatives
-    block = 0
   [../]
 
   [./elasticity_tensor]
     type = ComputeConcentrationDependentElasticityTensor
     c = c
-    block = 0
     C0_ijkl = '1.0 1.0'
     C1_ijkl = '3.0 3.0'
     fill_method0 = symmetric_isotropic
@@ -119,16 +116,13 @@
   [../]
   [./smallstrain]
     type = ComputeSmallStrain
-    block = 0
   [../]
   [./linearelastic_a]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = F
-    block = 0
     args = 'c'
     derivative_order = 3
   [../]

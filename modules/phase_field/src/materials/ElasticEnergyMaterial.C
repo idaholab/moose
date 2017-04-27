@@ -57,6 +57,13 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const InputParameters & parameters)
   }
 }
 
+void
+ElasticEnergyMaterial::initialSetup()
+{
+  validateCoupling<RankTwoTensor>(_base_name + "elastic_strain");
+  validateCoupling<RankFourTensor>(_base_name + "elasticity_tensor");
+}
+
 Real
 ElasticEnergyMaterial::computeF()
 {

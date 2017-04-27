@@ -16,12 +16,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -63,7 +59,6 @@
   [./strain_A]
     type = ComputeSmallStrain
     base_name = A
-    displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]
   [./stress_A]
@@ -87,7 +82,6 @@
   [./strain_B]
     type = ComputeSmallStrain
     base_name = B
-    displacements = 'disp_x disp_y'
     eigenstrain_names = 'B_eigenstrain'
   [../]
   [./stress_B]
