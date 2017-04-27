@@ -1,5 +1,6 @@
 import os
 from MooseMarkdown import MooseMarkdown
+from MooseMarkdownPresentation import MooseMarkdownPresentation
 from markdown.util import etree
 
 def get_collection_items(info_objects, show_hidden=False):

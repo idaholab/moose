@@ -147,7 +147,6 @@ def load_config(config_file, **kwargs):
     config.update(kwargs)
 
     # Set the default arguments
-    config.setdefault('site_dir', abspath('site'))
     config.setdefault('navigation', abspath(os.path.join(os.getcwd(), 'navigation.yml')))
     config.setdefault('template', 'materialize.html')
     config.setdefault('template_arguments', dict())
@@ -213,7 +212,6 @@ def read_markdown(md_file):
             break
     return '\n'.join(lines[count:]), output
 
-
 def purge(extensions):
     """
     Removes generated files from repository.
@@ -242,23 +240,29 @@ def command_line_options(*args):
     # Command-line options
     parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
     parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
-    parser.add_argument('--config-file', type=str, default='moosedocs.yml', help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
 
     subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
     # Add the sub-commands
-    test_parser = commands.test_options(parser, subparser)
-    check_parser = commands.check_options(parser, subparser)
-    generate_parser = commands.generate_options(parser, subparser)
-    serve_parser = commands.serve_options(parser, subparser)
-    build_parser = commands.build_options(parser, subparser)
-    latex_parser = commands.latex_options(parser, subparser)
-    presentation_parser = commands.presentation_options(parser, subparser)
+    test_parser = subparser.add_parser('test', help='Performs unit testing of MooseDocs module.')
+    commands.test_options(test_parser)
 
-    # Parse the arguments
-    options = parser.parse_args(*args)
+    check_parser = subparser.add_parser('check', help="Check that the documentation exists and is complete for your application and optionally generating missing markdown files.")
+    commands.check_options(check_parser)
 
-    return options
+    build_parser = subparser.add_parser('build', help='Build the documentation for serving on another system.')
+    commands.build_options(build_parser)
+
+    serve_parser = subparser.add_parser('serve', help='Serve the documentation using a local server.')
+    commands.serve_options(serve_parser)
+
+    latex_parser = subparser.add_parser('latex', help='Generate a .tex or .pdf document from a markdown file.')
+    commands.latex_options(latex_parser)
+
+    presentation_parser = subparser.add_parser('presentation', help="Convert a markdown file to an html presentation.")
+    commands.presentation_options(presentation_parser)
+
+    return parser.parse_args(*args)
 
 def moosedocs():
 
@@ -294,6 +298,8 @@ def moosedocs():
         retcode = commands.build(**options)
     elif cmd == 'latex':
         retcode = commands.latex(**options)
+    elif cmd == 'presentation':
+        retcode = commands.presentation(**options)
 
     # Check retcode
     if retcode is not None:

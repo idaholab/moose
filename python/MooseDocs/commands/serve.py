@@ -10,19 +10,15 @@ import MooseDocs
 import build
 log = logging.getLogger(__name__)
 
-def serve_options(parser, subparser):
+def serve_options(parser):
     """
     Command-line options for serve command.
     """
+    build.build_options(parser, site_dir=False)
+    parser.add_argument('--host', default='127.0.0.1', type=str, help="The local host location for live web server (default: %(default)s).")
+    parser.add_argument('--port', default='8000', type=str, help="The local host port for live web server (default: %(default)s).")
 
-    serve_parser = subparser.add_parser('serve', help='Serve the documentation using a local server.')
-    serve_parser.add_argument('--host', default='127.0.0.1', type=str, help="The local host location for live web server (default: %(default)s).")
-    serve_parser.add_argument('--port', default='8000', type=str, help="The local host port for live web server (default: %(default)s).")
-    serve_parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(), help="Specify the number of threads to build pages with.")
-
-    return serve_parser
-
-def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', num_threads=multiprocessing.cpu_count()):
+def serve(config_file=None, host=None, port=None, num_threads=None, template=None):
     """
     Create live server
     """
@@ -44,7 +40,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', num_thread
 
     # Wrapper for building complete website
     def build_complete():
-        return build.build_site(config_file=config_file, site_dir=tempdir, num_threads=num_threads)
+        return build.build_site(config_file=config_file, site_dir=tempdir, num_threads=num_threads, template=template)
     config, parser, builder = build_complete()
 
     # Create the live server
@@ -69,4 +65,4 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', num_thread
     server.watch('templates', builder.build)
 
     # Start the server
-    server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)
+    server.serve(root=tempdir, host=host, port=port, restart_delay=0)

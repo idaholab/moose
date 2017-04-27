@@ -11,13 +11,15 @@ from MooseDocsNode import MooseDocsNode
 from MooseDocsMarkdownNode import MooseDocsMarkdownNode
 
 
-def build_options(parser, subparser):
+def build_options(parser, site_dir=True):
     """
     Command-line options for build command.
     """
-    build_parser = subparser.add_parser('build', help='Build the documentation for serving on another system.')
-    build_parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(), help="Specify the number of threads to build pages with.")
-    return build_parser
+    parser.add_argument('--config-file', type=str, default='moosedocs.yml', help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
+    parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(), help="Specify the number of threads to build pages with.")
+    parser.add_argument('--template', type=str, default='website.html', help="The template html file to utilize (Default: %(default)s).")
+    if site_dir:
+        parser.add_argument('--site-dir', type=str, default=os.path.join(MooseDocs.ROOT_DIR, 'site'), help="The location to build the website content (Default: %(default)s).")
 
 def make_tree(directory, node, **kwargs):
     """
@@ -123,20 +125,20 @@ class Builder(object):
             helper(os.path.join(from_dir, 'css'), os.path.join(self._site_dir, 'css'))
             helper(os.path.join(from_dir, 'media'), os.path.join(self._site_dir, 'media'))
 
-def build_site(config_file='moosedocs.yml', num_threads=multiprocessing.cpu_count(), **kwargs):
+def build_site(config_file=None, site_dir=None, num_threads=None, template=None):
     """
     The main build command.
     """
 
     # Load the YAML configuration file
-    config = MooseDocs.load_config(config_file, **kwargs)
+    config = MooseDocs.load_config(config_file, template=template)
 
     # Create the markdown parser
     extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
     parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
 
     # Create object for storing pages to be generated
-    builder = Builder(parser, config['site_dir'], config['template'], config['template_arguments'], config['navigation'])
+    builder = Builder(parser, site_dir, config['template'], config['template_arguments'], config['navigation'])
 
     # Create the html
     builder.build(num_threads=num_threads)

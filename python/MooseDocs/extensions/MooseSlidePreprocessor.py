@@ -56,7 +56,7 @@ class MooseSlidePreprocessor(Preprocessor):
             if id:
                 if parent and parent != id:
                     id = '{}-{}'.format(parent, id)
-            attr.append('id="{}"'.format(id))
+                attr.append('id="{}"'.format(id))
 
         # Define section tags
         start_section = u'<section {}>'.format(' '.join(attr))

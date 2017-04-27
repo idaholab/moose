@@ -20,7 +20,7 @@ from MoosePackageParser import MoosePackageParser
 from MooseSlider import MooseSlider
 from MooseDiagram import MooseDiagram
 from MooseCSS import MooseCSS
-from MooseSlidePreprocessor import MooseSlidePreprocessor
+from MooseCSSPreprocessor import MooseCSSPreprocessor
 from MooseBuildStatus import MooseBuildStatus
 from MooseBibtex import MooseBibtex
 from MooseActionList import MooseActionList
@@ -43,7 +43,6 @@ class MooseMarkdown(markdown.Extension):
         self.config['locations']    = [dict(), "The locations to parse for syntax."]
         self.config['repo']         = ['', "The remote repository to create hyperlinks."]
         self.config['links']        = [dict(), "The set of paths for generating input file and source code links to objects."]
-        self.config['slides']       = [False, "Enable the parsing for creating reveal.js slides."]
         self.config['package']      = [False, "Enable the use of the MoosePackageParser."]
         self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
         self.config['dot_ext']      = ['svg', "The graphviz/dot output file extension (default: svg)."]
@@ -109,8 +108,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Preprocessors
         md.preprocessors.add('moose_bibtex', MooseBibtex(markdown_instance=md, **config), '_end')
-        if config['slides']:
-            md.preprocessors.add('moose_slides', MooseSlidePreprocessor(markdown_instance=md), '_end')
+        md.preprocessors.add('moose_css_list', MooseCSSPreprocessor(markdown_instance=md, **config), '_end')
 
         # Block processors
         md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, **config), '_begin')

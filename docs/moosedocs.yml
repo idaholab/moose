@@ -1,5 +1,3 @@
-template: website.html
-
 template_arguments:
     title: MOOSE
     logo: ../media/moose_logo_small.png

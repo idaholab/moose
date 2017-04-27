@@ -48,7 +48,8 @@ class MooseCSS(BlockProcessor, MooseCommonExtension):
             top_div = etree.SubElement(parent, 'div')
             p_el = self.applyElementSettings(etree.SubElement(top_div, 'p'), settings)
             p_el.text = paragraph
+            print p_el.text
         else:
             top_div = sibling
 
-        self.parser.parseChunk(top_div, block)
+        self.parser.parseChunk(parent, block)
