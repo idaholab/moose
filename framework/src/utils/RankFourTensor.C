@@ -720,8 +720,8 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & in
           _vals[i][j][k][l] = input[0] * (i == j) * (k == l) + input[1] * (i == k) * (j == l) +
                               input[1] * (i == l) * (j == k);
           for (unsigned int m = 0; m < N; ++m)
-            _vals[i][j][k][l] +=
-                input[2] * RankThreeTensor::leviCivita(i, j, m) * RankThreeTensor::leviCivita(k, l, m);
+            _vals[i][j][k][l] += input[2] * RankThreeTensor::leviCivita(i, j, m) *
+                                 RankThreeTensor::leviCivita(k, l, m);
         }
 }
 

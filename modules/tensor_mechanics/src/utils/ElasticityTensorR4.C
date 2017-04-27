@@ -95,7 +95,7 @@ ElasticityTensorR4::momentJacobianwc(const unsigned int i,
     for (unsigned int l = 0; l < N; ++l)
       for (unsigned int m = 0; m < N; ++m)
         for (unsigned int n = 0; n < N; ++n)
-          the_sum +=
-              RankThreeTensor::leviCivita(i, j, m) * _vals[j][m][l][n] * RankThreeTensor::leviCivita(l, n, k);
+          the_sum += RankThreeTensor::leviCivita(i, j, m) * _vals[j][m][l][n] *
+                     RankThreeTensor::leviCivita(l, n, k);
   return test * phi * the_sum;
 }

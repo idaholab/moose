@@ -72,7 +72,8 @@ momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Rea
     for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
       for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
         for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
-          sum += RankThreeTensor::leviCivita(i, j, m) * r4t(j, m, l, n) * RankThreeTensor::leviCivita(l, n, k);
+          sum += RankThreeTensor::leviCivita(i, j, m) * r4t(j, m, l, n) *
+                 RankThreeTensor::leviCivita(l, n, k);
 
   return test * phi * sum;
 }
