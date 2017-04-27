@@ -2,8 +2,6 @@
 
 [GlobalParams]
   gravity = '0 0 0'
-  rho = 1
-  mu = 1
   integrate_p_by_parts = false
 []
 
@@ -96,6 +94,15 @@
     boundary = top_right
     value = 0
     variable = p
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu'
+    prop_values = '1  1'
   [../]
 []
 

@@ -2,8 +2,6 @@
 
 [GlobalParams]
   gravity = '0 0 0'
-  rho = 1
-  mu = 1
   integrate_p_by_parts = true
 []
 
@@ -79,6 +77,15 @@
     variable = vel_x
     boundary = 'left'
     function = 'inlet_func'
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu'
+    prop_values = '1  1'
   [../]
 []
 

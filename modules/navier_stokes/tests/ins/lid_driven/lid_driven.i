@@ -1,9 +1,5 @@
 [GlobalParams]
   gravity = '0 0 0'
-  rho = 1
-  mu = 1
-  cp = 1
-  k = .01
 []
 
 [Mesh]
@@ -150,6 +146,15 @@
     variable = p
     boundary = 'pinned_node'
     value = 0
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu cp k'
+    prop_values = '1  1  1  .01'
   [../]
 []
 

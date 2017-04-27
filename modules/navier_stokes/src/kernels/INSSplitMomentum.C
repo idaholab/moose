@@ -25,12 +25,14 @@ validParams<INSSplitMomentum>()
   params.addCoupledVar("a3", "z-acceleration"); // only required in 3D
 
   // Required parameters
-  params.addRequiredParam<Real>("mu", "dynamic viscosity");
-  params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addRequiredParam<unsigned>(
       "component",
       "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
   return params;
 }
@@ -62,10 +64,12 @@ INSSplitMomentum::INSSplitMomentum(const InputParameters & parameters)
     _a3_var_number(_mesh.dimension() == 3 ? coupled("a3") : libMesh::invalid_uint),
 
     // Required parameters
-    _mu(getParam<Real>("mu")),
-    _rho(getParam<Real>("rho")),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _component(getParam<unsigned>("component"))
+    _component(getParam<unsigned>("component")),
+
+    // Material properties
+    _mu(getMaterialProperty<Real>("mu_name")),
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -117,7 +121,7 @@ INSSplitMomentum::computeQpResidual()
   Real convective_part = (grad_U * U) * test;
 
   // The viscous part, tau : grad(v)
-  Real viscous_part = (_mu / _rho) * tau.contract(grad_test);
+  Real viscous_part = (_mu[_qp] / _rho[_qp]) * tau.contract(grad_test);
 
   return symmetric_part + convective_part + viscous_part;
 }
@@ -194,7 +198,7 @@ INSSplitMomentum::computeQpOffDiagJacobian(unsigned jvar)
     Real convective_part = convective_jac * test;
 
     // Compute the viscous part
-    Real viscous_part = (_mu / _rho) * dtau.contract(grad_test);
+    Real viscous_part = (_mu[_qp] / _rho[_qp]) * dtau.contract(grad_test);
 
     // Return the result
     return convective_part + viscous_part;

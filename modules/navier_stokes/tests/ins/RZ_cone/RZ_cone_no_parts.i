@@ -4,8 +4,6 @@
 # .) Not integrating the pressure by parts, thereby requiring a pressure pin.
 # .) Natural boundary condition at the outlet.
 [GlobalParams]
-  rho = 1
-  mu = 1
   integrate_p_by_parts = false
   gravity = '0 0 0'
 []
@@ -156,6 +154,15 @@
     v = vel_y
     p = p
     component = 1
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu'
+    prop_values = '1  1'
   [../]
 []
 

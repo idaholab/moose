@@ -24,8 +24,6 @@ validParams<INSMomentumBase>()
   params.addRequiredCoupledVar("p", "pressure");
 
   // Required parameters
-  params.addRequiredParam<Real>("mu", "dynamic viscosity");
-  params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addRequiredParam<unsigned>(
       "component",
@@ -33,6 +31,10 @@ validParams<INSMomentumBase>()
   params.addParam<bool>("integrate_p_by_parts",
                         true,
                         "Allows simulations to be run with pressure BC if set to false");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
   return params;
 }
@@ -59,14 +61,13 @@ INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
     _p_var_number(coupled("p")),
 
     // Required parameters
-    _mu(getParam<Real>("mu")),
-    _rho(getParam<Real>("rho")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _component(getParam<unsigned>("component")),
-    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
 
-// Material properties
-// _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity"))
+    // Material properties
+    _mu(getMaterialProperty<Real>("mu_name")),
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -75,8 +76,9 @@ INSMomentumBase::computeQpResidual()
 {
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
-  Real convective_part = _rho * (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
-                                 _w_vel[_qp] * _grad_u[_qp](2)) *
+  Real convective_part = _rho[_qp] *
+                         (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
+                          _w_vel[_qp] * _grad_u[_qp](2)) *
                          _test[_i][_qp];
 
   // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
@@ -92,7 +94,7 @@ INSMomentumBase::computeQpResidual()
   // Body force term.  For truly incompressible flow, this term is constant, and
   // since it is proportional to g, can be written as the gradient of some scalar
   // and absorbed into the pressure definition.
-  // Real body_force_part = - _rho * _gravity(_component);
+  // Real body_force_part = - _rho[_qp] * _gravity(_component);
 
   return convective_part + pressure_part + viscous_part /*+ body_force_part*/;
 }
@@ -103,8 +105,9 @@ INSMomentumBase::computeQpJacobian()
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
-  Real convective_part =
-      _rho * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) * _test[_i][_qp];
+  Real convective_part = _rho[_qp] *
+                         ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
+                         _test[_i][_qp];
 
   // Call derived class to compute the viscous contribution.
   Real viscous_part = computeQpJacobianViscousPart();
