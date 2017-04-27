@@ -16,8 +16,11 @@
 class ReturnMappingModel : public ConstitutiveModel
 {
 public:
-  ReturnMappingModel(const InputParameters & parameters);
+  ReturnMappingModel(const InputParameters & parameters,
+                     const std::string inelastic_strain_name = "");
   virtual ~ReturnMappingModel() {}
+
+  virtual void initStatefulProperties(unsigned n_points);
 
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress(const Elem & current_elem,
@@ -57,6 +60,9 @@ protected:
   const Real _relative_tolerance;
   const Real _absolute_tolerance;
   Real _effective_strain_increment;
+
+  MaterialProperty<Real> & _effective_inelastic_strain;
+  MaterialProperty<Real> & _effective_inelastic_strain_old;
 
 private:
 };
