@@ -6,7 +6,7 @@
 []
 
 [GlobalParams]
-  op_num = 12
+  op_num = 9
   var_name_base = gr
   grain_num = 36
 []
@@ -16,9 +16,17 @@
   [../]
 []
 
+[UserObjects]
+  [./hex_ic]
+    type = PolycrystalHex
+    coloring_algorithm = bt
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalHexGrainIC]
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = hex_ic
     [../]
   [../]
 []
