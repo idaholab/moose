@@ -73,3 +73,26 @@ class ExodusPlugin(peacock.base.Plugin):
         self._reader = None
         self._result = None
         self._window = None
+
+    def stateKey(self, other=""):
+        """
+        Generates a (mostly) unique key for use in saving state of a widget.
+        """
+        s = self.__class__.__name__
+        if self._filename:
+            s += "_" + self._filename
+        s += str(other)
+        return s
+
+    def onPreFileChanged(self):
+        """
+        Save the state of the widget before the file changes
+        """
+        self.store(self.stateKey(), 'Filename')
+
+    def onPostFileChanged(self):
+        """
+        Load the state of the widget based on the new file name.
+        """
+        self.load(self.stateKey(), 'Filename')
+

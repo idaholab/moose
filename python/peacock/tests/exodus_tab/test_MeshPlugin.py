@@ -51,7 +51,6 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
 
         # Toggle the mesh
         self._widget.MeshPlugin.ViewMeshToggle.setCheckState(QtCore.Qt.Checked)
-        self._widget.MeshPlugin.ViewMeshToggle.clicked.emit(True)
         self._window._window.resetCamera() # needed since vtk7.0.0
         self.assertImage('testViewMeshToggle.png', allowed=0.98) # lines are slightly different across platforms
 
@@ -129,7 +128,6 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
 
         # Disable displacement
         self._widget.MeshPlugin.DisplacementToggle.setCheckState(QtCore.Qt.Unchecked)
-        self._widget.MeshPlugin.DisplacementToggle.clicked.emit(QtCore.Qt.Unchecked)
         self.assertFalse(self._widget.MeshPlugin.DisplacmentMagnitude.isEnabled())
         self.assertImage('testDisplacmentOff.png')
 
@@ -148,7 +146,6 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self._widget.MeshPlugin.ScaleX.setValue(1.5)
         self._widget.MeshPlugin.ScaleX.valueChanged.emit(1.5)
         self._widget.MeshPlugin.ViewMeshToggle.setCheckState(QtCore.Qt.Checked)
-        self._widget.MeshPlugin.ViewMeshToggle.clicked.emit(True)
         self.assertImage('testState1.png', allowed=0.94) # lines are different across platforms
 
         # Return to state0

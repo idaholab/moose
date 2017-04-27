@@ -54,7 +54,7 @@ class BlockPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         When a variable changes, load the state of the clip.
         """
         super(BlockPlugin, self).onVariableChanged(*args)
-        self.load(self._variable, 'Variable')
+        self.load(self.stateKey(self._variable), 'Variable')
         if self._result:
             self.__updateVariableState()
             self._callbackSelector()
@@ -69,7 +69,7 @@ class BlockPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self._contour = state
         self.SidesetSelector.setEnabled(not state)
         self.NodesetSelector.setEnabled(not state)
-        self.load(state, 'Contour')
+        self.load(self.stateKey(state), 'Contour')
         if self._result:
             self._callbackSelector()
 
@@ -106,8 +106,8 @@ class BlockPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Updates the visible block/nodesets/sidesets based on the selector widget settings.
         """
 
-        self.store(self._contour, 'Contour')
-        self.store(self._variable, 'Variable')
+        self.store(self.stateKey(self._contour), 'Contour')
+        self.store(self.stateKey(self._variable), 'Variable')
 
         options = dict()
         options['block'] = self.BlockSelector.getBlocks()

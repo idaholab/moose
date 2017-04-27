@@ -81,8 +81,9 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         When a variable changes, load the state of the clip.
         """
+        self.store(self.stateKey(self._variable), 'Variable')
         super(MeshPlugin, self).onVariableChanged(*args)
-        self.load(self._variable, 'Variable')
+        self.load(self.stateKey(self._variable), 'Variable')
         if self._result:
             self.mesh()
 
@@ -93,10 +94,12 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         # Options to pass to ExodusResult
         reader_options = dict()
         result_options = dict()
-        filters = self._result.getOption('filters')
+        filters = []
+        if self._result:
+            filters = self._result.getOption('filters')
 
         # Displacement toggle and magnitude
-        reader_options['displacements'] = bool(self.DisplacementToggle.checkState())
+        reader_options['displacements'] = bool(self.DisplacementToggle.isChecked())
         reader_options['displacement_magnitude'] = self.DisplacmentMagnitude.value()
         self.DisplacmentMagnitude.setEnabled(reader_options['displacements'])
 
@@ -121,7 +124,6 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         # Emit the update signal with the new arguments
         self.readerOptionsChanged.emit(reader_options)
         self.resultOptionsChanged.emit(result_options)
-        self.store(self._variable, 'Variable')
         self.windowRequiresUpdate.emit()
 
     def _setupDisplacementToggle(self, qobject):
@@ -129,7 +131,7 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Setup method for DisplacementToggle widget. (protected)
         """
         qobject.setChecked(True)
-        qobject.clicked.connect(self.mesh)
+        qobject.stateChanged.connect(lambda value: self.mesh())
 
     def _setupDisplacmentMagnitude(self, qobject):
         """
@@ -154,7 +156,7 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Callback for Representation widget. (protected)
         """
 
-        WidgetUtils.loadWidget(self.ViewMeshToggle, self.Representation.currentIndex(), 'Respresentation')
+        WidgetUtils.loadWidget(self.ViewMeshToggle, self.stateKey(self.Representation.currentIndex()), 'Respresentation')
 
         index = self.Representation.currentIndex()
         if index == 0:
@@ -169,13 +171,13 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup for showing the ViewMeshToggle widget. (protected)
         """
-        qobject.clicked.connect(self._callbackViewMeshToggle)
+        qobject.stateChanged.connect(lambda value: self._callbackViewMeshToggle())
 
     def _callbackViewMeshToggle(self):
         """
         Callback for ViewMeshToggle widget. (protected)
         """
-        WidgetUtils.storeWidget(self.ViewMeshToggle, self.Representation.currentIndex(), 'Respresentation')
+        WidgetUtils.storeWidget(self.ViewMeshToggle, self.stateKey(self.Representation.currentIndex()), 'Respresentation')
         self.mesh()
 
     def _setupScaleLabel(self, qobject):
