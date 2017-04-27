@@ -45,7 +45,7 @@ protected:
   unsigned _a3_var_number;
 
   // Material properties
-  Real _rho;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif // INSPRESSUREPOISSON_H

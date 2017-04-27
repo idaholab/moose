@@ -46,7 +46,7 @@ protected:
   unsigned _p_var_number;
 
   // Material properties
-  Real _rho;
+  const MaterialProperty<Real> & _rho;
 
   // Parameters
   unsigned _component;

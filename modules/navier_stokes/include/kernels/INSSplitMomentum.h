@@ -62,8 +62,8 @@ protected:
   unsigned _a3_var_number;
 
   // Material properties
-  Real _mu;
-  Real _rho;
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
   RealVectorValue _gravity;
 
   // Parameters
