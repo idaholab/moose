@@ -26,13 +26,13 @@ class DerivativeTwoPhaseMaterial : public DerivativeFunctionMaterialBase
 public:
   DerivativeTwoPhaseMaterial(const InputParameters & parameters);
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
-  virtual Real computeF();
-  virtual Real computeDF(unsigned int i_var);
-  virtual Real computeD2F(unsigned int i_var, unsigned int j_var);
-  virtual Real computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var);
+  virtual Real computeF() override;
+  virtual Real computeDF(unsigned int i_var) override;
+  virtual Real computeD2F(unsigned int i_var, unsigned int j_var) override;
+  virtual Real computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var) override;
 
   /// Phase parameter (0=A-phase, 1=B-phase)
   const VariableValue & _eta;

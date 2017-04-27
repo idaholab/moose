@@ -7,12 +7,8 @@
 
 [Variables]
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./v]
-    order = FIRST
-    family = LAGRANGE
     [./InitialCondition]
       type = SmoothCircleIC
       x1 = 0.5
