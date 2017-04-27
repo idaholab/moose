@@ -1,6 +1,4 @@
 [GlobalParams]
-  rho = 1
-  mu = .01389 # ~2/144
   gravity = '0 0 0'
 []
 
@@ -130,6 +128,15 @@
     v = vel_y
     p = p
     component = 1
+  [../]
+[]
+
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = 'rho mu'
+    prop_values = '1 .01389' # 2/144
   [../]
 []
 
