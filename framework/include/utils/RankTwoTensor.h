@@ -405,13 +405,12 @@ public:
   /// returns this_ij * b_ijkl
   RankTwoTensor initialContraction(const RankFourTensor & b) const;
 
-
-  /// rank two permutation tensor (also known as Levi-Civita symbol):
-  /* eps(i1, i2, ..., iD) =
+  /// rank two permutation tensor (the Levi-Civita symbol):
+  /* leviCivita(i1, i2, ..., iD) =
   *   +1 if (i1, i2, ..., iD) is an even permutation of (0, 1, ..., D)
   *   -1 if (i1, i2, ..., iD) is an odd permutation of (0, 1, ..., D)
   /*    0 otherwise */
-  static int eps(unsigned int i, unsigned int j);
+  static int leviCivita(unsigned int i, unsigned int j);
 
 private:
   static const unsigned int N = LIBMESH_DIM;

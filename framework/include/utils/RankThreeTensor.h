@@ -148,13 +148,12 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
-  /// rank three permutation tensor (also known as Levi-Civita symbol):
-  /* eps(i1, i2, ..., iD) =
+  /// rank three permutation tensor (the Levi-Civita symbol):
+  /* leviCivita(i1, i2, ..., iD) =
   *   +1 if (i1, i2, ..., iD) is an even permutation of (0, 1, ..., D)
   *   -1 if (i1, i2, ..., iD) is an odd permutation of (0, 1, ..., D)
   /*    0 otherwise */
-  static int eps(unsigned int i, unsigned int j, unsigned int k);
-
+  static int leviCivita(unsigned int i, unsigned int j, unsigned int k);
 
 protected:
   /// Dimensionality of rank-three tensor

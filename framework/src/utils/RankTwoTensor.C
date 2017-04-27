@@ -1106,7 +1106,7 @@ RankTwoTensor::initialContraction(const RankFourTensor & b) const
 }
 
 int
-RankTwoTensor::eps(unsigned int i, unsigned int j)
+RankTwoTensor::leviCivita(unsigned int i, unsigned int j)
 {
   if (i == 0 && j == 1)
     return 1;

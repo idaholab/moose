@@ -305,16 +305,14 @@ RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
       }
 }
 
-
 int
-RankThreeTensor::eps(unsigned int i, unsigned int j, unsigned int k)
+RankThreeTensor::leviCivita(unsigned int i, unsigned int j, unsigned int k)
 {
   if (i == 0 && j > 0 && k > 0)
-    return RankTwoTensor::eps(j - 1, k - 1);
+    return RankTwoTensor::leviCivita(j - 1, k - 1);
   else if (j == 0 && i > 0 && k > 0)
-    return -RankTwoTensor::eps(i - 1, k - 1);
+    return -RankTwoTensor::leviCivita(i - 1, k - 1);
   else if (k == 0 && i > 0 && j > 0)
-    return RankTwoTensor::eps(i - 1, j - 1);
+    return RankTwoTensor::leviCivita(i - 1, j - 1);
   return 0;
 }
-
