@@ -12,7 +12,7 @@
 []
 
 [GlobalParams]
-  op_num = 8
+  op_num = 3
   var_name_base = gr
   grain_num = 36
   #use_displaced_mesh = true
@@ -31,10 +31,35 @@
   [../]
 []
 
+[UserObjects]
+  [./hex]
+    type = PolycrystalHex
+    rand_seed = 236
+    x_offset = 0.0
+    execute_on = 'initial'
+    coloring_algorithm = bt
+  [../]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_36_test2_2D.tex
+  [../]
+  [./grain_tracker]
+    type = GrainTrackerElasticity
+    threshold = 0.2
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_begin'
+    flood_entity_type = ELEMENTAL
+
+    fill_method = symmetric9
+    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
+    euler_angle_provider = euler_angle_file
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalHexGrainIC]
-      x_offset = 0.0
+    [./PolycrystalVoronoiIC]
+      polycrystal_ic_uo = hex
     [../]
   [../]
 []
@@ -161,7 +186,7 @@
   [./Periodic]
     [./All]
       auto_direction = 'x y'
-      variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7'
+      variable = 'gr0 gr1 gr2'
     [../]
   [../]
   [./top_displacement]
@@ -228,24 +253,6 @@
   [../]
   [./bnd_length]
     type = GrainBoundaryArea
-  [../]
-[]
-
-[UserObjects]
-  [./euler_angle_file]
-    type = EulerAngleFileReader
-    file_name = grn_36_test2_2D.tex
-  [../]
-  [./grain_tracker]
-    type = GrainTrackerElasticity
-    threshold = 0.2
-    compute_var_to_feature_map = true
-    execute_on = 'initial timestep_begin'
-    flood_entity_type = ELEMENTAL
-
-    fill_method = symmetric9
-    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
-    euler_angle_provider = euler_angle_file
   [../]
 []
 

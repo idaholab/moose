@@ -13,7 +13,7 @@
 []
 
 [GlobalParams]
-  op_num = 10
+  op_num = 8
   var_name_base = gr
 []
 
@@ -22,12 +22,28 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 10 # Number of grains
+    coloring_algorithm = bt
+    rand_seed = 1
+    execute_on = 'initial'
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.5
+    connecting_threshold = 0.2
+    # Note: This is here for demonstration purposes
+    # use elemental for most simulations
+    flood_entity_type = NODAL
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 1
-      grain_num = 10
-      coloring_algorithm = bt
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -87,14 +103,6 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.5
-    connecting_threshold = 0.2
-    # Note: This is here for demonstration purposes
-    # use elemental for most simulations
-    flood_entity_type = NODAL
-  [../]
   [./DOFs]
     type = NumDOFs
     execute_on = 'initial timestep_end'

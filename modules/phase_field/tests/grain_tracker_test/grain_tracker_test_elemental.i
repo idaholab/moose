@@ -14,8 +14,21 @@
 []
 
 [GlobalParams]
-  op_num = 12
+  op_num = 8
   var_name_base = gr
+[]
+
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 8675
+    grain_num = 12
+    execute_on = 'initial'
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    flood_entity_type = ELEMENTAL
+  [../]
 []
 
 [Variables]
@@ -26,8 +39,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 8675
-      grain_num = 12
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -92,10 +104,6 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    flood_entity_type = ELEMENTAL
-  [../]
   [./DOFs]
     type = NumDOFs
   [../]

@@ -29,9 +29,27 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 125
+    execute_on = 'initial'
+  [../]
+  [./grain_tracker]
+    type = FauxGrainTracker
+    flood_entity_type = ELEMENTAL
+    outputs = none
+  [../]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_3_rand_2D.tex
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -72,18 +90,6 @@
     Q = 0.23 #Activation energy for grain growth from Schonfelder 1997
     T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # nm    #Width of the diffuse GB
-  [../]
-[]
-
-[UserObjects]
-  [./grain_tracker]
-    type = FauxGrainTracker
-    flood_entity_type = ELEMENTAL
-    outputs = none
-  [../]
-  [./euler_angle_file]
-    type = EulerAngleFileReader
-    file_name = grn_3_rand_2D.tex
   [../]
 []
 

@@ -4,28 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef HEXPOLYCRYSTALIC_H
-#define HEXPOLYCRYSTALIC_H
+#ifndef POLYCRYSTALHEX_H
+#define POLYCRYSTALHEX_H
 
-#include "PolycrystalReducedIC.h"
+#include "PolycrystalVoronoi.h"
 #include "MooseRandom.h"
 
 // Forward Declarations
-class HexPolycrystalIC;
+class PolycrystalHex;
 
 template <>
-InputParameters validParams<HexPolycrystalIC>();
+InputParameters validParams<PolycrystalHex>();
 
 /**
- * HexPolycrystalIC creates a hexagonal polycrystal initial condition.
+ * PolycrystalHex creates a hexagonal polycrystal initial condition.
  * Only works for squared number of grains and with periodic BCs
  */
-class HexPolycrystalIC : public PolycrystalReducedIC
+class PolycrystalHex : public PolycrystalVoronoi
 {
 public:
-  HexPolycrystalIC(const InputParameters & parameters);
+  PolycrystalHex(const InputParameters & parameters);
 
-  virtual void initialSetup();
+  virtual void precomputeGrainStructure();
 
 private:
   const Real _x_offset;
@@ -33,4 +33,4 @@ private:
   MooseRandom _random;
 };
 
-#endif // HEXPOLYCRYSTALIC_H
+#endif // POLYCRYSTALHEX_H

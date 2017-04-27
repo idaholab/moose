@@ -18,6 +18,16 @@
   var_name_base = gr
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 125
+    grain_num = 4
+    columnar_3D = true
+    execute_on = 'initial'
+  [../]
+[]
+
 [Variables]
   [./PolycrystalVariables]
   [../]
@@ -26,8 +36,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 4
-      columnar_3D = true
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -68,15 +77,6 @@
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
-[]
-
-[Postprocessors]
-  active = ''
-  [./ngrains]
-    type = FeatureFloodCount
-    variable = bnds
-    threshold = 0.7
   [../]
 []
 

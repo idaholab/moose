@@ -18,11 +18,10 @@ class PolycrystalVoronoiICAction : public Action
 public:
   PolycrystalVoronoiICAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
 private:
   const unsigned int _op_num;
-  const unsigned int _grain_num;
   const std::string _var_name_base;
 };
 

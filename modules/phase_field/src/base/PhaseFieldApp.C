@@ -85,7 +85,6 @@
 #include "BimodalSuperellipsoidsIC.h"
 #include "ClosePackIC.h"
 #include "CrossIC.h"
-#include "HexPolycrystalIC.h"
 #include "LatticeSmoothCircleIC.h"
 #include "MultiBoundingBoxIC.h"
 #include "MultiSmoothCircleIC.h"
@@ -215,6 +214,8 @@
 #include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
+#include "PolycrystalHex.h"
+#include "PolycrystalVoronoi.h"
 #include "RandomEulerAngleProvider.h"
 
 #include "EBSDReader.h"
@@ -374,7 +375,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(BimodalSuperellipsoidsIC);
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
-  registerInitialCondition(HexPolycrystalIC);
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiBoundingBoxIC);
   registerInitialCondition(MultiSmoothCircleIC);
@@ -453,6 +453,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
+  registerPostprocessor(PolycrystalHex);
+  registerPostprocessor(PolycrystalVoronoi);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);

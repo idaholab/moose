@@ -31,12 +31,19 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 20 # Number of grains
+    rand_seed = 10
+    execute_on = 'initial'
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 20 #Number of grains
-      coloring_algorithm = bt
-      rand_seed = 10
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []

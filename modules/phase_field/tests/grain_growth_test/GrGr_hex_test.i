@@ -18,6 +18,15 @@
   var_name_base = gr
 []
 
+[UserObjects]
+  [./hex]
+    type = PolycrystalHex
+    x_offset = .5
+    grain_num = 4
+    execute_on = 'initial'
+  [../]
+[]
+
 [Variables]
   [./PolycrystalVariables]
   [../]
@@ -25,9 +34,8 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalHexGrainIC]
-      x_offset = .5
-      grain_num = 4
+    [./PolycrystalVoronoiIC]
+      polycrystal_ic_uo = hex
     [../]
   [../]
 []
@@ -68,15 +76,6 @@
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
-[]
-
-[Postprocessors]
-  active = ''
-  [./ngrains]
-    type = FeatureFloodCount
-    variable = bnds
-    threshold = 0.7
   [../]
 []
 

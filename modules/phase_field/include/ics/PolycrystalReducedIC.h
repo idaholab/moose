@@ -12,6 +12,8 @@
 
 // Forward Declarations
 class PolycrystalReducedIC;
+class GrainTrackerInterface;
+class PolycrystalUserObjectBase;
 
 template <>
 InputParameters validParams<PolycrystalReducedIC>();
@@ -28,32 +30,11 @@ class PolycrystalReducedIC : public InitialCondition
 public:
   PolycrystalReducedIC(const InputParameters & parameters);
 
-  virtual Real value(const Point & p);
-  virtual void initialSetup();
+  virtual Real value(const Point & p) override;
 
 protected:
-  MooseMesh & _mesh;
-
-  /// mesh dimension
-  unsigned int _dim;
-
-  unsigned int _op_num;
-  unsigned int _grain_num;
   unsigned int _op_index;
-
-  unsigned int _rand_seed;
-
-  bool _cody_test;
-  bool _columnar_3D;
-
-  Point _bottom_left;
-  Point _top_right;
-  Point _range;
-
-  MooseEnum _coloring_algorithm;
-
-  std::vector<Point> _centerpoints;
-  std::vector<unsigned int> _assigned_op;
+  const PolycrystalUserObjectBase & _poly_ic_uo;
 };
 
 #endif // POLYCRYSTALREDUCEDIC_H
