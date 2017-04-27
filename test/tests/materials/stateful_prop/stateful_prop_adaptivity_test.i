@@ -7,6 +7,9 @@
   uniform_refine = 2
   # This option is necessary if you have uniform refinement + stateful material properties + adaptivity
   skip_partitioning = true
+  # stateful material properties + adaptivity are not yet compatible
+  # with distributed meshes
+  parallel_type = replicated
 []
 
 [Variables]
