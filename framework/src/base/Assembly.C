@@ -647,6 +647,8 @@ void
 Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
+  return;
+
   _current_neighbor_elem = NULL;
   _current_elem_volume_computed = false;
 
