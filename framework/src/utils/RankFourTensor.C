@@ -8,12 +8,12 @@
 
 // MOOSE includes
 #include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
 #include "MooseEnum.h"
 #include "MooseException.h"
 #include "MooseUtils.h"
 #include "MatrixTools.h"
 #include "MaterialProperty.h"
-#include "PermutationTensor.h"
 
 // libMesh includes
 #include "libmesh/utility.h"
@@ -721,7 +721,7 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & in
                               input[1] * (i == l) * (j == k);
           for (unsigned int m = 0; m < N; ++m)
             _vals[i][j][k][l] +=
-                input[2] * PermutationTensor::eps(i, j, m) * PermutationTensor::eps(k, l, m);
+                input[2] * RankThreeTensor::eps(i, j, m) * RankThreeTensor::eps(k, l, m);
         }
 }
 
@@ -894,4 +894,19 @@ RankFourTensor::isIsotropic() const
         return false;
 
   return true;
+}
+
+
+int
+RankFourTensor::eps(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
+{
+  if (i == 0 && j > 0 && k > 0 && l > 0)
+    return RankThreeTensor::eps(j - 1, k - 1, l - 1);
+  else if (j == 0 && i > 0 && k > 0 && l > 0)
+    return -RankThreeTensor::eps(i - 1, k - 1, l - 1);
+  else if (k == 0 && i > 0 && j > 0 && l > 0)
+    return RankThreeTensor::eps(i - 1, j - 1, l - 1);
+  else if (l == 0 && i > 0 && j > 0 && k > 0)
+    return -RankThreeTensor::eps(i - 1, j - 1, k - 1);
+  return 0;
 }
