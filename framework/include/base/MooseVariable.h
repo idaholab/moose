@@ -196,7 +196,7 @@ public:
   const Node *& node() { return _node; }
   dof_id_type & nodalDofIndex() { return _nodal_dof_index; }
   bool isNodalDefined() { return _is_defined; }
-  const VariableValue & nodalSln() { return _nodal_u; }
+  const VariableValue & nodalSln() { _need_nodal_u = true; return _nodal_u; }
   const VariableValue & nodalSlnOld() { return _nodal_u_old; }
   const VariableValue & nodalSlnOlder() { return _nodal_u_older; }
   const VariableValue & nodalSlnPreviousNL()

@@ -113,58 +113,8 @@ protected:
   /// The thread ID for this kernel
   THREAD_ID _tid;
 
-  /// Reference to this Kernel's assembly object
-  Assembly & _assembly;
-
   /// Reference to this Kernel's MooseVariable object
   MooseVariable & _var;
-
-  /// Reference to this Kernel's mesh object
-  MooseMesh & _mesh;
-
-  const Elem *& _current_elem;
-
-  /// Volume of the current element
-  const Real & _current_elem_volume;
-
-  /// The current quadrature point index
-  unsigned int _qp;
-
-  /// The physical location of the element's quadrature Points, indexed by _qp
-  const MooseArray<Point> & _q_point;
-
-  /// active quadrature rule
-  QBase *& _qrule;
-
-  /// The current quadrature point weight value
-  const MooseArray<Real> & _JxW;
-
-  /// The scaling factor to convert from cartesian to another coordinate system (e.g rz, spherical, etc.)
-  const MooseArray<Real> & _coord;
-
-  /// current index for the test function
-  unsigned int _i;
-
-  /// current index for the shape function
-  unsigned int _j;
-
-  /// the current test function
-  const VariableTestValue & _test;
-
-  /// gradient of the test function
-  const VariableTestGradient & _grad_test;
-
-  /// the current shape functions
-  const VariablePhiValue & _phi;
-
-  /// gradient of the shape function
-  const VariablePhiGradient & _grad_phi;
-
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseVector<Number> _local_re;
-
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseMatrix<Number> _local_ke;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
