@@ -321,7 +321,6 @@ protected:
 
   template <class T>
   friend void dataLoad(std::istream &, T &, void *);
-
 };
 
 template <>
