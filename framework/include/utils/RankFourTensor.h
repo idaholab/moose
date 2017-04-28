@@ -220,6 +220,13 @@ public:
   /// checks if the tensor is isotropic
   bool isIsotropic() const;
 
+  // rank four permutation tensor (the Levi-Civita symbol):
+  /* leviCivita(i1, i2, ..., iD) =
+  *   +1 if (i1, i2, ..., iD) is an even permutation of (0, 1, ..., D)
+  *   -1 if (i1, i2, ..., iD) is an odd permutation of (0, 1, ..., D)
+  /*    0 otherwise */
+  static int leviCivita(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+
 protected:
   /// Dimensionality of rank-four tensor
   static const unsigned int N = LIBMESH_DIM;
@@ -315,12 +322,6 @@ protected:
   template <class T>
   friend void dataLoad(std::istream &, T &, void *);
 
-  // rank four permutation tensor (the Levi-Civita symbol):
-  /* leviCivita(i1, i2, ..., iD) =
-  *   +1 if (i1, i2, ..., iD) is an even permutation of (0, 1, ..., D)
-  *   -1 if (i1, i2, ..., iD) is an odd permutation of (0, 1, ..., D)
-  /*    0 otherwise */
-  static int leviCivita(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 };
 
 template <>
