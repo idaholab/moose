@@ -109,6 +109,18 @@ RankThreeTensor::operator=(const RankThreeTensor & a)
   return *this;
 }
 
+RealVectorValue RankThreeTensor::operator*(const RankTwoTensor & a) const
+{
+  RealVectorValue result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        result(i) += _vals[i][j][k] * a(j, k);
+
+  return result;
+}
+
 RankThreeTensor RankThreeTensor::operator*(const Real b) const
 {
   RankThreeTensor result;
@@ -252,6 +264,38 @@ RankThreeTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod
 }
 
 void
+RankThreeTensor::fillFromPlaneNormal(const RealVectorValue & input)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+      {
+        _vals[i][j][k] = -2 * input(i) * input(j) * input(k);
+        if (i == j)
+          _vals[i][j][k] += input(k);
+        if (i == k)
+          _vals[i][j][k] += input(j);
+        _vals[i][j][k] /= 2.0;
+      }
+}
+
+RankFourTensor
+RankThreeTensor::mixedProductRankFour(const RankTwoTensor & a) const
+{
+  RankFourTensor result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          for (unsigned int m = 0; m < N; ++m)
+            for (unsigned int n = 0; n < N; ++n)
+              result(i, j, k, l) += _vals[m][i][j] * a(m, n) * _vals[n][k][l];
+
+  return result;
+}
+
+void
 RankThreeTensor::rotate(const RealTensorValue & R)
 {
   RankThreeTensor old = *this;
@@ -304,4 +348,16 @@ RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
         ind = i * N * N + j * N + k;
         _vals[i][j][k] = input[ind];
       }
+}
+
+RankTwoTensor operator*(const RealVectorValue & p, const RankThreeTensor & b)
+{
+  RankTwoTensor result;
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        result(i, j) += p(k) * b(k, i, j);
+
+  return result;
 }
