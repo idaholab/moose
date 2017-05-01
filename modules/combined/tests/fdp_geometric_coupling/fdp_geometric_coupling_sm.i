@@ -50,45 +50,24 @@
 []
 
 [BCs]
-  [./left_x]
+  [./left_right_x]
     type = PresetBC
     variable = disp_x
-    boundary = 1
+    boundary = '1 4'
     value = 0.0
   [../]
 
-  [./left_y]
+  [./left_right_y]
     type = PresetBC
     variable = disp_y
-    boundary = 1
+    boundary = '1 4'
     value = 0.0
   [../]
 
-  [./left_z]
+  [./left_right_z]
     type = PresetBC
     variable = disp_z
-    boundary = 1
-    value = 0.0
-  [../]
-
-  [./right_y]
-    type = PresetBC
-    variable = disp_y
-    boundary = 4
-    value = 0.0
-  [../]
-
-  [./right_z]
-    type = PresetBC
-    variable = disp_z
-    boundary = 4
-    value = 0.0
-  [../]
-
-  [./right_x]
-    type = PresetBC
-    variable = disp_x
-    boundary = 4
+    boundary = '1 4'
     value = 0.0
   [../]
 
@@ -104,7 +83,7 @@
   [./dummy_name]
     master = 2
     slave = 3
-    penalty = 1e6
+    penalty = 1e8
   [../]
 []
 
@@ -122,6 +101,7 @@
 
     temp = temp
     thermal_expansion = 1e-4
+    increment_calculation = Eigen
   [../]
   [./stiffStuff2]
     type = Elastic
@@ -136,6 +116,7 @@
 
     temp = temp
     thermal_expansion = 1e-5
+    increment_calculation = Eigen
   [../]
 
   [./heat]
@@ -175,11 +156,10 @@
 
   l_max_its = 5
   nl_max_its = 3
-  dt = 1.0e-1
-  num_steps = 10
+  dt = 5.0e-1
+  num_steps = 2
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

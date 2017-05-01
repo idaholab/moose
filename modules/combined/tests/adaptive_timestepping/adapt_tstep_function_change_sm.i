@@ -6,7 +6,9 @@
 # oscillation.
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  disp_x = disp_x
+  disp_y = disp_y
+  disp_z = disp_z
   order = FIRST
   family = LAGRANGE
   block = 1
@@ -14,6 +16,7 @@
 
 [Mesh]
   file = 1hex8_10mm_cube.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -39,15 +42,19 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = FINITE
-    volumetric_locking_correction = true
-    incremental = true
-    eigenstrain_names = thermal_expansion
-    decomposition_method = EigenSolution
-    add_variables  = true
-    generate_output = 'vonmises_stress'
+[AuxVariables]
+  [./vonmises_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
   [../]
 []
 
@@ -67,6 +74,16 @@
      variable = temp
      value = 1.0
      function = Fiss_Function
+  [../]
+[]
+
+[AuxKernels]
+  [./vonmises]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = vonmises_stress
+    quantity = vonmises
+    execute_on = timestep_end
   [../]
 []
 
@@ -105,31 +122,22 @@
     thermal_conductivity = 1.0
   [../]
 
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./elastic]
+    type = Elastic
     youngs_modulus = 300e6
     poissons_ratio = .3
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-  [../]
-
-  [./thermal_expansion]
-    type = ComputeThermalExpansionEigenstrain
-    thermal_expansion_coeff = 5e-6
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
+    thermal_expansion = 5e-6
     stress_free_temperature = 300.0
-    temperature = temp
-    incremental_form = true
-    eigenstrain_name = thermal_expansion
+    increment_calculation = Eigen
   [../]
 
   [./density]
     type = Density
     density = 10963.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
