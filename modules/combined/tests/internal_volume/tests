@@ -69,6 +69,22 @@
     prereq = 'hex8'
   [../]
 
+  [./rz_displaced_sm]
+    type = 'CSVDiff'
+    input = 'rz_displaced_sm.i'
+    cli_args = 'Outputs/file_base=rz_displaced_out'
+    csvdiff = 'rz_displaced_out.csv'
+    prereq = 'rz_displaced'
+  [../]
+
+  [./rz_displaced_quad8_sm]
+    type = 'CSVDiff'
+    input = 'rz_displaced_quad8_sm.i'
+    cli_args = 'Outputs/file_base=rz_displaced_quad8_out'
+    csvdiff = 'rz_displaced_quad8_out.csv'
+    prereq = 'rz_displaced_quad8'
+  [../]
+
   [./rspherical]
     type = 'CSVDiff'
     input = 'rspherical.i'
@@ -138,4 +154,5 @@
     input = 'rz_displaced_quad8.i'
     csvdiff = 'rz_displaced_quad8_out.csv'
   [../]
+
 []
