@@ -62,11 +62,4 @@
     rel_err = 9e-06
     prereq = 'test_function_change test_function_change_restart1'
   [../]
-
-  [./test_exception_creep]
-    type = 'Exodiff'
-    input = 'exception_creep_iterations.i'
-    exodiff = 'out_except_creep.e'
-    skip = 'Needs a review'
-  [../]
 []
