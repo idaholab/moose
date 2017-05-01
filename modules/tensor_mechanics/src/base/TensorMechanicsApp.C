@@ -279,8 +279,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeExtraStressConstant);
   registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
-  registerDeprecatedObjectName(
-      ComputeThermalExpansionEigenstrain, "ComputeThermalExpansionEigenStrain", "12/19/2016 00:00");
   registerMaterial(ComputeThermalExpansionEigenstrain);
   registerMaterial(ComputeMeanThermalExpansionFunctionEigenstrain);
   registerMaterial(ComputeInstantaneousThermalExpansionFunctionEigenstrain);
