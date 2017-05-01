@@ -172,6 +172,7 @@ public:
   /*    0 otherwise */
   static Real leviCivita(unsigned int i, unsigned int j, unsigned int k);
 
+
 protected:
   /// Dimensionality of rank-three tensor
   static const unsigned int N = LIBMESH_DIM;

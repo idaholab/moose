@@ -372,3 +372,4 @@ RankThreeTensor::leviCivita(unsigned int i, unsigned int j, unsigned int k)
     return RankTwoTensor::leviCivita(i - 1, j - 1);
   return 0;
 }
+
