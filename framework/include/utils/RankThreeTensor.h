@@ -19,6 +19,7 @@
 class MooseEnum;
 class RankTwoTensor;
 class RankThreeTensor;
+class RankFourTensor;
 
 template <typename T>
 void mooseSetToZero(T & v);
@@ -82,6 +83,9 @@ public:
 
   /// r_ijk*a_kl
   // RankTwoTensor operator*(const RankTwoTensor & a) const;
+
+  /// b_i = r_ijk * a_jk
+  RealVectorValue operator*(const RankTwoTensor & a) const;
 
   /// r_ijk*a_kl
   // RealTensorValue operator*(const RealTensorValue & a) const;
@@ -148,6 +152,19 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
+  /**
+   * Fills RankThreeTensor from plane normal vectors
+   * ref. Kuhl et. al. Int. J. Solids Struct. 38(2001) 2933-2952
+   * @param input plane normal vector
+   */
+  void fillFromPlaneNormal(const RealVectorValue & input);
+
+  /**
+   * Creates fourth order tensor D=A*b*A where A is rank 3 and b is rank 2
+   * @param a RankTwoTensor A in the equation above
+   */
+  RankFourTensor mixedProductRankFour(const RankTwoTensor & a) const;
+
   /// rank three permutation tensor (the Levi-Civita symbol):
   /* leviCivita(i1, i2, ..., iD) =
   *   +1 if (i1, i2, ..., iD) is an even permutation of (0, 1, ..., D)
@@ -178,6 +195,9 @@ template <>
 void dataLoad(std::istream &, RankThreeTensor &, void *);
 
 inline RankThreeTensor operator*(Real a, const RankThreeTensor & b) { return b * a; }
+
+///r=v*A where r is rank 2, v is vector and A is rank 3
+RankTwoTensor operator*(const RealVectorValue &, const RankThreeTensor &);
 
 template <class T>
 void
