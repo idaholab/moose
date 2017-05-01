@@ -31,9 +31,8 @@
 #  Note:  Because the InternalVolume PP computes cavity volumes as positive,
 #         the volumes reported are negative.
 #
-
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
 []
 
 [Problem]
@@ -41,7 +40,8 @@
 []
 
 [Mesh]
-  file = meshes/rz_displaced.e
+  file = meshes/rz_displaced_quad8.e
+  displacements = 'disp_x disp_y'
 []
 
 [Functions]
@@ -50,43 +50,30 @@
     x = '0. 1.'
     y = '0. 0.5380168369562588'
   [../]
+  [./disp_x2]
+    type = PiecewiseLinear
+    scale_factor = 0.5
+    x = '0. 1.'
+    y = '0. 0.5380168369562588'
+  [../]
 []
 
 [Variables]
   [./disp_x]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 []
 
-[AuxVariables]
-  [./volumetric_strain]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = false
-    decomposition_method = EigenSolution
-    incremental = true
-    strain = FINITE
-  [../]
-[]
-
-[AuxKernels]
-  [./fred]
-    type = RankTwoScalarAux
-    rank_two_tensor = total_strain
-    variable = volumetric_strain
-    scalar_type = VolumetricStrain
-    execute_on = timestep_end
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
   [../]
 []
 
@@ -106,22 +93,31 @@
   [../]
 
   [./x]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     boundary = 3
     variable = disp_x
     function = disp_x
   [../]
+  [./x2]
+    type = FunctionPresetBC
+    boundary = 4
+    variable = disp_x
+    function = disp_x2
+  [../]
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+    disp_z = disp_y
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
+    formulation = NonlinearRZ
+    increment_calculation = Eigen
   [../]
 []
 
@@ -132,6 +128,10 @@
   start_time = 0.0
   dt = 1.0
   end_time = 1.0
+
+  [./Quadrature]
+    order = THIRD
+  [../]
 []
 
 [Postprocessors]
@@ -139,16 +139,6 @@
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'
-  [../]
-  [./volStrain0]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = volumetric_strain
-  [../]
-  [./volStrain1]
-    type = ElementalVariableValue
-    elementid = 1
-    variable = volumetric_strain
   [../]
 []
 

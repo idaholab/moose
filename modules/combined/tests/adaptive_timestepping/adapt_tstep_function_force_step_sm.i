@@ -6,7 +6,9 @@
 # oscillation.
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  disp_x = disp_x
+  disp_y = disp_y
+  disp_z = disp_z
   order = FIRST
   family = LAGRANGE
   block = 1
@@ -14,13 +16,14 @@
 
 [Mesh]
   file = 1hex8_10mm_cube.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
   [./Fiss_Function]
     type = PiecewiseLinear
-    x = '0 1e6  2e6  2.001e6 2.002e6'
-    y = '0 3e8  3e8  12e8    0'
+    data_file = blip.csv
+    format = columns
   [../]
 []
 
@@ -39,17 +42,23 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = FINITE
-    volumetric_locking_correction = true
-    incremental = true
-    eigenstrain_names = thermal_expansion
-    decomposition_method = EigenSolution
-    add_variables  = true
-    generate_output = 'vonmises_stress'
+
+[AuxVariables]
+  [./vonmises_stress]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
+
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
+  [../]
+[]
+
 
 [Kernels]
   [./heat]
@@ -70,31 +79,42 @@
   [../]
 []
 
+
+[AuxKernels]
+  [./vonmises_stress]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = vonmises_stress
+    quantity = vonmises
+    execute_on = timestep_end
+  [../]
+[]
+
 [BCs]
-  [./bottom_temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 1
-    value = 300
-  [../]
-  [./top_bottom_disp_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = '1'
-    value = 0
-  [../]
-  [./top_bottom_disp_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = '1'
-    value = 0
-  [../]
-  [./top_bottom_disp_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = '1'
-    value = 0
-  [../]
+ [./bottom_temp]
+   type = DirichletBC
+   variable = temp
+   boundary = 1
+   value = 300
+ [../]
+ [./top_bottom_disp_x]
+   type = DirichletBC
+   variable = disp_x
+   boundary = '1'
+   value = 0
+ [../]
+ [./top_bottom_disp_y]
+   type = DirichletBC
+   variable = disp_y
+   boundary = '1'
+   value = 0
+ [../]
+ [./top_bottom_disp_z]
+   type = DirichletBC
+   variable = disp_z
+   boundary = '1'
+   value = 0
+ [../]
 []
 
 [Materials]
@@ -105,31 +125,21 @@
     thermal_conductivity = 1.0
   [../]
 
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./elastic]
+    type = Elastic
     youngs_modulus = 300e6
     poissons_ratio = .3
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
-  [../]
-
-  [./thermal_expansion]
-    type = ComputeThermalExpansionEigenstrain
-    thermal_expansion_coeff = 5e-6
-    stress_free_temperature = 300.0
-    temperature = temp
-    incremental_form = true
-    eigenstrain_name = thermal_expansion
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
+    thermal_expansion = 5e-6
+    formulation = Nonlinear3D
   [../]
 
   [./density]
     type = Density
     density = 10963.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
@@ -141,12 +151,14 @@
   nl_abs_tol = 1e-10
   start_time = 0.0
   num_steps = 50000
-  end_time = 2.002e6
+
+  end_time = 5.1e3
   [./TimeStepper]
     type = IterationAdaptiveDT
     timestep_limiting_function = Fiss_Function
-    max_function_change = 3e7
-    dt = 1e6
+    max_function_change = 3e20
+    force_step_every_function_point = true
+    dt = 1e2
   [../]
 []
 

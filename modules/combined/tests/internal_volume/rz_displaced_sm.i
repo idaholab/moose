@@ -31,9 +31,8 @@
 #  Note:  Because the InternalVolume PP computes cavity volumes as positive,
 #         the volumes reported are negative.
 #
-
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
 []
 
 [Problem]
@@ -42,6 +41,7 @@
 
 [Mesh]
   file = meshes/rz_displaced.e
+  displacements = 'disp_x disp_y'
 []
 
 [Functions]
@@ -71,21 +71,19 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    volumetric_locking_correction = false
-    decomposition_method = EigenSolution
-    incremental = true
-    strain = FINITE
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
   [../]
 []
 
 [AuxKernels]
   [./fred]
-    type = RankTwoScalarAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    quantity = VolUMetricsTRAiN
     variable = volumetric_strain
-    scalar_type = VolumetricStrain
+    tensor = total_strain
     execute_on = timestep_end
   [../]
 []
@@ -114,14 +112,17 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+    disp_z = disp_y
+
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
+    formulation = NonlinearRZ
+    increment_calculation = Eigen
   [../]
 []
 
