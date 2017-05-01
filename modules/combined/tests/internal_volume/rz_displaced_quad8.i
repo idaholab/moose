@@ -32,6 +32,10 @@
 #         the volumes reported are negative.
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Problem]
   coord_type = RZ
 []
@@ -67,10 +71,12 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
+[Modules/TensorMechanics/Master]
+  [./all]
+    volumetric_locking_correction = false
+    decomposition_method = EigenSolution
+    incremental = true
+    strain = FINITE
   [../]
 []
 
@@ -104,15 +110,14 @@
 []
 
 [Materials]
-  [./stiffStuff]
-    type = Elastic
-    block = 1
-
-    disp_r = disp_x
-    disp_z = disp_y
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  [../]
+
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 []
 
