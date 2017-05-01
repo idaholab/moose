@@ -1398,6 +1398,9 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                  MAT_NEW_NONZERO_ALLOCATION_ERR,
                  PETSC_FALSE);
+  if (_fe_problem.ignoreZerosInJacobian())
+    MatSetOption(
+        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
 #endif
 
   std::vector<numeric_index_type> zero_rows;

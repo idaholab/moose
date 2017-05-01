@@ -1197,6 +1197,10 @@ public:
     _error_on_jacobian_nonzero_reallocation = state;
   }
 
+  bool ignoreZerosInJacobian() { return _ignore_zeros_in_jacobian; }
+
+  void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
+
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
@@ -1504,6 +1508,7 @@ protected:
 
 private:
   bool _error_on_jacobian_nonzero_reallocation;
+  bool _ignore_zeros_in_jacobian;
   bool _force_restart;
   bool _fail_next_linear_convergence_check;
 
