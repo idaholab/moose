@@ -31,6 +31,7 @@ class QueueManager(Scheduler):
         # Used to store launched job information
         self.launched_jobs = {}
         self.queue_file = harness.getQueueFile()
+        self.queue_data = harness.getQueueData()
 
     # return this test's queue ID if avaialble
     def getJobID(self):
@@ -91,7 +92,17 @@ class QueueManager(Scheduler):
             # Match nothing if not set. Better way?
             pattern = re.compile(r'')
 
+        # Create the job directory
+        if not os.path.exists(self.specs['working_dir']):
+            try:
+                os.makedirs(self.specs['working_dir'])
+            except OSError, ex:
+                if ex.errno == errno.EEXIST: pass
+                else: raise
+
         # Copy files (unless they are listed in "no_copy")
+        current_pwd = os.getcwd()
+        os.chdir(self.specs['working_dir'])
         for file in os.listdir('../'):
             if os.path.isfile('../' + file) and file != self.options.input_file_name and \
                (not params.isValid('no_copy') or file not in params['no_copy']) and \
@@ -113,19 +124,23 @@ class QueueManager(Scheduler):
                         if ex.errno == errno.EEXIST: pass
                         else: raise
 
+        # return to the previous directory
+        os.chdir(current_pwd)
+
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
-    def run(self, tester, command, recurse=True, slot_check=True):
+    ## Note: slot_check should be False for launching jobs to a third party queueing system
+    def run(self, tester, command, recurse=True, slot_check=False):
         # First see if any of the queued jobs can be run but only if recursion is allowed on this run
         if recurse:
             self.startReadyJobs(slot_check)
 
         # The command the tester needs us to launch
-        queue_command = command
+        tester_command = command
 
         # Augment Queue params with Tester params
-        self.updateParamsBase(tester, queue_command)
+        self.updateParamsBase(tester, tester_command)
 
-        # The command the queueing system needs us to launch
+        # Get the derived queueing command the queueing system needs us to launch
         command = self.getQueueCommand(tester)
 
         # Handle unsatisfied prereq tests if we are trying to launch jobs
@@ -143,10 +158,23 @@ class QueueManager(Scheduler):
             for prereq_test in tester.specs['prereq']:
                 prereq_job_ids.append(self.launched_jobs[prereq_test])
 
-        # Create Queue launch script
+        #  script
         if not self.options.processingQueue:
+            # Create and copy all the files/directories this test requires
+            self.copyFiles()
+
+            # Call the derived method to build the launch batch script
             self.prepareQueueScript(prereq_job_ids)
 
+        # We need to move into the working_dir so stdout writes to the correct location (cwd)
+        current_pwd = os.getcwd()
+        os.chdir(self.specs['working_dir'])
+
+        # We're good up to this point? Then launch the job!
+        self.launchJob(tester, command, slot_check)
+
+        # Return to the previous directory
+        os.chdir(current_pwd)
 
     ## Return control to the test harness by finalizing the test output and calling the callback
     def returnToTestHarness(self, job_index):

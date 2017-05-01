@@ -548,6 +548,15 @@ class TestHarness:
         if self.queue_file:
             self.queue_file.close()
 
+    def cleanQueueFiles(self):
+        # Open the PBS batch file and assign it to a list
+        for job_id, job_data in self.queue_data.iteritems():
+            try:
+                shutil.rmtree(job_data['test_dir'])
+            except OSError:
+                pass
+        os.remove(self.options.queue_cleanup)
+
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
@@ -739,11 +748,11 @@ class TestHarness:
         if self.queue_file:
             # PBS arguments supplied and file exists
             if os.path.exists(self.queue_file):
+                self.queue_file = open(self.queue_file, 'r')
                 try:
-                    with open(self.queue_file, 'r') as q_file:
-                        self.queue_data = json.load(q_file)
+                    self.queue_data = json.load(self.queue_file)
                 except ValueError:
-                    print 'PBS file specified not json format:', self.queue_file
+                    print 'PBS file specified not json format:', self.queue_file.name
                     sys.exit(1)
                 opts.processingQueue = True
 
@@ -826,12 +835,18 @@ class TestHarness:
         elif self.options.dump:
             self.factory.printDump("Tests")
             sys.exit(0)
+        elif self.options.queue_cleanup:
+            self.cleanQueueFiles()
+            sys.exit(0)
 
     def getOptions(self):
         return self.options
 
     def getQueueFile(self):
         return self.queue_file
+
+    def getQueueData(self):
+        return self.queue_data
 
 #################################################################################################################################
 # The TestTimer TestHarness
