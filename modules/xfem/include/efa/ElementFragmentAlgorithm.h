@@ -31,10 +31,12 @@ private:
   std::map<unsigned int, EFANode *> _permanent_nodes;
   std::map<unsigned int, EFANode *> _embedded_nodes;
   std::map<unsigned int, EFANode *> _temp_nodes;
+  std::map<unsigned int, EFANode *> _embedded_permanent_nodes;
   std::map<unsigned int, EFAElement *> _elements;
   //  std::map< std::set< EFAnode* >, std::set< EFAelement* > > _merged_edge_map;
   std::set<EFAElement *> _crack_tip_elements;
   std::vector<EFANode *> _new_nodes;
+  std::vector<EFANode *> _deleted_nodes;
   std::vector<EFAElement *> _child_elements;
   std::vector<EFAElement *> _parent_elements;
   std::map<EFANode *, std::set<EFAElement *>> _inverse_connectivity;
@@ -47,6 +49,7 @@ public:
   void updateEdgeNeighbors();
   void initCrackTipTopology();
   void addElemEdgeIntersection(unsigned int elemid, unsigned int edgeid, double position);
+  void addElemNodeIntersection(unsigned int elemid, unsigned int nodeid);
   bool addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
   void addElemFaceIntersection(unsigned int elemid,
                                unsigned int faceid,

@@ -40,6 +40,14 @@ EFAEdge::equivalent(const EFAEdge & other) const
     isEqual = true;
   else if (other._edge_node2 == _edge_node1 && other._edge_node1 == _edge_node2)
     isEqual = true;
+
+  // For cut along the edge case
+  if (isEqual)
+  {
+    if (_edge_node1->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT &&
+        _edge_node2->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+      isEqual = false;
+  }
   return isEqual;
 }
 
@@ -187,7 +195,14 @@ EFAEdge::reverseNodes()
 bool
 EFAEdge::hasIntersection() const
 {
-  return _embedded_nodes.size() > 0;
+  bool has = false;
+  if (_edge_node1->parent() != NULL)
+    has = has || _edge_node1->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
+
+  if (_edge_node2->parent() != NULL)
+    has = has || _edge_node2->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
+
+  return has || _embedded_nodes.size() > 0;
 }
 
 bool

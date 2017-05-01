@@ -43,6 +43,7 @@ public:
 
   virtual void switchNode(EFANode * new_node, EFANode * old_node, bool descend_to_parent);
   virtual void switchEmbeddedNode(EFANode * new_node, EFANode * old_node);
+  virtual void updateFragmentNode();
   virtual void getMasterInfo(EFANode * node,
                              std::vector<EFANode *> & master_nodes,
                              std::vector<double> & master_weights) const;

@@ -94,6 +94,16 @@ EFAFragment2D::getNumCuts() const
   return num_cut_edges;
 }
 
+unsigned int
+EFAFragment2D::getNumCutNodes() const
+{
+  unsigned int num_cut_nodes = 0;
+  for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
+    if (_boundary_edges[i]->getNode(0)->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+      num_cut_nodes++;
+  return num_cut_nodes;
+}
+
 std::set<EFANode *>
 EFAFragment2D::getAllNodes() const
 {
@@ -323,8 +333,11 @@ EFAFragment2D::split()
   // N.B. each boundary each can only have 1 cut at most
   std::vector<EFAFragment2D *> new_fragments;
   std::vector<unsigned int> cut_edges;
+  std::vector<unsigned int> cut_nodes;
   for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
   {
+    if (_boundary_edges[iedge]->getNode(0)->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+      cut_nodes.push_back(iedge);
     if (_boundary_edges[iedge]->numEmbeddedNodes() > 1)
       EFAError("A fragment boundary edge can't have more than 1 cuts");
     if (_boundary_edges[iedge]->hasIntersection())
@@ -335,7 +348,269 @@ EFAFragment2D::split()
   {
     EFAError("In split() fragment cannot have more than 2 cut edges");
   }
-  else if (cut_edges.size() == 1 || cut_edges.size() == 2)
+  else if (cut_edges.size() == 1 && cut_nodes.size() == 1)
+  {
+    if (cut_edges[0] == 1 && cut_nodes[0] == 0) // case 1
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getEmbeddedNode(0);
+      EFANode * node4 = _boundary_edges[1]->getNode(1);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node1));
+
+      new_frag2->addEdge(new EFAEdge(node1, node3));
+      new_frag2->addEdge(new EFAEdge(node3, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node1));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 2 && cut_nodes[0] == 0) // case 2
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getNode(1);
+      EFANode * node4 = _boundary_edges[2]->getEmbeddedNode(0);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node1));
+
+      new_frag2->addEdge(new EFAEdge(node1, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node1));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 2 && cut_nodes[0] == 1) // case 3
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getNode(1);
+      EFANode * node4 = _boundary_edges[2]->getEmbeddedNode(0);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node5));
+      new_frag1->addEdge(new EFAEdge(node5, node1));
+
+      new_frag2->addEdge(new EFAEdge(node2, node3));
+      new_frag2->addEdge(new EFAEdge(node3, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node2));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 3 && cut_nodes[0] == 1) // case 4
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getNode(1);
+      EFANode * node4 = _boundary_edges[2]->getNode(1);
+      EFANode * node5 = _boundary_edges[3]->getEmbeddedNode(0);
+
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node5));
+      new_frag1->addEdge(new EFAEdge(node5, node2));
+
+      new_frag2->addEdge(new EFAEdge(node1, node2));
+      new_frag2->addEdge(new EFAEdge(node2, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node1));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 3 && cut_nodes[0] == 2) // case 5
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getNode(1);
+      EFANode * node4 = _boundary_edges[3]->getEmbeddedNode(0);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node1));
+
+      new_frag2->addEdge(new EFAEdge(node3, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node3));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 3 && cut_nodes[0] == 2) // case 5
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getNode(1);
+      EFANode * node4 = _boundary_edges[3]->getEmbeddedNode(0);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node1));
+
+      new_frag2->addEdge(new EFAEdge(node3, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node3));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 3 && cut_nodes[0] == 2) // case 6
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getEmbeddedNode(0);
+      EFANode * node3 = _boundary_edges[0]->getNode(1);
+      EFANode * node4 = _boundary_edges[1]->getNode(1);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node5));
+      new_frag1->addEdge(new EFAEdge(node5, node1));
+
+      new_frag2->addEdge(new EFAEdge(node2, node3));
+      new_frag2->addEdge(new EFAEdge(node3, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node2));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 1 && cut_nodes[0] == 3) // case 7
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getNode(1);
+      EFANode * node3 = _boundary_edges[1]->getEmbeddedNode(0);
+      EFANode * node4 = _boundary_edges[1]->getNode(1);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node5));
+      new_frag1->addEdge(new EFAEdge(node5, node1));
+
+      new_frag2->addEdge(new EFAEdge(node3, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node3));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if (cut_edges[0] == 0 && cut_nodes[0] == 3) // case 8
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[0]->getEmbeddedNode(0);
+      EFANode * node3 = _boundary_edges[0]->getNode(1);
+      EFANode * node4 = _boundary_edges[1]->getNode(1);
+      EFANode * node5 = _boundary_edges[2]->getNode(1);
+
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node5));
+      new_frag1->addEdge(new EFAEdge(node5, node2));
+
+      new_frag2->addEdge(new EFAEdge(node1, node2));
+      new_frag2->addEdge(new EFAEdge(node2, node5));
+      new_frag2->addEdge(new EFAEdge(node5, node1));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+  }
+  else if (cut_nodes.size() == 2)
+  {
+    if ((cut_nodes[0] == 0 && cut_nodes[1] == 2) || (cut_nodes[0] == 2 && cut_nodes[1] == 0))
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[1]->getNode(0);
+      EFANode * node3 = _boundary_edges[2]->getNode(0);
+      EFANode * node4 = _boundary_edges[3]->getNode(0);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node3));
+      new_frag1->addEdge(new EFAEdge(node3, node1));
+
+      new_frag2->addEdge(new EFAEdge(node3, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node1));
+      new_frag2->addEdge(new EFAEdge(node1, node3));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if ((cut_nodes[0] == 1 && cut_nodes[1] == 3) || (cut_nodes[0] == 3 && cut_nodes[1] == 1))
+    {
+      EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
+      EFAFragment2D * new_frag2 = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[1]->getNode(0);
+      EFANode * node3 = _boundary_edges[2]->getNode(0);
+      EFANode * node4 = _boundary_edges[3]->getNode(0);
+
+      new_frag1->addEdge(new EFAEdge(node1, node2));
+      new_frag1->addEdge(new EFAEdge(node2, node4));
+      new_frag1->addEdge(new EFAEdge(node4, node1));
+
+      new_frag2->addEdge(new EFAEdge(node2, node3));
+      new_frag2->addEdge(new EFAEdge(node3, node4));
+      new_frag2->addEdge(new EFAEdge(node4, node2));
+
+      new_fragments.push_back(new_frag1);
+      new_fragments.push_back(new_frag2);
+    }
+    else if ((cut_nodes[0] == 0 && cut_nodes[1] == 1) || (cut_nodes[0] == 1 && cut_nodes[1] == 2) ||
+             (cut_nodes[0] == 2 && cut_nodes[1] == 3) || (cut_nodes[0] == 3 && cut_nodes[1] == 0) ||
+             (cut_nodes[0] == 1 && cut_nodes[1] == 0) || (cut_nodes[0] == 2 && cut_nodes[1] == 1) ||
+             (cut_nodes[0] == 3 && cut_nodes[1] == 2) || (cut_nodes[0] == 0 && cut_nodes[1] == 3))
+    {
+      EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+      EFANode * node1 = _boundary_edges[0]->getNode(0);
+      EFANode * node2 = _boundary_edges[1]->getNode(0);
+      EFANode * node3 = _boundary_edges[2]->getNode(0);
+      EFANode * node4 = _boundary_edges[3]->getNode(0);
+
+      new_frag->addEdge(new EFAEdge(node1, node2));
+      new_frag->addEdge(new EFAEdge(node2, node3));
+      new_frag->addEdge(new EFAEdge(node3, node4));
+      new_frag->addEdge(new EFAEdge(node4, node1));
+
+      new_fragments.push_back(new_frag);
+    }
+  }
+  else if (cut_edges.size() == 2 || (cut_edges.size() == 1 && cut_nodes.size() == 0))
   {
     unsigned int iedge = 0;
     unsigned int icutedge = 0;
@@ -394,6 +669,17 @@ EFAFragment2D::split()
 
       new_fragments.push_back(new_frag);
     } while (new_fragments.size() < cut_edges.size());
+  }
+  else if (cut_nodes.size() == 1)
+  {
+    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+    for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
+    {
+      EFANode * first_node_on_edge = _boundary_edges[iedge]->getNode(0);
+      EFANode * second_node_on_edge = _boundary_edges[iedge]->getNode(1);
+      new_frag->addEdge(new EFAEdge(first_node_on_edge, second_node_on_edge));
+    }
+    new_fragments.push_back(new_frag);
   }
 
   return new_fragments;

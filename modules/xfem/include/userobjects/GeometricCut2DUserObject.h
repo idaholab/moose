@@ -29,6 +29,7 @@ public:
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<CutEdge> & cut_edges,
+                                    std::vector<CutNode> & cut_nodes,
                                     Real time) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<CutFace> & cut_faces,

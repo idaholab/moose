@@ -23,6 +23,8 @@ EFANode::idCatString()
     s << "e";
   else if (_category == N_CATEGORY_TEMP)
     s << "t";
+  else if (_category == N_CATEGORY_EMBEDDED_PERMANENT)
+    s << "ep";
   else
     s << " ";
   return s.str();
@@ -50,4 +52,10 @@ void
 EFANode::removeParent()
 {
   _parent = NULL;
+}
+
+void
+EFANode::setCategory(EFANode::N_CATEGORY category)
+{
+  _category = category;
 }
