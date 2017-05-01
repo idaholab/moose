@@ -8,16 +8,14 @@
 # increasing throughout the run.
 #
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
   order = FIRST
   family = LAGRANGE
   volumetric_locking_correction = true
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]#Comment
   file = one_elem2.e
-  displacements = 'disp_x disp_y'
 [] # Mesh
 
 [Variables]
@@ -94,103 +92,130 @@
   [../]
 [] # AuxVariables
 
-[SolidMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
-[]
+[] # Kernels
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./vonmises]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
     variable = vonmises
-    quantity = vonmises
+    scalar_type = VonMisesStress
     execute_on = timestep_end
   [../]
   [./pressure]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
     variable = pressure
-    quantity = hydrostatic
+    scalar_type = Hydrostatic
     execute_on = timestep_end
   [../]
   [./elastic_strain_xx]
-    type = MaterialTensorAux
-    tensor = elastic_strain
+    type = RankTwoAux
+    rank_two_tensor = elastic_strain
     variable = elastic_strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./elastic_strain_yy]
-    type = MaterialTensorAux
-    tensor = elastic_strain
+    type = RankTwoAux
+    rank_two_tensor = elastic_strain
     variable = elastic_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./elastic_strain_zz]
-    type = MaterialTensorAux
-    tensor = elastic_strain
+    type = RankTwoAux
+    rank_two_tensor = elastic_strain
     variable = elastic_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./plastic_strain_xx]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./plastic_strain_yy]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./plastic_strain_zz]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./tot_strain_xx]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = tot_strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./tot_strain_yy]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = tot_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./tot_strain_zz]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = tot_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./eff_plastic_strain]
     type = MaterialRealAux
@@ -241,21 +266,28 @@
 [] # BCs
 
 [Materials]
-  [./stiffStuff1]
-    type = SolidModel
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 250e9
     poissons_ratio = 0.25
-    constitutive_model = isoplas
-    formulation = NonlinearPlaneStrain
+  [../]
+  [./strain]
+    type = ComputePlaneFiniteStrain
+    block = 1
+  [../]
+  [./stress]
+    type = ComputeReturnMappingStress
+    return_mapping_models = 'isoplas'
+    block = 1
   [../]
   [./isoplas]
-    type = IsotropicPlasticity
-    block = 1
+    type = IsotropicPlasticityStressUpdate
     yield_stress = 5e6
     hardening_constant = 0.0
     relative_tolerance = 1e-20
     absolute_tolerance = 1e-8
+    max_iterations = 50
   [../]
 [] # Materials
 
