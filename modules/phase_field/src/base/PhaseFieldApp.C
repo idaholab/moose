@@ -216,6 +216,7 @@
 #include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
+#include "PolycrystalHex.h"
 #include "PolycrystalVoronoi.h"
 #include "RandomEulerAngleProvider.h"
 
@@ -377,7 +378,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(BimodalSuperellipsoidsIC);
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
-  registerInitialCondition(HexPolycrystalIC);
+  registerDeprecatedObjectName(PolycrystalHex, "HexPolycrystalIC", "07/01/2017 00:00");
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiBoundingBoxIC);
   registerInitialCondition(MultiSmoothCircleIC);
@@ -457,7 +458,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
-  registerPostprocessor(PolycrystalVoronoi);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
@@ -487,6 +487,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(EulerAngleUpdater);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
+  registerUserObject(PolycrystalHex);
+  registerUserObject(PolycrystalVoronoi);
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
