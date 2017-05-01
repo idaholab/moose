@@ -225,7 +225,7 @@ public:
   *   +1 if (i1, i2, ..., iD) is an even permutation of (0, 1, ..., D)
   *   -1 if (i1, i2, ..., iD) is an odd permutation of (0, 1, ..., D)
   /*    0 otherwise */
-  static int leviCivita(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+  static Real leviCivita(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 
 protected:
   /// Dimensionality of rank-four tensor

@@ -896,7 +896,7 @@ RankFourTensor::isIsotropic() const
   return true;
 }
 
-int
+Real
 RankFourTensor::leviCivita(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
 {
   if (i == 0 && j > 0 && k > 0 && l > 0)

@@ -305,7 +305,7 @@ RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
       }
 }
 
-int
+Real
 RankThreeTensor::leviCivita(unsigned int i, unsigned int j, unsigned int k)
 {
   if (i == 0 && j > 0 && k > 0)
