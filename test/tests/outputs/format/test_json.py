@@ -31,6 +31,10 @@ def run_app(args=[]):
     proc = None
     app_name = find_app()
     args.insert(0, app_name)
+    #  "-options_left 0" is used to stop the debug version of PETSc from printing
+    # out WARNING messages that sometime confuse the json parser
+    args.insert(1, "-options_left")
+    args.insert(2, "0")
     cmd_line = ' '.join(args)
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
