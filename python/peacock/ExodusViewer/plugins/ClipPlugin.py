@@ -62,7 +62,8 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         When a variable changes, load the state of the clip.
         """
-        self.store(self.stateKey(self._variable), 'Variable')
+        if self.isEnabled():
+            self.store(self.stateKey(self._variable), 'Variable')
         super(ClipPlugin, self).onVariableChanged(*args)
         self.load(self.stateKey(self._variable), 'Variable')
 

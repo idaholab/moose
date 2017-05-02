@@ -88,11 +88,11 @@ class ExodusPlugin(peacock.base.Plugin):
         """
         Save the state of the widget before the file changes
         """
-        self.store(self.stateKey(), 'Filename')
+        if self.isEnabled():
+            self.store(self.stateKey(), 'Filename')
 
     def onPostFileChanged(self):
         """
         Load the state of the widget based on the new file name.
         """
         self.load(self.stateKey(), 'Filename')
-
