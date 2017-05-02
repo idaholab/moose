@@ -4,6 +4,9 @@
   nx = 10
   ny = 10
   displacements = 'disp_x disp_y'
+  # Transferring data from a sub application is currently only
+  # supported with a ReplicatedMesh
+  parallel_type = replicated
 []
 
 [Variables]
