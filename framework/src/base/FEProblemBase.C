@@ -129,6 +129,10 @@ validParams<FEProblemBase>()
                         false,
                         "This causes PETSc to error if it had to reallocate memory in the Jacobian "
                         "matrix due to not having enough nonzeros");
+  params.addParam<bool>("ignore_zeros_in_jacobian",
+                        false,
+                        "Do not explicitly store zero values in "
+                        "the Jacobian matrix if true");
   params.addParam<bool>("force_restart",
                         false,
                         "EXPERIMENTAL: If true, a sub_app may use a "
@@ -197,6 +201,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_execute_on_flag(EXEC_NONE),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
+    _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
     _fail_next_linear_convergence_check(false),
     _currently_computing_jacobian(false),
