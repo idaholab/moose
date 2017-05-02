@@ -247,12 +247,6 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSMass);
   registerKernel(INSMassRZ);
   registerKernel(INSMomentumTimeDerivative);
-  // INSMomentum is now deprecated, convert input files to use
-  // INSMomentumLaplaceForm or INSMomentumTractionForm instead.
-  registerDeprecatedObjectName(INSMomentumTractionForm, "INSMomentum", "10/07/2017 12:00");
-  // INSMomentumRZ has been renamed, convert input files to use
-  // INSMomentumTractionFormRZ.
-  registerDeprecatedObjectName(INSMomentumTractionFormRZ, "INSMomentumRZ", "10/07/2017 12:00");
   registerKernel(INSMomentumTractionForm);
   registerKernel(INSMomentumTractionFormRZ);
   registerKernel(INSMomentumLaplaceForm);
@@ -268,10 +262,6 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSCompressibilityPenalty);
 
   // BCs
-  // Register the newly-named class with the old name for a while in
-  // case anyone is using this in their app.
-  registerDeprecatedObjectName(
-      INSMomentumNoBCBCTractionForm, "INSMomentumNoBCBC", "10/07/2017 12:00");
   registerBoundaryCondition(INSMomentumNoBCBCTractionForm);
   registerBoundaryCondition(INSMomentumNoBCBCLaplaceForm);
   registerBoundaryCondition(INSTemperatureNoBCBC);
