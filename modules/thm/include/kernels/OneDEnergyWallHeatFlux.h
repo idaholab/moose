@@ -23,7 +23,7 @@ protected:
   /// Heat flux function
   Function & _q_wall;
   /// Heat flux perimeter
-  const VariableValue & _Phf;
+  const VariableValue & _P_hf;
 };
 
 #endif // ONEDENERGYWALLHEATFLUX_H

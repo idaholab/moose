@@ -29,7 +29,7 @@ protected:
 
   const VariableValue & _heat_transfer_coefficient;
   const VariableValue & _T_wall;
-  const VariableValue & _Phf;
+  const VariableValue & _P_hf;
 
   // For Jacobian terms
   unsigned _rhoA_var_number;
