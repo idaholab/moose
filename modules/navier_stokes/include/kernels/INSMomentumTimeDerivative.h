@@ -33,7 +33,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Parameters
-  Real _rho;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif // INSMOMENTUMTIMEDERIVATIVE_H

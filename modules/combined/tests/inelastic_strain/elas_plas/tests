@@ -1,0 +1,13 @@
+[Tests]
+  [./elastic_plastic]
+    type = 'Exodiff'
+    input = 'elas_plas_nl1.i'
+    exodiff = 'elas_plas_nl1_out.e'
+  [../]
+  [./elastic_plastic_cycle]
+    type = 'Exodiff'
+    input = 'elas_plas_nl1_cycle.i'
+    exodiff = 'elas_plas_nl1_cycle_out.e'
+    custom_cmp = 'elas_plas_nl1_cycle_out.exodiff'
+  [../]
+[]

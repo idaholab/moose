@@ -360,4 +360,3 @@ RankTwoTensor operator*(const RealVectorValue & p, const RankThreeTensor & b)
 
   return result;
 }
-

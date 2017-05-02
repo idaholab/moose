@@ -45,11 +45,11 @@ protected:
   unsigned _w_vel_star_var_number;
   unsigned _p_var_number;
 
-  // Material properties
-  Real _rho;
-
   // Parameters
   unsigned _component;
+
+  // Material properties
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif // INSCHORINCORRECTOR_H

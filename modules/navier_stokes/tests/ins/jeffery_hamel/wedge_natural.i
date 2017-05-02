@@ -4,8 +4,6 @@
 # outlet still "looks" reasonable.
 [GlobalParams]
   gravity = '0 0 0'
-  rho = 1
-  mu = 1
 
   # Params used by the WedgeFunction for computing the exact solution.
   # The value of K is only required for comparing the pressure to the
@@ -97,8 +95,17 @@
   [../]
 []
 
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 1
+    prop_names = 'rho mu'
+    prop_values = '1  1'
+  [../]
+[]
+
 [Preconditioning]
-  [./SMP_PJFNK]
+  [./SMP_NEWTON]
     type = SMP
     full = true
     solve_type = NEWTON
@@ -138,9 +145,13 @@
   [./vel_x_exact]
     type = WedgeFunction
     var_num = 0
+    mu = 1
+    rho = 1
   [../]
   [./vel_y_exact]
     type = WedgeFunction
     var_num = 1
+    mu = 1
+    rho = 1
   [../]
 []

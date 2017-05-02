@@ -1,15 +1,5 @@
 [GlobalParams]
-  # rho = 1000    # kg/m^3
-  # mu = 0.798e-3 # Pa-s at 30C
-  # cp = 4.179e3  # J/kg-K at 30C
-  # k = 0.58      # W/m-K at ?C
   gravity = '0 0 0'
-
-  # Dummy parameters
-  rho = 1
-  mu = 1
-  cp = 1
-  k = 1
 []
 
 
@@ -142,9 +132,6 @@
   [../]
 []
 
-
-
-
 [BCs]
   [./u_no_slip]
     type = DirichletBC
@@ -202,7 +189,20 @@
   [../]
 []
 
+[Materials]
+  [./const]
+    type = GenericConstantMaterial
+    block = 0
+    # rho = 1000    # kg/m^3
+    # mu = 0.798e-3 # Pa-s at 30C
+    # cp = 4.179e3  # J/kg-K at 30C
+    # k = 0.58      # W/m-K at ?C
 
+    # Dummy parameters
+    prop_names = 'rho mu cp k'
+    prop_values = '1  1  1  1'
+  [../]
+[]
 
 [Preconditioning]
 #active = 'FDP_Newton'

@@ -22,13 +22,13 @@ validParams<INSExplicitTimestepSelector>()
   // Coupled variables
   params.addRequiredCoupledVar("vel_mag", "Velocity magnitude");
 
-  // Material properties
-  params.addRequiredParam<Real>("mu", "dynamic viscosity");
-  params.addRequiredParam<Real>("rho", "density");
-
-  // Other parameters
+  // Required parameters
   params.addRequiredParam<Real>("beta",
                                 "0 < beta < 1, choose some fraction of the limiting timestep size");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
   return params;
 }
@@ -37,12 +37,12 @@ INSExplicitTimestepSelector::INSExplicitTimestepSelector(const InputParameters &
   : ElementPostprocessor(parameters),
     _vel_mag(coupledValue("vel_mag")),
 
-    // Material properties
-    _mu(getParam<Real>("mu")),
-    _rho(getParam<Real>("rho")),
-
     // Other parameters
-    _beta(getParam<Real>("beta"))
+    _beta(getParam<Real>("beta")),
+
+    // Material properties
+    _mu(getMaterialProperty<Real>("mu_name")),
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -74,10 +74,10 @@ INSExplicitTimestepSelector::execute()
     // But we also have to obey the diffusive time restriction,
     // dt <= 1/(2*nu)*(1/h1^2 + 1/h2^2 + 1/h3^2)^(-1) <=
     //    <= h_min^2 / n_dim / (2*nu)
-    Real diffusive_limit_dt = 0.5 * h_min * h_min / (_mu / _rho) / dim;
+    Real diffusive_limit_dt = 0.5 * h_min * h_min / (_mu[qp] / _rho[qp]) / dim;
 
     // And the "combined" condition, dt <= 2*nu/|u|^2
-    Real combined_limit_dt = 2. * (_mu / _rho) / vel_mag / vel_mag;
+    Real combined_limit_dt = 2. * (_mu[qp] / _rho[qp]) / vel_mag / vel_mag;
 
     // // Debugging:
     // Moose::out << "courant_limit_dt   = " << courant_limit_dt   << "\n"

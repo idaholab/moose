@@ -51,8 +51,8 @@ INSMomentumTractionForm::computeQpResidualViscousPart()
       mooseError("Unrecognized _component requested.");
   }
 
-  // The viscous part, _mu * tau : grad(v)
-  return _mu * (tau_row * _grad_test[_i][_qp]);
+  // The viscous part, _mu[_qp] * tau : grad(v)
+  return _mu[_qp] * (tau_row * _grad_test[_i][_qp]);
 }
 
 Real
@@ -60,8 +60,8 @@ INSMomentumTractionForm::computeQpJacobianViscousPart()
 {
   // Viscous part, full stress tensor.  The extra contribution comes from the "2"
   // on the diagonal of the viscous stress tensor.
-  return _mu * (_grad_phi[_j][_qp] * _grad_test[_i][_qp] +
-                _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
+  return _mu[_qp] * (_grad_phi[_j][_qp] * _grad_test[_i][_qp] +
+                     _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
 }
 
 Real
@@ -69,13 +69,13 @@ INSMomentumTractionForm::computeQpOffDiagJacobianViscousPart(unsigned jvar)
 {
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
-    return _mu * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](0);
+    return _mu[_qp] * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](0);
 
   else if (jvar == _v_vel_var_number)
-    return _mu * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](1);
+    return _mu[_qp] * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](1);
 
   else if (jvar == _w_vel_var_number)
-    return _mu * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](2);
+    return _mu[_qp] * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](2);
 
   else
     return 0;

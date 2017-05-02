@@ -1,5 +1,10 @@
 [Mesh]
-  file = cube.e
+  type = GeneratedMesh
+  displacements = 'disp_x disp_y disp_z'
+  dim = 3
+  nx = 4
+  ny = 4
+  nz = 4
 []
 
 [Problem]
@@ -73,102 +78,94 @@
   [./bottom_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 1
+    boundary = bottom
     value = 0.0
   [../]
 
   [./bottom_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 1
+    boundary = bottom
     value = 0.0
   [../]
 
   [./bottom_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 1
+    boundary = bottom
     value = 0.0
   [../]
 
   [./top_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 2
+    boundary = top
     value = 0.0
   [../]
 
   [./top_y]
     type = FunctionDirichletBC
     variable = disp_y
-    boundary = 2
+    boundary = top
     function = pull
   [../]
 
   [./top_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 2
+    boundary = top
     value = 0.0
   [../]
 
   [./bottom_temp]
     type = DirichletBC
     variable = temp
-    boundary = 1
+    boundary = bottom
     value = 10.0
   [../]
 
   [./top_temp]
     type = DirichletBC
     variable = temp
-    boundary = 2
+    boundary = top
     value = 20.0
   [../]
 []
 
 [Materials]
-
   [./constant]
-    type = LinearIsotropicMaterial
-    block = 1
-
+    type = Elastic
+    block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     temp = temp
-
     youngs_modulus = 1.0
     poissons_ratio = .3
     thermal_expansion = 1e-5
+    increment_calculation = Eigen
   [../]
 
   [./heat1]
     type = HeatConductionMaterial
-    block = 1
-
+    block = 0
     specific_heat = 1.0
     thermal_conductivity = 1e-3 #Tuned to give temperature reference resid close to that of solidmech
   [../]
 
   [./density]
     type = Density
-    block = 1
+    block = 0
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
   [../]
-
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   nl_rel_tol = 1e-10
 
@@ -206,6 +203,5 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

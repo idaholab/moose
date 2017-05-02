@@ -3,10 +3,8 @@
   dim = 2
   nx = 25
   ny = 25
-  nz = 0
   xmax = 250
   ymax = 250
-  zmax = 0
   elem_type = QUAD4
 []
 
@@ -96,7 +94,6 @@
   [../]
   [./strain]
     type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]
   [./stress]

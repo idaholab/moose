@@ -25,14 +25,14 @@ Real
 INSMomentumLaplaceForm::computeQpResidualViscousPart()
 {
   // Simplified version: mu * Laplacian(u_component)
-  return _mu * (_grad_u[_qp] * _grad_test[_i][_qp]);
+  return _mu[_qp] * (_grad_u[_qp] * _grad_test[_i][_qp]);
 }
 
 Real
 INSMomentumLaplaceForm::computeQpJacobianViscousPart()
 {
   // Viscous part, Laplacian version
-  return _mu * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]);
+  return _mu[_qp] * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]);
 }
 
 Real

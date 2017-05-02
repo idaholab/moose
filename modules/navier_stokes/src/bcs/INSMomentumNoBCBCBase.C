@@ -22,8 +22,6 @@ validParams<INSMomentumNoBCBCBase>()
   params.addRequiredCoupledVar("p", "pressure");
 
   // Required parameters
-  params.addRequiredParam<Real>("mu", "dynamic viscosity");
-  params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addRequiredParam<unsigned>(
       "component",
@@ -31,6 +29,10 @@ validParams<INSMomentumNoBCBCBase>()
   params.addParam<bool>("integrate_p_by_parts",
                         true,
                         "Allows simulations to be run with pressure BC if set to false");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
   return params;
 }
@@ -56,10 +58,12 @@ INSMomentumNoBCBCBase::INSMomentumNoBCBCBase(const InputParameters & parameters)
     _p_var_number(coupled("p")),
 
     // Required parameters
-    _mu(getParam<Real>("mu")),
-    _rho(getParam<Real>("rho")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _component(getParam<unsigned>("component")),
-    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
+
+    // Material properties
+    _mu(getMaterialProperty<Real>("mu_name")),
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }

@@ -35,7 +35,7 @@ INSMomentumLaplaceFormRZ::computeQpResidual()
 
     // If this is the radial component of momentum, there is an extra term for RZ.
     // The only difference between this and the traction form is a factor of 2.
-    res_base += _mu * _u_vel[_qp] / (r * r) * _test[_i][_qp];
+    res_base += _mu[_qp] * _u_vel[_qp] / (r * r) * _test[_i][_qp];
 
     // If the pressure is also integrated by parts, there is an extra term in RZ.
     if (_integrate_p_by_parts)
@@ -56,7 +56,7 @@ INSMomentumLaplaceFormRZ::computeQpJacobian()
   {
     const Real r = _q_point[_qp](0);
     // The only difference between this and the traction form is a factor of 2.
-    jac_base += _mu * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
+    jac_base += _mu[_qp] * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
   }
 
   return jac_base;

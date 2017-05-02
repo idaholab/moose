@@ -23,10 +23,12 @@ validParams<INSChorinCorrector>()
   params.addRequiredCoupledVar("p", "pressure");
 
   // Required parameters
-  params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<unsigned>(
       "component",
       "0,1,2 depending on if we are solving the x,y,z component of the Corrector equation");
+
+  // Optional parameters
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "density name");
 
   return params;
 }
@@ -49,8 +51,10 @@ INSChorinCorrector::INSChorinCorrector(const InputParameters & parameters)
     _p_var_number(coupled("p")),
 
     // Required parameters
-    _rho(getParam<Real>("rho")),
-    _component(getParam<unsigned>("component"))
+    _component(getParam<unsigned>("component")),
+
+    // Material properties
+    _rho(getMaterialProperty<Real>("rho_name"))
 {
 }
 
@@ -64,7 +68,7 @@ INSChorinCorrector::computeQpResidual()
   Real symmetric_part = (_u[_qp] - U_star(_component)) * _test[_i][_qp];
 
   // The pressure part, don't forget to multiply by dt!
-  Real pressure_part = (_dt / _rho) * _grad_p[_qp](_component) * _test[_i][_qp];
+  Real pressure_part = (_dt / _rho[_qp]) * _grad_p[_qp](_component) * _test[_i][_qp];
 
   return symmetric_part + pressure_part;
 }
@@ -89,7 +93,7 @@ INSChorinCorrector::computeQpOffDiagJacobian(unsigned jvar)
   }
 
   else if (jvar == _p_var_number)
-    return (_dt / _rho) * _grad_phi[_j][_qp](_component) * _test[_i][_qp];
+    return (_dt / _rho[_qp]) * _grad_phi[_j][_qp](_component) * _test[_i][_qp];
 
   else
     return 0;

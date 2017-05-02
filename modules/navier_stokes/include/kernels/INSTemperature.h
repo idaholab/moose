@@ -42,9 +42,9 @@ protected:
   unsigned _w_vel_var_number;
 
   // Required parameters
-  Real _rho;
-  Real _k;
-  Real _cp;
+  const MaterialProperty<Real> & _rho;
+  const MaterialProperty<Real> & _k;
+  const MaterialProperty<Real> & _cp;
 };
 
 #endif // INSTEMPERATURE_H

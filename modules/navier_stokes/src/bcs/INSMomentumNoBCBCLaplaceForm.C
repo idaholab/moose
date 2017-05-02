@@ -28,7 +28,7 @@ Real
 INSMomentumNoBCBCLaplaceForm::computeQpResidual()
 {
   // -mu * (grad(u).n) * test
-  Real viscous_part = -_mu * (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
+  Real viscous_part = -_mu[_qp] * (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
 
   // pIn * test
   Real pressure_part = 0.;
@@ -41,7 +41,7 @@ INSMomentumNoBCBCLaplaceForm::computeQpResidual()
 Real
 INSMomentumNoBCBCLaplaceForm::computeQpJacobian()
 {
-  return -_mu * (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
+  return -_mu[_qp] * (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
 }
 
 Real

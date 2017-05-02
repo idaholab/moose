@@ -43,7 +43,7 @@ protected:
   unsigned _w_vel_star_var_number;
 
   // Material properties
-  Real _rho;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif // INSCHORINPRESSUREPOISSON_H
