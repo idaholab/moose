@@ -40,7 +40,9 @@ class JsonData(object):
         Return:
             the data
         """
-        data = ExeLauncher.runExe(app_path, "--json")
+        #  "-options_left 0" is used to stop the debug version of PETSc from printing
+        # out WARNING messages that sometime confuse the json parser
+        data = ExeLauncher.runExe(app_path, ["-options_left","0","--json"] )
         data = data.split('**START JSON DATA**\n')[1]
         data = data.split('**END JSON DATA**')[0]
         return data
