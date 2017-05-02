@@ -29,10 +29,10 @@ sgn(T val)
  * @param volume_fraction The volume fraction of the phase
  * @param rho The density of the phase
  * @param v The velocity of the phase
- * @param Dh The hydraulic diameter
+ * @param D_h The hydraulic diameter
  * @param visc The viscosity of the phase
  */
-Real Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc);
+Real Reynolds(Real volume_fraction, Real rho, Real v, Real D_h, Real visc);
 
 /**
  * Compute Prandtl number
@@ -47,12 +47,12 @@ Real Prandtl(Real cp, Real mu, Real k);
  * Compute Grashof number
  * @param beta Thermal expansion coefficient
  * @param dT |T_w - T|
- * @param Dh Hydraulic diameter
+ * @param D_h Hydraulic diameter
  * @param rho_l Density of liquid
  * @param visc_l Viscosity of liquid
  * @return Grashof number
  */
-Real Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l);
+Real Grashof(Real beta, Real dT, Real D_h, Real rho_l, Real visc_l);
 
 /**
  * Compute Laplace number (or coefficient)
@@ -76,10 +76,10 @@ Real viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_r
  * Compute wall heat transfer coefficient
  * @param Nu Nusselt number
  * @param k Thermal conductivity
- * @param Dh Hydraulic diameter
+ * @param D_h Hydraulic diameter
  * @return Returns the wall heat transfer coefficient
  */
-Real wallHeatTransferCoefficient(Real Nu, Real k, Real Dh);
+Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
 
 /**
 * Computes surface tension [N/m]
