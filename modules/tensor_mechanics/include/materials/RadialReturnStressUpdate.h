@@ -31,7 +31,8 @@ InputParameters validParams<RadialReturnStressUpdate>();
 class RadialReturnStressUpdate : public StressUpdateBase
 {
 public:
-  RadialReturnStressUpdate(const InputParameters & parameters);
+  RadialReturnStressUpdate(const InputParameters & parameters,
+                           const std::string inelastic_strain_name = "");
 
   /// A radial return (J2) mapping method is defined in this material by overwritting
   /// the computeInelasticStrainIncrement method.
@@ -40,6 +41,7 @@ public:
                             RankTwoTensor & stress_new) override;
 
 protected:
+  virtual void initQpStatefulProperties() override;
   virtual void computeStressInitialize(Real /*effectiveTrialStress*/) {}
   virtual void iterationInitialize(Real /*scalar*/) {}
   virtual Real computeResidual(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
@@ -54,6 +56,9 @@ protected:
   const bool _output_iteration_info_on_error;
   const Real _relative_tolerance;
   const Real _absolute_tolerance;
+
+  MaterialProperty<Real> & _effective_inelastic_strain;
+  MaterialProperty<Real> & _effective_inelastic_strain_old;
 };
 
 #endif // RECOMPUTERADIALRETURN_H

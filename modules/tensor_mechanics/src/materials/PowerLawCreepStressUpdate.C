@@ -30,7 +30,7 @@ validParams<PowerLawCreepStressUpdate>()
 }
 
 PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters)
-  : RadialReturnStressUpdate(parameters),
+  : RadialReturnStressUpdate(parameters, "creep"),
     _coefficient(parameters.get<Real>("coefficient")),
     _n_exponent(parameters.get<Real>("n_exponent")),
     _m_exponent(parameters.get<Real>("m_exponent")),

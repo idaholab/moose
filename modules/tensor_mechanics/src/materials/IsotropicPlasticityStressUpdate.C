@@ -31,7 +31,7 @@ validParams<IsotropicPlasticityStressUpdate>()
 }
 
 IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputParameters & parameters)
-  : RadialReturnStressUpdate(parameters),
+  : RadialReturnStressUpdate(parameters, "plastic"),
     _yield_stress_function(
         isParamValid("yield_stress_function") ? &getFunction("yield_stress_function") : NULL),
     _yield_stress(getParam<Real>("yield_stress")),
@@ -42,12 +42,6 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
 
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
-    _scalar_plastic_strain(declareProperty<Real>("scalar_plastic_strain")),
-    // only make the scalar plastic strain stateful if the hardening function is used; the scalar
-    // plastic strain is needed for the hardening function derivative
-    _scalar_plastic_strain_old(isParamValid("hardening_function")
-                                   ? &declarePropertyOld<Real>("scalar_plastic_strain")
-                                   : NULL),
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
@@ -77,10 +71,6 @@ IsotropicPlasticityStressUpdate::initQpStatefulProperties()
   _hardening_variable_old[_qp] = 0.0;
   _hardening_slope = 0.0;
   _plastic_strain[_qp].zero();
-
-  _scalar_plastic_strain[_qp] = 0.0;
-  if ((_scalar_plastic_strain_old) != NULL)
-    (*_scalar_plastic_strain_old)[_qp] = 0.0;
 }
 
 void
@@ -130,9 +120,6 @@ IsotropicPlasticityStressUpdate::iterationFinalize(Real scalar)
 {
   if (_yield_condition > 0.0)
     _hardening_variable[_qp] = computeHardeningValue(scalar);
-
-  if ((_scalar_plastic_strain_old) != NULL)
-    _scalar_plastic_strain[_qp] = (*_scalar_plastic_strain_old)[_qp] + scalar;
 }
 
 void
@@ -147,7 +134,7 @@ IsotropicPlasticityStressUpdate::computeHardeningValue(Real scalar)
   Real value = _hardening_variable_old[_qp] + (_hardening_slope * scalar);
   if (_hardening_function)
   {
-    const Real strain_old = (*_scalar_plastic_strain_old)[_qp];
+    const Real strain_old = _effective_inelastic_strain_old[_qp];
     Point p;
 
     value = _hardening_function->value(strain_old + scalar, p) - _yield_stress;
@@ -160,7 +147,7 @@ Real IsotropicPlasticityStressUpdate::computeHardeningDerivative(Real /*scalar*/
   Real slope = _hardening_constant;
   if (_hardening_function)
   {
-    const Real strain_old = (*_scalar_plastic_strain_old)[_qp];
+    const Real strain_old = _effective_inelastic_strain_old[_qp];
     Point p; // Always (0,0,0)
 
     slope = _hardening_function->timeDerivative(strain_old, p);
