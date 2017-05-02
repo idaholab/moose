@@ -102,6 +102,13 @@ PolycrystalUserObjectBase::finalize()
 
   if (_is_master)
   {
+    /**
+     * We'll sort here to place the grains in the vector in the same order for parallel runs.
+     * We don't need this for building the adjacency matrix or for the coloring but it makes
+     * things consistent for other accesses to _feature_sets.
+     */
+    std::sort(_feature_sets.begin(), _feature_sets.end());
+
     buildGrainAdjacencyMatrix();
 
     assignOpsToGrains();
@@ -120,6 +127,13 @@ PolycrystalUserObjectBase::finalize()
 
   // Communicate the coloring with all ranks
   _communicator.broadcast(_grain_to_op);
+
+  /**
+   * All ranks: Update the variable indices based on the graph coloring algorithm. Here we index
+   * into the _grain_to_op vector based on the grain_id to obtain the right assignment.
+   */
+  for (auto & grain : _feature_sets)
+    grain._var_index = _grain_to_op[grain._id];
 
   if (_output_adjacency_matrix)
   {
