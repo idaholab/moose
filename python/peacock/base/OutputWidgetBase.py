@@ -37,8 +37,10 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Updates the live script view.
         """
         if self.LiveScript.isVisible() and hasattr(self, "_plugin_manager"):
+            # don't reset the text if it is the same. This allows for easier select/copy
             s = self._plugin_manager.repr()
-            self.LiveScript.setText(s)
+            if s != self.LiveScript.toPlainText():
+                self.LiveScript.setText(s)
 
     def _setupPythonButton(self, qobject):
         """
