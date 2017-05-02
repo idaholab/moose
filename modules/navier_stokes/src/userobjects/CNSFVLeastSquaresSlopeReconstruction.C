@@ -125,12 +125,12 @@ CNSFVLeastSquaresSlopeReconstruction::reconstructElementSlope()
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    const Elem * neig = elem->neighbor(is);
 
     /// for internal side
 
-    if (elem->neighbor(is) != NULL)
+    if (neig != NULL && this->hasBlocks(neig->subdomain_id()))
     {
-      const Elem * neig = elem->neighbor(is);
       dof_id_type neigID = neig->id();
 
       if (!_side_geoinfo_cached)
