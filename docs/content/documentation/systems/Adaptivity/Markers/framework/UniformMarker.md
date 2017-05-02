@@ -3,7 +3,7 @@
 !description /Adaptivity/Markers/UniformMarker
 
 ## Example Input Syntax
-!input test/tests/markers/uniform_marker/uniform_marker.i block=Adaptivity
+!listing test/tests/markers/uniform_marker/uniform_marker.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/UniformMarker
 

@@ -11,7 +11,7 @@ memory_logger.py --run "mpiexec -n 2 /absolute/path/to/moose_test-opt -i simple_
 
 Memory Logger will launch your process as normal, and begin to track the two processes that launched. When Memory Logger detects that the process/s has exited (for good or for ill), it will explain where the log was saved. You can then instruct Memory Logger to open this file, and display its information either using Matplotlib (--plot), or by formatting the information and outputting it to stdout (--read).
 
-!text docs/content/utilities/memory_logger/memory_logger_output1.txt overflow-y=scroll max-height=500px font-size=smaller
+!listing docs/content/utilities/memory_logger/memory_logger_output1.txt
 
 The items displayed are self-explanatory except perhaps for the percentage. The percentage is the current percent of memory used at this point in time out of the total that will be consumed. This is a post processing technique on the log file itself.
 
@@ -21,12 +21,12 @@ memory_logger.py  --repeat-rate .01 \
 --run "mpiexec -n 2 /absolute/path/to/moose_test-opt -i simple_diffusion.i -r 5"
 ```
 
-!text docs/content/utilities/memory_logger/memory_logger_output2.txt overflow-y=scroll max-height=500px font-size=smaller
+!listing docs/content/utilities/memory_logger/memory_logger_output2.txt
 
 Okay... A bit too accurate, as several samples remained unchanged during tracking. However sometimes more is desirable, though just not printed in this fashion. For data dumps like this, using Matplotlib is far more efficient.
 
 ## Using Matplotlib
-!image docs/media/memory_logger-plot_multi.png width=300 float=right caption=Figure 1
+!media docs/media/memory_logger-plot_multi.png width=300 float=right caption=Figure 1
 
 We can visualize the results by plotting the data with Matplotlib (Figure 1):
 ```text
@@ -65,7 +65,7 @@ You can also display stdout along the Matplotlib graph:
 ```text
 memory_logger.py --pstack --stdout --plot simple_diffusion_memory.log
 ```
-!image docs/media/memory_logger-darkmode.png width=300 float=right caption=--darkmode
+!media docs/media/memory_logger-darkmode.png width=300 float=right caption=--darkmode
 
 That white back ground to bright for you? Try dark mode:
 ```text

@@ -1,3 +1,19 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
+
 class Extension(object):
     """
     Base class for creating extensions.
@@ -9,7 +25,8 @@ class Extension(object):
 
         #: Configure options
         self._configs = kwargs
-        self._configs.setdefault('headings', ['section', 'subsection', 'subsubsection', 'textbf', 'underline', 'emph'])
+        headings = ['section', 'subsection', 'subsubsection', 'textbf', 'underline', 'emph']
+        self._configs.setdefault('headings', headings)
 
     def getConfigs(self):
         """

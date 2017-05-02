@@ -9,7 +9,7 @@ $$ \begin{align} v_x &= \sin^2(\pi x)\sin(2\pi y)\ v_y &= -\sin^2(\pi y) \sin(2\
 There are two methods defined for reversing the velocity direction ("instantenous" and "cosine"). The former simply switches the sine of the velocity at mid-point of the provided reversal time. The later applies a cosine multiplier so that the reversal is smooth.
 Example Input Syntax
 
-!input modules/level_set/tests/functions/olsson_vortex/olsson_vortex.i block=Functions
+!listing modules/level_set/tests/functions/olsson_vortex/olsson_vortex.i block=Functions
 
 !parameters /Functions/LevelSetOlssonVortex
 

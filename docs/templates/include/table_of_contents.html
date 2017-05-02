@@ -13,17 +13,17 @@ set to True (the default).
 <div class="toc-wrapper pin-top">
   {% if github_edit|default(true) %}
     <div class="moose-devel-links-container">
-      {% for items in current.code(repo_url) %}
-        <a href="{{items[1]}}" class="moose-code-links waves-effect waves-light btn">{{items[0]}}</a>
+      {% for items in mooseCode(repo_url) %}
+        <a href="{{items[1]}}" class="moose-code-links waves-effect waves-light btn tooltipped" data-tooltip={{items[1]}}>{{items[0]}}</a>
       {% endfor %}
-      {% if current.doxygen() %}
-        <a href="{{current.doxygen()}}" class="moose-doxygen-link waves-effect waves-light btn">Doxygen</a>
+      {% if doxygen|default(false) %}
+        <a href="{{doxygen}}" class="moose-doxygen-link waves-effect waves-light btn">Doxygen</a>
       {% endif %}
     </div>
   {% endif %}
   <div class="section table-of-contents">
     <ul>
-      {% for text, id in current.contents() %}
+      {% for text, id in tableofcontents %}
         <li><a href="#{{id}}">{{text}}</a></li>
       {% endfor %}
     </ul>

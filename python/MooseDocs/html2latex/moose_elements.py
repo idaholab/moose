@@ -1,10 +1,25 @@
-
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
 import os
-import re
 import logging
-log = logging.getLogger(__name__)
 
+import MooseDocs
 import elements
+
+LOG = logging.getLogger(__name__)
 
 def get_language(tag):
     """
@@ -12,311 +27,137 @@ def get_language(tag):
     """
     # Map from lower case hljs name to latex listings name
     languages = {'c++':'C++', 'python':'Python'}
+    for html, latex in languages.iteritems():
+        lang = 'language-{}'.format(html)
+        if lang in tag.get('class', ''):
+            return latex
 
-    lang = ''
-    if 'class' in tag.attrs and 'hljs' in tag.attrs['class']:
-        idx = tag.attrs['class'].index('hljs') + 1
-        lang = tag.attrs['class'][idx]
-        if lang.lower() in languages:
-            lang = languages[lang.lower()]
-        else:
-            lang = ''
-    return lang
-
-
-def escape(content):
-    """
-    Escape special latex characters.
-    """
-    map = dict()
-    map['_'] = '\\_'
-    map['{'] = '\\{'
-    map['}'] = '\\}'
-    map['$'] = '\\$'
-    map['&'] = '\\&'
-    map['%'] = '\\%'
-    map['\\'] = '\\textbackslash '
-    map['~'] = '\\textasciitilde '
-    map['^'] = '\\textasciicircum '
-    def sub(match):
-        return map[match.group(1)]
-    return re.sub(r'([_{}$\\%&~^])', sub, content)
-
-
-def admonition_preamble():
-    """
-    Returns commands to create admonition in latex.
-    """
-    out = ['\\usepackage{xparse}']
-    out += ['\\usepackage{tabularx}']
-    out += ['\\usepackage[table]{xcolor}']
-    out += ['\\definecolor{code-background}{HTML}{ECF0F1}']
-    out += ['\\definecolor{info-title}{HTML}{528452} \\definecolor{info}{HTML}{82E0AA}']
-    out += ['\\definecolor{note-title}{HTML}{3A7296} \\definecolor{note}{HTML}{85C1E9}']
-    out += ['\\definecolor{important-title}{HTML}{B100B0} \\definecolor{important}{HTML}{FF00FF}']
-    out += ['\\definecolor{warning-title}{HTML}{968B2B} \\definecolor{warning}{HTML}{FFEC46}']
-    out += ['\\definecolor{danger-title}{HTML}{B14D00} \\definecolor{danger}{HTML}{F75E1D}']
-    out += ['\\definecolor{error-title}{HTML}{940000} \\definecolor{error}{HTML}{FFB4B4}']
-    cmd = '\\DeclareDocumentCommand{\\admonition}{O{warning-title}O{warning}mm}\n'
-    cmd += '{\n'
-    cmd += '  \\rowcolors{1}{#1}{#2}\n'
-    cmd += '  \\renewcommand{\\arraystretch}{1.5}\n'
-    cmd += '  \\begin{tabularx}{\\textwidth}{X}\n'
-    cmd += '  \\textcolor[rgb]{1,1,1}{\\textbf{#3}} \\\\ #4\n'
-    cmd += '  \\end{tabularx}\n'
-    cmd += '  \\rowcolors{1}{white}{white}\n'
-    cmd += '}\n'
-    return out + [cmd]
-
-
-def listings_settings():
-    out = ['\\usepackage[table]{xcolor}']
-    out += ['\\definecolor{code-background}{HTML}{ECF0F1}']
-    out += ['\\lstset{basicstyle=\\footnotesize\\rmfamily, breaklines=true, backgroundcolor=\\color{code-background}}']
-    return out
-
-
-class moose_table(elements.BlockElement):
+class MooseTable(elements.Table):
     """
     Builds table fitted to the width of the document.
     """
-    name = 'table'
-    def convert(self, tag, content):
-        tr = tag.tr
-        td = tr.find_all('th')
-        frmt = ['l']*len(td)
+    def __init__(self, **kwargs):
+        kwargs.setdefault('command', 'tabularx')
+        super(MooseTable, self).__init__(**kwargs)
+    def convert(self, tag):
+        super(MooseTable, self).convert(tag)
+        cols = tag.contents[0]
+        frmt = ['l']*self.numColumns(tag)
         frmt[-1] = 'X'
-        return '\\begin{tabularx}{\linewidth}{%s}%s\\end{tabularx}' % (''.join(frmt), content)
-    def preamble(self):
-        return ['\\usepackage{tabularx}']
+        cols.string = ''.join(frmt)
+        width = self.new()
+        width['data-latex-begin'] = '{\\linewidth'
+        width['data-latex-end'] = '}'
+        cols.insert_before(width)
 
-
-class admonition_div(elements.BlockElement):
+class Admonition(elements.Command):
     """
     Create an admonition in latex, assumes that the \admonition command is defined
     in the latex preamble.
     """
-    name = 'div'
-    attrs = ['class']
+    def __init__(self, **kwargs):
+        super(Admonition, self).__init__(name='div',
+                                         command='admonition',
+                                         attrs={'class':'admonition'})
 
-    def test(self, tag):
-        return super(admonition_div, self).test(tag) and 'admonition' in tag.attrs['class']
-
-    def convert(self, tag, content):
+    def convert(self, tag):
+        super(Admonition, self).convert(tag)
         atype = tag.attrs['class'][tag.attrs['class'].index('admonition')+1]
-        title = self.content(tag.contents[1])
-        #Message is optional
-        if len(tag.contents) < 4:
-            msg = ''
+        title = tag.find(class_='admonition-title')
+        if title:
+            title.replace_with(self.curly(string=title.string))
         else:
-            msg = self.content(tag.contents[3])
-        return '\\admonition[%s-title][%s]{%s}{%s}' % (atype, atype, title, msg)
+            tag.insert(0, self.curly())
+        tag.p.replace_with(self.curly(string=tag.p.string))
 
-    def preamble(self):
-        return admonition_preamble()
+        tag.insert(0, self.square(string='{}-title'.format(atype)))
+        tag.insert(1, self.square(string=atype))
+        tag['data-latex-close'] = '\n'
 
-
-class moose_hide_hr(elements.hr):
-    """
-    Hides horizontal hr tags in latex.
-    """
-    def convert(self, tag, content):
-        return ''
-
-
-class moose_inline_code(elements.InlineElement):
-    """
-    Improved inline code that wraps lines and escapes latex special commands.
-    """
-    name = 'code'
-    def convert(self, tag, content):
-        return '\\textrm{%s}' % escape(content)
-
-
-class moose_pre(elements.pre):
+class MoosePreCode(elements.PreCode):
     """
     Uses listing package rather than verbatim for code.
     """
-    def convert(self, tag, content):
-        lang = get_language(tag.contents[0])
-        return '\\begin{lstlisting}[language=%s]\n%s\\end{lstlisting}' % (lang, content)
-    def preamble(self):
-        return ['\\usepackage{listings}'] + listings_settings()
+    def __init__(self, **kwargs):
+        kwargs.setdefault('command', 'lstlisting')
+        super(MoosePreCode, self).__init__(**kwargs)
+    def convert(self, tag):
+        super(MoosePreCode, self).convert(tag)
+        lang = get_language(tag)
+        if lang:
+            sq = self.square()
+            sq.append(self.new(string='language='))
+            sq.append(self.new(string=lang))
+            sq.attrs['data-latex-end-suffix'] = '\n'
+            tag.attrs['data-latex-begin-suffix'] = ''
+            tag.wrap(self.new())
+            tag.insert(0, sq)
 
-
-class moose_pre_code(elements.pre_code):
+class MooseCodeDiv(MoosePreCode):
     """
-    Handles the code environments that have the filename as a heading.
+    Create a listing block for code blocks generated by MooseMarkdownExtension.
     """
-    def convert(self, tag, content):
-        lang = get_language(tag.contents[0])
-        return '\\begin{lstlisting}[language=%s]\n%s\\end{lstlisting}' % (lang, self.content(tag.contents[0]))
-    def preamble(self):
-        return ['\\usepackage{listings}'] + listings_settings()
+    def __init__(self, **kwargs):
+        kwargs.setdefault('name', 'div')
+        kwargs.setdefault('attrs', {'class':'moosedocs-code-div'})
+        super(MooseCodeDiv, self).__init__(**kwargs)
 
+    def convert(self, tag):
+        caption = tag.contents[0].extract()
+        pre = tag.pre
+        super(MooseCodeDiv, self).convert(pre)
 
-class moose_code_div(elements.BlockElement):
+        sq = pre.find('latex', attrs={'data-latex-end-suffix':'\n'})
+        if not sq:
+            sq = self.square()
+            pre.insert(0, sq)
+            sq.attrs['data-latex-end-suffix'] = '\n'
+            pre.attrs['data-latex-begin-suffix'] = ''
+        else:
+            sq.append(self.new(string=', '))
+
+        sq.append(self.new(string='caption='))
+        sq.append(caption)
+
+class MooseFigure(elements.Figure):
     """
-    Create a listing block for code blocks generated by MooseMarkdown.
+    Convert moose figure block.
     """
-    name = 'div'
-    attrs = ['class']
-
-    def __init__(self):
-        super(moose_code_div, self).__init__()
-
+    def __init__(self, **kwargs):
+        kwargs.setdefault('name', 'div')
+        kwargs.setdefault('end_prefix', '')
+        super(MooseFigure, self).__init__(**kwargs)
     def test(self, tag):
-        return super(moose_code_div, self).test(tag) and 'moosedocs-code-div' in tag.attrs['class']
+        return super(MooseFigure, self).test(tag) and tag.find(class_='card') \
+                                                  and tag.find(class_='card-image') \
+                                                  and tag.find('img')
 
-    def convert(self, tag, content):
-
-        # Locate the code
-        for code in tag.descendants:
-            if code.name == 'code':
-                break
-
-        # Determine the language and include the listings conversion from html to listing names
-        lang = get_language(code)
-        return '\\begin{lstlisting}[caption=%s, language=%s]\n%s\\end{lstlisting}' % (tag.contents[0], lang, self.content(code))
-
-    def preamble(self):
-        out = '\\usepackage{caption}\n'
-        out += '\\DeclareCaptionFormat{listing}{#1#2#3}\n'
-        out += '\\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={sf}}'
-        return ['\\usepackage{listings}', out]
-
-
-class moose_internal_links(elements.a):
+class MooseImage(elements.Image):
     """
-    Create section-based hyper links
+    Handles images and figures created with MOOSE markdown.
     """
-    def test(self, tag):
-        return super(moose_internal_links, self).test(tag) and tag['href'].startswith('#')
-
-    def convert(self, tag, content):
-        return '\\hyperref[sec:%s]{%s}' % (tag['href'][1:], content)
-
-    def preamble(self):
-        return ['\\usepackage{hyperref}']
-
-
-class moose_markdown_links(elements.a):
-    """
-    <a> tag that links to website if markdown file is provided.
-    """
-    def __init__(self, site=None):
-        self._site = site
-        self._path = None # when testing the path is determined and used in
-
-    def test(self, tag):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('begin_suffix', '[width=\\linewidth]')
+        super(MooseImage, self).__init__(**kwargs)
+    def convert(self, tag):
         """
-        Test if the <a> tag contains a .md file include handling # for page section links.
+        Builds up the content of the latex figure block.
         """
-        if super(moose_markdown_links, self).test(tag):
-            if tag['href'].endswith('.md'):
-                self._path = tag['href'][:-3].strip('/')
-                return True
-            elif '.md#' in tag['href']:
-                self._path = tag['href'].replace('.md', '/')
-                return True
-
-        self._path = None
-        return False
-
-    def convert(self, tag, content):
-        url = '{}/{}'.format(self._site, self._path)
-        return '\\href{%s}{%s}' % (url, content)
-
-    def preamble(self):
-        return ['\\usepackage{hyperref}']
-
-
-class moose_img(elements.img):
-    """
-    Handles images with MOOSE markdown by doing some extra work to make sure path is correct.
-    """
-
-    def convert(self, tag, content):
-
-        path = tag.attrs['src']
+        super(MooseImage, self).convert(tag)
+        path = tag['src']
         if not os.path.exists(path):
-            lpath = path.strip('/')
-            if os.path.exists(lpath):
-                path = lpath
+            root_path = os.path.join(MooseDocs.ROOT_DIR, path)
+            if os.path.exists(root_path):
+                tag['src'] = root_path
 
-        if not os.path.exists(path):
-            log.error('Image file does not exist: {}'.format(path))
-
-        path = os.path.abspath(path)
-        width = tag.attrs.get('width', '\linewidth')
-        return "\\begin{center}\n\\includegraphics[width=%s]{%s}\n\\end{center}" % (width, path)
-
-    def preamble(self):
-        return ['\\usepackage{graphicx}']
-
-class moose_bib(elements.ol):
-    """
-    Convert html bibliography (from MooseBibtex) to the correct latex entry.
-    """
-    attrs = ['data-moose-bibfiles']
-    def convert(self, tag, content):
-        bibfiles = eval(tag.attrs['data-moose-bibfiles'])
-        return '\\bibliographystyle{unsrtnat}\n\\bibliography{%s}' % ','.join(bibfiles)
-    def preamble(self):
-        return ['\\usepackage{natbib}']
-
-class moose_bib_span(elements.span):
+class MooseCite(elements.Element):
     """
     Convert the cite command from MooseBibtex to the proper latex cite command.
     """
-    attrs = ['data-moose-cite']
-    def convert(self, tag, content):
-        return tag.attrs['data-moose-cite']
-
-class moose_slider(elements.BlockElement):
-    """
-    Produces error for unsupported syntax for PDF creation.
-    """
-    name = 'div'
-    attrs = ['class']
-    def test(self, tag):
-        return super(moose_slider, self).test(tag) and 'slider' in tag.attrs['class']
-
-    def convert(self, tag, content):
-        log.warning("!slideshow markdown is not currently supported for latex/pdf output.")
-        return '\\admonition[error-title][error]{ERROR: Un-supported Markdown!}{MOOSE Slider is not currently supported for pdf output.}'
-    def preamble(self):
-        return admonition_preamble()
-
-class moose_buildstatus(elements.BlockElement):
-    """
-    Produces error for unsupported syntax for PDF creation.
-    """
-    name = 'div'
-    attrs = ['class']
-    def test(self, tag):
-        return super(moose_buildstatus, self).test(tag) and 'moose-buildstatus' in tag.attrs['class']
-
-    def convert(self, tag, content):
-        log.warning("!buildstatus markdown is not currently supported for latex/pdf output.")
-        return '\\admonition[error-title][error]{ERROR: Un-supported Markdown!}{MOOSE build status (!buildstatus) is not currently supported for pdf output.}'
-    def preamble(self):
-        return admonition_preamble()
-
-
-class moose_diagram(elements.BlockElement):
-    """
-    Produce and error for unsupported syntax for diagrams.
-
-    @TODO: graphviz needs to support png output, the one in the MOOSE package does not.
-    """
-    name = 'img'
-    attrs = ['class']
-    def test(self, tag):
-        return super(moose_diagram, self).test(tag) and 'moose-diagram' in tag.attrs['class']
-
-    def convert(self, tag, content):
-        log.warning("Dot diagram markdown syntax is not currently supported for latex/pdf output.")
-        return '\\admonition[error-title][error]{ERROR: Un-supported Markdown!}{Dot diagram markdown syntax is not currently supported for latex/pdf output.}'
-    def preamble(self):
-        return admonition_preamble()
+    def __init__(self, **kwargs):
+        kwargs.setdefault('name', 'span')
+        kwargs.setdefault('attrs', {'data-moose-cite': ''})
+        super(MooseCite, self).__init__(**kwargs)
+    def convert(self, tag):
+        tag['data-latex-content'] = tag['data-moose-cite']
+        super(MooseCite, self).convert(tag)

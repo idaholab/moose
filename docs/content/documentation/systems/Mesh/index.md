@@ -12,7 +12,7 @@ Mesh settings are applied with the `[Mesh]` of the input files, for example the 
 a file from a mesh is shown below. For additional information on the other types of Mesh objects refer to the
 individual object pages listed below.
 
-!input test/tests/auxkernels/solution_aux/build.i block=Mesh label=None
+!listing test/tests/auxkernels/solution_aux/build.i block=Mesh label=None
 
 !subobjects /Mesh title=None
 
@@ -33,11 +33,11 @@ Any parameter that takes entity IDs in the input file will accept either numbers
 assigned to IDs on-the-fly in existing meshes to ease input file maintenance (see example). On-the-fly names will
 also be written to Exodus/XDA/XDR files. An illustration for mesh in exodus file format.
 
-!input test/tests/mesh/named_entities/name_on_the_fly.i block=Mesh label=False
+!listing test/tests/mesh/named_entities/name_on_the_fly.i block=Mesh label=False
 
 ## Replicated and Distributed Mesh
 
-The core of the mesh capabilities are derived from [libMesh](http://libmesh.github.io), which has two underlying
+The core of the mesh capabilities are derived from [libMesh], which has two underlying
 parallel mesh formats: "replicated" and "distributed".
 
 The replicated mesh format is the default format for MOOSE and is the most appropriate format to utilize for nearly
@@ -59,10 +59,10 @@ Calculations can take place in either the initial mesh configuration or, when re
 configuration. To enable displacements, provide a vector of displacement variable names for each spatial dimension in
 the 'displacements' parameters within the Mesh block.
 
-!input modules/tensor_mechanics/tests/truss/truss_2d.i block=Mesh label=False
+!listing modules/tensor_mechanics/tests/truss/truss_2d.i block=Mesh label=False
 
 Once enabled, the any object that should operate on the displaced configuration should set the "use_displaced_mesh" to
 true. For example, the following snippet enables the computation of a [Postprocessor](/Postprocessors/index.md)
 with and without the displaced configuration.
 
-!input test/tests/postprocessors/displaced_mesh/elemental.i block=Postprocessors label=False
+!listing test/tests/postprocessors/displaced_mesh/elemental.i block=Postprocessors label=False

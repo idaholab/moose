@@ -1,6 +1,6 @@
 # Setup Atom Editor for MOOSE
 
-!image docs/media/atom_screenshot.png width=300px padding-left=20px float=right caption=Screenshot of Atom in action
+!media docs/media/atom_screenshot.png width=300px padding-left=20px float=right caption=Screenshot of Atom in action
 
 [Atom](http://atom.io) is a text editor developed by GitHub with a flexible plugin structure. Several plugins are available to customize Atom for MOOSE development, some specifically developed for MOOSE.
 
@@ -13,7 +13,7 @@ Installation packages can be downloaded for Mac, Linux, and Windows operating sy
 
 ## Important commands
 
-!image docs/media/atom_fuzzyfinder.png width=300px padding-left=20px float=right caption=Opening new files with the fuzzy search (Cmd-T)
+!media docs/media/atom_fuzzyfinder.png width=300px padding-left=20px float=right caption=Opening new files with the fuzzy search (Cmd-T)
 
 * **Cmd-Shift-P** opens the command palette. Every available Atom command can be accessed by typing a few letters here. The dropdown list shows the keyboard shortcuts.
 * **Cmd-T** opens a file anywhere in the current project tree (i.e. below the directory in which you issued the `atom .` command. No need to know the precise path or even the precise spelling of the filename!
@@ -25,7 +25,7 @@ Tip: To install a plugin, use the "apm" command on your terminal:
 apm install switch-header-source
 ```
 
-!image docs/media/atom_autocomplete.gif width=300px padding-left=20px float=right caption=Autocompletion for MOOSE input files
+!media docs/media/atom_autocomplete.gif width=300px padding-left=20px float=right caption=Autocompletion for MOOSE input files
 
 The following plugins should be installed to effectively develop MOOSE based codes and edit MOOSE input files using Atom
 

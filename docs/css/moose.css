@@ -1,9 +1,9 @@
 html {
-    font-family: GillSans, Calibri, Trebuchet, sans-serif;
-    line-height: 1.75rem;
+    line-height: 2rem;
     color: rgba(0,0,0,1.0);
-    font-size: large;
+    font-size: 20px;
     text-align: justify;
+    font-weight: 300;
 }
 
 /* make inline code snippets have a non-white background */
@@ -13,6 +13,14 @@ code {
 
 html, body {
   height: 100%;
+}
+
+.table-of-contents *,
+.moose-bibliography *{
+  text-align: left;
+}
+.nav ul:not(.browser-default) li{
+  list-style-type: none;
 }
 
 .page-wrap {
@@ -28,6 +36,10 @@ html, body {
 
 .page-footer, .page-wrap:after {
   height: 142px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-align: left;
 }
 
 h1 {
@@ -58,6 +70,76 @@ ul {
      margin-left:1.5rem;
 }
 
+
+.moose-listing-div p.moose-float-caption
+{
+  border-bottom-style: solid;
+  border-width: 3px;
+  margin-bottom: 0;
+}
+
+.moose-table-div p.moose-float-caption
+{
+  border-bottom-style: solid;
+  border-width: 3px;
+  margin-bottom: 0;
+}
+
+.moose-table-div tr:hover
+{
+    background: beige;
+}
+
+.moose-table-header-tr
+{
+  border-bottom-style: solid;
+  border-width: 1px;
+}
+
+.moose-table-div table
+{
+  font-size: smaller;
+}
+
+.moose-table-div td, th{
+  padding-top: 5px;
+  padding-bottom: 5px;
+  line-height: 1.5;
+}
+
+.moose-listing-div pre
+{
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.moose-float-div p.moose-float-caption{
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.moose-float-div span.moose-float-caption-heading
+{
+  font-weight: 600;
+}
+
+.moose-figure-div p.moose-float-caption{
+  margin-bottom: 30px;
+}
+
+.moose-figure-caption-text,
+.moose-table-caption-text,
+.moose-listing-caption-text
+{
+  font-weight: 300;
+}
+
+.moose-listing-link{
+  text-align: right;
+  data-position: bottom;
+}
+
 .moose-site-generated{
     text-align: left;
     float: left;
@@ -65,7 +147,6 @@ ul {
 
 .moose-edit-markdown{
     text-align: right;
-    float: right;
 }
 
 .moose-copy-button{
@@ -84,11 +165,6 @@ ul {
   opacity:1;
 }
 
-moose-caption {
-    padding: 5px;
-    margin: 0px;
-}
-
 .toc-wrapper {
     width:220px;
 }
@@ -103,11 +179,14 @@ moose-caption {
 
 .moose-code-links {
     text-transform: none;
+    text-overflow: ellipsis;
 }
 
-a.moose-bad-link{
+a.moose-bad-link,
+a.moose-unknown-reference{
     color:red;
 }
+
 
 li{
     padding-left:15px;
@@ -458,21 +537,6 @@ footer.page-footer {
     border: 0px solid transparent;
 }
 
-
-/* Slide style */
-.reveal h1 {
-    font-size: 2em;
-}
-
-.reveal h2 {
-    font-size: 1.5em;
-}
-
-.reveal .slides > section {
-  text-align: left;
-}
-
-
 /* MOOSE Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;
@@ -535,4 +599,51 @@ footer.page-footer {
 
 #moose-markdown-content ul.collapsible li {
   list-style-type: none;
+}
+
+.reveal .slides{
+  position: relative;
+  text-align: left;
+}
+
+.reveal .slides not(.overview){
+  overflow: scroll;
+}
+
+.reveal h1 {
+    font-size:3rem;
+    font-weight:600;
+}
+
+.reveal h2 {
+    font-size:2.5rem;
+    font-weight:300;
+}
+
+.reveal h3 {
+    font-size:2.0rem;
+    font-weight:300;
+}
+
+.reveal h4 {
+    font-size:1.5rem;
+    font-weight:300;
+}
+
+.reveal p, .reveal a, .reveal li{
+    font-size:1.5rem;
+}
+
+.reveal pre{
+  font-size: 1.0rem;
+  line-height: normal;
+}
+
+.reveal ul:not(.browser-default) li{
+  list-style-type: disc;
+}
+
+.reveal section img{
+  border: none;
+  box-shadow: none;
 }

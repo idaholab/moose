@@ -17,9 +17,9 @@ Then navigate to the location of the test:
 cd tests/mesh/tiled_mesh
 ```
 
-!image docs/media/mesh/tiled_mesh_output.png float=right width=25% margin-left=2% caption=Fig. 2: Tiled cube created from the cube input.
+!media docs/media/mesh/tiled_mesh_output.png float=right width=25% margin-left=2% caption=Fig. 2: Tiled cube created from the cube input.
 
-!image docs/media/mesh/tiled_mesh_input.png float=right width=25% margin-left=3% caption=Fig. 1: Cube utilized as input to `TiledMesh` object.
+!media docs/media/mesh/tiled_mesh_input.png float=right width=25% margin-left=3% caption=Fig. 1: Cube utilized as input to `TiledMesh` object.
 
 The example utilizes a cube (cube.e) mesh as input as shown in Figure 1, which is a regular cube on the domain from
 0 to 10 in the x, y, and z-directions.
@@ -33,7 +33,7 @@ complete simulation.
 ~/projects/moose/test/moose_test-opt -i tiled_mesh_test.i --mesh-only
 ```
 
-!text test/tests/mesh/tiled_mesh/tiled_mesh_test.i
+!listing test/tests/mesh/tiled_mesh/tiled_mesh_test.i
 
 
 

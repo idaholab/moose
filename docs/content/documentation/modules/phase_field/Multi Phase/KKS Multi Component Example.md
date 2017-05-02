@@ -1,6 +1,6 @@
 # Kim-Kim-Suzuki Example for three or more components
 
-!text modules/phase_field/examples/kim-kim-suzuki/kks_example_ternary.i max-height=300px strip-extra-newlines=True overflow-y=scroll
+!listing modules/phase_field/examples/kim-kim-suzuki/kks_example_ternary.i
 
 When additional chemical components are added to the KKS model, a Cahn-Hilliard
 equation must be added for each additional component. (For $n$ components, $n-1$

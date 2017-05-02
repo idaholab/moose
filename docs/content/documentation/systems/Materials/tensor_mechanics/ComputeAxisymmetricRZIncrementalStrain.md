@@ -3,7 +3,7 @@
 
 
 ## Description
-{!docs/content/documentation/modules/tensor_mechanics/common/supplementalAxisymmetricRZStrain.md!}
+!include docs/content/documentation/modules/tensor_mechanics/common/supplementalAxisymmetricRZStrain.md
 
 Only minimal changes are required to adapt a plane strain problem to an axisymmetric problem; thus,
 `ComputeAxisymmetricRZIncrementalStrain` inherits from `Compute2DIncrementalStrain`.  The finite strain axisymmetric code overwrites the two methods used the calculation of the deformation gradient components:  the virtual function `computeDeformGradZZ` and its old deformation gradient equivalent `computeDeformGradZZOld`.

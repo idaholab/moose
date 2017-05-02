@@ -1,6 +1,6 @@
 # Virtual Machine
 
-{!docs/content/getting_started/minimum_requirements.md!}
+!include docs/content/getting_started/minimum_requirements.md
 
 ---
 ## Pre-Reqs
@@ -9,7 +9,7 @@
 
 ## Download the Virtual Machine
 
-* Download !MOOSEPACKAGE arch=virtual return=link!
+* Download !moosepackage arch=virtual return=link!
 * When the download is complete, extract the contents anywhere you would like.
 * Double-clicking on this item should launch the VM. If you see a 'vmwarevm' extension on the item, you will need to go into this directory instead and double click on 'moose_3-29-2016.vmx' to launch the VM.
 
@@ -24,6 +24,6 @@
 !!! Info
     This image does not have any server daemons installed (SSH, Apache etc).
 
-{!docs/content/getting_started/installation/clone_moose.md!}
-{!docs/content/getting_started/installation/build_libmesh.md!}
-{!docs/content/getting_started/installation/conclusion.md!}
+!include docs/content/getting_started/installation/clone_moose.md
+!include docs/content/getting_started/installation/build_libmesh.md
+!include docs/content/getting_started/installation/conclusion.md

@@ -1,3 +1,19 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
+import mooseutils
 import elements
 
 class ElementStorage(object):
@@ -36,7 +52,8 @@ class ElementStorage(object):
         """
 
         if not isinstance(obj, self._type):
-            raise Exception('ERROR: Incorrect object provide, expected {} but recieved {}'.format(self._type, type(obj)))
+            msg = 'Incorrect object provide, expected %s but received %s'
+            raise mooseutils.MooseException(msg, self._type, obj)
 
         index = None
         if location == '_end':

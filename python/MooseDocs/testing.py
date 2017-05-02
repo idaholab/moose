@@ -1,17 +1,34 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
 import os
 import inspect
 import unittest
 import difflib
-import markdown
+import bs4
 import MooseDocs
+from MooseDocs.html2latex import Translator, BasicExtension, MooseExtension
 
 def text_diff(text, gold):
     """
     Helper for creating nicely formatted text diff message.
     """
     result = list(difflib.ndiff(gold, text))
-    n =  len(max(result, key=len))
-    msg = "\nThe supplied text differs from the gold as follows:\n{0}\n{1}\n{0}".format('~'*n, '\n'.join(result).encode('utf-8'))
+    n = len(max(result, key=len))
+    msg = "\nThe supplied text differs from the gold as follows:\n{0}\n{1}\n{0}" \
+         .format('~'*n, '\n'.join(result).encode('utf-8'))
     return msg
 
 class MarkdownTestCase(unittest.TestCase):
@@ -19,41 +36,43 @@ class MarkdownTestCase(unittest.TestCase):
     Provides functions for converting markdown to html and asserting conversion against
     gold html files.
     """
-    parser = None
-    working_dir = os.getcwd()
-
+    WORKING_DIR = os.getcwd()
+    EXTENSIONS = [] # If provided only these extensions will be loaded
+    CONFIG = 'website.yml'
 
     @classmethod
     def setUpClass(cls):
         """
-        Create the markdown parser using the 'moosedocs.yml' configuration file.
+        Create the markdown parser using the configuration file.
         """
 
         # Define the local directory
         cls._path = os.path.abspath(os.path.dirname(inspect.getfile(cls)))
 
         # Create the markdown object
-        cwd = os.getcwd()
         os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
 
-        config = MooseDocs.load_config('moosedocs.yml')
+        # Read the YAML configurations
+        config = MooseDocs.load_config(cls.CONFIG)
 
-        extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
-        cls.updateExtensionConfigs(extension_configs)
-        cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
-        os.chdir(cwd)
+        # Update extension list
+        if cls.EXTENSIONS:
+            for key in config:
+                if key not in cls.EXTENSIONS:
+                    config.pop(key)
+
+        cls.updateExtensions(config)
+        cls.parser = MooseDocs.MooseMarkdown(extensions=config.keys(), extension_configs=config)
+        os.chdir(cls.WORKING_DIR)
 
     @classmethod
-    def updateExtensionConfigs(cls, extension_configs):
+    def updateExtensions(cls, configs):
         """
         Method to change the arguments that come from the configuration file for
         specific tests.  This way one can test optional arguments without permanently
-        changing moosedocs.yml
+        changing the configuration file.
         """
-        if 'testBibtexMacro' in dir(cls):
-            if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
-                extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
-                  ['docs/bib/macro_test_abbrev.bib']
+        pass
 
     def setUp(self):
         """
@@ -65,30 +84,44 @@ class MarkdownTestCase(unittest.TestCase):
         """
         Restore the working directory.
         """
-        os.chdir(self.working_dir)
+        os.chdir(self.WORKING_DIR)
 
     def readGold(self, name):
         """
         Read gold file in current directory.
         """
-        gold_name = os.path.join(os.path.dirname(name), 'gold', os.path.basename(name))
-        self.assertTrue(os.path.exists(gold_name), "Failed to locate gold file: {}".format(gold_name))
+        gold_name = os.path.join(self.WORKING_DIR, 'gold', os.path.basename(name))
+        self.assertTrue(os.path.exists(gold_name),
+                        "Failed to locate gold file: {}".format(gold_name))
         with open(gold_name) as fid:
-            gold = fid.read().encode('utf-8').splitlines()
-        return gold
+            gold = fid.read().encode('utf-8')
+            gold = gold.replace(r'{{CWD}}', os.getcwd())
+            gold = gold.replace(r'{{ROOT_DIR}}', MooseDocs.ROOT_DIR)
 
-    def convert(self, md):
+        return gold.splitlines()
+
+    def convert(self, md_text):
         """
         Convenience function for converting markdown to html.
         """
-        return self.parser.convert(md)
+        return self.parser.convert(md_text)
+
+    def assertMarkdown(self, md_text, gold):
+        """
+        Convert the supplied markdown and compare the supplied gold.
+        """
+        html = self.parser.convert(md_text)
+        print ('\n{:>15}: {}'*3).format('MARKDOWN', repr(md_text), 'HTML', repr(html),
+                                        'HTML (GOLD)', repr(gold))
+        self.assertEqual(html, gold, text_diff(html.splitlines(), gold.splitlines()))
 
     def assertTextFile(self, name):
         """
         Assert method for comparing converted html (text) against the text in gold file.
 
         Inputs:
-            name[str]: Name of html file to open, there should be a corresponding file in the gold directory.
+            name[str]: Name of html file to open, there should be a corresponding file in the gold
+                       directory.
         """
         # Read text file
         self.assertTrue(os.path.exists(name), "Failed to locate test output file: {}".format(name))
@@ -99,17 +132,17 @@ class MarkdownTestCase(unittest.TestCase):
         gold = self.readGold(name)
         self.assertEqual(text, gold, text_diff(text, gold))
 
-    def assertConvert(self, name, md):
+    def assertConvert(self, name, md_text):
         """
         Assert that markdown is converted to html, compared against gold file.
 
         Inputs:
             name[str]: The name of the html file to create.
-            md[str]: The markdown text to convert and create.
+            md_texg[str]: The markdown text to convert and create.
         """
         name = os.path.join(self._path, name)
         with open(name, 'w') as fid:
-            fid.write(self.parser.convert(md))
+            fid.write(self.parser.convert(md_text))
         self.assertTextFile(name)
 
     def assertConvertFile(self, name, md_name):
@@ -123,7 +156,8 @@ class MarkdownTestCase(unittest.TestCase):
 
         # Read the markdown file
         md_name = os.path.join(self._path, md_name)
-        self.assertTrue(os.path.exists(md_name), "Failed to locate markdown file: {}".format(md_name))
+        self.assertTrue(os.path.exists(md_name),
+                        "Failed to locate markdown file: {}".format(md_name))
         with open(md_name, 'r') as fid:
             md = fid.read()
 
@@ -135,41 +169,37 @@ class MarkdownTestCase(unittest.TestCase):
         # Compare against gold
         self.assertTextFile(name)
 
-class TestLatexBase(unittest.TestCase):
+class TestLatexBase(MarkdownTestCase):
     """
     Test that basic html to latex conversion working.
     """
-    working_dir = os.getcwd()
-    defaults = vars(MooseDocs.command_line_options(['latex', 'fake.md']))
+    EXTENSIONS = [BasicExtension, MooseExtension]
+    CONFIG = dict()
 
-    def setUp(self):
-        """
-        Runs prior to each test.
-        """
-        os.chdir(os.path.join(MooseDocs.ROOT_DIR, 'docs'))
+    @classmethod
+    def setUpClass(cls):
+        cls._translator = Translator(extensions=[ext(**cls.CONFIG) for ext in cls.EXTENSIONS])
 
-    def tearDown(self):
+    def convert(self, html):
         """
-        Runs after each test.
+        Convert the html to latex.
         """
-        os.chdir(self.working_dir)
+        return self._translator.convert(html)
 
-    def assertLaTeX(self, md, gold, preamble='', **kwargs):
+    def assertLaTeX(self, html, gold):
         """
-        Assert that the supplied markdown can be converted to latex.
-
-        This mimics latex.py without creating files.
-
-        Inputs:
-            md[str]: The markdown to convert.
-            gold[str]: The expected latex.
+        Assert markdown to latex conversion.
         """
-        kwargs.update(self.defaults)
-        config_file = os.path.join(MooseDocs.ROOT_DIR, 'docs', kwargs['config_file'])
-        html, settings = MooseDocs.html2latex.generate_html(md, config_file)
-        for key, value in kwargs.iteritems():
-            if not value and key in settings:
-                kwargs[key] = settings[key]
-        tex, h2l = MooseDocs.html2latex.generate_latex(html, **kwargs)
-        self.assertEqual(tex, gold)
-        self.assertEqual(h2l.preamble(), preamble)
+        tex = self.convert(html)
+        print ('\n{:>15}: {}'*3).format('HTML', repr(html), 'TEX', repr(tex), 'TEX (GOLD)',
+                                        repr(gold))
+        self.assertEqual(tex, gold, text_diff(tex.splitlines(), gold.splitlines()))
+
+    @staticmethod
+    def soup(html_file):
+        """
+        Assert markdown to latex conversion from an html file.
+        """
+        with open(html_file, 'r') as fid:
+            html = fid.read()
+        return bs4.BeautifulSoup(html, 'html.parser')

@@ -1,6 +1,6 @@
 # OpenSUSE
 
-{!docs/content/getting_started/minimum_requirements.md!}
+!include docs/content/getting_started/minimum_requirements.md
 
 ---
 ## Pre-Reqs
@@ -20,9 +20,9 @@ git
 
 * Download one our redistributables according to your version of OpenSUSE
 
-    * OpenSuSE Leap: !MOOSEPACKAGE arch=opensuseleap return=link!
+    * OpenSuSE Leap: !moosepackage arch=opensuseleap return=link!
 
-{!docs/content/getting_started/installation/install_redistributable_rpm.md!}
-{!docs/content/getting_started/installation/clone_moose.md!}
-{!docs/content/getting_started/installation/build_libmesh.md!}
-{!docs/content/getting_started/installation/conclusion.md!}
+!include docs/content/getting_started/installation/install_redistributable_rpm.md
+!include docs/content/getting_started/installation/clone_moose.md
+!include docs/content/getting_started/installation/build_libmesh.md
+!include docs/content/getting_started/installation/conclusion.md

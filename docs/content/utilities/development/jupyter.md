@@ -36,7 +36,7 @@ A browser window sould open with a list of notebooks (`*.ipynb` files) and a few
 From the _New_ dropdown in the top right select _Python 2_ under _Notebooks_. A new browser tab
 with an empty notebook should open.
 
-!image docs/media/jupyter_new.png width=100%
+!media docs/media/jupyter_new.png width=100%
 
 Start by importing [sympy](http://www.sympy.org/en/index.html) in `In [1]:` and enabling LaTeX rendering for equations.
 
@@ -69,7 +69,7 @@ deriuvatives of the expression `f` with respect to `c` and `eta`
 
 This should yield
 
-!image docs/media/jupyter_example.png width=100%
+!media docs/media/jupyter_example.png width=100%
 
 ## Enabling and disabling the environment
 

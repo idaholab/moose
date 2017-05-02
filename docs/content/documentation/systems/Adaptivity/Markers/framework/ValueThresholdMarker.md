@@ -22,7 +22,7 @@ region is used to define a region of elements that are marked with
 adjacent to elements marked for refinement.
 
 ## Example Input Syntax
-!input test/tests/markers/value_threshold_marker/value_threshold_marker_test.i block=Adaptivity
+!listing test/tests/markers/value_threshold_marker/value_threshold_marker_test.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/ValueThresholdMarker
 

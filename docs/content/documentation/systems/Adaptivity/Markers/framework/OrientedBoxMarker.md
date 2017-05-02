@@ -13,7 +13,7 @@ The refinement flags for elements inside and/or outside of the box are
 then defined.
 
 ## Example Input Syntax
-!input test/tests/markers/oriented_box_marker/obm.i block=Adaptivity
+!listing test/tests/markers/oriented_box_marker/obm.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/OrientedBoxMarker
 

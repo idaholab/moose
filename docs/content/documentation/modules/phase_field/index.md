@@ -1,6 +1,6 @@
 # Phase Field Module
 
-!image docs/media/phase_field/pf_module_examples_vertical.png width=200px padding-left=20px float=right caption=Phase field results produced using the MOOSE Phase Field Module
+!media docs/media/phase_field/pf_module_examples_vertical.png width=200px padding-left=20px float=right caption=Phase field results produced using the MOOSE Phase Field Module
 
 * [Systems](phase_field/systems.md)
 
@@ -25,7 +25,7 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 * [Multiphase Models](Multi Phase/WBM.md) - _N_ phases, _N_ phase order parameters
 * Grand Potential Model - solving a Legendre transform of teh phase field equations, where the independent variable is the chemical potential
 
-!image docs/media/phase_field/solutionrasterizer.png width=200px padding-left=20px float=right caption=Atomistic input file generated using the SolutionRasterizer.
+!media docs/media/phase_field/solutionrasterizer.png width=200px padding-left=20px float=right caption=Atomistic input file generated using the SolutionRasterizer.
 
 ## Multiphysics Coupling
 * Mechanics Coupling - Coupling phase field equations with mechanics

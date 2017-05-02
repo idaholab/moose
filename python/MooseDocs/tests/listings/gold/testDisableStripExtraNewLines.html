@@ -1,0 +1,17 @@
+<p>
+<div class="moose-float-div moose-listing-div">
+<pre style="overflow-y:scroll;max-height:350px"><code class="language-cpp">#include "Diffusion.h"
+
+template &lt;&gt;
+InputParameters
+validParams&lt;Diffusion&gt;()
+{
+  InputParameters params = validParams&lt;Kernel&gt;();
+  params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
+                             "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
+  return params;
+}
+</code></pre>
+<div><a class="moose-listing-link tooltipped" data-tooltip="framework/src/kernels/Diffusion.C" href="https://github.com/idaholab/moose/blob/master/framework/src/kernels/Diffusion.C">(Diffusion.C)</a></div>
+</div>
+</p>

@@ -10,7 +10,7 @@ extents of the bounding box, in 3 dimensions regardless of the
 dimensions of the problem.
 
 ## Example Input Syntax
-!input test/tests/markers/box_marker/box_marker_test.i block=Adaptivity
+!listing test/tests/markers/box_marker/box_marker_test.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/BoxMarker
 

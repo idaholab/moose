@@ -12,7 +12,7 @@ mechanics system setup. It performs
 
 ## Example
 
-!text modules/tensor_mechanics/tests/action/two_block_new.i start=Modules/TensorMechanics/Master end=AuxVariables
+!listing modules/tensor_mechanics/tests/action/two_block_new.i start=Modules/TensorMechanics/Master end=AuxVariables
 
 ## Subblocks
 
