@@ -377,7 +377,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(BimodalSuperellipsoidsIC);
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
-  registerDeprecatedObjectName(PolycrystalHex, "HexPolycrystalIC", "07/01/2017 00:00");
+  registerDeprecatedObjectWithReplacement(HexPolycrystalIC, "PolycrystalHex", "07/01/2017 00:00");
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiBoundingBoxIC);
   registerInitialCondition(MultiSmoothCircleIC);
