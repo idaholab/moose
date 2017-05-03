@@ -78,6 +78,8 @@ protected:
 
   std::string prettyCppType(const std::string & cpp_type);
   std::string basicCppType(const std::string & cpp_type);
+  size_t
+  setParams(InputParameters * params, bool search_match, moosecontrib::Json::Value & all_params);
 
   std::string
   buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);

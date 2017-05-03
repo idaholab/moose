@@ -80,27 +80,17 @@ JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bo
   return val;
 }
 
-bool
-JsonSyntaxTree::addParameters(const std::string & parent,
-                              const std::string & path,
-                              bool is_type,
-                              const std::string & action,
-                              bool is_action,
-                              InputParameters * params,
-                              const FileLineInfo & lineinfo)
+size_t
+JsonSyntaxTree::setParams(InputParameters * params,
+                          bool search_match,
+                          moosecontrib::Json::Value & all_params)
 {
-  moosecontrib::Json::Value all_params;
-  if (action == "EmptyAction")
-    return false;
-
   size_t count = 0;
   for (auto & iter : *params)
   {
     // Make sure we want to see this parameter
-    if (params->isPrivate(iter.first) ||
-        (_search != "" && !MooseUtils::wildCardMatch(iter.first, _search) &&
-         !MooseUtils::wildCardMatch(path, _search) && !MooseUtils::wildCardMatch(action, _search) &&
-         !MooseUtils::wildCardMatch(parent, _search)))
+    bool param_match = !_search.empty() && MooseUtils::wildCardMatch(iter.first, _search);
+    if (params->isPrivate(iter.first) || (!_search.empty() && !search_match && !param_match))
       continue;
 
     ++count;
@@ -126,7 +116,27 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     param_json["description"] = doc;
     all_params[iter.first] = param_json;
   }
-  if (_search != "" && count == 0)
+  return count;
+}
+
+bool
+JsonSyntaxTree::addParameters(const std::string & parent,
+                              const std::string & path,
+                              bool is_type,
+                              const std::string & action,
+                              bool is_action,
+                              InputParameters * params,
+                              const FileLineInfo & lineinfo)
+{
+  if (action == "EmptyAction")
+    return false;
+
+  moosecontrib::Json::Value all_params;
+  bool search_match = !_search.empty() && (MooseUtils::wildCardMatch(path, _search) ||
+                                           MooseUtils::wildCardMatch(action, _search) ||
+                                           MooseUtils::wildCardMatch(parent, _search));
+  auto count = setParams(params, search_match, all_params);
+  if (!_search.empty() && count == 0)
     // no parameters that matched the search string
     return false;
 
