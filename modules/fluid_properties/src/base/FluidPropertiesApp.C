@@ -23,6 +23,7 @@
 #include "NaClFluidProperties.h"
 #include "BrineFluidProperties.h"
 #include "SimpleFluidProperties.h"
+#include "TabulatedFluidProperties.h"
 
 #include "SpecificEnthalpyAux.h"
 #include "StagnationPressureAux.h"
@@ -85,6 +86,7 @@ FluidPropertiesApp::registerObjects(Factory & factory)
   registerUserObject(NaClFluidProperties);
   registerUserObject(BrineFluidProperties);
   registerUserObject(SimpleFluidProperties);
+  registerUserObject(TabulatedFluidProperties);
 
   registerAuxKernel(SpecificEnthalpyAux);
   registerAuxKernel(StagnationPressureAux);
