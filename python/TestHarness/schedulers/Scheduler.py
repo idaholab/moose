@@ -171,9 +171,6 @@ class Scheduler(MooseObject):
         # It deadlocks rather easy.  Instead we will use temporary files
         # to hold the output as it is produced
         try:
-            if self.options.dry_run or not tester.shouldExecute():
-                tmp_command = command
-                command = "echo"
 
             f = TemporaryFile()
 
@@ -184,8 +181,6 @@ class Scheduler(MooseObject):
             else:
                 p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid)
 
-            if self.options.dry_run or not tester.shouldExecute():
-                command = tmp_command
         except:
             print "Error in launching a new task"
             raise

@@ -176,6 +176,12 @@ class RunApp(Tester):
         else:
             command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
 
+        #If this test is not to execute an app, or we are in dry-run mode
+        # prepend 'echo' to the command to run instead
+        if specs.isValid('should_execute') or options.dry_run:
+            if not specs['should_execute'] or options.dry_run:
+                return 'echo ' + command
+
         return command
 
     def processResults(self, moose_dir, retcode, options, output):

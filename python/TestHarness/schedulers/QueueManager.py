@@ -311,7 +311,8 @@ class QueueManager(Scheduler):
             # Test has been launched by qsub (we do not want to include this in final results table)
             else:
                 self.finished_jobs.add(tester.specs['test_name'])
-                self.harness.handleTestStatus(tester, output)
+                #self.harness.handleTestStatus(tester, output)
+                self.harness.handleTestResult(tester, output, tester.getStatusMessage())
 
         self.jobs[job_index] = None
         self.slots_in_use = self.slots_in_use - slots
