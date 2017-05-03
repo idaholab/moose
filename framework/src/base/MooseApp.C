@@ -200,6 +200,8 @@ validParams<MooseApp>()
   params.addPrivateParam<char **>("_argv");
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
+  params.addPrivateParam<unsigned int>("_multiapp_level");
+  params.addPrivateParam<unsigned int>("_multiapp_number");
 
   return params;
 }
@@ -234,7 +236,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
-    _multiapp_level(0)
+    _multiapp_level(
+        isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
+    _multiapp_number(
+        isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0)
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {

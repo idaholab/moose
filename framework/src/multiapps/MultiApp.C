@@ -529,6 +529,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
+  app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
+  app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   _apps[i].reset(AppFactory::instance().create(_app_type, full_name, app_params, _my_comm));
   auto & app = _apps[i];
 
@@ -571,7 +573,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 
   // Update the MultiApp level for the app that was just created
-  app->setMultiAppLevel(_app.multiAppLevel() + 1);
   app->setupOptions();
   preRunInputFile();
   app->runInputFile();
