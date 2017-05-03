@@ -56,6 +56,8 @@ public:
    */
   virtual const std::vector<unsigned int> & getGrainToOps() const { return _grain_to_op; }
 
+  const std::vector<FeatureData> & getFeatures() const { return _feature_sets; }
+
   /**
    * Returns all available coloring algorithms as an enumeration type for input files.
    */

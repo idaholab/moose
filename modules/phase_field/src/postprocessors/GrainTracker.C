@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "EBSDReader.h"
+#include "PolycrystalUserObjectBase.h"
 #include "GeneratedMesh.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
@@ -65,6 +66,9 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _remap(getParam<bool>("remap_grains")),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _feature_sets_old(declareRestartableData<std::vector<FeatureData>>("unique_grains")),
+    _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
+                    ? &getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo")
+                    : nullptr),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader")
                                                         : nullptr),
     _ebsd_op_var(_ebsd_reader
@@ -181,6 +185,9 @@ GrainTracker::execute()
   if (_t_step < _tracking_step)
     return;
 
+  if (_poly_ic_uo && _first_time)
+    return;
+
   Moose::perf_log.push("execute()", "GrainTracker");
   FeatureFloodCount::execute();
   Moose::perf_log.pop("execute()", "GrainTracker");
@@ -273,6 +280,27 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
 }
 
 void
+GrainTracker::prepopulateState(const FeatureFloodCount & ffc_object)
+{
+  mooseAssert(_first_time, "This method should only be called on the first invocation");
+
+  _feature_sets.clear();
+
+  /**
+   * The minimum information needed to bootstrap the GrainTracker is as follows:
+   * _feature_sets
+   * _feature_count
+   */
+  const auto & features = _poly_ic_uo->getFeatures();
+  for (auto & feature : features)
+    _feature_sets.emplace_back(feature.duplicate());
+
+  _feature_count = _feature_sets.size();
+  // Make sure that feature count is communicated to all ranks
+  _communicator.broadcast(_feature_count);
+}
+
+void
 GrainTracker::finalize()
 {
   /**
@@ -291,20 +319,25 @@ GrainTracker::finalize()
                              ? _halo_level - 1
                              : 0; // The first level of halos already exists so subtract one
 
-  if (_ebsd_reader && _first_time)
+  if (_poly_ic_uo && _first_time)
+    prepopulateState(*_poly_ic_uo);
+  else
   {
-    expandPointHalos();
+    if (_ebsd_reader && _first_time)
+    {
+      expandPointHalos();
 
-    /**
-     * By expanding the EBSD Grains we've effectively erased one level of halo.
-     * We'll just request one additional layer of halo this time around.
-     */
-    ++num_halo_layers;
+      /**
+       * By expanding the EBSD Grains we've effectively erased one level of halo.
+       * We'll just request one additional layer of halo this time around.
+       */
+      ++num_halo_layers;
+    }
+    expandEdgeHalos(num_halo_layers);
+
+    // Build up the grain map on the root processor
+    communicateAndMerge();
   }
-  expandEdgeHalos(num_halo_layers);
-
-  // Build up the grain map on the root processor
-  communicateAndMerge();
 
   /**
    * Assign or Track Grains

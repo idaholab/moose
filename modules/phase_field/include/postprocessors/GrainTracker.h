@@ -16,6 +16,7 @@
 
 class GrainTracker;
 class EBSDReader;
+class PolycrystalUserObjectBase;
 struct GrainDistance;
 
 template <>
@@ -77,6 +78,16 @@ protected:
                                              Status & status,
                                              unsigned int & new_id) override;
 
+  /**
+   * This method extracts the necessary state from the passed in object necessary to continue
+   * tracking grains. This method is meant to be used with the PolycrystalUserobjectBase class
+   * that sets up initial conditions for Polycrystal simulations. We can use the state of that
+   * object rather than rediscovering everything ourselves.
+   */
+  void prepopulateState(const FeatureFloodCount & ffc_object);
+
+  /**
+   */
   void communicateHaloMap();
 
   /**
@@ -202,6 +213,8 @@ protected:
    * The information is updated each timestep to track grains over time.
    */
   std::vector<FeatureData> & _feature_sets_old;
+
+  const PolycrystalUserObjectBase * _poly_ic_uo;
 
   /// Optional ESBD Reader
   const EBSDReader * _ebsd_reader;
