@@ -291,7 +291,7 @@ GrainTracker::prepopulateState(const FeatureFloodCount & ffc_object)
    * _feature_sets
    * _feature_count
    */
-  const auto & features = _poly_ic_uo->getFeatures();
+  const auto & features = ffc_object.getFeatures();
   for (auto & feature : features)
     _feature_sets.emplace_back(feature.duplicate());
 

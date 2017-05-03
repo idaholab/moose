@@ -19,6 +19,9 @@ validParams<PolycrystalVoronoi>()
   InputParameters params = validParams<PolycrystalUserObjectBase>();
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiAction)");
+  params.addRequiredParam<unsigned int>(
+      "grain_num", "Number of grains being represented by the order parameters");
+
   params.addParam<unsigned int>("rand_seed", 0, "The random seed");
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
@@ -28,6 +31,7 @@ validParams<PolycrystalVoronoi>()
 
 PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
   : PolycrystalUserObjectBase(parameters),
+    _grain_num(getParam<unsigned int>("grain_num")),
     _columnar_3D(getParam<bool>("columnar_3D")),
     _rand_seed(getParam<unsigned int>("rand_seed"))
 {

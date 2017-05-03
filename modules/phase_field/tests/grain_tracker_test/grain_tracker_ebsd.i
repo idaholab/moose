@@ -11,15 +11,30 @@
 []
 
 [UserObjects]
-  [./ebsd]
+  [./ebsd_reader]
     type = EBSDReader
+  [../]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = jp
+    ebsd_reader = ebsd_reader
+    output_adjacency_matrix = true
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.2
+    connecting_threshold = 0.08
+    flood_entity_type = ELEMENTAL
+    compute_halo_maps = true # For displaying HALO fields
+    polycrystal_ic_uo = ebsd
+    execute_on = 'initial timestep_end'
   [../]
 []
 
 [ICs]
   [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = ebsd
     [../]
   [../]
 []
@@ -106,13 +121,13 @@
   [./grain_aux]
     type = EBSDReaderPointDataAux
     variable = ebsd_grains
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     data_name = 'feature_id'
     execute_on = 'initial timestep_end'
   [../]
   [./phi1]
     type = OutputEulerAngles
-    euler_angle_provider = ebsd
+    euler_angle_provider = ebsd_reader
     output_euler_angle = phi1
     grain_tracker = grain_tracker
     variable = phi1
@@ -201,12 +216,6 @@
 
   [./DOFs]
     type = NumDOFs
-  [../]
-
-  [./grain_tracker]
-    type = GrainTracker
-    ebsd_reader = ebsd
-    compute_halo_maps = true # For displaying HALO fields
   [../]
 []
 

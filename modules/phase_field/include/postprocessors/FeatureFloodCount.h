@@ -273,6 +273,9 @@ public:
     ///@}
   };
 
+  /// Return a constant reference to the vector of all discovered features
+  const std::vector<FeatureData> & getFeatures() const { return _feature_sets; }
+
 protected:
   /**
    * This method is used to populate any of the data structures used for storing field data (nodal

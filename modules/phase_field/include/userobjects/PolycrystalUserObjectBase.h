@@ -56,8 +56,6 @@ public:
    */
   virtual const std::vector<unsigned int> & getGrainToOps() const { return _grain_to_op; }
 
-  const std::vector<FeatureData> & getFeatures() const { return _feature_sets; }
-
   /**
    * Returns all available coloring algorithms as an enumeration type for input files.
    */
@@ -115,9 +113,6 @@ protected:
 
   /// The maximum number of order parameters (colors) available to assign to the grain structure
   const unsigned int _op_num;
-
-  /// The number of grains to create or created by derived classes
-  const unsigned int _grain_num;
 
   /// A vector indicating which op is assigned to each grain
   std::vector<unsigned int> _grain_to_op;

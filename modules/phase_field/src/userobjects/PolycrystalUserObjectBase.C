@@ -25,8 +25,6 @@ validParams<PolycrystalUserObjectBase>()
                              "order parameter polycrystal initial conditions.");
   params.addRequiredCoupledVarWithAutoBuild(
       "variable", "var_name_base", "op_num", "Array of coupled variables");
-  params.addRequiredParam<unsigned int>(
-      "grain_num", "Number of grains being represented by the order parameters");
   params.addParam<bool>("output_adjacency_matrix",
                         false,
                         "Output the Grain Adjacency Matrix used in the coloring algorithms. "
@@ -50,15 +48,10 @@ PolycrystalUserObjectBase::PolycrystalUserObjectBase(const InputParameters & par
   : FeatureFloodCount(parameters),
     _dim(_mesh.dimension()),
     _op_num(_vars.size()),
-    _grain_num(getParam<unsigned int>("grain_num")),
-    _grain_to_op(_grain_num, PolycrystalUserObjectBase::INVALID_COLOR),
     _coloring_algorithm(getParam<MooseEnum>("coloring_algorithm")),
     _initialized(false),
     _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix"))
 {
-  if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalVoronoi: Number of order parameters (op_num) can't be larger "
-               "than the number of grains (grain_num)");
 }
 
 void
@@ -188,7 +181,7 @@ PolycrystalUserObjectBase::areFeaturesMergeable(const FeatureData & f1,
 void
 PolycrystalUserObjectBase::buildGrainAdjacencyMatrix()
 {
-  _grain_to_op.resize(_feature_count);
+  _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
 
   if (_is_master)
   {
@@ -228,7 +221,7 @@ PolycrystalUserObjectBase::assignOpsToGrains()
     const std::string & ca_str = _coloring_algorithm;
     Real * am_data = _adjacency_matrix->get_values().data();
     Moose::PetscSupport::colorAdjacencyMatrix(
-        am_data, _grain_num, _vars.size(), _grain_to_op, ca_str.c_str());
+        am_data, _feature_count, _vars.size(), _grain_to_op, ca_str.c_str());
 #else
     mooseError("Selected coloring algorithm requires PETSc");
 #endif
@@ -241,7 +234,7 @@ bool
 PolycrystalUserObjectBase::colorGraph(unsigned int vertex)
 {
   // Base case: All grains are assigned
-  if (vertex == _grain_num)
+  if (vertex == _feature_count)
     return true;
 
   // Consider this grain and try different ops
@@ -270,7 +263,7 @@ bool
 PolycrystalUserObjectBase::isGraphValid(unsigned int vertex, unsigned int color)
 {
   // See if the proposed color is valid based on the current neighbor colors
-  for (unsigned int neighbor = 0; neighbor < _grain_num; ++neighbor)
+  for (unsigned int neighbor = 0; neighbor < _feature_count; ++neighbor)
     if ((*_adjacency_matrix)(vertex, neighbor) && color == _grain_to_op[neighbor])
       return false;
   return true;

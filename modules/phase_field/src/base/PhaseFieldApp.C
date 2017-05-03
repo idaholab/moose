@@ -218,6 +218,7 @@
 #include "MaskedGrainForceAndTorque.h"
 #include "PolycrystalHex.h"
 #include "PolycrystalVoronoi.h"
+#include "PolycrystalEBSD.h"
 #include "RandomEulerAngleProvider.h"
 
 #include "EBSDReader.h"
@@ -488,6 +489,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(MaskedGrainForceAndTorque);
   registerUserObject(PolycrystalHex);
   registerUserObject(PolycrystalVoronoi);
+  registerUserObject(PolycrystalEBSD);
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
