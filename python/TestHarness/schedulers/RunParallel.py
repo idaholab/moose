@@ -22,9 +22,6 @@ class RunParallel(Scheduler):
 
         return params
 
-    ## Return this return code if the process must be killed because of timeout
-    TIMEOUT = -999999
-
     def __init__(self, harness, params):
         Scheduler.__init__(self, harness, params)
 
@@ -89,7 +86,7 @@ class RunParallel(Scheduler):
                 pgid = os.getpgid(p.pid)
                 os.killpg(pgid, SIGTERM)
 
-            self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock())
+            self.harness.testOutputAndFinish(tester, Scheduler.TIMEOUT, output, time, clock())
         else:
             f.close()
 

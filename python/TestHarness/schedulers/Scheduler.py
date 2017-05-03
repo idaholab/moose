@@ -22,6 +22,9 @@ class Scheduler(MooseObject):
 
         return params
 
+    ## Return this return code if the process must be killed because of timeout
+    TIMEOUT = -999999
+
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
 
@@ -81,6 +84,36 @@ class Scheduler(MooseObject):
         # Reporting timer which resets when ever data is printed to the screen.
         self.reported_timer = clock()
 
+    # Allow derived schedulers to skip tests
+    def canLaunch(self, tester, command, checks, test_list):
+        return tester.checkRunnableBase(self.options, checks, test_list)
+
+    ## Schedule job for running
+    def schedule(self, tester, command, checks, test_list=None):
+        should_run = self.canLaunch(tester, self.options, checks, test_list)
+
+        # check for deprecated tuple
+        if type(should_run) == type(()):
+            (should_run, reason) = should_run
+            if not should_run:
+                reason = 'deprected checkRunnableBase #8037'
+                tester.setStatus(reason, tester.bucket_skip)
+        if should_run:
+            command = tester.getCommand(self.options)
+            # This method spawns another process and allows this loop to continue looking for tests
+            # RunParallel will call self.testOutputAndFinish when the test has completed running
+            # This method will block when the maximum allowed parallel processes are running
+            self.run(tester, command)
+        else: # This job is skipped - notify the scheduler
+            status = tester.getStatus()
+            if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
+                if (self.options.report_skipped and status == tester.bucket_skip) \
+                   or status == tester.bucket_skip:
+                    self.harness.handleTestStatus(tester)
+                elif status == tester.bucket_deleted and self.options.extra_info:
+                    self.harness.handleTestStatus(tester)
+            self.jobSkipped(tester.parameters()['test_name'])
+
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
     def run(self, tester, command, recurse=True, slot_check=True):
         return
@@ -94,11 +127,10 @@ class Scheduler(MooseObject):
         if tester.specs['prereq'] != [] and len(set(tester.specs['prereq']) - self.finished_jobs):
             if self.options.ignored_caveats is None:
                 return True
-            else:
-                if self.options.ignored_caveats:
-                    caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
-                    if 'all' not in self.options.ignored_caveats and 'prereq' not in self.options.ignored_caveats:
-                        return True
+            elif self.options.ignored_caveats != 'all':
+                caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
+                if 'prereq' not in caveat_list:
+                    return True
         return False
 
     ## Find an empty slot and launch the job

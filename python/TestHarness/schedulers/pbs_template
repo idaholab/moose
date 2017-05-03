@@ -3,7 +3,7 @@
 #PBS -l select=<MPI_PROCS>
 #PBS -l place=<PLACE>
 #PBS -l walltime=<WALLTIME>
-<PBS_PREREQ>
+<PREREQ>
 <PBS_PROJECT>
 <COMBINE_STREAMS>
 
@@ -11,7 +11,5 @@ JOB_NUM=${PBS_JOBID%\.*}
 
 export MV2_ENABLE_AFFINITY=0
 
-<PRE_SCRIPT>
 cd <WORKING_DIR>
 <COMMAND>
-

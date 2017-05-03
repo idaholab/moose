@@ -233,28 +233,8 @@ class TestHarness:
             elif tester.parameters().isValid('error_code'):
                 tester.setStatus('Parser Error', tester.bucket_skip)
             else:
-                should_run = tester.checkRunnableBase(self.options, self.checks, self.test_list)
-                # check for deprecated tuple
-                if type(should_run) == type(()):
-                    (should_run, reason) = should_run
-                    if not should_run:
-                        reason = 'deprected checkRunnableBase #8037'
-                        tester.setStatus(reason, tester.bucket_skip)
-                if should_run:
-                    command = tester.getCommand(self.options)
-                    # This method spawns another process and allows this loop to continue looking for tests
-                    # RunParallel will call self.testOutputAndFinish when the test has completed running
-                    # This method will block when the maximum allowed parallel processes are running
-                    self.scheduler.run(tester, command)
-                else: # This job is skipped - notify the scheduler
-                    status = tester.getStatus()
-                    if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
-                        if (self.options.report_skipped and status == tester.bucket_skip) \
-                           or status == tester.bucket_skip:
-                            self.handleTestStatus(tester)
-                        elif status == tester.bucket_deleted and self.options.extra_info:
-                            self.handleTestStatus(tester)
-                    self.scheduler.jobSkipped(tester.parameters()['test_name'])
+                command = tester.getCommand(self.options)
+                self.scheduler.schedule(tester, command, self.checks, self.test_list)
 
     def prunePath(self, filename):
         test_dir = os.path.abspath(os.path.dirname(filename))
@@ -454,7 +434,7 @@ class TestHarness:
 
         print printResult(tester, result, timing, start, end, self.options)
 
-        if self.options.verbose or (not did_pass and not self.options.quiet):
+        if self.options.verbose or (not did_pass and not self.options.quiet and not status == tester.bucket_pending):
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n');
 
@@ -546,6 +526,9 @@ class TestHarness:
 
         # Close the queue file
         if self.queue_file:
+            if not self.options.processingQueue:
+                # Write the json data to queue file
+                json.dump(self.queue_data, self.queue_file, indent=2)
             self.queue_file.close()
 
     def cleanQueueFiles(self):
@@ -733,7 +716,7 @@ class TestHarness:
             print 'ERROR: options --pbs %s and --slurm %s can not be used simultaneously' % (opts.pbs, opts.slurm)
             sys.exit(1)
 
-        # normalize pbs/slurm options
+        # normalize queueing options
         if opts.pbs:
             self.queue_file = opts.pbs
         elif opts.slurm:
@@ -741,20 +724,23 @@ class TestHarness:
         else:
             self.queue_file = None
 
-        # Set initial Queue globals
+        # Initialize Queue globals
         self.options.processingQueue = False
 
-        # Initialize PBS options if supplied
+        # Initialize Queue options if supplied
         if self.queue_file:
-            # PBS arguments supplied and file exists
+            # Queue arguments supplied and file exists
             if os.path.exists(self.queue_file):
                 self.queue_file = open(self.queue_file, 'r')
                 try:
                     self.queue_data = json.load(self.queue_file)
                 except ValueError:
-                    print 'PBS file specified not json format:', self.queue_file.name
+                    print 'Queue file specified not json format:', self.queue_file.name
+                    self.queue_file.close()
                     sys.exit(1)
-                opts.processingQueue = True
+
+                # Set the TestHarness to processing mode
+                self.options.processingQueue = True
 
             # PBS arguments supplied and file does not exist
             else:
@@ -767,7 +753,7 @@ class TestHarness:
                             largest_serial_num = int(m.group(1))
                     self.queue_file = "queue_" +  str(largest_serial_num+1).zfill(3)
 
-                # Set the pbs_file handler
+                # Set the queue_file handler
                 self.queue_file = open(self.queue_file, 'w')
                 self.queue_data = {}
 
@@ -779,7 +765,7 @@ class TestHarness:
                     with open(opts.queue_cleanup, 'r') as q_file:
                         self.queue_data = json.load(q_file)
                 except ValueError:
-                    print 'PBS file specified not json format:', opts.queue_cleanup
+                    print 'Queue file specified not json format:', opts.queue_cleanup
                     sys.exit(1)
             else:
                 print 'Specified PBS file not found'
