@@ -1016,7 +1016,8 @@ FeatureFloodCount::flood(const DofObject * dof_object,
   auto entity_id = dof_object->id();
 
   // Has this entity already been marked? - if so move along
-  if (_entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
+  if (current_index != invalid_size_t &&
+      _entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
     return false;
 
   // See if the current entity either starts a new feature or continues an existing feature
@@ -1025,6 +1026,8 @@ FeatureFloodCount::flood(const DofObject * dof_object,
       Status::INACTIVE; // Status is inactive until we find an entity above the starting threshold
   if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, status, new_id))
     return false;
+
+  mooseAssert(current_index != invalid_size_t, "current_index is invalid");
 
   /**
    * If we reach this point (i.e. we haven't returned early from this routine),

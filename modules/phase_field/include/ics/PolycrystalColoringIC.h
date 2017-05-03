@@ -35,6 +35,9 @@ public:
 protected:
   unsigned int _op_index;
   const PolycrystalUserObjectBase & _poly_ic_uo;
+
+private:
+  std::vector<unsigned int> _grains;
 };
 
 #endif // POLYCRYSTALCOLORINGIC_H

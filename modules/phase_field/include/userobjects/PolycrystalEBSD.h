@@ -21,13 +21,17 @@ class PolycrystalEBSD : public PolycrystalUserObjectBase
 public:
   PolycrystalEBSD(const InputParameters & parameters);
 
-  virtual unsigned int getGrainBasedOnPoint(const Point & point) const override;
+  virtual void getGrainsBasedOnPoint(const Point & point,
+                                     std::vector<unsigned int> & grains) const override;
+  virtual Real getVariableValue(unsigned int op_index, const Point & p) const override;
+  virtual Real getVariableValue(unsigned int op_index, const Node & n) const override;
   virtual unsigned int getNumGrains() const override;
 
 protected:
   const EBSDReader & _ebsd_reader;
   const bool _consider_phase;
   const unsigned int _phase;
+  const std::map<dof_id_type, std::vector<Real>> & _node_to_grain_weight_map;
 };
 
 #endif // POLYCRYSTALEBSD_H

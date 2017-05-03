@@ -52,6 +52,7 @@ PolycrystalUserObjectBase::PolycrystalUserObjectBase(const InputParameters & par
     _initialized(false),
     _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix"))
 {
+  mooseAssert(_single_map_mode, "Do not turn off single_map_mode with this class");
 }
 
 void
@@ -105,7 +106,7 @@ PolycrystalUserObjectBase::execute()
 
     // Loop over elements or nodes
     if (_is_elemental)
-      while (flood(current_elem, 0 /* Always work on map 0 */, nullptr /* no active feature */))
+      while (flood(current_elem, invalid_size_t, nullptr))
         ;
     else
     {
@@ -114,7 +115,7 @@ PolycrystalUserObjectBase::execute()
       {
         const Node * current_node = current_elem->get_node(i);
 
-        while (flood(current_node, 0 /* always work on map 0 */, nullptr /* no active feature */))
+        while (flood(current_node, invalid_size_t, nullptr))
           ;
       }
     }
@@ -126,11 +127,14 @@ PolycrystalUserObjectBase::finalize()
 {
   // TODO: Possibly retrieve the halo thickness from the active GrainTracker object?
   constexpr unsigned int halo_thickness = 2;
-  expandPointHalos();
+  // expandPointHalos();
   expandEdgeHalos(halo_thickness - 1);
 
+  // _feature_count is updated on all ranks by communicateAndMerge
   communicateAndMerge();
 
+  // Resize the color assignment vector here. All ranks need a copy of this
+  _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
   if (_is_master)
   {
     /**
@@ -145,15 +149,7 @@ PolycrystalUserObjectBase::finalize()
     assignOpsToGrains();
 
     if (_output_adjacency_matrix)
-    {
-      _console << "Grain Adjacency Matrix:\n";
-      for (unsigned int i = 0; i < _adjacency_matrix->m(); i++)
-      {
-        for (unsigned int j = 0; j < _adjacency_matrix->n(); j++)
-          _console << _adjacency_matrix->el(i, j) << "  ";
-        _console << '\n';
-      }
-    }
+      printGrainAdjacencyMatrix();
   }
 
   // Communicate the coloring with all ranks
@@ -165,14 +161,6 @@ PolycrystalUserObjectBase::finalize()
    */
   for (auto & grain : _feature_sets)
     grain._var_index = _grain_to_op[grain._id];
-
-  if (_output_adjacency_matrix)
-  {
-    _console << "Grain to OP assignments:\n";
-    for (auto op : _grain_to_op)
-      _console << op << "  ";
-    _console << '\n' << std::endl;
-  }
 }
 
 bool
@@ -184,11 +172,10 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
 {
   mooseAssert(_t_step == 0, "PolyIC only works if we begin in the initial condition");
 
-  unsigned int grain_id;
   if (_is_elemental)
-    grain_id = getGrainBasedOnElem(*static_cast<const Elem *>(dof_object));
+    getGrainsBasedOnElem(*static_cast<const Elem *>(dof_object), _prealloc_tmp_grains);
   else
-    grain_id = getGrainBasedOnPoint(*static_cast<const Node *>(dof_object));
+    getGrainsBasedOnPoint(*static_cast<const Node *>(dof_object), _prealloc_tmp_grains);
 
   // Retrieve the id of the current entity
   auto entity_id = dof_object->id();
@@ -197,24 +184,37 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
    * When building the IC, we can't use the _entities_visited data structure the same way as we do
    * for the base class. We need to discover multiple overlapping grains in a single pass. However
    * we don't know what grain we are working on when we enter the flood routine (when that check is
-   * normally made). Only after we've made the callback to the child class do we know which grain we
-   * are operating on (at least until we've triggered the recursion). We need to see if we've
-   * visited this entity before for this grain here.
+   * normally made). Only after we've made the callback to the child class do we know which grains
+   * we are operating on (at least until we've triggered the recursion). We need to see if there
+   * is at least one active grain where we haven't already visited the current entity before
+   * continuing.
    */
-  // Update the parameter, then check to see if we've visited before in the corresponding map
-  current_index = grain_id;
-  if (_entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
-    return false; // This will dump us out of the current flood call
+  if (current_index == invalid_size_t)
+  {
+    for (auto grain_id : _prealloc_tmp_grains)
+      if (_entities_visited[grain_id].find(entity_id) == _entities_visited[grain_id].end())
+      {
+        current_index = grain_id;
+        break;
+      }
+
+    if (current_index == invalid_size_t)
+      return false;
+  }
+  else if (_entities_visited[current_index].find(entity_id) !=
+           _entities_visited[current_index].end())
+    return false;
 
   if (!feature)
   {
-    new_id = grain_id;
+    new_id = current_index;
     status &= ~Status::INACTIVE;
 
     return true;
   }
   else
-    return feature->_id == grain_id;
+    return std::find(_prealloc_tmp_grains.begin(), _prealloc_tmp_grains.end(), feature->_id) !=
+           _prealloc_tmp_grains.end();
 }
 
 bool
@@ -227,24 +227,20 @@ PolycrystalUserObjectBase::areFeaturesMergeable(const FeatureData & f1,
 void
 PolycrystalUserObjectBase::buildGrainAdjacencyMatrix()
 {
-  _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
+  mooseAssert(_is_master, "This routine should only be called on the master rank");
 
-  if (_is_master)
+  _adjacency_matrix = libmesh_make_unique<DenseMatrix<Real>>(_feature_count, _feature_count);
+  for (auto & grain1 : _feature_sets)
   {
-    _adjacency_matrix = libmesh_make_unique<DenseMatrix<Real>>(_feature_count, _feature_count);
-
-    for (auto & grain1 : _feature_sets)
+    for (auto & grain2 : _feature_sets)
     {
-      for (auto & grain2 : _feature_sets)
-      {
-        if (&grain1 == &grain2)
-          continue;
+      if (&grain1 == &grain2)
+        continue;
 
-        if (grain1.boundingBoxesIntersect(grain2) && grain1.halosIntersect(grain2))
-        {
-          (*_adjacency_matrix)(grain1._id, grain2._id) = 1.;
-          (*_adjacency_matrix)(grain1._id, grain2._id) = 1.;
-        }
+      if (grain1.boundingBoxesIntersect(grain2) && grain1.halosIntersect(grain2))
+      {
+        (*_adjacency_matrix)(grain1._id, grain2._id) = 1.;
+        (*_adjacency_matrix)(grain1._id, grain2._id) = 1.;
       }
     }
   }
@@ -253,6 +249,8 @@ PolycrystalUserObjectBase::buildGrainAdjacencyMatrix()
 void
 PolycrystalUserObjectBase::assignOpsToGrains()
 {
+  mooseAssert(_is_master, "This routine should only be called on the master rank");
+
   // Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
   //
   // Use a simple backtracking coloring algorithm
@@ -313,6 +311,23 @@ PolycrystalUserObjectBase::isGraphValid(unsigned int vertex, unsigned int color)
     if ((*_adjacency_matrix)(vertex, neighbor) && color == _grain_to_op[neighbor])
       return false;
   return true;
+}
+
+void
+PolycrystalUserObjectBase::printGrainAdjacencyMatrix() const
+{
+  _console << "Grain Adjacency Matrix:\n";
+  for (unsigned int i = 0; i < _adjacency_matrix->m(); i++)
+  {
+    for (unsigned int j = 0; j < _adjacency_matrix->n(); j++)
+      _console << _adjacency_matrix->el(i, j) << "  ";
+    _console << '\n';
+  }
+
+  _console << "Grain to OP assignments:\n";
+  for (auto op : _grain_to_op)
+    _console << op << "  ";
+  _console << '\n' << std::endl;
 }
 
 MooseEnum

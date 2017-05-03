@@ -6,7 +6,7 @@
 []
 
 [GlobalParams]
-  op_num = 7
+  op_num = 4
   var_name_base = gr
 []
 
@@ -16,7 +16,7 @@
   [../]
   [./ebsd]
     type = PolycrystalEBSD
-    coloring_algorithm = jp
+    coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     output_adjacency_matrix = true
   [../]
@@ -76,18 +76,6 @@
     family = MONOMIAL
   [../]
   [./halo3]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./halo4]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./halo5]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./halo6]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -160,38 +148,7 @@
     field_display = HALOS
     flood_counter = grain_tracker
   [../]
-  [./halo4]
-    type = FeatureFloodCountAux
-    variable = halo4
-    map_index = 4
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
-  [./halo5]
-    type = FeatureFloodCountAux
-    variable = halo5
-    map_index = 5
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
-  [./halo6]
-    type = FeatureFloodCountAux
-    variable = halo6
-    map_index = 6
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
 []
-
-#[Modules]
-#  [./PhaseField]
-#    [./EulerAngles2RGB]
-#      crystal_structure = cubic
-#      euler_angle_provider = ebsd
-#      grain_tracker = grain_tracker
-#    [../]
-#  [../]
-#[]
 
 [Materials]
   [./CuGrGr]
