@@ -4760,7 +4760,7 @@ FEProblemBase::serializeSolution()
 void
 FEProblemBase::setRestartFile(const std::string & file_name)
 {
-  _app.setRestart(true);
+  _app.setRestart();
   _resurrector->setRestartFile(file_name);
 }
 

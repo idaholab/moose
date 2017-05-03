@@ -212,7 +212,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _pars(parameters),
     _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
-    _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
@@ -233,9 +232,17 @@ MooseApp::MooseApp(InputParameters parameters)
     _recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
-    _restartable_data(libMesh::n_threads()),
-    _multiapp_level(0)
+    _restartable_data(libMesh::n_threads())
 {
+  if (isParamValid("_parent"))
+  {
+    _parent = parameters.getCheckedPointerParam<const MooseApp *>("_parent");
+    _restart = _parent->isRestarting();
+    _recover = _parent->isRecovering();
+    if (_parent->multiAppLevel() > 0)
+      _name = _parent->name() + "_" + _name;
+  }
+
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
@@ -272,7 +279,7 @@ MooseApp::setupOptions()
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
   if (multiAppLevel() > 0)
-    MooseUtils::indentMessage(_name, hdr);
+    MooseUtils::indentMessage(name(), hdr);
   Moose::out << hdr << std::flush;
 
   if (getParam<bool>("error_unused"))
@@ -481,10 +488,22 @@ MooseApp::setInputFileName(std::string input_filename)
   _input_filename = input_filename;
 }
 
-std::string
-MooseApp::getOutputFileBase()
+const MooseApp &
+MooseApp::root() const
 {
-  return _output_file_base;
+  if (!_parent)
+    return *this;
+  return _parent->root();
+}
+
+std::string
+MooseApp::levelString()
+{
+  if (isUltimateMaster())
+    return "";
+  std::string base = root().getFileName();
+  size_t pos = base.find_last_of('.');
+  return base.substr(0, pos) + "_out_" + _name;
 }
 
 void
@@ -705,7 +724,6 @@ MooseApp::run()
 void
 MooseApp::setOutputPosition(Point p)
 {
-  _output_position_set = true;
   _output_position = p;
   _output_warehouse.meshChanged();
 
@@ -730,11 +748,11 @@ MooseApp::getCheckpointFiles()
   if (common->isParamValid("file_base"))
     checkpoint_dirs.push_back(common->getParam<std::string>("file_base") + "_cp");
   // Case for normal application or master in a Multiapp setting
-  else if (getOutputFileBase().empty())
+  else if (levelString().empty())
     checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, "_out_cp"));
   // Case for a sub app in a Multiapp setting
   else
-    checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
+    checkpoint_dirs.push_back(levelString() + "_cp");
 
   // Add the directories from any existing checkpoint objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
@@ -1139,20 +1157,6 @@ MooseApp::clearMeshModifiers()
 }
 
 void
-MooseApp::setRestart(const bool & value)
-{
-  _restart = value;
-
-  std::shared_ptr<FEProblemBase> fe_problem = _action_warehouse.problemBase();
-}
-
-void
-MooseApp::setRecover(const bool & value)
-{
-  _recover = value;
-}
-
-void
 MooseApp::restoreCachedBackup()
 {
   if (!_cached_backup.get())
@@ -1252,4 +1256,20 @@ MooseApp::createMinimalApp()
   }
 
   _action_warehouse.build();
+}
+
+unsigned int
+MooseApp::multiAppLevel() const
+{
+  if (!_parent)
+    return 0;
+  return _parent->multiAppLevel() + 1;
+}
+
+std::map<std::string, unsigned int>
+MooseApp::getOutputFileNumbers() const
+{
+  if (isUltimateMaster())
+    return _output_warehouse.getFileNumbers();
+  return _parent->getOutputFileNumbers();
 }

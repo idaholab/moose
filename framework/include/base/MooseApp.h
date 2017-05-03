@@ -42,6 +42,7 @@ class MeshModifier;
 class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
+class MultiApp;
 
 template <>
 InputParameters validParams<MooseApp>();
@@ -65,7 +66,7 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() { return _name; }
+  const std::string & name() const { return _name; }
 
   /**
    * Get the parameters of the object
@@ -120,15 +121,9 @@ public:
    */
   std::string getInputFileName() { return _input_filename; }
 
-  /**
-   * Override the selection of the output file base name.
-   */
-  void setOutputFileBase(std::string output_file_base) { _output_file_base = output_file_base; }
-
-  /**
-   * Override the selection of the output file base name.
-   */
-  std::string getOutputFileBase();
+  /// Returns a string identifying the nesting of this app with MultiApp and
+  /// subapp levels will be encoded into it.
+  std::string levelString();
 
   /**
    * Tell the app to output in a specific position.
@@ -140,12 +135,6 @@ public:
    * @param files A Set of checkpoint filenames to populate
    */
   std::list<std::string> getCheckpointFiles();
-
-  /**
-   * Whether or not an output position has been set.
-   * @return True if it has
-   */
-  bool hasOutputPosition() { return _output_position_set; }
 
   /**
    * Get the output position.
@@ -312,30 +301,12 @@ public:
 
   /**
    * Store a map of outputter names and file numbers
-   * The MultiApp system requires this to get the file numbering to propagate down through the
-   * Multiapps.
-   * @param numbers Map of outputter names and file numbers
-   *
-   * @see MultiApp TransientMultiApp OutputWarehouse
-   */
-  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers)
-  {
-    _output_file_numbers = numbers;
-  }
-
-  /**
-   * Store a map of outputter names and file numbers
    * The MultiApp system requires this to get the file numbering to propogate down through the
    * multiapps.
    *
    * @see MultiApp TransientMultiApp
    */
-  std::map<std::string, unsigned int> & getOutputFileNumbers() { return _output_file_numbers; }
-
-  /**
-   * Return true if the output position has been set
-   */
-  bool hasOutputWarehouse() { return _output_position_set; }
+  std::map<std::string, unsigned int> getOutputFileNumbers() const;
 
   /**
    * Get the OutputWarehouse objects
@@ -430,22 +401,11 @@ public:
    */
   virtual std::string header() const;
 
-  /**
-   * The MultiApp Level
-   * @return The current number of levels from the master app
-   */
-  unsigned int multiAppLevel() const { return _multiapp_level; }
+  /// The number of (MultiApp) levels from master - master is zero.
+  unsigned int multiAppLevel() const;
 
-  /**
-   * Set the MultiApp Level
-   * @param level The level to assign to this app.
-   */
-  void setMultiAppLevel(const unsigned int level) { _multiapp_level = level; }
-
-  /**
-   * Whether or not this app is the ultimate master app. (ie level == 0)
-   */
-  bool isUltimateMaster() { return !_multiapp_level; }
+  /// Returns true if this app is the root master app (i.e. level == 0).
+  bool isUltimateMaster() const { return _parent == nullptr; }
 
   /**
    * Add a mesh modifier that will act on the meshes in the system
@@ -469,14 +429,8 @@ public:
    */
   void executeMeshModifiers();
 
-  ///@{
-  /**
-   * Sets the restart/recover flags
-   * @param state The state to set the flag to
-   */
-  void setRestart(const bool & value);
-  void setRecover(const bool & value);
-  ///@}
+  /// Sets the restart flag to true.
+  void setRestart() { _restart = true; }
 
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
@@ -535,12 +489,6 @@ protected:
 
   /// Input file name used
   std::string _input_filename;
-
-  /// The output file basename
-  std::string _output_file_base;
-
-  /// Whether or not an output position has been set for this app
-  bool _output_position_set;
 
   /// The output position
   Point _output_position;
@@ -619,8 +567,11 @@ protected:
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
 
-  /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
-  std::map<std::string, unsigned int> _output_file_numbers;
+  /// Legacy Uo Aux computation flag
+  bool _legacy_uo_aux_computation_default;
+
+  /// Legacy Uo Initialization flag
+  bool _legacy_uo_initialization_default;
 
   /// true if we want to just check the input file
   bool _check_input;
@@ -629,6 +580,14 @@ protected:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
+  /// Returns the root app for this app or itself if it has no parent.
+  const MooseApp & root() const;
+
+  /// Pointer to the parent/owning MooseApp object if any.
+  /// It is important that this stay const and private to preserve multi-app
+  /// isolation.
+  const MooseApp * _parent = nullptr;
+
   /** Method for creating the minimum required actions for an application (no input file)
    *
    * Mimics the following input file:
@@ -668,9 +627,6 @@ private:
     OBJECT,
     SYNTAX
   };
-
-  /// Level of multiapp, the master is level 0. This used by the Console to indent output
-  unsigned int _multiapp_level;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;

@@ -516,18 +516,12 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // Define the app name
   std::ostringstream multiapp_name;
-  std::string full_name;
   multiapp_name << name() << std::setw(std::ceil(std::log10(_total_num_apps)))
                 << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
-
-  // Only add parent name if it the parent is not the main app
-  if (_app.multiAppLevel() > 0)
-    full_name = _app.name() + "_" + multiapp_name.str();
-  else
-    full_name = multiapp_name.str();
+  std::string full_name = multiapp_name.str();
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
-  app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
+  app_params.set<const MooseApp *>("_parent") = &_app;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
   _apps[i].reset(AppFactory::instance().create(_app_type, full_name, app_params, _my_comm));
   auto & app = _apps[i];
@@ -538,27 +532,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   else
     input_file = _input_files[_first_local_app + i];
 
-  std::ostringstream output_base;
-
-  // Create an output base by taking the output base of the master problem and appending
-  // the name of the multiapp + a number to it
-  if (!_app.getOutputFileBase().empty())
-    output_base << _app.getOutputFileBase() + "_";
-  else
-  {
-    std::string base = _app.getFileName();
-    size_t pos = base.find_last_of('.');
-    output_base << base.substr(0, pos) + "_out_";
-  }
-
-  // Append the sub app name to the output file base
-  output_base << multiapp_name.str();
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);
-  app->setOutputFileBase(output_base.str());
-  app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
-  app->setRestart(_app.isRestarting());
-  app->setRecover(_app.isRecovering());
 
   // This means we have a backup of this app that we need to give to it
   // Note: This won't do the restoration immediately.  The Backup
@@ -567,11 +542,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (_app.isRestarting() || _app.isRecovering())
     app->restore(_backups[i]);
 
-  if (getParam<bool>("output_in_position"))
+  if (_output_in_position)
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 
-  // Update the MultiApp level for the app that was just created
-  app->setMultiAppLevel(_app.multiAppLevel() + 1);
   app->setupOptions();
   preRunInputFile();
   app->runInputFile();

@@ -302,8 +302,7 @@ Exodus::output(const ExecFlagType & type)
   outputSetup();
 
   // Adjust the position of the output
-  if (_app.hasOutputPosition())
-    _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
+  _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
 
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
