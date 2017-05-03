@@ -80,7 +80,45 @@ PolycrystalUserObjectBase::execute()
 {
   precomputeGrainStructure();
 
-  FeatureFloodCount::execute();
+  /**
+   * We need one map per grain when creating the initial condition to support overlapping features.
+   * Luckily, this is a fairly sparse structure.
+   */
+  _entities_visited.resize(getNumGrains());
+
+  /**
+   * This loop is similar to the one found in the base class however, there are two key differences
+   * between building up the initial condition and discovering features based on solution variables:
+   *
+   * 1) When building up the initial condition, we aren't inspecting the actual variable values so
+   *    we don't need to loop over all of the coupled variables.
+   * 2) We want to discover all features on a single pass since there may be thousands of features
+   *    in a simulation. However, we can only actively flood a single feature at a time. To make
+   *    sure that we pick up all features that might start on a given entity, we'll keep retrying
+   *    the flood routine on the same entity as long as new discoveries are being made. We know
+   *    this information from the return value of flood.
+   */
+  const auto end = _mesh.getMesh().active_local_elements_end();
+  for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  {
+    const Elem * current_elem = *el;
+
+    // Loop over elements or nodes
+    if (_is_elemental)
+      while (flood(current_elem, 0 /* Always work on map 0 */, nullptr /* no active feature */))
+        ;
+    else
+    {
+      auto n_nodes = current_elem->n_vertices();
+      for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
+      {
+        const Node * current_node = current_elem->get_node(i);
+
+        while (flood(current_node, 0 /* always work on map 0 */, nullptr /* no active feature */))
+          ;
+      }
+    }
+  }
 }
 
 void
@@ -139,26 +177,34 @@ PolycrystalUserObjectBase::finalize()
 
 bool
 PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                                         std::size_t current_index,
+                                                         std::size_t & current_index,
                                                          FeatureData *& feature,
                                                          Status & status,
                                                          unsigned int & new_id)
 {
   mooseAssert(_t_step == 0, "PolyIC only works if we begin in the initial condition");
-  // mooseAssert(_is_elemental, "PolyIC only works with elemental grain tracker");
-
-  /**
-   * When generating ICs we aren't looking at the op index at all. We need to return
-   * false on all non-zero ops so we don't count each grain multiple times.
-   */
-  if (current_index != 0)
-    return false;
 
   unsigned int grain_id;
   if (_is_elemental)
     grain_id = getGrainBasedOnElem(*static_cast<const Elem *>(dof_object));
   else
     grain_id = getGrainBasedOnPoint(*static_cast<const Node *>(dof_object));
+
+  // Retrieve the id of the current entity
+  auto entity_id = dof_object->id();
+
+  /**
+   * When building the IC, we can't use the _entities_visited data structure the same way as we do
+   * for the base class. We need to discover multiple overlapping grains in a single pass. However
+   * we don't know what grain we are working on when we enter the flood routine (when that check is
+   * normally made). Only after we've made the callback to the child class do we know which grain we
+   * are operating on (at least until we've triggered the recursion). We need to see if we've
+   * visited this entity before for this grain here.
+   */
+  // Update the parameter, then check to see if we've visited before in the corresponding map
+  current_index = grain_id;
+  if (_entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
+    return false; // This will dump us out of the current flood call
 
   if (!feature)
   {

@@ -51,6 +51,8 @@ public:
     return getGrainBasedOnPoint(elem.centroid());
   }
 
+  virtual unsigned int getNumGrains() const = 0;
+
   /**
    * Method for retrieving the initial grain OP assignments.
    */
@@ -76,7 +78,7 @@ public:
 protected:
   virtual bool areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const override;
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                             std::size_t current_index,
+                                             std::size_t & current_index,
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id) override;

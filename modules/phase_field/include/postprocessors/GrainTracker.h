@@ -73,7 +73,7 @@ protected:
   virtual void updateFieldInfo() override;
   virtual Real getThreshold(std::size_t current_index) const override;
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                             std::size_t current_index,
+                                             std::size_t & current_index,
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id) override;

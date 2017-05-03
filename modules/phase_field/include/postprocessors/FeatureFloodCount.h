@@ -289,8 +289,10 @@ protected:
    * are above the supplied threshold. If feature is NULL, we are exploring
    * for a new region to mark, otherwise we are in the recursive calls
    * currently marking a region.
+   *
+   * @return Boolean indicating whether a new feature was found while exploring the current entity.
    */
-  void flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
+  bool flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
 
   /**
    * Return the starting comparison threshold to use when inspecting an entity during the flood
@@ -317,7 +319,7 @@ protected:
    * of a new feature.
    */
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                             std::size_t current_index,
+                                             std::size_t & current_index,
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id);
@@ -549,7 +551,7 @@ protected:
    * in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
-  std::vector<std::map<dof_id_type, bool>> _entities_visited;
+  std::vector<std::set<dof_id_type>> _entities_visited;
 
   /**
    * This map keeps track of which variables own which nodes.  We need a vector of them for multimap

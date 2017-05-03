@@ -207,7 +207,7 @@ GrainTracker::getThreshold(std::size_t var_index) const
 
 bool
 GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                            std::size_t current_index,
+                                            std::size_t & current_index,
                                             FeatureData *& feature,
                                             Status & status,
                                             unsigned int & new_id)

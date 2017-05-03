@@ -176,7 +176,6 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _n_vars(_vars.size()),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _n_procs(_app.n_processors()),
-    _entities_visited(_vars.size()), // This map is always sized to the number of variables
     _feature_counts_per_map(_maps_size),
     _feature_count(0),
     _partial_feature_sets(_maps_size),
@@ -200,6 +199,9 @@ FeatureFloodCount::~FeatureFloodCount() {}
 void
 FeatureFloodCount::initialSetup()
 {
+  // We need one map per coupled variable for normal runs to support overlapping features
+  _entities_visited.resize(_vars.size());
+
   // Get a pointer to the PeriodicBoundaries buried in libMesh
   _pbs = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
 
@@ -243,14 +245,13 @@ FeatureFloodCount::initialize()
 
   _entity_var_to_features.clear();
 
-  clearDataStructures();
+  for (auto & map_ref : _entities_visited)
+    map_ref.clear();
 }
 
 void
 FeatureFloodCount::clearDataStructures()
 {
-  for (auto & map_ref : _entities_visited)
-    map_ref.clear();
 }
 
 void
@@ -1003,27 +1004,27 @@ FeatureFloodCount::updateFieldInfo()
   }
 }
 
-void
+bool
 FeatureFloodCount::flood(const DofObject * dof_object,
                          std::size_t current_index,
                          FeatureData * feature)
 {
   if (dof_object == nullptr)
-    return;
+    return false;
 
   // Retrieve the id of the current entity
   auto entity_id = dof_object->id();
 
   // Has this entity already been marked? - if so move along
   if (_entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
-    return;
+    return false;
 
   // See if the current entity either starts a new feature or continues an existing feature
   auto new_id = invalid_id; // Writable reference to hold an optional id;
   Status status =
       Status::INACTIVE; // Status is inactive until we find an entity above the starting threshold
   if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, status, new_id))
-    return;
+    return false;
 
   /**
    * If we reach this point (i.e. we haven't returned early from this routine),
@@ -1033,7 +1034,7 @@ FeatureFloodCount::flood(const DofObject * dof_object,
    * feature any time a "connecting threshold" is used since we may have
    * already visited this entity earlier but it was in-between two thresholds.
    */
-  _entities_visited[current_index][entity_id] = true;
+  _entities_visited[current_index].emplace(entity_id);
 
   auto map_num = _single_map_mode ? decltype(current_index)(0) : current_index;
 
@@ -1085,6 +1086,8 @@ FeatureFloodCount::flood(const DofObject * dof_object,
                         current_index,
                         feature,
                         /*expand_halos_only =*/false);
+
+  return true;
 }
 
 Real FeatureFloodCount::getThreshold(std::size_t /*current_index*/) const
@@ -1106,7 +1109,7 @@ FeatureFloodCount::compareValueWithThreshold(Real entity_value, Real threshold) 
 
 bool
 FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                                 std::size_t current_index,
+                                                 std::size_t & current_index,
                                                  FeatureData *& feature,
                                                  Status & status,
                                                  unsigned int & /*new_id*/)

@@ -21,8 +21,8 @@ public:
   PolycrystalVoronoi(const InputParameters & parameters);
 
   virtual void precomputeGrainStructure() override;
-
   virtual unsigned int getGrainBasedOnPoint(const Point & point) const override;
+  virtual unsigned int getNumGrains() const override { return _grain_num; }
 
 protected:
   /// The number of grains to create

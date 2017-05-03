@@ -22,6 +22,7 @@ public:
   PolycrystalEBSD(const InputParameters & parameters);
 
   virtual unsigned int getGrainBasedOnPoint(const Point & point) const override;
+  virtual unsigned int getNumGrains() const override;
 
 protected:
   const EBSDReader & _ebsd_reader;

@@ -43,3 +43,9 @@ PolycrystalEBSD::getGrainBasedOnPoint(const Point & point) const
 
   return _consider_phase ? local_id : global_id;
 }
+
+unsigned int
+PolycrystalEBSD::getNumGrains() const
+{
+  return _ebsd_reader.getGrainNum();
+}
