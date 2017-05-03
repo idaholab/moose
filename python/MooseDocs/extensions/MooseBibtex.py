@@ -173,4 +173,9 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
             html = '(<span data-moose-cite="{}">{}</span>)'.format(tex, '; '.join(cite_list))
         else:
             html = '<span data-moose-cite="{}">{}</span>'.format(tex, ', '.join(cite_list))
+
+        # substitute Umlauts
+        umlaut_re = re.compile(r"\{\\\"([aouAOU])\}")
+        html = umlaut_re.sub('&\\1uml;', html)
+
         return self.markdown.htmlStash.store(html, safe=True)
