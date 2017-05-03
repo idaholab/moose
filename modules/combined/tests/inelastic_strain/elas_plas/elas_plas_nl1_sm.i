@@ -2,29 +2,28 @@
 # Test for effective strain calculation.
 # Boundary conditions from NAFEMS test NL1
 #
-# This is not a verification test. This is the creep analog of the same test
-# in the elas_plas directory. Instead of using the IsotropicPlasticity
-# material model this test uses the PowerLawCreep material model.
+# This is not a verification test. The boundary conditions are applied such
+# that the first step generates only elastic stresses. The second and third
+# steps generate plastic deformation and the effective strain should be
+# increasing throughout the run.
 #
 [GlobalParams]
-  temperature = temp
+  disp_x = disp_x
+  disp_y = disp_y
   order = FIRST
   family = LAGRANGE
   volumetric_locking_correction = true
-  displacements = 'disp_x disp_y'
 []
 
 [Mesh]#Comment
   file = one_elem2.e
+  displacements = 'disp_x disp_y'
 [] # Mesh
 
 [Variables]
   [./disp_x]
   [../]
   [./disp_y]
-  [../]
-  [./temp]
-    initial_condition = 600.0
   [../]
 [] # Variables
 
@@ -65,15 +64,15 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./creep_strain_xx]
+  [./plastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./creep_strain_yy]
+  [./plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./creep_strain_zz]
+  [./plastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -89,155 +88,122 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./eff_creep_strain]
+  [./eff_plastic_strain]
     order = CONSTANT
     family = MONOMIAL
   [../]
 [] # AuxVariables
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-    decomposition_method = EigenSolution
-  [../]
-  [./heat]
-    type = HeatConduction
-    variable = temp
-  [../]
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
-    variable = temp
+[SolidMechanics]
+  [./solid]
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+    index = 0
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+    index = 1
   [../]
   [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
+    index = 2
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
+    index = 3
   [../]
   [./vonmises]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = vonmises
-    scalar_type = VonMisesStress
+    quantity = vonmises
     execute_on = timestep_end
   [../]
   [./pressure]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = pressure
-    scalar_type = Hydrostatic
+    quantity = hydrostatic
     execute_on = timestep_end
   [../]
   [./elastic_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    type = MaterialTensorAux
+    tensor = elastic_strain
     variable = elastic_strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+    index = 0
   [../]
   [./elastic_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    type = MaterialTensorAux
+    tensor = elastic_strain
     variable = elastic_strain_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+    index = 1
   [../]
   [./elastic_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    type = MaterialTensorAux
+    tensor = elastic_strain
     variable = elastic_strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
+    index = 2
   [../]
-  [./creep_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = creep_strain
-    variable = creep_strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+  [./plastic_strain_xx]
+    type = MaterialTensorAux
+    tensor = plastic_strain
+    variable = plastic_strain_xx
+    index = 0
   [../]
-  [./creep_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = creep_strain
-    variable = creep_strain_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+  [./plastic_strain_yy]
+    type = MaterialTensorAux
+    tensor = plastic_strain
+    variable = plastic_strain_yy
+    index = 1
   [../]
-  [./creep_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = creep_strain
-    variable = creep_strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
+  [./plastic_strain_zz]
+    type = MaterialTensorAux
+    tensor = plastic_strain
+    variable = plastic_strain_zz
+    index = 2
   [../]
   [./tot_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = tot_strain_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./tot_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = tot_strain_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./tot_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = tot_strain_zz
-    index_i = 2
-    index_j = 2
+    index = 2
   [../]
-  [./eff_creep_strain]
+  [./eff_plastic_strain]
     type = MaterialRealAux
-    property = effective_creep_strain
-    variable = eff_creep_strain
+    property = effective_plastic_strain
+    variable = eff_plastic_strain
   [../]
 [] # AuxKernels
 
 [Functions]
   [./appl_dispy]
     type = PiecewiseLinear
-    x = '0     1.0     2.0'
-    y = '0.0 0.25e-4 0.50e-4'
+    x = '0     1.0     2.0     3.0'
+    y = '0.0 0.208e-4 0.50e-4 1.00e-4'
   [../]
 []
 
@@ -272,52 +238,24 @@
     boundary = 1
     function = appl_dispy
   [../]
-  [./temp_fix]
-    type = DirichletBC
-    variable = temp
-    boundary = '1 2'
-    value = 600.0
-  [../]
 [] # BCs
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff1]
+    type = SolidModel
     block = 1
     youngs_modulus = 250e9
     poissons_ratio = 0.25
+    constitutive_model = isoplas
+    formulation = NonlinearPlaneStrain
   [../]
-  [./strain]
-    type = ComputePlaneFiniteStrain
+  [./isoplas]
+    type = IsotropicPlasticity
     block = 1
-  [../]
-  [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    block = 1
-    return_mapping_models = 'powerlawcrp'
-  [../]
-  [./powerlawcrp]
-    type = PowerLawCreepStressUpdate
-    block = 1
-    coefficient = 3.125e-14
-    n_exponent = 5.0
-    m_exponent = 0.0
-    activation_energy = 0.0
-    max_iterations = 100
-    relative_tolerance = 1e-5
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    block = 1
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-
-  [./density]
-    type = Density
-    block = 1
-    density = 1.0
+    yield_stress = 5e6
+    hardening_constant = 0.0
+    relative_tolerance = 1e-20
+    absolute_tolerance = 1e-8
   [../]
 [] # Materials
 
@@ -335,7 +273,7 @@
   dt = 1.0
   start_time = 0.0
   num_steps = 100
-  end_time = 2.0
+  end_time = 3.0
 [] # Executioner
 
 [Postprocessors]
@@ -375,21 +313,21 @@
     type = ElementAverageValue
     variable = elastic_strain_zz
   [../]
-  [./crp_strain_xx]
+  [./pl_strain_xx]
     type = ElementAverageValue
-    variable = creep_strain_xx
+    variable = plastic_strain_xx
   [../]
-  [./crp_strain_yy]
+  [./pl_strain_yy]
     type = ElementAverageValue
-    variable = creep_strain_yy
+    variable = plastic_strain_yy
   [../]
-  [./crp_strain_zz]
+  [./pl_strain_zz]
     type = ElementAverageValue
-    variable = creep_strain_zz
+    variable = plastic_strain_zz
   [../]
-  [./eff_creep_strain]
+  [./eff_plastic_strain]
     type = ElementAverageValue
-    variable = eff_creep_strain
+    variable = eff_plastic_strain
   [../]
   [./tot_strain_xx]
     type = ElementAverageValue
@@ -431,6 +369,7 @@
 [Outputs]
   exodus = true
   csv = true
+  file_base=elas_plas_nl1_out
   [./console]
     type = Console
     perf_log = true

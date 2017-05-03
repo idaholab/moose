@@ -39,14 +39,25 @@ validParams<RadialReturnStressUpdate>()
   return params;
 }
 
-RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters)
+RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters,
+                                                   const std::string inelastic_strain_name)
   : StressUpdateBase(parameters),
     _max_its(parameters.get<unsigned int>("max_iterations")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-    _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
+    _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+    _effective_inelastic_strain(
+        declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
+    _effective_inelastic_strain_old(
+        declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain"))
 {
+}
+
+void
+RadialReturnStressUpdate::initQpStatefulProperties()
+{
+  _effective_inelastic_strain[_qp] = 0;
 }
 
 void
@@ -66,6 +77,8 @@ RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   Real effective_trial_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
+  Real scalar_effective_inelastic_strain = 0;
+
   // If the effective trial stress is zero, so should the inelastic strain increment be zero
   // In that case skip the entire iteration if the effective trial stress is zero
   if (effective_trial_stress != 0.0)
@@ -73,7 +86,6 @@ RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
     computeStressInitialize(effective_trial_stress);
 
     // Use Newton iteration to determine the scalar effective inelastic strain increment
-    Real scalar_effective_inelastic_strain = 0;
     unsigned int iteration = 0;
 
     Real residual, norm_residual, first_norm_residual = 0;
@@ -141,6 +153,8 @@ RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
     inelastic_strain_increment.zero();
 
   strain_increment -= inelastic_strain_increment;
+  _effective_inelastic_strain[_qp] =
+      _effective_inelastic_strain_old[_qp] + scalar_effective_inelastic_strain;
   stress_new = _elasticity_tensor[_qp] * (strain_increment + _elastic_strain_old[_qp]);
 
   computeStressFinalize(inelastic_strain_increment);

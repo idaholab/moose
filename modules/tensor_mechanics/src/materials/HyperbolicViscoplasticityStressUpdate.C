@@ -33,7 +33,7 @@ validParams<HyperbolicViscoplasticityStressUpdate>()
 
 HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
     const InputParameters & parameters)
-  : RadialReturnStressUpdate(parameters),
+  : RadialReturnStressUpdate(parameters, "plastic"),
     _yield_stress(parameters.get<Real>("yield_stress")),
     _hardening_constant(parameters.get<Real>("hardening_constant")),
     _c_alpha(parameters.get<Real>("c_alpha")),

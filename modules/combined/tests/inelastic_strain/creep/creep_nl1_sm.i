@@ -7,15 +7,18 @@
 # material model this test uses the PowerLawCreep material model.
 #
 [GlobalParams]
-  temperature = temp
+  disp_x = disp_x
+  disp_y = disp_y
+  temp = temp
   order = FIRST
   family = LAGRANGE
   volumetric_locking_correction = true
-  displacements = 'disp_x disp_y'
+  block = 1
 []
 
 [Mesh]#Comment
   file = one_elem2.e
+  displacements = 'disp_x disp_y'
 [] # Mesh
 
 [Variables]
@@ -95,11 +98,12 @@
   [../]
 [] # AuxVariables
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-    decomposition_method = EigenSolution
+[SolidMechanics]
+  [./solid]
   [../]
+[]
+
+[Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
@@ -112,119 +116,96 @@
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+    index = 0
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+    index = 1
   [../]
   [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
+    index = 2
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
+    index = 3
   [../]
   [./vonmises]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = vonmises
-    scalar_type = VonMisesStress
+    quantity = vonmises
     execute_on = timestep_end
   [../]
   [./pressure]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    variable = pressure
-    scalar_type = Hydrostatic
+    type = MaterialTensorAux
+    tensor = stress
+    variable =pressure
+    quantity = hydrostatic
     execute_on = timestep_end
   [../]
   [./elastic_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    type = MaterialTensorAux
+    tensor = elastic_strain
     variable = elastic_strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+    index = 0
   [../]
   [./elastic_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    type = MaterialTensorAux
+    tensor = elastic_strain
     variable = elastic_strain_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+    index = 1
   [../]
   [./elastic_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    type = MaterialTensorAux
+    tensor = elastic_strain
     variable = elastic_strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
+    index = 2
   [../]
   [./creep_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = creep_strain
+    type = MaterialTensorAux
+    tensor = creep_strain
     variable = creep_strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+    index = 0
   [../]
   [./creep_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = creep_strain
+    type = MaterialTensorAux
+    tensor = creep_strain
     variable = creep_strain_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+    index = 1
   [../]
   [./creep_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = creep_strain
+    type = MaterialTensorAux
+    tensor = creep_strain
     variable = creep_strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
+    index = 2
   [../]
   [./tot_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = tot_strain_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./tot_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = tot_strain_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./tot_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = tot_strain_zz
-    index_i = 2
-    index_j = 2
+    index = 2
   [../]
   [./eff_creep_strain]
     type = MaterialRealAux
@@ -281,30 +262,23 @@
 [] # BCs
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiff]
+    type = SolidModel
     block = 1
     youngs_modulus = 250e9
     poissons_ratio = 0.25
-  [../]
-  [./strain]
-    type = ComputePlaneFiniteStrain
-    block = 1
-  [../]
-  [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    block = 1
-    return_mapping_models = 'powerlawcrp'
+    formulation = NonlinearPlaneStrain
+    constitutive_model = powerlawcrp
+    increment_calculation = Eigen
   [../]
   [./powerlawcrp]
-    type = PowerLawCreepStressUpdate
+    type = PowerLawCreepModel
     block = 1
     coefficient = 3.125e-14
     n_exponent = 5.0
     m_exponent = 0.0
     activation_energy = 0.0
-    max_iterations = 100
-    relative_tolerance = 1e-5
+    max_its = 100
   [../]
 
   [./thermal]
@@ -431,6 +405,7 @@
 [Outputs]
   exodus = true
   csv = true
+  file_base=creep_nl1_out
   [./console]
     type = Console
     perf_log = true

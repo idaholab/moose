@@ -56,8 +56,6 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _plastic_strain;
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
-  MaterialProperty<Real> & _scalar_plastic_strain;
-  MaterialProperty<Real> * _scalar_plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
