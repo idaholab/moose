@@ -7,7 +7,8 @@
   [./tabulated]
     type = CSVDiff
     input = 'tabulated.i'
-    csvdiff = 'sweos_out.csv'
+    csvdiff = 'sweos_tabulated_out.csv'
+    cli_args = 'Outputs/file_base=sweos_tabulated_out'
     prereq = 'sweos'
     rel_err = '1e-4'
   [../]
