@@ -8,7 +8,7 @@ validParams<OneDMomentumFriction>()
   params.addRequiredCoupledVar("area", "Cross-sectional area");
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
-  params.addCoupledVar("rhoEA", "Conserved total energy");
+  params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
   params.addRequiredCoupledVar("u", "velocity");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>(
@@ -25,12 +25,11 @@ OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters)
     _dCw_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("Cw", "beta") : NULL),
     _dCw_drhoA(getMaterialPropertyDerivativeRelap<Real>("Cw", "rhoA")),
     _dCw_drhouA(getMaterialPropertyDerivativeRelap<Real>("Cw", "rhouA")),
-    _dCw_drhoEA(isCoupled("rhoEA") ? &getMaterialPropertyDerivativeRelap<Real>("Cw", "rhoEA")
-                                   : NULL),
+    _dCw_drhoEA(getMaterialPropertyDerivativeRelap<Real>("Cw", "rhoEA")),
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
-    _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint)
+    _rhoEA_var_number(coupled("rhoEA"))
 {
 }
 
@@ -65,7 +64,7 @@ OneDMomentumFriction::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _rhoEA_var_number)
   {
-    return (*_dCw_drhoEA)[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] *
+    return _dCw_drhoEA[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] *
            _test[_i][_qp];
   }
   else if (jvar == _beta_var_number)

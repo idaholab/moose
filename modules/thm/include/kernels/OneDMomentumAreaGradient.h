@@ -39,7 +39,7 @@ protected:
   const MaterialProperty<Real> * const _dp_dbeta;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
-  const MaterialProperty<Real> * const _dp_darhoEA;
+  const MaterialProperty<Real> & _dp_darhoEA;
   const MaterialProperty<Real> * const _daL_dbeta;
 
   unsigned int _alpha_rhoA_var_number;

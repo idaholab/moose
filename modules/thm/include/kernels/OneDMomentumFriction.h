@@ -31,7 +31,7 @@ protected:
   const MaterialProperty<Real> * const _dCw_dbeta;
   const MaterialProperty<Real> & _dCw_drhoA;
   const MaterialProperty<Real> & _dCw_drhouA;
-  const MaterialProperty<Real> * const _dCw_drhoEA;
+  const MaterialProperty<Real> & _dCw_drhoEA;
 
   unsigned int _beta_var_number;
   unsigned int _rhoA_var_number;

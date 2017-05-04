@@ -30,7 +30,7 @@ protected:
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
-  const MaterialProperty<Real> * _dp_darhoEA;
+  const MaterialProperty<Real> & _dp_darhoEA;
   const VariableValue & _area;
 
   unsigned int _rhoA_var_number;
