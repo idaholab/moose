@@ -8,7 +8,7 @@
 [MeshModifiers]
   [./image]
     type = ImageSubdomain
-    file = ../../mesh_modifiers/image_subdomain/kitten.png
+    file = kitten.png
     threshold = 100
   [../]
 []
