@@ -179,5 +179,57 @@ class Tests(Testing.PeacockTester):
         self.input.blockChanged(mesh)
         self.assertEqual(self.input.vtkwin.isEnabled(), False)
 
+    def testExodusChangedFile(self):
+        """
+        When changing input files, both having the default exodus output file name,
+        we were seeing that the MeshPlugin wasn't getting reset properly.
+        """
+        cwd = os.getcwd()
+        diffusion1 = "../../common/simple_diffusion.i"
+        self.create_app([diffusion1, Testing.find_moose_test_exe(), "-w", cwd])
+        tabs = self.app.main_widget.tab_plugin
+        self.check_current_tab(tabs, self.input.tabName())
+        self.app.main_widget.setTab(self.exe.tabName())
+        self.exe.ExecuteRunnerPlugin.runClicked()
+        Testing.process_events(self.qapp, t=2)
+        self.app.main_widget.setTab(self.result.tabName())
+        mesh = self.result.currentWidget().MeshPlugin
+
+        self.assertTrue(mesh.isEnabled())
+        mesh.ScaleX.setValue(.9)
+        mesh.ScaleY.setValue(.8)
+        mesh.ScaleZ.setValue(.7)
+        mesh.Representation.setCurrentIndex(1)
+        mesh.DisplacementToggle.setChecked(True)
+        mesh.DisplacementMagnitude.setValue(2.0)
+        fname = "diffusion1.png"
+        Testing.set_window_size(self.vtkwin)
+        self.vtkwin.onWrite(fname)
+        self.assertFalse(Testing.gold_diff(fname))
+
+        diffusion2 = "../../common/simple_diffusion2.i"
+        self.app.main_widget.setTab(self.input.tabName())
+        self.input.setInputFile(diffusion2)
+        self.app.main_widget.setTab(self.exe.tabName())
+        self.exe.ExecuteOptionsPlugin.setWorkingDir(cwd)
+        self.exe.ExecuteRunnerPlugin.runClicked()
+        Testing.process_events(self.qapp, t=2)
+        self.app.main_widget.setTab(self.result.tabName())
+
+        self.assertTrue(mesh.isEnabled())
+        self.assertEqual(mesh.ViewMeshToggle.isChecked(), False)
+        self.assertEqual(mesh.ScaleX.value(), .9)
+        self.assertEqual(mesh.ScaleY.value(), .8)
+        self.assertEqual(mesh.ScaleZ.value(), .7)
+        self.assertEqual(mesh.Representation.currentIndex(), 1)
+        self.assertEqual(mesh.DisplacementToggle.isChecked(), True)
+        self.assertEqual(mesh.DisplacementMagnitude.value(), 2.0)
+
+        fname = "diffusion2.png"
+        Testing.set_window_size(self.vtkwin)
+        self.vtkwin.onWrite(fname)
+        self.assertFalse(Testing.gold_diff(fname))
+
+
 if __name__ == '__main__':
     Testing.run_tests()

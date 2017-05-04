@@ -84,6 +84,62 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.tabText(self._widget.currentIndex()), 'Results (2)')
         self.assertFalse(self._widget.cornerWidget().CloseButton.isEnabled())
 
+    def testMeshState(self):
+        """
+        Test that the state of the mesh widget after changing files.
+        """
+        f0 = Testing.get_chigger_input('diffusion_1.e')
+        f1 = Testing.get_chigger_input('diffusion_2.e')
+        self._widget.onSetFilenames([f0, f1])
+        mesh = self._widget.currentWidget().MeshPlugin
+        fp = self._widget.currentWidget().FilePlugin
+        fp._callbackAvailableFiles(0)
+        mesh.ViewMeshToggle.setChecked(False)
+        mesh.ScaleX.setValue(.9)
+        mesh.ScaleY.setValue(.8)
+        mesh.ScaleZ.setValue(.7)
+        mesh.Representation.setCurrentIndex(1)
+        mesh.DisplacementToggle.setChecked(True)
+        mesh.DisplacementMagnitude.setValue(2.0)
+        self.assertImage('testDiffusion1.png')
+
+        fp._callbackAvailableFiles(1)
+        # had a case where switching files that had the same variable name
+        # disabled the entire widget. Couldn't reproduce it with just the MeshPlugin
+        # unit tests.
+        self.assertEqual(mesh.isEnabled(), True)
+        self.assertEqual(mesh.ViewMeshToggle.isEnabled(), True)
+
+        mesh.ViewMeshToggle.setChecked(True)
+        mesh.ScaleX.setValue(.7)
+        mesh.ScaleY.setValue(.9)
+        mesh.ScaleZ.setValue(.8)
+        mesh.DisplacementToggle.setChecked(False)
+        mesh.DisplacementMagnitude.setValue(1.5)
+        self.assertImage('testDiffusion2.png')
+
+        fp._callbackAvailableFiles(0)
+        self.assertEqual(mesh.isEnabled(), True)
+        self.assertEqual(mesh.ViewMeshToggle.isEnabled(), False) # not enabled for wireframe
+        self.assertEqual(mesh.ViewMeshToggle.isChecked(), False)
+        self.assertEqual(mesh.ScaleX.value(), .9)
+        self.assertEqual(mesh.ScaleY.value(), .8)
+        self.assertEqual(mesh.ScaleZ.value(), .7)
+        self.assertEqual(mesh.DisplacementToggle.isChecked(), True)
+        self.assertEqual(mesh.DisplacementMagnitude.value(), 2.0)
+        self.assertImage('testDiffusion1.png')
+
+        fp._callbackAvailableFiles(1)
+        self.assertEqual(mesh.isEnabled(), True)
+        self.assertEqual(mesh.ViewMeshToggle.isEnabled(), True)
+        self.assertEqual(mesh.ViewMeshToggle.isChecked(), True)
+        self.assertEqual(mesh.ScaleX.value(), .7)
+        self.assertEqual(mesh.ScaleY.value(), .9)
+        self.assertEqual(mesh.ScaleZ.value(), .8)
+        self.assertEqual(mesh.DisplacementToggle.isChecked(), False)
+        self.assertEqual(mesh.DisplacementMagnitude.value(), 1.5)
+        self.assertImage('testDiffusion2.png')
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

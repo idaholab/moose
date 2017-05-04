@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import unittest
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui
 from peacock.ExodusViewer.plugins.BackgroundPlugin import main
 from peacock.utils import Testing
 
@@ -63,8 +63,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         """
         Test gradient toggle.
         """
-        self._widget.BackgroundPlugin.GradientToggle.setChecked(QtCore.Qt.Unchecked)
-        self._widget.BackgroundPlugin.GradientToggle.clicked.emit(QtCore.Qt.Unchecked)
+        self._widget.BackgroundPlugin.GradientToggle.setChecked(False)
         self.assertEqual(self._widget.BackgroundPlugin.TopLabel.text(), 'Background Color:')
         self._widget.BackgroundPlugin._top = QtGui.QColor(255,0,0)
         self._widget.BackgroundPlugin.color()
@@ -74,36 +73,36 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         """
         Test the extents toggle.
         """
-        self._widget.BackgroundPlugin.Extents.clicked.emit(True)
+        self._widget.BackgroundPlugin.Extents.setChecked(True)
         self.assertImage('testExtents.png')
-        self._widget.BackgroundPlugin.Extents.clicked.emit(False)
+        self._widget.BackgroundPlugin.Extents.setChecked(False)
         self.assertImage('testInitial.png')
 
     def testElementLabels(self):
         """
         Test the element label toggle.
         """
-        self._widget.BackgroundPlugin.Elements.clicked.emit(True)
+        self._widget.BackgroundPlugin.Elements.setChecked(True)
         self.assertImage('testElements.png')
-        self._widget.BackgroundPlugin.Elements.clicked.emit(False)
+        self._widget.BackgroundPlugin.Elements.setChecked(False)
         self.assertImage('testInitial.png')
 
     def testNodeLabels(self):
         """
         Test the node label toggle.
         """
-        self._widget.BackgroundPlugin.Nodes.clicked.emit(True)
+        self._widget.BackgroundPlugin.Nodes.setChecked(True)
         self.assertImage('testNodes.png')
-        self._widget.BackgroundPlugin.Nodes.clicked.emit(False)
+        self._widget.BackgroundPlugin.Nodes.setChecked(False)
         self.assertImage('testInitial.png')
 
     def testNodalValueLabels(self):
         """
         Test the label of nodal data toggle.
         """
-        self._widget.BackgroundPlugin.Values.clicked.emit(True)
+        self._widget.BackgroundPlugin.Values.setChecked(True)
         self.assertImage('testNodalValues.png')
-        self._widget.BackgroundPlugin.Values.clicked.emit(False)
+        self._widget.BackgroundPlugin.Values.setChecked(False)
         self.assertImage('testInitial.png')
 
     def testElementalValueLabels(self):
@@ -113,9 +112,9 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         self._window.onResultOptionsChanged({'variable':'aux_elem'})
         self._window.onWindowRequiresUpdate()
         self.assertImage('testElementalInitial.png')
-        self._widget.BackgroundPlugin.Values.clicked.emit(True)
+        self._widget.BackgroundPlugin.Values.setChecked(True)
         self.assertImage('testElementalValues.png')
-        self._widget.BackgroundPlugin.Values.clicked.emit(False)
+        self._widget.BackgroundPlugin.Values.setChecked(False)
         self.assertImage('testElementalInitial.png')
 
 if __name__ == '__main__':

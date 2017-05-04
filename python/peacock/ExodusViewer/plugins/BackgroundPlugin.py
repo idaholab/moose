@@ -100,14 +100,14 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Setup method for gradient toggle.
         """
         qobject.setChecked(QtCore.Qt.Checked)
-        qobject.clicked.connect(self._callbackGradientToggle)
+        qobject.stateChanged.connect(self._callbackGradientToggle)
 
     def _callbackGradientToggle(self, value):
         """
         Called when the gradient toggle is checked/Unchecked.
         """
 
-        if value:
+        if value == QtCore.Qt.Checked:
             self.TopLabel.setText('Background Top:')
             self.BottomLabel.setVisible(True)
             self.BottomButton.setVisible(True)
@@ -166,7 +166,7 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup method for the extents toggle.
         """
-        qobject.clicked.connect(self._callbackExtents)
+        qobject.stateChanged.connect(self._callbackExtents)
 
     def _callbackExtents(self, value):
         """
@@ -174,7 +174,7 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         if not self._result:
             return
-        elif value:
+        elif value == QtCore.Qt.Checked:
             self._volume_axes = chigger.misc.VolumeAxes(self._result)
             self.appendResult.emit(self._volume_axes)
         else:
@@ -187,13 +187,13 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup method for the element labels.
         """
-        qobject.clicked.connect(self._callbackElements)
+        qobject.stateChanged.connect(self._callbackElements)
 
     def _callbackElements(self, value):
         """
         Enables/disables the element labels.
         """
-        if value:
+        if value == QtCore.Qt.Checked:
             self._cell_labels = chigger.exodus.LabelExodusResult(self._result, label_type='cell', font_size=12)
             self.appendResult.emit(self._cell_labels)
         else:
@@ -205,13 +205,13 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup method for the node labels.
         """
-        qobject.clicked.connect(self._callbackNodes)
+        qobject.stateChanged.connect(self._callbackNodes)
 
     def _callbackNodes(self, value):
         """
         Enables/disables the node labels.
         """
-        if value:
+        if value == QtCore.Qt.Checked:
             self._node_labels = chigger.exodus.LabelExodusResult(self._result, label_type='point', font_size=12)
             self.appendResult.emit(self._node_labels)
         else:
@@ -223,13 +223,13 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup method for the variable value labels.
         """
-        qobject.clicked.connect(self._callbackValues)
+        qobject.stateChanged.connect(self._callbackValues)
 
     def _callbackValues(self, value):
         """
         Enables/disables the variable value labels.
         """
-        if value:
+        if value == QtCore.Qt.Checked:
             self._variable_labels = chigger.exodus.LabelExodusResult(self._result, label_type='variable', font_size=12)
             self.appendResult.emit(self._variable_labels)
         else:

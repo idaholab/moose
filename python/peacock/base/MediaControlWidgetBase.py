@@ -47,8 +47,7 @@ class MediaControlWidgetBase(object):
         # TimeStep display/edit
         self.__addEditBox('TimeStepDisplay', 'Timestep:', "Set the simulation timestep.", True)
         self.__addEditBox('TimeDisplay', 'Time:', "Set the simulation time.")
-        self.__addEditBox('FrameDelayDisplay', 'Frame delay:', "Set the delay of playback, in milliseconds.", True)
-        self.FrameDelayDisplay.setText("100")
+        self.__addEditBox('FrameDelayDisplay', 'Frame delay:', "Set the delay of playback, in milliseconds.", True, "100")
 
         # Slider
         self.TimeSlider = QtWidgets.QSlider()
@@ -105,9 +104,13 @@ class MediaControlWidgetBase(object):
         self.TimeSlider.setValue(step)
 
         if not self.TimeStepDisplay.hasFocus():
+            self.TimeStepDisplay.blockSignals(True)
             self.TimeStepDisplay.setText(str(step))
+            self.TimeStepDisplay.blockSignals(False)
         if not self.TimeDisplay.hasFocus():
+            self.TimeDisplay.blockSignals(True)
             self.TimeDisplay.setText(str(self._times[step]))
+            self.TimeDisplay.blockSignals(False)
 
     def start(self):
         """
@@ -197,16 +200,20 @@ class MediaControlWidgetBase(object):
         self._callbackPauseButton()
         self.updateControls(timestep=-1, time=None)
 
-    def _callbackTimeStepDisplay(self):
+    def _callbackTimeStepDisplay(self, text):
         self._callbackPauseButton()
-        self.updateControls(timestep=int(float(self.TimeStepDisplay.text())), time=None)
+        if text:
+            self.updateControls(timestep=int(float(text)), time=None)
 
-    def _callbackTimeDisplay(self):
+    def _callbackTimeDisplay(self, text):
         self._callbackPauseButton()
-        self.updateControls(time=float(self.TimeDisplay.text()), timestep=None)
+        if text:
+            self.updateControls(time=float(text), timestep=None)
 
-    def _callbackFrameDelayDisplay(self):
-        self.Timer.setInterval(int(self.FrameDelayDisplay.text()))
+    def _callbackFrameDelayDisplay(self, text=""):
+        text = self.FrameDelayDisplay.text()
+        if text:
+            self.Timer.setInterval(int(text))
 
     def _setupTimeSlider(self, qobject):
         qobject.setOrientation(QtCore.Qt.Horizontal)
@@ -226,7 +233,7 @@ class MediaControlWidgetBase(object):
         self.ButtonLayout.addWidget(qobject)
         setattr(self, name, qobject)
 
-    def __addEditBox(self, name, label, tooltip, int_validate=False):
+    def __addEditBox(self, name, label, tooltip, int_validate=False, default=""):
         edit = QtWidgets.QLineEdit()
 
         if int_validate:
@@ -237,7 +244,8 @@ class MediaControlWidgetBase(object):
         edit.setValidator(validate)
         edit.setToolTip(tooltip)
         edit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Maximum)
-        edit.editingFinished.connect(getattr(self, '_callback' + name))
+        edit.setText(default)
+        edit.textChanged.connect(getattr(self, '_callback' + name))
 
         label = QtWidgets.QLabel(label)
         label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)

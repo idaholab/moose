@@ -80,8 +80,8 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         self._widget.BackgroundPlugin.GradientToggle.clicked.emit(False)
 
         # Mesh
-        self._widget.MeshPlugin.DisplacmentMagnitude.setValue(0.3)
-        self._widget.MeshPlugin.DisplacmentMagnitude.editingFinished.emit()
+        self._widget.MeshPlugin.DisplacementMagnitude.setValue(0.3)
+        self._widget.MeshPlugin.DisplacementMagnitude.editingFinished.emit()
         self._widget.MeshPlugin.ScaleY.setValue(1.5)
         self._widget.MeshPlugin.ScaleY.editingFinished.emit()
 

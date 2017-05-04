@@ -42,6 +42,10 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
     #: pyqtSignal: Emitted when a file is changed via the file select.
     fileChanged = QtCore.pyqtSignal(str)
+    #: pyqtSignal: Emitted right before the fileChanged is emitted
+    preFileChanged = QtCore.pyqtSignal()
+    #: pyqtSignal: Emitted right after the fileChanged is emitted
+    postFileChanged = QtCore.pyqtSignal()
 
     #: pyqtSignal: Emitted when the file has changed and a camera has been stashed
     cameraChanged = QtCore.pyqtSignal(vtk.vtkCamera)
@@ -118,7 +122,9 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
             index[int]: The index of the selected item.
         """
         full_file = str(self.AvailableFiles.itemData(index))
+        self.preFileChanged.emit()
         self.fileChanged.emit(full_file)
+        self.postFileChanged.emit()
 
         if full_file in self._cameras:
             self.cameraChanged.emit(self._cameras[full_file])
