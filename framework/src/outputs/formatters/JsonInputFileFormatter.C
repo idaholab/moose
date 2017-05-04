@@ -24,8 +24,8 @@ JsonInputFileFormatter::toString(const moosecontrib::Json::Value & root)
 {
   _stream.clear();
   _stream.str("");
-  for (auto && name : root.getMemberNames())
-    addBlock(name, root[name], true);
+  for (auto && name : root["blocks"].getMemberNames())
+    addBlock(name, root["blocks"][name], true);
   return _stream.str();
 }
 

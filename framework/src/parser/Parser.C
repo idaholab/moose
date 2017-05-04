@@ -668,6 +668,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
       }
     }
   }
+  root.addGlobal();
 }
 
 void

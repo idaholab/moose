@@ -43,7 +43,7 @@ JsonSyntaxTree::getJson(const std::string & path)
 {
   auto paths = splitPath(path);
   mooseAssert(paths.size() > 0, "path is empty");
-  moosecontrib::Json::Value * next = &_root[paths[0]];
+  moosecontrib::Json::Value * next = &_root["blocks"][paths[0]];
 
   for (auto pit = paths.begin() + 1; pit != paths.end(); ++pit)
   {
@@ -117,6 +117,19 @@ JsonSyntaxTree::setParams(InputParameters * params,
     all_params[iter.first] = param_json;
   }
   return count;
+}
+
+void
+JsonSyntaxTree::addGlobal()
+{
+  // If they are doing a search they probably don't want to see this
+  if (_search.empty())
+  {
+    auto params = validParams<Action>();
+    moosecontrib::Json::Value jparams;
+    setParams(&params, true, jparams);
+    _root["global"]["parameters"] = jparams;
+  }
 }
 
 bool

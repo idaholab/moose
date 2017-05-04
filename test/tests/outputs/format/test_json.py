@@ -71,7 +71,9 @@ class TestJSON(unittest.TestCase):
         Some basic checks to see if some data
         is there and is in the right location.
         """
-        data = self.getJsonData()
+        all_data = self.getJsonData()
+        self.assertIn("active", all_data["global"]["parameters"])
+        data = all_data["blocks"]
         self.assertIn("Executioner", data)
         self.assertIn("BCs", data)
         bcs = data["BCs"]
@@ -107,7 +109,9 @@ class TestJSON(unittest.TestCase):
         """
         Make sure parameter search works
         """
-        data = self.getJsonData(["initial_marker"])
+        all_data = self.getJsonData(["initial_marker"])
+        self.assertNotIn("global", all_data)
+        data = all_data["blocks"]
         self.assertNotIn("Executioner", data)
         self.assertNotIn("BCs", data)
         self.assertIn("Adaptivity", data)
@@ -117,7 +121,8 @@ class TestJSON(unittest.TestCase):
         self.assertEqual(len(params.keys()), 1)
 
         # test to make sure it matches blocks as well
-        data = self.getJsonData(["diffusion"])
+        all_data = self.getJsonData(["diffusion"])
+        data = all_data["blocks"]
         self.assertEqual(len(data.keys()), 2)
         self.assertIn("BadKernels", data)
         self.assertIn("Kernels", data)
@@ -183,7 +188,8 @@ class TestJSON(unittest.TestCase):
         """
         Make sure file/line information works
         """
-        data = self.getJsonData()
+        all_data = self.getJsonData()
+        data = all_data["blocks"]
         adapt = data["Adaptivity"]["actions"]["SetAdaptivityOptionsAction"]
         fi = adapt["file_info"]
         self.assertEqual(len(fi.keys()), 1)

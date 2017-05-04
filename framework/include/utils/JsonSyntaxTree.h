@@ -73,6 +73,11 @@ public:
    */
   void addSyntaxType(const std::string & path, const std::string type);
 
+  /**
+   * Add the global section to the output
+   */
+  void addGlobal();
+
 protected:
   std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p);
 
