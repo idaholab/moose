@@ -84,6 +84,10 @@ class Scheduler(MooseObject):
         # Reporting timer which resets when ever data is printed to the screen.
         self.reported_timer = clock()
 
+    # Return post run command from derived classes
+    def postCommand(self):
+        return
+
     # Allow derived schedulers to skip tests
     def canLaunch(self, tester, command, checks, test_list):
         return tester.checkRunnableBase(self.options, checks, test_list)

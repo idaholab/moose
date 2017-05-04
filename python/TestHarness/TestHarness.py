@@ -514,8 +514,8 @@ class TestHarness:
             print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code )
 
-            if self.queue_file:
-                print '\nYour Queue batch file:', self.queue_file.name
+        # Run a post command if any derived classes are asking for it
+        self.scheduler.postCommand()
 
         if self.file:
             self.file.close()
@@ -529,16 +529,29 @@ class TestHarness:
             if not self.options.processingQueue:
                 # Write the json data to queue file
                 json.dump(self.queue_data, self.queue_file, indent=2)
-            self.queue_file.close()
 
+            # Clost the queue file
+            self.queue_file.close()
+            print '\nYour Queue batch file:', self.queue_file.name
+
+    # Delete all files created by queueing options
     def cleanQueueFiles(self):
-        # Open the PBS batch file and assign it to a list
-        for job_id, job_data in self.queue_data.iteritems():
-            try:
-                shutil.rmtree(job_data['test_dir'])
-            except OSError:
-                pass
-        os.remove(self.options.queue_cleanup)
+        if os.path.exists(self.options.queue_cleanup):
+            with open(self.options.queue_cleanup, 'r') as q_file:
+                try:
+                    queue_data = json.load(q_file)
+                except ValueError:
+                    print 'Queue file specified not json format:', self.options.queue_cleanup
+                    sys.exit(1)
+                for job_name, job_data in queue_data.iteritems():
+                    try:
+                        shutil.rmtree(job_data['test_dir'])
+                    except OSError:
+                        pass
+            os.remove(self.options.queue_cleanup)
+        else:
+            print 'Specified file not found', self.options.queue_cleanup
+            sys.exit(1)
 
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
@@ -758,20 +771,6 @@ class TestHarness:
                 self.queue_file = open(self.queue_file, 'w')
                 self.queue_data = {}
 
-        # Delete old pbs files
-        if opts.queue_cleanup:
-            # Populate pbs_data file if it exists
-            if os.path.exists(opts.queue_cleanup):
-                try:
-                    with open(opts.queue_cleanup, 'r') as q_file:
-                        self.queue_data = json.load(q_file)
-                except ValueError:
-                    print 'Queue file specified not json format:', opts.queue_cleanup
-                    sys.exit(1)
-            else:
-                print 'Specified PBS file not found'
-                sys.exit(1)
-
     def checkForRaceConditionOutputs(self, testers, dirpath):
         d = DependencyResolver()
 
@@ -822,7 +821,7 @@ class TestHarness:
         elif self.options.dump:
             self.factory.printDump("Tests")
             sys.exit(0)
-        elif self.options.queue_cleanup:
+        elif self.options.queue_cleanup is not None:
             self.cleanQueueFiles()
             sys.exit(0)
 

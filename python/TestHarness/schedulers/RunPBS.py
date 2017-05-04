@@ -21,12 +21,20 @@ class RunPBS(QueueManager):
     def __init__(self, harness, params):
         QueueManager.__init__(self, harness, params)
         self.specs = params
+        self.launched_ids = []
 
+    # Return command to release all launched jobs
+    def getpostQueueCommand(self):
+        if len(self.launched_ids):
+            print '\nreleasing launched jobs...'
+            return 'qrls ' + ' '.join(self.launched_ids)
+
+    # Return command necessary for current mode
     def getQueueCommand(self, tester):
         if self.options.processingQueue:
             return 'qstat -xf %s' % (self.getQueueID(tester))
         else:
-            return 'qsub %s' % (self.getQueueScript(tester))
+            return 'qsub -h %s' % (self.getQueueScript(tester))
 
     # Read the template file make some changes, and write the launch script
     def prepareQueueScript(self, tester, preq_list):
@@ -60,6 +68,11 @@ class RunPBS(QueueManager):
             job_id = pattern.search(output).group(1)
             # Update the queue_data with launch information
             self.updateQueueFile(tester, job_id)
+
+            # Append this job_id to a self governed list of launched jobs
+            self.launched_ids.append(job_id)
+
+            # Set the tester status
             tester.setStatus('%s LAUNCHED' % (str(job_id)), tester.bucket_pending)
 
         elif 'command not found' in output:

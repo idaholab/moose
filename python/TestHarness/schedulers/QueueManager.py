@@ -1,4 +1,5 @@
 from subprocess import *
+from util import *
 from timeit import default_timer as clock
 
 from Scheduler import Scheduler
@@ -41,6 +42,10 @@ class QueueManager(Scheduler):
     def getQueueCommand(self):
         return
 
+    # Get the command to run after all jobs have launched
+    def getpostQueueCommand(self):
+        return
+
     # Handle output generated from launching the job into the queue
     def handleQueueLaunch(self, tester, output):
         return
@@ -49,9 +54,23 @@ class QueueManager(Scheduler):
     def handleQueueStatus(self, tester, output):
         return
 
-    # Return path-friendly test name
+    # derived post command for this group of tests
+    def postCommand(self):
+        command = self.getpostQueueCommand()
+        if command:
+            runCommand(command)
+
+    # Return path-friendly test name (remove special characters)
     def getJobName(self, tester):
-        return tester.specs['test_name'].replace('/', '_')
+        # A little hackish. But there is an instance where we do not
+        # have a tester 'object' that we have to deal with. And that is
+        # with prereq test lists supplied by specs['prereq'].
+        if type(tester) == type(str()):
+            tester_text = tester
+        else:
+            tester_text = tester.specs['test_name']
+
+        return ''.join(txt for txt in tester_text if txt.isalnum() or txt in ['_', '-'])
 
     # Return queue working directory
     def getWorkingDir(self, tester):
@@ -253,7 +272,7 @@ class QueueManager(Scheduler):
             prereq_job_ids = []
             if tester.specs['prereq'] != [] and not self.options.processingQueue:
                 for prereq_test in tester.specs['prereq']:
-                    path_friendly = prereq_test.replace('/', '_')
+                    path_friendly = self.getJobName(prereq_test)
                     prereq_job_ids.append(self.queue_data[path_friendly]['id'])
 
             # Create and copy all the files/directories this test requires
