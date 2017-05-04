@@ -5,6 +5,7 @@
     cli_args = 'Outputs/file_base=rspherical_out'
     csvdiff = 'rspherical_out.csv'
     prereq = 'rspherical'    
+    link_files = meshes
   [../]
 
   [./rspherical_error_sm]
@@ -12,6 +13,7 @@
     input = 'rspherical_sm.i'
     cli_args = 'Postprocessors/intVolTotal/component=1'
     expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
+    link_files = meshes
   [../]
 
   [./rz_sm]
@@ -20,6 +22,7 @@
     cli_args = 'Outputs/file_base=rz_out'
     csvdiff = 'rz_out.csv'
     prereq = 'rz2'
+    link_files = meshes
   [../]
 
   [./rz2_sm]
@@ -28,6 +31,7 @@
     cli_args = 'Postprocessors/internalVolume/component=1 Outputs/file_base=rz_out'
     csvdiff = 'rz_out.csv'
     prereq = 'rz_sm'
+    link_files = meshes
   [../]
 
   [./rz_error_sm]
@@ -35,6 +39,7 @@
     input = 'rz_sm.i'
     cli_args = 'Postprocessors/internalVolume/component=2'
     expect_err = 'With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.'
+    link_files = meshes
   [../]
 
   [./hex20_sm]
@@ -43,6 +48,7 @@
     cli_args = 'Outputs/file_base=hex20_out'
     csvdiff = 'hex20_out.csv'
     prereq = 'hex20'
+    link_files = meshes
   [../]
 
   [./rz_quad8_sm]
@@ -51,6 +57,7 @@
     cli_args = 'Outputs/file_base=rz_quad8_out'
     csvdiff = 'rz_quad8_out.csv'
     prereq = 'rz_quad8'
+    link_files = meshes
   [../]
 
   [./rz_cone_sm]
@@ -59,6 +66,7 @@
     cli_args = 'Outputs/file_base=rz_cone_out'
     csvdiff = 'rz_cone_out.csv'
     prereq = 'rz_cone'
+    link_files = meshes
   [../]
 
   [./hex8_sm]
@@ -67,6 +75,7 @@
     cli_args = 'Outputs/file_base=hex8_out'
     csvdiff = 'hex8_out.csv'
     prereq = 'hex8'
+    link_files = meshes
   [../]
 
   [./rz_displaced_sm]
@@ -75,6 +84,7 @@
     cli_args = 'Outputs/file_base=rz_displaced_out'
     csvdiff = 'rz_displaced_out.csv'
     prereq = 'rz_displaced'
+    link_files = meshes
   [../]
 
   [./rz_displaced_quad8_sm]
@@ -83,12 +93,14 @@
     cli_args = 'Outputs/file_base=rz_displaced_quad8_out'
     csvdiff = 'rz_displaced_quad8_out.csv'
     prereq = 'rz_displaced_quad8'
+    link_files = meshes
   [../]
 
   [./rspherical]
     type = 'CSVDiff'
     input = 'rspherical.i'
     csvdiff = 'rspherical_out.csv'
+    link_files = meshes
   [../]
 
   [./rspherical_error]
@@ -96,12 +108,14 @@
     input = 'rspherical.i'
     cli_args = 'Postprocessors/intVolTotal/component=1'
     expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
+    link_files = meshes
   [../]
 
   [./rz]
     type = 'CSVDiff'
     input = 'rz.i'
     csvdiff = 'rz_out.csv'
+    link_files = meshes
   [../]
 
   [./rz2]
@@ -110,6 +124,7 @@
     csvdiff = 'rz_out.csv'
     cli_args = 'Postprocessors/internalVolume/component=1'
     prereq = rz
+    link_files = meshes
   [../]
 
   [./rz_error]
@@ -117,42 +132,49 @@
     input = 'rz.i'
     cli_args = 'Postprocessors/internalVolume/component=2'
     expect_err = 'With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.'
+    link_files = meshes
   [../]
 
   [./hex20]
     type = 'CSVDiff'
     input = 'hex20.i'
     csvdiff = 'hex20_out.csv'
+    link_files = meshes
   [../]
 
   [./rz_quad8]
     type = 'CSVDiff'
     input = 'rz_quad8.i'
     csvdiff = 'rz_quad8_out.csv'
+    link_files = meshes
   [../]
 
   [./rz_cone]
     type = 'CSVDiff'
     input = 'rz_cone.i'
     csvdiff = 'rz_cone_out.csv'
+    link_files = meshes
   [../]
 
   [./hex8]
     type = 'CSVDiff'
     input = 'hex8.i'
     csvdiff = 'hex8_out.csv'
+    link_files = meshes
   [../]
 
   [./rz_displaced]
     type = 'CSVDiff'
     input = 'rz_displaced.i'
     csvdiff = 'rz_displaced_out.csv'
+    link_files = meshes
   [../]
 
   [./rz_displaced_quad8]
     type = 'CSVDiff'
     input = 'rz_displaced_quad8.i'
     csvdiff = 'rz_displaced_quad8_out.csv'
+    link_files = meshes
   [../]
 
 []

@@ -5,8 +5,9 @@
     # When we run this input file through the test harness to check
     # for regressions, we'll use a much smaller mesh in place of the
     # real bridge.e mesh, just to make the checks run faster.
-    cli_args = 'Mesh/file=../../../tensor_mechanics/examples/bridge/fake_bridge.e'
+    cli_args = 'Mesh/file=bridge/fake_bridge.e'
     check_input = True
+    link_files = bridge
   [../]
   [./bridge_large_strain]
     type = RunApp
@@ -14,7 +15,8 @@
     # When we run this input file through the test harness to check
     # for regressions, we'll use a much smaller mesh in place of the
     # real bridge.e mesh, just to make the checks run faster.
-    cli_args = 'Mesh/file=../../../tensor_mechanics/examples/bridge/fake_bridge.e'
+    cli_args = 'Mesh/file=bridge/fake_bridge.e'
     check_input = True
+    link_files = bridge
   [../]
 []
