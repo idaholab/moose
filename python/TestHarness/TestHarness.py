@@ -723,9 +723,7 @@ class TestHarness:
             self.queue_file = opts.slurm
         else:
             self.queue_file = None
-
-        # Initialize Queue globals
-        self.options.processingQueue = False
+            self.options.processingQueue = None
 
         # Initialize Queue options if supplied
         if self.queue_file:
@@ -752,6 +750,9 @@ class TestHarness:
                         if m != None and int(m.group(1)) > largest_serial_num:
                             largest_serial_num = int(m.group(1))
                     self.queue_file = "queue_" +  str(largest_serial_num+1).zfill(3)
+
+                # Set the TestHarness to Queueing mode
+                self.options.processingQueue = False
 
                 # Set the queue_file handler
                 self.queue_file = open(self.queue_file, 'w')

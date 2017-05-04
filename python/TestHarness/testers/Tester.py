@@ -55,6 +55,11 @@ class Tester(MooseObject):
         params.addParam('check_input',    False, "Check for correct input file syntax")
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
 
+        # Queueing specific (PBS/SLURM)
+        params.addParam('copy_files',         [], "Additional list of files/directories to copy when performing queueing operations")
+        params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
+        params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
+
         return params
 
     def __init__(self, name, params):
@@ -327,6 +332,10 @@ class Tester(MooseObject):
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
+
+        # Check for queueing
+        if not self.specs['queue_scheduler'] and options.processingQueue is not None:
+            reasons['queue_scheduler'] = 'NO QUEUE'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.

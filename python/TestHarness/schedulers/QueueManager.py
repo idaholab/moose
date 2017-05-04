@@ -18,8 +18,6 @@ class QueueManager(Scheduler):
         params.addRequiredParam('job_name',                 '', "the path-friendly name of this test")
         params.addRequiredParam('working_dir',              '', "the working directory")
 
-        params.addParam('copy_files',            '',     "list of files to copy")
-        params.addParam('no_copy_files',         '',     "list of files not to copy")
         params.addParam('no_copy_pattern', '.*\.sh',     "pattern of files not to copy")
 
         return params
@@ -120,7 +118,7 @@ class QueueManager(Scheduler):
         self.specs['working_dir'] = self.getWorkingDir(tester)
 
         #### create a set for copy and nocopy so its easier to work with
-        no_copy_files = set([self.options.input_file_name])
+        no_copy_files = set([])
         copy_files = set([])
 
         if tester.specs.isValid('no_copy_files'):
@@ -211,7 +209,17 @@ class QueueManager(Scheduler):
                         shutil.copytree('../' + file, file)
                     except OSError, ex:
                         if ex.errno == errno.EEXIST: pass
-                        else: raise
+                        else: raise Exception()
+
+        # Create symlinks (do last, to allow hard copy above to be default)
+        if tester.specs.isValid('link_files'):
+            for file in tester.specs['link_files']:
+                if os.path.exists('../' + file):
+                    try:
+                        os.symlink('../' + file, file)
+                    except OSError, ex:
+                        if ex.errno == errno.EEXIST: pass
+                        else: raise Exception()
 
         # return to the previous directory
         os.chdir(current_pwd)
