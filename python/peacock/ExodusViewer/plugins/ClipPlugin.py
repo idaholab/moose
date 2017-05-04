@@ -62,8 +62,10 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         When a variable changes, load the state of the clip.
         """
+        if self.isEnabled():
+            self.store(self.stateKey(self._variable), 'Variable')
         super(ClipPlugin, self).onVariableChanged(*args)
-        self.load(self._variable, 'Variable')
+        self.load(self.stateKey(self._variable), 'Variable')
 
     def clip(self):
         """
@@ -74,7 +76,9 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         checked = self.ClipToggle.isChecked()
         self.ClipDirection.setEnabled(checked)
         self.ClipSlider.setEnabled(checked)
-        filters = self._result.getOption('filters')
+        filters = []
+        if self._result:
+            filters = self._result.getOption('filters')
 
         # Clipping
         if checked:
@@ -95,7 +99,6 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
             if self._clipper in filters:
                 filters.remove(self._clipper)
 
-        self.store(self._variable, 'Variable')
         self.resultOptionsChanged.emit({'filters':filters})
         self.windowRequiresUpdate.emit()
 
@@ -103,7 +106,7 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup method for the clip toggle.
         """
-        qobject.clicked.connect(self.clip)
+        qobject.stateChanged.connect(lambda val: self.clip())
 
     def _setupClipDirection(self, qobject):
         """
@@ -120,7 +123,7 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Callback for when clip direction is altered.
         """
         index = self.ClipDirection.currentIndex()
-        WidgetUtils.loadWidget(self.ClipSlider, index, 'ClipDirection')
+        WidgetUtils.loadWidget(self.ClipSlider, self.stateKey(index), 'ClipDirection')
         self.clip()
 
     def _setupClipSlider(self, qobject):
@@ -131,7 +134,7 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         qobject.setRange(0, self._increments)
         qobject.setSliderPosition(self._increments/2)
         qobject.setProperty('cache', ['ClipDirection'])
-        qobject.sliderReleased.connect(self._callbackClipSlider)
+        qobject.valueChanged.connect(self._callbackClipSlider)
 
         # Store the initial state of the slide for index 0, why?
         #
@@ -143,15 +146,15 @@ class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         #
         # Without this 'x' would be at the 'y' position instead of at the midpoint.
         qobject.setEnabled(True)
-        WidgetUtils.storeWidget(qobject, 0, 'ClipDirection')
+        WidgetUtils.storeWidget(qobject, self.stateKey(0), 'ClipDirection')
         qobject.setEnabled(False)
 
-    def _callbackClipSlider(self):
+    def _callbackClipSlider(self, value):
         """
         Callback for slider.
         """
         index = self.ClipDirection.currentIndex()
-        WidgetUtils.storeWidget(self.ClipSlider, index, 'ClipDirection')
+        WidgetUtils.storeWidget(self.ClipSlider, self.stateKey(index), 'ClipDirection')
         self.clip()
 
 def main(size=None):

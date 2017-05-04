@@ -37,7 +37,6 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
 
         # Enable clipping
         self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # Test visibility
         self.assertTrue(self._widget.ClipPlugin.ClipDirection.isEnabled())
@@ -53,7 +52,6 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
 
         # Enable clipping
         self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # y-axis
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
@@ -75,7 +73,6 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
 
         # Enable clipping
         self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # Update the slider
         self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
@@ -89,7 +86,6 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
 
         # Enable clipping
         self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
 
         # Test the initial slider position
         self.assertEqual(20, self._widget.ClipPlugin.ClipSlider.sliderPosition())
@@ -118,14 +114,12 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         # Store an initial state of the GUI
         self._widget.ClipPlugin.onVariableChanged('state0')
         self._widget.ClipPlugin.ClipToggle.setChecked(False)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(False)
 
         # Switch variables
         self._widget.ClipPlugin.onVariableChanged('state1')
 
         # Enable contours
         self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
         self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
         self._widget.ClipPlugin.ClipSlider.sliderReleased.emit()

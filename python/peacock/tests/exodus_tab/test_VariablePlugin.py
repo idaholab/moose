@@ -196,6 +196,47 @@ class TestVariablePlugin(Testing.PeacockImageTestCase):
         self.assertAlmostEqual(float(self._widget.VariablePlugin.RangeMaximum.text()), 0.0)
         self.assertIn('color:#8C8C8C', self._widget.VariablePlugin.RangeMinimum.styleSheet())
 
+    def testFileChangedState(self):
+        """
+        Test changing files and making sure the state is saved/restored
+        """
+        # Change the file to something with vectors
+        vp = self._widget.VariablePlugin
+        fp = self._widget.FilePlugin
+        fp._callbackAvailableFiles(0)
+        vp.VariableList.setCurrentIndex(1)
+        vp.ColorMapList.setCurrentIndex(1)
+        vp.RangeMinimum.setText("100")
+        vp.RangeMaximum.setText("1000")
+        vp.ColorBarToggle.setChecked(False)
+        vp.ReverseColorMap.setChecked(True)
+
+        fp._callbackAvailableFiles(1)
+        vp.VariableList.setCurrentIndex(1)
+        vp.ColorMapList.setCurrentIndex(3)
+        vp.RangeMinimum.setText("200")
+        vp.RangeMaximum.setText("2000")
+        # These get inherited from the previous file
+        self.assertEqual(vp.ColorBarToggle.isChecked(), False)
+        self.assertEqual(vp.ReverseColorMap.isChecked(), True)
+        vp.ColorBarToggle.setChecked(True)
+        vp.ReverseColorMap.setChecked(False)
+
+        fp._callbackAvailableFiles(0)
+        self.assertEqual(vp.VariableList.currentIndex(), 1)
+        self.assertEqual(vp.ColorMapList.currentIndex(), 1)
+        self.assertEqual(vp.RangeMinimum.text(), "100")
+        self.assertEqual(vp.RangeMaximum.text(), "1000")
+        self.assertEqual(vp.ColorBarToggle.isChecked(), False)
+        self.assertEqual(vp.ReverseColorMap.isChecked(), True)
+
+        fp._callbackAvailableFiles(1)
+        self.assertEqual(vp.VariableList.currentIndex(), 1)
+        self.assertEqual(vp.ColorMapList.currentIndex(), 3)
+        self.assertEqual(vp.RangeMinimum.text(), "200")
+        self.assertEqual(vp.RangeMaximum.text(), "2000")
+        self.assertEqual(vp.ColorBarToggle.isChecked(), True)
+        self.assertEqual(vp.ReverseColorMap.isChecked(), False)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

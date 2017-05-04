@@ -36,7 +36,7 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         Test the initial state of the widget.
         """
         self.assertTrue(self._widget.MeshPlugin.DisplacementToggle.isChecked())
-        self.assertEqual(self._widget.MeshPlugin.DisplacmentMagnitude.value(), 1.0)
+        self.assertEqual(self._widget.MeshPlugin.DisplacementMagnitude.value(), 1.0)
         self.assertEqual(self._widget.MeshPlugin.Representation.currentText(), 'Surface')
         self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
         self.assertEqual(self._widget.MeshPlugin.ScaleX.value(), 1.0)
@@ -51,7 +51,6 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
 
         # Toggle the mesh
         self._widget.MeshPlugin.ViewMeshToggle.setCheckState(QtCore.Qt.Checked)
-        self._widget.MeshPlugin.ViewMeshToggle.clicked.emit(True)
         self._window._window.resetCamera() # needed since vtk7.0.0
         self.assertImage('testViewMeshToggle.png', allowed=0.98) # lines are slightly different across platforms
 
@@ -120,18 +119,17 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self._window._result.update(camera=None, colorbar={'visible':False}, block=['2'])
         self._window.onResultOptionsChanged({'variable':'distance'})
         self._window.onWindowRequiresUpdate()
-        self.assertImage('testDisplacmentInitial.png')
+        self.assertImage('testDisplacementInitial.png')
 
         # Set the magnitude
-        self._widget.MeshPlugin.DisplacmentMagnitude.setValue(3.1)
-        self._widget.MeshPlugin.DisplacmentMagnitude.valueChanged.emit(3.1)
-        self.assertImage('testDisplacmentMagnitude.png')
+        self._widget.MeshPlugin.DisplacementMagnitude.setValue(3.1)
+        self._widget.MeshPlugin.DisplacementMagnitude.valueChanged.emit(3.1)
+        self.assertImage('testDisplacementMagnitude.png')
 
         # Disable displacement
         self._widget.MeshPlugin.DisplacementToggle.setCheckState(QtCore.Qt.Unchecked)
-        self._widget.MeshPlugin.DisplacementToggle.clicked.emit(QtCore.Qt.Unchecked)
-        self.assertFalse(self._widget.MeshPlugin.DisplacmentMagnitude.isEnabled())
-        self.assertImage('testDisplacmentOff.png')
+        self.assertFalse(self._widget.MeshPlugin.DisplacementMagnitude.isEnabled())
+        self.assertImage('testDisplacementOff.png')
 
     def testVariableState(self):
         """
@@ -148,7 +146,6 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self._widget.MeshPlugin.ScaleX.setValue(1.5)
         self._widget.MeshPlugin.ScaleX.valueChanged.emit(1.5)
         self._widget.MeshPlugin.ViewMeshToggle.setCheckState(QtCore.Qt.Checked)
-        self._widget.MeshPlugin.ViewMeshToggle.clicked.emit(True)
         self.assertImage('testState1.png', allowed=0.94) # lines are different across platforms
 
         # Return to state0

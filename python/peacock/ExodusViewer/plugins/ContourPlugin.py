@@ -82,7 +82,7 @@ class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         When a variable changes, load the state of the clip.
         """
         super(ContourPlugin, self).onVariableChanged(*args)
-        self.load(self._variable, 'Variable')
+        self.load(self.stateKey(self._variable), 'Variable')
         if self._result:
             self.contour()
 
@@ -128,7 +128,7 @@ class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
         # Emit the changes
         if self._variable:
-            self.store(self._variable, 'Variable')
+            self.store(self.stateKey(self._variable), 'Variable')
         self.resultOptionsChanged.emit({'filters':filters})
         self.windowRequiresUpdate.emit()
         self.contourClicked.emit(checked)

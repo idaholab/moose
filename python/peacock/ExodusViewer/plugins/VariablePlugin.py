@@ -84,10 +84,6 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         # Call widget setup methods
         self.setup()
 
-    def onFileChanged(self, *args):
-        super(VariablePlugin, self).onFileChanged(*args)
-        self.load(self._filename, 'Filename')
-
     def onWindowUpdated(self, *args):
         """
         Update the variable list when the window is updated.
@@ -116,9 +112,9 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self.__setVariableList(reader)
 
         # Update the settings based on current selections
-        self.ColorBarToggle.clicked.emit(self.ColorBarToggle.isChecked())
+        self.ColorBarToggle.stateChanged.emit(self.ColorBarToggle.checkState())
         self.ColorMapList.currentIndexChanged.emit(self.ColorMapList.currentIndex())
-        self.ReverseColorMap.clicked.emit(self.ReverseColorMap.isChecked())
+        self.ReverseColorMap.stateChanged.emit(self.ReverseColorMap.checkState())
 
         # Select the variable
         self.VariableList.blockSignals(False)
@@ -172,8 +168,7 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
                 except:
                     qobject.setStyleSheet('color:#ff0000')
 
-        self.store(self._filename, 'Filename')
-        WidgetUtils.storeWidget(qobject, component, 'Component')
+        WidgetUtils.storeWidget(qobject, self.stateKey(component), 'Component')
         if emit:
             self.windowRequiresUpdate.emit()
 
@@ -230,9 +225,9 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         index = self.ComponentList.currentData()
         self.resultOptionsChanged.emit({'component':index})
-        self.store(self._variable, 'Variable')
-        WidgetUtils.loadWidget(self.RangeMinimum, index, 'Component')
-        WidgetUtils.loadWidget(self.RangeMaximum, index, 'Component')
+        self.store(self.stateKey(self._variable), 'Variable')
+        WidgetUtils.loadWidget(self.RangeMinimum, self.stateKey(index), 'Component')
+        WidgetUtils.loadWidget(self.RangeMaximum, self.stateKey(index), 'Component')
         self.setLimit(0)
         self.setLimit(1)
         self.windowRequiresUpdate.emit()
@@ -285,13 +280,14 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup the reverse toggle.
         """
-        qobject.clicked.connect(self._callbackReverseColorMap)
+        qobject.stateChanged.connect(self._callbackReverseColorMap)
 
     def _callbackReverseColorMap(self, value):
         """
         Callback for reverse toggle.
         """
-        self.resultOptionsChanged.emit({'cmap_reverse':value})
+        checked = QtCore.Qt.Checked == value
+        self.resultOptionsChanged.emit({'cmap_reverse':checked})
         self.windowRequiresUpdate.emit()
 
     def _setupColorBarToggle(self, qobject):
@@ -299,13 +295,13 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Setup the colorbar toggle.
         """
         qobject.setChecked(True)
-        qobject.clicked.connect(self._callbackColorBarToggle)
+        qobject.stateChanged.connect(self._callbackColorBarToggle)
 
     def _callbackColorBarToggle(self, value):
         """
         Callback for the colorbar toggle.
         """
-        if value:
+        if value == QtCore.Qt.Checked:
             self.appendResult.emit(self._colorbar)
         else:
             self.removeResult.emit(self._colorbar)
@@ -357,5 +353,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
     widget, _ = main()
-    widget.initialize(filenames)
+    widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())
