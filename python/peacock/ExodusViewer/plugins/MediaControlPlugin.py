@@ -59,8 +59,8 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         if 'time' in kwargs:
             self.readerOptionsChanged.emit({'time':kwargs.get('time')})
 
-        self.windowRequiresUpdate.emit()
         self.timeChanged.emit()
+        self.windowRequiresUpdate.emit()
 
 def main(size=None):
     """
