@@ -437,10 +437,10 @@ public:
   unsigned int multiAppLevel() const { return _multiapp_level; }
 
   /**
-   * Set the MultiApp Level
-   * @param level The level to assign to this app.
+   * The MultiApp number
+   * @return The numbering in all the sub-apps on the same level
    */
-  void setMultiAppLevel(const unsigned int level) { _multiapp_level = level; }
+  unsigned int multiAppNumber() const { return _multiapp_number; }
 
   /**
    * Whether or not this app is the ultimate master app. (ie level == 0)
@@ -671,6 +671,9 @@ private:
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
   unsigned int _multiapp_level;
+
+  /// Numbering in all the sub-apps on the same level
+  unsigned int _multiapp_number;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
