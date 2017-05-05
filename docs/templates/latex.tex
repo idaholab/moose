@@ -1,14 +1,55 @@
+@+ set documentclass = documentclass|default('report') +@
+@+ set preamble = preamble|default([]) +@
+@+ set margin = margin|default('1in') +@
+@+ set paper = paper|default('letterpaper') +@
+@+ set linkcolor = linkcolor|default('blue') +@
+@+ set citecolor = citecolor|default(linkcolor) +@
+@+ set filecolor = filecolor|default(linkcolor) +@
+@+ set urlcolor = urlcolor|default(linkcolor) +@
+
 \documentclass[++fontsize++]{++documentclass++}
+\renewcommand{\familydefault}{\sfdefault}
 \usepackage[paper=++paper++, top=++margin++, bottom=++margin++, left=++margin++, right=++margin++]{geometry}
-\usepackage[T1]{fontenc}
-\catcode`\_=12
-
-\usepackage{hyperref}
-\hypersetup{colorlinks=true, linkcolor=++linkcolor++, citecolor=++linkcolor++, filecolor=++linkcolor++, urlcolor=++linkcolor++}
-
+\usepackage{graphicx}
 \usepackage[parfill]{parskip}
 
-++preamble++
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=++linkcolor++, citecolor=++citecolor++, filecolor=++filecolor++, urlcolor=++urlcolor++}
+
+\usepackage{xparse}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\definecolor{code-background}{HTML}{ECF0F1}
+\definecolor{info-title}{HTML}{528452}
+\definecolor{info}{HTML}{82E0AA}
+\definecolor{note-title}{HTML}{3A7296}
+\definecolor{note}{HTML}{85C1E9}
+\definecolor{important-title}{HTML}{B100B0}
+\definecolor{important}{HTML}{FF00FF}
+\definecolor{warning-title}{HTML}{968B2B}
+\definecolor{warning}{HTML}{FFEC46}
+\definecolor{danger-title}{HTML}{B14D00}
+\definecolor{danger}{HTML}{F75E1D}
+\definecolor{error-title}{HTML}{940000}
+\definecolor{error}{HTML}{FFB4B4}
+
+\DeclareDocumentCommand{\admonition}{O{warning-title}O{warning}mm}
+{
+  \rowcolors{1}{#1}{#2}
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabularx}{\textwidth}{X}
+    \textcolor[rgb]{1,1,1}{\textbf{#3}} \\ #4
+  \end{tabularx}
+  \rowcolors{1}{white}{white}
+}
+
+\usepackage[table]{listings}
+\usepackage{caption}
+%\DeclareCaptionFormat{listing}{#1#2#3}
+%\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, ont={sf}}
+%\definecolor{code-background}{HTML}{ECF0F1}
+\lstset{language=sh, basicstyle=\footnotesize\rmfamily, breaklines=true, backgroundcolor=\color{code-background}}
+
 
 \begin{document}
 @+ if title +@

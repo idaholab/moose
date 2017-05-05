@@ -21,7 +21,7 @@ The LevelSetAdvectionSUPG [Kernel](systems/Kernels/index.md) should be used in c
 For example, the following provides the necessary objects for the complete level set equation
 with SUPG stabilization.
 
-!input modules/level_set/examples/vortex/vortex_supg.i block=Kernels label=False
+!listing modules/level_set/examples/vortex/vortex_supg.i block=Kernels label=False
 
 
 !parameters /Kernels/LevelSetAdvectionSUPG

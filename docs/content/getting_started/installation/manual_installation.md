@@ -1,5 +1,5 @@
 # Manual Installation
-{!docs/content/getting_started/minimum_requirements.md!}
+!include docs/content/getting_started/minimum_requirements.md
 
 ---
 ## Pre-Reqs

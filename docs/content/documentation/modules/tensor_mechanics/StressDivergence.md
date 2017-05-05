@@ -24,11 +24,11 @@ In the stress divergence kernel, nabla is given by the gradients of the test fun
 
 Small strain linearized elasticity problems should be run with the parameter `use_displaced_mesh = false` in the kernel to ensure all calculations across all three classes (strain, stress, and kernel) are computed with respect to the reference mesh.
 
-!input modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Kernels overflow-y=scroll max-height=300px
+!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Kernels
 
 !!! important
     Large deformation problems should be run with the parameter setting `use_displaced_mesh = true` in the kernel so that the kernel and the materials all compute variables with respect to the deformed mesh.
 
 The input file syntax to set the Stress Divergence kernel for large deformation (finite strain) problems is
 
-!input modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules overflow-y=scroll max-height=300px
+!listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules

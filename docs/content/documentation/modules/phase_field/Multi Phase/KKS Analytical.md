@@ -1,10 +1,10 @@
 # Analytical Solution for a 1D equilibrium interface
 
-!image docs/media/phase_field/kks_c.png width=200px padding-left=20px float=right caption=Composition $c$ for 2D simulation domain
+!media docs/media/phase_field/kks_c.png width=200px padding-left=20px float=right caption=Composition $c$ for 2D simulation domain
 
-!image docs/media/phase_field/kks_example_split_eta_0050.png width=200px padding-left=20px float=right clear=both caption=Order parameter $\eta$ along $y=0$
+!media docs/media/phase_field/kks_example_split_eta_0050.png width=200px padding-left=20px float=right clear=both caption=Order parameter $\eta$ along $y=0$
 
-!image docs/media/phase_field/kks_example_split_c_0050.png width=200px padding-left=20px float=right clear=both caption=Composition $c$ along $y=0$
+!media docs/media/phase_field/kks_example_split_c_0050.png width=200px padding-left=20px float=right clear=both caption=Composition $c$ along $y=0$
 
 In the KKS model, an analytical solution exists for the order parameter $\eta$
 and composition $c$ through a 1D equilibrium interface:
@@ -29,11 +29,11 @@ along $y=0$, the results are output to a CSV file, and plotted together with the
 1D analytical solution. (We will use no-flux boundary conditions, so a boundary
 conditions block is not required in the input file.)
 
-!text modules/phase_field/examples/kim-kim-suzuki/kks_example_noflux.i max-height=300px strip-extra-newlines=True overflow-y=scroll
+!listing modules/phase_field/examples/kim-kim-suzuki/kks_example_noflux.i
 
 # Verification against analytical solution
 
-!image docs/media/phase_field/kks_convergence.png width=200px padding-left=20px float=right clear=both caption=$L^2$ error for order parameter $\eta$
+!media docs/media/phase_field/kks_convergence.png width=200px padding-left=20px float=right clear=both caption=$L^2$ error for order parameter $\eta$
 
 To perform a more quantitative comparison of the simulation results to the analytical
 solution, we will calculate the $L^2$ norm of the difference between the simulation
@@ -71,6 +71,6 @@ $L^2$ error versus $h$ for $\eta$ in this problem. As expected, on a log-log sca
 the points are fit well by a straight line. The slope was determined to be 1.995,
 in good agreement with the expected value of 2.
 
-!text modules/phase_field/examples/kim-kim-suzuki/kks_example_dirichlet.i max-height=300px strip-extra-newlines=True overflow-y=scroll
+!listing modules/phase_field/examples/kim-kim-suzuki/kks_example_dirichlet.i
 
 \bibliography{docs/bib/phase_field.bib}

@@ -1,4 +1,4 @@
-name: Home
+name: 'Home'
 show_breadcrumbs: False
 show_table_of_contents: False
 

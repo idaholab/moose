@@ -3,7 +3,7 @@
 
 
 ## Description
-{!docs/content/documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md!}
+!include docs/content/documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 In isotropic linear hardening plasticity, with the hardening function $ r = hp$, the effective plastic strain increment has the form:
 $$

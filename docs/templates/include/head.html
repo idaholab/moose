@@ -5,7 +5,7 @@
 <title>{{title}}</title>
 
 <!-- CSS  -->
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css"/>
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css"/>
+<link href="{{material_icons|default('https://fonts.googleapis.com/icon?family=Material+Icons')}}" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="{{materialize_css|default('https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css')}}"/>
+<link type="text/css" rel="stylesheet" href="{{prism_css|default('https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/themes/prism.min.css')}}"/>
 <link type="text/css" rel="stylesheet" href="{{current.relpath('css/moose.css')}}"/>

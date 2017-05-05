@@ -11,7 +11,7 @@ app_name = 'moose_python'
 MOOSE_DIR = os.path.abspath(os.path.join('..'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
-  MOOSE_DIR = os.environ['MOOSE_DIR']
+    MOOSE_DIR = os.environ['MOOSE_DIR']
 
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.path.join(MOOSE_DIR, 'python')

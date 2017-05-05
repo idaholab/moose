@@ -11,8 +11,7 @@ In its configuration block all non-linear variables the free energy depends on (
 The following material object creates a single property for visualization purposes.
 It will be 0 for phase 1, -1 for phase 2, and 1 for phase 3
 
-!text modules/combined/examples/phase_field-mechanics/Pattern1.i start=phasemap end=matrix overflow-y=scroll max-height=500px
-
+!listing modules/combined/examples/phase_field-mechanics/Pattern1.i start=phasemap end=matrix
 
 !parameters /Materials/ParsedMaterial
 

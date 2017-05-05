@@ -240,10 +240,10 @@ For simplicity, the wave speed is set to $1$.
 To demonstrate the oscillation-free solution quality during wave propagation, an animation is presented below.
 In addition, the numerical results at $t=0.2$ are presented in the following figure.
 
-!image docs/media/rdg/fig_1d_aefv_square_wave.png width=50% padding-right=20px float=right caption=Instantaneous rDG solution for simulating a right-going square-shaped wave in 1D.
+!media docs/media/rdg/fig_1d_aefv_square_wave.png width=50% padding-right=20px float=right caption=Instantaneous rDG solution for simulating a right-going square-shaped wave in 1D.
 
 
-!image docs/media/rdg/anim_1d_aefv_square_wave.gif width=50% padding-right=20px float=right caption=Time evolution of rDG solution for simulating a right-going square-shaped wave in 1D.
+!media docs/media/rdg/anim_1d_aefv_square_wave.gif width=50% padding-right=20px float=right caption=Time evolution of rDG solution for simulating a right-going square-shaped wave in 1D.
 
 ###Input File
 
@@ -251,7 +251,7 @@ The content of some input file blocks is described in detail for clarity.
 
 ####GlobalParams
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=GlobalParams
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=GlobalParams
 
 Notes:
 
@@ -261,7 +261,7 @@ Notes:
 
 ####Mesh
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Mesh
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Mesh
 
 Notes:
 
@@ -269,7 +269,7 @@ Notes:
 
 ####Functions
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Functions
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Functions
 
 Notes:
 
@@ -277,7 +277,7 @@ Notes:
 
 ####UserObjects
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=UserObjects
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=UserObjects
 
 Notes:
 
@@ -289,7 +289,7 @@ Notes:
 
 ####Variables
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Variables
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Variables
 
 Notes:
 
@@ -297,7 +297,7 @@ Notes:
 
 ####Kernels
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Kernels
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Kernels
 
 Notes:
 
@@ -307,7 +307,7 @@ Notes:
 
 ####DGKernels
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=DGKernels
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=DGKernels
 
 Notes:
 
@@ -315,7 +315,7 @@ Notes:
 
 ####BCs
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=BCs
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=BCs
 
 Notes:
 
@@ -323,7 +323,7 @@ Notes:
 
 ####Materials
 
-!input modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Materials
+!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Materials
 
 Notes:
 

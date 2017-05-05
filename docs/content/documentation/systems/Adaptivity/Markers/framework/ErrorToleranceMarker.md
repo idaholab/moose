@@ -12,7 +12,7 @@ element is define for coarsening or refinement using a hard tolerances:
 * Coarsen if the element error is less than value supplied in "coarsen" input parameter.
 
 ## Example Input Syntax
-!input test/tests/markers/error_tolerance_marker/error_tolerance_marker_test.i block=Adaptivity
+!listing test/tests/markers/error_tolerance_marker/error_tolerance_marker_test.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/ErrorToleranceMarker
 

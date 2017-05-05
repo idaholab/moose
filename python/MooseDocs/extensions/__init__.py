@@ -1,6 +1,26 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
 import os
-from MooseMarkdown import MooseMarkdown
+import logging
+
 from markdown.util import etree
+
+import MooseDocs
+
+LOG = logging.getLogger(__name__)
 
 def get_collection_items(info_objects, show_hidden=False):
     """
@@ -20,7 +40,7 @@ def get_collection_items(info_objects, show_hidden=False):
         header.set('class', 'collapsible-header')
         header_row = etree.SubElement(header, 'div')
         header_row.set('class', 'row')
-        item_name= etree.SubElement(header_row, 'div' )
+        item_name = etree.SubElement(header_row, 'div')
         item_name.set('class', 'moose-collection-name col l4')
         a = etree.SubElement(item_name, 'a')
         a.text = info.name
@@ -35,14 +55,14 @@ def get_collection_items(info_objects, show_hidden=False):
     return items
 
 
-def create_collection(name, syntax, action, groups=[], **kwargs):
+def create_collection(name, syntax, action, groups=None, **kwargs):
     """
     Creates subobject collection for a given node from the YAML dump.
 
     Inputs:
       name: The name of the object/system
       syntax: The dict of MooseApplicationSyntax objects
-      action[str]: Name of test function on the MooseApplicationSyntax object to call ('system' or 'object')
+      action[str]: Function on the MooseApplicationSyntax object to call ('system' or 'object')
       groups[list]: The list of groups to restrict the collection.
     """
 
@@ -56,7 +76,7 @@ def create_collection(name, syntax, action, groups=[], **kwargs):
         elif action == 'system':
             items = get_collection_items(syntax[group].actions(name, include_self=False), **kwargs)
         else:
-            log.error('Invalid action name, must supply "system" or "object".')
+            LOG.error('Invalid action name, must supply "system" or "object".')
             return None
 
         if items and use_header:

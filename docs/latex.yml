@@ -1,0 +1,32 @@
+- toc
+- smarty
+- admonition
+- extra
+- meta
+- mdx_math:
+    enable_dollar_delimiter: True
+- MooseDocs.extensions.global:
+    globals: !include docs/globals.yml
+- MooseDocs.extensions.bibtex
+- MooseDocs.extensions.css
+- MooseDocs.extensions.diagram
+- MooseDocs.extensions.devel
+- MooseDocs.extensions.materialize
+- MooseDocs.extensions.media
+- MooseDocs.extensions.equation
+- MooseDocs.extensions.include:
+    repo: https://github.com/idaholab/moose/blob/master
+    make_dir: modules/combined
+- MooseDocs.extensions.float
+- MooseDocs.extensions.template:
+    template: latex.tex
+    environment_args:
+        variable_start_string: "++"
+        variable_end_string: "++"
+        comment_start_string: "%%"
+        comment_end_string: "%%"
+        block_start_string: "@+"
+        block_end_string: "+@"
+- MooseDocs.extensions.app_syntax: !include docs/app_syntax.yml
+- MooseDocs.extensions.html_to_latex:
+    site: http://mooseframework.com/docs/moose_docs/site

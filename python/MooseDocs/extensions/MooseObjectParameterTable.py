@@ -1,3 +1,19 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
+
 import re
 from markdown.util import etree
 
@@ -8,7 +24,7 @@ class MooseObjectParameterTable(object):
 
     INNER = [('name', 'Name:'), ('cpp_type', 'Type:'), ('default', 'Default:')]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs): #pylint: disable=unused-argument
         self._parameters = []
 
     def __nonzero__(self):
@@ -77,32 +93,35 @@ class MooseObjectParameterTable(object):
 
         return ul
 
-    def _formatParam(self, parameter, key):
+    @staticmethod
+    def _formatParam(parameter, key):
         """
         Convert the supplied parameter into a format suitable for output.
 
         Args:
-          param[str]: The value of the parameter.
+          parameter[str]: The parameter dict() item.
           key[str]: The current key.
-          ptype[str]: The C++ type for the parameter.
         """
 
         # Make sure that supplied parameter is a string
         ptype = parameter['cpp_type']
         param = str(parameter[key]).strip()
 
-        # The c++ types returned by the yaml dump are raw and contain "allocator" stuff. This script attempts
-        # to present the types in a more readable fashion.
+        # The c++ types returned by the yaml dump are raw and contain "allocator" stuff. This script
+        # attempts to present the types in a more readable fashion.
         if key == 'cpp_type':
             # Convert std::string
-            string = 'std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >'
+            string = "std::__1::basic_string<char, std::__1::char_traits<char>, " \
+                     "std::__1::allocator<char> >"
             param = param.replace(string, 'std::string')
 
             # Convert vectors
-            param = re.sub(r'std::__1::vector\<(.*),\sstd::__1::allocator\<(.*)\>\s\>', r'std::vector<\1>', param)
+            param = re.sub(r'std::__1::vector\<(.*),\sstd::__1::allocator\<(.*)\>\s\>',
+                           r'std::vector<\1>', param)
             param = '`' + param + '`'
 
-            param = re.sub(r'std::vector\<(.*),\sstd::allocator\<(.*)\>\s\>',  r'std::vector<\1>', param)
+            param = re.sub(r'std::vector\<(.*),\sstd::allocator\<(.*)\>\s\>',
+                           r'std::vector<\1>', param)
             param = '`' + param + '`'
 
         elif key == 'default':

@@ -1,8 +1,8 @@
 # Reading EBSD Data
 
-!image docs/media/phase_field/EBSDReader_example.png width=200px padding-left=20px float=right caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
+!media docs/media/phase_field/EBSDReader_example.png width=200px padding-left=20px float=right caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
 
-!image docs/media/phase_field/EBSDReader_stress.png width=200px padding-left=20px float=right clear=both caption=Reconstructed microstructure with stress, created using the combined module example file `EBSD_reconstruction_grain_growth_mech.i`
+!media docs/media/phase_field/EBSDReader_stress.png width=200px padding-left=20px float=right clear=both caption=Reconstructed microstructure with stress, created using the combined module example file `EBSD_reconstruction_grain_growth_mech.i`
 
 <!--!slider max-width=75% left=220px
      docs/media/phase_field/EBSDReader_example.png caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
@@ -25,7 +25,7 @@ adaptivity and allow the mesh to get coarser during the simulation, the
 `uniform_refine` parameter is used to set how many times the mesh can be coarsened.
 The block takes the form:
 
-!text modules/phase_field/examples/ebsd_reconstruction/IN100-111grn.i start=Mesh end=GlobalParams
+!listing modules/phase_field/examples/ebsd_reconstruction/IN100-111grn.i start=Mesh end=GlobalParams
 
 ## EBSD Reader UserObject
 
@@ -33,7 +33,7 @@ The UserObject reads in the data file, using the name supplied in the mesh block
 and stores a data object with the local data at each material point as well as the
 average data about each grain. The block syntax is very simple:
 
-!text modules/phase_field/examples/ebsd_reconstruction/IN100-111grn.i start=UserObjects end=Variables
+!listing modules/phase_field/examples/ebsd_reconstruction/IN100-111grn.i start=UserObjects end=Variables
 
 ## Applying Initial Conditions
 
@@ -46,19 +46,19 @@ A grain structure is created from the EBSD data by assigning initial condition
 values for order parameters. Many more grains can be represented than the number
 of order parameters. The required blocks are
 
-!text modules/phase_field/tests/reconstruction/1phase_reconstruction.i start=Mesh end=ENDDOC
+!listing modules/phase_field/tests/reconstruction/1phase_reconstruction.i start=Mesh end=ENDDOC
 
 ### Case 2: Initialize a variable from a specific phase number in the EBSD data, ignoring the grain numbers
 Here, the value for a single variable is initialized from the EBSD data corresponding
 to a single phase number. The required blocks are
 
-!text modules/phase_field/tests/reconstruction/2phase_reconstruction.i start=Mesh end=ENDDOC
+!listing modules/phase_field/tests/reconstruction/2phase_reconstruction.i start=Mesh end=ENDDOC
 
 ###Case 3: Create an initial grain structure from the EBSD data only corresponding to one phase number
 Here, the grain and phase numbers are used. The order parameters are initialized
 from the EBSD data, but only using those grains with a given phase number.
 
-!text modules/phase_field/tests/reconstruction/2phase_reconstruction2.i start=Mesh end=ENDDOC
+!listing modules/phase_field/tests/reconstruction/2phase_reconstruction2.i start=Mesh end=ENDDOC
 
 ## Using EBSD Crystal Info
 
@@ -102,7 +102,7 @@ _centerpoints[gr] = d.p;
 
 ## Plotting Color Representation of Crystal Orientations
 
-!image docs/media/phase_field/RGB_plot.png width=200px padding-left=20px float=right caption=Reconstructed microstructure with the color representation of the inverse polefigure description of the crystyal orientations. Image created using the phase_field module example file `IN100-111grn.i`.
+!media docs/media/phase_field/RGB_plot.png width=200px padding-left=20px float=right caption=Reconstructed microstructure with the color representation of the inverse polefigure description of the crystyal orientations. Image created using the phase_field module example file `IN100-111grn.i`.
 
 It is common to use an inverse pole figure representation of the crystal orientations
 to color the grains to represent EBSD data. To simplify the comparison with experiments,

@@ -1,3 +1,3 @@
-name:FAQ
+name:'FAQ'
 
 # Frequently Asked Questions

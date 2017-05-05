@@ -20,12 +20,12 @@ where $h$ is the element length.
 The LevelSetForcingFunctionSUPG [Kernel](systems/Kernels/index.md) should be used in conjunction with a forcing term. For
 example, if a [UserForcingFunction](framework/UserForcingFunction.md) is defined as follows in the `[Kernels]` block.
 
-!input modules/level_set/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing label=False
+!listing modules/level_set/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing label=False
 
 Given the forcing term, it is then possible to add the SUPG term to the same forcing function in the `[Kernels]` block
 as follows.
 
-!input modules/level_set/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing_supg label=False
+!listing modules/level_set/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing_supg label=False
 
 
 !parameters /Kernels/LevelSetForcingFunctionSUPG

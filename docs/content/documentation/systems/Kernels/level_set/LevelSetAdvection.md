@@ -18,7 +18,7 @@ The weak form of this portion of the equation is defined as: find $u_h$ such tha
 This kernel is utilized from within the [`[Kernels]`](systems/Kernels/index.md) block in conjunction with a time derivative
 kernel ([TimeDerivative](framework/TimeDerivative.md)).
 
-!input modules/level_set/tests/reinitialization/master.i block=Kernels label=False
+!listing modules/level_set/tests/reinitialization/master.i block=Kernels label=False
 
 !parameters /Kernels/LevelSetAdvection
 
