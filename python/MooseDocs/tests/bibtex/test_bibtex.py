@@ -14,10 +14,8 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 
-import os
 import unittest
 
-import MooseDocs
 from MooseDocs.testing import MarkdownTestCase
 
 class TestBibtexExtension(MarkdownTestCase):
