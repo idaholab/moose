@@ -25,7 +25,9 @@ class Tests(Testing.PeacockTester):
         path = Testing.find_moose_test_exe()
         y.appChanged(path)
         self.assertNotEqual(y.json_data, None)
-        self.assertIn("Variables", y.json_data.keys())
+        self.assertIn("blocks", y.json_data.keys())
+        self.assertIn("global", y.json_data.keys())
+        self.assertIn("Variables", y.json_data["blocks"].keys())
 
     def testPickle(self):
         y = JsonData()

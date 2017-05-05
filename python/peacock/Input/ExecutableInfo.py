@@ -146,7 +146,7 @@ class ExecutableInfo(object):
     def _createPathMap(self):
         self.path_map = {}
         self.root_info = BlockInfo(None, "/", False, "root node")
-        for name, block in self.json_data.json_data.iteritems():
+        for name, block in self.json_data.json_data["blocks"].iteritems():
             block["name"] = name
             block_info = self._processChild(self.root_info, block, True)
             self.root_info.addChildBlock(block_info)
