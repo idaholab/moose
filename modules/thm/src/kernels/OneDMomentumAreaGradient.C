@@ -32,7 +32,7 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
     _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoEA")),
     _daL_dbeta(isCoupled("beta") ? &getMaterialProperty<Real>("daL_dbeta") : nullptr),
     _alpha_rhoA_var_number(coupled("arhoA")),
-    _alpha_rhoE_var_number(isCoupled("arhoEA") ? coupled("arhoEA") : libMesh::invalid_uint),
+    _alpha_rhoE_var_number(coupled("arhoEA")),
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint)
 {
 }
