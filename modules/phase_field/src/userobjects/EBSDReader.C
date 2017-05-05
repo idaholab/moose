@@ -262,17 +262,11 @@ EBSDReader::indexFromPoint(const Point & p) const
   unsigned int x_index, y_index, z_index, global_index;
 
   x_index = (unsigned int)((p(0) - _minx) / _dx);
-  if (x_index == _nx)
-    --x_index;
   y_index = (unsigned int)((p(1) - _miny) / _dy);
-  if (y_index == _ny)
-    --y_index;
 
   if (_mesh_dimension == 3)
   {
     z_index = (unsigned int)((p(2) - _minz) / _dz);
-    if (z_index == _nz)
-      --z_index;
     global_index = z_index * _ny;
   }
   else
