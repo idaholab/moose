@@ -526,9 +526,10 @@ class TestHarness:
 
         # Close the queue file
         if self.queue_file:
-            if not self.options.processingQueue:
-                # Write the json data to queue file
-                json.dump(self.queue_data, self.queue_file, indent=2)
+            # Write the json data to queue file
+            self.queue_file.seek(0)
+            json.dump(self.queue_data, self.queue_file, indent=2)
+            self.queue_file.truncate()
 
             # Clost the queue file
             self.queue_file.close()
@@ -729,20 +730,21 @@ class TestHarness:
             print 'ERROR: options --pbs %s and --slurm %s can not be used simultaneously' % (opts.pbs, opts.slurm)
             sys.exit(1)
 
+        # Initialize queue mode as none (for checkRunnable)
+        self.options.processingQueue = None
+
         # normalize queueing options
+        self.queue_file = None
         if opts.pbs:
             self.queue_file = opts.pbs
         elif opts.slurm:
             self.queue_file = opts.slurm
-        else:
-            self.queue_file = None
-            self.options.processingQueue = None
 
         # Initialize Queue options if supplied
         if self.queue_file:
             # Queue arguments supplied and file exists
             if os.path.exists(self.queue_file):
-                self.queue_file = open(self.queue_file, 'r')
+                self.queue_file = open(self.queue_file, 'r+')
                 try:
                     self.queue_data = json.load(self.queue_file)
                 except ValueError:
@@ -752,6 +754,9 @@ class TestHarness:
 
                 # Set the TestHarness to processing mode
                 self.options.processingQueue = True
+
+                # Set the input file name to match user's previous -i argument (needed for findAndRunTests)
+                self.options.input_file_name = self.queue_data.itervalues().next()['input_name']
 
             # PBS arguments supplied and file does not exist
             else:

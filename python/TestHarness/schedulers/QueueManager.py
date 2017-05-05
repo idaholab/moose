@@ -63,8 +63,8 @@ class QueueManager(Scheduler):
     # Return path-friendly test name (remove special characters)
     def getJobName(self, tester):
         # A little hackish. But there is an instance where we do not
-        # have a tester 'object' that we have to deal with. And that is
-        # with prereq test lists supplied by specs['prereq'].
+        # have a tester 'object' that we can to deal with. And that is
+        # with the prereq test lists supplied by specs['prereq'].
         if type(tester) == type(str()):
             tester_text = tester
         else:
@@ -91,7 +91,7 @@ class QueueManager(Scheduler):
             return self.queue_data[self.getJobName(tester)]
 
     # Record launched job information
-    def updateQueueFile(self, tester, queue_id, skipped=False):
+    def updateQueueFile(self, tester, queue_id, skipped=False, exit_code=None):
         if skipped:
             queue_id = None
         # Update the queue_data global so that it can be saved/retreived to/from the json file.
@@ -100,10 +100,12 @@ class QueueManager(Scheduler):
                                                      'test_dir'     : self.getWorkingDir(tester),
                                                      'skipped'      : skipped,
                                                      'status'       : tester.getStatusMessage(),
+                                                     'exit_code'    : exit_code,
                                                      'id'           : queue_id }
 
     # Verify we have this test in our records if we are processing the queue
     # If it was skipped before, skip it again (displaying caveats)
+
     # If it was skipped with a silent attribute (--re= options etc) do not save this
     # information into the queue file. This will have the effect of being 'silent'
     def canLaunch(self, tester, command, checks, test_list):
@@ -147,7 +149,7 @@ class QueueManager(Scheduler):
         if tester.specs.isValid('gold_dir'):
             copy_files.update([tester.specs['gold_dir']])
 
-        #### convert the copy and nocopy sets to flat lists so PBSJob can work with them
+        #### convert the copy and nocopy sets to flat lists
         self.specs['copy_files'] = ' '.join(copy_files)
         self.specs['no_copy'] = ' '.join(no_copy_files)
 
@@ -259,16 +261,16 @@ class QueueManager(Scheduler):
         # Get the derived queueing command the queueing system needs us to launch
         command = self.getQueueCommand(tester)
 
-        # Handle unsatisfied prereq tests if we are trying to launch jobs
-        # If we are trying to process results instead, skip this check
+        # Handle unsatisfied prereq tests if we are trying to launch jobs.
+        # If we are trying to process results instead, skip this check.
         if not self.options.processingQueue:
             if self.unsatisfiedPrereqs(tester):
                 self.queue.append([tester, tester_command, os.getcwd()])
                 return
 
+        # If we are trying to process results instead, skip this check.
         if not self.options.processingQueue:
-            # This test can now be launched because the prereq test(s) have been satisfied
-            # This means we can fill in any prereq requirements in the queue batch script
+            # This test can now be launched because the prereq test(s) have been satisfied above
             prereq_job_ids = []
             if tester.specs['prereq'] != [] and not self.options.processingQueue:
                 for prereq_test in tester.specs['prereq']:
@@ -281,7 +283,7 @@ class QueueManager(Scheduler):
             # Call the derived method to build the queue batch script
             self.prepareQueueScriptBase(tester, prereq_job_ids)
 
-        # We need to move into the working_dir so stdout writes to the correct location (cwd)
+        # Move into the working_dir
         current_pwd = os.getcwd()
         os.chdir(self.getWorkingDir(tester))
 

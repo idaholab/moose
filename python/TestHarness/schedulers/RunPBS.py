@@ -66,7 +66,8 @@ class RunPBS(QueueManager):
 
         if pattern.search(output):
             job_id = pattern.search(output).group(1)
-            # Update the queue_data with launch information
+
+            # Update the queue_data
             self.updateQueueFile(tester, job_id)
 
             # Append this job_id to a self governed list of launched jobs
@@ -97,51 +98,76 @@ class RunPBS(QueueManager):
         output = qstat_output
 
         if output_value:
-            # Report the current status of JOB_ID
+            # Get job information from queue_data
+            test_info = self.getQueueData(tester)
+
+            # Save oringal test_dir so we can properly update the queue_data
+            original_testdir = tester.specs['test_dir']
+
+            ## Report the current status of JOB_ID
             if output_value.group(1) == 'F':
-                test_info = self.getQueueData(tester)
+                # Job is finished
                 stdout_file = os.path.join(test_info['test_dir'], test_info['job_name'] + '.o%s' % (test_info['id']))
 
                 # Read the stdout file and allow testOutputAndFinish to do its job
                 if os.path.exists(stdout_file) and exit_code is not None:
                     with open(stdout_file, 'r') as output_file:
                         outfile = output_file.read()
+
                     # Modify the tester object's 'test_dir' to reflect the directory path created by QueueManager.copyFiles
-                    # We need to do this because we are not copying the 'tests' file to this queued location
+                    # We need to do this because tester.processResults will be incorrectly operating 'up one' directory
+                    # from our current queued working directory.
                     tester.specs['test_dir'] = test_info['test_dir']
 
-                    # Allow the tester to verify its own output and set the status. This stage of the test
-                    # shall not return a 'pending' status
+                    # Allow the tester to verify its own output and set the status
                     output = tester.processResults(tester.specs['moose_dir'], exit_code, self.options, outfile)
 
                 elif exit_code == None:
-                    # When this was job canceled or deleted (qdel)
+                    # This job was canceled or deleted (qdel)
                     reason = 'FAILED (PBS ERROR)'
                     tester.setStatus(reason, tester.bucket_fail)
                 else:
-                    # I ran into this scenario when the cluster went down, but launched/completed my job :)
+                    # The job is done but there is no stdout file to read. Can happen when PBS had issues of some kind.
                     reason = 'NO STDOUT FILE'
                     tester.setStatus(reason, tester.bucket_fail)
 
+            # Job is currently running
             elif output_value.group(1) == 'R':
-                # Job is currently running
                 reason = 'RUNNING'
+
+            # Job is exiting
             elif output_value.group(1) == 'E':
-                # Job is exiting
                 reason = 'EXITING'
+
+            # Job is currently queued
             elif output_value.group(1) == 'Q':
-                # Job is currently queued
                 reason = 'QUEUED'
+
+            # Job is waiting for other jobs
             elif output_value.group(1) == 'H':
-                # Job is waiting for other jobs
                 reason = 'HOLDING'
+
+            # Unknown statuses should be treated as failures
             else:
-                # Unknown statuses should be treated as failures
                 reason = 'UNKNOWN PBS STATUS'
                 tester.setStatus(reason, tester.bucket_fail)
 
+            # Set the test status to one of the pending statuses above
             if reason != '' and tester.getStatus() != tester.bucket_fail:
                 tester.setStatus(reason, tester.bucket_pending)
+
+            # Revert the test_dir back to original value so we build the correct path
+            # to working_dir in the queue_file while we update it with the lastest test
+            # status information (all this business of changing test_dir is annoying).
+            # I suppose we don't need to do any of this, because we don't need to update
+            # the queue_file at all (the statuses are generated on the fly correctly with
+            # tester.processResults). I just assume others may find the test statuses
+            # stored in the json file useful someday.
+            tester.specs['test_dir'] = original_testdir
+
+            # Update the queue_data with new test status
+            self.updateQueueFile(tester, test_info['id'], exit_code=exit_code)
+
         else:
             # Job status not available
             reason = 'INVALID QSTAT RESULTS'
