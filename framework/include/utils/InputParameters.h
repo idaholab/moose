@@ -649,6 +649,17 @@ public:
    */
   const std::set<std::string> & getControllableParameters() const { return _controllable_params; }
 
+  /**
+   * Provide a set of reserved values for a parameter. These are values that are in addition
+   * to the normal set of values the parameter can take.
+   */
+  void setReservedValues(const std::string & name, const std::set<std::string> & reserved);
+
+  /**
+   * Get a set of reserved parameter values
+   */
+  std::set<std::string> reservedValues(const std::string & name) const;
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -727,6 +738,9 @@ private:
 
   /// A list of parameters declared as controllable
   std::set<std::string> _controllable_params;
+
+  /// The reserved option names for a parameter
+  std::map<std::string, std::set<std::string>> _reserved_values;
 
   /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid dumping messages
   bool _show_deprecated_message;

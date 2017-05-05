@@ -105,6 +105,10 @@ JsonSyntaxTree::setParams(InputParameters * params,
       param_json["default"] = params->defaultCoupledValue(iter.first);
 
     param_json["options"] = buildOptions(iter);
+    auto reserved_values = params->reservedValues(iter.first);
+    for (auto & reserved : reserved_values)
+      param_json["reserved_values"].append(reserved);
+
     std::string t = prettyCppType(params->type(iter.first));
     param_json["cpp_type"] = t;
     param_json["basic_type"] = basicCppType(t);
