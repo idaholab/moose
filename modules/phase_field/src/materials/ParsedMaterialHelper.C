@@ -173,7 +173,7 @@ ParsedMaterialHelper::functionsOptimize()
   if (!_disable_fpoptimizer)
     _func_F->Optimize();
   if (_enable_jit && !_func_F->JITCompile())
-    mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
+    mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
 }
 
 void

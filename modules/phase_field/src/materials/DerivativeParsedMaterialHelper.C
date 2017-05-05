@@ -174,7 +174,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       if (!_disable_fpoptimizer)
         newitem._F->Optimize();
       if (_enable_jit && !newitem._F->JITCompile())
-        mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
+        mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
 
       // generate material property argument vector
       std::vector<VariableName> darg_names(0);
