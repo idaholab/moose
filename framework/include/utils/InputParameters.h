@@ -656,7 +656,8 @@ public:
   void setReservedValues(const std::string & name, const std::set<std::string> & reserved);
 
   /**
-   * Get a set of reserved parameter values
+   * Get a set of reserved parameter values.
+   * Returns a set by value since we can return an empty set.
    */
   std::set<std::string> reservedValues(const std::string & name) const;
 
