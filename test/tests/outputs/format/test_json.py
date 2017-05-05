@@ -105,6 +105,11 @@ class TestJSON(unittest.TestCase):
         self.assertIn("associated_types", f)
         self.assertEquals(["FunctionName"], f["associated_types"])
 
+        a = data["Adaptivity"]
+        i = a["subblocks"]["Indicators"]["star"]["subblock_types"]["AnalyticalIndicator"]
+        self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
+        self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
+
     def testJsonSearch(self):
         """
         Make sure parameter search works

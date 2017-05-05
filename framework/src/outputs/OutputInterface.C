@@ -30,6 +30,8 @@ validParams<OutputInterface>()
                                            "associated with this object");
 
   params.addParamNamesToGroup("outputs", "Advanced");
+  std::set<std::string> reserved = {"all", "none"};
+  params.setReservedValues("outputs", reserved);
 
   return params;
 }
