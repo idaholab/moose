@@ -20,7 +20,7 @@ refinement.
 
 ## Example Input Syntax
 
-!input test/tests/markers/value_range_marker/value_range_marker_test.i block=Adaptivity
+!listing test/tests/markers/value_range_marker/value_range_marker_test.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/ValueRangeMarker
 

@@ -1,10 +1,33 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
+
 import re
-import bs4
+import uuid
 import logging
-log = logging.getLogger(__name__)
+
+import bs4
+from pylatexenc.latexencode import utf8tolatex
+
+import mooseutils
+
 from Extension import Extension
 from ElementStorage import ElementStorage
 import elements
+
+LOG = logging.getLogger(__name__)
 
 class Translator(object):
     """
@@ -13,17 +36,25 @@ class Translator(object):
     Args:
       extensions[list]: List of Extension objects. If empty the BasicExtension will be used.
     """
-    def __init__(self, unknown=elements.unknown(), extensions=[]):
+    ESCAPE_MAP = dict()
+    ESCAPE_MAP['_'] = '\\_'
+    ESCAPE_MAP['{'] = '\\{'
+    ESCAPE_MAP['}'] = '\\}'
+    ESCAPE_MAP['$'] = '\\$'
+    ESCAPE_MAP['&'] = '\\&'
+    ESCAPE_MAP['%'] = '\\%'
+    ESCAPE_MAP['\\'] = '\\textbackslash~'
+    ESCAPE_MAP['~'] = '\\textasciitilde~'
+    ESCAPE_MAP['^'] = '\\textasciicircum~'
+
+    def __init__(self, extensions=None):
 
         #: BlockElement objects
         self.elements = ElementStorage(etype=elements.Element)
 
-        self.used = set()
-
-        #: Unknown tag conversion
-        self.unknown = unknown
-
         # Add extensions
+        if extensions is None:
+            extensions = []
         for e in extensions:
             if isinstance(e, type):
                 obj = e()
@@ -31,9 +62,9 @@ class Translator(object):
                 obj = e
 
             if not isinstance(obj, Extension):
-                raise Exception('Invalid extension type or instance provided, expected {} but was given {}.'.format('Extension', type(e)))
+                msg = 'Invalid extension type or instance provided, expected {} but was given {}.'
+                raise mooseutils.MooseException(msg.format('Extension', type(e)))
             obj.extend(self)
-
 
     def convert(self, html):
         """
@@ -44,83 +75,78 @@ class Translator(object):
         """
 
         # The html parser attempts to match < > even when they are inside code blocks
-        def subAngleBrackets(match):
-            return '<code{}>{}</code>'.format(match.group(1), match.group(2).replace('<', '##LESSTHAN##').replace('>', '##GREATERTHAN##').replace('&lt;','##LESSTHAN##').replace('&gt;','##GREATERTHAN##'))
-        html = re.sub(r'<code(.*?)>(.*?)</code>', subAngleBrackets, html,
-        flags=re.MULTILINE|re.DOTALL)
+        lt = str(uuid.uuid4())
+        gt = str(uuid.uuid4())
+        def sub_angle_brackets(match):
+            """
+            Replaces angle brackets in <code> blocks with a unique id to avoid it being parsed.
+            """
+            return u'<code{}>{}</code>'.format(match.group(1),
+                                               match.group(2).replace('<', lt).replace('>', gt))
+        html = re.sub(r'<code(.*?)>(.*?)</code>',
+                      sub_angle_brackets,
+                      html,
+                      flags=re.MULTILINE|re.DOTALL)
 
-        # Replace html's unicode quotation marks with those used by latex
-        def subQuoteMarks(match):
-            return '<p>{}</p>'.format(match.group(1).replace('&ldquo;','``').replace('&rdquo;','\'\'').replace('&lsquo;','`').replace('&rsquo;','\''))
-        html = re.sub(r'<p>(.*?)</p>', subQuoteMarks, html, flags=re.MULTILINE|re.DOTALL)
+        # Parse the HTML and convert tags for latex conversion
+        soup = bs4.BeautifulSoup(html, "lxml")
+        for elem in self.elements:
+            for tag in soup.descendants:
+                elem(soup, tag)
 
-        def html2latex(input):
-            n_tags = 0
-            soup = bs4.BeautifulSoup(input, "html.parser")
-            output = []
-            for child in soup.children:
-                if isinstance(child, bs4.element.Tag):
-                    n_tags += 1
-                    result = self._convertTag(child)
-                    if result:
-                        output += result
-                    else:
-                        output += unicode(child)
-                else:
-                    output += unicode(child)
+        # Label unknown HTML for verbatim output
+        for child in soup.descendants:
+            if isinstance(child, bs4.element.Tag) and \
+               (child.name != 'latex') and (len(child.contents) == 1) and \
+               isinstance(child.contents[0], bs4.element.NavigableString):
+                LOG.error('Failed to convert tag %s: %s', child.name, str(child))
+                tex = soup.new_tag('latex')
+                tex.string = unicode(child)
+                tex['data-latex-begin'] = '\\begin{verbatim}'
+                tex['data-latex-end'] = '\\end{verbatim}'
+                tex['data-latex-begin-suffix'] = '\n'
+                tex['data-latex-end-prefix'] = '\n'
+                child.replace_with(tex)
 
-            tex = ''.join(output)
-            return (tex, n_tags)
+        # Convert the latex
+        output = ''.join(x for x in self.process(soup) if x is not None)
+        return output.replace(lt, '<').replace(gt, '>')
 
-        tex = html
-        old_n_tags = 0
-        while (True):
-            tex, n_tags = html2latex(tex)
-            if n_tags == old_n_tags:
-                break
-            old_n_tags = n_tags
-
-        output = []
-        soup = bs4.BeautifulSoup(tex, "html.parser")
-        for child in soup.children:
-            if isinstance(child, bs4.element.Tag):
-                log.error('Failed to convert tag {}: {}'.format(child.name, str(child)))
-                output += self.unknown.convert(child, self.unknown.content(child))
-            else:
-                output += unicode(child)
-        tex = ''.join(output)
-
-        return tex.replace('##LESSTHAN##', '<').replace('##GREATERTHAN##', '>')
-
-    def _convertTag(self, tag):
+    @staticmethod
+    def process(tag):
         """
-        Convert tag to latex.
-
-        Args:
-          tag[bs4.element.Tag]: The tag element to convert.
+        Converts html "latex" tag to actual latex.
         """
 
-        for obj in self.elements:
-            if obj.test(tag):
-                self.used.add(obj)
-                #@todo check return type of convert(), expects a string
-                return obj.prefix(tag) + obj.convert(tag, obj.content(tag))
+        if isinstance(tag, elements.LatexNavigableString):
+            yield utf8tolatex(tag.strip('\n'), non_ascii_only=True, brackets=False)
 
-        return ''
+        elif isinstance(tag, bs4.element.NavigableString):
+            yield utf8tolatex(Translator.escape(tag).strip('\n'),
+                              non_ascii_only=True,
+                              brackets=False)
 
-    def preamble(self):
+        else:
+            yield tag.get('data-latex-open')
+            yield tag.get('data-latex-begin-prefix')
+            yield tag.get('data-latex-begin')
+            yield tag.get('data-latex-begin-suffix')
+
+            for child in tag.children:
+                for p in Translator.process(child):
+                    yield p
+
+            yield tag.get('data-latex-end-prefix')
+            yield tag.get('data-latex-end')
+            yield tag.get('data-latex-end-suffix')
+            yield tag.get('data-latex-close')
+
+    @staticmethod
+    def escape(content):
         """
-        Return the latex preamble content.
+        Escape special latex characters.
         """
-
-        output = []
-
-        for obj in self.used:
-            preamble = obj.preamble()
-            if not isinstance(preamble, list):
-                log.error("The preamble method of {} must return a list.".format(obj.__class__.__name__))
-            for p in preamble:
-                if p not in output:
-                    output.append(p)
-
-        return '\n'.join(output)
+        def sub(match):
+            """Substitution function."""
+            return Translator.ESCAPE_MAP[match.group(1)]
+        return re.sub(r'([_{}$\\%&~^])', sub, content)

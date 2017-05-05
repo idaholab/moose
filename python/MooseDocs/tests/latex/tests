@@ -1,0 +1,15 @@
+[Tests]
+  [./generation]
+    type = PythonUnitTest
+    input = test_generation.py
+    skip = 'WIP'
+  [../]
+  [./elements]
+    type = PythonUnitTest
+    input = test_elements.py
+  [../]
+  [./moose_elements]
+    type = PythonUnitTest
+    input = test_moose_elements.py
+  [../]
+[]

@@ -17,8 +17,8 @@ Total strain theories are path independent: in MOOSE, path independence means th
 
 The input file syntax for small strain is
 
-!text modules/tensor_mechanics/tutorials/basics/part_1.1.i start=strain
-end=stress overflow-y=scroll max-height=300px
+!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i start=strain
+end=stress
 
 ##Incremental Small Strains
 Applicable for small linearized strains, MOOSE includes an incremental small strain material, [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md).  As in the small strain material, the incremental small strain class assumes the gradient of displacement with respect to position is much smaller than unity, and the squared displacement gradient term is neglected in the small strain definition to give:
@@ -31,7 +31,7 @@ As the class name suggests, `ComputeIncrementalSmallStrain` is an incremental fo
 
 The input file syntax for incremental small strain is
 
-!text modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i start=small_strain end=small_stress overflow-y=scroll max-height=300px
+!listing modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i start=small_strain end=small_stress
 
 
 ##Finite Large Strains
@@ -61,4 +61,4 @@ where $\mathrm{av}_{el}()$ is the average value for the entire element. The stra
 
 The input file syntax for a finite incremental strain material is
 
-!text modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress overflow-y=scroll max-height=300px
+!listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress

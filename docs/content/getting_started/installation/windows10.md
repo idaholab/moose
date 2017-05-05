@@ -1,6 +1,6 @@
 # Windows 10
 
-{!docs/content/getting_started/minimum_requirements.md!}
+!include docs/content/getting_started/minimum_requirements.md
 
 ---
 ## Pre-Reqs
@@ -50,9 +50,9 @@ libglu1-mesa
 
 
 * Download our redistributatble package for Ubuntu 14.04
-    * !MOOSEPACKAGE arch=ubuntu14.04 return=link!
+    * !moosepackage arch=ubuntu14.04 return=link!
 
-{!docs/content/getting_started/installation/install_redistributable_deb.md!}
+!include docs/content/getting_started/installation/install_redistributable_deb.md
 
 * Allow your Bash session to connect to Xming
 
@@ -62,6 +62,6 @@ libglu1-mesa
 
 * Restart Bash session (so the moose-environment gets loaded)
 
-{!docs/content/getting_started/installation/clone_moose.md!}
-{!docs/content/getting_started/installation/build_libmesh.md!}
-{!docs/content/getting_started/installation/conclusion.md!}
+!include docs/content/getting_started/installation/clone_moose.md
+!include docs/content/getting_started/installation/build_libmesh.md
+!include docs/content/getting_started/installation/conclusion.md

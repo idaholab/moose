@@ -45,6 +45,6 @@ Volumetric locking correction is set to false by default in tensor mechanics. Wh
 
 When volumetric locking correction is turned on, using a SMP preconditioner with coupled displacement variables may help with convergence. For a 3-D problem with only displacement as unknown variables, the following pre-conditioner block may be used:
 
-!text modules/tensor_mechanics/tests/finite_strain_elastic/elastic_rotation_test.i start=Preconditioning end=Executioner overflow-y=scroll max-height=300px
+!listing modules/tensor_mechanics/tests/finite_strain_elastic/elastic_rotation_test.i start=Preconditioning end=Executioner
 
 \bibliography{docs/bib/tensor_mechanics.bib}

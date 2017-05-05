@@ -26,7 +26,7 @@
         <!-- Markdown -->
         {% if show_table_of_contents|default(True) %}
           <div id="moose-markdown-content" class="col s12 m8 l9">
-            {{current.content()}}
+            {{content}}
           </div>
 
           <!-- TOC -->
@@ -37,7 +37,7 @@
         {% else %}
 
           <div id="moose-markdown-content" class="col s12 m12 l12">
-            {{current.content()}}
+            {{content}}
           </div>
         {% endif %}
 

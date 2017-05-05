@@ -13,7 +13,7 @@ mesh in a consistent manner, as detailed in the [Adaptivity system](systems/Adap
 The four possible `MarkerValue` states are defined in `Marker.h` as
 follows:
 
-!text framework/include/markers/Marker.h include_end=True start=enum MarkerValue end=};
+!listing framework/include/markers/Marker.h include_end=True start=enum MarkerValue end=};
 
 The purpose of each value of the `MarkerValue` is define in the
 following table.
@@ -26,6 +26,6 @@ following table.
 | REFINE | Marks and element to be refined, if possible. |
 
 ## Example Syntax
-!input test/tests/markers/combo_marker/combo_marker_test.i block=Adaptivity
+!listing test/tests/markers/combo_marker/combo_marker_test.i block=Adaptivity
 
 !subobjects /Adaptivity/Markers title=Available Marker Objects

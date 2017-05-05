@@ -15,7 +15,7 @@ independently.
 
 ## Example Syntax
 
-!input test/tests/kernels/simple_diffusion/simple_diffusion.i block=Mesh
+!listing test/tests/kernels/simple_diffusion/simple_diffusion.i block=Mesh
 
 !parameters /Mesh/GeneratedMesh
 

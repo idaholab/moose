@@ -8,7 +8,7 @@ perform simulations that rely on image data, such as setting up an initial condi
 the generated mesh is sized to the dimensions of the images and creates one element per pixel.
 
 ## Example Syntax
-!input test/tests/functions/image_function/image_mesh_3d.i block=Mesh
+!listing test/tests/functions/image_function/image_mesh_3d.i block=Mesh
 
 !parameters /Mesh/ImageMesh
 

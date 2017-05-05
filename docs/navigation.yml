@@ -6,7 +6,7 @@
     - Interfaces: docs/content/documentation/interfaces/index.md
     - Modules: docs/content/documentation/modules/index.md
 - Utilites:
-    - Documentation Generation: docs/content/utilities/documentation/index.md
+    - MooseDocs: docs/content/utilities/moose_docs/index.md
     - Developing MOOSE Apps: docs/content/utilities/development/index.md
     - Memory Logger: docs/content/utilities/memory_logger/memory_logger.md
 - Help:

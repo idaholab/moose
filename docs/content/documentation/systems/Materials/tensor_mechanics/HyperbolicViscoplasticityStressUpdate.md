@@ -3,7 +3,7 @@
 
 
 ## Description
-{!docs/content/documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md!}
+!include docs/content/documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 This uniaxial viscoplasticity class computes the plastic strain as a stateful material property.  The constitutive equation for scalar plastic strain rate used in this model is
 $$

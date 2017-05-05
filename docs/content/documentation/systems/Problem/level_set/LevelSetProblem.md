@@ -8,7 +8,7 @@ that is performing level set reinitialization steps.
 The [LevelSetProblem](#) is invoked by setting the "type" parameter within the [Problem](Problem/index.md) of the
 input file.
 
-!text modules/level_set/tests/transfers/markers/multi_level/master.i start=[Problem] end=[Executioner] label=False
+!listing modules/level_set/tests/transfers/markers/multi_level/master.i start=[Problem] end=[Executioner] label=False
 
 !parameters /Problem/LevelSetProblem
 
