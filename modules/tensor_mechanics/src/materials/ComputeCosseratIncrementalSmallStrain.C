@@ -8,7 +8,7 @@
 #include "ComputeCosseratIncrementalSmallStrain.h"
 
 // MOOSE includes
-#include "PermutationTensor.h"
+#include "RankThreeTensor.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
@@ -68,8 +68,8 @@ ComputeCosseratIncrementalSmallStrain::computeQpProperties()
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned k = 0; k < LIBMESH_DIM; ++k)
       {
-        strain(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
-        strain_old(i, j) += PermutationTensor::eps(i, j, k) * wc_vector_old(k);
+        strain(i, j) += RankThreeTensor::leviCivita(i, j, k) * wc_vector(k);
+        strain_old(i, j) += RankThreeTensor::leviCivita(i, j, k) * wc_vector_old(k);
       }
 
   _deformation_gradient[_qp] = strain;

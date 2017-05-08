@@ -1104,3 +1104,13 @@ RankTwoTensor::initialContraction(const RankFourTensor & b) const
 
   return result;
 }
+
+Real
+RankTwoTensor::leviCivita(unsigned int i, unsigned int j)
+{
+  if (i == 0 && j == 1)
+    return 1;
+  else if (i == 1 && j == 0)
+    return -1;
+  return 0;
+}

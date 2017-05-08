@@ -10,9 +10,9 @@
 #include "ElasticityTensorTools.h"
 #include "Material.h"
 #include "MooseVariable.h"
-#include "PermutationTensor.h"
-#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
+#include "RankFourTensor.h"
 
 template <>
 InputParameters
@@ -70,7 +70,7 @@ MomentBalancing::computeQpResidual()
   Real the_sum = 0.0;
   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-      the_sum += PermutationTensor::eps(_component, j, k) * _stress[_qp](j, k);
+      the_sum += RankThreeTensor::leviCivita(_component, j, k) * _stress[_qp](j, k);
   return _test[_i][_qp] * the_sum;
 }
 

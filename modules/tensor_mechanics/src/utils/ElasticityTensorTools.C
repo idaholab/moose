@@ -6,7 +6,7 @@
 /****************************************************************/
 
 #include "MooseTypes.h"
-#include "PermutationTensor.h"
+#include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 
 namespace ElasticityTensorTools
@@ -41,7 +41,7 @@ elasticJacobianWC(const RankFourTensor & r4t,
   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
       for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
-        sum += r4t(i, j, m, n) * PermutationTensor::eps(m, n, k) * grad_test(j);
+        sum += r4t(i, j, m, n) * RankThreeTensor::leviCivita(m, n, k) * grad_test(j);
   return sum * phi;
 }
 
@@ -58,7 +58,7 @@ momentJacobian(const RankFourTensor & r4t,
   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
       for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
-        sum += PermutationTensor::eps(i, j, m) * r4t(j, m, k, n) * grad_phi(n);
+        sum += RankThreeTensor::leviCivita(i, j, m) * r4t(j, m, k, n) * grad_phi(n);
   return test * sum;
 }
 
@@ -72,8 +72,8 @@ momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Rea
     for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
       for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
         for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
-          sum +=
-              PermutationTensor::eps(i, j, m) * r4t(j, m, l, n) * PermutationTensor::eps(l, n, k);
+          sum += RankThreeTensor::leviCivita(i, j, m) * r4t(j, m, l, n) *
+                 RankThreeTensor::leviCivita(l, n, k);
 
   return test * phi * sum;
 }

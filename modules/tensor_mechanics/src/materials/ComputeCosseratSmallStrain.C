@@ -8,7 +8,7 @@
 #include "ComputeCosseratSmallStrain.h"
 
 // MOOSE includes
-#include "PermutationTensor.h"
+#include "RankThreeTensor.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
@@ -49,7 +49,7 @@ ComputeCosseratSmallStrain::computeQpProperties()
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned k = 0; k < LIBMESH_DIM; ++k)
-        strain(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
+        strain(i, j) += RankThreeTensor::leviCivita(i, j, k) * wc_vector(k);
 
   _total_strain[_qp] = strain;
 
