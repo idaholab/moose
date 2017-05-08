@@ -149,50 +149,72 @@ class TestHarness:
         self.start_time = clock()
 
         try:
-            self.base_dir = os.getcwd()
-            for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
-                # Prune submdule paths when searching for tests
-                if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
-                    dirnames[:] = []
+            # Checking status on previously launched tests
+            if self.options.checkStatus:
+                for (dirpath, file) in self.scheduler.getTests():
 
-                # walk into directories that aren't contrib directories
-                if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
-                    for file in filenames:
-                        # See if there were other arguments (test names) passed on the command line
-                        if file == self.options.input_file_name: #and self.test_match.search(file):
-                            saved_cwd = os.getcwd()
-                            sys.path.append(os.path.abspath(dirpath))
-                            os.chdir(dirpath)
+                    # Enter test directory
+                    saved_cwd = os.getcwd()
+                    sys.path.append(os.path.abspath(dirpath))
+                    os.chdir(dirpath)
 
-                            if self.prunePath(file):
-                                continue
+                    # Get the testers for this test
+                    testers = self.createTesters(dirpath, file, find_only)
 
-                            # Build a Parser to parse the objects
-                            parser = Parser(self.factory, self.warehouse)
+                    # Schedule the test for execution
+                    self.scheduleTesters(testers)
 
-                            # Parse it
-                            self.error_code = self.error_code | parser.parse(file)
+                    # Return to previous directory
+                    os.chdir(saved_cwd)
+                    sys.path.pop()
 
-                            # Retrieve the tests from the warehouse
-                            testers = self.warehouse.getActiveObjects()
+            # Scheduling tests for launch
+            else:
+                self.base_dir = os.getcwd()
+                for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
+                    # Prune submdule paths when searching for tests
+                    if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
+                        dirnames[:] = []
 
-                            # Pass control to launchTest (refactored)
-                            self.launchTest(find_only, file, dirpath, testers)
+                    # walk into directories that aren't contrib directories
+                    if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
+                        for file in filenames:
+                            # See if there were other arguments (test names) passed on the command line
+                            if file == self.options.input_file_name: #and self.test_match.search(file):
 
-                            # See if any tests have colliding outputs
-                            self.checkForRaceConditionOutputs(testers, dirpath)
+                                # Enter test directory
+                                saved_cwd = os.getcwd()
+                                sys.path.append(os.path.abspath(dirpath))
+                                os.chdir(dirpath)
 
-                            os.chdir(saved_cwd)
-                            sys.path.pop()
+                                # Get the testers for this test
+                                testers = self.createTesters(dirpath, file, find_only)
+
+                                # Schedule the test for execution
+                                self.scheduleTesters(testers)
+
+                                # See if any tests have colliding outputs
+                                self.checkForRaceConditionOutputs(testers, dirpath)
+
+                                # Return to previous directory
+                                os.chdir(saved_cwd)
+                                sys.path.pop()
 
         except KeyboardInterrupt:
-            if self.writeFailedTest != None:
-                self.writeFailedTest.close()
+            self.closeFiles()
             print '\nExiting due to keyboard interrupt...'
-            sys.exit(0)
+            sys.exit(1)
 
         # Wait for all tests to finish
         self.scheduler.join()
+
+        # Run a post command if any derived classes are asking for it
+        self.scheduler.postCommand()
+
+        # Go again?
+        if self.scheduler.goAgain():
+            self.findAndRunTests()
+            return
 
         self.cleanup()
 
@@ -202,7 +224,19 @@ class TestHarness:
 
         return
 
-    def launchTest(self, find_only, file, dirpath, testers):
+    def createTesters(self, dirpath, file, find_only):
+        if self.prunePath(file):
+            return
+
+        # Build a Parser to parse the objects
+        parser = Parser(self.factory, self.warehouse)
+
+        # Parse it
+        self.error_code = self.error_code | parser.parse(file)
+
+        # Retrieve the tests from the warehouse
+        testers = self.warehouse.getActiveObjects()
+
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
             self.augmentParameters(file, tester)
@@ -219,7 +253,10 @@ class TestHarness:
         if self.options.enable_recover:
             testers = self.appendRecoverableTests(testers)
 
-        # Go through the Testers and run them
+        return testers
+
+    def scheduleTesters(self, testers):
+        # Go through the Testers and schedule them for launch
         for tester in testers:
             # Double the alloted time for tests when running with the valgrind option
             tester.setValgrindMode(self.options.valgrind_mode)
@@ -233,8 +270,9 @@ class TestHarness:
             elif tester.parameters().isValid('error_code'):
                 tester.setStatus('Parser Error', tester.bucket_skip)
             else:
-                command = tester.getCommand(self.options)
-                self.scheduler.schedule(tester, command, self.checks, self.test_list)
+                self.scheduler.schedule(tester, self.checks, self.test_list)
+
+        return testers
 
     def prunePath(self, filename):
         test_dir = os.path.abspath(os.path.dirname(filename))
@@ -484,7 +522,7 @@ class TestHarness:
         if self.error_code & ~Parser.getErrorCodeMask():
             fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
 
-        # Print a different footer when performing a dry run
+        # Print a different footer based on TestHarness run modes
         if self.options.dry_run:
             print 'Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time)
             summary = '<b>%d would run</b>'
@@ -494,7 +532,10 @@ class TestHarness:
                              colored=self.options.colored, code=self.options.code )
 
         else:
-            print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
+            if self.options.checkStatus:
+                print 'Processed %d test results in %.1f seconds' % (self.num_passed+self.num_failed, time)
+            else:
+                print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
@@ -514,26 +555,27 @@ class TestHarness:
             print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code )
 
-        # Run a post command if any derived classes are asking for it
-        self.scheduler.postCommand()
+        self.closeFiles()
+
+        if self.options.checkStatus:
+            print '\nYour Queue batch file:', self.queue_file.name
+
+    def closeFiles(self):
+        if self.writeFailedTest:
+            self.writeFailedTest.close()
 
         if self.file:
             self.file.close()
 
-        # Close the failed_tests file
-        if self.writeFailedTest != None:
+        if self.writeFailedTest:
             self.writeFailedTest.close()
 
-        # Close the queue file
         if self.queue_file:
             # Write the json data to queue file
             self.queue_file.seek(0)
             json.dump(self.queue_data, self.queue_file, indent=2)
             self.queue_file.truncate()
-
-            # Clost the queue file
             self.queue_file.close()
-            print '\nYour Queue batch file:', self.queue_file.name
 
     # Delete all files created by queueing options
     def cleanQueueFiles(self):
@@ -731,7 +773,8 @@ class TestHarness:
             sys.exit(1)
 
         # Initialize queue mode as none (for checkRunnable)
-        self.options.processingQueue = None
+        self.options.checkStatus = None
+        self.queue_data = None
 
         # normalize queueing options
         self.queue_file = None
@@ -753,7 +796,7 @@ class TestHarness:
                     sys.exit(1)
 
                 # Set the TestHarness to processing mode
-                self.options.processingQueue = True
+                self.options.checkStatus = True
 
                 # Set the input file name to match user's previous -i argument (needed for findAndRunTests)
                 self.options.input_file_name = self.queue_data.itervalues().next()['input_name']
@@ -770,7 +813,7 @@ class TestHarness:
                     self.queue_file = "queue_" +  str(largest_serial_num+1).zfill(3)
 
                 # Set the TestHarness to Queueing mode
-                self.options.processingQueue = False
+                self.options.checkStatus = False
 
                 # Set the queue_file handler
                 self.queue_file = open(self.queue_file, 'w')

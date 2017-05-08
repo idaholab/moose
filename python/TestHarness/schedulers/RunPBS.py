@@ -1,7 +1,9 @@
 from timeit import default_timer as clock
 from MooseObject import MooseObject
 from QueueManager import QueueManager
-import os, re
+import os, re, subprocess
+from util import *
+
 ## This class launches jobs using the PBS queuing system
 class RunPBS(QueueManager):
     @staticmethod
@@ -9,56 +11,63 @@ class RunPBS(QueueManager):
         params = QueueManager.validParams()
         params.addRequiredParam('scheduler', 'RunPBS',       "the name of the scheduler used")
         params.addRequiredParam('place',       'free',       "node placement")
-        params.addRequiredParam('walltime',        '',       "amount of time to request for this test")
 
         params.addParam('combine_streams',  '#PBS -j oe',           "combine stdout and stderr")
         params.addParam('pbs_queue',                  '',           "the PBS queue to use")
         params.addParam('pbs_project',                '',           "the PBS project to use")
-        params.addParam('prereq',                     '',           "list of jobs this job depends on")
 
         return params
 
     def __init__(self, harness, params):
         QueueManager.__init__(self, harness, params)
-        self.specs = params
+
+        # store job ids launched to qrls later
         self.launched_ids = []
 
     # Return command to release all launched jobs
     def getpostQueueCommand(self):
-        if len(self.launched_ids):
-            print '\nreleasing launched jobs...'
-            return 'qrls ' + ' '.join(self.launched_ids)
+        if not self.options.checkStatus:
+            if len(self.launched_ids):
+                print 'Releasing jobs...'
+                return 'qrls ' + ' '.join(self.launched_ids)
 
     # Return command necessary for current mode
     def getQueueCommand(self, tester):
-        if self.options.processingQueue:
+        if self.options.checkStatus:
             return 'qstat -xf %s' % (self.getQueueID(tester))
         else:
             return 'qsub -h %s' % (self.getQueueScript(tester))
 
     # Read the template file make some changes, and write the launch script
-    def prepareQueueScript(self, tester, preq_list):
+    def prepareQueueScript(self, template_queue, tester, preq_list):
         # Add prereq job id, now that we know them!
+        template_queue['prereq'] = ''
         if len(preq_list):
-            self.specs['prereq'] = '#PBS -W depend=afterany:%s' % (':'.join(preq_list))
+            template_queue['prereq'] = '#PBS -W depend=afterany:%s' % (':'.join(preq_list))
+        return template_queue
 
     # Augment PBS Queue specs for tester params
-    def updateParams(self, tester):
+    def updateParams(self, template_queue, tester):
+        # Set place
+        template_queue['place'] = self.specs['place']
+
         # Use the PBS template
-        self.specs['template_script'] = os.path.join(tester.specs['moose_dir'], 'python/TestHarness/schedulers', 'pbs_template')
+        template_queue['template_script'] = os.path.join(tester.specs['moose_dir'], 'python/TestHarness/schedulers', 'pbs_template')
 
         # Convert MAX_TIME to hours:minutes for walltime use
         hours = int(int(tester.specs['max_time']) / 3600)
         minutes = int(int(tester.specs['max_time']) / 60) % 60
-        self.specs['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
+        template_queue['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
 
         # Add PBS project directive
         if self.options.project:
-            self.specs['pbs_project'] = '#PBS -P %s' % (self.options.project)
+            template_queue['pbs_project'] = '#PBS -P %s' % (self.options.project)
 
         # Add PBS queue directive
         if self.options.queue:
-            self.specs['pbs_queue'] = '#PBS -q %s' % (self.options.queue)
+            template_queue['pbs_queue'] = '#PBS -q %s' % (self.options.queue)
+
+        return template_queue
 
     # Handle statuses supplied by qsub output
     def handleQueueLaunch(self, tester, output):

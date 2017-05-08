@@ -13,9 +13,9 @@ class QueueManager(Scheduler):
     @staticmethod
     def validParams():
         params = Scheduler.validParams()
+        params.addRequiredParam('template_script',          '', "the template script used")
         params.addRequiredParam('command',                  '', "the tester command to run")
         params.addRequiredParam('mpi_procs',                '', "number of processors to request")
-        params.addRequiredParam('template_script',  'template', "the template script used")
         params.addRequiredParam('job_name',                 '', "the path-friendly name of this test")
         params.addRequiredParam('working_dir',              '', "the working directory")
 
@@ -35,11 +35,11 @@ class QueueManager(Scheduler):
         return
 
     # Get derived queue batch script requirements
-    def prepareQueueScript(self, preq_list):
+    def prepareQueueScript(self, template_queue, tester, preq_list):
         return
 
     # Get the command we need to run
-    def getQueueCommand(self):
+    def getQueueCommand(self, tester):
         return
 
     # Get the command to run after all jobs have launched
@@ -54,7 +54,33 @@ class QueueManager(Scheduler):
     def handleQueueStatus(self, tester, output):
         return
 
-    # derived post command for this group of tests
+    # Return a list of tuples of test files to run
+    # This needs to return an absolute path to a directory containing 'tests' file
+    # along with the 'test' file:
+    # [(dirpath, tests), (dirpath, tests)]
+    def getTests(self):
+        test_list = []
+        if self.queue_data:
+            for tests in self.queue_data.keys():
+                test_dir = os.path.dirname(self.queue_data[tests]['test_dir'])
+                test_file = self.queue_data[tests]['input_name']
+                test_list.append((test_dir, test_file))
+        return test_list
+
+    # Go Again!
+    def goAgain(self):
+        if not self.options.checkStatus:
+            print 'Jobs released, begin checking status...\n'
+
+            # Clear the scheduler queue in preperation to go again
+            self.clearAndInitializeJobs()
+
+            # Set the checkStatus
+            self.options.checkStatus = True
+
+            return True
+
+    # derived post command after launching tests
     def postCommand(self):
         command = self.getpostQueueCommand()
         if command:
@@ -90,7 +116,7 @@ class QueueManager(Scheduler):
         if self.getJobName(tester) in self.queue_data:
             return self.queue_data[self.getJobName(tester)]
 
-    # Record launched job information
+    # Update queue_data with launched job information
     def updateQueueFile(self, tester, queue_id, skipped=False, exit_code=None):
         if skipped:
             queue_id = None
@@ -103,40 +129,55 @@ class QueueManager(Scheduler):
                                                      'exit_code'    : exit_code,
                                                      'id'           : queue_id }
 
-    # Verify we have this test in our records if we are processing the queue
-    # If it was skipped before, skip it again (displaying caveats)
-
-    # If it was skipped with a silent attribute (--re= options etc) do not save this
-    # information into the queue file. This will have the effect of being 'silent'
-    def canLaunch(self, tester, command, checks, test_list):
+    # canLaunch is the QueueManager's way of providing checkRunnable due to the multitude of
+    # modes the TestHarness can operate in.
+    def canLaunch(self, tester, checks, test_list):
         # We are processing a previous run
-        if self.options.processingQueue:
-            if self.getJobName(tester) in self.queue_data.keys():
+        if self.options.checkStatus:
+
+            # Only launch a test if not launched yet, and if it exists in our queue_file
+            if tester.specs['test_name'] not in self.launched_jobs and tester.specs['test_name'] not in self.skipped_jobs \
+               and self.getJobName(tester) in self.queue_data.keys():
+
+                # This test, while previously skipped, should have its skipped caveats re-displayed
                 if self.queue_data[self.getJobName(tester)]['skipped']:
                     tester.setStatus(self.queue_data[self.getJobName(tester)]['status'], tester.bucket_skip)
+
+                # Continue to support checkRunnable (--re options etc)
                 else:
-                    return True
-        # We are launching jobs normally
+                    # TODO: this might stop a test from running when in fact did run previously under some strange
+                    # circumstances. Need to test this.
+                    return tester.checkRunnableBase(self.options, checks, test_list)
+
+        # We are launching jobs normally, ask checkRunnable if we can run this test
         else:
             should_run = tester.checkRunnableBase(self.options, checks, test_list)
             if should_run:
                 return True
+
+            # Do not launch this test. However, save the skipped caveat if the test status is not of the silent variety
             else:
-                # Do not save silent|deleted skipped tests to the queue file
                 if tester.getStatus() != tester.bucket_silent and tester.getStatus() != tester.bucket_deleted:
                     self.updateQueueFile(tester, 0, True)
         return False
 
     # Augment base queue paramaters with tester params
     def updateParamsBase(self, tester, command):
-        # Set processor count
-        self.specs['mpi_procs'] = tester.getProcs(self.options)
+        # Initialize our template_dictionary
+        template_queue = {}
+
+        # Loops through params and inject them into our tempalte_dictionary
+        for param in self.specs.keys():
+            template_queue[param] = self.specs[param]
+
+        # Set CPU request count
+        template_queue['mpi_procs'] = tester.getProcs(self.options)
 
         # Set job name
-        self.specs['job_name'] = self.getJobName(tester)
+        template_queue['job_name'] = self.getJobName(tester)
 
         # Set working directory
-        self.specs['working_dir'] = self.getWorkingDir(tester)
+        template_queue['working_dir'] = self.getWorkingDir(tester)
 
         #### create a set for copy and nocopy so its easier to work with
         no_copy_files = set([])
@@ -150,52 +191,48 @@ class QueueManager(Scheduler):
             copy_files.update([tester.specs['gold_dir']])
 
         #### convert the copy and nocopy sets to flat lists
-        self.specs['copy_files'] = ' '.join(copy_files)
-        self.specs['no_copy'] = ' '.join(no_copy_files)
+        template_queue['copy_files'] = copy_files
+        template_queue['no_copy'] = no_copy_files
 
         # The command the tester needs to run within the queue system
-        self.specs['command'] = command
+        template_queue['command'] = command
 
         # ask the derived classes to update any specific queue specs
-        self.updateParams(tester)
+        template_queue = self.updateParams(template_queue, tester)
 
-        return
+        return template_queue
 
     # Create the queue launch script
-    def prepareQueueScriptBase(self, tester, preq_list):
+    def prepareQueueScriptBase(self, template_queue, tester, preq_list):
         # Augment derived queue script requirements
-        self.prepareQueueScript(tester, preq_list)
+        template_queue = self.prepareQueueScript(template_queue, tester, preq_list)
 
-        f = open(self.specs['template_script'], 'r')
+        f = open(template_queue['template_script'], 'r')
         content = f.read()
         f.close()
-
-        params = self.specs
 
         f = open(self.getQueueScript(tester), 'w')
 
         # Do all of the replacements for the valid parameters
-        for param in params.valid_keys():
-            if param in params.substitute:
-                params[param] = params.substitute[param].replace(param.upper(), params[param])
-            content = content.replace('<' + param.upper() + '>', str(params[param]))
+        for key in template_queue.keys():
+            if key.upper() in content:
+                content = content.replace('<' + key.upper() + '>', str(template_queue[key]))
 
         # Make sure we strip out any string substitution parameters that were not supplied
-        for param in params.substitute_keys():
-            if not params.isValid(param):
-                content = content.replace('<' + param.upper() + '>', '')
+        for key in template_queue.keys():
+            if key.upper() not in content:
+                content = content.replace('<' + key.upper() + '>', '')
 
         f.write(content)
         f.close()
 
     # Called from the current directory to copy files
-    def copyFiles(self, tester):
-        params = self.specs
+    def copyFiles(self, template_queue, tester):
 
         # Create regexp object of no_copy_pattern
-        if params.isValid('no_copy_pattern'):
+        if 'no_copy_pattern' in template_queue.keys():
             # Match no_copy_pattern value
-            pattern = re.compile(params['no_copy_pattern'])
+            pattern = re.compile(template_queue['no_copy_pattern'])
         else:
             # Match nothing if not set. Better way?
             pattern = re.compile(r'')
@@ -213,15 +250,15 @@ class QueueManager(Scheduler):
         os.chdir(self.getWorkingDir(tester))
         for file in os.listdir('../'):
             if os.path.isfile('../' + file) and file != self.options.input_file_name and \
-               (not params.isValid('no_copy') or file not in params['no_copy']) and \
-               (not params.isValid('no_copy_pattern') or pattern.match(file) is None) and \
+               (not tester.specs.isValid('no_copy') or file not in tester.specs['no_copy']) and \
+               (not 'no_copy_pattern' in template_queue.keys() or pattern.match(file) is None) and \
                not os.path.exists(file) and \
                os.path.splitext(file)[1] != '':
                 shutil.copy('../' + file, '.')
 
         # Copy directories
-        if params.isValid('copy_files'):
-            for file in params['copy_files'].split():
+        if 'copy_files' in template_queue.keys():
+            for file in template_queue['copy_files']:
                 if os.path.isfile('../' + file):
                     if not os.path.exists(file):
                         shutil.copy('../' + file, '.')
@@ -255,33 +292,33 @@ class QueueManager(Scheduler):
         # The command the tester needs us to launch
         tester_command = command
 
-        # Augment Queue params with Tester params
-        self.updateParamsBase(tester, tester_command)
+        # Build template_queue params based on Tester params
+        template_queue = self.updateParamsBase(tester, tester_command)
 
         # Get the derived queueing command the queueing system needs us to launch
         command = self.getQueueCommand(tester)
 
         # Handle unsatisfied prereq tests if we are trying to launch jobs.
         # If we are trying to process results instead, skip this check.
-        if not self.options.processingQueue:
+        if not self.options.checkStatus:
             if self.unsatisfiedPrereqs(tester):
                 self.queue.append([tester, tester_command, os.getcwd()])
                 return
 
         # If we are trying to process results instead, skip this check.
-        if not self.options.processingQueue:
+        if not self.options.checkStatus:
             # This test can now be launched because the prereq test(s) have been satisfied above
             prereq_job_ids = []
-            if tester.specs['prereq'] != [] and not self.options.processingQueue:
+            if tester.specs['prereq'] != [] and not self.options.checkStatus:
                 for prereq_test in tester.specs['prereq']:
                     path_friendly = self.getJobName(prereq_test)
                     prereq_job_ids.append(self.queue_data[path_friendly]['id'])
 
             # Create and copy all the files/directories this test requires
-            self.copyFiles(tester)
+            self.copyFiles(template_queue, tester)
 
             # Call the derived method to build the queue batch script
-            self.prepareQueueScriptBase(tester, prereq_job_ids)
+            self.prepareQueueScriptBase(template_queue, tester, prereq_job_ids)
 
         # Move into the working_dir
         current_pwd = os.getcwd()
@@ -317,7 +354,7 @@ class QueueManager(Scheduler):
             f.close()
 
             # determine tester statuses depending on mode (launching or checking status)
-            if self.options.processingQueue:
+            if self.options.checkStatus:
                 # the test was already launched
                 output += self.handleQueueStatus(tester, queue_output)
             else:
@@ -332,7 +369,7 @@ class QueueManager(Scheduler):
 
             # Handle TestResult
             # Test can still be pending in the queue (but we need to add these results to the table)
-            elif self.options.processingQueue and tester.getStatus() == tester.bucket_pending:
+            elif self.options.checkStatus and tester.getStatus() == tester.bucket_pending:
                 self.skipped_jobs.add(tester.specs['test_name'])
                 self.harness.handleTestResult(tester, output, tester.getStatusMessage())
 

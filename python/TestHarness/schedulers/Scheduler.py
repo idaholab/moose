@@ -28,6 +28,8 @@ class Scheduler(MooseObject):
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
 
+        self.specs = params
+
         ## The test harness to run callbacks on
         self.harness = harness
 
@@ -50,15 +52,44 @@ class Scheduler(MooseObject):
             self.soft_limit = False
             self.job_slots = params['max_processes'] # hard limit
 
+        # Requested average load level to stay below
+        self.average_load = params['average_load']
+
+        # Initialize Scheduler queue objects
+        self.clearAndInitializeJobs()
+
+    # Return post run command from derived classes
+    def postCommand(self):
+        return
+
+    # Allow derived schedulers to initiate FindAunTests again
+    def goAgain(self):
+        return
+
+    # Allow derived schedulers to skip tests
+    def canLaunch(self, tester, checks, test_list):
+        return tester.checkRunnableBase(self.options, checks, test_list)
+
+    ## run the command asynchronously and call testharness.testOutputAndFinish when complete
+    def run(self, tester, command, recurse=True, slot_check=True):
+        return
+
+    ## Return control to the test harness by finalizing the test output and calling the callback
+    def returnToTestHarness(self, job_index):
+        return
+
+    ## Returns a list of tests to run
+    def getTests(self):
+        return
+
+    ## Clear and Initialize the scheduler queue
+    def clearAndInitializeJobs(self):
         # Current slots in use
         self.slots_in_use = 0
 
         ## List of currently running jobs as (Popen instance, command, test, time when expires, slots) tuples
         # None means no job is running in this slot
         self.jobs = [None] * self.job_slots
-
-        # Requested average load level to stay below
-        self.average_load = params['average_load']
 
         # queue for jobs needing a prereq
         self.queue = deque()
@@ -68,6 +99,9 @@ class Scheduler(MooseObject):
 
         # Jobs that have finished
         self.finished_jobs = set()
+
+        # Jobs that have launched
+        self.launched_jobs = set()
 
         # List of skipped jobs to resolve prereq issues for tests that never run
         self.skipped_jobs = set()
@@ -84,17 +118,20 @@ class Scheduler(MooseObject):
         # Reporting timer which resets when ever data is printed to the screen.
         self.reported_timer = clock()
 
-    # Return post run command from derived classes
-    def postCommand(self):
-        return
-
-    # Allow derived schedulers to skip tests
-    def canLaunch(self, tester, command, checks, test_list):
-        return tester.checkRunnableBase(self.options, checks, test_list)
+    ## Returns False if all pre-preqs have been satisfied
+    def unsatisfiedPrereqs(self, tester):
+        if tester.specs['prereq'] != [] and len(set(tester.specs['prereq']) - self.finished_jobs):
+            if self.options.ignored_caveats is None:
+                return True
+            elif self.options.ignored_caveats != 'all':
+                caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
+                if 'prereq' not in caveat_list:
+                    return True
+        return False
 
     ## Schedule job for running
-    def schedule(self, tester, command, checks, test_list=None):
-        should_run = self.canLaunch(tester, self.options, checks, test_list)
+    def schedule(self, tester, checks, test_list=None):
+        should_run = self.canLaunch(tester, checks, test_list)
 
         # check for deprecated tuple
         if type(should_run) == type(()):
@@ -117,25 +154,6 @@ class Scheduler(MooseObject):
                 elif status == tester.bucket_deleted and self.options.extra_info:
                     self.harness.handleTestStatus(tester)
             self.jobSkipped(tester.parameters()['test_name'])
-
-    ## run the command asynchronously and call testharness.testOutputAndFinish when complete
-    def run(self, tester, command, recurse=True, slot_check=True):
-        return
-
-    ## Return control to the test harness by finalizing the test output and calling the callback
-    def returnToTestHarness(self, job_index):
-        return
-
-    ## Returns False if all pre-preqs have been satisfied
-    def unsatisfiedPrereqs(self, tester):
-        if tester.specs['prereq'] != [] and len(set(tester.specs['prereq']) - self.finished_jobs):
-            if self.options.ignored_caveats is None:
-                return True
-            elif self.options.ignored_caveats != 'all':
-                caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
-                if 'prereq' not in caveat_list:
-                    return True
-        return False
 
     ## Find an empty slot and launch the job
     def launchJob(self, tester, command, slot_check=True):
@@ -171,13 +189,15 @@ class Scheduler(MooseObject):
         # TODO: Does this belong here in the base class?
         tester.prepare(self.options)
 
+        # Record the launched job
+        self.launched_jobs.add(tester.specs['test_name'])
+
         # It seems that using PIPE doesn't work very well when launching multiple jobs.
         # It deadlocks rather easy.  Instead we will use temporary files
         # to hold the output as it is produced
         try:
 
             f = TemporaryFile()
-
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
             if platform.system() == "Windows":
@@ -185,12 +205,12 @@ class Scheduler(MooseObject):
             else:
                 p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid)
 
+            self.jobs[job_index] = (p, command, tester, clock(), f, slots)
+            self.slots_in_use = self.slots_in_use + slots
+
         except:
             print "Error in launching a new task"
             raise
-
-        self.jobs[job_index] = (p, command, tester, clock(), f, slots)
-        self.slots_in_use = self.slots_in_use + slots
 
     ## Attempt to launch jobs that can be launched
     def startReadyJobs(self, slot_check):

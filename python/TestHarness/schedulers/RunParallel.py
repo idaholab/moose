@@ -25,6 +25,10 @@ class RunParallel(Scheduler):
     def __init__(self, harness, params):
         Scheduler.__init__(self, harness, params)
 
+    def getTests(self):
+        print 'Not supported'
+        return []
+
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
     def run(self, tester, command, recurse=True, slot_check=True):
         # First see if any of the queued jobs can be run but only if recursion is allowed on this run

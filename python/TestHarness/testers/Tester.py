@@ -334,7 +334,7 @@ class Tester(MooseObject):
             reasons['display_required'] = 'NO DISPLAY'
 
         # Check for queueing
-        if not self.specs['queue_scheduler'] and options.processingQueue is not None:
+        if not self.specs['queue_scheduler'] and options.checkStatus is not None:
             reasons['queue_scheduler'] = 'NO QUEUE'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
