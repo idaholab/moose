@@ -43,18 +43,17 @@ if [[ ! -f "$MOOSE_DIR/stork/include/base/StorkApp.h" ]]; then
     exit 1
 fi
 
-absdir=$(echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")")
-if [[ "$kind" == "app" && "$absdir" =~ "$MOOSE_DIR" ]]; then
-    echo "error: your current working directory is inside the MOOSE directory" >&2
-    exit 1
+if [[ "$kind" == "app" ]]; then
+    git status &>/dev/null && echo "error: your current working directory is inside a git repository" >&2 && exit 1
 fi
 
-# make new app dir and copy stork files
+# copy stork tree - abort if dir already exists or copy fails
 if [[ -d "$dir" ]]; then
     echo "error: directory '$dir' already exists" >&2
     exit 1
 fi
-cp -R "$MOOSE_DIR/stork" "$dir"
+cp -R "$MOOSE_DIR/stork" "$dir" || echo "error: app/module creation failed" >&2 || exit 1
+
 find $dir | grep '/[.]' | xargs rm -f # remove hidden files (e.g. vim swp files)
 
 # rename app name within files
@@ -85,11 +84,15 @@ if [[ "$kind" == "module" ]]; then
 fi
 
 if [[ "$kind" == "app" ]]; then
-    (
-        cd $dir
-        git init
-        git add *
-    )
+    # copy clang-format related files
+    mkdir -p $dir/scripts
+    cp $MOOSE_DIR/scripts/install-format-hook.sh $dir/scripts/
+    cp $MOOSE_DIR/.clang-format $dir/
+    cp $MOOSE_DIR/.gitignore $dir/
+
+    dir="$PWD/$dir"
+    (cd $dir && git init && git add *)
+
     echo "MOOSE app created in '$dir'"
     echo ""
     echo "To store your changes on github:"
@@ -100,5 +103,11 @@ if [[ "$kind" == "app" ]]; then
     echo "         git remote add origin https://github.com/YourGitHubUserName/$dstname"
     echo '         git commit -m "initial commit"'
     echo "         git push -u origin master"
+    echo ""
+    echo "To automatically enforce MOOSE C++ code style in your commits, run:"
+    echo "" 
+    echo "    cd $dir"
+    echo "    ./scripts/install-format-hook.sh" 
+    echo ""
 fi
 
