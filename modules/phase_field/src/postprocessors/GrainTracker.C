@@ -1419,7 +1419,11 @@ GrainTracker::updateFieldInfo()
       {
         const Elem * elem = mesh.elem(entity);
         std::vector<Point> centroid(1, elem->centroid());
-        if (_ebsd_reader && _first_time)
+        if (_poly_ic_uo && _first_time)
+        {
+          entity_value = _poly_ic_uo->getVariableValue(grain._var_index, centroid[0]);
+        }
+        else if (_ebsd_reader && _first_time)
         {
           const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader->getData(centroid[0]);
           const auto phase = d._phase;

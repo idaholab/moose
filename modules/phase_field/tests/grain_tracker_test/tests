@@ -72,6 +72,13 @@
     exodiff = 'grain_tracker_ebsd_out.e'
   [../]
 
+  [./test_ebsd_adapt]
+    type = 'Exodiff'
+    input = 'grain_tracker_ebsd.i'
+    exodiff = 'grain_tracker_ebsd_adapt_out.e'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=1 Executioner/Adaptivity/refine_fraction=0.7 Executioner/Adaptivity/max_h_level=1 Outputs/file_base=grain_tracker_ebsd_adapt_out'
+  [../]
+
   [./split_grain]
     type = 'CSVDiff'
     # Make sure that this simulation hits the "split grain" logic branch
