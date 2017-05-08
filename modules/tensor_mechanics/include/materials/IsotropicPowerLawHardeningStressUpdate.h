@@ -33,8 +33,9 @@ public:
   IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(Real effectiveTrialStress) override;
-  virtual void computeYieldStress() override;
+  virtual void computeStressInitialize(Real effectiveTrialStress,
+                                       const RankFourTensor & elasticity_tensor) override;
+  virtual void computeYieldStress(const RankFourTensor & elasticity_tensor) override;
   virtual Real computeHardeningDerivative(Real scalar) override;
 
   ///@{ Power law hardening coefficients
@@ -48,7 +49,7 @@ protected:
   ///
   Real _effective_trial_stress;
 
-  Real getIsotropicLameLambda();
+  Real getIsotropicLameLambda(const RankFourTensor & elasticity_tensor);
 };
 
 template <>

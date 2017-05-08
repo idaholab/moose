@@ -4,17 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "PQPlasticModel.h"
+#include "TwoParameterPlasticityStressUpdate.h"
 
 #include "Conversion.h"      // for stringify
 #include "libmesh/utility.h" // for Utility::pow
 
 template <>
 InputParameters
-validParams<PQPlasticModel>()
+validParams<TwoParameterPlasticityStressUpdate>()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = validParams<StressUpdateBase>();
   params.addClassDescription("Return-map and Jacobian algorithms for (P, Q) plastic models");
+  params.addParam<std::string>("name_prepender",
+                               "Optional parameter that allows the user to define "
+                               "multiple plastic models on the same block, and the "
+                               "plastic_internal_parameter, plastic_yield_function, "
+                               "plastic_NR_iterations and plastic_linesearch_needed Material "
+                               "Properties will be prepended by this string");
   params.addRangeCheckedParam<unsigned int>(
       "max_NR_iterations",
       20,
@@ -42,11 +48,6 @@ validParams<PQPlasticModel>()
                                 "code detects precision loss then it also deems the return-map "
                                 "process has converged.");
   MooseEnum tangent_operator("elastic nonlinear", "nonlinear");
-  params.addParam<MooseEnum>("tangent_operator",
-                             tangent_operator,
-                             "Type of tangent operator to return.  'elastic': "
-                             "return the elasticity tensor.  'nonlinear': return "
-                             "the full consistent tangent operator.");
   params.addParam<Real>("min_step_size",
                         1.0,
                         "In order to help the Newton-Raphson procedure, the applied strain "
@@ -61,40 +62,36 @@ validParams<PQPlasticModel>()
   return params;
 }
 
-PQPlasticModel::PQPlasticModel(const InputParameters & parameters,
-                               unsigned num_yf,
-                               unsigned num_intnl)
-  : ComputeStressBase(parameters),
+TwoParameterPlasticityStressUpdate::TwoParameterPlasticityStressUpdate(
+    const InputParameters & parameters, unsigned num_yf, unsigned num_intnl)
+  : StressUpdateBase(parameters),
     _num_yf(num_yf),
     _num_intnl(num_intnl),
+    _name_prepender(isParamValid("name_prepender") ? getParam<std::string>("name_prepender") + "_"
+                                                   : ""),
     _max_nr_its(getParam<unsigned>("max_NR_iterations")),
     _perform_finite_strain_rotations(getParam<bool>("perform_finite_strain_rotations")),
     _smoothing_tol(getParam<Real>("smoothing_tol")),
     _f_tol(getParam<Real>("yield_function_tol")),
     _f_tol2(Utility::pow<2>(getParam<Real>("yield_function_tol"))),
-    _tangent_operator_type((TangentOperatorEnum)(int)getParam<MooseEnum>("tangent_operator")),
     _min_step_size(getParam<Real>("min_step_size")),
     _step_one(declareRestartableData<bool>("step_one", true)),
     _warn_about_precision_loss(getParam<bool>("warn_about_precision_loss")),
 
-    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
-    _intnl(declareProperty<std::vector<Real>>("plastic_internal_parameter")),
-    _intnl_old(declarePropertyOld<std::vector<Real>>("plastic_internal_parameter")),
-    _yf(declareProperty<std::vector<Real>>("plastic_yield_function")),
-    _iter(declareProperty<Real>("plastic_NR_iterations")), // this is really an unsigned int, but
+    _plastic_strain(declareProperty<RankTwoTensor>(_name_prepender + "plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_name_prepender + "plastic_strain")),
+    _intnl(declareProperty<std::vector<Real>>(_name_prepender + "plastic_internal_parameter")),
+    _intnl_old(
+        getMaterialPropertyOld<std::vector<Real>>(_name_prepender + "plastic_internal_parameter")),
+    _yf(declareProperty<std::vector<Real>>(_name_prepender + "plastic_yield_function")),
+    _iter(declareProperty<Real>(_name_prepender +
+                                "plastic_NR_iterations")), // this is really an unsigned int, but
                                                            // for visualisation i convert it to Real
-    _linesearch_needed(declareProperty<Real>("plastic_linesearch_needed")), // this is really a
-                                                                            // boolean, but for
-                                                                            // visualisation i
-                                                                            // convert it to Real
-
-    _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
-    _rotation_increment(
-        getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-
-    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
+    _linesearch_needed(
+        declareProperty<Real>(_name_prepender + "plastic_linesearch_needed")), // this is really a
+                                                                               // boolean, but for
+                                                                               // visualisation i
+                                                                               // convert it to Real
 
     _p_trial(0.0),
     _q_trial(0.0),
@@ -118,10 +115,8 @@ PQPlasticModel::PQPlasticModel(const InputParameters & parameters,
 }
 
 void
-PQPlasticModel::initQpStatefulProperties()
+TwoParameterPlasticityStressUpdate::initQpStatefulProperties()
 {
-  ComputeStressBase::initQpStatefulProperties();
-
   _plastic_strain[_qp].zero();
   _intnl[_qp].assign(_num_intnl, 0);
   _yf[_qp].assign(_num_yf, 0);
@@ -130,40 +125,28 @@ PQPlasticModel::initQpStatefulProperties()
 }
 
 void
-PQPlasticModel::computeQpStress()
+TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment,
+                                                RankTwoTensor & inelastic_strain_increment,
+                                                const RankTwoTensor & rotation_increment,
+                                                RankTwoTensor & stress_new,
+                                                const RankTwoTensor & stress_old,
+                                                const RankFourTensor & elasticity_tensor,
+                                                const RankTwoTensor & /*elastic_strain_old*/,
+                                                bool compute_full_tangent_operator,
+                                                RankFourTensor & tangent_operator)
 {
   initialiseReturnProcess();
+
   if (_t_step >= 2)
     _step_one = false;
 
-  returnMap();
-
-  // Update measures of strain
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp] -
-                         (_plastic_strain[_qp] - _plastic_strain_old[_qp]);
-
-  // Rotate the tensors to the current configuration
-  if (_perform_finite_strain_rotations)
-  {
-    _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
-    _elastic_strain[_qp] =
-        _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
-    _plastic_strain[_qp] =
-        _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
-  }
-}
-
-void
-PQPlasticModel::returnMap()
-{
   // initially assume an elastic deformation
-  _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
   for (unsigned i = 0; i < _num_intnl; ++i)
     _intnl[_qp][i] = _intnl_old[_qp][i];
   _iter[_qp] = 0.0;
   _linesearch_needed[_qp] = 0.0;
 
-  computePQ(_stress[_qp], _p_trial, _q_trial);
+  computePQ(stress_new, _p_trial, _q_trial);
   yieldFunctionValues(_p_trial, _q_trial, _intnl[_qp], _yf[_qp]);
 
   /* Need to consider smoothing_tol, not just yf<=0, because
@@ -181,11 +164,14 @@ PQPlasticModel::returnMap()
   {
     _plastic_strain[_qp] = _plastic_strain_old[_qp];
     if (_fe_problem.currentlyComputingJacobian())
-      _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+    {
+      inelastic_strain_increment.zero();
+      tangent_operator = elasticity_tensor;
+    }
     return;
   }
 
-  const RankTwoTensor stress_trial = _stress[_qp];
+  const RankTwoTensor stress_trial = stress_new;
   /* The trial stress must be inadmissible
    * so we need to return to the yield surface.  The following
    * equations must be satisfied.
@@ -200,13 +186,13 @@ PQPlasticModel::returnMap()
    * while substituting the "intnl parameters" equations into these during the solve process
    */
 
-  preReturnMap(_p_trial, _q_trial, _stress[_qp], _intnl_old[_qp], _yf[_qp]);
-  setEppEqq(_elasticity_tensor[_qp], _Epp, _Eqq);
+  preReturnMap(_p_trial, _q_trial, stress_new, _intnl_old[_qp], _yf[_qp], elasticity_tensor);
+  setEppEqq(elasticity_tensor, _Epp, _Eqq);
 
   // values of p, q  and intnl we know to be admissible
   Real p_ok;
   Real q_ok;
-  computePQ(_stress_old[_qp], p_ok, q_ok);
+  computePQ(stress_old, p_ok, q_ok);
   std::copy(_intnl_old[_qp].begin(), _intnl_old[_qp].end(), _intnl_ok.begin());
   // note that _intnl[_qp] is the "running" intnl variable that gets updated every NR iteration
   if (isParamValid("initial_stress") && _step_one)
@@ -293,9 +279,9 @@ PQPlasticModel::returnMap()
             std::abs(_rhs[1]) <= 1E-13 * std::abs(p) && std::abs(_rhs[2]) <= 1E-13 * std::abs(q))
         {
           if (_warn_about_precision_loss)
-            Moose::err << "PQPlasticModel: precision-loss in element " << _current_elem->id()
-                       << " quadpoint=" << _qp << " p=" << p << " q=" << q << " gaE=" << gaE
-                       << "\n";
+            Moose::err << "TwoParameterPlasticityStressUpdate: precision-loss in element "
+                       << _current_elem->id() << " quadpoint=" << _qp << " p=" << p << " q=" << q
+                       << " gaE=" << gaE << "\n";
           res2 = 0.0;
           break;
         }
@@ -325,7 +311,8 @@ PQPlasticModel::returnMap()
                  gaE,
                  _intnl_ok,
                  smoothed_q,
-                 step_size);
+                 step_size,
+                 compute_full_tangent_operator);
       if (step_iter > _iter[_qp])
         _iter[_qp] = step_iter;
       step_size *= 1.1;
@@ -338,47 +325,52 @@ PQPlasticModel::returnMap()
   }
 
   if (step_size < _min_step_size)
-    errorHandler("PQPlasticModel: Minimum step-size violated");
+    errorHandler("TwoParameterPlasticityStressUpdate: Minimum step-size violated");
 
   // success!
-  finaliseReturnProcess();
+  finalizeReturnProcess(rotation_increment);
   yieldFunctionValues(p_ok, q_ok, _intnl[_qp], _yf[_qp]);
 
   if (!smoothed_q_calculated)
     smoothed_q = smoothAllQuantities(p_ok, q_ok, _intnl[_qp]);
 
-  setStressAfterReturn(stress_trial, p_ok, q_ok, gaE_total, _intnl[_qp], smoothed_q, _stress[_qp]);
+  setStressAfterReturn(
+      stress_trial, p_ok, q_ok, gaE_total, _intnl[_qp], smoothed_q, elasticity_tensor, stress_new);
 
-  _plastic_strain[_qp] = _plastic_strain_old[_qp] +
-                         (gaE_total / _Epp) * (smoothed_q.dg[0] * dpdstress(_stress[_qp]) +
-                                               smoothed_q.dg[1] * dqdstress(_stress[_qp]));
+  inelastic_strain_increment = (gaE_total / _Epp) * (smoothed_q.dg[0] * dpdstress(stress_new) +
+                                                     smoothed_q.dg[1] * dqdstress(stress_new));
+  strain_increment = strain_increment - inelastic_strain_increment;
+  _plastic_strain[_qp] = _plastic_strain_old[_qp] + inelastic_strain_increment;
 
   consistentTangentOperator(stress_trial,
                             _p_trial,
                             _q_trial,
-                            _stress[_qp],
+                            stress_new,
                             p_ok,
                             q_ok,
                             gaE_total,
                             smoothed_q,
-                            _Jacobian_mult[_qp]);
+                            elasticity_tensor,
+                            compute_full_tangent_operator,
+                            tangent_operator);
 }
 
 void
-PQPlasticModel::dVardTrial(bool elastic_only,
-                           Real p_trial,
-                           Real q_trial,
-                           Real p,
-                           Real q,
-                           Real gaE,
-                           const std::vector<Real> & intnl,
-                           const f_and_derivs & smoothed_q,
-                           Real step_size)
+TwoParameterPlasticityStressUpdate::dVardTrial(bool elastic_only,
+                                               Real p_trial,
+                                               Real q_trial,
+                                               Real p,
+                                               Real q,
+                                               Real gaE,
+                                               const std::vector<Real> & intnl,
+                                               const f_and_derivs & smoothed_q,
+                                               Real step_size,
+                                               bool compute_full_tangent_operator)
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
 
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  if (!compute_full_tangent_operator)
     return;
 
   if (elastic_only)
@@ -430,8 +422,9 @@ PQPlasticModel::dVardTrial(bool elastic_only,
               &gesv_num_rhs,
               &info);
   if (info != 0)
-    errorHandler("PQPlasticModel: PETSC LAPACK gsev routine returned with error code " +
-                 Moose::stringify(info));
+    errorHandler(
+        "TwoParameterPlasticityStressUpdate: PETSC LAPACK gsev routine returned with error code " +
+        Moose::stringify(info));
 
   const Real dgaEn_dptn = rhs_cto[0];
   const Real dpn_dptn = rhs_cto[1];
@@ -453,8 +446,10 @@ PQPlasticModel::dVardTrial(bool elastic_only,
   _dq_dqt = dqn_dqtn * (step_size + dq_dqt_old) + dqn_dptn * dp_dqt_old;
 }
 
-PQPlasticModel::f_and_derivs
-PQPlasticModel::smoothAllQuantities(Real p, Real q, const std::vector<Real> & intnl)
+TwoParameterPlasticityStressUpdate::f_and_derivs
+TwoParameterPlasticityStressUpdate::smoothAllQuantities(Real p,
+                                                        Real q,
+                                                        const std::vector<Real> & intnl)
 {
   for (unsigned i = _all_q.size(); i < _num_yf; ++i)
     _all_q.push_back(f_and_derivs(_num_pq, _num_intnl));
@@ -515,9 +510,10 @@ PQPlasticModel::smoothAllQuantities(Real p, Real q, const std::vector<Real> & in
 }
 
 Real
-PQPlasticModel::ismoother(Real f_diff) const
+TwoParameterPlasticityStressUpdate::ismoother(Real f_diff) const
 {
-  mooseAssert(f_diff <= 0.0, "PQPlasticModel: ismoother called with positive argument");
+  mooseAssert(f_diff <= 0.0,
+              "TwoParameterPlasticityStressUpdate: ismoother called with positive argument");
   if (f_diff <= -_smoothing_tol)
     return 0.0;
   return 0.5 * (f_diff + _smoothing_tol) -
@@ -525,7 +521,7 @@ PQPlasticModel::ismoother(Real f_diff) const
 }
 
 Real
-PQPlasticModel::smoother(Real f_diff) const
+TwoParameterPlasticityStressUpdate::smoother(Real f_diff) const
 {
   if (f_diff >= _smoothing_tol)
     return 1.0;
@@ -535,7 +531,7 @@ PQPlasticModel::smoother(Real f_diff) const
 }
 
 Real
-PQPlasticModel::dsmoother(Real f_diff) const
+TwoParameterPlasticityStressUpdate::dsmoother(Real f_diff) const
 {
   if (f_diff >= _smoothing_tol)
     return 0.0;
@@ -545,14 +541,14 @@ PQPlasticModel::dsmoother(Real f_diff) const
 }
 
 int
-PQPlasticModel::lineSearch(Real & res2,
-                           Real & gaE,
-                           Real & p,
-                           Real & q,
-                           Real p_trial,
-                           Real q_trial,
-                           f_and_derivs & smoothed_q,
-                           const std::vector<Real> & intnl_ok)
+TwoParameterPlasticityStressUpdate::lineSearch(Real & res2,
+                                               Real & gaE,
+                                               Real & p,
+                                               Real & q,
+                                               Real p_trial,
+                                               Real q_trial,
+                                               f_and_derivs & smoothed_q,
+                                               const std::vector<Real> & intnl_ok)
 {
   const Real res2_old = res2;
   const Real gaE_old = gaE;
@@ -630,10 +626,10 @@ PQPlasticModel::lineSearch(Real & res2,
 }
 
 void
-PQPlasticModel::dnRHSdVar(const f_and_derivs & smoothed_q,
-                          const std::vector<std::vector<Real>> & dintnl,
-                          Real gaE,
-                          std::array<double, _num_rhs * _num_rhs> & jac) const
+TwoParameterPlasticityStressUpdate::dnRHSdVar(const f_and_derivs & smoothed_q,
+                                              const std::vector<std::vector<Real>> & dintnl,
+                                              Real gaE,
+                                              std::array<double, _num_rhs * _num_rhs> & jac) const
 {
   // LAPACK gsev stores the matrix in the following way:
 
@@ -678,7 +674,7 @@ PQPlasticModel::dnRHSdVar(const f_and_derivs & smoothed_q,
 }
 
 int
-PQPlasticModel::nrStep(
+TwoParameterPlasticityStressUpdate::nrStep(
     const f_and_derivs & smoothed_q, Real p_trial, Real q_trial, Real p, Real q, Real gaE)
 {
   setIntnlDerivatives(p_trial, q_trial, p, q, _intnl[_qp], _dintnl);
@@ -697,7 +693,7 @@ PQPlasticModel::nrStep(
 }
 
 Real
-PQPlasticModel::calculateRHS(
+TwoParameterPlasticityStressUpdate::calculateRHS(
     Real p_trial, Real q_trial, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q)
 {
   _rhs[0] = smoothed_q.f;
@@ -707,35 +703,37 @@ PQPlasticModel::calculateRHS(
 }
 
 void
-PQPlasticModel::errorHandler(const std::string & message)
+TwoParameterPlasticityStressUpdate::errorHandler(const std::string & message)
 {
   throw MooseException(message);
 }
 
 void
-PQPlasticModel::initialiseReturnProcess()
+TwoParameterPlasticityStressUpdate::initialiseReturnProcess()
 {
   return;
 }
 
 void
-PQPlasticModel::finaliseReturnProcess()
+TwoParameterPlasticityStressUpdate::finalizeReturnProcess(
+    const RankTwoTensor & /*rotation_increment*/)
 {
   return;
 }
 
 void
-PQPlasticModel::preReturnMap(Real /*p_trial*/,
-                             Real /*q_trial*/,
-                             const RankTwoTensor & /*stress_trial*/,
-                             const std::vector<Real> & /*intnl_old*/,
-                             const std::vector<Real> & /*yf*/)
+TwoParameterPlasticityStressUpdate::preReturnMap(Real /*p_trial*/,
+                                                 Real /*q_trial*/,
+                                                 const RankTwoTensor & /*stress_trial*/,
+                                                 const std::vector<Real> & /*intnl_old*/,
+                                                 const std::vector<Real> & /*yf*/,
+                                                 const RankFourTensor & /*Eijkl*/)
 {
   return;
 }
 
 Real
-PQPlasticModel::yieldF(Real p, Real q, const std::vector<Real> & intnl) const
+TwoParameterPlasticityStressUpdate::yieldF(Real p, Real q, const std::vector<Real> & intnl) const
 {
   std::vector<Real> yf(_num_yf);
   yieldFunctionValues(p, q, intnl, yf);
@@ -751,13 +749,13 @@ PQPlasticModel::yieldF(Real p, Real q, const std::vector<Real> & intnl) const
 }
 
 void
-PQPlasticModel::initialiseVars(Real p_trial,
-                               Real q_trial,
-                               const std::vector<Real> & intnl_old,
-                               Real & p,
-                               Real & q,
-                               Real & gaE,
-                               std::vector<Real> & intnl) const
+TwoParameterPlasticityStressUpdate::initialiseVars(Real p_trial,
+                                                   Real q_trial,
+                                                   const std::vector<Real> & intnl_old,
+                                                   Real & p,
+                                                   Real & q,
+                                                   Real & gaE,
+                                                   std::vector<Real> & intnl) const
 {
   p = p_trial;
   q = q_trial;
@@ -766,21 +764,24 @@ PQPlasticModel::initialiseVars(Real p_trial,
 }
 
 void
-PQPlasticModel::consistentTangentOperator(const RankTwoTensor & stress_trial,
-                                          Real /*p_trial*/,
-                                          Real /*q_trial*/,
-                                          const RankTwoTensor & stress,
-                                          Real /*p*/,
-                                          Real /*q*/,
-                                          Real gaE,
-                                          const f_and_derivs & smoothed_q,
-                                          RankFourTensor & cto) const
+TwoParameterPlasticityStressUpdate::consistentTangentOperator(
+    const RankTwoTensor & stress_trial,
+    Real /*p_trial*/,
+    Real /*q_trial*/,
+    const RankTwoTensor & stress,
+    Real /*p*/,
+    Real /*q*/,
+    Real gaE,
+    const f_and_derivs & smoothed_q,
+    const RankFourTensor & elasticity_tensor,
+    bool compute_full_tangent_operator,
+    RankFourTensor & cto) const
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
 
-  cto = _elasticity_tensor[_qp];
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  cto = elasticity_tensor;
+  if (!compute_full_tangent_operator)
     return;
 
   const RankTwoTensor dpdsig = dpdstress(stress);
@@ -788,12 +789,12 @@ PQPlasticModel::consistentTangentOperator(const RankTwoTensor & stress_trial,
   const RankTwoTensor dqdsig = dqdstress(stress);
   const RankTwoTensor dqdsig_trial = dqdstress(stress_trial);
 
-  const RankTwoTensor s1 = _elasticity_tensor[_qp] * ((1.0 / _Epp) * (1.0 - _dp_dpt) * dpdsig +
-                                                      (1.0 / _Eqq) * (-_dq_dpt) * dqdsig);
-  const RankTwoTensor s2 = _elasticity_tensor[_qp] * ((1.0 / _Epp) * (-_dp_dqt) * dpdsig +
-                                                      (1.0 / _Eqq) * (1.0 - _dq_dqt) * dqdsig);
-  const RankTwoTensor t1 = _elasticity_tensor[_qp] * dpdsig_trial;
-  const RankTwoTensor t2 = _elasticity_tensor[_qp] * dqdsig_trial;
+  const RankTwoTensor s1 = elasticity_tensor * ((1.0 / _Epp) * (1.0 - _dp_dpt) * dpdsig +
+                                                (1.0 / _Eqq) * (-_dq_dpt) * dqdsig);
+  const RankTwoTensor s2 = elasticity_tensor * ((1.0 / _Epp) * (-_dp_dqt) * dpdsig +
+                                                (1.0 / _Eqq) * (1.0 - _dq_dqt) * dqdsig);
+  const RankTwoTensor t1 = elasticity_tensor * dpdsig_trial;
+  const RankTwoTensor t2 = elasticity_tensor * dqdsig_trial;
 
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
     for (unsigned j = 0; j < _tensor_dimensionality; ++j)
@@ -804,7 +805,7 @@ PQPlasticModel::consistentTangentOperator(const RankTwoTensor & stress_trial,
   const RankFourTensor d2pdsig2 = d2pdstress2(stress);
   const RankFourTensor d2qdsig2 = d2qdstress2(stress);
 
-  const RankFourTensor Tijab = _elasticity_tensor[_qp] * (gaE / _Epp) *
+  const RankFourTensor Tijab = elasticity_tensor * (gaE / _Epp) *
                                (smoothed_q.dg[0] * d2pdsig2 + smoothed_q.dg[1] * d2qdsig2);
 
   RankFourTensor inv = RankFourTensor(RankFourTensor::initIdentityFour) + Tijab;
@@ -823,15 +824,16 @@ PQPlasticModel::consistentTangentOperator(const RankTwoTensor & stress_trial,
 }
 
 void
-PQPlasticModel::setStressAfterReturn(const RankTwoTensor & stress_trial,
-                                     Real /*p_ok*/,
-                                     Real /*q_ok*/,
-                                     Real gaE,
-                                     const std::vector<Real> & /*intnl*/,
-                                     const f_and_derivs & smoothed_q,
-                                     RankTwoTensor & stress) const
+TwoParameterPlasticityStressUpdate::setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                                         Real /*p_ok*/,
+                                                         Real /*q_ok*/,
+                                                         Real gaE,
+                                                         const std::vector<Real> & /*intnl*/,
+                                                         const f_and_derivs & smoothed_q,
+                                                         const RankFourTensor & elasticity_tensor,
+                                                         RankTwoTensor & stress) const
 {
-  const RankTwoTensor correction = _elasticity_tensor[_qp] * (smoothed_q.dg[0] * dpdstress(stress) +
-                                                              smoothed_q.dg[1] * dqdstress(stress));
+  const RankTwoTensor correction = elasticity_tensor * (smoothed_q.dg[0] * dpdstress(stress) +
+                                                        smoothed_q.dg[1] * dqdstress(stress));
   stress = stress_trial - gaE / _Epp * correction;
 }

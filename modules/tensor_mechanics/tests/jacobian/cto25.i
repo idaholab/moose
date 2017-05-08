@@ -77,16 +77,19 @@
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = dp
+    initial_stress = '6 5 4  5 7 2  4 2 2'
+  [../]
   [./dp]
-    type = ComputeCappedDruckerPragerStress
-    block = 0
+    type = CappedDruckerPragerStressUpdate
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs
     yield_function_tol = 1E-11
     tip_smoother = 1
     smoothing_tol = 1
-    initial_stress = '6 5 4  5 7 2  4 2 2'
   [../]
 []
 

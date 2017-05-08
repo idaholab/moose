@@ -4,34 +4,44 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef PQPLASTICMODEL_H
-#define PQPLASTICMODEL_H
+#ifndef TWOPARAMETERPLASTICITYSTRESSUPDATE_H
+#define TWOPARAMETERPLASTICITYSTRESSUPDATE_H
 
-#include "ComputeStressBase.h"
+#include "StressUpdateBase.h"
 
 #include <array>
 
-class PQPlasticModel;
+class TwoParameterPlasticityStressUpdate;
 
 template <>
-InputParameters validParams<PQPlasticModel>();
+InputParameters validParams<TwoParameterPlasticityStressUpdate>();
 
 /**
- * PQPlasticModel performs the return-map
+ * TwoParameterPlasticityStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
  * models that describe (p, q) plasticity.  That is,
  * for plastic models where the yield function and flow
  * directions only depend on two parameters, p and q, that
  * are themselves functions of stress
  */
-class PQPlasticModel : public ComputeStressBase
+class TwoParameterPlasticityStressUpdate : public StressUpdateBase
 {
 public:
-  PQPlasticModel(const InputParameters & parameters, unsigned num_yf, unsigned num_intnl);
+  TwoParameterPlasticityStressUpdate(const InputParameters & parameters,
+                                     unsigned num_yf,
+                                     unsigned num_intnl);
 
 protected:
-  virtual void computeQpStress() override;
   virtual void initQpStatefulProperties() override;
+  virtual void updateState(RankTwoTensor & strain_increment,
+                           RankTwoTensor & inelastic_strain_increment,
+                           const RankTwoTensor & rotation_increment,
+                           RankTwoTensor & stress_new,
+                           const RankTwoTensor & stress_old,
+                           const RankFourTensor & elasticity_tensor,
+                           const RankTwoTensor & elastic_strain_old,
+                           bool compute_full_tangent_operator,
+                           RankFourTensor & tangent_operator) override;
 
   /// Number of variables = 2 = (p, q)
   constexpr static int _num_pq = 2;
@@ -47,6 +57,9 @@ protected:
 
   /// Number of internal parameters
   const unsigned _num_intnl;
+
+  /// String prepended to various MaterialProperties that are defined by this class
+  const std::string _name_prepender;
 
   /// Maximum number of Newton-Raphson iterations allowed in the return-map process
   const unsigned _max_nr_its;
@@ -87,13 +100,13 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain;
 
   /// Old value of plastic strain
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 
   /// internal parameters.  intnl[0] = shear.  intnl[1] = tensile.
   MaterialProperty<std::vector<Real>> & _intnl;
 
   /// old values of internal parameters
-  MaterialProperty<std::vector<Real>> & _intnl_old;
+  const MaterialProperty<std::vector<Real>> & _intnl_old;
 
   /// yield functions
   MaterialProperty<std::vector<Real>> & _yf;
@@ -103,18 +116,6 @@ protected:
 
   /// Whether a line-search was needed in the latest Newton-Raphson process (1 if true, 0 otherwise)
   MaterialProperty<Real> & _linesearch_needed;
-
-  /// strain increment (coming from ComputeIncrementalSmallStrain, for example)
-  const MaterialProperty<RankTwoTensor> & _strain_increment;
-
-  /// Rotation increment (coming from ComputeIncrementalSmallStrain, for example)
-  const MaterialProperty<RankTwoTensor> & _rotation_increment;
-
-  /// Old value of stress
-  MaterialProperty<RankTwoTensor> & _stress_old;
-
-  /// Old value of elastic strain
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
   /// Trial value of p
   Real _p_trial;
@@ -183,11 +184,6 @@ protected:
   Real dsmoother(Real f_diff) const;
 
   /**
-   * Performs the return-map algorithm
-   */
-  void returnMap();
-
-  /**
    * Calculates _all_q, and then performs the smoothing scheme
    * @param p stress_zz
    * @param q sqrt(stress_zx^2 + stress_zy^2)
@@ -208,6 +204,8 @@ protected:
    * @param intnl the value of the internal parameters at the returned position
    * @param smoothed_q contains the yield function and derivatives evaluated at (p, q)
    * @param step_size size of this (sub)strain increment
+   * @param compute_full_tangent_operator true if the full consistent tangent operator is needed,
+   * otherwise false
    */
   void dVardTrial(bool elastic_only,
                   Real p_trial,
@@ -217,7 +215,8 @@ protected:
                   Real gaE,
                   const std::vector<Real> & intnl,
                   const f_and_derivs & smoothed_q,
-                  Real step_size);
+                  Real step_size,
+                  bool compute_full_tangent_operator);
 
   /**
    * Performs a line-search to find (p, q)
@@ -367,12 +366,14 @@ protected:
    * @param stress_trial Trial stress tensor
    * @param intnl_old Old value of the internal parameters.
    * @param yf The yield functions at (p_trial, q_trial, intnl_old)
+   * @param Eijkl The elasticity tensor
    */
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
                             const RankTwoTensor & stress_trial,
                             const std::vector<Real> & intnl_old,
-                            const std::vector<Real> & yf);
+                            const std::vector<Real> & yf,
+                            const RankFourTensor & Eijkl);
 
   /**
    * Sets (p, q, gaE, intnl) at "good guesses" of the solution to the Return-Map algorithm.
@@ -459,7 +460,7 @@ protected:
    * Derived classes may use this to perform calculations before
    * any return-map process is performed, for instance, to initialise
    * variables.
-   * This is called at the very start of computeQpStress, even before
+   * This is called at the very start of updateState, even before
    * any checking for admissible stresses, etc, is performed
    */
   virtual void initialiseReturnProcess();
@@ -468,13 +469,14 @@ protected:
    * Derived classes may use this to perform calculations after the
    * return-map process has completed successfully in (p, q) space
    * but before the returned stress tensor has been performed.
+   * @param rotation_increment The large-strain rotation increment
    */
-  virtual void finaliseReturnProcess();
+  virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment);
 
   /**
    * Sets stress from the admissible parameters.
    * This is called after the return-map process has completed
-   * successfully in (p, q) space, just after finaliseReturnProcess
+   * successfully in (p, q) space, just after finalizeReturnProcess
    * has been called.
    * Derived classes may override this function
    * @param stress_trial The trial value of stress
@@ -483,6 +485,7 @@ protected:
    * @param gaE Value of gaE induced by the return (gaE = gamma * Epp)
    * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p_ok,
    * q_ok, _intnl)
+   * @param Eijkl The elasticity tensor
    * @param stress[out] The returned value of the stress tensor
    */
   virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
@@ -491,6 +494,7 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const;
 
   /**
@@ -507,6 +511,9 @@ protected:
    * @param q the returned value of q for this strain increment
    * @param gaE the total value of that came from this strain increment
    * @param smoothed_q contains the yield function and derivatives evaluated at (p, q)
+   * @param Eijkl The elasticity tensor
+   * @param compute_full_tangent_operator true if the full consistent tangent operator is needed,
+   * otherwise false
    * @param[out] cto The consistent tangent operator
    */
   virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
@@ -517,6 +524,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const;
 
   /**
@@ -552,4 +561,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
 };
 
-#endif // PQPLASTICMODEL_H
+#endif // TWOPARAMETERPLASTICITYSTRESSUPDATE_H

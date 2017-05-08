@@ -108,8 +108,13 @@
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = mc
+    perform_finite_strain_rotations = false
+  [../]
   [./mc]
-    type = ComputeCappedWeakPlaneStress
+    type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanphi

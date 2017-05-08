@@ -4,65 +4,42 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
-#define COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
+#ifndef CAPPEDWEAKPLANESTRESSUPDATE_H
+#define CAPPEDWEAKPLANESTRESSUPDATE_H
 
-#include "PQPlasticModel.h"
+#include "TwoParameterPlasticityStressUpdate.h"
 #include "TensorMechanicsHardeningModel.h"
-#include "TensorMechanicsPlasticDruckerPrager.h"
 
-class ComputeCappedDruckerPragerStress;
+#include <array>
+
+class CappedWeakPlaneStressUpdate;
 
 template <>
-InputParameters validParams<ComputeCappedDruckerPragerStress>();
+InputParameters validParams<CappedWeakPlaneStressUpdate>();
 
 /**
- * ComputeCappedDruckerPragerStress performs the return-map
+ * CappedWeakPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
- * models that describe capped Drucker-Prager plasticity.
+ * models that describe capped weak-plane plasticity
  *
- * This plastic model is ideally suited to a material (eg rock)
- * that has different compressive, tensile and shear
- * strengths.  Any of these strengths may be set large to
- * accommodate special situations.  For instance, setting
- * the compressive strength large is appropriate if there
- * is no chance of compressive failure in a model.
- *
- * This plastic model has two internal parameters:
- *  - a "shear" internal parameter which parameterises the
- *    amount of shear plastic strain.  The cohesion, friction
- *    angle, and dilation angle are assumed to be functions
- *    of this internal parameter.
- *  - a "tensile" internal parameter which parameterises the
- *    amount of tensile plastic strain.  The tensile strength
- *    and compressive strength are assumed to be functions of
- *    this internal parameter.  This means, for instance, that
- *    failure in tension can cause the compressive strenght
- *    to soften, as would be expected in rock-mechanics
- *    scenarios.
- *
- * This plasticity model assumes the elasticity tensor obeys:
- * E_ijkl s_kl = 2 E_0101 * s_ij, for any traceless tensor, s_ij.
- * (This expression defines the scalar quantity, Eqq,
- *  which is just the shear modulus in the isotropic situation.)
- *
- * As of Feb2017, small tests suggest that this Material model
- * is marginally more efficient than ComputeMultiPlasticityStress
- * with a DruckerPragerHyperbolic user object, if the compressive
- * and tensile strengths are set large.  Adding compressive or
- * tensile failure adds about 40% more computation time (on
- * average) which again appears to be better than
- * ComputeMultiPlasticityStress with DruckerPrager and MeanCap(s)
- * user objects.
+ * It assumes various things about the elasticity tensor, viz
+ * E(i,i,j,k) = 0 except if k=j
+ * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedDruckerPragerStress : public PQPlasticModel
+class CappedWeakPlaneStressUpdate : public TwoParameterPlasticityStressUpdate
 {
 public:
-  ComputeCappedDruckerPragerStress(const InputParameters & parameters);
+  CappedWeakPlaneStressUpdate(const InputParameters & parameters);
 
 protected:
-  /// Hardening model for cohesion, friction and dilation angles
-  const TensorMechanicsPlasticDruckerPrager & _dp;
+  /// Hardening model for cohesion
+  const TensorMechanicsHardeningModel & _cohesion;
+
+  /// Hardening model for tan(phi)
+  const TensorMechanicsHardeningModel & _tan_phi;
+
+  /// Hardening model for tan(psi)
+  const TensorMechanicsHardeningModel & _tan_psi;
 
   /// Hardening model for tensile strength
   const TensorMechanicsHardeningModel & _tstrength;
@@ -96,12 +73,11 @@ protected:
     no_tension
   } _stress_return_type;
 
-  /**
-   * If true, and if the trial stress exceeds the tensile strength,
-   * then the user gaurantees that the returned stress will be
-   * independent of the compressive strength.
-   */
-  const bool _small_dilation;
+  /// trial value of stress(0, 2)
+  Real _in_trial02;
+
+  /// trial value of stress(1, 2)
+  Real _in_trial12;
 
   /// trial value of q
   Real _in_q_trial;
@@ -116,11 +92,33 @@ protected:
                            const std::vector<Real> & intnl,
                            std::vector<f_and_derivs> & all_q) const override;
 
+  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
+                                         Real p_trial,
+                                         Real q_trial,
+                                         const RankTwoTensor & stress,
+                                         Real p,
+                                         Real q,
+                                         Real gaE,
+                                         const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
+                                         RankFourTensor & cto) const override;
+
+  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                    Real p_ok,
+                                    Real q_ok,
+                                    Real gaE,
+                                    const std::vector<Real> & intnl,
+                                    const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
+                                    RankTwoTensor & stress) const override;
+
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
                             const RankTwoTensor & stress_trial,
                             const std::vector<Real> & intnl_old,
-                            const std::vector<Real> & yf) override;
+                            const std::vector<Real> & yf,
+                            const RankFourTensor & Eijkl) override;
 
   virtual void initialiseVars(Real p_trial,
                               Real q_trial,
@@ -148,27 +146,9 @@ protected:
 
   virtual void initialiseReturnProcess() override;
 
-  virtual void finaliseReturnProcess() override;
+  virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
-
-  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
-                                    Real p_ok,
-                                    Real q_ok,
-                                    Real gaE,
-                                    const std::vector<Real> & intnl,
-                                    const f_and_derivs & smoothed_q,
-                                    RankTwoTensor & stress) const override;
-
-  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
-                                         Real p_trial,
-                                         Real q_trial,
-                                         const RankTwoTensor & stress,
-                                         Real p,
-                                         Real q,
-                                         Real gaE,
-                                         const f_and_derivs & smoothed_q,
-                                         RankFourTensor & cto) const override;
 
   virtual RankTwoTensor dpdstress(const RankTwoTensor & stress) const override;
 
@@ -179,4 +159,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
+#endif // CAPPEDWEAKPLANESTRESSUPDATE_H

@@ -234,9 +234,10 @@
   [../]
 
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
+    type = ComputeMultipleInelasticStress
     block = 0
-    return_mapping_models = 'temp_dep_hardening'
+    tangent_operator = elastic
+    inelastic_models = 'temp_dep_hardening'
   [../]
 []
 

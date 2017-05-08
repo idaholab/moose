@@ -43,13 +43,15 @@ IsotropicPowerLawHardeningStressUpdate::IsotropicPowerLawHardeningStressUpdate(
 }
 
 void
-IsotropicPowerLawHardeningStressUpdate::computeStressInitialize(Real effectiveTrialStress)
+IsotropicPowerLawHardeningStressUpdate::computeStressInitialize(
+    Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus();
-  computeYieldStress();
+  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
+  computeYieldStress(elasticity_tensor);
 
   _effective_trial_stress = effectiveTrialStress;
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
@@ -66,10 +68,10 @@ IsotropicPowerLawHardeningStressUpdate::computeHardeningDerivative(Real scalar)
 }
 
 void
-IsotropicPowerLawHardeningStressUpdate::computeYieldStress()
+IsotropicPowerLawHardeningStressUpdate::computeYieldStress(const RankFourTensor & elasticity_tensor)
 {
   // Pull in the Lam\`{e} lambda, and caculate E
-  const Real lambda = getIsotropicLameLambda();
+  const Real lambda = getIsotropicLameLambda(elasticity_tensor);
   _youngs_modulus =
       _shear_modulus * (3.0 * lambda + 2 * _shear_modulus) / (lambda + _shear_modulus);
 
@@ -82,11 +84,12 @@ IsotropicPowerLawHardeningStressUpdate::computeYieldStress()
 }
 
 Real
-IsotropicPowerLawHardeningStressUpdate::getIsotropicLameLambda()
+IsotropicPowerLawHardeningStressUpdate::getIsotropicLameLambda(
+    const RankFourTensor & elasticity_tensor)
 {
-  const Real lame_lambda = _elasticity_tensor[_qp](0, 0, 1, 1);
+  const Real lame_lambda = elasticity_tensor(0, 0, 1, 1);
 
-  if (_mesh.dimension() == 3 && lame_lambda != _elasticity_tensor[_qp](1, 1, 2, 2))
+  if (_mesh.dimension() == 3 && lame_lambda != elasticity_tensor(1, 1, 2, 2))
     mooseError(
         "Check to ensure that your Elasticity Tensor is truly Isotropic: different lambda values");
   return lame_lambda;

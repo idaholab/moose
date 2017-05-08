@@ -61,9 +61,15 @@ RadialReturnStressUpdate::initQpStatefulProperties()
 }
 
 void
-RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
-                                       RankTwoTensor & inelastic_strain_increment,
-                                       RankTwoTensor & stress_new)
+RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
+                                      RankTwoTensor & inelastic_strain_increment,
+                                      const RankTwoTensor & /*rotation_increment*/,
+                                      RankTwoTensor & stress_new,
+                                      const RankTwoTensor & /*stress_old*/,
+                                      const RankFourTensor & elasticity_tensor,
+                                      const RankTwoTensor & elastic_strain_old,
+                                      bool /*compute_full_tangent_operator*/,
+                                      RankFourTensor & tangent_operator)
 {
   // Given the stretching, update the inelastic strain
   // Compute the stress in the intermediate configuration while retaining the stress history
@@ -83,7 +89,7 @@ RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
   // In that case skip the entire iteration if the effective trial stress is zero
   if (effective_trial_stress != 0.0)
   {
-    computeStressInitialize(effective_trial_stress);
+    computeStressInitialize(effective_trial_stress, elasticity_tensor);
 
     // Use Newton iteration to determine the scalar effective inelastic strain increment
     unsigned int iteration = 0;
@@ -155,27 +161,33 @@ RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
   strain_increment -= inelastic_strain_increment;
   _effective_inelastic_strain[_qp] =
       _effective_inelastic_strain_old[_qp] + scalar_effective_inelastic_strain;
-  stress_new = _elasticity_tensor[_qp] * (strain_increment + _elastic_strain_old[_qp]);
+  stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
 
   computeStressFinalize(inelastic_strain_increment);
+
+  /**
+   * Note!  The tangent operator for this class, and derived class is
+   * currently just the elasticity tensor, irrespective of compute_full_tangent_operator
+   */
+  tangent_operator = elasticity_tensor;
 }
 
 Real
-RadialReturnStressUpdate::getIsotropicShearModulus()
+RadialReturnStressUpdate::getIsotropicShearModulus(const RankFourTensor & elasticity_tensor)
 {
-  const Real shear_modulus = _elasticity_tensor[_qp](0, 1, 0, 1);
-  if (_mesh.dimension() == 3 && shear_modulus != _elasticity_tensor[_qp](0, 2, 0, 2))
+  const Real shear_modulus = elasticity_tensor(0, 1, 0, 1);
+  if (_mesh.dimension() == 3 && shear_modulus != elasticity_tensor(0, 2, 0, 2))
     mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
   return shear_modulus;
 }
 
 Real
-RadialReturnStressUpdate::getIsotropicBulkModulus()
+RadialReturnStressUpdate::getIsotropicBulkModulus(const RankFourTensor & elasticity_tensor)
 {
-  const Real shear_modulus = getIsotropicShearModulus();
+  const Real shear_modulus = getIsotropicShearModulus(elasticity_tensor);
   // dilatational modulus is defined as lambda plus two mu
-  const Real dilatational_modulus = _elasticity_tensor[_qp](0, 0, 0, 0);
-  if (_mesh.dimension() == 3 && dilatational_modulus != _elasticity_tensor[_qp](2, 2, 2, 2))
+  const Real dilatational_modulus = elasticity_tensor(0, 0, 0, 0);
+  if (_mesh.dimension() == 3 && dilatational_modulus != elasticity_tensor(2, 2, 2, 2))
     mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
   const Real lambda = dilatational_modulus - 2.0 * shear_modulus;
   const Real bulk_modulus = lambda + 2.0 * shear_modulus / 3.0;

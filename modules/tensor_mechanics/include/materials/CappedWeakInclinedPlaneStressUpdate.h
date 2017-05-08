@@ -4,18 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
-#define COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
+#ifndef CAPPEDWEAKINCLINEDPLANESTRESSUPDATE_H
+#define CAPPEDWEAKINCLINEDPLANESTRESSUPDATE_H
 
-#include "ComputeCappedWeakPlaneStress.h"
+#include "CappedWeakPlaneStressUpdate.h"
 
-class ComputeCappedWeakInclinedPlaneStress;
+class CappedWeakInclinedPlaneStressUpdate;
 
 template <>
-InputParameters validParams<ComputeCappedWeakInclinedPlaneStress>();
+InputParameters validParams<CappedWeakInclinedPlaneStressUpdate>();
 
 /**
- * ComputeCappedWeakInclinedPlaneStress performs the return-map
+ * CappedWeakInclinedPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
  * models that describe capped weak-plane plasticity
  *
@@ -25,14 +25,13 @@ InputParameters validParams<ComputeCappedWeakInclinedPlaneStress>();
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedWeakInclinedPlaneStress : public ComputeCappedWeakPlaneStress
+class CappedWeakInclinedPlaneStressUpdate : public CappedWeakPlaneStressUpdate
 {
 public:
-  ComputeCappedWeakInclinedPlaneStress(const InputParameters & parameters);
+  CappedWeakInclinedPlaneStressUpdate(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeQpStress() override;
 
   /// User-input value of the normal vector to the weak plane
   RealVectorValue _n_input;
@@ -56,12 +55,14 @@ protected:
   RankFourTensor _rotated_Eijkl;
 
   virtual void initialiseReturnProcess() override;
+  virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
                             const RankTwoTensor & stress_trial,
                             const std::vector<Real> & intnl_old,
-                            const std::vector<Real> & yf) override;
+                            const std::vector<Real> & yf,
+                            const RankFourTensor & Eijkl) override;
 
   virtual void computePQ(const RankTwoTensor & stress, Real & p, Real & q) const override;
 
@@ -73,6 +74,7 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
   virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
@@ -83,6 +85,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 
   virtual RankTwoTensor dpdstress(const RankTwoTensor & stress) const override;
@@ -92,4 +96,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
+#endif // CAPPEDWEAKINCLINEDPLANESTRESSUPDATE_H

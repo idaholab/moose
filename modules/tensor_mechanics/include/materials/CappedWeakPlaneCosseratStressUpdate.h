@@ -4,18 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTECAPPEDWEAKPLANECOSSERATSTRESS_H
-#define COMPUTECAPPEDWEAKPLANECOSSERATSTRESS_H
+#ifndef CAPPEDWEAKPLANECOSSERATSTRESSUPDATE_H
+#define CAPPEDWEAKPLANECOSSERATSTRESSUPDATE_H
 
-#include "ComputeCappedWeakPlaneStress.h"
+#include "CappedWeakPlaneStressUpdate.h"
 
-class ComputeCappedWeakPlaneCosseratStress;
+class CappedWeakPlaneCosseratStressUpdate;
 
 template <>
-InputParameters validParams<ComputeCappedWeakPlaneCosseratStress>();
+InputParameters validParams<CappedWeakPlaneCosseratStressUpdate>();
 
 /**
- * ComputeCappedWeakPlaneCosseratStress performs the return-map
+ * CappedWeakPlaneCosseratStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic
  * models that describe capped weak-plane Cosserat plasticity
  *
@@ -23,10 +23,10 @@ InputParameters validParams<ComputeCappedWeakPlaneCosseratStress>();
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedWeakPlaneCosseratStress : public ComputeCappedWeakPlaneStress
+class CappedWeakPlaneCosseratStressUpdate : public CappedWeakPlaneStressUpdate
 {
 public:
-  ComputeCappedWeakPlaneCosseratStress(const InputParameters & parameters);
+  CappedWeakPlaneCosseratStressUpdate(const InputParameters & parameters);
 
 protected:
   /// The Cosserat curvature strain
@@ -56,6 +56,8 @@ protected:
                                          Real q,
                                          Real gaE,
                                          const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & Eijkl,
+                                         bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
 
   virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
@@ -64,6 +66,7 @@ protected:
                                     Real gaE,
                                     const std::vector<Real> & intnl,
                                     const f_and_derivs & smoothed_q,
+                                    const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
   virtual RankTwoTensor dqdstress(const RankTwoTensor & stress) const override;
@@ -71,4 +74,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif // COMPUTECAPPEDWEAKPLANECOSSERATSTRESS_H
+#endif // CAPPEDWEAKPLANECOSSERATSTRESSUPDATE_H

@@ -36,20 +36,29 @@ public:
 
   /// A radial return (J2) mapping method is defined in this material by overwritting
   /// the computeInelasticStrainIncrement method.
-  virtual void updateStress(RankTwoTensor & strain_increment,
-                            RankTwoTensor & inelastic_strain_increment,
-                            RankTwoTensor & stress_new) override;
+  virtual void updateState(RankTwoTensor & strain_increment,
+                           RankTwoTensor & inelastic_strain_increment,
+                           const RankTwoTensor & rotation_increment,
+                           RankTwoTensor & stress_new,
+                           const RankTwoTensor & stress_old,
+                           const RankFourTensor & elasticity_tensor,
+                           const RankTwoTensor & elastic_strain_old,
+                           bool compute_full_tangent_operator,
+                           RankFourTensor & tangent_operator) override;
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeStressInitialize(Real /*effectiveTrialStress*/) {}
+  virtual void computeStressInitialize(Real /*effectiveTrialStress*/,
+                                       const RankFourTensor & /*elasticity_tensor*/)
+  {
+  }
   virtual void iterationInitialize(Real /*scalar*/) {}
   virtual Real computeResidual(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
   virtual Real computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
   virtual void iterationFinalize(Real /*scalar*/) {}
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
-  virtual Real getIsotropicShearModulus();
-  virtual Real getIsotropicBulkModulus();
+  virtual Real getIsotropicShearModulus(const RankFourTensor & elasticity_tensor);
+  virtual Real getIsotropicBulkModulus(const RankFourTensor & elasticity_tensor);
 
   const unsigned int _max_its;
   const bool _output_iteration_info;

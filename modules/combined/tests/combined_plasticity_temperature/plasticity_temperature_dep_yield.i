@@ -122,9 +122,10 @@
     poissons_ratio = 0.3
   [../]
   [./creep_plas]
-    type = ComputeReturnMappingStress
+    type = ComputeMultipleInelasticStress
+    tangent_operator = elastic
     block = 0
-    return_mapping_models = 'plasticity'
+    inelastic_models = 'plasticity'
     max_iterations = 50
     absolute_tolerance = 1e-05
   [../]

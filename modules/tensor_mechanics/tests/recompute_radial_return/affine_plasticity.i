@@ -307,8 +307,9 @@
     max_iterations = 50
   [../]
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    return_mapping_models = 'isotropic_plasticity'
+    type = ComputeMultipleInelasticStress
+    tangent_operator = elastic
+    inelastic_models = 'isotropic_plasticity'
   [../]
 
 [] # Materials
@@ -320,8 +321,8 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 
   nl_abs_tol = 1e-10
 

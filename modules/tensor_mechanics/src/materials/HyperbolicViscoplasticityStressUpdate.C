@@ -27,6 +27,8 @@ validParams<HyperbolicViscoplasticityStressUpdate>()
                                 "Viscoplasticity coefficient, scales the hyperbolic function");
   params.addRequiredParam<Real>("c_beta",
                                 "Viscoplasticity coefficient inside the hyperbolic sin function");
+  params.addParam<std::string>(
+      "plastic_prepend", "", "String that is prepended to the plastic_strain Material Property");
 
   return params;
 }
@@ -34,6 +36,7 @@ validParams<HyperbolicViscoplasticityStressUpdate>()
 HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
     const InputParameters & parameters)
   : RadialReturnStressUpdate(parameters, "plastic"),
+    _plastic_prepend(getParam<std::string>("plastic_prepend")),
     _yield_stress(parameters.get<Real>("yield_stress")),
     _hardening_constant(parameters.get<Real>("hardening_constant")),
     _c_alpha(parameters.get<Real>("c_alpha")),
@@ -41,8 +44,8 @@ HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
 
-    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain"))
+    _plastic_strain(declareProperty<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_plastic_prepend + "plastic_strain"))
 {
 }
 
@@ -58,11 +61,13 @@ HyperbolicViscoplasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
-HyperbolicViscoplasticityStressUpdate::computeStressInitialize(Real effectiveTrialStress)
+HyperbolicViscoplasticityStressUpdate::computeStressInitialize(
+    Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus();
+  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
 
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }

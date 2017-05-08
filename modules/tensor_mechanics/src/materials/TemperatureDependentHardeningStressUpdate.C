@@ -72,11 +72,12 @@ TemperatureDependentHardeningStressUpdate::TemperatureDependentHardeningStressUp
 }
 
 void
-TemperatureDependentHardeningStressUpdate::computeStressInitialize(Real effectiveTrialStress)
+TemperatureDependentHardeningStressUpdate::computeStressInitialize(
+    Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus();
+  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
   initializeHardeningFunctions();
-  computeYieldStress();
+  computeYieldStress(elasticity_tensor);
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
@@ -140,7 +141,8 @@ Real TemperatureDependentHardeningStressUpdate::computeHardeningDerivative(Real 
 }
 
 void
-TemperatureDependentHardeningStressUpdate::computeYieldStress()
+TemperatureDependentHardeningStressUpdate::computeYieldStress(
+    const RankFourTensor & /*elasticity_tensor*/)
 {
   _yield_stress = _interp_yield_stress->sample(_temperature[_qp]);
   if (_yield_stress <= 0.0)

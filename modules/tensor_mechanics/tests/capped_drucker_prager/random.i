@@ -222,9 +222,13 @@
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = dp
+    perform_finite_strain_rotations = false
+  [../]
   [./dp]
-    type = ComputeCappedDruckerPragerStress
-    block = 0
+    type = CappedDruckerPragerStressUpdate
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs
