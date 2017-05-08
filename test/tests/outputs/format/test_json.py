@@ -104,6 +104,7 @@ class TestJSON(unittest.TestCase):
         f = data["Functions"]["star"]
         self.assertIn("associated_types", f)
         self.assertEquals(["FunctionName"], f["associated_types"])
+        self.assertEqual(f["subblock_types"]["ParsedFunction"]["file_info"]["class"], "MooseParsedFunction")
 
         a = data["Adaptivity"]
         i = a["subblocks"]["Indicators"]["star"]["subblock_types"]["AnalyticalIndicator"]

@@ -189,3 +189,19 @@ Factory::getLineInfo(const std::string & name) const
 {
   return _name_to_line.getInfo(name);
 }
+
+void
+Factory::associateNameToClass(const std::string & name, const std::string & class_name)
+{
+  _name_to_class[name] = class_name;
+}
+
+std::string
+Factory::associatedClassName(const std::string & name) const
+{
+  auto it = _name_to_class.find(name);
+  if (it == _name_to_class.end())
+    return "";
+  else
+    return it->second;
+}

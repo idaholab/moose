@@ -143,7 +143,8 @@ JsonSyntaxTree::addParameters(const std::string & parent,
                               const std::string & action,
                               bool is_action,
                               InputParameters * params,
-                              const FileLineInfo & lineinfo)
+                              const FileLineInfo & lineinfo,
+                              const std::string & classname)
 {
   if (action == "EmptyAction")
     return false;
@@ -174,7 +175,11 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["parent_syntax"] = parent;
     json["description"] = params->getClassDescription();
     if (lineinfo.isValid())
+    {
       json["file_info"][lineinfo.file()] = lineinfo.line();
+      if (!classname.empty())
+        json["file_info"]["class"] = classname;
+    }
   }
   return true;
 }

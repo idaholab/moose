@@ -595,7 +595,8 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                                            action,
                                            true,
                                            &action_obj_params,
-                                           _syntax.getLineInfo(act_name, action, ""));
+                                           _syntax.getLineInfo(act_name, action, ""),
+                                           "");
 
     if (params_added)
     {
@@ -657,13 +658,15 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
           moose_obj_params.set<std::string>("type") = moose_obj->first;
 
           auto lineinfo = _factory.getLineInfo(moose_obj->first);
+          std::string classname = _factory.associatedClassName(moose_obj->first);
           root.addParameters(act_name,
                              name,
                              is_type,
                              moose_obj->first,
                              is_action_params,
                              &moose_obj_params,
-                             lineinfo);
+                             lineinfo,
+                             classname);
         }
       }
     }
