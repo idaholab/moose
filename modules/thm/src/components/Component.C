@@ -182,11 +182,7 @@ Component::connectObject(const InputParameters & params,
                          const std::string & mooseName,
                          const std::string & name)
 {
-  ControlLogicNameEntry rne(params.get<std::string>("_moose_base") + "::" + mooseName, name);
-  if (_parent != NULL)
-    _parent->_rname_map[rname][name].push_back(rne);
-  else
-    _rname_map[rname][name].push_back(rne);
+  connectObject(params, rname, mooseName, name, name);
 }
 
 void
@@ -201,6 +197,11 @@ Component::connectObject(const InputParameters & params,
     _parent->_rname_map[rname][name].push_back(rne);
   else
     _rname_map[rname][name].push_back(rne);
+
+  MooseObjectParameterName alias("component/" + this->name() + "/" + name);
+  MooseObjectParameterName par_value(
+      MooseObjectName(params.get<std::string>("_moose_base"), mooseName), par_name);
+  _app.getInputParameterWarehouse().addControllableParameterConnection(alias, par_value);
 }
 
 void
