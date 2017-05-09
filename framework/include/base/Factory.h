@@ -32,7 +32,13 @@ class InputParameters;
  */
 #define stringifyName(name) #name
 #define registerObject(name) factory.reg<name>(stringifyName(name), __FILE__, __LINE__)
-#define registerNamedObject(obj, name) factory.reg<obj>(name, __FILE__, __LINE__)
+#define registerNamedObject(obj, name)                                                             \
+  do                                                                                               \
+  {                                                                                                \
+    factory.reg<obj>(name, __FILE__, __LINE__);                                                    \
+    factory.associateNameToClass(name, stringifyName(obj));                                        \
+  } while (0)
+
 #define registerDeprecatedObject(name, time)                                                       \
   factory.regDeprecated<name>(stringifyName(name), time, __FILE__, __LINE__)
 
@@ -186,6 +192,20 @@ public:
   FileLineInfo getLineInfo(const std::string & name) const;
 
   /**
+   * Associates an object name with a class name.
+   * Primarily used with the registerNamed* macros to store the
+   * mapping between the object name and the class that implements the object.
+   */
+  void associateNameToClass(const std::string & name, const std::string & class_name);
+
+  /**
+   * Get the associated class name for an object name.
+   * This will return an empty string if the name was not previously
+   * associated with a class name via associateNameToClass()
+   */
+  std::string associatedClassName(const std::string & name) const;
+
+  /**
    * Register a deprecated object that expires
    * @param obj_name The name of the object to register
    * @param t_str String containing the expiration date for the object
@@ -325,6 +345,9 @@ protected:
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 
   FileLineInfoMap _name_to_line;
+
+  /// Object name to class name association
+  std::map<std::string, std::string> _name_to_class;
 
   /// Storage for deprecated object experiation dates
   std::map<std::string, time_t> _deprecated_time;
