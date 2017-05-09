@@ -938,32 +938,6 @@ FeatureFloodCount::updateFieldInfo()
   for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
   {
     auto & feature = _feature_sets[i];
-    decltype(i) global_feature_number;
-
-    if (_is_master)
-      /**
-       * If we are on processor zero, the global feature number is simply the current
-       * index since we previously merged and sorted the partial features.
-       */
-      global_feature_number = i;
-    else
-    {
-      /**
-       * For the remaining ranks, obtaining the feature number requires us to
-       * first obtain the original local index (stored inside of the feature).
-       * Once we have that index, we can use it to look up the global id
-       * in the local to global map.
-       */
-      mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
-
-      // Get the local ID from the orig IDs
-      auto local_id = feature._orig_ids.begin()->second;
-      mooseAssert(local_id < _local_to_global_feature_map.size(),
-                  "local_id : " << local_id << " is out of range ("
-                                << _local_to_global_feature_map.size()
-                                << ')');
-      global_feature_number = _local_to_global_feature_map[local_id];
-    }
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth
     // map
@@ -973,7 +947,7 @@ FeatureFloodCount::updateFieldInfo()
     // Loop over the entity ids of this feature and update our local map
     for (auto entity : feature._local_ids)
     {
-      _feature_maps[map_index][entity] = static_cast<int>(global_feature_number);
+      _feature_maps[map_index][entity] = static_cast<int>(feature._id);
 
       if (_var_index_mode)
         _var_index_maps[map_index][entity] = feature._var_index;
@@ -992,7 +966,7 @@ FeatureFloodCount::updateFieldInfo()
     if (_compute_halo_maps)
       // Loop over the halo ids to update cells with halo information
       for (auto entity : feature._halo_ids)
-        _halo_ids[map_index][entity] = static_cast<int>(global_feature_number);
+        _halo_ids[map_index][entity] = static_cast<int>(feature._id);
 
     // Loop over the ghosted ids to update cells with ghost information
     for (auto entity : feature._ghosted_ids)

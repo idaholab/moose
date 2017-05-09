@@ -85,6 +85,9 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
 {
   if (_ebsd_reader && !_ebsd_op_var)
     mooseError("EBSD OP variable must be supplied if the reader is supplied");
+
+  if (_tracking_step > 0 && _poly_ic_uo)
+    mooseError("Can't start tracking after the initial condition when using a polycrystal_ic_uo");
 }
 
 GrainTracker::~GrainTracker() {}
