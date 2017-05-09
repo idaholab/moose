@@ -501,8 +501,13 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = stress
+    perform_finite_strain_rotations = false
+  [../]
   [./stress]
-    type = ComputeCappedWeakPlaneStress
+    type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi
@@ -511,7 +516,6 @@
     tip_smoother = 0.5E6
     smoothing_tol = 0.5E6
     yield_function_tol = 1E-2
-    store_stress_old = true
   [../]
   [./density]
     type = GenericConstantMaterial

@@ -25,12 +25,15 @@ validParams<PowerLawCreepStressUpdate>()
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
+  params.addParam<std::string>(
+      "creep_prepend", "", "String that is prepended to the creep_strain Material Property");
 
   return params;
 }
 
 PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters)
   : RadialReturnStressUpdate(parameters, "creep"),
+    _creep_prepend(getParam<std::string>("creep_prepend")),
     _coefficient(parameters.get<Real>("coefficient")),
     _n_exponent(parameters.get<Real>("n_exponent")),
     _m_exponent(parameters.get<Real>("m_exponent")),
@@ -40,8 +43,8 @@ PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & par
     _shear_modulus(0.0),
     _has_temp(isCoupled("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
-    _creep_strain(declareProperty<RankTwoTensor>(_base_name + "creep_strain")),
-    _creep_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "creep_strain"))
+    _creep_strain(declareProperty<RankTwoTensor>(_creep_prepend + "creep_strain")),
+    _creep_strain_old(declarePropertyOld<RankTwoTensor>(_creep_prepend + "creep_strain"))
 {
 }
 
@@ -49,12 +52,13 @@ void
 PowerLawCreepStressUpdate::initQpStatefulProperties()
 {
   _creep_strain[_qp].zero();
-  _creep_strain_old[_qp].zero();
 }
 
-void PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/)
+void
+PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/,
+                                                   const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus();
+  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
 
   if (_has_temp)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));

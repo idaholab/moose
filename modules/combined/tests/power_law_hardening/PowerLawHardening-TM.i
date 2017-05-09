@@ -138,8 +138,9 @@
   [../]
 
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    return_mapping_models = 'power_law_hardening'
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'power_law_hardening'
+    tangent_operator = elastic
   [../]
 []
 

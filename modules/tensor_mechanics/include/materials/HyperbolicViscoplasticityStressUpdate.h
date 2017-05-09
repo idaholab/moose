@@ -32,11 +32,15 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(Real effectiveTrialStress) override;
+  virtual void computeStressInitialize(Real effectiveTrialStress,
+                                       const RankFourTensor & elasticity_tensor) override;
   virtual Real computeResidual(Real effectiveTrialStress, Real scalar) override;
   virtual Real computeDerivative(Real effectiveTrialStress, Real scalar) override;
   virtual void iterationFinalize(Real scalar) override;
   virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement) override;
+
+  /// a string to prepend to the plastic strain Material Property name
+  const std::string _plastic_prepend;
 
   ///@{ Linear strain hardening parameters
   const Real _yield_stress;
@@ -61,8 +65,11 @@ protected:
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
 
+  /// plastic strain of this model
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+
+  /// old value of plastic strain
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 };
 
 template <>

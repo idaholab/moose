@@ -35,15 +35,19 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(Real effectiveTrialStress) override;
+  virtual void computeStressInitialize(Real effectiveTrialStress,
+                                       const RankFourTensor & elasticity_tensor) override;
   virtual Real computeResidual(Real effectiveTrialStress, Real scalar) override;
   virtual Real computeDerivative(Real effectiveTrialStress, Real scalar) override;
   virtual void iterationFinalize(Real scalar) override;
   virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement) override;
 
-  virtual void computeYieldStress();
+  virtual void computeYieldStress(const RankFourTensor & elasticity_tensor);
   virtual Real computeHardeningValue(Real scalar);
   virtual Real computeHardeningDerivative(Real scalar);
+
+  /// a string to prepend to the plastic strain Material Property name
+  const std::string _plastic_prepend;
 
   Function * _yield_stress_function;
   Real _yield_stress;
@@ -54,15 +58,15 @@ protected:
   Real _hardening_slope;
   Real _shear_modulus;
 
+  /// plastic strain in this model
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+
+  /// old value of plastic strain
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
   const VariableValue & _temperature;
 };
-
-template <>
-InputParameters validParams<IsotropicPlasticityStressUpdate>();
 
 #endif // ISOTROPICPLASTICITYSTRESSUPDATE_H

@@ -389,8 +389,14 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
   [../]
+  [./admissible]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = stress
+    tangent_operator = nonlinear
+    perform_finite_strain_rotations = false
+  [../]
   [./stress]
-    type = ComputeCappedWeakPlaneStress
+    type = CappedWeakPlaneStressUpdate
     cohesion = coh_irrelevant
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi
@@ -401,7 +407,6 @@
     smoothing_tol = 1E5
     yield_function_tol = 1E-5
     perfect_guess = true
-    tangent_operator = nonlinear
     min_step_size = 0.1
   [../]
   [./density]

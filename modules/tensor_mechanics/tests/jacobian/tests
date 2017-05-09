@@ -222,6 +222,13 @@
     cli_args = '--no-trap-fpe'
   [../]
 
+  [./cto27]
+    type = 'PetscJacobianTester'
+    input = 'cto27.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+
   [./poro01]
     type = 'PetscJacobianTester'
     input = 'poro01.i'

@@ -79,8 +79,9 @@
     poissons_ratio = 0.3
   [../]
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
-    return_mapping_models = 'power_law_creep'
+    type = ComputeMultipleInelasticStress
+    tangent_operator = elastic
+    inelastic_models = 'power_law_creep'
   [../]
   [./power_law_creep]
     type = PowerLawCreepStressUpdate

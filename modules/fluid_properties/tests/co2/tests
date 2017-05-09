@@ -4,4 +4,11 @@
     input = 'sweos.i'
     csvdiff = 'sweos_out.csv'
   [../]
+  [./tabulated]
+    type = CSVDiff
+    input = 'tabulated.i'
+    csvdiff = 'sweos_out.csv'
+    prereq = 'sweos'
+    rel_err = '1e-4'
+  [../]
 []

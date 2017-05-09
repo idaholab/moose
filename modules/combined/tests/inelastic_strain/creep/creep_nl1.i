@@ -292,9 +292,9 @@
     block = 1
   [../]
   [./radial_return_stress]
-    type = ComputeReturnMappingStress
+    type = ComputeMultipleInelasticStress
     block = 1
-    return_mapping_models = 'powerlawcrp'
+    inelastic_models = 'powerlawcrp'
   [../]
   [./powerlawcrp]
     type = PowerLawCreepStressUpdate

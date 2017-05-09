@@ -4,15 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ComputeCappedDruckerPragerStress.h"
+#include "CappedDruckerPragerStressUpdate.h"
 
 #include "libmesh/utility.h"
 
 template <>
 InputParameters
-validParams<ComputeCappedDruckerPragerStress>()
+validParams<CappedDruckerPragerStressUpdate>()
 {
-  InputParameters params = validParams<PQPlasticModel>();
+  InputParameters params = validParams<TwoParameterPlasticityStressUpdate>();
   params.addClassDescription("Capped Drucker-Prager plasticity stress calculator");
   params.addRequiredParam<UserObjectName>(
       "DP_model",
@@ -47,9 +47,8 @@ validParams<ComputeCappedDruckerPragerStress>()
   return params;
 }
 
-ComputeCappedDruckerPragerStress::ComputeCappedDruckerPragerStress(
-    const InputParameters & parameters)
-  : PQPlasticModel(parameters, 3, 2),
+CappedDruckerPragerStressUpdate::CappedDruckerPragerStressUpdate(const InputParameters & parameters)
+  : TwoParameterPlasticityStressUpdate(parameters, 3, 2),
     _dp(getUserObject<TensorMechanicsPlasticDruckerPrager>("DP_model")),
     _tstrength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
     _cstrength(getUserObject<TensorMechanicsHardeningModel>("compressive_strength")),
@@ -62,28 +61,29 @@ ComputeCappedDruckerPragerStress::ComputeCappedDruckerPragerStress(
   // With arbitary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
   if (_tstrength.value(0) + _cstrength.value(0) <= _smoothing_tol)
-    mooseError("ComputeCappedDruckerPragerStress: Tensile strength plus compressive strength must "
+    mooseError("CappedDruckerPragerStressUpdate: Tensile strength plus compressive strength must "
                "be greater than smoothing_tol");
 }
 
 void
-ComputeCappedDruckerPragerStress::initialiseReturnProcess()
+CappedDruckerPragerStressUpdate::initialiseReturnProcess()
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
 
 void
-ComputeCappedDruckerPragerStress::finaliseReturnProcess()
+CappedDruckerPragerStressUpdate::finalizeReturnProcess(const RankTwoTensor & /*rotation_increment*/)
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
 
 void
-ComputeCappedDruckerPragerStress::preReturnMap(Real /*p_trial*/,
-                                               Real q_trial,
-                                               const RankTwoTensor & /*stress_trial*/,
-                                               const std::vector<Real> & /*intnl_old*/,
-                                               const std::vector<Real> & yf)
+CappedDruckerPragerStressUpdate::preReturnMap(Real /*p_trial*/,
+                                              Real q_trial,
+                                              const RankTwoTensor & /*stress_trial*/,
+                                              const std::vector<Real> & /*intnl_old*/,
+                                              const std::vector<Real> & yf,
+                                              const RankFourTensor & /*Eijkl*/)
 {
   // If it's obvious, then simplify the return-type
   if (yf[2] >= 0)
@@ -95,28 +95,28 @@ ComputeCappedDruckerPragerStress::preReturnMap(Real /*p_trial*/,
 }
 
 void
-ComputeCappedDruckerPragerStress::computePQ(const RankTwoTensor & stress, Real & p, Real & q) const
+CappedDruckerPragerStressUpdate::computePQ(const RankTwoTensor & stress, Real & p, Real & q) const
 {
   p = stress.trace();
   q = std::sqrt(stress.secondInvariant());
 }
 
 void
-ComputeCappedDruckerPragerStress::setEppEqq(const RankFourTensor & Eijkl,
-                                            Real & Epp,
-                                            Real & Eqq) const
+CappedDruckerPragerStressUpdate::setEppEqq(const RankFourTensor & Eijkl,
+                                           Real & Epp,
+                                           Real & Eqq) const
 {
   Epp = Eijkl.sum3x3();
   Eqq = Eijkl(0, 1, 0, 1);
 }
 
 void
-ComputeCappedDruckerPragerStress::setIntnlDerivatives(Real /*p_trial*/,
-                                                      Real q_trial,
-                                                      Real /*p*/,
-                                                      Real q,
-                                                      const std::vector<Real> & intnl,
-                                                      std::vector<std::vector<Real>> & dintnl) const
+CappedDruckerPragerStressUpdate::setIntnlDerivatives(Real /*p_trial*/,
+                                                     Real q_trial,
+                                                     Real /*p*/,
+                                                     Real q,
+                                                     const std::vector<Real> & intnl,
+                                                     std::vector<std::vector<Real>> & dintnl) const
 {
   Real tanpsi;
   _dp.onlyB(intnl[0], _dp.dilation, tanpsi);
@@ -129,10 +129,10 @@ ComputeCappedDruckerPragerStress::setIntnlDerivatives(Real /*p_trial*/,
 }
 
 void
-ComputeCappedDruckerPragerStress::yieldFunctionValues(Real p,
-                                                      Real q,
-                                                      const std::vector<Real> & intnl,
-                                                      std::vector<Real> & yf) const
+CappedDruckerPragerStressUpdate::yieldFunctionValues(Real p,
+                                                     Real q,
+                                                     const std::vector<Real> & intnl,
+                                                     std::vector<Real> & yf) const
 {
   Real aaa;
   Real bbb;
@@ -151,10 +151,10 @@ ComputeCappedDruckerPragerStress::yieldFunctionValues(Real p,
 }
 
 void
-ComputeCappedDruckerPragerStress::computeAllQ(Real p,
-                                              Real q,
-                                              const std::vector<Real> & intnl,
-                                              std::vector<f_and_derivs> & all_q) const
+CappedDruckerPragerStressUpdate::computeAllQ(Real p,
+                                             Real q,
+                                             const std::vector<Real> & intnl,
+                                             std::vector<f_and_derivs> & all_q) const
 {
   Real aaa;
   Real bbb;
@@ -256,13 +256,13 @@ ComputeCappedDruckerPragerStress::computeAllQ(Real p,
 }
 
 void
-ComputeCappedDruckerPragerStress::initialiseVars(Real p_trial,
-                                                 Real q_trial,
-                                                 const std::vector<Real> & intnl_old,
-                                                 Real & p,
-                                                 Real & q,
-                                                 Real & gaE,
-                                                 std::vector<Real> & intnl) const
+CappedDruckerPragerStressUpdate::initialiseVars(Real p_trial,
+                                                Real q_trial,
+                                                const std::vector<Real> & intnl_old,
+                                                Real & p,
+                                                Real & q,
+                                                Real & gaE,
+                                                std::vector<Real> & intnl) const
 {
   if (!_perfect_guess)
   {
@@ -352,12 +352,12 @@ ComputeCappedDruckerPragerStress::initialiseVars(Real p_trial,
 }
 
 void
-ComputeCappedDruckerPragerStress::setIntnlValues(Real p_trial,
-                                                 Real q_trial,
-                                                 Real p,
-                                                 Real q,
-                                                 const std::vector<Real> & intnl_old,
-                                                 std::vector<Real> & intnl) const
+CappedDruckerPragerStressUpdate::setIntnlValues(Real p_trial,
+                                                Real q_trial,
+                                                Real p,
+                                                Real q,
+                                                const std::vector<Real> & intnl_old,
+                                                std::vector<Real> & intnl) const
 {
   intnl[0] = intnl_old[0] + (q_trial - q) / _Eqq;
   Real tanpsi;
@@ -366,13 +366,14 @@ ComputeCappedDruckerPragerStress::setIntnlValues(Real p_trial,
 }
 
 void
-ComputeCappedDruckerPragerStress::setStressAfterReturn(const RankTwoTensor & stress_trial,
-                                                       Real p_ok,
-                                                       Real q_ok,
-                                                       Real /*gaE*/,
-                                                       const std::vector<Real> & /*intnl*/,
-                                                       const f_and_derivs & /*smoothed_q*/,
-                                                       RankTwoTensor & stress) const
+CappedDruckerPragerStressUpdate::setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                                      Real p_ok,
+                                                      Real q_ok,
+                                                      Real /*gaE*/,
+                                                      const std::vector<Real> & /*intnl*/,
+                                                      const f_and_derivs & /*smoothed_q*/,
+                                                      const RankFourTensor & /*Eijkl*/,
+                                                      RankTwoTensor & stress) const
 {
   // stress = s_ij + de_ij tr(stress) / 3 = q / q_trial * s_ij^trial + de_ij p / 3 = q / q_trial *
   // (stress_ij^trial - de_ij tr(stress^trial) / 3) + de_ij p / 3
@@ -384,19 +385,19 @@ ComputeCappedDruckerPragerStress::setStressAfterReturn(const RankTwoTensor & str
 }
 
 RankTwoTensor
-ComputeCappedDruckerPragerStress::dpdstress(const RankTwoTensor & stress) const
+CappedDruckerPragerStressUpdate::dpdstress(const RankTwoTensor & stress) const
 {
   return stress.dtrace();
 }
 
 RankFourTensor
-ComputeCappedDruckerPragerStress::d2pdstress2(const RankTwoTensor & /*stress*/) const
+CappedDruckerPragerStressUpdate::d2pdstress2(const RankTwoTensor & /*stress*/) const
 {
   return RankFourTensor();
 }
 
 RankTwoTensor
-ComputeCappedDruckerPragerStress::dqdstress(const RankTwoTensor & stress) const
+CappedDruckerPragerStressUpdate::dqdstress(const RankTwoTensor & stress) const
 {
   const Real j2 = stress.secondInvariant();
   if (j2 == 0.0)
@@ -405,7 +406,7 @@ ComputeCappedDruckerPragerStress::dqdstress(const RankTwoTensor & stress) const
 }
 
 RankFourTensor
-ComputeCappedDruckerPragerStress::d2qdstress2(const RankTwoTensor & stress) const
+CappedDruckerPragerStressUpdate::d2qdstress2(const RankTwoTensor & stress) const
 {
   const Real j2 = stress.secondInvariant();
   if (j2 == 0.0)
@@ -417,21 +418,23 @@ ComputeCappedDruckerPragerStress::d2qdstress2(const RankTwoTensor & stress) cons
 }
 
 void
-ComputeCappedDruckerPragerStress::consistentTangentOperator(const RankTwoTensor & /*stress_trial*/,
-                                                            Real /*p_trial*/,
-                                                            Real /*q_trial*/,
-                                                            const RankTwoTensor & stress,
-                                                            Real /*p*/,
-                                                            Real q,
-                                                            Real gaE,
-                                                            const f_and_derivs & smoothed_q,
-                                                            RankFourTensor & cto) const
+CappedDruckerPragerStressUpdate::consistentTangentOperator(const RankTwoTensor & /*stress_trial*/,
+                                                           Real /*p_trial*/,
+                                                           Real /*q_trial*/,
+                                                           const RankTwoTensor & stress,
+                                                           Real /*p*/,
+                                                           Real q,
+                                                           Real gaE,
+                                                           const f_and_derivs & smoothed_q,
+                                                           const RankFourTensor & Eijkl,
+                                                           bool compute_full_tangent_operator,
+                                                           RankFourTensor & cto) const
 {
   if (!_fe_problem.currentlyComputingJacobian())
     return;
 
-  cto = _elasticity_tensor[_qp];
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  cto = Eijkl;
+  if (!compute_full_tangent_operator)
     return;
 
   const RankTwoTensor s_over_q =
@@ -451,8 +454,7 @@ ComputeCappedDruckerPragerStress::consistentTangentOperator(const RankTwoTensor 
 
   if (smoothed_q.dg[1] != 0.0)
   {
-    const RankFourTensor Tijab =
-        _elasticity_tensor[_qp] * (gaE / _Epp) * smoothed_q.dg[1] * d2qdstress2(stress);
+    const RankFourTensor Tijab = Eijkl * (gaE / _Epp) * smoothed_q.dg[1] * d2qdstress2(stress);
     RankFourTensor inv = RankFourTensor(RankFourTensor::initIdentityFour) + Tijab;
     try
     {
