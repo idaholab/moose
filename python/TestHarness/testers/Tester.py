@@ -149,6 +149,14 @@ class Tester(MooseObject):
     def didPass(self):
         return self.status.didPass()
 
+    # Method to check if this test is pending
+    def isPending(self):
+        return self.status.isPending()
+
+    # Method to check if this test is skipped
+    def isSkipped(self):
+        return self.status.isSkipped()
+
     def getCheckInput(self):
         return self.check_input
 

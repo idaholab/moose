@@ -129,6 +129,13 @@ class QueueManager(Scheduler):
                                                      'exit_code'    : exit_code,
                                                      'id'           : queue_id }
 
+    # The Scheduler has updated a tester's status. If the test is skipped, add it
+    # to the queue file, so it gets printed again during a checkStatus
+    def notifySchedulers(self, tester):
+        if tester.isSkipped():
+            self.updateQueueFile(tester, 0, True)
+        return
+
     # canLaunch is the QueueManager's way of providing checkRunnable due to the multitude of
     # modes the TestHarness can operate in.
     def canLaunch(self, tester, checks, test_list):
@@ -139,8 +146,9 @@ class QueueManager(Scheduler):
             if tester.specs['test_name'] not in self.launched_jobs and tester.specs['test_name'] not in self.skipped_jobs \
                and self.getJobName(tester) in self.queue_data.keys():
 
-                # This test, while previously skipped, should have its skipped caveats re-displayed
-                if self.queue_data[self.getJobName(tester)]['skipped']:
+                # This test, while previously skipped, should have its skipped caveats re-displayed (unless the
+                # user is only interested in failed tests)
+                if self.queue_data[self.getJobName(tester)]['skipped'] and not self.options.failed_tests:
                     tester.setStatus(self.queue_data[self.getJobName(tester)]['status'], tester.bucket_skip)
 
                 # Continue to support checkRunnable (--re options etc)
@@ -331,62 +339,38 @@ class QueueManager(Scheduler):
         os.chdir(current_pwd)
 
     ## Return control to the test harness by finalizing the test output and calling the callback
-    def returnToTestHarness(self, job_index):
+    def returnToTestHarness(self, job_index, output):
         (p, command, tester, time, f, slots) = self.jobs[job_index]
-        log( 'Command %d done:    %s' % (job_index, command) )
-        output = 'Working Directory: ' + self.getWorkingDir(tester) + '\nRunning command: ' + command + '\n'
 
-        if p.poll() == None: # process has not completed, it timed out
-            output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
-            f.close()
-            tester.setStatus('TIMEOUT', tester.bucket_fail)
-            if platform.system() == "Windows":
-                p.terminate()
-            else:
-                pgid = os.getpgid(p.pid)
-                os.killpg(pgid, SIGTERM)
+        # Get stdout from executed command
+        queue_output = self.readOutput(f)
 
-            self.harness.testOutputAndFinish(tester, Scheduler.TIMEOUT, output, time, clock())
+        # determine tester statuses depending on mode (launching or checking status)
+        if self.options.checkStatus:
+            # the test was already launched
+            output += self.handleQueueStatus(tester, queue_output)
         else:
+            # the test needed to be launched
+            output += self.handleQueueLaunch(tester, queue_output)
 
-            # Get stdout from executed command
-            queue_output = self.readOutput(f)
-            f.close()
+        # Launching Jobs
+        # When launching jobs we need to _not_ add results to the 'final results' table
+        # but only if they didn't fail during launch
+        if not self.options.checkStatus and tester.isPending():
+            self.finished_jobs.add(tester.specs['test_name'])
+            self.harness.handleTestResult(tester, output, tester.getStatusMessage(), add_to_table=False)
 
-            # determine tester statuses depending on mode (launching or checking status)
-            if self.options.checkStatus:
-                # the test was already launched
-                output += self.handleQueueStatus(tester, queue_output)
-            else:
-                # the test needed to be launched
-                output += self.handleQueueLaunch(tester, queue_output)
+        # Launching Job or Checking Status and the test failed
+        elif tester.didFail():
+            self.finished_jobs.add(tester.specs['test_name'])
+            self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
-            # TestOutputAndFinish
-            # Test is finished regardless of a passing status (so add to results table)
-            if tester.didFail() or tester.didPass():
-                self.finished_jobs.add(tester.specs['test_name'])
-                self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
+        # Checking Status and the test is still pending
+        elif self.options.checkStatus and tester.isPending():
+            self.skipped_jobs.add(tester.specs['test_name'])
+            self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
-            # Handle TestResult
-            # Test can still be pending in the queue (but we need to add these results to the table)
-            elif self.options.checkStatus and tester.getStatus() == tester.bucket_pending:
-                self.skipped_jobs.add(tester.specs['test_name'])
-                self.harness.handleTestResult(tester, output, tester.getStatusMessage())
-
-            # Handle TestStatus
-            # Test has been launched by qsub (we do not want to include this in final results table)
-            else:
-                self.finished_jobs.add(tester.specs['test_name'])
-                #self.harness.handleTestStatus(tester, output)
-                self.harness.handleTestResult(tester, output, tester.getStatusMessage())
-
-        self.jobs[job_index] = None
-        self.slots_in_use = self.slots_in_use - slots
-
-## Static logging string for debugging
-LOG = []
-LOG_ON = False
-def log(msg):
-    if LOG_ON:
-        LOG.append(msg)
-        print msg
+        # Checking Status and the test has finished
+        elif self.options.checkStatus and not tester.isPending():
+            self.finished_jobs.add(tester.specs['test_name'])
+            self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())

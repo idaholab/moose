@@ -560,6 +560,20 @@ class TestStatus(object):
         status = self.getStatus()
         return status == self.bucket_fail or status == self.bucket_diff
 
+    def isPending(self):
+        """
+        Return boolean pending status
+        """
+        status = self.getStatus()
+        return status == self.bucket_pending
+
+    def isSkipped(self):
+        """
+        Return boolean skipped status
+        """
+        status = self.getStatus()
+        return status == self.bucket_skip
+
     def getRunnable(self):
         """
         Return boolean whether the test should be allowed to run or not

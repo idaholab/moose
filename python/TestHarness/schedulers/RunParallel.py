@@ -54,11 +54,8 @@ class RunParallel(Scheduler):
         return file_output
 
     ## Return control to the test harness by finalizing the test output and calling the callback
-    def returnToTestHarness(self, job_index):
+    def returnToTestHarness(self, job_index, output):
         (p, command, tester, time, f, slots) = self.jobs[job_index]
-
-        log( 'Command %d done:    %s' % (job_index, command) )
-        output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
 
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
@@ -80,44 +77,15 @@ class RunParallel(Scheduler):
         else:
             output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
-        if p.poll() == None: # process has not completed, it timed out
-            output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
-            f.close()
-            tester.setStatus('TIMEOUT', tester.bucket_fail)
-            if platform.system() == "Windows":
-                p.terminate()
-            else:
-                pgid = os.getpgid(p.pid)
-                os.killpg(pgid, SIGTERM)
+        if tester in self.reported_jobs:
+            tester.specs.addParam('caveats', ['FINISHED'], "")
 
-            self.harness.testOutputAndFinish(tester, Scheduler.TIMEOUT, output, time, clock())
-        else:
-            f.close()
+        if tester.getStatus() != 'FAIL': # Still haven't processed results!
+            output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
 
-            if tester in self.reported_jobs:
-                tester.specs.addParam('caveats', ['FINISHED'], "")
-
-            if self.options.dry_run:
-                # Set the successful message for DRY_RUN
-                tester.success_message = 'DRY RUN'
-                output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
-            elif tester.getStatus() != 'FAIL': # Still haven't processed results!
-                output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
-
-            self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
+        self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
         if tester.didPass():
             self.finished_jobs.add(tester.specs['test_name'])
         else:
             self.skipped_jobs.add(tester.specs['test_name'])
-
-        self.jobs[job_index] = None
-        self.slots_in_use = self.slots_in_use - slots
-
-## Static logging string for debugging
-LOG = []
-LOG_ON = False
-def log(msg):
-    if LOG_ON:
-        LOG.append(msg)
-        print msg

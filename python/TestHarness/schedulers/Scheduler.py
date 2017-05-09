@@ -82,6 +82,18 @@ class Scheduler(MooseObject):
     def getTests(self):
         return
 
+    # Notify schedulers of status change
+    def notifySchedulers(self, tester):
+        return
+
+    # Notify TestHarness of status change
+    def notifySchedulersBase(self, tester):
+        # Notify the TestHarness
+        self.harness.handleTestStatus(tester)
+
+        # Notify derived schedulers of status change
+        return self.notifySchedulers(tester)
+
     ## Clear and Initialize the scheduler queue
     def clearAndInitializeJobs(self):
         # Current slots in use
@@ -117,6 +129,45 @@ class Scheduler(MooseObject):
 
         # Reporting timer which resets when ever data is printed to the screen.
         self.reported_timer = clock()
+
+    ## Return control to the test harness by finalizing the test output and calling the callback
+    def returnToTestHarnessBase(self, job_index):
+        (p, command, tester, time, f, slots) = self.jobs[job_index]
+
+        log( 'Command %d done:    %s' % (job_index, command) )
+        output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
+
+        if p.poll() == None: # process has not completed, it timed out
+            output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
+            f.close()
+            tester.setStatus('TIMEOUT', tester.bucket_fail)
+            if platform.system() == "Windows":
+                p.terminate()
+            else:
+                pgid = os.getpgid(p.pid)
+                os.killpg(pgid, SIGTERM)
+
+            self.harness.testOutputAndFinish(tester, Scheduler.TIMEOUT, output, time, clock())
+        else:
+            # Handle --dru-run
+            if self.options.dry_run:
+                tester.success_message = 'DRY RUN'
+                output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
+                self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
+                if tester.didPass():
+                    self.finished_jobs.add(tester.specs['test_name'])
+                else:
+                    self.skipped_jobs.add(tester.specs['test_name'])
+            else:
+                # Allow derived schedulers to perform postprocessing on results
+                self.returnToTestHarness(job_index, output)
+
+            # Close the output file
+            f.close()
+
+            # Clear this job slot
+            self.jobs[job_index] = None
+            self.slots_in_use = self.slots_in_use - slots
 
     ## Returns False if all pre-preqs have been satisfied
     def unsatisfiedPrereqs(self, tester):
@@ -248,21 +299,21 @@ class Scheduler(MooseObject):
                         # and send it back to the tester.
                         elif now > (start_time + self.default_reporting_time):
                             # Report
-                            self.returnToTestHarness(job_index)
+                            self.returnToTestHarnessBase(job_index)
                             self.reported_timer = now
                             slot_freed = True
 
                     # Output is ready
                     else:
                         # Report
-                        self.returnToTestHarness(job_index)
+                        self.returnToTestHarnessBase(job_index)
                         self.reported_timer = now
                         slot_freed = True
 
                 # Timeouts
                 elif now > (start_time + float(tester.specs['max_time'])):
                     # Report
-                    self.returnToTestHarness(job_index)
+                    self.returnToTestHarnessBase(job_index)
                     self.reported_timer = now
                     slot_freed = True
 
@@ -341,13 +392,13 @@ class Scheduler(MooseObject):
                     # these remaining big jobs. Otherwise, we'll skip them
                     if not self.soft_limit and slots > self.job_slots:
                         tester.setStatus('Insufficient slots', tester.bucket_skip)
-                        self.harness.handleTestStatus(tester)
+                        self.notifySchedulersBase(tester)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # Do we have unsatisfied dependencies left?
                     elif len(set(tester.specs['prereq']) & self.skipped_jobs):
                         tester.setStatus('skipped dependency', tester.bucket_skip)
-                        self.harness.handleTestStatus(tester)
+                        self.notifySchedulersBase(tester)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # We need to keep trying in case there is a chain of unresolved dependencies
