@@ -83,6 +83,7 @@ public:
    * UserObject interface overrides. Derived classes should _not_ override any of these methods.
    */
   virtual void initialSetup() override;
+  virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
 
@@ -138,8 +139,8 @@ protected:
   /// The selected graph coloring algorithm used by this object
   const MooseEnum _coloring_algorithm;
 
-  /// A Boolean indicating whether the object has been initialized or not (internal use)
-  bool _initialized;
+  /// A Boolean indicating whether the object has assigned colors to grains (internal use)
+  bool _colors_assigned;
 
   /// A user controllable Boolean which can be used to print the adjacency matrix to the console
   const bool _output_adjacency_matrix;

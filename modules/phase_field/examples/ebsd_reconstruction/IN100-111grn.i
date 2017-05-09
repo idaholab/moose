@@ -17,6 +17,7 @@
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
+    enable_var_coloring = true
   [../]
   [./grain_tracker]
     type = GrainTracker
@@ -43,6 +44,10 @@
 [AuxVariables]
   [./bnds]
   [../]
+  [./unique_grains_ic]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./unique_grains]
     order = CONSTANT
     family = MONOMIAL
@@ -52,6 +57,10 @@
     family = MONOMIAL
   [../]
   [./halos]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./var_indices_ic]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -89,6 +98,20 @@
     field_display = HALOS
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
+  [../]
+  [./var_indices_ic]
+    type = FeatureFloodCountAux
+    variable = var_indices_ic
+    execute_on = 'initial'
+    flood_counter = ebsd
+    field_display = VARIABLE_COLORING
+  [../]
+  [./unique_grains_ic]
+    type = FeatureFloodCountAux
+    variable = unique_grains_ic
+    execute_on = 'initial'
+    flood_counter = ebsd
+    field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux

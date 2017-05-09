@@ -36,6 +36,9 @@ validParams<PolycrystalUserObjectBase>()
   // Hide the output of the IC objects by default, it doesn't change over time
   params.set<std::vector<OutputName>>("outputs") = {"none"};
 
+  /// Run this user object more than once on the initial condition to handle initial adaptivity
+  params.set<bool>("allow_duplicate_execution_on_initial") = true;
+
   // This object should only be executed _before_ the initial condition
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
   execute_options = "initial";
@@ -49,7 +52,7 @@ PolycrystalUserObjectBase::PolycrystalUserObjectBase(const InputParameters & par
     _dim(_mesh.dimension()),
     _op_num(_vars.size()),
     _coloring_algorithm(getParam<MooseEnum>("coloring_algorithm")),
-    _initialized(false),
+    _colors_assigned(false),
     _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix"))
 {
   mooseAssert(_single_map_mode, "Do not turn off single_map_mode with this class");
@@ -77,9 +80,22 @@ PolycrystalUserObjectBase::initialSetup()
 }
 
 void
+PolycrystalUserObjectBase::initialize()
+{
+  if (_colors_assigned && !_fe_problem.hasInitialAdaptivity())
+    return;
+
+  FeatureFloodCount::initialize();
+}
+
+void
 PolycrystalUserObjectBase::execute()
 {
-  precomputeGrainStructure();
+  if (!_colors_assigned)
+    precomputeGrainStructure();
+  // No need to rerun the object if the mesh hasn't changed
+  else if (!_fe_problem.hasInitialAdaptivity())
+    return;
 
   /**
    * We need one map per grain when creating the initial condition to support overlapping features.
@@ -125,6 +141,9 @@ PolycrystalUserObjectBase::execute()
 void
 PolycrystalUserObjectBase::finalize()
 {
+  if (_colors_assigned && !_fe_problem.hasInitialAdaptivity())
+    return;
+
   // TODO: Possibly retrieve the halo thickness from the active GrainTracker object?
   constexpr unsigned int halo_thickness = 2;
   // expandPointHalos();
@@ -133,34 +152,41 @@ PolycrystalUserObjectBase::finalize()
   // _feature_count is updated on all ranks by communicateAndMerge
   communicateAndMerge();
 
-  // Resize the color assignment vector here. All ranks need a copy of this
-  _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
-  if (_is_master)
+  if (!_colors_assigned)
   {
+    // Resize the color assignment vector here. All ranks need a copy of this
+    _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
+    if (_is_master)
+    {
+      /**
+       * We'll sort here to place the grains in the vector in the same order for parallel runs.
+       * We don't need this for building the adjacency matrix or for the coloring but it makes
+       * things consistent for other accesses to _feature_sets.
+       */
+      std::sort(_feature_sets.begin(), _feature_sets.end());
+
+      buildGrainAdjacencyMatrix();
+
+      assignOpsToGrains();
+
+      if (_output_adjacency_matrix)
+        printGrainAdjacencyMatrix();
+    }
+
+    // Communicate the coloring with all ranks
+    _communicator.broadcast(_grain_to_op);
+
     /**
-     * We'll sort here to place the grains in the vector in the same order for parallel runs.
-     * We don't need this for building the adjacency matrix or for the coloring but it makes
-     * things consistent for other accesses to _feature_sets.
+     * All ranks: Update the variable indices based on the graph coloring algorithm. Here we index
+     * into the _grain_to_op vector based on the grain_id to obtain the right assignment.
      */
-    std::sort(_feature_sets.begin(), _feature_sets.end());
-
-    buildGrainAdjacencyMatrix();
-
-    assignOpsToGrains();
-
-    if (_output_adjacency_matrix)
-      printGrainAdjacencyMatrix();
+    for (auto & grain : _feature_sets)
+      grain._var_index = _grain_to_op[grain._id];
   }
 
-  // Communicate the coloring with all ranks
-  _communicator.broadcast(_grain_to_op);
+  updateFieldInfo();
 
-  /**
-   * All ranks: Update the variable indices based on the graph coloring algorithm. Here we index
-   * into the _grain_to_op vector based on the grain_id to obtain the right assignment.
-   */
-  for (auto & grain : _feature_sets)
-    grain._var_index = _grain_to_op[grain._id];
+  _colors_assigned = true;
 }
 
 bool
@@ -189,14 +215,25 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
    * is at least one active grain where we haven't already visited the current entity before
    * continuing.
    */
+  auto saved_grain_id = invalid_id;
   if (current_index == invalid_size_t)
   {
     for (auto grain_id : _prealloc_tmp_grains)
-      if (_entities_visited[grain_id].find(entity_id) == _entities_visited[grain_id].end())
+    {
+      mooseAssert(!_colors_assigned || grain_id < _grain_to_op.size(), "grain_id out of range");
+      auto map_num = _colors_assigned ? _grain_to_op[grain_id] : grain_id;
+      if (_entities_visited[map_num].find(entity_id) == _entities_visited[map_num].end())
       {
-        current_index = grain_id;
+        saved_grain_id = grain_id;
+
+        if (!_colors_assigned)
+          current_index = grain_id;
+        else
+          current_index = _grain_to_op[grain_id];
+
         break;
       }
+    }
 
     if (current_index == invalid_size_t)
       return false;
@@ -207,7 +244,7 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
 
   if (!feature)
   {
-    new_id = current_index;
+    new_id = saved_grain_id;
     status &= ~Status::INACTIVE;
 
     return true;
@@ -221,7 +258,7 @@ bool
 PolycrystalUserObjectBase::areFeaturesMergeable(const FeatureData & f1,
                                                 const FeatureData & f2) const
 {
-  return f1._id == f2._id;
+  return _colors_assigned ? f1.mergeable(f2) : f1._id == f2._id;
 }
 
 void
