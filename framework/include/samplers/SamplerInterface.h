@@ -12,60 +12,60 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DISTRIBUTIONINTERFACE_H
-#define DISTRIBUTIONINTERFACE_H
+#ifndef SAMPLERINTERFACE_H
+#define SAMPLERINTERFACE_H
 
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 #include "FEProblemBase.h"
 
 // Forward declarations
-class Distribution;
-class DistributionInterface;
+class Sampler;
+class SamplerInterface;
 
 template <>
-InputParameters validParams<DistributionInterface>();
+InputParameters validParams<SamplerInterface>();
 
 /**
- * Interface for objects that need to use distributions
+ * Interface for objects that need to use samplers
  *
- * Inherit from this class at a very low level to make the getDistribution method
+ * Inherit from this class at a very low level to make the getSampler method
  * available.
  */
-class DistributionInterface
+class SamplerInterface
 {
 public:
   /**
    * @param params The parameters used by the object being instantiated. This
-   *        class needs them so it can get the distribution named in the input file,
-   *        but the object calling getDistribution only needs to use the name on the
-   *        left hand side of the statement "distribution = dist_name"
+   *        class needs them so it can get the sampler named in the input file,
+   *        but the object calling getSampler only needs to use the name on the
+   *        left hand side of the statement "sampler = sampler_name"
    */
-  DistributionInterface(const MooseObject * moose_object);
+  SamplerInterface(const MooseObject * moose_object);
 
   /**
-   * Get a distribution with a given name
-   * @param name The name of the parameter key of the distribution to retrieve
-   * @return The distribution with name associated with the parameter 'name'
+   * Get a sampler with a given name
+   * @param name The name of the parameter key of the sampler to retrieve
+   * @return The sampler with name associated with the parameter 'name'
    */
-  Distribution & getDistribution(const std::string & name);
+  Sampler & getSampler(const std::string & name);
 
   /**
-   * Get a distribution with a given name
-   * @param name The name of the distribution to retrieve
-   * @return The distribution with name 'name'
+   * Get a sampler with a given name
+   * @param name The name of the sampler to retrieve
+   * @return The sampler with name 'name'
    */
-  Distribution & getDistributionByName(const DistributionName & name);
+  Sampler & getSamplerByName(const SamplerName & name);
 
 private:
   /// Parameters of the object with this interface
-  const InputParameters & _dni_params;
+  const InputParameters & _smi_params;
 
   /// Reference to FEProblemBase instance
-  FEProblemBase & _dni_feproblem;
+  FEProblemBase & _smi_feproblem;
 
   /// Thread ID
-  THREAD_ID _dni_tid;
+  THREAD_ID _smi_tid;
 };
 
-#endif /* DISTRIBUTIONINTERFACE_H */
+#endif /* SAMPLERINTERFACE_H */

@@ -12,34 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DistributionInterface.h"
-#include "Distribution.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
+#include "AddSamplerAction.h"
+#include "FEProblem.h"
 
 template <>
 InputParameters
-validParams<DistributionInterface>()
+validParams<AddSamplerAction>()
 {
-  return emptyInputParameters();
+  return validParams<MooseObjectAction>();
 }
 
-DistributionInterface::DistributionInterface(const MooseObject * moose_object)
-  : _dni_params(moose_object->parameters()),
-    _dni_feproblem(*_dni_params.get<FEProblemBase *>("_fe_problem_base")),
-    _dni_tid(_dni_params.have_parameter<THREAD_ID>("_tid") ? _dni_params.get<THREAD_ID>("_tid") : 0)
-{
-}
+AddSamplerAction::AddSamplerAction(InputParameters params) : MooseObjectAction(params) {}
 
-Distribution &
-DistributionInterface::getDistribution(const std::string & name)
+void
+AddSamplerAction::act()
 {
-  DistributionName dist_name = _dni_params.get<DistributionName>(name);
-  return _dni_feproblem.getDistribution(dist_name, _dni_tid);
-}
-
-Distribution &
-DistributionInterface::getDistributionByName(const DistributionName & name)
-{
-  return _dni_feproblem.getDistribution(name, _dni_tid);
+  _problem->addSampler(_type, _name, _moose_object_pars);
 }

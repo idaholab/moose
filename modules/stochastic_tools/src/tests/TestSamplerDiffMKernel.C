@@ -11,35 +11,34 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "DistributionInterface.h"
-#include "Distribution.h"
-#include "SubProblem.h"
-#include "MooseTypes.h"
+#include "TestSamplerDiffMKernel.h"
 
 template <>
 InputParameters
-validParams<DistributionInterface>()
+validParams<TestSamplerDiffMKernel>()
 {
-  return emptyInputParameters();
+  InputParameters params = validParams<Kernel>();
+  params.addRequiredParam<MaterialPropertyName>(
+      "mat_prop", "the name of the material property we are going to use");
+  params.addParam<Real>("offset", 4.0, "Offset on residual evaluation");
+  return params;
 }
 
-DistributionInterface::DistributionInterface(const MooseObject * moose_object)
-  : _dni_params(moose_object->parameters()),
-    _dni_feproblem(*_dni_params.get<FEProblemBase *>("_fe_problem_base")),
-    _dni_tid(_dni_params.have_parameter<THREAD_ID>("_tid") ? _dni_params.get<THREAD_ID>("_tid") : 0)
+TestSamplerDiffMKernel::TestSamplerDiffMKernel(const InputParameters & parameters)
+  : Kernel(parameters),
+    _diff(getMaterialProperty<Real>("mat_prop")),
+    _offset(getParam<Real>("offset"))
 {
 }
 
-Distribution &
-DistributionInterface::getDistribution(const std::string & name)
+Real
+TestSamplerDiffMKernel::computeQpResidual()
 {
-  DistributionName dist_name = _dni_params.get<DistributionName>(name);
-  return _dni_feproblem.getDistribution(dist_name, _dni_tid);
+  return _diff[_qp] * _grad_test[_i][_qp] * _grad_u[_qp] - _offset;
 }
 
-Distribution &
-DistributionInterface::getDistributionByName(const DistributionName & name)
+Real
+TestSamplerDiffMKernel::computeQpJacobian()
 {
-  return _dni_feproblem.getDistribution(name, _dni_tid);
+  return _diff[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }
