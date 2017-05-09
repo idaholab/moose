@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "MooseObjectName.h"
+#include "MooseError.h"
 
 // STL includes
 #include <iostream>
@@ -23,6 +24,7 @@ MooseObjectName::MooseObjectName(const std::string & tag,
                                  const std::string & separator)
   : _tag(tag), _name(name), _combined(tag + name), _separator(separator)
 {
+  check();
 }
 
 MooseObjectName::MooseObjectName(std::string name) : _separator("::")
@@ -42,14 +44,15 @@ MooseObjectName::MooseObjectName(std::string name) : _separator("::")
   else if (idx1 != std::string::npos)
   {
     _tag = name.substr(0, idx1);
-    _name = name.erase(0, idx1 + 2);
+    _name = name.erase(0, idx1 + 1);
     _separator = "/";
   }
 
-  // If you get here, just use the supplied name without a tag
+  // If you get here, just use the supplied name without a tag (this will produce an error in check)
   else
     _name = name;
 
+  check();
   _combined = _tag + _name;
 }
 
@@ -63,8 +66,8 @@ MooseObjectName::MooseObjectName(const MooseObjectName & rhs)
 bool
 MooseObjectName::operator==(const MooseObjectName & rhs) const
 {
-  if ((_name == rhs._name || _name.empty() || rhs._name.empty()) &&
-      (_tag == rhs._tag || _tag.empty() || rhs._tag.empty()))
+  if ((_name == rhs._name || _name == "*" || rhs._name == "*") &&
+      (_tag == rhs._tag || _tag == "*" || rhs._tag == "*"))
   {
     return true;
   }
@@ -90,4 +93,15 @@ operator<<(std::ostream & stream, const MooseObjectName & obj)
     return stream << obj._name;
   else
     return stream << obj._tag << obj._separator << obj._name;
+}
+
+void
+MooseObjectName::check()
+{
+  if (_name.empty())
+    mooseError("The supplied name cannot be empty, to allow for any name to be supplied use the "
+               "'*' character.");
+  if (_tag.empty())
+    mooseError("The supplied tag cannot be empty, to allow for any tag to be supplied use the '*' "
+               "character.");
 }

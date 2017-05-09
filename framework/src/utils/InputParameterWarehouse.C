@@ -54,8 +54,11 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   {
     const std::vector<std::string> & tags = ptr->get<std::vector<std::string>>("control_tags");
     for (const auto & tag : tags)
-      _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(
-          MooseObjectName(tag, name), ptr));
+    {
+      if (!tag.empty())
+        _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(
+            MooseObjectName(tag, name), ptr));
+    }
   }
 
   // Set the name and tid parameters
