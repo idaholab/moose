@@ -8,7 +8,7 @@ The radial return mapping method, introduced by Simo and Taylor (1985), uses a v
 In addition to the Sumo and Hughes textbook \cite{simo2006computational}, _Introduction to Computational Plasticity_ by Dunnu and Petrinic (2004) is an excellent reference for users working with the Radial Return Stress Update materials; several of the isotropic plasticity and creep effective plastic strain increment algorithms are taken from \cite{dunne2005introduction}.
 
 ###The Radial Return Stress Update Description
-The stress update materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method.  For the `RadialReturnStressUpdate` materials, this calling material is [ComputeReturnMappingStress](ComputeReturnMappingStress.md).  Separating the call to the stress update materials from MOOSE allows us to iteratively call the stress update materials as is required to achieve convergence.
+The stress update materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method.  For the `RadialReturnStressUpdate` materials, this calling material is [ComputeMultipleInelasticStress](ComputeMultipleInelasticStress.md).  Separating the call to the stress update materials from MOOSE allows us to iteratively call the stress update materials as is required to achieve convergence.
 
 ##Radial Return Algorithm Overview
 !media docs/media/tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the deviatoric yield surface and the radial return stress which is normal to the yield surface.
@@ -33,12 +33,12 @@ $$
 = \epsilon_{elastic} + \left( \epsilon_{plastic} + \epsilon_{creep} + \epsilon_{damage}  \right) + \epsilon_{eigenstrain}
 $$
 
-The final inelastic strain is returned from the radial return stress update material, and `ComputeReturnMappingStress` computes the stress, with a return mapping stress increment following elasticity theory for finite strains. The final stress is calculated from the elastic strain increment.
+The final inelastic strain is returned from the radial return stress update material, and `ComputeMultipleInelasticStress` computes the stress, with a return mapping stress increment following elasticity theory for finite strains. The final stress is calculated from the elastic strain increment.
 $$
 \sigma^{new}_{ij} = C_{ijkl} \left( \Delta \epsilon^{elastic}_{kl} + \epsilon^{old-elastic}_{kl} \right)
 $$
 
-When more than one radial recompute material is included in the simulation, as in Combined Power Law Creep and Linear Strain Hardening, `ComputeReturnMappingStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.
+When more than one radial recompute material is included in the simulation, as in Combined Power Law Creep and Linear Strain Hardening, `ComputeMultipleInelasticStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.
 
 Users can print out any of these strains and stresses using the `RankTwoAux` as described on the
 [Introduction/Visualizing Tensors](auto::/introduction/VisualizingTensors) page.
