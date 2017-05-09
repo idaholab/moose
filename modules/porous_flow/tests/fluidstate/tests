@@ -21,4 +21,10 @@
     input = 'theis.i'
     csvdiff = "theis_csvout.csv"
   [../]
+  [./theis_tabulated]
+    type = 'CSVDiff'
+    input = 'theis_tabulated.i'
+    csvdiff = "theis_csvout.csv"
+    prereq = 'theis'
+  [../]
 []
