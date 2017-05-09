@@ -47,7 +47,8 @@ public:
                      const std::string & action,
                      bool is_action,
                      InputParameters * params,
-                     const FileLineInfo & lineinfo);
+                     const FileLineInfo & lineinfo,
+                     const std::string & classname);
 
   /**
    * Add a task to the tree
