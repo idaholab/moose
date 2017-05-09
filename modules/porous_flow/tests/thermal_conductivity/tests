@@ -1,0 +1,8 @@
+[Tests]
+  [./ThermalCondPorosity01]
+    type = 'CSVDiff'
+    input = 'ThermalCondPorosity01.i'
+    csvdiff = 'ThermalCondPorosity01.csv'
+    rel_err = 1.0E-8
+  [../]
+[]
