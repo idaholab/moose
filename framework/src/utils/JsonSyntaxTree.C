@@ -178,7 +178,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     {
       json["file_info"][lineinfo.file()] = lineinfo.line();
       if (!classname.empty())
-        json["file_info"]["class"] = classname;
+        json["class"] = classname;
     }
   }
   return true;
