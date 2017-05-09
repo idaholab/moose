@@ -23,6 +23,7 @@ InputParameters
 validParams<TimePeriod>()
 {
   InputParameters params = validParams<Control>();
+  params.addClassDescription("Control the enabled/disabled state of objects with time.");
   params.addParam<std::vector<std::string>>(
       "disable_objects", std::vector<std::string>(), "A list of object tags to disable.");
   params.addParam<std::vector<std::string>>(
