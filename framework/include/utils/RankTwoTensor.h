@@ -97,10 +97,10 @@ public:
   static RankTwoTensor Identity() { return RankTwoTensor(initIdentity); }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
-  Real & operator()(unsigned int i, unsigned int j);
+  inline Real & operator()(unsigned int i, unsigned int j) { return _vals[i * N + j]; }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2, used for const
-  Real operator()(unsigned int i, unsigned int j) const;
+  inline Real operator()(unsigned int i, unsigned int j) const { return _vals[i * N + j]; }
 
   /// zeroes all _vals components
   void zero();
@@ -406,14 +406,19 @@ public:
   RankTwoTensor initialContraction(const RankFourTensor & b) const;
 
 private:
-  static const unsigned int N = LIBMESH_DIM;
-  Real _vals[N][N];
+  static constexpr unsigned int N = LIBMESH_DIM;
+  static constexpr unsigned int N2 = N * N;
+
+  /// The values of the rank-two tensor stored by index=(i * LIBMESH_DIM + j)
+  Real _vals[N2];
 
   template <class T>
   friend void dataStore(std::ostream &, T &, void *);
 
   template <class T>
   friend void dataLoad(std::istream &, T &, void *);
+  friend class RankFourTensor;
+  friend class RankThreeTensor;
 };
 
 inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }
