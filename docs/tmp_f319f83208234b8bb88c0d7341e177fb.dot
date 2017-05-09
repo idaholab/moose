@@ -1,0 +1,5 @@
+graph {
+    bgcolor="#ffffff00" // transparent background
+    a -- b -- c;
+    b -- d;
+}
