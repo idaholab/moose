@@ -9,8 +9,8 @@
     # Test Error when complete name is not provided
     type = 'RunException'
     input = 'real_parameter_reporter.i'
-    cli_args = 'Postprocessors/coef_value/parameter=diff/coef'
-    expect_err = "Unknown InputParameters object diff"
+    cli_args = 'Postprocessors/coef_value/parameter=*/diff/coef'
+    expect_err = "Unknown InputParameters object \*/diff"
   [../]
 
   [./no_param_error]

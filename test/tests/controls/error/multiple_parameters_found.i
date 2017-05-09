@@ -66,6 +66,6 @@
   [./func_control]
     type = TestControl
     test_type = 'real'
-    parameter = 'coef'
+    parameter = '*/*/coef'
   [../]
 []

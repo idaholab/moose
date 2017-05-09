@@ -58,8 +58,8 @@
 [Controls]
   [./diff]
     type = TimePeriod
-    enable_objects = 'diff0'
-    disable_objects = 'diff1'
+    enable_objects = 'Kernel::diff0'
+    disable_objects = '*::diff1'
     start_time = '0'
     end_time = '0.49'
   [../]

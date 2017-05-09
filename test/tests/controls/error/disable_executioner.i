@@ -54,7 +54,7 @@
   [./func_control]
     type = TestControl
     test_type = 'disable_executioner' # tests error
-    parameter = 'enable'
+    parameter = 'Executioner::*/enable'
     execute_on = 'initial timestep_begin'
   [../]
 []

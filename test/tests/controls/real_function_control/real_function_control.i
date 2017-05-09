@@ -79,7 +79,7 @@
 [Controls]
   [./func_control]
     type = RealFunctionControl
-    parameter = 'coef'
+    parameter = '*/*/coef'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   [../]

@@ -88,8 +88,8 @@
     type = TimePeriod
     start_time = 0.0
     end_time = 0.45
-    enable_objects = 'ffn1 all1'
-    disable_objects = 'ffn2 all2'
+    enable_objects = '*/ffn1 */all1'
+    disable_objects = '*/ffn2 */all2'
     execute_on = 'initial timestep_begin'
     set_sync_times = true
   [../]

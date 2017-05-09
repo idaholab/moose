@@ -80,7 +80,7 @@
 [Controls]
   [./pp_control]
     type = TimePeriod
-    enable_objects = 'nodal elemental general internal_side side'
+    enable_objects = '*/nodal */elemental */general */internal_side */side'
     start_time = 0.5
     end_time = 1
     execute_on = 'INITIAL TIMESTEP_END'
