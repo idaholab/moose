@@ -61,6 +61,7 @@
 #include "PorousFlowJoiner.h"
 #include "PorousFlowTemperature.h"
 #include "PorousFlowThermalConductivityIdeal.h"
+#include "PorousFlowThermalConductivityFromPorosity.h"
 #include "PorousFlowMatrixInternalEnergy.h"
 #include "PorousFlowInternalEnergyIdeal.h"
 #include "PorousFlowEnthalpy.h"
@@ -200,6 +201,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowJoiner);
   registerMaterial(PorousFlowTemperature);
   registerMaterial(PorousFlowThermalConductivityIdeal);
+  registerMaterial(PorousFlowThermalConductivityFromPorosity);
   registerMaterial(PorousFlowMatrixInternalEnergy);
   registerMaterial(PorousFlowInternalEnergyIdeal);
   registerMaterial(PorousFlowEnthalpy);
