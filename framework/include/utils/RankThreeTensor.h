@@ -64,13 +64,16 @@ public:
   RankThreeTensor(const std::vector<Real> &, FillMethod);
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
-  Real & operator()(unsigned int i, unsigned int j, unsigned int k);
+  inline Real & operator()(unsigned int i, unsigned int j, unsigned int k)
+  {
+    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)];
+  }
 
-  /**
-   * Gets the value for the index specified.  Takes index = 0,1,2
-   * used for const
-   */
-  Real operator()(unsigned int i, unsigned int j, unsigned int k) const;
+  /// Gets the value for the index specified.  Takes index = 0,1,2. Used for const
+  inline Real operator()(unsigned int i, unsigned int j, unsigned int k) const
+  {
+    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)];
+  }
 
   /// Zeros out the tensor.
   void zero();
@@ -167,10 +170,12 @@ public:
 
 protected:
   /// Dimensionality of rank-three tensor
-  static const unsigned int N = LIBMESH_DIM;
+  static constexpr unsigned int N = LIBMESH_DIM;
+  static constexpr unsigned int N2 = N * N;
+  static constexpr unsigned int N3 = N * N * N;
 
-  /// The values of the rank-three tensor
-  Real _vals[N][N][N];
+  /// The values of the rank-three tensor stored by index=((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)
+  Real _vals[N3];
 
   void fillGeneralFromInputVector(const std::vector<Real> & input);
 
@@ -196,19 +201,24 @@ template <class T>
 void
 RankThreeTensor::rotate(const T & R)
 {
-  RankThreeTensor old = *this;
-
+  unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
       {
+        unsigned int index2 = 0;
         Real sum = 0.0;
         for (unsigned int m = 0; m < N; ++m)
+        {
+          Real a = R(i, m);
           for (unsigned int n = 0; n < N; ++n)
+          {
+            Real ab = a * R(j, n);
             for (unsigned int o = 0; o < N; ++o)
-              sum += R(i, m) * R(j, n) * R(k, o) * old(m, n, o);
-
-        _vals[i][j][k] = sum;
+              sum += ab * R(k, o) * _vals[index2++];
+          }
+        }
+        _vals[index++] = sum;
       }
 }
 

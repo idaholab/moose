@@ -43,4 +43,8 @@
     type = PythonUnitTest
     input = test_Ignore.py
   [../]
+  [./timeout]
+    type = PythonUnitTest
+    input = test_Timeout.py
+  [../]
 []

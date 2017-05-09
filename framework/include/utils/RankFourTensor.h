@@ -84,13 +84,19 @@ public:
   static RankFourTensor IdentityFour() { return RankFourTensor(initIdentityFour); };
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
-  Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+  inline Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
+  {
+    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l];
+  }
 
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
    * used for const
    */
-  Real operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
+  inline Real operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const
+  {
+    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l];
+  }
 
   /// Zeros out the tensor.
   void zero();
@@ -222,10 +228,14 @@ public:
 
 protected:
   /// Dimensionality of rank-four tensor
-  static const unsigned int N = LIBMESH_DIM;
+  static constexpr unsigned int N = LIBMESH_DIM;
+  static constexpr unsigned int N2 = N * N;
+  static constexpr unsigned int N3 = N * N * N;
+  static constexpr unsigned int N4 = N * N * N * N;
 
-  /// The values of the rank-four tensor
-  Real _vals[N][N][N][N];
+  /// The values of the rank-four tensor stored by
+  /// index=(((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l)
+  Real _vals[N4];
 
   /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
@@ -281,7 +291,7 @@ protected:
   /**
    * fillGeneralFromInputVector takes 81 inputs to fill the Rank-4 tensor
    * No symmetries are explicitly maintained
-   * @param input  C[i][j][k][l] = input[i*N*N*N + j*N*N + k*N + l]
+   * @param input  C(i,j,k,l) = input[i*N*N*N + j*N*N + k*N + l]
    */
   void fillAxisymmetricRZFromInputVector(const std::vector<Real> & input);
 
@@ -314,6 +324,9 @@ protected:
 
   template <class T>
   friend void dataLoad(std::istream &, T &, void *);
+
+  friend class RankTwoTensor;
+  friend class RankThreeTensor;
 };
 
 template <>
@@ -330,19 +343,29 @@ RankFourTensor::rotate(const T & R)
 {
   RankFourTensor old = *this;
 
+  int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
         {
           Real sum = 0.0;
+          int index2 = 0;
           for (unsigned int m = 0; m < N; ++m)
+          {
+            Real a = R(i, m);
             for (unsigned int n = 0; n < N; ++n)
+            {
+              Real ab = a * R(j, n);
               for (unsigned int o = 0; o < N; ++o)
+              {
+                Real abc = ab * R(k, o);
                 for (unsigned int p = 0; p < N; ++p)
-                  sum += R(i, m) * R(j, n) * R(k, o) * R(l, p) * old(m, n, o, p);
-
-          _vals[i][j][k][l] = sum;
+                  sum += abc * R(l, p) * old._vals[index2++];
+              }
+            }
+          }
+          _vals[index++] = sum;
         }
 }
 
