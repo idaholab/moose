@@ -129,11 +129,12 @@ class FloatLinker(Postprocessor):
         # Number the floats
         for div in soup.find_all('div', class_='moose-float-div'):
             name = div.get('data-moose-float-name', None)
-            if name:
+            if name and ('id' in div.attrs):
                 span = div.find('span', class_='moose-float-caption-heading-number')
-                counts[name] += 1
-                lookup[div.get('id').lower()] = (name, counts[name])
-                span.string.replace_with(str(counts[name]))
+                if span:
+                    counts[name] += 1
+                    lookup[div.get('id').lower()] = (name, counts[name])
+                    span.string.replace_with(str(counts[name]))
 
         # Update references
         for a in soup.find_all('a', class_='moose-unknown-reference'):

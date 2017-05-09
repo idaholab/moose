@@ -104,7 +104,7 @@ For **isotropic materials** the radial return approach offers distinct advantage
 
   - **Faster simulation run times**: The isotropic material iteration algorithm uses single variable `Reals` to compute and converge the inelastic strain instead of inverting the full `Rank-4` elasticity tensor required in more complicated anisotropic algorithms.
   - **Easy to understand**: The return mapping algorithm implemented in [RadialReturnStressUpdate](/RadialReturnStressUpdate.md) is the classical radial return method based on the von Mises yield criterion.
-  - **Applicable to a variety of models**: The radial return method provides the flexibility to include creep, plasticity, and damage within a single simulation.  The [ComputeReturnMappingStress](/ComputeReturnMappingStress.md) class calls each individual creep and plasticity model to iterate separately over the inelastic strain increment before checking for the convergence of the combined total radial return stress increment required to return the stress state to the yield surface.
+  - **Applicable to a variety of models**: The radial return method provides the flexibility to include creep, plasticity, and damage within a single simulation.  The [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) class calls each individual creep and plasticity model to iterate separately over the inelastic strain increment before checking for the convergence of the combined total radial return stress increment required to return the stress state to the yield surface.
 
 
 The stress update materials each individually calculate, using the [Newton Method](http://mathworld.wolfram.com/NewtonsMethod.html), the amount of effective inelastic strain required to return the stress state to the yield surface.
@@ -117,4 +117,4 @@ $$
 $$
 where G is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress.
 
-When more than one stress update material is included in the simulation `ComputeReturnMappingStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.
+When more than one stress update material is included in the simulation `ComputeMultipleInelasticStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.
