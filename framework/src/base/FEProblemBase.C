@@ -41,6 +41,7 @@
 #include "Function.h"
 #include "NonlinearSystem.h"
 #include "Distribution.h"
+#include "Sampler.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
@@ -1587,6 +1588,26 @@ FEProblemBase::getDistribution(const std::string & name, THREAD_ID tid)
     mooseError("Unable to find distribution " + name);
 
   return *(_distributions.getActiveObject(name, tid));
+}
+
+void
+FEProblemBase::addSampler(std::string type, const std::string & name, InputParameters parameters)
+{
+  setInputParametersFEProblem(parameters);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::shared_ptr<Sampler> dist = _factory.create<Sampler>(type, name, parameters, tid);
+    _samplers.addObject(dist, tid);
+  }
+}
+
+Sampler &
+FEProblemBase::getSampler(const std::string & name, THREAD_ID tid)
+{
+  if (!_samplers.hasActiveObject(name, tid))
+    mooseError("Unable to find Sampler " + name);
+
+  return *(_samplers.getActiveObject(name, tid));
 }
 
 void

@@ -12,34 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DistributionInterface.h"
-#include "Distribution.h"
+#include "SamplerInterface.h"
+#include "Sampler.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
 template <>
 InputParameters
-validParams<DistributionInterface>()
+validParams<SamplerInterface>()
 {
   return emptyInputParameters();
 }
 
-DistributionInterface::DistributionInterface(const MooseObject * moose_object)
-  : _dni_params(moose_object->parameters()),
-    _dni_feproblem(*_dni_params.get<FEProblemBase *>("_fe_problem_base")),
-    _dni_tid(_dni_params.have_parameter<THREAD_ID>("_tid") ? _dni_params.get<THREAD_ID>("_tid") : 0)
+SamplerInterface::SamplerInterface(const MooseObject * moose_object)
+  : _smi_params(moose_object->parameters()),
+    _smi_feproblem(*_smi_params.get<FEProblemBase *>("_fe_problem_base")),
+    _smi_tid(_smi_params.have_parameter<THREAD_ID>("_tid") ? _smi_params.get<THREAD_ID>("_tid") : 0)
 {
 }
 
-Distribution &
-DistributionInterface::getDistribution(const std::string & name)
+Sampler &
+SamplerInterface::getSampler(const std::string & name)
 {
-  DistributionName dist_name = _dni_params.get<DistributionName>(name);
-  return _dni_feproblem.getDistribution(dist_name, _dni_tid);
+  SamplerName dist_name = _smi_params.get<SamplerName>(name);
+  return _smi_feproblem.getSampler(dist_name, _smi_tid);
 }
 
-Distribution &
-DistributionInterface::getDistributionByName(const DistributionName & name)
+Sampler &
+SamplerInterface::getSamplerByName(const SamplerName & name)
 {
-  return _dni_feproblem.getDistribution(name, _dni_tid);
+  return _smi_feproblem.getSampler(name, _smi_tid);
 }

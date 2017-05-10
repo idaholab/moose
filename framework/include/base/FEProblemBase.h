@@ -73,6 +73,7 @@ class InternalSideUserObject;
 class GeneralUserObject;
 class Function;
 class Distribution;
+class Sampler;
 class KernelBase;
 class IntegratedBC;
 
@@ -528,6 +529,12 @@ public:
   virtual void
   addDistribution(std::string type, const std::string & name, InputParameters parameters);
   virtual Distribution & getDistribution(const std::string & name, THREAD_ID tid = 0);
+
+  /**
+   * The following functions will enable MOOSE to have the capability to import Samplers
+   */
+  virtual void addSampler(std::string type, const std::string & name, InputParameters parameters);
+  virtual Sampler & getSampler(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
@@ -1322,6 +1329,9 @@ protected:
 
   /// distributions
   MooseObjectWarehouseBase<Distribution> _distributions;
+
+  /// Samplers
+  MooseObjectWarehouseBase<Sampler> _samplers;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
