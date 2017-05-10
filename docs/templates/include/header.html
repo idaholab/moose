@@ -16,7 +16,7 @@ Page header including the "sidebar" navigation.
 
 <nav>
   <div class="nav-wrapper container">
-    <a href="{{current.relpath('index.html')}}" class="page-title">MOOSE</a>
+    <a href="{{current.relpath('index.html')}}" class="page-title">{{title|default("MOOSE")}}</a>
     <ul class="right">
       {% for nav in navigation %}
         {% set nav_key=nav.keys()[0] %}
