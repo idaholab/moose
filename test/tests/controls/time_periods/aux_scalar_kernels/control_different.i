@@ -82,9 +82,9 @@
 [Controls]
   [./damping_control]
     type = TimePeriod
-    disable_objects =    'scalar_aux0 scalar_aux1'
-    start_time      = '0.25        0.45'
-    end_time        =   '0.55        0.75'
+    disable_objects = 'AuxScalarKernels/scalar_aux0 */scalar_aux1'
+    start_time      = '0.25 0.45'
+    end_time        = '0.55 0.75'
     execute_on = 'initial timestep_begin'
   [../]
 []

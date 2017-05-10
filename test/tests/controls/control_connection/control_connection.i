@@ -16,10 +16,6 @@
     variable = u
     coef = 0.1
   [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
-  [../]
 []
 
 [BCs]
@@ -38,23 +34,21 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 10
-  dt = 0.1
-  solve_type = PJFNK
+  type = Steady
+  solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  csv = true
+[Controls]
+  [./control]
+    type = TestControl
+    execute_on = INITIAL
+    test_type = 'connection'
+    parameter = 'Kernels/diff/coef'
+  [../]
 []
 
-[Controls]
-  [./func_control]
-    type = TestControl
-    test_type = 'disable_executioner' # tests error
-    parameter = 'Executioner::*/enable'
-    execute_on = 'initial timestep_begin'
-  [../]
+[Outputs]
+  exodus = true
 []

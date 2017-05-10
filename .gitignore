@@ -97,6 +97,7 @@ compile_commands.json
 
 peacock_run_tmp.i
 yaml_dump*
+test/tests/outputs/format/dump.i
 
 # Generated header file
 MooseRevision.h

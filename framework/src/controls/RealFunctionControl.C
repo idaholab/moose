@@ -21,7 +21,8 @@ InputParameters
 validParams<RealFunctionControl>()
 {
   InputParameters params = validParams<Control>();
-
+  params.addClassDescription(
+      "Sets the value of a 'Real' input parameters to the value of a provided function.");
   params.addRequiredParam<FunctionName>(
       "function", "The function to use for controlling the specified parameter.");
   params.addRequiredParam<std::string>(

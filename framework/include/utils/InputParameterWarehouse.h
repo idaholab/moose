@@ -159,6 +159,8 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
   // Vector of desired parameters
   std::vector<MooseObjectParameterName> params(1, input);
   const auto link_it = _input_parameter_links.find(input);
+
+  // Add connected parameters
   if (link_it != _input_parameter_links.end())
     params.insert(params.end(), link_it->second.begin(), link_it->second.end());
 

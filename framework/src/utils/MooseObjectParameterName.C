@@ -14,14 +14,25 @@
 
 // MOOSE includes
 #include "MooseObjectParameterName.h"
+#include "MooseError.h"
 
 // STL includes
 #include <iostream>
 
 MooseObjectParameterName::MooseObjectParameterName(const MooseObjectName & obj_name,
-                                                   std::string param)
+                                                   const std::string & param)
   : MooseObjectName(obj_name), _parameter(param)
 {
+  _combined = _tag + _name + _parameter;
+}
+
+MooseObjectParameterName::MooseObjectParameterName(const std::string & tag,
+                                                   const std::string & name,
+                                                   const std::string & param,
+                                                   const std::string & separator)
+  : MooseObjectName(tag, name, separator), _parameter(param)
+{
+  _combined += _parameter;
 }
 
 MooseObjectParameterName::MooseObjectParameterName(std::string name) : MooseObjectName()
@@ -61,12 +72,6 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) : MooseObje
   if (_name.empty() && !name.empty())
     _name = name;
 
-  // Handle asterisks
-  if (_tag == "*")
-    _tag = "";
-  if (_name == "*")
-    _name = "";
-
   // Set the combined name for sorting
   _combined = _tag + _name + _parameter;
 }
@@ -74,23 +79,16 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) : MooseObje
 bool
 MooseObjectParameterName::operator==(const MooseObjectParameterName & rhs) const
 {
-  if ((_name == rhs._name || _name.empty() || rhs._name.empty()) &&
-      (_tag == rhs._tag || _tag.empty() || rhs._tag.empty()) && (_parameter == rhs._parameter))
-  {
+  if (MooseObjectName::operator==(rhs) &&
+      (_parameter == rhs._parameter || _parameter == "*" || rhs._parameter == "*"))
     return true;
-  }
   return false;
 }
 
 bool
 MooseObjectParameterName::operator==(const MooseObjectName & rhs) const
 {
-  if ((_name == rhs._name || _name.empty() || rhs._name.empty()) &&
-      (_tag == rhs._tag || _tag.empty() || rhs._tag.empty()))
-  {
-    return true;
-  }
-  return false;
+  return MooseObjectName::operator==(rhs);
 }
 
 bool
@@ -102,7 +100,7 @@ MooseObjectParameterName::operator!=(const MooseObjectParameterName & rhs) const
 bool
 MooseObjectParameterName::operator!=(const MooseObjectName & rhs) const
 {
-  return !(*this == rhs);
+  return MooseObjectName::operator!=(rhs);
 }
 
 bool
@@ -122,4 +120,13 @@ operator<<(std::ostream & stream, const MooseObjectParameterName & obj)
     return stream << obj._tag << obj._separator << obj._parameter;
   else
     return stream << obj._tag << obj._separator << obj._name << "/" << obj._parameter;
+}
+
+void
+MooseObjectParameterName::check()
+{
+  MooseObjectName::check();
+  if (_parameter.empty())
+    mooseError("The supplied parameter name cannot be empty, to allow for any parameter name to be "
+               "supplied use the '*' character.");
 }

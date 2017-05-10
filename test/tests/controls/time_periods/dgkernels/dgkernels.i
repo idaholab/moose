@@ -98,8 +98,8 @@
 [Controls]
   [./dg_problem]
     type = TimePeriod
-    enable_objects = 'dg_diff2'
-    disable_objects = 'dg_diff'
+    enable_objects = 'DGKernels/dg_diff2'
+    disable_objects = 'DGKernel::dg_diff'
     start_time = '2'
     execute_on = 'initial timestep_begin'
   [../]
