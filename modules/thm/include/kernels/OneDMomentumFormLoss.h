@@ -44,12 +44,20 @@ protected:
   const MaterialProperty<Real> & _dvel_darhoA;
   const MaterialProperty<Real> & _dvel_darhouA;
 
+  /// two-phase multiplier
+  const MaterialProperty<Real> & _mult;
+  const MaterialProperty<Real> * const _dmult_dbeta;
+  const MaterialProperty<Real> & _dmult_darhoA;
+  const MaterialProperty<Real> & _dmult_darhouA;
+  const MaterialProperty<Real> & _dmult_darhoEA;
+
   /// form loss coefficient per unit length function
   Function & _K_prime;
 
   unsigned int _beta_var_number;
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;
+  unsigned int _arhoEA_var_number;
 };
 
 #endif
