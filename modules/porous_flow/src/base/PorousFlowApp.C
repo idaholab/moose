@@ -56,11 +56,13 @@
 #include "PorousFlowRelativePermeabilityVG.h"
 #include "PorousFlowRelativePermeabilityBW.h"
 #include "PorousFlowRelativePermeabilityFLAC.h"
+#include "PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity.h"
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
 #include "PorousFlowTemperature.h"
 #include "PorousFlowThermalConductivityIdeal.h"
+#include "PorousFlowThermalConductivityFromPorosity.h"
 #include "PorousFlowMatrixInternalEnergy.h"
 #include "PorousFlowInternalEnergyIdeal.h"
 #include "PorousFlowEnthalpy.h"
@@ -195,11 +197,13 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowRelativePermeabilityVG);
   registerMaterial(PorousFlowRelativePermeabilityBW);
   registerMaterial(PorousFlowRelativePermeabilityFLAC);
+  registerMaterial(PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);
   registerMaterial(PorousFlowTemperature);
   registerMaterial(PorousFlowThermalConductivityIdeal);
+  registerMaterial(PorousFlowThermalConductivityFromPorosity);
   registerMaterial(PorousFlowMatrixInternalEnergy);
   registerMaterial(PorousFlowInternalEnergyIdeal);
   registerMaterial(PorousFlowEnthalpy);
