@@ -4,14 +4,15 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceRelap.h"
 
-// Forward Declarations
 class OneDMomentumFriction;
 
 template <>
 InputParameters validParams<OneDMomentumFriction>();
 
 /**
- * Contribution due to wall friction
+ * Computes wall friction term
+ *
+ * Equation (229) {eq:wall_friction_force_2phase}
  */
 class OneDMomentumFriction : public DerivativeMaterialInterfaceRelap<Kernel>
 {
@@ -20,23 +21,29 @@ public:
   virtual ~OneDMomentumFriction();
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  const VariableValue & _area;
-  const VariableValue & _u_vel;
-  const VariableValue & _rhoA;
+  /// area
+  const VariableValue & _A;
+
+  /// velocity
+  const MaterialProperty<Real> & _vel;
+  const MaterialProperty<Real> & _dvel_darhoA;
+  const MaterialProperty<Real> & _dvel_darhouA;
+
+  /// drag coefficient
   const MaterialProperty<Real> & _Cw;
   const MaterialProperty<Real> * const _dCw_dbeta;
   const MaterialProperty<Real> & _dCw_drhoA;
   const MaterialProperty<Real> & _dCw_drhouA;
   const MaterialProperty<Real> & _dCw_drhoEA;
 
-  unsigned int _beta_var_number;
-  unsigned int _rhoA_var_number;
-  unsigned int _rhouA_var_number;
-  unsigned int _rhoEA_var_number;
+  const unsigned int _beta_var_number;
+  const unsigned int _arhoA_var_number;
+  const unsigned int _arhouA_var_number;
+  const unsigned int _arhoEA_var_number;
 };
 
 #endif
