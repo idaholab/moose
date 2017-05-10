@@ -163,7 +163,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _partitioner_overridden(false),
     _custom_partitioner_requested(false),
     _uniform_refine_level(0),
-    _is_changed(false),
     _is_nemesis(getParam<bool>("nemesis")),
     _is_prepared(false),
     _needs_prepare_for_use(false),
@@ -270,7 +269,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
-    _is_changed(false),
     _is_nemesis(false),
     _is_prepared(false),
     _needs_prepare_for_use(false),
@@ -508,9 +506,6 @@ MooseMesh::meshChanged()
   getLocalNodeRange();
   getBoundaryNodeRange();
   getBoundaryElementRange();
-
-  // Lets the output system know that the mesh has changed recently.
-  _is_changed = true;
 
   // Call the callback function onMeshChanged
   onMeshChanged();
@@ -2129,18 +2124,6 @@ const Elem *
 MooseMesh::queryElemPtr(const dof_id_type i) const
 {
   return getMesh().query_elem_ptr(i);
-}
-
-bool
-MooseMesh::changed() const
-{
-  return _is_changed;
-}
-
-void
-MooseMesh::changed(bool state)
-{
-  _is_changed = state;
 }
 
 bool
