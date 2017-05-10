@@ -261,12 +261,6 @@ public:
   virtual const Elem * queryElemPtr(const dof_id_type i) const;
 
   /**
-   * Setter/getter for the _is_changed flag.
-   */
-  bool changed() const;
-  void changed(bool state);
-
-  /**
    * Setter/getter for the _is_prepared flag.
    */
   bool prepared() const;
