@@ -4,3 +4,7 @@ python-markdown: http://pythonhosted.org/Markdown/
 YAML: http://yaml.org/
 python: https://www.python.org/
 markdown: http://daringfireball.net/projects/markdown/
+BCs: systems/BCs/index.md
+Kernels: systems/Kernels/index.md
+Functions: systems/Functions/index.md
+Postprocessors: systems/Postprocessors/index.md

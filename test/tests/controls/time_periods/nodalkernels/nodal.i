@@ -60,7 +60,7 @@
 [Controls]
   [./time_period]
     type = TimePeriod
-    enable_objects = constant_rate
+    enable_objects = '*::constant_rate'
     start_time = 0.5
     end_time = 1
   [../]

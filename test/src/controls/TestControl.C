@@ -21,7 +21,7 @@ validParams<TestControl>()
 {
   InputParameters params = validParams<Control>();
 
-  MooseEnum test_type("real variable point tid_warehouse_error disable_executioner");
+  MooseEnum test_type("real variable point tid_warehouse_error disable_executioner connection");
   params.addRequiredParam<MooseEnum>(
       "test_type", test_type, "Indicates the type of test to perform");
   params.addRequiredParam<std::string>(
@@ -45,7 +45,14 @@ TestControl::TestControl(const InputParameters & parameters)
     _fe_problem.getControlWarehouse().initialSetup(12345);
 
   else if (_test_type == "disable_executioner")
-    getControllableValueByName<bool>("Executioner/enable");
+    getControllableValue<bool>("parameter");
+
+  else if (_test_type == "connection")
+  {
+    MooseObjectParameterName master(MooseObjectName("Kernels", "diff"), "coef");
+    MooseObjectParameterName slave(MooseObjectName("BCs", "left"), "value");
+    _app.getInputParameterWarehouse().addControllableParameterConnection(master, slave);
+  }
 
   else if (_test_type != "point")
     mooseError("Unknown test type.");
@@ -56,4 +63,7 @@ TestControl::execute()
 {
   if (_test_type == "point")
     setControllableValue<Point>("parameter", Point(0.25, 0.25));
+
+  if (_test_type == "connection")
+    setControllableValue<Real>("parameter", 0.2);
 }

@@ -83,7 +83,7 @@
   [./point_control]
     type = TestControl
     test_type = 'point'
-    parameter = 'tag::point'
+    parameter = 'tag/*/point'
     execute_on = 'initial'
   [../]
 []

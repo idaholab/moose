@@ -20,6 +20,7 @@ validParams<DirichletBC>()
 {
   InputParameters p = validParams<NodalBC>();
   p.addRequiredParam<Real>("value", "Value of the BC");
+  p.declareControllable("value");
   return p;
 }
 

@@ -79,7 +79,7 @@
 [Controls]
   [./transfers]
     type = TimePeriod
-    enable_objects = pp_transfer
+    enable_objects = Transfer::pp_transfer
     start_time = 2
     execute_on = 'initial timestep_begin'
   [../]

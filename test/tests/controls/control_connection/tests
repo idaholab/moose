@@ -1,0 +1,7 @@
+[Tests]
+  [./basic]
+    type = Exodiff
+    input = control_connection.i
+    exodiff = control_connection_out.e
+  [../]
+[]

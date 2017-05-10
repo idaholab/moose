@@ -91,7 +91,13 @@ protected:
                                        bool warn_when_values_differ = true);
 
   template <typename T>
+  const T & getControllableValueByName(const std::string & object_name,
+                                       const std::string & param_name,
+                                       bool warn_when_values_differ = true);
+
+  template <typename T>
   const T & getControllableValueByName(const std::string & tag,
+                                       const std::string & object_name,
                                        const std::string & param_name,
                                        bool warn_when_values_differ = true);
   ///@}
@@ -116,7 +122,14 @@ protected:
                                   bool warn_when_values_differ = false);
 
   template <typename T>
+  void setControllableValueByName(const std::string & object_name,
+                                  const std::string & param_name,
+                                  const T & value,
+                                  bool warn_when_values_differ = false);
+
+  template <typename T>
   void setControllableValueByName(const std::string & tag,
+                                  const std::string & object_name,
                                   const std::string & param_name,
                                   const T & value,
                                   bool warn_when_values_differ = false);
@@ -152,11 +165,24 @@ Control::getControllableValueByName(const std::string & name, bool warn_when_val
 
 template <typename T>
 const T &
-Control::getControllableValueByName(const std::string & tag,
+Control::getControllableValueByName(const std::string & object_name,
                                     const std::string & param_name,
                                     bool warn_when_values_differ)
 {
-  MooseObjectParameterName desired(tag, param_name);
+  MooseObjectParameterName desired(MooseObjectName(object_name), param_name);
+  ControllableParameter<T> helper =
+      getControllableParameterHelper<T>(desired, warn_when_values_differ);
+  return *(helper.get()[0]);
+}
+
+template <typename T>
+const T &
+Control::getControllableValueByName(const std::string & tag,
+                                    const std::string & object_name,
+                                    const std::string & param_name,
+                                    bool warn_when_values_differ)
+{
+  MooseObjectParameterName desired(tag, object_name, param_name);
   ControllableParameter<T> helper =
       getControllableParameterHelper<T>(desired, warn_when_values_differ);
   return *(helper.get()[0]);
@@ -185,12 +211,26 @@ Control::setControllableValueByName(const std::string & name,
 
 template <typename T>
 void
-Control::setControllableValueByName(const std::string & tag,
+Control::setControllableValueByName(const std::string & object_name,
                                     const std::string & param_name,
                                     const T & value,
                                     bool warn_when_values_differ)
 {
-  MooseObjectParameterName desired(tag, param_name);
+  MooseObjectParameterName desired(MooseObjectName(object_name), param_name);
+  ControllableParameter<T> helper =
+      getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true);
+  helper.set(value);
+}
+
+template <typename T>
+void
+Control::setControllableValueByName(const std::string & tag,
+                                    const std::string & object_name,
+                                    const std::string & param_name,
+                                    const T & value,
+                                    bool warn_when_values_differ)
+{
+  MooseObjectParameterName desired(tag, object_name, param_name);
   ControllableParameter<T> helper =
       getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true);
   helper.set(value);

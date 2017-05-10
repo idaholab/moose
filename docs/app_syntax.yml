@@ -37,7 +37,6 @@ locations:
             - /AuxVariables
             - /BCs
             - /Constraints
-            - /Controls
             - /DGKernels
             - /Dampers
             - /Debug

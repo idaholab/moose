@@ -67,7 +67,7 @@
 [Controls]
   [./damping_control]
     type = TimePeriod
-    disable_objects = 'const_damp'
+    disable_objects = '*::const_damp'
     start_time = 0.25
     execute_on = 'initial timestep_begin'
   [../]
