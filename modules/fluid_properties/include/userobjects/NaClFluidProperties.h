@@ -31,6 +31,12 @@ public:
   virtual ~NaClFluidProperties();
 
   /**
+   * Fluid name
+   * @return "nacl"
+   */
+  virtual std::string fluidName() const override;
+
+  /**
    * NaCl molar mass
    * @return molar mass (kg/mol)
    */

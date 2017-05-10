@@ -69,6 +69,12 @@ BrineFluidProperties::getComponent(unsigned int component) const
   }
 }
 
+std::string
+BrineFluidProperties::fluidName() const
+{
+  return "brine";
+}
+
 Real
 BrineFluidProperties::molarMass(Real xnacl) const
 {

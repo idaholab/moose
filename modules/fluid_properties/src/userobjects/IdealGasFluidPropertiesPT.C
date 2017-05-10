@@ -42,6 +42,12 @@ IdealGasFluidPropertiesPT::IdealGasFluidPropertiesPT(const InputParameters & par
 
 IdealGasFluidPropertiesPT::~IdealGasFluidPropertiesPT() {}
 
+std::string
+IdealGasFluidPropertiesPT::fluidName() const
+{
+  return "ideal_gas";
+}
+
 Real
 IdealGasFluidPropertiesPT::molarMass() const
 {

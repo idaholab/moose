@@ -35,6 +35,9 @@ public:
   SimpleFluidProperties(const InputParameters & parameters);
   virtual ~SimpleFluidProperties();
 
+  /// Fluid name
+  virtual std::string fluidName() const override;
+
   /// Molar mass (kg/mol)
   virtual Real molarMass() const override;
 

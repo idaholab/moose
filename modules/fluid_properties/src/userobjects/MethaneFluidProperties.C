@@ -29,6 +29,12 @@ MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameter
 
 MethaneFluidProperties::~MethaneFluidProperties() {}
 
+std::string
+MethaneFluidProperties::fluidName() const
+{
+  return "methane";
+}
+
 Real
 MethaneFluidProperties::molarMass() const
 {

@@ -79,6 +79,8 @@ public:
 
   virtual void initialSetup() override;
 
+  /// Fluid name
+  virtual std::string fluidName() const override;
   /// Molar mass
   virtual Real molarMass() const override;
   /// Density

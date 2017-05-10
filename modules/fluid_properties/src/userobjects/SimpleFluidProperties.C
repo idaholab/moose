@@ -55,6 +55,12 @@ SimpleFluidProperties::SimpleFluidProperties(const InputParameters & parameters)
 
 SimpleFluidProperties::~SimpleFluidProperties() {}
 
+std::string
+SimpleFluidProperties::fluidName() const
+{
+  return "simple_fluid";
+}
+
 Real
 SimpleFluidProperties::molarMass() const
 {
