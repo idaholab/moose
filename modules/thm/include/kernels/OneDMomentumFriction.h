@@ -36,14 +36,21 @@ protected:
   /// drag coefficient
   const MaterialProperty<Real> & _Cw;
   const MaterialProperty<Real> * const _dCw_dbeta;
-  const MaterialProperty<Real> & _dCw_drhoA;
-  const MaterialProperty<Real> & _dCw_drhouA;
-  const MaterialProperty<Real> & _dCw_drhoEA;
+  const MaterialProperty<Real> & _dCw_darhoA;
+  const MaterialProperty<Real> & _dCw_darhouA;
+  const MaterialProperty<Real> & _dCw_darhoEA;
 
-  const unsigned int _beta_var_number;
-  const unsigned int _arhoA_var_number;
-  const unsigned int _arhouA_var_number;
-  const unsigned int _arhoEA_var_number;
+  /// two-phase multiplier
+  const MaterialProperty<Real> & _mult;
+  const MaterialProperty<Real> * const _dmult_dbeta;
+  const MaterialProperty<Real> & _dmult_darhoA;
+  const MaterialProperty<Real> & _dmult_darhouA;
+  const MaterialProperty<Real> & _dmult_darhoEA;
+
+  unsigned int _beta_var_number;
+  unsigned int _arhoA_var_number;
+  unsigned int _arhouA_var_number;
+  unsigned int _arhoEA_var_number;
 };
 
 #endif

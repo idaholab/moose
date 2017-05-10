@@ -12,6 +12,7 @@ validParams<OneDMomentumFriction>()
   params.addRequiredCoupledVar("arhoEA", "Solution variable alpha*rho*E*A");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity property");
   params.addRequiredParam<MaterialPropertyName>("Cw", "Wall drag coefficient property");
+  params.addRequiredParam<MaterialPropertyName>("2phase_multiplier", "2-phase multiplier property");
   return params;
 }
 
@@ -26,9 +27,17 @@ OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters)
     _Cw(getMaterialProperty<Real>("Cw")),
     _dCw_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("Cw", "beta")
                                  : nullptr),
-    _dCw_drhoA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhoA")),
-    _dCw_drhouA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhouA")),
-    _dCw_drhoEA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhoEA")),
+    _dCw_darhoA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhoA")),
+    _dCw_darhouA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhouA")),
+    _dCw_darhoEA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhoEA")),
+
+    _mult(getMaterialProperty<Real>("2phase_multiplier")),
+    _dmult_dbeta(isCoupled("beta")
+                     ? &getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "beta")
+                     : nullptr),
+    _dmult_darhoA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhoA")),
+    _dmult_darhouA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhouA")),
+    _dmult_darhoEA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhoEA")),
 
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _arhoA_var_number(coupled("arhoA")),
@@ -42,7 +51,7 @@ OneDMomentumFriction::~OneDMomentumFriction() {}
 Real
 OneDMomentumFriction::computeQpResidual()
 {
-  return _Cw[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] * _test[_i][_qp];
+  return _mult[_qp] * _Cw[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -56,25 +65,29 @@ OneDMomentumFriction::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _beta_var_number)
   {
-    return (*_dCw_dbeta)[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] * _phi[_j][_qp] *
-           _test[_i][_qp];
+    return ((*_dmult_dbeta)[_qp] * _Cw[_qp] + _mult[_qp] * (*_dCw_dbeta)[_qp]) * _vel[_qp] *
+           std::abs(_vel[_qp]) * _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhoA_var_number)
   {
-    Real dCwu2_darhoA = _dCw_drhoA[_qp] * _vel[_qp] * std::abs(_vel[_qp]) +
-                        _Cw[_qp] * 2.0 * std::abs(_vel[_qp]) * _dvel_darhoA[_qp];
-    return dCwu2_darhoA * _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    const Real vel2 = _vel[_qp] * std::abs(_vel[_qp]);
+    const Real dvel2_darhoA = 2 * std::abs(_vel[_qp]) * _dvel_darhoA[_qp];
+    return (_dmult_darhoA[_qp] * _Cw[_qp] * vel2 + _mult[_qp] * _dCw_darhoA[_qp] * vel2 +
+            _mult[_qp] * _Cw[_qp] * dvel2_darhoA) *
+           _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhouA_var_number)
   {
-    Real dCwu2_darhouA = _dCw_drhouA[_qp] * _vel[_qp] * std::abs(_vel[_qp]) +
-                         _Cw[_qp] * 2.0 * std::abs(_vel[_qp]) * _dvel_darhouA[_qp];
-    return dCwu2_darhouA * _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    const Real vel2 = _vel[_qp] * std::abs(_vel[_qp]);
+    const Real dvel2_darhouA = 2 * std::abs(_vel[_qp]) * _dvel_darhouA[_qp];
+    return (_dmult_darhouA[_qp] * _Cw[_qp] * vel2 + _mult[_qp] * _dCw_darhouA[_qp] * vel2 +
+            _mult[_qp] * _Cw[_qp] * dvel2_darhouA) *
+           _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhoEA_var_number)
   {
-    return _dCw_drhoEA[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] * _phi[_j][_qp] *
-           _test[_i][_qp];
+    return (_dmult_darhoEA[_qp] * _Cw[_qp] + _mult[_qp] * _dCw_darhoEA[_qp]) * _vel[_qp] *
+           std::abs(_vel[_qp]) * _A[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0;
