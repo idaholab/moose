@@ -50,6 +50,9 @@ def build_options(parser):
     parser.add_argument('--serve', action='store_true',
                         help="Serve the presentation with live reloading, the 'site_dir' is "
                              "ignored for this case.")
+    parser.add_argument('--no-livereload', action='store_true',
+                        help="When --serve is used this flag disables the live reloading.")
+
 
 def make_tree(directory, node, site_dir, parser):
     """
@@ -155,7 +158,7 @@ class Builder(object):
             helper(os.path.join(from_dir, 'css'), os.path.join(self._site_dir, 'css'))
             helper(os.path.join(from_dir, 'media'), os.path.join(self._site_dir, 'media'))
 
-def build(config_file=None, site_dir=None, num_threads=None,
+def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False,
           clean=False, serve=False, host=None, port=None, **kwargs):
     """
     The main build command.
@@ -194,18 +197,19 @@ def build(config_file=None, site_dir=None, num_threads=None,
         server = livereload.Server()
 
         # Watch markdown files
-        for page in builder:
-            server.watch(page.source(), page.build)
+        if not no_livereload:
+            for page in builder:
+                server.watch(page.source(), page.build)
 
-        # Watch support directories
-        server.watch(os.path.join(os.getcwd(), 'media'), builder.copyFiles)
-        server.watch(os.path.join(os.getcwd(), 'css'), builder.copyFiles)
-        server.watch(os.path.join(os.getcwd(), 'js'), builder.copyFiles)
-        server.watch(os.path.join(os.getcwd(), 'fonts'), builder.copyFiles)
+            # Watch support directories
+            server.watch(os.path.join(os.getcwd(), 'media'), builder.copyFiles)
+            server.watch(os.path.join(os.getcwd(), 'css'), builder.copyFiles)
+            server.watch(os.path.join(os.getcwd(), 'js'), builder.copyFiles)
+            server.watch(os.path.join(os.getcwd(), 'fonts'), builder.copyFiles)
 
-        # Watch the files and directories that require complete rebuild
-        server.watch(config_file, build_complete)
-        server.watch('templates', builder.build)
+            # Watch the files and directories that require complete rebuild
+            server.watch(config_file, build_complete)
+            server.watch('templates', builder.build)
 
         # Start the server
         server.serve(root=site_dir, host=host, port=port, restart_delay=0)
