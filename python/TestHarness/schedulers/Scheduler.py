@@ -5,6 +5,7 @@ from tempfile import TemporaryFile
 from collections import deque
 from MooseObject import MooseObject
 
+from signal import SIGTERM
 import os, sys, platform
 
 ## Base class for handling how jobs are launched
@@ -165,9 +166,9 @@ class Scheduler(MooseObject):
             # Close the output file
             f.close()
 
-            # Clear this job slot
-            self.jobs[job_index] = None
-            self.slots_in_use = self.slots_in_use - slots
+        # Clear this job slot
+        self.jobs[job_index] = None
+        self.slots_in_use = self.slots_in_use - slots
 
     ## Returns False if all pre-preqs have been satisfied
     def unsatisfiedPrereqs(self, tester):
@@ -190,6 +191,7 @@ class Scheduler(MooseObject):
             if not should_run:
                 reason = 'deprected checkRunnableBase #8037'
                 tester.setStatus(reason, tester.bucket_skip)
+                self.notifySchedulersBase(tester)
         if should_run:
             command = tester.getCommand(self.options)
             # This method spawns another process and allows this loop to continue looking for tests
@@ -201,9 +203,9 @@ class Scheduler(MooseObject):
             if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
                 if (self.options.report_skipped and status == tester.bucket_skip) \
                    or status == tester.bucket_skip:
-                    self.harness.handleTestStatus(tester)
+                    self.notifySchedulersBase(tester)
                 elif status == tester.bucket_deleted and self.options.extra_info:
-                    self.harness.handleTestStatus(tester)
+                    self.notifySchedulersBase(tester)
             self.jobSkipped(tester.parameters()['test_name'])
 
     ## Find an empty slot and launch the job
@@ -224,7 +226,7 @@ class Scheduler(MooseObject):
                 self.big_queue.append([tester, command, os.getcwd()])
             else:
                 tester.setStatus('Insufficient slots', tester.bucket_skip)
-                self.harness.handleTestStatus(tester)
+                self.notifySchedulersBase(tester)
                 self.skipped_jobs.add(tester.specs['test_name'])
             return
 
@@ -327,7 +329,7 @@ class Scheduler(MooseObject):
 
                         if now >= self.reported_timer + seconds_to_report:
                             tester.setStatus('RUNNING...', tester.bucket_pending)
-                            self.harness.handleTestStatus(tester)
+                            self.notifySchedulersBase(tester)
                             self.reported_jobs.add(tester)
                             self.reported_timer = now
 

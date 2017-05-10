@@ -170,6 +170,10 @@ class TestHarness:
 
             # Find and schedule tests for launch
             else:
+                # record tests that we launch so we do not launch them
+                # again due to os.walk following links
+                launched_tests = []
+
                 self.base_dir = os.getcwd()
                 for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
                     # Prune submdule paths when searching for tests
@@ -180,7 +184,8 @@ class TestHarness:
                     if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
                         for file in filenames:
                             # See if there were other arguments (test names) passed on the command line
-                            if file == self.options.input_file_name: #and self.test_match.search(file):
+                            if file == self.options.input_file_name \
+                               and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
                                 # Enter test directory
                                 saved_cwd = os.getcwd()
@@ -193,6 +198,9 @@ class TestHarness:
                                 # Schedule the test for execution
                                 self.scheduleTesters(testers)
 
+                                # record this launched test
+                                launched_tests.append(os.path.abspath(file))
+
                                 # See if any tests have colliding outputs
                                 self.checkForRaceConditionOutputs(testers, dirpath)
 
@@ -201,7 +209,7 @@ class TestHarness:
                                 sys.path.pop()
 
         except KeyboardInterrupt:
-            self.closeFiles()
+            self.closeFiles(1)
             print '\nExiting due to keyboard interrupt...'
             sys.exit(1)
 
@@ -557,7 +565,7 @@ class TestHarness:
         if self.options.checkStatus:
             print '\nYour Queue batch file:', self.queue_file.name
 
-    def closeFiles(self):
+    def closeFiles(self, exit_code=0):
         if self.writeFailedTest:
             self.writeFailedTest.close()
 
@@ -568,6 +576,8 @@ class TestHarness:
             self.writeFailedTest.close()
 
         if self.queue_file:
+            if exit_code < 0 and self.options.checkStatus is False:
+                print 'WARNING: You killed the TestHarness while busy launching jobs. You most likely have jobs owned by you, that will remain on hold indefinitely'
             # Write the json data to queue file
             self.queue_file.seek(0)
             json.dump(self.queue_data, self.queue_file, indent=2)

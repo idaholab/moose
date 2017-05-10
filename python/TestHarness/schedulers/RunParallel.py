@@ -1,7 +1,6 @@
 from timeit import default_timer as clock
 
 from Tester import Tester
-from signal import SIGTERM
 from Scheduler import Scheduler
 from MooseObject import MooseObject
 import platform
