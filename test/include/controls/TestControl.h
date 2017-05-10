@@ -37,6 +37,9 @@ public:
 private:
   /// The type of test to perform
   MooseEnum _test_type;
+
+  /// Storage for the alias test
+  const MooseObjectParameterName _alias;
 };
 
 #endif // TESTCONTROL_H

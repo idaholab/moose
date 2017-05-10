@@ -21,10 +21,11 @@ validParams<TestControl>()
 {
   InputParameters params = validParams<Control>();
 
-  MooseEnum test_type("real variable point tid_warehouse_error disable_executioner connection");
+  MooseEnum test_type(
+      "real variable point tid_warehouse_error disable_executioner connection alias");
   params.addRequiredParam<MooseEnum>(
       "test_type", test_type, "Indicates the type of test to perform");
-  params.addRequiredParam<std::string>(
+  params.addParam<std::string>(
       "parameter",
       "The input parameter(s) to control. Specify a single parameter name and all "
       "parameters in all objects matching the name will be updated");
@@ -33,7 +34,7 @@ validParams<TestControl>()
 }
 
 TestControl::TestControl(const InputParameters & parameters)
-  : Control(parameters), _test_type(getParam<MooseEnum>("test_type"))
+  : Control(parameters), _test_type(getParam<MooseEnum>("test_type")), _alias("this/is/alias")
 {
   if (_test_type == "real")
     getControllableValue<Real>("parameter");
@@ -54,6 +55,12 @@ TestControl::TestControl(const InputParameters & parameters)
     _app.getInputParameterWarehouse().addControllableParameterConnection(master, slave);
   }
 
+  else if (_test_type == "alias")
+  {
+    MooseObjectParameterName slave(MooseObjectName("BCs", "left"), "value");
+    _app.getInputParameterWarehouse().addControllableParameterConnection(_alias, slave);
+  }
+
   else if (_test_type != "point")
     mooseError("Unknown test type.");
 }
@@ -66,4 +73,7 @@ TestControl::execute()
 
   if (_test_type == "connection")
     setControllableValue<Real>("parameter", 0.2);
+
+  if (_test_type == "alias")
+    setControllableValueByName<Real>(_alias, 0.42);
 }
