@@ -1,8 +1,14 @@
 # Trivial test of PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
 # Porosity = 0.1
-# Solid density = 2500
-# Fluid density = 1000
-# Expected bulk density = 2500 * (1 - 0.1) + 1000 * 0.1 = 2350
+# Solid density = 3
+# Fluid density = 2
+# Fluid bulk modulus = 4
+# Bulk density: rho = 3 * (1 - 0.1) + 2 * 0.1 = 2.9
+# Derivative wrt fluid pressure: d_rho / d_pp = d_rho / d_rho_f * d_rho_f / d_pp
+#   = phi * rho_f / B
+#   where rho_f = rho_0 * exp(pp / B) is fluid density, pp is fluid pressure, phi is
+#   porosity and B is fluid bulk modulus
+# With pp = 0, d_rho / d_pp = phi * rho_0 / B = 0.1 * 2 / 4 = 0.05
 
 [Mesh]
   type = GeneratedMesh
@@ -19,7 +25,6 @@
 []
 
 [GlobalParams]
-  block = 0
   PorousFlowDictator = dictator
 []
 
@@ -28,8 +33,8 @@
     [./simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0
-      bulk_modulus = 2E9
-      density0 = 1000
+      bulk_modulus = 4
+      density0 = 2
     [../]
   [../]
 []
@@ -41,9 +46,6 @@
       value = 0
     [../]
   [../]
-[]
-
-[Functions]
 []
 
 [Kernels]
@@ -67,6 +69,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./ddensity_dpp]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
@@ -75,6 +81,12 @@
     property = density
     variable = density
   [../]
+  [./ddensity_dpp]
+    type = MaterialStdVectorAux
+    property = ddensity_dvar
+    variable = ddensity_dpp
+    index = 0
+  [../]
 []
 
 [Postprocessors]
@@ -82,6 +94,12 @@
     type = ElementalVariableValue
     elementid = 0
     variable = density
+    execute_on = 'timestep_end'
+  [../]
+  [./ddensity_dpp]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = ddensity_dpp
     execute_on = 'timestep_end'
   [../]
 []
@@ -118,7 +136,7 @@
   [../]
   [./density]
     type = PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
-    rho_s = 2500
+    rho_s = 3
   [../]
 []
 
@@ -132,13 +150,6 @@
 [Executioner]
   solve_type = Newton
   type = Steady
-  l_tol = 1E-5
-  nl_abs_tol = 1E-4
-  nl_rel_tol = 1E-8
-  l_max_its = 200
-  nl_max_its = 10
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
-  petsc_options_value = ' asm      2              lu            gmres     200'
 []
 
 

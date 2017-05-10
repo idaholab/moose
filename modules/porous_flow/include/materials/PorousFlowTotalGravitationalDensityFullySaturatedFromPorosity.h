@@ -34,25 +34,6 @@ protected:
   void initQpStatefulProperties() override;
   void computeQpProperties() override;
 
-  /**
-   * Fluid density
-   * Over-ride in derived classes to implement other fluid density formulations
-   *
-   * @param ph phase index
-   * @return fluid density
-   */
-  virtual Real rho_f(unsigned int ph = 0) const;
-
-  /**
-   * Derivatives of fluid density wrt a variable
-   * Over-ride in derived classes to implement other fluid density formulations
-   *
-   * @param ph phase index
-   * @param v variable index
-   * @return derivatives of fluid density
-   */
-  virtual Real drho_f_dvar(unsigned int ph = 0, unsigned int v = 0) const;
-
   /// Solid density
   const Real _rho_s;
 

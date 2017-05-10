@@ -40,36 +40,23 @@ PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::
                "at_nodes = false");
 }
 
-Real
-PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::rho_f(unsigned int ph) const
-{
-  return _rho_f_qp[_qp][ph];
-}
-
-Real
-PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::drho_f_dvar(unsigned int ph,
-                                                                           unsigned int v) const
-{
-  return _drho_f_qp_dvar[_qp][ph][v];
-}
-
 void
 PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::initQpStatefulProperties()
 {
   const unsigned ph = 0;
-  _gravdensity[_qp] = _rho_s * (1.0 - _porosity_qp[_qp]) + rho_f(ph) * _porosity_qp[_qp];
+  _gravdensity[_qp] = _rho_s * (1.0 - _porosity_qp[_qp]) + _rho_f_qp[_qp][ph] * _porosity_qp[_qp];
 }
 
 void
 PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::computeQpProperties()
 {
   const unsigned ph = 0;
-  _gravdensity[_qp] = _rho_s * (1.0 - _porosity_qp[_qp]) + rho_f(ph) * _porosity_qp[_qp];
+  _gravdensity[_qp] = _rho_s * (1.0 - _porosity_qp[_qp]) + _rho_f_qp[_qp][ph] * _porosity_qp[_qp];
 
   _dgravdensity_dvar[_qp].resize(_num_var);
   for (unsigned int v = 0; v < _num_var; ++v)
   {
     _dgravdensity_dvar[_qp][v] =
-        _dporosity_qp_dvar[_qp][v] * (rho_f(ph) - _rho_s) + drho_f_dvar(ph, v) * _porosity_qp[_qp];
+        _dporosity_qp_dvar[_qp][v] * (_rho_f_qp[_qp][ph] - _rho_s) + _drho_f_qp_dvar[_qp][ph][v] * _porosity_qp[_qp];
   }
 }
