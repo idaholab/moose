@@ -25,6 +25,9 @@ public:
   IdealGasFluidPropertiesPT(const InputParameters & parameters);
   virtual ~IdealGasFluidPropertiesPT();
 
+  /// Fluid name
+  virtual std::string fluidName() const override;
+
   /// Molar mass (kg/mol)
   virtual Real molarMass() const override;
 

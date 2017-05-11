@@ -41,6 +41,12 @@ public:
   virtual ~Water97FluidProperties();
 
   /**
+   * Fluid name
+   * @return "water"
+   */
+  virtual std::string fluidName() const override;
+
+  /**
    * Water molar mass
    * @return molar mass (kg/mol)
    */

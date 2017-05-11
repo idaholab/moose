@@ -27,6 +27,12 @@ public:
   virtual ~BrineFluidProperties();
 
   /**
+   * Fluid name
+   * @return "brine"
+   */
+  virtual std::string fluidName() const override;
+
+  /**
    * Average molar mass of brine
    * @param xnacl NaCl mass fraction (-)
    * @return average molar mass (kg/mol)

@@ -25,6 +25,8 @@ public:
   SinglePhaseFluidPropertiesPT(const InputParameters & parameters);
   virtual ~SinglePhaseFluidPropertiesPT();
 
+  /// Fluid name
+  virtual std::string fluidName() const = 0;
   /// Molar mass (kg/mol)
   virtual Real molarMass() const = 0;
   /// Density from pressure and temperature (kg/m^3)
