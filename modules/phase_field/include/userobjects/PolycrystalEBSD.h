@@ -28,9 +28,8 @@ public:
   virtual unsigned int getNumGrains() const override;
 
 protected:
-  const EBSDReader & _ebsd_reader;
-  const bool _consider_phase;
   const unsigned int _phase;
+  const EBSDReader & _ebsd_reader;
   const std::map<dof_id_type, std::vector<Real>> & _node_to_grain_weight_map;
 };
 

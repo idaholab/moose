@@ -24,7 +24,6 @@
     flood_entity_type = ELEMENTAL
     compute_halo_maps = true # For displaying HALO fields
     polycrystal_ic_uo = ebsd
-    execute_on = 'initial timestep_end'
   [../]
 []
 

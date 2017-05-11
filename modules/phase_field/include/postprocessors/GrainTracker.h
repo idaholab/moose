@@ -15,7 +15,6 @@
 #include "libmesh/mesh_tools.h"
 
 class GrainTracker;
-class EBSDReader;
 class PolycrystalUserObjectBase;
 struct GrainDistance;
 
@@ -72,11 +71,6 @@ public:
 protected:
   virtual void updateFieldInfo() override;
   virtual Real getThreshold(std::size_t current_index) const override;
-  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                             std::size_t & current_index,
-                                             FeatureData *& feature,
-                                             Status & status,
-                                             unsigned int & new_id) override;
 
   /**
    * This method extracts the necessary state from the passed in object necessary to continue
@@ -92,10 +86,7 @@ protected:
 
   /**
    * When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every
-   * FeatureData object found by the FeatureFloodCount object. If an EBSDReader is linked into
-   * the GrainTracker the information from the reader is used to assign grain information,
-   * otherwise it's ordered by each Feature's "minimum entity id" and assigned a non-negative
-   * integer.
+   * FeatureData object found by the FeatureFloodCount object.
    */
   void assignGrains();
 
@@ -214,19 +205,8 @@ protected:
    */
   std::vector<FeatureData> & _feature_sets_old;
 
+  /// An optional IC UserObject which can provide initial data structures to this object.
   const PolycrystalUserObjectBase * _poly_ic_uo;
-
-  /// Optional ESBD Reader
-  const EBSDReader * _ebsd_reader;
-
-  /// Optional EBSD OP variable pointer (required if EBSD is supplied)
-  MooseVariable * _ebsd_op_var;
-
-  /// The phase to retrieve EBSD information from
-  const unsigned int _phase;
-
-  /// Boolean to indicate that we should retrieve EBSD information from a specific phase
-  const bool _consider_phase;
 
   /**
    * Boolean to indicate the first time this object executes.

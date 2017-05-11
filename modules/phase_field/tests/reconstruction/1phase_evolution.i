@@ -9,24 +9,30 @@
 []
 
 [GlobalParams]
-  op_num = 6
+  op_num = 5
   var_name_base = gr
 []
 
 [UserObjects]
-  [./ebsd]
+  [./ebsd_reader]
     type = EBSDReader
   [../]
-  [./tracker]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = bt
+    ebsd_reader = ebsd_reader
+    output_adjacency_matrix = true
+  [../]
+  [./grain_tracker]
     type = GrainTracker
-    ebsd_reader = ebsd
+    polycrystal_ic_uo = ebsd
   [../]
 []
 
 [ICs]
   [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = ebsd
     [../]
   [../]
 []
@@ -52,8 +58,8 @@
   [./feature]
     type = EBSDReaderAvgDataAux
     variable = feature
-    ebsd_reader = ebsd
-    grain_tracker = tracker
+    ebsd_reader = ebsd_reader
+    grain_tracker = grain_tracker
     data_name = feature_id
     execute_on = 'initial timestep_end'
   [../]
