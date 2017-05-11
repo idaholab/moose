@@ -64,7 +64,7 @@ class PostprocessorViewer(peacock.base.ViewerBase):
         Args:
             filenames[list]: A list of filenames to load.
         """
-        filenames = peacock.utils.getOptionFilenames(options, 'postprocessors', '.csv')
+        filenames = peacock.utils.getOptionFilenames(options, 'postprocessors', '.*\.csv')
         self.onSetFilenames(filenames)
 
     def onClone(self):

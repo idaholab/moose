@@ -36,7 +36,7 @@ class ExodusViewer(peacock.base.ViewerBase):
         Args:
             options: Complete parsed command line parameters from argparse.
         """
-        filenames = peacock.utils.getOptionFilenames(options, 'exodus', '.e')
+        filenames = peacock.utils.getOptionFilenames(options, 'exodus', ['.*\.e', '.*\.e-s[0-9]+'])
         self.onSetFilenames(filenames)
 
     def onClone(self):

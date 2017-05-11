@@ -43,7 +43,7 @@ class VectorPostprocessorViewer(PostprocessorViewer):
         """
         Initialize the manager by appending supplied files from parser.
         """
-        filenames = peacock.utils.getOptionFilenames(options, 'vectorpostprocessors', '*.csv')
+        filenames = peacock.utils.getOptionFilenames(options, 'vectorpostprocessors', '.*\*\.csv')
         self.onSetFilenames(filenames)
 
 def main():

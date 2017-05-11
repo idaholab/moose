@@ -1,5 +1,7 @@
 import os
-def getOptionFilenames(options, base, extension=None):
+import re
+
+def getOptionFilenames(options, base, extensions=[]):
     """
     Return a list of filenames with correct absolute path.
 
@@ -9,11 +11,15 @@ def getOptionFilenames(options, base, extension=None):
         extension: (Optional) The file extension to parse from 'arguments' command-line option.
     """
     # Complete list of Exodus files to open
+    if not isinstance(extensions, list):
+        extensions = [extensions]
+
     filenames = getattr(options, base)
-    if extension:
+    if extensions:
         for arg in options.arguments:
-            if arg.endswith(extension):
-                filenames.append(arg)
+            for e in extensions:
+                if re.match(e, arg):
+                    filenames.append(arg)
 
     # Make all paths absolute
     for i, fname in enumerate(filenames):
