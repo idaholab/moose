@@ -21,7 +21,7 @@ validParams<PenaltyDirichletBC>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addParam<Real>("value", 0.0, "Boundary value of the variable");
-
+  params.declareControllable("value");
   return params;
 }
 

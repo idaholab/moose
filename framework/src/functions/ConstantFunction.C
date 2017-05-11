@@ -20,6 +20,7 @@ validParams<ConstantFunction>()
 {
   InputParameters params = validParams<Function>();
   params.addParam<Real>("value", 0.0, "The constant value");
+  params.declareControllable("value");
   return params;
 }
 

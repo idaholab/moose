@@ -40,7 +40,7 @@ protected:
 
 private:
   Real _p;
-  Real _v;
+  const Real & _v;
 };
 
 #endif

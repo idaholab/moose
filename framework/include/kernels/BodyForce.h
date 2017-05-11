@@ -40,7 +40,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
 
-  Real _value;
+  const Real & _value;
   Function & _function;
   const PostprocessorValue * const _postprocessor;
 };
