@@ -198,7 +198,11 @@
   num_steps = 10
 
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = IterationAdaptiveDT
+    optimal_iterations = 9
+    iteration_window = 2
+    growth_factor = 1.1
+    cutback_factor = 0.75
     dt = 0.3
   [../]
 []
