@@ -179,6 +179,12 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         if index != self.AvailableFiles.currentIndex():
             self.AvailableFiles.setCurrentIndex(index)
 
+    def onWindowReset(self):
+        """
+        We want to the user to always be able to open files.
+        """
+        super(FilePlugin, self).onWindowReset()
+        self.setEnabled(True)
 
 def main(size=None):
     """
