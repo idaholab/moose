@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 import sys
 import os
-import pdb
 
 # Locate MOOSE directory
-MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
-if not os.path.exists(MOOSE_DIR):
-    MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
+os.chdir(os.path.abspath(os.path.dirname(__file__)))
+MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', '..', 'moose'))
+
 if not os.path.exists(MOOSE_DIR):
     raise Exception('Failed to locate MOOSE, specify the MOOSE_DIR environment variable.')
 
