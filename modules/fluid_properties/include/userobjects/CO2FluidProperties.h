@@ -87,6 +87,12 @@ public:
       Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
+   * Fluid name
+   * @return "co2"
+   */
+  virtual std::string fluidName() const override;
+
+  /**
    * CO2 molar mass
    * @return molar mass (kg/mol)
    */

@@ -108,6 +108,12 @@ TabulatedFluidProperties::initialSetup()
       _pressure, _temperature, _enthalpy, _dh_dp_0, _dh_dp_n, _dh_dT_0, _dh_dT_n);
 }
 
+std::string
+TabulatedFluidProperties::fluidName() const
+{
+  return _fp.fluidName();
+}
+
 Real
 TabulatedFluidProperties::molarMass() const
 {

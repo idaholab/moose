@@ -29,6 +29,12 @@ NaClFluidProperties::NaClFluidProperties(const InputParameters & parameters)
 
 NaClFluidProperties::~NaClFluidProperties() {}
 
+std::string
+NaClFluidProperties::fluidName() const
+{
+  return "nacl";
+}
+
 Real
 NaClFluidProperties::molarMass() const
 {

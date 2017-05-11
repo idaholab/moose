@@ -25,6 +25,12 @@ CO2FluidProperties::CO2FluidProperties(const InputParameters & parameters)
 
 CO2FluidProperties::~CO2FluidProperties() {}
 
+std::string
+CO2FluidProperties::fluidName() const
+{
+  return "co2";
+}
+
 Real
 CO2FluidProperties::molarMass() const
 {

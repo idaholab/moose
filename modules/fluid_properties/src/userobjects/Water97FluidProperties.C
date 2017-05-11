@@ -30,6 +30,12 @@ Water97FluidProperties::Water97FluidProperties(const InputParameters & parameter
 
 Water97FluidProperties::~Water97FluidProperties() {}
 
+std::string
+Water97FluidProperties::fluidName() const
+{
+  return "water";
+}
+
 Real
 Water97FluidProperties::molarMass() const
 {

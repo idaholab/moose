@@ -26,6 +26,8 @@ public:
   MultiComponentFluidPropertiesPT(const InputParameters & parameters);
   virtual ~MultiComponentFluidPropertiesPT();
 
+  /// Fluid name
+  virtual std::string fluidName() const = 0;
   /// Density (kg/m^3)
   virtual Real rho(Real pressure, Real temperature, Real xmass) const = 0;
   /// Density and its derivatives wrt pressure, temperature and mass fraction

@@ -26,6 +26,12 @@ public:
   virtual ~MethaneFluidProperties();
 
   /**
+   * Fluid name
+   * @return "methane"
+   */
+  virtual std::string fluidName() const override;
+
+  /**
    * Methane molar mass
    * @return molar mass (kg/mol)
    */
