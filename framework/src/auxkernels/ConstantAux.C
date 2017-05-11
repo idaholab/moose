@@ -20,6 +20,7 @@ validParams<ConstantAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam<Real>("value", 0.0, "Some constant value that can be read from the input file");
+  params.declareControllable("value");
   return params;
 }
 

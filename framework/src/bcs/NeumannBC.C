@@ -20,6 +20,7 @@ validParams<NeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
+  params.declareControllable("value");
   return params;
 }
 

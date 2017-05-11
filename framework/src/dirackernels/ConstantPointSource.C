@@ -21,6 +21,7 @@ validParams<ConstantPointSource>()
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
+  params.declareControllable("value");
   return params;
 }
 
