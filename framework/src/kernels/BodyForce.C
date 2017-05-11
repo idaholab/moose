@@ -27,6 +27,7 @@ validParams<BodyForce>()
   params.addParam<FunctionName>("function", "1", "A function that describes the body force");
   params.addParam<PostprocessorName>("postprocessor",
                                      "A postprocessor whose value is multiplied by the body force");
+  params.declareControllable("value");
   return params;
 }
 

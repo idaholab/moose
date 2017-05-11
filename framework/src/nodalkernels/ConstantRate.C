@@ -20,6 +20,7 @@ validParams<ConstantRate>()
 {
   InputParameters params = validParams<NodalKernel>();
   params.addRequiredParam<Real>("rate", "The constant rate in 'du/dt = rate'");
+  params.declareControllable("rate");
   return params;
 }
 

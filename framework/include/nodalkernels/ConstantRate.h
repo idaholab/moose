@@ -40,7 +40,7 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /// The rate
-  Real _rate;
+  const Real & _rate;
 };
 
 #endif

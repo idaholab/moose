@@ -20,7 +20,7 @@ validParams<ConstantScalarAux>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
   params.addRequiredParam<Real>("value", "The value to be set to the scalar variable.");
-
+  params.declareControllable("value");
   return params;
 }
 
