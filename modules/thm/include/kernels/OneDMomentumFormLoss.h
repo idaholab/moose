@@ -14,7 +14,7 @@ InputParameters validParams<OneDMomentumFormLoss>();
  * Computes the force per unit length due to form loss, provided a form
  * loss coefficient per unit length function
  *
- * Equation (238) {eq:form_loss_force_2phase}
+ * Equation (239) {eq:form_loss_force_2phase}
  */
 class OneDMomentumFormLoss : public DerivativeMaterialInterfaceRelap<Kernel>
 {

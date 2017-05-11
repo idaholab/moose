@@ -12,7 +12,7 @@ InputParameters validParams<OneDMomentumFriction>();
 /**
  * Computes wall friction term
  *
- * Equation (229) {eq:wall_friction_force_2phase}
+ * Equation (230) {eq:wall_friction_force_2phase}
  */
 class OneDMomentumFriction : public DerivativeMaterialInterfaceRelap<Kernel>
 {
