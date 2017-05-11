@@ -86,7 +86,6 @@ fi
 if [[ "$kind" == "app" ]]; then
     # copy clang-format related files
     mkdir -p $dir/scripts
-    cp $MOOSE_DIR/scripts/install-format-hook.sh $dir/scripts/
     cp $MOOSE_DIR/.clang-format $dir/
     cp $MOOSE_DIR/.gitignore $dir/
 
