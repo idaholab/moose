@@ -39,6 +39,9 @@ public:
 
 protected:
   SplineInterpolation _ipol;
+
+  /// Desired component
+  int _component;
 };
 
 #endif /* SPLINEFUNCTION_H */
