@@ -5,7 +5,7 @@
 
 class StorkApp;
 
-template<>
+template <>
 InputParameters validParams<StorkApp>();
 
 class StorkApp : public MooseApp

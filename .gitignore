@@ -19,7 +19,6 @@
 *.dylib
 *.so
 *.so.*
-*.gitignore*
 *.vrb
 *.jou
 *.pyc
