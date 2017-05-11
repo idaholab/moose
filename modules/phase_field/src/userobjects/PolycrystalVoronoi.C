@@ -84,6 +84,8 @@ PolycrystalVoronoi::getVariableValue(unsigned int op_index, const Point & p) con
 void
 PolycrystalVoronoi::precomputeGrainStructure()
 {
+  MooseRandom::seed(_rand_seed);
+
   // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {

@@ -22,12 +22,27 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 10 # Number of grains
+    coloring_algorithm = bt # bt will assign one grain to each op if they are the same
+    rand_seed = 1
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.5
+    connecting_threshold = 0.2
+    # Note: This is here for demonstration purposes
+    # use elemental for most simulations
+    flood_entity_type = NODAL
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
-      rand_seed = 1
-      grain_num = 10
-      coloring_algorithm = bt
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -87,14 +102,6 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.5
-    connecting_threshold = 0.2
-    # Note: This is here for demonstration purposes
-    # use elemental for most simulations
-    flood_entity_type = NODAL
-  [../]
   [./DOFs]
     type = NumDOFs
     execute_on = 'initial timestep_end'

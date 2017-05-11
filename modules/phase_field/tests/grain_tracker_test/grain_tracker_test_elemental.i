@@ -14,7 +14,7 @@
 []
 
 [GlobalParams]
-  op_num = 12
+  op_num = 12 # Should match grain_num so we can test with FauxGrainTracker too
   var_name_base = gr
 []
 
@@ -23,11 +23,22 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 12 # Number of grains
+    coloring_algorithm = bt # bt will assign one grain to each op if they are the same
+    rand_seed = 8675
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
-      rand_seed = 8675
-      grain_num = 12
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -92,10 +103,6 @@
 []
 
 [Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    flood_entity_type = ELEMENTAL
-  [../]
   [./DOFs]
     type = NumDOFs
   [../]

@@ -53,19 +53,6 @@
     valgrind = 'HEAVY'
   [../]
 
-  [./test_recover]
-    type = 'Exodiff'
-    input = 'grain_tracker_recover.i'
-    exodiff = 'grain_tracker_recover_out.e
-               grain_tracker_recover_out.e-s002
-               grain_tracker_recover_out.e-s003'
-
-    #Note: this test should be run with min parallel=2
-    #but can diff across architectures in the finite nodal aux fields.
-    # min_parallel = 2
-    skip = '#84'
-  [../]
-
   [./test_ebsd]
     type = 'Exodiff'
     input = 'grain_tracker_ebsd.i'
@@ -96,7 +83,7 @@
   [./test_faux_nodal]
     type = 'Exodiff'
     input = 'grain_tracker_same.i'
-    cli_args = 'Outputs/file_base=gt_faux_nodal_out Postprocessors/grain_tracker/type=FauxGrainTracker'
+    cli_args = 'Outputs/file_base=gt_faux_nodal_out UserObjects/grain_tracker/type=FauxGrainTracker'
 
     exodiff = 'gt_faux_nodal_out.e'
     valgrind = 'HEAVY'
@@ -106,7 +93,7 @@
   [./test_faux_element]
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
-    cli_args = 'Outputs/file_base=gt_faux_elemental_out Postprocessors/grain_tracker/type=FauxGrainTracker'
+    cli_args = 'Outputs/file_base=gt_faux_elemental_out UserObjects/grain_tracker/type=FauxGrainTracker'
 
     exodiff = 'gt_faux_elemental_out.e-s002'
     method = '!DBG' # slow test
