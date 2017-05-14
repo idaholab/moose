@@ -5,13 +5,12 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import erfc
-import pandas as pd
 
 #
 # Diffusion-only test
 #
 # Read MOOSE simulation data
-data = pd.read_csv("../../tests/dispersion/diff01_out_xmass_0021.csv")
+data = np.genfromtxt('../../tests/dispersion/diff01_out_xmass_0021.csv', delimiter = ',', names = True, dtype = None)
 
 # The analytical solution is erfc(u) where u is a similarity variable
 x = np.linspace(0,10,100)
@@ -23,7 +22,7 @@ u = x/(2*np.sqrt(D*t))
 
 plt.figure(1)
 plt.plot(x, erfc(u), label = 'Analytical')
-plt.plot(data.x, data.massfrac0, 'o', label = 'MOOSE')
+plt.plot(data['x'], data['massfrac0'], 'o', label = 'MOOSE')
 plt.xlabel('x (m)')
 plt.ylabel('Mass fraction (-)')
 plt.legend()
@@ -44,11 +43,11 @@ def expected(x,t):
     erfc((x+v*t)/(2*np.sqrt(D*t)))
 
 # Read MOOSE simulation data
-data = pd.read_csv("../../tests/dispersion/disp01_out_xmass_0029.csv")
+data = np.genfromtxt('../../tests/dispersion/disp01_out_xmass_0029.csv', delimiter = ',', names = True, dtype = None)
 
 plt.figure(2)
 plt.plot(x, expected(x, 1e3), label = 'Analytical')
-plt.plot(data.x, data.massfrac0, 'o', label = 'MOOSE')
+plt.plot(data['x'], data['massfrac0'], 'o', label = 'MOOSE')
 plt.xlabel('x (m)')
 plt.ylabel('Mass fraction (-)')
 plt.legend()
@@ -60,11 +59,11 @@ plt.savefig("dispersion_fig.pdf")
 # Heavy dispersion test
 #
 # Read MOOSE simulation data
-data = pd.read_csv("../../tests/dispersion/disp01_heavy_out_xmass_0105.csv")
+data = np.genfromtxt('../../tests/dispersion/disp01_heavy_out_xmass_0105.csv', delimiter = ',', names = True, dtype = None)
 
 plt.figure(3)
 plt.plot(x, expected(x, 1e3), label = 'Analytical')
-plt.plot(data.x, data.massfrac0, 'o', label = 'MOOSE', markevery=4)
+plt.plot(data['x'], data['massfrac0'], 'o', label = 'MOOSE', markevery=4)
 plt.xlabel('x (m)')
 plt.ylabel('Mass fraction (-)')
 plt.legend()
