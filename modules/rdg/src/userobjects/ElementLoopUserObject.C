@@ -87,36 +87,35 @@ ElementLoopUserObject::execute()
       _old_subdomain = _subdomain;
       _subdomain = cur_subdomain;
 
-      if (!this->hasBlocks(_subdomain))
-        break;
-
-      if (_subdomain != _old_subdomain)
-        subdomainChanged();
-
-      onElement(elem);
-
-      for (unsigned int side = 0; side < elem->n_sides(); side++)
+      if (this->hasBlocks(_subdomain))
       {
-        std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+        if (_subdomain != _old_subdomain)
+          subdomainChanged();
 
-        if (boundary_ids.size() > 0)
-          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
-               it != boundary_ids.end();
-               ++it)
-            onBoundary(elem, side, *it);
+        onElement(elem);
 
-        if (elem->neighbor(side) != NULL)
+        for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
-          if (this->hasBlocks(elem->neighbor(side)->subdomain_id()))
-            onInternalSide(elem, side);
+          std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+
           if (boundary_ids.size() > 0)
             for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
                  it != boundary_ids.end();
                  ++it)
-              onInterface(elem, side, *it);
-        }
-      } // sides
+              onBoundary(elem, side, *it);
 
+          if (elem->neighbor(side) != NULL)
+          {
+            if (this->hasBlocks(elem->neighbor(side)->subdomain_id()))
+              onInternalSide(elem, side);
+            if (boundary_ids.size() > 0)
+              for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
+                   it != boundary_ids.end();
+                   ++it)
+                onInterface(elem, side, *it);
+          }
+        } // sides
+      }
     } // range
 
     post();
