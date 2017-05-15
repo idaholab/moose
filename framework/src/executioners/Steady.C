@@ -39,12 +39,6 @@ Steady::Steady(const InputParameters & parameters)
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
-
-  {
-    std::string ti_str = "SteadyState";
-    InputParameters params = _app.getFactory().getValidParams(ti_str);
-    _problem.addTimeIntegrator(ti_str, "ti", params);
-  }
 }
 
 void

@@ -172,7 +172,8 @@ Transient::Transient(const InputParameters & parameters)
     _picard_timestep_end_norm(declareRecoverableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _sln_diff(_problem.getNonlinearSystemBase().addVector("sln_diff", false, PARALLEL))
 {
   _problem.getNonlinearSystemBase().setDecomposition(_splitting);
   _t_step = 0;
@@ -463,7 +464,7 @@ Transient::solveStep(Real input_dt)
       if (_picard_max_its <= 1)
         _time_stepper->acceptStep();
 
-      _sln_diff_norm = _problem.relativeSolutionDifferenceNorm();
+      _sln_diff_norm = relativeSolutionDifferenceNorm();
       _solution_change_norm = _sln_diff_norm / _dt;
 
       _problem.onTimestepEnd();
@@ -757,4 +758,17 @@ Transient::getTimeStepperName()
   }
   else
     return std::string();
+}
+
+Real
+Transient::relativeSolutionDifferenceNorm()
+{
+  const NumericVector<Number> & current_solution =
+      *_problem.getNonlinearSystemBase().currentSolution();
+  const NumericVector<Number> & old_solution = _problem.getNonlinearSystemBase().solutionOld();
+
+  _sln_diff = current_solution;
+  _sln_diff -= old_solution;
+
+  return (_sln_diff.l2_norm() / current_solution.l2_norm());
 }

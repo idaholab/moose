@@ -257,7 +257,7 @@ void
 AuxiliarySystem::compute(ExecFlagType type)
 {
   // avoid division by dt which might be zero.
-  if (_fe_problem.dt() > 0.)
+  if (_fe_problem.dt() > 0. && _time_integrator)
     _time_integrator->preStep();
 
   // We need to compute time derivatives every time each kind of the variables is finished, because:
@@ -272,7 +272,7 @@ AuxiliarySystem::compute(ExecFlagType type)
   {
     computeScalarVars(type);
     // compute time derivatives of scalar aux variables _after_ the values were updated
-    if (_fe_problem.dt() > 0.)
+    if (_fe_problem.dt() > 0. && _time_integrator)
       _time_integrator->computeTimeDerivatives();
   }
 
@@ -280,7 +280,7 @@ AuxiliarySystem::compute(ExecFlagType type)
   {
     computeNodalVars(type);
     // compute time derivatives of nodal aux variables _after_ the values were updated
-    if (_fe_problem.dt() > 0.)
+    if (_fe_problem.dt() > 0. && _time_integrator)
       _time_integrator->computeTimeDerivatives();
   }
 
@@ -288,7 +288,7 @@ AuxiliarySystem::compute(ExecFlagType type)
   {
     computeElementalVars(type);
     // compute time derivatives of elemental aux variables _after_ the values were updated
-    if (_fe_problem.dt() > 0.)
+    if (_fe_problem.dt() > 0. && _time_integrator)
       _time_integrator->computeTimeDerivatives();
   }
 
