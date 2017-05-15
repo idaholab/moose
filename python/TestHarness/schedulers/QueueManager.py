@@ -8,7 +8,7 @@ from tempfile import TemporaryFile
 
 import os, sys, re, shutil, errno, platform, json
 
-## Base class for providing routines common to queueing systems
+# Base class for providing an interface to an external scheduler
 class QueueManager(Scheduler):
     @staticmethod
     def validParams():
@@ -54,17 +54,64 @@ class QueueManager(Scheduler):
     def handleQueueStatus(self, tester, output):
         return
 
-    # Return a list of tuples of test files to run
-    # This needs to return an absolute path to a directory containing 'tests' file
-    # along with the 'test' file:
-    # [(dirpath, tests), (dirpath, tests)]
+    # return Prereqs for a given test that may exist in queue_data
+    # returns None type if value does not exist
+    def getPrereqs(self, test_name):
+        return self.getData(self.getJobName(test_name), prereq_tests=True)['prereq_tests']
+
+    # Update dependency information in the queue file
+    def updateDependencies(self, tester):
+        return
+
+    # Get specified data from queue_data
+    def getData(self, job, **kwargs):
+        tmp_dict = {}
+        if job in self.queue_data.keys():
+            for kkey in kwargs.keys():
+                try:
+                    tmp_dict[kkey] = self.queue_data[job][kkey]
+                except KeyError: # Requested key not available
+                    tmp_dict[kkey] = None
+        return tmp_dict
+
+    # Set queue_data (this overwrites attributes)
+    def putData(self, job, **kwargs):
+        for key, value in kwargs.iteritems():
+            if job in self.queue_data.keys():
+                self.queue_data[job][key] = value
+            else:
+                self.queue_data[job] = {key : value}
+
+    # Update queue_data (appends specified values)
+    def updateData(self, job, **kwargs):
+        data = self.getData(job, **kwargs)
+        data_copy = data.copy()
+        for key, value in kwargs.iteritems():
+            tmp_dict = { key : value }
+
+            # Nothing to update, treat as new data (putData)
+            if data[key] != None:
+
+                # There is current data we need to append to
+                if type(data[key]) == type([]) and type(value) == type([]):
+                    data_copy[key].extend(value)
+                    self.putData(job, **data_copy)
+
+                # request can not be satisfied (updateData only supports updating list attributes)
+                else:
+                    raise Exception('updateData only supports updating list types')
+            else:
+                self.putData(job, **tmp_dict)
+
+    # Return a list of tuples containing abspath of test_dir and corresponding test file
     def getTests(self):
         test_list = []
         if self.queue_data:
-            for tests in self.queue_data.keys():
-                test_dir = os.path.dirname(self.queue_data[tests]['test_dir'])
-                test_file = self.queue_data[tests]['input_name']
-                test_list.append((test_dir, test_file))
+            for job, values in self.queue_data.iteritems():
+                if 'test_dir' in values.keys() and 'input_name' in values.keys():
+                    test_dir = os.path.dirname(values['test_dir'])
+                    input_name = values['input_name']
+                    test_list.append((test_dir, input_name))
         return test_list
 
     # Go Again!
@@ -84,13 +131,19 @@ class QueueManager(Scheduler):
     def postCommand(self):
         command = self.getpostQueueCommand()
         if command:
-            runCommand(command)
+            try:
+                output = runCommand(command)
+            except KeyboardInterrupt:
+                self.cleanup(1)
+            if 'ERROR' in output:
+                print output
+                self.cleanup(1)
 
     # Return path-friendly test name (remove special characters)
     def getJobName(self, tester):
-        # A little hackish. But there is an instance where we do not
-        # have a tester 'object' that we can to deal with. And that is
-        # with the prereq test lists supplied by specs['prereq'].
+        # A little hackish. But there is an instance or two where we do
+        # not have a tester 'object' that we can to deal with, just the
+        # str(test_name)
         if type(tester) == type(str()):
             tester_text = tester
         else:
@@ -99,41 +152,20 @@ class QueueManager(Scheduler):
         return ''.join(txt for txt in tester_text if txt.isalnum() or txt in ['_', '-'])
 
     # Return queue working directory
+    # test_dir/job_<queue-filename>/
     def getWorkingDir(self, tester):
         return os.path.join(tester.specs['test_dir'], 'job_' + self.queue_file.name)
 
-    # Return this test's queue ID if avaialble
-    def getQueueID(self, tester):
-        if self.getJobName(tester) in self.queue_data.keys():
-            return self.queue_data[self.getJobName(tester)]['id']
-
     # Return location of queue launch script
+    # test_dir/job_<queue-filename>/<queue-filename>-test_name.sh
     def getQueueScript(self, tester):
         return os.path.join(self.getWorkingDir(tester), self.queue_file.name + '-' + self.getJobName(tester) + '.sh')
-
-    # Return json queued test information
-    def getQueueData(self, tester):
-        if self.getJobName(tester) in self.queue_data:
-            return self.queue_data[self.getJobName(tester)]
-
-    # Update queue_data with launched job information
-    def updateQueueFile(self, tester, queue_id, skipped=False, exit_code=None):
-        if skipped:
-            queue_id = None
-        # Update the queue_data global so that it can be saved/retreived to/from the json file.
-        self.queue_data[self.getJobName(tester)] = { 'job_name'     : self.getJobName(tester),
-                                                     'input_name'   : self.options.input_file_name,
-                                                     'test_dir'     : self.getWorkingDir(tester),
-                                                     'skipped'      : skipped,
-                                                     'status'       : tester.getStatusMessage(),
-                                                     'exit_code'    : exit_code,
-                                                     'id'           : queue_id }
 
     # The Scheduler has updated a tester's status. If the test is skipped, add it
     # to the queue file, so it gets printed again during a checkStatus
     def notifySchedulers(self, tester):
         if tester.isSkipped():
-            self.updateQueueFile(tester, 0, True)
+            self.putData(self.getJobName(tester), skipped=True)
         return
 
     # canLaunch is the QueueManager's way of providing checkRunnable due to the multitude of
@@ -148,25 +180,23 @@ class QueueManager(Scheduler):
 
                 # This test, while previously skipped, should have its skipped caveats re-displayed (unless the
                 # user is only interested in failed tests)
-                if self.queue_data[self.getJobName(tester)]['skipped'] and not self.options.failed_tests:
-                    tester.setStatus(self.queue_data[self.getJobName(tester)]['status'], tester.bucket_skip)
+                job = self.getData(self.getJobName(tester), skipped=True, status=True)
+                if job['skipped'] and job['status'] and not self.options.failed_tests:
+                    tester.setStatus(job['status'], tester.bucket_skip)
+                    return False
 
                 # Continue to support checkRunnable (--re options etc)
-                else:
-                    # TODO: this might stop a test from running when in fact did run previously under some strange
-                    # circumstances. Need to test this.
-                    return tester.checkRunnableBase(self.options, checks, test_list)
+                return tester.checkRunnableBase(self.options, checks, test_list)
 
         # We are launching jobs normally, ask checkRunnable if we can run this test
         else:
-            should_run = tester.checkRunnableBase(self.options, checks, test_list)
-            if should_run:
+            if tester.checkRunnableBase(self.options, checks, test_list):
                 return True
 
             # Do not launch this test. However, save the skipped caveat if the test status is not of the silent variety
             else:
-                if tester.getStatus() != tester.bucket_silent and tester.getStatus() != tester.bucket_deleted:
-                    self.updateQueueFile(tester, 0, True)
+                if not tester.isSilent() and not tester.isDeleted():
+                    self.putData(self.getJobName(tester), skipped=True, status=tester.getStatusMessage())
         return False
 
     # Augment base queue paramaters with tester params
@@ -253,9 +283,12 @@ class QueueManager(Scheduler):
                 if ex.errno == errno.EEXIST: pass
                 else: raise
 
-        # Copy files (unless they are listed in "no_copy")
+
+        # Move into the newly created test directory
         current_pwd = os.getcwd()
         os.chdir(self.getWorkingDir(tester))
+
+        # Copy files (unless they are listed in "no_copy")
         for file in os.listdir('../'):
             if os.path.isfile('../' + file) and file != self.options.input_file_name and \
                (not tester.specs.isValid('no_copy') or file not in tester.specs['no_copy']) and \
@@ -287,6 +320,16 @@ class QueueManager(Scheduler):
                         if ex.errno == errno.EEXIST: pass
                         else: raise Exception()
 
+        # Update the queue file based on the information we already know. We _could_ wait
+        # until we launch the job, but on the off chance the user hits ctrl-c, we have the
+        # ability to run --queue-cleanup, and delete this mess we just created
+        self.putData(self.getJobName(tester),
+                     test_dir=self.getWorkingDir(tester),
+                     input_name=self.options.input_file_name,
+                     status=tester.getStatusMessage(),
+                     job_name=self.getJobName(tester),
+                     test_name=tester.specs['test_name'])
+
         # return to the previous directory
         os.chdir(current_pwd)
 
@@ -316,17 +359,24 @@ class QueueManager(Scheduler):
         # If we are trying to process results instead, skip this check.
         if not self.options.checkStatus:
             # This test can now be launched because the prereq test(s) have been satisfied above
-            prereq_job_ids = []
+            # meaning, their job_id is available
+            prereq_ids = set()
             if tester.specs['prereq'] != [] and not self.options.checkStatus:
                 for prereq_test in tester.specs['prereq']:
-                    path_friendly = self.getJobName(prereq_test)
-                    prereq_job_ids.append(self.queue_data[path_friendly]['id'])
+                    job = self.getData(self.getJobName(prereq_test), id=True)
+                    prereq_ids.update([job['id']])
+
+                    # Update queue_data with prereq test information
+                    self.putData(self.getJobName(tester), prereq_tests=[(prereq_test, job['id'])])
+
+                # With the update to queue_data above, perform a reverse dependency update
+                self.updateDependencies(tester)
 
             # Create and copy all the files/directories this test requires
             self.copyFiles(template_queue, tester)
 
             # Call the derived method to build the queue batch script
-            self.prepareQueueScriptBase(template_queue, tester, prereq_job_ids)
+            self.prepareQueueScriptBase(template_queue, tester, prereq_ids)
 
         # Move into the working_dir
         current_pwd = os.getcwd()
@@ -374,3 +424,10 @@ class QueueManager(Scheduler):
         elif self.options.checkStatus and not tester.isPending():
             self.finished_jobs.add(tester.specs['test_name'])
             self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
+
+        # Update the queue_data with new test status reason
+        self.putData(self.getJobName(tester),
+                     status=tester.getStatusMessage(),
+                     is_pending=tester.isPending(),
+                     did_pass=tester.didPass(),
+                     did_fail=tester.didFail())

@@ -79,7 +79,7 @@ class RunParallel(Scheduler):
         if tester in self.reported_jobs:
             tester.specs.addParam('caveats', ['FINISHED'], "")
 
-        if tester.getStatus() != 'FAIL': # Still haven't processed results!
+        if tester.isPending(): # Tester has not yet processed output
             output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
 
         self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())

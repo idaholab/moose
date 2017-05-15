@@ -560,6 +560,13 @@ class TestStatus(object):
         status = self.getStatus()
         return status == self.bucket_fail or status == self.bucket_diff
 
+    def didDiff(self):
+        """
+        Return boolean diff status (True if diff'd)
+        """
+        status = self.getStatus()
+        return status == self.bucket_diff
+
     def isPending(self):
         """
         Return boolean pending status
@@ -573,6 +580,20 @@ class TestStatus(object):
         """
         status = self.getStatus()
         return status == self.bucket_skip
+
+    def isSilent(self):
+        """
+        Return boolean silent status
+        """
+        status = self.getStatus()
+        return status == self.bucket_silent
+
+    def isDeleted(self):
+        """
+        Return boolean deleted status
+        """
+        status = self.getStatus()
+        return status == self.bucket_deleted
 
     def getRunnable(self):
         """

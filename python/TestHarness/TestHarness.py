@@ -576,13 +576,21 @@ class TestHarness:
             self.writeFailedTest.close()
 
         if self.queue_file:
-            if exit_code < 0 and self.options.checkStatus is False:
-                print 'WARNING: You killed the TestHarness while busy launching jobs. You most likely have jobs owned by you, that will remain on hold indefinitely'
             # Write the json data to queue file
             self.queue_file.seek(0)
             json.dump(self.queue_data, self.queue_file, indent=2)
             self.queue_file.truncate()
             self.queue_file.close()
+
+            if exit_code > 0 and self.options.checkStatus is False:
+                print '\n\nWARNING: \n\tYou killed the TestHarness while busy launching jobs.', \
+                    'You have %d jobs owned by you,' % (len(self.queue_data.keys())), \
+                    '\n\tthat may remain on hold indefinitely until user intervention.'
+
+        # we are closing files due to an error so exit here instead of returning
+        # to prevent further file operations
+        if exit_code > 0:
+            sys.exit(1)
 
     # Delete all files created by queueing options
     def cleanQueueFiles(self):
@@ -594,10 +602,11 @@ class TestHarness:
                     print 'Queue file specified not json format:', self.options.queue_cleanup
                     sys.exit(1)
                 for job_name, job_data in queue_data.iteritems():
-                    try:
-                        shutil.rmtree(job_data['test_dir'])
-                    except OSError:
-                        pass
+                    if 'test_dir' in job_data.keys(): # skipped tests do not create a 'test_dir'
+                        try:
+                            shutil.rmtree(job_data['test_dir'])
+                        except OSError:
+                            pass
             os.remove(self.options.queue_cleanup)
         else:
             print 'Specified file not found', self.options.queue_cleanup

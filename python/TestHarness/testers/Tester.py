@@ -66,10 +66,10 @@ class Tester(MooseObject):
         MooseObject.__init__(self, name, params)
         self.specs = params
 
-        # Initialize the status bucket class
+        # Initialize the status bucket class (this also sets the tester status to pending)
         self.status = util.TestStatus()
 
-        # Enumerate the buckets here so ther are easier to work with in the tester class
+        # Enumerate the buckets here so they are easier to work with in the tester class
         self.bucket_success = self.status.bucket_success
         self.bucket_fail    = self.status.bucket_fail
         self.bucket_diff    = self.status.bucket_diff
@@ -77,9 +77,6 @@ class Tester(MooseObject):
         self.bucket_deleted = self.status.bucket_deleted
         self.bucket_skip    = self.status.bucket_skip
         self.bucket_silent  = self.status.bucket_silent
-
-        # Initialize the tester with a pending status
-        self.setStatus('launched', self.bucket_pending)
 
         # Set the status message
         if self.specs['check_input']:
@@ -149,6 +146,10 @@ class Tester(MooseObject):
     def didPass(self):
         return self.status.didPass()
 
+    # Method to check if this test has diff'd
+    def didDiff(self):
+        return self.status.didDiff()
+
     # Method to check if this test is pending
     def isPending(self):
         return self.status.isPending()
@@ -156,6 +157,14 @@ class Tester(MooseObject):
     # Method to check if this test is skipped
     def isSkipped(self):
         return self.status.isSkipped()
+
+    # Method to check if this test is silent
+    def isSilent(self):
+        return self.status.isSilent()
+
+    # Method to check if this test is deleted
+    def isDeleted(self):
+        return self.status.isDeleted()
 
     def getCheckInput(self):
         return self.check_input

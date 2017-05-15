@@ -87,6 +87,10 @@ class Scheduler(MooseObject):
     def notifySchedulers(self, tester):
         return
 
+    # Call back to TestHarness closeFiles
+    def cleanup(self, exit_code=0):
+        self.harness.closeFiles(exit_code)
+
     # Notify TestHarness of status change
     def notifySchedulersBase(self, tester):
         # Notify the TestHarness
@@ -192,19 +196,22 @@ class Scheduler(MooseObject):
                 reason = 'deprected checkRunnableBase #8037'
                 tester.setStatus(reason, tester.bucket_skip)
                 self.notifySchedulersBase(tester)
+
+        # This job is allowed to run
         if should_run:
             command = tester.getCommand(self.options)
             # This method spawns another process and allows this loop to continue looking for tests
             # RunParallel will call self.testOutputAndFinish when the test has completed running
             # This method will block when the maximum allowed parallel processes are running
             self.run(tester, command)
-        else: # This job is skipped - notify the scheduler
-            status = tester.getStatus()
-            if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
-                if (self.options.report_skipped and status == tester.bucket_skip) \
-                   or status == tester.bucket_skip:
+
+        # This job is skipped - notify the scheduler
+        else:
+            if tester.isSilent(): # SILENT occurs when a user is using --re options
+                if (self.options.report_skipped and tester.isSkipped()) \
+                   or tester.isSkipped():
                     self.notifySchedulersBase(tester)
-                elif status == tester.bucket_deleted and self.options.extra_info:
+                elif tester.isDeleted() and self.options.extra_info:
                     self.notifySchedulersBase(tester)
             self.jobSkipped(tester.parameters()['test_name'])
 

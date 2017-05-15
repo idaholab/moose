@@ -4,7 +4,7 @@ from QueueManager import QueueManager
 import os, re, subprocess
 from util import *
 
-## This class launches jobs using the PBS queuing system
+## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
     @staticmethod
     def validParams():
@@ -34,7 +34,8 @@ class RunPBS(QueueManager):
     # Return command necessary for current mode
     def getQueueCommand(self, tester):
         if self.options.checkStatus:
-            return 'qstat -xf %s' % (self.getQueueID(tester))
+            job = self.getData(self.getJobName(tester), id=True)
+            return 'qstat -xf %s' % (job['id'])
         else:
             return 'qsub -h %s' % (self.getQueueScript(tester))
 
@@ -77,7 +78,7 @@ class RunPBS(QueueManager):
             job_id = pattern.search(output).group(1)
 
             # Update the queue_data
-            self.updateQueueFile(tester, job_id)
+            self.putData(self.getJobName(tester), id=job_id)
 
             # Append this job_id to a self governed list of launched jobs
             self.launched_ids.append(job_id)
@@ -100,6 +101,9 @@ class RunPBS(QueueManager):
         if exit_code:
             exit_code = int(exit_code.group(1))
 
+            # If we have an exit code from PBS, go ahead and update the queue data
+            self.putData(self.getJobName(tester), exit_code=exit_code)
+
         # Set the initial reason for a test NOT to be finished
         reason = ''
 
@@ -108,7 +112,7 @@ class RunPBS(QueueManager):
 
         if output_value:
             # Get job information from queue_data
-            test_info = self.getQueueData(tester)
+            job = self.getData(self.getJobName(tester), test_dir=True, job_name=True, id=True)
 
             # Save oringal test_dir so we can properly update the queue_data
             original_testdir = tester.specs['test_dir']
@@ -116,7 +120,7 @@ class RunPBS(QueueManager):
             ## Report the current status of JOB_ID
             if output_value.group(1) == 'F':
                 # Job is finished
-                stdout_file = os.path.join(test_info['test_dir'], test_info['job_name'] + '.o%s' % (test_info['id']))
+                stdout_file = os.path.join(job['test_dir'], job['job_name'] + '.o%s' % (job['id']))
 
                 # Read the stdout file and allow testOutputAndFinish to do its job
                 if os.path.exists(stdout_file) and exit_code is not None:
@@ -126,10 +130,13 @@ class RunPBS(QueueManager):
                     # Modify the tester object's 'test_dir' to reflect the directory path created by QueueManager.copyFiles
                     # We need to do this because tester.processResults will be incorrectly operating 'up one' directory
                     # from our current queued working directory.
-                    tester.specs['test_dir'] = test_info['test_dir']
+                    tester.specs['test_dir'] = job['test_dir']
 
                     # Allow the tester to verify its own output and set the status
                     output = tester.processResults(tester.specs['moose_dir'], exit_code, self.options, outfile)
+
+                    # Get that new status (we use this to populate the queue_file with an updated reason)
+                    reason = tester.getStatusMessage()
 
                 elif exit_code == None:
                     # This job was canceled or deleted (qdel)
@@ -161,21 +168,9 @@ class RunPBS(QueueManager):
                 reason = 'UNKNOWN PBS STATUS'
                 tester.setStatus(reason, tester.bucket_fail)
 
-            # Set the test status to one of the pending statuses above
-            if reason != '' and tester.getStatus() != tester.bucket_fail:
+            # Update the reason why this test is still pending
+            if tester.isPending():
                 tester.setStatus(reason, tester.bucket_pending)
-
-            # Revert the test_dir back to original value so we build the correct path
-            # to working_dir in the queue_file while we update it with the lastest test
-            # status information (all this business of changing test_dir is annoying).
-            # I suppose we don't need to do any of this, because we don't need to update
-            # the queue_file at all (the statuses are generated on the fly correctly with
-            # tester.processResults). I just assume others may find the test statuses
-            # stored in the json file useful someday.
-            tester.specs['test_dir'] = original_testdir
-
-            # Update the queue_data with new test status
-            self.updateQueueFile(tester, test_info['id'], exit_code=exit_code)
 
         else:
             # Job status not available
