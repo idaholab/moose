@@ -179,18 +179,18 @@ public:
       Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
-   * Thermal conductivity as a function of pressure and temperature
+   * Thermal conductivity
    * From Urqhart and Bauer, Experimental determination of single-crystal halite
    * thermal conductivity, diffusivity and specific heat from -75 C to 300 C,
    * Int. J. Rock Mech. and Mining Sci., 78 (2015)
    * Note: The function given in this reference doesn't satisfactorily match their
    * experimental data, so the data was refitted using a third order polynomial
    *
-   * @param pressure fluid pressure (Pa)
+   * @param density fluid density (kg/m^3)
    * @param temperature fluid temperature (K)
    * @return k (W/m/K)
    */
-  virtual Real k(Real pressure, Real temperature) const override;
+  virtual Real k(Real density, Real temperature) const override;
 
   /**
    * Specific entropy as a function of pressure and temperature

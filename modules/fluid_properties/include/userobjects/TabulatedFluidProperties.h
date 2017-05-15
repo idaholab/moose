@@ -63,8 +63,8 @@ InputParameters validParams<TabulatedFluidProperties>();
  * the initial time to generate the data and the subsequent interpolation time can be much
  * less than using the original FluidProperties UserObject.
  *
- * Density, internal_energy and enthalpy and there derivatives wrt pressure and
- * temperature are always calculated using bicubic spline interpolatio, while all
+ * Density, internal_energy and enthalpy and their derivatives wrt pressure and
+ * temperature are always calculated using bicubic spline interpolation, while all
  * remaining fluid properties are calculated using the FluidProperties UserObject _fp.
  *
  * A function to write generated data to file using the correct format is provided

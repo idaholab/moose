@@ -44,7 +44,7 @@ public:
   virtual Real c(Real pressure, Real temperature) const override;
 
   /// Thermal conductivity (W/m/K)
-  virtual Real k(Real pressure, Real temperature) const override;
+  virtual Real k(Real density, Real temperature) const override;
 
   /// Specific entropy (J/kg/K)
   virtual Real s(Real pressure, Real temperature) const override;
