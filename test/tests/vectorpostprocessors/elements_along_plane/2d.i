@@ -3,6 +3,8 @@
   dim = 2
   nx = 10
   ny = 10
+  # Our CSV diffs here depend on a fixed element id numbering
+  allow_renumbering = false
 []
 
 [Variables]
