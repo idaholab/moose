@@ -1,0 +1,6 @@
+[Tests]
+  [./line]
+    type = PythonUnitTest
+    input = testLineChart.py
+  [../]
+[]

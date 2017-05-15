@@ -19,6 +19,7 @@ import argparse
 import logging
 import multiprocessing
 import subprocess
+import collections
 
 import mooseutils
 
@@ -30,7 +31,6 @@ LOG = logging.getLogger(__name__)
 class MooseDocsFormatter(logging.Formatter):
     """
     A formatter that is aware of the class hierarchy of the MooseDocs library.
-
     Call the init_logging function to initialize the use of this custom formatter.
     """
     COLOR = {'DEBUG':'CYAN',
@@ -40,6 +40,7 @@ class MooseDocsFormatter(logging.Formatter):
              'CRITICAL':'MAGENTA'}
     COUNTS = {'ERROR': multiprocessing.Value('I', 0, lock=True),
               'WARNING': multiprocessing.Value('I', 0, lock=True)}
+    MESSAGES = collections.defaultdict(list)
 
     def format(self, record):
         msg = logging.Formatter.format(self, record)
@@ -50,7 +51,14 @@ class MooseDocsFormatter(logging.Formatter):
             with self.COUNTS[record.levelname].get_lock():
                 self.COUNTS[record.levelname].value += 1
 
+        self.MESSAGES[record.levelname].append(msg)
         return msg
+
+    def messages(self, level):
+        """
+        Return the messages for the given level. This is for testing.
+        """
+        return self.MESSAGES[level]
 
     def counts(self):
         """
@@ -58,7 +66,8 @@ class MooseDocsFormatter(logging.Formatter):
         """
         return self.COUNTS['WARNING'].value, self.COUNTS['ERROR'].value
 
-def init_logging(verbose=False):
+
+def init_logging(verbose=False, stream=None):
     """
     Call this function to initialize the MooseDocs logging formatter.
     """
@@ -71,7 +80,10 @@ def init_logging(verbose=False):
 
     # Custom format that colors and counts errors/warnings
     formatter = MooseDocsFormatter()
-    handler = logging.StreamHandler()
+    if stream is not None:
+        handler = logging.StreamHandler(stream)
+    else:
+        handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
     # The markdown package dumps way too much information in debug mode (so always set it to INFO)
@@ -84,6 +96,7 @@ def init_logging(verbose=False):
     log.setLevel(level)
     log.addHandler(logging.NullHandler())
     return formatter
+
 
 def purge(exts):
     """

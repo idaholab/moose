@@ -1,0 +1,221 @@
+#pylint: disable=missing-docstring
+####################################################################################################
+#                                    DO NOT MODIFY THIS HEADER                                     #
+#                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
+#                                                                                                  #
+#                              (c) 2010 Battelle Energy Alliance, LLC                              #
+#                                       ALL RIGHTS RESERVED                                        #
+#                                                                                                  #
+#                            Prepared by Battelle Energy Alliance, LLC                             #
+#                               Under Contract No. DE-AC07-05ID14517                               #
+#                               With the U. S. Department of Energy                                #
+#                                                                                                  #
+#                               See COPYRIGHT for full restrictions                                #
+####################################################################################################
+#pylint: enable=missing-docstring
+import os
+import logging
+
+import pandas
+import jinja2
+
+from markdown.util import etree
+from markdown.inlinepatterns import Pattern
+
+import MooseDocs
+from MooseMarkdownExtension import MooseMarkdownExtension
+from MooseMarkdownCommon import MooseMarkdownCommon
+
+LOG = logging.getLogger(__name__)
+
+class GoogleChartExtension(MooseMarkdownExtension):
+    """
+    Adds support for google charts.
+    """
+
+    @staticmethod
+    def defaultConfig():
+        """GoogleChartExtension configuration."""
+        config = MooseMarkdownExtension.defaultConfig()
+        return config
+
+    def extendMarkdown(self, md, md_globals):
+        """
+        Adds eqref support for MOOSE flavored markdown.
+        """
+        md.registerExtension(self)
+        config = self.getConfigs()
+
+        md.inlinePatterns.add('moose-line-chart',
+                              LineChart(markdown_instance=md, **config),
+                              '_begin')
+
+        md.inlinePatterns.add('moose-scatter-chart',
+                              ScatterChart(markdown_instance=md, **config),
+                              '_begin')
+
+def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
+    """Create GoogleChartExtension"""
+    return GoogleChartExtension(*args, **kwargs)
+
+class GoogleChartBase(MooseMarkdownCommon, Pattern):
+    """
+    Base class for !chart command.
+    """
+    TEMPLATE = None
+    @staticmethod
+    def defaultSettings():
+        """GoogleChartBase settings."""
+        settings = MooseMarkdownCommon.defaultSettings()
+        settings['caption'] = (None, "The caption to place after the float heading and number.")
+        settings['counter'] = ('figure', "The name of global counter to utilized for numbering.")
+        settings['csv'] = (None, "The name of the CSV file to load.")
+        return settings
+
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        regex = r'^!chart\s+(?P<template>{})(?:$|\s+)(?P<settings>.*)'.format(self.TEMPLATE)
+        Pattern.__init__(self, regex, markdown_instance)
+        self._csv = None
+        self._count = 0
+
+    def arguments(self, settings):
+        """
+        Method for modifying the template arguments to be applied to the jinja2 templates engine.
+
+        By default all the "settings" from the class are returned as template arguments.
+
+        Args:
+            settings[dict]: The class object settings.
+        """
+
+        if settings['csv'] is None:
+            LOG.error("The 'csv' setting is required in %s.", self.markdown.current.source())
+            settings['data_frame'] = pandas.DataFrame()
+        else:
+            settings['data_frame'] = self._readCSV(MooseDocs.abspath(settings['csv']))
+        return settings
+
+    def globals(self, env):
+        """
+        Defines global template functions. (virtual)
+
+        Args:
+            env[jinja2.Environment]: Template object for adding global functions.
+        """
+        pass
+        #env.globals['csv'] = self._readCSV
+
+    def handleMatch(self, match):
+        """
+        Creates chart from a chart template.
+        """
+        # Extract settings and template
+        template = match.group('template') + '.js'
+        settings = self.getSettings(match.group('settings'), legacy_style=False)
+
+        # Create a float element
+        div = self.createFloatElement(settings)
+
+        # Create 'chart_id' for linking JS with <div>
+        settings['chart_id'] = 'moose-google-{}-chart-{}'.format(self.TEMPLATE, int(self._count))
+        self._count += 1
+
+        # Paths to Google Chart template
+        paths = [os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'templates', 'gchart'),
+                 os.path.join(os.getcwd(), 'templates', 'gchart')]
+
+        # Apply the arguments to the template
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(paths))
+        self.globals(env)
+        template = env.get_template(template)
+        complete = template.render(**self.arguments(settings))
+
+        # Create the <script> tag
+        script = etree.SubElement(div, 'script')
+        script.set('type', 'text/javascript')
+        script.text = self.markdown.htmlStash.store(complete, safe=True)
+
+        # Add the <div> to be replaced with the chart
+        el = etree.Element('div')
+        el.set('id', settings['chart_id'])
+        div.insert(0, el)
+        return div
+
+    def _readCSV(self, filename):
+        """
+        Read the CSV data into a pandas DataFrame.
+        """
+
+        if self._csv is None:
+            try:
+                self._csv = pandas.read_csv(filename)
+
+            except IOError:
+                LOG.error("Failed to read CSV file '%s' in chart command of %s.", \
+                          filename, self.markdown.current.source())
+                return pandas.DataFrame()
+
+        return self._csv
+
+class ColumnChartBase(GoogleChartBase):
+    """
+    Base class for column based chart types (e.g., 'line', 'scatter').
+    """
+    @staticmethod
+    def defaultSettings():
+        """LineChart settings."""
+        settings = GoogleChartBase.defaultSettings()
+        settings['columns'] = ('', "A comma separated list of names defining the columns from the "
+                                   "the CSV to extract for plotting in the chart.")
+        settings['column_names'] = ('', "A comma separated list of names to associate with each "
+                                        "column, the number of names must match the number of "
+                                        "columns.")
+        settings['title'] = ('', "The chart title.")
+        settings['subtitle'] = ('', "The chart sub-title.")
+        settings['chart_width'] = (900, "The Google chart width.")
+        settings['chart_height'] = (400, "The Google chart height.")
+        return settings
+
+    def arguments(self, settings):
+        """
+        Define template arguments to pass to template.
+        """
+        settings = super(ColumnChartBase, self).arguments(settings)
+
+        # Update the 'columns' and 'column_names'
+        settings['columns'] = [col.strip() for col in settings['columns'].split(',')]
+        if settings['column_names']:
+            settings['column_names'] = [col.strip() for col in settings['column_names'].split(',')]
+        else:
+            settings['column_names'] = settings['columns']
+
+        if len(settings['column_names']) != len(settings['columns']):
+            LOG.error("The 'column_names' list must be the same length as 'columns'.")
+            settings['column_names'] = settings['columns']
+
+        return settings
+
+class LineChart(ColumnChartBase):
+    """
+    Creates a Google line chart from CSV data.
+    """
+    TEMPLATE = 'line'
+    #def __init__(self, **kwargs):
+    #    super(LineChart, self).__init__(template='line', **kwargs)
+
+class ScatterChart(ColumnChartBase):
+    """
+    Creates a Google scatter chart from CSV data.
+    """
+    TEMPLATE = 'scatter'
+    @staticmethod
+    def defaultSettings():
+        """ScatterChart settings."""
+        settings = ColumnChartBase.defaultSettings()
+        settings['vaxis_title'] = ('y', "The vertical y-axis title.")
+        settings['haxis_title'] = ('x', "The horizontal x-axis title.")
+        return settings
+
+    #def __init__(self, **kwargs):
+    #    super(ScatterChart, self).__init__(template='scatter', **kwargs)
