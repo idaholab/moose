@@ -24,19 +24,20 @@ public:
   IdealGasFluidProperties(const InputParameters & parameters);
   virtual ~IdealGasFluidProperties();
 
-  virtual Real pressure(Real v, Real u) const;
-  virtual Real temperature(Real v, Real u) const;
-  virtual Real c(Real v, Real u) const;
-  virtual Real cp(Real v = 0., Real u = 0.) const;
-  virtual Real cv(Real v = 0., Real u = 0.) const;
-  virtual Real gamma(Real v = 0., Real u = 0.) const;
-  virtual Real mu(Real v, Real u) const;
-  virtual Real k(Real v, Real u) const;
-  virtual Real s(Real v, Real u) const;
-  virtual void dp_duv(Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const;
+  virtual Real pressure(Real v, Real u) const override;
+  virtual Real temperature(Real v, Real u) const override;
+  virtual Real c(Real v, Real u) const override;
+  virtual Real cp(Real v = 0., Real u = 0.) const override;
+  virtual Real cv(Real v = 0., Real u = 0.) const override;
+  virtual Real gamma(Real v = 0., Real u = 0.) const override;
+  virtual Real mu(Real v, Real u) const override;
+  virtual Real k(Real v, Real u) const override;
+  virtual Real s(Real v, Real u) const override;
+  virtual void
+  dp_duv(Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const override;
 
   /// Compute internal energy and density from specific entropy and pressure
-  virtual void rho_e_ps(Real pressure, Real entropy, Real & rho, Real & e) const;
+  virtual void rho_e_ps(Real pressure, Real entropy, Real & rho, Real & e) const override;
   virtual void rho_e_dps(Real pressure,
                          Real entropy,
                          Real & rho,
@@ -44,24 +45,26 @@ public:
                          Real & drho_ds,
                          Real & e,
                          Real & de_dp,
-                         Real & de_ds) const;
+                         Real & de_ds) const override;
 
-  virtual Real beta(Real p, Real T) const;
+  virtual Real beta(Real p, Real T) const override;
 
-  virtual void rho_e(Real pressure, Real temperature, Real & rho, Real & e) const;
-  virtual Real rho(Real pressure, Real temperature) const;
-  virtual void
-  rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
+  virtual void rho_e(Real pressure, Real temperature, Real & rho, Real & e) const override;
+  virtual Real rho(Real pressure, Real temperature) const override;
+  virtual void rho_dpT(
+      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
   virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const;
 
-  virtual Real e(Real pressure, Real rho) const;
-  virtual void e_dprho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const;
+  virtual Real e(Real pressure, Real rho) const override;
+  virtual void
+  e_dprho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
 
-  virtual Real h(Real pressure, Real temperature) const;
-  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
+  virtual Real h(Real pressure, Real temperature) const override;
+  virtual void
+  h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  virtual Real p_from_h_s(Real h, Real s) const;
-  virtual Real dpdh_from_h_s(Real h, Real s) const;
+  virtual Real p_from_h_s(Real h, Real s) const override;
+  virtual Real dpdh_from_h_s(Real h, Real s) const override;
 
 protected:
   Real _gamma;

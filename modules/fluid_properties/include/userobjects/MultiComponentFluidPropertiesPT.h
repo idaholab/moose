@@ -71,7 +71,7 @@ public:
                       Real & de_dT,
                       Real & de_dx) const = 0;
   /// Thermal conductivity (W/m/K)
-  virtual Real k(Real pressure, Real temperature, Real xmass) const = 0;
+  virtual Real k(Real density, Real temperature, Real xmass) const = 0;
   /// Get UserObject for specified component
   virtual const SinglePhaseFluidPropertiesPT & getComponent(unsigned int component) const = 0;
 

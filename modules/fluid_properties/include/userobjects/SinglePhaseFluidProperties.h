@@ -65,7 +65,7 @@ public:
   /// Computes density and internal energy from pressure and temperature
   virtual void rho_e(Real pressure, Real temperature, Real & rho, Real & e) const = 0;
 
-  /// Computes internal energy from pressure and temperature
+  /// Computes internal energy from pressure and density
   virtual Real e(Real pressure, Real rho) const = 0;
   /// Computes internal energy and its derivatives of internal energy w.r.t. pressure and density
   virtual void e_dprho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const = 0;

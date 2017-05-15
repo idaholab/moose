@@ -181,7 +181,7 @@ MethaneFluidProperties::mu_drhoT(
 }
 
 Real
-MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::k(Real /*density*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
