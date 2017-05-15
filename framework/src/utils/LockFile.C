@@ -15,6 +15,7 @@
 #include "LockFile.h"
 #include "MooseError.h"
 #include <fcntl.h>
+#include <sys/file.h>
 #include <unistd.h>
 
 LockFile::LockFile(const std::string & filename, bool do_lock)
