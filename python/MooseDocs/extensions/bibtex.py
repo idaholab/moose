@@ -223,4 +223,12 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
         umlaut_re = re.compile(r"\{\\\"([aouAOU])\}")
         html = umlaut_re.sub('&\\1uml;', html)
 
+        # substitute acutes
+        acute_re = re.compile(r"\{\\\'([aeiouyAEIOUY])\}")
+        html = acute_re.sub('&\\1acute;', html)
+
+        # substitute graves
+        grave_re = re.compile(r"\{\\\`([aeiouAEIOU])\}")
+        html = grave_re.sub('&\\1grave;', html)
+
         return self.markdown.htmlStash.store(html, safe=True)
