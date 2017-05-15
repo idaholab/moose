@@ -144,7 +144,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
                 self.reset()
 
         # Display Exodus result
-        if file_exists:
+        if file_exists and os.path.getsize(self._filename) > 0:
             # Clear any-existing VTK objects on the window
             self._window.clear()
 
