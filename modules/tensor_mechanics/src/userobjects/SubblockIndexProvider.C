@@ -4,11 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ScalarVariableIndexProvider.h"
+#include "SubblockIndexProvider.h"
 
 template <>
 InputParameters
-validParams<ScalarVariableIndexProvider>()
+validParams<SubblockIndexProvider>()
 {
   return validParams<GeneralUserObject>();
 }

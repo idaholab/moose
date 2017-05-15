@@ -8,7 +8,7 @@
 #define GENERALIZEDPLANESTRAINUSEROBJECT_H
 
 #include "ElementUserObject.h"
-#include "ScalarVariableIndexProvider.h"
+#include "SubblockIndexProvider.h"
 
 class GeneralizedPlaneStrainUserObject;
 class RankTwoTensor;
@@ -36,8 +36,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  const ScalarVariableIndexProvider * _scalar_var_id_provider;
-  const unsigned int _total_scalar_vars;
+  const SubblockIndexProvider * _subblock_id_provider;
 
   Function & _out_of_plane_pressure;
   const Real _factor;

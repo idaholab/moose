@@ -12,28 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SCALARVARIABLEINDEXPROVIDER_H
-#define SCALARVARIABLEINDEXPROVIDER_H
+#ifndef SUBBLOCKINDEXPROVIDER_H
+#define SUBBLOCKINDEXPROVIDER_H
 
 #include "GeneralUserObject.h"
 
-class ScalarVariableIndexProvider;
+class SubblockIndexProvider;
 
 template <>
-InputParameters validParams<ScalarVariableIndexProvider>();
+InputParameters validParams<SubblockIndexProvider>();
 
 /**
- * Abstract base class for user objects that provide subblock scalar variable index
+ * Abstract base class for user objects that provide an index for a given element that is
+ * independent of the block id, so that behavior can be different on subsets of element blocks.
+ * This is used to apply independent generalized plane constraints to subsets of element blocks.
  */
-class ScalarVariableIndexProvider : public GeneralUserObject
+class SubblockIndexProvider : public GeneralUserObject
 {
 public:
-  ScalarVariableIndexProvider(const InputParameters & params) : GeneralUserObject(params) {}
+  SubblockIndexProvider(const InputParameters & params) : GeneralUserObject(params) {}
 
   /**
-   * The index of scalar variable this element is operating on.
+   * The index of subblock this element is on.
    */
-  virtual unsigned int getScalarVarIndex(const Elem & /* elem */) const = 0;
+  virtual unsigned int getSubblockIndex(const Elem & /* elem */) const = 0;
+
+  /**
+   * The max index of subblock.
+   */
+  virtual unsigned int getMaxSubblockIndex() const = 0;
 };
 
 #endif /* SCALARVARIABLEINDEXPROVIDER_H */

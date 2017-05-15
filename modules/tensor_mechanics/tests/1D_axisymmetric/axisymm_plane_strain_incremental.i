@@ -29,11 +29,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-    initial_condition = 0.0
-  [../]
   [./strain_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -146,7 +141,7 @@
 
   [./strain]
     type = ComputeAxisymmetric1DIncrementalStrain
-    out_of_plane_strain = strain_yy
+    out_of_plane_strain = 0
     eigenstrain_names = eigenstrain
   [../]
 

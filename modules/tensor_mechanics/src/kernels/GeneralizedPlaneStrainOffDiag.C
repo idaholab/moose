@@ -30,8 +30,8 @@ validParams<GeneralizedPlaneStrainOffDiag>()
   params.addParam<NonlinearVariableName>("temperature", "Variable for the temperature");
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for generalized plane strain");
-  params.addParam<UserObjectName>("scalar_variable_index_provider",
-                                  "ScalarVariableIndexProvider user object name");
+  params.addParam<UserObjectName>("subblock_index_provider",
+                                  "SubblockIndexProvider user object name");
   params.addParam<unsigned int>(
       "scalar_out_of_plane_strain_index",
       "The index number of scalar_out_of_plane_strain this kernel acts on");
@@ -49,10 +49,9 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _deigenstrain_dT(_eigenstrain_names.size()),
     _scalar_out_of_plane_strain_var(coupledScalar("scalar_out_of_plane_strain")),
-    _scalar_var_id_provider(
-        isParamValid("scalar_variable_index_provider")
-            ? &getUserObject<ScalarVariableIndexProvider>("scalar_variable_index_provider")
-            : nullptr),
+    _subblock_id_provider(isParamValid("subblock_index_provider")
+                              ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
+                              : nullptr),
     _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
                        ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
                        : 0),
@@ -75,14 +74,15 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
 
   if (isParamValid("scalar_variable_index_provider") &&
       !isParamValid("scalar_out_of_plane_strain_index"))
-    mooseError("scalar_out_of_plane_strain_index should be provided if more than one is available");
+    mooseError("scalar_out_of_plane_strain_index should be provided if more "
+               "than one is available");
 }
 
 void
 GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
 {
   const unsigned int elem_scalar_var_id =
-      _scalar_var_id_provider ? _scalar_var_id_provider->getScalarVarIndex(*_current_elem) : 0;
+      _subblock_id_provider ? _subblock_id_provider->getSubblockIndex(*_current_elem) : 0;
 
   if (elem_scalar_var_id == _scalar_var_id)
   {

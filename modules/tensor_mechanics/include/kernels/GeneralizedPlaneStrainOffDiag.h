@@ -10,7 +10,7 @@
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
-#include "ScalarVariableIndexProvider.h"
+#include "SubblockIndexProvider.h"
 
 // Forward Declarations
 class GeneralizedPlaneStrainOffDiag;
@@ -46,7 +46,7 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
 
   unsigned int _scalar_out_of_plane_strain_var;
-  const ScalarVariableIndexProvider * _scalar_var_id_provider;
+  const SubblockIndexProvider * _subblock_id_provider;
   const unsigned int _scalar_var_id;
 
   MooseVariable * _temp_var;
