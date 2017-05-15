@@ -12,16 +12,14 @@ InputParameters
 validParams<StiffenedGasFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidProperties>();
-
   params.addRequiredParam<Real>("gamma", "Heat capacity ratio");
   params.addRequiredParam<Real>("cv", "Constant volume specific heat");
-  params.addRequiredParam<Real>("q", "");
-  params.addRequiredParam<Real>("p_inf", "");
+  params.addRequiredParam<Real>("q", "Parameter defining zero point of internal energy");
+  params.addRequiredParam<Real>("p_inf", "Stiffness parameter");
   params.addParam<Real>("q_prime", 0, "Parameter");
-
   params.addParam<Real>("mu", 1.e-3, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 0.6, "Thermal conductivity, W/(m-K)");
-
+  params.addClassDescription("Fluid properties for a stiffened gas");
   return params;
 }
 
@@ -32,7 +30,6 @@ StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters &
     _q(getParam<Real>("q")),
     _q_prime(getParam<Real>("q_prime")),
     _p_inf(getParam<Real>("p_inf")),
-
     _mu(getParam<Real>("mu")),
     _k(getParam<Real>("k"))
 {

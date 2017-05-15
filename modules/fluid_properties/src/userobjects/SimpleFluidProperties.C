@@ -31,9 +31,7 @@ validParams<SimpleFluidProperties>()
                         "The enthalpy is internal_energy + P / density * "
                         "porepressure_coefficient.  Physically this should be 1.0, "
                         "but analytic solutions are simplified when it is zero");
-  params.addClassDescription("Fluid properties for a simple fluid.  density=density0 * exp(P / "
-                             "bulk_modulus - thermal_expansion * T), internal_energy = cv * T, "
-                             "enthalpy = cp * T");
+  params.addClassDescription("Fluid properties for a simple fluid with a constant bulk density");
   return params;
 }
 
@@ -82,7 +80,7 @@ SimpleFluidProperties::c(Real pressure, Real temperature) const
   return std::sqrt(_bulk_modulus / rho(pressure, temperature));
 }
 
-Real SimpleFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::k(Real /*density*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
