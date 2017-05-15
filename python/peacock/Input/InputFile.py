@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import path
-from FactorySystem.ParseGetPot import readInputFile, GPNode
+from FactorySystem.ParseGetPot import readInputFile, GPNode, ParseException
 import mooseutils
 from peacock.PeacockException import PeacockException
 
@@ -62,8 +62,12 @@ class InputFile(object):
             with open(filename, "r") as f:
                 self.original_text = f.read()
             self.changed = False
+        except ParseException as e:
+            msg = "Failed to parse input file %s:\n%s\n" % (filename, e.msg)
+            mooseutils.mooseWarning(msg)
+            raise e
         except Exception as e:
-            msg = "Failed to parse input file %s:\n%s\n" % (filename, e)
+            msg = "Error occurred while parsing input file %s:\n%s\n" % (filename, e)
             mooseutils.mooseWarning(msg)
             raise e
 
