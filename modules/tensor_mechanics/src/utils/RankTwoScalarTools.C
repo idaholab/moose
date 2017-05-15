@@ -17,11 +17,10 @@ namespace RankTwoScalarTools
 MooseEnum
 scalarOptions()
 {
-  return MooseEnum(
-      "VonMisesStress EquivalentPlasticStrain EffectiveStrain Hydrostatic L2norm MaxPrincipal "
-      "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
-      "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
-      "Direction");
+  return MooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm MaxPrincipal "
+                   "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
+                   "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
+                   "Direction");
 }
 
 Real
@@ -40,52 +39,48 @@ getQuantity(const RankTwoTensor & tensor,
       val = vonMisesStress(tensor);
       break;
     case 1:
-      ///For plastic strain tensor (ep), tr(ep) = 0 is considered
-      val = equivalentPlasticStrain(tensor);
-      break;
-    case 2:
       val = effectiveStrain(tensor);
       break;
-    case 3:
+    case 2:
       val = hydrostatic(tensor);
       break;
-    case 4:
+    case 3:
       val = L2norm(tensor);
       break;
-    case 5:
+    case 4:
       val = maxPrinciple(tensor);
       break;
-    case 6:
+    case 5:
       val = midPrinciple(tensor);
       break;
-    case 7:
+    case 6:
       val = minPrinciple(tensor);
       break;
-    case 8:
+    case 7:
       val = volumetricStrain(tensor);
       break;
-    case 9:
+    case 8:
       val = firstInvariant(tensor);
       break;
-    case 10:
+    case 9:
       val = secondInvariant(tensor);
       break;
-    case 11:
+    case 10:
       val = thirdInvariant(tensor);
       break;
-    case 12:
+    case 11:
       val = axialStress(tensor, point1, point2, direction);
       break;
-    case 13:
+    case 12:
       val = hoopStress(tensor, point1, point2, curr_point, direction);
       break;
-    case 14:
+    case 13:
       val = radialStress(tensor, point1, point2, curr_point, direction);
       break;
-    case 15:
+    case 14:
       val = triaxialityStress(tensor);
       break;
-    case 16:
+    case 15:
       val = directionValueTensor(tensor, direction);
       break;
     default:
@@ -123,12 +118,6 @@ vonMisesStress(const RankTwoTensor & stress)
   RankTwoTensor dev_stress = stress.deviatoric();
 
   return std::sqrt(3.0 / 2.0 * dev_stress.doubleContraction(dev_stress));
-}
-
-Real
-equivalentPlasticStrain(const RankTwoTensor & strain)
-{
-  return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
 }
 
 Real

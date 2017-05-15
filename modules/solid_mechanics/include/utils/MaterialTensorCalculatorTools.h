@@ -36,13 +36,6 @@ Real component(const SymmTensor & symm_tensor, unsigned int index, RealVectorVal
 Real vonMisesStress(const SymmTensor & symm_stress);
 
 /*
- * The equivalent plastic strain is calculated as
- * \epsilon_{eqv}^{pl} = \sqrt{\frac{2}{3}\epsilon_{ij}^{pl} \epsilon_{ij}^{pl}}
- * Users must take care to pass in the plastic inelastic_strain only.
- */
-Real equivalentPlasticStrain(const SymmTensor & symm_strain);
-
-/*
  * The effective strain is calculated as
  * \epsilon_{eff} = \sqrt{\frac{2}{3}\epsilon_{ij} \epsilon_{ij}}
  */

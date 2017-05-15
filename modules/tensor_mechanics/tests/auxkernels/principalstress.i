@@ -122,7 +122,7 @@
     type = RankTwoScalarAux
     rank_two_tensor = plastic_strain
     variable = peeq
-    scalar_type = EquivalentPlasticStrain
+    scalar_type = EffectiveStrain
   [../]
   [./stress_max]
     type = RankTwoScalarAux

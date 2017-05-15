@@ -53,12 +53,6 @@ vonMisesStress(const SymmTensor & symm_stress)
 }
 
 Real
-equivalentPlasticStrain(const SymmTensor & symm_strain)
-{
-  return std::sqrt(2.0 / 3.0 * symm_strain.doubleContraction(symm_strain));
-}
-
-Real
 effectiveStrain(const SymmTensor & symm_strain)
 {
   return std::sqrt(2.0 / 3.0 * symm_strain.doubleContraction(symm_strain));
