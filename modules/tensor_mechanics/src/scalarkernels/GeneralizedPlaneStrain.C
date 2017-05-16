@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "GeneralizedPlaneStrainUserObject.h"
 #include "MooseVariableScalar.h"
+#include "SystemBase.h"
 
 template <>
 InputParameters
@@ -19,14 +20,20 @@ validParams<GeneralizedPlaneStrain>()
   InputParameters params = validParams<ScalarKernel>();
   params.addClassDescription("Generalized Plane Strain Scalar Kernel");
   params.addRequiredParam<UserObjectName>("generalized_plane_strain",
-                                          "The name of the GeneralizedPlaneStrainUO UserObject");
+                                          "The name of the GeneralizedPlaneStrainUserObject");
+  params.addParam<unsigned int>(
+      "scalar_out_of_plane_strain_index",
+      "The index number of scalar_out_of_plane_strain this kernel acts on");
 
   return params;
 }
 
 GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameters)
   : ScalarKernel(parameters),
-    _gps(getUserObject<GeneralizedPlaneStrainUserObject>("generalized_plane_strain"))
+    _gps(getUserObject<GeneralizedPlaneStrainUserObject>("generalized_plane_strain")),
+    _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
+                       ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
+                       : 0)
 {
 }
 
@@ -35,7 +42,7 @@ GeneralizedPlaneStrain::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   for (_i = 0; _i < re.size(); ++_i)
-    re(_i) += _gps.returnResidual();
+    re(_i) += _gps.returnResidual(_scalar_var_id);
 }
 
 /**
@@ -48,5 +55,5 @@ GeneralizedPlaneStrain::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   for (_i = 0; _i < ke.m(); ++_i)
-    ke(_i, _i) += _gps.returnJacobian();
+    ke(_i, _i) += _gps.returnJacobian(_scalar_var_id);
 }
