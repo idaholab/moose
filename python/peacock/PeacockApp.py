@@ -62,10 +62,8 @@ class PeacockApp(object):
                 qapp.processEvents()
                 self.main_widget.setTab(exodus_plugin.tabName())
                 qapp.processEvents()
-            elif tree.input_filename:
-                self.main_widget.setTab(input_plugin.tabName())
             else:
-                self.main_widget.setTab(exe_plugin.tabName())
+                self.main_widget.setTab(input_plugin.tabName())
         else:
             self.main_widget.setTab(exe_plugin.tabName())
         self.main_widget.setPythonVariable("PeacockApp", self)
