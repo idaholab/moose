@@ -13,10 +13,9 @@ InputParameters
 validParams<MaterialTensorCalculator>()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum quantities(
-      "VonMises=1 PlasticStrainMag EffectiveStrain Hydrostatic Direction Hoop Radial Axial "
-      "MaxPrincipal MedPrincipal MinPrincipal FirstInvariant SecondInvariant "
-      "ThirdInvariant TriAxiality VolumetricStrain");
+  MooseEnum quantities("VonMises=1 EffectiveStrain Hydrostatic Direction Hoop Radial Axial "
+                       "MaxPrincipal MedPrincipal MinPrincipal FirstInvariant SecondInvariant "
+                       "ThirdInvariant TriAxiality VolumetricStrain");
 
   params.addParam<int>(
       "index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
@@ -85,62 +84,58 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
       break;
 
     case 2:
-      value = MaterialTensorCalculatorTools::equivalentPlasticStrain(tensor);
-      break;
-
-    case 3:
       value = MaterialTensorCalculatorTools::effectiveStrain(tensor);
       break;
 
-    case 4:
+    case 3:
       value = MaterialTensorCalculatorTools::hydrostatic(tensor);
       break;
 
-    case 5:
+    case 4:
       value = MaterialTensorCalculatorTools::directionValueTensor(tensor, _direction);
       break;
 
-    case 6:
+    case 5:
       value = MaterialTensorCalculatorTools::hoopStress(tensor, _p1, _p2, curr_point, direction);
       break;
 
-    case 7:
+    case 6:
       value = MaterialTensorCalculatorTools::radialStress(tensor, _p1, _p2, curr_point, direction);
       break;
 
-    case 8:
+    case 7:
       value = MaterialTensorCalculatorTools::axialStress(tensor, _p1, _p2, direction);
       break;
 
-    case 9:
+    case 8:
       value = MaterialTensorCalculatorTools::maxPrincipal(tensor, direction);
       break;
 
-    case 10:
+    case 9:
       value = MaterialTensorCalculatorTools::midPrincipal(tensor, direction);
       break;
 
-    case 11:
+    case 10:
       value = MaterialTensorCalculatorTools::minPrincipal(tensor, direction);
       break;
 
-    case 12:
+    case 11:
       value = MaterialTensorCalculatorTools::firstInvariant(tensor);
       break;
 
-    case 13:
+    case 12:
       value = MaterialTensorCalculatorTools::secondInvariant(tensor);
       break;
 
-    case 14:
+    case 13:
       value = MaterialTensorCalculatorTools::thirdInvariant(tensor);
       break;
 
-    case 15:
+    case 14:
       value = MaterialTensorCalculatorTools::triaxialityStress(tensor);
       break;
 
-    case 16:
+    case 15:
       value = MaterialTensorCalculatorTools::volumetricStrain(tensor);
       break;
 

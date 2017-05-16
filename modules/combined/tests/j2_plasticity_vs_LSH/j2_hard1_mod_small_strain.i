@@ -80,7 +80,7 @@
   [./eq_pl_strain]
     type = RankTwoScalarAux
     rank_two_tensor = plastic_strain
-    scalar_type = EquivalentPlasticStrain
+    scalar_type = EffectiveStrain
     variable = eq_pl_strain
   [../]
   [./vm_stress]
