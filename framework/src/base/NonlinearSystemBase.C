@@ -158,7 +158,8 @@ NonlinearSystemBase::init()
 {
   Moose::setup_perf_log.push("NonlinerSystem::init()", "Setup");
 
-  setupDampers();
+  if (_fe_problem.hasDampers())
+    setupDampers();
 
   _current_solution = _sys.current_local_solution.get();
 
