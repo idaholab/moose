@@ -128,10 +128,9 @@
   [../]
 
   [./plastic_strain_mag]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = MaterialRealAux
+    property = effective_plastic_strain
     variable = plastic_strain_mag
-    quantity = plasticStrainMag
   [../]
 
  []
