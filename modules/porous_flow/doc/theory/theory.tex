@@ -40,7 +40,7 @@ Each nontrivial test in the test suite {\em has its own separate
   documentation} and these should help users understand more clearly
 how to build a PorousFlow input file.
 
-Within this document, black text indicates funcionality that has been
+Within this document, black text indicates functionality that has been
 implemented and tested \textcolor{red}{and red text indicates
   functionality that should be implemented by December 2017}.  }
 
@@ -217,6 +217,12 @@ the rock-fluid system when aqueous phase saturation is zero. \\
 $\lambda_{wet}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
 the rock-fluid system when aqueous phase saturation is unity. \\
 
+$\lambda_{R}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
+the rock grains. \\
+
+$\lambda_{f}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
+the fluid phase (single phase case). \\
+
 $M$ & kg.m$^{-3}$ & Mass density \\
 
 $\mu$ & Pa.s & Dynamic viscosity measured in Pa.s or
@@ -252,11 +258,11 @@ $q^{T}$ & J.m$^{-3}$.s$^{-1}$ & Heat source. \\
 
 $\rho$ & kg.m$^{-3}$ & Fluid density \\
 
-$\rho_{R}$ & kg.m$^{-3}$ & Grain density of the rock (so that
+$\rho_{R}$ & kg.m$^{-3}$ & Density of rock grains (so that
 $(1-\phi)\rho_{R}$ is the density of the dry porous rock). \\
 
 $\rho_{\mathrm{mat}}$ & kg.m$^{-3}$ & The mass-density of the
-fluid-filled porous solid $\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} +
+fluid-filled porous solid $\rho_{\mathrm{mat}} = (1 - \phi)\rho_{R} +
 \phi\sum_{\phase}S_{\phase}\rho_{\phase}$. \\
 
 $\rho_{L}$ & kg.m$^{-3}$ & Langmuir density\\
@@ -1049,7 +1055,7 @@ $P_{f}=P$.  The elastic constitutive equation is
 \hyperref[eqn.elasticity]{Eqn~(\ref*{eqn.elasticity})}.  Conservation
 of momentum is given in
 \hyperref[cons.mom.eqn]{Eqn~(\ref*{cons.mom.eqn})}, with
-$\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} + \phi \rho$.  The variables
+$\rho_{\mathrm{mat}} = (1 - \phi)\rho_{R} + \phi \rho$.  The variables
 are the 3 displacements (in 3 dimensional problems), $u_{i}$.
 
 The evolution of porosity is given in
@@ -1164,7 +1170,7 @@ s = \sum_{i}f(P_{i})w_{i}\delta(x - x_{i}) \ .
 Here $s$ is a volume source, measured in kg.m$^{-3}$.s$^{-1}$ (or
 J.m$^{-3}$.s$^{-1}$ for heat flow), which when integrated over the
 finite element yields just the sink ``strength'', $f$, which has units
-kg.s$^{-1}$ for fluid flow, or J.s$^{-1}$ for heat flow.  
+kg.s$^{-1}$ for fluid flow, or J.s$^{-1}$ for heat flow.
 The strength, $f$, is a function of porepressure or temperature, and
 may involve other quantities, as enumerated below.  The convention
 followed is:
@@ -1716,7 +1722,7 @@ At first glance this expression may appear rather obscure.  It has
 been constructed to satisfy the following requirements:
 \begin{enumerate}
 \item As $x\rightarrow 0$, $\phi\rightarrow B$, which is necessary for
-continuity at $x=0$.  
+continuity at $x=0$.
 \item As $x\rightarrow\infty$, $\phi\rightarrow 0$, which is
   physically desireable.
 \item The expression is monotonically decreasing, which is both
@@ -1804,9 +1810,13 @@ derivative is continuous at $S_{\mathrm{eff}}=1$.
 
 \section{Thermal conductivity}
 
-Currently the Porous Flow module implements a
-simple approach to the functional dependence of thermal conductivity
-on the rock and fluid-phase conductivities.  A ``wet'' thermal
+Currently the Porous Flow module implements two
+simple approaches to the functional dependence of thermal conductivity
+on the rock and fluid-phase conductivities.
+
+\subsection{Ideal}
+
+A ``wet'' thermal
 conductivity, $\lambda_{\mathrm{wet}}$, and a ``dry'' thermal
 conductivity $\lambda_{\mathrm{dry}}$, are defined (both of which are
 tensors), and
@@ -1817,12 +1827,40 @@ tensors), and
 where $S_{\mathrm{aqueous}}$ is the aqueous phase saturation, and $n$
 is a user-defined exponent.
 
+\subsection{Linear variation with porosity}
+
+For the single phase, fully saturated case, a linear variation of
+thermal conductivity with porosity is defined:
+
+\begin{equation}
+  \lambda = \lambda_R (1-\phi) + \lambda_f \phi
+\end{equation}
+
+where $\lambda_R$ is the thermal conductivity of the rock grains
+and $\lambda_f$ is the thermal conductivity of the fluid phase.
+
 \textcolor{red}{The dependence of fluid thermal conductivity on temperature may be
 handled within the fluid property modules (to accommodate
 the kind of large changes that can occur when water flashes to
 steam).}  \textcolor{red}{The solid thermal
-conductivities also have a slight dependence on pressure, but it
+conductivities also have a slight dependence on pressure, but it is
 sometimes difficult to obtain reliable data for these dependencies.}
+
+\section{Porous medium density}
+
+The density $\rho_{\mathrm{mat}}$ of the rock-fluid system appears in the inertial and
+body force terms of the conservation of momentum \hyperref[cons.mom.eqn]{Eqn~(\ref*{cons.mom.eqn})}, thus it is required for
+dynamic mechanical simulations, and for mechanical simulations involving
+gravity for example. Currently the Porous Flow module
+implements a simple relationship with porosity and fluid density for the single phase,
+fully saturated case:
+
+\begin{equation}
+  \rho_{\mathrm{mat}} = \rho_R (1-\phi) + \rho \phi
+\end{equation}
+
+Alternatively $\rho_{\mathrm{mat}}$ can be specified as a constant.
+
 
 \section{Viscosity}
 
@@ -2062,10 +2100,10 @@ found to be effective for various types of PorousFlow simulations.
 \item {\tt pc\_type = bjacobi, ksp\_type = bcgs}.
 \item {\tt pc\_type = bjacobi, ksp\_type = gmres}.
 \item {\tt pc\_type = asm, pc\_asm\_overlap = 2, sub\_pc\_type = lu,
-  sub\_pc\_factor\_shift\_type = NONZERO, 
+  sub\_pc\_factor\_shift\_type = NONZERO,
   ksp\_type = gmres}.
 \item {\tt pc\_type = asm, pc\_asm\_overlap = 2, sub\_pc\_type = lu,
-  sub\_pc\_factor\_shift\_type = NONZERO, 
+  sub\_pc\_factor\_shift\_type = NONZERO,
   ksp\_type = gmres} along with the following options {\tt
   -ksp\_diagonal\_scale -ksp\_diagonal\_scale\_fix
   -ksp\_gmres\_modifiedgramschmidt}.
@@ -2097,7 +2135,7 @@ criterion.
   steadystate if $P = -(\rho_{0} g + \epsilon)z$.  Here $\epsilon$
   needn't be constant: it may switch in sign, but its magnitude
   $|\epsilon|$ is roughly the same over the domain of interest.  For instance, for
-  water, an error of 
+  water, an error of
   $|\epsilon|=1$\,Pa.m$^{-1}$ might be suitable in your problem.
 
 Then recall
