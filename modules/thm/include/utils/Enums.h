@@ -4,11 +4,11 @@
 namespace RELAP7
 {
 
-/// Type of the stabilization
+/// Type of the heat transfer geometry
 enum EConvHeatTransGeom
 {
   CHTG_PIPE,
-  CHTG_VERT_BUNDLE_W_XFLOW
+  CHTG_ROD_BUNDLE
 };
 
 ///< Type of the end
