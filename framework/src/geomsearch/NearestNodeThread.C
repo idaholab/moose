@@ -77,8 +77,12 @@ NearestNodeThread::operator()(const NodeIdRange & range)
       for (unsigned int k = 0; k < n_neighbor_nodes; k++)
       {
         const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
-        if (std::isnan((*cur_node)(0)) || std::isnan((*cur_node)(1)) || std::isnan((*cur_node)(2)))
-          mooseError("Failure in NearestNodeThread because solution contans not-a-number entries");
+        if (std::isnan((*cur_node)(0)) || std::isinf((*cur_node)(0)) ||
+            std::isnan((*cur_node)(1)) || std::isinf((*cur_node)(1)) ||
+            std::isnan((*cur_node)(2)) || std::isinf((*cur_node)(2)))
+          mooseError("Failure in NearestNodeThread because solution contans inf or not-a-number "
+                     "entries.  This is likely due to a failed factorization of the Jacobian "
+                     "matrix.");
       }
       mooseError("Unable to find nearest node!");
     }
