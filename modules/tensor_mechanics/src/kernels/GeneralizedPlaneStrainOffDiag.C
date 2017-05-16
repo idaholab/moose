@@ -30,6 +30,11 @@ validParams<GeneralizedPlaneStrainOffDiag>()
   params.addParam<NonlinearVariableName>("temperature", "Variable for the temperature");
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for generalized plane strain");
+  params.addParam<UserObjectName>("subblock_index_provider",
+                                  "SubblockIndexProvider user object name");
+  params.addParam<unsigned int>(
+      "scalar_out_of_plane_strain_index",
+      "The index number of scalar_out_of_plane_strain this kernel acts on");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
@@ -44,6 +49,12 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _deigenstrain_dT(_eigenstrain_names.size()),
     _scalar_out_of_plane_strain_var(coupledScalar("scalar_out_of_plane_strain")),
+    _subblock_id_provider(isParamValid("subblock_index_provider")
+                              ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
+                              : nullptr),
+    _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
+                       ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
+                       : 0),
     _temp_var(isParamValid("temperature")
                   ? &_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature"))
                   : NULL)
@@ -60,22 +71,33 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
   for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
     _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(
         _base_name + _eigenstrain_names[i], _temp_var->name());
+
+  if (isParamValid("scalar_variable_index_provider") &&
+      !isParamValid("scalar_out_of_plane_strain_index"))
+    mooseError("scalar_out_of_plane_strain_index should be provided if more "
+               "than one is available");
 }
 
 void
 GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  if (_assembly.coordSystem() == Moose::COORD_XYZ)
-    _scalar_out_of_plane_strain_direction = 2;
-  else if (_assembly.coordSystem() == Moose::COORD_RZ)
-    _scalar_out_of_plane_strain_direction = 1;
+  const unsigned int elem_scalar_var_id =
+      _subblock_id_provider ? _subblock_id_provider->getSubblockIndex(*_current_elem) : 0;
 
-  if (_var.number() == _disp_var[0]->number())
-    computeDispOffDiagJacobianScalar(0, jvar);
-  else if (_var.number() == _disp_var[1]->number())
-    computeDispOffDiagJacobianScalar(1, jvar);
-  else if (isParamValid("temperature") ? _var.number() == _temp_var->number() : 0)
-    computeTempOffDiagJacobianScalar(jvar);
+  if (elem_scalar_var_id == _scalar_var_id)
+  {
+    if (_assembly.coordSystem() == Moose::COORD_XYZ)
+      _scalar_out_of_plane_strain_direction = 2;
+    else if (_assembly.coordSystem() == Moose::COORD_RZ)
+      _scalar_out_of_plane_strain_direction = 1;
+
+    if (_var.number() == _disp_var[0]->number())
+      computeDispOffDiagJacobianScalar(0, jvar);
+    else if (_var.number() == _disp_var[1]->number())
+      computeDispOffDiagJacobianScalar(1, jvar);
+    else if (isParamValid("temperature") ? _var.number() == _temp_var->number() : 0)
+      computeTempOffDiagJacobianScalar(jvar);
+  }
 }
 
 void

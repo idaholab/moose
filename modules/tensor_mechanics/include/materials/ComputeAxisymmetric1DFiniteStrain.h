@@ -8,6 +8,7 @@
 #define COMPUTEAXISYMMETRIC1DFINITESTRAIN_H
 
 #include "Compute1DFiniteStrain.h"
+#include "SubblockIndexProvider.h"
 
 /**
  * ComputeAxisymmetric1DFiniteStrain defines a strain increment for finite strains
@@ -35,16 +36,25 @@ protected:
   /// \f$ \epsilon_{\theta-old} = \frac{u_{r-old}}{r_{old}} \f$
   Real computeGradDispZZOld() override;
 
+  /// gets its subblock index for current element
+  unsigned int getCurrentSubblockIndex() const
+  {
+    return _subblock_id_provider ? _subblock_id_provider->getSubblockIndex(*_current_elem) : 0;
+  };
+
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 
-  bool _out_of_plane_strain_coupled;
+  const SubblockIndexProvider * _subblock_id_provider;
+
+  bool _has_out_of_plane_strain;
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
 
-  bool _scalar_out_of_plane_strain_coupled;
-  const VariableValue & _scalar_out_of_plane_strain;
-  const VariableValue & _scalar_out_of_plane_strain_old;
+  bool _has_scalar_out_of_plane_strain;
+  unsigned int _nscalar_strains;
+  std::vector<const VariableValue *> _scalar_out_of_plane_strain;
+  std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
 };
 
 #endif // COMPUTEAXISYMMETRIC1DFINITESTRAIN_H
