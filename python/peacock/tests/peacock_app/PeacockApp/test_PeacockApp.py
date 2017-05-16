@@ -26,7 +26,7 @@ class Tests(Testing.PeacockTester):
     def testPeacockAppWithExe(self):
         self.create_app([Testing.find_moose_test_exe()])
         tabs = self.app.main_widget.tab_plugin
-        self.check_current_tab(tabs, self.exe.tabName())
+        self.check_current_tab(tabs, self.input.tabName())
 
     def testPeacockAppWithInput(self):
         self.create_app(["../../common/transient.i", Testing.find_moose_test_exe()])
@@ -135,7 +135,7 @@ class Tests(Testing.PeacockTester):
     def testBadInput(self):
         self.create_app(["-i", "../../common/out_transient.e", Testing.find_moose_test_exe()])
         tabs = self.app.main_widget.tab_plugin
-        self.check_current_tab(tabs, self.exe.tabName())
+        self.check_current_tab(tabs, self.input.tabName())
 
     def testClearSettings(self):
         args = ["--clear-settings"]
