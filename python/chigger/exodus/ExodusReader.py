@@ -15,11 +15,24 @@
 import os
 import collections
 import bisect
+import contextlib
+import fcntl
 import vtk
 
 import mooseutils
 from .. import utils
 from .. import base
+
+@contextlib.contextmanager
+def lock_file(filename):
+    """
+    Locks a file so that the exodus reader can safely read
+    a file without MOOSE writing to it while we do it.
+    """
+    with open(filename, "a+") as f: # "a+" to make sure it gets created
+        fcntl.flock(f, fcntl.LOCK_SH)
+        yield
+        fcntl.flock(f, fcntl.LOCK_UN)
 
 class ExodusReaderErrorObserver(object):
     """
@@ -158,49 +171,50 @@ class ExodusReader(base.ChiggerObject):
         self.__initializeTimeInformation()
         self.__current = self.__getTimeInformation()
         self.__vtkreader.SetFileName(None) # http://vtk.1045678.n5.nabble.com/How-to-re-load-time-information-in-ExodusIIReader-tp5741615.html pylint: disable=line-too-long
-        self.__vtkreader.SetFileName(self.__current.filename)
-        self.__vtkreader.SetTimeStep(self.__current.index)
-        self.__vtkreader.UpdateInformation()
-        self.__vtkreader.Modified()
+        with lock_file(self.__current.filename):
+            self.__vtkreader.SetFileName(self.__current.filename)
+            self.__vtkreader.SetTimeStep(self.__current.index)
+            self.__vtkreader.UpdateInformation()
+            self.__vtkreader.Modified()
 
-        # Displacement Settings
-        if self.getOption('displacements'):
-            self.__vtkreader.ApplyDisplacementsOn()
-            self.__vtkreader.SetDisplacementMagnitude(self.getOption('displacement_magnitude'))
-        else:
-            self.__vtkreader.ApplyDisplacementsOff()
-
-        # Set the geometric objects to load (i.e., subdomains, nodesets, sidesets)
-        active_blockinfo = self.__getActiveBlocks()
-        blockinfo = self.getBlockInformation()
-        for object_type in ExodusReader.BLOCK_TYPES:
-            for data in blockinfo[object_type].itervalues():
-                if (not active_blockinfo) or (data in active_blockinfo):
-                    self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 1)
-                else:
-                    self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 0)
-
-        # According to the VTK documentation setting this to False (not the default) speeds up data
-        # loading. In my testing I was seeing load times cut in half or more with "squeezing"
-        # disabled. I am leaving this as an option just in case we discover some reason it shouldn't
-        # be disabled.
-        self.__vtkreader.SetSqueezePoints(self.getOption('squeeze'))
-
-        # Set the data arrays to load
-        #
-        # If the object has not been initialized then all of the variables should be enabled so that
-        # the block and variable information are complete when populated. After this only the
-        # variables listed in the 'variables' options, if any, are activated, which reduces loading
-        # times. If 'variables' is not given, all the variables are loaded.
-        variables = self.getOption('variables')
-        variable_info = self.getVariableInformation()
-        for vinfo in variable_info.itervalues():
-            if (not variables) or (vinfo.name in variables):
-                self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 1)
+            # Displacement Settings
+            if self.getOption('displacements'):
+                self.__vtkreader.ApplyDisplacementsOn()
+                self.__vtkreader.SetDisplacementMagnitude(self.getOption('displacement_magnitude'))
             else:
-                self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 0)
+                self.__vtkreader.ApplyDisplacementsOff()
 
-        self.__vtkreader.Update()
+            # Set the geometric objects to load (i.e., subdomains, nodesets, sidesets)
+            active_blockinfo = self.__getActiveBlocks()
+            blockinfo = self.getBlockInformation()
+            for object_type in ExodusReader.BLOCK_TYPES:
+                for data in blockinfo[object_type].itervalues():
+                    if (not active_blockinfo) or (data in active_blockinfo):
+                        self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 1)
+                    else:
+                        self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 0)
+
+            # According to the VTK documentation setting this to False (not the default) speeds
+            # up data loading. In my testing I was seeing load times cut in half or more with
+            # "squeezing" disabled. I am leaving this as an option just in case we discover some
+            # reason it shouldn't be disabled.
+            self.__vtkreader.SetSqueezePoints(self.getOption('squeeze'))
+
+            # Set the data arrays to load
+            #
+            # If the object has not been initialized then all of the variables should be enabled
+            # so that the block and variable information are complete when populated. After this
+            # only the variables listed in the 'variables' options, if any, are activated, which
+            # reduces loading times. If 'variables' is not given, all the variables are loaded.
+            variables = self.getOption('variables')
+            variable_info = self.getVariableInformation()
+            for vinfo in variable_info.itervalues():
+                if (not variables) or (vinfo.name in variables):
+                    self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 1)
+                else:
+                    self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 0)
+
+            self.__vtkreader.Update()
 
     def needsUpdate(self):
         """ Determine the status of the object to indicate if the "update" method should be called.
@@ -414,17 +428,20 @@ class ExodusReader(base.ChiggerObject):
             if tinfo and (tinfo.modified == current_modified):
                 continue
 
-            self.__vtkreader.SetFileName(filename)
-            self.__vtkreader.Modified()
-            self.__vtkreader.UpdateInformation()
+            with lock_file(filename):
+                self.__vtkreader.SetFileName(filename)
+                self.__vtkreader.Modified()
+                self.__vtkreader.UpdateInformation()
 
-            vtkinfo = self.__vtkreader.GetExecutive().GetOutputInformation(0)
-            times = [vtkinfo.Get(key, i) for i in range(self.__vtkreader.GetNumberOfTimeSteps())]
+                vtkinfo = self.__vtkreader.GetExecutive().GetOutputInformation(0)
+                steps = range(self.__vtkreader.GetNumberOfTimeSteps())
+                times = [vtkinfo.Get(key, i) for i in steps]
 
-            if not times:
-                times = [None] # When --mesh-only is used, not time information is written
-            self.__fileinfo[filename] = ExodusReader.FileInformation(filename=filename, times=times,
-                                                                     modified=current_modified)
+                if not times:
+                    times = [None] # When --mesh-only is used, not time information is written
+                self.__fileinfo[filename] = ExodusReader.FileInformation(filename=filename,
+                                                                         times=times,
+                                                                         modified=current_modified)
 
         # Re-populate the time data
         self.__timedata = []

@@ -21,6 +21,7 @@
 #include "FileMesh.h"
 #include "MooseApp.h"
 #include "MooseVariableScalar.h"
+#include "LockFile.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -300,6 +301,7 @@ Exodus::output(const ExecFlagType & type)
 
   // Prepare the ExodusII_IO object
   outputSetup();
+  LockFile lf(filename(), processor_id() == 0);
 
   // Adjust the position of the output
   if (_app.hasOutputPosition())
