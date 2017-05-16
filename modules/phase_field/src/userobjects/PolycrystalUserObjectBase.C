@@ -146,11 +146,10 @@ PolycrystalUserObjectBase::finalize()
 
   // TODO: Possibly retrieve the halo thickness from the active GrainTracker object?
   constexpr unsigned int halo_thickness = 2;
-  // expandPointHalos();
+
   expandEdgeHalos(halo_thickness - 1);
 
-  // _feature_count is updated on all ranks by communicateAndMerge
-  communicateAndMerge();
+  FeatureFloodCount::finalize();
 
   if (!_colors_assigned)
   {
@@ -158,13 +157,6 @@ PolycrystalUserObjectBase::finalize()
     _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
     if (_is_master)
     {
-      /**
-       * We'll sort here to place the grains in the vector in the same order for parallel runs.
-       * We don't need this for building the adjacency matrix or for the coloring but it makes
-       * things consistent for other accesses to _feature_sets.
-       */
-      std::sort(_feature_sets.begin(), _feature_sets.end());
-
       buildGrainAdjacencyMatrix();
 
       assignOpsToGrains();
@@ -183,8 +175,6 @@ PolycrystalUserObjectBase::finalize()
     for (auto & grain : _feature_sets)
       grain._var_index = _grain_to_op[grain._id];
   }
-
-  updateFieldInfo();
 
   _colors_assigned = true;
 }

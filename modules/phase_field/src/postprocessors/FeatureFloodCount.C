@@ -400,7 +400,8 @@ FeatureFloodCount::sortAndLabel()
 
   // Label the features with an ID based on the sorting (processor number independent value)
   for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
-    _feature_sets[i]._id = i;
+    if (_feature_sets[i]._id == invalid_id)
+      _feature_sets[i]._id = i;
 }
 
 void
@@ -413,9 +414,12 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
   // Now size the individual counts vectors based on the largest index seen per processor
   for (const auto & feature : _feature_sets)
     for (const auto & local_index_pair : feature._orig_ids)
-      // local index                                             // rank
+    {
+      // local_index_pair.first = ranks, local_index_pair.second = local_index
+      mooseAssert(local_index_pair.first < _n_procs, "Processor ID is out of range");
       if (local_index_pair.second >= static_cast<std::size_t>(counts[local_index_pair.first]))
         counts[local_index_pair.first] = local_index_pair.second + 1;
+    }
 
   // Build the offsets vector
   unsigned int globalsize = 0;
