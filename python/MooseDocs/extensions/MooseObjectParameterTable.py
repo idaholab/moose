@@ -126,6 +126,6 @@ class MooseObjectParameterTable(object):
 
         elif key == 'default':
             if ptype == 'bool':
-                param = repr(bool(param))
+                param = repr(param in ['True', '1'])
 
         return param
