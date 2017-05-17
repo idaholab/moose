@@ -14,7 +14,7 @@
 [GlobalParams]
   int_width = 4.0
   block = 0
-  op_num = 12
+  op_num = 8
   deformed_grain_num = 16
   var_name_base = gr
   grain_num = 18
@@ -35,9 +35,27 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 81
+    coloring_algorithm = bt
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.2
+    connecting_threshold = 0.08
+    compute_var_to_feature_map = true
+    flood_entity_type = elemental
+    execute_on = ' initial timestep_begin'
+    outputs = none
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -69,18 +87,6 @@
   [./deformed]
     type = DeformedGrainMaterial
     outputs = exodus
-  [../]
-[]
-
-[UserObjects]
-  [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.2
-    connecting_threshold = 0.08
-    compute_var_to_feature_map = true
-    flood_entity_type = elemental
-    execute_on = ' initial timestep_begin'
-    outputs = none
   [../]
 []
 

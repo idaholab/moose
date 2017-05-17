@@ -85,7 +85,6 @@
 #include "BimodalSuperellipsoidsIC.h"
 #include "ClosePackIC.h"
 #include "CrossIC.h"
-#include "HexPolycrystalIC.h"
 #include "LatticeSmoothCircleIC.h"
 #include "MultiBoundingBoxIC.h"
 #include "MultiSmoothCircleIC.h"
@@ -93,7 +92,6 @@
 #include "PFCFreezingIC.h"
 #include "PolycrystalColoringIC.h"
 #include "PolycrystalRandomIC.h"
-#include "PolycrystalReducedIC.h"
 #include "PolycrystalVoronoiVoidIC.h"
 #include "RampIC.h"
 #include "ReconPhaseVarIC.h"
@@ -250,12 +248,10 @@
 #include "PFCRFFVariablesAction.h"
 #include "PolycrystalColoringICAction.h"
 #include "PolycrystalElasticDrivingForceAction.h"
-#include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalKernelAction.h"
 #include "PolycrystalRandomICAction.h"
 #include "PolycrystalStoredEnergyAction.h"
 #include "PolycrystalVariablesAction.h"
-#include "PolycrystalVoronoiICAction.h"
 #include "PolycrystalVoronoiVoidICAction.h"
 #include "RigidBodyMultiKernelAction.h"
 #include "Tricrystal2CircleGrainsICAction.h"
@@ -377,7 +373,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(BimodalSuperellipsoidsIC);
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
-  registerDeprecatedObjectWithReplacement(HexPolycrystalIC, "PolycrystalHex", "07/01/2017 00:00");
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiBoundingBoxIC);
   registerInitialCondition(MultiSmoothCircleIC);
@@ -385,7 +380,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalColoringIC);
   registerInitialCondition(PolycrystalRandomIC);
-  registerInitialCondition(PolycrystalReducedIC);
   registerInitialCondition(PolycrystalVoronoiVoidIC);
   registerInitialCondition(RampIC);
   registerInitialCondition(ReconPhaseVarIC);
@@ -528,12 +522,10 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
   registerSyntax("PolycrystalColoringICAction", "ICs/PolycrystalICs/PolycrystalColoringIC");
   registerSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
-  registerSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
   registerSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
   registerSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
   registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
-  registerSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   registerSyntax("PolycrystalVoronoiVoidICAction", "ICs/PolycrystalICs/PolycrystalVoronoiVoidIC");
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
@@ -560,12 +552,10 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PFCRFFVariablesAction, "add_variable");
   registerAction(PolycrystalElasticDrivingForceAction, "add_kernel");
   registerAction(PolycrystalColoringICAction, "add_ic");
-  registerAction(PolycrystalHexGrainICAction, "add_ic");
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
   registerAction(PolycrystalStoredEnergyAction, "add_kernel");
   registerAction(PolycrystalVariablesAction, "add_variable");
-  registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(PolycrystalVoronoiVoidICAction, "add_ic");
   registerAction(RigidBodyMultiKernelAction, "add_kernel");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
