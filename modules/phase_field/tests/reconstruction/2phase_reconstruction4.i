@@ -15,8 +15,26 @@
 []
 
 [GlobalParams]
-  op_num = 8
+  op_num = 6
   var_name_base = gr
+[]
+
+[UserObjects]
+  [./ebsd_reader]
+    type = EBSDReader
+  [../]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = bt
+    ebsd_reader = ebsd_reader
+    phase = 2
+    output_adjacency_matrix = true
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    polycrystal_ic_uo = ebsd
+    remap_grains = false
+  [../]
 []
 
 [AuxVariables]
@@ -35,35 +53,16 @@
   [../]
 []
 
-[UserObjects]
-  [./ebsd]
-    type = EBSDReader
-  [../]
-[]
-
 [ICs]
   [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
-      coloring_algorithm = bt
-      phase = 2
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = ebsd
     [../]
   [../]
 []
 
 [Variables]
   [./PolycrystalVariables]
-  [../]
-[]
-
-[Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    remap_grains = false
-
-    # These two parameters better match those in the ICs block!
-    ebsd_reader = ebsd
-    phase = 2
   [../]
 []
 

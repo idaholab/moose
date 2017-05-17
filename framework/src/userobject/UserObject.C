@@ -36,12 +36,18 @@ validParams<UserObject>()
                         "in the case this is true but no "
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParam<bool>("allow_duplicate_execution_on_initial",
+                        false,
+                        "In the case where this UserObject is depended upon by an initial "
+                        "condition, allow it to be executed twice during the initial setup (once "
+                        "before the IC and again after mesh adaptivity (if applicable).");
 
   params.declareControllable("enable");
 
   params.registerBase("UserObject");
 
+  params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial",
+                              "Advanced");
   return params;
 }
 
@@ -57,7 +63,8 @@ UserObject::UserObject(const InputParameters & parameters)
     _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _coord_sys(_assembly.coordSystem())
+    _coord_sys(_assembly.coordSystem()),
+    _duplicate_initial_execution(getParam<bool>("allow_duplicate_execution_on_initial"))
 {
 }
 

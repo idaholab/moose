@@ -34,6 +34,7 @@ public:
 
 protected:
   unsigned int _op_index;
+  unsigned int _phase;
   const PolycrystalUserObjectBase & _poly_ic_uo;
 };
 

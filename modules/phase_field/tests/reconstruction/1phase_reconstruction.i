@@ -20,14 +20,27 @@
 
 [GlobalParams]
   # Define the number and names of the order parameters used to represent the grains
-  op_num = 8
+  op_num = 4
   var_name_base = gr
 []
 
 [UserObjects]
-  [./ebsd]
+  [./ebsd_reader]
     # Read in the EBSD data. Uses the filename given in the mesh block.
     type = EBSDReader
+  [../]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = bt
+    ebsd_reader = ebsd_reader
+    output_adjacency_matrix = true
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    # For displaying HALO fields
+    compute_halo_maps = true
+    # Link in the ebsd userobject here so that grain tracker can extract info from it
+    polycrystal_ic_uo = ebsd
   [../]
 []
 
@@ -41,9 +54,9 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./ReconVarIC]
+    [./PolycrystalColoringIC]
       # Uses the data from the user object 'ebsd' to initialize the variables for all the order parameters.
-      ebsd_reader = ebsd
+      polycrystal_ic_uo = ebsd
     [../]
   [../]
 []
@@ -53,14 +66,6 @@
   execute_on = 'initial'
   family = MONOMIAL
   order = CONSTANT
-[]
-
-[UserObjects]
-  [./grain_tracker]
-    type = GrainTracker
-    ebsd_reader = ebsd
-    compute_halo_maps = true # For displaying HALO fields
-  [../]
 []
 
 [AuxVariables]
@@ -84,39 +89,31 @@
   [../]
   [./halo3]
   [../]
-  [./halo4]
-  [../]
-  [./halo5]
-  [../]
-  [./halo6]
-  [../]
-  [./halo7]
-  [../]
 []
 
 [AuxKernels]
   [./phi1_aux]
     type = EBSDReaderPointDataAux
     variable = PHI1
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     data_name = 'phi1'
   [../]
   [./phi_aux]
     type = EBSDReaderPointDataAux
     variable = PHI
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     data_name = 'phi'
   [../]
   [./phi2_aux]
     type = EBSDReaderPointDataAux
     variable = PHI2
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     data_name = 'phi2'
   [../]
   [./grain_aux]
     type = EBSDReaderPointDataAux
     variable = GRAIN
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     data_name = 'feature_id'
   [../]
   [./unique_grains]
@@ -156,34 +153,6 @@
     type = FeatureFloodCountAux
     variable = halo3
     map_index = 3
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
-  [./halo4]
-    type = FeatureFloodCountAux
-    variable = halo4
-    map_index = 4
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
-  [./halo5]
-    type = FeatureFloodCountAux
-    variable = halo5
-    map_index = 5
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
-  [./halo6]
-    type = FeatureFloodCountAux
-    variable = halo6
-    map_index = 6
-    field_display = HALOS
-    flood_counter = grain_tracker
-  [../]
-  [./halo7]
-    type = FeatureFloodCountAux
-    variable = halo7
-    map_index = 7
     field_display = HALOS
     flood_counter = grain_tracker
   [../]

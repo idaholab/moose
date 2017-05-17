@@ -1064,6 +1064,16 @@ public:
    * @return The number of adaptivity cycles completed.
    */
   unsigned int getNumCyclesCompleted() { return _cycles_completed; }
+
+  /**
+   * Return a Boolean indicating whether initial AMR is turned on.
+   */
+  bool hasInitialAdaptivity() const { return _adaptivity.getInitialSteps() > 0; }
+#else
+  /**
+   * Return a Boolean indicating whether initial AMR is turned on.
+   */
+  bool hasInitialAdaptivity() const { return false; }
 #endif // LIBMESH_ENABLE_AMR
 
   /// Create XFEM controller object

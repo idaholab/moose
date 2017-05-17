@@ -4,41 +4,33 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef POLYCRYSTALVORONOI_H
-#define POLYCRYSTALVORONOI_H
+#ifndef POLYCRYSTALEBSD_H
+#define POLYCRYSTALEBSD_H
 
 #include "PolycrystalUserObjectBase.h"
 
 // Forward Declarations
-class PolycrystalVoronoi;
+class PolycrystalEBSD;
+class EBSDReader;
 
 template <>
-InputParameters validParams<PolycrystalVoronoi>();
+InputParameters validParams<PolycrystalEBSD>();
 
-class PolycrystalVoronoi : public PolycrystalUserObjectBase
+class PolycrystalEBSD : public PolycrystalUserObjectBase
 {
 public:
-  PolycrystalVoronoi(const InputParameters & parameters);
+  PolycrystalEBSD(const InputParameters & parameters);
 
-  virtual void precomputeGrainStructure() override;
   virtual void getGrainsBasedOnPoint(const Point & point,
                                      std::vector<unsigned int> & grains) const override;
   virtual Real getVariableValue(unsigned int op_index, const Point & p) const override;
-  virtual unsigned int getNumGrains() const override { return _grain_num; }
+  virtual Real getVariableValue(unsigned int op_index, const Node & n) const override;
+  virtual unsigned int getNumGrains() const override;
 
 protected:
-  /// The number of grains to create
-  const unsigned int _grain_num;
-
-  const bool _columnar_3D;
-
-  const unsigned int _rand_seed;
-
-  Point _bottom_left;
-  Point _top_right;
-  Point _range;
-
-  std::vector<Point> _centerpoints;
+  const unsigned int _phase;
+  const EBSDReader & _ebsd_reader;
+  const std::map<dof_id_type, std::vector<Real>> & _node_to_grain_weight_map;
 };
 
-#endif // POLYCRYSTALVORONOI_H
+#endif // POLYCRYSTALEBSD_H

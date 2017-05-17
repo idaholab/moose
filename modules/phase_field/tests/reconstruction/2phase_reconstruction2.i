@@ -18,13 +18,20 @@
 []
 
 [GlobalParams]
-  op_num = 3
+  op_num = 2
   var_name_base = gr
 []
 
 [UserObjects]
-  [./ebsd]
+  [./ebsd_reader]
     type = EBSDReader
+  [../]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = bt
+    ebsd_reader = ebsd_reader
+    phase = 1
+    output_adjacency_matrix = true
   [../]
 []
 
@@ -35,10 +42,9 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
+    [./PolycrystalColoringIC]
       # select only data for phase 1 from the EBSD file
-      phase = 1
+      polycrystal_ic_uo = ebsd
     [../]
   [../]
 []

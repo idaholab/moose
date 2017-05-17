@@ -10,8 +10,28 @@
 []
 
 [UserObjects]
-  [./ebsd]
+  [./ebsd_reader]
     type = EBSDReader
+  [../]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = bt
+    ebsd_reader = ebsd_reader
+    enable_var_coloring = true
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    flood_entity_type = ELEMENTAL
+    compute_halo_maps = true # For displaying HALO fields
+    polycrystal_ic_uo = ebsd
+  [../]
+[]
+
+[ICs]
+  [./PolycrystalICs]
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = ebsd
+    [../]
   [../]
 []
 
@@ -22,6 +42,10 @@
 
 [AuxVariables]
   [./bnds]
+  [../]
+  [./unique_grains_ic]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./unique_grains]
     order = CONSTANT
@@ -35,6 +59,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./var_indices_ic]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./var_indices]
     order = CONSTANT
     family = MONOMIAL
@@ -42,15 +70,6 @@
   [./ebsd_grains]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-[]
-
-[ICs]
-  [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
-      coloring_algorithm = bt
-    [../]
   [../]
 []
 
@@ -79,6 +98,20 @@
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
   [../]
+  [./var_indices_ic]
+    type = FeatureFloodCountAux
+    variable = var_indices_ic
+    execute_on = 'initial'
+    flood_counter = ebsd
+    field_display = VARIABLE_COLORING
+  [../]
+  [./unique_grains_ic]
+    type = FeatureFloodCountAux
+    variable = unique_grains_ic
+    execute_on = 'initial'
+    flood_counter = ebsd
+    field_display = UNIQUE_REGION
+  [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
@@ -96,7 +129,7 @@
   [./grain_aux]
     type = EBSDReaderPointDataAux
     variable = ebsd_grains
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     data_name = 'feature_id'
     execute_on = 'initial timestep_end'
   [../]
@@ -106,7 +139,7 @@
   [./PhaseField]
     [./EulerAngles2RGB]
       crystal_structure = cubic
-      euler_angle_provider = ebsd
+      euler_angle_provider = ebsd_reader
       grain_tracker = grain_tracker
     [../]
   [../]
@@ -141,11 +174,6 @@
   [../]
   [./DOFs]
     type = NumDOFs
-  [../]
-  [./grain_tracker]
-    type = GrainTracker
-    ebsd_reader = ebsd
-    compute_halo_maps = true # Only necessary for displaying HALOS
   [../]
 []
 

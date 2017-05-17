@@ -17,7 +17,7 @@
     input = '1phase_reconstruction.i'
 
     # Read in a 2-phase file but ignore phase
-    cli_args = 'Mesh/filename=ebsd_40x40_2_phase.txt Outputs/file_base=1phase_reconstruction_40x40_out'
+    cli_args = 'Mesh/filename=ebsd_40x40_2_phase.txt GlobalParams/op_num=5 Outputs/file_base=1phase_reconstruction_40x40_out'
     exodiff = '1phase_reconstruction_40x40_out.e'
   [../]
 
