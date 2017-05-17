@@ -65,4 +65,9 @@
     input = 'switchingfunctionmultiphasematerial.i'
     exodiff = 'switchingfunctionmultiphasematerial_out.e'
   [../]
+  [./mixedswitchingfunctionmaterial]
+    type = 'Exodiff'
+    input = 'mixedswitchingfunctionmaterial.i'
+    exodiff = 'mixedswitchingfunctionmaterial_out.e'
+  []
 []
