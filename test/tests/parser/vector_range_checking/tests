@@ -2,43 +2,43 @@
   [./realvectorlength]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/rv3"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/rv3"
     cli_args = 'Materials/vecrangecheck/rv3="1.0 2.0"'
   [../]
   [./intvectorlength]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/iv3"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/iv3"
     cli_args = 'Materials/vecrangecheck/iv3="1 2"'
   [../]
   [./allelementcheck]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/rvp\n\tExpression: rvp > 0\n\t Component: 1"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/rvp\n\tExpression: rvp > 0\n\t Component: 1"
     cli_args = 'Materials/vecrangecheck/rvp="1.0 -2.0 3.0"'
   [../]
   [./elementcompare_unsigned_int]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/uvg"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/uvg"
     cli_args = 'Materials/vecrangecheck/uvg="1 2"'
   [../]
   [./elementcompare_long]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/lvg"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/lvg"
     cli_args = 'Materials/vecrangecheck/lvg="1 2"'
   [../]
   [./elementcompare_int]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/ivg"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/ivg"
     cli_args = 'Materials/vecrangecheck/ivg="1 2"'
   [../]
   [./elementcompare_real]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Range check failed for parameter vecrangecheck/rvg"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/rvg"
     cli_args = 'Materials/vecrangecheck/rvg="1.0 2.0"'
   [../]
   [./outofbounds]

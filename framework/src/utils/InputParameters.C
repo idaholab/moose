@@ -388,8 +388,8 @@ InputParameters::mooseObjectSyntaxVisibility() const
 void
 InputParameters::checkParams(const std::string & parsing_syntax)
 {
-  std::string l_prefix = this->have_parameter<std::string>("_object_name")
-                             ? this->get<std::string>("_object_name")
+  std::string l_prefix = this->have_parameter<std::string>("parser_syntax")
+                             ? this->get<std::string>("parser_syntax")
                              : parsing_syntax;
 
   std::ostringstream oss;
