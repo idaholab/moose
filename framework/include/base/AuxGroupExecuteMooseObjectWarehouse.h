@@ -103,11 +103,12 @@ AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(
     if (depend_ic.find(object_ptr->name()) != depend_ic.end())
     {
       _group_objects[Moose::PRE_IC].addObjectMask(object_ptr, tid, initial_flag_mask);
-      already_added = true;
+      already_added = !object_ptr->shouldDuplicateInitialExecution();
     }
 
     std::uint16_t remaining_flags = already_added ? not_initial_flag_mask : all_flags;
-    if (depend_aux.find(object_ptr->name()) != depend_aux.end())
+    if (depend_aux.find(object_ptr->name()) != depend_aux.end() ||
+        depend_ic.find(object_ptr->name()) != depend_ic.end())
       _group_objects[Moose::PRE_AUX].addObjectMask(object_ptr, tid, remaining_flags);
     else
       _group_objects[Moose::POST_AUX].addObjectMask(object_ptr, tid, remaining_flags);

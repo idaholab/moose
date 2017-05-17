@@ -97,7 +97,6 @@
 #include "PolycrystalVoronoiVoidIC.h"
 #include "RampIC.h"
 #include "ReconPhaseVarIC.h"
-#include "ReconVarIC.h"
 #include "RndBoundingBoxIC.h"
 #include "RndSmoothCircleIC.h"
 #include "SmoothCircleIC.h"
@@ -218,6 +217,7 @@
 #include "MaskedGrainForceAndTorque.h"
 #include "PolycrystalHex.h"
 #include "PolycrystalVoronoi.h"
+#include "PolycrystalEBSD.h"
 #include "RandomEulerAngleProvider.h"
 
 #include "EBSDReader.h"
@@ -256,7 +256,6 @@
 #include "PolycrystalVariablesAction.h"
 #include "PolycrystalVoronoiICAction.h"
 #include "PolycrystalVoronoiVoidICAction.h"
-#include "ReconVarICAction.h"
 #include "RigidBodyMultiKernelAction.h"
 #include "Tricrystal2CircleGrainsICAction.h"
 
@@ -389,7 +388,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(PolycrystalVoronoiVoidIC);
   registerInitialCondition(RampIC);
   registerInitialCondition(ReconPhaseVarIC);
-  registerInitialCondition(ReconVarIC);
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(SmoothCircleIC);
@@ -488,6 +486,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(MaskedGrainForceAndTorque);
   registerUserObject(PolycrystalHex);
   registerUserObject(PolycrystalVoronoi);
+  registerUserObject(PolycrystalEBSD);
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
@@ -534,7 +533,6 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
   registerSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   registerSyntax("PolycrystalVoronoiVoidICAction", "ICs/PolycrystalICs/PolycrystalVoronoiVoidIC");
-  registerSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
 
@@ -567,8 +565,6 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalVariablesAction, "add_variable");
   registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(PolycrystalVoronoiVoidICAction, "add_ic");
-  registerAction(ReconVarICAction, "add_aux_variable");
-  registerAction(ReconVarICAction, "add_ic");
   registerAction(RigidBodyMultiKernelAction, "add_kernel");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
 }

@@ -19,6 +19,9 @@ validParams<PolycrystalVoronoi>()
   InputParameters params = validParams<PolycrystalUserObjectBase>();
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiAction)");
+  params.addRequiredParam<unsigned int>(
+      "grain_num", "Number of grains being represented by the order parameters");
+
   params.addParam<unsigned int>("rand_seed", 0, "The random seed");
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
@@ -28,13 +31,15 @@ validParams<PolycrystalVoronoi>()
 
 PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
   : PolycrystalUserObjectBase(parameters),
+    _grain_num(getParam<unsigned int>("grain_num")),
     _columnar_3D(getParam<bool>("columnar_3D")),
     _rand_seed(getParam<unsigned int>("rand_seed"))
 {
 }
 
-unsigned int
-PolycrystalVoronoi::getGrainBasedOnPoint(const Point & point) const
+void
+PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
+                                          std::vector<unsigned int> & grains) const
 {
   auto n_grains = _centerpoints.size();
   auto min_distance = _range.norm();
@@ -54,12 +59,33 @@ PolycrystalVoronoi::getGrainBasedOnPoint(const Point & point) const
 
   mooseAssert(min_index < n_grains, "Couldn't find closest Voronoi cell");
 
-  return min_index;
+  grains.resize(1);
+  grains[0] = min_index;
+}
+
+Real
+PolycrystalVoronoi::getVariableValue(unsigned int op_index, const Point & p) const
+{
+  std::vector<unsigned int> grain_ids;
+  getGrainsBasedOnPoint(p, grain_ids);
+
+  // Now see if any of those grains are represented by the passed in order parameter
+  unsigned int active_grain_on_op = invalid_id;
+  for (auto grain_id : grain_ids)
+    if (op_index == _grain_to_op[grain_id])
+    {
+      active_grain_on_op = grain_id;
+      break;
+    }
+
+  return active_grain_on_op != invalid_id ? 1.0 : 0.0;
 }
 
 void
 PolycrystalVoronoi::precomputeGrainStructure()
 {
+  MooseRandom::seed(_rand_seed);
+
   // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {

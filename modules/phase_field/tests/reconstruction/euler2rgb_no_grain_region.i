@@ -4,21 +4,38 @@
 []
 
 [GlobalParams]
-  op_num = 9
+  op_num = 8
   var_name_base = gr
+[]
+
+[UserObjects]
+  [./ebsd_reader]
+    type = EBSDReader
+    execute_on = initial
+  [../]
+  [./ebsd]
+    type = PolycrystalEBSD
+    coloring_algorithm = bt
+    ebsd_reader = ebsd_reader
+    phase = 2
+    output_adjacency_matrix = true
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    polycrystal_ic_uo = ebsd
+  [../]
 []
 
 [ICs]
   [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
-      phase = 2
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = ebsd
     [../]
   [../]
   [./void_phase]
     type = ReconPhaseVarIC
     variable = c
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     phase = 1
   [../]
 []
@@ -29,7 +46,7 @@
 []
 
 [AuxVariables]
-  active = 'c bnds'
+#  active = 'c bnds'
 
   [./c]
   [../]
@@ -58,7 +75,7 @@
 []
 
 [AuxKernels]
-  active = 'BndsCalc'
+#  active = 'BndsCalc'
 
   [./BndsCalc]
     type = BndsCalcAux
@@ -68,7 +85,7 @@
   [./ebsd_numbers]
     type = EBSDReaderAvgDataAux
     data_name = feature_id
-    ebsd_reader = ebsd
+    ebsd_reader = ebsd_reader
     grain_tracker = grain_tracker
     variable = ebsd_numbers
     execute_on = 'initial timestep_end'
@@ -96,7 +113,7 @@
     [./EulerAngles2RGB]
       crystal_structure = cubic
       grain_tracker = grain_tracker
-      euler_angle_provider = ebsd
+      euler_angle_provider = ebsd_reader
       no_grain_color = '.1 .1 .1'
     [../]
   [../]
@@ -113,22 +130,6 @@
     Q = 2.77
     length_scale = 1.0e-6
     time_scale = 60.0
-  [../]
-[]
-
-[Postprocessors]
-  [./grain_tracker]
-    type = GrainTracker
-    execute_on = 'initial timestep_begin'
-    ebsd_reader = ebsd
-    phase = 2
-  [../]
-[]
-
-[UserObjects]
-  [./ebsd]
-    type = EBSDReader
-    execute_on = initial
   [../]
 []
 

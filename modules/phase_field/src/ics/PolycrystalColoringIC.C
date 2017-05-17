@@ -20,8 +20,8 @@ validParams<PolycrystalColoringIC>()
   InputParameters params = validParams<InitialCondition>();
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiICAction)");
-  params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "TODO");
+  params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
 
   return params;
 }
@@ -36,9 +36,8 @@ PolycrystalColoringIC::PolycrystalColoringIC(const InputParameters & parameters)
 Real
 PolycrystalColoringIC::value(const Point & p)
 {
-  const auto grain_to_op = _poly_ic_uo.getGrainToOps();
-  auto grain_id = _poly_ic_uo.getGrainBasedOnPoint(p);
-  auto assigned_op = grain_to_op[grain_id];
-
-  return (assigned_op == _op_index) ? 1.0 : 0.0;
+  if (_current_node)
+    return _poly_ic_uo.getVariableValue(_op_index, *_current_node);
+  else
+    return _poly_ic_uo.getVariableValue(_op_index, p);
 }

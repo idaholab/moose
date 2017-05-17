@@ -110,8 +110,9 @@ public:
     INACTIVE = 0x4
   };
 
-  struct FeatureData
+  class FeatureData
   {
+  public:
     FeatureData() : FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE) {}
 
     FeatureData(std::size_t var_index,
@@ -123,45 +124,19 @@ public:
       _orig_ids = {std::make_pair(rank, local_index)};
     }
 
-    FeatureData(std::size_t var_index, Status status)
+    FeatureData(std::size_t var_index,
+                Status status,
+                unsigned int id = invalid_id,
+                std::vector<MeshTools::BoundingBox> bboxes = {MeshTools::BoundingBox()})
       : _var_index(var_index),
-        _id(invalid_id),
-        _bboxes(1), // Assume at least one bounding box
+        _id(id),
+        _bboxes(bboxes), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _vol_count(0),
         _status(status),
         _intersects_boundary(false)
     {
     }
-
-///@{
-/**
- * We do not expect these objects to ever be copied. This is important
- * since they are stored in standard containers directly. To enforce
- * this, we are explicitly deleting the copy constructor, and copy
- * assignment operator.
- */
-#ifdef __INTEL_COMPILER
-    /**
-     * 2016-07-14
-     * The INTEL compiler we are currently using (2013 with GCC 4.8) appears to have a bug
-     * introduced by the addition of the Point member in this structure. Even though
-     * it supports move semantics on other non-POD types like libMesh::BoundingBox,
-     * it fails to compile this class with the "centroid" member. Specifically, it
-     * supports the move operation into the vector type but fails to work with the
-     * bracket operator on std::map and the std::sort algorithm used in this class.
-     * It does work with std::map::emplace() but that syntax is much less appealing
-     * and still doesn't work around the issue. For now, I'm allowing the copy
-     * constructor so that this class works under the Intel compiler but there
-     * may be a degradation in performance in that case.
-     */
-    FeatureData(const FeatureData & f) = default;
-    FeatureData & operator=(const FeatureData & f) = default;
-#else // GCC CLANG
-    FeatureData(const FeatureData & f) = delete;
-    FeatureData & operator=(const FeatureData & f) = delete;
-#endif
-    ///@}
 
     ///@{
     // Default Move constructors
@@ -283,7 +258,36 @@ public:
 
     /// Flag indicating whether this feature intersects a boundary
     bool _intersects_boundary;
+
+    FeatureData duplicate() const { return FeatureData(*this); }
+
+#ifndef __INTEL_COMPILER
+    /**
+     * 2016-07-14
+     * The INTEL compiler we are currently using (2013 with GCC 4.8) appears to have a bug
+     * introduced by the addition of the Point member in this structure. Even though it supports
+     * move semantics on other non-POD types like libMesh::BoundingBox, it fails to compile this
+     * class with the "centroid" member. Specifically, it supports the move operation into the
+     * vector type but fails to work with the bracket operator on std::map and the std::sort
+     * algorithm used in this class. It does work with std::map::emplace() but that syntax is much
+     * less appealing and still doesn't work around the issue. For now, I'm allowing the copy
+     * constructor to be called where it shouldn't so that this class works under the Intel compiler
+     * but there may be a degradation in performance in that case. */
+  private:
+#endif
+    ///@{
+    /**
+     * We do not expect these objects to ever be copied. This is important since they are stored in
+     * standard containers directly. To enforce this, we are explicitly marking these methods
+     * private. They can be triggered through an explicit call to "duplicate".
+     */
+    FeatureData(const FeatureData & f) = default;
+    FeatureData & operator=(const FeatureData & f) = default;
+    ///@}
   };
+
+  /// Return a constant reference to the vector of all discovered features
+  const std::vector<FeatureData> & getFeatures() const { return _feature_sets; }
 
 protected:
   /**
@@ -298,8 +302,10 @@ protected:
    * are above the supplied threshold. If feature is NULL, we are exploring
    * for a new region to mark, otherwise we are in the recursive calls
    * currently marking a region.
+   *
+   * @return Boolean indicating whether a new feature was found while exploring the current entity.
    */
-  void flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
+  bool flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
 
   /**
    * Return the starting comparison threshold to use when inspecting an entity during the flood
@@ -326,7 +332,7 @@ protected:
    * of a new feature.
    */
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object,
-                                             std::size_t current_index,
+                                             std::size_t & current_index,
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id);
@@ -558,7 +564,7 @@ protected:
    * in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
-  std::vector<std::map<dof_id_type, bool>> _entities_visited;
+  std::vector<std::set<dof_id_type>> _entities_visited;
 
   /**
    * This map keeps track of which variables own which nodes.  We need a vector of them for multimap
