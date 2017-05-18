@@ -743,13 +743,13 @@ Real Water97FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
 }
 
 Real
-Water97FluidProperties::pSat(Real temperature) const
+Water97FluidProperties::vaporPressure(Real temperature) const
 {
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    mooseError(
-        "Water97FluidProperties::pSat: Temperature is outside range 273.15 K <= T <= 647.096 K");
+    mooseError("Water97FluidProperties::vaporPressure: Temperature is outside range 273.15 K <= T "
+               "<= 647.096 K");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4{0.11670521452767e4,
@@ -775,13 +775,13 @@ Water97FluidProperties::pSat(Real temperature) const
 }
 
 void
-Water97FluidProperties::pSat_dT(Real temperature, Real & psat, Real & dpsat_dT) const
+Water97FluidProperties::vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const
 {
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    mooseError(
-        "Water97FluidProperties::pSat_dT: Temperature is outside range 273.15 K <= T <= 647.096 K");
+    mooseError("Water97FluidProperties::vaporPressure_dT: Temperature is outside range 273.15 K <= "
+               "T <= 647.096 K");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4{0.11670521452767e4,
@@ -823,13 +823,13 @@ Water97FluidProperties::pSat_dT(Real temperature, Real & psat, Real & dpsat_dT) 
 }
 
 Real
-Water97FluidProperties::TSat(Real pressure) const
+Water97FluidProperties::vaporTemperature(Real pressure) const
 {
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure < 611.23 || pressure > _p_critical)
-    mooseError(
-        "Water97FluidProperties::TSat: Pressure is outside range 611.213 Pa <= p <= 22.064 MPa");
+    mooseError("Water97FluidProperties::vaporTemperature: Pressure is outside range 611.213 Pa <= "
+               "p <= 22.064 MPa");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4{0.11670521452767e4,
@@ -899,7 +899,7 @@ Water97FluidProperties::inRegion(Real pressure, Real temperature) const
   //          1073.15 K <= T <= 2273.15 K, p <= 50 Mpa
   if (temperature >= 273.15 && temperature <= 1073.15)
   {
-    if (pressure < pSat(273.15) || pressure > 100.0e6)
+    if (pressure < vaporPressure(273.15) || pressure > 100.0e6)
       mooseError("Pressure ", pressure, " is out of range in Water97FluidProperties::inRegion");
   }
   else if (temperature > 1073.15 && temperature <= 2273.15)
@@ -915,7 +915,7 @@ Water97FluidProperties::inRegion(Real pressure, Real temperature) const
 
   if (temperature >= 273.15 && temperature <= 623.15)
   {
-    if (pressure > pSat(temperature) && pressure <= 100.0e6)
+    if (pressure > vaporPressure(temperature) && pressure <= 100.0e6)
       region = 1;
     else
       region = 2;
@@ -1316,7 +1316,8 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
     else // (temperature > tempXY(pressure, JK))
       subregion = 10;
   }
-  else if (pMPa > pSat(643.15) * 1.0e-6 && pMPa <= 22.5) // pSat(643.15) = 21.04 MPa
+  else if (pMPa > vaporPressure(643.15) * 1.0e-6 &&
+           pMPa <= 22.5) // vaporPressure(643.15) = 21.04 MPa
   {
     if (temperature <= tempXY(pressure, CD))
       subregion = 2;
@@ -1346,17 +1347,17 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
         else // (temperature > tempXY(pressure, WX) && temperature <= tempXY(pressure, RX))
           subregion = 23;
       }
-      else if (temperature <= TSat(pressure))
+      else if (temperature <= vaporTemperature(pressure))
       {
         if (pMPa > 21.93161551 && pMPa <= 22.064)
           if (temperature > tempXY(pressure, QU) && temperature <= tempXY(pressure, UV))
             subregion = 20;
           else
             subregion = 24;
-        else // (pMPa > pSat(643.15) * 1.0e-6 && pMPa <= 21.93161551)
+        else // (pMPa > vaporPressure(643.15) * 1.0e-6 && pMPa <= 21.93161551)
           subregion = 20;
       }
-      else if (temperature > TSat(pressure))
+      else if (temperature > vaporTemperature(pressure))
       {
         if (pMPa > 21.90096265 && pMPa <= 22.064)
         {
@@ -1374,13 +1375,14 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
     else
       subregion = 10;
   }
-  else if (pMPa > 20.5 && pMPa <= pSat(643.15) * 1.0e-6) // pSat(643.15) = 21.04 MPa
+  else if (pMPa > 20.5 &&
+           pMPa <= vaporPressure(643.15) * 1.0e-6) // vaporPressure(643.15) = 21.04 MPa
   {
     if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, CD) && temperature <= TSat(pressure))
+    else if (temperature > tempXY(pressure, CD) && temperature <= vaporTemperature(pressure))
       subregion = 16;
-    else if (temperature > TSat(pressure) && temperature <= tempXY(pressure, JK))
+    else if (temperature > vaporTemperature(pressure) && temperature <= tempXY(pressure, JK))
       subregion = 17;
     else // (temperature > tempXY(pressure, JK))
       subregion = 10;
@@ -1389,14 +1391,14 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
   {
     if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, CD) && temperature <= TSat(pressure))
+    else if (temperature > tempXY(pressure, CD) && temperature <= vaporTemperature(pressure))
       subregion = 18;
     else
       subregion = 19;
   }
-  else if (pMPa > pSat(623.15) * 1.0e-6 && pMPa <= P3cd)
+  else if (pMPa > vaporPressure(623.15) * 1.0e-6 && pMPa <= P3cd)
   {
-    if (temperature < TSat(pressure))
+    if (temperature < vaporTemperature(pressure))
       subregion = 2;
     else
       subregion = 19;
@@ -1611,14 +1613,14 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
   unsigned int region;
 
   // Need to calculate enthalpies at the boundaries to delineate regions
-  Real p273 = pSat(273.15);
-  Real p623 = pSat(623.15);
+  Real p273 = vaporPressure(273.15);
+  Real p623 = vaporPressure(623.15);
 
   if (pressure >= p273 && pressure <= p623)
   {
-    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, TSat(pressure)))
+    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, vaporTemperature(pressure)))
       region = 1;
-    else if (enthalpy > h(pressure, TSat(pressure)) && enthalpy <= h(pressure, 1073.15))
+    else if (enthalpy > h(pressure, vaporTemperature(pressure)) && enthalpy <= h(pressure, 1073.15))
       region = 2;
     else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
       region = 5;

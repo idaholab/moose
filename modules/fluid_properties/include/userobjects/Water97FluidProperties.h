@@ -258,7 +258,7 @@ public:
    * @param temperature water temperature (K)
    * @return saturation pressure (Pa)
    */
-  Real pSat(Real temperature) const;
+  Real vaporPressure(Real temperature) const;
 
   /**
    * Saturation pressure as a function of temperature and derivative
@@ -274,7 +274,7 @@ public:
    * @param[out] saturation pressure (Pa)
    * @param[out] derivative of saturation pressure wrt temperature (Pa/K)
    */
-  void pSat_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
+  void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
 
   /**
    * Saturation temperature as a function of pressure.
@@ -288,7 +288,7 @@ public:
    * @param pressure water pressure (Pa)
    * @return saturation temperature (K)
    */
-  Real TSat(Real pressure) const;
+  Real vaporTemperature(Real pressure) const;
 
   /**
    * Auxillary equation for the boundary between regions 2 and 3.

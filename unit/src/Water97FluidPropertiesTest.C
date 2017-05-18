@@ -132,11 +132,11 @@ TEST_F(Water97FluidPropertiesTest, b3ab)
  * Revised Release on the IAPWS Industrial Formulation 1997 for the
  * Thermodynamic Properties of Water and Steam, IAPWS 2007
  */
-TEST_F(Water97FluidPropertiesTest, pSat)
+TEST_F(Water97FluidPropertiesTest, vaporPressure)
 {
-  REL_TEST("pSat", _fp->pSat(300), 3.53658941e3, 1.0e-8);
-  REL_TEST("pSat", _fp->pSat(500), 2.63889776e6, 1.0e-8);
-  REL_TEST("pSat", _fp->pSat(600), 12.3443146e6, 1.0e-8);
+  REL_TEST("vaporPressure", _fp->vaporPressure(300), 3.53658941e3, 1.0e-8);
+  REL_TEST("vaporPressure", _fp->vaporPressure(500), 2.63889776e6, 1.0e-8);
+  REL_TEST("vaporPressure", _fp->vaporPressure(600), 12.3443146e6, 1.0e-8);
 }
 
 /**
@@ -145,11 +145,11 @@ TEST_F(Water97FluidPropertiesTest, pSat)
  * Revised Release on the IAPWS Industrial Formulation 1997 for the
  * Thermodynamic Properties of Water and Steam, IAPWS 2007
  */
-TEST_F(Water97FluidPropertiesTest, TSat)
+TEST_F(Water97FluidPropertiesTest, vaporTemperature)
 {
-  REL_TEST("pSat", _fp->TSat(0.1e6), 372.755919, 1.0e-8);
-  REL_TEST("pSat", _fp->TSat(1.0e6), 453.035632, 1.0e-8);
-  REL_TEST("pSat", _fp->TSat(10.0e6), 584.149488, 1.0e-8);
+  REL_TEST("vaporPressure", _fp->vaporTemperature(0.1e6), 372.755919, 1.0e-8);
+  REL_TEST("vaporPressure", _fp->vaporTemperature(1.0e6), 453.035632, 1.0e-8);
+  REL_TEST("vaporPressure", _fp->vaporTemperature(10.0e6), 584.149488, 1.0e-8);
 }
 
 /**
@@ -483,11 +483,11 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   T = 300.0;
   Real dT = 1.0e-4;
 
-  Real dpSat_dT_fd = (_fp->pSat(T + dT) - _fp->pSat(T - dT)) / (2.0 * dT);
+  Real dpSat_dT_fd = (_fp->vaporPressure(T + dT) - _fp->vaporPressure(T - dT)) / (2.0 * dT);
   Real pSat = 0.0, dpSat_dT = 0.0;
-  _fp->pSat_dT(T, pSat, dpSat_dT);
+  _fp->vaporPressure_dT(T, pSat, dpSat_dT);
 
-  REL_TEST("dpSat_dT", dpSat_dT, dpSat_dT_fd, 1.0e-6);
+  REL_TEST("dvaporPressure_dT", dpSat_dT, dpSat_dT_fd, 1.0e-6);
 
   // Region 5
   p = 30.0e6;
@@ -509,4 +509,3 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-6);
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
 }
-

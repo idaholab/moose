@@ -39,7 +39,7 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
   // component, and Raoult's law for water).
   // Note: these are in terms of mole fraction
   Real K0 = _ncg_fp.henryConstant(Tk) / _gas_porepressure[_qp];
-  Real K1 = _water_fp.pSat(Tk) / _gas_porepressure[_qp];
+  Real K1 = _water_fp.vaporPressure(Tk) / _gas_porepressure[_qp];
 
   // The mole fractions for the NCG component in the two component
   // case can be expressed in terms of the equilibrium constants only
@@ -112,7 +112,7 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
     Real dK0_dT = dKh_dT / _gas_porepressure[_qp];
 
     Real psat, dpsat_dT;
-    _water_fp.pSat_dT(Tk, psat, dpsat_dT);
+    _water_fp.vaporPressure_dT(Tk, psat, dpsat_dT);
     Real dK1_dp = -psat / _gas_porepressure[_qp] / _gas_porepressure[_qp];
     Real dK1_dT = dpsat_dT / _gas_porepressure[_qp];
 
@@ -262,7 +262,7 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
       Real dK0_dT = dKh_dT / _gas_porepressure[_qp];
 
       Real psat, dpsat_dT;
-      _water_fp.pSat_dT(Tk, psat, dpsat_dT);
+      _water_fp.vaporPressure_dT(Tk, psat, dpsat_dT);
       Real dK1_dp = -psat / _gas_porepressure[_qp] / _gas_porepressure[_qp];
       Real dK1_dT = dpsat_dT / _gas_porepressure[_qp];
 
