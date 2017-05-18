@@ -22,9 +22,9 @@
  */
 TEST_F(BrineFluidPropertiesTest, vapor)
 {
-  REL_TEST("vapor", _fp->pSat(473.15, 0.185), 1.34e6, 1.0e-2);
-  REL_TEST("vapor", _fp->pSat(473.15, 0.267), 1.21e6, 1.0e-2);
-  REL_TEST("vapor", _fp->pSat(473.15, 0.312), 1.13e6, 1.0e-2);
+  REL_TEST("vapor", _fp->vaporPressure(473.15, 0.185), 1.34e6, 1.0e-2);
+  REL_TEST("vapor", _fp->vaporPressure(473.15, 0.267), 1.21e6, 1.0e-2);
+  REL_TEST("vapor", _fp->vaporPressure(473.15, 0.312), 1.13e6, 1.0e-2);
 }
 
 /**
