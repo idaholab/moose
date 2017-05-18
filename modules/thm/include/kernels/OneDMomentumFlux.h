@@ -26,7 +26,7 @@ protected:
   bool _is_liquid;
   Real _sign;
   const VariableValue & _alpha;
-  const VariableValue & _u_vel;
+  const VariableValue & _vel;
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;

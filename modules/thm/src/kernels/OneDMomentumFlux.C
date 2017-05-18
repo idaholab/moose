@@ -10,7 +10,7 @@ validParams<OneDMomentumFlux>()
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
-  params.addRequiredCoupledVar("u", "velocity");
+  params.addRequiredCoupledVar("vel", "velocity");
   params.addRequiredCoupledVar("area", "cross-sectional area");
   params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
   params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
@@ -22,7 +22,7 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _alpha(coupledValue("alpha")),
-    _u_vel(coupledValue("u")),
+    _vel(coupledValue("vel")),
     _pressure(getMaterialProperty<Real>("pressure")),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
@@ -43,7 +43,7 @@ OneDMomentumFlux::~OneDMomentumFlux() {}
 Real
 OneDMomentumFlux::computeQpResidual()
 {
-  Real F2 = _u[_qp] * _u_vel[_qp] + _alpha[_qp] * _pressure[_qp] * _area[_qp];
+  Real F2 = _u[_qp] * _vel[_qp] + _alpha[_qp] * _pressure[_qp] * _area[_qp];
   // The contribution due to the convective flux.  Negative sign on
   // the F2 term comes from integration by parts.
   return -F2 * _grad_test[_i][_qp](0);
@@ -53,7 +53,7 @@ Real
 OneDMomentumFlux::computeQpJacobian()
 {
   // (2,2) entry of flux Jacobian is the same as the constant area case, p_1 + 2*u
-  Real A22 = 2. * _u_vel[_qp] + _alpha[_qp] * _dp_darhouA[_qp] * _area[_qp];
+  Real A22 = 2. * _vel[_qp] + _alpha[_qp] * _dp_darhouA[_qp] * _area[_qp];
 
   // Negative sign comes from integration by parts
   return -A22 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
@@ -65,7 +65,7 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _rhoA_var_number)
   {
     // (2,1) entry of flux Jacobian is the same as the constant area case, p_0 - u^2
-    Real A21 = _alpha[_qp] * _dp_darhoA[_qp] * _area[_qp] - _u_vel[_qp] * _u_vel[_qp];
+    Real A21 = _alpha[_qp] * _dp_darhoA[_qp] * _area[_qp] - _vel[_qp] * _vel[_qp];
 
     // The contribution from the convective flux term.  Negative sign comes from integration by
     // parts.
