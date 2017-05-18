@@ -57,7 +57,7 @@ void
 FlowJunction::addMooseObjects()
 {
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
-  std::vector<VariableName> cv_u(1, FlowModel::VELOCITY);
+  std::vector<VariableName> cv_vel(1, FlowModel::VELOCITY);
   std::vector<VariableName> cv_pressure(1, FlowModel::PRESSURE);
   std::vector<VariableName> cv_enthalpy(1, FlowModel::SPECIFIC_TOTAL_ENTHALPY);
   std::vector<VariableName> cv_rhoA(1, FlowModel::RHOA);
@@ -97,7 +97,7 @@ FlowJunction::addMooseObjects()
       // coupling
       params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
-      params.set<std::vector<VariableName>>("u") = cv_u;
+      params.set<std::vector<VariableName>>("vel") = cv_vel;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
       params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
@@ -114,7 +114,7 @@ FlowJunction::addMooseObjects()
       // coupling
       params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
-      params.set<std::vector<VariableName>>("u") = cv_u;
+      params.set<std::vector<VariableName>>("vel") = cv_vel;
       params.set<std::vector<VariableName>>("pressure") = cv_pressure;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
@@ -133,7 +133,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
       params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
-      params.set<std::vector<VariableName>>("u") = cv_u;
+      params.set<std::vector<VariableName>>("vel") = cv_vel;
       params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<PostprocessorName>("c") = c_pps;
@@ -159,7 +159,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("e") = cv_e;
     params.set<std::vector<VariableName>>("v") = cv_v;
-    params.set<std::vector<VariableName>>("u") = cv_u;
+    params.set<std::vector<VariableName>>("vel") = cv_vel;
     params.set<std::vector<VariableName>>("p") = cv_pressure;
     params.set<std::vector<VariableName>>("area") = cv_area;
     params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
