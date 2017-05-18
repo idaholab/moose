@@ -1,0 +1,28 @@
+[Tests]
+  [./standard]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+  [../]
+
+  [./master_relaxed]
+    type = 'Exodiff'
+    input = 'picard_relaxed_master.i'
+    exodiff = 'picard_relaxed_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+  [../]
+
+  [./sub_relaxed]
+    type = 'Exodiff'
+    input = 'sub_relaxed_master.i'
+    exodiff = 'sub_relaxed_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+  [../]
+
+  [./bad_relax_factor]
+    type = 'RunException'
+    input = 'bad_relax_factor_master.i'
+    expect_err = 'The Picard iteration relaxation factor should be between 0.0 and 2.0'
+  [../]
+[]
