@@ -76,6 +76,11 @@
     variable = gr1
     execute_on = 'initial timestep_end'
   [../]
+  [./avg_grain_vol]
+    type = AverageGrainVolume
+    grain_num = 4
+    execute_on = 'initial timestep_end'
+  [../]
 []
 
 [Preconditioning]

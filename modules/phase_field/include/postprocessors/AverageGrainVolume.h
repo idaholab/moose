@@ -28,9 +28,9 @@ class AverageGrainVolume : public GeneralPostprocessor,
 {
 public:
   AverageGrainVolume(const InputParameters & parameters);
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
 
 protected:
   void accumulateVolumes(const std::vector<unsigned int> & var_to_features,
@@ -41,7 +41,6 @@ private:
   /// A reference to the mesh
   MooseMesh & _mesh;
   Assembly & _assembly;
-  unsigned int _nvals;
   std::vector<unsigned int> _static_var_to_feature;
   std::vector<const VariableValue *> _vals;
   std::vector<Real> _feature_volumes;
