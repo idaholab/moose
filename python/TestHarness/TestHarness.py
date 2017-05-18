@@ -151,7 +151,7 @@ class TestHarness:
         try:
             # Checking status on previously launched tests
             if self.options.checkStatus:
-                for (dirpath, file) in self.scheduler.getTests():
+                for (dirpath, file, test_name) in self.scheduler.getTests():
 
                     # Enter test directory
                     saved_cwd = os.getcwd()
@@ -161,8 +161,18 @@ class TestHarness:
                     # Get the testers for this test
                     testers = self.createTesters(dirpath, file, find_only)
 
-                    # Schedule the test for execution
-                    self.scheduleTesters(testers)
+                    # Reverse the dependency order while checking test statuses
+                    self.reverseDependencies(testers)
+
+                    # See if any tests have colliding outputs
+                    self.checkForRaceConditionOutputs(testers, dirpath)
+
+                    # Schedule the test for execution _if_ it matches the name we want
+                    # (because one test file can create multiple testers, and the user
+                    # may have only asked for one of these tests to run (--re))
+                    for tester in testers:
+                        if test_name == tester.getTestName():
+                            self.scheduler.schedule(tester, self.checks, self.test_list)
 
                     # Return to previous directory
                     os.chdir(saved_cwd)
@@ -284,6 +294,27 @@ class TestHarness:
                 self.scheduler.schedule(tester, self.checks, self.test_list)
 
         return testers
+
+    def reverseDependencies(self, testers):
+        r = ReverseDependencyResolver()
+        unordered_testers = {}
+
+        for tester in testers:
+            unordered_testers[tester.getTestName()] = tester
+            if tester.getPrereqs() != []:
+                r.insertDependency(tester.getTestName(), tester.getPrereqs())
+            else:
+                r.insertDependency(tester.getTestName(), [])
+        reversed_set = r.getSortedValuesSets()
+
+        for key, value in reversed_set.iteritems():
+            runnable_tests = []
+
+            # Loop through all reverse dependencies and verify they can run
+            for pre_test in list(value):
+                if unordered_testers[pre_test].checkRunnableBase(self.options, self.checks, self.test_list):
+                    runnable_tests.append(pre_test)
+            unordered_testers[key].specs['prereq'] = list(runnable_tests)
 
     def prunePath(self, filename):
         test_dir = os.path.abspath(os.path.dirname(filename))
@@ -841,13 +872,18 @@ class TestHarness:
     def checkForRaceConditionOutputs(self, testers, dirpath):
         d = DependencyResolver()
 
+        # Create a local dictionary to store a tests getRunnable()
+        get_runnable_tests = {}
+
         # Create a dictionary of test_names to Tester objects
         # We'll use this to retrieve the Tester objects by
         # name to call additional methods while determining
         # depedencies.
         name_to_object = {}
+
         for tester in testers:
             name_to_object[tester.getTestName()] = tester
+            get_runnable_tests[tester.getTestName()] = tester.getRunnable()
 
         # Now build up our tester dependencies
         for tester in testers:
@@ -855,17 +891,19 @@ class TestHarness:
             # We don't really care about skipped tests, heavy tests, etc.
             for name in tester.getPrereqs():
                 if not name_to_object[name].getRunnable():
-                    tester.setStatus('skipped dependency', tester.bucket_skip)
+                    # If the prereq test is not going to run, then neither can this test
+                    get_runnable_tests[tester.getTestName()] = False
 
             prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
             d.insertDependency(tester, prereq_objects)
 
         try:
             concurrent_tester_sets = d.getSortedValuesSets()
+
             for concurrent_testers in concurrent_tester_sets:
                 output_files_in_dir = set()
                 for tester in concurrent_testers:
-                    if tester.getRunnable():
+                    if get_runnable_tests[tester.getTestName()]:
                         output_files = tester.getOutputFiles()
                         duplicate_files = output_files_in_dir.intersection(output_files)
                         if len(duplicate_files):

@@ -483,7 +483,6 @@ class ReverseReachability:
 
         return reached
 
-
 class TestStatus(object):
     """
     Class for handling test statuses

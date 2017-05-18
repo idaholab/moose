@@ -94,6 +94,12 @@ class Tester(MooseObject):
     def getPrereqs(self):
         return self.specs['prereq']
 
+    def getMooseDir(self):
+        return self.specs['moose_dir']
+
+    def getTestDir(self):
+        return self.specs['test_dir']
+
     # Method to return if the test can run
     def getRunnable(self):
         return self.status.getRunnable()

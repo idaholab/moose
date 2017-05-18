@@ -59,10 +59,6 @@ class QueueManager(Scheduler):
     def getPrereqs(self, test_name):
         return self.getData(self.getJobName(test_name), prereq_tests=True)['prereq_tests']
 
-    # Update dependency information in the queue file
-    def updateDependencies(self, tester):
-        return
-
     # Get specified data from queue_data
     def getData(self, job, **kwargs):
         tmp_dict = {}
@@ -104,6 +100,7 @@ class QueueManager(Scheduler):
                 self.putData(job, **tmp_dict)
 
     # Return a list of tuples containing abspath of test_dir and corresponding test file
+    # and test name
     def getTests(self):
         test_list = []
         if self.queue_data:
@@ -111,7 +108,8 @@ class QueueManager(Scheduler):
                 if 'test_dir' in values.keys() and 'input_name' in values.keys():
                     test_dir = os.path.dirname(values['test_dir'])
                     input_name = values['input_name']
-                    test_list.append((test_dir, input_name))
+                    test_name = values['test_name']
+                    test_list.append((test_dir, input_name, test_name))
         return test_list
 
     # Go Again!
@@ -154,7 +152,7 @@ class QueueManager(Scheduler):
     # Return queue working directory
     # test_dir/job_<queue-filename>/
     def getWorkingDir(self, tester):
-        return os.path.join(tester.specs['test_dir'], 'job_' + self.queue_file.name)
+        return os.path.join(tester.getTestDir(), 'job_' + self.queue_file.name)
 
     # Return location of queue launch script
     # test_dir/job_<queue-filename>/<queue-filename>-test_name.sh
@@ -174,8 +172,10 @@ class QueueManager(Scheduler):
         # We are processing a previous run
         if self.options.checkStatus:
 
-            # Only launch a test if not launched yet, and if it exists in our queue_file
-            if tester.specs['test_name'] not in self.launched_jobs and tester.specs['test_name'] not in self.skipped_jobs \
+            # Only launch a test if not launched or already finished, and if it exists in our queue_file
+            if tester.getTestName() not in self.launched_jobs \
+               and tester.getTestName() not in self.skipped_jobs \
+               and tester.getTestName() not in self.finished_jobs \
                and self.getJobName(tester) in self.queue_data.keys():
 
                 # This test, while previously skipped, should have its skipped caveats re-displayed (unless the
@@ -217,6 +217,19 @@ class QueueManager(Scheduler):
         # Set working directory
         template_queue['working_dir'] = self.getWorkingDir(tester)
 
+        # We need to modify tester's test_dir to align with newly created directory
+        # the Queueing system is about to create. This is so when we run
+        # tester.processResultsCommand, the correct paths are returned
+        temp_test_dir = tester.getTestDir()
+        tester.specs['test_dir'] = self.getWorkingDir(tester)
+
+        # The command the tester needs to run for postProcessing (with the modified test_dir above)
+        template_queue['post_command'] = ';'.join(tester.processResultsCommand(tester.getMooseDir(), self.options))
+
+        # And now we set test_dir back again...
+        tester.specs['test_dir'] = temp_test_dir
+
+
         #### create a set for copy and nocopy so its easier to work with
         no_copy_files = set([])
         copy_files = set([])
@@ -241,9 +254,19 @@ class QueueManager(Scheduler):
         return template_queue
 
     # Create the queue launch script
-    def prepareQueueScriptBase(self, template_queue, tester, preq_list):
+    def prepareQueueScriptBase(self, template_queue, tester):
+        # Get a list of prereq tests this test may have
+        prereq_ids = set()
+        if tester.getPrereqs() != []:
+            for prereq_test in tester.getPrereqs():
+                job = self.getData(self.getJobName(prereq_test), id=True)
+                prereq_ids.update([job['id']])
+
+                # update queue_data with prereq test information
+                self.updateData(self.getJobName(tester), prereq_tests=[self.getJobName(prereq_test)])
+
         # Augment derived queue script requirements
-        template_queue = self.prepareQueueScript(template_queue, tester, preq_list)
+        template_queue = self.prepareQueueScript(template_queue, tester, prereq_ids)
 
         f = open(template_queue['template_script'], 'r')
         content = f.read()
@@ -328,7 +351,7 @@ class QueueManager(Scheduler):
                      input_name=self.options.input_file_name,
                      status=tester.getStatusMessage(),
                      job_name=self.getJobName(tester),
-                     test_name=tester.specs['test_name'])
+                     test_name=tester.getTestName())
 
         # return to the previous directory
         os.chdir(current_pwd)
@@ -349,41 +372,25 @@ class QueueManager(Scheduler):
         # Get the derived queueing command the queueing system needs us to launch
         command = self.getQueueCommand(tester)
 
-        # Handle unsatisfied prereq tests if we are trying to launch jobs.
-        # If we are trying to process results instead, skip this check.
+        # Check to see if this test has any unsatisfied tests
+        if self.unsatisfiedPrereqs(tester):
+            self.queue.append([tester, tester_command, os.getcwd()])
+            return
+
+        # If we are trying to process results instead, skip these methods
         if not self.options.checkStatus:
-            if self.unsatisfiedPrereqs(tester):
-                self.queue.append([tester, tester_command, os.getcwd()])
-                return
-
-        # If we are trying to process results instead, skip this check.
-        if not self.options.checkStatus:
-            # This test can now be launched because the prereq test(s) have been satisfied above
-            # meaning, their job_id is available
-            prereq_ids = set()
-            if tester.specs['prereq'] != [] and not self.options.checkStatus:
-                for prereq_test in tester.specs['prereq']:
-                    job = self.getData(self.getJobName(prereq_test), id=True)
-                    prereq_ids.update([job['id']])
-
-                    # Update queue_data with prereq test information
-                    self.putData(self.getJobName(tester), prereq_tests=[(prereq_test, job['id'])])
-
-                # With the update to queue_data above, perform a reverse dependency update
-                self.updateDependencies(tester)
-
             # Create and copy all the files/directories this test requires
             self.copyFiles(template_queue, tester)
 
             # Call the derived method to build the queue batch script
-            self.prepareQueueScriptBase(template_queue, tester, prereq_ids)
+            self.prepareQueueScriptBase(template_queue, tester)
 
         # Move into the working_dir
         current_pwd = os.getcwd()
         os.chdir(self.getWorkingDir(tester))
 
         # We're good up to this point? Then launch the job!
-        self.launchJob(tester, command, slot_check)
+        self.launchJob(tester, command, slot_check=True)
 
         # Return to the previous directory
         os.chdir(current_pwd)
@@ -404,25 +411,23 @@ class QueueManager(Scheduler):
             output += self.handleQueueLaunch(tester, queue_output)
 
         # Launching Jobs
-        # When launching jobs we need to _not_ add results to the 'final results' table
-        # but only if they didn't fail during launch
         if not self.options.checkStatus and tester.isPending():
-            self.finished_jobs.add(tester.specs['test_name'])
+            self.finished_jobs.add(tester.getTestName())
             self.harness.handleTestResult(tester, output, tester.getStatusMessage(), add_to_table=False)
 
         # Launching Job or Checking Status and the test failed
         elif tester.didFail():
-            self.finished_jobs.add(tester.specs['test_name'])
+            self.skipped_jobs.add(tester.getTestName())
             self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
         # Checking Status and the test is still pending
         elif self.options.checkStatus and tester.isPending():
-            self.skipped_jobs.add(tester.specs['test_name'])
+            self.finished_jobs.add(tester.getTestName())
             self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
         # Checking Status and the test has finished
         elif self.options.checkStatus and not tester.isPending():
-            self.finished_jobs.add(tester.specs['test_name'])
+            self.finished_jobs.add(tester.getTestName())
             self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
         # Update the queue_data with new test status reason

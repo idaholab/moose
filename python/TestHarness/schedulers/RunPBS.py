@@ -77,8 +77,9 @@ class RunPBS(QueueManager):
         if pattern.search(output):
             job_id = pattern.search(output).group(1)
 
-            # Update the queue_data
-            self.putData(self.getJobName(tester), id=job_id)
+            # Update the queue_data based on results
+            job = self.getData(self.getJobName(tester), job_name=True, test_dir=True)
+            self.putData(self.getJobName(tester), id=job_id, std_out=os.path.join(job['test_dir'], job['job_name'] + '.o%s' %(job_id)))
 
             # Append this job_id to a self governed list of launched jobs
             self.launched_ids.append(job_id)
@@ -112,15 +113,15 @@ class RunPBS(QueueManager):
 
         if output_value:
             # Get job information from queue_data
-            job = self.getData(self.getJobName(tester), test_dir=True, job_name=True, id=True)
+            job = self.getData(self.getJobName(tester), std_out=True, test_dir=True)
 
             # Save oringal test_dir so we can properly update the queue_data
-            original_testdir = tester.specs['test_dir']
+            # original_testdir = tester.specs['test_dir']
 
             ## Report the current status of JOB_ID
             if output_value.group(1) == 'F':
-                # Job is finished
-                stdout_file = os.path.join(job['test_dir'], job['job_name'] + '.o%s' % (job['id']))
+
+                stdout_file = job['std_out']
 
                 # Read the stdout file and allow testOutputAndFinish to do its job
                 if os.path.exists(stdout_file) and exit_code is not None:
@@ -134,9 +135,6 @@ class RunPBS(QueueManager):
 
                     # Allow the tester to verify its own output and set the status
                     output = tester.processResults(tester.specs['moose_dir'], exit_code, self.options, outfile)
-
-                    # Get that new status (we use this to populate the queue_file with an updated reason)
-                    reason = tester.getStatusMessage()
 
                 elif exit_code == None:
                     # This job was canceled or deleted (qdel)

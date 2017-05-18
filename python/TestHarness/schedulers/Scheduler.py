@@ -97,7 +97,7 @@ class Scheduler(MooseObject):
         self.harness.handleTestStatus(tester)
 
         # Notify derived schedulers of status change
-        return self.notifySchedulers(tester)
+        self.notifySchedulers(tester)
 
     ## Clear and Initialize the scheduler queue
     def clearAndInitializeJobs(self):
@@ -157,7 +157,7 @@ class Scheduler(MooseObject):
             # Handle --dru-run
             if self.options.dry_run:
                 tester.success_message = 'DRY RUN'
-                output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
+                output += '\n'.join(tester.processResultsCommand(tester.getMooseDir(), self.options))
                 self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
                 if tester.didPass():
                     self.finished_jobs.add(tester.specs['test_name'])
@@ -176,7 +176,7 @@ class Scheduler(MooseObject):
 
     ## Returns False if all pre-preqs have been satisfied
     def unsatisfiedPrereqs(self, tester):
-        if tester.specs['prereq'] != [] and len(set(tester.specs['prereq']) - self.finished_jobs):
+        if tester.getPrereqs() != [] and len(set(tester.getPrereqs()) - self.finished_jobs):
             if self.options.ignored_caveats is None:
                 return True
             elif self.options.ignored_caveats != 'all':
@@ -207,7 +207,7 @@ class Scheduler(MooseObject):
 
         # This job is skipped - notify the scheduler
         else:
-            if tester.isSilent(): # SILENT occurs when a user is using --re options
+            if not tester.isSilent(): # SILENT occurs when a user is using --re options
                 if (self.options.report_skipped and tester.isSkipped()) \
                    or tester.isSkipped():
                     self.notifySchedulersBase(tester)
@@ -420,7 +420,7 @@ class Scheduler(MooseObject):
                 print "\nCyclic or Invalid Dependency Detected!"
                 for (tester, command, dirpath) in self.queue:
                     print tester.specs['test_name']
-                sys.exit(1)
+                self.harness.closeFiles(1)
 
     # Add a skipped job to the list
     def jobSkipped(self, name):
