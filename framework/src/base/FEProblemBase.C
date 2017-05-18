@@ -969,8 +969,10 @@ FEProblemBase::residualVector(Moose::KernelType type)
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  if (_nl->hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_nl->hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -979,8 +981,10 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  if (_nl->hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_nl->hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
 }
@@ -988,8 +992,10 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addResidualScalar(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addResidualScalar(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  if (_nl->hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addResidualScalar(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_nl->hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addResidualScalar(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 }
 
 void
@@ -1011,8 +1017,10 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addCachedResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  if (_nl->hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addCachedResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_nl->hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addCachedResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);
@@ -1021,8 +1029,10 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
-  _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
+  if (_nl->hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
+  if (_nl->hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -3766,15 +3776,6 @@ FEProblemBase::initPetscOutput()
 {
   _app.getOutputWarehouse().solveSetup();
   Moose::PetscSupport::petscSetDefaults(*this);
-}
-
-Real
-FEProblemBase::relativeSolutionDifferenceNorm()
-{
-  if (_solve)
-    return _nl->relativeSolutionDifferenceNorm();
-  else
-    return 0;
 }
 
 void

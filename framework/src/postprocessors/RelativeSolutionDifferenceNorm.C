@@ -24,12 +24,14 @@ validParams<RelativeSolutionDifferenceNorm>()
 }
 
 RelativeSolutionDifferenceNorm::RelativeSolutionDifferenceNorm(const InputParameters & params)
-  : GeneralPostprocessor(params)
+  : GeneralPostprocessor(params), _trex(dynamic_cast<Transient *>(_app.getExecutioner()))
 {
+  if (!_trex)
+    mooseError("RelativeSolutionDifferenceNorm postprocessor is only for transient calculations");
 }
 
 Real
 RelativeSolutionDifferenceNorm::getValue()
 {
-  return _fe_problem.relativeSolutionDifferenceNorm();
+  return _trex->relativeSolutionDifferenceNorm();
 }
