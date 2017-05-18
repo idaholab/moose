@@ -16,15 +16,16 @@ class RecentlyUsedMenu(QObject, MooseWidget):
         self._menu = menu
         settings = QSettings()
         self._values = self._getSettingsValue(settings, self._recent_key, [])
-        max_val = settings.value(self._max_recent_key, type=int)
-        if max_val == None:
+        self._max_val = settings.value(self._max_recent_key)
+        if self._max_val is None:
             settings.setValue(self._max_recent_key, self._max_recent_default)
-        self._updateRecentlyOpened()
+            self._max_val = self._max_recent_default
+        self.updateRecentlyOpened()
 
         self.setup()
 
     def _getSettingsValue(self, settings, key, default):
-        val = settings.value(key, type=str)
+        val = settings.value(key)
         if val == None:
             return default
         return [str(x) for x in val]
@@ -48,7 +49,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
         if not name:
             return
         self.updateRecentlyUsed(name)
-        self._updateRecentlyOpened()
+        self.updateRecentlyOpened()
 
     def entryCount(self):
         return len(self._values)
@@ -57,7 +58,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
         settings = QSettings()
         settings.setValue(self._recent_key, [])
         self._values = []
-        self._updateRecentlyOpened()
+        self.updateRecentlyOpened()
 
     def removeEntry(self, value):
         settings = QSettings()
@@ -69,7 +70,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
                 for action in self._menu.actions():
                     if action.text() == value:
                         self._menu.removeAction(action)
-        self._updateRecentlyOpened()
+        self.updateRecentlyOpened()
 
     def updateRecentlyUsed(self, value):
         settings = QSettings()
@@ -82,7 +83,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
                 self._values.insert(0, value)
                 max_files = settings.value(self._max_recent_key, type=int)
                 if not max_files:
-                    max_files = self._max_recent_default
+                    max_files = self._max_val
                     settings.setValue(self._max_recent_key, max_files)
                 if len(self._values) >= max_files:
                     self._values.pop()
@@ -91,14 +92,14 @@ class RecentlyUsedMenu(QObject, MooseWidget):
         settings.setValue(self._recent_key, self._values)
         return self._values
 
-    def _updateRecentlyOpened(self):
+    def updateRecentlyOpened(self):
         self._menu.clear()
         if not self._values:
             self._menu.setEnabled(False)
             return
         self._menu.setEnabled(True)
         for i, value in enumerate(self._values):
-            if i < self._max_recent_default:
+            if i < self._max_val:
                 action = QAction(value, self)
                 action.triggered.connect(self._fileSelected)
                 self._menu.addAction(action)

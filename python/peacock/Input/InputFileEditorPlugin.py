@@ -4,7 +4,6 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
 from peacock.base.Plugin import Plugin
 from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
-from InputSettings import InputSettings
 from CheckInputWidget import CheckInputWidget
 from InputFileEditor import InputFileEditor
 import os
@@ -40,6 +39,14 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         self.input_file_view.setWindowFlags(Qt.Window)
         self.input_file_view.resize(640, 480)
         self.has_changed = False
+
+        self._preferences.addInt("input/maxRecentlyUsed",
+                "Max number of input files",
+                20,
+                1,
+                50,
+                "Set the maximum number of recent input files that have been used.",
+                )
 
         self.setup()
 
@@ -148,7 +155,11 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         self._open_action = WidgetUtils.addAction(menu, "Open", self._openInputFile, "Ctrl+O")
         recentMenu = menu.addMenu("Recently opened")
-        self._recently_used_menu = RecentlyUsedMenu(recentMenu, InputSettings.RECENTLY_USED_KEY, InputSettings.MAX_RECENT_KEY, InputSettings.MAX_RECENT_DEFAULT)
+        self._recently_used_menu = RecentlyUsedMenu(recentMenu,
+                "input/recentlyUsed",
+                "input/maxRecentlyUsed",
+                20,
+                )
         self._recently_used_menu.selected.connect(self.setInputFile)
 
         self._save_action = WidgetUtils.addAction(menu, "Save", self._saveInputFile)

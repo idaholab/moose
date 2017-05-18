@@ -7,7 +7,6 @@ from peacock.utils import WidgetUtils
 from peacock.base.Plugin import Plugin
 import mooseutils
 from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
-from ExecuteSettings import ExecuteSettings
 
 class ExecuteOptionsPlugin(QWidget, Plugin):
     """
@@ -23,6 +22,48 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
 
     def __init__(self, **kwds):
         super(ExecuteOptionsPlugin, self).__init__(**kwds)
+
+        self._preferences.addInt("execute/maxRecentWorkingDirs",
+                "Max recent working directories",
+                10,
+                1,
+                50,
+                "Set the maximum number of recent working directories that have been used.",
+                )
+        self._preferences.addInt("execute/maxRecentExes",
+                "Max recent executables",
+                10,
+                1,
+                50,
+                "Set the maximum number of recent executables that have been used.",
+                )
+        self._preferences.addInt("execute/maxRecentArgs",
+                "Max recent command line arguments",
+                10,
+                1,
+                50,
+                "Set the maximum number of recent command line arguments that have been used.",
+                )
+        self._preferences.addBool("execute/mpiEnabled",
+                "Enable MPI by default",
+                False,
+                "Set the MPI checkbox on by default",
+                )
+        self._preferences.addString("execute/mpiArgs",
+                "Default mpi command",
+                "mpiexec -n 2",
+                "Set the default MPI command to run",
+                )
+        self._preferences.addBool("execute/threadsEnabled",
+                "Enable threads by default",
+                False,
+                "Set the threads checkbox on by default",
+                )
+        self._preferences.addString("execute/threadsArgs",
+                "Default threads arguments",
+                "--n-threads=2",
+                "Set the default threads arguments",
+                )
 
         self.all_exe_layout = WidgetUtils.addLayout(grid=True)
         self.setLayout(self.all_exe_layout)
@@ -50,18 +91,20 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self.mpi_label = WidgetUtils.addLabel(None, self, "Use MPI")
         self.all_exe_layout.addWidget(self.mpi_label, 3, 0)
         self.mpi_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
+        self.mpi_checkbox.setChecked(self._preferences.value("execute/mpiEnabled"))
         self.all_exe_layout.addWidget(self.mpi_checkbox, 3, 1, alignment=Qt.AlignHCenter)
         self.mpi_line = WidgetUtils.addLineEdit(None, self, None)
-        self.mpi_line.setText("mpiexec -n 2")
+        self.mpi_line.setText(self._preferences.value("execute/mpiArgs"))
         self.mpi_line.cursorPositionChanged.connect(self._mpiLineCursorChanged)
         self.all_exe_layout.addWidget(self.mpi_line, 3, 2)
 
         self.threads_label = WidgetUtils.addLabel(None, self, "Use Threads")
         self.all_exe_layout.addWidget(self.threads_label, 4, 0)
         self.threads_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
+        self.threads_checkbox.setChecked(self._preferences.value("execute/threadsEnabled"))
         self.all_exe_layout.addWidget(self.threads_checkbox, 4, 1, alignment=Qt.AlignHCenter)
         self.threads_line = WidgetUtils.addLineEdit(None, self, None)
-        self.threads_line.setText("--n-threads=2")
+        self.threads_line.setText(self._preferences.value("execute/threadsArgs"))
         self.threads_line.cursorPositionChanged.connect(self._threadsLineCursorChanged)
         self.all_exe_layout.addWidget(self.threads_line, 4, 2)
 
@@ -209,21 +252,38 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
             else:
                 self._recent_working_menu.update(full_path)
 
+    def onPreferencesSaved(self):
+        self._recent_args_menu.updateRecentlyOpened()
+        self._recent_working_menu.updateRecentlyOpened()
+        self._recent_exe_menu.updateRecentlyOpened()
+
     def addToMenu(self, menu):
         """
         Adds menu entries specific to the Arguments to the menubar.
         """
         workingMenu = menu.addMenu("Recent &working dirs")
-        self._recent_working_menu = RecentlyUsedMenu(workingMenu, ExecuteSettings.RECENT_WORKING_KEY, ExecuteSettings.RECENT_WORKING_MAX_KEY, ExecuteSettings.MAX_DEFAULT)
+        self._recent_working_menu = RecentlyUsedMenu(workingMenu,
+                "execute/recentWorkingDirs",
+                "execute/maxRecentWorkingDirs",
+                20,
+                )
         self._recent_working_menu.selected.connect(self.setWorkingDir)
         self._workingDirChanged()
 
         exeMenu = menu.addMenu("Recent &executables")
-        self._recent_exe_menu = RecentlyUsedMenu(exeMenu, ExecuteSettings.RECENT_EXES_KEY, ExecuteSettings.RECENT_EXES_MAX_KEY, ExecuteSettings.MAX_DEFAULT)
+        self._recent_exe_menu = RecentlyUsedMenu(exeMenu,
+                "execute/recentExes",
+                "execute/maxRecentExes",
+                20,
+                )
         self._recent_exe_menu.selected.connect(self.setExecutablePath)
 
         argsMenu = menu.addMenu("Recent &arguments")
-        self._recent_args_menu = RecentlyUsedMenu(argsMenu, ExecuteSettings.RECENT_ARGS_KEY, ExecuteSettings.RECENT_ARGS_MAX_KEY, ExecuteSettings.MAX_DEFAULT)
+        self._recent_args_menu = RecentlyUsedMenu(argsMenu,
+                "execute/recentArgs",
+                "execute/maxRecentArgs",
+                20,
+                )
         self._recent_args_menu.selected.connect(self._setExecutableArgs)
 
     def clearRecentlyUsed(self):

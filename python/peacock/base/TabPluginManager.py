@@ -2,6 +2,7 @@ import argparse
 from PyQt5 import QtWidgets
 from PluginManager import PluginManager
 from TabPlugin import TabPlugin
+from TabbedPreferences import TabbedPreferences
 
 class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
     """
@@ -16,6 +17,7 @@ class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
         super(TabPluginManager, self).__init__(plugins=plugins, plugin_base=plugin_base)
         self._description = 'A GUI application (use setDescription within __init__ to change this message).'
         self.setup()
+        self._pref_widget = None
 
     def description(self):
         """
@@ -59,6 +61,14 @@ class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
         """
         for tab_plugin in self._all_plugins:
             tab_plugin.initialize(options)
+
+    def tabPreferenceWidget(self):
+        """
+        Returns an instance of a widget to set preferences
+        """
+        if not self._pref_widget:
+            self._pref_widget = TabbedPreferences(self._all_plugins)
+        return self._pref_widget
 
 
 if __name__ == '__main__':

@@ -11,7 +11,6 @@ from InputFileEditorPlugin import InputFileEditorPlugin
 import os
 import BCHighlighter
 import TimeStepEstimate
-from InputSettings import InputSettings
 
 class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
     """
@@ -237,12 +236,6 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Clears all the items in the recently used menu
         """
         self.InputFileEditorPlugin.clearRecentlyUsed()
-
-    def settingsWidget(self):
-        """
-        Just returns a widget that allows editing of settings for this widget
-        """
-        return InputSettings()
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow

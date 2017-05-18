@@ -35,6 +35,13 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self._auto = [True, True]
         self._colorbar = None
 
+        self._preferences.addCombo("exodus/defaultColorMap",
+                "Default colormap",
+                "default",
+                sorted(self._availableColorMaps().keys()),
+                "Set the default colormap to use",
+                )
+
         # QGroupBox settings
         self.setTitle('Variable')
 
@@ -255,16 +262,26 @@ class VariablePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         qobject.setStyleSheet('color:#000000')
         self._auto[index] = False
 
+    def _availableColorMaps(self):
+        filenames = glob.glob(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'icons', 'colormaps', '*.png')))
+        colormaps = {}
+        for i in range(len(filenames)):
+            name = os.path.basename(filenames[i])[0:-4]
+            colormaps[name] = filenames[i]
+        return colormaps
+
     def _setupColorMapList(self, qobject):
         """
         Setup the list of colormaps.
         """
-        filenames = glob.glob(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'icons', 'colormaps', '*.png')))
-        for i in range(len(filenames)):
-            name = os.path.basename(filenames[i])[0:-4]
+        colormaps = self._availableColorMaps()
+        names = sorted(colormaps.keys())
+        default = self._preferences.value("exodus/defaultColorMap")
+        for i in range(len(names)):
+            name = names[i]
             self.ColorMapList.addItem(name)
-            self.ColorMapList.setItemIcon(i, QtGui.QIcon(filenames[i]))
-            if name == 'default':
+            self.ColorMapList.setItemIcon(i, QtGui.QIcon(colormaps[name]))
+            if name == default:
                 self.ColorMapList.setCurrentIndex(i)
 
         qobject.currentIndexChanged.connect(self._callbackColorMapList)

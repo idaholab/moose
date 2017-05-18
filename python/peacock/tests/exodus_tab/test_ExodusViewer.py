@@ -2,7 +2,7 @@
 import sys
 import unittest
 import vtk
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from peacock.ExodusViewer.ExodusViewer import main
 from peacock.utils import Testing
@@ -139,6 +139,22 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         self.assertEqual(mesh.DisplacementToggle.isChecked(), False)
         self.assertEqual(mesh.DisplacementMagnitude.value(), 1.5)
         self.assertImage('testDiffusion2.png')
+
+    def testPrefs(self):
+        settings = QtCore.QSettings()
+        settings.setValue("exodus/defaultColorMap", "magma")
+        settings.sync()
+        self.setUp()
+        cmap = self._widget.currentWidget().VariablePlugin.ColorMapList
+        pref = self._widget.preferencesWidget()
+        self.assertEqual(pref.count(), 1)
+        self.assertEqual(cmap.currentText(), "magma")
+
+        settings.setValue("exodus/defaultColorMap", "default")
+        settings.sync()
+        self.setUp()
+        cmap = self._widget.currentWidget().VariablePlugin.ColorMapList
+        self.assertEqual(cmap.currentText(), "default")
 
 
 if __name__ == '__main__':
