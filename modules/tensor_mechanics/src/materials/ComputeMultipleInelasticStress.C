@@ -150,7 +150,6 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
              << "iteration output for ComputeMultipleInelasticStress solve:"
              << " time=" << _t << " int_pt=" << _qp << std::endl;
   }
-
   Real l2norm_delta_stress, first_l2norm_delta_stress;
   unsigned int counter = 0;
 
@@ -183,15 +182,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
       // the strain increment into an elastic part (elastic_strain_increment) and an
       // inelastic part (inelastic_strain_increment[i_rmm])
-      _models[i_rmm]->updateState(elastic_strain_increment,
-                                  inelastic_strain_increment[i_rmm],
-                                  _rotation_increment[_qp],
-                                  _stress[_qp],
-                                  _stress_old[_qp],
-                                  _elasticity_tensor[_qp],
-                                  _elastic_strain_old[_qp],
-                                  _tangent_operator_type == TangentOperatorEnum::nonlinear,
-                                  _consistent_tangent_operator[i_rmm]);
+      computeAdmissibleState(i_rmm, elastic_strain_increment, inelastic_strain_increment[i_rmm], _consistent_tangent_operator[i_rmm]);
 
       if (i_rmm == 0)
       {
@@ -246,6 +237,13 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     combined_inelastic_strain_increment +=
         _inelastic_weights[i_rmm] * inelastic_strain_increment[i_rmm];
 
+  if (_fe_problem.currentlyComputingJacobian())
+      computeQpJacobianMult();
+}
+
+void
+ComputeMultipleInelasticStress::computeQpJacobianMult()
+{
   if (_tangent_operator_type == TangentOperatorEnum::elastic)
     _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
   else
@@ -267,13 +265,19 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
 
   _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
-  _models[0]->updateState(elastic_strain_increment,
-                          combined_inelastic_strain_increment,
-                          _rotation_increment[_qp],
-                          _stress[_qp],
-                          _stress_old[_qp],
-                          _elasticity_tensor[_qp],
-                          _elastic_strain_old[_qp],
-                          _tangent_operator_type == TangentOperatorEnum::nonlinear,
-                          _Jacobian_mult[_qp]);
+  computeAdmissibleState(0, elastic_strain_increment, combined_inelastic_strain_increment, _Jacobian_mult[_qp]);
+}
+
+void
+ComputeMultipleInelasticStress::computeAdmissibleState(unsigned model_number, RankTwoTensor & elastic_strain_increment, RankTwoTensor & inelastic_strain_increment, RankFourTensor & consistent_tangent_operator)
+{
+  _models[model_number]->updateState(elastic_strain_increment,
+                              inelastic_strain_increment,
+                              _rotation_increment[_qp],
+                              _stress[_qp],
+                              _stress_old[_qp],
+                              _elasticity_tensor[_qp],
+                              _elastic_strain_old[_qp],
+                              _tangent_operator_type == TangentOperatorEnum::nonlinear,
+                              consistent_tangent_operator);
 }

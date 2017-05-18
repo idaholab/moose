@@ -43,6 +43,7 @@
 #include "CappedWeakInclinedPlaneStressUpdate.h"
 #include "CappedWeakPlaneCosseratStressUpdate.h"
 #include "CappedDruckerPragerStressUpdate.h"
+#include "CappedDruckerPragerCosseratStressUpdate.h"
 #include "ComputeMultiPlasticityStress.h"
 #include "ComputeCosseratLinearElasticStress.h"
 #include "ComputeCosseratSmallStrain.h"
@@ -89,6 +90,7 @@
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
 #include "ComputeMultipleInelasticStress.h"
+#include "ComputeMultipleInelasticCosseratStress.h"
 #include "RadialReturnStressUpdate.h"
 #include "IsotropicPlasticityStressUpdate.h"
 #include "IsotropicPowerLawHardeningStressUpdate.h"
@@ -245,6 +247,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(CappedWeakInclinedPlaneStressUpdate);
   registerMaterial(CappedWeakPlaneCosseratStressUpdate);
   registerMaterial(CappedDruckerPragerStressUpdate);
+  registerMaterial(CappedDruckerPragerCosseratStressUpdate);
   registerMaterial(ComputeMultiPlasticityStress);
   registerMaterial(ComputeCosseratLinearElasticStress);
   registerMaterial(ComputeCosseratSmallStrain);
@@ -291,6 +294,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
   registerMaterial(ComputeMultipleInelasticStress);
+  registerMaterial(ComputeMultipleInelasticCosseratStress);
   registerMaterial(RadialReturnStressUpdate);
   registerMaterial(IsotropicPlasticityStressUpdate);
   registerMaterial(IsotropicPowerLawHardeningStressUpdate);

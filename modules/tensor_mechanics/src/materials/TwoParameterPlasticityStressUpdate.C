@@ -59,6 +59,7 @@ validParams<TwoParameterPlasticityStressUpdate>()
                         "Output a message to the console every "
                         "time precision-loss is encountered "
                         "during the Newton-Raphson process");
+  params.addParam<std::vector<Real>>("admissible_stress", std::vector<Real>{0.0, 0.0}, "A single admissible value of the value of (p, q) for internal parameters = 0.  This is used to initialise the return-mapping algorithm during the first nonlinear iteration");
   return params;
 }
 
@@ -106,12 +107,16 @@ TwoParameterPlasticityStressUpdate::TwoParameterPlasticityStressUpdate(
     _dgaE_dqt(0.0),
     _dp_dqt(0.0),
     _dq_dqt(0.0),
-    _all_q(_num_yf)
+    _all_q(_num_yf),
+
+    _pq_ok(getParam<std::vector<Real>>("admissible_stress"))
 {
   for (unsigned i = 0; i < _num_intnl; ++i)
     _dintnl[i].resize(_num_pq);
   for (unsigned i = 0; i < _num_yf; ++i)
     _all_q[i] = f_and_derivs(_num_pq, _num_intnl);
+  if (_pq_ok.size() != 2)
+    mooseError("TwoParameterPlasticityStressUpdate: admissible_stress parameter must be two numbers");
 }
 
 void
@@ -195,11 +200,12 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
   computePQ(stress_old, p_ok, q_ok);
   std::copy(_intnl_old[_qp].begin(), _intnl_old[_qp].end(), _intnl_ok.begin());
   // note that _intnl[_qp] is the "running" intnl variable that gets updated every NR iteration
-  if (isParamValid("initial_stress") && _step_one)
+  //if (isParamValid("initial_stress") && _step_one)
+  if (_step_one)
   {
     // the initial stress might be inadmissible
-    p_ok = 0.0;
-    q_ok = 0.0;
+    p_ok = _pq_ok[0];
+    q_ok = _pq_ok[1];
   }
 
   _dgaE_dpt = 0.0;
@@ -337,8 +343,8 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
   setStressAfterReturn(
       stress_trial, p_ok, q_ok, gaE_total, _intnl[_qp], smoothed_q, elasticity_tensor, stress_new);
 
-  inelastic_strain_increment = (gaE_total / _Epp) * (smoothed_q.dg[0] * dpdstress(stress_new) +
-                                                     smoothed_q.dg[1] * dqdstress(stress_new));
+  setInelasticStrainIncrementAfterReturn(stress_trial, gaE_total, smoothed_q, elasticity_tensor, stress_new, inelastic_strain_increment);
+
   strain_increment = strain_increment - inelastic_strain_increment;
   _plastic_strain[_qp] = _plastic_strain_old[_qp] + inelastic_strain_increment;
 
@@ -836,4 +842,15 @@ TwoParameterPlasticityStressUpdate::setStressAfterReturn(const RankTwoTensor & s
   const RankTwoTensor correction = elasticity_tensor * (smoothed_q.dg[0] * dpdstress(stress) +
                                                         smoothed_q.dg[1] * dqdstress(stress));
   stress = stress_trial - gaE / _Epp * correction;
+}
+
+void
+TwoParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(const RankTwoTensor & /*stress_trial*/,
+                                                         Real gaE,
+                                                         const f_and_derivs & smoothed_q,
+                                                         const RankFourTensor & /*elasticity_tensor*/,
+                                                                           const RankTwoTensor & returned_stress, RankTwoTensor & inelastic_strain_increment) const
+{
+  inelastic_strain_increment = (gaE / _Epp) * (smoothed_q.dg[0] * dpdstress(returned_stress) +
+                                                     smoothed_q.dg[1] * dqdstress(returned_stress));
 }

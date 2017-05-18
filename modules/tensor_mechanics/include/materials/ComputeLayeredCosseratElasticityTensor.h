@@ -30,8 +30,18 @@ protected:
   /// Flexural rigidity tensor
   RankFourTensor _Bijkl;
 
+  /**
+   * Inverse of elasticity tensor.
+   * The usual _Eijkl.invSymm() cannot be used here as _Eijkl
+   * does not possess the usual symmetries
+   */
+  RankFourTensor _Cijkl;
+
   /// Flexural rigidity tensor at the qps
   MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
+
+  /// Compliance tensor (_Eijkl^-1) at the qps
+  MaterialProperty<RankFourTensor> & _compliance;
 };
 
 #endif // COMPUTELAYEREDCOSSERATELASTICITYTENSOR_H

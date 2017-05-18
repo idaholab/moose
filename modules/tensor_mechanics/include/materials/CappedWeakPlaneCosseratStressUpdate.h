@@ -29,25 +29,6 @@ public:
   CappedWeakPlaneCosseratStressUpdate(const InputParameters & parameters);
 
 protected:
-  /// The Cosserat curvature strain
-  const MaterialProperty<RankTwoTensor> & _curvature;
-
-  /// The Cosserat elastic flexural rigidity tensor
-  const MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
-
-  /// the Cosserat couple-stress
-  MaterialProperty<RankTwoTensor> & _couple_stress;
-
-  /// the old value of Cosserat couple-stress
-  MaterialProperty<RankTwoTensor> & _couple_stress_old;
-
-  /// derivative of couple-stress w.r.t. curvature
-  MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
-
-  virtual void initQpStatefulProperties() override;
-
-  virtual void initialiseReturnProcess() override;
-
   virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
                                          Real p_trial,
                                          Real q_trial,
