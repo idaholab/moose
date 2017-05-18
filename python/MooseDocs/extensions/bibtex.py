@@ -22,7 +22,7 @@ import logging
 
 from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
-from pybtex.database.input.bibtex import UndefinedMacro
+from pybtex.database.input.bibtex import UndefinedMacro, Person
 
 import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
@@ -189,6 +189,22 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
             # Build the author list
             self._citations.append(key)
             entry = self._bibtex.entries[key]
+            author_found = True
+            if not 'author' in entry.persons.keys() and not 'Author' in entry.persons.keys():
+                author_found = False
+                entities = ['institution', 'organization']
+                for entity in entities:
+                    if entity in entry.fields.keys():
+                        author_found = True
+                        name = ''
+                        for word in entry.fields[entity]:
+                            if word[0].isupper():
+                                name += word[0]
+                        entry.persons['author'] = [Person(name)]
+
+            if not author_found:
+                LOG.error('No author, institution, or organization for %s', key)
+
             a = entry.persons['author']
             n = len(a)
             if n > 2:

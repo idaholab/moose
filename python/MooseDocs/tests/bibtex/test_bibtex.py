@@ -68,8 +68,12 @@ class TestBibtexExtension(MarkdownTestCase):
         self.assertConvert('test_citepThree.html', md)
 
     def testBibtexMacro(self):
-        md = r'\cite{macroTestKey}\n\bibliography{docs/bib/macro_test.bib}'
+        md = r'\cite{macroTestKey}\n\bibliography{docs/bib/test.bib}'
         self.assertConvert('test_bibtex_macro.html', md)
+
+    def testNoAuthor(self):
+        md = r'\cite{noAuthorTestKey}\n\bibliography{docs/bib/test.bib}'
+        self.assertConvert('test_no_author.html', md)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
