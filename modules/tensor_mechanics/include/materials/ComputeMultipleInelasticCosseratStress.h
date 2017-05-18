@@ -46,7 +46,10 @@ protected:
    * elastic/inelastic strain decomposition.  Overriding this
    * method allows the correction to be made.
    */
-  virtual void computeAdmissibleState(unsigned model_number, RankTwoTensor & elastic_strain_increment, RankTwoTensor & inelastic_strain_increment, RankFourTensor & consistent_tangent_operator) override;
+  virtual void computeAdmissibleState(unsigned model_number,
+                                      RankTwoTensor & elastic_strain_increment,
+                                      RankTwoTensor & inelastic_strain_increment,
+                                      RankFourTensor & consistent_tangent_operator) override;
 
   /// The Cosserat curvature strain
   const MaterialProperty<RankTwoTensor> & _curvature;
@@ -64,7 +67,7 @@ protected:
   MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
 
   /// Inverse of the elasticity tensor
-  const  MaterialProperty<RankFourTensor> & _compliance;
+  const MaterialProperty<RankFourTensor> & _compliance;
 };
 
 #endif // COMPUTEMULTIPLEINELASTICCOSSERATSTRESS_H

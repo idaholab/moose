@@ -1,3 +1,4 @@
+#Cosserat capped weak plane and capped drucker prager
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -78,25 +79,33 @@
 []
 
 [UserObjects]
-  [./coh]
+  [./ts]
     type = TensorMechanicsHardeningConstant
-    value = 1
+    value = 10
   [../]
-  [./tanphi]
+  [./cs]
     type = TensorMechanicsHardeningConstant
-    value = 0.5
+    value = 10
   [../]
-  [./tanpsi]
+  [./mc_coh]
     type = TensorMechanicsHardeningConstant
-    value = 2.055555555556E-01
+    value = 10
   [../]
-  [./t_strength]
+  [./phi]
     type = TensorMechanicsHardeningConstant
-    value = 1
+    value = 0.8
   [../]
-  [./c_strength]
+  [./psi]
     type = TensorMechanicsHardeningConstant
-    value = 100
+    value = 0.4
+  [../]
+  [./dp]
+    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    mc_cohesion = mc_coh
+    mc_friction_angle = phi
+    mc_dilation_angle = psi
+    yield_function_tolerance = 1E-11     # irrelevant here
+    internal_constraint_tolerance = 1E-9 # irrelevant here
   [../]
 []
 
@@ -114,19 +123,23 @@
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
-    inelastic_models = stress
-    initial_stress = '1 0.1 0.2  0.1 1 0.3  0 0 2' # not symmetric
+    inelastic_models = 'dp'
+    initial_stress = '10 0 0  0 10 0  0 0 10'
+    relative_tolerance = 2.0
+    absolute_tolerance = 1E6
+    max_iterations = 1
   [../]
-  [./stress]
-    type = CappedWeakPlaneCosseratStressUpdate
-    cohesion = coh
-    tan_friction_angle = tanphi
-    tan_dilation_angle = tanpsi
-    tensile_strength = t_strength
-    compressive_strength = c_strength
-    tip_smoother = 0.1
-    smoothing_tol = 0.1
-    yield_function_tol = 1E-5
+  [./dp]
+    type = CappedDruckerPragerCosseratStressUpdate
+    host_youngs_modulus = 10.0
+    host_poissons_ratio = 0.25
+    name_prepender = dp
+    DP_model = dp
+    tensile_strength = ts
+    compressive_strength = cs
+    yield_function_tol = 1E-11
+    tip_smoother = 1
+    smoothing_tol = 1
   [../]
 []
 

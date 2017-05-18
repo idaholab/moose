@@ -35,7 +35,7 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(
     _Bijkl(RankFourTensor()),
     _Cijkl(RankFourTensor()),
     _elastic_flexural_rigidity_tensor(
-                                      declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
+        declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
     _compliance(declareProperty<RankFourTensor>(_base_name + "compliance_tensor"))
 {
   const Real E = getParam<Real>("young");
@@ -83,18 +83,18 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(
   // this is the main reason it is calculated here, since we can't use
   // _Eijkl.invSymm()
   const Real pre = (nu - 1.0) / (a0000 * (nu - 1.0) + 2.0 * a2222 * Utility::pow<2>(nu));
-  const Real cp0000 = ((a2222 - a0000) * nu * nu + 2.0 * a0000 * nu - a0000) / (2.0 * a0000 * nu - a0000);
-  const Real cp0011 = - ((a0000 + a2222) * nu * nu - a0000 * nu) / (2.0 * a0000 * nu - a0000);
+  const Real cp0000 =
+      ((a2222 - a0000) * nu * nu + 2.0 * a0000 * nu - a0000) / (2.0 * a0000 * nu - a0000);
+  const Real cp0011 = -((a0000 + a2222) * nu * nu - a0000 * nu) / (2.0 * a0000 * nu - a0000);
   _Cijkl(0, 0, 0, 0) = _Cijkl(1, 1, 1, 1) = pre * cp0000;
   _Cijkl(0, 0, 1, 1) = _Cijkl(1, 1, 0, 0) = pre * cp0011;
   _Cijkl(2, 2, 2, 2) = pre * a0000 / a2222;
-  _Cijkl(0, 0, 2, 2) = _Cijkl(1, 1, 2, 2) = _Cijkl(2, 2, 0, 0) = _Cijkl(2, 2, 1, 1) = - nu * pre;
+  _Cijkl(0, 0, 2, 2) = _Cijkl(1, 1, 2, 2) = _Cijkl(2, 2, 0, 0) = _Cijkl(2, 2, 1, 1) = -nu * pre;
   _Cijkl(0, 1, 0, 1) = _Cijkl(0, 1, 1, 0) = _Cijkl(1, 0, 0, 1) = _Cijkl(1, 0, 1, 0) = 0.25 / a0101;
   const Real slip = 2.0 / (G - Gprime);
-  _Cijkl(0, 2, 2, 0) = _Cijkl(2, 0, 0, 2) = _Cijkl(1, 2, 2, 1) = _Cijkl(2, 1, 1, 2) = - slip;
+  _Cijkl(0, 2, 2, 0) = _Cijkl(2, 0, 0, 2) = _Cijkl(1, 2, 2, 1) = _Cijkl(2, 1, 1, 2) = -slip;
   _Cijkl(0, 2, 0, 2) = _Cijkl(1, 2, 1, 2) = (G + Gprime) * slip / 2.0 / Gprime;
   _Cijkl(2, 0, 2, 0) = _Cijkl(2, 1, 2, 1) = slip;
-
 }
 
 void

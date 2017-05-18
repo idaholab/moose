@@ -1,3 +1,5 @@
+# CappedDruckerPragerCosserat
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -29,6 +31,7 @@
   [./wc_y]
   [../]
 []
+
 
 [Kernels]
   [./cx_elastic]
@@ -78,55 +81,73 @@
 []
 
 [UserObjects]
-  [./coh]
-    type = TensorMechanicsHardeningConstant
-    value = 1
+  [./ts]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 1
+    value_residual = 2
+    internal_limit = 100
   [../]
-  [./tanphi]
-    type = TensorMechanicsHardeningConstant
-    value = 0.5
+  [./cs]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 5
+    value_residual = 3
+    internal_limit = 100
   [../]
-  [./tanpsi]
-    type = TensorMechanicsHardeningConstant
-    value = 2.055555555556E-01
+  [./mc_coh]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 10
+    value_residual = 1
+    internal_limit = 100
   [../]
-  [./t_strength]
-    type = TensorMechanicsHardeningConstant
-    value = 1
+  [./phi]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 0.8
+    value_residual = 0.4
+    internal_limit = 50
   [../]
-  [./c_strength]
-    type = TensorMechanicsHardeningConstant
-    value = 100
+  [./psi]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 0.4
+    value_residual = 0
+    internal_limit = 10
+  [../]
+  [./dp]
+    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    mc_cohesion = mc_coh
+    mc_friction_angle = phi
+    mc_dilation_angle = psi
+    yield_function_tolerance = 1E-11     # irrelevant here
+    internal_constraint_tolerance = 1E-9 # irrelevant here
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
-    young = 10.0
-    poisson = 0.25
-    layer_thickness = 10.0
-    joint_normal_stiffness = 2.5
-    joint_shear_stiffness = 2.0
+    young = 2.1
+    poisson = 0.1
+    layer_thickness = 1.0
+    joint_normal_stiffness = 3.0
+    joint_shear_stiffness = 2.5
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
-    inelastic_models = stress
-    initial_stress = '1 0.1 0.2  0.1 1 0.3  0 0 2' # not symmetric
+    inelastic_models = dp
+    initial_stress = '6 5 4  5.1 7 2  4 2.1 2'
   [../]
-  [./stress]
-    type = CappedWeakPlaneCosseratStressUpdate
-    cohesion = coh
-    tan_friction_angle = tanphi
-    tan_dilation_angle = tanpsi
-    tensile_strength = t_strength
-    compressive_strength = c_strength
+  [./dp]
+    type = CappedDruckerPragerCosseratStressUpdate
+    host_youngs_modulus = 2.1
+    host_poissons_ratio = 0.1
+    DP_model = dp
+    tensile_strength = ts
+    compressive_strength = cs
+    yield_function_tol = 1E-11
     tip_smoother = 0.1
     smoothing_tol = 0.1
-    yield_function_tol = 1E-5
   [../]
 []
 
@@ -140,8 +161,6 @@
 []
 
 [Executioner]
-  solve_type = 'NEWTON'
-  end_time = 1
-  dt = 1
   type = Transient
+  solve_type = Newton
 []

@@ -512,14 +512,17 @@ protected:
    * the returned configuration
    * @param Eijkl The elasticity tensor
    * @param returned_stress The stress after the return-map process
-   * @param inelastic_strain_increment[out] The inelastic strain increment resulting from this return-map
+   * @param inelastic_strain_increment[out] The inelastic strain increment resulting from this
+   * return-map
    */
-  virtual void setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
-                                                         Real gaE,
-                                                         const f_and_derivs & smoothed_q,
-                                                         const RankFourTensor & elasticity_tensor,
-                                                      const RankTwoTensor & returned_stress, RankTwoTensor & inelastic_strain_increment) const;
-  
+  virtual void
+  setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
+                                         Real gaE,
+                                         const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & elasticity_tensor,
+                                         const RankTwoTensor & returned_stress,
+                                         RankTwoTensor & inelastic_strain_increment) const;
+
   /**
    * Calculates the consistent tangent operator.
    * Derived classes may choose to override this for computational

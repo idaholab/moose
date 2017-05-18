@@ -59,7 +59,11 @@ validParams<TwoParameterPlasticityStressUpdate>()
                         "Output a message to the console every "
                         "time precision-loss is encountered "
                         "during the Newton-Raphson process");
-  params.addParam<std::vector<Real>>("admissible_stress", std::vector<Real>{0.0, 0.0}, "A single admissible value of the value of (p, q) for internal parameters = 0.  This is used to initialise the return-mapping algorithm during the first nonlinear iteration");
+  params.addParam<std::vector<Real>>(
+      "admissible_stress",
+      std::vector<Real>{0.0, 0.0},
+      "A single admissible value of the value of (p, q) for internal parameters = 0.  This is used "
+      "to initialise the return-mapping algorithm during the first nonlinear iteration");
   return params;
 }
 
@@ -116,7 +120,8 @@ TwoParameterPlasticityStressUpdate::TwoParameterPlasticityStressUpdate(
   for (unsigned i = 0; i < _num_yf; ++i)
     _all_q[i] = f_and_derivs(_num_pq, _num_intnl);
   if (_pq_ok.size() != 2)
-    mooseError("TwoParameterPlasticityStressUpdate: admissible_stress parameter must be two numbers");
+    mooseError(
+        "TwoParameterPlasticityStressUpdate: admissible_stress parameter must be two numbers");
 }
 
 void
@@ -200,7 +205,7 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
   computePQ(stress_old, p_ok, q_ok);
   std::copy(_intnl_old[_qp].begin(), _intnl_old[_qp].end(), _intnl_ok.begin());
   // note that _intnl[_qp] is the "running" intnl variable that gets updated every NR iteration
-  //if (isParamValid("initial_stress") && _step_one)
+  // if (isParamValid("initial_stress") && _step_one)
   if (_step_one)
   {
     // the initial stress might be inadmissible
@@ -343,7 +348,12 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
   setStressAfterReturn(
       stress_trial, p_ok, q_ok, gaE_total, _intnl[_qp], smoothed_q, elasticity_tensor, stress_new);
 
-  setInelasticStrainIncrementAfterReturn(stress_trial, gaE_total, smoothed_q, elasticity_tensor, stress_new, inelastic_strain_increment);
+  setInelasticStrainIncrementAfterReturn(stress_trial,
+                                         gaE_total,
+                                         smoothed_q,
+                                         elasticity_tensor,
+                                         stress_new,
+                                         inelastic_strain_increment);
 
   strain_increment = strain_increment - inelastic_strain_increment;
   _plastic_strain[_qp] = _plastic_strain_old[_qp] + inelastic_strain_increment;
@@ -823,6 +833,11 @@ TwoParameterPlasticityStressUpdate::consistentTangentOperator(
   {
     // Cannot form the inverse, so probably at some degenerate place in stress space.
     // Just return with the "best estimate" of the cto.
+    mooseWarning("TwoParameterPlasticityStressUpdate: Cannot invert 1+T in consistent tangent "
+                 "operator computation at quadpoint ",
+                 _qp,
+                 " of element ",
+                 _current_elem->id());
     return;
   }
 
@@ -845,12 +860,14 @@ TwoParameterPlasticityStressUpdate::setStressAfterReturn(const RankTwoTensor & s
 }
 
 void
-TwoParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(const RankTwoTensor & /*stress_trial*/,
-                                                         Real gaE,
-                                                         const f_and_derivs & smoothed_q,
-                                                         const RankFourTensor & /*elasticity_tensor*/,
-                                                                           const RankTwoTensor & returned_stress, RankTwoTensor & inelastic_strain_increment) const
+TwoParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
+    const RankTwoTensor & /*stress_trial*/,
+    Real gaE,
+    const f_and_derivs & smoothed_q,
+    const RankFourTensor & /*elasticity_tensor*/,
+    const RankTwoTensor & returned_stress,
+    RankTwoTensor & inelastic_strain_increment) const
 {
   inelastic_strain_increment = (gaE / _Epp) * (smoothed_q.dg[0] * dpdstress(returned_stress) +
-                                                     smoothed_q.dg[1] * dqdstress(returned_stress));
+                                               smoothed_q.dg[1] * dqdstress(returned_stress));
 }

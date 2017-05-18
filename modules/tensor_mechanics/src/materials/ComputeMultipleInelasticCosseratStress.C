@@ -12,12 +12,15 @@ validParams<ComputeMultipleInelasticCosseratStress>()
 {
   InputParameters params = validParams<ComputeMultipleInelasticStress>();
   params.addClassDescription("Compute state (stress and other quantities such as plastic "
-                             "strains and internal parameters) using an iterative process, as well as Cosserat versions of these quantities.  Only elasticity is currently implemented for the Cosserat versions."
+                             "strains and internal parameters) using an iterative process, as well "
+                             "as Cosserat versions of these quantities.  Only elasticity is "
+                             "currently implemented for the Cosserat versions."
                              "Combinations of creep models and plastic models may be used");
   return params;
 }
 
-ComputeMultipleInelasticCosseratStress::ComputeMultipleInelasticCosseratStress(const InputParameters & parameters)
+ComputeMultipleInelasticCosseratStress::ComputeMultipleInelasticCosseratStress(
+    const InputParameters & parameters)
   : ComputeMultipleInelasticStress(parameters),
     _curvature(getMaterialProperty<RankTwoTensor>("curvature")),
     _elastic_flexural_rigidity_tensor(
@@ -47,7 +50,8 @@ ComputeMultipleInelasticCosseratStress::computeQpStress()
 
   if (_perform_finite_strain_rotations)
   {
-    _couple_stress[_qp] = _rotation_increment[_qp] * _couple_stress[_qp] * _rotation_increment[_qp].transpose();
+    _couple_stress[_qp] =
+        _rotation_increment[_qp] * _couple_stress[_qp] * _rotation_increment[_qp].transpose();
     _Jacobian_mult_couple[_qp].rotate(_rotation_increment[_qp]);
   }
 }
@@ -61,21 +65,26 @@ ComputeMultipleInelasticCosseratStress::computeQpJacobianMult()
   {
     _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
     for (unsigned i_rmm = 1; i_rmm < _num_models; ++i_rmm)
-      _Jacobian_mult[_qp] = _consistent_tangent_operator[i_rmm] * _compliance[_qp] * _Jacobian_mult[_qp];
+      _Jacobian_mult[_qp] =
+          _consistent_tangent_operator[i_rmm] * _compliance[_qp] * _Jacobian_mult[_qp];
   }
 }
 
-
 void
-ComputeMultipleInelasticCosseratStress::computeAdmissibleState(unsigned model_number, RankTwoTensor & elastic_strain_increment, RankTwoTensor & inelastic_strain_increment, RankFourTensor & consistent_tangent_operator)
+ComputeMultipleInelasticCosseratStress::computeAdmissibleState(
+    unsigned model_number,
+    RankTwoTensor & elastic_strain_increment,
+    RankTwoTensor & inelastic_strain_increment,
+    RankFourTensor & consistent_tangent_operator)
 {
   const RankTwoTensor trial_stress = _stress[_qp];
   const RankTwoTensor applied_strain_increment = elastic_strain_increment;
 
-  ComputeMultipleInelasticStress::computeAdmissibleState(model_number, elastic_strain_increment, inelastic_strain_increment, consistent_tangent_operator);
+  ComputeMultipleInelasticStress::computeAdmissibleState(model_number,
+                                                         elastic_strain_increment,
+                                                         inelastic_strain_increment,
+                                                         consistent_tangent_operator);
 
   inelastic_strain_increment = _compliance[_qp] * (trial_stress - _stress[_qp]);
   elastic_strain_increment = applied_strain_increment - inelastic_strain_increment;
 }
-
-

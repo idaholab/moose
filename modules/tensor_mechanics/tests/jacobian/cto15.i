@@ -47,29 +47,6 @@
   [../]
 []
 
-[BCs]
-  active = ''
-  [./dum1]
-    type = PresetBC
-    variable = disp_x
-    value = 0
-    boundary = 'top bottom'
-  [../]
-  [./dum2]
-    type = PresetBC
-    variable = disp_y
-    value = 0
-    boundary = 'top bottom'
-  [../]
-  [./dum3]
-    type = PresetBC
-    variable = disp_z
-    value = 0
-    boundary = 'top bottom'
-  [../]
-[]
-
-
 [AuxVariables]
   [./stress_xx]
     order = CONSTANT
