@@ -9,7 +9,7 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
-  params.addRequiredCoupledVar("u", "velocity");
+  params.addRequiredCoupledVar("vel", "velocity");
   params.addRequiredCoupledVar("enthalpy", "enthalpy");
   params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
   params.addCoupledVar("alpha", 1., "Volume fraction");
@@ -26,7 +26,7 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _sign(_is_liquid ? 1. : -1.),
     _rhouA(coupledValue("rhouA")),
     _area(coupledValue("area")),
-    _u_vel(coupledValue("u")),
+    _vel(coupledValue("vel")),
     _enthalpy(coupledValue("enthalpy")),
     _pressure(getMaterialProperty<Real>("pressure")),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
@@ -53,7 +53,7 @@ OneDEnergyFlux::computeQpResidual()
 Real
 OneDEnergyFlux::computeQpJacobian()
 {
-  Real A33 = _u_vel[_qp] * (1. + _alpha[_qp] * _dp_darhoEA[_qp] * _area[_qp]);
+  Real A33 = _vel[_qp] * (1. + _alpha[_qp] * _dp_darhoEA[_qp] * _area[_qp]);
   return -A33 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
 }
 
@@ -62,17 +62,17 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _rhoA_var_number)
   {
-    Real A31 = _u_vel[_qp] * (_alpha[_qp] * _dp_darhoA[_qp] * _area[_qp] - _enthalpy[_qp]);
+    Real A31 = _vel[_qp] * (_alpha[_qp] * _dp_darhoA[_qp] * _area[_qp] - _enthalpy[_qp]);
     return -A31 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _rhouA_var_number)
   {
-    Real A32 = _u_vel[_qp] * _alpha[_qp] * _dp_darhouA[_qp] * _area[_qp] + _enthalpy[_qp];
+    Real A32 = _vel[_qp] * _alpha[_qp] * _dp_darhouA[_qp] * _area[_qp] + _enthalpy[_qp];
     return -A32 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _beta_var_number)
   {
-    return -(_u_vel[_qp] *
+    return -(_vel[_qp] *
              (_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp])) *
            _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }

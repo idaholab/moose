@@ -27,7 +27,7 @@ protected:
   Real _sign;
   const VariableValue & _rhouA;
   const VariableValue & _area;
-  const VariableValue & _u_vel;
+  const VariableValue & _vel;
   const VariableValue & _enthalpy;
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> & _dp_darhoA;
