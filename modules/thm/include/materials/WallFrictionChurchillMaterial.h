@@ -30,7 +30,7 @@ protected:
   /// Density of the phase
   const VariableValue & _rho;
   /// Velocity (x-component)
-  const VariableValue & _u_vel;
+  const VariableValue & _vel;
   /// Hydraulic diameter
   const VariableValue & _D_h;
   /// Roughness of the surface
