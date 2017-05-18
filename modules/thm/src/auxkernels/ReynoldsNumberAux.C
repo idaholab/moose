@@ -9,7 +9,7 @@ validParams<ReynoldsNumberAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addCoupledVar("alpha", 1, "Volume fraction of the phase");
   params.addRequiredCoupledVar("rho", "Density of the phase");
-  params.addRequiredCoupledVar("u_vel", "x-component of phase velocity");
+  params.addRequiredCoupledVar("vel", "x-component of phase velocity");
   params.addRequiredCoupledVar("D_h", "Hydraulic diameter");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");
@@ -22,7 +22,7 @@ ReynoldsNumberAux::ReynoldsNumberAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _alpha(coupledValue("alpha")),
     _rho(coupledValue("rho")),
-    _u_vel(coupledValue("u_vel")),
+    _vel(coupledValue("vel")),
     _D_h(coupledValue("D_h")),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
@@ -36,5 +36,5 @@ Real
 ReynoldsNumberAux::computeValue()
 {
   Real visc = _fp.mu(_v[_qp], _e[_qp]);
-  return Reynolds(_alpha[_qp], _rho[_qp], _u_vel[_qp], _D_h[_qp], visc);
+  return Reynolds(_alpha[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], visc);
 }

@@ -26,7 +26,7 @@ protected:
   /// Density of the phase
   const VariableValue & _rho;
   /// Velocity of the phase
-  const VariableValue & _u_vel;
+  const VariableValue & _vel;
   /// Hydraulic diameter
   const VariableValue & _D_h;
   /// Specific volume
