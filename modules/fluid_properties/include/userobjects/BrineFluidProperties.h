@@ -224,7 +224,7 @@ public:
    * @param xnacl salt mass fraction (-)
    * @return brine vapour pressure (Pa)
    */
-  Real pSat(Real temperature, Real xnacl) const;
+  Real vaporPressure(Real temperature, Real xnacl) const;
 
   /**
    * Solubility of halite (solid NaCl) in water

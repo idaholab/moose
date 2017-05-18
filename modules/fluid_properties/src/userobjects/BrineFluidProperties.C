@@ -19,7 +19,7 @@ validParams<BrineFluidProperties>()
 BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   : MultiComponentFluidPropertiesPT(parameters), _Mnacl(58.443e-3)
 {
-  // Water97FluidProperties UserObject for water (needed to access pSat)
+  // Water97FluidProperties UserObject for water (needed to access vapor pressure)
   std::string water97_name = name() + ":water97";
   {
     std::string class_name = "Water97FluidProperties";
@@ -348,7 +348,7 @@ BrineFluidProperties::k(Real water_density, Real temperature, Real xnacl) const
 }
 
 Real
-BrineFluidProperties::pSat(Real temperature, Real xnacl) const
+BrineFluidProperties::vaporPressure(Real temperature, Real xnacl) const
 {
   // Correlation requires molal concentration (mol/kg)
   Real mol = massFractionToMolalConc(xnacl);
@@ -364,7 +364,7 @@ BrineFluidProperties::pSat(Real temperature, Real xnacl) const
 
   // The brine vapour pressure is then found by evaluating the saturation pressure for pure water
   // using this effective temperature. Note: requires _water97_fp UserObject
-  return _water97_fp->pSat(th20);
+  return _water97_fp->vaporPressure(th20);
 }
 
 Real
