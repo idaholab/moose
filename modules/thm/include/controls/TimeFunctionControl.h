@@ -7,7 +7,7 @@ class TimeFunctionControl;
 class Function;
 
 template <>
-InputParameters validParams<RELAP7Control>();
+InputParameters validParams<TimeFunctionControl>();
 
 class TimeFunctionControl : public RELAP7Control
 {
