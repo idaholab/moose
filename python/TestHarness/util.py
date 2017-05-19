@@ -415,6 +415,47 @@ class DependencyResolver:
         return r
 
 
+class Reachability:
+    def __init__(self):
+        self.dependency_dict = {}
+        self.all_keys = set()
+
+    def insertDependency(self, key, values):
+        self.dependency_dict[key] = values
+        self.all_keys.add(key)
+        self.all_keys.update(values)
+
+    def getReverseReachabilitySets(self):
+        reverse_reachability = {}
+        # Make sure that all nodes are in our reverse dictionary
+        for key in self.all_keys:
+            reverse_reachability[key] = set()
+
+        for key in self.dependency_dict:
+            reach_set = self.getReachableSet(key)
+            for reach_node in reach_set:
+                reverse_reachability[reach_node].add(key)
+
+        return reverse_reachability
+
+    def getReachableSet(self, key):
+        return self._reachability(key)
+
+    def _reachability(self, key, seen = None):
+        seen = seen or []
+        seen.append(key)
+        reached = set()
+        adjacent = self.dependency_dict.get(key)
+
+        if adjacent:
+            reached.update(adjacent)
+            for subkey in adjacent:
+                if subkey in adjacent and subkey not in seen:
+                    reached.update(self._reachability(subkey, seen))
+
+        return reached
+
+
 class TestStatus(object):
     """
     Class for handling test statuses
