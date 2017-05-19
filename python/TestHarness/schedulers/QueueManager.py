@@ -59,6 +59,23 @@ class QueueManager(Scheduler):
     def getPrereqs(self, test_name):
         return self.getData(self.getJobName(test_name), prereq_tests=True)['prereq_tests']
 
+    # Update the dependencies stored in the queue_data
+    def updateDependencies(self, tester):
+        r = ReverseDependencyResolver()
+
+        # To save processes we are only interested in changing tests
+        # related to this tester (matching test_dir)
+        for job_name, values in self.queue_data.iteritems():
+            if values['test_dir'] == self.getWorkingDir(tester):
+                if 'prereq_tests' in values.keys() and 'test_name' in values.keys():
+                    r.insertDependency(values['test_name'], values['prereq_tests'])
+                elif 'test_name' in values.keys():
+                    r.insertDependency(values['test_name'], [])
+
+        sorted_values = r.getSortedValuesSets()
+        for job_name, deps in sorted_values.iteritems():
+            self.putData(self.getJobName(job_name), depends_on_me=list(deps))
+
     # Get specified data from queue_data
     def getData(self, job, **kwargs):
         tmp_dict = {}
@@ -172,21 +189,24 @@ class QueueManager(Scheduler):
         # We are processing a previous run
         if self.options.checkStatus:
 
-            # Only launch a test if not launched or already finished, and if it exists in our queue_file
-            if tester.getTestName() not in self.launched_jobs \
-               and tester.getTestName() not in self.skipped_jobs \
-               and tester.getTestName() not in self.finished_jobs \
-               and self.getJobName(tester) in self.queue_data.keys():
+            # This test, while previously skipped, should have its skipped caveats re-displayed (unless the
+            # user is only interested in failed tests)
+            job = self.getData(self.getJobName(tester), skipped=True, status=True, depends_on_me=True)
+            if job['skipped'] and job['status'] and not self.options.failed_tests:
+                tester.setStatus(job['status'], tester.bucket_skip)
+                return False
 
-                # This test, while previously skipped, should have its skipped caveats re-displayed (unless the
-                # user is only interested in failed tests)
-                job = self.getData(self.getJobName(tester), skipped=True, status=True)
-                if job['skipped'] and job['status'] and not self.options.failed_tests:
-                    tester.setStatus(job['status'], tester.bucket_skip)
-                    return False
+            # If this test has a dependent, and we are checking status, these dependents become
+            # this tests prereq.
+            if job['depends_on_me']:
+                tester.specs['prereq'] = job['depends_on_me']
 
-                # Continue to support checkRunnable (--re options etc)
-                return tester.checkRunnableBase(self.options, checks, test_list)
+            # If this test has no dependents, just go.
+            else:
+                tester.specs['prereq'] = []
+
+            # Continue to support checkRunnable (--re options etc)
+            return tester.checkRunnableBase(self.options, checks, test_list)
 
         # We are launching jobs normally, ask checkRunnable if we can run this test
         else:
@@ -196,7 +216,12 @@ class QueueManager(Scheduler):
             # Do not launch this test. However, save the skipped caveat if the test status is not of the silent variety
             else:
                 if not tester.isSilent() and not tester.isDeleted():
-                    self.putData(self.getJobName(tester), skipped=True, status=tester.getStatusMessage())
+                    self.putData(self.getJobName(tester),
+                                 skipped=True,
+                                 status=tester.getStatusMessage(),
+                                 input_name=self.options.input_file_name,
+                                 test_dir=self.getWorkingDir(tester),
+                                 test_name=tester.getTestName())
         return False
 
     # Augment base queue paramaters with tester params
@@ -263,7 +288,10 @@ class QueueManager(Scheduler):
                 prereq_ids.update([job['id']])
 
                 # update queue_data with prereq test information
-                self.updateData(self.getJobName(tester), prereq_tests=[self.getJobName(prereq_test)])
+                self.updateData(self.getJobName(tester), prereq_tests=[prereq_test])
+
+            # Update dependencies due to a prereq test
+            self.updateDependencies(tester)
 
         # Augment derived queue script requirements
         template_queue = self.prepareQueueScript(template_queue, tester, prereq_ids)
@@ -390,7 +418,9 @@ class QueueManager(Scheduler):
         os.chdir(self.getWorkingDir(tester))
 
         # We're good up to this point? Then launch the job!
-        self.launchJob(tester, command, slot_check=True)
+        # NOTE: We do not want a slot check because we are submitting job
+        # to a third party queue.
+        self.launchJob(tester, command, slot_check=False)
 
         # Return to the previous directory
         os.chdir(current_pwd)

@@ -161,9 +161,6 @@ class TestHarness:
                     # Get the testers for this test
                     testers = self.createTesters(dirpath, file, find_only)
 
-                    # Reverse the dependency order while checking test statuses
-                    self.reverseDependencies(testers)
-
                     # See if any tests have colliding outputs
                     self.checkForRaceConditionOutputs(testers, dirpath)
 
@@ -294,27 +291,6 @@ class TestHarness:
                 self.scheduler.schedule(tester, self.checks, self.test_list)
 
         return testers
-
-    def reverseDependencies(self, testers):
-        r = ReverseDependencyResolver()
-        unordered_testers = {}
-
-        for tester in testers:
-            unordered_testers[tester.getTestName()] = tester
-            if tester.getPrereqs() != []:
-                r.insertDependency(tester.getTestName(), tester.getPrereqs())
-            else:
-                r.insertDependency(tester.getTestName(), [])
-        reversed_set = r.getSortedValuesSets()
-
-        for key, value in reversed_set.iteritems():
-            runnable_tests = []
-
-            # Loop through all reverse dependencies and verify they can run
-            for pre_test in list(value):
-                if unordered_testers[pre_test].checkRunnableBase(self.options, self.checks, self.test_list):
-                    runnable_tests.append(pre_test)
-            unordered_testers[key].specs['prereq'] = list(runnable_tests)
 
     def prunePath(self, filename):
         test_dir = os.path.abspath(os.path.dirname(filename))
