@@ -161,9 +161,6 @@ class TestHarness:
                     # Get the testers for this test
                     testers = self.createTesters(dirpath, file, find_only)
 
-                    # See if any tests have colliding outputs
-                    self.checkForRaceConditionOutputs(testers, dirpath)
-
                     # Schedule the test for execution _if_ it matches the name we want
                     # (because one test file can create multiple testers, and the user
                     # may have only asked for one of these tests to run (--re))

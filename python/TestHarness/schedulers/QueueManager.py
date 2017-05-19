@@ -61,7 +61,7 @@ class QueueManager(Scheduler):
 
     # Update the dependencies stored in the queue_data
     def updateDependencies(self, tester):
-        r = ReverseDependencyResolver()
+        r = Reachability()
 
         # To save processes we are only interested in changing tests
         # related to this tester (matching test_dir)
@@ -69,10 +69,11 @@ class QueueManager(Scheduler):
             if values['test_dir'] == self.getWorkingDir(tester):
                 if 'prereq_tests' in values.keys() and 'test_name' in values.keys():
                     r.insertDependency(values['test_name'], values['prereq_tests'])
+
                 elif 'test_name' in values.keys():
                     r.insertDependency(values['test_name'], [])
 
-        sorted_values = r.getSortedValuesSets()
+        sorted_values = r.getReverseReachabilitySets()
         for job_name, deps in sorted_values.iteritems():
             self.putData(self.getJobName(job_name), depends_on_me=list(deps))
 
