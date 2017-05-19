@@ -434,11 +434,6 @@ public:
    */
   virtual bool startedInitialSetup() { return _started_initial_setup; }
 
-  /**
-   * The relative L2 norm of the difference between solution and old solution vector.
-   */
-  virtual Real relativeSolutionDifferenceNorm();
-
   virtual void onTimestepBegin() override;
   virtual void onTimestepEnd() override;
 

@@ -155,8 +155,13 @@ NonlinearSystem::solve()
   if (_use_finite_differenced_preconditioner)
     setupFiniteDifferencedPreconditioner();
 
-  _time_integrator->solve();
-  _time_integrator->postSolve();
+  if (_time_integrator)
+  {
+    _time_integrator->solve();
+    _time_integrator->postSolve();
+  }
+  else
+    system().solve();
 
   // store info about the solve
   _n_iters = _transient_sys.n_nonlinear_iterations();
@@ -200,8 +205,9 @@ NonlinearSystem::stopSolve()
   // Clean up by getting other vectors into a valid state for a
   // (possible) subsequent solve.  There may be more than just
   // these...
-  residualVector(Moose::KT_TIME).close();
-  residualVector(Moose::KT_NONTIME).close();
+  if (_Re_time)
+    _Re_time->close();
+  _Re_non_time->close();
 }
 
 void

@@ -546,16 +546,20 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_NONTIME),
-                                      Moose::KT_NONTIME);
+  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_NONTIME),
+                                        Moose::KT_NONTIME);
 }
 
 void
@@ -573,8 +577,11 @@ DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_TIME))
+    _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_NONTIME))
+    _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_NONTIME),
+                                      Moose::KT_NONTIME);
 }
 
 void

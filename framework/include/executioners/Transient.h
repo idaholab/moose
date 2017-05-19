@@ -205,6 +205,11 @@ public:
   // iteration count (which starts at 0), increment by 1.
   Real numPicardIts() { return _picard_it + 1; }
 
+  /**
+   * The relative L2 norm of the difference between solution and old solution vector.
+   */
+  virtual Real relativeSolutionDifferenceNorm();
+
 protected:
   /**
    * This should execute the solve for one timestep.
@@ -291,6 +296,9 @@ protected:
   bool _verbose;
 
   Real _solution_change_norm;
+
+  /// The difference of current and old solutions
+  NumericVector<Number> & _sln_diff;
 
   void setupTimeIntegrator();
 };

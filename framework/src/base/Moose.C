@@ -328,7 +328,6 @@
 #include "AB2PredictorCorrector.h"
 
 // time integrators
-#include "SteadyState.h"
 #include "ImplicitEuler.h"
 #include "BDF2.h"
 #include "CrankNicolson.h"
@@ -778,7 +777,6 @@ registerObjects(Factory & factory)
   registerTimeStepper(PostprocessorDT);
   registerTimeStepper(AB2PredictorCorrector);
   // time integrators
-  registerTimeIntegrator(SteadyState);
   registerTimeIntegrator(ImplicitEuler);
   registerTimeIntegrator(BDF2);
   registerTimeIntegrator(CrankNicolson);

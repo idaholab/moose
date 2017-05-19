@@ -322,6 +322,7 @@ public:
 
   virtual NumericVector<Number> & solutionUDot() override;
   virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
+  virtual bool hasResidualVector(Moose::KernelType type) const;
 
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
 
@@ -515,11 +516,6 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
-  /**
-   * The relative L2 norm of the difference between solution and old solution vector.
-   */
-  virtual Real relativeSolutionDifferenceNorm();
-
   virtual NumericVector<Number> & solution() override { return *_sys.solution; }
 
   virtual System & system() override { return _sys; }
@@ -572,7 +568,7 @@ protected:
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual
-  NumericVector<Number> & _residual_ghosted;
+  NumericVector<Number> * _residual_ghosted;
 
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
@@ -586,13 +582,13 @@ protected:
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
-  NumericVector<Number> & _u_dot;
+  NumericVector<Number> * _u_dot;
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
   /// residual vector for time contributions
-  NumericVector<Number> & _Re_time;
+  NumericVector<Number> * _Re_time;
   /// residual vector for non-time contributions
-  NumericVector<Number> & _Re_non_time;
+  NumericVector<Number> * _Re_non_time;
 
   ///@{
   /// Kernel Storage
@@ -640,8 +636,6 @@ protected:
 protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
-  /// The difference of current and old solutions
-  NumericVector<Number> & _sln_diff;
   /// Preconditioner
   std::shared_ptr<MoosePreconditioner> _preconditioner;
   /// Preconditioning side

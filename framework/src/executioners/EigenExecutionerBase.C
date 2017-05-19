@@ -67,13 +67,6 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   //       We will need 'step' in the future.
   _problem.transient(true);
 
-  {
-    // No time integrator for eigenvalue problem
-    std::string ti_str = "SteadyState";
-    InputParameters params = _app.getFactory().getValidParams(ti_str);
-    _problem.addTimeIntegrator(ti_str, "ti", params);
-  }
-
   // we want to tell the App about what our system time is (in case anyone else is interested).
   Real system_time = getParam<Real>("time");
   _app.setStartTime(system_time);
