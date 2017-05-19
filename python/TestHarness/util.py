@@ -414,34 +414,31 @@ class DependencyResolver:
             d = dict(((k, v-t) for k, v in d.items() if v))
         return r
 
-
-class Reachability:
+# Calculates the Reverse Reachability of a graph. This class does this by
+# computing the reachability of a graph (reversing the direction of edges)
+class ReverseReachability:
     def __init__(self):
         self.dependency_dict = {}
-        self.all_keys = set()
 
     def insertDependency(self, key, values):
-        self.dependency_dict[key] = values
-        self.all_keys.add(key)
-        self.all_keys.update(values)
+        # Insert the dependencies in backwards
+        for value in values:
+            self.dependency_dict.setdefault(value, set(key)).add(key)
+
+        # Also make sure the original key is in there with an empty set
+        self.dependency_dict.setdefault(key, set())
 
     def getReverseReachabilitySets(self):
-        reverse_reachability = {}
-        # Make sure that all nodes are in our reverse dictionary
-        for key in self.all_keys:
-            reverse_reachability[key] = set()
-
+        reachable = {}
         for key in self.dependency_dict:
-            reach_set = self.getReachableSet(key)
-            for reach_node in reach_set:
-                reverse_reachability[reach_node].add(key)
+            reachable[key] = self.getReverseReachableSet(key)
 
-        return reverse_reachability
+        return reachable
 
-    def getReachableSet(self, key):
-        return self._reachability(key)
+    def getReverseReachableSet(self, key):
+        return self._reverse_reachability(key)
 
-    def _reachability(self, key, seen = None):
+    def _reverse_reachability(self, key, seen = None):
         seen = seen or []
         seen.append(key)
         reached = set()
@@ -451,7 +448,7 @@ class Reachability:
             reached.update(adjacent)
             for subkey in adjacent:
                 if subkey in adjacent and subkey not in seen:
-                    reached.update(self._reachability(subkey, seen))
+                    reached.update(self._reverse_reachability(subkey, seen))
 
         return reached
 

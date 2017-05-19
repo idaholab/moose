@@ -6,7 +6,7 @@ from util import *
 
 class TestUtils(unittest.TestCase):
     def testRerverseReachability1(self):
-        r = Reachability()
+        r = ReverseReachability()
 
         r.insertDependency('f', ['d'])
         r.insertDependency('e', ['d'])
@@ -24,7 +24,7 @@ class TestUtils(unittest.TestCase):
 
 
     def testRerverseReachability2(self):
-        r = Reachability()
+        r = ReverseReachability()
 
         r.insertDependency('c', ['a'])
         r.insertDependency('a', ['b'])
@@ -36,7 +36,7 @@ class TestUtils(unittest.TestCase):
 
 
     def testRerverseReachability3(self):
-        r = Reachability()
+        r = ReverseReachability()
 
         r.insertDependency('a', ['d'])
         r.insertDependency('b', ['a', 'e'])
@@ -51,7 +51,7 @@ class TestUtils(unittest.TestCase):
 
 
     def testRerverseReachabilityCyclic(self):
-        r = Reachability()
+        r = ReverseReachability()
 
         r.insertDependency('c', ['b'])
         r.insertDependency('b', ['a'])
