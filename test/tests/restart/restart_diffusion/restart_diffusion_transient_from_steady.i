@@ -2,9 +2,12 @@
   file = square.e
 []
 
-[Variables]
-  active = 'u'
+[Problem]
+  restart_file_base = steady_out_cp/0001
+  skip_additional_restart_data = true
+[]
 
+[Variables]
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -12,17 +15,21 @@
 []
 
 [Kernels]
-  active = 'diff'
+  active = 'bodyforce ie'
 
-  [./diff]
-    type = Diffusion
+  [./bodyforce]
+    type = BodyForce
+    variable = u
+    value = 10.0
+  [../]
+
+  [./ie]
+    type = TimeDerivative
     variable = u
   [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
@@ -46,14 +53,16 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+
+  start_time = 0.0
+  num_steps = 10
+  dt = .1
 []
 
 [Outputs]
-  file_base = steady_out
   exodus = true
-  checkpoint = true
 []

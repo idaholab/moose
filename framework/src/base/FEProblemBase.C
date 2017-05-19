@@ -139,6 +139,10 @@ validParams<FEProblemBase>()
                         "EXPERIMENTAL: If true, a sub_app may use a "
                         "restart file instead of using of using the master "
                         "backup file");
+  params.addParam<bool>("skip_additional_restart_data",
+                        false,
+                        "True to skip additional data in equation system for restart. It is useful "
+                        "for starting a transient calculation with a steady-state solution");
 
   return params;
 }
@@ -204,6 +208,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
+    _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
     _currently_computing_jacobian(false),
     _started_initial_setup(false)

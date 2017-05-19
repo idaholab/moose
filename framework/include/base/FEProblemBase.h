@@ -1254,6 +1254,11 @@ public:
    */
   bool needsPreviousNewtonIteration();
 
+  /**
+   * Whether or not to skip loading the additional data when restarting
+   */
+  bool skipAdditionalRestartData() const { return _skip_additional_restart_data; }
+
 public:
   ///@{
   /**
@@ -1525,6 +1530,7 @@ private:
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   bool _force_restart;
+  bool _skip_additional_restart_data;
   bool _fail_next_linear_convergence_check;
 
   /// Whether or not the system is currently computing the Jacobian matrix

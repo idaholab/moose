@@ -26,6 +26,13 @@
     exodiff = 'steady_out.e'
   [../]
 
+  [./restart_from_steady]
+    type = 'Exodiff'
+    input = 'restart_diffusion_transient_from_steady.i'
+    exodiff = 'restart_diffusion_transient_from_steady_out.e'
+    prereq = 'test_1'
+  [../]
+
   [./test_2]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient.i'
