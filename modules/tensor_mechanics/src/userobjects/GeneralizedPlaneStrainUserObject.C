@@ -39,9 +39,7 @@ GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
-    _subblock_id_provider(isParamValid("subblock_index_provider")
-                              ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
-                              : nullptr),
+    _subblock_id_provider(nullptr),
     _out_of_plane_pressure(getFunction("out_of_plane_pressure")),
     _factor(getParam<Real>("factor"))
 {
@@ -50,6 +48,8 @@ GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(
 void
 GeneralizedPlaneStrainUserObject::initialize()
 {
+  if (isParamValid("subblock_index_provider"))
+    _subblock_id_provider = &getUserObject<SubblockIndexProvider>("subblock_index_provider");
   if (_assembly.coordSystem() == Moose::COORD_XYZ)
     _scalar_out_of_plane_strain_direction = 2;
   else if (_assembly.coordSystem() == Moose::COORD_RZ)
