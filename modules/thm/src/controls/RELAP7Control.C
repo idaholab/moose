@@ -9,4 +9,9 @@ validParams<RELAP7Control>()
   return params;
 }
 
-RELAP7Control::RELAP7Control(const InputParameters & parameters) : Control(parameters) {}
+RELAP7Control::RELAP7Control(const InputParameters & parameters)
+  : Control(parameters),
+    Restartable(parameters, "RELAP7Controls"),
+    _sim(*_app.parameters().get<Simulation *>("_sim"))
+{
+}
