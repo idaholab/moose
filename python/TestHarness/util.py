@@ -444,7 +444,9 @@ class ReverseReachability:
 
         """
         for value in values:
-            self.dependency_dict.setdefault(value, set()).add(key)
+            default_set = set()
+            default_set.add(key)
+            self.dependency_dict.setdefault(value, default_set).add(key)
 
         # Also make sure the original key is in there with an empty set
         self.dependency_dict.setdefault(key, set())
