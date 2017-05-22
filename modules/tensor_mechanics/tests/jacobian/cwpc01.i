@@ -72,46 +72,6 @@
   [../]
 []
 
-[BCs]
-  [./bottomx]
-    type = PresetBC
-    variable = disp_x
-    boundary = back
-    value = 0.0
-  [../]
-  [./bottomy]
-    type = PresetBC
-    variable = disp_y
-    boundary = back
-    value = 0.0
-  [../]
-  [./bottomz]
-    type = PresetBC
-    variable = disp_z
-    boundary = back
-    value = 0.0
-  [../]
-
-  [./topx]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = front
-    function = 32*t/3.333333333333E+00
-  [../]
-  [./topy]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = front
-    function = 24*t/3.333333333333E+00
-  [../]
-  [./topz]
-    type = FunctionPresetBC
-    variable = disp_z
-    boundary = front
-    function = 10*t/8.108108108108E+00
-  [../]
-[]
-
 [AuxVariables]
   [./wc_z]
   [../]
@@ -132,7 +92,7 @@
   [../]
   [./t_strength]
     type = TensorMechanicsHardeningConstant
-    value = 100
+    value = 1
   [../]
   [./c_strength]
     type = TensorMechanicsHardeningConstant
@@ -153,8 +113,10 @@
     type = ComputeCosseratIncrementalSmallStrain
   [../]
   [./admissible]
-    type = ComputeMultipleInelasticStress
+    type = ComputeMultipleInelasticCosseratStress
+    initial_stress = '10 0 0  0 10 0  0 0 10'
     inelastic_models = stress
+    perform_finite_strain_rotations = false
   [../]
   [./stress]
     type = CappedWeakPlaneCosseratStressUpdate
@@ -163,9 +125,9 @@
     tan_dilation_angle = tanpsi
     tensile_strength = t_strength
     compressive_strength = c_strength
-    tip_smoother = 0
-    smoothing_tol = 0
-    yield_function_tol = 1E-5
+    tip_smoother = 1
+    smoothing_tol = 1
+    yield_function_tol = 1E-11
   [../]
 []
 

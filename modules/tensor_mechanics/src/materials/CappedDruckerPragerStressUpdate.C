@@ -464,6 +464,11 @@ CappedDruckerPragerStressUpdate::consistentTangentOperator(const RankTwoTensor &
     {
       // Cannot form the inverse, so probably at some degenerate place in stress space.
       // Just return with the "best estimate" of the cto.
+      mooseWarning("CappedDruckerPragerStressUpdate: Cannot invert 1+T in consistent tangent "
+                   "operator computation at quadpoint ",
+                   _qp,
+                   " of element ",
+                   _current_elem->id());
       return;
     }
     cto = (cto.transposeMajor() * inv).transposeMajor();

@@ -229,6 +229,13 @@
     difference_tol = 1E10
   [../]
 
+  [./cto29]
+    type = 'PetscJacobianTester'
+    input = 'cto29.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+
   [./poro01]
     type = 'PetscJacobianTester'
     input = 'poro01.i'
@@ -320,6 +327,32 @@
     type = 'PetscJacobianTester'
     input = 'phe01.i'
     ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./cdpc01]
+    type = 'PetscJacobianTester'
+    input = 'cdpc01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cdpc02]
+    type = 'PetscJacobianTester'
+    input = 'cdpc02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./cdp_cwp_coss01]
+    type = 'PetscJacobianTester'
+    input = 'cdp_cwp_coss01.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./cdp_cwp_coss02]
+    type = 'PetscJacobianTester'
+    input = 'cdp_cwp_coss02.i'
+    ratio_tol = 1E-6
     difference_tol = 1E10
   [../]
 []

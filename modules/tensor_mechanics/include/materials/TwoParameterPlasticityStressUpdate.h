@@ -325,6 +325,9 @@ protected:
    */
   std::vector<f_and_derivs> _all_q;
 
+  /// An admissible value of (p, q)
+  const std::vector<Real> _pq_ok;
+
   /**
    * Computes the values of the yield functions, given p, q and intnl parameters.
    * Derived classes must override this, to provide the values of the yield functions
@@ -496,6 +499,29 @@ protected:
                                     const f_and_derivs & smoothed_q,
                                     const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const;
+
+  /**
+   * Sets inelastic strain increment from the returned configuration
+   * This is called after the return-map process has completed
+   * successfully in (p, q) space, just after finalizeReturnProcess
+   * has been called.
+   * Derived classes may override this function
+   * @param stress_trial The trial value of stress
+   * @param gaE Value of gaE induced by the return (gaE = gamma * Epp)
+   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at
+   * the returned configuration
+   * @param Eijkl The elasticity tensor
+   * @param returned_stress The stress after the return-map process
+   * @param inelastic_strain_increment[out] The inelastic strain increment resulting from this
+   * return-map
+   */
+  virtual void
+  setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
+                                         Real gaE,
+                                         const f_and_derivs & smoothed_q,
+                                         const RankFourTensor & elasticity_tensor,
+                                         const RankTwoTensor & returned_stress,
+                                         RankTwoTensor & inelastic_strain_increment) const;
 
   /**
    * Calculates the consistent tangent operator.
