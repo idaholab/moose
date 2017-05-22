@@ -61,7 +61,7 @@ class QueueManager(Scheduler):
 
     # Update the dependencies stored in the queue_data
     def updateDependencies(self, tester):
-        r = Reachability()
+        r = ReverseReachability()
 
         # To save processes we are only interested in changing tests
         # related to this tester (matching test_dir)
@@ -177,12 +177,17 @@ class QueueManager(Scheduler):
     def getQueueScript(self, tester):
         return os.path.join(self.getWorkingDir(tester), self.queue_file.name + '-' + self.getJobName(tester) + '.sh')
 
-    # The Scheduler has updated a tester's status. If the test is skipped, add it
-    # to the queue file, so it gets printed again during a checkStatus
+    # The Scheduler has updated a tester's status, so update that status in our queue_data
     def notifySchedulers(self, tester):
-        if tester.isSkipped():
-            self.putData(self.getJobName(tester), skipped=True)
-        return
+        self.putData(self.getJobName(tester),
+                     status=tester.getStatusMessage(),
+                     is_pending=tester.isPending(),
+                     did_pass=tester.didPass(),
+                     did_fail=tester.didFail(),
+                     skipped=tester.isSkipped(),
+                     test_dir=self.getWorkingDir(tester),
+                     test_name=tester.getTestName(),
+                     input_name=self.options.input_file_name)
 
     # canLaunch is the QueueManager's way of providing checkRunnable due to the multitude of
     # modes the TestHarness can operate in.
@@ -453,7 +458,7 @@ class QueueManager(Scheduler):
 
         # Checking Status and the test is still pending
         elif self.options.checkStatus and tester.isPending():
-            self.finished_jobs.add(tester.getTestName())
+            self.skipped_jobs.add(tester.getTestName())
             self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
         # Checking Status and the test has finished

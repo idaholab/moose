@@ -92,12 +92,12 @@ class Scheduler(MooseObject):
         self.harness.closeFiles(exit_code)
 
     # Notify TestHarness of status change
-    def notifySchedulersBase(self, tester):
-        # Notify the TestHarness
-        self.harness.handleTestStatus(tester)
-
+    def notifySchedulersBase(self, tester, add_to_table=False):
         # Notify derived schedulers of status change
         self.notifySchedulers(tester)
+
+        # Notify the TestHarness (print status)
+        self.harness.handleTestStatus(tester, add_to_table=add_to_table)
 
     ## Clear and Initialize the scheduler queue
     def clearAndInitializeJobs(self):
@@ -401,13 +401,16 @@ class Scheduler(MooseObject):
                     # these remaining big jobs. Otherwise, we'll skip them
                     if not self.soft_limit and slots > self.job_slots:
                         tester.setStatus('Insufficient slots', tester.bucket_skip)
-                        self.notifySchedulersBase(tester)
+                        self.notifySchedulersBase(tester, add_to_table=True)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # Do we have unsatisfied dependencies left?
                     elif len(set(tester.specs['prereq']) & self.skipped_jobs):
-                        tester.setStatus('skipped dependency', tester.bucket_skip)
-                        self.notifySchedulersBase(tester)
+                        if self.options.checkStatus:
+                            tester.setStatus('WAITING ON QUEUE', tester.bucket_pending)
+                        else:
+                            tester.setStatus('skipped dependency', tester.bucket_skip)
+                        self.notifySchedulersBase(tester, add_to_table=True)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # We need to keep trying in case there is a chain of unresolved dependencies
