@@ -406,10 +406,7 @@ class Scheduler(MooseObject):
                         keep_going = True
                     # Do we have unsatisfied dependencies left?
                     elif len(set(tester.specs['prereq']) & self.skipped_jobs):
-                        if self.options.checkStatus:
-                            tester.setStatus('WAITING ON QUEUE', tester.bucket_pending)
-                        else:
-                            tester.setStatus('skipped dependency', tester.bucket_skip)
+                        tester.setStatus('skipped dependency', tester.bucket_skip)
                         self.notifySchedulersBase(tester, add_to_table=True)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
