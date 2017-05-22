@@ -6,6 +6,13 @@
     group = 'requirements'
   [../]
 
+  [./aux]
+    type = 'Exodiff'
+    input = 'real_function_control_aux.i'
+    exodiff = 'real_function_control_aux_out.e'
+    group = 'requirements'
+  [../]
+
   [./multiple]
     type = 'CSVDiff'
     input = 'multi_real_function_control.i'
