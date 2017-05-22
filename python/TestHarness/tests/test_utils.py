@@ -38,16 +38,16 @@ class TestUtils(unittest.TestCase):
     def testRerverseReachability3(self):
         r = ReverseReachability()
 
-        r.insertDependency('a', ['d'])
-        r.insertDependency('b', ['a', 'e'])
-        r.insertDependency('c', ['a', 'e'])
+        r.insertDependency('aa', ['dd'])
+        r.insertDependency('bb', ['aa', 'ee'])
+        r.insertDependency('cc', ['aa', 'ee'])
 
         all_sets = r.getReverseReachabilitySets()
-        self.assertEqual(all_sets['a'], set(['c', 'b']))
-        self.assertEqual(all_sets['b'], set())
-        self.assertEqual(all_sets['c'], set())
-        self.assertEqual(all_sets['d'], set(['a', 'b', 'c']))
-        self.assertEqual(all_sets['e'], set(['c', 'b']))
+        self.assertEqual(all_sets['aa'], set(['cc', 'bb']))
+        self.assertEqual(all_sets['bb'], set())
+        self.assertEqual(all_sets['cc'], set())
+        self.assertEqual(all_sets['dd'], set(['aa', 'bb', 'cc']))
+        self.assertEqual(all_sets['ee'], set(['cc', 'bb']))
 
 
     def testRerverseReachabilityCyclic(self):

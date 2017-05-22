@@ -390,13 +390,24 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
 
 # See http://code.activestate.com/recipes/576570-dependency-resolver/
 class DependencyResolver:
+    """
+    Class for returning dependency sets. That is, all of the vertices from a directed
+    graph that a given vertex depends on (or can reach)
+    """
     def __init__(self):
         self.dependency_dict = {}
 
     def insertDependency(self, key, values):
+        """
+        Insert all of the immediate dependencies for a given vertex. "values" should be a set
+        """
         self.dependency_dict[key] = values
 
     def getSortedValuesSets(self):
+        """
+        Method to return the "execution order" for a directed graph (i.e. the order in which
+        nodes must be visited to satistfy dependencies
+        """
         d = dict((k, set(self.dependency_dict[k])) for k in self.dependency_dict)
         r = []
         while d:
@@ -414,21 +425,34 @@ class DependencyResolver:
             d = dict(((k, v-t) for k, v in d.items() if v))
         return r
 
-# Calculates the Reverse Reachability of a graph. This class does this by
-# computing the reachability of a graph (reversing the direction of edges)
 class ReverseReachability:
+    """
+    Calculates the Reverse Reachability of a graph. This class does this by
+    computing the reachability of a graph (reversing the direction of edges)
+    """
     def __init__(self):
+        """
+        Creats the dictionary to hold all of the reverse dependencies. (i.e. the key -> value
+        pair is inserted in the dictionary such that the value -> key)
+        """
         self.dependency_dict = {}
 
     def insertDependency(self, key, values):
-        # Insert the dependencies in backwards
+        """
+        Inserts all of the dependencies for a given key. "values" can either be
+        a single value or a set of values.
+
+        """
         for value in values:
-            self.dependency_dict.setdefault(value, set(key)).add(key)
+            self.dependency_dict.setdefault(value, set()).add(key)
 
         # Also make sure the original key is in there with an empty set
         self.dependency_dict.setdefault(key, set())
 
     def getReverseReachabilitySets(self):
+        """
+        Method to retrieve all of the vertices that can reach a given vertex in a complete dictionary.
+        """
         reachable = {}
         for key in self.dependency_dict:
             reachable[key] = self.getReverseReachableSet(key)
@@ -436,9 +460,16 @@ class ReverseReachability:
         return reachable
 
     def getReverseReachableSet(self, key):
-        return self._reverse_reachability(key)
+        """
+        Method to retrieve all of the verices for the passed in vertex (key)
+        """
+        return self._reverseReachability(key)
 
-    def _reverse_reachability(self, key, seen = None):
+    def _reverseReachability(self, key, seen = None):
+        """
+        Helper method to discover all of the vertices that can reach this vertex. It uses recursion
+        to populate the data structures.
+        """
         seen = seen or []
         seen.append(key)
         reached = set()
@@ -448,7 +479,7 @@ class ReverseReachability:
             reached.update(adjacent)
             for subkey in adjacent:
                 if subkey in adjacent and subkey not in seen:
-                    reached.update(self._reverse_reachability(subkey, seen))
+                    reached.update(self._reverseReachability(subkey, seen))
 
         return reached
 
