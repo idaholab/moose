@@ -19,30 +19,8 @@ validParams<CappedWeakPlaneCosseratStressUpdate>()
 
 CappedWeakPlaneCosseratStressUpdate::CappedWeakPlaneCosseratStressUpdate(
     const InputParameters & parameters)
-  : CappedWeakPlaneStressUpdate(parameters),
-    _curvature(getMaterialPropertyByName<RankTwoTensor>("curvature")),
-    _elastic_flexural_rigidity_tensor(
-        getMaterialPropertyByName<RankFourTensor>("elastic_flexural_rigidity_tensor")),
-    _couple_stress(declareProperty<RankTwoTensor>("couple_stress")),
-    _couple_stress_old(declarePropertyOld<RankTwoTensor>("couple_stress")),
-    _Jacobian_mult_couple(declareProperty<RankFourTensor>("couple_Jacobian_mult"))
+  : CappedWeakPlaneStressUpdate(parameters)
 {
-}
-
-void
-CappedWeakPlaneCosseratStressUpdate::initQpStatefulProperties()
-{
-  CappedWeakPlaneStressUpdate::initQpStatefulProperties();
-  _couple_stress[_qp].zero();
-}
-
-void
-CappedWeakPlaneCosseratStressUpdate::initialiseReturnProcess()
-{
-  CappedWeakPlaneStressUpdate::initialiseReturnProcess();
-  _couple_stress[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];
-  if (_fe_problem.currentlyComputingJacobian())
-    _Jacobian_mult_couple[_qp] = _elastic_flexural_rigidity_tensor[_qp];
 }
 
 void

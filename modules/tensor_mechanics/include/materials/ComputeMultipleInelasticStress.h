@@ -65,6 +65,33 @@ protected:
   virtual void updateQpStateSingleModel(RankTwoTensor & elastic_strain_increment,
                                         RankTwoTensor & combined_inelastic_strain_increment);
 
+  /**
+   * Using _elasticity_tensor[_qp] and the consistent tangent operators,
+   * _comsistent_tangent_operator[...] computed by the inelastic models,
+   * compute _Jacobian_mult[_qp]
+   */
+  virtual void computeQpJacobianMult();
+
+  /**
+   * Given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
+   * let the model_number model produce an admissible stress (gets placed back in _stress[_qp]), and
+   * decompose
+   * the strain increment into an elastic part (gets placed back into elastic_strain_increment) and
+   * an
+   * inelastic part (inelastic_strain_increment), as well as computing the
+   * consistent_tangent_operator
+   * @param model_number The inelastic model to use
+   * @param elastic_strain_increment Upon input, this is the strain increment.  Upon output, it is
+   * the elastic part of the strain increment
+   * @param inelastic_strain_increment The inelastic strain increment corresponding to the supplied
+   * strain increment
+   * @param consistent_tangent_operator The consistent tangent operator
+   */
+  virtual void computeAdmissibleState(unsigned model_number,
+                                      RankTwoTensor & elastic_strain_increment,
+                                      RankTwoTensor & inelastic_strain_increment,
+                                      RankFourTensor & consistent_tangent_operator);
+
   ///@{Input parameters associated with the recompute iteration to return the stress state to the yield surface
   const unsigned int _max_iterations;
   const Real _relative_tolerance;

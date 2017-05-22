@@ -885,7 +885,7 @@
     type = ComputeCosseratIncrementalSmallStrain
   [../]
   [./admissible]
-    type = ComputeMultipleInelasticStress
+    type = ComputeMultipleInelasticCosseratStress
     inelastic_models = stress
     perform_finite_strain_rotations = false
   [../]

@@ -1,3 +1,4 @@
+#Cosserat capped weak plane and capped drucker prager, coming back to a mix of shear and tensile failure in both
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -78,9 +79,38 @@
 []
 
 [UserObjects]
+  [./ts]
+    type = TensorMechanicsHardeningConstant
+    value = 10
+  [../]
+  [./cs]
+    type = TensorMechanicsHardeningConstant
+    value = 10
+  [../]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 10
+  [../]
+  [./phi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.8
+  [../]
+  [./psi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.4
+  [../]
+  [./dp]
+    type = TensorMechanicsPlasticDruckerPragerHyperbolic
+    mc_cohesion = mc_coh
+    mc_friction_angle = phi
+    mc_dilation_angle = psi
+    yield_function_tolerance = 1E-11     # irrelevant here
+    internal_constraint_tolerance = 1E-9 # irrelevant here
+  [../]
+
   [./coh]
     type = TensorMechanicsHardeningConstant
-    value = 1
+    value = 2
   [../]
   [./tanphi]
     type = TensorMechanicsHardeningConstant
@@ -98,6 +128,7 @@
     type = TensorMechanicsHardeningConstant
     value = 100
   [../]
+
 []
 
 [Materials]
@@ -114,11 +145,27 @@
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
-    inelastic_models = stress
-    initial_stress = '1 0.1 0.2  0.1 1 0.3  0 0 2' # not symmetric
+    inelastic_models = 'dp wp'
+    initial_stress = '1 0.1 0  0.1 2 0  11 12 10' # note unsymmetric
+    relative_tolerance = 2.0
+    absolute_tolerance = 1E6
+    max_iterations = 1
   [../]
-  [./stress]
+  [./dp]
+    type = CappedDruckerPragerCosseratStressUpdate
+    host_youngs_modulus = 10.0
+    host_poissons_ratio = 0.25
+    name_prepender = dp
+    DP_model = dp
+    tensile_strength = ts
+    compressive_strength = cs
+    yield_function_tol = 1E-11
+    tip_smoother = 1
+    smoothing_tol = 1
+  [../]
+  [./wp]
     type = CappedWeakPlaneCosseratStressUpdate
+    name_prepender = wp
     cohesion = coh
     tan_friction_angle = tanphi
     tan_dilation_angle = tanpsi
@@ -126,7 +173,7 @@
     compressive_strength = c_strength
     tip_smoother = 0.1
     smoothing_tol = 0.1
-    yield_function_tol = 1E-5
+    yield_function_tol = 1E-11
   [../]
 []
 
@@ -134,6 +181,7 @@
   [./andy]
     type = SMP
     full = true
+    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]
