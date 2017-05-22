@@ -170,6 +170,7 @@
 /*
  * Postprocessors
  */
+#include "AverageGrainVolume.h"
 #include "FeatureFloodCount.h"
 #include "GrainBoundaryArea.h"
 #include "GrainTracker.h"
@@ -448,6 +449,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(TimeStepMaterial);
   registerMaterial(VariableGradientMaterial);
 
+  registerPostprocessor(AverageGrainVolume);
   registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(FeatureVolumeFraction);
