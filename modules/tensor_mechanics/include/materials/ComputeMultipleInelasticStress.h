@@ -55,14 +55,15 @@ protected:
 
   /**
    * An optimised version of updateQpState that gets used when the number
-   * of plastic models is unity.
+   * of plastic models is unity, or when we're cycling through models
    * Given the _strain_increment[_qp], find an admissible stress (which is
    * put into _stress[_qp]) and inelastic strain, as well as the tangent operator
    * (which is placed into _Jacobian_mult[_qp])
+   * @param model_number Use this model number
    * @param elastic_strain_increment The elastic part of _strain_increment[_qp]
    * @param combined_inelastic_strain_increment The inelastic part of _strain_increment[_qp]
    */
-  virtual void updateQpStateSingleModel(RankTwoTensor & elastic_strain_increment,
+  virtual void updateQpStateSingleModel(unsigned model_number, RankTwoTensor & elastic_strain_increment,
                                         RankTwoTensor & combined_inelastic_strain_increment);
 
   /**
@@ -125,6 +126,9 @@ protected:
 
   /// the consistent tangent operators computed by each plastic model
   std::vector<RankFourTensor> _consistent_tangent_operator;
+
+  /// whether to cycle through the models, using only one model per timestep
+  const bool _cycle_models;
 
   /**
    * The user supplied list of inelastic models to use in the simulation
