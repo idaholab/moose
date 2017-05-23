@@ -5,6 +5,7 @@
     - Systems: docs/content/documentation/systems/index.md
     - Interfaces: docs/content/documentation/interfaces/index.md
     - Modules: docs/content/documentation/modules/index.md
+    - MooseUtils: docs/content/documentation/MooseUtils/index.md
 - Utilites:
     - MooseDocs: docs/content/utilities/moose_docs/index.md
     - Developing MOOSE Apps: docs/content/utilities/development/index.md

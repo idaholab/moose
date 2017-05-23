@@ -24,6 +24,8 @@ InputParameters
 validParams<CSVReader>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
+  params.addClassDescription(
+      "Converts columns of a CSV file into vectors of a VectorPostprocessor.");
   params.addRequiredParam<FileName>("csv_file",
                                     "The name of the CSV file to read. Currently, with "
                                     "the exception of the header row, only numeric "
@@ -34,12 +36,11 @@ validParams<CSVReader>()
       "When true it is assumed that the first row contains column headers, these "
       "headers are used as the VectorPostprocessor vector names. If false the "
       "file is assumed to contain only numbers and the vectors are named "
-      "automatically based on the VectorPostprocessor block name (e.g., 'foo_0000', 'foo_0001').");
-  params.addParam<std::string>(
-      "delimiter",
-      ",",
-      "The column delimiter, which defaults to a comma. Despite the name this can read files "
-      "separated by delimiter other than a comma.");
+      "automatically based on the column number (e.g., 'column_0000', 'column_0001').");
+  params.addParam<std::string>("delimiter",
+                               ",",
+                               "The column delimiter. Despite the name this can read files "
+                               "separated by delimiter other than a comma.");
   params.set<MultiMooseEnum>("execute_on") = "initial";
   return params;
 }
