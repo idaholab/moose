@@ -32,9 +32,26 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    coloring_algorithm = bt
+  [../]
+  [./grain_tracker]
+    type = FauxGrainTracker # Note: FauxGrainTracker only used for testing purposes. Use GrainTracker when using GrainTextureVectorPostprocessor.
+    flood_entity_type = ELEMENTAL
+    outputs = none
+  [../]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_3_rand_2D.tex
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -75,18 +92,6 @@
     Q = 0.23 #Activation energy for grain growth from Schonfelder 1997
     T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # nm    #Width of the diffuse GB
-  [../]
-[]
-
-[UserObjects]
-  [./grain_tracker]
-    type = FauxGrainTracker # Note: FauxGrainTracker only used for testing purposes. Use GrainTracker when using GrainTextureVectorPostprocessor.
-    flood_entity_type = ELEMENTAL
-    outputs = none
-  [../]
-  [./euler_angle_file]
-    type = EulerAngleFileReader
-    file_name = grn_3_rand_2D.tex
   [../]
 []
 
