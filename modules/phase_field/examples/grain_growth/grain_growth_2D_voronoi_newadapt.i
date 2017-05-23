@@ -2,6 +2,8 @@
 # Mesh adaptivity (new system) and time step adaptivity are used
 # An AuxVariable is used to calculate the grain boundary locations
 # Postprocessors are used to record time step and the number of grains
+# We are not using the GrainTracker in this example so the number
+# of order paramaters must match the number of grains.
 
 [Mesh]
   # Mesh block.  Meshes can be read in or automatically generated
@@ -26,18 +28,27 @@
   var_name_base = gr # Base name of grains
 []
 
-[Variables]
-  # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
-    # Custom action that created all of the grain variables and sets their initial condition
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    grain_num = 15
+    rand_seed = 42
+    coloring_algorithm = bt # We must use bt to force the UserObject to assign one grain to each op
   [../]
 []
 
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
-      grain_num = 15
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
+  [../]
+[]
+
+[Variables]
+  # Variable block, where all variables in the simulation are declared
+  [./PolycrystalVariables]
+    # Custom action that created all of the grain variables and sets their initial condition
   [../]
 []
 
@@ -88,12 +99,6 @@
 
 [Postprocessors]
   # Scalar postprocessors
-  [./ngrains]
-  #Counts the number of grains in the polycrystal
-    type = FeatureFloodCount
-    variable = bnds
-    threshold = 0.7
-  [../]
   [./dt]
     # Outputs the current time step
     type = TimestepSize

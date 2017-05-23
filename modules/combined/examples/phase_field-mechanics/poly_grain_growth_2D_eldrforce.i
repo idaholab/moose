@@ -30,9 +30,32 @@
   [../]
 []
 
+[UserObjects]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_36_rand_2D.tex
+  [../]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    coloring_algorithm = bt
+  [../]
+  [./grain_tracker]
+    type = GrainTrackerElasticity
+    threshold = 0.2
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_begin'
+    flood_entity_type = ELEMENTAL
+
+    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
+    fill_method = symmetric9
+    euler_angle_provider = euler_angle_file
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
@@ -225,24 +248,6 @@
   [./run_time]
     type = RunTime
     time_type = active
-  [../]
-[]
-
-[UserObjects]
-  [./euler_angle_file]
-    type = EulerAngleFileReader
-    file_name = grn_36_rand_2D.tex
-  [../]
-  [./grain_tracker]
-    type = GrainTrackerElasticity
-    threshold = 0.2
-    compute_var_to_feature_map = true
-    execute_on = 'initial timestep_begin'
-    flood_entity_type = ELEMENTAL
-
-    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
-    fill_method = symmetric9
-    euler_angle_provider = euler_angle_file
   [../]
 []
 

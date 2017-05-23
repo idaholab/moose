@@ -23,11 +23,20 @@
   [../]
 []
 
+[UserObjects]
+  [./voronoi]
+    type = PolycrystalVoronoi
+    rand_seed = 47
+    grain_num = 4
+    columnar_3D = true
+    coloring_algorithm = bt
+  [../]
+[]
+
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
-      grain_num = 4
-      columnar_3D = true
+    [./PolycrystalColoringIC]
+      polycrystal_ic_uo = voronoi
     [../]
   [../]
 []
