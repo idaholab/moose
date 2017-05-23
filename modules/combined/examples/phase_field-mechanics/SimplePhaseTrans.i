@@ -6,18 +6,20 @@
 # Eigenstrain as a function of SOP
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 100
   ny = 100
-  nz = 0
   xmin = 0
   xmax = 100
   ymin = 0
   ymax = 100
-  zmin = 0
-  zmax = 0
+
   elem_type = QUAD4
 []
 
@@ -35,21 +37,17 @@
       int_width = 5.0
     [../]
   [../]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
+[]
+
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    generate_output = 'stress_xx stress_yy'
+    eigenstrain_names = 'eigenstrain'
   [../]
 []
 
 [Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y'
-  [../]
-
   [./eta_bulk]
     type = AllenCahn
     variable = eta
@@ -65,10 +63,6 @@
     variable = eta
   [../]
 []
-
-#
-# Try visualizing the stress tensor components as done in Conserved.i
-#
 
 [Materials]
   [./consts]
@@ -116,12 +110,6 @@
     eigenstrain_name = eigenstrain
   [../]
 
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'
-    eigenstrain_names = eigenstrain
-  [../]
-
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
@@ -138,81 +126,17 @@
   [../]
 []
 
-[AuxVariables]
-  [./sigma11_aux]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./sigma12_aux]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-[AuxKernels]
-  [./matl_sigma11]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-    variable = sigma11_aux
-  [../]
-  [./matl_sigma22]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 1
-    variable = sigma12_aux
-    execute_on = 'timestep_end initial'
-  [../]
-[]
-
 [BCs]
-  [./bottom_y]
+  [./all_y]
     type = PresetBC
     variable = disp_y
-    boundary = 'bottom'
+    boundary = 'top bottom left right'
     value = 0
   [../]
-  [./top_y]
-    type = PresetBC
-    variable = disp_y
-    boundary = 'top'
-    value = 0
-  [../]
-  [./left_y]
-    type = PresetBC
-    variable = disp_y
-    boundary = 'left'
-    value = 0
-  [../]
-  [./right_y]
-      type = PresetBC
-      variable = disp_y
-      boundary = 'right'
-      value = 0
-  [../]
-  [./top_x]
+  [./all_x]
     type = PresetBC
     variable = disp_x
-    boundary = 'top'
-    value = 0
-  [../]
-  [./bottom_x]
-      type = PresetBC
-      variable = disp_x
-      boundary = 'bottom'
-      value = 0
-    [../]
-      [./right_x]
-    type = PresetBC
-    variable = disp_x
-    boundary = 'right'
-    value = 0
-  [../]
-  [./left_x]
-    type = PresetBC
-    variable = disp_x
-    boundary = 'left'
+    boundary = 'top bottom left right'
     value = 0
   [../]
 []
@@ -243,7 +167,11 @@
   num_steps = 10
 
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = IterationAdaptiveDT
+    optimal_iterations = 9
+    iteration_window = 2
+    growth_factor = 1.1
+    cutback_factor = 0.75
     dt = 0.3
   [../]
 []
