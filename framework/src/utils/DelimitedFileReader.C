@@ -27,7 +27,7 @@ namespace MooseUtils
 DelimitedFileReader::DelimitedFileReader(const std::string & filename,
                                          const bool header,
                                          const std::string delimiter,
-                                         std::shared_ptr<libMesh::Parallel::Communicator> comm)
+                                         const libMesh::Parallel::Communicator * comm)
   : _filename(filename), _header(header), _delimiter(delimiter), _communicator(comm)
 {
 }
@@ -43,7 +43,7 @@ DelimitedFileReader::read()
   std::size_t size_raw;
 
   // Read data
-  if (_communicator->rank() == 0)
+  if (_communicator == nullptr || _communicator->rank() == 0)
   {
     // Check the file
     MooseUtils::checkFileReadable(_filename);
@@ -51,13 +51,13 @@ DelimitedFileReader::read()
     // Create the file stream
     std::ifstream stream_data(_filename);
 
-    // Read the header and data
+    // Read/generate the header
     initializeColumns(stream_data);
 
     // Set the number of columns
     n_cols = _column_names.size();
 
-    // Read the header and data
+    // Read the data
     readData(stream_data, raw);
 
     // Close the stream
@@ -67,18 +67,23 @@ DelimitedFileReader::read()
     size_raw = raw.size();
   }
 
-  // Broadcast column names
-  _communicator->broadcast(n_cols);
-  _column_names.resize(n_cols);
-  _communicator->broadcast(_column_names);
+  if (_communicator != nullptr)
+  {
+    // Broadcast column names
+    _communicator->broadcast(n_cols);
+    _column_names.resize(n_cols);
+    _communicator->broadcast(_column_names);
 
-  // Broadcast raw data
-  _communicator->broadcast(size_raw);
-  raw.resize(size_raw);
-  _communicator->broadcast(raw);
+    // Broadcast raw data
+    _communicator->broadcast(size_raw);
+    raw.resize(size_raw);
+    _communicator->broadcast(raw);
+  }
 
   // Update the data
   _data.resize(n_cols);
+  mooseAssert(raw.size() % n_cols == 0,
+              "The raw data is not evenly divisible by the number of columns.");
   const std::size_t n_rows = raw.size() / n_cols;
   for (std::size_t j = 0; j < n_cols; ++j)
   {

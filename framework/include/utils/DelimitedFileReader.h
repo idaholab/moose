@@ -33,7 +33,9 @@ namespace MooseUtils
  *                If false, the names are generated in numeric order: "0", "1", etc.
  * @param delimiter (Default: ",") The delimiter separating the data and header.
  *
- * This class assumes that all data is numeric and can be converted to a C++ double.
+ * This class assumes that all data is numeric and can be converted to a C++ double. If a
+ * Communicator is provide then it will only read on processor 0 and broadcast the data to all
+ * processors. If not provided it will read on all processors.
  */
 class DelimitedFileReader
 {
@@ -41,8 +43,7 @@ public:
   DelimitedFileReader(const std::string & filename,
                       const bool header = true,
                       const std::string delimiter = ",",
-                      std::shared_ptr<libMesh::Parallel::Communicator> comm =
-                          std::make_shared<libMesh::Parallel::Communicator>());
+                      const libMesh::Parallel::Communicator * comm = nullptr);
 
   /**
    * Perform the actual data reading.
@@ -80,7 +81,7 @@ protected:
   std::vector<std::vector<double>> _data;
 
   // Communicator
-  std::shared_ptr<libMesh::Parallel::Communicator> _communicator;
+  const libMesh::Parallel::Communicator * _communicator;
 
 private:
   /**

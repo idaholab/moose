@@ -35,10 +35,11 @@ validParams<CSVReader>()
       "headers are used as the VectorPostprocessor vector names. If false the "
       "file is assumed to contain only numbers and the vectors are named "
       "automatically based on the VectorPostprocessor block name (e.g., 'foo_0000', 'foo_0001').");
-  params.addParam<std::string>("delimiter",
-                               ",",
-                               "The column delimiter. Despite the name this can read files "
-                               "separated by delimiter other than a comma.");
+  params.addParam<std::string>(
+      "delimiter",
+      ",",
+      "The column delimiter, which defaults to a comma. Despite the name this can read files "
+      "separated by delimiter other than a comma.");
   params.set<MultiMooseEnum>("execute_on") = "initial";
   return params;
 }
@@ -48,7 +49,7 @@ CSVReader::CSVReader(const InputParameters & params)
     _csv_reader(getParam<FileName>("csv_file"),
                 getParam<bool>("header"),
                 getParam<std::string>("delimiter"),
-                std::make_shared<libMesh::Parallel::Communicator>(_communicator.get()))
+                &_communicator)
 {
 }
 

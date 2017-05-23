@@ -36,7 +36,7 @@ public:
 
 protected:
   const VectorPostprocessorValue & _vpp_data;
-  const unsigned int & _rank;
+  const processor_id_type & _rank;
   const std::vector<double> & _gold;
 };
 
