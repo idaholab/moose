@@ -88,24 +88,6 @@ public:
   bool hasComponentByName(const std::string & cname, bool log_errors = true) const;
 
   /**
-   * Get the ids associated with the component.  These can either be subdomain ids or boundary ids
-   * depending
-   * on what you are asking for.
-   *
-   * @param piece The name of the piece of the component you are interested in.
-   */
-  virtual std::vector<unsigned int> getIDs(std::string piece) const = 0;
-
-  /**
-   * Returns the variable associated with that part of the component.
-   *
-   * In case of an error, this method will throw a std::string exception with an error description.
-   *
-   * @param piece The name of the piece of the component you are interested in.
-   */
-  virtual std::string variableName(std::string piece) const = 0;
-
-  /**
    * Connect with control logic
    */
   void connectObject(const InputParameters & params,
