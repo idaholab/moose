@@ -114,9 +114,9 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   // Finite differencing parameters
   Real dp = 1.0e-2;
   Real dT = 1.0e-4;
-  Real dx = 1.0e-6;
+  Real dx = 1.0e-8;
 
-  // density
+  // Density
   Real drho_dp_fd = (_fp->rho(p + dp, T, x) - _fp->rho(p - dp, T, x)) / (2.0 * dp);
   Real drho_dT_fd = (_fp->rho(p, T + dT, x) - _fp->rho(p, T - dT, x)) / (2.0 * dT);
   Real drho_dx_fd = (_fp->rho(p, T, x + dx) - _fp->rho(p, T, x - dx)) / (2.0 * dx);
@@ -129,7 +129,7 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   REL_TEST("drho_dT", drho_dT, drho_dT_fd, 1.0e-3);
   REL_TEST("drho_dx", drho_dx, drho_dx_fd, 1.0e-3);
 
-  // enthalpy
+  // Enthalpy
   Real dh_dp_fd = (_fp->h(p + dp, T, x) - _fp->h(p - dp, T, x)) / (2.0 * dp);
   Real dh_dT_fd = (_fp->h(p, T + dT, x) - _fp->h(p, T - dT, x)) / (2.0 * dT);
   Real dh_dx_fd = (_fp->h(p, T, x + dx) - _fp->h(p, T, x - dx)) / (2.0 * dx);
@@ -142,7 +142,7 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   REL_TEST("dh_dT", dh_dT, dh_dT_fd, 1.0e-3);
   REL_TEST("dh_dx", dh_dx, dh_dx_fd, 1.0e-3);
 
-  // internal energy
+  // Internal energy
   Real de_dp_fd = (_fp->e(p + dp, T, x) - _fp->e(p - dp, T, x)) / (2.0 * dp);
   Real de_dT_fd = (_fp->e(p, T + dT, x) - _fp->e(p, T - dT, x)) / (2.0 * dT);
   Real de_dx_fd = (_fp->e(p, T, x + dx) - _fp->e(p, T, x - dx)) / (2.0 * dx);
@@ -167,5 +167,32 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   ABS_TEST("mu", mu, _fp->mu(rho, T, x), 1.0e-15);
   REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-3);
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-3);
+  REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-3);
+
+  // Verify that derivatives wrt x are defined when x = 0
+  x = 0.0;
+
+  // Density
+  _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  drho_dx_fd = (_fp->rho(p, T, x + dx) - _fp->rho(p, T, x)) / dx;
+
+  REL_TEST("drho_dx", drho_dx, drho_dx_fd, 1.0e-3);
+
+  // Enthalpy
+  _fp->h_dpTx(p, T, x, h, dh_dp, dh_dT, dh_dx);
+  dh_dx_fd = (_fp->h(p, T, x + dx) - _fp->h(p, T, x)) / dx;
+
+  REL_TEST("dh_dx", dh_dx, dh_dx_fd, 1.0e-3);
+
+  // Internal energy
+  _fp->e_dpTx(p, T, x, e, de_dp, de_dT, de_dx);
+  de_dx_fd = (_fp->e(p, T, x + dx) - _fp->e(p, T, x)) / dx;
+
+  REL_TEST("de_dx", de_dx, de_dx_fd, 1.0e-3);
+
+  // Viscosity
+  dmu_dx_fd = (_fp->mu(rho, T, x + dx) - _fp->mu(rho, T, x)) / dx;
+  _fp->mu_drhoTx(rho, T, x, mu, dmu_drho, dmu_dT, dmu_dx);
+
   REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-3);
 }
