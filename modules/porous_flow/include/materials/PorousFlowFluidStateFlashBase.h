@@ -53,6 +53,28 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
+  /// Data structure to pass calculated thermophysical properties
+  struct FluidStateProperties
+  {
+    Real pressure;
+    Real saturation;
+    Real fluid_density;
+    Real fluid_viscosity;
+    std::vector<Real> mass_fraction;
+    Real dsaturation_dp;
+    Real dsaturation_dT;
+    Real dsaturation_dz;
+    Real dfluid_density_dp;
+    Real dfluid_density_dT;
+    Real dfluid_density_dz;
+    Real dfluid_viscosity_dp;
+    Real dfluid_viscosity_dT;
+    Real dfluid_viscosity_dz;
+    std::vector<Real> dmass_fraction_dp;
+    std::vector<Real> dmass_fraction_dT;
+    std::vector<Real> dmass_fraction_dz;
+  };
+
   /// Size material property vectors and initialise with zeros
   void setMaterialVectorSize() const;
 
@@ -60,7 +82,7 @@ protected:
    * Calculates all required thermophysical properties and derivatives for each phase
    * and fluid component. Must override in all derived classes.
    */
-  virtual void thermophysicalProperties() const = 0;
+  virtual void thermophysicalProperties() = 0;
 
   /**
    * Rachford-Rice equation for vapor fraction. Can be solved analytically for two
@@ -208,6 +230,8 @@ protected:
   const Real _nr_tol;
   /// Flag to indicate whether to calculate stateful properties
   bool _is_initqp;
+  /// FluidStateProperties data structure
+  std::vector<FluidStateProperties> _fsp;
 };
 
 #endif // POROUSFLOWFLUIDSTATEFLASHBASE_H

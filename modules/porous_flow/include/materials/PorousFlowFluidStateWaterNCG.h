@@ -27,7 +27,7 @@ public:
   PorousFlowFluidStateWaterNCG(const InputParameters & parameters);
 
 protected:
-  virtual void thermophysicalProperties() const override;
+  virtual void thermophysicalProperties() override;
 
   /**
    * Enthalpy of dissolution of NCG in water calculated using Henry's constant
