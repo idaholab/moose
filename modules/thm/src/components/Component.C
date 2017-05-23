@@ -153,30 +153,6 @@ Component::setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSyste
 }
 
 void
-Component::aliasParam(const std::string & rname, const std::string & name)
-{
-  _param_alias_map[rname] = std::pair<Component *, std::string>(this, name);
-}
-
-void
-Component::aliasParam(const std::string & rname,
-                      const std::string & name,
-                      const std::string & comp_name)
-{
-  Component * comp = const_cast<Component *>(&getComponentByName<Component>(comp_name));
-  _param_alias_map[rname] = std::pair<Component *, std::string>(comp, name);
-}
-
-void
-Component::aliasVectorParam(const std::string & rname,
-                            const std::string & name,
-                            unsigned int pos,
-                            Component * /*comp = NULL*/)
-{
-  createVectorControllableParMapping(rname, name, pos);
-}
-
-void
 Component::connectObject(const InputParameters & params,
                          const std::string & rname,
                          const std::string & mooseName,
@@ -187,28 +163,13 @@ Component::connectObject(const InputParameters & params,
 
 void
 Component::connectObject(const InputParameters & params,
-                         const std::string & rname,
+                         const std::string & /*rname*/,
                          const std::string & mooseName,
                          const std::string & name,
                          const std::string & par_name)
 {
-  ControlLogicNameEntry rne(params.get<std::string>("_moose_base") + "::" + mooseName, par_name);
-  if (_parent != NULL)
-    _parent->_rname_map[rname][name].push_back(rne);
-  else
-    _rname_map[rname][name].push_back(rne);
-
   MooseObjectParameterName alias("component/" + this->name() + "/" + name);
   MooseObjectParameterName par_value(
       MooseObjectName(params.get<std::string>("_moose_base"), mooseName), par_name);
   _app.getInputParameterWarehouse().addControllableParameterConnection(alias, par_value);
-}
-
-void
-Component::createVectorControllableParMapping(const std::string & rname,
-                                              const std::string & mooseName,
-                                              unsigned int pos)
-{
-  ControlLogicMapContainer mc(mooseName, pos);
-  _rvect_map.insert(std::pair<std::string, ControlLogicMapContainer>(rname, mc));
 }
