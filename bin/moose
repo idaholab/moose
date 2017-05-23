@@ -1,0 +1,298 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import re
+import argparse
+import os.path
+import sys
+import shutil
+import subprocess
+
+def main():
+    parser = argparse.ArgumentParser()
+    build_cmds(parser)
+    args = parser.parse_args()
+    args.func(args)
+
+def build_cmds(parser):
+    mpath = os.environ.get('MOOSE_DIR')
+    if mpath is None:
+        print('the MOOSE_DIR environment variable must be set to use this command', file=sys.stderr)
+        sys.exit(1)
+    sys.path.append(os.path.join(mpath, 'python'))
+
+    import path_tool # this needs to die
+    path_tool.activate_module('TestHarness') # this needs to die
+
+    classname, projname, projpath = find_app('./')
+
+    projinfo = {'path': projpath, 'class': classname, 'name': projname, 'moose_path': mpath}
+    parser.set_defaults(proj=projinfo, parser=parser)
+
+    subs = parser.add_subparsers()
+
+    subcmd = 'help'
+    help = 'display help for subcomands'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    sub.add_argument('subcommand', nargs='?', default='summary', help='show help for a specific subcommand')
+    sub.set_defaults(func=helpcmd)
+
+    subcmd = 'appinfo'
+    help = 'display local project info'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    sub.set_defaults(func=show_app_info)
+
+    subcmd = 'newobj'
+    help = 'add and register a new moose object'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    sub.add_argument('kind', type=str, help='superclass of object to create')
+    sub.add_argument('name', type=str, help='class name for new object')
+    sub.add_argument('--noregister', action='store_true', default=False, help="don't auto-generate the in-app registration line (default=True)")
+    sub.set_defaults(func=newobj)
+
+    subcmd = 'libmesh'
+    help = 'perform libmesh-related tasks'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    subsubs = sub.add_subparsers()
+    help='update and rebuild the libmesh submodule in MOOSE'
+    subsub = subsubs.add_parser('update', help=help, description=help)
+    subsub.add_argument('--clean', action='store_true', default=False, help='remove existing build directory and reconfigure before build')
+    subsub.add_argument('--enable-timestamps', action='store_true', default=False, help='use timestamps to trigger object rebuilds')
+    subsub.set_defaults(func=update_libmesh)
+
+    subcmd = 'build'
+    help = '(re)build moose apps, libraries, modules, and tests'
+    desc = 'With no arguments, builds the moose app in the current location.'
+    sub = subs.add_parser(subcmd, help=help, description=desc)
+    sub.add_argument('--modules', action='store_true', default=False, help='build core moose module binaries and tests')
+    sub.add_argument('--unit', action='store_true', default=False, help='build unit tests for the current project')
+    sub.add_argument('-j', type=int, default=4, help='number of parallel build jobs')
+    sub.set_defaults(func=buildproj)
+
+    subcmd = 'test'
+    help = 'test moose apps, libraries, and modules'
+    desc = 'With no arguments, runs regression tests for the moose app in the current location. ' \
+           'To use test harness options, put -h (or desired options) after a -- (i.e. "moose test -- --no-color" or "moose test -- -h").'
+    sub = subs.add_parser(subcmd, help=help, description=desc)
+    sub.add_argument('--unit', action='store_true', default=False, help='run unit tests for the current project')
+    sub.add_argument('testflags', nargs='*', default=[], help='flags to pass into the test harness')
+    sub.set_defaults(func=testproj)
+
+def helpcmd(args):
+    if args.subcommand == 'summary':
+        args.parser.print_help()
+        return
+
+    # retrieve subparsers from parser and find the one matching [subcommand]
+    subparsers_actions = [
+        action for action in args.parser._actions
+        if isinstance(action, argparse._SubParsersAction)]
+    for subparsers_action in subparsers_actions:
+        for subname, subparser in subparsers_action.choices.items():
+            if subname == args.subcommand:
+                print(subparser.format_help())
+                return
+
+def show_app_info(args):
+    if args.proj['class'] is None:
+        print('no MOOSE app found here', file=sys.stderr)
+        sys.exit(1)
+
+    proj = args.proj
+    print(' ' + proj['name'] + ':')
+    print('    Class:', proj['class'])
+    print('    Path:', proj['path'])
+    print('    MOOSE_DIR:', proj['moose_path'])
+
+
+def testproj(args):
+    proj = args.proj
+    iscore = in_moose_core('./')
+    if proj['class'] is None and not iscore:
+        print('no MOOSE app/project found here', file=sys.stderr)
+        sys.exit(1)
+
+    mpath = proj['moose_path']
+    if proj['class'] is None:
+        appname = 'moose_test'
+        wd = os.path.join(mpath, 'test')
+        if args.unit:
+            wd = os.path.join(mpath, 'unit')
+    else:
+        wd = proj['path']
+        appname = proj['class'].lower()
+        if args.unit:
+            wd = os.path.join(proj['path'], 'unit')
+
+    if not args.unit:
+        print("Running regression tests for '{}'...".format(appname))
+        runtests(proj, wd, appname, args.testflags)
+    else:
+        print("Running unit tests for '{}'...".format(appname))
+        p = subprocess.Popen('./run_tests', cwd=wd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+        p.communicate()
+        if p.returncode != 0:
+            print('unit tests in "{}" failed to run'.format(wd), file=sys.stderr)
+            sys.exit(p.returncode)
+
+def runtests(proj, path, app_name, flags):
+    from TestHarness import TestHarness
+    os.chdir(path)
+
+    flags.insert(0, './run_tests')
+    flags.insert(1, '--error')
+
+    TestHarness.buildAndRun(flags, app_name, proj['moose_path'])
+
+def buildproj(args):
+    proj = args.proj
+    iscore = in_moose_core('./')
+    if proj['class'] is None and not iscore:
+        print('no MOOSE app/project found here', file=sys.stderr)
+        sys.exit(1)
+
+    mpath = proj['moose_path']
+    cmd = ['make', '-j', str(args.j)]
+    if proj['class'] is None:
+        if args.unit:
+            wd = os.path.join(mpath, 'unit')
+        elif args.modules:
+            wd = os.path.join(mpath, 'modules')
+        else:
+            wd = os.path.join(mpath, 'test')
+    else:
+        if args.unit:
+            wd = os.path.join(proj['path'], 'unit')
+        else:
+            wd = proj['path']
+
+
+    p = subprocess.Popen(cmd, cwd=wd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+    p.communicate()
+    if p.returncode != 0:
+        print('build in "{}" failed'.format(wd), file=sys.stderr)
+        sys.exit(p.returncode)
+
+def update_libmesh(args):
+    proj = args.proj
+    cmd = [os.path.join(proj['moose_path'], 'scripts', 'update_and_rebuild_libmesh.sh')]
+    if args.enable_timestamps:
+        cmd.append('--enable-timestamps')
+    if not args.clean:
+        cmd.append('--fast')
+
+    p = subprocess.Popen(cmd, cwd=proj['moose_path'], stdout=sys.stdout, stderr=subprocess.STDOUT)
+    p.communicate()
+    if p.returncode != 0:
+        print('libmesh update failed', file=sys.stderr)
+        sys.exit(p.returncode)
+
+def newobj(args):
+    if args.proj['class'] is None:
+        print('no MOOSE app found here', file=sys.stderr)
+        sys.exit(1)
+
+    proj, kind, name = args.proj, args.kind, args.name
+    copy_template(proj, kind, name)
+
+    if not args.noregister:
+        register_object(proj, name)
+
+def copy_template(proj, kind, name):
+    path_info = prepare_obj_paths(proj, kind, name)
+    if path_info is None:
+        print("invalid object kind '{}'".format(kind), file=sys.stderr)
+        sys.exit(1)
+
+
+    dirname = os.path.dirname(path_info['dst_h'])
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    dirname = os.path.dirname(path_info['dst_C'])
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    shutil.copyfile(path_info['template_h'], path_info['dst_h'])
+    shutil.copyfile(path_info['template_C'], path_info['dst_C'])
+    rename_internal(path_info['dst_h'], name)
+    rename_internal(path_info['dst_C'], name)
+
+def prepare_obj_paths(proj, kind, name):
+    mpath, ppath = proj['moose_path'], proj['path']
+    if kind == 'Kernel':
+        return {
+            'template_h': os.path.join(mpath, 'templates/Kernel.h'),
+            'template_C': os.path.join(mpath, 'templates/Kernel.C'),
+            'dst_h': os.path.join(ppath, 'include/kernels/{}.h'.format(name)),
+            'dst_C': os.path.join(ppath, 'src/kernels/{}.C'.format(name)),
+            }
+    return None
+
+def in_moose_core(curr_path, depth=0):
+    maxdepth = 10
+    fpath = os.path.join(curr_path, 'framework/include/kernels/Kernel.h')
+    if os.path.exists(fpath):
+        return True
+    if depth < maxdepth:
+        return in_moose_core(os.path.join(curr_path, '..'), depth+1)
+    return False
+
+def find_app(proj_path, depth=0):
+    fpath = os.path.join(proj_path, 'src/main.C')
+    if not os.path.exists(fpath):
+        maxdepth = 10
+        if depth < maxdepth:
+            return find_app(os.path.join(proj_path, '..'), depth+1)
+        return None, None, None
+
+    with open(fpath, 'r') as f:
+        body = f.read()
+    r = re.compile(r'\s([A-Za-z0-9_]*)App::registerApps\(\s*\)\s*;')
+    m = r.search(body)
+    if m is None:
+        return None, None, None
+
+    fpath = os.path.join(proj_path, 'Makefile')
+    if not os.path.exists(fpath):
+        return None, None, None
+
+    with open(fpath, 'r') as f:
+        body = f.read()
+
+    r = re.compile(r'\s*APPLICATION_NAME\s*:=\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*')
+    m = r.search(body)
+    if m is None:
+        return None, None, None
+
+    proj_path = os.path.abspath(proj_path)
+    return m.group(1), m.group(1), proj_path
+
+def rename_internal(fname, objname):
+    with open(fname, 'r') as f:
+        body = f.read()
+
+    body = body.replace('TmplKernel', objname)
+    body = body.replace('TMPLKERNEL', objname.upper())
+
+    with open(fname, 'w') as f:
+        f.write(body)
+
+def register_object(proj, name):
+    r = re.compile(r'(App::registerObjects\( *Factory.*\)\s*{[^\n]*\n)')
+
+    appfile = os.path.join(proj['path'], 'src/base', proj['class']+'App.C')
+    if not os.path.exists(appfile):
+        print('app file "{}" not foundA)'.format(appfile), file=stderr)
+        sys.exit(1)
+    with open(appfile, 'r') as f:
+        body = f.read()
+
+    body = '#include "{}.h"\n'.format(name) + body
+    body = r.sub(r'\g<1>  registerObject({});\n'.format(name), body)
+
+    with open(appfile, 'w') as f:
+        f.write(body)
+
+if __name__ == '__main__':
+    main()
+
