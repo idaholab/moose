@@ -3,17 +3,20 @@
     type = 'CSVDiff'
     input = '1d.i'
     csvdiff = '1d_out_elems_0001.csv'
+    mesh_mode = replicated
   [../]
 
   [./2d]
     type = 'CSVDiff'
     input = '2d.i'
     csvdiff = '2d_out_elems_0001.csv'
+    mesh_mode = replicated
   [../]
 
   [./3d]
     type = 'CSVDiff'
     input = '3d.i'
     csvdiff = '3d_out_elems_0001.csv'
-  [../]
+    mesh_mode = replicated
+[../]
 []
