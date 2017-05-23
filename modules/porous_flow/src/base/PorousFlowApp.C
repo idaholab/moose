@@ -73,6 +73,7 @@
 #include "PorousFlowConstantBiotModulus.h"
 #include "PorousFlowConstantThermalExpansionCoefficient.h"
 #include "PorousFlowFluidStateWaterNCG.h"
+#include "PorousFlowFluidStateBrineCO2.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -214,6 +215,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowConstantBiotModulus);
   registerMaterial(PorousFlowConstantThermalExpansionCoefficient);
   registerMaterial(PorousFlowFluidStateWaterNCG);
+  registerMaterial(PorousFlowFluidStateBrineCO2);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
