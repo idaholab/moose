@@ -84,7 +84,8 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
     _consistent_tangent_operator(_num_models),
-    _cycle_models(getParam<bool>("cycle_models"))
+    _cycle_models(getParam<bool>("cycle_models")),
+    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit"))
 {
   if (_inelastic_weights.size() != _num_models)
     mooseError(
@@ -262,6 +263,12 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
 
   if (_fe_problem.currentlyComputingJacobian())
     computeQpJacobianMult();
+
+  _matl_timestep_limit[_qp] = 0.0;
+  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
+
+  _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
 }
 
 void
@@ -295,6 +302,8 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
                          elastic_strain_increment,
                          combined_inelastic_strain_increment,
                          _Jacobian_mult[_qp]);
+
+  _matl_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
 
   /* propagate internal variables, etc, to this timestep for those inelastic models where
    * "updateState" is not called */
