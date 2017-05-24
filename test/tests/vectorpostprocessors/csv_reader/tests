@@ -1,0 +1,20 @@
+[Tests]
+  [./read]
+    type = CSVDiff
+    input = read.i
+    csvdiff = 'read_out_reader_0000.csv'
+  [../]
+  [./parallel]
+    type = RunApp
+    input = read.i
+    cli_args = 'UserObjects/tester/rank=1'
+    min_parallel = 2
+  [../]
+  [./tester_fail]
+    type = RunException
+    input = read.i
+    cli_args = "UserObjects/tester/rank=1 UserObjects/tester/gold='1 2 3'"
+    min_parallel = 2
+    expect_err = "The supplied gold data does not match the VPP data on the given rank."
+  [../]
+[]
