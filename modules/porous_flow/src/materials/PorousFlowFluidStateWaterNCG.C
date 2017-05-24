@@ -30,7 +30,7 @@ PorousFlowFluidStateWaterNCG::PorousFlowFluidStateWaterNCG(const InputParameters
 }
 
 void
-PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
+PorousFlowFluidStateWaterNCG::thermophysicalProperties()
 {
   // The FluidProperty objects use temperature in K
   Real Tk = _temperature[_qp] + _T_c2k;
@@ -194,21 +194,10 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
                      (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
   }
 
-  // Set the saturations and pressures for each phase
+  // Calculate the saturations and pressures for each phase
   liquid_saturation = 1.0 - gas_saturation;
   Real seff = effectiveSaturation(liquid_saturation);
   Real liquid_porepressure = _gas_porepressure[_qp] + capillaryPressure(seff);
-
-  _saturation[_qp][_aqueous_phase_number] = liquid_saturation;
-  _saturation[_qp][_gas_phase_number] = gas_saturation;
-  _porepressure[_qp][_aqueous_phase_number] = liquid_porepressure;
-  _porepressure[_qp][_gas_phase_number] = _gas_porepressure[_qp];
-
-  // Set the mass fractions
-  _mass_frac[_qp][_aqueous_phase_number][_aqueous_fluid_component] = 1.0 - X0;
-  _mass_frac[_qp][_aqueous_phase_number][_gas_fluid_component] = X0;
-  _mass_frac[_qp][_gas_phase_number][_aqueous_fluid_component] = 1.0 - Y0;
-  _mass_frac[_qp][_gas_phase_number][_gas_fluid_component] = Y0;
 
   // Calculate liquid density and viscosity if in the two phase or single phase
   // liquid region, assuming they are not affected by the presence of dissolved
@@ -225,36 +214,42 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
     dliquid_viscosity_dp = dliquid_viscosity_drho * dliquid_density_dp;
   }
 
-  // Set the phase densities and viscosities
-  _fluid_density[_qp][_aqueous_phase_number] = liquid_density;
-  _fluid_density[_qp][_gas_phase_number] = gas_density;
+  // Save properties in FluidStateProperties vector
+  auto & liquid = _fsp[_aqueous_phase_number];
+  auto & gas = _fsp[_gas_phase_number];
 
-  _fluid_viscosity[_qp][_aqueous_phase_number] = liquid_viscosity;
-  _fluid_viscosity[_qp][_gas_phase_number] = gas_viscosity;
+  liquid.saturation = liquid_saturation;
+  gas.saturation = gas_saturation;
+  liquid.pressure = liquid_porepressure;
+  gas.pressure = _gas_porepressure[_qp];
+
+  liquid.mass_fraction[_aqueous_fluid_component] = 1.0 - X0;
+  liquid.mass_fraction[_gas_fluid_component] = X0;
+  gas.mass_fraction[_aqueous_fluid_component] = 1.0 - Y0;
+  gas.mass_fraction[_gas_fluid_component] = Y0;
+
+  liquid.fluid_density = liquid_density;
+  gas.fluid_density = gas_density;
+  liquid.fluid_viscosity = liquid_viscosity;
+  gas.fluid_viscosity = gas_viscosity;
 
   // Derivatives wrt PorousFlow variables are required by the kernels
   // Note: these don't need to be stateful so don't calculate them in
   // initQpStatefulProperties
   if (!_is_initqp)
   {
-    // Calculate derivatives of material properties wrt primary variables
-    // Derivative of z wrt variables
-    std::vector<Real> dz_dvar;
-    dz_dvar.assign(_num_pf_vars, 0.0);
-    if (_dictator.isPorousFlowVariable(_z_varnum[0]))
-      dz_dvar[_zvar[0]] = 1.0;
-
-    // Derivative of saturation wrt variables
+    // Derivative of gas saturation wrt variables
+    Real ds_dp = 0.0, ds_dT = 0.0, ds_dz = 0.0;
     if (is_twophase)
     {
       K0 = Y0 / X0;
       K1 = (1.0 - Y0) / (1.0 - X0);
-      Real ds_dv = gas_density * liquid_density /
-                   (gas_density + vapor_mass_fraction * (liquid_density - gas_density)) /
-                   (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
       Real dv_dz = (K1 - K0) / ((K0 - 1.0) * (K1 - 1.0));
-      _dsaturation_dvar[_qp][_gas_phase_number][_zvar[0]] = ds_dv * dv_dz;
-      _dsaturation_dvar[_qp][_aqueous_phase_number][_zvar[0]] = -ds_dv * dv_dz;
+      ds_dz = gas_density * liquid_density * dv_dz +
+              vapor_mass_fraction * (1.0 - vapor_mass_fraction) *
+                  (gas_density * dliquid_density_dz - dgas_density_dz * liquid_density);
+      ds_dz /= (gas_density + vapor_mass_fraction * (liquid_density - gas_density)) *
+               (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
 
       Real Kh, dKh_dT;
       _ncg_fp.henryConstant_dT(Tk, Kh, dKh_dT);
@@ -268,125 +263,57 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties() const
 
       Real dv_dp = (*_z[0])[_qp] * dK1_dp / (K1 - 1.0) / (K1 - 1.0) +
                    (1.0 - (*_z[0])[_qp]) * dK0_dp / (K0 - 1.0) / (K0 - 1.0);
-      Real ds_dp = gas_density * liquid_density * dv_dp +
-                   vapor_mass_fraction * (1.0 - vapor_mass_fraction) *
-                       (gas_density * dliquid_density_dp - dgas_density_dp * liquid_density);
+      ds_dp = gas_density * liquid_density * dv_dp +
+              vapor_mass_fraction * (1.0 - vapor_mass_fraction) *
+                  (gas_density * dliquid_density_dp - dgas_density_dp * liquid_density);
 
       ds_dp /= (gas_density + vapor_mass_fraction * (liquid_density - gas_density)) *
                (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
 
       Real dv_dT = (*_z[0])[_qp] * dK1_dT / (K1 - 1.0) / (K1 - 1.0) +
                    (1.0 - (*_z[0])[_qp]) * dK0_dT / (K0 - 1.0) / (K0 - 1.0);
-      Real ds_dT = gas_density * liquid_density * dv_dT +
-                   vapor_mass_fraction * (1.0 - vapor_mass_fraction) *
-                       (gas_density * dliquid_density_dT - dgas_density_dT * liquid_density);
+      ds_dT = gas_density * liquid_density * dv_dT +
+              vapor_mass_fraction * (1.0 - vapor_mass_fraction) *
+                  (gas_density * dliquid_density_dT - dgas_density_dT * liquid_density);
 
       ds_dT /= (gas_density + vapor_mass_fraction * (liquid_density - gas_density)) *
                (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
-
-      _dsaturation_dvar[_qp][_gas_phase_number][_pvar] = ds_dp;
-      _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar] = -ds_dp;
     }
 
-    // Derivative of porepressure wrt variables
-    if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
-    {
-      for (unsigned int ph = 0; ph < _num_phases; ++ph)
-      {
-        _dporepressure_dvar[_qp][ph][_pvar] = 1.0;
-        if (!_nodal_material)
-          (*_dgradp_qp_dgradv)[_qp][ph][_pvar] = 1.0;
-      }
+    liquid.dsaturation_dp = -ds_dp;
+    liquid.dsaturation_dT = -ds_dT;
+    liquid.dsaturation_dz = -ds_dz;
+    gas.dsaturation_dp = ds_dp;
+    gas.dsaturation_dT = ds_dT;
+    gas.dsaturation_dz = ds_dz;
 
-      // The aqueous phase porepressure is a function of liquid saturation,
-      // which depends on both gas porepressure and z
-      if (is_twophase)
-      {
-        Real dpc = dCapillaryPressure_dS(seff) * _dseff_ds;
-        _dporepressure_dvar[_qp][_aqueous_phase_number][_pvar] +=
-            dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar];
-        _dporepressure_dvar[_qp][_aqueous_phase_number][_zvar[0]] =
-            dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_zvar[0]];
-      }
-    }
+    liquid.dmass_fraction_dp[_aqueous_fluid_component] = -dX0_dp;
+    liquid.dmass_fraction_dp[_gas_fluid_component] = dX0_dp;
+    liquid.dmass_fraction_dT[_aqueous_fluid_component] = -dX0_dT;
+    liquid.dmass_fraction_dT[_gas_fluid_component] = dX0_dT;
+    liquid.dmass_fraction_dz[_aqueous_fluid_component] = -dX0_dz;
+    liquid.dmass_fraction_dz[_gas_fluid_component] = dX0_dz;
 
-    // Derivatives of properties wrt primary variables
-    for (unsigned int v = 0; v < _num_pf_vars; ++v)
-    {
-      // Derivative of density in each phase
-      _dfluid_density_dvar[_qp][_aqueous_phase_number][v] +=
-          dliquid_density_dp * _dporepressure_dvar[_qp][_aqueous_phase_number][v];
-      _dfluid_density_dvar[_qp][_gas_phase_number][v] +=
-          dgas_density_dp * _dporepressure_dvar[_qp][_gas_phase_number][v];
-      _dfluid_density_dvar[_qp][_aqueous_phase_number][v] +=
-          dliquid_density_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_density_dvar[_qp][_gas_phase_number][v] +=
-          dgas_density_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_density_dvar[_qp][_aqueous_phase_number][v] += dliquid_density_dz * dz_dvar[v];
-      _dfluid_density_dvar[_qp][_gas_phase_number][v] += dgas_density_dz * dz_dvar[v];
+    gas.dmass_fraction_dp[_aqueous_fluid_component] = -dY0_dp;
+    gas.dmass_fraction_dp[_gas_fluid_component] = dY0_dp;
+    gas.dmass_fraction_dT[_aqueous_fluid_component] = -dY0_dT;
+    gas.dmass_fraction_dT[_gas_fluid_component] = dY0_dT;
+    gas.dmass_fraction_dz[_aqueous_fluid_component] = -dY0_dz;
+    gas.dmass_fraction_dz[_gas_fluid_component] = dY0_dz;
 
-      // Derivative of viscosity in each phase
-      _dfluid_viscosity_dvar[_qp][_aqueous_phase_number][v] +=
-          dliquid_viscosity_dp * _dporepressure_dvar[_qp][_aqueous_phase_number][v];
-      _dfluid_viscosity_dvar[_qp][_gas_phase_number][v] +=
-          dgas_viscosity_dp * _dporepressure_dvar[_qp][_gas_phase_number][v];
-      _dfluid_viscosity_dvar[_qp][_aqueous_phase_number][v] +=
-          dliquid_viscosity_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_viscosity_dvar[_qp][_gas_phase_number][v] +=
-          dgas_viscosity_dT * _dtemperature_dvar[_qp][v];
-      _dfluid_viscosity_dvar[_qp][_aqueous_phase_number][v] += dliquid_viscosity_dz * dz_dvar[v];
-      _dfluid_viscosity_dvar[_qp][_gas_phase_number][v] += dgas_viscosity_dz * dz_dvar[v];
+    liquid.dfluid_density_dp = dliquid_density_dp;
+    liquid.dfluid_density_dT = dliquid_density_dT;
+    liquid.dfluid_density_dz = dliquid_density_dz;
+    gas.dfluid_density_dp = dgas_density_dp;
+    gas.dfluid_density_dT = dgas_density_dT;
+    gas.dfluid_density_dz = dgas_density_dz;
 
-      // The derivative of the mass fractions for each fluid component in each
-      // phase
-      _dmass_frac_dvar[_qp][_aqueous_phase_number][_aqueous_fluid_component][v] =
-          -dX0_dp * _dporepressure_dvar[_qp][_aqueous_phase_number][v];
-      _dmass_frac_dvar[_qp][_aqueous_phase_number][_aqueous_fluid_component][v] -=
-          dX0_dT * _dtemperature_dvar[_qp][v];
-      _dmass_frac_dvar[_qp][_aqueous_phase_number][_aqueous_fluid_component][v] -=
-          dX0_dz * dz_dvar[v];
-      _dmass_frac_dvar[_qp][_aqueous_phase_number][_gas_fluid_component][v] =
-          dX0_dp * _dporepressure_dvar[_qp][_aqueous_phase_number][v];
-      _dmass_frac_dvar[_qp][_aqueous_phase_number][_gas_fluid_component][v] +=
-          dX0_dT * _dtemperature_dvar[_qp][v];
-      _dmass_frac_dvar[_qp][_aqueous_phase_number][_gas_fluid_component][v] += dX0_dz * dz_dvar[v];
-      _dmass_frac_dvar[_qp][_gas_phase_number][_aqueous_fluid_component][v] =
-          -dY0_dp * _dporepressure_dvar[_qp][_gas_phase_number][v];
-      _dmass_frac_dvar[_qp][_gas_phase_number][_aqueous_fluid_component][v] -=
-          dY0_dT * _dtemperature_dvar[_qp][v];
-      _dmass_frac_dvar[_qp][_gas_phase_number][_aqueous_fluid_component][v] -= dY0_dz * dz_dvar[v];
-      _dmass_frac_dvar[_qp][_gas_phase_number][_gas_fluid_component][v] =
-          dY0_dp * _dporepressure_dvar[_qp][_gas_phase_number][v];
-      _dmass_frac_dvar[_qp][_gas_phase_number][_gas_fluid_component][v] +=
-          dY0_dT * _dtemperature_dvar[_qp][v];
-      _dmass_frac_dvar[_qp][_gas_phase_number][_gas_fluid_component][v] += dY0_dz * dz_dvar[v];
-    }
-  }
-
-  // If the material properties are being evaluated at the qps, calculate the
-  // gradients as well. Note: only nodal properties are evaluated in
-  // initQpStatefulProperties(), so no need to check _is_initqp flag for qp
-  // properties
-  if (!_nodal_material)
-  {
-    Real dpc = dCapillaryPressure_dS(seff) * _dseff_ds;
-    (*_grads_qp)[_qp][_gas_phase_number] =
-        _dsaturation_dvar[_qp][_gas_phase_number][_pvar] * _gas_gradp_qp[_qp] +
-        _dsaturation_dvar[_qp][_gas_phase_number][_zvar[0]] * (*_gradz_qp[0])[_qp];
-    (*_grads_qp)[_qp][_aqueous_phase_number] = -(*_grads_qp)[_qp][_gas_phase_number];
-
-    (*_gradp_qp)[_qp][_gas_phase_number] = _gas_gradp_qp[_qp];
-    (*_gradp_qp)[_qp][_aqueous_phase_number] =
-        _gas_gradp_qp[_qp] + dpc * (*_grads_qp)[_qp][_aqueous_phase_number];
-
-    (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] =
-        -dX0_dp * _gas_gradp_qp[_qp] - dX0_dz * (*_gradz_qp[0])[_qp];
-    (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] =
-        -(*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component];
-    (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] =
-        -dY0_dp * _gas_gradp_qp[_qp] - dY0_dz * (*_gradz_qp[0])[_qp];
-    (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] =
-        -(*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component];
+    liquid.dfluid_viscosity_dp = dliquid_viscosity_dp;
+    liquid.dfluid_viscosity_dT = dliquid_viscosity_dT;
+    liquid.dfluid_viscosity_dz = dliquid_viscosity_dz;
+    gas.dfluid_viscosity_dp = dgas_viscosity_dp;
+    gas.dfluid_viscosity_dT = dgas_viscosity_dT;
+    gas.dfluid_viscosity_dz = dgas_viscosity_dz;
   }
 }
 
