@@ -6,7 +6,7 @@
 
     # This example uses ShapeElementUserObject which contains a
     # mooseWarning()
-    executable_pattern = 'phase_field-\w+$'
+    allow_warnings = True
     check_input = True
   [../]
   [./AC_CH_advection_constforce_rect]
@@ -15,7 +15,7 @@
 
     # This example uses NonlocalKernel which contains a
     # mooseWarning()
-    executable_pattern = 'phase_field-\w+$'
+    allow_warnings = True
     check_input = True
   [../]
   [./grain_forcedensity_ext]
@@ -24,7 +24,7 @@
 
     # This example uses ShapeElementUserObject which contains a
     # mooseWarning()
-    executable_pattern = 'phase_field-\w+$'
+    allow_warnings = True
     check_input = True
   [../]
 []
