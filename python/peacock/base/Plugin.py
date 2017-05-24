@@ -14,7 +14,7 @@ class Plugin(MooseWidget):
     see Manager.py
     """
 
-    def __init__(self, layout='MainLayout'):
+    def __init__(self, layout='MainLayout', settings_key=""):
         super(Plugin, self).__init__()
 
         # Name of layout that this plugin should be added (see PluginManager.py)
@@ -31,7 +31,7 @@ class Plugin(MooseWidget):
         # The Peacock tab index
         self._index = None
         self._plugin_manager = None
-        self._preferences = Preferences()
+        self._preferences = Preferences(settings_key)
 
     @staticmethod
     def commandLineArgs(parser):

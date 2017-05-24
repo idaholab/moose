@@ -34,8 +34,8 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         if not plugins:
             plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
                        lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
-                       lambda: MeshPlugin(layout='BottomLayout'),
-                       lambda: BackgroundPlugin(values=False, layout='BottomLayout'),
+                       lambda: MeshPlugin(layout='BottomLayout', settings_key="input"),
+                       lambda: BackgroundPlugin(values=False, layout='BottomLayout', settings_key="input"),
                        lambda: BlockHighlighterPlugin(layout='RightLayout', collapsible_layout=QVBoxLayout)]
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
         # The layouts for this widget

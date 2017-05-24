@@ -154,7 +154,7 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         settings.setValue("exodus/defaultColorMap", "magma")
         settings.sync()
         self._widget.cornerWidget().clone.emit()
-        self.assertEqual(self._widget.preferencesWidget().count(), 1)
+        self.assertEqual(self._widget.preferencesWidget().count(), 6)
         self.assertEqual(self._widget.currentWidget().VariablePlugin.ColorMapList.currentText(), "magma")
 
         settings.setValue("exodus/defaultColorMap", "default")

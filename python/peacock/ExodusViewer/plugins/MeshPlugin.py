@@ -22,6 +22,12 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QVBoxLayout)
         ExodusPlugin.__init__(self, **kwargs)
 
+        self._preferences.addBool("exodus/viewMesh",
+                "View the mesh",
+                False,
+                "View the mesh by default",
+                )
+
         # Current variable (used for caching settings)
         self._variable = None
         self._transform = chigger.filters.TransformFilter()
@@ -180,6 +186,7 @@ class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Setup for showing the ViewMeshToggle widget. (protected)
         """
         qobject.stateChanged.connect(lambda value: self._callbackViewMeshToggle())
+        qobject.setChecked(self._preferences.value("exodus/viewMesh"))
 
     def _callbackViewMeshToggle(self):
         """
