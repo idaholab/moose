@@ -36,6 +36,7 @@ ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters)
     _end(getParam<Point>("end")),
     _elem_ids(declareVector("elem_ids"))
 {
+  _fe_problem.mesh().errorIfDistributedMesh("ElementsAlongLine");
 }
 
 void

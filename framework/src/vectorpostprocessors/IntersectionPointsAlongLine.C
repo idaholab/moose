@@ -50,6 +50,8 @@ IntersectionPointsAlongLine::IntersectionPointsAlongLine(const InputParameters &
   _intersections.push_back(&_z_intersections);
 #endif
 #endif
+
+  _fe_problem.mesh().errorIfDistributedMesh("IntersectionPointsAlongLine");
 }
 
 void

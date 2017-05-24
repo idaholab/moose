@@ -50,6 +50,8 @@ void
 MultiAppVariableValueSampleTransfer::initialSetup()
 {
   variableIntegrityCheck(_to_var_name);
+
+  _multi_app->problemBase().mesh().errorIfDistributedMesh("MultiAppVariableValueSampleTransfer");
 }
 
 void

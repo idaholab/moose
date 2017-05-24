@@ -2,6 +2,8 @@
   type = GeneratedMesh
   dim = 1
   nx = 10
+  # Ray tracing code is not yet compatible with DistributedMesh
+  parallel_type = replicated
 []
 
 [Variables]

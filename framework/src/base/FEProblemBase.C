@@ -4500,6 +4500,9 @@ FEProblemBase::checkProblemIntegrity()
                     "properties!  This can lead to large load imbalances and degraded "
                     "performance!!\n\n";
         _mesh.getMesh().skip_partitioning(true);
+
+        _mesh.errorIfDistributedMesh("StatefulMaterials + Adaptivity");
+
         if (_displaced_problem)
           _displaced_problem->mesh().getMesh().skip_partitioning(true);
       }
