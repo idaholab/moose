@@ -27,4 +27,15 @@
     csvdiff = "theis_csvout.csv"
     prereq = 'theis'
   [../]
+  [./brineco2]
+    type = 'CSVDiff'
+    input = 'brineco2.i'
+    csvdiff = 'brineco2.csv'
+  [../]
+  [./theis_brineco2]
+    type = 'CSVDiff'
+    input = 'theis_brineco2.i'
+    csvdiff = "theis_brineco2_csvout.csv"
+    heavy = true
+  [../]
 []
