@@ -8,3 +8,4 @@ BCs: systems/BCs/index.md
 Kernels: systems/Kernels/index.md
 Functions: systems/Functions/index.md
 Postprocessors: systems/Postprocessors/index.md
+VectorPostprocessors: systems/VectorPostprocessors/index.md

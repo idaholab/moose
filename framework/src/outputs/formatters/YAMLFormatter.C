@@ -85,7 +85,10 @@ YAMLFormatter::printParams(const std::string & prefix,
       for (auto & ch : tmp_str)
         if (ch == '\n')
           ch = ' ';
-      oss << tmp_str;
+      if (tmp_str == ",")
+        oss << "\"" << tmp_str << "\"";
+      else
+        oss << tmp_str;
     }
     else if (params.hasDefaultCoupledValue(iter.first))
       oss << params.defaultCoupledValue(iter.first);

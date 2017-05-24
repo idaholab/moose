@@ -335,7 +335,7 @@ bool wildCardMatch(std::string name, std::string search_string);
  * This function will split the passed in string on a set of delimiters appending the substrings
  * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
  * if min_len is supplied, the minimum token length will be greater than the supplied value.
- * T should be std::string or a MOOSE derivied string class.
+ * T should be std::string or a MOOSE derived string class.
  */
 template <typename T>
 void

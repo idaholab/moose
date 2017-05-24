@@ -253,6 +253,7 @@
 #include "LineFunctionSampler.h"
 #include "VolumeHistogram.h"
 #include "SphericalAverage.h"
+#include "CSVReader.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -695,6 +696,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(LineFunctionSampler);
   registerVectorPostprocessor(VolumeHistogram);
   registerVectorPostprocessor(SphericalAverage);
+  registerVectorPostprocessor(CSVReader);
 
   // user objects
   registerUserObject(LayeredIntegral);
