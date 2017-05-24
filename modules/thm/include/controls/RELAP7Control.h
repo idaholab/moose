@@ -40,8 +40,8 @@ template <typename T>
 T &
 RELAP7Control::declareControlData(const std::string & data_name)
 {
-  std::string full_name = "RELAP7/Controls/" + name() + ":" + data_name;
-  ControlData<T> * data_ptr = _sim.getControlData<T>(full_name);
+  std::string full_name = name() + ":" + data_name;
+  ControlData<T> * data_ptr = _sim.getControlData<T>(full_name, true);
   return data_ptr->set();
 }
 
@@ -50,8 +50,7 @@ const T &
 RELAP7Control::getControlData(const std::string & param_name)
 {
   std::string data_name = getParam<std::string>(param_name);
-  std::string full_name = "RELAP7/Controls/" + data_name;
-  ControlData<T> * data_ptr = _sim.getControlData<T>(full_name);
+  ControlData<T> * data_ptr = _sim.getControlData<T>(data_name);
   if (data_ptr == nullptr)
     mooseError("Trying to get control data '",
                data_name,
