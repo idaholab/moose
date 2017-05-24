@@ -17,7 +17,7 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    */
-  ControlDataValue(std::string name) : _name(name) {}
+  ControlDataValue(std::string name) : _name(name), _declared(false) {}
 
   /**
    * Destructor.
@@ -35,9 +35,21 @@ public:
    */
   const std::string & name() const { return _name; }
 
+  /**
+   * Mark the data as declared
+   */
+  void setDeclared() { _declared = true; }
+
+  /**
+   * Get the declared state
+   */
+  bool getDeclared() { return _declared; }
+
 protected:
   /// The full (unique) name of this particular piece of data.
   const std::string _name;
+  /// true if the data was declared by calling declareControlData. All data must be declared up front.
+  bool _declared;
 };
 
 /**
