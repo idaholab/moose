@@ -39,7 +39,6 @@ validParams<TensorMechanicsActionBase>()
 
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");
-  params.addParam<NonlinearVariableName>("temp", "The temperature"); // Deprecated
   params.addParam<NonlinearVariableName>("temperature", "The temperature");
 
   MooseEnum strainType("SMALL FINITE", "SMALL");

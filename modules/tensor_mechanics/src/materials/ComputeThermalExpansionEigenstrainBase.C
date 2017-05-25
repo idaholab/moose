@@ -13,9 +13,6 @@ validParams<ComputeThermalExpansionEigenstrainBase>()
 {
   InputParameters params = validParams<ComputeEigenstrainBase>();
   params.addCoupledVar("temperature", "Coupled temperature");
-  params.addDeprecatedParam<Real>("stress_free_reference_temperature",
-                                  "Reference temperature for thermal eigenstrain calculation",
-                                  "'stress_free_temperature' has replaced this parameter");
   params.addParam<Real>("stress_free_temperature",
                         "Reference temperature for thermal eigenstrain calculation");
 
@@ -31,8 +28,6 @@ ComputeThermalExpansionEigenstrainBase::ComputeThermalExpansionEigenstrainBase(
 {
   if (isParamValid("stress_free_temperature"))
     _stress_free_temperature = getParam<Real>("stress_free_temperature");
-  else if (isParamValid("stress_free_reference_temperature"))
-    _stress_free_temperature = getParam<Real>("stress_free_reference_temperature");
   else
     mooseError("Please specify 'stress_free_temperature'.");
 }
