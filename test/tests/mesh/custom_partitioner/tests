@@ -4,7 +4,7 @@
     input = 'custom_linear_partitioner_test.i'
     exodiff = 'custom_linear_partitioner_test_out.e'
     min_parallel = 2
-    max_parallel = 4
+    max_parallel = 2
     group = 'requirements'
   [../]
   [./custom_linear_partitioner_displacement]
@@ -20,7 +20,7 @@
     input = 'custom_linear_partitioner_restart_test.i'
     exodiff = 'custom_linear_partitioner_restart_test_out.e'
     min_parallel = 2
-    max_parallel = 4
+    max_parallel = 2
     group = 'requirements'
   [../]
 []
