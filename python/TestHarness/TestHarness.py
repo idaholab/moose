@@ -190,8 +190,6 @@ class TestHarness:
                             if file == self.options.input_file_name \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
-                                if 'bridge' in os.path.join(dirpath, file):
-                                    print os.path.join(dirpath, file)
                                 # Enter test directory
                                 saved_cwd = os.getcwd()
                                 sys.path.append(os.path.abspath(dirpath))
