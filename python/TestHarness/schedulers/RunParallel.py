@@ -42,15 +42,14 @@ class RunParallel(Scheduler):
         # We're good up to this point? Then launch the job!
         self.launchJob(tester, command, slot_check)
 
-    def getOutputFromFiles(self, tester):
-        file_output = ''
-        for processor_id in xrange(tester.getProcs(self.options)):
-            # Obtain path and append processor id to redirect_output filename
-            file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
-            if os.access(file_path, os.R_OK):
-                with open(file_path, 'r') as f:
-                    file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
-        return file_output
+    # Check if test has any redirected output, and if its ready to be read
+    def checkOutputReady(self, tester):
+        for redirected_file in tester.getRedirectedOutputFiles(self.options):
+            file_path = os.path.join(tester.getTestDir(), redirected_file)
+            if not os.access(file_path, os.R_OK):
+                return False
+
+        return True
 
     ## Return control to the test harness by finalizing the test output and calling the callback
     def returnToTestHarness(self, job_index, output):

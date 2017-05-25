@@ -428,18 +428,17 @@ class Scheduler(MooseObject):
         self.skipped_jobs.add(name)
 
     def checkOutputReady(self, tester):
-        # See if the output is available, it'll be available if we are just using the TemporaryFile mechanism
-        # If we are redirecting output though, it might take a few moments for the file buffers to appear
-        # after one of the process quits.
-        if not tester.specs.isValid('redirect_output') or not tester.specs['redirect_output'] or tester.getProcs(self.options) == 1:
-            return True
-
-        for processor_id in xrange(tester.getProcs(self.options)):
-            # Obtain path and append processor id to redirect_output filename
-            file_path = os.path.join(tester.getTestName(), tester.name() + '.processor.{}'.format(processor_id))
-            if not os.access(file_path, os.R_OK):
-                return False
         return True
+
+    # return concatenated output from tests with redirected output
+    def getOutputFromFiles(self, tester):
+        file_output = ''
+        if self.checkOutputReady(tester):
+            for iteration, redirected_file in enumerate(tester.getRedirectedOutputFiles(self.options)):
+                file_path = os.path.join(tester.getTestDir(), redirected_file)
+                with open(file_path, 'r') as f:
+                    file_output += "#"*80 + "\nOutput from processor " + str(iteration) + "\n" + "#"*80 + "\n" + self.readOutput(f)
+        return file_output
 
     # This function reads output from the file (i.e. the test output)
     # but trims it down to the specified size.  It'll save the first two thirds

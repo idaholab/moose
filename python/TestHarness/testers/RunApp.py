@@ -90,6 +90,18 @@ class RunApp(Tester):
         ncpus = min(ncpus, int(self.specs['max_parallel']))
         return ncpus
 
+    # Return boolean on test having redirected output
+    def hasRedirectedOutput(self, options):
+        return (self.specs['redirect_output'] == True and self.getProcs(options) > 1) or options.parallel != None
+
+    # Return list of redirected output files
+    def getRedirectedOutputFiles(self, options):
+        redirected_list = []
+        if self.hasRedirectedOutput(options):
+            for processor in xrange(self.getProcs(options)):
+                redirected_list.append(self.name() + '.processor.{}'.format(processor))
+        return redirected_list
+
     def getCommand(self, options):
         specs = self.specs
 
@@ -152,7 +164,8 @@ class RunApp(Tester):
         else:
             default_ncpus = options.parallel
 
-        if specs['redirect_output'] and ncpus > 1:
+        # check to see if this test is asking for redirected output
+        if self.hasRedirectedOutput(options):
             specs['cli_args'].append('--keep-cout --redirect-output ' + self.name())
 
         caveats = []

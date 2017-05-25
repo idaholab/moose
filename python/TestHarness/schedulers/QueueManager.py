@@ -520,7 +520,7 @@ class QueueManager(Scheduler):
     def returnToTestHarness(self, job_index, output):
         (p, command, tester, time, f, slots) = self.jobs[job_index]
 
-        # Get stdout from executed command
+        # Get stdout from executed queue command
         queue_output = self.readOutput(f)
 
         # determine tester statuses depending on mode (launching or checking status)
