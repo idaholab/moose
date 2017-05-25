@@ -116,7 +116,7 @@ class RunPBS(QueueManager):
             job = self.getData(self.getJobName(tester), std_out=True, test_dir=True)
 
             # Save oringal test_dir so we can properly update the queue_data
-            # original_testdir = tester.specs['test_dir']
+            original_testdir = tester.specs['test_dir']
 
             ## Report the current status of JOB_ID
             if output_value.group(1) == 'F':
@@ -170,6 +170,8 @@ class RunPBS(QueueManager):
             if tester.isPending():
                 tester.setStatus(reason, tester.bucket_pending)
 
+            # Because we may have modified it earlier
+            tester.specs['test_dir'] = original_testdir
         else:
             # Job status not available
             reason = 'INVALID QSTAT RESULTS'

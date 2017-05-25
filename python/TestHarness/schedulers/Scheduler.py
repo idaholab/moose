@@ -195,7 +195,8 @@ class Scheduler(MooseObject):
             if not should_run:
                 reason = 'deprected checkRunnableBase #8037'
                 tester.setStatus(reason, tester.bucket_skip)
-                self.notifySchedulersBase(tester)
+                self.notifySchedulersBase(tester, add_to_table=True)
+                self.jobSkipped(tester.getTestName())
 
         # This job is allowed to run
         if should_run:
@@ -210,10 +211,10 @@ class Scheduler(MooseObject):
             if not tester.isSilent(): # SILENT occurs when a user is using --re options
                 if (self.options.report_skipped and tester.isSkipped()) \
                    or tester.isSkipped():
-                    self.notifySchedulersBase(tester)
+                    self.notifySchedulersBase(tester, add_to_table=True)
                 elif tester.isDeleted() and self.options.extra_info:
-                    self.notifySchedulersBase(tester)
-            self.jobSkipped(tester.parameters()['test_name'])
+                    self.notifySchedulersBase(tester, add_to_table=True)
+            self.jobSkipped(tester.getTestName())
 
     ## Find an empty slot and launch the job
     def launchJob(self, tester, command, slot_check=True):
@@ -233,7 +234,7 @@ class Scheduler(MooseObject):
                 self.big_queue.append([tester, command, os.getcwd()])
             else:
                 tester.setStatus('Insufficient slots', tester.bucket_skip)
-                self.notifySchedulersBase(tester)
+                self.notifySchedulersBase(tester, add_to_table=True)
                 self.skipped_jobs.add(tester.specs['test_name'])
             return
 
@@ -402,13 +403,13 @@ class Scheduler(MooseObject):
                     if not self.soft_limit and slots > self.job_slots:
                         tester.setStatus('Insufficient slots', tester.bucket_skip)
                         self.notifySchedulersBase(tester, add_to_table=True)
-                        self.skipped_jobs.add(tester.specs['test_name'])
+                        self.skipped_jobs.add(tester.getTestName())
                         keep_going = True
                     # Do we have unsatisfied dependencies left?
                     elif len(set(tester.specs['prereq']) & self.skipped_jobs):
                         tester.setStatus('skipped dependency', tester.bucket_skip)
                         self.notifySchedulersBase(tester, add_to_table=True)
-                        self.skipped_jobs.add(tester.specs['test_name'])
+                        self.skipped_jobs.add(tester.getTestName())
                         keep_going = True
                     # We need to keep trying in case there is a chain of unresolved dependencies
                     # and we hit them out of order in this loop
@@ -419,7 +420,7 @@ class Scheduler(MooseObject):
             if len(self.queue) != 0:
                 print "\nCyclic or Invalid Dependency Detected!"
                 for (tester, command, dirpath) in self.queue:
-                    print tester.specs['test_name']
+                    print tester.getTestName()
                 self.harness.closeFiles(1)
 
     # Add a skipped job to the list
@@ -435,7 +436,7 @@ class Scheduler(MooseObject):
 
         for processor_id in xrange(tester.getProcs(self.options)):
             # Obtain path and append processor id to redirect_output filename
-            file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
+            file_path = os.path.join(tester.getTestName(), tester.name() + '.processor.{}'.format(processor_id))
             if not os.access(file_path, os.R_OK):
                 return False
         return True
