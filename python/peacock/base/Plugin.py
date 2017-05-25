@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets
 from MooseWidget import MooseWidget
 import mooseutils
+from Preferences import Preferences
+
 class Plugin(MooseWidget):
     """
     A base class for all plugin objects.
@@ -12,7 +14,7 @@ class Plugin(MooseWidget):
     see Manager.py
     """
 
-    def __init__(self, layout='MainLayout'):
+    def __init__(self, layout='MainLayout', settings_key=""):
         super(Plugin, self).__init__()
 
         # Name of layout that this plugin should be added (see PluginManager.py)
@@ -29,6 +31,7 @@ class Plugin(MooseWidget):
         # The Peacock tab index
         self._index = None
         self._plugin_manager = None
+        self._preferences = Preferences(settings_key)
 
     @staticmethod
     def commandLineArgs(parser):
@@ -94,11 +97,10 @@ class Plugin(MooseWidget):
         """
         pass
 
-    def settingsWidget(self):
+    def onPreferencesSaved(self):
         """
-        Returns a widget to be included in the global settings widget
+        Called when the preferences have been saved.
         """
-        return None
 
     def clearRecentlyUsed(self):
         """
@@ -129,3 +131,6 @@ class Plugin(MooseWidget):
         if signal:
             signal.connect(self.onCurrentChanged)
         self._index = index
+
+    def preferenceWidgets(self):
+        return self._preferences.widgets()

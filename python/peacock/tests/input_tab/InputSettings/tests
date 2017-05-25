@@ -1,7 +1,0 @@
-[Tests]
-  [./InputSettings]
-    type = PythonUnitTest
-    input = test_InputSettings.py
-    display_required = True
-  [../]
-[]

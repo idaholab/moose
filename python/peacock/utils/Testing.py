@@ -131,12 +131,19 @@ class PeacockTester(unittest.TestCase):
         message.MOOSE_TESTING_MODE = True
         qtutils.setAppInformation()
         self.starting_directory = os.getcwd()
+        self.clearSettings()
+
+    def clearSettings(self):
+        settings = QtCore.QSettings()
+        settings.clear()
+        settings.sync()
 
     def tearDown(self):
         if self.app:
             self.app.main_widget.close()
             del self.app
         os.chdir(self.starting_directory)
+        self.clearSettings()
 
     def run_finished(self, current, total):
         if current == total:

@@ -6,8 +6,8 @@ class ExodusPlugin(peacock.base.Plugin):
     Plugin class for the Exodus volume rendering portion of Peacock.
     """
 
-    def __init__(self, layout='LeftLayout'):
-        super(ExodusPlugin, self).__init__(layout=layout)
+    def __init__(self, layout='LeftLayout', settings_key=""):
+        super(ExodusPlugin, self).__init__(layout=layout, settings_key=settings_key)
 
         # The default layout name
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)

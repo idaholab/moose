@@ -5,7 +5,6 @@ from peacock.base.TabPluginManager import TabPluginManager
 from peacock.base.TabPlugin import TabPlugin
 from peacock.base.MooseWidget import MooseWidget
 from peacock.utils import WidgetUtils
-from peacock.SettingsWidget import SettingsWidget
 from peacock.LogWidget import LogWidget
 import os
 
@@ -22,10 +21,9 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         self.setObjectName("BasePeacockMainWindow")
         self.tab_plugin = TabPluginManager(plugins=plugins, plugin_base=plugin_base)
         self.setCentralWidget(self.tab_plugin)
-        self.settings = SettingsWidget()
         self.log = LogWidget()
         self._closed = False
-        self.settings.load()
+        self.settings = None
         self.setup()
 
     @staticmethod
@@ -89,8 +87,11 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         """
         Shows the preferences window
         """
+        if not self.settings:
+            self.settings = self.tab_plugin.tabPreferenceWidget()
         self.settings.load()
         self.settings.show()
+        self.settings.raise_()
 
     def _addMenus(self):
         """
@@ -169,12 +170,6 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         command_line_options.start_dir = os.getcwd()
 
         self._addMenus()
-        for name, plugin in self.tab_plugin._plugins.items():
-            if command_line_options.clear_recent:
-                plugin.clearRecentlyUsed()
-            w = plugin.settingsWidget()
-            if w:
-                self.settings.addTab(plugin.tabName(), w)
 
         self.tab_plugin.initialize(command_line_options)
         for name, plugin in self.tab_plugin._plugins.items():

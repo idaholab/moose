@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets
 from MooseWidget import MooseWidget
 from Plugin import Plugin
 import mooseutils
+from PreferenceWidget import PreferenceWidget
 
 class PluginManager(MooseWidget):
     """
@@ -46,6 +47,7 @@ class PluginManager(MooseWidget):
 
         # List of all plugins for connecting signal
         self._all_plugins = []
+        self._pref_widget = None
 
     def __contains__(self, item):
         """
@@ -155,6 +157,21 @@ class PluginManager(MooseWidget):
             if hasattr(plugin, method):
                 attr = getattr(plugin, method)
                 attr(*args, **kwargs)
+
+    def preferencesWidget(self):
+        """
+        Returns an instance of a widget to set preferences for all the plugins.
+        """
+        if not self._pref_widget:
+            self._pref_widget = PreferenceWidget(self._all_plugins)
+        return self._pref_widget
+
+    def onPreferencesSaved(self):
+        """
+        This will be called when the preferences have been saved.
+        """
+        for p in self._all_plugins:
+            p.onPreferencesSaved()
 
     def fixLayoutWidth(self, layout):
         # Set the width of the left-side widgets to that the VTK window gets the space

@@ -8,7 +8,6 @@ from ExecuteOptionsPlugin import ExecuteOptionsPlugin
 from ExecuteRunnerPlugin import ExecuteRunnerPlugin
 from ConsoleOutputViewerPlugin import ConsoleOutputViewerPlugin
 from peacock.Input.ExecutableInfo import ExecutableInfo
-from ExecuteSettings import ExecuteSettings
 import os
 
 class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
@@ -123,9 +122,6 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
         """
         executeMenu = menubar.addMenu("E&xecute")
         self.ExecuteOptionsPlugin.addToMenu(executeMenu)
-
-    def settingsWidget(self):
-        return ExecuteSettings()
 
     def closing(self):
         """

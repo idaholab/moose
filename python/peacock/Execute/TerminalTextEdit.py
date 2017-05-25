@@ -49,6 +49,9 @@ class TerminalTextEdit(QTextEdit):
         """
         self.setHtml("")
 
+    def setFontSize(self, size):
+        self.setStyleSheet("TerminalTextEdit { background: black; color: white; font: %spx}" % size)
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
     import sys
