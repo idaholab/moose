@@ -68,7 +68,6 @@
     use_old_floor = True
     max_parallel = 1
     prereq = 'xyz_hex20_sm'
-    queue_scheduler = false
   [../]
   [./xyz_quad4_qp_select]
     type = 'Exodiff'

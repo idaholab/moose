@@ -112,7 +112,6 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
-    queue_scheduler = false
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -124,7 +123,6 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
-    queue_scheduler = false
   [../]
   [./frictionless_kin_sm]
     type = 'CSVDiff'

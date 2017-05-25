@@ -14,7 +14,6 @@
     compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'plane_strain'
-    queue_scheduler = false
   [../]
   [./finite_planestrain]
     type = Exodiff
@@ -48,7 +47,6 @@
                 Materials/stress/type=ComputeLinearElasticStress'
     rel_err = 5E-4
     prereq = 'axisym_smallstrain'
-    queue_scheduler = false
   [../]
   [./axisym_incremental_strain]
     type = Exodiff
@@ -57,7 +55,6 @@
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     prereq = 'axisym_smallstrain_Bbar'
-    queue_scheduler = false
   [../]
   [./axisym_incremental_strain_Bbar]
     type = Exodiff
@@ -68,7 +65,6 @@
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     prereq = 'axisym_incremental_strain'
     rel_err = 5E-4
-    queue_scheduler = false
   [../]
   [./axisym_finitestrain]
     type = Exodiff

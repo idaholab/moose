@@ -36,7 +36,6 @@
     exodiff = 'nodal_area_Hex20_out.e'
     custom_cmp = 'nodal_area_Hex20.exodiff'
     prereq = Hex20
-    queue_scheduler = false
   [../]
   [./Hex20_3]
     type = 'Exodiff'
@@ -65,7 +64,6 @@
     custom_cmp = 'nodal_area_Hex27.exodiff'
     prereq = Hex27
     min_parallel = 2
-    queue_scheduler = false
   [../]
   [./Hex20_sm]
     type = 'Exodiff'

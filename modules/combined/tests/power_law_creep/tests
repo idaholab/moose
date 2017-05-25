@@ -9,7 +9,6 @@
     input = 'power_law_creep_sm.i'
     exodiff = 'power_law_creep_out.e'
     prereq = 'power_law_creep_tm'
-    queue_scheduler = false
   [../]
   [./testRestart1_tm]
     type = 'RunApp'

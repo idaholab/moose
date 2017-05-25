@@ -5,7 +5,6 @@
     exodiff = 'creep_nl1_out.e'
     prereq = 'creep_sm'
     abs_zero = 7e-5
-    queue_scheduler = false
   [../]
   [./creep_sm]
     type = 'Exodiff'
