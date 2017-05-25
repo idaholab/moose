@@ -29,7 +29,6 @@ validParams<StressDivergenceTensors>()
                                         "1 for y, 2 for z)");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
-  params.addCoupledVar("temp", "The temperature"); // Deprecated
   params.addCoupledVar("temperature", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
@@ -50,8 +49,8 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
-    _temp_coupled(isCoupled("temp") || isCoupled("temperature")),
-    _temp_var(_temp_coupled ? (isCoupled("temp") ? coupled("temp") : coupled("temperature")) : 0),
+    _temp_coupled(isCoupled("temperature")),
+    _temp_var(_temp_coupled ? coupled("temperature") : 0),
     _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
@@ -71,10 +70,6 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
         &getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient");
     _rotation_increment = &getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment");
   }
-
-  // deprecate temp in favor of temperature
-  if (isCoupled("temp"))
-    mooseDeprecated("Use 'temperature' instead of 'temp'");
 
   // Error if volumetic locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)

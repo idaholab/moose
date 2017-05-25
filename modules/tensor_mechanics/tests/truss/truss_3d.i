@@ -191,9 +191,6 @@
     block = '1 2'
     youngs_modulus = 1e6
     displacements = 'disp_x disp_y disp_z'
-#    thermal_expansion_coeff = 0.1
-#    temperature_ref = 0.5
-#    temperature = temp
   [../]
 []
 
