@@ -80,3 +80,11 @@ class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
         self._index = index
         for i in range(self.count()):
             self.widget(i).setTabIndex(index, signal)
+
+    def preferencesWidget(self):
+        """
+        Return the preference widget.
+        We only need one widget, so we just use the current tab
+        since they should all be the same.
+        """
+        return self.currentWidget().preferencesWidget()

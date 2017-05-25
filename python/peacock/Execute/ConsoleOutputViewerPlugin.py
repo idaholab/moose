@@ -11,6 +11,14 @@ class ConsoleOutputViewerPlugin(TerminalTextEdit, Plugin):
         self.do_scroll = True
         self.vert_bar = self.verticalScrollBar()
         self.vert_bar.valueChanged.connect(self.viewPositionChanged)
+        self._preferences.addInt("execute/terminalFontSize",
+                "Execute output font size",
+                12,
+                1,
+                30,
+                "Set the output font size for the terminal",
+                )
+        self.onPreferencesSaved()
 
     def onOutputAdded(self, text):
         """
@@ -21,6 +29,9 @@ class ConsoleOutputViewerPlugin(TerminalTextEdit, Plugin):
         self.append(text)
         if self.do_scroll:
             self.vert_bar.setValue(self.vert_bar.maximum())
+
+    def onPreferencesSaved(self):
+        self.setFontSize(self._preferences.value("execute/terminalFontSize"))
 
     def onClearLog(self):
         """

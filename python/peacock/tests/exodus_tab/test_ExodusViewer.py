@@ -2,10 +2,11 @@
 import sys
 import unittest
 import vtk
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from peacock.ExodusViewer.ExodusViewer import main
-from peacock.utils import Testing
+from peacock.utils import Testing, qtutils
+from mooseutils import message
 
 
 class TestExodusViewer(Testing.PeacockImageTestCase):
@@ -26,6 +27,13 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         """
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
+        message.MOOSE_TESTING_MODE = True
+        qtutils.setAppInformation()
+
+        settings = QtCore.QSettings()
+        settings.clear()
+        settings.sync()
+
         self._widget = main(size=[400,400])
         self._widget.onSetFilenames([self._filename])
 
@@ -139,6 +147,21 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         self.assertEqual(mesh.DisplacementToggle.isChecked(), False)
         self.assertEqual(mesh.DisplacementMagnitude.value(), 1.5)
         self.assertImage('testDiffusion2.png')
+
+    def testPrefs(self):
+
+        settings = QtCore.QSettings()
+        settings.setValue("exodus/defaultColorMap", "magma")
+        settings.sync()
+        self._widget.cornerWidget().clone.emit()
+        self.assertEqual(self._widget.preferencesWidget().count(), 6)
+        self.assertEqual(self._widget.currentWidget().VariablePlugin.ColorMapList.currentText(), "magma")
+
+        settings.setValue("exodus/defaultColorMap", "default")
+        settings.sync()
+
+        self._widget.cornerWidget().clone.emit()
+        self.assertEqual(self._widget.currentWidget().VariablePlugin.ColorMapList.currentText(), "default")
 
 
 if __name__ == '__main__':

@@ -23,9 +23,34 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QGridLayout)
         ExodusPlugin.__init__(self, **kwargs)
 
+        self._preferences.addBool("exodus/backgroundGradient",
+                "Use background gradient",
+                True,
+                "Turn on/off the background gradient",
+                )
+
+        self._preferences.addColor("exodus/gradientTopColor",
+                "Background top gradient color",
+                QtGui.QColor(111, 111, 111),
+                "Set the top gradient color",
+                )
+
+        self._preferences.addColor("exodus/gradientBottomColor",
+                "Background bottom gradient color",
+                QtGui.QColor(180, 180, 180),
+                "Set the top gradient color",
+                )
+
+        self._preferences.addColor("exodus/solidBackgroundColor",
+                "Solid Background color",
+                QtGui.QColor(111, 111, 111),
+                "Solid Background color",
+                )
+
         # Default colors
-        self._top = QtGui.QColor(111, 111, 111)
-        self._bottom = QtGui.QColor(180, 180, 180)
+        self._top = QtGui.QColor(self._preferences.value("exodus/gradientTopColor"))
+        self._bottom = QtGui.QColor(self._preferences.value("exodus/gradientBottomColor"))
+        self._solid = QtGui.QColor(self._preferences.value("exodus/solidBackgroundColor"))
 
         # Setup this widget
         self.MainLayout = self.collapsibleLayout()
@@ -71,20 +96,21 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Apply the supplied colors to the window.
         """
-
-        top = self._top.getRgb()
-        self.TopButton.setStyleSheet('border:none; background:rgb' + str(top))
-
-        bottom = self._bottom.getRgb()
-        self.BottomButton.setStyleSheet('border:none; background:rgb' + str(bottom))
-
         if self._window:
             if self.GradientToggle.isChecked():
+                top = self._top.getRgb()
+
+                bottom = self._bottom.getRgb()
+                self.BottomButton.setStyleSheet('border:none; background:rgb' + str(bottom))
+
                 background = [bottom[0]/255., bottom[1]/255., bottom[2]/255.]
                 background2 = [top[0]/255., top[1]/255., top[2]/255.]
             else:
+                top = self._solid.getRgb()
                 background = [top[0]/255., top[1]/255., top[2]/255.]
                 background2 = None
+
+            self.TopButton.setStyleSheet('border:none; background:rgb' + str(top))
             self.windowOptionsChanged.emit({'background':background, 'background2':background2, 'gradient_background':self.GradientToggle.isChecked()})
             self.windowRequiresUpdate.emit()
 
@@ -99,7 +125,7 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Setup method for gradient toggle.
         """
-        qobject.setChecked(QtCore.Qt.Checked)
+        qobject.setChecked(self._preferences.value("exodus/backgroundGradient"))
         qobject.stateChanged.connect(self._callbackGradientToggle)
 
     def _callbackGradientToggle(self, value):

@@ -32,6 +32,13 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
 
     def __init__(self):
         super(ExecuteRunnerPlugin, self).__init__()
+
+        self._preferences.addBool("execute/clearLog",
+                "Clear log before running",
+                False,
+                "Clear the output from previous runs before starting a new run",
+                )
+
         self.top_layout = WidgetUtils.addLayout(vertical=True)
 
         self.run_layout = WidgetUtils.addLayout()
@@ -118,6 +125,9 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
         self._showProgressBar(True)
         self.progress_bar.setMaximum(11)
         self.progress_bar.setValue(0)
+
+        if self._preferences.value("execute/clearLog"):
+            self.clearLog.emit()
 
         start_time = math.floor(time.time()) if sys.platform == 'darwin' else time.time()
         self.startJob.emit(self.has_csv, input_file, start_time)
