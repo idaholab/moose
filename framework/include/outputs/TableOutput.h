@@ -36,7 +36,7 @@ InputParameters validParams<TableOutput>();
  *
  * @see CSV Console
  */
-class TableOutput : public AdvancedOutput<FileOutput>
+class TableOutput : public AdvancedOutput
 {
 public:
   /**

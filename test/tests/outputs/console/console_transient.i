@@ -57,6 +57,6 @@
     verbose = true
     perf_log = true
     time_precision = 6
-    execute_on = 'failed nonlinear linear timestep_end'
+    execute_on = 'failed nonlinear linear timestep_begin timestep_end'
   [../]
 []

@@ -34,9 +34,8 @@ validParams<TableOutput>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<AdvancedOutput<FileOutput>>();
-  params +=
-      AdvancedOutput<FileOutput>::enableOutputTypes("postprocessor scalar vector_postprocessor");
+  InputParameters params = validParams<AdvancedOutput>();
+  params += AdvancedOutput::enableOutputTypes("postprocessor scalar vector_postprocessor");
 
   // Option for writing vector_postprocessor time file
   params.addParam<bool>("time_data",
@@ -57,7 +56,7 @@ validParams<TableOutput>()
 }
 
 TableOutput::TableOutput(const InputParameters & parameters)
-  : AdvancedOutput<FileOutput>(parameters),
+  : AdvancedOutput(parameters),
     _tables_restartable(getParam<bool>("append_restart")),
     _postprocessor_table(_tables_restartable
                              ? declareRestartableData<FormattedTable>("postprocessor_table")

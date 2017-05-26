@@ -16,7 +16,6 @@
 #define CHECKPOINT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "FileOutput.h"
 #include "RestartableDataIO.h"
 
@@ -47,7 +46,7 @@ struct CheckpointFileNames
 /**
  *
  */
-class Checkpoint : public BasicOutput<FileOutput>
+class Checkpoint : public FileOutput
 {
 public:
   /**
@@ -55,12 +54,6 @@ public:
    * @param parameters
    */
   Checkpoint(const InputParameters & parameters);
-
-  /**
-   * Outputs a checkpoint file.
-   * Each call to this function creates various files associated with
-   */
-  void output(const ExecFlagType & type) override;
 
   /**
    * Returns the base filename for the checkpoint files
@@ -74,9 +67,15 @@ public:
   std::string directory();
 
 protected:
-  void updateCheckpointFiles(CheckpointFileNames file_struct);
+  /**
+   * Outputs a checkpoint file.
+   * Each call to this function creates various files associated with
+   */
+  virtual void output(const ExecFlagType & type) override;
 
 private:
+  void updateCheckpointFiles(CheckpointFileNames file_struct);
+
   /// Max no. of output files to store
   unsigned int _num_files;
 

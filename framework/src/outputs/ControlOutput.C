@@ -24,7 +24,7 @@ InputParameters
 validParams<ControlOutput>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<Output>>();
+  InputParameters params = validParams<Output>();
   params.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
   params.addParam<bool>(
       "clear_after_output", true, "Clear the active control display after each output.");
@@ -35,7 +35,7 @@ validParams<ControlOutput>()
 }
 
 ControlOutput::ControlOutput(const InputParameters & parameters)
-  : BasicOutput<Output>(parameters),
+  : Output(parameters),
     _clear_after_output(getParam<bool>("clear_after_output")),
     _show_active_objects(getParam<bool>("show_active_objects"))
 {

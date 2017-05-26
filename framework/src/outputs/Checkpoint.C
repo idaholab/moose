@@ -32,7 +32,7 @@ InputParameters
 validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
-  InputParameters params = validParams<BasicOutput<FileOutput>>();
+  InputParameters params = validParams<FileOutput>();
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -48,7 +48,7 @@ validParams<Checkpoint>()
 }
 
 Checkpoint::Checkpoint(const InputParameters & parameters)
-  : BasicOutput<FileOutput>(parameters),
+  : FileOutput(parameters),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),

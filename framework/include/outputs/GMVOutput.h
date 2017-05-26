@@ -16,7 +16,6 @@
 #define GMVOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declarations
@@ -28,7 +27,7 @@ InputParameters validParams<GMVOutput>();
 /**
  * Class for output data to the GMVOutputII format
  */
-class GMVOutput : public BasicOutput<OversampleOutput>
+class GMVOutput : public OversampleOutput
 {
 public:
   /**
