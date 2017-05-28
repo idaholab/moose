@@ -135,6 +135,14 @@ TwoParameterPlasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
+TwoParameterPlasticityStressUpdate::propagateQpProperties()
+{
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+  for (unsigned i = 0; i < _num_intnl; ++i)
+    _intnl[_qp][i] = _intnl_old[_qp][i];
+}
+
+void
 TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment,
                                                 RankTwoTensor & inelastic_strain_increment,
                                                 const RankTwoTensor & rotation_increment,

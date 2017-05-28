@@ -60,6 +60,8 @@ validParams<ComputeMultipleInelasticStress>()
                                      "is a vector of weights, of the same length as "
                                      "inelastic_models.  Default = '1 1 ... 1'.  This "
                                      "parameter is set to 1 if the number of models = 1");
+  params.addParam<bool>(
+      "cycle_models", false, "At timestep N use only inelastic model N % num_models.");
   return params;
 }
 
@@ -81,7 +83,8 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _inelastic_weights(isParamValid("combined_inelastic_strain_weights")
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
-    _consistent_tangent_operator(_num_models)
+    _consistent_tangent_operator(_num_models),
+    _cycle_models(getParam<bool>("cycle_models"))
 {
   if (_inelastic_weights.size() != _num_models)
     mooseError(
@@ -119,8 +122,9 @@ ComputeMultipleInelasticStress::computeQpStress()
   RankTwoTensor elastic_strain_increment;
   RankTwoTensor combined_inelastic_strain_increment;
 
-  if (_num_models == 1)
-    updateQpStateSingleModel(elastic_strain_increment, combined_inelastic_strain_increment);
+  if (_num_models == 1 || _cycle_models)
+    updateQpStateSingleModel(
+        (_t_step - 1) % _num_models, elastic_strain_increment, combined_inelastic_strain_increment);
   else
     updateQpState(elastic_strain_increment, combined_inelastic_strain_increment);
 
@@ -260,16 +264,27 @@ ComputeMultipleInelasticStress::computeQpJacobianMult()
 
 void
 ComputeMultipleInelasticStress::updateQpStateSingleModel(
-    RankTwoTensor & elastic_strain_increment, RankTwoTensor & combined_inelastic_strain_increment)
+    unsigned model_number,
+    RankTwoTensor & elastic_strain_increment,
+    RankTwoTensor & combined_inelastic_strain_increment)
 {
-  _models[0]->setQp(_qp);
+  for (auto model : _models)
+    model->setQp(_qp);
 
   elastic_strain_increment = _strain_increment[_qp];
 
   _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
-  computeAdmissibleState(
-      0, elastic_strain_increment, combined_inelastic_strain_increment, _Jacobian_mult[_qp]);
+  computeAdmissibleState(model_number,
+                         elastic_strain_increment,
+                         combined_inelastic_strain_increment,
+                         _Jacobian_mult[_qp]);
+
+  /* propagate internal variables, etc, to this timestep for those inelastic models where
+   * "updateState" is not called */
+  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    if (i_rmm != model_number)
+      _models[i_rmm]->propagateQpProperties();
 }
 
 void

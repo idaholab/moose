@@ -43,6 +43,8 @@ protected:
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) override;
 
+  virtual void propagateQpProperties() override;
+
   /// Number of variables = 2 = (p, q)
   constexpr static int _num_pq = 2;
 

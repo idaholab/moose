@@ -73,6 +73,12 @@ public:
   /// Sets the value of the global variable _qp for inheriting classes
   void setQp(unsigned int qp);
 
+  /**
+   * If updateState is not called during a timestep, this will be.  This method allows derived
+   * classes to set internal parameters from their Old values, for instance
+   */
+  virtual void propagateQpProperties();
+
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
   void resetQpProperties() final {}
   void resetProperties() final {}
