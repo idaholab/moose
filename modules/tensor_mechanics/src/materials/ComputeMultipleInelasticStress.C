@@ -284,7 +284,7 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
    * "updateState" is not called */
   for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
     if (i_rmm != model_number)
-      _models[i_rmm]->propagateQpProperties();
+      _models[i_rmm]->propagateQpStatefulProperties();
 }
 
 void

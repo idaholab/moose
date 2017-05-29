@@ -33,6 +33,8 @@ StressUpdateBase::setQp(unsigned int qp)
 }
 
 void
-StressUpdateBase::propagateQpProperties()
+StressUpdateBase::propagateQpStatefulProperties()
 {
+  mooseError(
+      "propagateQpStatefulProperties called: it needs to be implemented by your inelastic model");
 }

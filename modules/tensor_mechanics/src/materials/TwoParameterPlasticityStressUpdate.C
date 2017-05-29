@@ -135,7 +135,7 @@ TwoParameterPlasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
-TwoParameterPlasticityStressUpdate::propagateQpProperties()
+TwoParameterPlasticityStressUpdate::propagateQpStatefulProperties()
 {
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
   for (unsigned i = 0; i < _num_intnl; ++i)
@@ -280,7 +280,7 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
       // this is a plastic step
 
       // initialise p, q and gaE using a good guess based on the non-smoothed situation
-      initialiseVars(_p_trial, _q_trial, _intnl_old[_qp], p, q, gaE, _intnl[_qp]);
+      initialiseVars(_p_trial, _q_trial, _intnl_ok, p, q, gaE, _intnl[_qp]);
       smoothed_q = smoothAllQuantities(p, q, _intnl[_qp]);
       smoothed_q_calculated = true;
       res2 = calculateRHS(_p_trial, _q_trial, p, q, gaE, smoothed_q);
@@ -304,7 +304,6 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
           res2 = 0.0;
           break;
         }
-
         // apply (parts of) the updates, re-calculate smoothed_q, and res2
         ls_failure = lineSearch(res2, gaE, p, q, _p_trial, _q_trial, smoothed_q, _intnl_ok);
         step_iter++;
@@ -339,6 +338,7 @@ TwoParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment
     else
     {
       // Newton-Raphson + line-search process failed
+      std::copy(_intnl_ok.begin(), _intnl_ok.end(), _intnl[_qp].begin());
       step_size *= 0.5;
     }
   }
