@@ -60,8 +60,7 @@ class RunParallel(Scheduler):
         # status yet in the postprocessing stage. We'll inspect didPass() after processing results
         if not tester.didFail():
             # Read the output either from the temporary file or redirected files
-            if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
-                # If the tester enabled redirect_stdout and is using more than one processor
+            if tester.hasRedirectedOutput(self.options):
                 redirected_output = self.getOutputFromFiles(tester)
                 output += redirected_output
 

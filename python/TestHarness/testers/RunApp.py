@@ -92,7 +92,7 @@ class RunApp(Tester):
 
     # Return boolean on test having redirected output
     def hasRedirectedOutput(self, options):
-        return (self.specs['redirect_output'] == True and self.getProcs(options) > 1) or options.parallel != None
+        return self.specs['redirect_output'] == True and self.getProcs(options) > 1
 
     # Return list of redirected output files
     def getRedirectedOutputFiles(self, options):
