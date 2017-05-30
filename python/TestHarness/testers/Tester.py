@@ -215,6 +215,14 @@ class Tester(MooseObject):
     def processResultsCommand(self, moose_dir, options):
         return []
 
+    # Return boolean on test having redirected output
+    def hasRedirectedOutput(self, options):
+        return False
+
+    # Return a list of redirected output
+    def getRedirectedOutputFiles(self, options):
+        return []
+
     # This method will be called to process the results of running the test.  Any post-test
     # processing should happen in this method
     def processResults(self, moose_dir, retcode, options, output):
