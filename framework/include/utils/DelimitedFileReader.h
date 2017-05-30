@@ -55,14 +55,19 @@ public:
   /**
    * Return the column names.
    */
-  const std::vector<std::string> & getColumnNames();
+  const std::vector<std::string> & getColumnNames() const;
 
   /**
    * Return the columns of data.
    *
    * The outer vector is column and the inner the rows.
    */
-  const std::vector<std::vector<double>> & getColumnData();
+  const std::vector<std::vector<double>> & getColumnData() const;
+
+  /**
+   * Return the column of data for a specified header entry
+   */
+  const std::vector<double> & getColumnData(const std::string & name) const;
 
 protected:
   /// The supplied filename.

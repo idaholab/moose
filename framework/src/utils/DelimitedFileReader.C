@@ -94,15 +94,24 @@ DelimitedFileReader::read()
 }
 
 const std::vector<std::string> &
-DelimitedFileReader::getColumnNames()
+DelimitedFileReader::getColumnNames() const
 {
   return _column_names;
 }
 
 const std::vector<std::vector<double>> &
-DelimitedFileReader::getColumnData()
+DelimitedFileReader::getColumnData() const
 {
   return _data;
+}
+
+const std::vector<double> &
+DelimitedFileReader::getColumnData(const std::string & name) const
+{
+  const auto it = find(_column_names.begin(), _column_names.end(), name);
+  if (it == _column_names.end())
+    mooseError("Could not find '", name, "' in header of file ", _filename, ".");
+  return _data[std::distance(_column_names.begin(), it)];
 }
 
 void
