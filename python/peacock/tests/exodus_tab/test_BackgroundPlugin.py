@@ -18,7 +18,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         Creates a window attached to FilePlugin widget.
         """
         message.MOOSE_TESTING_MODE = True
-        qtutils.setAppInformation()
+        qtutils.setAppInformation("peacock_backgroundplugin")
 
         settings = QtCore.QSettings()
         settings.clear()
