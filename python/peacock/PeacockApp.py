@@ -27,7 +27,7 @@ class PeacockApp(object):
         icon_path = os.path.join(peacock_dir, "icons", "peacock_logo.ico")
         qapp.setWindowIcon(QIcon(icon_path))
 
-        qtutils.setAppInformation("peacock")
+        qtutils.setAppInformation("peacock_peacockapp")
 
         if parsed_args.exodus or parsed_args.postprocessors or parsed_args.vectorpostprocessors:
             # If the user wants to view files then don't try to automatically find an executable.
