@@ -12,9 +12,7 @@ validParams<MixedSwitchingFunctionMaterial>()
 {
   InputParameters params = validParams<OrderParameterFunctionMaterial>();
   params.addClassDescription("Helper material to provide h(eta) and its derivative in one of two "
-                             "polynomial forms.\nMIX234: "
-                             "weight*(3*eta^2-2*eta^3)+(1-weight)(4*eta^3)-3*eta^4\n"
-                             "weight*(2*eta^2-eta^4)+(1-weight)(3*eta^4-2*eta^6");
+                             "polynomial forms. MIX234 and MIX246");
   MooseEnum h_order("MIX234=0 MIX246", "MIX234");
   params.addParam<MooseEnum>(
       "h_order", h_order, "Polynomial order of the switching function h(eta)");
