@@ -70,8 +70,16 @@ NonlinearEigenSystem::solve()
   _current_nl_its = 0;
   // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
-  _time_integrator->solve();
-  _time_integrator->postSolve();
+
+  // Solve the transient problem if we have a time integrator; the
+  // steady problem if not.
+  if (_time_integrator)
+  {
+    _time_integrator->solve();
+    _time_integrator->postSolve();
+  }
+  else
+    system().solve();
 
   // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
