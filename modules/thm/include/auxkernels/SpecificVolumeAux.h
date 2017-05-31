@@ -15,7 +15,6 @@ class SpecificVolumeAux : public AuxKernel
 {
 public:
   SpecificVolumeAux(const InputParameters & parameters);
-  virtual ~SpecificVolumeAux();
 
 protected:
   Real computeValue();

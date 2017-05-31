@@ -15,7 +15,6 @@ class SpecificInternalEnergyAux : public AuxKernel
 {
 public:
   SpecificInternalEnergyAux(const InputParameters & parameters);
-  virtual ~SpecificInternalEnergyAux();
 
 protected:
   virtual Real computeValue();

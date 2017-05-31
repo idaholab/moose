@@ -16,7 +16,6 @@ class PrandtlNumberAux : public AuxKernel
 {
 public:
   PrandtlNumberAux(const InputParameters & parameters);
-  virtual ~PrandtlNumberAux();
 
 protected:
   virtual Real computeValue();

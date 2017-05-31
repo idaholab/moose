@@ -14,8 +14,6 @@ HydraulicDiameterCircularAux::HydraulicDiameterCircularAux(const InputParameters
 {
 }
 
-HydraulicDiameterCircularAux::~HydraulicDiameterCircularAux() {}
-
 Real
 HydraulicDiameterCircularAux::computeValue()
 {

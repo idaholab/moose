@@ -24,8 +24,6 @@ SpecificTotalEnthalpyAux::SpecificTotalEnthalpyAux(const InputParameters & param
 {
 }
 
-SpecificTotalEnthalpyAux::~SpecificTotalEnthalpyAux() {}
-
 Real
 SpecificTotalEnthalpyAux::computeValue()
 {

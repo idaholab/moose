@@ -19,8 +19,6 @@ SpecificInternalEnergyAux::SpecificInternalEnergyAux(const InputParameters & par
 {
 }
 
-SpecificInternalEnergyAux::~SpecificInternalEnergyAux() {}
-
 Real
 SpecificInternalEnergyAux::computeValue()
 {

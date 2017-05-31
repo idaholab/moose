@@ -23,8 +23,6 @@ MachNumberAux::MachNumberAux(const InputParameters & parameters)
 {
 }
 
-MachNumberAux::~MachNumberAux() {}
-
 Real
 MachNumberAux::computeValue()
 {

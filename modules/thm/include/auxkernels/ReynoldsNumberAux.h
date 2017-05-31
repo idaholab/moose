@@ -16,7 +16,6 @@ class ReynoldsNumberAux : public AuxKernel
 {
 public:
   ReynoldsNumberAux(const InputParameters & parameters);
-  virtual ~ReynoldsNumberAux();
 
 protected:
   virtual Real computeValue();

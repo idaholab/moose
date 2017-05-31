@@ -21,7 +21,6 @@ class SpecificTotalEnthalpyAux : public AuxKernel
 {
 public:
   SpecificTotalEnthalpyAux(const InputParameters & parameters);
-  virtual ~SpecificTotalEnthalpyAux();
 
 protected:
   virtual Real computeValue();

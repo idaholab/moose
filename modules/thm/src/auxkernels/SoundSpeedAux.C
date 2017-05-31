@@ -21,8 +21,6 @@ SoundSpeedAux::SoundSpeedAux(const InputParameters & parameters)
 {
 }
 
-SoundSpeedAux::~SoundSpeedAux() {}
-
 Real
 SoundSpeedAux::computeValue()
 {

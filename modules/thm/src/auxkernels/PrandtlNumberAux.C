@@ -22,8 +22,6 @@ PrandtlNumberAux::PrandtlNumberAux(const InputParameters & parameters)
 {
 }
 
-PrandtlNumberAux::~PrandtlNumberAux() {}
-
 Real
 PrandtlNumberAux::computeValue()
 {

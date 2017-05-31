@@ -30,8 +30,6 @@ ReynoldsNumberAux::ReynoldsNumberAux(const InputParameters & parameters)
 {
 }
 
-ReynoldsNumberAux::~ReynoldsNumberAux() {}
-
 Real
 ReynoldsNumberAux::computeValue()
 {

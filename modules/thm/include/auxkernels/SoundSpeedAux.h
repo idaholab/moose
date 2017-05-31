@@ -16,7 +16,6 @@ class SoundSpeedAux : public AuxKernel
 {
 public:
   SoundSpeedAux(const InputParameters & parameters);
-  virtual ~SoundSpeedAux();
 
 protected:
   virtual Real computeValue();

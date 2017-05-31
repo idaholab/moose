@@ -15,7 +15,6 @@ class HydraulicDiameterCircularAux : public AuxKernel
 {
 public:
   HydraulicDiameterCircularAux(const InputParameters & parameters);
-  virtual ~HydraulicDiameterCircularAux();
 
 protected:
   Real computeValue();

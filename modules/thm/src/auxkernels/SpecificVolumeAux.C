@@ -21,8 +21,6 @@ SpecificVolumeAux::SpecificVolumeAux(const InputParameters & parameters)
 {
 }
 
-SpecificVolumeAux::~SpecificVolumeAux() {}
-
 Real
 SpecificVolumeAux::computeValue()
 {

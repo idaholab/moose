@@ -16,7 +16,6 @@ class MachNumberAux : public AuxKernel
 {
 public:
   MachNumberAux(const InputParameters & parameters);
-  virtual ~MachNumberAux();
 
 protected:
   virtual Real computeValue();
