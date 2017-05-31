@@ -22,7 +22,6 @@ class Component : public RELAP7Object
 {
 public:
   Component(const InputParameters & parameters);
-  virtual ~Component();
 
   unsigned int id() { return _id; }
 

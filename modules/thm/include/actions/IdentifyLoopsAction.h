@@ -15,7 +15,6 @@ class IdentifyLoopsAction : public R7Action
 {
 public:
   IdentifyLoopsAction(InputParameters parameters);
-  virtual ~IdentifyLoopsAction();
 
   virtual void act();
 };

@@ -12,7 +12,6 @@ class BuildMeshAction : public R7Action
 {
 public:
   BuildMeshAction(InputParameters params);
-  virtual ~BuildMeshAction();
 
   virtual void act();
 };

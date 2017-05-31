@@ -12,7 +12,6 @@ class AddComponentPhysicsAction : public R7Action
 {
 public:
   AddComponentPhysicsAction(InputParameters params);
-  virtual ~AddComponentPhysicsAction();
 
   virtual void act();
 };

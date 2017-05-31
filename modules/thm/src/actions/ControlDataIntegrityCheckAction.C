@@ -15,8 +15,6 @@ ControlDataIntegrityCheckAction::ControlDataIntegrityCheckAction(InputParameters
 {
 }
 
-ControlDataIntegrityCheckAction::~ControlDataIntegrityCheckAction() {}
-
 void
 ControlDataIntegrityCheckAction::act()
 {

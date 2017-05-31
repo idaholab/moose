@@ -16,7 +16,6 @@ class RELAP7Mesh : public MooseMesh
 public:
   RELAP7Mesh(const InputParameters & parameters);
   RELAP7Mesh(const RELAP7Mesh & other_mesh);
-  virtual ~RELAP7Mesh();
 
   virtual unsigned int dimension() const;
   virtual MooseMesh & clone() const;

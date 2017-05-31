@@ -12,8 +12,6 @@ validParams<IntegrityCheckAction>()
 
 IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : R7Action(parameters) {}
 
-IntegrityCheckAction::~IntegrityCheckAction() {}
-
 void
 IntegrityCheckAction::act()
 {

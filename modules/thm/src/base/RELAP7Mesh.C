@@ -19,8 +19,6 @@ RELAP7Mesh::RELAP7Mesh(const RELAP7Mesh & other_mesh) : MooseMesh(other_mesh), _
 {
 }
 
-RELAP7Mesh::~RELAP7Mesh() {}
-
 unsigned int
 RELAP7Mesh::dimension() const
 {

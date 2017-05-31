@@ -11,8 +11,6 @@ validParams<BuildMeshAction>()
 
 BuildMeshAction::BuildMeshAction(InputParameters params) : R7Action(params) {}
 
-BuildMeshAction::~BuildMeshAction() {}
-
 void
 BuildMeshAction::act()
 {

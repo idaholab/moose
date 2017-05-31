@@ -39,8 +39,6 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
   _n_nodes = computeNumberOfNodes(_n_elem);
 }
 
-GeometricalComponent::~GeometricalComponent() {}
-
 void
 GeometricalComponent::validateNSectionsConsistent(int n_lengths, int n_n_elems)
 {

@@ -15,7 +15,6 @@ class IntegrityCheckAction : public R7Action
 {
 public:
   IntegrityCheckAction(InputParameters parameters);
-  virtual ~IntegrityCheckAction();
 
   virtual void act();
 

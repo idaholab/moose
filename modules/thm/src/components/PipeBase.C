@@ -17,8 +17,6 @@ PipeBase::PipeBase(const InputParameters & params)
 {
 }
 
-PipeBase::~PipeBase() {}
-
 void
 PipeBase::init()
 {

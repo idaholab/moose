@@ -10,8 +10,6 @@ validParams<AddComponentPhysicsAction>()
 
 AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : R7Action(params) {}
 
-AddComponentPhysicsAction::~AddComponentPhysicsAction() {}
-
 void
 AddComponentPhysicsAction::act()
 {

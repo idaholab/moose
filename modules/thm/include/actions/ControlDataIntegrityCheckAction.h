@@ -15,7 +15,6 @@ class ControlDataIntegrityCheckAction : public R7Action
 {
 public:
   ControlDataIntegrityCheckAction(InputParameters parameters);
-  virtual ~ControlDataIntegrityCheckAction();
 
   virtual void act();
 

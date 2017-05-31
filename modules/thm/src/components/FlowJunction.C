@@ -34,8 +34,6 @@ FlowJunction::FlowJunction(const InputParameters & params)
 {
 }
 
-FlowJunction::~FlowJunction() {}
-
 void
 FlowJunction::check()
 {

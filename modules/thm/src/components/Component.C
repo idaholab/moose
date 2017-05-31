@@ -95,8 +95,6 @@ Component::Component(const InputParameters & parameters)
 {
 }
 
-Component::~Component() {}
-
 void
 Component::init()
 {

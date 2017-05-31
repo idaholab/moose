@@ -20,7 +20,6 @@ class GeometricalComponent : public Component
 {
 public:
   GeometricalComponent(const InputParameters & parameters);
-  virtual ~GeometricalComponent();
 
   virtual void setupMesh();
   virtual void displaceMesh() override;
