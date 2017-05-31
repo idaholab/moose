@@ -1352,11 +1352,12 @@ Assembly::cacheResidual()
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     for (unsigned int i = 0; i < _sub_Re.size(); i++)
-      cacheResidualBlock(_cached_residual_values[i],
-                         _cached_residual_rows[i],
-                         _sub_Re[i][var->number()],
-                         var->dofIndices(),
-                         var->scalingFactor());
+      if (_sys.hasResidualVector((Moose::KernelType)i))
+        cacheResidualBlock(_cached_residual_values[i],
+                           _cached_residual_rows[i],
+                           _sub_Re[i][var->number()],
+                           var->dofIndices(),
+                           var->scalingFactor());
 }
 
 void
@@ -1372,11 +1373,12 @@ Assembly::cacheResidualNeighbor()
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     for (unsigned int i = 0; i < _sub_Re.size(); i++)
-      cacheResidualBlock(_cached_residual_values[i],
-                         _cached_residual_rows[i],
-                         _sub_Rn[i][var->number()],
-                         var->dofIndicesNeighbor(),
-                         var->scalingFactor());
+      if (_sys.hasResidualVector((Moose::KernelType)i))
+        cacheResidualBlock(_cached_residual_values[i],
+                           _cached_residual_rows[i],
+                           _sub_Rn[i][var->number()],
+                           var->dofIndicesNeighbor(),
+                           var->scalingFactor());
 }
 
 void
@@ -1394,8 +1396,31 @@ Assembly::cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type>
 }
 
 void
+Assembly::addCachedResiduals()
+{
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  {
+    Moose::KernelType type = (Moose::KernelType)i;
+    if (!_sys.hasResidualVector(type))
+    {
+      _cached_residual_values[i].clear();
+      _cached_residual_rows[i].clear();
+      continue;
+    }
+    addCachedResidual(_sys.residualVector(type), type);
+  }
+}
+
+void
 Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
+  if (!_sys.hasResidualVector(type))
+  {
+    _cached_residual_values[type].clear();
+    _cached_residual_rows[type].clear();
+    return;
+  }
+
   std::vector<Real> & cached_residual_values = _cached_residual_values[type];
   std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[type];
 

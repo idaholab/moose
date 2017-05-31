@@ -322,7 +322,7 @@ public:
 
   virtual NumericVector<Number> & solutionUDot() override;
   virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
-  virtual bool hasResidualVector(Moose::KernelType type) const;
+  virtual bool hasResidualVector(Moose::KernelType type) const override;
 
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
 

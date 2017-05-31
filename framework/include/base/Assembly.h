@@ -420,6 +420,8 @@ public:
    */
   void cacheResidualNeighbor();
 
+  void addCachedResiduals();
+
   /**
    * Adds the values that have been cached by calling cacheResidual() and or cacheResidualNeighbor()
    * to the residual.
