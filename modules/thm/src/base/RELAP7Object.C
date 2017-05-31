@@ -9,5 +9,3 @@ validParams<RELAP7Object>()
 }
 
 RELAP7Object::RELAP7Object(const InputParameters & parameters) : MooseObject(parameters) {}
-
-RELAP7Object::~RELAP7Object() {}

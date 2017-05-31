@@ -15,7 +15,6 @@ class RELAP7Object : public MooseObject
 {
 public:
   RELAP7Object(const InputParameters & parameters);
-  virtual ~RELAP7Object();
 
 protected:
   /**
