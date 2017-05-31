@@ -9,6 +9,7 @@
   [./creep_sm]
     type = 'Exodiff'
     input = 'creep_nl1_sm.i'
-    exodiff = 'creep_nl1_out.e'
+    exodiff = 'creep_nl1_sm_out.e'
+    cli_args = 'Outputs/file_base=creep_nl1_sm_out'
   [../]
 []
