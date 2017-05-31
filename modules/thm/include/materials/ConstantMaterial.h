@@ -15,7 +15,6 @@ class ConstantMaterial : public Material
 {
 public:
   ConstantMaterial(const InputParameters & parameters);
-  virtual ~ConstantMaterial();
 
 protected:
   virtual void computeQpProperties();

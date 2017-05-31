@@ -17,8 +17,6 @@ ConstantMaterial::ConstantMaterial(const InputParameters & parameters)
 {
 }
 
-ConstantMaterial::~ConstantMaterial() {}
-
 void
 ConstantMaterial::computeQpProperties()
 {
