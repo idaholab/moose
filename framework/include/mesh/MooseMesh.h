@@ -433,9 +433,8 @@ public:
   void ghostGhostedBoundaries();
 
   /**
-   * Getter/setter for the patch_size parameter.
+   * Getter for the patch_size parameter.
    */
-  void setPatchSize(const unsigned int patch_size);
   unsigned int getPatchSize() const;
 
   /**
