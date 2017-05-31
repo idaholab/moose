@@ -138,13 +138,15 @@ validParams<MooseMesh>()
                         false,
                         "Boolean to specify whether or not all point neighbors are ghosted"
                         " when DistributedMesh is used. Value is ignored in ReplicatedMesh mode");
+  params.addParam<unsigned int>(
+      "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
 
   params.registerBase("MooseMesh");
 
   // groups
   params.addParamNamesToGroup(
       "dim nemesis patch_update_strategy construct_node_list_from_side_list num_ghosted_layers"
-      " ghost_point_neighbors",
+      " ghost_point_neighbors patch_size",
       "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
@@ -168,7 +170,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _needs_prepare_for_use(false),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
-    _patch_size(40),
+    _patch_size(getParam<unsigned int>("patch_size")),
     _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
     _allow_recovery(true),
@@ -273,7 +275,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _is_prepared(false),
     _needs_prepare_for_use(false),
     _node_to_elem_map_built(false),
-    _patch_size(40),
+    _patch_size(other_mesh._patch_size),
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list)
@@ -2351,12 +2353,6 @@ MooseMesh::ghostGhostedBoundaries()
                                      boundary_elems_to_ghost.begin(),
                                      boundary_elems_to_ghost.end(),
                                      extra_ghost_elem_inserter<Elem>(mesh));
-}
-
-void
-MooseMesh::setPatchSize(const unsigned int patch_size)
-{
-  _patch_size = patch_size;
 }
 
 unsigned int

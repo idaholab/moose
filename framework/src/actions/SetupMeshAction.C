@@ -58,12 +58,9 @@ validParams<SetupMeshAction>()
                                      "this value to a vector of amounts to inflate the bounding "
                                      "boxes by.  ie if you are running a 3D problem you might set "
                                      "it to '0.2 0.1 0.4'");
-  params.addParam<unsigned int>(
-      "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
 
   params.addParam<unsigned int>(
       "uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
-
   params.addParam<bool>("skip_partitioning",
                         false,
                         "If true the mesh won't be partitioned. This may cause large load "
@@ -72,8 +69,8 @@ validParams<SetupMeshAction>()
                         "material properties");
 
   // groups
-  params.addParamNamesToGroup(
-      "displacements ghosted_boundaries ghosted_boundaries_inflation patch_size", "Advanced");
+  params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation",
+                              "Advanced");
   params.addParamNamesToGroup("second_order construct_side_list_from_node_list skip_partitioning",
                               "Advanced");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
@@ -91,8 +88,6 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
 
   for (const auto & bnd_name : ghosted_boundaries)
     mesh->addGhostedBoundary(mesh->getBoundaryID(bnd_name));
-
-  mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
   if (isParamValid("ghosted_boundaries_inflation"))
   {
