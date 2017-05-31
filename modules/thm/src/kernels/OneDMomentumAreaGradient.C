@@ -37,8 +37,6 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
 {
 }
 
-OneDMomentumAreaGradient::~OneDMomentumAreaGradient() {}
-
 Real
 OneDMomentumAreaGradient::computeQpResidual()
 {

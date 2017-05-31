@@ -38,8 +38,6 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
 {
 }
 
-OneDMomentumFlux::~OneDMomentumFlux() {}
-
 Real
 OneDMomentumFlux::computeQpResidual()
 {

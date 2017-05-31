@@ -18,7 +18,6 @@ class OneDMomentumFriction : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumFriction(const InputParameters & parameters);
-  virtual ~OneDMomentumFriction();
 
 protected:
   virtual Real computeQpResidual() override;

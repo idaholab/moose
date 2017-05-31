@@ -59,8 +59,6 @@ OneDMomentumFormLoss::OneDMomentumFormLoss(const InputParameters & parameters)
 {
 }
 
-OneDMomentumFormLoss::~OneDMomentumFormLoss() {}
-
 Real
 OneDMomentumFormLoss::computeQpResidual()
 {

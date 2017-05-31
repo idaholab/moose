@@ -16,7 +16,6 @@ class OneDMomentumFlux : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumFlux(const InputParameters & parameters);
-  virtual ~OneDMomentumFlux();
 
 protected:
   virtual Real computeQpResidual();

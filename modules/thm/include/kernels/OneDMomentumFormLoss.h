@@ -20,7 +20,6 @@ class OneDMomentumFormLoss : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumFormLoss(const InputParameters & parameters);
-  virtual ~OneDMomentumFormLoss();
 
 protected:
   virtual Real computeQpResidual() override;

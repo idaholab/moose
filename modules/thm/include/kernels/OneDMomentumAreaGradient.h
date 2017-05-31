@@ -21,7 +21,6 @@ class OneDMomentumAreaGradient : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumAreaGradient(const InputParameters & parameters);
-  virtual ~OneDMomentumAreaGradient();
 
 protected:
   virtual Real computeQpResidual();

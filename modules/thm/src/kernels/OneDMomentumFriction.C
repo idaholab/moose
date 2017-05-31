@@ -46,8 +46,6 @@ OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters)
 {
 }
 
-OneDMomentumFriction::~OneDMomentumFriction() {}
-
 Real
 OneDMomentumFriction::computeQpResidual()
 {
