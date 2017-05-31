@@ -16,7 +16,6 @@ class SolidWall : public BoundaryBase
 {
 public:
   SolidWall(const InputParameters & params);
-  virtual ~SolidWall();
 
   virtual void addVariables() override;
   virtual void addMooseObjects() override;

@@ -14,8 +14,6 @@ validParams<SolidWall>()
 
 SolidWall::SolidWall(const InputParameters & params) : BoundaryBase(params) {}
 
-SolidWall::~SolidWall() {}
-
 void
 SolidWall::addVariables()
 {
