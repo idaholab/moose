@@ -15,8 +15,6 @@ OneDMassFlux::OneDMassFlux(const InputParameters & parameters)
 {
 }
 
-OneDMassFlux::~OneDMassFlux() {}
-
 Real
 OneDMassFlux::computeQpResidual()
 {

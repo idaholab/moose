@@ -15,7 +15,6 @@ class OneDMassFlux : public Kernel
 {
 public:
   OneDMassFlux(const InputParameters & parameters);
-  virtual ~OneDMassFlux();
 
 protected:
   virtual Real computeQpResidual();
