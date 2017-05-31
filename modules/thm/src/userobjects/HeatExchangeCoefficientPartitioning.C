@@ -17,8 +17,6 @@ HeatExchangeCoefficientPartitioning::HeatExchangeCoefficientPartitioning(
 {
 }
 
-HeatExchangeCoefficientPartitioning::~HeatExchangeCoefficientPartitioning() {}
-
 Real
 HeatExchangeCoefficientPartitioning::getPartition(Real alpha_liquid, Real) const
 {

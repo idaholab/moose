@@ -15,7 +15,6 @@ class HeatExchangeCoefficientPartitioning : public GeneralUserObject
 {
 public:
   HeatExchangeCoefficientPartitioning(const InputParameters & parameters);
-  virtual ~HeatExchangeCoefficientPartitioning();
 
   virtual void execute(){};
   virtual void initialize(){};
