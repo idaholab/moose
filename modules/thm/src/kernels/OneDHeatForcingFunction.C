@@ -23,8 +23,6 @@ OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & paramet
 {
 }
 
-OneDHeatForcingFunction::~OneDHeatForcingFunction() {}
-
 Real
 OneDHeatForcingFunction::computeQpResidual()
 {

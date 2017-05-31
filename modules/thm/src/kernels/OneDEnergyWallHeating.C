@@ -29,8 +29,6 @@ OneDEnergyWallHeating::OneDEnergyWallHeating(const InputParameters & parameters)
 {
 }
 
-OneDEnergyWallHeating::~OneDEnergyWallHeating() {}
-
 Real
 OneDEnergyWallHeating::computeQpResidual()
 {

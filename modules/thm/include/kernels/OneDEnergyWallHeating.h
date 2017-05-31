@@ -15,7 +15,6 @@ class OneDEnergyWallHeating : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDEnergyWallHeating(const InputParameters & parameters);
-  virtual ~OneDEnergyWallHeating();
 
 protected:
   virtual Real computeQpResidual();

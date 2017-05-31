@@ -16,7 +16,6 @@ class OneDHeatForcingFunction : public Kernel
 {
 public:
   OneDHeatForcingFunction(const InputParameters & parameters);
-  virtual ~OneDHeatForcingFunction();
 
 protected:
   virtual Real computeQpResidual();

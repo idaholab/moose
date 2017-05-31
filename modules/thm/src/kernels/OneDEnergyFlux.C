@@ -42,8 +42,6 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
 {
 }
 
-OneDEnergyFlux::~OneDEnergyFlux() {}
-
 Real
 OneDEnergyFlux::computeQpResidual()
 {

@@ -16,7 +16,6 @@ class OneDEnergyFlux : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDEnergyFlux(const InputParameters & parameters);
-  virtual ~OneDEnergyFlux();
 
 protected:
   virtual Real computeQpResidual();
