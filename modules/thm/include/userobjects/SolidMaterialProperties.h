@@ -17,7 +17,6 @@ class SolidMaterialProperties : public GeneralUserObject, public ZeroInterface
 {
 public:
   SolidMaterialProperties(const InputParameters & parameters);
-  virtual ~SolidMaterialProperties();
 
   virtual void initialize();
   virtual void finalize();

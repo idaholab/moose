@@ -26,8 +26,6 @@ SolidMaterialProperties::SolidMaterialProperties(const InputParameters & paramet
 {
 }
 
-SolidMaterialProperties::~SolidMaterialProperties() {}
-
 void
 SolidMaterialProperties::initialize()
 {
