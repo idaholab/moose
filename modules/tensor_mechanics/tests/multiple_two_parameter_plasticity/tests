@@ -9,4 +9,9 @@
     input = 'dp_and_wp.i'
     csvdiff = 'dp_and_wp.csv'
   [../]
+  [./cycled_dp_then_wp]
+    type = 'CSVDiff'
+    input = 'cycled_dp_then_wp.i'
+    csvdiff = 'cycled_dp_then_wp.csv'
+  [../]
 []
