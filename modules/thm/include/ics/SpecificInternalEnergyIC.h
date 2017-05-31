@@ -15,7 +15,6 @@ class SpecificInternalEnergyIC : public InitialCondition
 {
 public:
   SpecificInternalEnergyIC(const InputParameters & parameters);
-  virtual ~SpecificInternalEnergyIC();
 
   virtual Real value(const Point & p);
 

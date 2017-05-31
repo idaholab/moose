@@ -19,8 +19,6 @@ SpecificInternalEnergyIC::SpecificInternalEnergyIC(const InputParameters & param
 {
 }
 
-SpecificInternalEnergyIC::~SpecificInternalEnergyIC() {}
-
 Real
 SpecificInternalEnergyIC::value(const Point & /*p*/)
 {

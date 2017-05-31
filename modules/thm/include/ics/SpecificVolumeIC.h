@@ -15,7 +15,6 @@ class SpecificVolumeIC : public InitialCondition
 {
 public:
   SpecificVolumeIC(const InputParameters & parameters);
-  virtual ~SpecificVolumeIC();
 
   virtual Real value(const Point & p);
 

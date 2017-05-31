@@ -20,8 +20,6 @@ SpecificVolumeIC::SpecificVolumeIC(const InputParameters & parameters)
 {
 }
 
-SpecificVolumeIC::~SpecificVolumeIC() {}
-
 Real
 SpecificVolumeIC::value(const Point & /*p*/)
 {
