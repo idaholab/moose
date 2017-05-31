@@ -51,6 +51,12 @@ Logger::getNumberOfWarnings()
 }
 
 void
+Logger::setWarningsAsErrors()
+{
+  _warnings_are_errors = true;
+}
+
+void
 Logger::printMessage()
 {
   Moose::err << COLOR_DEFAULT << std::endl;

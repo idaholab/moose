@@ -74,6 +74,11 @@ public:
    */
   unsigned int getNumberOfWarnings();
 
+  /**
+   * Treat warnings as errors
+   */
+  void setWarningsAsErrors();
+
 protected:
   /**
    * Simple data structure to hold the messages
