@@ -28,7 +28,7 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
         message.MOOSE_TESTING_MODE = True
-        qtutils.setAppInformation()
+        qtutils.setAppInformation("peacock_exodusviewer")
 
         settings = QtCore.QSettings()
         settings.clear()

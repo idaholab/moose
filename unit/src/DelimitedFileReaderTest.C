@@ -35,6 +35,23 @@ TEST(DelimitedFileReader, BadFilename)
     ASSERT_TRUE(pos != std::string::npos);
   }
 }
+TEST(DelimitedFileReader, BadHeaderName)
+{
+  try
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
+    reader.read();
+    reader.getColumnData("second");
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what())
+                          .find("Could not find 'second' in header of file "
+                                "data/csv/example.csv.");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
 
 TEST(DelimitedFileReader, Headers)
 {
@@ -82,6 +99,13 @@ TEST(DelimitedFileReader, Data)
     const std::vector<std::vector<double>> & data = reader.getColumnData();
     std::vector<std::vector<double>> gold = {
         {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    EXPECT_EQ(data, gold);
+  }
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
+    reader.read();
+    const std::vector<double> & data = reader.getColumnData("day");
+    std::vector<double> gold = {24, 9, 1, 15};
     EXPECT_EQ(data, gold);
   }
 }
