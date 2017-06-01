@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+foo(foobar, "aas;dlkfjao;siejoawinevoiwbevopiwenvopinweopivbwopiebvoipwebvopiwqbevopiwbqepiovbwqpoibeviowpqbev");
+
 #include "Assembly.h"
 
 // MOOSE includes
