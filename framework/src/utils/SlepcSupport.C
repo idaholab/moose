@@ -25,6 +25,12 @@
 #include "InputParameters.h"
 #include "EigenProblem.h"
 #include "Conversion.h"
+#include "EigenProblem.h"
+#include "NonlinearSystemBase.h"
+
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/slepc_macro.h"
 
 namespace Moose
 {
@@ -36,7 +42,8 @@ getSlepcValidParams()
 {
   InputParameters params = emptyInputParameters();
 
-  MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON");
+  MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
+                             "NONLINEAR_POWER MONOLITH_NEWTON");
   params.addParam<MooseEnum>("eigen_solve_type",
                              eigen_solve_type,
                              "POWER: Power / Inverse / RQI "
@@ -231,6 +238,25 @@ setEigenSolverOptions(SolverParams & solver_params)
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "jd");
       break;
 
+    case Moose::EST_NONLINEAR_POWER:
+#if !SLEPC_VERSION_LESS_THAN(3, 7, 3)
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+#else
+      mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
+#endif
+      break;
+
+    case Moose::EST_MONOLITH_NEWTON:
+#if !SLEPC_VERSION_LESS_THAN(3, 7, 3)
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+#else
+      mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
+#endif
+      break;
+
     default:
       mooseError("Unknown eigen solver type \n");
   }
@@ -247,6 +273,89 @@ slepcSetOptions(FEProblemBase & problem)
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 
+void
+moosePetscSNESFormJacobian(
+    SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, Moose::KernelType type)
+{
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> X_global(x, sys.comm());
+
+  // update local solution
+  X_global.localize(*sys.current_local_solution.get());
+
+  PetscMatrix<Number> PC(pc, sys.comm());
+  PetscMatrix<Number> Jac(jac, sys.comm());
+
+  // Set the dof maps
+  PC.attach_dof_map(sys.get_dof_map());
+  Jac.attach_dof_map(sys.get_dof_map());
+
+  PC.zero();
+
+  eigen_problem->computeJacobian(*sys.current_local_solution.get(), PC, type);
+
+  PC.close();
+  if (jac != pc)
+    Jac.close();
+}
+
+PetscErrorCode
+mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, Moose::KT_NONEIGEN);
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, Moose::KT_EIGEN);
+  PetscFunctionReturn(0);
+}
+
+void
+moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, Moose::KernelType type)
+{
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> X_global(x, sys.comm()), R(r, sys.comm());
+
+  // update local solution
+  X_global.localize(*sys.current_local_solution.get());
+
+  R.zero();
+
+  eigen_problem->computeResidualType(*sys.current_local_solution.get(), R, type);
+
+  R.close();
+}
+
+PetscErrorCode
+mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moosePetscSNESFormFunction(snes, x, r, ctx, Moose::KT_NONEIGEN);
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moosePetscSNESFormFunction(snes, x, r, ctx, Moose::KT_EIGEN);
+  PetscFunctionReturn(0);
+}
 } // namespace SlepcSupport
 } // namespace moose
 
