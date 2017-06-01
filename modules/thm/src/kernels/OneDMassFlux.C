@@ -26,7 +26,7 @@ Real
 OneDMassFlux::computeQpJacobian()
 {
   // This seems weird at first glance, but this term does not depend
-  // on U0, only the conserved variable U1.  In other words the (1,1)
+  // on arhoA, only the conserved variable arhouA.  In other words the (1,1)
   // entry of the flux Jacobian is 0.
   return 0.;
 }
