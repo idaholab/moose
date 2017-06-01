@@ -10,7 +10,7 @@ class TerminalTextEdit(QTextEdit):
     def __init__(self, **kwds):
         super(TerminalTextEdit, self).__init__(**kwds)
 
-        self.setStyleSheet("TerminalTextEdit { background: black; color: white; }")
+        self.setStyleSheet("TerminalTextEdit { background: black; color: white; font-size: 10px;}")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setReadOnly(True)
 
