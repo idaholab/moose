@@ -1,0 +1,16 @@
+[Tests]
+  [./test5a]
+    type = 'Exodiff'
+    input = 'nafems_test5a.i'
+    exodiff = 'nafems_test5a_out.e'
+    abs_zero = 1e-5
+    rel_err = 5e-5
+  [../]
+  [./test5b]
+    type = 'Exodiff'
+    input = 'nafems_test5b.i'
+    exodiff = 'nafems_test5b_out.e'
+    abs_zero = 1e-6
+    rel_err = 1e-5
+  [../]
+[]
