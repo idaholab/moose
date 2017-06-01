@@ -484,13 +484,10 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   const KernelWarehouse & getKernelWarehouse() { return _kernels; }
-  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse()
-  {
-    return _non_eigen_kernels;
-  }
+  const KernelWarehouse & getTimeKernelWarehouse() { return _time_kernels; }
+  const KernelWarehouse & getNonTimeKernelWarehouse() { return _non_time_kernels; }
+  const KernelWarehouse & getEigenKernelWarehouse() { return _eigen_kernels; }
+  const KernelWarehouse & getNonEigenKernelWarehouse() { return _non_eigen_kernels; }
   const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
@@ -598,10 +595,10 @@ protected:
   MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
-  MooseObjectWarehouse<KernelBase> _time_kernels;
-  MooseObjectWarehouse<KernelBase> _non_time_kernels;
-  MooseObjectWarehouse<KernelBase> _eigen_kernels;
-  MooseObjectWarehouse<KernelBase> _non_eigen_kernels;
+  KernelWarehouse _time_kernels;
+  KernelWarehouse _non_time_kernels;
+  KernelWarehouse _eigen_kernels;
+  KernelWarehouse _non_eigen_kernels;
 
   ///@}
 
