@@ -282,31 +282,32 @@ ireg_vu_SBTL95(double v,
 }
 
 Real
-dv_dalphaL(Real area, Real U0)
+dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid)
 {
-  return (area / U0);
+  const Real sign = is_liquid ? 1.0 : -1.0;
+  return sign * (area / arhoA);
 }
 
 Real
-dv_dU0(Real area, Real U0)
+dv_darhoA(Real area, Real arhoA)
 {
-  return -area / U0 / U0;
+  return -area / arhoA / arhoA;
 }
 
 Real
-de_dU0(Real U0, Real U1, Real U2)
+de_darhoA(Real arhoA, Real arhouA, Real arhoEA)
 {
-  return (-U2 / U0 / U0 + U1 * U1 / U0 / U0 / U0);
+  return (-arhoEA / arhoA / arhoA + arhouA * arhouA / arhoA / arhoA / arhoA);
 }
 
 Real
-de_dU1(Real U0, Real U1)
+de_darhouA(Real arhoA, Real arhouA)
 {
-  return (-U1 / U0 / U0);
+  return (-arhouA / arhoA / arhoA);
 }
 
 Real
-de_dU2(Real U0)
+de_darhoEA(Real arhoA)
 {
-  return (1 / U0);
+  return (1 / arhoA);
 }

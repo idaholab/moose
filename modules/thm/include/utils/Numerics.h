@@ -116,40 +116,41 @@ int ireg_vu_SBTL95(double v,
  *
  * Makes sense only when using 7-equation model
  * @param area - The cross-sectional area
- * @param arhoA - conserved density of the phase, i.e. alpha_rho_A (liquid or vapor)
+ * @param arhoA - density equation solution variable: alpha*rho*A
+ * @param is_liquid - True if the specific volume corresponds to liquid phase
  */
-Real dv_dalphaL(Real area, Real U0);
+Real dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid);
 
 /**
- * Derivative of specific volume wrt density of the phase (rho_A or alpha_rho_A)
+ * Derivative of specific volume wrt density equation solution variable
  *
  * @param area - Cross-sectional area
- * @param U0 - conserved density of the phase, i.e. rho_A or alpha_rho_A (liquid or vapor)
+ * @param arhoA - density equation solution variable: alpha*rho*A
  */
-Real dv_dU0(Real area, Real U0);
+Real dv_darhoA(Real area, Real arhoA);
 
 /**
  * Derivative of specific internal energy wrt density of the phase (rho_A or alpha_rho_A)
  *
- * @param U0 - conserved density of the phase, i.e. rho_A or alpha_rho_A (liquid or vapor)
- * @param U1 - conserved momentum of the phase, i.e. rhou_A or alpha_rhou_A (liquid or vapor)
- * @param U2 - conserved total energy of the phase, i.e. rhoE_A or alpha_rhoE_A (liquid or vapor)
+ * @param arhoA - density equation solution variable: alpha*rho*A
+ * @param arhouA - momentum equation solution variable: alpha*rho*u*A
+ * @param arhoEA - energy equation solution variable: alpha*rho*E*A
  */
-Real de_dU0(Real U0, Real U1, Real U2);
+Real de_darhoA(Real arhoA, Real arhouA, Real arhoEA);
 
 /**
  * Derivative of specific internal energy wrt momentum of the phase (rhou_A or alpha_rhou_A)
  *
- * @param U0 - conserved density of the phase, i.e. rho_A or alpha_rho_A (liquid or vapor)
- * @param U1 - conserved momentum of the phase, i.e. rhou_A or alpha_rhou_A (liquid or vapor)
+ * @param arhoA - density equation solution variable: alpha*rho*A
+ * @param arhouA - momentum equation solution variable: alpha*rho*u*A
  */
-Real de_dU1(Real U0, Real U1);
+Real de_darhouA(Real arhoA, Real arhouA);
 
 /**
  * Derivative of specific internal energy wrt total energy of the phase (rhoE_A or alpha_rhoE_A)
  *
- * @param U0 - conserved density of the phase, i.e. rho_A or alpha_rho_A (liquid or vapor)
+ * @param arhoA - density equation solution variable: alpha*rho*A
  */
-Real de_dU2(Real U0);
+Real de_darhoEA(Real arhoA);
 
 #endif // NUMERICS_H
