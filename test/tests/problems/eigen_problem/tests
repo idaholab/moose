@@ -72,4 +72,10 @@
     csvdiff = 'ane_eigenvalues_0001.csv'
     slepc_version = '>=3.7.4'
   [../]
+  [./coupled_system]
+    type = 'CSVDiff'
+    input = 'ne_coupled.i'
+    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+  [../]
 []
