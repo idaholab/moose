@@ -21,19 +21,20 @@ validParams<CoupledForce>()
   InputParameters params = validParams<Kernel>();
 
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
+  params.addParam<Real>("cof", 1.0, "Coefficent to multiply by the coupled force term");
 
   return params;
 }
 
 CoupledForce::CoupledForce(const InputParameters & parameters)
-  : Kernel(parameters), _v_var(coupled("v")), _v(coupledValue("v"))
+  : Kernel(parameters), _v_var(coupled("v")), _v(coupledValue("v")), _cof(getParam<Real>("cof"))
 {
 }
 
 Real
 CoupledForce::computeQpResidual()
 {
-  return -_v[_qp] * _test[_i][_qp];
+  return _cof * -_v[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -46,6 +47,6 @@ Real
 CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-    return -_phi[_j][_qp] * _test[_i][_qp];
+    return _cof * -_phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
 }
