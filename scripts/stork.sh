@@ -79,10 +79,6 @@ rm -f $dir/Makefile.*
 rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
 
-if [[ "$kind" == "module" ]]; then
-    rm -f "$dir/include/base/${dstname}App.h"
-fi
-
 if [[ "$kind" == "app" ]]; then
     # copy clang-format related files
     mkdir -p $dir/scripts
@@ -104,9 +100,8 @@ if [[ "$kind" == "app" ]]; then
     echo "         git push -u origin master"
     echo ""
     echo "To automatically enforce MOOSE C++ code style in your commits, run:"
-    echo "" 
+    echo ""
     echo "    cd $dir"
-    echo "    ./scripts/install-format-hook.sh" 
+    echo "    ./scripts/install-format-hook.sh"
     echo ""
 fi
-
