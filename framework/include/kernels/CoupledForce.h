@@ -41,6 +41,7 @@ protected:
 private:
   unsigned int _v_var;
   const VariableValue & _v;
+  Real _coef;
 };
 
 #endif // COUPLEDFORCE_H
