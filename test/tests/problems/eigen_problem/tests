@@ -48,7 +48,7 @@
     input = 'ne.i'
     cli_args = 'Executioner/eigen_solve_type=NONLINEAR_POWER Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
-    slepc_version = '3.7.4'
+    slepc_version = '>=3.7.4'
   [../]
 
   [./monolith_newton]
@@ -56,6 +56,15 @@
     input = 'ne.i'
     cli_args = 'Executioner/eigen_solve_type=MONOLITH_NEWTON Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
-    slepc_version = '3.7.4'
+    slepc_version = '>=3.7.4'
   [../]
+
+  [./ne_deficient]
+    type = 'CSVDiff'
+    input = 'ne_deficient_b.i'
+    csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+  [../]
+
+  
 []
