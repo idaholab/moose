@@ -58,4 +58,13 @@
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
     slepc_version = '>=3.7.4'
   [../]
+
+  [./ne_deficient]
+    type = 'CSVDiff'
+    input = 'ne_deficient_b.i'
+    csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+  [../]
+
+  
 []
