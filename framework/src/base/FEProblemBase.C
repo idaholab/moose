@@ -1022,10 +1022,7 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addCachedResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addCachedResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  _assembly[tid]->addCachedResiduals();
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);

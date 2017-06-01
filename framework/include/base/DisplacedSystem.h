@@ -35,6 +35,16 @@ public:
 
   virtual void init() override;
 
+  virtual bool hasResidualVector(Moose::KernelType type) const override
+  {
+    return _undisplaced_system.hasResidualVector(type);
+  }
+
+  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override
+  {
+    return _undisplaced_system.residualVector(type);
+  }
+
   virtual NumericVector<Number> & getVector(const std::string & name) override;
 
   virtual NumericVector<Number> & serializedSolution() override
