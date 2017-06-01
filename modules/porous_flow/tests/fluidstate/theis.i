@@ -1,5 +1,5 @@
 # Two phase Theis problem: Flow from single source using WaterNCG fluidstate.
-# Constant rate injection 0.5 kg/s
+# Constant rate injection 2 kg/s
 # 1D cylindrical mesh
 # Initially, system has only a liquid phase, until enough gas is injected
 # to form a gas phase, in which case the system becomes two phase.
@@ -25,19 +25,15 @@
 
 [AuxVariables]
   [./saturation_gas]
-    order = FIRST
+    order = CONSTANT
     family = MONOMIAL
   [../]
   [./x1]
-    order = FIRST
+    order = CONSTANT
     family = MONOMIAL
   [../]
   [./y0]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./pgas2]
-    order = FIRST
+    order = CONSTANT
     family = MONOMIAL
   [../]
 []
@@ -64,13 +60,6 @@
     property = mass_fraction
     phase = 1
     fluid_component = 0
-    execute_on = timestep_end
-  [../]
-  [./pgas2]
-    type = PorousFlowPropertyAux
-    variable = pgas2
-    property = pressure
-    phase = 1
     execute_on = timestep_end
   [../]
 []
@@ -230,14 +219,6 @@
     sort_by = x
     variable = 'pgas zi'
     execute_on = 'timestep_end'
-  [../]
-  [./line2]
-    type = LineValueSampler
-    sort_by = x
-    start_point = '0 0 0'
-    end_point = '1000 0 0'
-    num_points = 1500
-    variable = 'saturation_gas x1 pgas'
   [../]
 []
 
