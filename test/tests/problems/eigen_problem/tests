@@ -66,5 +66,10 @@
     slepc_version = '>=3.7.4'
   [../]
 
-  
+  [./nonlinear_laplace]
+    type = 'CSVDiff'
+    input = 'ane.i'
+    csvdiff = 'ane_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+  [../]
 []
