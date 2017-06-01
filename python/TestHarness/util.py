@@ -52,6 +52,15 @@ LIBMESH_OPTIONS = {
   'petsc_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_MINOR\s+(\d+)',
                      'default'   : '1'
                    },
+  'slepc_major' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_SLEPC_VERSION_MAJOR\s+(\d+)',
+                     'default'   : '1'
+                   },
+  'slepc_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_SLEPC_VERSION_MINOR\s+(\d+)',
+                     'default'   : '1'
+                   },
+  'slepc_subminor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR\s+(\d+)',
+                     'default'   : '1'
+                   },
   'dof_id_bytes' : { 're_option' : r'#define\s+LIBMESH_DOF_ID_BYTES\s+(\d+)',
                      'default'   : '4'
                    },
@@ -222,6 +231,15 @@ def getPetscVersion(libmesh_dir):
 
     return major_version.pop() + '.' + minor_version.pop()
 
+def getSlepcVersion(libmesh_dir):
+    major_version = getLibMeshConfigOption(libmesh_dir, 'slepc_major')
+    minor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_minor')
+    subminor_version = getLibMeshConfigOption(libmesh_dir, 'slepc_subminor')
+    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
+      return None
+
+    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
+
 # Break down petsc version logic in a new define
 # TODO: find a way to eval() logic instead
 def checkPetscVersion(checks, test):
@@ -245,6 +263,38 @@ def checkPetscVersion(checks, test):
         elif logic == '<' and checks['petsc_version'][0:3] < version[0:3]:
             return (True, None, version)
         elif logic == '<=' and checks['petsc_version'][0:3] <= version[0:3]:
+            return (True, None, version)
+    return (False, logic, version)
+
+
+# Break down slepc version logic in a new define
+def checkSlepcVersion(checks, test):
+    # User does not require anything
+    if len(test['slepc_version']) == 0:
+       return (False, None, None)
+    # SLEPc is not installed
+    if checks['slepc_version'] == None:
+       return (False, None, None)
+    # If any version of SLEPc works, return true immediately
+    if 'ALL' in set(test['slepc_version']):
+        return (True, None, None)
+    # Iterate through SLEPc versions in test[SLEPC_VERSION] and match it against check[SLEPC_VERSION]
+    for slepc_version in test['slepc_version']:
+        logic, version = re.search(r'(.*?)(\d\S+)', slepc_version).groups()
+        # Exact match
+        if logic == '' or logic == '=':
+            if version == checks['slepc_version']:
+                return (True, None, version)
+            else:
+                return (False, '!=', version)
+        # Logical match
+        if logic == '>' and checks['slepc_version'][0:5] > version[0:5]:
+            return (True, None, version)
+        elif logic == '>=' and checks['slepc_version'][0:5] >= version[0:5]:
+            return (True, None, version)
+        elif logic == '<' and checks['slepc_version'][0:5] < version[0:5]:
+            return (True, None, version)
+        elif logic == '<=' and checks['slepc_version'][0:5] <= version[0:5]:
             return (True, None, version)
     return (False, logic, version)
 
