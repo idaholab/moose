@@ -149,6 +149,7 @@ public:
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
   virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
+  virtual bool hasResidualVector(Moose::KernelType) const { return false; };
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();

@@ -577,11 +577,7 @@ DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_NONTIME),
-                                      Moose::KT_NONTIME);
+  _assembly[tid]->addCachedResiduals();
 }
 
 void
