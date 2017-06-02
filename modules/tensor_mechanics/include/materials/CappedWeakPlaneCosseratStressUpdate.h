@@ -28,6 +28,11 @@ class CappedWeakPlaneCosseratStressUpdate : public CappedWeakPlaneStressUpdate
 public:
   CappedWeakPlaneCosseratStressUpdate(const InputParameters & parameters);
 
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return false; }
+
 protected:
   virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
                                          Real p_trial,

@@ -46,6 +46,11 @@ public:
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) override;
 
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return true; }
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeStressInitialize(Real /*effectiveTrialStress*/,
