@@ -59,6 +59,14 @@ class JvarMapInterfaceBase : public T
 public:
   JvarMapInterfaceBase(const InputParameters & parameters);
 
+  /**
+   * Returns true if jvar has a corresponding index in the _coupled_moose_vars array.
+   *
+   * @param[in] jvar Variable number passed as argument to computeQpOffDiagJacobian
+   * @return true if jvar has a corresponding index in the _coupled_moose_vars array
+   */
+  bool hasCvar(unsigned int jvar);
+
   /// Return index into the _coupled_moose_vars array for a given jvar
   unsigned int mapJvarToCvar(unsigned int jvar);
 
@@ -95,9 +103,13 @@ JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters
     if (number < _jvar_map.size())
       _jvar_map[number] = i;
   }
+}
 
-  // mark the kernel variable for the check in computeOffDiagJacobian
-  _jvar_map[this->_var.number()] = 0;
+template <class T>
+bool
+JvarMapInterfaceBase<T>::hasCvar(unsigned int jvar)
+{
+  return _jvar_map[jvar] >= 0;
 }
 
 template <class T>
@@ -128,8 +140,12 @@ template <class T>
 void
 JvarMapKernelInterface<T>::computeOffDiagJacobian(unsigned int jvar)
 {
-  // the Kernel is not coupled to the variable; no need to loop over QPs
-  if (this->_jvar_map[jvar] < 0)
+  // If the variable is not in the Kernel's _coupled_moose_vars and it is not
+  // the diagonal variable, then it is known that computeQpOffDiagJacobian
+  // should return zero; thus there is no need to loop over QPs. Note that
+  // a Kernel may depend on the Kernel variable without that variable being
+  // in _coupled_moose_vars.
+  if (this->_jvar_map[jvar] < 0 && jvar != T::variable().number())
     return;
 
   // call the underlying class' off-diagonal Jacobian

@@ -53,8 +53,13 @@ MaterialDerivativeTestKernel::computeQpJacobian()
 Real
 MaterialDerivativeTestKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // get the coupled variable number corresponding to jvar
-  const unsigned int cvar = mapJvarToCvar(jvar);
+  if (hasCvar(jvar))
+  {
+    // get the coupled variable number corresponding to jvar
+    const unsigned int cvar = mapJvarToCvar(jvar);
 
-  return (*_p_derivatives[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return (*_p_derivatives[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  else
+    return 0;
 }
