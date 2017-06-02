@@ -946,17 +946,17 @@ class TestHarness:
             name_to_object[tester.getTestName()] = tester
 
         # Now build up our tester dependencies
-        for tester in testers:
-            # Now we need to see which dependencies are real
-            # We don't really care about skipped tests, heavy tests, etc.
-            for name in tester.getPrereqs():
-                if not name_to_object[name].getRunnable():
-                    tester.setStatus('skipped dependency', tester.bucket_skip)
-
-            prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
-            d.insertDependency(tester, prereq_objects)
-
         try:
+            for tester in testers:
+                # Now we need to see which dependencies are real
+                # We don't really care about skipped tests, heavy tests, etc.
+                for name in tester.getPrereqs():
+                    if not name_to_object[name].getRunnable():
+                        tester.setStatus('skipped dependency', tester.bucket_skip)
+
+                prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
+                d.insertDependency(tester, prereq_objects)
+
             concurrent_tester_sets = d.getSortedValuesSets()
             for concurrent_testers in concurrent_tester_sets:
                 output_files_in_dir = set()
