@@ -26,13 +26,18 @@ recursive Subroutine wateos_PH(p, h, T, dw, hx, energyscale, tolerance, ierr)
   dt=-1D-7
 
   do
-   succ= cowat(tx, p, dw, hw)
+   succ = cowat(tx, p, dw, hw)
    hx= hw * energyscale
 !   if(dabs((hx-h)/h)<= 1D-14) exit
     if(dabs((hx-h))<= tolerance) exit
    txd = tx + dt
-   succ = cowat(txd, p, dw, hw)
+   succ = succ .and. cowat(txd, p, dw, hw)
    hxd= hw * energyscale
+   if ( .not. succ ) then
+      print *, 'Wateos_PH: Error calling cowat. STOP'
+      print *, p, h, t, tx, txd, hx, hxd
+      stop
+   endif
    tx = tx + ( h - hx)*dt / (hxd-hx)
 !   print *, itr, tx, h,hx, hxd
    itr =itr+1
