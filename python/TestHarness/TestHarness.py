@@ -372,12 +372,10 @@ class TestHarness:
             caveats = test['caveats']
 
         # Check for test failure using the status bucket
-        did_pass = tester.didPass()
-        status = tester.getStatus()
         result = ''
 
         # PASS and DRY_RUN fall into this catagory
-        if did_pass:
+        if tester.didPass():
             if self.options.extra_info:
                 checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
                 for check in checks:
@@ -389,7 +387,7 @@ class TestHarness:
                 result = tester.getSuccessMessage()
 
         # FAIL, DIFF and DELETED fall into this catagory
-        elif status == tester.bucket_fail or status == tester.bucket_diff or status == tester.bucket_deleted:
+        elif tester.didFail() or tester.didDiff() or tester.isDeleted():
             result = 'FAILED (%s)' % tester.getStatusMessage()
 
         # Note: SKIP and RUNNING messages are handled in handleTestResult because the
@@ -432,8 +430,6 @@ class TestHarness:
     def handleTestResult(self, tester, output, result, start=0, end=0, add_to_table=True):
         caveats = []
         timing = ''
-        status = tester.getStatus()
-        did_pass = tester.didPass()
 
         if tester.specs.isValid('caveats'):
             caveats = tester.specs['caveats']
@@ -444,7 +440,7 @@ class TestHarness:
             timing = self.getSolveTime(output)
 
         # format the SKIP messages received
-        if status == tester.bucket_skip:
+        if tester.isSkipped():
             # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
             # but Exodiff is instructed to 'SKIP' on scaled tests.
             if len(caveats):
@@ -455,18 +451,18 @@ class TestHarness:
         # result is normally populated by a tester object when a test has failed. But in this case
         # checkRunnableBase determined the test a failure before it even ran. So we need to set the
         # results here, so they are printed if the extra_info argument was supplied
-        elif status == tester.bucket_deleted:
+        elif tester.isDeleted():
             result = tester.getStatusMessage()
 
         # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
         # in the 'Final Test Results' area.
         if add_to_table and self.options.checkStatus is not False: # checkStatus could be None
             self.test_table.append( (tester, output, result, timing, start, end) )
-            if status == tester.bucket_skip:
+            if tester.isSkipped():
                 self.num_skipped += 1
-            elif status == tester.bucket_success:
+            elif tester.didPass():
                 self.num_passed += 1
-            elif status == tester.bucket_pending:
+            elif tester.isPending():
                 self.num_pending += 1
             else:
                 # Dump everything else into the failure status
@@ -476,7 +472,7 @@ class TestHarness:
 
         print printResult(tester, result, timing, start, end, self.options)
 
-        if self.options.verbose or (not did_pass and not self.options.quiet and not status == tester.bucket_pending):
+        if self.options.verbose or (self.options.quiet is not True and (tester.didFail() or tester.didDiff())):
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n');
 
@@ -484,23 +480,23 @@ class TestHarness:
             color = tester.getColor()
 
             if output != '':
-                test_name = colorText(tester.specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
+                test_name = colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
                 output = test_name + ("\n" + test_name).join(lines)
                 print output
 
                 # Print result line again at the bottom of the output for failed tests
                 print printResult(tester, result, timing, start, end, self.options), "(reprint)"
 
-        if status != tester.bucket_skip and status != tester.bucket_pending:
-            if not did_pass and not self.options.failed_tests:
-                self.writeFailedTest.write(tester.specs['test_name'] + '\n')
+        if not tester.isSkipped() and not tester.isPending():
+            if not tester.didPass() and not self.options.failed_tests:
+                self.writeFailedTest.write(tester.getTestName() + '\n')
 
             if self.options.file:
                 self.file.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
                 self.file.write(output)
 
-            if self.options.sep_files or (self.options.fail_files and not did_pass) or (self.options.ok_files and did_pass):
-                fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
+            if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
+                fname = os.path.join(tester.getTestDir(), tester.getTestName().split('/')[-1] + '.' + result[:6] + '.txt')
                 f = open(fname, 'w')
                 f.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
                 f.write(output)
