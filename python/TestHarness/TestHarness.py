@@ -760,8 +760,6 @@ class TestHarness:
         if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
             print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
             sys.exit(1)
-        if opts.pbs and opts.failed_tests:
-            print 'Warning: queueing options used along with --failed-tests will only re-run checked output. It can not re-launch the test!'
 
         # Update any keys from the environment as necessary
         if not self.options.method:
@@ -787,14 +785,19 @@ class TestHarness:
 
         # normalize queueing options
         self.queue_file = None
+
+        # Add logic for each queueing plugin argument here
+        # if opts.<name of queueing plugin>:
+        #     self.queue_file = opts.<name of queueing plugin>
         if opts.pbs:
             self.queue_file = opts.pbs
+
 
         # Initialize Queue options if supplied
         if self.queue_file and opts.dry_run:
             print 'ERROR: --dry-run can not by used by a queueing scheduler'
             sys.exit(1)
-        elif self.queue_file:
+        elif self.queue_file and opts.queue_cleanup == None:
             # Queue arguments supplied and file exists
             if os.path.exists(self.queue_file):
                 self.queue_file = open(self.queue_file, 'r+')
@@ -809,7 +812,11 @@ class TestHarness:
                 self.options.checkStatus = True
 
                 # Set the input file name to match user's previous -i argument (needed for findAndRunTests)
-                self.options.input_file_name = self.queue_data.itervalues().next()['input_name']
+                if len(self.queue_data):
+                    self.options.input_file_name = self.queue_data.itervalues().next()['input_name']
+                else:
+                    print 'Empty json file'
+                    sys.exit(1)
 
             # PBS arguments supplied and file does not exist
             else:

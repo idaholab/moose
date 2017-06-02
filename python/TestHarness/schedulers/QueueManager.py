@@ -1,12 +1,13 @@
 from subprocess import *
 from util import *
+from collections import namedtuple
 from timeit import default_timer as clock
 
 from Scheduler import Scheduler
 from MooseObject import MooseObject
 from tempfile import TemporaryFile
 
-import os, sys, re, shutil, errno, platform, json
+import os, sys, re, shutil, errno
 
 # Base class for providing an interface to an external scheduler
 class QueueManager(Scheduler):
@@ -54,30 +55,36 @@ class QueueManager(Scheduler):
     def handleQueueStatus(self, tester, output):
         return
 
+    # convert a dictionary_bucket status to a tester_bucket status
+    def createStatusBucket(self, json_status):
+        # Create a status_bucket according to what is stored in the json file
+        test_status = namedtuple('status_bucket', json_status)
+        return test_status(status=json_status['status'], color=json_status['color'])
+
     # Update tester status in queue_data
     def updateTesterStatus(self, tester):
-        # Update the queue_data with new relevant information
         self.putData(self.getJobName(tester),
-                     job_name=self.getJobName(tester),
-                     status=tester.getStatusMessage(),
-                     skipped=tester.isSkipped(),
-                     is_pending=tester.isPending(),
-                     is_silent=tester.isSilent(),
-                     is_deleted=tester.isDeleted(),
-                     did_pass=tester.didPass(),
-                     did_fail=tester.didFail(),
-                     did_diff=tester.didDiff(),
-                     test_dir=self.getWorkingDir(tester),
-                     test_name=tester.getTestName(),
-                     input_name=self.options.input_file_name)
+                     job_name       = self.getJobName(tester),
+                     skipped        = tester.isSkipped(),
+                     is_pending     = tester.isPending(),
+                     is_silent      = tester.isSilent(),
+                     is_deleted     = tester.isDeleted(),
+                     did_pass       = tester.didPass(),
+                     did_fail       = tester.didFail(),
+                     did_diff       = tester.didDiff(),
+                     test_dir       = self.getWorkingDir(tester),
+                     test_name      = tester.getTestName(),
+                     input_name     = self.options.input_file_name,
+                     status_message = tester.getStatusMessage(),
+                     status_bucket  = dict(tester.getStatus()._asdict()))
 
     # Return a set of dependents for a tester
     def getDependents(self, tester):
         r = ReverseReachability()
-        # To save processes we are only interested in changing tests
-        # related to this tester (matching test_dir)
-        # TODO: I do not like the way I am doing this. But I have no
-        # access to the list of tester objects. Better way?
+        # To save processes we are only interested in obtaining tests related to this tester by matching
+        # test_dir (because we have to iterate over the entire queue_data dictionary) I do not like the
+        # way I am doing this. But I have no access to the list of tester objects (QueueManager only
+        # receives one tester at a time). Better way?
         for job_name, values in self.queue_data.iteritems():
             if values['test_dir'] == self.getWorkingDir(tester):
                 if 'prereq_tests' in values.keys() and 'test_name' in values.keys():
@@ -134,8 +141,8 @@ class QueueManager(Scheduler):
             else:
                 self.putData(job, **tmp_dict)
 
-    # Return a list of tuples containing abspath of test_dir and corresponding test file
-    # and test name from the queue_data
+    # Return a list of tuples containing abspath of test_dir and corresponding test file and test name from
+    # the queue_data
     def getTests(self):
         test_list = []
         if self.queue_data:
@@ -174,9 +181,8 @@ class QueueManager(Scheduler):
 
     # Return path-friendly test name (remove special characters)
     def getJobName(self, tester):
-        # A little hackish. But there is an instance or two where we do
-        # not have a tester 'object' that we can to deal with, just the
-        # str(test_name)
+        # A little hackish. But there is an instance or two where we do not have a tester 'object' that we
+        # can to deal with, just the str(test_name)
         if type(tester) == type(str()) or type(tester) == type(u''):
             tester_text = tester
         else:
@@ -201,10 +207,10 @@ class QueueManager(Scheduler):
         # and see if they are truly skipped/failed, or still pending in the queue. If they are pending,
         # we need to alter this test's status to reflect a 'HOLDING' pending status instead.
 
-        # TODO: I do not like using logic based on the status _message_. But I see no other way
-        # to determine the _why_ a test was skipped. To the TestHarness a skipped test is still a
-        # skipped test. Adding additional buckets probably wouldn't help either. That would only
-        # create this mess somewhere else... Better way?
+        # TODO: I do not like using logic based on the status _message_. But I see no other way to
+        # determine the _why_ a test was skipped. To the TestHarness a skipped test is still a skipped
+        # test. Adding additional buckets probably wouldn't help either. That would only create this mess
+        # somewhere else... Better way?
         if tester.getStatusMessage() == 'skipped dependency':
             # get reverse dependencies
             reverse_deps = self.getDependents(tester)
@@ -214,11 +220,12 @@ class QueueManager(Scheduler):
                 for dependent in dependents:
                     tmp_job = self.getData(self.getJobName(dependent), skipped=True, did_fail=True)
                     if tmp_job['skipped'] or tmp_job['did_fail']:
-                        # A dependent has been skipped or failed, so continue to let this job
-                        # be flagged as a 'skipped dependency'
+                        # A dependent has been skipped or failed, so continue to let this job be flagged as
+                        # a 'skipped dependency'
                         return
 
-            # No dependents were found to be skipped or failed, so alter the status of this test
+            # No dependents were found to be skipped or failed, so alter the status of this test from
+            # skipped (due to a skipped dependency), to pending instead.
             tester.setStatus('HOLDING', tester.bucket_pending)
 
     # The Scheduler has updated a tester's status, so update that status in our queue_data
@@ -227,59 +234,21 @@ class QueueManager(Scheduler):
             self.adjustSkippedStatus(tester)
         self.updateTesterStatus(tester)
 
-    # canLaunch is the QueueManager's way of providing checkRunnable due to the multitude of
-    # modes the TestHarness can operate in.
+    # canLaunch is the QueueManager's way of providing checkRunnable due to the multitude of modes the
+    # TestHarness can operate in.
     def canLaunch(self, tester, checks, test_list):
         # We are processing a previous run
         if self.options.checkStatus:
             # Get this jobs previous status from queue_data
             job = self.getData(self.getJobName(tester),
-                               skipped=True,
-                               is_pending=True,
-                               is_silent=True,
-                               is_deleted=True,
-                               did_fail=True,
-                               did_diff=True,
-                               did_pass=True,
-                               status=True,
                                depends_on_me=True,
-                               test_name=True)
+                               status_message=True,
+                               status_bucket=True)
 
-            # Set this tester object to the previous status found in the queue_data
-            # SKIPPED
-            if job['skipped']:
-                tester.setStatus(job['status'], tester.bucket_skip)
-
-            # FAILED
-            elif job['did_fail']:
-
-                # DIFF specific failure
-                if job['did_diff']:
-                    # Previously failed, but we want to only run failed tests (so
-                    # override previous status and make it pending)
-                    if self.options.failed_tests:
-                        tester.setStatus(job['status'], tester.bucket_pending)
-                    else:
-                        tester.setStatus(job['status'], tester.bucket_diff)
-                else:
-                    # Previously failed, but we want to only run failed tests (so
-                    # override previous status and make it pending)
-                    if self.options.failed_tests:
-                        tester.setStatus(job['status'], tester.bucket_pending)
-                    else:
-                        tester.setStatus(job['status'], tester.bucket_fail)
-
-            # PASS
-            elif job['did_pass']:
-                tester.setStatus(job['status'], tester.bucket_success)
-
-            # DELETED
-            elif job['is_deleted']:
-                tester.setStatus(job['status'], tester.bucket_deleted)
-
-            # SILENT
-            elif job['is_silent']:
-                tester.setStatus(job['status'], tester.bucket_silent)
+            # Create a status_bucket according to what is stored in the json file and assign that status to
+            # this tester
+            bucket = self.createStatusBucket(job['status_bucket'])
+            tester.setStatus(job['status_message'], bucket)
 
             # Reverse the dependency arrows
             # NOTE: I think this is right. Seems to work. Looks too simple to me
@@ -290,7 +259,7 @@ class QueueManager(Scheduler):
             else:
                 tester.specs['prereq'] = []
 
-        # Continue to support checkRunnable (--re, --failed-tests, etc)
+        # ask checkRunnable if we can run this test
         return tester.checkRunnableBase(self.options, checks, test_list)
 
     # Augment base queue paramaters with tester params
@@ -311,9 +280,8 @@ class QueueManager(Scheduler):
         # Set working directory
         template_queue['working_dir'] = self.getWorkingDir(tester)
 
-        # We need to modify tester's test_dir to align with newly created directory
-        # the Queueing system is about to create. This is so when we run
-        # tester.processResultsCommand, the correct paths are returned
+        # We need to modify tester's test_dir to align with newly created directory the Queueing system is about
+        # to create. This is so when we run tester.processResultsCommand, the correct paths are returned
         temp_test_dir = tester.getTestDir()
         tester.specs['test_dir'] = self.getWorkingDir(tester)
 
@@ -440,11 +408,6 @@ class QueueManager(Scheduler):
                         if ex.errno == errno.EEXIST: pass
                         else: raise Exception()
 
-        # Update the queue file based on the information we already know. We _could_ wait
-        # until we launch the job, but on the off chance the user hits ctrl-c, we have the
-        # ability to run --queue-cleanup, and delete this mess we just created
-        self.updateTesterStatus(tester)
-
         # return to the previous directory
         os.chdir(current_pwd)
 
@@ -474,6 +437,9 @@ class QueueManager(Scheduler):
             # Create and copy all the files/directories this test requires
             self.copyFiles(template_queue, tester)
 
+            # Update the queue file
+            self.updateTesterStatus(tester)
+
             # Call the derived method to build the queue batch script
             self.prepareQueueScriptBase(template_queue, tester)
 
@@ -489,31 +455,62 @@ class QueueManager(Scheduler):
         os.chdir(self.getWorkingDir(tester))
 
         # We're good up to this point? Then launch the job!
-        # NOTE: We do not want a slot check because we are submitting job
-        # to a third party queue.
+        # NOTE: We do not want a slot check because we are submitting job to a third party queue.
         self.launchJob(tester, command, slot_check=False)
 
         # Return to the previous directory
         os.chdir(current_pwd)
 
-    ## Handle a test which has previously run
+    # A method to alter test_dir to reflect sub directory creation, and allow the tester to perform its
+    # processResults method
+    def processResults(self, tester):
+        job = self.getData(self.getJobName(tester), std_out=True, test_dir=True, exit_code=True)
+        with open(job['std_out'], 'r') as output_file:
+            outfile = output_file.read()
+
+        # Alter test_dir to reflect sub-directory creation
+        original_testdir = tester.getTestDir()
+        tester.specs['test_dir'] = job['test_dir']
+
+        if tester.hasRedirectedOutput(self.options):
+            outfile += self.getOutputFromFiles(tester)
+
+        # Allow the tester to verify its own output and set the status
+        output = tester.processResults(tester.specs['moose_dir'], job['exit_code'], self.options, outfile)
+
+        # reset the original test_dir
+        tester.specs['test_dir'] = original_testdir
+
+        return output
+
+    ## Handle a test which has previously ran
     def handlePreviousStatus(self, tester):
         finished_job = self.getData(self.getJobName(tester), std_out=True, test_dir=True, exit_code=True, did_pass=True)
         output = ''
 
-        # If the job is finished and did not pass or we want to read the perflog
-        # open the std_out file and read in its contents as output
-        if not finished_job['did_pass'] or self.options.timing:
+        # If we want to read the perflog open the std_out file and read in its contents as output
+        if self.options.timing and finished_job['did_pass']:
             with open(finished_job['std_out'], 'r') as f:
                 output = self.readOutput(f)
 
-        # The job is finished and it did not pass
+        # The job previously finished with a failure (re-run the processResults method)
         if not finished_job['did_pass']:
-            self.skipped_jobs.add(tester.getTestName())
+            output = self.processResults(tester)
+
+            # I suppose the test _might_ succeed this time
+            if tester.didFail():
+                self.skipped_jobs.add(tester.getTestName())
+            else:
+                self.finished_jobs.add(tester.getTestName())
 
         # The job finished
         else:
             self.finished_jobs.add(tester.getTestName())
+
+        # Update the queue_data with possibly updated statuses/reasons
+        self.updateTesterStatus(tester)
+
+        # return to the TestHarness and print the results
         self.harness.testOutputAndFinish(tester, finished_job['exit_code'], output)
 
     ## Return control to the test harness by finalizing the test output and calling the callback
