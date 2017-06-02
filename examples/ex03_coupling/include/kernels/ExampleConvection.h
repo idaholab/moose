@@ -29,11 +29,12 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
-
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
 private:
   const VariableGradient & _grad_some_variable;
+  unsigned _some_variable_id;
 };
 
 #endif // EXAMPLECONVECTION_H

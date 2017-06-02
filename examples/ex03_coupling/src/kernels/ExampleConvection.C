@@ -26,7 +26,9 @@ validParams<ExampleConvection>()
 }
 
 ExampleConvection::ExampleConvection(const InputParameters & parameters)
-  : Kernel(parameters), _grad_some_variable(coupledGradient("some_variable"))
+  : Kernel(parameters),
+    _grad_some_variable(coupledGradient("some_variable")),
+    _some_variable_id(coupled("some_variable"))
 {
 }
 
@@ -40,4 +42,14 @@ Real
 ExampleConvection::computeQpJacobian()
 {
   return _test[_i][_qp] * (_grad_some_variable[_qp] * _grad_phi[_j][_qp]);
+}
+
+Real
+ExampleConvection::computeQpOffDiagJacobian(unsigned jvar)
+{
+  if (jvar == _some_variable_id)
+    return _test[_i][_qp] * (_grad_phi[_j][_qp] * _grad_u[_qp]);
+
+  else
+    return 0.;
 }
