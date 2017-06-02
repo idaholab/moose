@@ -78,7 +78,7 @@
   dt = 0.1
   l_max_its = 50
   nl_max_its = 20
-  petsc_options = '-snes -pc_factor_shift_nonzero -ksp_monitor'
+  petsc_options = '-pc_factor_shift_nonzero'
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   l_tol = 1e-04

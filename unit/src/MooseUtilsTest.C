@@ -36,3 +36,23 @@ TEST(MooseUtils, underscoreToCamelCase)
   EXPECT_EQ(MooseUtils::underscoreToCamelCase("_foo_bar", true), "FooBar");
   EXPECT_EQ(MooseUtils::underscoreToCamelCase("_foo_bar_", true), "FooBar");
 }
+
+TEST(MooseUtils, toUpper)
+{
+  std::string specs("RotaryGirder");
+  EXPECT_EQ(MooseUtils::toUpper(specs), "ROTARYGIRDER");
+}
+
+TEST(MooseUtils, join)
+{
+  {
+    std::vector<std::string> names = {"A", "B", "D", "C"};
+    EXPECT_EQ(MooseUtils::join(names.begin(), names.end(), ","), "A,B,D,C");
+    EXPECT_EQ(MooseUtils::join(names.begin(), names.end(), ", "), "A, B, D, C");
+  }
+  {
+    std::set<std::string> names = {"A", "B", "D", "C"};
+    EXPECT_EQ(MooseUtils::join(names.begin(), names.end(), ","), "A,B,C,D");
+    EXPECT_EQ(MooseUtils::join(names.begin(), names.end(), "; "), "A; B; C; D");
+  }
+}

@@ -67,8 +67,8 @@ public:
    * Cast operators to make this object behave as value_types and std::string
    * these methods can be used so that this class behaves more like a normal value_type enumeration
    */
-  operator int() const { return _current_id; }
-  operator std::string() const { return _current_name_preserved; }
+  operator int() const { return _current.id(); }
+  operator std::string() const { return _current.rawName(); }
 
   /**
    * Comparison operators for comparing with character constants, MooseEnums
@@ -100,7 +100,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const override { return _current_id > INVALID_ID; }
+  virtual bool isValid() const override { return _current.id() > INVALID_ID; }
 
   // InputParameters is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -109,7 +109,7 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj)
   {
-    out << obj._current_name_preserved;
+    out << obj._current.rawName();
     return out;
   }
 
@@ -134,11 +134,7 @@ private:
   MooseEnum(const MooseEnumBase & other_enum);
 
   /// The current id
-  int _current_id;
-
-  /// The corresponding name
-  std::string _current_name;
-  std::string _current_name_preserved;
+  MooseEnumItem _current;
 };
 
 template <typename T>
@@ -149,7 +145,7 @@ MooseEnum::getEnum() const
   static_assert(std::is_enum<T>::value == true,
                 "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
 #endif
-  return static_cast<T>(_current_id);
+  return static_cast<T>(_current.id());
 }
 
 #endif // MOOSEENUM_H

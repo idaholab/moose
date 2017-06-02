@@ -28,6 +28,8 @@
     type = 'RunApp'
     input = 'IGNORED'
     absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
+    # suppress error checking, the word 'ERROR' shows up in the yaml dump
+    errors = 'zzzzz zzzzz'
     cli_args = '--yaml /Executioner'
   [../]
 

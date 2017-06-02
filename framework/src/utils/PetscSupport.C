@@ -235,7 +235,7 @@ petscSetOptions(FEProblemBase & problem)
 
   // Add any additional options specified in the input file
   for (const auto & flag : petsc.flags)
-    setSinglePetscOption(flag.c_str());
+    setSinglePetscOption(flag.rawName().c_str());
   for (unsigned int i = 0; i < petsc.inames.size(); ++i)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
@@ -624,7 +624,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 
       if (help_string != "")
         mooseWarning("The PETSc option ",
-                     option,
+                     std::string(option),
                      " should not be used directly in a MOOSE input file. ",
                      help_string);
     }

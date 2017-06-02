@@ -17,12 +17,14 @@
 // MOOSE includes
 #include "HashMap.h"
 #include "MaterialProperty.h" // MaterialProperties
+#include "InfixIterator.h"
 
 // C++ includes
 #include <string>
 #include <vector>
 #include <map>
 #include <list>
+#include <iterator>
 
 // Forward Declarations
 namespace libMesh
@@ -382,6 +384,23 @@ tokenizeAndConvert(const std::string & str,
       return false;
   }
   return true;
+}
+
+/**
+ * Convert supplied string to upper case.
+ */
+std::string toUpper(std::string name);
+
+/**
+ * Join strings similar to python join.
+ */
+template <typename InputIterator>
+std::string
+join(InputIterator begin, InputIterator end, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(begin, end, infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
 }
 }
 

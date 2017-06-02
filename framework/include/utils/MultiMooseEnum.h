@@ -19,7 +19,7 @@
 #include "MooseEnumBase.h"
 
 // C++ includes
-#include <set>
+#include <vector>
 
 // Forward declarations
 namespace libMesh
@@ -27,7 +27,7 @@ namespace libMesh
 class Parameters;
 }
 
-typedef std::set<std::string>::const_iterator MooseEnumIterator;
+typedef std::vector<MooseEnumItem>::const_iterator MooseEnumIterator;
 
 /**
  * This is a "smart" enum class intended to replace many of the
@@ -88,6 +88,7 @@ public:
   bool contains(int value) const;
   bool contains(unsigned short value) const;
   bool contains(const MultiMooseEnum & value) const;
+  bool contains(const MooseEnumItem & value) const;
   ///@}
 
   ///@{
@@ -146,8 +147,8 @@ public:
    * Returns a begin/end iterator to all of the items in the enum. Items will
    * always be capitalized.
    */
-  MooseEnumIterator begin() const { return _current_names.begin(); }
-  MooseEnumIterator end() const { return _current_names.end(); }
+  MooseEnumIterator begin() const { return _current.begin(); }
+  MooseEnumIterator end() const { return _current.end(); }
   ///@}
 
   /**
@@ -169,7 +170,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const override { return !_current_ids.empty(); }
+  virtual bool isValid() const override { return !_current.empty(); }
 
   // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -207,11 +208,7 @@ private:
   void remove(InputIterator first, InputIterator last);
 
   /// The current id
-  std::vector<int> _current_ids;
-
-  /// The corresponding name
-  std::set<std::string> _current_names;
-  std::vector<std::string> _current_names_preserved;
+  std::vector<MooseEnumItem> _current;
 };
 
 #endif // MULTIMOOSEENUM_H

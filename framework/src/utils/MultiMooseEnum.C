@@ -33,10 +33,7 @@ MultiMooseEnum::MultiMooseEnum(std::string names,
 }
 
 MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
-  : MooseEnumBase(other_enum),
-    _current_ids(other_enum._current_ids),
-    _current_names(other_enum._current_names),
-    _current_names_preserved(other_enum._current_names_preserved)
+  : MooseEnumBase(other_enum), _current(other_enum._current)
 {
 }
 
@@ -61,12 +58,7 @@ MultiMooseEnum::operator==(const MultiMooseEnum & value) const
     return false;
 
   // Return false if this enum does not contain an item from the other
-  for (const auto & me : value)
-    if (!contains(me))
-      return false;
-
-  // If you get here, they must be the same
-  return true;
+  return (_current == value._current) && (_items == value._items);
 }
 
 bool
@@ -78,34 +70,43 @@ MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const std::string & value) const
 {
-  std::string upper(value);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  return std::find(_current_names.begin(), _current_names.end(), upper) != _current_names.end();
+  std::string upper(MooseUtils::toUpper(value));
+  return std::find_if(_current.begin(), _current.end(), [upper](MooseEnumItem const & item) {
+           return item.name() == upper;
+         }) != _current.end();
 }
 
 bool
 MultiMooseEnum::contains(int value) const
 {
-  return std::find(_current_ids.begin(), _current_ids.end(), value) != _current_ids.end();
+  return std::find_if(_current.begin(), _current.end(), [value](MooseEnumItem const & item) {
+           return item.id() == value;
+         }) != _current.end();
 }
 
 bool
 MultiMooseEnum::contains(unsigned short value) const
 {
-  return std::find(_current_ids.begin(), _current_ids.end(), value) != _current_ids.end();
+  return std::find_if(_current.begin(), _current.end(), [value](MooseEnumItem const & item) {
+           return item.id() == value;
+         }) != _current.end();
 }
 
 bool
 MultiMooseEnum::contains(const MultiMooseEnum & value) const
 {
-  std::set<int> lookup_set(_current_ids.begin(), _current_ids.end());
-
-  for (const auto & id : value._current_ids)
-    if (lookup_set.find(id) == lookup_set.end())
+  for (const auto & item : value._current)
+    if (!contains(item))
       return false;
-
   return true;
+}
+
+bool
+MultiMooseEnum::contains(const MooseEnumItem & value) const
+{
+  return std::find_if(_current.begin(), _current.end(), [value](MooseEnumItem const & item) {
+           return item == value;
+         }) != _current.end();
 }
 
 MultiMooseEnum &
@@ -170,22 +171,21 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
 
 const std::string & MultiMooseEnum::operator[](unsigned int i) const
 {
-  mooseAssert(i < _current_names_preserved.size(),
-              "Access out of bounds in MultiMooseEnum (i: " << i << " size: "
-                                                            << _current_names_preserved.size()
+  mooseAssert(i < _current.size(),
+              "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current.size()
                                                             << ")");
 
-  return _current_names_preserved[i];
+  return _current[i].rawName();
 }
 
 unsigned int
 MultiMooseEnum::get(unsigned int i) const
 {
-  mooseAssert(i < _current_ids.size(),
-              "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_ids.size()
+  mooseAssert(i < _current.size(),
+              "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current.size()
                                                             << ")");
 
-  return _current_ids[i];
+  return _current[i].id();
 }
 
 template <typename InputIterator>
@@ -195,37 +195,29 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
   if (!append)
     clear();
 
-  std::copy(first, last, std::back_inserter(_current_names_preserved));
   for (InputIterator it = first; it != last; ++it)
   {
-    std::string upper(*it);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
+    std::string upper(MooseUtils::toUpper(*it));
     checkDeprecatedBase(upper);
+    std::set<MooseEnumItem>::const_iterator iter = find(upper);
 
-    _current_names.insert(upper);
-
-    if (std::find(_names.begin(), _names.end(), upper) == _names.end())
+    if (iter == _items.end())
     {
       if (_out_of_range_index == 0) // Are out of range values allowed?
         mooseError("Invalid option \"",
                    upper,
                    "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"",
-                   _raw_names,
+                   getRawNames(),
                    "\".");
       else
       {
-        // Allow values assigned outside of the enumeration range
-        _names.push_back(upper);
-
-        int current_id = _out_of_range_index++;
-        _name_to_id[upper] = current_id;
-
-        _current_ids.push_back(current_id);
+        MooseEnumItem created(upper, _out_of_range_index++);
+        _current.push_back(created);
+        _items.insert(created);
       }
     }
     else
-      _current_ids.push_back(_name_to_id[upper]);
+      _current.push_back(*iter);
   }
   return *this;
 }
@@ -235,57 +227,53 @@ void
 MultiMooseEnum::remove(InputIterator first, InputIterator last)
 {
   // Create a new list of enumerations by striping out the supplied values
-  std::set<std::string> current = _current_names;
   for (InputIterator it = first; it != last; ++it)
   {
     // Values stored as upper case
-    std::string upper(*it);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-    std::set<std::string>::iterator found = current.find(upper);
-    if (found != current.end())
-      current.erase(found);
+    std::string upper(MooseUtils::toUpper(*it));
+    std::vector<MooseEnumItem>::iterator iter =
+        std::find_if(_current.begin(), _current.end(), [upper](MooseEnumItem const & item) {
+          return item.name() == upper;
+        });
+    if (iter != _current.end())
+      _current.erase(iter);
   }
-
-  // Build the new enumeration
-  assign(current.begin(), current.end(), false);
 }
 
 void
 MultiMooseEnum::clear()
 {
-  _current_names.clear();
-  _current_names_preserved.clear();
-  _current_ids.clear();
+  _current.clear();
 }
 
 unsigned int
 MultiMooseEnum::size() const
 {
-  mooseAssert(_current_ids.size() == _current_names_preserved.size(),
-              "Internal inconsistency between id and name vectors in MultiMooseEnum");
-  return _current_ids.size();
+  return _current.size();
 }
 
 unsigned int
 MultiMooseEnum::unique_items_size() const
 {
-  std::set<int> unique_ids(_current_ids.begin(), _current_ids.end());
+  std::set<MooseEnumItem> unique_ids(_current.begin(), _current.end());
   return unique_ids.size();
 }
 
 void
 MultiMooseEnum::checkDeprecated() const
 {
-  for (const auto & name : _current_names)
-    checkDeprecatedBase(name);
+  for (const auto & item : _current)
+    checkDeprecatedBase(item.name());
 }
 
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  std::copy(obj._current_names.begin(),
-            obj._current_names.end(),
-            infix_ostream_iterator<std::string>(out, " "));
+  if (obj._current.size() > 0)
+  {
+    out << obj._current[0].rawName();
+    for (std::size_t i = 1; i < obj._current.size(); ++i)
+      out << " " << obj._current[i].rawName();
+  }
   return out;
 }

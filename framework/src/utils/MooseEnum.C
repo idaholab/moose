@@ -24,16 +24,13 @@
 #include <iostream>
 
 MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out_of_range)
-  : MooseEnumBase(names, allow_out_of_range)
+  : MooseEnumBase(names, allow_out_of_range), _current("", INVALID_ID)
 {
   *this = default_name;
 }
 
 MooseEnum::MooseEnum(const MooseEnum & other_enum)
-  : MooseEnumBase(other_enum),
-    _current_id(other_enum._current_id),
-    _current_name(other_enum._current_name),
-    _current_name_preserved(other_enum._current_name_preserved)
+  : MooseEnumBase(other_enum), _current(other_enum._current)
 {
 }
 
@@ -46,46 +43,40 @@ MooseEnum::withNamesFrom(const MooseEnumBase & other_enum)
 /**
  * Private constuctor for use by libmesh::Parameters
  */
-MooseEnum::MooseEnum() : _current_id(INVALID_ID) {}
+MooseEnum::MooseEnum() : _current("", INVALID_ID) {}
 
-MooseEnum::MooseEnum(const MooseEnumBase & other_enum) : MooseEnumBase(other_enum) {}
+MooseEnum::MooseEnum(const MooseEnumBase & other_enum)
+  : MooseEnumBase(other_enum), _current("", INVALID_ID)
+{
+}
 
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {
   if (name == "")
   {
-    _current_id = INVALID_ID;
-    _current_name = "";
-    _current_name_preserved = "";
+    _current = MooseEnumItem("", INVALID_ID);
     return *this;
   }
 
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  _current_name = upper;
-  _current_name_preserved = name;
-
+  std::string upper(MooseUtils::toUpper(name));
   checkDeprecatedBase(upper);
 
-  if (std::find(_names.begin(), _names.end(), upper) == _names.end())
+  std::set<MooseEnumItem>::const_iterator iter = find(upper);
+  if (iter == _items.end())
   {
     if (_out_of_range_index == 0) // Are out of range values allowed?
       mooseError(std::string("Invalid option \"") + upper +
-                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names +
+                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                  "\".");
     else
     {
-      // Allow values assigned outside of the enumeration range
-      _names.push_back(upper);
-
-      _current_id = _out_of_range_index++;
-      _name_to_id[upper] = _current_id;
+      _current = MooseEnumItem(name, _out_of_range_index++);
+      _items.insert(_current);
     }
   }
   else
-    _current_id = _name_to_id[upper];
+    _current = *iter;
 
   return *this;
 }
@@ -93,15 +84,15 @@ MooseEnum::operator=(const std::string & name)
 bool
 MooseEnum::operator==(const char * name) const
 {
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  std::string upper(MooseUtils::toUpper(name));
+  std::set<MooseEnumItem>::const_iterator iter = find(upper);
 
-  mooseAssert(
-      _out_of_range_index != 0 || std::find(_names.begin(), _names.end(), upper) != _names.end(),
-      std::string("Invalid string comparison \"") + upper +
-          "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
+  mooseAssert(_out_of_range_index != 0 || iter != _items.end(),
+              std::string("Invalid string comparison \"") + upper +
+                  "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
+                  "\".");
 
-  return _current_name == upper;
+  return _current == upper;
 }
 
 bool
@@ -113,41 +104,41 @@ MooseEnum::operator!=(const char * name) const
 bool
 MooseEnum::operator==(int value) const
 {
-  return value == _current_id;
+  return value == _current;
 }
 
 bool
 MooseEnum::operator!=(int value) const
 {
-  return value != _current_id;
+  return value != _current;
 }
 
 bool
 MooseEnum::operator==(unsigned short value) const
 {
-  return value == _current_id;
+  return value == _current;
 }
 
 bool
 MooseEnum::operator!=(unsigned short value) const
 {
-  return value != _current_id;
+  return value != _current;
 }
 
 bool
 MooseEnum::operator==(const MooseEnum & value) const
 {
-  return value._current_name == _current_name;
+  return value._current == _current;
 }
 
 bool
 MooseEnum::operator!=(const MooseEnum & value) const
 {
-  return value._current_name != _current_name;
+  return value._current != _current;
 }
 
 void
 MooseEnum::checkDeprecated() const
 {
-  checkDeprecatedBase(_current_name);
+  checkDeprecatedBase(_current.name());
 }

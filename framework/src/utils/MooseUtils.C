@@ -553,4 +553,11 @@ wildCardMatch(std::string name, std::string search_string)
     return false;
 }
 
+std::string
+toUpper(std::string name)
+{
+  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+  return name;
+}
+
 } // MooseUtils namespace
