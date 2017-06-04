@@ -666,6 +666,9 @@ FEProblemBase::initialSetup()
   _to_multi_app_transfers.initialSetup();
   _from_multi_app_transfers.initialSetup();
 
+  // Control Logic
+  executeControls(EXEC_INITIAL);
+
   if (!_app.isRecovering())
   {
     _current_execute_on_flag = EXEC_INITIAL;
@@ -726,9 +729,6 @@ FEProblemBase::initialSetup()
                                      _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
-
-  // Control Logic
-  executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -2720,6 +2720,9 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
 
+  // Controls
+  executeControls(exec_type);
+
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
 
@@ -2728,9 +2731,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Post-aux UserObjects
   computeUserObjects(exec_type, Moose::POST_AUX);
-
-  // Controls
-  executeControls(exec_type);
 
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
@@ -3884,6 +3884,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 
   execMultiApps(EXEC_LINEAR);
 
+  executeControls(EXEC_LINEAR);
+
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
@@ -3919,8 +3921,6 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
   }
 
   computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
-
-  executeControls(EXEC_LINEAR);
 
   _current_execute_on_flag = EXEC_NONE;
 
@@ -3961,6 +3961,8 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
     execTransfers(EXEC_NONLINEAR);
     execMultiApps(EXEC_NONLINEAR);
 
+    executeControls(EXEC_NONLINEAR);
+
     for (unsigned int tid = 0; tid < n_threads; tid++)
       reinitScalars(tid);
 
@@ -3980,8 +3982,6 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
     _aux->compute(EXEC_NONLINEAR);
 
     computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
-
-    executeControls(EXEC_NONLINEAR);
 
     _app.getOutputWarehouse().jacobianSetup();
 
