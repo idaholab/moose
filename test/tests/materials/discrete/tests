@@ -26,7 +26,7 @@
     # Test warning message when trying getting a Material object that has 'compute = true'
     type = 'RunException'
     input = 'recompute_warning.i'
-    expect_err = "You are retrieving a Material object \(recompute_props\), but its compute flag is not set to true"
+    expect_err = "You are retrieving a Material object \(recompute_props\), but its compute flag is set to true"
     cli_args = '--error'
   [../]
 
