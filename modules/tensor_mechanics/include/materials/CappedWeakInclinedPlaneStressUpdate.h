@@ -30,6 +30,11 @@ class CappedWeakInclinedPlaneStressUpdate : public CappedWeakPlaneStressUpdate
 public:
   CappedWeakInclinedPlaneStressUpdate(const InputParameters & parameters);
 
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return false; }
+
 protected:
   virtual void initQpStatefulProperties() override;
 
