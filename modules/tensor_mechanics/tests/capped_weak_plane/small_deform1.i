@@ -127,34 +127,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f_shear]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./f_tensile]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./f_compressive]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./intnl_shear]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./intnl_tensile]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./iter]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./ls]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [AuxKernels]
@@ -202,85 +174,45 @@
   [../]
   [./strainp_xx]
     type = RankTwoAux
-    rank_two_tensor = plastic_strain
+    rank_two_tensor = combined_inelastic_strain
     variable = strainp_xx
     index_i = 0
     index_j = 0
   [../]
   [./strainp_xy]
     type = RankTwoAux
-    rank_two_tensor = plastic_strain
+    rank_two_tensor = combined_inelastic_strain
     variable = strainp_xy
     index_i = 0
     index_j = 1
   [../]
   [./strainp_xz]
     type = RankTwoAux
-    rank_two_tensor = plastic_strain
+    rank_two_tensor = combined_inelastic_strain
     variable = strainp_xz
     index_i = 0
     index_j = 2
   [../]
   [./strainp_yy]
     type = RankTwoAux
-    rank_two_tensor = plastic_strain
+    rank_two_tensor = combined_inelastic_strain
     variable = strainp_yy
     index_i = 1
     index_j = 1
   [../]
   [./strainp_yz]
     type = RankTwoAux
-    rank_two_tensor = plastic_strain
+    rank_two_tensor = combined_inelastic_strain
     variable = strainp_yz
     index_i = 1
     index_j = 2
   [../]
   [./strainp_zz]
     type = RankTwoAux
-    rank_two_tensor = plastic_strain
+    rank_two_tensor = combined_inelastic_strain
     variable = strainp_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./f_shear]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 0
-    variable = f_shear
-  [../]
-  [./f_tensile]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 1
-    variable = f_tensile
-  [../]
-  [./f_compressive]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 2
-    variable = f_compressive
-  [../]
-  [./intnl_shear]
-    type = MaterialStdVectorAux
-    property = plastic_internal_parameter
-    index = 0
-    variable = intnl_shear
-  [../]
-  [./intnl_tensile]
-    type = MaterialStdVectorAux
-    property = plastic_internal_parameter
-    index = 1
-    variable = intnl_tensile
-  [../]
-  [./iter]
-    type = MaterialRealAux
-    property = plastic_NR_iterations
-    variable = iter
-  [../]
-  [./ls]
-    type = MaterialRealAux
-    property = plastic_linesearch_needed
-    variable = ls
   [../]
 []
 
@@ -345,65 +277,6 @@
     point = '0 0 0'
     variable = strainp_zz
   [../]
-  [./f_shear]
-    type = PointValue
-    point = '0 0 0'
-    variable = f_shear
-  [../]
-  [./f_tensile]
-    type = PointValue
-    point = '0 0 0'
-    variable = f_tensile
-  [../]
-  [./f_compressive]
-    type = PointValue
-    point = '0 0 0'
-    variable = f_compressive
-  [../]
-  [./intnl_shear]
-    type = PointValue
-    point = '0 0 0'
-    variable = intnl_shear
-  [../]
-  [./intnl_tensile]
-    type = PointValue
-    point = '0 0 0'
-    variable = intnl_tensile
-  [../]
-  [./iter]
-    type = PointValue
-    point = '0 0 0'
-    variable = iter
-  [../]
-  [./ls]
-    type = PointValue
-    point = '0 0 0'
-    variable = ls
-  [../]
-[]
-
-
-[UserObjects]
-  [./coh]
-    type = TensorMechanicsHardeningConstant
-    value = 30
-  [../]
-  [./tanphi]
-    type = TensorMechanicsHardeningConstant
-    value = 0.5
-  [../]
-  [./tanpsi]
-    type = TensorMechanicsHardeningConstant
-    value = 0.1111077
-  [../]
-  [./t_strength]
-    type = TensorMechanicsHardeningConstant
-    value = 30
-  [../]
-  [./c_strength]
-    type = TensorMechanicsHardeningConstant
-    value = 40
-  [../]
 []
 
 [Materials]
@@ -418,19 +291,8 @@
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
-    inelastic_models = stress
+    inelastic_models = ''
     perform_finite_strain_rotations = false
-  [../]
-  [./stress]
-    type = CappedWeakPlaneStressUpdate
-    cohesion = coh
-    tan_friction_angle = tanphi
-    tan_dilation_angle = tanpsi
-    tensile_strength = t_strength
-    compressive_strength = c_strength
-    tip_smoother = 0
-    smoothing_tol = 1
-    yield_function_tol = 1E-5
   [../]
 []
 
