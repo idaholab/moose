@@ -2119,7 +2119,7 @@ FEProblemBase::getMaterial(std::string name,
   if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
-                 "), but its compute flag is not set to true. This indicates that MOOSE is "
+                 "), but its compute flag is set to true. This indicates that MOOSE is "
                  "computing this property which may not be desired and produce un-expected "
                  "results.");
 
