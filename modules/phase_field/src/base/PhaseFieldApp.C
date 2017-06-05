@@ -147,6 +147,7 @@
 #include "KKSXeVacSolidMaterial.h"
 #include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
+#include "MixedSwitchingFunctionMaterial.h"
 #include "MultiBarrierFunctionMaterial.h"
 #include "ParsedMaterial.h"
 #include "PFCRFFMaterial.h"
@@ -426,6 +427,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
+  registerMaterial(MixedSwitchingFunctionMaterial);
   registerMaterial(MultiBarrierFunctionMaterial);
   registerMaterial(ParsedMaterial);
   registerMaterial(PFCRFFMaterial);
