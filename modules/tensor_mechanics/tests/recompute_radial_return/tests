@@ -79,7 +79,7 @@
                 Materials/isotropic_plasticity/yield_stress=50
                 Materials/elasticity_tensor/type=ComputeElasticityTensor Materials/elasticity_tensor/fill_method=symmetric21
                 Materials/elasticity_tensor/C_ijkl="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21"'
-    expect_err = 'Check to ensure that your Elasticity Tensor is truly Isotropic'
+    expect_err = 'Model isotropic_plasticity requires an isotropic elasticity tensor, but the one supplied is not guaranteed isotropic'
     prereq = 'isotropic_plasticity_error4'
   [../]
   [./affine_plasticity]

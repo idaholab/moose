@@ -60,6 +60,11 @@ class CappedDruckerPragerStressUpdate : public TwoParameterPlasticityStressUpdat
 public:
   CappedDruckerPragerStressUpdate(const InputParameters & parameters);
 
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return true; }
+
 protected:
   /// Hardening model for cohesion, friction and dilation angles
   const TensorMechanicsPlasticDruckerPrager & _dp;

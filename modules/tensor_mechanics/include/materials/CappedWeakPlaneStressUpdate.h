@@ -31,6 +31,11 @@ class CappedWeakPlaneStressUpdate : public TwoParameterPlasticityStressUpdate
 public:
   CappedWeakPlaneStressUpdate(const InputParameters & parameters);
 
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return false; }
+
 protected:
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _cohesion;

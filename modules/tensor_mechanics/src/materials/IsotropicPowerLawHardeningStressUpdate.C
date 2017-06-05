@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "IsotropicPowerLawHardeningStressUpdate.h"
+#include "ElasticityTensorTools.h"
 
 template <>
 InputParameters
@@ -46,7 +47,7 @@ void
 IsotropicPowerLawHardeningStressUpdate::computeStressInitialize(
     Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
+  _shear_modulus = ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
   computeYieldStress(elasticity_tensor);
 
   _effective_trial_stress = effectiveTrialStress;

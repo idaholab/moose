@@ -110,7 +110,12 @@ ComputeMultipleInelasticStress::initialSetup()
   {
     StressUpdateBase * rrr = dynamic_cast<StressUpdateBase *>(&getMaterialByName(models[i]));
     if (rrr)
+    {
       _models.push_back(rrr);
+      if (rrr->requiresIsotropicTensor() && !isElasticityTensorGuaranteedIsotropic())
+        mooseError("Model " + models[i] + " requires an isotropic elasticity tensor, but the one "
+                                          "supplied is not guaranteed isotropic");
+    }
     else
       mooseError("Model " + models[i] + " is not compatible with ComputeMultipleInelasticStress");
   }
