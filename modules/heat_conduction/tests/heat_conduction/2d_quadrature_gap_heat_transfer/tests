@@ -34,4 +34,10 @@
     input = 'moving.i'
     exodiff = 'moving_out.e'
   [../]
+
+  [./gap_conductivity_property]
+    type = 'Exodiff'
+    input = 'gap_conductivity_property.i'
+    exodiff = 'gap_conductivity_property_out.e'
+  [../]
 []
