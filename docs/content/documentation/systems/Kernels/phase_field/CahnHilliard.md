@@ -1,4 +1,3 @@
-
 # CahnHilliard
 !description /Kernels/CahnHilliard
 
@@ -10,8 +9,9 @@ $$
 
 $F$ is the free energy functional of the system that is defined as $F=\int f(c) d\Omega$.
 
-$\eta$ is the variable the kernel is acting on and $f$ is a free energy density
-provided by the [function material](../../introduction/FunctionMaterials) specified in `f_name`.
+$\eta$ is the variable the kernel is acting on, $M$ (`mob_name`) is a scalar (isotropic)
+mobility, and $f$ (`f_name`) is a free energy density
+provided by the [function material](../../introduction/FunctionMaterials).
 
 Note that this makes the assumption that $F$ is _not_ depending on $\nabla c$. The $\nabla c$ dependent terms
 that arise from the gradient interface energy are handled separately in the [`CHInterface`](/CHInterface.md) kernel.

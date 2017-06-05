@@ -11,15 +11,16 @@ InputParameters
 validParams<KKSMultiPhaseConcentration>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("KKS multi-phase model kernel to enforce (c = h1*c1 + h2*c2 + h3*c3 "
-                             "+.. The non-linear variable of this kernel is cn, the final phase "
-                             "concenration in the list.");
+  params.addClassDescription(
+      "KKS multi-phase model kernel to enforce $c = h_1c_1 + h_2c_2 + h_3c_3 + \\dots$"
+      ". The non-linear variable of this kernel is $c_n$, the final phase "
+      "concentration in the list.");
   params.addRequiredCoupledVar(
       "cj", "Array of phase concentrations cj. Place in same order as hj_names!");
   params.addRequiredCoupledVar("c", "Physical concentration");
   params.addCoupledVar("etas", "Order parameters for all phases");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
-      "hj_names", "Switching Function Materials that provide h(eta_1, eta_2,...)");
+      "hj_names", "Switching Function Materials that provide $h(\\eta_1, \\eta_2,\\dots)$");
   return params;
 }
 

@@ -1,5 +1,3 @@
-
-
 # MatAnisoDiffusion
 !description /Kernels/MatAnisoDiffusion
 
