@@ -31,10 +31,11 @@ MaterialDerivativeTestKernel::MaterialDerivativeTestKernel(const InputParameters
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _n_vars(_coupled_moose_vars.size()),
     _p(getMaterialProperty<Real>("material_property")),
-    _p_derivatives(_n_vars)
+    _p_off_diag_derivatives(_n_vars),
+    _p_diag_derivative(getMaterialPropertyDerivative<Real>("material_property", _var.name()))
 {
   for (unsigned int m = 0; m < _n_vars; ++m)
-    _p_derivatives[m] =
+    _p_off_diag_derivatives[m] =
         &getMaterialPropertyDerivative<Real>("material_property", _coupled_moose_vars[m]->name());
 }
 
@@ -47,7 +48,7 @@ MaterialDerivativeTestKernel::computeQpResidual()
 Real
 MaterialDerivativeTestKernel::computeQpJacobian()
 {
-  return computeQpOffDiagJacobian(_var.number());
+  return _p_diag_derivative[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
@@ -55,6 +56,5 @@ MaterialDerivativeTestKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable number corresponding to jvar
   const unsigned int cvar = mapJvarToCvar(jvar);
-
-  return (*_p_derivatives[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  return (*_p_off_diag_derivatives[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
