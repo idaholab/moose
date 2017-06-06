@@ -13,5 +13,6 @@
     recover = false
     mesh_mode = REPLICATED
     prereq = test
+    cli_args = 'Outputs/exodus=false'
   []
 []

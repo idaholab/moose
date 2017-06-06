@@ -55,27 +55,28 @@ class Tester(MooseObject):
         params.addParam('check_input',    False, "Check for correct input file syntax")
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
 
+        # Queueing specific (PBS/SLURM)
+        params.addParam('copy_files',         [], "Additional list of files/directories to copy when performing queueing operations")
+        params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
+        params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
+
         return params
 
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
         self.specs = params
 
-        # Initialize the status bucket class
+        # Initialize the status bucket class (this also sets the tester status to pending)
         self.status = util.TestStatus()
 
-        # Enumerate the buckets here so ther are easier to work with in the tester class
+        # Enumerate the buckets here so they are easier to work with in the tester class
         self.bucket_success = self.status.bucket_success
         self.bucket_fail    = self.status.bucket_fail
         self.bucket_diff    = self.status.bucket_diff
-        self.bucket_pbs     = self.status.bucket_pbs
         self.bucket_pending = self.status.bucket_pending
         self.bucket_deleted = self.status.bucket_deleted
         self.bucket_skip    = self.status.bucket_skip
         self.bucket_silent  = self.status.bucket_silent
-
-        # Initialize the tester with a pending status
-        self.setStatus('launched', self.bucket_pending)
 
         # Set the status message
         if self.specs['check_input']:
@@ -92,6 +93,12 @@ class Tester(MooseObject):
 
     def getPrereqs(self):
         return self.specs['prereq']
+
+    def getMooseDir(self):
+        return self.specs['moose_dir']
+
+    def getTestDir(self):
+        return self.specs['test_dir']
 
     # Method to return if the test can run
     def getRunnable(self):
@@ -145,6 +152,26 @@ class Tester(MooseObject):
     def didPass(self):
         return self.status.didPass()
 
+    # Method to check if this test has diff'd
+    def didDiff(self):
+        return self.status.didDiff()
+
+    # Method to check if this test is pending
+    def isPending(self):
+        return self.status.isPending()
+
+    # Method to check if this test is skipped
+    def isSkipped(self):
+        return self.status.isSkipped()
+
+    # Method to check if this test is silent
+    def isSilent(self):
+        return self.status.isSilent()
+
+    # Method to check if this test is deleted
+    def isDeleted(self):
+        return self.status.isDeleted()
+
     def getCheckInput(self):
         return self.check_input
 
@@ -186,6 +213,14 @@ class Tester(MooseObject):
 
     # This method is called to return the commands (list) used for processing results
     def processResultsCommand(self, moose_dir, options):
+        return []
+
+    # Return boolean on test having redirected output
+    def hasRedirectedOutput(self, options):
+        return False
+
+    # Return a list of redirected output
+    def getRedirectedOutputFiles(self, options):
         return []
 
     # This method will be called to process the results of running the test.  Any post-test
@@ -328,6 +363,10 @@ class Tester(MooseObject):
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
+
+        # Check for queueing
+        if not self.specs['queue_scheduler'] and options.checkStatus is not None:
+            reasons['queue_scheduler'] = 'NO QUEUE'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
