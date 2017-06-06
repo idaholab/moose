@@ -1,0 +1,13 @@
+[Tests]
+  [./consistent_specific_heat]
+    type = 'Exodiff'
+    input = 'consistent_specific_heat.i'
+    exodiff = 'consistent_specific_heat_out.e'
+  [../]
+
+  [./consistent_heat_capacity]
+    type = 'Exodiff'
+    input = 'consistent_heat_capacity.i'
+    exodiff = 'consistent_heat_capacity_out.e'
+  [../]
+[]
