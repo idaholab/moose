@@ -405,7 +405,7 @@
 [Outputs]
   exodus = true
   csv = true
-  file_base=creep_nl1_out
+  file_base=creep_nl1_sm_out
   [./console]
     type = Console
     perf_log = true
