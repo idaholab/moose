@@ -63,8 +63,6 @@ protected:
   virtual Real computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
   virtual void iterationFinalize(Real /*scalar*/) {}
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
-  virtual Real getIsotropicShearModulus(const RankFourTensor & elasticity_tensor);
-  virtual Real getIsotropicBulkModulus(const RankFourTensor & elasticity_tensor);
 
   const unsigned int _max_its;
   const bool _output_iteration_info;
