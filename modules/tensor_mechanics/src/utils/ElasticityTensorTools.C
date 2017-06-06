@@ -126,4 +126,16 @@ getIsotropicBulkModulus(const RankFourTensor & elasticity_tensor)
   const Real bulk_modulus = lambda + 2.0 * shear_modulus / 3.0;
   return bulk_modulus;
 }
+
+Real
+getIsotropicYoungsModulus(const RankFourTensor & elasticity_tensor)
+{
+  const Real shear_modulus = getIsotropicShearModulus(elasticity_tensor);
+  // dilatational modulus is defined as lambda plus two mu
+  const Real dilatational_modulus = elasticity_tensor(0, 0, 0, 0);
+  const Real lambda = dilatational_modulus - 2.0 * shear_modulus;
+  const Real youngs_modulus =
+      shear_modulus * (3.0 * lambda + 2.0 * shear_modulus) / (lambda + shear_modulus);
+  return youngs_modulus;
+}
 }
