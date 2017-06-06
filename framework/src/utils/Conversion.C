@@ -97,6 +97,8 @@ initEigenSolveType()
     eigen_solve_type_to_enum["ARNOLDI"] = EST_ARNOLDI;
     eigen_solve_type_to_enum["KRYLOVSCHUR"] = EST_KRYLOVSCHUR;
     eigen_solve_type_to_enum["JACOBI_DAVIDSON"] = EST_JACOBI_DAVIDSON;
+    eigen_solve_type_to_enum["NONLINEAR_POWER"] = EST_NONLINEAR_POWER;
+    eigen_solve_type_to_enum["MONOLITH_NEWTON"] = EST_MONOLITH_NEWTON;
   }
 }
 

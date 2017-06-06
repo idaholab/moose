@@ -25,6 +25,13 @@
 #include "InputParameters.h"
 #include "EigenProblem.h"
 #include "Conversion.h"
+#include "EigenProblem.h"
+#include "NonlinearSystemBase.h"
+#include "nlpower.h"
+#include "monolith.h"
+
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
 
 namespace Moose
 {
@@ -36,7 +43,8 @@ getSlepcValidParams()
 {
   InputParameters params = emptyInputParameters();
 
-  MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON");
+  MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
+                             "NONLINEAR_POWER  MONOLITH_NEWTON");
   params.addParam<MooseEnum>("eigen_solve_type",
                              eigen_solve_type,
                              "POWER: Power / Inverse / RQI "
@@ -44,6 +52,13 @@ getSlepcValidParams()
                              "KRYLOVSCHUR: Krylov-Schur "
                              "JACOBI_DAVIDSON: Jacobi-Davidson ");
   return params;
+}
+
+void
+registerEigenSolvers()
+{
+  EPSRegister("nlpower", EPSCreate_NLPower);
+  EPSRegister("monolith", EPSCreate_Monolith);
 }
 
 InputParameters
@@ -84,6 +99,8 @@ getSlepcEigenProblemValidParams()
                              "TARGET_REAL "
                              "TARGET_IMAGINARY "
                              "ALL_EIGENVALUES ");
+  // Register solvers as early as possible
+  registerEigenSolvers();
   return params;
 }
 
@@ -231,6 +248,14 @@ setEigenSolverOptions(SolverParams & solver_params)
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "jd");
       break;
 
+    case Moose::EST_NONLINEAR_POWER:
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "nlpower");
+      break;
+
+    case Moose::EST_MONOLITH_NEWTON:
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "monolith");
+      break;
+
     default:
       mooseError("Unknown eigen solver type \n");
   }
@@ -247,6 +272,103 @@ slepcSetOptions(FEProblemBase & problem)
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 
+void
+moose_petsc_snes_formJacobian(
+    SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, Moose::KernelType type)
+{
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+  PetscVector<Number> X_global(x, sys.comm());
+
+  // update local solution
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
+
+  PetscMatrix<Number> PC(pc, sys.comm());
+  PetscMatrix<Number> Jac(jac, sys.comm());
+
+  // Set the dof maps
+  PC.attach_dof_map(sys.get_dof_map());
+  Jac.attach_dof_map(sys.get_dof_map());
+
+  PC.zero();
+
+  eigen_problem->computeJacobian(*sys.current_local_solution.get(), PC, type);
+
+  PC.close();
+  if (jac != pc)
+    Jac.close();
+}
+
+#undef __FUNCT__
+#define __FUNCT__ "moose_slepc_eigen_formJacobianA"
+PetscErrorCode
+moose_slepc_eigen_formJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moose_petsc_snes_formJacobian(snes, x, jac, pc, ctx, Moose::KT_NONEIGEN);
+  PetscFunctionReturn(0);
+}
+
+#undef __FUNCT__
+#define __FUNCT__ "moose_slepc_eigen_formJacobianB"
+PetscErrorCode
+moose_slepc_eigen_formJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moose_petsc_snes_formJacobian(snes, x, jac, pc, ctx, Moose::KT_EIGEN);
+  PetscFunctionReturn(0);
+}
+
+void
+moose_petsc_snes_formFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, Moose::KernelType type)
+{
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+  PetscVector<Number> X_global(x, sys.comm()), R(r, sys.comm());
+
+  // update local solution
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
+
+  R.zero();
+
+  eigen_problem->computeResidualType(*sys.current_local_solution.get(), R, type);
+
+  R.close();
+}
+
+#undef __FUNCT__
+#define __FUNCT__ "moose_slepc_eigen_formFunctionA"
+PetscErrorCode
+moose_slepc_eigen_formFunctionA(SNES snes, Vec x, Vec r, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moose_petsc_snes_formFunction(snes, x, r, ctx, Moose::KT_NONEIGEN);
+  PetscFunctionReturn(0);
+}
+
+#undef __FUNCT__
+#define __FUNCT__ "moose_slepc_eigen_formFunctionB"
+PetscErrorCode
+moose_slepc_eigen_formFunctionB(SNES snes, Vec x, Vec r, void * ctx)
+{
+  PetscFunctionBegin;
+
+  moose_petsc_snes_formFunction(snes, x, r, ctx, Moose::KT_EIGEN);
+  PetscFunctionReturn(0);
+}
 } // namespace SlepcSupport
 } // namespace moose
 

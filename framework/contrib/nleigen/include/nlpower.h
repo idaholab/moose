@@ -12,36 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COUPLEDFORCE_H
-#define COUPLEDFORCE_H
+#ifndef NLPOWER_H
+#define NLPOWER_H
 
-#include "Kernel.h"
+#include "libmesh/libmesh_config.h"
 
-// Forward Declaration
-class CoupledForce;
+#if LIBMESH_HAVE_SLEPC
 
-template <>
-InputParameters validParams<CoupledForce>();
+#include <slepc/private/epsimpl.h> /*I "slepceps.h" I*/
 
-/**
- * Simple class to demonstrate off diagonal Jacobian contributions.
- */
-class CoupledForce : public Kernel
-{
-public:
-  CoupledForce(const InputParameters & parameters);
+PETSC_EXTERN PetscErrorCode EPSCreate_NLPower(EPS eps);
 
-protected:
-  virtual Real computeQpResidual() override;
-
-  virtual Real computeQpJacobian() override;
-
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-private:
-  unsigned int _v_var;
-  const VariableValue & _v;
-  Real _cof;
-};
-
-#endif // COUPLEDFORCE_H
+#endif
+#endif

@@ -42,4 +42,42 @@
     expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
     slepc = false
   [../]
+
+  [./nonlinear_power]
+    type = 'CSVDiff'
+    input = 'ne.i'
+    cli_args = 'Executioner/eigen_solve_type=NONLINEAR_POWER Outputs/file_base=nonlinear_power'
+    csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+
+  [./monolith_newton]
+    type = 'CSVDiff'
+    input = 'ne.i'
+    cli_args = 'Executioner/eigen_solve_type=MONOLITH_NEWTON Outputs/file_base=monolith_newton'
+    csvdiff = 'monolith_newton_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+
+  [./rank_deficient]
+    type = 'CSVDiff'
+    input = 'ne_deficient_b.i'
+    rel_err = 1e-2
+    csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+
+  [./real_nonlinear_eigenvalue]
+    type = 'CSVDiff'
+    input = 'ane.i'
+    csvdiff = 'ane_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+
+  [./coupled_nonlinear_eigenvalue]
+    type = 'CSVDiff'
+    input = 'ne_coupled.i'
+    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+    slepc = true
+  [../]
 []

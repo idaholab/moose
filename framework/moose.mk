@@ -27,6 +27,16 @@ gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
 gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 
+# nleigen
+#
+nleigen_DIR       := $(FRAMEWORK_DIR)/contrib/nleigen
+nleigen_srcfiles  := $(shell find $(nleigen_DIR) -name "*.c")
+nleigen_objects   := $(patsubst %.c, %.$(obj-suffix), $(nleigen_srcfiles))
+nleigen_LIB       := $(nleigen_DIR)/libnleigen-$(METHOD).la
+# dependency files
+nleigen_deps      := $(patsubst %.c, %.$(obj-suffix).d, $(nleigen_srcfiles))
+
+
 moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += "$(gtest_DIR)"
@@ -37,7 +47,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
-moose_LIBS := $(moose_LIB) $(pcre_LIB)
+moose_LIBS := $(moose_LIB) $(pcre_LIB) $(nleigen_LIB)
 
 # source files
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
@@ -93,10 +103,19 @@ $(gtest_LIB): $(gtest_objects)
 	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(gtest_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(gtest_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(gtest_LIB) $(gtest_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB)
+
+$(nleigen_LIB): $(nleigen_objects)
+	@echo "Linking Library "$@"..."
+	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
+		$(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(nleigen_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(nleigen_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(nleigen_LIB) $(nleigen_DIR)
+
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(nleigen_LIB)
+
+
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(nleigen_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ## Clang static analyzer
@@ -109,6 +128,7 @@ sa:: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/jsoncpp/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/nleigen/src/*.d)
 
 #
 # exodiff
@@ -141,9 +161,10 @@ $(exodiff_APP): $(exodiff_objects)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB)
-app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects)
-app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(nleigen_deps)
+app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(nleigen_deps)
+app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(nleigen_deps)
+
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:

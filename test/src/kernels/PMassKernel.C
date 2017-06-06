@@ -11,37 +11,31 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#ifndef COUPLEDFORCE_H
-#define COUPLEDFORCE_H
-
-#include "Kernel.h"
-
-// Forward Declaration
-class CoupledForce;
+#include "PMassKernel.h"
 
 template <>
-InputParameters validParams<CoupledForce>();
-
-/**
- * Simple class to demonstrate off diagonal Jacobian contributions.
- */
-class CoupledForce : public Kernel
+InputParameters
+validParams<PMassKernel>()
 {
-public:
-  CoupledForce(const InputParameters & parameters);
+  InputParameters params = validParams<Kernel>();
+  params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The exponent p");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual() override;
+PMassKernel::PMassKernel(const InputParameters & parameters)
+  : Kernel(parameters), _p(getParam<Real>("p") - 2.0)
+{
+}
 
-  virtual Real computeQpJacobian() override;
+Real
+PMassKernel::computeQpResidual()
+{
+  return std::pow(std::fabs(_u[_qp]), _p) * _u[_qp] * _test[_i][_qp];
+}
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-private:
-  unsigned int _v_var;
-  const VariableValue & _v;
-  Real _cof;
-};
-
-#endif // COUPLEDFORCE_H
+Real
+PMassKernel::computeQpJacobian()
+{
+  // Note: this jacobian evaluation is not exact when p!=2.
+  return std::pow(std::fabs(_phi[_j][_qp]), _p) * _phi[_j][_qp] * _test[_i][_qp];
+}

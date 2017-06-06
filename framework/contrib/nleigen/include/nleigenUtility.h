@@ -12,36 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COUPLEDFORCE_H
-#define COUPLEDFORCE_H
+#ifndef NLEIGENUTILITY_H
+#define NLEIGENUTILITY_H
 
-#include "Kernel.h"
+#include "libmesh/libmesh_config.h"
 
-// Forward Declaration
-class CoupledForce;
+#if LIBMESH_HAVE_SLEPC
 
-template <>
-InputParameters validParams<CoupledForce>();
+PETSC_EXTERN PetscErrorCode EPSGetOperators_Moose(EPS,Mat*,Mat*);
+PETSC_EXTERN PetscErrorCode EPSGetStartVector_Moose(EPS,PetscInt,PetscBool*);
+PETSC_EXTERN PetscErrorCode EPSCreateSubIS(Vec vec, IS *sub_is);
 
-/**
- * Simple class to demonstrate off diagonal Jacobian contributions.
- */
-class CoupledForce : public Kernel
-{
-public:
-  CoupledForce(const InputParameters & parameters);
-
-protected:
-  virtual Real computeQpResidual() override;
-
-  virtual Real computeQpJacobian() override;
-
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-private:
-  unsigned int _v_var;
-  const VariableValue & _v;
-  Real _cof;
-};
-
-#endif // COUPLEDFORCE_H
+#endif
+#endif
