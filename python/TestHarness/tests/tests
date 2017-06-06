@@ -55,4 +55,8 @@
     type = PythonUnitTest
     input = test_UnknownPrereq.py
   [../]
+  [./syntax]
+    type = PythonUnitTest
+    input = test_Syntax.py
+  [../]
 []
