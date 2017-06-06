@@ -127,14 +127,25 @@ ComputeMultipleInelasticStress::computeQpStress()
   RankTwoTensor elastic_strain_increment;
   RankTwoTensor combined_inelastic_strain_increment;
 
-  if (_num_models == 1 || _cycle_models)
-    updateQpStateSingleModel(
-        (_t_step - 1) % _num_models, elastic_strain_increment, combined_inelastic_strain_increment);
+  if (_num_models == 0)
+  {
+    _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
+    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+    if (_fe_problem.currentlyComputingJacobian())
+      _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  }
   else
-    updateQpState(elastic_strain_increment, combined_inelastic_strain_increment);
+  {
+    if (_num_models == 1 || _cycle_models)
+      updateQpStateSingleModel((_t_step - 1) % _num_models,
+                               elastic_strain_increment,
+                               combined_inelastic_strain_increment);
+    else
+      updateQpState(elastic_strain_increment, combined_inelastic_strain_increment);
 
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + elastic_strain_increment;
-  _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + combined_inelastic_strain_increment;
+    _elastic_strain[_qp] = _elastic_strain_old[_qp] + elastic_strain_increment;
+    _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + combined_inelastic_strain_increment;
+  }
 
   if (_perform_finite_strain_rotations)
   {
@@ -144,7 +155,7 @@ ComputeMultipleInelasticStress::computeQpStress()
     _inelastic_strain[_qp] =
         _rotation_increment[_qp] * _inelastic_strain[_qp] * _rotation_increment[_qp].transpose();
     if (!(isElasticityTensorGuaranteedIsotropic() &&
-          _tangent_operator_type == TangentOperatorEnum::elastic))
+          (_tangent_operator_type == TangentOperatorEnum::elastic || _num_models == 0)))
       _Jacobian_mult[_qp].rotate(_rotation_increment[_qp]);
   }
 }
