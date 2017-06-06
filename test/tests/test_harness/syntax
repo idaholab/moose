@@ -1,0 +1,7 @@
+[Tests]
+  [./syntax]
+    type = RunApp
+    input = good.i
+    check_input = true
+  [../]
+[]

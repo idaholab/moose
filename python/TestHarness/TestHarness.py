@@ -830,6 +830,7 @@ class TestHarness:
         parser.add_argument('--pbs-project', nargs=1, default='moose', help='Identify PBS job submission to specified project')
         parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
+        parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
