@@ -19,7 +19,9 @@
 #include "AnisoHeatConduction.h"
 #include "HeatConductionTimeDerivative.h"
 #include "HeatCapacityConductionTimeDerivative.h"
+#include "ConsistentHeatCapacityTimeDerivative.h"
 #include "SpecificHeatConductionTimeDerivative.h"
+#include "ConsistentSpecificHeatTimeDerivative.h"
 #include "HeatConductionMaterial.h"
 #include "AnisoHeatConductionMaterial.h"
 #include "HeatConductionBC.h"
@@ -83,8 +85,10 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(HeatSource);
   registerKernel(HomogenizedHeatConduction);
   registerKernel(HeatCapacityConductionTimeDerivative);
+  registerKernel(ConsistentHeatCapacityTimeDerivative);
   registerKernel(JouleHeatingSource);
   registerKernel(SpecificHeatConductionTimeDerivative);
+  registerKernel(ConsistentSpecificHeatTimeDerivative);
 
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
