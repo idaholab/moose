@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QIcon
 from PeacockMainWindow import PeacockMainWindow
-import argparse, os
+import argparse, os, sys
 from peacock.utils import qtutils
 
 class PeacockApp(object):
@@ -48,7 +48,7 @@ class PeacockApp(object):
 
         # issue #9255
         # For some unknown reason, the Execute tab doesn't work
-        # properly on low resolution displays (and some widgets
+        # properly on Mac low resolution displays (and some widgets
         # on the input tab ).
         # If you switch to the ExodusViewer tab then back again, it works.
         # If the Execute tab is created after the ExodusViewer
@@ -56,8 +56,9 @@ class PeacockApp(object):
         # tab is removed, it works. So there is some resizing issue
         # or something.
         # This ugly hack seems to fix the immediate problem.
-        for idx in range(self.main_widget.tab_plugin.count()):
-            self.main_widget.tab_plugin.setCurrentIndex(idx)
+        if sys.platform == 'darwin':
+            for idx in range(self.main_widget.tab_plugin.count()):
+                self.main_widget.tab_plugin.setCurrentIndex(idx)
 
         if parsed_args.vectorpostprocessors:
             self.main_widget.setTab(vpp_plugin.tabName())
