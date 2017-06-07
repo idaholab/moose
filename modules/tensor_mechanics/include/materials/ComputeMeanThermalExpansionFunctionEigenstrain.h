@@ -26,23 +26,25 @@ public:
 
 protected:
   /*
-   * Get the reference temperature for the mean thermal expansion relationship
+   * Get the reference temperature for the mean thermal expansion relationship.  This is
+   * the temperature at which \f$\delta L = 0\f$.
    */
   virtual Real referenceTemperature() override;
 
   /*
    * Compute the total mean thermal expansion relative to the reference temperature.
-   * This is the linear thermal strain (\delta L / L)
+   * This is the linear thermal strain divided by the temperature difference:
+   * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
    */
-  virtual Real meanThermalExpansion(const Real temperature) override;
+  virtual Real meanThermalExpansionCoefficient(const Real temperature) override;
 
   /*
-   * Compute the derivative of the total mean thermal expansion relative to the reference
-   * temperature wrt temperature.  This is for the linear thermal strain (\delta L / L)
+   * Compute the derivative of the total mean thermal expansion coefficient \f$\bar{\alpha}\f$
+   * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
    */
-  virtual Real meanThermalExpansionDerivative(const Real temperature) override;
+  virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) override;
 
   Function & _thermal_expansion_function;
 
