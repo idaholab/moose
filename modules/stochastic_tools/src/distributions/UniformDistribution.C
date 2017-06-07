@@ -27,11 +27,8 @@ validParams<UniformDistribution>()
 
 UniformDistribution::UniformDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    _lower_bound(getParam<Real>("lower_bound")),
-    _upper_bound(getParam<Real>("upper_bound"))
+    BasicUniformDistribution(getParam<Real>("lower_bound"),getParam<Real>("upper_bound"))
 {
-  if (_lower_bound >= _upper_bound)
-    mooseError("The lower bound is larger than the upper bound!");
 }
 
 UniformDistribution::~UniformDistribution() {}
@@ -39,28 +36,33 @@ UniformDistribution::~UniformDistribution() {}
 Real
 UniformDistribution::pdf(const Real & x)
 {
-  if (x < _lower_bound || x > _upper_bound)
-    return 0.0;
-  else
-    return 1.0 / (_upper_bound - _lower_bound);
+    return BasicUniformDistribution::pdf(x);
+  //if (x < _lower_bound || x > _upper_bound)
+  //  return 0.0;
+  //else
+  //  return 1.0 / (_upper_bound - _lower_bound);
 }
 
 Real
 UniformDistribution::cdf(const Real & x)
 {
-  if (x < _lower_bound)
-    return 0.0;
-  else if (x > _upper_bound)
-    return 1.0;
-  else
-    return (x - _lower_bound) / (_upper_bound - _lower_bound);
+    return BasicUniformDistribution::cdf(x);
+  //if (x < _lower_bound)
+  //  return 0.0;
+  //else if (x > _upper_bound)
+  //  return 1.0;
+  //else
+  //  return (x - _lower_bound) / (_upper_bound - _lower_bound);
 }
 
 Real
 UniformDistribution::inverseCdf(const Real & y)
 {
-  if (y < 0 || y > 1)
-    mooseError("The cdf_value provided is out of range 0 to 1.");
-  else
-    return y * (_upper_bound - _lower_bound) + _lower_bound;
+    return BasicUniformDistribution::inverseCdf(y);
+  //if (y < 0 || y > 1)
+  //  mooseError("The cdf_value provided is out of range 0 to 1.");
+  //else
+  //  return y * (_upper_bound - _lower_bound) + _lower_bound;
 }
+
+

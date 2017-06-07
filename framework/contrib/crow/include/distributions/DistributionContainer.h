@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "distribution.h"
+#include "BasicDistribution.h"
 #include "randomClass.h"
 
 class BasicDistribution;

@@ -17,7 +17,7 @@
 
 #include <string>
 #include <vector>
-#include "distribution.h"
+#include "BasicDistribution.h"
 #include "distributionFunctions.h"
 
 class DistributionBackend;

@@ -12,8 +12,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#ifndef DISTRIBUTION_H
-#define DISTRIBUTION_H
+#ifndef BASICDISTRIBUTION_H
+#define BASICDISTRIBUTION_H
 
 #include <map>
 #include <vector>
@@ -86,4 +86,4 @@ protected:
 
 
 
-#endif /* DISTRIBUTION_H */
+#endif /* BASICDISTRIBUTION_H */

@@ -16,6 +16,8 @@
 #define UNIFORMDISTRIBUTION_H
 
 #include "Distribution.h"
+//#include "distribution.h"
+#include "distribution_1D.h"
 
 class UniformDistribution;
 
@@ -24,7 +26,7 @@ InputParameters validParams<UniformDistribution>();
 /**
  * A class used to generate uniform distribution
  */
-class UniformDistribution : public Distribution
+class UniformDistribution : public Distribution, BasicUniformDistribution
 {
 public:
   UniformDistribution(const InputParameters & parameters);
@@ -35,9 +37,9 @@ protected:
   virtual Real cdf(const Real & x) override;
   virtual Real inverseCdf(const Real & y) override;
   /// The lower bound for the uniform distribution
-  const Real & _lower_bound;
+  //const Real & _lower_bound;
   /// The upper bound for the uniform distribution
-  const Real & _upper_bound;
+  //const Real & _upper_bound;
 };
 
 #endif /* UNIFORMDISTRIBUTION_H */
