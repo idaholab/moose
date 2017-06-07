@@ -42,7 +42,7 @@ class NodalBC : public BoundaryCondition,
 public:
   NodalBC(const InputParameters & parameters);
 
-  virtual void computeResidual(NumericVector<Number> & residual);
+  virtual void computeResidual(NumericVector<Number> & residual, Moose::KernelType kernel_type=Moose::KT_ALL);
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);
 

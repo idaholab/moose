@@ -36,9 +36,9 @@ NodalNormalBC::NodalNormalBC(const InputParameters & parameters)
 }
 
 void
-NodalNormalBC::computeResidual(NumericVector<Number> & residual)
+NodalNormalBC::computeResidual(NumericVector<Number> & residual, Moose::KernelType kernel_type)
 {
   _qp = 0;
   _normal = Point(_nx[_qp], _ny[_qp], _nz[_qp]);
-  NodalBC::computeResidual(residual);
+  NodalBC::computeResidual(residual, kernel_type);
 }

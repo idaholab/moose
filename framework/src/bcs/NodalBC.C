@@ -84,13 +84,15 @@ NodalBC::NodalBC(const InputParameters & parameters)
 }
 
 void
-NodalBC::computeResidual(NumericVector<Number> & residual)
+NodalBC::computeResidual(NumericVector<Number> & residual, Moose::KernelType kernel_type)
 {
   if (_var.isNodalDefined())
   {
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    Real res = computeQpResidual();
+    Real res = 0;
+    if (kernel_type != Moose::KT_EIGEN)
+      res = computeQpResidual();
     residual.set(dof_idx, res);
 
     if (_has_save_in)
