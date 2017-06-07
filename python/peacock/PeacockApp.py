@@ -46,6 +46,19 @@ class PeacockApp(object):
         pp_plugin = self.main_widget.tab_plugin.PostprocessorViewer
         vpp_plugin = self.main_widget.tab_plugin.VectorPostprocessorViewer
 
+        # issue #9255
+        # For some unknown reason, the Execute tab doesn't work
+        # properly on low resolution displays (and some widgets
+        # on the input tab ).
+        # If you switch to the ExodusViewer tab then back again, it works.
+        # If the Execute tab is created after the ExodusViewer
+        # tab, it works. If the VTKWindowPlugin of the ExodusViewer
+        # tab is removed, it works. So there is some resizing issue
+        # or something.
+        # This ugly hack seems to fix the immediate problem.
+        for idx in range(self.main_widget.tab_plugin.count()):
+            self.main_widget.tab_plugin.setCurrentIndex(idx)
+
         if parsed_args.vectorpostprocessors:
             self.main_widget.setTab(vpp_plugin.tabName())
         elif parsed_args.postprocessors:
