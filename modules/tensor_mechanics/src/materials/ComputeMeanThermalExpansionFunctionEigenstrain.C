@@ -39,13 +39,14 @@ ComputeMeanThermalExpansionFunctionEigenstrain::referenceTemperature()
 }
 
 Real
-ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansion(const Real temperature)
+ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
+    const Real temperature)
 {
   return _thermal_expansion_function.value(temperature, Point());
 }
 
 Real
-ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionDerivative(
+ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficientDerivative(
     const Real temperature)
 {
   return _thermal_expansion_function.timeDerivative(temperature, Point());
