@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from PyQt5.QtWidgets import QWidget, QFileDialog
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSignal, Qt, QFileSystemWatcher
 import os, shlex
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import WidgetUtils
@@ -122,6 +122,8 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self._recent_exe_menu = None
         self._recent_working_menu = None
         self._recent_args_menu = None
+        self._exe_watcher = QFileSystemWatcher()
+        self._exe_watcher.fileChanged.connect(self.setExecutablePath)
 
         self.setup()
 
@@ -140,6 +142,10 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
             self.exe_line.setText(app_path)
             self.executableInfoChanged.emit(app_info)
             self.executableChanged.emit(app_path)
+            files = self._exe_watcher.files()
+            if files:
+                self._exe_watcher.removePaths(files)
+            self._exe_watcher.addPath(app_path)
         self._updateRecentExe(app_path, not app_info.valid())
 
     def _chooseExecutable(self):
