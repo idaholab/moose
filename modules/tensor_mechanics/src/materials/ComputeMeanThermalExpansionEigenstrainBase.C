@@ -28,12 +28,12 @@ ComputeMeanThermalExpansionEigenstrainBase::ComputeMeanThermalExpansionEigenstra
 void
 ComputeMeanThermalExpansionEigenstrainBase::initialSetup()
 {
-  _alphabar_stress_free_temperature = meanThermalExpansion(_stress_free_temperature);
+  _alphabar_stress_free_temperature = meanThermalExpansionCoefficient(_stress_free_temperature);
   _thexp_stress_free_temperature =
       _alphabar_stress_free_temperature * (_stress_free_temperature - referenceTemperature());
 
   // Evaluate the derivative so it will error out early on if there are any issues with that
-  meanThermalExpansionDerivative(_stress_free_temperature);
+  meanThermalExpansionCoefficientDerivative(_stress_free_temperature);
 }
 
 void
@@ -44,21 +44,18 @@ ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_
 
   const Real reference_temperature = referenceTemperature();
   const Real & current_temp = _temperature[_qp];
-  const Real current_alphabar = meanThermalExpansion(current_temp);
+  const Real current_alphabar = meanThermalExpansionCoefficient(current_temp);
   const Real thexp_current_temp = current_alphabar * (current_temp - reference_temperature);
 
-  // Per the paper:  M. Niffenegger and K. Reichlin. The proper use of thermal expansion
-  // coefficients in
-  // finite element calculations. Nuclear Engineering and Design, 243:356-359, Feb. 2012,
-  // strictly speaking, thermal_strain should be divided by (1.0 + _thexp_stress_free_temperature)
-  // to account for the ratio of the length at the stress-free temperature to the length at the
-  // reference temperature.
-  // While this is very close to 1, we include it for completeness here.
+  // Per M. Niffenegger and K. Reichlin (2012), thermal_strain should be divided by
+  // (1.0 + _thexp_stress_free_temperature) to account for the ratio of the length at the
+  // stress-free temperature to the length at the reference temperature. It can be neglected
+  // because it is very close to 1, but we include it for completeness here.
 
   thermal_strain = (thexp_current_temp - _thexp_stress_free_temperature) /
                    (1.0 + _thexp_stress_free_temperature);
 
-  const Real dalphabar_dT = meanThermalExpansionDerivative(current_temp);
+  const Real dalphabar_dT = meanThermalExpansionCoefficientDerivative(current_temp);
   const Real numerator = dalphabar_dT * (current_temp - reference_temperature) + current_alphabar;
   const Real denominator =
       1.0 + _alphabar_stress_free_temperature * (_stress_free_temperature - reference_temperature);
