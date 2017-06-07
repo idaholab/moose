@@ -412,14 +412,12 @@ class QueueManager(Scheduler):
         os.chdir(current_pwd)
 
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
-    ## Note: slot_check should be False for launching jobs to a third party queueing system
-    def run(self, tester, command, recurse=True, slot_check=False):
-        # First see if any of the queued jobs can be run but only if recursion is allowed on this run
-        if recurse:
-            self.startReadyJobs(slot_check)
+    def run(self, tester):
+        # Pre-run preperation
+        tester.prepare(self.options)
 
         # The command the tester needs us to launch
-        tester_command = command
+        tester_command = tester.getCommand()
 
         # Build template_queue params based on Tester params
         template_queue = self.updateParamsBase(tester, tester_command)
@@ -473,7 +471,7 @@ class QueueManager(Scheduler):
         tester.specs['test_dir'] = job['test_dir']
 
         if tester.hasRedirectedOutput(self.options):
-            outfile += self.getOutputFromFiles(tester)
+            outfile += getOutputFromFiles(tester)
 
         # Allow the tester to verify its own output and set the status
         output = tester.processResults(tester.specs['moose_dir'], job['exit_code'], self.options, outfile)
@@ -491,7 +489,7 @@ class QueueManager(Scheduler):
         # If we want to read the perflog open the std_out file and read in its contents as output
         if self.options.timing and finished_job['did_pass']:
             with open(finished_job['std_out'], 'r') as f:
-                output = self.readOutput(f)
+                output = readOutput(f)
 
         # The job previously finished with a failure (re-run the processResults method)
         if not finished_job['did_pass']:
@@ -513,9 +511,43 @@ class QueueManager(Scheduler):
         # return to the TestHarness and print the results
         self.harness.testOutputAndFinish(tester, finished_job['exit_code'], output)
 
+
     ## Return control to the test harness by finalizing the test output and calling the callback
-    def returnToTestHarness(self, job_index, output):
+    def returnToTestHarness(self, tester):
         (p, command, tester, time, f, slots) = self.jobs[job_index]
+
+        log( 'Command done:    %s' % (command) )
+        output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + command + '\n'
+
+        if p.poll() == None: # process has not completed, it timed out
+            output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
+            f.close()
+            tester.setStatus('TIMEOUT', tester.bucket_fail)
+            if platform.system() == "Windows":
+                p.terminate()
+            else:
+                pgid = os.getpgid(p.pid)
+                os.killpg(pgid, SIGTERM)
+
+            self.harness.testOutputAndFinish(tester, Scheduler.TIMEOUT, output, time, clock())
+        else:
+            # Handle --dru-run
+            if self.options.dry_run:
+                tester.success_message = 'DRY RUN'
+                output += '\n'.join(tester.processResultsCommand(tester.getMooseDir(), self.options))
+
+                self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
+
+                # add this test result to the status thread pool
+                self.status_pool.put((tester, p.returncode, output, time, clock()))
+
+                if tester.didPass():
+                    self.finished_jobs.add(tester.getTestName())
+                else:
+                    self.skipped_jobs.add(tester.getTestName())
+            else:
+                # Allow derived schedulers to perform postprocessing on results
+                self.returnToTestHarness(output)
 
         # Get stdout from executed queue command
         queue_output = self.readOutput(f)
@@ -550,3 +582,11 @@ class QueueManager(Scheduler):
 
         # Update the queue_data with new test status reason
         self.updateTesterStatus(tester)
+
+## Static logging string for debugging
+LOG = []
+LOG_ON = False
+def log(msg):
+    if LOG_ON:
+        LOG.append(msg)
+        print msg

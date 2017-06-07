@@ -66,17 +66,23 @@ class Tester(MooseObject):
         MooseObject.__init__(self, name, params)
         self.specs = params
 
+        ### several variables needed when performing processResults
+        self.exit_code = None
+        self.start_time = None
+        self.std_outfile = None
+
         # Initialize the status bucket class (this also sets the tester status to pending)
         self.status = util.TestStatus()
 
         # Enumerate the buckets here so they are easier to work with in the tester class
-        self.bucket_success = self.status.bucket_success
-        self.bucket_fail    = self.status.bucket_fail
-        self.bucket_diff    = self.status.bucket_diff
-        self.bucket_pending = self.status.bucket_pending
-        self.bucket_deleted = self.status.bucket_deleted
-        self.bucket_skip    = self.status.bucket_skip
-        self.bucket_silent  = self.status.bucket_silent
+        self.bucket_success   = self.status.bucket_success
+        self.bucket_fail      = self.status.bucket_fail
+        self.bucket_diff      = self.status.bucket_diff
+        self.bucket_pending   = self.status.bucket_pending
+        self.bucket_finished  = self.status.bucket_finished
+        self.bucket_deleted   = self.status.bucket_deleted
+        self.bucket_skip      = self.status.bucket_skip
+        self.bucket_silent    = self.status.bucket_silent
 
         # Set the status message
         if self.specs['check_input']:
@@ -99,6 +105,15 @@ class Tester(MooseObject):
 
     def getTestDir(self):
         return self.specs['test_dir']
+
+    def getExitCode(self):
+        return self.exit_code
+
+    def getOutput(self):
+        return self.std_outfile
+
+    def getStartTime(self):
+        return self.start_time
 
     # Method to return if the test can run
     def getRunnable(self):
@@ -182,6 +197,10 @@ class Tester(MooseObject):
         elif mode == 'HEAVY':
             self.specs['max_time'] = self.specs['max_time'] * 6
 
+
+    # Return maxtime this test is allowed to run
+    def getMaxTime(self):
+        return self.specs['max_time']
 
     # Override this method to tell the harness whether or not this test should run.
     # This function should return a tuple (Boolean, reason)

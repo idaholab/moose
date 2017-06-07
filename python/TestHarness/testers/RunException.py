@@ -35,6 +35,10 @@ class RunException(RunApp):
         reason = ''
         specs = self.specs
 
+        if self.hasRedirectedOutput(options):
+            redirected_output = util.getOutputFromFiles(self, options)
+            output += redirected_output
+
         # Expected errors and assertions might do a lot of things including crash so we
         # will handle them seperately
         if specs.isValid('expect_err'):
@@ -51,6 +55,6 @@ class RunException(RunApp):
         if reason != '':
             self.setStatus(reason, self.bucket_fail)
         else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.getSuccessMessage(), self.bucket_success)
 
         return output

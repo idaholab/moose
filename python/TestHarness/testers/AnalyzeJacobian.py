@@ -1,7 +1,7 @@
 import re, os, sys
 import util
 from Tester import Tester
-from RunParallel import RunParallel # For TIMEOUT value
+from Scheduler import Scheduler # For TIMEOUT value
 
 class AnalyzeJacobian(Tester):
 
@@ -65,7 +65,7 @@ class AnalyzeJacobian(Tester):
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         if reason == '':
-            if retcode == RunParallel.TIMEOUT:
+            if retcode == Scheduler.TIMEOUT:
                 reason = 'TIMEOUT'
             elif retcode != 0 :
                 reason = 'CRASH'
@@ -74,6 +74,6 @@ class AnalyzeJacobian(Tester):
         if reason != '':
             self.setStatus(reason, self.bucket_fail)
         else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.getSuccessMessage(), self.bucket_success)
 
         return output

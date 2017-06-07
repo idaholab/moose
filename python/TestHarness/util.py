@@ -106,7 +106,7 @@ def printResult(tester, result, timing, start, end, options, color=True):
     f_result = ''
     caveats = ''
     first_directory = tester.specs['first_directory']
-    test_name = tester.specs['test_name']
+    test_name = tester.getTestName()
     status = tester.getStatus()
 
     cnt = (TERM_COLS-2) - len(test_name + result)
@@ -388,6 +388,46 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     # TL;DR; Just pass...
                     pass
 
+# Check if test has any redirected output, and if its ready to be read
+def checkOutputReady(tester, options):
+    for redirected_file in tester.getRedirectedOutputFiles(options):
+        file_path = os.path.join(tester.getTestDir(), redirected_file)
+        if not os.access(file_path, os.R_OK):
+            return False
+
+    return True
+
+# return concatenated output from tests with redirected output
+def getOutputFromFiles(tester, options):
+    file_output = ''
+    if checkOutputReady(tester, options):
+        for iteration, redirected_file in enumerate(tester.getRedirectedOutputFiles(options)):
+            file_path = os.path.join(tester.getTestDir(), redirected_file)
+            with open(file_path, 'r') as f:
+                file_output += "#"*80 + "\nOutput from processor " + str(iteration) + "\n" + "#"*80 + "\n" + readOutput(f, options)
+    return file_output
+
+# This function reads output from the file (i.e. the test output)
+# but trims it down to the specified size.  It'll save the first two thirds
+# of the requested size and the last third trimming from the middle
+def readOutput(f, options, max_size=100000):
+    first_part = int(max_size*(2.0/3.0))
+    second_part = int(max_size*(1.0/3.0))
+    output = ''
+
+    f.seek(0)
+    if options.sep_files != True:
+        output = f.read(first_part)     # Limit the output to 1MB
+        if len(output) == first_part:   # This means we didn't read the whole file yet
+            output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
+            f.seek(-second_part, 2)       # Skip the middle part of the file
+
+            if (f.tell() <= first_part):  # Don't re-read some of what you've already read
+                f.seek(first_part+1, 0)
+
+    output += f.read()              # Now read the rest
+    return output
+
 # See http://code.activestate.com/recipes/576570-dependency-resolver/
 class DependencyResolver:
     """
@@ -493,27 +533,28 @@ class TestStatus(object):
     ###### bucket status discriptions
     ## The following is a list of statuses possible in the TestHarness
     ##
-    ## PASS    =  Passing tests 'OK'
-    ## FAIL    =  Failing tests
-    ## DIFF    =  Failing tests due to Exodiff, CSVDiff
-    ## PENDING =  A pending status applied by the TestHarness (RUNNING...)
-    ## DELETED =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
-    ##            is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
-    ##            printed to stdout) when the user has specifically asked for more information while
-    ##            running tests (-e)
-    ## SKIP    =  Any test reported as skipped
-    ## SILENT  =  Any test reported as skipped and should not alert the user (deleted, tests not
-    ##            matching '--re=' options, etc)
+    ## PASS     =  Passing tests 'OK'
+    ## FAIL     =  Failing tests
+    ## DIFF     =  Failing tests due to Exodiff, CSVDiff
+    ## PENDING  =  A pending status applied by the TestHarness (RUNNING...)
+    ## DELETED  =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
+    ##             is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
+    ##             printed to stdout) when the user has specifically asked for more information while
+    ##             running tests (-e)
+    ## SKIP     =  Any test reported as skipped
+    ## SILENT   =  Any test reported as skipped and should not alert the user (deleted, tests not
+    ##             matching '--re=' options, etc)
     ######
 
-    test_status    = namedtuple('test_status', 'status color')
-    bucket_success = test_status(status='PASS', color='GREEN')
-    bucket_fail    = test_status(status='FAIL', color='RED')
-    bucket_deleted = test_status(status='DELETED', color='RED')
-    bucket_diff    = test_status(status='DIFF', color='YELLOW')
-    bucket_pending = test_status(status='PENDING', color='CYAN')
-    bucket_skip    = test_status(status='SKIP', color='RESET')
-    bucket_silent  = test_status(status='SILENT', color='RESET')
+    test_status      = namedtuple('test_status', 'status color')
+    bucket_success   = test_status(status='PASS', color='GREEN')
+    bucket_fail      = test_status(status='FAIL', color='RED')
+    bucket_deleted   = test_status(status='DELETED', color='RED')
+    bucket_diff      = test_status(status='DIFF', color='YELLOW')
+    bucket_pending   = test_status(status='PENDING', color='CYAN')
+    bucket_finished  = test_status(status='FINISHED', color='CYAN')
+    bucket_skip      = test_status(status='SKIP', color='RESET')
+    bucket_silent    = test_status(status='SILENT', color='RESET')
 
     # Initialize the class with a pending status
     # TODO: don't do this? Initialize instead with None type? If we do
@@ -574,6 +615,21 @@ class TestStatus(object):
         """
         status = self.getStatus()
         return status == self.bucket_pending
+
+    def isFinished(self):
+        """
+        Return boolean finished status. Finished should mean, the test will no longer attempt to 'do' anything, and
+        the TestHarness should stop trying to do that thing. We can not simply use: if not isPending(): due to
+        needing a way to differintiate between long running tests (which are PENDING, allowing the TestHarness to keep
+        trying), verses the actual tests that have FINISHED, but with a pending status (QUEUED).
+        """
+        status = self.getStatus()
+        return  (status is not self.bucket_pending
+                 or not self.getRunnable()
+                 or self.didDiff()
+                 or self.didFail()
+                 or self.didPass()
+                 or stats == self.bucket_finished)
 
     def isSkipped(self):
         """

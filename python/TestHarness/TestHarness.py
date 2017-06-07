@@ -152,24 +152,11 @@ class TestHarness:
             if self.options.checkStatus:
                 for (dirpath, file, test_name) in self.scheduler.getTests():
 
-                    # Enter test directory
-                    saved_cwd = os.getcwd()
-                    sys.path.append(os.path.abspath(dirpath))
-                    os.chdir(dirpath)
-
                     # Get the testers for this test
                     testers = self.createTesters(dirpath, file, find_only)
 
-                    # Schedule the test for execution _if_ it matches the name we want
-                    # (because one test file can create multiple testers, and the user
-                    # may have only asked for one of these tests to run (--re))
-                    for tester in testers:
-                        if test_name == tester.getTestName():
-                            self.scheduler.schedule(tester, self.checks, self.test_list)
-
-                    # Return to previous directory
-                    os.chdir(saved_cwd)
-                    sys.path.pop()
+                    # Schedule the testers for execution
+                    self.scheduler.schedule(testers)
 
             # Find and schedule tests for launch
             else:
@@ -190,7 +177,6 @@ class TestHarness:
                             if file == self.options.input_file_name \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
-                                # Enter test directory
                                 saved_cwd = os.getcwd()
                                 sys.path.append(os.path.abspath(dirpath))
                                 os.chdir(dirpath)
@@ -198,40 +184,41 @@ class TestHarness:
                                 # Get the testers for this test
                                 testers = self.createTesters(dirpath, file, find_only)
 
-                                # Schedule the test for execution
-                                self.scheduleTesters(testers)
+                                # Schedule the testers for execution
+                                self.scheduler.schedule(testers, self.checks, self.test_list)
 
-                                # record this launched test
+                                # record this launched test to prevent this test from launching again
+                                # due to os.walk following symbolic links
                                 launched_tests.append(os.path.join(dirpath, file))
 
                                 # See if any tests have colliding outputs
                                 self.checkForRaceConditionOutputs(testers, dirpath)
 
-                                # Return to previous directory
                                 os.chdir(saved_cwd)
                                 sys.path.pop()
+
+            # Wait for all the tests to complete
+            self.scheduler.waitFinish()
+
+            # Run a post command if any derived classes are asking for it
+            self.scheduler.postCommand()
+
+            # Go again if a scheduler plugin is asking for it
+            if self.scheduler.goAgain():
+                self.findAndRunTests()
+                return
+
+            # were done, print the finalized results footer and any other clean up operation
+            self.cleanup()
+
+            # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
+            if self.num_failed:
+                self.error_code = self.error_code | 0x80
 
         except KeyboardInterrupt:
             self.closeFiles(1)
             print '\nExiting due to keyboard interrupt...'
             sys.exit(1)
-
-        # Wait for all tests to finish
-        self.scheduler.join()
-
-        # Run a post command if any derived classes are asking for it
-        self.scheduler.postCommand()
-
-        # Go again?
-        if self.scheduler.goAgain():
-            self.findAndRunTests()
-            return
-
-        self.cleanup()
-
-        # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
-        if self.num_failed:
-            self.error_code = self.error_code | 0x80
 
         return
 
@@ -268,7 +255,7 @@ class TestHarness:
 
         return testers
 
-    # Schedule a list of tester objects to run their tests
+    # Schedule tester objects to run their tests if we have not 
     def scheduleTesters(self, testers):
         # Go through the Testers and schedule them for launch
         for tester in testers:
@@ -283,8 +270,9 @@ class TestHarness:
                 tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
             elif tester.parameters().isValid('error_code'):
                 tester.setStatus('Parser Error', tester.bucket_skip)
-            else:
-                self.scheduler.schedule(tester, self.checks, self.test_list)
+
+        # Schedule these tests for execution
+        self.scheduler.schedule(testers, self.checks, self.test_list)
 
         return testers
 
@@ -364,10 +352,9 @@ class TestHarness:
         return testers
 
     ## Finish the test by inspecting the raw output
-    def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
+    def testOutputAndFinish(self, tester, retcode=None, output=None, start=0, end=0):
         caveats = []
         test = tester.specs  # Need to refactor
-
         if test.isValid('caveats'):
             caveats = test['caveats']
 
@@ -415,11 +402,15 @@ class TestHarness:
             return True
 
     ## Method to print output generated by the TestHarness while attempting to run a tester
-    def handleTestStatus(self, tester, output=None, add_to_table=False):
+    def handleTestStatus(self, tester, add_to_table=False):
         result = tester.getStatusMessage()
+
         # Statuses that inform the TestHarness, that this test is still running.
         if tester.isPending() and not add_to_table:
             print printResult(tester, result, 0, 0, 0, self.options)
+
+        elif tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
+            return
 
         # All other statuses, including those of 'pending' if that is indeed the final
         # status of the test (queued tests still waiting)
