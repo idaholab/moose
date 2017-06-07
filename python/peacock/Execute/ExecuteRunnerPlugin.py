@@ -173,12 +173,11 @@ if __name__ == "__main__":
     qapp = QApplication(sys.argv)
     exe = Testing.find_moose_test_exe()
     w = ExecuteRunnerPlugin()
-    w.onCommandChanged(exe, [], False)
+    w.setCommand(exe, [], False)
     def needInputFile(input_file):
         this_dir = os.path.dirname(os.path.abspath(__file__))
         peacock_dir = os.path.dirname(this_dir)
-        chigger_dir = os.path.dirname(peacock_dir)
-        test_file = os.path.join(chigger_dir, "tests", "peacock", "common", "transient.i")
+        test_file = os.path.join(peacock_dir, "tests", "common", "transient.i")
         with open(test_file, "r") as fin:
             data = fin.read()
             with open(input_file, "w") as fout:

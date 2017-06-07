@@ -210,10 +210,12 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         args = []
         if self.mpi_checkbox.isChecked():
             mpi_args = shlex.split(str(self.mpi_line.text()))
-            cmd = mpi_args[0]
-            args = mpi_args[1:]
-            args.append(str(self.exe_line.text()))
-        else:
+            if mpi_args:
+                cmd = mpi_args[0]
+                args = mpi_args[1:]
+                args.append(str(self.exe_line.text()))
+
+        if not cmd:
             cmd = str(self.exe_line.text())
 
         args += shlex.split(str(self.args_line.text()))
@@ -307,7 +309,6 @@ if __name__ == "__main__":
     w = ExecuteOptionsPlugin()
     main_win.setCentralWidget(w)
     main_win.show()
-    w.initialize()
     menubar = main_win.menuBar()
     menubar.setNativeMenuBar(False)
     executeMenu = menubar.addMenu("E&xecute")

@@ -44,8 +44,7 @@ if __name__ == "__main__":
     exe = Testing.find_moose_test_exe()
     this_dir = os.path.dirname(os.path.abspath(__file__))
     peacock_dir = os.path.dirname(this_dir)
-    chigger_dir = os.path.dirname(peacock_dir)
-    test_file = os.path.join(chigger_dir, "tests", "peacock", "common", "transient.i")
+    test_file = os.path.join(peacock_dir, "tests", "common", "transient.i")
     exe_info = ExecutableInfo()
     exe_info.path = exe
     tree = InputTree(exe_info)
