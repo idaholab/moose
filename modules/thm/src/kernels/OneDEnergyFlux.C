@@ -11,19 +11,15 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("vel", "velocity");
   params.addRequiredCoupledVar("enthalpy", "enthalpy");
-  params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
-  params.addCoupledVar("alpha", 1., "Volume fraction");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
-  params.addParam<MaterialPropertyName>("daL_dbeta", "Derivative of alphaL w.r.t. beta");
+  params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
 
   return params;
 }
 
 OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
-    _is_liquid(getParam<bool>("is_liquid")),
-    _sign(_is_liquid ? 1. : -1.),
     _rhouA(coupledValue("rhouA")),
     _area(coupledValue("area")),
     _vel(coupledValue("vel")),
@@ -37,8 +33,8 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _has_beta(isCoupled("beta")),
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
     _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta") : nullptr),
-    _daL_dbeta(_has_beta ? &getMaterialProperty<Real>("daL_dbeta") : nullptr),
-    _alpha(coupledValue("alpha"))
+    _alpha(getMaterialProperty<Real>("alpha")),
+    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr)
 {
 }
 
@@ -71,7 +67,7 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
   else if (jvar == _beta_var_number)
   {
     return -(_vel[_qp] *
-             (_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp])) *
+             (_pressure[_qp] * (*_dalpha_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp])) *
            _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else

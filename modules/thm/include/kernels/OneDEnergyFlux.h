@@ -22,8 +22,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  bool _is_liquid;
-  Real _sign;
   const VariableValue & _rhouA;
   const VariableValue & _area;
   const VariableValue & _vel;
@@ -37,8 +35,9 @@ protected:
   bool _has_beta;
   unsigned int _beta_var_number;
   const MaterialProperty<Real> * _dp_dbeta;
-  const MaterialProperty<Real> * _daL_dbeta;
-  const VariableValue & _alpha;
+
+  const MaterialProperty<Real> & _alpha;
+  const MaterialProperty<Real> * const _dalpha_dbeta;
 };
 
 #endif /* ONEDENERGYFLUX_H */
