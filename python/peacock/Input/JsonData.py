@@ -2,6 +2,7 @@
 from peacock.utils import ExeLauncher
 import json
 import mooseutils
+from PyQt5.QtWidgets import QApplication
 
 class JsonData(object):
     """
@@ -21,6 +22,15 @@ class JsonData(object):
         if app_path:
             self.appChanged(app_path)
 
+    def _processEvents(self):
+        """
+        If we are in a QApplication, process events so
+        the GUI stays responsive.
+        """
+        qapp = QApplication.instance()
+        if qapp:
+            qapp.processEvents()
+
     def appChanged(self, app_path):
         """
         Called when the executable changed.
@@ -28,8 +38,11 @@ class JsonData(object):
             app_path: New executable path
         """
         try:
+            self._processEvents()
             raw_data = self._getRawDump(app_path)
+            self._processEvents()
             self.json_data = json.loads(raw_data)
+            self._processEvents()
             self.app_path = app_path
         except Exception as e:
             mooseutils.mooseWarning("Failed to load json from '%s': %s" % (app_path, e))
