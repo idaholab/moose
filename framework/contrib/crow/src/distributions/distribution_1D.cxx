@@ -51,13 +51,11 @@
 
 #define _USE_MATH_DEFINES   // needed in order to use M_PI = 3.14159
 
-#define throwError(msg) {throw std::runtime_error("Error"); }
-
-//#ifdef MOOSEERROR_H
-//  #define throwError(msg) mooseError(msg)
-//#else
-// #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
-//#endif
+#ifdef MOOSEERROR_H
+  #define throwError(msg) mooseError(msg)
+#else
+ #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+#endif
 
 class DistributionBackend {
 public:
@@ -298,10 +296,11 @@ BasicUniformDistribution::BasicUniformDistribution(double x_min, double x_max)
 {
   _dist_parameters["xMin"] = x_min;
   _dist_parameters["xMax"] = x_max;
+  if (x_min>x_max)
+    throwError("ERROR: The lower bound is larger than the upper bound!");
+
   _backend = new UniformDistributionBackend(x_min, x_max);
 
-  if (x_min>x_max)
-    throwError("ERROR: bounds for uniform distribution are incorrect");
 }
 
 BasicUniformDistribution::~BasicUniformDistribution()
