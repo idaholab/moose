@@ -5,23 +5,22 @@ InputParameters
 validParams<OneDMomentumFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("alpha", 1.0, "Volume fraction");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("vel", "velocity");
   params.addRequiredCoupledVar("area", "cross-sectional area");
-  params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
+  params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
   return params;
 }
 
 OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
-    _is_liquid(getParam<bool>("is_liquid")),
-    _sign(_is_liquid ? 1. : -1.),
-    _alpha(coupledValue("alpha")),
+    _alpha(getMaterialProperty<Real>("alpha")),
+    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
+                                    : nullptr),
     _vel(coupledValue("vel")),
     _pressure(getMaterialProperty<Real>("pressure")),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
@@ -30,11 +29,10 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
     _area(coupledValue("area")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(coupled("rhoEA")),
-    _has_beta(isCoupled("beta")),
     _beta(coupledValue("beta")),
-    _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
-    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta") : nullptr),
-    _daL_dbeta(_has_beta ? &getMaterialProperty<Real>("daL_dbeta") : nullptr)
+    _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
+    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta")
+                                : nullptr)
 {
 }
 
@@ -79,7 +77,7 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _beta_var_number)
   {
-    return -(_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp]) *
+    return -(_pressure[_qp] * (*_dalpha_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp]) *
            _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else

@@ -27,10 +27,9 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  bool _is_liquid;
-  Real _sign;
+  const MaterialProperty<Real> & _alpha;
+  const MaterialProperty<Real> * const _dalpha_dbeta;
 
-  const VariableValue & _alpha;
   const VariableValue & _area;
   const VariableGradient & _area_grad;
 
@@ -39,7 +38,6 @@ protected:
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
   const MaterialProperty<Real> & _dp_darhoEA;
-  const MaterialProperty<Real> * const _daL_dbeta;
 
   unsigned int _alpha_rhoA_var_number;
   unsigned int _alpha_rhoE_var_number;
