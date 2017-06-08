@@ -5,70 +5,101 @@ InputParameters
 validParams<OneDEnergyFlux>()
 {
   InputParameters params = validParams<Kernel>();
+
   params.addRequiredCoupledVar("A", "Cross-sectional area");
-  params.addRequiredCoupledVar("rhoA", "alpha*rho*A");
-  params.addRequiredCoupledVar("rhouA", "alpha*rho*u*A");
-  params.addRequiredCoupledVar("rhoEA", "alpha*rho*E*A");
-  params.addRequiredCoupledVar("vel", "Velocity");
-  params.addRequiredCoupledVar("H", "Specific total enthalpy");
+
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
-  params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
+  params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
+  params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
+  params.addRequiredCoupledVar("arhoEA", "alpha*rho*E*A");
+
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
+  params.addRequiredParam<MaterialPropertyName>("rho", "Density material property");
+  params.addRequiredParam<MaterialPropertyName>("vel", "Velocity material property");
+  params.addRequiredParam<MaterialPropertyName>("e", "Specific internal energy material property");
+  params.addRequiredParam<MaterialPropertyName>("p", "Pressure material property");
 
   return params;
 }
 
 OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
-    _rhouA(coupledValue("rhouA")),
-    _area(coupledValue("A")),
-    _vel(coupledValue("vel")),
-    _enthalpy(coupledValue("H")),
-    _pressure(getMaterialProperty<Real>("p")),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoA")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "rhouA")),
-    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoEA")),
-    _rhoA_var_number(coupled("rhoA")),
-    _rhouA_var_number(coupled("rhouA")),
+
     _has_beta(isCoupled("beta")),
-    _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
-    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
+
+    _A(coupledValue("A")),
+
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr)
+    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr),
+
+    _rho(getMaterialProperty<Real>("rho")),
+    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta") : nullptr),
+    _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
+
+    _vel(getMaterialProperty<Real>("vel")),
+    _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
+    _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
+
+    _e(getMaterialProperty<Real>("e")),
+    _de_darhoA(getMaterialPropertyDerivativeRelap<Real>("e", "arhoA")),
+    _de_darhouA(getMaterialPropertyDerivativeRelap<Real>("e", "arhouA")),
+    _de_darhoEA(getMaterialPropertyDerivativeRelap<Real>("e", "arhoEA")),
+
+    _p(getMaterialProperty<Real>("p")),
+    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "arhouA")),
+    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoEA")),
+
+    _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
+    _arhoA_var_number(coupled("arhoA")),
+    _arhouA_var_number(coupled("arhouA"))
 {
 }
 
 Real
 OneDEnergyFlux::computeQpResidual()
 {
-  return -_rhouA[_qp] * _enthalpy[_qp] * _grad_test[_i][_qp](0);
+  return -_alpha[_qp] * _vel[_qp] *
+         (_rho[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) + _p[_qp]) * _A[_qp] *
+         _grad_test[_i][_qp](0);
 }
 
 Real
 OneDEnergyFlux::computeQpJacobian()
 {
-  Real A33 = _vel[_qp] * (1. + _alpha[_qp] * _dp_darhoEA[_qp] * _area[_qp]);
-  return -A33 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+  return -_alpha[_qp] * _vel[_qp] * (_rho[_qp] * _de_darhoEA[_qp] + _dp_darhoEA[_qp]) * _A[_qp] *
+         _phi[_j][_qp] * _grad_test[_i][_qp](0);
 }
 
 Real
 OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _rhoA_var_number)
+  if (jvar == _arhoA_var_number)
   {
-    Real A31 = _vel[_qp] * (_alpha[_qp] * _dp_darhoA[_qp] * _area[_qp] - _enthalpy[_qp]);
-    return -A31 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -_alpha[_qp] *
+           (_dvel_darhoA[_qp] * (_rho[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) + _p[_qp]) +
+            _vel[_qp] *
+                (_drho_darhoA[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) +
+                 _rho[_qp] * (_de_darhoA[_qp] + _vel[_qp] * _dvel_darhoA[_qp]) + _dp_darhoA[_qp])) *
+           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
-  else if (jvar == _rhouA_var_number)
+  else if (jvar == _arhouA_var_number)
   {
-    Real A32 = _vel[_qp] * _alpha[_qp] * _dp_darhouA[_qp] * _area[_qp] + _enthalpy[_qp];
-    return -A32 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -_alpha[_qp] *
+           (_dvel_darhouA[_qp] * (_rho[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) + _p[_qp]) +
+            _vel[_qp] * (_rho[_qp] * (_de_darhouA[_qp] + _vel[_qp] * _dvel_darhouA[_qp]) +
+                         _dp_darhouA[_qp])) *
+           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else if (jvar == _beta_var_number)
   {
-    return -(_vel[_qp] *
-             (_pressure[_qp] * (*_dalpha_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp])) *
-           _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -((*_dalpha_dbeta)[_qp] * _vel[_qp] *
+                 (_rho[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) + _p[_qp]) +
+             _alpha[_qp] * _vel[_qp] *
+                 ((*_drho_dbeta)[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) +
+                  (*_dp_dbeta)[_qp])) *
+           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else
     return 0.;
