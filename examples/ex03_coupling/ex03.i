@@ -24,7 +24,7 @@
     type = ExampleConvection
     variable = convected
 
-    # Couple a variable into the convection kernel using local_name = simulationg_name syntax
+    # Couple a variable into the convection kernel using local_name = simulation_name syntax
     some_variable = diffused
   [../]
 
@@ -61,6 +61,13 @@
     variable = diffused
     boundary = 'top'
     value = 0
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
   [../]
 []
 
