@@ -49,7 +49,7 @@ protected:
   virtual Real referenceTemperature() = 0;
 
   /*
-   * Compute the total mean thermal expansion relative to the reference temperature.
+   * Compute the mean thermal expansion coefficient relative to the reference temperature.
    * This is the linear thermal strain divided by the temperature difference:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
@@ -57,7 +57,7 @@ protected:
   virtual Real meanThermalExpansionCoefficient(const Real temperature) = 0;
 
   /*
-   * Compute the derivative of the total mean thermal expansion coefficient \f$\bar{\alpha}\f$
+   * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
    * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
    */
