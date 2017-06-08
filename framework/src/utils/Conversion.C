@@ -45,6 +45,7 @@ initExecStoreType()
     execstore_type_to_enum["NONLINEAR"] = EXEC_NONLINEAR;
     execstore_type_to_enum["TIMESTEP_END"] = EXEC_TIMESTEP_END;
     execstore_type_to_enum["TIMESTEP_BEGIN"] = EXEC_TIMESTEP_BEGIN;
+    execstore_type_to_enum["FINAL"] = EXEC_FINAL;
     execstore_type_to_enum["CUSTOM"] = EXEC_CUSTOM;
   }
 }
