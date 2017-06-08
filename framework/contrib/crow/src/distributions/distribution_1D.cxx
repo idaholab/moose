@@ -51,7 +51,13 @@
 
 #define _USE_MATH_DEFINES   // needed in order to use M_PI = 3.14159
 
-#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+#define throwError(msg) {throw std::runtime_error("Error"); }
+
+//#ifdef MOOSEERROR_H
+//  #define throwError(msg) mooseError(msg)
+//#else
+// #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+//#endif
 
 class DistributionBackend {
 public:
