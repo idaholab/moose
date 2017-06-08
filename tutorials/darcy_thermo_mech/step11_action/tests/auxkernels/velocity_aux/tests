@@ -1,1 +1,13 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/tests/auxkernels/velocity_aux/tests
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'velocity_aux.i'
+    exodiff = 'velocity_aux_out.e'
+  [../]
+  [./action]
+    type = 'Exodiff'
+    input = 'action_velocity_aux.i'
+    exodiff = 'action_velocity_aux_out.e'
+    prereq = test
+  [../]
+[]

@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/unit/Makefile
+../../step10_multiapps/unit/Makefile

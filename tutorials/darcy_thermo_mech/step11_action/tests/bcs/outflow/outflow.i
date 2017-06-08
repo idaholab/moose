@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/tests/bcs/outflow/outflow.i
+../../../../step10_multiapps/tests/bcs/outflow/outflow.i

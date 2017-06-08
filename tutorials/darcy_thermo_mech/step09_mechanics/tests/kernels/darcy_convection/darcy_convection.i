@@ -1,1 +1,1 @@
-../../../../step08_adaptivity/tests/kernels/darcy_convection/darcy_convection.i
+../../../../step07_adaptivity/tests/kernels/darcy_convection/darcy_convection.i

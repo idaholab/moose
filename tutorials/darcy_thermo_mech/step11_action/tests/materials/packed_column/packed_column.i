@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/tests/materials/packed_column/packed_column.i
+../../../../step10_multiapps/tests/materials/packed_column/packed_column.i

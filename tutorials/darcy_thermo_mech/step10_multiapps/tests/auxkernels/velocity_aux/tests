@@ -4,10 +4,4 @@
     input = 'velocity_aux.i'
     exodiff = 'velocity_aux_out.e'
   [../]
-  [./action]
-    type = 'Exodiff'
-    input = 'action_velocity_aux.i'
-    exodiff = 'action_velocity_aux_out.e'
-    prereq = test
-  [../]
 []

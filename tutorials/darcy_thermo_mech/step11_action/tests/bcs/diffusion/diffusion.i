@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/tests/bcs/diffusion/diffusion.i
+../../../../step10_multiapps/tests/bcs/diffusion/diffusion.i

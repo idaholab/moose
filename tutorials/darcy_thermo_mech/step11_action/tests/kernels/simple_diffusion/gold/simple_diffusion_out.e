@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/tests/kernels/simple_diffusion/gold/simple_diffusion_out.e
+../../../../../step10_multiapps/tests/kernels/simple_diffusion/gold/simple_diffusion_out.e

@@ -1,1 +1,1 @@
-/Users/slauae/projects/moose-docs/tutorials/darcy_thermo_mech/step10_multiapps/tests/auxkernels/velocity_aux/gold/velocity_aux_out.e
+../../../../../step10_multiapps/tests/auxkernels/velocity_aux/gold/velocity_aux_out.e
