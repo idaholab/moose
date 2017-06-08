@@ -84,6 +84,8 @@ public:
    */
   virtual bool requiresIsotropicTensor() = 0;
 
+  virtual Real computeTimeStepLimit();
+
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
   void resetQpProperties() final {}
   void resetProperties() final {}

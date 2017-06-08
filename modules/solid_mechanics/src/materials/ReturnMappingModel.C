@@ -26,6 +26,8 @@ validParams<ReturnMappingModel>()
       "relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
   params.addParam<Real>(
       "absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
+  params.addParam<Real>(
+      "max_inelastic_incr", 1e-4, "The maximum inelastic strain increment allowed in a time step");
 
   return params;
 }
@@ -42,7 +44,9 @@ ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters,
     _effective_inelastic_strain(
         declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
     _effective_inelastic_strain_old(
-        declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain"))
+        declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
+    _max_inelastic_incr(isParamValid("max_inelastic_incr") ? getParam<Real>("max_inelastic_incr")
+                                                           : 0.)
 {
 }
 
@@ -185,4 +189,17 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/,
   stress_new += stress_old;
 
   computeStressFinalize(qp, inelastic_strain_increment);
+}
+
+Real
+ReturnMappingModel::computeTimeStepLimit(unsigned qp)
+{
+  Real tmp_max_incr;
+  Real scalar_inelastic_strain_incr;
+
+  scalar_inelastic_strain_incr =
+      _effective_inelastic_strain[qp] - _effective_inelastic_strain_old[qp];
+  tmp_max_incr = _max_inelastic_incr * 1e-10;
+  _max_inc = std::max(scalar_inelastic_strain_incr, tmp_max_incr);
+  return _dt * _max_inelastic_incr / _max_inc;
 }

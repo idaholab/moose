@@ -38,3 +38,9 @@ StressUpdateBase::propagateQpStatefulProperties()
   mooseError(
       "propagateQpStatefulProperties called: it needs to be implemented by your inelastic model");
 }
+
+Real
+StressUpdateBase::computeTimeStepLimit()
+{
+  return std::numeric_limits<Real>::max();
+}
