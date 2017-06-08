@@ -44,6 +44,6 @@ protected:
    * Do NOT copy this line of code!
    */
 
-  VariableValue _coupled_coef;
+  const VariableValue _coupled_coef;
 };
 #endif // EXAMPLEDIFFUSION_H
