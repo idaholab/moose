@@ -28,10 +28,10 @@ fi
 # set old/new app name variables
 srcname='Stork'
 dstname=$1
-srcnamelow=$(echo "$srcname" | awk '{print tolower($0)}')
-srcnameup=$(echo "$srcname" | awk '{print toupper($0)}')
-dstnamelow=$(echo "$dstname" | awk '{print tolower($0)}')
-dstnameup=$(echo "$dstname" | awk '{print toupper($0)}')
+srcnamelow=$(echo "$srcname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[A-Z]/[a-z]/')
+srcnameup=$(echo "$srcname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[a-z]/[A-Z]/')
+dstnamelow=$(echo "$dstname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[A-Z]/[a-z]/')
+dstnameup=$(echo "$dstname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[a-z]/[A-Z]/')
 dir="$dstnamelow"
 if [[ -z $MOOSE_DIR ]]; then
     MOOSE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
