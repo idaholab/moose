@@ -112,6 +112,8 @@ Steady::execute()
   }
 #endif
 
+  _problem.execute(EXEC_FINAL);
+
   postExecute();
 }
 
