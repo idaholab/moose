@@ -17,15 +17,15 @@
 
 [AuxVariables]
   [./velocity_x]
-    order = CONSTANT
+    order = THIRD
     family = MONOMIAL
   [../]
   [./velocity_y]
-    order = CONSTANT
+    order = THIRD
     family = MONOMIAL
   [../]
   [./velocity_z]
-    order = CONSTANT
+    order = THIRD
     family = MONOMIAL
   [../]
 []
@@ -47,6 +47,9 @@
     type = DarcyConvection
     variable = temperature
     darcy_pressure = pressure
+    velocity_x = velocity_x
+    velocity_y = velocity_y
+    velocity_z = velocity_z
   [../]
 []
 
