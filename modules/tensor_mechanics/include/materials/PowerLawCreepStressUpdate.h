@@ -54,6 +54,8 @@ protected:
   const VariableValue & _temperature;
   MaterialProperty<RankTwoTensor> & _creep_strain;
   MaterialProperty<RankTwoTensor> & _creep_strain_old;
+
+  Real _max_creep_incr;
 };
 
 template <>

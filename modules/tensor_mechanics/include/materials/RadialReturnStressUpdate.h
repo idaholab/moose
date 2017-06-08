@@ -45,6 +45,7 @@ public:
                            const RankTwoTensor & elastic_strain_old,
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) override;
+  virtual Real computeTimeStepLimit() override;
 
   /**
    * Does the model require the elasticity tensor to be isotropic?
@@ -73,6 +74,8 @@ protected:
 
   MaterialProperty<Real> & _effective_inelastic_strain;
   MaterialProperty<Real> & _effective_inelastic_strain_old;
+  Real _max_inelastic_incr;
+  Real _max_inc;
 };
 
 #endif // RECOMPUTERADIALRETURN_H
