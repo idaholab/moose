@@ -349,10 +349,6 @@ BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma) {
   if(not hasParameter("xMax")) {
     _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
-  //std::cout << "mu " << mu << " sigma " << sigma
-  //          << " truncation " << _dist_parameters["truncation"]
-  //          << " xMin " << _dist_parameters["xMin"]
-  //          << " xMax " << _dist_parameters["xMax"] << std::endl;
   _backend = new NormalDistributionBackend(mu, sigma);
 }
 
@@ -361,15 +357,6 @@ BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma, double
 {
   _dist_parameters["mu"] = mu; //mean
   _dist_parameters["sigma"] = sigma; //sd
-  //if(not hasParameter("truncation")) {
-  //  _dist_parameters["truncation"] = 1.0;
-  //}
-  //_dist_parameters["xMin"] = x_min;
-  //_dist_parameters["xMax"] = x_max;
-  //std::cout << "mu " << mu << " sigma " << sigma
-  //          << " truncation " << _dist_parameters["truncation"]
-  //          << " xMin " << _dist_parameters["xMin"]
-  //          << " xMax " << _dist_parameters["xMax"] << std::endl;
   _backend = new NormalDistributionBackend(mu, sigma);
 
 }
