@@ -26,7 +26,7 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  const Real _coef;
+  const Real & _coef;
   Function * const _func;
 };
 

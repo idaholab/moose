@@ -17,6 +17,8 @@ validParams<CoefDiffusion>()
                                 "this function.  This is useful for temporally or "
                                 "spatially varying diffusivities");
   params.addClassDescription("Kernel for diffusion with diffusivity = coef + function");
+  params.declareControllable("coef");
+
   return params;
 }
 

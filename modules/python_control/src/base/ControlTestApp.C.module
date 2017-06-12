@@ -1,0 +1,52 @@
+#include "ControlTestApp.h"
+#include "Moose.h"
+#include "AppFactory.h"
+#include "MooseSyntax.h"
+
+template<>
+InputParameters validParams<ControlTestApp>()
+{
+  InputParameters params = validParams<MooseApp>();
+
+  params.set<bool>("use_legacy_uo_initialization") = false;
+  params.set<bool>("use_legacy_uo_aux_computation") = false;
+  params.set<bool>("use_legacy_output_syntax") = false;
+
+  return params;
+}
+
+ControlTestApp::ControlTestApp(InputParameters parameters) :
+    MooseApp(parameters)
+{
+  Moose::registerObjects(_factory);
+  ControlTestApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  ControlTestApp::associateSyntax(_syntax, _action_factory);
+}
+
+ControlTestApp::~ControlTestApp()
+{
+}
+
+// External entry point for dynamic application loading
+extern "C" void ControlTestApp__registerApps() { ControlTestApp::registerApps(); }
+void
+ControlTestApp::registerApps()
+{
+  registerApp(ControlTestApp);
+}
+
+// External entry point for dynamic object registration
+extern "C" void ControlTestApp__registerObjects(Factory & factory) { ControlTestApp::registerObjects(factory); }
+void
+ControlTestApp::registerObjects(Factory & /*factory*/)
+{
+}
+
+// External entry point for dynamic syntax association
+extern "C" void ControlTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ControlTestApp::associateSyntax(syntax, action_factory); }
+void
+ControlTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}

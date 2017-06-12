@@ -1,0 +1,19 @@
+[Tests]
+  [./execute]
+    type = 'Exodiff'
+    input = 'control_test.i'
+    exodiff = 'control_test_out.e'
+  [../]
+
+  [./stop]
+    type = 'Exodiff'
+    input = 'stop_test.i'
+    exodiff = 'stop_test_out.e'
+  [../]
+
+  [./both]
+    type = 'Exodiff'
+    input = 'both_test.i'
+    exodiff = 'both_test_out.e'
+  [../]
+[]
