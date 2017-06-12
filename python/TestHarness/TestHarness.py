@@ -255,7 +255,7 @@ class TestHarness:
 
         return testers
 
-    # Schedule tester objects to run their tests if we have not 
+    # Schedule tester objects to run their tests if we have not
     def scheduleTesters(self, testers):
         # Go through the Testers and schedule them for launch
         for tester in testers:
