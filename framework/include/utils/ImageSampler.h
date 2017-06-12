@@ -40,6 +40,7 @@
 #include "vtkImageShiftScale.h"
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
+#include "vtkImageResample.h"
 
 #include "libmesh/restore_warnings.h"
 
@@ -104,6 +105,11 @@ protected:
    */
   void vtkFlip();
 
+  /**
+   * Apply image resample.
+   */
+  void vtkResample();
+
 private:
 #ifdef LIBMESH_HAVE_VTK
 
@@ -130,11 +136,14 @@ private:
 
   /// Pointers to image flipping filter.  May be used for x, y, or z.
   vtkSmartPointer<vtkImageFlip> _flip_filter;
+
+  /// Resample filter
+  vtkSmartPointer<vtkImageResample> _resample_filter;
 #endif
 
 /**
  * Helper method for flipping image
- * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
+ * @param axis Flag for determining the flip axis: "x=0", "y=1", "z=2"
  * @return A smart pointer the flipping filter
  */
 #ifdef LIBMESH_HAVE_VTK
@@ -152,6 +161,9 @@ private:
 
   /// Physical pixel size
   std::vector<double> _voxel;
+
+  /// Resample spacing
+  std::vector<double> _resample_spacing;
 
 /// Component to extract
 #ifdef LIBMESH_HAVE_VTK

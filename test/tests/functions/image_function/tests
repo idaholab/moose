@@ -133,4 +133,18 @@
     exodiff = moose_logo_test_2D_out.e
     vtk = true
   [../]
+  [./resample]
+    # Test the vtkImageResample filter
+    type = Exodiff
+    input = image_resample.i
+    exodiff = image_resample_out.e
+    vtk = true
+  [../]
+  [./resample_error]
+    type = RunException
+    input = image_resample.i
+    cli_args = "Functions/image_func/output_spacing='1 1 1 1'"
+    expect_err = "The 'output_spacing' parameter must contain 3 values, but it contains 4."
+    vtk = true
+  [../]
 []

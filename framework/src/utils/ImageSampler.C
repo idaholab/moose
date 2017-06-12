@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// STL includes
+#include <vector>
+
 // MOOSE includes
 #include "ImageSampler.h"
 #include "MooseApp.h"
@@ -54,6 +57,10 @@ validParams<ImageSampler>()
   params.addParam<bool>("flip_z", false, "Flip the image along the z-axis");
   params.addParamNamesToGroup("flip_x flip_y flip_z", "Flip");
 
+  // Resample
+  params.addParam<std::vector<double>>(
+      "output_spacing", "Set the x,y,z output spacing for use with the vtkImageResample filter.");
+  params.addParamNamesToGroup("output_spacing", "Resample");
   return params;
 }
 
@@ -63,6 +70,9 @@ ImageSampler::ImageSampler(const InputParameters & parameters)
     _data(NULL),
     _algorithm(NULL),
 #endif
+    _resample_spacing(parameters.isParamValid("output_spacing")
+                          ? parameters.get<std::vector<double>>("output_spacing")
+                          : std::vector<double>()),
     _is_pars(parameters),
     _is_console((parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))->getOutputWarehouse())
 
@@ -210,6 +220,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   vtkShiftAndScale();
   vtkThreshold();
   vtkFlip();
+  vtkResample();
 #endif
 }
 
@@ -235,7 +246,7 @@ ImageSampler::sample(const Point & p)
       x[i] = std::floor((p(i) - _origin(i)) / _voxel[i]);
 
       // If the point falls on the mesh extents the index needs to be decreased by one
-      if (x[i] == _dims[i])
+      if (MooseUtils::absoluteFuzzyEqual(x[i], _dims[i]))
         x[i]--;
     }
   }
@@ -371,3 +382,29 @@ ImageSampler::imageFlip(const int & axis)
   return flip_image;
 }
 #endif
+
+void
+ImageSampler::vtkResample()
+{
+#ifdef LIBMESH_HAVE_VTK
+  if (!_resample_spacing.empty())
+  {
+    if (_resample_spacing.size() != LIBMESH_DIM)
+      mooseError("The 'output_spacing' parameter must contain ",
+                 LIBMESH_DIM,
+                 " values, but it contains ",
+                 _resample_spacing.size(),
+                 '.');
+
+    _resample_filter = vtkSmartPointer<vtkImageResample>::New();
+    _resample_filter->SetInputConnection(_algorithm);
+
+    for (int i = 0; i < LIBMESH_DIM; ++i)
+      _resample_filter->SetAxisOutputSpacing(i, _resample_spacing[i]);
+
+    _resample_filter->Update();
+    _data = _resample_filter->GetOutput();
+    _algorithm = _resample_filter->GetOutputPort();
+  }
+#endif
+}
