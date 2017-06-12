@@ -4,7 +4,7 @@ Logger::Logger() : _warnings_are_errors(false), _n_errors(0), _n_warnings(0) {}
 
 Logger::~Logger()
 {
-  for (auto it : _msgs)
+  for (auto && it : _msgs)
     delete it;
 }
 
@@ -15,7 +15,7 @@ Logger::print()
   if (_n_errors > 0)
   {
     printMessage(COLOR_RED, _n_errors, " error", (_n_errors > 1 ? "s" : ""), ":");
-    for (auto it : _msgs)
+    for (auto && it : _msgs)
       if (it->_type == ERROR)
         printMessage(COLOR_RED, "  - ", it->_msg);
     printMessage();
@@ -25,7 +25,7 @@ Logger::print()
   if (_n_warnings > 0)
   {
     printMessage(COLOR_YELLOW, _n_warnings, " warning", (_n_warnings > 1 ? "s" : ""), ":");
-    for (auto it : _msgs)
+    for (auto && it : _msgs)
       if (it->_type == WARNING)
         printMessage(COLOR_YELLOW, "  - ", it->_msg);
     printMessage();
