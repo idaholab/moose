@@ -85,7 +85,7 @@ Component::Component(const InputParameters & parameters)
   : RELAP7Object(parameters),
     _id(comp_id++),
     _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent")
-                                                              : NULL),
+                                                              : nullptr),
     _sim(*getParam<Simulation *>("_sim")),
     _app(dynamic_cast<RELAP7App &>(MooseObject::_app)),
     _factory(_app.getFactory()),

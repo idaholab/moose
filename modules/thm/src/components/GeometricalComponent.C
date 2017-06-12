@@ -184,7 +184,7 @@ GeometricalComponent::getVariableFn(const FunctionName & fn_param_name)
   const FunctionName & fn_name = getParam<FunctionName>(fn_param_name);
   const Function & fn = _sim.getFunction(fn_name);
 
-  if (dynamic_cast<const ConstantFunction *>(&fn) != NULL)
+  if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
   {
     connectObject(fn.parameters(), "", fn_name, fn_param_name, "value");
   }
