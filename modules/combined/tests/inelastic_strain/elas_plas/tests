@@ -16,12 +16,12 @@
   [./elastic_plastic_sm]
     type = 'Exodiff'
     input = 'elas_plas_nl1_sm.i'
-    exodiff = 'elas_plas_nl1_out.e'
+    exodiff = 'elas_plas_nl1_sm_out.e'
   [../]
   [./elastic_plastic_cycle_sm]
     type = 'Exodiff'
     input = 'elas_plas_nl1_cycle_sm.i'
-    exodiff = 'elas_plas_nl1_cycle_out.e'
+    exodiff = 'elas_plas_nl1_cycle_sm_out.e'
     abs_zero = 6e-5
   [../]
 []

@@ -210,7 +210,7 @@
 []
 
 [Outputs]
-  file_base = power_law_creep_out
+  file_base = power_law_creep_restart_out
   exodus = true
 []
 

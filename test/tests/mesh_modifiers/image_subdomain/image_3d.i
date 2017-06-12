@@ -14,7 +14,7 @@
 [MeshModifiers]
   [./image]
     type = ImageSubdomain
-    file_base = ../../functions/image_function/stack/test
+    file_base = stack/test
     file_suffix = png
     threshold = 2.7e4
   [../]

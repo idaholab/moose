@@ -316,7 +316,7 @@
 
 [Outputs]
   csv = true
-  file_base = sweos_out
+  file_base = sweos_tabulated_out
   execute_on = 'TIMESTEP_END'
   print_perf_log = true
 []
