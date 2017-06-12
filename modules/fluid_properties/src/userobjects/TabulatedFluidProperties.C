@@ -11,7 +11,6 @@
 
 // C++ includes
 #include <fstream>
-#include <ctime>
 
 template <>
 InputParameters
@@ -56,7 +55,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp"))
+    _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp")),
+    _csv_reader(_file_name, true, ",", &_communicator)
 {
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
@@ -77,18 +77,104 @@ TabulatedFluidProperties::initialSetup()
   if (file.good())
   {
     _console << "Reading tabulated properties from " << _file_name << "\n";
-    parseTabulatedData(_file_name);
+    _csv_reader.read();
 
-    // If any required tabulated data is missing (eg, the data file did not include
-    // one of the required properties), then generate property data for that property
-    // so that spline interpolation can be used
-    generateMissingTabulatedData();
+    const std::vector<std::string> & column_names = _csv_reader.getColumnNames();
+
+    // Check that all required columns are present
+    for (std::size_t i = 0; i < _required_columns.size(); ++i)
+    {
+      if (std::find(column_names.begin(), column_names.end(), _required_columns[i]) ==
+          column_names.end())
+        mooseError("No ",
+                   _required_columns[i],
+                   " data read in ",
+                   _file_name,
+                   ". A column named ",
+                   _required_columns[i],
+                   " must be present");
+    }
+
+    std::map<std::string, unsigned int> data_index;
+    for (std::size_t i = 0; i < _required_columns.size(); ++i)
+    {
+      auto it = std::find(column_names.begin(), column_names.end(), _required_columns[i]);
+      data_index[_required_columns[i]] = std::distance(column_names.begin(), it);
+    }
+
+    const std::vector<std::vector<Real>> & column_data = _csv_reader.getColumnData();
+
+    // Extract the pressure and temperature data vectors
+    _pressure = column_data[data_index.find("pressure")->second];
+    _temperature = column_data[data_index.find("temperature")->second];
+
+    // Pressure and temperature data contains duplicates due to the csv format.
+    // First, check that pressure is monotonically increasing
+    if (!std::is_sorted(_pressure.begin(), _pressure.end()))
+      mooseError("The column data for pressure is not monotonically increasing in ", _file_name);
+
+    // The first pressure value is repeated for each temperature value. Counting the
+    // number of repeats provides the number of temperature values
+    auto num_T = std::count(_pressure.begin(), _pressure.end(), _pressure.front());
+
+    // Now remove the duplicates in the pressure vector
+    auto last_unique = std::unique(_pressure.begin(), _pressure.end());
+    _pressure.erase(last_unique, _pressure.end());
+    _num_p = _pressure.size();
+
+    // Check that the number of rows in the csv file is equal to _num_p * _num_T
+    if (column_data[0].size() != _num_p * num_T)
+      mooseError("The number of rows in ",
+                 _file_name,
+                 " is not equal to the number of unique pressure values ",
+                 _num_p,
+                 " multiplied by the number of unique temperature values ",
+                 num_T);
+
+    // Need to make sure that the temperature values are provided in ascending order
+    // as well as duplicated for each pressure value
+    std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
+    if (!std::is_sorted(temp0.begin(), temp0.end()))
+      mooseError("The column data for temperature is not monotonically increasing in ", _file_name);
+
+    auto it_temp = _temperature.begin() + num_T;
+    for (std::size_t i = 1; i < _pressure.size(); ++i)
+    {
+      std::vector<Real> temp(it_temp, it_temp + num_T);
+      if (temp != temp0)
+        mooseError("Temperature values for pressure ",
+                   _pressure[i],
+                   " are not identical to values for ",
+                   _pressure[0]);
+
+      std::advance(it_temp, num_T);
+    }
+
+    // At this point, all temperature data has been provided in ascending order
+    // identically for each pressure value, so we can just keep the first range
+    _temperature.erase(_temperature.begin() + num_T, _temperature.end());
+    _num_T = _temperature.size();
+
+    // Minimum and maximum pressure and temperature. Note that _pressure and
+    // _temperature are sorted
+    _pressure_min = _pressure.front();
+    _pressure_max = _pressure.back();
+    _temperature_min = _temperature.front();
+    _temperature_max = _temperature.back();
+
+    // Extract the fluid property data and reshape into 2D arrays for interpolation
+    reshapeData2D(_num_p, _num_T, column_data[data_index.find("density")->second], _density);
+    reshapeData2D(_num_p, _num_T, column_data[data_index.find("enthalpy")->second], _enthalpy);
+    reshapeData2D(
+        _num_p, _num_T, column_data[data_index.find("internal_energy")->second], _internal_energy);
   }
   else
   {
     _console << "No tabulated properties file named " << _file_name << " exists.\n"
              << "Generating tabulated data and writing output to " << _file_name << "\n";
-    generateAllTabulatedData();
+
+    generateTabulatedData();
+
     // Write tabulated data to file
     writeTabulatedData(_file_name);
   }
@@ -248,205 +334,29 @@ TabulatedFluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & d
 }
 
 void
-TabulatedFluidProperties::parseTabulatedData(std::string file_name)
-{
-  MooseUtils::checkFileReadable(file_name);
-
-  /// List of axes names read from file
-  std::vector<std::string> axes_names;
-  /// Data for axes
-  std::vector<std::vector<Real>> axes;
-  /// List of property names read from file
-  std::vector<std::string> property_names;
-  /// Data for each fluid property
-  std::vector<std::vector<Real>> properties;
-
-  std::ifstream file_in(file_name.c_str());
-  std::string line;
-
-  while (getline(file_in, line))
-  {
-    // Skip empty lines
-    if (line.empty())
-      continue;
-
-    // Skip lines containing whitespace only
-    if (std::all_of(line.begin(), line.end(), isspace))
-      continue;
-
-    // Skip lines starting with # (treat as comments)
-    if (line.find("#") == 0)
-      continue;
-
-    // Found an axes keyword
-    else if (std::find(_required_axes.begin(), _required_axes.end(), line) != _required_axes.end())
-    {
-      auto it = std::find(_required_axes.begin(), _required_axes.end(), line);
-      auto index = std::distance(_required_axes.begin(), it);
-      axes_names.push_back(_required_axes[index]);
-
-      std::vector<Real> data;
-      while (getline(file_in, line))
-      {
-        if (!line.empty())
-          parseData(line, data);
-        else
-          break;
-      }
-      axes.push_back(data);
-    }
-
-    // Found a fluid properties keyword
-    else if (std::find(_valid_props.begin(), _valid_props.end(), line) != _valid_props.end())
-    {
-      auto it = std::find(_valid_props.begin(), _valid_props.end(), line);
-      auto index = std::distance(_valid_props.begin(), it);
-      property_names.push_back(_valid_props[index]);
-
-      std::vector<Real> data;
-
-      while (getline(file_in, line))
-      {
-        if (!line.empty())
-          parseData(line, data);
-        else
-          break;
-      }
-      properties.push_back(data);
-    }
-
-    // Found an invalid keyword, so ignore data
-    else if (std::find(_valid_props.begin(), _valid_props.end(), line) == _valid_props.end())
-    {
-      while (getline(file_in, line))
-        if (!line.empty())
-          continue;
-        else
-          break;
-    }
-  }
-
-  // Check that axes data has been provided in ascending order
-  for (unsigned int i = 0; i < axes.size(); ++i)
-    if (!std::is_sorted(axes[i].begin(), axes[i].end()))
-      mooseError(
-          "The axes data for ", axes_names[i], " is not monotonically ascending in ", file_name);
-
-  // Check that the correct number of data points have been provided for each property
-  unsigned int num_data = 1;
-  for (auto ax : axes)
-    num_data *= ax.size();
-
-  for (unsigned int i = 0; i < properties.size(); ++i)
-    if (properties[i].size() != num_data)
-      mooseError(
-          "The number of supplied ", property_names[i], " values is not correct in ", file_name);
-
-  for (unsigned int i = 0; i < axes_names.size(); ++i)
-  {
-    if (axes_names[i] == "pressure")
-      _pressure = axes[i];
-
-    else // (axes_names[i] == "temperature")
-      _temperature = axes[i];
-  }
-
-  // Both pressure and temperature data must be provided
-  if (_pressure.empty())
-    mooseError("No pressure axes data read in ", file_name);
-  if (_temperature.empty())
-    mooseError("No temperature axes data read in ", file_name);
-
-  // Number of pressure and temperature data points
-  _num_T = _temperature.size();
-  _num_p = _pressure.size();
-
-  // Minimum and maximum pressure and temperature. Note that _pressure and
-  // _temperature are sorted
-  _pressure_min = _pressure.front();
-  _pressure_max = _pressure.back();
-  _temperature_min = _temperature.front();
-  _temperature_max = _temperature.back();
-
-  for (unsigned int i = 0; i < property_names.size(); ++i)
-  {
-    if (property_names[i] == "density")
-      reshapeData2D(_num_p, _num_T, properties[i], _density);
-
-    else if (property_names[i] == "internal_energy")
-      reshapeData2D(_num_p, _num_T, properties[i], _internal_energy);
-
-    else // (property_names[i] == "enthalpy")
-      reshapeData2D(_num_p, _num_T, properties[i], _enthalpy);
-  }
-}
-
-void
-TabulatedFluidProperties::parseData(std::string line, std::vector<Real> & data)
-{
-  std::istringstream linestream(line);
-  std::string item;
-
-  while (getline(linestream, item, ' '))
-  {
-    std::istringstream iss(item);
-    Real value;
-    iss >> value;
-    data.push_back(value);
-  }
-}
-
-void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 {
-  MooseUtils::checkFileWriteable(file_name);
-
-  std::ofstream file_out(file_name.c_str());
-
-  std::vector<std::string> axes_names{"pressure", "temperature"};
-  std::vector<std::vector<Real>> axes_data;
-  axes_data.push_back(_pressure);
-  axes_data.push_back(_temperature);
-
-  std::vector<std::string> property_names{"density", "internal_energy", "enthalpy"};
-  std::vector<std::vector<Real>> property_data;
-  property_data.push_back(flattenData(_density));
-  property_data.push_back(flattenData(_internal_energy));
-  property_data.push_back(flattenData(_enthalpy));
-
-  // Write out date and object created
-  time_t now = time(&now);
-  file_out << "# Created by TabulatedFluidProperties on " << ctime(&now) << "\n";
-
-  // Write out axes
-  for (unsigned int i = 0; i < axes_names.size(); ++i)
+  if (processor_id() == 0)
   {
-    file_out << axes_names[i] << "\n";
-    for (auto item : axes_data[i])
-      file_out << item << "\n";
+    MooseUtils::checkFileWriteable(file_name);
 
-    file_out << "\n";
-  }
+    std::ofstream file_out(file_name.c_str());
 
-  // Write out the fluid property data
-  for (unsigned int i = 0; i < property_names.size(); ++i)
-  {
-    file_out << property_names[i] << "\n";
+    std::string column_names{"pressure, temperature, density, enthalpy, internal_energy"};
 
-    unsigned int item_count = 0;
-    for (auto item : property_data[i])
-    {
-      file_out << item << " ";
-      ++item_count;
-      if (item_count % 10 == 0)
-        file_out << "\n";
-    }
-    file_out << "\n";
+    // Write out column names
+    file_out << column_names << "\n";
+
+    // Write out the fluid property data
+    for (unsigned int i = 0; i < _num_p; ++i)
+      for (unsigned int j = 0; j < _num_T; ++j)
+        file_out << _pressure[i] << ", " << _temperature[j] << ", " << _density[i][j] << ", "
+                 << _enthalpy[i][j] << ", " << _internal_energy[i][j] << "\n";
   }
 }
 
 void
-TabulatedFluidProperties::generateAllTabulatedData()
+TabulatedFluidProperties::generateTabulatedData()
 {
   _pressure.resize(_num_p);
   _temperature.resize(_num_T);
@@ -485,38 +395,9 @@ TabulatedFluidProperties::generateAllTabulatedData()
 }
 
 void
-TabulatedFluidProperties::generateMissingTabulatedData()
-{
-  // Generate tabulated data for any property that is missing
-  if (_density.empty())
-  {
-    _density.resize(_num_p);
-    for (unsigned int i = 0; i < _num_p; ++i)
-      for (unsigned int j = 0; j < _num_T; ++j)
-        _density[i].push_back(_fp.rho(_pressure[i], _temperature[j]));
-  }
-
-  if (_internal_energy.empty())
-  {
-    _internal_energy.resize(_num_p);
-    for (unsigned int i = 0; i < _num_p; ++i)
-      for (unsigned int j = 0; j < _num_T; ++j)
-        _internal_energy[i].push_back(_fp.e(_pressure[i], _temperature[j]));
-  }
-
-  if (_enthalpy.empty())
-  {
-    _enthalpy.resize(_num_p);
-    for (unsigned int i = 0; i < _num_p; ++i)
-      for (unsigned int j = 0; j < _num_T; ++j)
-        _enthalpy[i].push_back(_fp.h(_pressure[i], _temperature[j]));
-  }
-}
-
-void
 TabulatedFluidProperties::reshapeData2D(unsigned int nrow,
                                         unsigned int ncol,
-                                        std::vector<Real> & vec,
+                                        const std::vector<Real> & vec,
                                         std::vector<std::vector<Real>> & mat)
 {
   if (!vec.empty())
@@ -527,23 +408,6 @@ TabulatedFluidProperties::reshapeData2D(unsigned int nrow,
       for (unsigned int j = 0; j < ncol; ++j)
         mat[i].push_back(vec[i * ncol + j]);
   }
-}
-
-std::vector<Real>
-TabulatedFluidProperties::flattenData(std::vector<std::vector<Real>> & mat)
-{
-  std::vector<Real> vec;
-
-  if (!mat.empty())
-  {
-    const unsigned int n = mat.size();
-    const unsigned int m = mat[0].size();
-
-    for (unsigned int i = 0; i < n; ++i)
-      for (unsigned int j = 0; j < m; ++j)
-        vec.push_back(mat[i][j]);
-  }
-  return vec;
 }
 
 void
