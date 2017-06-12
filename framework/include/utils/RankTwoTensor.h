@@ -80,6 +80,16 @@ public:
                 const TypeVector<Real> & row2,
                 const TypeVector<Real> & row3);
 
+  /// named constructor for initializing from row vectors
+  static RankTwoTensor initializeFromRows(const TypeVector<Real> & row1,
+                                          const TypeVector<Real> & row2,
+                                          const TypeVector<Real> & row3);
+
+  /// named constructor for initializing from column vectors
+  static RankTwoTensor initializeFromColumns(const TypeVector<Real> & col1,
+                                             const TypeVector<Real> & col2,
+                                             const TypeVector<Real> & col3);
+
   /// Constructor that proxies the fillFromInputVector method
   RankTwoTensor(const std::vector<Real> & input) { this->fillFromInputVector(input); };
 
@@ -109,16 +119,16 @@ public:
   static MooseEnum fillMethodEnum();
 
   /**
-  * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
-  * If 6 inputs, then symmetry is assumed S_ij = S_ji, and
-  *   _vals[0][0] = input[0]
-  *   _vals[1][1] = input[1]
-  *   _vals[2][2] = input[2]
-  *   _vals[1][2] = input[3]
-  *   _vals[0][2] = input[4]
-  *   _vals[0][1] = input[5]
-  * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
-  */
+   * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
+   * If 6 inputs, then symmetry is assumed S_ij = S_ji, and
+   *   _vals[0][0] = input[0]
+   *   _vals[1][1] = input[1]
+   *   _vals[2][2] = input[2]
+   *   _vals[1][2] = input[3]
+   *   _vals[0][2] = input[4]
+   *   _vals[0][1] = input[5]
+   * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
+   */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method = autodetect);
 
 public:

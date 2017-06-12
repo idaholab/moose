@@ -93,6 +93,24 @@ RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1,
     _vals[two_n + i] = row3(i);
 }
 
+RankTwoTensor
+RankTwoTensor::initializeFromRows(const TypeVector<Real> & row1,
+                                  const TypeVector<Real> & row2,
+                                  const TypeVector<Real> & row3)
+{
+  return RankTwoTensor(
+      row1(0), row2(0), row3(0), row1(1), row2(1), row3(1), row1(2), row2(2), row3(2));
+}
+
+RankTwoTensor
+RankTwoTensor::initializeFromColumns(const TypeVector<Real> & col1,
+                                     const TypeVector<Real> & col2,
+                                     const TypeVector<Real> & col3)
+{
+  return RankTwoTensor(
+      col1(0), col1(1), col1(2), col2(0), col2(1), col2(2), col3(0), col3(1), col3(2));
+}
+
 RankTwoTensor::RankTwoTensor(const TypeTensor<Real> & a)
 {
   (*this)(0, 0) = a(0, 0);
