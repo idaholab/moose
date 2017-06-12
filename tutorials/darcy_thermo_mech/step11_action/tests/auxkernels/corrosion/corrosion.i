@@ -1,0 +1,1 @@
+../../../../step10_multiapps/tests/auxkernels/corrosion/corrosion.i

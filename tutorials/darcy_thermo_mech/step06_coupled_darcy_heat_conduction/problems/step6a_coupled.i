@@ -47,6 +47,9 @@
     type = DarcyConvection
     variable = temperature
     darcy_pressure = pressure
+    velocity_x = velocity_x
+    velocity_y = velocity_y
+    velocity_z = velocity_z
   [../]
 []
 
