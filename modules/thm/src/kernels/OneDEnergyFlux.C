@@ -36,8 +36,8 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _rhouA_var_number(coupled("rhouA")),
     _has_beta(isCoupled("beta")),
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
-    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta") : NULL),
-    _daL_dbeta(_has_beta ? &getMaterialProperty<Real>("daL_dbeta") : NULL),
+    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta") : nullptr),
+    _daL_dbeta(_has_beta ? &getMaterialProperty<Real>("daL_dbeta") : nullptr),
     _alpha(coupledValue("alpha"))
 {
 }
