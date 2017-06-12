@@ -26,7 +26,7 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
     _area_grad(coupledGradient("area")),
     _pressure(getMaterialProperty<Real>("pressure")),
     _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta")
-                                : NULL),
+                                : nullptr),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoA")),
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhouA")),
     _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoEA")),
