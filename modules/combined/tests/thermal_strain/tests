@@ -16,5 +16,6 @@
     scale_refine = 1
     max_parallel = 1
     prereq = 'thermal_strain_test'
+    queue_scheduler = false
   [../]
 []
