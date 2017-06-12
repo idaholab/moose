@@ -108,6 +108,7 @@
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
 #include "ComputeAxisymmetric1DFiniteStrain.h"
 #include "ComputePlasticHeatEnergy.h"
+#include "ComputeInterfaceStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -313,6 +314,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetric1DIncrementalStrain);
   registerMaterial(ComputeAxisymmetric1DFiniteStrain);
   registerMaterial(ComputePlasticHeatEnergy);
+  registerMaterial(ComputeInterfaceStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
