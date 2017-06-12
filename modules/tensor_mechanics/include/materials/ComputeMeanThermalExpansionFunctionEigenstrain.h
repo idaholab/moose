@@ -7,8 +7,7 @@
 #ifndef COMPUTEMEANTHERMALEXPANSIONFUNCTIONEIGENSTRAIN_H
 #define COMPUTEMEANTHERMALEXPANSIONFUNCTIONEIGENSTRAIN_H
 
-#include "ComputeThermalExpansionEigenstrainBase.h"
-#include "DerivativeMaterialInterface.h"
+#include "ComputeMeanThermalExpansionEigenstrainBase.h"
 
 class ComputeMeanThermalExpansionFunctionEigenstrain;
 
@@ -19,19 +18,37 @@ InputParameters validParams<ComputeMeanThermalExpansionFunctionEigenstrain>();
  * ComputeMeanThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion according to a mean thermal expansion function.
  */
-class ComputeMeanThermalExpansionFunctionEigenstrain : public ComputeThermalExpansionEigenstrainBase
+class ComputeMeanThermalExpansionFunctionEigenstrain
+    : public ComputeMeanThermalExpansionEigenstrainBase
 {
 public:
   ComputeMeanThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup() override;
-  virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
+  /*
+   * Get the reference temperature for the mean thermal expansion relationship.  This is
+   * the temperature at which \f$\delta L = 0\f$.
+   */
+  virtual Real referenceTemperature() override;
+
+  /*
+   * Compute the total mean thermal expansion relative to the reference temperature.
+   * This is the linear thermal strain divided by the temperature difference:
+   * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
+   * param temperature  temperature at which this is evaluated
+   */
+  virtual Real meanThermalExpansionCoefficient(const Real temperature) override;
+
+  /*
+   * Compute the derivative of the total mean thermal expansion coefficient \f$\bar{\alpha}\f$
+   * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
+   * param temperature  temperature at which this is evaluated
+   */
+  virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) override;
 
   Function & _thermal_expansion_function;
-  const Real & _reference_temperature;
-  Real _alphabar_stress_free_temperature;
-  Real _thexp_stress_free_temperature;
+
+  const Real & _thexp_func_ref_temp;
 };
 
 #endif // COMPUTEMEANTHERMALEXPANSIONFUNCTIONEIGENSTRAIN_H

@@ -1,0 +1,7 @@
+[Tests]
+  [./nl1_lim]
+    type = 'Exodiff'
+    input = 'nafems_nl1_lim.i'
+    exodiff = 'nafems_nl1_lim_out.e'
+  [../]
+[]

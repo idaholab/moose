@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "PowerLawCreepStressUpdate.h"
+#include "ElasticityTensorTools.h"
 
 #include "Function.h"
 
@@ -58,7 +59,7 @@ void
 PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/,
                                                    const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = getIsotropicShearModulus(elasticity_tensor);
+  _shear_modulus = ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   if (_has_temp)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));

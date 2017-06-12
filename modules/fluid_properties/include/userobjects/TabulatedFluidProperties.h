@@ -9,6 +9,7 @@
 #define TABULATEDFLUIDPROPERTIES_H
 
 #include "SinglePhaseFluidPropertiesPT.h"
+#include "DelimitedFileReader.h"
 
 class SinglePhaseFluidPropertiesPT;
 class BicubicSplineInterpolation;
@@ -20,7 +21,7 @@ InputParameters validParams<TabulatedFluidProperties>();
 /**
  * Class for fluid properties read from a file.
  *
- * Property values are read from a file containing keywords followed by data.
+ * Property values are read from a CSV file containing property data.
  * Monotonically increasing values of pressure and temperature must be included in
  * the data file, specifying the phase space where tabulated fluid properties will
  * be defined. An error is thrown if either temperature or pressure data is not
@@ -39,16 +40,28 @@ InputParameters validParams<TabulatedFluidProperties>();
  * and enthalpy.
  *
  * The expected file format for the tabulated fluid properties is now described.
- * Lines beginning with # are ignored, so comments can be included.
- * Keywords 'pressure' and 'temperature' must be included, each followed by numerical data
- * that increases monotonically. A blank line signifies the end of the data for the
- * preceding keyword.
+ * The first line must be the header containing the required column
+ * names "pressure", "temperature", "density", "enthalpy", "internal_energy" (note: the
+ * order is not important, although having pressure and temperature first makes the data
+ * easier for a human to read).
  *
- * Fluid properties for density, internal energy, and enthalpy can be included, with
- * the keyword 'density', 'internal_energy', or 'enthalpy' followed by data that cycles
- * first by temperature then pressure. If any of these properties are not supplied,
- * this UserObject will generate it using the pressure and temperature values provided.
- * An error is thrown if an incorrect number of property values has been supplied.
+ * The data in the pressure and temperature columns must be monotonically increasing. This file
+ * format does require duplication of the pressure and temperature data - each pressure value
+ * must be included num_T times, while each temperature value is repeated num_p times, where
+ * num_T and num_p are the number of temperature and pressure points, respectively. This class
+ * will check that the required number of data points have been entered (num_T * num_p).
+ *
+ * An example of a valid fluid properties file is provided below:
+ *
+ * pressure, temperature,   density, enthalpy, internal_energy
+ *   200000,         275,   3.90056,   -21487,        -72761.7
+ *   200000,         277,   3.86573, -19495.4,        -71232.0
+ *   200000,         280,   3.83155, -17499.1,        -69697.3
+ *   300000,         275,   6.07273, -22728.3,        -73626.5
+ *   300000,         277,   6.01721, -20711.5,        -72079.3
+ *   300000,         280,   5.96277, -18691.0,        -70527.7
+ *
+ * and so on.
  *
  * If no tabulated fluid property data file exists, then data for density, internal energy
  * and enthalpy will be generated using the pressure and temperature ranges specified
@@ -131,19 +144,6 @@ public:
 
 protected:
   /**
-   * Read tabulated data from a file and store it in vectors
-   * @param file_name name of the file to be read
-   */
-  void parseTabulatedData(std::string file_name);
-
-  /**
-   * Helper function to parse lines of data read from file.
-   * @param line line to be parsed
-   * @param[out] data vector of data parsed from line
-   */
-  void parseData(std::string line, std::vector<Real> & data);
-
-  /**
    * Writes tabulated data to a file.
    * @param file_name name of the file to be written
    */
@@ -161,15 +161,7 @@ protected:
    * Generates a table of fluid properties by looping over pressure and temperature
    * and calculating properties using the FluidProperties UserObject _fp.
    */
-  virtual void generateAllTabulatedData();
-
-  /**
-   * Generates any missing data that has been parsed from an input file. For example,
-   * if one of the required properties has not been included, then it is generated using
-   * the FluidProperties UserObject at the pressure and temperature points given in the
-   * data file.
-   */
-  virtual void generateMissingTabulatedData();
+  virtual void generateTabulatedData();
 
   /**
    * Forms a 2D matrix from a single std::vector.
@@ -180,15 +172,8 @@ protected:
    */
   void reshapeData2D(unsigned int nrow,
                      unsigned int ncol,
-                     std::vector<Real> & vec,
+                     const std::vector<Real> & vec,
                      std::vector<std::vector<Real>> & mat);
-
-  /**
-   * Forms a 1D vector from a 2D matrix.
-   * @param mat 2D matrix
-   * @return 1D vector containing elements of mat
-   */
-  std::vector<Real> flattenData(std::vector<std::vector<Real>> & mat);
 
   /// File name of tabulated data file
   FileName _file_name;
@@ -233,10 +218,11 @@ protected:
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidPropertiesPT & _fp;
 
-  /// List of reuired axes names to be read
-  const std::vector<std::string> _required_axes{"pressure", "temperature"};
-  /// List of valid fluid property names that can be read
-  const std::vector<std::string> _valid_props{"density", "enthalpy", "internal_energy"};
+  /// List of required column names to be read
+  const std::vector<std::string> _required_columns{
+      "pressure", "temperature", "density", "enthalpy", "internal_energy"};
+  /// The MOOSE delimited file reader.
+  MooseUtils::DelimitedFileReader _csv_reader;
 };
 
 #endif /* TABULATEDFLUIDPROPERTIES_H */

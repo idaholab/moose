@@ -1,0 +1,8 @@
+[Tests]
+  [./tabulated]
+    type = CSVDiff
+    input = 'tabulated.i'
+    csvdiff = 'tabulated_out.csv'
+    rel_err = 1e-4
+  [../]
+[]

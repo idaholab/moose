@@ -43,6 +43,7 @@ protected:
   bool _output_iteration_info;
   Real _relative_tolerance;
   Real _absolute_tolerance;
+  MaterialProperty<Real> & _matl_timestep_limit;
 
 private:
 };

@@ -1,43 +1,6 @@
 # Test thermophysical property calculations using TabulatedFluidProperties.
 # Calculations for density, internal energy and enthalpy using bicubic spline
 # interpolation of data generated using CO2FluidProperties.
-#
-# The fluid properties calculated using this test are compared with the results
-# using the CO2FluidProperties test co2.i.
-#
-# Comparison with values from Span and Wagner, "A New Equation of State for
-# Carbon Dioxide Covering the Fluid Region from the Triple-Point Temperature
-# to 1100K at Pressures up to 800 MPa", J. Phys. Chem. Ref. Data, 25 (1996)
-#
-# Viscosity values from Fenghour et al., "The viscosity of carbon dioxide",
-# J. Phys. Chem. Ref. Data, 27, 31-44 (1998)
-#
-#  --------------------------------------------------------------
-#  Pressure (Mpa)             |   1       |    1      |   1
-#  Temperature (K)            |  280      |  360      |  500
-#  --------------------------------------------------------------
-#  Expected values
-#  --------------------------------------------------------------
-#  Density (kg/m^3)           |  20.199   |  15.105   |  10.664
-#  Internal energy (kJ/kg/K)  |  -75.892  |  -18.406  |  91.829
-#  Enthalpy (kJ/kg)           |  -26.385  |  47.797   |  185.60
-#  Entropy (kJ/kg/K)          |  -0.51326 |  -0.28033 |  0.04225
-#  cv (kJ/kg/K)               |  0.67092  |  0.72664  |  0.82823
-#  cp (kJ/kg/K)               |  0.92518  |  0.94206  |  1.0273
-#  Speed of sound (m/s)       |  252.33   |  289.00   |  339.81
-#  Viscosity (1e-6Pa.s)       |  14.15    |  17.94    |  24.06
-#  --------------------------------------------------------------
-#  Calculated values
-#  --------------------------------------------------------------
-#  Density (kg/m^3)           |  20.199   |  15.105   |  10.664
-#  Internal energy (kJ/kg/K)  |  -75.892  |  -18.406  |  91.829
-#  Enthalpy (kJ/kg)           |  -26.385  |  47.797   |  185.60
-#  Entropy (kJ/kg/K)          |  -0.51326 |  -0.28033 |  0.04225
-#  cv (kJ/kg/K)               |  0.67092  |  0.72664  |  0.82823
-#  cp (kJ/kg/K)               |  0.92518  |  0.94206  |  1.0273
-#  Speed of sound (m/s)       |  252.33   |  289.00   |  339.81
-#  Viscosity (1e-6 Pa.s)      |  14.15    |  17.94    |  24.06
-#  --------------------------------------------------------------
 
 [Mesh]
   type = GeneratedMesh
@@ -316,7 +279,7 @@
 
 [Outputs]
   csv = true
-  file_base = sweos_tabulated_out
+  file_base = tabulated_out
   execute_on = 'TIMESTEP_END'
   print_perf_log = true
 []

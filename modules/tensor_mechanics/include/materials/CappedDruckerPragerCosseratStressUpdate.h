@@ -54,6 +54,11 @@ class CappedDruckerPragerCosseratStressUpdate : public CappedDruckerPragerStress
 public:
   CappedDruckerPragerCosseratStressUpdate(const InputParameters & parameters);
 
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return false; }
+
 protected:
   /// Shear modulus for the host medium
   const Real _shear;

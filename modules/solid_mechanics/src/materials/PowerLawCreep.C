@@ -19,6 +19,8 @@ validParams<PowerLawCreep>()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0, "Start time (if not zero)");
+  params.addParam<Real>(
+      "max_creep_incr", 1e-4, "The maximum creep strain increment allowed in a time step");
 
   //  Sub-Newton Iteration control parameters
   params.addParam<Real>(

@@ -35,7 +35,8 @@ CombinedCreepPlasticity::CombinedCreepPlasticity(const InputParameters & paramet
     _max_its(parameters.get<unsigned int>("max_its")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-    _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
+    _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit"))
 {
 }
 
@@ -168,6 +169,12 @@ CombinedCreepPlasticity::computeStress(const Elem & current_elem,
   }
 
   strain_increment = elastic_strain_increment;
+
+  _matl_timestep_limit[qp] = 0.0;
+  for (unsigned i_rmm(0); i_rmm < num_submodels; ++i_rmm)
+    _matl_timestep_limit[qp] += 1.0 / rmm[i_rmm]->computeTimeStepLimit(qp);
+
+  _matl_timestep_limit[qp] = 1.0 / _matl_timestep_limit[qp];
 }
 
 bool

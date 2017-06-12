@@ -237,23 +237,24 @@
 #include "VariableResidual.h"
 
 // vector PPS
-#include "MaterialVectorPostprocessor.h"
+#include "CSVReader.h"
 #include "ConstantVectorPostprocessor.h"
 #include "Eigenvalues.h"
-#include "NodalValueSampler.h"
-#include "SideValueSampler.h"
-#include "PointValueSampler.h"
-#include "LineValueSampler.h"
-#include "VectorOfPostprocessors.h"
-#include "LeastSquaresFit.h"
+#include "ElementVariablesDifferenceMax.h"
 #include "ElementsAlongLine.h"
 #include "ElementsAlongPlane.h"
 #include "IntersectionPointsAlongLine.h"
-#include "LineMaterialRealSampler.h"
+#include "LeastSquaresFit.h"
 #include "LineFunctionSampler.h"
-#include "VolumeHistogram.h"
+#include "LineMaterialRealSampler.h"
+#include "LineValueSampler.h"
+#include "MaterialVectorPostprocessor.h"
+#include "NodalValueSampler.h"
+#include "PointValueSampler.h"
+#include "SideValueSampler.h"
 #include "SphericalAverage.h"
-#include "CSVReader.h"
+#include "VectorOfPostprocessors.h"
+#include "VolumeHistogram.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -680,23 +681,24 @@ registerObjects(Factory & factory)
   registerPostprocessor(VariableResidual);
 
   // vector PPS
+  registerVectorPostprocessor(CSVReader);
   registerVectorPostprocessor(ConstantVectorPostprocessor);
-  registerVectorPostprocessor(MaterialVectorPostprocessor);
   registerVectorPostprocessor(Eigenvalues);
-  registerVectorPostprocessor(NodalValueSampler);
-  registerVectorPostprocessor(SideValueSampler);
-  registerVectorPostprocessor(PointValueSampler);
-  registerVectorPostprocessor(LineValueSampler);
-  registerVectorPostprocessor(VectorOfPostprocessors);
-  registerVectorPostprocessor(LeastSquaresFit);
+  registerVectorPostprocessor(ElementVariablesDifferenceMax);
   registerVectorPostprocessor(ElementsAlongLine);
   registerVectorPostprocessor(ElementsAlongPlane);
   registerVectorPostprocessor(IntersectionPointsAlongLine);
-  registerVectorPostprocessor(LineMaterialRealSampler);
+  registerVectorPostprocessor(LeastSquaresFit);
   registerVectorPostprocessor(LineFunctionSampler);
-  registerVectorPostprocessor(VolumeHistogram);
+  registerVectorPostprocessor(LineMaterialRealSampler);
+  registerVectorPostprocessor(LineValueSampler);
+  registerVectorPostprocessor(MaterialVectorPostprocessor);
+  registerVectorPostprocessor(NodalValueSampler);
+  registerVectorPostprocessor(PointValueSampler);
+  registerVectorPostprocessor(SideValueSampler);
   registerVectorPostprocessor(SphericalAverage);
-  registerVectorPostprocessor(CSVReader);
+  registerVectorPostprocessor(VectorOfPostprocessors);
+  registerVectorPostprocessor(VolumeHistogram);
 
   // user objects
   registerUserObject(LayeredIntegral);

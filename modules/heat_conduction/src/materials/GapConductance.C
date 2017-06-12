@@ -124,6 +124,7 @@ GapConductance::GapConductance(const InputParameters & parameters)
     _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
     _gap_conductance(declareProperty<Real>("gap_conductance" + _appended_property_name)),
     _gap_conductance_dT(declareProperty<Real>("gap_conductance" + _appended_property_name + "_dT")),
+    _gap_thermal_conductivity(declareProperty<Real>("gap_conductivity")),
     _gap_conductivity(getParam<Real>("gap_conductivity")),
     _gap_conductivity_function(isParamValid("gap_conductivity_function")
                                    ? &getFunction("gap_conductivity_function")
@@ -293,7 +294,9 @@ GapConductance::computeQpConductance()
 Real
 GapConductance::h_conduction()
 {
-  return gapK() / gapLength(_gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap);
+  _gap_thermal_conductivity[_qp] = gapK();
+  return _gap_thermal_conductivity[_qp] /
+         gapLength(_gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap);
 }
 
 Real

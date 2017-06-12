@@ -44,8 +44,10 @@ protected:
   const unsigned int _n_vars;
   /// material property for which to test derivatives
   const MaterialProperty<Real> & _p;
-  /// material properties for the derivatives of the tested property
-  std::vector<const MaterialProperty<Real> *> _p_derivatives;
+  /// material properties for the off-diagonal derivatives of the tested property
+  std::vector<const MaterialProperty<Real> *> _p_off_diag_derivatives;
+  /// material property for the diagonal derivative of the tested property
+  const MaterialProperty<Real> & _p_diag_derivative;
 };
 
 #endif /* MATERIALDERIVATIVETESTKERNEL_H */

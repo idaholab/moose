@@ -666,6 +666,7 @@ class TestHarness:
         parser.add_argument('--max-fails', nargs=1, type=int, dest='max_fails', default=50, help='The number of tests allowed to fail before any additional tests will run')
         parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
+        parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -840,18 +841,17 @@ class TestHarness:
             get_runnable_tests[tester.getTestName()] = tester.getRunnable()
 
         # Now build up our tester dependencies
-        for tester in testers:
-            # Now we need to see which dependencies are real
-            # We don't really care about skipped tests, heavy tests, etc.
-            for name in tester.getPrereqs():
-                if not name_to_object[name].getRunnable():
-                    # If the prereq test is not going to run, then neither can this test
-                    get_runnable_tests[tester.getTestName()] = False
-
-            prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
-            d.insertDependency(tester, prereq_objects)
-
         try:
+            for tester in testers:
+                # Now we need to see which dependencies are real
+                # We don't really care about skipped tests, heavy tests, etc.
+                for name in tester.getPrereqs():
+                    if not name_to_object[name].getRunnable():
+                        tester.setStatus('skipped dependency', tester.bucket_skip)
+
+                prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
+                d.insertDependency(tester, prereq_objects)
+
             concurrent_tester_sets = d.getSortedValuesSets()
 
             for concurrent_testers in concurrent_tester_sets:

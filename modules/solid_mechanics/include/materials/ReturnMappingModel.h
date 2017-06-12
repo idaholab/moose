@@ -38,6 +38,8 @@ public:
                      SymmTensor & stress_new,
                      SymmTensor & inelastic_strain_increment);
 
+  Real computeTimeStepLimit(unsigned qp);
+
 protected:
   virtual void computeStressInitialize(unsigned /*qp*/,
                                        Real /*effectiveTrialStress*/,
@@ -63,8 +65,8 @@ protected:
 
   MaterialProperty<Real> & _effective_inelastic_strain;
   MaterialProperty<Real> & _effective_inelastic_strain_old;
-
-private:
+  Real _max_inelastic_incr;
+  Real _max_inc;
 };
 
 template <>

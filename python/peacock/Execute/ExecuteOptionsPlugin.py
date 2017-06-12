@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from PyQt5.QtWidgets import QWidget, QFileDialog
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox, QApplication
+from PyQt5.QtCore import pyqtSignal, Qt, QFileSystemWatcher
 import os, shlex
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import WidgetUtils
@@ -122,6 +122,15 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self._recent_exe_menu = None
         self._recent_working_menu = None
         self._recent_args_menu = None
+        self._exe_watcher = QFileSystemWatcher()
+        self._exe_watcher.fileChanged.connect(self.setExecutablePath)
+
+        self._loading_dialog = QMessageBox(parent=self)
+        self._loading_dialog.setWindowTitle("Loading executable")
+        self._loading_dialog.setStandardButtons(QMessageBox.NoButton) # get rid of the OK button
+        self._loading_dialog.setWindowModality(Qt.ApplicationModal)
+        self._loading_dialog.setIcon(QMessageBox.Information)
+        self._loading_dialog.setText("Loading executable")
 
         self.setup()
 
@@ -134,13 +143,26 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         if not app_path:
             return
 
+        self._loading_dialog.setInformativeText(app_path)
+        self._loading_dialog.show()
+        self._loading_dialog.raise_()
+        QApplication.processEvents()
+
         app_info = ExecutableInfo()
         app_info.setPath(app_path)
+
+        QApplication.processEvents()
+
         if app_info.valid():
             self.exe_line.setText(app_path)
             self.executableInfoChanged.emit(app_info)
             self.executableChanged.emit(app_path)
+            files = self._exe_watcher.files()
+            if files:
+                self._exe_watcher.removePaths(files)
+            self._exe_watcher.addPath(app_path)
         self._updateRecentExe(app_path, not app_info.valid())
+        self._loading_dialog.hide()
 
     def _chooseExecutable(self):
         """
@@ -210,10 +232,12 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         args = []
         if self.mpi_checkbox.isChecked():
             mpi_args = shlex.split(str(self.mpi_line.text()))
-            cmd = mpi_args[0]
-            args = mpi_args[1:]
-            args.append(str(self.exe_line.text()))
-        else:
+            if mpi_args:
+                cmd = mpi_args[0]
+                args = mpi_args[1:]
+                args.append(str(self.exe_line.text()))
+
+        if not cmd:
             cmd = str(self.exe_line.text())
 
         args += shlex.split(str(self.args_line.text()))
@@ -300,14 +324,13 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self.threads_checkbox.setChecked(True)
 
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication, QMainWindow
+    from PyQt5.QtWidgets import QMainWindow
     import sys
     qapp = QApplication(sys.argv)
     main_win = QMainWindow()
     w = ExecuteOptionsPlugin()
     main_win.setCentralWidget(w)
     main_win.show()
-    w.initialize()
     menubar = main_win.menuBar()
     menubar.setNativeMenuBar(False)
     executeMenu = menubar.addMenu("E&xecute")

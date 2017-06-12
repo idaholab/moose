@@ -1,32 +1,37 @@
 #!/bin/bash
 
 function printusage {
-    echo "Usage:    stork.sh <type> <AppName>"
+    echo "Usage:    stork.sh <name>"
     echo ""
     echo "    Creates a new blank MOOSE app in the current working directory."
-    echo "    <type> must be either "app" or "module"."
-    echo "    <AppName> should be given in CamelCase format."
+    echo "    <name> should be given in CamelCase format."
+    echo "    When --module is supplied after the <name> a MOOSE module will be created."
 }
 
-if [[ "$1" == "-h" || $# != 2 ]]; then
+if [[ "$1" == "-h" || $# == 0 || $# > 2 ]]; then
     printusage
     exit 1
 fi
 
-if [[ "$1" != "app" && "$1" != "module" ]]; then
-    echo "error: invalid type given" >&2
+if [[ $# == 2 && "$2" != "--module" ]]; then
     printusage
     exit 1
+fi
+
+
+if [[ $# == 2 && "$2" == "--module" ]]; then
+    kind="module"
+else
+    kind="app"
 fi
 
 # set old/new app name variables
 srcname='Stork'
-dstname=$2
-kind=$1
-srcnamelow=$(echo "$srcname" | awk '{print tolower($0)}')
-srcnameup=$(echo "$srcname" | awk '{print toupper($0)}')
-dstnamelow=$(echo "$dstname" | awk '{print tolower($0)}')
-dstnameup=$(echo "$dstname" | awk '{print toupper($0)}')
+dstname=$1
+srcnamelow=$(echo "$srcname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[A-Z]/[a-z]/')
+srcnameup=$(echo "$srcname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[a-z]/[A-Z]/')
+dstnamelow=$(echo "$dstname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[A-Z]/[a-z]/')
+dstnameup=$(echo "$dstname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[a-z]/[A-Z]/')
 dir="$dstnamelow"
 if [[ -z $MOOSE_DIR ]]; then
     MOOSE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
@@ -79,10 +84,6 @@ rm -f $dir/Makefile.*
 rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
 
-if [[ "$kind" == "module" ]]; then
-    rm -f "$dir/include/base/${dstname}App.h"
-fi
-
 if [[ "$kind" == "app" ]]; then
     # copy clang-format related files
     mkdir -p $dir/scripts
@@ -104,9 +105,8 @@ if [[ "$kind" == "app" ]]; then
     echo "         git push -u origin master"
     echo ""
     echo "To automatically enforce MOOSE C++ code style in your commits, run:"
-    echo "" 
+    echo ""
     echo "    cd $dir"
-    echo "    ./scripts/install-format-hook.sh" 
+    echo "    ./scripts/install-format-hook.sh"
     echo ""
 fi
-

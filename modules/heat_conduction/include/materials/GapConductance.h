@@ -88,6 +88,7 @@ protected:
   const VariableValue & _gap_temp_value;
   MaterialProperty<Real> & _gap_conductance;
   MaterialProperty<Real> & _gap_conductance_dT;
+  MaterialProperty<Real> & _gap_thermal_conductivity;
 
   const Real _gap_conductivity;
   Function * const _gap_conductivity_function;

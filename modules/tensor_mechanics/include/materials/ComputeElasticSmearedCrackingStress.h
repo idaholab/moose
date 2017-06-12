@@ -53,8 +53,8 @@ protected:
   ///@{ Material properties related to stress and strain
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
-  MaterialProperty<RankTwoTensor> & _stress_old;
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   ///@}
 
   ///@{ Input parameters for smeared crack models
@@ -66,19 +66,22 @@ protected:
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
   const Real _cracking_neg_fraction;
+
+  const Real _cracking_beta;
+  const bool _shear_retention;
   ///@}
 
   //@{ Stateful material properties related to smeared cracking model
-  MaterialProperty<RealVectorValue> * _crack_flags;
-  MaterialProperty<RealVectorValue> * _crack_flags_old;
+  MaterialProperty<RealVectorValue> & _crack_flags;
+  const MaterialProperty<RealVectorValue> & _crack_flags_old;
   MaterialProperty<RealVectorValue> * _crack_count;
-  MaterialProperty<RealVectorValue> * _crack_count_old;
-  MaterialProperty<RankTwoTensor> * _crack_rotation;
-  MaterialProperty<RankTwoTensor> * _crack_rotation_old;
-  MaterialProperty<RealVectorValue> * _crack_strain;
-  MaterialProperty<RealVectorValue> * _crack_strain_old;
-  MaterialProperty<RealVectorValue> * _crack_max_strain;
-  MaterialProperty<RealVectorValue> * _crack_max_strain_old;
+  const MaterialProperty<RealVectorValue> * _crack_count_old;
+  MaterialProperty<RankTwoTensor> & _crack_rotation;
+  const MaterialProperty<RankTwoTensor> & _crack_rotation_old;
+  MaterialProperty<RealVectorValue> & _crack_strain;
+  const MaterialProperty<RealVectorValue> & _crack_strain_old;
+  MaterialProperty<RealVectorValue> & _crack_max_strain;
+  const MaterialProperty<RealVectorValue> & _crack_max_strain_old;
   ///@}
 
   //@{ Variables used by multiple methods within the calculation for a single material point
