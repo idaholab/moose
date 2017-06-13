@@ -14,8 +14,15 @@ validParams<ComputeInterfaceStress>()
   InputParameters params = validParams<Material>();
   params.addClassDescription(
       "Stress in the plane of an interface defined by the gradient of an order parameter");
-  params.addCoupledVar("v", "Order parameter which defines the interface through its gradient");
+  params.addCoupledVar("v",
+                       "Order parameter that defines the interface. The interface is the region "
+                       "where the gradient of this order parameter is non-zero.");
   params.addRequiredParam<Real>("stress", "Planar stress");
+  params.addParam<Real>("op_range",
+                        1.0,
+                        "Range over which order parameters change across an "
+                        "interface. By default order parameters are assumed to "
+                        "vary from 0 to 1");
   params.addParam<MaterialPropertyName>(
       "planar_stress_name", "extra_stress", "Material property name for the planar stress");
   return params;
@@ -24,7 +31,7 @@ validParams<ComputeInterfaceStress>()
 ComputeInterfaceStress::ComputeInterfaceStress(const InputParameters & parameters)
   : Material(parameters),
     _grad_v(coupledGradient("v")),
-    _stress(getParam<Real>("stress")),
+    _stress(getParam<Real>("stress") / getParam<Real>("op_range")),
     _planar_stress(
         declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("planar_stress_name")))
 {
@@ -70,5 +77,5 @@ ComputeInterfaceStress::computeQpProperties()
   RankTwoTensor S = RankTwoTensor::initializeFromColumns(_col[0], _col[1], _col[2]);
 
   // basis change into cartesian coordinates (and scale with gradient norm)
-  _planar_stress[_qp] = (S * _planar_stress[_qp] * S.inverse()) * _grad_norm;
+  _planar_stress[_qp] = (S * _planar_stress[_qp] * S.transpose()) * _grad_norm;
 }

@@ -4,14 +4,14 @@
 The resulting stress tensor has the property of having one Eigenvector in the
 direction of the order parameter gradient, with an Eigenvalue of zero, and two
 Eigenvectors perpendicular to that direction, with an Eigenvalue $\sigma_i\cdot|\nabla\eta|$,
-where $\sigma$ (`stress`) is a supplied parameter and $\eta$ (`v`) is a given order
+where the scalar $\sigma_i$ (`stress`) is a supplied parameter and $\eta$ (`v`) is a given order
 parameter.
 
 $$
 \vec e_1 = \frac{\nabla\eta}{|\nabla\eta|}.
 $$
 
-Then two mor linearly independent vectors $\vec e_2$ and $\vec e_3$ are generated
+Then two more linearly independent vectors $\vec e_2$ and $\vec e_3$ are generated
 by determining the component $m$ of $\vec e_1$ with the largest magnitude. $\vec e_2$
 and $\vec e_3$ are then set to unit vectors from the set
 
@@ -22,10 +22,11 @@ $$
 such that
 
 $$
-\vec e_2 = \vec u_{(m+1) \backslash{3}}, \vec e_3 = \vec u_{(m+2)\backslash{3}}.
+\vec e_2 = \vec u_{(m+1) \backslash{3}}, \vec e_3 = \vec u_{(m+2)\backslash{3}},
 $$
 
-The basis $\vec e_i$ is then orthonormalized using the modified Gram-Schmidt procedure,
+where the $\backslash$ operator represents integer modulo. The basis $\vec e_i$
+is then orthonormalized using the modified Gram-Schmidt procedure,
 holding $\vec e_1$ constant. We construct two matrices
 
 $$
@@ -49,7 +50,7 @@ $$
 which is a basis transformation from the Eigenvector basis into the cartesian basis.
 The $|\nabla\eta|$ factor causes the integral over the stress tensor across the interface
 to evaluate the same value, regardless of interfacial width (provided the order parameter
-range is well defined - commonly 0 and 1 o the two sides of the interface).
+range is well defined - commonly 0 and 1 on the two sides of the interface).
 
 !parameters /Materials/ComputeInterfaceStress
 

@@ -81,14 +81,14 @@ public:
                 const TypeVector<Real> & row3);
 
   /// named constructor for initializing from row vectors
-  static RankTwoTensor initializeFromRows(const TypeVector<Real> & row1,
-                                          const TypeVector<Real> & row2,
-                                          const TypeVector<Real> & row3);
+  static RankTwoTensor initializeFromRows(const TypeVector<Real> & row0,
+                                          const TypeVector<Real> & row1,
+                                          const TypeVector<Real> & row2);
 
   /// named constructor for initializing from column vectors
-  static RankTwoTensor initializeFromColumns(const TypeVector<Real> & col1,
-                                             const TypeVector<Real> & col2,
-                                             const TypeVector<Real> & col3);
+  static RankTwoTensor initializeFromColumns(const TypeVector<Real> & col0,
+                                             const TypeVector<Real> & col1,
+                                             const TypeVector<Real> & col2);
 
   /// Constructor that proxies the fillFromInputVector method
   RankTwoTensor(const std::vector<Real> & input) { this->fillFromInputVector(input); };
