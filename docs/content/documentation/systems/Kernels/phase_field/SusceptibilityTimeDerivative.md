@@ -7,13 +7,13 @@ $$
 F(u,a,b,\dots)\cdot\frac{\partial u}{\partial t},
 $$
 
-where $F$ (`f_name`) is a [FunctionMaterial](FunctionMaterials.md) providing derivatives
-(for example defined using the [DerivativeParsedMaterial](DerivativeParsedMaterial.md)),
+where $F$ (`f_name`) is a [FunctionMaterial](/FunctionMaterials.md) providing derivatives
+(for example defined using the [DerivativeParsedMaterial](/DerivativeParsedMaterial.md)),
 $u$ is the kernel variable the time derivative is taken of, and $a, b, \dots$ (`args`)
 are further arguments of the susceptibility function $F$ which should contribute to
 off-diagonal Jacobian entries.
 
-See also [TimeDerivative](TimeDerivative.md).
+See also [TimeDerivative](/TimeDerivative.md).
 
 !parameters /Kernels/SusceptibilityTimeDerivative
 

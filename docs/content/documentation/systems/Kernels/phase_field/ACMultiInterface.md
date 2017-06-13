@@ -161,7 +161,7 @@ f_{int}  & = \frac12 \kappa_{ab} \left| \eta_a\nabla(1-\eta_a) - (1-\eta_a)\nabl
 \end{aligned}
 $$
 
-which is the familiar form implemented by [ACInterface](ACInterface.md).
+which is the familiar form implemented by [ACInterface](/ACInterface.md).
 
 !parameters /Kernels/ACMultiInterface
 
