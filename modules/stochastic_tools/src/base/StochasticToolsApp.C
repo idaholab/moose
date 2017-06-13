@@ -70,7 +70,7 @@ StochasticToolsApp::registerObjects(Factory & factory)
   registerDistribution(TriangularDistribution);
   registerDistribution(WeibullDistribution);
   registerDistribution(BetaDistribution);
-    
+
   // samplers
   registerSampler(MonteCarloSampler);
 

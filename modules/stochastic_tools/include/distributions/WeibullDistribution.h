@@ -12,11 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef UNIFORMDISTRIBUTION_H
-#define UNIFORMDISTRIBUTION_H
+#ifndef WEIBULLDISTRIBUTION_H
+#define WEIBULLDISTRIBUTION_H
 
 #include "Distribution.h"
-//#include "distribution.h"
 #include "distribution_1D.h"
 
 class UniformDistribution;
@@ -24,22 +23,18 @@ class UniformDistribution;
 template <>
 InputParameters validParams<UniformDistribution>();
 /**
- * A class used to generate uniform distribution
+ * A class used to generate a weibull distribution from contrib RAVEN crow
  */
-class UniformDistribution : public Distribution, BasicUniformDistribution
+class WeibullDistribution : public Distribution, BasicWeibullDistribution
 {
 public:
-  UniformDistribution(const InputParameters & parameters);
-  virtual ~UniformDistribution();
+  WeibullDistribution(const InputParameters & parameters);
+  virtual ~WeibullDistribution();
 
 protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real inverseCdf(const Real & y) override;
-  /// The lower bound for the uniform distribution
-  //const Real & _lower_bound;
-  /// The upper bound for the uniform distribution
-  //const Real & _upper_bound;
 };
 
-#endif /* UNIFORMDISTRIBUTION_H */
+#endif /* WEIBULLDISTRIBUTION_H */

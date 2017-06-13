@@ -22,32 +22,23 @@ validParams<BetaDistribution>()
   params.addClassDescription("Continuous beta distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
   params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
-  params.addParam<Real>("alpha", 0.0, "Distribution lower bound");
-  params.addParam<Real>("beta", 1.0, "Distribution upper bound");
-  params.addParam<Real>("scale", 0.0, "Distribution lower bound");
-  params.addParam<Real>("low", 1.0, "Distribution upper bound");
+  params.addParam<Real>("alpha", "Distribution alpha coefficient");
+  params.addParam<Real>("beta", "Distribution beta coefficient");
+  params.addParam<Real>("scale", 1.0, "Distribution scale factor");
   return params;
 }
 
 BetaDistribution::BetaDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicBetaDistribution(getParam<Real>("lower_bound"),
-                          getParam<Real>("upper_bound"),
-                          getParam<Real>("upper_bound"),
-                          getParam<Real>("upper_bound"),
-                          getParam<Real>("upper_bound"),
+    BasicBetaDistribution(getParam<Real>("alpha"),
+                          getParam<Real>("beta"),
+                          getParam<Real>("scale"),
                           getParam<Real>("lower_bound"),
-                          getParam<Real>("upper_bound")
-                          
-                          
-                          
+                          getParam<Real>("upper_bound"),
+                          getParam<Real>("lower_bound") //this is done on purpose
                           )
 {
 }
-
-
-double alpha, double beta, double scale, double x_min, double x_max, double low
-
 
 BetaDistribution::~BetaDistribution() {}
 

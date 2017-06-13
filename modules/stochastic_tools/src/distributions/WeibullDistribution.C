@@ -12,46 +12,53 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UniformDistribution.h"
+#include "WeibullDistribution.h"
 
 template <>
 InputParameters
-validParams<UniformDistribution>()
+validParams<WeibullDistribution>()
 {
   InputParameters params = validParams<Distribution>();
   params.addClassDescription("Continuous uniform distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
-  params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
+  params.addParam<Real>("upper_bound", std::numeric_limits<Real>::max(), "Distribution upper bound");
+  params.addParam<Real>("k", "Distribution shape factor");
+  params.addParam<Real>("lambda", "Distribution scale factor");
+  params.addParam<Real>("low", "Distribution lower domain scale");
   return params;
 }
 
-UniformDistribution::UniformDistribution(const InputParameters & parameters)
+WeibullDistribution::WeibullDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicUniformDistribution(getParam<Real>("lower_bound"),getParam<Real>("upper_bound"))
+    BasicWeibullDistribution(getParam<Real>("k"),
+                             getParam<Real>("lambda"),
+                             getParam<Real>("lower_bound"),
+                             getParam<Real>("upper_bound"),
+                             getParam<Real>("low"))
 {
 }
 
-UniformDistribution::~UniformDistribution() {}
+WeibullDistribution::~WeibullDistribution() {}
 
 Real
-UniformDistribution::pdf(const Real & x)
+WeibullDistribution::pdf(const Real & x)
 {
-  return BasicUniformDistribution::pdf(x);
+  return BasicWeibullDistribution::pdf(x);
 }
 
 Real
-UniformDistribution::cdf(const Real & x)
+WeibullDistribution::cdf(const Real & x)
 {
-  return BasicUniformDistribution::cdf(x);
+  return BasicWeibullDistribution::cdf(x);
 }
 
 Real
-UniformDistribution::inverseCdf(const Real & y)
+WeibullDistribution::inverseCdf(const Real & y)
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");
   else
-    return BasicUniformDistribution::inverseCdf(y);
+    return BasicWeibullDistribution::inverseCdf(y);
 }
 
 

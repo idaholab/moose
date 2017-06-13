@@ -42,13 +42,13 @@ LogNormalDistribution::~LogNormalDistribution() {}
 Real
 LogNormalDistribution::pdf(const Real & x)
 {
-  return BasicUniformDistribution::pdf(x);
+  return BasicLogNormalDistribution::pdf(x);
 }
 
 Real
 LogNormalDistribution::cdf(const Real & x)
 {
-  return BasicUniformDistribution::cdf(x);
+  return BasicLogNormalDistribution::cdf(x);
 }
 
 Real
@@ -57,7 +57,7 @@ LogNormalDistribution::inverseCdf(const Real & y)
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");
   else
-    return BasicUniformDistribution::inverseCdf(y);
+    return BasicLogNormalDistribution::inverseCdf(y);
 }
 
 

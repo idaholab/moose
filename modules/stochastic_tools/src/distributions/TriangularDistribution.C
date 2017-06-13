@@ -12,46 +12,49 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UniformDistribution.h"
+#include "TriangularDistribution.h"
 
 template <>
 InputParameters
-validParams<UniformDistribution>()
+validParams<TriangularDistribution>()
 {
   InputParameters params = validParams<Distribution>();
   params.addClassDescription("Continuous uniform distribution.");
-  params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
-  params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
+  params.addParam<Real>("lower_bound", "Distribution lower bound");
+  params.addParam<Real>("upper_bound", "Distribution upper bound");
+  params.addParam<Real>("x_peak", "Distribution central peak");
   return params;
 }
 
-UniformDistribution::UniformDistribution(const InputParameters & parameters)
+TriangularDistribution::TriangularDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicUniformDistribution(getParam<Real>("lower_bound"),getParam<Real>("upper_bound"))
+    BasicTriangularDistribution(getParam<Real>("x_peak"),
+                                getParam<Real>("lower_bound"),
+                                getParam<Real>("upper_bound"))
 {
 }
 
-UniformDistribution::~UniformDistribution() {}
+TriangularDistribution::~TriangularDistribution() {}
 
 Real
-UniformDistribution::pdf(const Real & x)
+TriangularDistribution::pdf(const Real & x)
 {
-  return BasicUniformDistribution::pdf(x);
+  return BasicTriangularDistribution::pdf(x);
 }
 
 Real
-UniformDistribution::cdf(const Real & x)
+TriangularDistribution::cdf(const Real & x)
 {
-  return BasicUniformDistribution::cdf(x);
+  return BasicTriangularDistribution::cdf(x);
 }
 
 Real
-UniformDistribution::inverseCdf(const Real & y)
+TriangularDistribution::inverseCdf(const Real & y)
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");
   else
-    return BasicUniformDistribution::inverseCdf(y);
+    return BasicTriangularDistribution::inverseCdf(y);
 }
 
 
