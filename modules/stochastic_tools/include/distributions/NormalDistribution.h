@@ -12,34 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef UNIFORMDISTRIBUTION_H
-#define UNIFORMDISTRIBUTION_H
+#ifndef NORMALDISTRIBUTION_H
+#define NORMALDISTRIBUTION_H
 
 #include "Distribution.h"
-//#include "distribution.h"
 #include "distribution_1D.h"
 
-class UniformDistribution;
+class NormalDistribution;
 
 template <>
-InputParameters validParams<UniformDistribution>();
+InputParameters validParams<NormalDistribution>();
 /**
- * A class used to generate uniform distribution
+ * A class used to generate normal distribution from contrib RAVEN crow
  */
-class UniformDistribution : public Distribution, BasicUniformDistribution
+class NormalDistribution : public Distribution, BasicNormalDistribution
 {
 public:
-  UniformDistribution(const InputParameters & parameters);
-  virtual ~UniformDistribution();
+  NormalDistribution(const InputParameters & parameters);
+  virtual ~NormalDistribution();
 
 protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real inverseCdf(const Real & y) override;
-  /// The lower bound for the uniform distribution
-  // const Real & _lower_bound;
-  /// The upper bound for the uniform distribution
-  // const Real & _upper_bound;
 };
 
-#endif /* UNIFORMDISTRIBUTION_H */
+#endif /* NORMALDISTRIBUTION_H */

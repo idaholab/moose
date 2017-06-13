@@ -12,34 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef UNIFORMDISTRIBUTION_H
-#define UNIFORMDISTRIBUTION_H
+#ifndef LOGNORMALDISTRIBUTION_H
+#define LOGNORMALDISTRIBUTION_H
 
 #include "Distribution.h"
-//#include "distribution.h"
 #include "distribution_1D.h"
 
-class UniformDistribution;
+class LogNormalDistribution;
 
 template <>
-InputParameters validParams<UniformDistribution>();
+InputParameters validParams<LogNormalDistribution>();
 /**
- * A class used to generate uniform distribution
+ * A class used to generate lognormal distribution from RAVEN crow
  */
-class UniformDistribution : public Distribution, BasicUniformDistribution
+class LogNormalDistribution : public Distribution, BasicLogNormalDistribution
 {
 public:
-  UniformDistribution(const InputParameters & parameters);
-  virtual ~UniformDistribution();
+  LogNormalDistribution(const InputParameters & parameters);
+  virtual ~LogNormalDistribution();
 
 protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real inverseCdf(const Real & y) override;
-  /// The lower bound for the uniform distribution
-  // const Real & _lower_bound;
-  /// The upper bound for the uniform distribution
-  // const Real & _upper_bound;
 };
 
-#endif /* UNIFORMDISTRIBUTION_H */
+#endif /* LOGNORMALDISTRIBUTION_H */

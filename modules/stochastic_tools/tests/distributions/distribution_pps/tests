@@ -1,28 +1,52 @@
 [Tests]
   [./uniform]
     type = 'CSVDiff'
-    input = 'distribution_pps.i'
-    csvdiff = 'distribution_pps_out.csv'
+    input = 'distribution_pps_uniform.i'
+    csvdiff = 'distribution_pps_uniform_out.csv'
   [../]
   
-  [./above_max]
+  [./above_max_uniform]
     type = 'RunException'
-    input = 'distribution_pps.i'
+    input = 'distribution_pps_uniform.i'
     cli_args = 'Postprocessors/value1/cdf_value=2 Outputs/csv=false'
     expect_err = 'The cdf_value provided is out of range 0 to 1.'
   [../]
   
-  [./below_min]
+  [./below_min_uniform]
     type = 'RunException'
-    input = 'distribution_pps.i'
+    input = 'distribution_pps_uniform.i'
     cli_args = 'Postprocessors/value1/cdf_value=-1.0 Outputs/csv=false'
     expect_err = 'The cdf_value provided is out of range 0 to 1.'
   [../]
   
-  [./bound_error]
+  [./bound_error_uniform]
     type = 'RunException'
-    input = 'distribution_pps.i'
+    input = 'distribution_pps_uniform.i'
     cli_args = 'Distributions/uniform1/lower_bound=5  Outputs/csv=false'
     expect_err = 'The lower bound is larger than the upper bound!'
+  [../]
+
+  [./normal]
+    type = 'CSVDiff'
+    input = 'distribution_pps_normal.i'
+    csvdiff = 'distribution_pps_normal_out.csv'
+  [../]
+
+  [./beta]
+    type = 'CSVDiff'
+    input = 'distribution_pps_beta.i'
+    csvdiff = 'distribution_pps_beta_out.csv'
+  [../]
+
+  [./triangular]
+    type = 'CSVDiff'
+    input = 'distribution_pps_triangular.i'
+    csvdiff = 'distribution_pps_triangular_out.csv'
+  [../]
+
+  [./weibull]
+    type = 'CSVDiff'
+    input = 'distribution_pps_weibull.i'
+    csvdiff = 'distribution_pps_weibull_out.csv'
   [../]
 []
