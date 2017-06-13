@@ -1,4 +1,4 @@
-// Boost.Units - A C++ library for zero-overhead dimensional analysis and 
+// Boost.Units - A C++ library for zero-overhead dimensional analysis and
 // unit/quantity manipulation and conversion
 //
 // Copyright (C) 2003-2008 Matthias Christian Schabel
@@ -15,34 +15,34 @@
 #include <boost/version.hpp>
 
 #ifndef BOOST_UNITS_HAS_BOOST_TYPEOF
-    #if (BOOST_VERSION >= 103400)
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_BOOST_TYPEOF    1
-    #else
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_BOOST_TYPEOF    0
-    #endif
-#endif 
+#if (BOOST_VERSION >= 103400)
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_BOOST_TYPEOF 1
+#else
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_BOOST_TYPEOF 0
+#endif
+#endif
 
 #if (BOOST_UNITS_HAS_BOOST_TYPEOF)
-    #include <boost/typeof/typeof.hpp> 
-    ///INTERNAL ONLY
-    #define BOOST_UNITS_HAS_TYPEOF          1
-#else    
-    #if (__GNUC__ && __cplusplus)
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_TYPEOF          1
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_GNU_TYPEOF      1
-    #elif defined(__MWERKS__)
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_TYPEOF          1
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_MWERKS_TYPEOF   1
-    #else
-        ///INTERNAL ONLY
-        #define BOOST_UNITS_HAS_TYPEOF          0
-    #endif
+#include <boost/typeof/typeof.hpp>
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_TYPEOF 1
+#else
+#if (__GNUC__ && __cplusplus)
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_TYPEOF 1
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_GNU_TYPEOF 1
+#elif defined(__MWERKS__)
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_TYPEOF 1
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_MWERKS_TYPEOF 1
+#else
+///INTERNAL ONLY
+#define BOOST_UNITS_HAS_TYPEOF 0
+#endif
 #endif
 
 // uncomment this to test without typeof support at all
@@ -51,31 +51,30 @@
 
 #ifndef BOOST_UNITS_NO_COMPILER_CHECK
 
-    #ifdef BOOST_NO_MEMBER_TEMPLATES
-        #error Boost.Units requires member template
-    #endif
+#ifdef BOOST_NO_MEMBER_TEMPLATES
+#error Boost.Units requires member template
+#endif
 
-    #ifdef BOOST_NO_MEMBER_TEMPLATE_KEYWORD
-        #error Boost.Units requires member template keyword
-    #endif
+#ifdef BOOST_NO_MEMBER_TEMPLATE_KEYWORD
+#error Boost.Units requires member template keyword
+#endif
 
-    #ifdef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
-        #error Boost.Units requires in class member initialization
-    #endif
+#ifdef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
+#error Boost.Units requires in class member initialization
+#endif
 
-    #ifdef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
-        #error Boost.Units requires function template partial ordering
-    #endif
-
+#ifdef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
+#error Boost.Units requires function template partial ordering
+#endif
 
 #endif
 
 #ifdef BOOST_UNITS_REQUIRE_LAYOUT_COMPATIBILITY
-    ///INTERNAL ONLY
-    #define BOOST_UNITS_CHECK_LAYOUT_COMPATIBILITY(a, b) BOOST_STATIC_ASSERT((sizeof(a) == sizeof(b)))
+///INTERNAL ONLY
+#define BOOST_UNITS_CHECK_LAYOUT_COMPATIBILITY(a, b) BOOST_STATIC_ASSERT((sizeof(a) == sizeof(b)))
 #else
-    ///INTERNAL ONLY
-    #define BOOST_UNITS_CHECK_LAYOUT_COMPATIBILITY(a, b) ((void)0)
+///INTERNAL ONLY
+#define BOOST_UNITS_CHECK_LAYOUT_COMPATIBILITY(a, b) ((void)0)
 #endif
 
 #ifdef BOOST_UNITS_DOXYGEN

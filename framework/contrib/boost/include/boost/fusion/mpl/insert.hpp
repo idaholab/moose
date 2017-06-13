@@ -13,28 +13,26 @@
 #include <boost/fusion/algorithm/transformation/insert.hpp>
 #include <boost/fusion/sequence/convert.hpp>
 
-namespace boost { namespace mpl
+namespace boost
 {
-    template <typename Tag>
-    struct insert_impl;
+namespace mpl
+{
+template <typename Tag>
+struct insert_impl;
 
-    template <>
-    struct insert_impl<fusion::fusion_sequence_tag>
-    {
-        template <typename Sequence, typename Pos, typename T>
-        struct apply
-        {
-            typedef typename
-                fusion::result_of::insert<Sequence, Pos, T>::type
-            result;
+template <>
+struct insert_impl<fusion::fusion_sequence_tag>
+{
+  template <typename Sequence, typename Pos, typename T>
+  struct apply
+  {
+    typedef typename fusion::result_of::insert<Sequence, Pos, T>::type result;
 
-            typedef typename
-                fusion::result_of::convert<
-                    typename fusion::detail::tag_of<Sequence>::type, result>::type
-            type;
-        };
-    };
-}}
+    typedef typename fusion::result_of::convert<typename fusion::detail::tag_of<Sequence>::type,
+                                                result>::type type;
+  };
+};
+}
+}
 
 #endif
-

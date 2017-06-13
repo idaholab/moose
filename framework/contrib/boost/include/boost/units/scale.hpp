@@ -1,4 +1,4 @@
-// Boost.Units - A C++ library for zero-overhead dimensional analysis and 
+// Boost.Units - A C++ library for zero-overhead dimensional analysis and
 // unit/quantity manipulation and conversion
 //
 // Copyright (C) 2003-2008 Matthias Christian Schabel
@@ -25,74 +25,90 @@
 #include <boost/units/detail/one.hpp>
 #include <boost/units/detail/static_rational_power.hpp>
 
-namespace boost {
+namespace boost
+{
 
-namespace units {
+namespace units
+{
 
-template<class S, class Scale>
+template <class S, class Scale>
 struct scaled_base_unit;
 
 /// class representing a scaling factor such as 10^3
 /// The exponent must be a static rational.
-template<long Base, class Exponent>
+template <long Base, class Exponent>
 struct scale
 {
-    static const long base = Base;
-    typedef Exponent exponent;
-    typedef double value_type;
-    static value_type value() { return(detail::static_rational_power<Exponent>(static_cast<double>(base))); }
-    // These need to be defined in specializations for
-    // printing to work.
-    // static std::string name();
-    // static std::string symbol();
+  static const long base = Base;
+  typedef Exponent exponent;
+  typedef double value_type;
+  static value_type value()
+  {
+    return (detail::static_rational_power<Exponent>(static_cast<double>(base)));
+  }
+  // These need to be defined in specializations for
+  // printing to work.
+  // static std::string name();
+  // static std::string symbol();
 };
 
-template<long Base, class Exponent>
+template <long Base, class Exponent>
 const long scale<Base, Exponent>::base;
 
 /// INTERNAL ONLY
-template<long Base>
-struct scale<Base, static_rational<0> >
+template <long Base>
+struct scale<Base, static_rational<0>>
 {
-    static const long base = Base;
-    typedef static_rational<0> exponent;
-    typedef one value_type;
-    static one value() { one result; return(result); }
-    static std::string name() { return(""); }
-    static std::string symbol() { return(""); }
+  static const long base = Base;
+  typedef static_rational<0> exponent;
+  typedef one value_type;
+  static one value()
+  {
+    one result;
+    return (result);
+  }
+  static std::string name() { return (""); }
+  static std::string symbol() { return (""); }
 };
 
-template<long Base>
-const long scale<Base, static_rational<0> >::base;
+template <long Base>
+const long scale<Base, static_rational<0>>::base;
 
-template<long Base,class Exponent>
-std::string symbol_string(const scale<Base,Exponent>&)
+template <long Base, class Exponent>
+std::string
+symbol_string(const scale<Base, Exponent> &)
 {
-    return scale<Base,Exponent>::symbol();
+  return scale<Base, Exponent>::symbol();
 }
 
-template<long Base,class Exponent>
-std::string name_string(const scale<Base,Exponent>&)
+template <long Base, class Exponent>
+std::string
+name_string(const scale<Base, Exponent> &)
 {
-    return scale<Base,Exponent>::name();
+  return scale<Base, Exponent>::name();
 }
 
 #ifndef BOOST_UNITS_DOXYGEN
 
-#define BOOST_UNITS_SCALE_SPECIALIZATION(base_,exponent_,val_,name_,symbol_) \
-template<>                                                                   \
-struct scale<base_, exponent_ >                                              \
-{                                                                            \
-    static const long base = base_;                                          \
-    typedef exponent_ exponent;                                              \
-    typedef double value_type;                                               \
-    static value_type value()   { return(val_); }                            \
-    static std::string name()   { return(#name_); }                          \
-    static std::string symbol() { return(#symbol_); }                        \
+#define BOOST_UNITS_SCALE_SPECIALIZATION(base_, exponent_, val_, name_, symbol_)                   \
+  \
+template<>                                                                                         \
+      \
+struct scale<base_, exponent_>                                                                     \
+  \
+{                                                                                             \
+    static const long base = base_;                                                                \
+    typedef exponent_ exponent;                                                                    \
+    typedef double value_type;                                                                     \
+    static value_type value() { return (val_); }                                                   \
+    static std::string name() { return (#name_); }                                                 \
+    static std::string symbol() { return (#symbol_); }                                             \
+  \
 }
 
-#define BOOST_UNITS_SCALE_DEF(exponent_,value_,name_,symbol_)                 \
-BOOST_UNITS_SCALE_SPECIALIZATION(10,static_rational<exponent_>,value_, name_, symbol_)
+#define BOOST_UNITS_SCALE_DEF(exponent_, value_, name_, symbol_)                                   \
+  \
+BOOST_UNITS_SCALE_SPECIALIZATION(10, static_rational<exponent_>, value_, name_, symbol_)
 
 BOOST_UNITS_SCALE_DEF(-24, 1e-24, yocto, y);
 BOOST_UNITS_SCALE_DEF(-21, 1e-21, zepto, z);

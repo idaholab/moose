@@ -15,7 +15,6 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_GENERATION_RUNGE_KUTTA_CASH_KARP54_CLASSIC_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_GENERATION_RUNGE_KUTTA_CASH_KARP54_CLASSIC_HPP_INCLUDED
 
@@ -23,26 +22,31 @@
 #include <boost/numeric/odeint/stepper/runge_kutta_cash_karp54_classic.hpp>
 #include <boost/numeric/odeint/stepper/generation/make_controlled.hpp>
 
-
-namespace boost {
-namespace numeric {
-namespace odeint {
-
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
 
 // Specializations for runge_kutta_cash_karp54
-template< class State , class Value , class Deriv , class Time , class Algebra , class Operations , class Resize >
-struct get_controller< runge_kutta_cash_karp54_classic< State , Value , Deriv , Time , Algebra , Operations , Resize > >
+template <class State,
+          class Value,
+          class Deriv,
+          class Time,
+          class Algebra,
+          class Operations,
+          class Resize>
+struct get_controller<
+    runge_kutta_cash_karp54_classic<State, Value, Deriv, Time, Algebra, Operations, Resize>>
 {
-    typedef runge_kutta_cash_karp54_classic< State , Value , Deriv , Time , Algebra , Operations , Resize > stepper_type;
-    typedef controlled_runge_kutta< stepper_type > type;
+  typedef runge_kutta_cash_karp54_classic<State, Value, Deriv, Time, Algebra, Operations, Resize>
+      stepper_type;
+  typedef controlled_runge_kutta<stepper_type> type;
 };
-
-
-
 
 } // odeint
 } // numeric
 } // boost
-
 
 #endif // BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_GENERATION_RUNGE_KUTTA_CASH_KARP54_CLASSIC_HPP_INCLUDED

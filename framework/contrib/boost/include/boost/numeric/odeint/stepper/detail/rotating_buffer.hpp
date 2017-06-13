@@ -14,71 +14,55 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_STEPPER_DETAIL_ROTATING_BUFFER_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_STEPPER_DETAIL_ROTATING_BUFFER_HPP_INCLUDED
 
 #include <boost/array.hpp>
 
-namespace boost {
-namespace numeric {
-namespace odeint {
-namespace detail {
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
+namespace detail
+{
 
-template< class T , size_t N >
+template <class T, size_t N>
 class rotating_buffer
 {
 public:
+  typedef T value_type;
+  const static size_t dim = N;
 
-    typedef T value_type;
-    const static size_t dim = N;
+  rotating_buffer(void) : m_first(0) {}
 
-    rotating_buffer( void ) : m_first( 0 )
-    { }
+  size_t size(void) const { return dim; }
 
-    size_t size( void ) const
-    {
-        return dim;
-    }
+  value_type & operator[](size_t i) { return m_data[get_index(i)]; }
 
-    value_type& operator[]( size_t i )
-    {
-        return m_data[ get_index( i ) ];
-    }
+  const value_type & operator[](size_t i) const { return m_data[get_index(i)]; }
 
-    const value_type& operator[]( size_t i ) const
-    {
-        return m_data[ get_index( i ) ];
-    }
-
-    void rotate( void )
-    {
-        if( m_first == 0 )
-            m_first = dim-1;
-        else
-            --m_first;
-    }
+  void rotate(void)
+  {
+    if (m_first == 0)
+      m_first = dim - 1;
+    else
+      --m_first;
+  }
 
 protected:
-
-    value_type m_data[N];
+  value_type m_data[N];
 
 private:
+  size_t get_index(size_t i) const { return ((i + m_first) % dim); }
 
-    size_t get_index( size_t i ) const
-    {
-        return ( ( i + m_first ) % dim );
-    }
-
-    size_t m_first;
-
+  size_t m_first;
 };
-
 
 } // detail
 } // odeint
 } // numeric
 } // boost
-
 
 #endif // BOOST_NUMERIC_ODEINT_STEPPER_DETAIL_ROTATING_BUFFER_HPP_INCLUDED

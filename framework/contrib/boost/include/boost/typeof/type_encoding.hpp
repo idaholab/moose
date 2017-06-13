@@ -5,23 +5,25 @@
 #ifndef BOOST_TYPEOF_TYPE_ENCODING_HPP_INCLUDED
 #define BOOST_TYPEOF_TYPE_ENCODING_HPP_INCLUDED
 
-#define BOOST_TYPEOF_REGISTER_TYPE_IMPL(T, Id)                          \
-                                                                        \
-    template<class V> struct encode_type_impl<V, T >                    \
-        : boost::type_of::push_back<V, boost::mpl::size_t<Id> >         \
-    {};                                                                 \
-    template<class Iter> struct decode_type_impl<boost::mpl::size_t<Id>, Iter> \
-    {                                                                   \
-        typedef T type;                                                 \
-        typedef Iter iter;                                              \
-    };
+#define BOOST_TYPEOF_REGISTER_TYPE_IMPL(T, Id)                                                     \
+                                                                                                   \
+  template <class V>                                                                               \
+  struct encode_type_impl<V, T> : boost::type_of::push_back<V, boost::mpl::size_t<Id>>             \
+  {                                                                                                \
+  };                                                                                               \
+  template <class Iter>                                                                            \
+  struct decode_type_impl<boost::mpl::size_t<Id>, Iter>                                            \
+  {                                                                                                \
+    typedef T type;                                                                                \
+    typedef Iter iter;                                                                             \
+  };
 
-#define BOOST_TYPEOF_REGISTER_TYPE_EXPLICIT_ID(Type, Id)                \
-    BOOST_TYPEOF_BEGIN_ENCODE_NS                                        \
-    BOOST_TYPEOF_REGISTER_TYPE_IMPL(Type, Id)                           \
-    BOOST_TYPEOF_END_ENCODE_NS
+#define BOOST_TYPEOF_REGISTER_TYPE_EXPLICIT_ID(Type, Id)                                           \
+  BOOST_TYPEOF_BEGIN_ENCODE_NS                                                                     \
+  BOOST_TYPEOF_REGISTER_TYPE_IMPL(Type, Id)                                                        \
+  BOOST_TYPEOF_END_ENCODE_NS
 
-#define BOOST_TYPEOF_REGISTER_TYPE(Type)                                \
-    BOOST_TYPEOF_REGISTER_TYPE_EXPLICIT_ID(Type, BOOST_TYPEOF_UNIQUE_ID())
+#define BOOST_TYPEOF_REGISTER_TYPE(Type)                                                           \
+  BOOST_TYPEOF_REGISTER_TYPE_EXPLICIT_ID(Type, BOOST_TYPEOF_UNIQUE_ID())
 
-#endif//BOOST_TYPEOF_TYPE_ENCODING_HPP_INCLUDED
+#endif // BOOST_TYPEOF_TYPE_ENCODING_HPP_INCLUDED

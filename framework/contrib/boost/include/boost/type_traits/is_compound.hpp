@@ -11,12 +11,19 @@
 
 #include <boost/type_traits/is_fundamental.hpp>
 
-namespace boost {
+namespace boost
+{
 
-#if defined( __CODEGEARC__ )
-   template <class T> struct is_compound : public integral_constant<bool, __is_compound(T)> {};
+#if defined(__CODEGEARC__)
+template <class T>
+struct is_compound : public integral_constant<bool, __is_compound(T)>
+{
+};
 #else
-   template <class T> struct is_compound : public integral_constant<bool, ! ::boost::is_fundamental<T>::value> {};
+template <class T>
+struct is_compound : public integral_constant<bool, !::boost::is_fundamental<T>::value>
+{
+};
 #endif
 
 } // namespace boost

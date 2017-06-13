@@ -8,22 +8,26 @@
 #ifndef BOOST_FUSION_ADAPTED_STRUCT_DETAIL_VALUE_OF_IMPL_HPP
 #define BOOST_FUSION_ADAPTED_STRUCT_DETAIL_VALUE_OF_IMPL_HPP
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template <typename>
-    struct value_of_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct value_of_impl;
 
-    template <>
-    struct value_of_impl<struct_iterator_tag>
-    {
-        template <typename It>
-        struct apply
-          : access::struct_member<
-                typename remove_const<typename It::seq_type>::type
-              , It::index::value
-            >
-        {};
-    };
-}}}
+template <>
+struct value_of_impl<struct_iterator_tag>
+{
+  template <typename It>
+  struct apply
+      : access::struct_member<typename remove_const<typename It::seq_type>::type, It::index::value>
+  {
+  };
+};
+}
+}
+}
 
 #endif

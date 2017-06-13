@@ -14,7 +14,6 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_HPP_INCLUDED
 
@@ -29,8 +28,6 @@
 #include <boost/numeric/odeint/stepper/generation/generation_runge_kutta_dopri5.hpp>
 #include <boost/numeric/odeint/stepper/generation/generation_runge_kutta_fehlberg78.hpp>
 
-
 #include <boost/numeric/odeint/stepper/generation/generation_rosenbrock4.hpp>
-
 
 #endif // BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_HPP_INCLUDED

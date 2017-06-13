@@ -24,44 +24,44 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/static_assert.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct reverse_view_iterator_tag;
+namespace fusion
+{
+struct reverse_view_iterator_tag;
 
-    template <typename First>
-    struct reverse_view_iterator
-        : iterator_base<reverse_view_iterator<First> >
-    {
-        typedef convert_iterator<First> converter;
-        typedef typename converter::type first_type;
-        typedef reverse_view_iterator_tag fusion_tag;
-        typedef typename traits::category_of<first_type>::type category;
+template <typename First>
+struct reverse_view_iterator : iterator_base<reverse_view_iterator<First>>
+{
+  typedef convert_iterator<First> converter;
+  typedef typename converter::type first_type;
+  typedef reverse_view_iterator_tag fusion_tag;
+  typedef typename traits::category_of<first_type>::type category;
 
-        BOOST_STATIC_ASSERT((
-            is_base_of<
-                bidirectional_traversal_tag
-              , category>::value));
+  BOOST_STATIC_ASSERT((is_base_of<bidirectional_traversal_tag, category>::value));
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        reverse_view_iterator(First const& in_first)
-            : first(converter::call(in_first)) {}
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED reverse_view_iterator(First const & in_first)
+    : first(converter::call(in_first))
+  {
+  }
 
-        first_type first;
+  first_type first;
 
-    private:
-        // silence MSVC warning C4512: assignment operator could not be generated
-        reverse_view_iterator& operator= (reverse_view_iterator const&);
-    };
-}}
+private:
+  // silence MSVC warning C4512: assignment operator could not be generated
+  reverse_view_iterator & operator=(reverse_view_iterator const &);
+};
+}
+}
 
 #ifdef BOOST_FUSION_WORKAROUND_FOR_LWG_2408
 namespace std
 {
-    template <typename First>
-    struct iterator_traits< ::boost::fusion::reverse_view_iterator<First> >
-    { };
+template <typename First>
+struct iterator_traits<::boost::fusion::reverse_view_iterator<First>>
+{
+};
 }
 #endif
 
 #endif
-

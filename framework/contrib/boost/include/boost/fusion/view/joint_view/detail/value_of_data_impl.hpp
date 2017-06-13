@@ -11,19 +11,25 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/fusion/iterator/value_of_data.hpp>
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template <typename>
-    struct value_of_data_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct value_of_data_impl;
 
-    template <>
-    struct value_of_data_impl<joint_view_iterator_tag>
-    {
-        template <typename It>
-        struct apply
-          : result_of::value_of_data<typename It::first_type>
-        {};
-    };
-}}}
+template <>
+struct value_of_data_impl<joint_view_iterator_tag>
+{
+  template <typename It>
+  struct apply : result_of::value_of_data<typename It::first_type>
+  {
+  };
+};
+}
+}
+}
 
 #endif

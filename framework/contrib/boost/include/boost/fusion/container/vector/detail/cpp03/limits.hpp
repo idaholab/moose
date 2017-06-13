@@ -12,14 +12,15 @@
 #include <boost/preprocessor/stringize.hpp>
 
 #if !defined(FUSION_MAX_VECTOR_SIZE)
-# define FUSION_MAX_VECTOR_SIZE 10
+#define FUSION_MAX_VECTOR_SIZE 10
 #else
-# if FUSION_MAX_VECTOR_SIZE < 3
-#   undef FUSION_MAX_VECTOR_SIZE
-#   define FUSION_MAX_VECTOR_SIZE 10
-# endif
+#if FUSION_MAX_VECTOR_SIZE < 3
+#undef FUSION_MAX_VECTOR_SIZE
+#define FUSION_MAX_VECTOR_SIZE 10
+#endif
 #endif
 
-#define FUSION_MAX_VECTOR_SIZE_STR BOOST_PP_STRINGIZE(BOOST_FUSION_PP_ROUND_UP(FUSION_MAX_VECTOR_SIZE))
+#define FUSION_MAX_VECTOR_SIZE_STR                                                                 \
+  BOOST_PP_STRINGIZE(BOOST_FUSION_PP_ROUND_UP(FUSION_MAX_VECTOR_SIZE))
 
 #endif

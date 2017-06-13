@@ -8,13 +8,16 @@
 #if !defined(BOOST_FUSION_TAG_OF_FWD_31122005_1445)
 #define BOOST_FUSION_TAG_OF_FWD_31122005_1445
 
-namespace boost { namespace fusion
+namespace boost
 {
-    namespace traits
-    {
-        template<typename T, typename Active = void>
-        struct tag_of;
-    }
-}}
+namespace fusion
+{
+namespace traits
+{
+template <typename T, typename Active = void>
+struct tag_of;
+}
+}
+}
 
 #endif

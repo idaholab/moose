@@ -30,7 +30,7 @@
 #include <boost/fusion/algorithm/iteration/detail/preprocessed/reverse_iter_fold.hpp>
 #else
 #if defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES)
-#pragma wave option(preserve: 2, line: 0, output: "detail/preprocessed/reverse_iter_fold.hpp")
+#pragma wave option(preserve : 2, line : 0, output : "detail/preprocessed/reverse_iter_fold.hpp")
 #endif
 
 /*=============================================================================
@@ -44,13 +44,13 @@
 ==============================================================================*/
 
 #if defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES)
-#pragma wave option(preserve: 1)
+#pragma wave option(preserve : 1)
 #endif
 
 #include <boost/fusion/algorithm/iteration/detail/fold.hpp>
 
 #if defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES)
-#pragma wave option(output: null)
+#pragma wave option(output : null)
 #endif
 
 #endif // BOOST_FUSION_DONT_USE_PREPROCESSED_FILES

@@ -20,8 +20,10 @@ validParams<NormalDistribution>()
 {
   InputParameters params = validParams<Distribution>();
   params.addClassDescription("Continuous normal distribution.");
-  params.addParam<Real>("lower_bound", -std::numeric_limits<Real>::max(), "Distribution lower bound");
-  params.addParam<Real>("upper_bound",  std::numeric_limits<Real>::max(), "Distribution upper bound");
+  params.addParam<Real>(
+      "lower_bound", -std::numeric_limits<Real>::max(), "Distribution lower bound");
+  params.addParam<Real>(
+      "upper_bound", std::numeric_limits<Real>::max(), "Distribution upper bound");
   params.addParam<Real>("mu", 0.0, "Distribution mu");
   params.addParam<Real>("sigma", 1.0, "Distribution sigma");
   return params;
@@ -58,5 +60,3 @@ NormalDistribution::inverseCdf(const Real & y)
   else
     return BasicNormalDistribution::inverseCdf(y);
 }
-
-

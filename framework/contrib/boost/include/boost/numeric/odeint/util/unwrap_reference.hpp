@@ -14,13 +14,10 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_UTIL_UNWRAP_REFERENCE_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_UTIL_UNWRAP_REFERENCE_HPP_INCLUDED
 
-
 #include <boost/numeric/odeint/config.hpp>
-
 
 #if BOOST_NUMERIC_ODEINT_CXX11
 #include <functional>
@@ -28,36 +25,40 @@
 #include <boost/ref.hpp>
 #endif
 
-namespace boost {
+namespace boost
+{
 
 #if BOOST_NUMERIC_ODEINT_CXX11
-template<typename T> class reference_wrapper;
+template <typename T>
+class reference_wrapper;
 
-template<typename T> struct unwrap_reference;
+template <typename T>
+struct unwrap_reference;
 #endif
 
-namespace numeric {
-namespace odeint {
-
+namespace numeric
+{
+namespace odeint
+{
 
 #if BOOST_NUMERIC_ODEINT_CXX11
 
-template<typename T>
+template <typename T>
 struct unwrap_reference
 {
-    typedef typename std::remove_reference<T>::type type;
+  typedef typename std::remove_reference<T>::type type;
 };
 
-template<typename T>
-struct unwrap_reference< std::reference_wrapper<T> >
+template <typename T>
+struct unwrap_reference<std::reference_wrapper<T>>
 {
-    typedef typename std::remove_reference<T>::type type;
+  typedef typename std::remove_reference<T>::type type;
 };
 
-template<typename T>
-struct unwrap_reference< boost::reference_wrapper<T> >
+template <typename T>
+struct unwrap_reference<boost::reference_wrapper<T>>
 {
-    typedef typename boost::unwrap_reference<T>::type type;
+  typedef typename boost::unwrap_reference<T>::type type;
 };
 
 #else
@@ -79,15 +80,12 @@ using ::boost::ref;
 
 #endif
 }
-
 }
 }
 }
-
-
 
 /*
- * 
+ *
  * the following is the suggested way, but unfortunately it does not work with all compilers.
  */
 
@@ -141,7 +139,7 @@ using ::boost::unwrap_reference;
 
 namespace boost {
 namespace numeric {
-namespace odeint {  
+namespace odeint {
 namespace detail {
 
 

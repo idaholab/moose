@@ -1,4 +1,4 @@
-// Boost.Units - A C++ library for zero-overhead dimensional analysis and 
+// Boost.Units - A C++ library for zero-overhead dimensional analysis and
 // unit/quantity manipulation and conversion
 //
 // Copyright (C) 2003-2008 Matthias Christian Schabel
@@ -16,11 +16,13 @@
 
 #include <boost/units/detail/conversion_impl.hpp>
 
-namespace boost {
+namespace boost
+{
 
-namespace units {
+namespace units
+{
 
-template<class From, class To>
+template <class From, class To>
 struct conversion_helper;
 
 #ifdef BOOST_UNITS_DOXYGEN
@@ -48,10 +50,10 @@ struct conversion_helper;
 /// In most cases, the predefined specializations for @c unit
 /// and @c absolute should be sufficient, so users should rarely
 /// need to use this.
-template<class From, class To>
+template <class From, class To>
 struct conversion_helper
 {
-    static To convert(const From&);
+  static To convert(const From &);
 };
 
 #endif
@@ -62,28 +64,28 @@ struct conversion_helper
 /// If the destination unit is a base unit or a unit that contains
 /// only one base unit which is raised to the first power (e.g. feet->meters)
 /// the reverse (meters->feet in this example) need not be defined explicitly.
-#define BOOST_UNITS_DEFINE_CONVERSION_FACTOR(Source, Destination, type_, value_)    \
-    namespace boost {                                                       \
-    namespace units {                                                       \
-    template<>                                                              \
-    struct select_base_unit_converter<                                      \
-        unscale<Source>::type,                                              \
-        unscale<reduce_unit<Destination::unit_type>::type>::type            \
-    >                                                                       \
-    {                                                                       \
-        typedef Source source_type;                                         \
-        typedef reduce_unit<Destination::unit_type>::type destination_type; \
-    };                                                                      \
-    template<>                                                              \
-    struct base_unit_converter<Source, reduce_unit<Destination::unit_type>::type>   \
-    {                                                                       \
-        static const bool is_defined = true;                                \
-        typedef type_ type;                                                 \
-        static type value() { return(value_); }                             \
-    };                                                                      \
-    }                                                                       \
-    }                                                                       \
-    void boost_units_require_semicolon()
+#define BOOST_UNITS_DEFINE_CONVERSION_FACTOR(Source, Destination, type_, value_)                   \
+  namespace boost                                                                                  \
+  {                                                                                                \
+  namespace units                                                                                  \
+  {                                                                                                \
+  template <>                                                                                      \
+  struct select_base_unit_converter<unscale<Source>::type,                                         \
+                                    unscale<reduce_unit<Destination::unit_type>::type>::type>      \
+  {                                                                                                \
+    typedef Source source_type;                                                                    \
+    typedef reduce_unit<Destination::unit_type>::type destination_type;                            \
+  };                                                                                               \
+  template <>                                                                                      \
+  struct base_unit_converter<Source, reduce_unit<Destination::unit_type>::type>                    \
+  {                                                                                                \
+    static const bool is_defined = true;                                                           \
+    typedef type_ type;                                                                            \
+    static type value() { return (value_); }                                                       \
+  };                                                                                               \
+  }                                                                                                \
+  }                                                                                                \
+  void boost_units_require_semicolon()
 
 /// Defines the conversion factor from a base unit to any other base
 /// unit with the same dimensions.  Params should be a Boost.Preprocessor
@@ -94,39 +96,42 @@ struct conversion_helper
 /// unit is scaled.  This is probably not an issue if both the source
 /// and destination types depend on the template parameters, but be aware
 /// that a generic conversion to kilograms is not going to work.
-#define BOOST_UNITS_DEFINE_CONVERSION_FACTOR_TEMPLATE(Params, Source, Destination, type_, value_)   \
-    namespace boost {                                                       \
-    namespace units {                                                       \
-    template<BOOST_PP_SEQ_ENUM(Params)>                                     \
-    struct base_unit_converter<                                             \
-        Source,                                                             \
-        BOOST_UNITS_MAKE_HETEROGENEOUS_UNIT(Destination, typename Source::dimension_type)\
-    >                                                                       \
-    {                                                                       \
-        static const bool is_defined = true;                                \
-        typedef type_ type;                                                 \
-        static type value() { return(value_); }                             \
-    };                                                                      \
-    }                                                                       \
-    }                                                                       \
-    void boost_units_require_semicolon()
+#define BOOST_UNITS_DEFINE_CONVERSION_FACTOR_TEMPLATE(Params, Source, Destination, type_, value_)  \
+  namespace boost                                                                                  \
+  {                                                                                                \
+  namespace units                                                                                  \
+  {                                                                                                \
+  template <BOOST_PP_SEQ_ENUM(Params)>                                                             \
+  struct base_unit_converter<Source,                                                               \
+                             BOOST_UNITS_MAKE_HETEROGENEOUS_UNIT(Destination,                      \
+                                                                 typename Source::dimension_type)> \
+  {                                                                                                \
+    static const bool is_defined = true;                                                           \
+    typedef type_ type;                                                                            \
+    static type value() { return (value_); }                                                       \
+  };                                                                                               \
+  }                                                                                                \
+  }                                                                                                \
+  void boost_units_require_semicolon()
 
 /// Specifies the default conversion to be applied when
 /// no direct conversion is available.
 /// Source is a base unit.  Dest is any unit with the
 /// same dimensions.
-#define BOOST_UNITS_DEFAULT_CONVERSION(Source, Dest)                \
-    namespace boost {                                               \
-    namespace units {                                               \
-    template<>                                                      \
-    struct unscaled_get_default_conversion<unscale<Source>::type>   \
-    {                                                               \
-        static const bool is_defined = true;                        \
-        typedef Dest::unit_type type;                               \
-    };                                                              \
-    }                                                               \
-    }                                                               \
-    void boost_units_require_semicolon()
+#define BOOST_UNITS_DEFAULT_CONVERSION(Source, Dest)                                               \
+  namespace boost                                                                                  \
+  {                                                                                                \
+  namespace units                                                                                  \
+  {                                                                                                \
+  template <>                                                                                      \
+  struct unscaled_get_default_conversion<unscale<Source>::type>                                    \
+  {                                                                                                \
+    static const bool is_defined = true;                                                           \
+    typedef Dest::unit_type type;                                                                  \
+  };                                                                                               \
+  }                                                                                                \
+  }                                                                                                \
+  void boost_units_require_semicolon()
 
 /// Specifies the default conversion to be applied when
 /// no direct conversion is available.
@@ -134,48 +139,62 @@ struct conversion_helper
 /// Source is a base unit.  Dest is any unit with the
 /// same dimensions.  The source must not be a scaled
 /// base unit.
-#define BOOST_UNITS_DEFAULT_CONVERSION_TEMPLATE(Params, Source, Dest)   \
-    namespace boost {                                                   \
-    namespace units {                                                   \
-    template<BOOST_PP_SEQ_ENUM(Params)>                                 \
-    struct unscaled_get_default_conversion<Source>                      \
-    {                                                                   \
-        static const bool is_defined = true;                            \
-        typedef typename Dest::unit_type type;                          \
-    };                                                                  \
-    }                                                                   \
-    }                                                                   \
-    void boost_units_require_semicolon()
+#define BOOST_UNITS_DEFAULT_CONVERSION_TEMPLATE(Params, Source, Dest)                              \
+  namespace boost                                                                                  \
+  {                                                                                                \
+  namespace units                                                                                  \
+  {                                                                                                \
+  template <BOOST_PP_SEQ_ENUM(Params)>                                                             \
+  struct unscaled_get_default_conversion<Source>                                                   \
+  {                                                                                                \
+    static const bool is_defined = true;                                                           \
+    typedef typename Dest::unit_type type;                                                         \
+  };                                                                                               \
+  }                                                                                                \
+  }                                                                                                \
+  void boost_units_require_semicolon()
 
 /// INTERNAL ONLY
 /// Users should not create their units in namespace boost::units.
 /// If we want to make this public it needs to allow better control over
 /// the namespaces. --SJW.
 /// template that defines a base_unit and conversion to another dimensionally-consistent unit
-#define BOOST_UNITS_DEFINE_BASE_UNIT_WITH_CONVERSIONS(namespace_, name_, name_string_, symbol_string_, factor, unit, id)\
-namespace boost {                                                           \
-namespace units {                                                           \
-namespace namespace_ {                                                      \
-struct name_ ## _base_unit                                                  \
-  : base_unit<name_ ## _base_unit, unit::dimension_type, id> {              \
-    static const char* name() { return(name_string_); }                     \
-    static const char* symbol() { return(symbol_string_); };                \
-};                                                                          \
-}                                                                           \
-}                                                                           \
-}                                                                           \
-BOOST_UNITS_DEFINE_CONVERSION_FACTOR(namespace_::name_ ## _base_unit, unit, double, factor); \
-BOOST_UNITS_DEFAULT_CONVERSION(namespace_::name_ ## _base_unit, unit)
+#define BOOST_UNITS_DEFINE_BASE_UNIT_WITH_CONVERSIONS(                                             \
+    namespace_, name_, name_string_, symbol_string_, factor, unit, id)                             \
+  \
+namespace boost                                                                                    \
+  {                                                                                                \
+    \
+namespace units                                                                                    \
+    {                                                                                              \
+      \
+namespace namespace_                                                                               \
+      {                                                                                            \
+        \
+struct name_##_base_unit : base_unit<name_##_base_unit, unit::dimension_type, id>                  \
+        {                                                                                          \
+          static const char * name() { return (name_string_); }                                    \
+          static const char * symbol() { return (symbol_string_); };                               \
+        \
+};                                                                                                 \
+      \
+}                                                                                         \
+    \
+}                                                                                           \
+  \
+}                                                                                             \
+  \
+BOOST_UNITS_DEFINE_CONVERSION_FACTOR(namespace_::name_##_base_unit, unit, double, factor);         \
+  \
+BOOST_UNITS_DEFAULT_CONVERSION(namespace_::name_##_base_unit, unit)
 
 /// Find the conversion factor between two units.
-template<class FromUnit,class ToUnit>
-inline
-typename one_to_double_type<
-    typename detail::conversion_factor_helper<FromUnit, ToUnit>::type
->::type
-conversion_factor(const FromUnit&,const ToUnit&)
+template <class FromUnit, class ToUnit>
+inline typename one_to_double_type<
+    typename detail::conversion_factor_helper<FromUnit, ToUnit>::type>::type
+conversion_factor(const FromUnit &, const ToUnit &)
 {
-    return(one_to_double(detail::conversion_factor_helper<FromUnit, ToUnit>::value()));
+  return (one_to_double(detail::conversion_factor_helper<FromUnit, ToUnit>::value()));
 }
 
 } // namespace units

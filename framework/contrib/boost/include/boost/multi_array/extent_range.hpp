@@ -1,6 +1,6 @@
 // Copyright 2002 The Trustees of Indiana University.
 
-// Use, modification and distribution is subject to the Boost Software 
+// Use, modification and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
@@ -15,24 +15,27 @@
 
 #include <utility>
 
-namespace boost {
-namespace detail {
-namespace multi_array {
+namespace boost
+{
+namespace detail
+{
+namespace multi_array
+{
 
 template <typename Extent, typename SizeType>
-class extent_range : private std::pair<Extent,Extent> {
-  typedef std::pair<Extent,Extent> super_type;
+class extent_range : private std::pair<Extent, Extent>
+{
+  typedef std::pair<Extent, Extent> super_type;
+
 public:
   typedef Extent index;
   typedef SizeType size_type;
 
-  extent_range(index start, index finish) :
-    super_type(start,finish) { }
+  extent_range(index start, index finish) : super_type(start, finish) {}
 
-  extent_range(index finish) :
-    super_type(0,finish) { }
+  extent_range(index finish) : super_type(0, finish) {}
 
-  extent_range() : super_type(0,0) { }
+  extent_range() : super_type(0, 0) {}
 
   index start() const { return super_type::first; }
 
@@ -42,8 +45,7 @@ public:
 };
 
 } // namespace multi_array
-} // namespace detail 
+} // namespace detail
 } // namespace boost
-
 
 #endif // BOOST_EXTENT_RANGE_RG071801_HPP

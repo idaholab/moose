@@ -1,4 +1,4 @@
-# /* **************************************************************************
+#/* **************************************************************************
 #  *                                                                          *
 #  *     (C) Copyright Paul Mensonides 2002.
 #  *     Distributed under the Boost Software License, Version 1.0. (See
@@ -7,11 +7,11 @@
 #  *                                                                          *
 #  ************************************************************************** */
 #
-# /* See http://www.boost.org for most recent version. */
+#/* See http://www.boost.org for most recent version. */
 #
-# ifndef BOOST_PREPROCESSOR_IF_HPP
-# define BOOST_PREPROCESSOR_IF_HPP
+#ifndef BOOST_PREPROCESSOR_IF_HPP
+#define BOOST_PREPROCESSOR_IF_HPP
 #
-# include <boost/preprocessor/control/if.hpp>
+#include <boost/preprocessor/control/if.hpp>
 #
-# endif
+#endif

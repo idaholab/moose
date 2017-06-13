@@ -35,7 +35,7 @@ BetaDistribution::BetaDistribution(const InputParameters & parameters)
                           getParam<Real>("scale"),
                           getParam<Real>("lower_bound"),
                           getParam<Real>("upper_bound"),
-                          getParam<Real>("lower_bound") //this is done on purpose
+                          getParam<Real>("lower_bound") // this is done on purpose
                           )
 {
 }
@@ -62,5 +62,3 @@ BetaDistribution::inverseCdf(const Real & y)
   else
     return BasicBetaDistribution::inverseCdf(y);
 }
-
-

@@ -20,39 +20,38 @@
 #include <boost/fusion/sequence/comparison/equal_to.hpp>
 #endif
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename Seq1, typename Seq2>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline bool
-    not_equal_to(Seq1 const& a, Seq2 const& b)
-    {
+namespace fusion
+{
+template <typename Seq1, typename Seq2>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline bool
+not_equal_to(Seq1 const & a, Seq2 const & b)
+{
 #if defined(FUSION_DIRECT_OPERATOR_USAGE)
-        return result_of::size<Seq1>::value != result_of::size<Seq2>::value
-            || detail::sequence_not_equal_to<
-            Seq1 const, Seq2 const
-            , result_of::size<Seq1>::value == result_of::size<Seq2>::value>::
-            call(fusion::begin(a), fusion::begin(b));
+  return result_of::size<Seq1>::value != result_of::size<Seq2>::value ||
+         detail::sequence_not_equal_to<Seq1 const,
+                                       Seq2 const,
+                                       result_of::size<Seq1>::value ==
+                                           result_of::size<Seq2>::value>::call(fusion::begin(a),
+                                                                               fusion::begin(b));
 #else
-        return !(a == b);
+  return !(a == b);
 #endif
-    }
+}
 
-    namespace operators
-    {
-        template <typename Seq1, typename Seq2>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        inline typename
-            boost::enable_if<
-                traits::enable_equality<Seq1, Seq2>
-              , bool
-            >::type
-        operator!=(Seq1 const& a, Seq2 const& b)
-        {
-            return fusion::not_equal_to(a, b);
-        }
-    }
-    using operators::operator!=;
-}}
+namespace operators
+{
+template <typename Seq1, typename Seq2>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline
+    typename boost::enable_if<traits::enable_equality<Seq1, Seq2>, bool>::type
+    operator!=(Seq1 const & a, Seq2 const & b)
+{
+  return fusion::not_equal_to(a, b);
+}
+}
+using operators::operator!=;
+}
+}
 
 #endif

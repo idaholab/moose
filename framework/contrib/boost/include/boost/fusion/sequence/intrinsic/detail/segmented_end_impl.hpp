@@ -15,54 +15,51 @@
 #include <boost/fusion/container/list/cons_fwd.hpp>
 #include <boost/fusion/support/is_segmented.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename First, typename Last>
-    struct iterator_range;
-}}
-
-namespace boost { namespace fusion { namespace detail
+namespace fusion
 {
-    //auto segmented_end_impl( seq, stack )
-    //{
-    //    assert(is_segmented(seq));
-    //    auto it = end(segments(seq));
-    //    return cons(iterator_range(it, it), stack);
-    //}
+template <typename First, typename Last>
+struct iterator_range;
+}
+}
 
-    template <typename Sequence, typename Stack>
-    struct segmented_end_impl
-    {
-        BOOST_MPL_ASSERT((traits::is_segmented<Sequence>));
+namespace boost
+{
+namespace fusion
+{
+namespace detail
+{
+// auto segmented_end_impl( seq, stack )
+//{
+//    assert(is_segmented(seq));
+//    auto it = end(segments(seq));
+//    return cons(iterator_range(it, it), stack);
+//}
 
-        typedef
-            typename result_of::end<
-                typename remove_reference<
-                    typename add_const<
-                        typename result_of::segments<Sequence>::type
-                    >::type
-                >::type
-            >::type
-        end_type;
+template <typename Sequence, typename Stack>
+struct segmented_end_impl
+{
+  BOOST_MPL_ASSERT((traits::is_segmented<Sequence>));
 
-        typedef iterator_range<end_type, end_type>  pair_type;
-        typedef cons<pair_type, Stack>              type;
+  typedef typename result_of::end<typename remove_reference<
+      typename add_const<typename result_of::segments<Sequence>::type>::type>::type>::type end_type;
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static pair_type make_pair(end_type end)
-        {
-            return pair_type(end, end);
-        }
+  typedef iterator_range<end_type, end_type> pair_type;
+  typedef cons<pair_type, Stack> type;
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static type call(Sequence & seq, Stack stack)
-        {
-            return type(
-                make_pair(fusion::end(fusion::segments(seq))),
-                stack);
-        }
-    };
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static pair_type make_pair(end_type end)
+  {
+    return pair_type(end, end);
+  }
 
-}}}
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Sequence & seq, Stack stack)
+  {
+    return type(make_pair(fusion::end(fusion::segments(seq))), stack);
+  }
+};
+}
+}
+}
 
 #endif

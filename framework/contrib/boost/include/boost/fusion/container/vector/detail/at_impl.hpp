@@ -12,49 +12,48 @@
 #include <boost/fusion/container/vector/detail/value_at_impl.hpp>
 #include <boost/static_assert.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct vector_tag;
+namespace fusion
+{
+struct vector_tag;
 
-    namespace extension
+namespace extension
+{
+template <typename Tag>
+struct at_impl;
+
+template <>
+struct at_impl<vector_tag>
+{
+  template <typename Sequence, typename N>
+  struct apply
+  {
+    typedef typename value_at_impl<vector_tag>::template apply<Sequence, N>::type element;
+    typedef typename detail::ref_result<element>::type type;
+
+    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Sequence & v)
     {
-        template <typename Tag>
-        struct at_impl;
-
-        template <>
-        struct at_impl<vector_tag>
-        {
-            template <typename Sequence, typename N>
-            struct apply
-            {
-                typedef typename value_at_impl<vector_tag>::template apply<Sequence, N>::type element;
-                typedef typename detail::ref_result<element>::type type;
-
-                BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-                static type
-                call(Sequence& v)
-                {
-                    BOOST_STATIC_ASSERT((N::value < Sequence::size::value));
-                    return v.at_impl(N());
-                }
-            };
-
-            template <typename Sequence, typename N>
-            struct apply <Sequence const, N>
-            {
-                typedef typename value_at_impl<vector_tag>::template apply<Sequence, N>::type element;
-                typedef typename detail::cref_result<element>::type type;
-
-                BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-                static type
-                call(Sequence const& v)
-                {
-                    BOOST_STATIC_ASSERT((N::value < Sequence::size::value));
-                    return v.at_impl(N());
-                }
-            };
-        };
+      BOOST_STATIC_ASSERT((N::value < Sequence::size::value));
+      return v.at_impl(N());
     }
-}}
+  };
+
+  template <typename Sequence, typename N>
+  struct apply<Sequence const, N>
+  {
+    typedef typename value_at_impl<vector_tag>::template apply<Sequence, N>::type element;
+    typedef typename detail::cref_result<element>::type type;
+
+    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Sequence const & v)
+    {
+      BOOST_STATIC_ASSERT((N::value < Sequence::size::value));
+      return v.at_impl(N());
+    }
+  };
+};
+}
+}
+}
 
 #endif

@@ -12,30 +12,29 @@
 #include <boost/fusion/iterator/segmented_iterator.hpp>
 #include <boost/fusion/container/list/cons.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace boost
 {
-    //auto segmented_end( seq )
-    //{
-    //    return make_segmented_iterator( segmented_end_impl( seq ) );
-    //}
+namespace fusion
+{
+namespace detail
+{
+// auto segmented_end( seq )
+//{
+//    return make_segmented_iterator( segmented_end_impl( seq ) );
+//}
 
-    template <typename Sequence, typename Nil_ = fusion::nil_>
-    struct segmented_end
-    {
-        typedef
-            segmented_iterator<
-                typename segmented_end_impl<Sequence, Nil_>::type
-            >
-        type;
+template <typename Sequence, typename Nil_ = fusion::nil_>
+struct segmented_end
+{
+  typedef segmented_iterator<typename segmented_end_impl<Sequence, Nil_>::type> type;
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static type call(Sequence & seq)
-        {
-            return type(
-                segmented_end_impl<Sequence, Nil_>::call(seq, Nil_()));
-        }
-    };
-
-}}}
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Sequence & seq)
+  {
+    return type(segmented_end_impl<Sequence, Nil_>::call(seq, Nil_()));
+  }
+};
+}
+}
+}
 
 #endif

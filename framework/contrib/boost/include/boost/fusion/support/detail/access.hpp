@@ -11,55 +11,55 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/add_reference.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace boost
 {
-    template <typename T>
-    struct ref_result
-    {
-        typedef typename add_reference<T>::type type;
-    };
+namespace fusion
+{
+namespace detail
+{
+template <typename T>
+struct ref_result
+{
+  typedef typename add_reference<T>::type type;
+};
 
-    template <typename T>
-    struct cref_result
-    {
-        typedef typename
-            add_reference<
-                typename add_const<T>::type
-            >::type
-        type;
-    };
+template <typename T>
+struct cref_result
+{
+  typedef typename add_reference<typename add_const<T>::type>::type type;
+};
 
-    template <typename T>
-    struct call_param
-    {
-        typedef T const& type;
-    };
+template <typename T>
+struct call_param
+{
+  typedef T const & type;
+};
 
-    template <typename T>
-    struct call_param<T&>
-    {
-        typedef T& type;
-    };
+template <typename T>
+struct call_param<T &>
+{
+  typedef T & type;
+};
 
-    template <typename T>
-    struct call_param<T const>
-    {
-        typedef T const& type;
-    };
+template <typename T>
+struct call_param<T const>
+{
+  typedef T const & type;
+};
 
-    template <typename T>
-    struct call_param<T volatile>
-    {
-        typedef T const& type;
-    };
+template <typename T>
+struct call_param<T volatile>
+{
+  typedef T const & type;
+};
 
-    template <typename T>
-    struct call_param<T const volatile>
-    {
-        typedef T const& type;
-    };
-
-}}}
+template <typename T>
+struct call_param<T const volatile>
+{
+  typedef T const & type;
+};
+}
+}
+}
 
 #endif
-

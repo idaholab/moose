@@ -14,90 +14,80 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_MAKE_CONTROLLED_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_MAKE_CONTROLLED_HPP_INCLUDED
 
-
-
-
-namespace boost {
-namespace numeric {
-namespace odeint {
-
-
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
 
 // default template for the controller
-template< class Stepper > struct get_controller { };
-
-
-
-// default controller factory
-template< class Stepper , class Controller >
-struct controller_factory
+template <class Stepper>
+struct get_controller
 {
-    Controller operator()(
-            typename Stepper::value_type abs_error ,
-            typename Stepper::value_type rel_error ,
-            const Stepper &stepper )
-    {
-        return Controller( abs_error , rel_error , stepper );
-    }
-
-    Controller operator()(
-            typename Stepper::value_type abs_error ,
-            typename Stepper::value_type rel_error ,
-            typename Stepper::time_type max_dt ,
-            const Stepper &stepper )
-    {
-        return Controller( abs_error , rel_error , max_dt, stepper );
-    }
 };
 
+// default controller factory
+template <class Stepper, class Controller>
+struct controller_factory
+{
+  Controller operator()(typename Stepper::value_type abs_error,
+                        typename Stepper::value_type rel_error,
+                        const Stepper & stepper)
+  {
+    return Controller(abs_error, rel_error, stepper);
+  }
 
-
+  Controller operator()(typename Stepper::value_type abs_error,
+                        typename Stepper::value_type rel_error,
+                        typename Stepper::time_type max_dt,
+                        const Stepper & stepper)
+  {
+    return Controller(abs_error, rel_error, max_dt, stepper);
+  }
+};
 
 namespace result_of
 {
-    template< class Stepper >
-    struct make_controlled
-    {
-        typedef typename get_controller< Stepper >::type type;
-    };
+template <class Stepper>
+struct make_controlled
+{
+  typedef typename get_controller<Stepper>::type type;
+};
 }
 
-
-template< class Stepper >
-typename result_of::make_controlled< Stepper >::type make_controlled(
-        typename Stepper::value_type abs_error ,
-        typename Stepper::value_type rel_error ,
-        const Stepper & stepper = Stepper() )
+template <class Stepper>
+typename result_of::make_controlled<Stepper>::type
+make_controlled(typename Stepper::value_type abs_error,
+                typename Stepper::value_type rel_error,
+                const Stepper & stepper = Stepper())
 {
-    typedef Stepper stepper_type;
-    typedef typename result_of::make_controlled< stepper_type >::type controller_type;
-    typedef controller_factory< stepper_type , controller_type > factory_type;
-    factory_type factory;
-    return factory( abs_error , rel_error , stepper );
+  typedef Stepper stepper_type;
+  typedef typename result_of::make_controlled<stepper_type>::type controller_type;
+  typedef controller_factory<stepper_type, controller_type> factory_type;
+  factory_type factory;
+  return factory(abs_error, rel_error, stepper);
 }
 
-
-template< class Stepper >
-typename result_of::make_controlled< Stepper >::type make_controlled(
-        typename Stepper::value_type abs_error ,
-        typename Stepper::value_type rel_error ,
-        typename Stepper::time_type max_dt ,
-        const Stepper & stepper = Stepper() )
+template <class Stepper>
+typename result_of::make_controlled<Stepper>::type
+make_controlled(typename Stepper::value_type abs_error,
+                typename Stepper::value_type rel_error,
+                typename Stepper::time_type max_dt,
+                const Stepper & stepper = Stepper())
 {
-    typedef Stepper stepper_type;
-    typedef typename result_of::make_controlled< stepper_type >::type controller_type;
-    typedef controller_factory< stepper_type , controller_type > factory_type;
-    factory_type factory;
-    return factory( abs_error , rel_error , max_dt, stepper );
+  typedef Stepper stepper_type;
+  typedef typename result_of::make_controlled<stepper_type>::type controller_type;
+  typedef controller_factory<stepper_type, controller_type> factory_type;
+  factory_type factory;
+  return factory(abs_error, rel_error, max_dt, stepper);
 }
 
 } // odeint
 } // numeric
 } // boost
-
 
 #endif // BOOST_NUMERIC_ODEINT_STEPPER_GENERATION_MAKE_CONTROLLED_HPP_INCLUDED

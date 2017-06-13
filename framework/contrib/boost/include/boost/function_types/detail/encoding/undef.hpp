@@ -35,4 +35,3 @@
 #undef BOOST_FT_full_mask
 
 #undef BOOST_FT_arity_mask
-

@@ -10,24 +10,30 @@
 #ifndef BOOST_FUSION_ADAPTED_STRUCT_DETAIL_SIZE_IMPL_HPP
 #define BOOST_FUSION_ADAPTED_STRUCT_DETAIL_SIZE_IMPL_HPP
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template<typename>
-    struct size_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct size_impl;
 
-    template <>
-    struct size_impl<struct_tag>
-    {
-        template <typename Seq>
-        struct apply
-          : struct_size<typename remove_const<Seq>::type>
-        {};
-    };
+template <>
+struct size_impl<struct_tag>
+{
+  template <typename Seq>
+  struct apply : struct_size<typename remove_const<Seq>::type>
+  {
+  };
+};
 
-    template <>
-    struct size_impl<assoc_struct_tag>
-      : size_impl<struct_tag>
-    {};
-}}}
+template <>
+struct size_impl<assoc_struct_tag> : size_impl<struct_tag>
+{
+};
+}
+}
+}
 
 #endif

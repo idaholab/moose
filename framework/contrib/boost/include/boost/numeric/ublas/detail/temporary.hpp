@@ -13,21 +13,28 @@
 #ifndef _BOOST_UBLAS_TEMPORARY_
 #define _BOOST_UBLAS_TEMPORARY_
 
-
-namespace boost { namespace numeric { namespace ublas {
+namespace boost
+{
+namespace numeric
+{
+namespace ublas
+{
 
 /// For the creation of temporary vectors in the assignment of proxies
 template <class M>
-struct vector_temporary_traits {
-   typedef typename M::vector_temporary_type type ;
+struct vector_temporary_traits
+{
+  typedef typename M::vector_temporary_type type;
 };
 
 /// For the creation of temporary vectors in the assignment of proxies
 template <class M>
-struct matrix_temporary_traits {
-   typedef typename M::matrix_temporary_type type ;
+struct matrix_temporary_traits
+{
+  typedef typename M::matrix_temporary_type type;
 };
-
-} } }
+}
+}
+}
 
 #endif

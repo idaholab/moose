@@ -30,28 +30,40 @@
 #include <iostream>
 #include <fstream>
 
-#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+#define throwError(msg)                                                                            \
+  {                                                                                                \
+    std::cerr << "\n\n" << msg << "\n\n";                                                          \
+    throw std::runtime_error("Error");                                                             \
+  }
 
-class BasicMultiDimensionalCartesianSpline: public virtual BasicDistributionND
+class BasicMultiDimensionalCartesianSpline : public virtual BasicDistributionND
 {
 public:
-  BasicMultiDimensionalCartesianSpline(const char * data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided);
+  BasicMultiDimensionalCartesianSpline(const char * data_filename,
+                                       std::vector<double> alpha,
+                                       std::vector<double> beta,
+                                       bool cdf_provided);
 
   BasicMultiDimensionalCartesianSpline(std::string data_filename, bool cdf_provided);
 
   BasicMultiDimensionalCartesianSpline(const char * data_filename, bool cdf_provided);
 
-  BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool cdf_provided);
+  BasicMultiDimensionalCartesianSpline(std::vector<std::vector<double>> & discretizations,
+                                       std::vector<double> & values,
+                                       std::vector<double> alpha,
+                                       std::vector<double> beta,
+                                       bool cdf_provided);
 
-  BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided);
+  BasicMultiDimensionalCartesianSpline(std::string data_filename,
+                                       std::vector<double> alpha,
+                                       std::vector<double> beta,
+                                       bool cdf_provided);
 
   void basicMultiDimensionalCartesianSplineInit();
 
   BasicMultiDimensionalCartesianSpline();
 
-  virtual ~BasicMultiDimensionalCartesianSpline()
-  {
-  };
+  virtual ~BasicMultiDimensionalCartesianSpline(){};
 
   double pdf(std::vector<double> x);
 

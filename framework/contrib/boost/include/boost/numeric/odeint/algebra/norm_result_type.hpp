@@ -19,15 +19,20 @@
 
 #include <boost/numeric/odeint/algebra/detail/extract_value_type.hpp>
 
-namespace boost {
-namespace numeric {
-namespace odeint {
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
 
-template< typename S , typename Enabler = void >
-struct norm_result_type {
-    typedef typename detail::extract_value_type< S >::type type;
+template <typename S, typename Enabler = void>
+struct norm_result_type
+{
+  typedef typename detail::extract_value_type<S>::type type;
 };
-
-} } }
+}
+}
+}
 
 #endif

@@ -28,9 +28,8 @@ validParams<TriangularDistribution>()
 
 TriangularDistribution::TriangularDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicTriangularDistribution(getParam<Real>("x_peak"),
-                                getParam<Real>("lower_bound"),
-                                getParam<Real>("upper_bound"))
+    BasicTriangularDistribution(
+        getParam<Real>("x_peak"), getParam<Real>("lower_bound"), getParam<Real>("upper_bound"))
 {
 }
 
@@ -56,5 +55,3 @@ TriangularDistribution::inverseCdf(const Real & y)
   else
     return BasicTriangularDistribution::inverseCdf(y);
 }
-
-

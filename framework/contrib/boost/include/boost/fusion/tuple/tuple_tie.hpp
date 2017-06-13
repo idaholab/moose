@@ -14,7 +14,7 @@
 // With no variadics, we will use the C++03 version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_TUPLE)
-# include <boost/fusion/tuple/detail/tuple_tie.hpp>
+#include <boost/fusion/tuple/detail/tuple_tie.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,17 +22,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <boost/fusion/tuple/tuple.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename ...T>
-    BOOST_FUSION_GPU_ENABLED
-    inline tuple<T&...>
-    tie(T&... arg)
-    {
-        return tuple<T&...>(arg...);
-    }
-}}
+namespace fusion
+{
+template <typename... T>
+BOOST_FUSION_GPU_ENABLED inline tuple<T &...>
+tie(T &... arg)
+{
+  return tuple<T &...>(arg...);
+}
+}
+}
 
 #endif
 #endif
-

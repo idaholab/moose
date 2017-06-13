@@ -13,61 +13,68 @@
 #include <boost/fusion/support/tag_of.hpp>
 #include <boost/fusion/sequence/intrinsic_fwd.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace boost
 {
-    struct segment_sequence_tag {};
+namespace fusion
+{
+namespace detail
+{
+struct segment_sequence_tag
+{
+};
 
-    // Here, Sequence is a sequence of ranges (which may or may not be
-    // segmented).
-    template<typename Sequence>
-    struct segment_sequence
-        : sequence_base<segment_sequence<Sequence> >
-    {
-        typedef fusion_sequence_tag tag;
-        typedef segment_sequence_tag fusion_tag;
-        typedef typename Sequence::is_view is_view;
-        typedef typename Sequence::category category;
-        typedef Sequence sequence_type;
-        sequence_type sequence;
+// Here, Sequence is a sequence of ranges (which may or may not be
+// segmented).
+template <typename Sequence>
+struct segment_sequence : sequence_base<segment_sequence<Sequence>>
+{
+  typedef fusion_sequence_tag tag;
+  typedef segment_sequence_tag fusion_tag;
+  typedef typename Sequence::is_view is_view;
+  typedef typename Sequence::category category;
+  typedef Sequence sequence_type;
+  sequence_type sequence;
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED explicit segment_sequence(Sequence const & seq)
-            : sequence(seq)
-        {}
-    };
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED explicit segment_sequence(Sequence const & seq)
+    : sequence(seq)
+  {
+  }
+};
 }
 
 namespace extension
 {
-    template<typename Tag>
-    struct is_segmented_impl;
+template <typename Tag>
+struct is_segmented_impl;
 
-    template<>
-    struct is_segmented_impl<detail::segment_sequence_tag>
+template <>
+struct is_segmented_impl<detail::segment_sequence_tag>
+{
+  template <typename Sequence>
+  struct apply : mpl::true_
+  {
+  };
+};
+
+template <typename Tag>
+struct segments_impl;
+
+template <>
+struct segments_impl<detail::segment_sequence_tag>
+{
+  template <typename Sequence>
+  struct apply
+  {
+    typedef typename Sequence::sequence_type type;
+
+    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Sequence & seq)
     {
-        template<typename Sequence>
-        struct apply
-            : mpl::true_
-        {};
-    };
-
-    template<typename Tag>
-    struct segments_impl;
-
-    template<>
-    struct segments_impl<detail::segment_sequence_tag>
-    {
-        template<typename Sequence>
-        struct apply
-        {
-            typedef typename Sequence::sequence_type type;
-
-            BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-            static type call(Sequence & seq)
-            {
-                return seq.sequence;
-            }
-        };
-    };
-}}}
+      return seq.sequence;
+    }
+  };
+};
+}
+}
+}
 
 #endif

@@ -37,9 +37,9 @@ protected:
   virtual Real cdf(const Real & x) override;
   virtual Real inverseCdf(const Real & y) override;
   /// The lower bound for the uniform distribution
-  //const Real & _lower_bound;
+  // const Real & _lower_bound;
   /// The upper bound for the uniform distribution
-  //const Real & _upper_bound;
+  // const Real & _upper_bound;
 };
 
 #endif /* UNIFORMDISTRIBUTION_H */

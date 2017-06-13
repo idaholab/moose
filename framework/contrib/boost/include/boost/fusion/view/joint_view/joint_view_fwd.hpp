@@ -7,12 +7,15 @@
 #if !defined(BOOST_FUSION_JOINT_VIEW_FWD_HPP_INCLUDED)
 #define BOOST_FUSION_JOINT_VIEW_FWD_HPP_INCLUDED
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct joint_view_tag;
+namespace fusion
+{
+struct joint_view_tag;
 
-    template <typename Sequence1, typename Sequence2>
-    struct joint_view;
-}}
+template <typename Sequence1, typename Sequence2>
+struct joint_view;
+}
+}
 
 #endif

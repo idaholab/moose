@@ -50,4 +50,3 @@
 #include <boost/math/distributions/find_location.hpp>
 
 #endif // BOOST_MATH_DISTRIBUTIONS_HPP
-

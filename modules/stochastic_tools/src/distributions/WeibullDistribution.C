@@ -21,7 +21,8 @@ validParams<WeibullDistribution>()
   InputParameters params = validParams<Distribution>();
   params.addClassDescription("Continuous uniform distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
-  params.addParam<Real>("upper_bound", std::numeric_limits<Real>::max(), "Distribution upper bound");
+  params.addParam<Real>(
+      "upper_bound", std::numeric_limits<Real>::max(), "Distribution upper bound");
   params.addParam<Real>("k", "Distribution shape factor");
   params.addParam<Real>("lambda", "Distribution scale factor");
   params.addParam<Real>("low", "Distribution lower domain scale");
@@ -60,5 +61,3 @@ WeibullDistribution::inverseCdf(const Real & y)
   else
     return BasicWeibullDistribution::inverseCdf(y);
 }
-
-

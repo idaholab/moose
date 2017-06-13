@@ -4,8 +4,8 @@
 
 // Copyright Aleksey Gurtovoy 2000-2004
 //
-// Distributed under the Boost Software License, Version 1.0. 
-// (See accompanying file LICENSE_1_0.txt or copy at 
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 // See http://www.boost.org/libs/mpl for documentation.
@@ -24,95 +24,104 @@
 #include <boost/mpl/aux_/value_wknd.hpp>
 #include <boost/mpl/aux_/config/ctps.hpp>
 
-namespace boost { namespace mpl { 
+namespace boost
+{
+namespace mpl
+{
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
-namespace aux {
+namespace aux
+{
 
-template< typename T, BOOST_MPL_AUX_NTTP_DECL(int, is_last_) >
+template <typename T, BOOST_MPL_AUX_NTTP_DECL(int, is_last_)>
 struct sel_iter;
 
-template< typename T >
-struct sel_iter<T,0>
+template <typename T>
+struct sel_iter<T, 0>
 {
-    typedef random_access_iterator_tag category;
-    typedef sel_iter<T,1> next;
-    typedef T type;
+  typedef random_access_iterator_tag category;
+  typedef sel_iter<T, 1> next;
+  typedef T type;
 };
 
-template< typename T >
-struct sel_iter<T,1>
+template <typename T>
+struct sel_iter<T, 1>
 {
-    typedef random_access_iterator_tag category;
-    typedef sel_iter<T,0> prior;
+  typedef random_access_iterator_tag category;
+  typedef sel_iter<T, 0> prior;
 };
 
 } // namespace aux
 
-template< typename T, BOOST_MPL_AUX_NTTP_DECL(int, is_last_), typename Distance >
-struct advance< aux::sel_iter<T,is_last_>,Distance>
+template <typename T, BOOST_MPL_AUX_NTTP_DECL(int, is_last_), typename Distance>
+struct advance<aux::sel_iter<T, is_last_>, Distance>
 {
-    typedef aux::sel_iter<
-          T
-        , ( is_last_ + BOOST_MPL_AUX_NESTED_VALUE_WKND(int, Distance) )
-        > type;
+  typedef aux::sel_iter<T, (is_last_ + BOOST_MPL_AUX_NESTED_VALUE_WKND(int, Distance))> type;
 };
 
-template< 
-      typename T
-    , BOOST_MPL_AUX_NTTP_DECL(int, l1)
-    , BOOST_MPL_AUX_NTTP_DECL(int, l2) 
-    >
-struct distance< aux::sel_iter<T,l1>, aux::sel_iter<T,l2> >
-    : int_<( l2 - l1 )>
+template <typename T, BOOST_MPL_AUX_NTTP_DECL(int, l1), BOOST_MPL_AUX_NTTP_DECL(int, l2)>
+struct distance<aux::sel_iter<T, l1>, aux::sel_iter<T, l2>> : int_<(l2 - l1)>
 {
 };
 
 #else
 
-namespace aux {
+namespace aux
+{
 
 struct sel_iter_tag;
 
-template< typename T, BOOST_MPL_AUX_NTTP_DECL(int, is_last_) >
+template <typename T, BOOST_MPL_AUX_NTTP_DECL(int, is_last_)>
 struct sel_iter
 {
-    enum { pos_ = is_last_ };
-    typedef aux::sel_iter_tag tag;
-    typedef random_access_iterator_tag category;
+  enum
+  {
+    pos_ = is_last_
+  };
+  typedef aux::sel_iter_tag tag;
+  typedef random_access_iterator_tag category;
 
-    typedef sel_iter<T,(is_last_ + 1)> next;
-    typedef sel_iter<T,(is_last_ - 1)> prior;
-    typedef T type;
+  typedef sel_iter<T, (is_last_ + 1)> next;
+  typedef sel_iter<T, (is_last_ - 1)> prior;
+  typedef T type;
 };
 
 } // namespace aux
 
-template<> struct advance_impl<aux::sel_iter_tag>
+template <>
+struct advance_impl<aux::sel_iter_tag>
 {
-    template< typename Iterator, typename N > struct apply
+  template <typename Iterator, typename N>
+  struct apply
+  {
+    enum
     {
-        enum { pos_ = Iterator::pos_, n_ = N::value };
-        typedef aux::sel_iter<
-              typename Iterator::type
-            , (pos_ + n_)
-            > type;
+      pos_ = Iterator::pos_,
+      n_ = N::value
     };
+    typedef aux::sel_iter<typename Iterator::type, (pos_ + n_)> type;
+  };
 };
 
-template<> struct distance_impl<aux::sel_iter_tag>
+template <>
+struct distance_impl<aux::sel_iter_tag>
 {
-    template< typename Iter1, typename Iter2 > struct apply
+  template <typename Iter1, typename Iter2>
+  struct apply
+  {
+    enum
     {
-        enum { pos1_ = Iter1::pos_, pos2_ = Iter2::pos_ };
-        typedef int_<( pos2_ - pos1_ )> type;
-        BOOST_STATIC_CONSTANT(int, value = ( pos2_ - pos1_ ));
+      pos1_ = Iter1::pos_,
+      pos2_ = Iter2::pos_
     };
+    typedef int_<(pos2_ - pos1_)> type;
+    BOOST_STATIC_CONSTANT(int, value = (pos2_ - pos1_));
+  };
 };
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
-
-}}
+}
+}
 
 #endif // BOOST_MPL_AUX_SINGLE_ELEMENT_ITER_HPP_INCLUDED

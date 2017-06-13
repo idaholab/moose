@@ -1,4 +1,4 @@
-// Boost.Units - A C++ library for zero-overhead dimensional analysis and 
+// Boost.Units - A C++ library for zero-overhead dimensional analysis and
 // unit/quantity manipulation and conversion
 //
 // Copyright (C) 2003-2008 Matthias Christian Schabel
@@ -13,105 +13,131 @@
 
 #include <boost/units/operators.hpp>
 
-namespace boost {
+namespace boost
+{
 
-namespace units {
+namespace units
+{
 
-struct one { one() {} };
+struct one
+{
+  one() {}
+};
 
 // workaround for pathscale.
-inline one make_one() {
-    one result;
-    return(result);
+inline one
+make_one()
+{
+  one result;
+  return (result);
 }
 
-template<class T>
+template <class T>
 struct multiply_typeof_helper<one, T>
 {
-    typedef T type;
+  typedef T type;
 };
 
-template<class T>
+template <class T>
 struct multiply_typeof_helper<T, one>
 {
-    typedef T type;
+  typedef T type;
 };
 
-template<>
+template <>
 struct multiply_typeof_helper<one, one>
 {
-    typedef one type;
+  typedef one type;
 };
 
-template<class T>
-inline T operator*(const one&, const T& t)
+template <class T>
+inline T operator*(const one &, const T & t)
 {
-    return(t);
+  return (t);
 }
 
-template<class T>
-inline T operator*(const T& t, const one&)
+template <class T>
+inline T operator*(const T & t, const one &)
 {
-    return(t);
+  return (t);
 }
 
-inline one operator*(const one&, const one&)
+inline one operator*(const one &, const one &)
 {
-    one result;
-    return(result);
+  one result;
+  return (result);
 }
 
-template<class T>
+template <class T>
 struct divide_typeof_helper<T, one>
 {
-    typedef T type;
+  typedef T type;
 };
 
-template<class T>
+template <class T>
 struct divide_typeof_helper<one, T>
 {
-    typedef T type;
+  typedef T type;
 };
 
-template<>
+template <>
 struct divide_typeof_helper<one, one>
 {
-    typedef one type;
+  typedef one type;
 };
 
-template<class T>
-inline T operator/(const T& t, const one&)
+template <class T>
+inline T
+operator/(const T & t, const one &)
 {
-    return(t);
+  return (t);
 }
 
-template<class T>
-inline T operator/(const one&, const T& t)
+template <class T>
+inline T
+operator/(const one &, const T & t)
 {
-    return(1/t);
+  return (1 / t);
 }
 
-inline one operator/(const one&, const one&)
+inline one
+operator/(const one &, const one &)
 {
-    one result;
-    return(result);
+  one result;
+  return (result);
 }
 
-template<class T>
-inline bool operator>(const boost::units::one&, const T& t) {
-    return(1 > t);
+template <class T>
+inline bool
+operator>(const boost::units::one &, const T & t)
+{
+  return (1 > t);
 }
 
-template<class T>
-T one_to_double(const T& t) { return t; }
+template <class T>
+T
+one_to_double(const T & t)
+{
+  return t;
+}
 
-inline double one_to_double(const one&) { return 1.0; }
+inline double
+one_to_double(const one &)
+{
+  return 1.0;
+}
 
-template<class T>
-struct one_to_double_type { typedef T type; };
+template <class T>
+struct one_to_double_type
+{
+  typedef T type;
+};
 
-template<>
-struct one_to_double_type<one> { typedef double type; };
+template <>
+struct one_to_double_type<one>
+{
+  typedef double type;
+};
 
 } // namespace units
 

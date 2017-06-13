@@ -17,15 +17,16 @@
 
 class RandomClassImpl;
 
-
 /**
  * The RandomClass class allows to create a random number generator instance
  * anywhere in crow
  */
 
-class RandomClass {
-  RandomClassImpl *_rng;
+class RandomClass
+{
+  RandomClassImpl * _rng;
   const double _range;
+
 public:
   RandomClass();
   ~RandomClass();

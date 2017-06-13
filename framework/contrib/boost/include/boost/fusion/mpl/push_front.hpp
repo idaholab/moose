@@ -13,28 +13,26 @@
 #include <boost/fusion/algorithm/transformation/push_front.hpp>
 #include <boost/fusion/sequence/convert.hpp>
 
-namespace boost { namespace mpl
+namespace boost
 {
-    template <typename Tag>
-    struct push_front_impl;
+namespace mpl
+{
+template <typename Tag>
+struct push_front_impl;
 
-    template <>
-    struct push_front_impl<fusion::fusion_sequence_tag>
-    {
-        template <typename Sequence, typename T>
-        struct apply
-        {
-            typedef typename
-                fusion::result_of::push_front<Sequence, T>::type
-            result;
+template <>
+struct push_front_impl<fusion::fusion_sequence_tag>
+{
+  template <typename Sequence, typename T>
+  struct apply
+  {
+    typedef typename fusion::result_of::push_front<Sequence, T>::type result;
 
-            typedef typename
-                fusion::result_of::convert<
-                    typename fusion::detail::tag_of<Sequence>::type, result>::type
-            type;
-        };
-    };
-}}
+    typedef typename fusion::result_of::convert<typename fusion::detail::tag_of<Sequence>::type,
+                                                result>::type type;
+  };
+};
+}
+}
 
 #endif
-

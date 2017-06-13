@@ -11,25 +11,12 @@
 
 #define BOOST_TT_TRAIT_NAME has_divides
 #define BOOST_TT_TRAIT_OP /
-#define BOOST_TT_FORBIDDEN_IF\
-   /* pointer with pointer or fundamental */\
-   (\
-      (\
-         ::boost::is_pointer< Lhs_noref >::value && \
-         ( \
-            ::boost::is_fundamental< Rhs_nocv >::value || \
-            ::boost::is_pointer< Rhs_noref >::value\
-         )\
-      )||\
-      (\
-         ::boost::is_pointer< Rhs_noref >::value && \
-         ( \
-            ::boost::is_fundamental< Lhs_nocv >::value || \
-            ::boost::is_pointer< Lhs_noref >::value\
-          )\
-      )\
-      )
-
+#define BOOST_TT_FORBIDDEN_IF                                                                      \
+  /* pointer with pointer or fundamental */                                                        \
+  ((::boost::is_pointer<Lhs_noref>::value &&                                                       \
+    (::boost::is_fundamental<Rhs_nocv>::value || ::boost::is_pointer<Rhs_noref>::value)) ||        \
+   (::boost::is_pointer<Rhs_noref>::value &&                                                       \
+    (::boost::is_fundamental<Lhs_nocv>::value || ::boost::is_pointer<Lhs_noref>::value)))
 
 #include <boost/type_traits/detail/has_binary_operator.hpp>
 

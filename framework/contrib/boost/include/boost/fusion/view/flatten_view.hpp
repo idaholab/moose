@@ -7,9 +7,7 @@
 #ifndef BOOST_FUSION_SEQUENCE_FLATTEN_VIEW_HPP_INCLUDED
 #define BOOST_FUSION_SEQUENCE_FLATTEN_VIEW_HPP_INCLUDED
 
-
 #include <boost/fusion/view/flatten_view/flatten_view.hpp>
 #include <boost/fusion/view/flatten_view/flatten_view_iterator.hpp>
-
 
 #endif

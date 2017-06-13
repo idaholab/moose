@@ -1,4 +1,4 @@
-// Boost.Units - A C++ library for zero-overhead dimensional analysis and 
+// Boost.Units - A C++ library for zero-overhead dimensional analysis and
 // unit/quantity manipulation and conversion
 //
 // Copyright (C) 2003-2008 Matthias Christian Schabel
@@ -20,59 +20,61 @@
 #include <boost/units/units_fwd.hpp>
 #include <boost/units/detail/push_front_if.hpp>
 
-namespace boost {
+namespace boost
+{
 
-namespace units {
+namespace units
+{
 
-template<class Item, class Next>
+template <class Item, class Next>
 struct list;
 
-namespace detail {
+namespace detail
+{
 
-template<class T>
+template <class T>
 struct is_empty_dim;
 
 /// add an instantiation of dim to Sequence.
-template<bool>
+template <bool>
 struct push_front_or_add_impl;
 
-template<>
+template <>
 struct push_front_or_add_impl<true>
 {
-    template<typename Sequence, typename T>
-    struct apply
-    {
-        typedef typename mpl::plus<T, typename Sequence::item>::type item;
-        typedef typename push_front_if<!is_empty_dim<item>::value>::template apply<
-            typename Sequence::next,
-            item
-        > type;
-    };
+  template <typename Sequence, typename T>
+  struct apply
+  {
+    typedef typename mpl::plus<T, typename Sequence::item>::type item;
+    typedef
+        typename push_front_if<!is_empty_dim<item>::value>::template apply<typename Sequence::next,
+                                                                           item>
+            type;
+  };
 };
 
-template<>
+template <>
 struct push_front_or_add_impl<false>
 {
-    template<typename Sequence, typename T>
-    struct apply
-    {
-        typedef list<T, Sequence> type;
-    };
+  template <typename Sequence, typename T>
+  struct apply
+  {
+    typedef list<T, Sequence> type;
+  };
 };
 
-template<typename Sequence, typename T>
+template <typename Sequence, typename T>
 struct push_front_or_add
 {
-    typedef typename push_front_or_add_impl<boost::is_same<typename T::tag_type, typename Sequence::item::tag_type>::value>::template apply<
-        Sequence,
-        T
-    >::type type;
+  typedef typename push_front_or_add_impl<
+      boost::is_same<typename T::tag_type, typename Sequence::item::tag_type>::value>::
+      template apply<Sequence, T>::type type;
 };
 
-template<typename T>
+template <typename T>
 struct push_front_or_add<dimensionless_type, T>
 {
-    typedef list<T, dimensionless_type> type;
+  typedef list<T, dimensionless_type> type;
 };
 
 } // namespace detail

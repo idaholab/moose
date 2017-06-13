@@ -18,12 +18,18 @@
 #define ALIGN16 __declspec(align(16))
 #endif
 
-namespace boost{ namespace math{ namespace lanczos{
+namespace boost
+{
+namespace math
+{
+namespace lanczos
+{
 
 template <>
-inline double lanczos13m53::lanczos_sum<double>(const double& x)
+inline double
+lanczos13m53::lanczos_sum<double>(const double & x)
 {
-   static const ALIGN16 double coeff[26] = {
+  static const ALIGN16 double coeff[26] = {
       static_cast<double>(2.506628274631000270164908177133837338626L),
       static_cast<double>(1u),
       static_cast<double>(210.8242777515793458725097339207133627117L),
@@ -49,145 +55,142 @@ inline double lanczos13m53::lanczos_sum<double>(const double& x)
       static_cast<double>(42919803642.64909876895789904700198885093L),
       static_cast<double>(39916800u),
       static_cast<double>(23531376880.41075968857200767445163675473L),
-      static_cast<double>(0u)
-   };
-   __m128d vx = _mm_load1_pd(&x);
-   __m128d sum_even = _mm_load_pd(coeff);
-   __m128d sum_odd = _mm_load_pd(coeff+2);
-   __m128d nc_odd, nc_even;
-   __m128d vx2 = _mm_mul_pd(vx, vx);
+      static_cast<double>(0u)};
+  __m128d vx = _mm_load1_pd(&x);
+  __m128d sum_even = _mm_load_pd(coeff);
+  __m128d sum_odd = _mm_load_pd(coeff + 2);
+  __m128d nc_odd, nc_even;
+  __m128d vx2 = _mm_mul_pd(vx, vx);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 4);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 6);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 4);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 6);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 8);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 10);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 8);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 10);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 12);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 14);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 12);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 14);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 16);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 18);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 16);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 18);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 20);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 22);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 20);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 22);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 24);
-   sum_odd = _mm_mul_pd(sum_odd, vx);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_even = _mm_add_pd(sum_even, sum_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 24);
+  sum_odd = _mm_mul_pd(sum_odd, vx);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_even = _mm_add_pd(sum_even, sum_odd);
 
+  double ALIGN16 t[2];
+  _mm_store_pd(t, sum_even);
 
-   double ALIGN16 t[2];
-   _mm_store_pd(t, sum_even);
-   
-   return t[0] / t[1];
+  return t[0] / t[1];
 }
 
 template <>
-inline double lanczos13m53::lanczos_sum_expG_scaled<double>(const double& x)
+inline double
+lanczos13m53::lanczos_sum_expG_scaled<double>(const double & x)
 {
-   static const ALIGN16 double coeff[26] = {
-         static_cast<double>(0.006061842346248906525783753964555936883222L),
-         static_cast<double>(1u),
-         static_cast<double>(0.5098416655656676188125178644804694509993L),
-         static_cast<double>(66u),
-         static_cast<double>(19.51992788247617482847860966235652136208L),
-         static_cast<double>(1925u),
-         static_cast<double>(449.9445569063168119446858607650988409623L),
-         static_cast<double>(32670u),
-         static_cast<double>(6955.999602515376140356310115515198987526L),
-         static_cast<double>(357423u),
-         static_cast<double>(75999.29304014542649875303443598909137092L),
-         static_cast<double>(2637558u),
-         static_cast<double>(601859.6171681098786670226533699352302507L),
-         static_cast<double>(13339535u),
-         static_cast<double>(3481712.15498064590882071018964774556468L),
-         static_cast<double>(45995730u),
-         static_cast<double>(14605578.08768506808414169982791359218571L),
-         static_cast<double>(105258076u),
-         static_cast<double>(43338889.32467613834773723740590533316085L),
-         static_cast<double>(150917976u),
-         static_cast<double>(86363131.28813859145546927288977868422342L),
-         static_cast<double>(120543840u),
-         static_cast<double>(103794043.1163445451906271053616070238554L),
-         static_cast<double>(39916800u),
-         static_cast<double>(56906521.91347156388090791033559122686859L),
-         static_cast<double>(0u)
-   };
-   __m128d vx = _mm_load1_pd(&x);
-   __m128d sum_even = _mm_load_pd(coeff);
-   __m128d sum_odd = _mm_load_pd(coeff+2);
-   __m128d nc_odd, nc_even;
-   __m128d vx2 = _mm_mul_pd(vx, vx);
+  static const ALIGN16 double coeff[26] = {
+      static_cast<double>(0.006061842346248906525783753964555936883222L),
+      static_cast<double>(1u),
+      static_cast<double>(0.5098416655656676188125178644804694509993L),
+      static_cast<double>(66u),
+      static_cast<double>(19.51992788247617482847860966235652136208L),
+      static_cast<double>(1925u),
+      static_cast<double>(449.9445569063168119446858607650988409623L),
+      static_cast<double>(32670u),
+      static_cast<double>(6955.999602515376140356310115515198987526L),
+      static_cast<double>(357423u),
+      static_cast<double>(75999.29304014542649875303443598909137092L),
+      static_cast<double>(2637558u),
+      static_cast<double>(601859.6171681098786670226533699352302507L),
+      static_cast<double>(13339535u),
+      static_cast<double>(3481712.15498064590882071018964774556468L),
+      static_cast<double>(45995730u),
+      static_cast<double>(14605578.08768506808414169982791359218571L),
+      static_cast<double>(105258076u),
+      static_cast<double>(43338889.32467613834773723740590533316085L),
+      static_cast<double>(150917976u),
+      static_cast<double>(86363131.28813859145546927288977868422342L),
+      static_cast<double>(120543840u),
+      static_cast<double>(103794043.1163445451906271053616070238554L),
+      static_cast<double>(39916800u),
+      static_cast<double>(56906521.91347156388090791033559122686859L),
+      static_cast<double>(0u)};
+  __m128d vx = _mm_load1_pd(&x);
+  __m128d sum_even = _mm_load_pd(coeff);
+  __m128d sum_odd = _mm_load_pd(coeff + 2);
+  __m128d nc_odd, nc_even;
+  __m128d vx2 = _mm_mul_pd(vx, vx);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 4);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 6);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 4);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 6);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 8);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 10);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 8);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 10);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 12);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 14);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 12);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 14);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 16);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 18);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 16);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 18);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 20);
-   sum_odd = _mm_mul_pd(sum_odd, vx2);
-   nc_odd = _mm_load_pd(coeff + 22);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_odd = _mm_add_pd(sum_odd, nc_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 20);
+  sum_odd = _mm_mul_pd(sum_odd, vx2);
+  nc_odd = _mm_load_pd(coeff + 22);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_odd = _mm_add_pd(sum_odd, nc_odd);
 
-   sum_even = _mm_mul_pd(sum_even, vx2);
-   nc_even = _mm_load_pd(coeff + 24);
-   sum_odd = _mm_mul_pd(sum_odd, vx);
-   sum_even = _mm_add_pd(sum_even, nc_even);
-   sum_even = _mm_add_pd(sum_even, sum_odd);
+  sum_even = _mm_mul_pd(sum_even, vx2);
+  nc_even = _mm_load_pd(coeff + 24);
+  sum_odd = _mm_mul_pd(sum_odd, vx);
+  sum_even = _mm_add_pd(sum_even, nc_even);
+  sum_even = _mm_add_pd(sum_even, sum_odd);
 
+  double ALIGN16 t[2];
+  _mm_store_pd(t, sum_even);
 
-   double ALIGN16 t[2];
-   _mm_store_pd(t, sum_even);
-   
-   return t[0] / t[1];
+  return t[0] / t[1];
 }
 
 } // namespace lanczos
@@ -197,8 +200,3 @@ inline double lanczos13m53::lanczos_sum_expG_scaled<double>(const double& x)
 #undef ALIGN16
 
 #endif // BOOST_MATH_SPECIAL_FUNCTIONS_LANCZOS
-
-
-
-
-

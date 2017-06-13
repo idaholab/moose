@@ -23,47 +23,57 @@
 
 const int _defaultSeed = 1256955321;
 
-enum truncation {MULTIPLICATIVE=1, SUM=2};
+enum truncation
+{
+  MULTIPLICATIVE = 1,
+  SUM = 2
+};
 
 class DistributionContainer;
 
 class BasicDistribution
 {
 public:
-   BasicDistribution();
-   virtual ~BasicDistribution();
-   double  getVariable(const std::string variable_name);  ///< getVariable from mapping
-   std::vector<double>  getVariableVector(const std::string variable_name);
-   void updateVariable(const std::string & variable_name, double & new_value);    ///< update variable into the mapping
+  BasicDistribution();
+  virtual ~BasicDistribution();
+  double getVariable(const std::string variable_name); ///< getVariable from mapping
+  std::vector<double> getVariableVector(const std::string variable_name);
+  void updateVariable(const std::string & variable_name,
+                      double & new_value); ///< update variable into the mapping
 
-   virtual double getRandom(double x);  //Same as inverseCdf, except it can be forced.
+  virtual double getRandom(double x); // Same as inverseCdf, except it can be forced.
 
-   virtual double  pdf(double x) = 0; ///< pdf function at coordinate x
-   virtual double  cdf(double x) = 0; ///< cdf function at coordinate x
-   virtual double  inverseCdf(double x) = 0; ///< x
+  virtual double pdf(double x) = 0;        ///< pdf function at coordinate x
+  virtual double cdf(double x) = 0;        ///< cdf function at coordinate x
+  virtual double inverseCdf(double x) = 0; ///< x
 
-   virtual double untrPdf(double x) = 0;
-   virtual double untrCdf(double x) = 0;
-   virtual double untrCdfComplement(double x)  = 0;
-   virtual double untrInverseCdf(double x) = 0;
-   virtual double untrMean() = 0;
-   /**
-      Calculates the untruncated standard deviation
-      \return the standard deviation
-    */
-   virtual double untrStdDev() = 0;
-   virtual double untrMedian() = 0;
-   virtual double untrMode() = 0;
-   virtual double untrHazard(double x) = 0;
+  virtual double untrPdf(double x) = 0;
+  virtual double untrCdf(double x) = 0;
+  virtual double untrCdfComplement(double x) = 0;
+  virtual double untrInverseCdf(double x) = 0;
+  virtual double untrMean() = 0;
+  /**
+     Calculates the untruncated standard deviation
+     \return the standard deviation
+   */
+  virtual double untrStdDev() = 0;
+  virtual double untrMedian() = 0;
+  virtual double untrMode() = 0;
+  virtual double untrHazard(double x) = 0;
 
-   int returnDimensionality(){return 1;}
+  int returnDimensionality() { return 1; }
 
-   std::string & getType(); ///< Get distribution type
-   unsigned int getSeed(); ///< Get seed
-   std::vector<std::string> getVariableNames();
+  std::string & getType(); ///< Get distribution type
+  unsigned int getSeed();  ///< Get seed
+  std::vector<std::string> getVariableNames();
 
 protected:
-  enum EForceRandom {NO_FORCING, FORCED_VALUE, FORCED_PROBABILITY};
+  enum EForceRandom
+  {
+    NO_FORCING,
+    FORCED_VALUE,
+    FORCED_PROBABILITY
+  };
 
   virtual EForceRandom forcingMethod();
   virtual double forcedConstant();
@@ -77,13 +87,11 @@ protected:
 
   bool hasParameter(std::string);
   std::string _type;                              ///< Distribution type
-  std::map <std::string,double> _dist_parameters;  ///< Distribution parameters
-  std::map <std::string,std::vector<double> > _dist_vector_parameters;
-  unsigned int _seed;                             ///< seed
+  std::map<std::string, double> _dist_parameters; ///< Distribution parameters
+  std::map<std::string, std::vector<double>> _dist_vector_parameters;
+  unsigned int _seed; ///< seed
 
   bool _check_status;
 };
-
-
 
 #endif /* BASICDISTRIBUTION_H */

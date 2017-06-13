@@ -16,41 +16,43 @@
 #include <boost/fusion/sequence/intrinsic/end.hpp>
 #include <boost/fusion/adapted/mpl/mpl_iterator.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    namespace result_of
-    {
-        template <typename Sequence, typename Position, typename Range>
-        struct insert_range
-        {
-            typedef typename convert_iterator<Position>::type pos_type;
-            typedef typename result_of::begin<Sequence>::type first_type;
-            typedef typename result_of::end<Sequence>::type last_type;
+namespace fusion
+{
+namespace result_of
+{
+template <typename Sequence, typename Position, typename Range>
+struct insert_range
+{
+  typedef typename convert_iterator<Position>::type pos_type;
+  typedef typename result_of::begin<Sequence>::type first_type;
+  typedef typename result_of::end<Sequence>::type last_type;
 
-            typedef iterator_range<first_type, pos_type> left_type;
-            typedef iterator_range<pos_type, last_type> right_type;
-            typedef joint_view<left_type, Range> left_insert_type;
-            typedef joint_view<left_insert_type, right_type> type;
-        };
-    }
+  typedef iterator_range<first_type, pos_type> left_type;
+  typedef iterator_range<pos_type, last_type> right_type;
+  typedef joint_view<left_type, Range> left_insert_type;
+  typedef joint_view<left_insert_type, right_type> type;
+};
+}
 
-    template <typename Sequence, typename Position, typename Range>
-    BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename result_of::insert_range<Sequence const, Position, Range const>::type
-    insert_range(Sequence const& seq, Position const& pos, Range const& range)
-    {
-        typedef result_of::insert_range<Sequence const, Position, Range const> result_of;
-        typedef typename result_of::left_type left_type;
-        typedef typename result_of::right_type right_type;
-        typedef typename result_of::left_insert_type left_insert_type;
-        typedef typename result_of::type result;
+template <typename Sequence, typename Position, typename Range>
+BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline
+    typename result_of::insert_range<Sequence const, Position, Range const>::type
+    insert_range(Sequence const & seq, Position const & pos, Range const & range)
+{
+  typedef result_of::insert_range<Sequence const, Position, Range const> result_of;
+  typedef typename result_of::left_type left_type;
+  typedef typename result_of::right_type right_type;
+  typedef typename result_of::left_insert_type left_insert_type;
+  typedef typename result_of::type result;
 
-        left_type left(fusion::begin(seq), convert_iterator<Position>::call(pos));
-        right_type right(convert_iterator<Position>::call(pos), fusion::end(seq));
-        left_insert_type left_insert(left, range);
-        return result(left_insert, right);
-    }
-}}
+  left_type left(fusion::begin(seq), convert_iterator<Position>::call(pos));
+  right_type right(convert_iterator<Position>::call(pos), fusion::end(seq));
+  left_insert_type left_insert(left, range);
+  return result(left_insert, right);
+}
+}
+}
 
 #endif
-

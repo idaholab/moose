@@ -3,7 +3,8 @@
  boost/numeric/odeint/util/state_wrapper.hpp
 
  [begin_description]
- State wrapper for the state type in all stepper. The state wrappers are responsible for construction,
+ State wrapper for the state type in all stepper. The state wrappers are responsible for
+ construction,
  destruction, copying construction, assignment and resizing.
  [end_description]
 
@@ -15,10 +16,8 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_UTIL_STATE_WRAPPER_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_UTIL_STATE_WRAPPER_HPP_INCLUDED
-
 
 #include <boost/type_traits/integral_constant.hpp>
 
@@ -26,25 +25,22 @@
 #include <boost/numeric/odeint/util/resize.hpp>
 #include <boost/numeric/odeint/util/same_size.hpp>
 
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
 
-namespace boost {
-namespace numeric {
-namespace odeint {
-
-
-template< class V , class Enabler = void >
+template <class V, class Enabler = void>
 struct state_wrapper
 {
-    typedef state_wrapper< V > state_wrapper_type;
+  typedef state_wrapper<V> state_wrapper_type;
 
-    V m_v;
+  V m_v;
 };
-
-
 }
 }
 }
-
-
 
 #endif // BOOST_NUMERIC_ODEINT_UTIL_STATE_WRAPPER_HPP_INCLUDED

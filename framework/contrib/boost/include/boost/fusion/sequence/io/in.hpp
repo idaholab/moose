@@ -14,30 +14,29 @@
 #include <boost/fusion/sequence/io/detail/in.hpp>
 #include <boost/fusion/support/is_sequence.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename Sequence>
-    inline std::istream&
-    in(std::istream& is, Sequence& seq)
-    {
-        detail::read_sequence(is, seq);
-        return is;
-    }
+namespace fusion
+{
+template <typename Sequence>
+inline std::istream &
+in(std::istream & is, Sequence & seq)
+{
+  detail::read_sequence(is, seq);
+  return is;
+}
 
-    namespace operators
-    {
-        template <typename Sequence>
-        inline typename
-            boost::enable_if<
-               fusion::traits::is_sequence<Sequence>
-              , std::istream&
-            >::type
-        operator>>(std::istream& is, Sequence& seq)
-        {
-            return fusion::in(is, seq);
-        }
-    }
-    using operators::operator>>;
-}}
+namespace operators
+{
+template <typename Sequence>
+inline typename boost::enable_if<fusion::traits::is_sequence<Sequence>, std::istream &>::type
+operator>>(std::istream & is, Sequence & seq)
+{
+  return fusion::in(is, seq);
+}
+}
+using operators::operator>>;
+}
+}
 
 #endif

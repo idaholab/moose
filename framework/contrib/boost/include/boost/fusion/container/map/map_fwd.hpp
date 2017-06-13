@@ -10,31 +10,30 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/config.hpp>
 
-#if (defined(BOOST_NO_CXX11_DECLTYPE)             \
-  || defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)   \
-  || defined(BOOST_NO_CXX11_RVALUE_REFERENCES))   \
-  || (defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES))
-# if defined(BOOST_FUSION_HAS_VARIADIC_MAP)
-#   undef BOOST_FUSION_HAS_VARIADIC_MAP
-# endif
+#if (defined(BOOST_NO_CXX11_DECLTYPE) || defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) ||             \
+     defined(BOOST_NO_CXX11_RVALUE_REFERENCES)) ||                                                 \
+    (defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES))
+#if defined(BOOST_FUSION_HAS_VARIADIC_MAP)
+#undef BOOST_FUSION_HAS_VARIADIC_MAP
+#endif
 #else
-# if !defined(BOOST_FUSION_HAS_VARIADIC_MAP)
-#   define BOOST_FUSION_HAS_VARIADIC_MAP
-# endif
+#if !defined(BOOST_FUSION_HAS_VARIADIC_MAP)
+#define BOOST_FUSION_HAS_VARIADIC_MAP
+#endif
 #endif
 
 // MSVC variadics at this point in time is not ready yet (ICE!)
 #if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1900))
-# if defined(BOOST_FUSION_HAS_VARIADIC_MAP)
-#   undef BOOST_FUSION_HAS_VARIADIC_MAP
-# endif
+#if defined(BOOST_FUSION_HAS_VARIADIC_MAP)
+#undef BOOST_FUSION_HAS_VARIADIC_MAP
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // With no decltype and variadics, we will use the C++03 version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_MAP)
-# include <boost/fusion/container/map/detail/cpp03/map_fwd.hpp>
+#include <boost/fusion/container/map/detail/cpp03/map_fwd.hpp>
 #else
 
 #include <boost/fusion/container/map/detail/map_impl.hpp>
@@ -42,11 +41,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // C++11 interface
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename ...T>
-    struct map;
-}}
+namespace fusion
+{
+template <typename... T>
+struct map;
+}
+}
 
 #endif
 #endif

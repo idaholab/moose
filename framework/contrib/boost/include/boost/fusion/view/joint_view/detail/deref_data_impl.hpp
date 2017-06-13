@@ -11,29 +11,31 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/fusion/iterator/deref_data.hpp>
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template <typename>
-    struct deref_data_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct deref_data_impl;
 
-    template <>
-    struct deref_data_impl<joint_view_iterator_tag>
+template <>
+struct deref_data_impl<joint_view_iterator_tag>
+{
+  template <typename It>
+  struct apply
+  {
+    typedef typename result_of::deref_data<typename It::first_type>::type type;
+
+    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(It const & it)
     {
-        template <typename It>
-        struct apply
-        {
-            typedef typename
-                result_of::deref_data<typename It::first_type>::type
-            type;
-
-            BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-            static type
-            call(It const& it)
-            {
-                return fusion::deref_data(it.first);
-            }
-        };
-    };
-}}}
+      return fusion::deref_data(it.first);
+    }
+  };
+};
+}
+}
+}
 
 #endif

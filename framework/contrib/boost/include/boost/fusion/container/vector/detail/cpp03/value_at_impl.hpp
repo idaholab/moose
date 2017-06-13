@@ -10,25 +10,28 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/mpl/at.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct vector_tag;
+namespace fusion
+{
+struct vector_tag;
 
-    namespace extension
-    {
-        template <typename Tag>
-        struct value_at_impl;
+namespace extension
+{
+template <typename Tag>
+struct value_at_impl;
 
-        template <>
-        struct value_at_impl<vector_tag>
-        {
-            template <typename Sequence, typename N>
-            struct apply
-            {
-                typedef typename mpl::at<typename Sequence::types, N>::type type;
-            };
-        };
-    }
-}}
+template <>
+struct value_at_impl<vector_tag>
+{
+  template <typename Sequence, typename N>
+  struct apply
+  {
+    typedef typename mpl::at<typename Sequence::types, N>::type type;
+  };
+};
+}
+}
+}
 
 #endif

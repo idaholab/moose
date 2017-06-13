@@ -12,7 +12,7 @@
 #define BOOST_RANGE_HPP_27_07_04
 
 #if defined(_MSC_VER)
-# pragma once
+#pragma once
 #endif
 
 #include <boost/range/functions.hpp>

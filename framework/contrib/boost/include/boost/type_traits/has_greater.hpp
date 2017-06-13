@@ -11,34 +11,19 @@
 
 #define BOOST_TT_TRAIT_NAME has_greater
 #define BOOST_TT_TRAIT_OP >
-#define BOOST_TT_FORBIDDEN_IF\
-   (\
-      /* Lhs==pointer and Rhs==fundamental */\
-      (\
-         ::boost::is_pointer< Lhs_noref >::value && \
-         ::boost::is_fundamental< Rhs_nocv >::value\
-      ) || \
-      /* Rhs==pointer and Lhs==fundamental */\
-      (\
-         ::boost::is_pointer< Rhs_noref >::value && \
-         ::boost::is_fundamental< Lhs_nocv >::value\
-      ) || \
-      /* Lhs==pointer and Rhs==pointer and Lhs!=base(Rhs) and Rhs!=base(Lhs) and Lhs!=void* and Rhs!=void* */\
-      (\
-         ::boost::is_pointer< Lhs_noref >::value && \
-         ::boost::is_pointer< Rhs_noref >::value && \
-         (! \
-            ( \
-               ::boost::is_base_of< Lhs_noptr, Rhs_noptr >::value || \
-               ::boost::is_base_of< Rhs_noptr, Lhs_noptr >::value || \
-               ::boost::is_same< Lhs_noptr, Rhs_noptr >::value || \
-               ::boost::is_void< Lhs_noptr >::value || \
-               ::boost::is_void< Rhs_noptr >::value\
-            )\
-         )\
-      )\
-   )
-
+#define BOOST_TT_FORBIDDEN_IF                                                                      \
+  (/* Lhs==pointer and Rhs==fundamental */                                                         \
+   (::boost::is_pointer<Lhs_noref>::value &&                                                       \
+    ::boost::is_fundamental<Rhs_nocv>::value) || /* Rhs==pointer and Lhs==fundamental */           \
+   (::boost::is_pointer<Rhs_noref>::value &&                                                       \
+    ::boost::is_fundamental<Lhs_nocv>::value) || /* Lhs==pointer and Rhs==pointer and              \
+                                                    Lhs!=base(Rhs) and Rhs!=base(Lhs) and          \
+                                                    Lhs!=void* and Rhs!=void* */                   \
+   (::boost::is_pointer<Lhs_noref>::value && ::boost::is_pointer<Rhs_noref>::value &&              \
+    (!(::boost::is_base_of<Lhs_noptr, Rhs_noptr>::value ||                                         \
+       ::boost::is_base_of<Rhs_noptr, Lhs_noptr>::value ||                                         \
+       ::boost::is_same<Lhs_noptr, Rhs_noptr>::value || ::boost::is_void<Lhs_noptr>::value ||      \
+       ::boost::is_void<Rhs_noptr>::value))))
 
 #include <boost/type_traits/detail/has_binary_operator.hpp>
 

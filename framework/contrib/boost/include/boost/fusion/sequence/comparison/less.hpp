@@ -15,32 +15,29 @@
 #include <boost/fusion/sequence/comparison/detail/less.hpp>
 #include <boost/fusion/sequence/comparison/enable_comparison.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename Seq1, typename Seq2>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline bool
-    less(Seq1 const& a, Seq2 const& b)
-    {
-        return detail::sequence_less<Seq1 const, Seq2 const>::
-            call(fusion::begin(a), fusion::begin(b));
-    }
+namespace fusion
+{
+template <typename Seq1, typename Seq2>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline bool
+less(Seq1 const & a, Seq2 const & b)
+{
+  return detail::sequence_less<Seq1 const, Seq2 const>::call(fusion::begin(a), fusion::begin(b));
+}
 
-    namespace operators
-    {
-        template <typename Seq1, typename Seq2>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        inline typename
-            boost::enable_if<
-                traits::enable_comparison<Seq1, Seq2>
-              , bool
-            >::type
-        operator<(Seq1 const& a, Seq2 const& b)
-        {
-            return fusion::less(a, b);
-        }
-    }
-    using operators::operator<;
-}}
+namespace operators
+{
+template <typename Seq1, typename Seq2>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline
+    typename boost::enable_if<traits::enable_comparison<Seq1, Seq2>, bool>::type
+    operator<(Seq1 const & a, Seq2 const & b)
+{
+  return fusion::less(a, b);
+}
+}
+using operators::operator<;
+}
+}
 
 #endif

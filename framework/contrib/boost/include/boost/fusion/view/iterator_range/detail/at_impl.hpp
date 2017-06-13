@@ -12,35 +12,35 @@
 #include <boost/fusion/iterator/advance.hpp>
 #include <boost/fusion/iterator/deref.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct iterator_range_tag;
+namespace fusion
+{
+struct iterator_range_tag;
 
-    namespace extension
+namespace extension
+{
+template <typename Tag>
+struct at_impl;
+
+template <>
+struct at_impl<iterator_range_tag>
+{
+  template <typename Seq, typename N>
+  struct apply
+  {
+    typedef typename Seq::begin_type begin_type;
+    typedef typename result_of::advance<begin_type, N>::type pos;
+    typedef typename result_of::deref<pos>::type type;
+
+    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Seq & s)
     {
-        template <typename Tag>
-        struct at_impl;
-
-        template <>
-        struct at_impl<iterator_range_tag>
-        {
-            template <typename Seq, typename N>
-            struct apply
-            {
-                typedef typename Seq::begin_type begin_type;
-                typedef typename result_of::advance<begin_type,N>::type pos;
-                typedef typename result_of::deref<pos>::type type;
-
-                BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-                static type
-                call(Seq& s)
-                {
-                    return * fusion::advance<N>(s.first);
-                }
-            };
-        };
+      return *fusion::advance<N>(s.first);
     }
-}}
+  };
+};
+}
+}
+}
 
 #endif
-

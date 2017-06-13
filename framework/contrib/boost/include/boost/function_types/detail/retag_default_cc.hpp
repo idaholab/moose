@@ -14,10 +14,9 @@
 #include <boost/function_types/components.hpp>
 
 #if defined(BOOST_FT_PREPROCESSING_MODE)
-#   include <boost/function_types/detail/pp_retag_default_cc/master.hpp>
+#include <boost/function_types/detail/pp_retag_default_cc/master.hpp>
 #else
-#   include <boost/function_types/detail/pp_retag_default_cc/preprocessed.hpp>
+#include <boost/function_types/detail/pp_retag_default_cc/preprocessed.hpp>
 #endif
 
 #endif
-

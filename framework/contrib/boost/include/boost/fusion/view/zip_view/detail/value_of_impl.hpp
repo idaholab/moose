@@ -19,53 +19,52 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/config.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct zip_view_iterator_tag;
+namespace fusion
+{
+struct zip_view_iterator_tag;
 
-    namespace detail
-    {
-        struct poly_value_of
-        {
-            template<typename T>
-            struct result;
+namespace detail
+{
+struct poly_value_of
+{
+  template <typename T>
+  struct result;
 
-            template<typename It>
-            struct result<poly_value_of(It)>
-                : mpl::eval_if<is_same<It, unused_type>,
-                               mpl::identity<unused_type>,
-                               result_of::value_of<It> >
-            {};
+  template <typename It>
+  struct result<poly_value_of(It)>
+      : mpl::eval_if<is_same<It, unused_type>, mpl::identity<unused_type>, result_of::value_of<It>>
+  {
+  };
 
-            // never called, but needed for decltype-based result_of (C++0x)
+// never called, but needed for decltype-based result_of (C++0x)
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-            template<typename It>
-            BOOST_FUSION_GPU_ENABLED
-            typename result<poly_value_of(It)>::type
-            operator()(It&&) const;
+  template <typename It>
+  BOOST_FUSION_GPU_ENABLED typename result<poly_value_of(It)>::type operator()(It &&) const;
 #endif
-        };
-    }
+};
+}
 
-    namespace extension
-    {
-        template<typename Tag>
-        struct value_of_impl;
+namespace extension
+{
+template <typename Tag>
+struct value_of_impl;
 
-        template<>
-        struct value_of_impl<zip_view_iterator_tag>
-        {
-            template<typename Iterator>
-            struct apply
-            {
-                typedef typename result_of::transform<
-                    typename Iterator::iterators,
-                    detail::poly_value_of>::type values;
+template <>
+struct value_of_impl<zip_view_iterator_tag>
+{
+  template <typename Iterator>
+  struct apply
+  {
+    typedef typename result_of::transform<typename Iterator::iterators, detail::poly_value_of>::type
+        values;
 
-                typedef typename result_of::as_vector<values>::type type;
-            };
-        };
-    }
-}}
+    typedef typename result_of::as_vector<values>::type type;
+  };
+};
+}
+}
+}
 
 #endif

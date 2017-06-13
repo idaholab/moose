@@ -11,16 +11,10 @@
 
 #define BOOST_TT_TRAIT_NAME has_dereference
 #define BOOST_TT_TRAIT_OP *
-#define BOOST_TT_FORBIDDEN_IF\
-   /* void* or fundamental */\
-   (\
-      (\
-         ::boost::is_pointer< Rhs_noref >::value && \
-         ::boost::is_void< Rhs_noptr >::value\
-      ) || \
-      ::boost::is_fundamental< Rhs_nocv >::value\
-   )
-
+#define BOOST_TT_FORBIDDEN_IF                                                                      \
+  /* void* or fundamental */                                                                       \
+  ((::boost::is_pointer<Rhs_noref>::value && ::boost::is_void<Rhs_noptr>::value) ||                \
+   ::boost::is_fundamental<Rhs_nocv>::value)
 
 #include <boost/type_traits/detail/has_prefix_operator.hpp>
 

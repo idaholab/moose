@@ -13,32 +13,41 @@
 
 #include <boost/numeric/interval/detail/c99sub_rounding_control.hpp>
 
-namespace boost {
-namespace numeric {
-namespace interval_lib {
-
-template<>
-struct rounding_control<float>:
-  detail::c99_rounding_control
+namespace boost
 {
-  static float force_rounding(float const &r)
-  { volatile float r_ = r; return r_; }
+namespace numeric
+{
+namespace interval_lib
+{
+
+template <>
+struct rounding_control<float> : detail::c99_rounding_control
+{
+  static float force_rounding(float const & r)
+  {
+    volatile float r_ = r;
+    return r_;
+  }
 };
 
-template<>
-struct rounding_control<double>:
-  detail::c99_rounding_control
+template <>
+struct rounding_control<double> : detail::c99_rounding_control
 {
-  static double force_rounding(double const &r)
-  { volatile double r_ = r; return r_; }
+  static double force_rounding(double const & r)
+  {
+    volatile double r_ = r;
+    return r_;
+  }
 };
 
-template<>
-struct rounding_control<long double>:
-  detail::c99_rounding_control
+template <>
+struct rounding_control<long double> : detail::c99_rounding_control
 {
-  static long double force_rounding(long double const &r)
-  { volatile long double r_ = r; return r_; }
+  static long double force_rounding(long double const & r)
+  {
+    volatile long double r_ = r;
+    return r_;
+  }
 };
 
 } // namespace interval_lib

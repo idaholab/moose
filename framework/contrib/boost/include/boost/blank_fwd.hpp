@@ -13,7 +13,8 @@
 #ifndef BOOST_BLANK_FWD_HPP
 #define BOOST_BLANK_FWD_HPP
 
-namespace boost {
+namespace boost
+{
 
 struct blank;
 

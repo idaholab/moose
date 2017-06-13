@@ -10,11 +10,13 @@
 #include <boost/type_traits/integral_promotion.hpp>
 #include <boost/type_traits/floating_point_promotion.hpp>
 
-namespace boost {
+namespace boost
+{
 
-template<class T> struct promote : public integral_promotion<typename floating_point_promotion<T>::type>{};
-
+template <class T>
+struct promote : public integral_promotion<typename floating_point_promotion<T>::type>
+{
+};
 }
 
 #endif // #ifndef FILE_boost_type_traits_promote_hpp_INCLUDED
-

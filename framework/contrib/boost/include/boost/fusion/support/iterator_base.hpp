@@ -10,27 +10,28 @@
 #include <boost/config.hpp>
 #include <boost/fusion/support/config.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct iterator_root {};
+namespace fusion
+{
+struct iterator_root
+{
+};
 
-    template <typename Iterator>
-    struct iterator_base : iterator_root
-    {
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        Iterator const&
-        cast() const BOOST_NOEXCEPT
-        {
-            return static_cast<Iterator const&>(*this);
-        }
+template <typename Iterator>
+struct iterator_base : iterator_root
+{
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED Iterator const & cast() const BOOST_NOEXCEPT
+  {
+    return static_cast<Iterator const &>(*this);
+  }
 
-        BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        Iterator&
-        cast() BOOST_NOEXCEPT
-        {
-            return static_cast<Iterator&>(*this);
-        }
-    };
-}}
+  BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED Iterator & cast() BOOST_NOEXCEPT
+  {
+    return static_cast<Iterator &>(*this);
+  }
+};
+}
+}
 
 #endif

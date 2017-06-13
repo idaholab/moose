@@ -13,18 +13,18 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
 */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_UTIL_ODEINT_ERROR_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_UTIL_ODEINT_ERROR_HPP_INCLUDED
 
 #include <stdexcept>
 #include <string>
 
-
-namespace boost {
-namespace numeric {
-namespace odeint {
-
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
 
 /**
  * \brief Runtime error thrown by odeint
@@ -32,11 +32,8 @@ namespace odeint {
 class odeint_error : public std::runtime_error
 {
 public:
-    odeint_error(const std::string &s)
-            : std::runtime_error(s)
-    { }
+  odeint_error(const std::string & s) : std::runtime_error(s) {}
 };
-
 
 /**
  * \brief Runtime error thrown from integrate routines
@@ -47,11 +44,8 @@ public:
 class no_progress_error : public odeint_error
 {
 public:
-    no_progress_error(const std::string &s)
-            : odeint_error(s)
-    { }
+  no_progress_error(const std::string & s) : odeint_error(s) {}
 };
-
 
 /**
  * \brief Runtime error thrown during stepsize adjustment
@@ -63,15 +57,10 @@ public:
 class step_adjustment_error : public odeint_error
 {
 public:
-    step_adjustment_error(const std::string &s)
-            : odeint_error(s)
-    { }
+  step_adjustment_error(const std::string & s) : odeint_error(s) {}
 };
-
 }
 }
 }
-
-
 
 #endif // BOOST_NUMERIC_ODEINT_UTIL_ODEINT_ERROR_HPP_INCLUDED

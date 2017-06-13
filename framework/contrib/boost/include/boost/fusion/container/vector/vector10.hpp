@@ -15,7 +15,7 @@
 // Without variadics, we will use the PP version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_VECTOR)
-#   include <boost/fusion/container/vector/detail/cpp03/vector10.hpp>
+#include <boost/fusion/container/vector/detail/cpp03/vector10.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,4 +26,3 @@
 
 #endif
 #endif
-

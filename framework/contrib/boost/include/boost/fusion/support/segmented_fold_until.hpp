@@ -12,60 +12,47 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/fusion/support/detail/segmented_fold_until_impl.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    //auto segmented_fold_until(seq, state, fun)
-    //{
-    //  return first(segmented_fold_until_impl(seq, state, nil_, fun));
-    //}
+namespace fusion
+{
+// auto segmented_fold_until(seq, state, fun)
+//{
+//  return first(segmented_fold_until_impl(seq, state, nil_, fun));
+//}
 
-    namespace result_of
-    {
-        template <typename Sequence, typename State, typename Fun>
-        struct segmented_fold_until
-        {
-            typedef
-                detail::segmented_fold_until_impl<
-                    Sequence
-                  , State
-                  , fusion::nil_
-                  , Fun
-                >
-            filter;
+namespace result_of
+{
+template <typename Sequence, typename State, typename Fun>
+struct segmented_fold_until
+{
+  typedef detail::segmented_fold_until_impl<Sequence, State, fusion::nil_, Fun> filter;
 
-            typedef
-                typename filter::type
-            type;
-        };
-    }
+  typedef typename filter::type type;
+};
+}
 
-    template <typename Sequence, typename State, typename Fun>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename
-        lazy_disable_if<
-            is_const<Sequence>
-          , result_of::segmented_fold_until<Sequence, State, Fun>
-        >::type
-    segmented_fold_until(Sequence& seq, State const& state, Fun const& fun)
-    {
-        typedef
-            typename result_of::segmented_fold_until<Sequence, State, Fun>::filter
-        filter;
+template <typename Sequence, typename State, typename Fun>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline
+    typename lazy_disable_if<is_const<Sequence>,
+                             result_of::segmented_fold_until<Sequence, State, Fun>>::type
+    segmented_fold_until(Sequence & seq, State const & state, Fun const & fun)
+{
+  typedef typename result_of::segmented_fold_until<Sequence, State, Fun>::filter filter;
 
-        return filter::call(seq, state, fusion::nil_(), fun);
-    }
+  return filter::call(seq, state, fusion::nil_(), fun);
+}
 
-    template <typename Sequence, typename State, typename Fun>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename result_of::segmented_fold_until<Sequence const, State, Fun>::type
-    segmented_fold_until(Sequence const& seq, State const& state, Fun const& fun)
-    {
-        typedef
-            typename result_of::segmented_fold_until<Sequence const, State, Fun>::filter
-        filter;
+template <typename Sequence, typename State, typename Fun>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline
+    typename result_of::segmented_fold_until<Sequence const, State, Fun>::type
+    segmented_fold_until(Sequence const & seq, State const & state, Fun const & fun)
+{
+  typedef typename result_of::segmented_fold_until<Sequence const, State, Fun>::filter filter;
 
-        return filter::call(seq, state, fusion::nil_(), fun);
-    }
-}}
+  return filter::call(seq, state, fusion::nil_(), fun);
+}
+}
+}
 
 #endif

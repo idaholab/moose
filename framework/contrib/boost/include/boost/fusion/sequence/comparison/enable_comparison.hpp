@@ -16,20 +16,24 @@
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 
-namespace boost { namespace fusion { namespace traits
+namespace boost
 {
-    template <typename Seq1, typename Seq2, typename Enable = void>
-    struct enable_equality
-        : mpl::or_<traits::is_sequence<Seq1>, traits::is_sequence<Seq2> >
-    {};
+namespace fusion
+{
+namespace traits
+{
+template <typename Seq1, typename Seq2, typename Enable = void>
+struct enable_equality : mpl::or_<traits::is_sequence<Seq1>, traits::is_sequence<Seq2>>
+{
+};
 
-    template <typename Seq1, typename Seq2, typename Enable = void>
-    struct enable_comparison
-        : mpl::and_<
-            mpl::or_<traits::is_sequence<Seq1>, traits::is_sequence<Seq2> >
-          , mpl::equal_to<result_of::size<Seq1>, result_of::size<Seq2> >
-        >
-    {};
-}}}
+template <typename Seq1, typename Seq2, typename Enable = void>
+struct enable_comparison : mpl::and_<mpl::or_<traits::is_sequence<Seq1>, traits::is_sequence<Seq2>>,
+                                     mpl::equal_to<result_of::size<Seq1>, result_of::size<Seq2>>>
+{
+};
+}
+}
+}
 
 #endif

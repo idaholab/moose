@@ -18,31 +18,31 @@
 // This algorithm computes sqrt(1+x)-1 for small x:
 //
 
-namespace boost{ namespace math{
+namespace boost
+{
+namespace math
+{
 
 template <class T, class Policy>
-inline typename tools::promote_args<T>::type sqrt1pm1(const T& val, const Policy& pol)
+inline typename tools::promote_args<T>::type
+sqrt1pm1(const T & val, const Policy & pol)
 {
-   typedef typename tools::promote_args<T>::type result_type;
-   BOOST_MATH_STD_USING
+  typedef typename tools::promote_args<T>::type result_type;
+  BOOST_MATH_STD_USING
 
-   if(fabs(result_type(val)) > 0.75)
-      return sqrt(1 + result_type(val)) - 1;
-   return boost::math::expm1(boost::math::log1p(val, pol) / 2, pol);
+  if (fabs(result_type(val)) > 0.75)
+    return sqrt(1 + result_type(val)) - 1;
+  return boost::math::expm1(boost::math::log1p(val, pol) / 2, pol);
 }
 
 template <class T>
-inline typename tools::promote_args<T>::type sqrt1pm1(const T& val)
+inline typename tools::promote_args<T>::type
+sqrt1pm1(const T & val)
 {
-   return sqrt1pm1(val, policies::policy<>());
+  return sqrt1pm1(val, policies::policy<>());
 }
 
 } // namespace math
 } // namespace boost
 
 #endif // BOOST_MATH_SQRT1PM1
-
-
-
-
-

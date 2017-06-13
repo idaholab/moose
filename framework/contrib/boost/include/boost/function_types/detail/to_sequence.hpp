@@ -17,29 +17,29 @@
 
 #include <boost/function_types/is_callable_builtin.hpp>
 
-namespace boost { namespace function_types { namespace detail {
+namespace boost
+{
+namespace function_types
+{
+namespace detail
+{
 
 // wrap first arguments in components, if callable builtin type
-template<typename T>
+template <typename T>
 struct to_sequence
 {
-  typedef typename
-   mpl::eval_if
-   < is_callable_builtin<T>
-   , to_sequence< components<T> >
-   , mpl::identity< T >
-   >::type
-  type;
+  typedef typename mpl::
+      eval_if<is_callable_builtin<T>, to_sequence<components<T>>, mpl::identity<T>>::type type;
 };
 
 // reduce template instantiations, if possible
-template<typename T, typename U>
-struct to_sequence< components<T,U> > 
+template <typename T, typename U>
+struct to_sequence<components<T, U>>
 {
-  typedef typename components<T,U>::types type;
+  typedef typename components<T, U>::types type;
 };
-
-} } } // namespace ::boost::function_types::detail
+}
+}
+} // namespace ::boost::function_types::detail
 
 #endif
-

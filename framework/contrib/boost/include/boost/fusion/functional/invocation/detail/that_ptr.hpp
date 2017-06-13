@@ -1,7 +1,7 @@
 /*=============================================================================
     Copyright (c) 2006-2007 Tobias Schwinger
-  
-    Use modification and distribution are subject to the Boost Software 
+
+    Use modification and distribution are subject to the Boost Software
     License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
     http://www.boost.org/LICENSE_1_0.txt).
 ==============================================================================*/
@@ -14,86 +14,83 @@
 #include <boost/utility/addressof.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace boost
 {
-    template <typename Wanted>
-    struct that_ptr
-    {
-      private:
+namespace fusion
+{
+namespace detail
+{
+template <typename Wanted>
+struct that_ptr
+{
+private:
+  typedef typename remove_reference<Wanted>::type pointee;
 
-        typedef typename remove_reference<Wanted>::type pointee;
+  template <typename T>
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static inline pointee * do_get_pointer(T &, pointee * x)
+  {
+    return x;
+  }
+  template <typename T>
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static inline pointee * do_get_pointer(T & x,
+                                                                                  void const *)
+  {
+    return get_pointer(x);
+  }
 
-        template <typename T> 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static inline pointee * do_get_pointer(T &, pointee * x) 
-        {
-            return x;
-        }
-        template <typename T> 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static inline pointee * do_get_pointer(T & x, void const *) 
-        {
-            return get_pointer(x); 
-        }
+public:
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static inline pointee * get(pointee * x) { return x; }
 
-      public:
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static inline pointee * get(pointee & x)
+  {
+    return boost::addressof(x);
+  }
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static inline pointee * get(pointee * x)
-        {
-            return x; 
-        }
+  template <typename T>
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static inline pointee * get(T & x)
+  {
+    return do_get_pointer(x, boost::addressof(x));
+  }
+};
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static inline pointee * get(pointee & x)
-        {
-            return boost::addressof(x); 
-        }
-
-        template <typename T>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        static inline pointee * get(T & x)
-        {
-            return do_get_pointer(x, boost::addressof(x)); 
-        }
-    };
-
-    template <typename PtrOrSmartPtr> struct non_const_pointee;
+template <typename PtrOrSmartPtr>
+struct non_const_pointee;
 
 #if defined(BOOST_MSVC) || (defined(__BORLANDC__) && !defined(BOOST_DISABLE_WIN32))
-#   define BOOST_FUSION_TRAIT_DECL __cdecl
+#define BOOST_FUSION_TRAIT_DECL __cdecl
 #else
-#   define BOOST_FUSION_TRAIT_DECL /**/
+#define BOOST_FUSION_TRAIT_DECL /**/
 #endif
 
 namespace adl_barrier
-    {
-        using boost::get_pointer;
-        void const * BOOST_FUSION_TRAIT_DECL get_pointer(...); // fallback
-  
-        template< typename T> char const_tester(T *);
-        template< typename T> long const_tester(T const *);
+{
+using boost::get_pointer;
+void const * BOOST_FUSION_TRAIT_DECL get_pointer(...); // fallback
 
-        template <typename Ptr>
-        struct non_const_pointee_impl
-        {
-            static Ptr & what;
+template <typename T>
+char const_tester(T *);
+template <typename T>
+long const_tester(T const *);
 
-            static bool const value =
-                sizeof(const_tester(get_pointer(what))) == 1;
-        };
-    }
+template <typename Ptr>
+struct non_const_pointee_impl
+{
+  static Ptr & what;
 
-    template <typename PtrOrSmartPtr> struct non_const_pointee
-        : adl_barrier::non_const_pointee_impl< 
-              typename remove_cv<
-                  typename remove_reference<PtrOrSmartPtr>::type >::type >
-    {
-        typedef non_const_pointee type;
-        typedef bool value_type;
-    };
+  static bool const value = sizeof(const_tester(get_pointer(what))) == 1;
+};
+}
 
-}}}
+template <typename PtrOrSmartPtr>
+struct non_const_pointee
+    : adl_barrier::non_const_pointee_impl<
+          typename remove_cv<typename remove_reference<PtrOrSmartPtr>::type>::type>
+{
+  typedef non_const_pointee type;
+  typedef bool value_type;
+};
+}
+}
+}
 
 #endif
-

@@ -13,27 +13,31 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/mpl/int.hpp>
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template<typename>
-    struct at_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct at_impl;
 
-    template <>
-    struct at_impl<struct_tag>
-    {
-        template <typename Seq, typename N>
-        struct apply
-          : access::struct_member<
-                typename remove_const<Seq>::type
-              , N::value
-            >::template apply<Seq>
-        {};
-    };
+template <>
+struct at_impl<struct_tag>
+{
+  template <typename Seq, typename N>
+  struct apply
+      : access::struct_member<typename remove_const<Seq>::type, N::value>::template apply<Seq>
+  {
+  };
+};
 
-    template <>
-    struct at_impl<assoc_struct_tag>
-      : at_impl<struct_tag>
-    {};
-}}}
+template <>
+struct at_impl<assoc_struct_tag> : at_impl<struct_tag>
+{
+};
+}
+}
+}
 
 #endif

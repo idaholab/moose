@@ -48,7 +48,11 @@
 
 //#include <Eigen/Dense>
 #include <Eigen/SVD>
-#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+#define throwError(msg)                                                                            \
+  {                                                                                                \
+    std::cerr << "\n\n" << msg << "\n\n";                                                          \
+    throw std::runtime_error("Error");                                                             \
+  }
 
 #define _USE_MATH_DEFINES
 
@@ -64,14 +68,15 @@ extern "C" {
 
 typedef boost::numeric::ublas::matrix<double> matrixDouble;
 
-void matrixConversionBoost(const std::vector<std::vector<double> > & original, matrixDouble & converted)
+void
+matrixConversionBoost(const std::vector<std::vector<double>> & original, matrixDouble & converted)
 {
-  converted.resize(original.size(),original.at(0).size());
-  for(unsigned int r=0; r < original.size(); r++)
+  converted.resize(original.size(), original.at(0).size());
+  for (unsigned int r = 0; r < original.size(); r++)
   {
-    for(unsigned int c=0; c < original.at(r).size(); c++)
+    for (unsigned int c = 0; c < original.at(r).size(); c++)
     {
-      converted(r,c)  = original.at(r).at(c);
+      converted(r, c) = original.at(r).at(c);
     }
   }
 }
@@ -89,13 +94,15 @@ void matrixConversion(std::vector<std::vector<double> > original, double convert
 }
 */
 
-void matrixBackConversionBoost(const matrixDouble & original, std::vector<std::vector<double> > & converted)
+void
+matrixBackConversionBoost(const matrixDouble & original,
+                          std::vector<std::vector<double>> & converted)
 {
-  for(unsigned int r=0; r < original.size1(); r++)
+  for (unsigned int r = 0; r < original.size1(); r++)
   {
-    for(unsigned int c = 0; c < original.size2(); c++)
+    for (unsigned int c = 0; c < original.size2(); c++)
     {
-      converted.at(r).at(c) = original(r,c);
+      converted.at(r).at(c) = original(r, c);
     }
   }
 }
@@ -128,88 +135,103 @@ void inverseMatrix(double* a, int n)
 }
 */
 
-//Roughly based on http://savingyoutime.wordpress.com/2009/09/21/c-matrix-inversion-boostublas/ and libs/numeric/ublas/test/test_lu.cpp
-void invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
+// Roughly based on http://savingyoutime.wordpress.com/2009/09/21/c-matrix-inversion-boostublas/ and
+// libs/numeric/ublas/test/test_lu.cpp
+void
+invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
 {
   boost::numeric::ublas::permutation_matrix<std::size_t> pm(a.size1());
 
-  boost::numeric::ublas::lu_factorize<matrixDouble,
-                                      boost::numeric::ublas::permutation_matrix<> >(a, pm);
+  boost::numeric::ublas::lu_factorize<matrixDouble, boost::numeric::ublas::permutation_matrix<>>(
+      a, pm);
 
   aInverted.assign(boost::numeric::ublas::identity_matrix<double>(a.size1()));
 
   boost::numeric::ublas::lu_substitute(a, pm, aInverted);
 }
 
-void computeInverse(const std::vector<std::vector<double> > & matrix, std::vector<std::vector<double> > & inverse){
-        int dimensions = matrix.size();
-        matrixDouble A(dimensions,dimensions),inverted(dimensions,dimensions);
-        matrixConversionBoost(matrix, A);
-        invertMatrixBoost(A,inverted);
-        matrixBackConversionBoost(inverted, inverse);
+void
+computeInverse(const std::vector<std::vector<double>> & matrix,
+               std::vector<std::vector<double>> & inverse)
+{
+  int dimensions = matrix.size();
+  matrixDouble A(dimensions, dimensions), inverted(dimensions, dimensions);
+  matrixConversionBoost(matrix, A);
+  invertMatrixBoost(A, inverted);
+  matrixBackConversionBoost(inverted, inverse);
 }
 
 // Convert the vector of covariance to vector of vector of covariance
-void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double> &vec_matrix, std::vector<std::vector<double> > &cov_matrix) {
-        /** Input Parameter
-         * vec_matrix: covariance matrix stored in a vector
-         * Output Parameter
-         * rows: the first dimension of the covariance matrix
-         * columns: the second dimension of the covariance matrix
-         * cov_matrix: covariance matrix stored in vector<vector<double> >
-         */
-        unsigned int dimensions = vec_matrix.size();
-        dimensions = std::lround(std::sqrt(dimensions));
-        rows = dimensions;
-        columns = dimensions;
-        if(rows*columns != vec_matrix.size())
-                      throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
-        for (unsigned int row = 0; row < rows; ++row) {
-                std::vector<double> temp;
-                for (unsigned int colm = 0; colm < columns; ++colm) {
-                        temp.push_back(vec_matrix.at(colm+row*columns));
-                }
-                cov_matrix.push_back(temp);
-        }
+void
+vectorToMatrix(unsigned int & rows,
+               unsigned int & columns,
+               std::vector<double> & vec_matrix,
+               std::vector<std::vector<double>> & cov_matrix)
+{
+  /** Input Parameter
+   * vec_matrix: covariance matrix stored in a vector
+   * Output Parameter
+   * rows: the first dimension of the covariance matrix
+   * columns: the second dimension of the covariance matrix
+   * cov_matrix: covariance matrix stored in vector<vector<double> >
+   */
+  unsigned int dimensions = vec_matrix.size();
+  dimensions = std::lround(std::sqrt(dimensions));
+  rows = dimensions;
+  columns = dimensions;
+  if (rows * columns != vec_matrix.size())
+    throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
+  for (unsigned int row = 0; row < rows; ++row)
+  {
+    std::vector<double> temp;
+    for (unsigned int colm = 0; colm < columns; ++colm)
+    {
+      temp.push_back(vec_matrix.at(colm + row * columns));
+    }
+    cov_matrix.push_back(temp);
+  }
 }
 
-//See for example http://en.wikipedia.org/wiki/LU_decomposition or
+// See for example http://en.wikipedia.org/wiki/LU_decomposition or
 // http://programmingexamples.net/wiki/CPP/Boost/Math/uBLAS/determinant
-double getDeterminantBoost(matrixDouble & a)
+double
+getDeterminantBoost(matrixDouble & a)
 {
   boost::numeric::ublas::permutation_matrix<std::size_t> pm(a.size1());
   double determinant = 1.0;
 
-  int result = boost::numeric::ublas::lu_factorize<matrixDouble,boost::numeric::ublas::permutation_matrix<> >(a, pm);
+  int result =
+      boost::numeric::ublas::lu_factorize<matrixDouble,
+                                          boost::numeric::ublas::permutation_matrix<>>(a, pm);
 
-  if(result)
+  if (result)
   {
     return 0.0;
   }
-  //det(a) = det(P^-1)det(L)det(U) = (-1)^S*(product(u_ii))
-  //Where S is the number of row exchanges
-  for(unsigned int i = 0; i < a.size1(); i++)
+  // det(a) = det(P^-1)det(L)det(U) = (-1)^S*(product(u_ii))
+  // Where S is the number of row exchanges
+  for (unsigned int i = 0; i < a.size1(); i++)
   {
-    //Multiple by current diagonal entry
-    determinant *= a(i,i);
-    if(i != pm(i))
+    // Multiple by current diagonal entry
+    determinant *= a(i, i);
+    if (i != pm(i))
     {
-      //Found a row exchange
+      // Found a row exchange
       determinant *= -1;
     }
-
   }
   return determinant;
 }
 
-double getDeterminant(std::vector<std::vector<double> > matrix){
-        int dimensions = matrix.size();
-        matrixDouble A(dimensions,dimensions);
+double
+getDeterminant(std::vector<std::vector<double>> matrix)
+{
+  int dimensions = matrix.size();
+  matrixDouble A(dimensions, dimensions);
 
-        matrixConversionBoost(matrix, A);
+  matrixConversionBoost(matrix, A);
 
-        return getDeterminantBoost(A);
-
+  return getDeterminantBoost(A);
 }
 
 /*
@@ -238,7 +260,13 @@ double getDeterminant(std::vector<std::vector<double> > matrix){
 }
 */
 
-void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &left_singular_vectors, std::vector<std::vector<double> > &right_singular_vectors, std::vector<double> &singular_values, std::vector<std::vector<double> > &transformed_matrix) {
+void
+svdDecomposition(const std::vector<std::vector<double>> & matrix,
+                 std::vector<std::vector<double>> & left_singular_vectors,
+                 std::vector<std::vector<double>> & right_singular_vectors,
+                 std::vector<double> & singular_values,
+                 std::vector<std::vector<double>> & transformed_matrix)
+{
   /**
    * This function compute the singular value decomposition for given matrix
    * Input Parameters
@@ -252,31 +280,39 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   unsigned int row = matrix.size();
   unsigned int col = matrix.at(0).size();
   unsigned int dim = 0;
-  if(row > col) {
+  if (row > col)
+  {
     dim = col;
-  }else {
+  }
+  else
+  {
     dim = row;
   }
-  Eigen::MatrixXd A(row,col);
-  Eigen::MatrixXd U(row,row);
-  Eigen::MatrixXd V(col,col);
-  Eigen::MatrixXd X(row,dim);
+  Eigen::MatrixXd A(row, col);
+  Eigen::MatrixXd U(row, row);
+  Eigen::MatrixXd V(col, col);
+  Eigen::MatrixXd X(row, dim);
   Eigen::VectorXd S(dim);
-  matrixConversionToEigenType(matrix,A);
-  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A,Eigen::ComputeFullU | Eigen::ComputeFullV);
+  matrixConversionToEigenType(matrix, A);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
   U = svd.matrixU();
   V = svd.matrixV();
   S = svd.singularValues();
-  for(unsigned int i = 0; i < dim; ++i) {
-    X.col(i) = U.col(i)*sqrt(S(i));
+  for (unsigned int i = 0; i < dim; ++i)
+  {
+    X.col(i) = U.col(i) * sqrt(S(i));
   }
-  matrixConversionToCxxVVectorType(U,left_singular_vectors);
-  matrixConversionToCxxVVectorType(V,right_singular_vectors);
-  vectorConversionToCxxVectorType(S,singular_values);
-  matrixConversionToCxxVVectorType(X,transformed_matrix);
+  matrixConversionToCxxVVectorType(U, left_singular_vectors);
+  matrixConversionToCxxVVectorType(V, right_singular_vectors);
+  vectorConversionToCxxVectorType(S, singular_values);
+  matrixConversionToCxxVVectorType(X, transformed_matrix);
 }
 
-void getInverseTransformedMatrix(const std::vector<std::vector<double> > &left_singular_vectors, std::vector<double> &singular_values, std::vector<std::vector<double> > &inverse_transformed_matrix) {
+void
+getInverseTransformedMatrix(const std::vector<std::vector<double>> & left_singular_vectors,
+                            std::vector<double> & singular_values,
+                            std::vector<std::vector<double>> & inverse_transformed_matrix)
+{
   /**
    * This function compute the inverse transformation matrix
    * Input Parameters
@@ -288,20 +324,31 @@ void getInverseTransformedMatrix(const std::vector<std::vector<double> > &left_s
   unsigned int row = left_singular_vectors.size();
   unsigned int col = left_singular_vectors.at(0).size();
   unsigned int dim = singular_values.size();
-  Eigen::MatrixXd U(row,col);
-  Eigen::MatrixXd inverseX(row,dim);
-  matrixConversionToEigenType(left_singular_vectors,U);
-  for (unsigned int i = 0; i < dim; ++i) {
-    if (singular_values.at(i) == 0) {
+  Eigen::MatrixXd U(row, col);
+  Eigen::MatrixXd inverseX(row, dim);
+  matrixConversionToEigenType(left_singular_vectors, U);
+  for (unsigned int i = 0; i < dim; ++i)
+  {
+    if (singular_values.at(i) == 0)
+    {
       inverseX.col(i) = U.col(i) * 0.0;
-    } else {
-      inverseX.col(i) = U.col(i) * (1.0/sqrt(singular_values.at(i)));
+    }
+    else
+    {
+      inverseX.col(i) = U.col(i) * (1.0 / sqrt(singular_values.at(i)));
     }
   }
-  matrixConversionToCxxVVectorType(inverseX.transpose(),inverse_transformed_matrix);
+  matrixConversionToCxxVVectorType(inverseX.transpose(), inverse_transformed_matrix);
 }
 
-void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &left_singular_vectors, std::vector<std::vector<double> > &right_singular_vectors, std::vector<double> &singular_values, std::vector<std::vector<double> > &transformed_matrix, unsigned int rank) {
+void
+svdDecomposition(const std::vector<std::vector<double>> & matrix,
+                 std::vector<std::vector<double>> & left_singular_vectors,
+                 std::vector<std::vector<double>> & right_singular_vectors,
+                 std::vector<double> & singular_values,
+                 std::vector<std::vector<double>> & transformed_matrix,
+                 unsigned int rank)
+{
   /**
    * This function compute the singular value decomposition for given matrix
    * Input Parameters
@@ -315,32 +362,39 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   unsigned int row = matrix.size();
   unsigned int col = matrix.at(0).size();
   unsigned int dim = 0;
-  if(row > col) {
+  if (row > col)
+  {
     dim = col;
-  }else {
+  }
+  else
+  {
     dim = row;
   }
-  Eigen::MatrixXd A(row,col);
-  Eigen::MatrixXd U(row,row);
-  Eigen::MatrixXd V(col,col);
-  Eigen::MatrixXd X(row,rank);
+  Eigen::MatrixXd A(row, col);
+  Eigen::MatrixXd U(row, row);
+  Eigen::MatrixXd V(col, col);
+  Eigen::MatrixXd X(row, rank);
   Eigen::VectorXd S(dim);
-  matrixConversionToEigenType(matrix,A);
-  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A,Eigen::ComputeFullU | Eigen::ComputeFullV);
+  matrixConversionToEigenType(matrix, A);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
   U = svd.matrixU();
   V = svd.matrixV();
   S = svd.singularValues();
-  for(unsigned int i = 0; i < rank; ++i) {
-    X.col(i) = U.col(i)*sqrt(S(i));
+  for (unsigned int i = 0; i < rank; ++i)
+  {
+    X.col(i) = U.col(i) * sqrt(S(i));
   }
   // transform and store the matrix for the truncated svd
-  matrixConversionToCxxVVectorType(U.block(0,0,row,rank),left_singular_vectors);
-  matrixConversionToCxxVVectorType(V.block(0,0,col,rank),right_singular_vectors);
-  vectorConversionToCxxVectorType(S.head(rank),singular_values);
-  matrixConversionToCxxVVectorType(X,transformed_matrix);
+  matrixConversionToCxxVVectorType(U.block(0, 0, row, rank), left_singular_vectors);
+  matrixConversionToCxxVVectorType(V.block(0, 0, col, rank), right_singular_vectors);
+  vectorConversionToCxxVectorType(S.head(rank), singular_values);
+  matrixConversionToCxxVVectorType(X, transformed_matrix);
 }
 
-void  computeNearestSymmetricMatrix(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &symmetric_matrix) {
+void
+computeNearestSymmetricMatrix(const std::vector<std::vector<double>> & matrix,
+                              std::vector<std::vector<double>> & symmetric_matrix)
+{
   /**
    * This function used to compute the nearest symmetric matrix
    * Input Parameters
@@ -350,18 +404,24 @@ void  computeNearestSymmetricMatrix(const std::vector<std::vector<double> > &mat
    */
   unsigned int row = matrix.size();
   unsigned int col = matrix.at(0).size();
-  if (row != col) {
-    throwError("The provided matrix is not a square matrix!" );
+  if (row != col)
+  {
+    throwError("The provided matrix is not a square matrix!");
   }
-  Eigen::MatrixXd A(row,col);
-  Eigen::MatrixXd B(col,row);
-  matrixConversionToEigenType(matrix,A);
+  Eigen::MatrixXd A(row, col);
+  Eigen::MatrixXd B(col, row);
+  matrixConversionToEigenType(matrix, A);
   B = A.transpose();
-  A = (A + B)*0.5;
-  matrixConversionToCxxVVectorType(A,symmetric_matrix);
+  A = (A + B) * 0.5;
+  matrixConversionToCxxVVectorType(A, symmetric_matrix);
 }
 
-void resetSingularValues(std::vector<std::vector<double> > &left_singular_vectors, std::vector<std::vector<double> > &right_singular_vectors, std::vector<double> &singular_values,std::vector<std::vector<double> > &transformed_matrix) {
+void
+resetSingularValues(std::vector<std::vector<double>> & left_singular_vectors,
+                    std::vector<std::vector<double>> & right_singular_vectors,
+                    std::vector<double> & singular_values,
+                    std::vector<std::vector<double>> & transformed_matrix)
+{
   /**
    * used to reset singular values
    * Input Parameters
@@ -378,36 +438,43 @@ void resetSingularValues(std::vector<std::vector<double> > &left_singular_vector
   unsigned int row2 = right_singular_vectors.size();
   unsigned int col2 = right_singular_vectors.at(0).size();
   unsigned int rank = transformed_matrix.at(0).size();
-  if (row1 != row2 && col1 != col2) {
-    throwError("The provided matrices should have the same shape!" );
+  if (row1 != row2 && col1 != col2)
+  {
+    throwError("The provided matrices should have the same shape!");
   }
-  Eigen::MatrixXd A(row1,col1);
-  Eigen::MatrixXd B(row2,col2);
-  Eigen::MatrixXd X(row1,rank);
-  matrixConversionToEigenType(left_singular_vectors,A);
-  matrixConversionToEigenType(right_singular_vectors,B);
+  Eigen::MatrixXd A(row1, col1);
+  Eigen::MatrixXd B(row2, col2);
+  Eigen::MatrixXd X(row1, rank);
+  matrixConversionToEigenType(left_singular_vectors, A);
+  matrixConversionToEigenType(right_singular_vectors, B);
   double tol;
   tol = 1.0E-15;
-  if (singular_values.at(0) == 0.0) {
+  if (singular_values.at(0) == 0.0)
+  {
     throwError("The provided covariance matrix is zero matrix!")
   }
-  for (unsigned int i = 0; i < singular_values.size(); ++i) {
-    if ((A.col(i) + B.col(i)).lpNorm<1>()/row1 < tol) {
+  for (unsigned int i = 0; i < singular_values.size(); ++i)
+  {
+    if ((A.col(i) + B.col(i)).lpNorm<1>() / row1 < tol)
+    {
       singular_values.at(i) = 0.0;
     }
-    if (singular_values.at(i)/singular_values.at(0) < tol) {
+    if (singular_values.at(i) / singular_values.at(0) < tol)
+    {
       singular_values.at(i) = 0.0;
     }
   }
-  for(unsigned int i = 0; i < rank; ++i) {
-    X.col(i) = A.col(i)*sqrt(singular_values.at(i));
+  for (unsigned int i = 0; i < rank; ++i)
+  {
+    X.col(i) = A.col(i) * sqrt(singular_values.at(i));
   }
   transformed_matrix.clear();
-  matrixConversionToCxxVVectorType(X,transformed_matrix);
+  matrixConversionToCxxVVectorType(X, transformed_matrix);
 }
 
-
-void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted) {
+void
+matrixConversionToEigenType(std::vector<std::vector<double>> original, Eigen::MatrixXd & converted)
+{
   /**
    * This function convert the data from type std::vector<std::vector<double> > to Eigen::MatrixXd
    * Input Parameters
@@ -415,18 +482,25 @@ void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eig
    * Output Parameters
    * converted: output data with the type of Eigen::MatrixXd
    */
-  converted.resize(original.size(),original.at(0).size());
-  for(unsigned int row = 0; row < original.size(); ++row) {
-    for(unsigned int col = 0; col < original.at(0).size(); ++col) {
-      if(original.at(0).size() != original.at(row).size()) {
-        throwError("The matrix stored in the C++ vector container with different lenght of columns");
+  converted.resize(original.size(), original.at(0).size());
+  for (unsigned int row = 0; row < original.size(); ++row)
+  {
+    for (unsigned int col = 0; col < original.at(0).size(); ++col)
+    {
+      if (original.at(0).size() != original.at(row).size())
+      {
+        throwError(
+            "The matrix stored in the C++ vector container with different lenght of columns");
       }
-      converted(row,col) = original.at(row).at(col);
+      converted(row, col) = original.at(row).at(col);
     }
   }
 }
 
-void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vector<std::vector<double> > &converted) {
+void
+matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original,
+                                 std::vector<std::vector<double>> & converted)
+{
   /**
    * This function convert the data from type Eigen::MatrixXd to type std::vector<double>
    * Input Parameters
@@ -434,16 +508,20 @@ void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vec
    * Output Parameters
    * converted: output data with the type of std::vector<std::vector<double> >
    */
-  for(unsigned int row = 0; row < original.rows(); ++row) {
+  for (unsigned int row = 0; row < original.rows(); ++row)
+  {
     std::vector<double> temp;
-    for(unsigned int col = 0; col < original.cols(); ++col) {
-      temp.push_back(original(row,col));
+    for (unsigned int col = 0; col < original.cols(); ++col)
+    {
+      temp.push_back(original(row, col));
     }
     converted.push_back(temp);
   }
 }
 
-void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double> &converted) {
+void
+vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double> & converted)
+{
   /**
    * This function convert the data from type Eigen::VectorXd to type std::vector<double>
    * Input Parameters
@@ -451,12 +529,14 @@ void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vect
    * Output Parameters
    * converted: output data with the type of std::vector<double>
    */
-  for(unsigned int dim = 0; dim < original.rows(); ++dim) {
+  for (unsigned int dim = 0; dim < original.rows(); ++dim)
+  {
     converted.push_back(original(dim));
   }
 }
 
-// void nrerror(const char error_text[]){     // added const to avoid "warning: deprecated conversion from string constant to *char
+// void nrerror(const char error_text[]){     // added const to avoid "warning: deprecated
+// conversion from string constant to *char
 // /* Numerical Recipes standard error handler */
 //  fprintf(stderr,"Numerical Recipes run-time error...\n");
 //  fprintf(stderr,"%s\n",error_text);
@@ -766,7 +846,8 @@ void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vect
 //        in.close();
 // }
 //
-// double calculateCustomPdf(double position, double fitting, double** data_set, int number_samples){
+// double calculateCustomPdf(double position, double fitting, double** data_set, int
+// number_samples){
 //  double value=-1;
 //  double min;
 //  double max;
@@ -788,7 +869,8 @@ void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vect
 //  return value;
 // }
 //
-// double calculateCustomCDF(double position, double fitting, double** data_set, int number_samples){
+// double calculateCustomCDF(double position, double fitting, double** data_set, int
+// number_samples){
 //  double value=-1;
 //  double min;
 //  double max;
@@ -802,7 +884,8 @@ void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vect
 //    if (fitting==1)
 //     value=cumulative+data_set[i-1][2]*(position-data_set[i-1][1]);
 //    else{
-//     double pdfValueInPosition =data_set[i-1][2]+(data_set[i][2]-data_set[i-1][2])/(data_set[i][1]-data_set[i-1][1])*(position-data_set[i-1][1]);
+//     double pdfValueInPosition
+//     =data_set[i-1][2]+(data_set[i][2]-data_set[i-1][2])/(data_set[i][1]-data_set[i-1][1])*(position-data_set[i-1][1]);
 //     value=cumulative + (pdfValueInPosition+data_set[i-1][2])*(position-data_set[i-1][1])/2;
 //    }
 //   }
@@ -920,12 +1003,12 @@ void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vect
 //              return (-0.5*x + 1.0)*x;
 // }
 
-        double abramStegunApproximation(double t)
-        {
-            // Abramowitz and Stegun formula
+double
+abramStegunApproximation(double t)
+{
+  // Abramowitz and Stegun formula
 
-            double c[] = {2.515517, 0.802853, 0.010328};
-            double d[] = {1.432788, 0.189269, 0.001308};
-            return t - ((c[2]*t + c[1])*t + c[0]) /
-                       (((d[2]*t + d[1])*t + d[0])*t + 1.0);
-        }
+  double c[] = {2.515517, 0.802853, 0.010328};
+  double d[] = {1.432788, 0.189269, 0.001308};
+  return t - ((c[2] * t + c[1]) * t + c[0]) / (((d[2] * t + d[1]) * t + d[0]) * t + 1.0);
+}

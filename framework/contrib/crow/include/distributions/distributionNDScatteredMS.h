@@ -30,63 +30,50 @@
 #include <iostream>
 #include <fstream>
 
-#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+#define throwError(msg)                                                                            \
+  {                                                                                                \
+    std::cerr << "\n\n" << msg << "\n\n";                                                          \
+    throw std::runtime_error("Error");                                                             \
+  }
 
-class BasicMultiDimensionalScatteredMS: public virtual BasicDistributionND
+class BasicMultiDimensionalScatteredMS : public virtual BasicDistributionND
 {
 public:
-  BasicMultiDimensionalScatteredMS(std::string data_filename,double p,int precision): _interpolator(data_filename,p,precision)
+  BasicMultiDimensionalScatteredMS(std::string data_filename, double p, int precision)
+    : _interpolator(data_filename, p, precision){};
+  BasicMultiDimensionalScatteredMS(double p, int precision) : _interpolator(p, precision){};
+  virtual ~BasicMultiDimensionalScatteredMS(){};
+  double pdf(std::vector<double> x) { return _interpolator.interpolateAt(x); };
+  double cdf(std::vector<double> x) { return _interpolator.interpolateAt(x); };
+
+  //  std::vector<double>
+  //  inverseCdf(double /*min*/, double /*max*/)
+  //  {
+  //    return std::vector<double>(2,-1.0);
+  //  };
+
+  std::vector<double> inverseCdf(double f, double g)
   {
-  };
-  BasicMultiDimensionalScatteredMS(double p,int precision): _interpolator(p,precision)
-  {
-  };
-  virtual ~BasicMultiDimensionalScatteredMS()
-  {
-  };
-  double
-  pdf(std::vector<double> x)
-  {
-    return _interpolator.interpolateAt(x);
-  };
-  double
-  cdf(std::vector<double> x)
-  {
-    return _interpolator.interpolateAt(x);
+    return _interpolator.ndInverseFunctionGrid(f, g);
+    // return _interpolator.NDinverseFunction(min, max);
   };
 
-//  std::vector<double>
-//  inverseCdf(double /*min*/, double /*max*/)
-//  {
-//    return std::vector<double>(2,-1.0);
-//  };
-
-  std::vector<double>
-  inverseCdf(double f, double g)
+  double inverseMarginal(double /* f */, int /* dimension */)
   {
-   return _interpolator.ndInverseFunctionGrid(f,g);
-   //return _interpolator.NDinverseFunction(min, max);
-  };
-
-  double
-    inverseMarginal(double /* f */, int /* dimension */)
-  {
-          throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
-          return 0.0;
+    throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
+    return 0.0;
   }
 
-  int
-  returnDimensionality()
-  {
-          return _interpolator.returnDimensionality();
-  }
+  int returnDimensionality() { return _interpolator.returnDimensionality(); }
 
-  double returnLowerBound(int dimension){
+  double returnLowerBound(int dimension)
+  {
     throwError("BasicMultiDimensionalScatteredMS: returnLowerBound not available");
     return 0.0;
   }
 
-  double returnUpperBound(int dimension){
+  double returnUpperBound(int dimension)
+  {
     throwError("BasicMultiDimensionalScatteredMS: returnUpperBound not available");
     return 0.0;
   }

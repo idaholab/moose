@@ -10,7 +10,6 @@
 
 #include <boost/preprocessor/seq/seq.hpp>
 
-#define BOOST_FUSION_ADAPT_IS_TPL(TEMPLATE_PARAMS_SEQ)                          \
-    BOOST_PP_SEQ_HEAD(TEMPLATE_PARAMS_SEQ)
+#define BOOST_FUSION_ADAPT_IS_TPL(TEMPLATE_PARAMS_SEQ) BOOST_PP_SEQ_HEAD(TEMPLATE_PARAMS_SEQ)
 
 #endif

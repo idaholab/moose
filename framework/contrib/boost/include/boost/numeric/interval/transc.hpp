@@ -21,11 +21,14 @@
 #include <boost/numeric/interval/arith2.hpp>
 #include <algorithm>
 
-namespace boost {
-namespace numeric {
+namespace boost
+{
+namespace numeric
+{
 
-template<class T, class Policies> inline
-interval<T, Policies> exp(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+exp(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -34,22 +37,22 @@ interval<T, Policies> exp(const interval<T, Policies>& x)
   return I(rnd.exp_down(x.lower()), rnd.exp_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> log(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+log(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
-  if (interval_lib::detail::test_input(x) ||
-      !interval_lib::user::is_pos(x.upper()))
+  if (interval_lib::detail::test_input(x) || !interval_lib::user::is_pos(x.upper()))
     return I::empty();
   typename Policies::rounding rnd;
   typedef typename Policies::checking checking;
-  T l = !interval_lib::user::is_pos(x.lower())
-             ? checking::neg_inf() : rnd.log_down(x.lower());
+  T l = !interval_lib::user::is_pos(x.lower()) ? checking::neg_inf() : rnd.log_down(x.lower());
   return I(l, rnd.log_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> cos(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+cos(const interval<T, Policies> & x)
 {
   if (interval_lib::detail::test_input(x))
     return interval<T, Policies>::empty();
@@ -59,7 +62,7 @@ interval<T, Policies> cos(const interval<T, Policies>& x)
 
   // get lower bound within [0, pi]
   const R pi2 = interval_lib::pi_twice<R>();
-  R tmp = fmod((const R&)x, pi2);
+  R tmp = fmod((const R &)x, pi2);
   if (width(tmp) >= pi2.lower())
     return I(static_cast<T>(-1), static_cast<T>(1), true); // we are covering a full period
   if (tmp.lower() >= interval_lib::constants::pi_upper<T>())
@@ -72,26 +75,30 @@ interval<T, Policies> cos(const interval<T, Policies>& x)
   if (u <= interval_lib::constants::pi_lower<T>())
     return I(rnd.cos_down(u), rnd.cos_up(l), true);
   else if (u <= pi2.lower())
-    return I(static_cast<T>(-1), rnd.cos_up(min BOOST_PREVENT_MACRO_SUBSTITUTION(rnd.sub_down(pi2.lower(), u), l)), true);
+    return I(static_cast<T>(-1),
+             rnd.cos_up(min BOOST_PREVENT_MACRO_SUBSTITUTION(rnd.sub_down(pi2.lower(), u), l)),
+             true);
   else
     return I(static_cast<T>(-1), static_cast<T>(1), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> sin(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+sin(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
     return I::empty();
   typename Policies::rounding rnd;
   typedef typename interval_lib::unprotect<I>::type R;
-  I r = cos((const R&)x - interval_lib::pi_half<R>());
+  I r = cos((const R &)x - interval_lib::pi_half<R>());
   (void)&rnd;
   return r;
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> tan(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+tan(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -101,7 +108,7 @@ interval<T, Policies> tan(const interval<T, Policies>& x)
 
   // get lower bound within [-pi/2, pi/2]
   const R pi = interval_lib::pi<R>();
-  R tmp = fmod((const R&)x, pi);
+  R tmp = fmod((const R &)x, pi);
   const T pi_half_d = interval_lib::constants::pi_half_lower<T>();
   if (tmp.lower() >= pi_half_d)
     tmp -= pi;
@@ -110,42 +117,40 @@ interval<T, Policies> tan(const interval<T, Policies>& x)
   return I(rnd.tan_down(tmp.lower()), rnd.tan_up(tmp.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> asin(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+asin(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
-  if (interval_lib::detail::test_input(x)
-     || x.upper() < static_cast<T>(-1) || x.lower() > static_cast<T>(1))
+  if (interval_lib::detail::test_input(x) || x.upper() < static_cast<T>(-1) ||
+      x.lower() > static_cast<T>(1))
     return I::empty();
   typename Policies::rounding rnd;
-  T l = (x.lower() <= static_cast<T>(-1))
-             ? -interval_lib::constants::pi_half_upper<T>()
-             : rnd.asin_down(x.lower());
-  T u = (x.upper() >= static_cast<T>(1) )
-             ?  interval_lib::constants::pi_half_upper<T>()
-             : rnd.asin_up  (x.upper());
+  T l = (x.lower() <= static_cast<T>(-1)) ? -interval_lib::constants::pi_half_upper<T>()
+                                          : rnd.asin_down(x.lower());
+  T u = (x.upper() >= static_cast<T>(1)) ? interval_lib::constants::pi_half_upper<T>()
+                                         : rnd.asin_up(x.upper());
   return I(l, u, true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> acos(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+acos(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
-  if (interval_lib::detail::test_input(x)
-     || x.upper() < static_cast<T>(-1) || x.lower() > static_cast<T>(1))
+  if (interval_lib::detail::test_input(x) || x.upper() < static_cast<T>(-1) ||
+      x.lower() > static_cast<T>(1))
     return I::empty();
   typename Policies::rounding rnd;
-  T l = (x.upper() >= static_cast<T>(1) )
-          ? static_cast<T>(0)
-          : rnd.acos_down(x.upper());
-  T u = (x.lower() <= static_cast<T>(-1))
-          ? interval_lib::constants::pi_upper<T>()
-          : rnd.acos_up  (x.lower());
+  T l = (x.upper() >= static_cast<T>(1)) ? static_cast<T>(0) : rnd.acos_down(x.upper());
+  T u = (x.lower() <= static_cast<T>(-1)) ? interval_lib::constants::pi_upper<T>()
+                                          : rnd.acos_up(x.lower());
   return I(l, u, true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> atan(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+atan(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -154,8 +159,9 @@ interval<T, Policies> atan(const interval<T, Policies>& x)
   return I(rnd.atan_down(x.lower()), rnd.atan_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> sinh(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+sinh(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -164,8 +170,9 @@ interval<T, Policies> sinh(const interval<T, Policies>& x)
   return I(rnd.sinh_down(x.lower()), rnd.sinh_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> cosh(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+cosh(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -179,8 +186,9 @@ interval<T, Policies> cosh(const interval<T, Policies>& x)
     return I(static_cast<T>(1), rnd.cosh_up(-x.lower() > x.upper() ? x.lower() : x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> tanh(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+tanh(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -189,8 +197,9 @@ interval<T, Policies> tanh(const interval<T, Policies>& x)
   return I(rnd.tanh_down(x.lower()), rnd.tanh_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> asinh(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+asinh(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x))
@@ -199,8 +208,9 @@ interval<T, Policies> asinh(const interval<T, Policies>& x)
   return I(rnd.asinh_down(x.lower()), rnd.asinh_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> acosh(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+acosh(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
   if (interval_lib::detail::test_input(x) || x.upper() < static_cast<T>(1))
@@ -210,19 +220,18 @@ interval<T, Policies> acosh(const interval<T, Policies>& x)
   return I(l, rnd.acosh_up(x.upper()), true);
 }
 
-template<class T, class Policies> inline
-interval<T, Policies> atanh(const interval<T, Policies>& x)
+template <class T, class Policies>
+inline interval<T, Policies>
+atanh(const interval<T, Policies> & x)
 {
   typedef interval<T, Policies> I;
-  if (interval_lib::detail::test_input(x)
-      || x.upper() < static_cast<T>(-1) || x.lower() > static_cast<T>(1))
+  if (interval_lib::detail::test_input(x) || x.upper() < static_cast<T>(-1) ||
+      x.lower() > static_cast<T>(1))
     return I::empty();
   typename Policies::rounding rnd;
   typedef typename Policies::checking checking;
-  T l = (x.lower() <= static_cast<T>(-1))
-             ? checking::neg_inf() : rnd.atanh_down(x.lower());
-  T u = (x.upper() >= static_cast<T>(1) )
-             ? checking::pos_inf() : rnd.atanh_up  (x.upper());
+  T l = (x.lower() <= static_cast<T>(-1)) ? checking::neg_inf() : rnd.atanh_down(x.lower());
+  T u = (x.upper() >= static_cast<T>(1)) ? checking::pos_inf() : rnd.atanh_up(x.upper());
   return I(l, u, true);
 }
 

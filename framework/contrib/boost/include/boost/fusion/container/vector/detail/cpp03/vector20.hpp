@@ -41,7 +41,7 @@
 #include <boost/fusion/container/vector/detail/cpp03/preprocessed/vector20.hpp>
 #else
 #if defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES)
-#pragma wave option(preserve: 2, line: 0, output: "preprocessed/vector20.hpp")
+#pragma wave option(preserve : 2, line : 0, output : "preprocessed/vector20.hpp")
 #endif
 
 /*=============================================================================
@@ -54,14 +54,16 @@
 ==============================================================================*/
 
 #if defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES)
-#pragma wave option(preserve: 1)
+#pragma wave option(preserve : 1)
 #endif
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct vector_tag;
-    struct fusion_sequence_tag;
-    struct random_access_traversal_tag;
+namespace fusion
+{
+struct vector_tag;
+struct fusion_sequence_tag;
+struct random_access_traversal_tag;
 
 #define FUSION_HASH #
 // expand vector11 to vector20
@@ -69,13 +71,13 @@ namespace boost { namespace fusion
 #define BOOST_PP_ITERATION_LIMITS (11, 20)
 #include BOOST_PP_ITERATE()
 #undef FUSION_HASH
-}}
+}
+}
 
 #if defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES)
-#pragma wave option(output: null)
+#pragma wave option(output : null)
 #endif
 
 #endif // BOOST_FUSION_DONT_USE_PREPROCESSED_FILES
 
 #endif
-

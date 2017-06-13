@@ -16,40 +16,42 @@
 
 #include <boost/config.hpp>
 
-
-namespace boost {
-namespace random {
-namespace detail {
+namespace boost
+{
+namespace random
+{
+namespace detail
+{
 
 // type_traits could help here, but I don't want to depend on type_traits.
-template<class T>
+template <class T>
 struct ptr_helper
 {
   typedef T value_type;
-  typedef T& reference_type;
-  typedef const T& rvalue_type;
-  static reference_type ref(T& r) { return r; }
-  static const T& ref(const T& r) { return r; }
+  typedef T & reference_type;
+  typedef const T & rvalue_type;
+  static reference_type ref(T & r) { return r; }
+  static const T & ref(const T & r) { return r; }
 };
 
-template<class T>
-struct ptr_helper<T&>
+template <class T>
+struct ptr_helper<T &>
 {
   typedef T value_type;
-  typedef T& reference_type;
-  typedef T& rvalue_type;
-  static reference_type ref(T& r) { return r; }
-  static const T& ref(const T& r) { return r; }
+  typedef T & reference_type;
+  typedef T & rvalue_type;
+  static reference_type ref(T & r) { return r; }
+  static const T & ref(const T & r) { return r; }
 };
 
-template<class T>
-struct ptr_helper<T*>
+template <class T>
+struct ptr_helper<T *>
 {
   typedef T value_type;
-  typedef T& reference_type;
-  typedef T* rvalue_type;
+  typedef T & reference_type;
+  typedef T * rvalue_type;
   static reference_type ref(T * p) { return *p; }
-  static const T& ref(const T * p) { return *p; }
+  static const T & ref(const T * p) { return *p; }
 };
 
 } // namespace detail
@@ -62,6 +64,6 @@ struct ptr_helper<T*>
 //  Helper macro for broken compilers defines specializations of
 //  ptr_helper.
 //
-# define BOOST_RANDOM_PTR_HELPER_SPEC(T)
+#define BOOST_RANDOM_PTR_HELPER_SPEC(T)
 
 #endif // BOOST_RANDOM_DETAIL_PTR_HELPER_HPP

@@ -13,20 +13,21 @@
 #include <boost/preprocessor/comparison/less.hpp>
 #include <boost/preprocessor/control/if.hpp>
 
-#define BOOST_FUSION_PP_ROUND_UP(N)                                            \
-      BOOST_PP_CAT(BOOST_FUSION_PP_DO_ROUND_UP_, N)()                          \
+#define BOOST_FUSION_PP_ROUND_UP(N)                                                                \
+  BOOST_PP_CAT(BOOST_FUSION_PP_DO_ROUND_UP_, N)                                                    \
+  () \
 /**/
 
-#define BOOST_FUSION_PP_DO_ROUND_UP_0()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_1()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_2()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_3()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_4()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_5()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_6()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_7()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_8()  10
-#define BOOST_FUSION_PP_DO_ROUND_UP_9()  10
+#define BOOST_FUSION_PP_DO_ROUND_UP_0() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_1() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_2() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_3() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_4() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_5() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_6() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_7() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_8() 10
+#define BOOST_FUSION_PP_DO_ROUND_UP_9() 10
 #define BOOST_FUSION_PP_DO_ROUND_UP_10() 10
 #define BOOST_FUSION_PP_DO_ROUND_UP_11() 20
 #define BOOST_FUSION_PP_DO_ROUND_UP_12() 20

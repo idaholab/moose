@@ -14,7 +14,7 @@
 // With no variadics, we will use the C++03 version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_TUPLE)
-# include <boost/fusion/tuple/detail/tuple.hpp>
+#include <boost/fusion/tuple/detail/tuple.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,65 +28,66 @@
 #include <boost/fusion/sequence/io.hpp>
 #include <utility>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename ...T>
-    struct tuple : vector<T...>
-    {
-        typedef vector<T...> base_type;
+namespace fusion
+{
+template <typename... T>
+struct tuple : vector<T...>
+{
+  typedef vector<T...> base_type;
 
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        tuple()
-            : base_type() {}
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED tuple() : base_type() {}
 
-        template <typename ...U>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        tuple(tuple<U...> const& other)
-            : base_type(other) {}
+  template <typename... U>
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED tuple(tuple<U...> const & other) : base_type(other)
+  {
+  }
 
-        template <typename ...U>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        tuple(tuple<U...>&& other)
-            : base_type(std::move(other)) {}
+  template <typename... U>
+  BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED tuple(tuple<U...> && other) : base_type(std::move(other))
+  {
+  }
 
-        template <typename ...U>
-        /*BOOST_CONSTEXPR*/ BOOST_FUSION_GPU_ENABLED
-        explicit
-        tuple(U&&... args)
-            : base_type(std::forward<U>(args)...) {}
+  template <typename... U>
+  /*BOOST_CONSTEXPR*/ BOOST_FUSION_GPU_ENABLED explicit tuple(U &&... args)
+    : base_type(std::forward<U>(args)...)
+  {
+  }
 
-        template <typename U>
-        BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        tuple& operator=(U&& rhs)
-        {
-            base_type::operator=(std::forward<U>(rhs));
-            return *this;
-        }
-    };
+  template <typename U>
+  BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED tuple & operator=(U && rhs)
+  {
+    base_type::operator=(std::forward<U>(rhs));
+    return *this;
+  }
+};
 
-    template <typename Tuple>
-    struct tuple_size : result_of::size<Tuple> {};
+template <typename Tuple>
+struct tuple_size : result_of::size<Tuple>
+{
+};
 
-    template <int N, typename Tuple>
-    struct tuple_element : result_of::value_at_c<Tuple, N> {};
+template <int N, typename Tuple>
+struct tuple_element : result_of::value_at_c<Tuple, N>
+{
+};
 
-    template <int N, typename Tuple>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename result_of::at_c<Tuple, N>::type
-    get(Tuple& tup)
-    {
-        return at_c<N>(tup);
-    }
+template <int N, typename Tuple>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline typename result_of::at_c<Tuple, N>::type
+get(Tuple & tup)
+{
+  return at_c<N>(tup);
+}
 
-    template <int N, typename Tuple>
-    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-    inline typename result_of::at_c<Tuple const, N>::type
-    get(Tuple const& tup)
-    {
-        return at_c<N>(tup);
-    }
-}}
+template <int N, typename Tuple>
+BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED inline typename result_of::at_c<Tuple const, N>::type
+get(Tuple const & tup)
+{
+  return at_c<N>(tup);
+}
+}
+}
 
 #endif
 #endif
-

@@ -14,7 +14,6 @@
  copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-
 #ifndef BOOST_NUMERIC_ODEINT_HPP_INCLUDED
 #define BOOST_NUMERIC_ODEINT_HPP_INCLUDED
 
@@ -79,6 +78,5 @@
 #include <boost/numeric/odeint/iterator/adaptive_time_iterator.hpp>
 #include <boost/numeric/odeint/iterator/const_step_iterator.hpp>
 #include <boost/numeric/odeint/iterator/const_step_time_iterator.hpp>
-
 
 #endif // BOOST_NUMERIC_ODEINT_HPP_INCLUDED

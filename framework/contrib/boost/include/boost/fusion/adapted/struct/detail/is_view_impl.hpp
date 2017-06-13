@@ -10,24 +10,30 @@
 #ifndef BOOST_FUSION_ADAPTED_STRUCT_DETAIL_IS_VIEW_IMPL_HPP
 #define BOOST_FUSION_ADAPTED_STRUCT_DETAIL_IS_VIEW_IMPL_HPP
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template<typename>
-    struct is_view_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct is_view_impl;
 
-    template<>
-    struct is_view_impl<struct_tag>
-    {
-        template<typename Seq>
-        struct apply
-          : struct_is_view<typename remove_const<Seq>::type>
-        {};
-    };
+template <>
+struct is_view_impl<struct_tag>
+{
+  template <typename Seq>
+  struct apply : struct_is_view<typename remove_const<Seq>::type>
+  {
+  };
+};
 
-    template <>
-    struct is_view_impl<assoc_struct_tag>
-      : is_view_impl<struct_tag>
-    {};
-}}}
+template <>
+struct is_view_impl<assoc_struct_tag> : is_view_impl<struct_tag>
+{
+};
+}
+}
+}
 
 #endif

@@ -13,4 +13,3 @@
 #undef non_member
 #undef variadic
 #undef non_variadic
-

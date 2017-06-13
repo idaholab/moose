@@ -10,34 +10,37 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/config.hpp>
 
-#if  defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) \
-  || (defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES))
-# if defined(BOOST_FUSION_HAS_VARIADIC_LIST)
-#   undef BOOST_FUSION_HAS_VARIADIC_LIST
-# endif
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES) ||                                                  \
+    (defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES))
+#if defined(BOOST_FUSION_HAS_VARIADIC_LIST)
+#undef BOOST_FUSION_HAS_VARIADIC_LIST
+#endif
 #else
-# if !defined(BOOST_FUSION_HAS_VARIADIC_LIST)
-#   define BOOST_FUSION_HAS_VARIADIC_LIST
-# endif
+#if !defined(BOOST_FUSION_HAS_VARIADIC_LIST)
+#define BOOST_FUSION_HAS_VARIADIC_LIST
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // With no variadics, we will use the C++03 version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_LIST)
-# include <boost/fusion/container/list/detail/cpp03/list_fwd.hpp>
+#include <boost/fusion/container/list/detail/cpp03/list_fwd.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
 // C++11 interface
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace fusion
+namespace boost
 {
-    struct void_;
+namespace fusion
+{
+struct void_;
 
-    template <typename ...T>
-    struct list;
-}}
+template <typename... T>
+struct list;
+}
+}
 
 #endif
 #endif

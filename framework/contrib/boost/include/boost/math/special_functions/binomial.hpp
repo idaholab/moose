@@ -15,45 +15,50 @@
 #include <boost/math/special_functions/beta.hpp>
 #include <boost/math/policies/error_handling.hpp>
 
-namespace boost{ namespace math{
+namespace boost
+{
+namespace math
+{
 
 template <class T, class Policy>
-T binomial_coefficient(unsigned n, unsigned k, const Policy& pol)
+T
+binomial_coefficient(unsigned n, unsigned k, const Policy & pol)
 {
-   BOOST_STATIC_ASSERT(!boost::is_integral<T>::value);
-   BOOST_MATH_STD_USING
-   static const char* function = "boost::math::binomial_coefficient<%1%>(unsigned, unsigned)";
-   if(k > n)
-      return policies::raise_domain_error<T>(
-         function, 
-         "The binomial coefficient is undefined for k > n, but got k = %1%.",
-         static_cast<T>(k), pol);
-   T result;
-   if((k == 0) || (k == n))
-      return static_cast<T>(1);
-   if((k == 1) || (k == n-1))
-      return static_cast<T>(n);
+  BOOST_STATIC_ASSERT(!boost::is_integral<T>::value);
+  BOOST_MATH_STD_USING
+  static const char * function = "boost::math::binomial_coefficient<%1%>(unsigned, unsigned)";
+  if (k > n)
+    return policies::raise_domain_error<T>(
+        function,
+        "The binomial coefficient is undefined for k > n, but got k = %1%.",
+        static_cast<T>(k),
+        pol);
+  T result;
+  if ((k == 0) || (k == n))
+    return static_cast<T>(1);
+  if ((k == 1) || (k == n - 1))
+    return static_cast<T>(n);
 
-   if(n <= max_factorial<T>::value)
-   {
-      // Use fast table lookup:
-      result = unchecked_factorial<T>(n);
-      result /= unchecked_factorial<T>(n-k);
-      result /= unchecked_factorial<T>(k);
-   }
-   else
-   {
-      // Use the beta function:
-      if(k < n - k)
-         result = k * beta(static_cast<T>(k), static_cast<T>(n-k+1), pol);
-      else
-         result = (n - k) * beta(static_cast<T>(k+1), static_cast<T>(n-k), pol);
-      if(result == 0)
-         return policies::raise_overflow_error<T>(function, 0, pol);
-      result = 1 / result;
-   }
-   // convert to nearest integer:
-   return ceil(result - 0.5f);
+  if (n <= max_factorial<T>::value)
+  {
+    // Use fast table lookup:
+    result = unchecked_factorial<T>(n);
+    result /= unchecked_factorial<T>(n - k);
+    result /= unchecked_factorial<T>(k);
+  }
+  else
+  {
+    // Use the beta function:
+    if (k < n - k)
+      result = k * beta(static_cast<T>(k), static_cast<T>(n - k + 1), pol);
+    else
+      result = (n - k) * beta(static_cast<T>(k + 1), static_cast<T>(n - k), pol);
+    if (result == 0)
+      return policies::raise_overflow_error<T>(function, 0, pol);
+    result = 1 / result;
+  }
+  // convert to nearest integer:
+  return ceil(result - 0.5f);
 }
 //
 // Type float can only store the first 35 factorials, in order to
@@ -61,22 +66,24 @@ T binomial_coefficient(unsigned n, unsigned k, const Policy& pol)
 // we'll promote to double:
 //
 template <>
-inline float binomial_coefficient<float, policies::policy<> >(unsigned n, unsigned k, const policies::policy<>& pol)
+inline float
+binomial_coefficient<float, policies::policy<>>(unsigned n,
+                                                unsigned k,
+                                                const policies::policy<> & pol)
 {
-   return policies::checked_narrowing_cast<float, policies::policy<> >(binomial_coefficient<double>(n, k, pol), "boost::math::binomial_coefficient<%1%>(unsigned,unsigned)");
+  return policies::checked_narrowing_cast<float, policies::policy<>>(
+      binomial_coefficient<double>(n, k, pol),
+      "boost::math::binomial_coefficient<%1%>(unsigned,unsigned)");
 }
 
 template <class T>
-inline T binomial_coefficient(unsigned n, unsigned k)
+inline T
+binomial_coefficient(unsigned n, unsigned k)
 {
-   return binomial_coefficient<T>(n, k, policies::policy<>());
+  return binomial_coefficient<T>(n, k, policies::policy<>());
 }
 
 } // namespace math
 } // namespace boost
 
-
 #endif // BOOST_MATH_SF_BINOMIAL_HPP
-
-
-

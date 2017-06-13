@@ -11,20 +11,23 @@
 #include <boost/fusion/support/sequence_base.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct sequence_facade_tag;
+namespace fusion
+{
+struct sequence_facade_tag;
 
-    template <typename Derived, typename Category, typename IsView = mpl::false_>
-    struct sequence_facade : sequence_base<Derived>
-    {
-        typedef fusion_sequence_tag tag;
-        typedef sequence_facade_tag fusion_tag;
-        typedef Derived derived_type;
-        typedef Category category;
-        typedef IsView is_view;
-        typedef mpl::false_ is_segmented;
-    };
-}}
+template <typename Derived, typename Category, typename IsView = mpl::false_>
+struct sequence_facade : sequence_base<Derived>
+{
+  typedef fusion_sequence_tag tag;
+  typedef sequence_facade_tag fusion_tag;
+  typedef Derived derived_type;
+  typedef Category category;
+  typedef IsView is_view;
+  typedef mpl::false_ is_segmented;
+};
+}
+}
 
 #endif

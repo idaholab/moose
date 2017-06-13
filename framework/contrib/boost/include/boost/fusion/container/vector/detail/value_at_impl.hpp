@@ -15,7 +15,7 @@
 // Without variadics, we will use the PP version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_VECTOR)
-# include <boost/fusion/container/vector/detail/cpp03/value_at_impl.hpp>
+#include <boost/fusion/container/vector/detail/cpp03/value_at_impl.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,34 +25,37 @@
 #include <boost/type_traits/declval.hpp>
 #include <boost/type_traits/remove_cv.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct vector_tag;
+namespace fusion
+{
+struct vector_tag;
 
-    namespace vector_detail
-    {
-        template <typename I, typename ...T>
-        struct vector_data;
-    }
+namespace vector_detail
+{
+template <typename I, typename... T>
+struct vector_data;
+}
 
-    namespace extension
-    {
-        template <typename Tag>
-        struct value_at_impl;
+namespace extension
+{
+template <typename Tag>
+struct value_at_impl;
 
-        template <>
-        struct value_at_impl<vector_tag>
-        {
-            template <typename Sequence, typename N>
-            struct apply
-            {
-                typedef typename boost::remove_cv<Sequence>::type seq;
-                typedef typename mpl::identity<decltype(seq::template value_at_impl<N::value>(boost::declval<seq*>()))>::type::type type;
-            };
-        };
-    }
-}}
+template <>
+struct value_at_impl<vector_tag>
+{
+  template <typename Sequence, typename N>
+  struct apply
+  {
+    typedef typename boost::remove_cv<Sequence>::type seq;
+    typedef typename mpl::identity<decltype(
+        seq::template value_at_impl<N::value>(boost::declval<seq *>()))>::type::type type;
+  };
+};
+}
+}
+}
 
 #endif
 #endif
-

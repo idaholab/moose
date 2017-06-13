@@ -33,14 +33,23 @@
 //            // prog.cc:6: error: conflict with 'template<class T> void foo(T)'
 //            // prog.cc:10: error: in call to 'foo'
 //      }
-namespace boost { namespace fusion { namespace detail
+namespace boost
 {
-    namespace barrier { }
-    using namespace barrier;
-}}}
-#define BOOST_FUSION_BARRIER_BEGIN namespace barrier {
-#define BOOST_FUSION_BARRIER_END   }
-
+namespace fusion
+{
+namespace detail
+{
+namespace barrier
+{
+}
+using namespace barrier;
+}
+}
+}
+#define BOOST_FUSION_BARRIER_BEGIN                                                                 \
+  namespace barrier                                                                                \
+  {
+#define BOOST_FUSION_BARRIER_END }
 
 #if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1900))
 // All of rvalue-reference ready MSVC don't perform implicit conversion from
@@ -60,15 +69,15 @@ namespace boost { namespace fusion { namespace detail
 // All of rvalue-reference ready Clang doesn't compile above static_cast usage [2], sigh...
 //
 // References:
-// 1. https://connect.microsoft.com/VisualStudio/feedback/details/1037806/implicit-conversion-doesnt-perform-for-fund
+// 1.
+// https://connect.microsoft.com/VisualStudio/feedback/details/1037806/implicit-conversion-doesnt-perform-for-fund
 // 2. http://llvm.org/bugs/show_bug.cgi?id=19917
 //
 // Tentatively, we use static_cast to forward if run under MSVC.
-#   define BOOST_FUSION_FWD_ELEM(type, value) static_cast<type&&>(value)
+#define BOOST_FUSION_FWD_ELEM(type, value) static_cast<type &&>(value)
 #else
-#   define BOOST_FUSION_FWD_ELEM(type, value) std::forward<type>(value)
+#define BOOST_FUSION_FWD_ELEM(type, value) std::forward<type>(value)
 #endif
-
 
 // Workaround for LWG 2408: C++17 SFINAE-friendly std::iterator_traits.
 // http://cplusplus.github.io/LWG/lwg-defects.html#2408
@@ -77,17 +86,16 @@ namespace boost { namespace fusion { namespace detail
 //   https://gcc.gnu.org/ml/gcc-patches/2014-11/msg01105.html
 //
 // - MSVC 10.0 implements iterator intrinsics; MSVC 13.0 implements LWG2408.
-#if (defined(BOOST_LIBSTDCXX_VERSION) && (BOOST_LIBSTDCXX_VERSION < 40500) && \
-     defined(BOOST_LIBSTDCXX11)) || \
+#if (defined(BOOST_LIBSTDCXX_VERSION) && (BOOST_LIBSTDCXX_VERSION < 40500) &&                      \
+     defined(BOOST_LIBSTDCXX11)) ||                                                                \
     (defined(BOOST_MSVC) && (1600 <= BOOST_MSVC && BOOST_MSVC < 1900))
-#   define BOOST_FUSION_WORKAROUND_FOR_LWG_2408
+#define BOOST_FUSION_WORKAROUND_FOR_LWG_2408
 namespace std
 {
-    template <typename>
-    struct iterator_traits;
+template <typename>
+struct iterator_traits;
 }
 #endif
-
 
 // Workaround for older GCC that doesn't accept `this` in constexpr.
 #if BOOST_WORKAROUND(BOOST_GCC, < 40700)

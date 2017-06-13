@@ -1,4 +1,4 @@
-# /* **************************************************************************
+#/* **************************************************************************
 #  *                                                                          *
 #  *     (C) Copyright Edward Diener 2011.                                    *
 #  *     (C) Copyright Paul Mensonides 2011.                                  *
@@ -8,18 +8,18 @@
 #  *                                                                          *
 #  ************************************************************************** */
 #
-# /* See http://www.boost.org for most recent version. */
+#/* See http://www.boost.org for most recent version. */
 #
-# ifndef BOOST_PREPROCESSOR_VARIADIC_TO_SEQ_HPP
-# define BOOST_PREPROCESSOR_VARIADIC_TO_SEQ_HPP
+#ifndef BOOST_PREPROCESSOR_VARIADIC_TO_SEQ_HPP
+#define BOOST_PREPROCESSOR_VARIADIC_TO_SEQ_HPP
 #
-# include <boost/preprocessor/config/config.hpp>
-# include <boost/preprocessor/tuple/to_seq.hpp>
+#include <boost/preprocessor/config/config.hpp>
+#include <boost/preprocessor/tuple/to_seq.hpp>
 #
-# /* BOOST_PP_VARIADIC_TO_SEQ */
+#/* BOOST_PP_VARIADIC_TO_SEQ */
 #
-# if BOOST_PP_VARIADICS
-#    define BOOST_PP_VARIADIC_TO_SEQ(...) BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__))
-# endif
+#if BOOST_PP_VARIADICS
+#define BOOST_PP_VARIADIC_TO_SEQ(...) BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__))
+#endif
 #
-# endif
+#endif

@@ -19,21 +19,25 @@
 
 #include <boost/numeric/odeint/algebra/default_operations.hpp>
 
-namespace boost {
-namespace numeric {
-namespace odeint {
-    
-template< class StateType , class Enabler = void >
+namespace boost
+{
+namespace numeric
+{
+namespace odeint
+{
+
+template <class StateType, class Enabler = void>
 struct operations_dispatcher_sfinae
 {
-    typedef default_operations operations_type;
+  typedef default_operations operations_type;
 };
 
-template< class StateType >
-struct operations_dispatcher : operations_dispatcher_sfinae< StateType > {};
+template <class StateType>
+struct operations_dispatcher : operations_dispatcher_sfinae<StateType>
+{
+};
 
 // no further specializations required
-
 }
 }
 }

@@ -1,4 +1,4 @@
-// Boost.Units - A C++ library for zero-overhead dimensional analysis and 
+// Boost.Units - A C++ library for zero-overhead dimensional analysis and
 // unit/quantity manipulation and conversion
 //
 // Copyright (C) 2003-2008 Matthias Christian Schabel
@@ -30,199 +30,205 @@
 #include <boost/units/units_fwd.hpp>
 #include <boost/units/detail/one.hpp>
 
-namespace boost {
+namespace boost
+{
 
-namespace units {
+namespace units
+{
 
-template<class T>
+template <class T>
 struct heterogeneous_system;
 
-template<class T, class D, class Scale>
+template <class T, class D, class Scale>
 struct heterogeneous_system_impl;
 
-template<class T, class E>
+template <class T, class E>
 struct heterogeneous_system_dim;
 
-template<class S, class Scale>
+template <class S, class Scale>
 struct scaled_base_unit;
 
 /// removes all scaling from a unit or a base unit.
-template<class T>
+template <class T>
 struct unscale
 {
 #ifndef BOOST_UNITS_DOXYGEN
-    typedef T type;
+  typedef T type;
 #else
-    typedef detail::unspecified type;
+  typedef detail::unspecified type;
 #endif
 };
 
 /// INTERNAL ONLY
-template<class S, class Scale>
-struct unscale<scaled_base_unit<S, Scale> >
+template <class S, class Scale>
+struct unscale<scaled_base_unit<S, Scale>>
 {
-    typedef typename unscale<S>::type type;
+  typedef typename unscale<S>::type type;
 };
 
 /// INTERNAL ONLY
-template<class D, class S>
-struct unscale<unit<D, S> >
+template <class D, class S>
+struct unscale<unit<D, S>>
 {
-    typedef unit<D, typename unscale<S>::type> type;
+  typedef unit<D, typename unscale<S>::type> type;
 };
 
 /// INTERNAL ONLY
-template<class Scale>
+template <class Scale>
 struct scale_list_dim;
 
 /// INTERNAL ONLY
-template<class T>
+template <class T>
 struct get_scale_list
 {
-    typedef dimensionless_type type;
+  typedef dimensionless_type type;
 };
 
 /// INTERNAL ONLY
-template<class S, class Scale>
-struct get_scale_list<scaled_base_unit<S, Scale> >
+template <class S, class Scale>
+struct get_scale_list<scaled_base_unit<S, Scale>>
 {
-    typedef typename mpl::times<list<scale_list_dim<Scale>, dimensionless_type>, typename get_scale_list<S>::type>::type type;
+  typedef typename mpl::times<list<scale_list_dim<Scale>, dimensionless_type>,
+                              typename get_scale_list<S>::type>::type type;
 };
 
 /// INTERNAL ONLY
-template<class D, class S>
-struct get_scale_list<unit<D, S> >
+template <class D, class S>
+struct get_scale_list<unit<D, S>>
 {
-    typedef typename get_scale_list<S>::type type;
+  typedef typename get_scale_list<S>::type type;
 };
 
 /// INTERNAL ONLY
-struct scale_dim_tag {};
+struct scale_dim_tag
+{
+};
 
 /// INTERNAL ONLY
-template<class Scale>
+template <class Scale>
 struct scale_list_dim : Scale
 {
-    typedef scale_dim_tag tag;
-    typedef scale_list_dim type;
+  typedef scale_dim_tag tag;
+  typedef scale_list_dim type;
 };
 
 } // namespace units
 
 #ifndef BOOST_UNITS_DOXYGEN
 
-namespace mpl {
+namespace mpl
+{
 
 /// INTERNAL ONLY
-template<>
+template <>
 struct less_impl<boost::units::scale_dim_tag, boost::units::scale_dim_tag>
 {
-    template<class T0, class T1>
-    struct apply : mpl::bool_<((T0::base) < (T1::base))> {};
+  template <class T0, class T1>
+  struct apply : mpl::bool_<((T0::base) < (T1::base))>
+  {
+  };
 };
-
 }
 
 #endif
 
-namespace units {
+namespace units
+{
 
-namespace detail {
+namespace detail
+{
 
-template<class Scale>
-struct is_empty_dim<scale_list_dim<Scale> > : mpl::false_ {};
+template <class Scale>
+struct is_empty_dim<scale_list_dim<Scale>> : mpl::false_
+{
+};
 
-template<long N>
-struct is_empty_dim<scale_list_dim<scale<N, static_rational<0, 1> > > > : mpl::true_ {};
+template <long N>
+struct is_empty_dim<scale_list_dim<scale<N, static_rational<0, 1>>>> : mpl::true_
+{
+};
 
-template<int N>
+template <int N>
 struct eval_scale_list_impl
 {
-    template<class Begin>
-    struct apply
-    {
-        typedef typename eval_scale_list_impl<N-1>::template apply<typename Begin::next> next_iteration;
-        typedef typename multiply_typeof_helper<typename next_iteration::type, typename Begin::item::value_type>::type type;
-        static type value()
-        {
-            return(next_iteration::value() * Begin::item::value());
-        }
-    };
+  template <class Begin>
+  struct apply
+  {
+    typedef typename eval_scale_list_impl<N - 1>::template apply<typename Begin::next>
+        next_iteration;
+    typedef typename multiply_typeof_helper<typename next_iteration::type,
+                                            typename Begin::item::value_type>::type type;
+    static type value() { return (next_iteration::value() * Begin::item::value()); }
+  };
 };
 
-template<>
+template <>
 struct eval_scale_list_impl<0>
 {
-    template<class Begin>
-    struct apply
+  template <class Begin>
+  struct apply
+  {
+    typedef one type;
+    static one value()
     {
-        typedef one type;
-        static one value()
-        {
-            one result;
-            return(result);
-        }
-    };
+      one result;
+      return (result);
+    }
+  };
 };
-
 }
 
 /// INTERNAL ONLY
-template<class T>
-struct eval_scale_list : detail::eval_scale_list_impl<T::size::value>::template apply<T> {};
+template <class T>
+struct eval_scale_list : detail::eval_scale_list_impl<T::size::value>::template apply<T>
+{
+};
 
 } // namespace units
 
 #ifndef BOOST_UNITS_DOXYGEN
 
-namespace mpl {
+namespace mpl
+{
 
 /// INTERNAL ONLY
-template<>
+template <>
 struct plus_impl<boost::units::scale_dim_tag, boost::units::scale_dim_tag>
 {
-    template<class T0, class T1>
-    struct apply
-    {
-        typedef boost::units::scale_list_dim<
-            boost::units::scale<
-                (T0::base),
-                typename mpl::plus<typename T0::exponent, typename T1::exponent>::type
-            >
-        > type;
-    };
+  template <class T0, class T1>
+  struct apply
+  {
+    typedef boost::units::scale_list_dim<
+        boost::units::scale<(T0::base),
+                            typename mpl::plus<typename T0::exponent, typename T1::exponent>::type>>
+        type;
+  };
 };
 
 /// INTERNAL ONLY
-template<>
+template <>
 struct negate_impl<boost::units::scale_dim_tag>
 {
-    template<class T0>
-    struct apply
-    {
-        typedef boost::units::scale_list_dim<
-            boost::units::scale<
-                (T0::base),
-                typename mpl::negate<typename T0::exponent>::type
-            >
-        > type;
-    };
+  template <class T0>
+  struct apply
+  {
+    typedef boost::units::scale_list_dim<
+        boost::units::scale<(T0::base), typename mpl::negate<typename T0::exponent>::type>>
+        type;
+  };
 };
 
 /// INTERNAL ONLY
-template<>
+template <>
 struct times_impl<boost::units::scale_dim_tag, boost::units::detail::static_rational_tag>
 {
-    template<class T0, class T1>
-    struct apply
-    {
-        typedef boost::units::scale_list_dim<
-            boost::units::scale<
-                (T0::base),
-                typename mpl::times<typename T0::exponent, T1>::type
-            >
-        > type;
-    };
+  template <class T0, class T1>
+  struct apply
+  {
+    typedef boost::units::scale_list_dim<
+        boost::units::scale<(T0::base), typename mpl::times<typename T0::exponent, T1>::type>>
+        type;
+  };
 };
 
 } // namespace mpl

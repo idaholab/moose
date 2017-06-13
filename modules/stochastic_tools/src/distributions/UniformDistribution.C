@@ -27,7 +27,7 @@ validParams<UniformDistribution>()
 
 UniformDistribution::UniformDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicUniformDistribution(getParam<Real>("lower_bound"),getParam<Real>("upper_bound"))
+    BasicUniformDistribution(getParam<Real>("lower_bound"), getParam<Real>("upper_bound"))
 {
 }
 
@@ -53,5 +53,3 @@ UniformDistribution::inverseCdf(const Real & y)
   else
     return BasicUniformDistribution::inverseCdf(y);
 }
-
-

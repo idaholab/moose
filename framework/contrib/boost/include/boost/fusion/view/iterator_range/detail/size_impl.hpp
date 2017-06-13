@@ -11,28 +11,27 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/fusion/iterator/distance.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct iterator_range_tag;
+namespace fusion
+{
+struct iterator_range_tag;
 
-    namespace extension
-    {
-        template <typename Tag>
-        struct size_impl;
+namespace extension
+{
+template <typename Tag>
+struct size_impl;
 
-        template <>
-        struct size_impl<iterator_range_tag>
-        {
-            template <typename Seq>
-            struct apply
-              : result_of::distance<
-                    typename Seq::begin_type,
-                    typename Seq::end_type
-                >
-            {};
-        };
-    }
-}}
+template <>
+struct size_impl<iterator_range_tag>
+{
+  template <typename Seq>
+  struct apply : result_of::distance<typename Seq::begin_type, typename Seq::end_type>
+  {
+  };
+};
+}
+}
+}
 
 #endif
-

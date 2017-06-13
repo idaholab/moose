@@ -13,31 +13,33 @@
 #include <boost/mpl/minus.hpp>
 #include <boost/mpl/int.hpp>
 
-namespace boost { namespace fusion { namespace extension
+namespace boost
 {
-    template <typename>
-    struct at_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct at_impl;
 
-    template <>
-    struct at_impl<reverse_view_tag>
+template <>
+struct at_impl<reverse_view_tag>
+{
+  template <typename Seq, typename N>
+  struct apply
+  {
+    typedef mpl::minus<typename Seq::size, mpl::int_<1>, N> real_n;
+
+    typedef typename result_of::at<typename Seq::seq_type, real_n>::type type;
+
+    BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED static type call(Seq & seq)
     {
-        template <typename Seq, typename N>
-        struct apply
-        {
-            typedef mpl::minus<typename Seq::size, mpl::int_<1>, N> real_n;
-
-            typedef typename
-                result_of::at<typename Seq::seq_type, real_n>::type
-            type;
-
-            BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-            static type
-            call(Seq& seq)
-            {
-                return fusion::at<real_n>(seq.seq);
-            }
-        };
-    };
-}}}
+      return fusion::at<real_n>(seq.seq);
+    }
+  };
+};
+}
+}
+}
 
 #endif

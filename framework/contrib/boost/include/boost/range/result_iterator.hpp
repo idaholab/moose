@@ -12,22 +12,22 @@
 #define BOOST_RANGE_RESULT_ITERATOR_HPP
 
 #if defined(_MSC_VER)
-# pragma once
+#pragma once
 #endif
 
 #include <boost/range/iterator.hpp>
 
 namespace boost
 {
-    //
-    // This interface is deprecated, use range_iterator<T>
-    //
-    
-    template< typename C >
-    struct range_result_iterator : range_iterator<C>
-    { };
-    
-} // namespace boost
+//
+// This interface is deprecated, use range_iterator<T>
+//
 
+template <typename C>
+struct range_result_iterator : range_iterator<C>
+{
+};
+
+} // namespace boost
 
 #endif

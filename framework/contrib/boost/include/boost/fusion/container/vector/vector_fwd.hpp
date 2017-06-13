@@ -15,7 +15,7 @@
 // With no variadics, we will use the C++03 version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_VECTOR)
-# include <boost/fusion/container/vector/detail/cpp03/vector_fwd.hpp>
+#include <boost/fusion/container/vector/detail/cpp03/vector_fwd.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,20 +24,22 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    template <typename ...T>
-    struct vector;
+namespace fusion
+{
+template <typename... T>
+struct vector;
 
-#define FUSION_VECTOR_N_ALIASES(z, N, d)                                    \
-    template <typename ...T>                                                \
-    using BOOST_PP_CAT(vector, N) = vector<T...>;
+#define FUSION_VECTOR_N_ALIASES(z, N, d)                                                           \
+  template <typename... T>                                                                         \
+  using BOOST_PP_CAT(vector, N) = vector<T...>;
 
-    BOOST_PP_REPEAT(51, FUSION_VECTOR_N_ALIASES, ~)
+BOOST_PP_REPEAT(51, FUSION_VECTOR_N_ALIASES, ~)
 
 #undef FUSION_VECTOR_N_ALIASES
-}}
+}
+}
 
 #endif
 #endif
-

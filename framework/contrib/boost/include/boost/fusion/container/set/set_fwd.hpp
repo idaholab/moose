@@ -11,36 +11,38 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/fusion/container/vector/detail/config.hpp>
 
-#if !defined(BOOST_FUSION_HAS_VARIADIC_VECTOR) \
-  || (defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES))
-# if defined(BOOST_FUSION_HAS_VARIADIC_SET)
-#   undef BOOST_FUSION_HAS_VARIADIC_SET
-# endif
+#if !defined(BOOST_FUSION_HAS_VARIADIC_VECTOR) ||                                                  \
+    (defined(__WAVE__) && defined(BOOST_FUSION_CREATE_PREPROCESSED_FILES))
+#if defined(BOOST_FUSION_HAS_VARIADIC_SET)
+#undef BOOST_FUSION_HAS_VARIADIC_SET
+#endif
 #else
-# if !defined(BOOST_FUSION_HAS_VARIADIC_SET)
-#   define BOOST_FUSION_HAS_VARIADIC_SET
-# endif
+#if !defined(BOOST_FUSION_HAS_VARIADIC_SET)
+#define BOOST_FUSION_HAS_VARIADIC_SET
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // With no variadics, we will use the C++03 version
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(BOOST_FUSION_HAS_VARIADIC_SET)
-# include <boost/fusion/container/set/detail/cpp03/set_fwd.hpp>
+#include <boost/fusion/container/set/detail/cpp03/set_fwd.hpp>
 #else
 
 ///////////////////////////////////////////////////////////////////////////////
 // C++11 interface
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace fusion
+namespace boost
 {
-    struct set_tag;
-    struct set_iterator_tag;
+namespace fusion
+{
+struct set_tag;
+struct set_iterator_tag;
 
-    template <typename ...T>
-    struct set;
-}}
+template <typename... T>
+struct set;
+}
+}
 
 #endif
 #endif
-

@@ -34,9 +34,9 @@ BOOST_TYPEOF_REGISTER_TYPE(long double)
 BOOST_TYPEOF_REGISTER_TYPE(wchar_t)
 #endif
 
-#if (defined(BOOST_MSVC) && (BOOST_MSVC == 1200)) \
-    || (defined(BOOST_INTEL_CXX_VERSION) && defined(_MSC_VER) && (BOOST_INTEL_CXX_VERSION <= 600)) \
-    || (defined(__BORLANDC__) && (__BORLANDC__ == 0x600) && (_MSC_VER == 1200))
+#if (defined(BOOST_MSVC) && (BOOST_MSVC == 1200)) ||                                               \
+    (defined(BOOST_INTEL_CXX_VERSION) && defined(_MSC_VER) && (BOOST_INTEL_CXX_VERSION <= 600)) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ == 0x600) && (_MSC_VER == 1200))
 BOOST_TYPEOF_REGISTER_TYPE(unsigned __int8)
 BOOST_TYPEOF_REGISTER_TYPE(__int8)
 BOOST_TYPEOF_REGISTER_TYPE(unsigned __int16)
@@ -49,7 +49,7 @@ BOOST_TYPEOF_REGISTER_TYPE(__int64)
 #endif
 #endif
 
-# if defined(BOOST_HAS_LONG_LONG)
+#if defined(BOOST_HAS_LONG_LONG)
 BOOST_TYPEOF_REGISTER_TYPE(::boost::ulong_long_type)
 BOOST_TYPEOF_REGISTER_TYPE(::boost::long_long_type)
 #elif defined(BOOST_HAS_MS_INT64)
@@ -59,4 +59,4 @@ BOOST_TYPEOF_REGISTER_TYPE(__int64)
 
 BOOST_TYPEOF_REGISTER_TYPE(void)
 
-#endif//BOOST_TYPEOF_REGISTER_FUNDAMENTAL_HPP_INCLUDED
+#endif // BOOST_TYPEOF_REGISTER_FUNDAMENTAL_HPP_INCLUDED

@@ -10,13 +10,19 @@
 
 #include <boost/config.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace boost
+{
+namespace fusion
+{
+namespace detail
 {
 
-struct enabler_ {};
+struct enabler_
+{
+};
 BOOST_STATIC_CONSTEXPR enabler_ enabler = {};
-
-}}}
+}
+}
+}
 
 #endif
-

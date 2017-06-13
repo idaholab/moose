@@ -11,8 +11,7 @@
 
 #define BOOST_TT_TRAIT_NAME has_unary_plus
 #define BOOST_TT_TRAIT_OP +
-#define BOOST_TT_FORBIDDEN_IF\
-   false
+#define BOOST_TT_FORBIDDEN_IF false
 
 #include <boost/type_traits/detail/has_prefix_operator.hpp>
 

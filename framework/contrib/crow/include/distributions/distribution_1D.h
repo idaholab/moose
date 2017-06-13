@@ -40,6 +40,7 @@ public:
   virtual double untrMedian();
   virtual double untrMode();
   virtual double untrHazard(double x);
+
 protected:
   DistributionBackend * _backend;
 };
@@ -47,9 +48,9 @@ protected:
 class BasicDiscreteDistribution : public virtual BasicDistribution
 {
 public:
-  virtual double pdf(double x);           ///< pdf function at coordinate x
-  virtual double cdf(double x);           ///< cdf function at coordinate x
-  virtual double inverseCdf(double x);    ///< x
+  virtual double pdf(double x);        ///< pdf function at coordinate x
+  virtual double cdf(double x);        ///< cdf function at coordinate x
+  virtual double inverseCdf(double x); ///< x
 
   virtual double untrPdf(double x);
   virtual double untrCdf(double x);
@@ -60,6 +61,7 @@ public:
   virtual double untrMedian();
   virtual double untrMode();
   virtual double untrHazard(double x);
+
 protected:
   DistributionBackend * _backend;
 };
@@ -69,7 +71,6 @@ protected:
  */
 class UniformDistribution;
 
-
 class UniformDistributionBackend;
 
 class BasicUniformDistribution : public BasicTruncatedDistribution
@@ -77,30 +78,27 @@ class BasicUniformDistribution : public BasicTruncatedDistribution
 public:
   BasicUniformDistribution(double x_min, double x_max);
   virtual ~BasicUniformDistribution();
-  double  pdf(double x);                ///< pdf function at coordinate x
-  double  cdf(double x);                ///< cdf function at coordinate x
-  double  inverseCdf(double x);        ///< x
+  double pdf(double x);        ///< pdf function at coordinate x
+  double cdf(double x);        ///< cdf function at coordinate x
+  double inverseCdf(double x); ///< x
 };
-
 
 /*
  * CLASS NORMAL DISTRIBUTION
  */
 class NormalDistribution;
 
-
 class NormalDistributionBackend;
 
-class BasicNormalDistribution : public  BasicTruncatedDistribution
+class BasicNormalDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicNormalDistribution(double mu, double sigma);
   BasicNormalDistribution(double mu, double sigma, double x_min, double x_max);
   virtual ~BasicNormalDistribution();
 
-  double  inverseCdf(double x);        ///< x
+  double inverseCdf(double x); ///< x
 };
-
 
 /*
  * CLASS LOG NORMAL DISTRIBUTION
@@ -116,7 +114,7 @@ public:
   BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max, double low);
   virtual ~BasicLogNormalDistribution();
 
-  double  inverseCdf(double x);        ///< x
+  double inverseCdf(double x); ///< x
 
   double untrPdf(double x);
   double untrCdf(double x);
@@ -127,15 +125,14 @@ public:
  */
 class LogisticDistribution;
 
-
 class LogisticDistributionBackend;
 
-class BasicLogisticDistribution : public BasicTruncatedDistribution {
+class BasicLogisticDistribution : public BasicTruncatedDistribution
+{
 public:
-   BasicLogisticDistribution(double location, double scale);
-   BasicLogisticDistribution(double location, double scale, double x_min, double x_max);
-   virtual ~BasicLogisticDistribution();
-
+  BasicLogisticDistribution(double location, double scale);
+  BasicLogisticDistribution(double location, double scale, double x_min, double x_max);
+  virtual ~BasicLogisticDistribution();
 };
 
 /*
@@ -145,12 +142,12 @@ class LaplaceDistribution;
 
 class LaplaceDistributionBackend;
 
-class BasicLaplaceDistribution : public BasicTruncatedDistribution {
+class BasicLaplaceDistribution : public BasicTruncatedDistribution
+{
 public:
   BasicLaplaceDistribution(double location, double scale, double x_min, double x_max);
   virtual ~BasicLaplaceDistribution();
 };
-
 
 /*
  * CLASS TRIANGULAR DISTRIBUTION
@@ -165,9 +162,7 @@ class BasicTriangularDistribution : public BasicTruncatedDistribution
 public:
   BasicTriangularDistribution(double x_peak, double lower_bound, double upper_bound);
   virtual ~BasicTriangularDistribution();
-
 };
-
 
 /*
  * CLASS EXPONENTIAL DISTRIBUTION
@@ -205,8 +200,8 @@ public:
   BasicWeibullDistribution(double k, double lambda, double x_min, double x_max, double low);
   virtual ~BasicWeibullDistribution();
 
-  double  untrPdf(double x);
-  double  untrCdf(double x);
+  double untrPdf(double x);
+  double untrCdf(double x);
   double inverseCdf(double x);
 };
 
@@ -223,10 +218,9 @@ public:
   BasicGammaDistribution(double k, double theta, double low, double x_min, double x_max);
   virtual ~BasicGammaDistribution();
 
-  double  untrPdf(double x);                ///< pdf function at coordinate x
-  double  untrCdf(double x);                ///< cdf function at coordinate x
-  double  untrInverseCdf(double x);        ///< x
-
+  double untrPdf(double x);        ///< pdf function at coordinate x
+  double untrCdf(double x);        ///< cdf function at coordinate x
+  double untrInverseCdf(double x); ///< x
 };
 
 /*
@@ -239,15 +233,16 @@ class BasicBetaDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicBetaDistribution(double alpha, double beta, double scale, double low);
-  BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max, double low);
+  BasicBetaDistribution(
+      double alpha, double beta, double scale, double x_min, double x_max, double low);
   virtual ~BasicBetaDistribution();
 
-  double  pdf(double x);                ///< pdf function at coordinate x
-  double  cdf(double x);                ///< cdf function at coordinate x
-  double  inverseCdf(double x);        ///< x
+  double pdf(double x);        ///< pdf function at coordinate x
+  double cdf(double x);        ///< cdf function at coordinate x
+  double inverseCdf(double x); ///< x
 
-  double  untrCdf(double x);
-  double  untrPdf(double x);
+  double untrCdf(double x);
+  double untrPdf(double x);
 };
 
 /*
@@ -262,11 +257,11 @@ public:
   BasicPoissonDistribution(double mu);
   virtual ~BasicPoissonDistribution();
 
-  double  pdf(double x);                ///< pdf function at coordinate x
-  double  cdf(double x);                ///< cdf function at coordinate x
-  double  inverseCdf(double x);        ///< x
+  double pdf(double x);        ///< pdf function at coordinate x
+  double cdf(double x);        ///< cdf function at coordinate x
+  double inverseCdf(double x); ///< x
 
-  double  untrCdf(double x);
+  double untrCdf(double x);
 };
 
 /*
@@ -281,7 +276,7 @@ public:
   BasicBinomialDistribution(double n, double p);
   virtual ~BasicBinomialDistribution();
 
-  double  untrCdf(double x);
+  double untrCdf(double x);
 };
 
 /*
@@ -304,7 +299,8 @@ class GeometricDistribution;
 
 class GeometricDistributionBackend;
 
-class BasicGeometricDistribution : public BasicDiscreteDistribution {
+class BasicGeometricDistribution : public BasicDiscreteDistribution
+{
 public:
   BasicGeometricDistribution(double p);
   virtual ~BasicGeometricDistribution();
@@ -314,15 +310,14 @@ public:
  * CLASS CONSTANT DISTRIBUTION
  */
 
-
 class BasicConstantDistribution : public virtual BasicDistribution
 {
 public:
   BasicConstantDistribution(double value);
   virtual ~BasicConstantDistribution();
-  double  pdf(double x);           ///< pdf function at coordinate x
-  double  cdf(double x);           ///< cdf function at coordinate x
-  double  inverseCdf(double);    ///< x
+  double pdf(double x);      ///< pdf function at coordinate x
+  double cdf(double x);      ///< cdf function at coordinate x
+  double inverseCdf(double); ///< x
 
   double untrPdf(double x);
   double untrCdf(double x);
@@ -333,9 +328,9 @@ public:
   double untrMedian();
   double untrMode();
   double untrHazard(double x);
+
 protected:
   double _value;
 };
-
 
 #endif

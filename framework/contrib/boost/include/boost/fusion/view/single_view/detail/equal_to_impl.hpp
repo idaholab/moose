@@ -14,27 +14,29 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/add_const.hpp>
 
-namespace boost { namespace fusion 
+namespace boost
 {
-    struct single_view_iterator_tag;
+namespace fusion
+{
+struct single_view_iterator_tag;
 
-    namespace extension
-    {
-        template<typename Tag>
-        struct equal_to_impl;
+namespace extension
+{
+template <typename Tag>
+struct equal_to_impl;
 
-        template<>
-        struct equal_to_impl<single_view_iterator_tag>
-        {
-            template<typename It1, typename It2>
-            struct apply
-              : mpl::equal_to<typename It1::position, typename It2::position>
-            {
-                BOOST_MPL_ASSERT((is_same<typename add_const<typename It1::single_view_type>::type, 
-                    typename add_const<typename It2::single_view_type>::type>));
-            };
-        };
-    }
-}}
+template <>
+struct equal_to_impl<single_view_iterator_tag>
+{
+  template <typename It1, typename It2>
+  struct apply : mpl::equal_to<typename It1::position, typename It2::position>
+  {
+    BOOST_MPL_ASSERT((is_same<typename add_const<typename It1::single_view_type>::type,
+                              typename add_const<typename It2::single_view_type>::type>));
+  };
+};
+}
+}
+}
 
 #endif

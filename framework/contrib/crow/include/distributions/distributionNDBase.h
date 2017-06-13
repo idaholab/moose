@@ -29,59 +29,68 @@
 #include <iostream>
 #include <fstream>
 
-#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+#define throwError(msg)                                                                            \
+  {                                                                                                \
+    std::cerr << "\n\n" << msg << "\n\n";                                                          \
+    throw std::runtime_error("Error");                                                             \
+  }
 
-enum EPbFunctionType{PDF,CDF};
+enum EPbFunctionType
+{
+  PDF,
+  CDF
+};
 
 class BasicDistributionND
 {
 public:
+  BasicDistributionND();
+  virtual ~BasicDistributionND();
+  double getVariable(const std::string & variable_name); ///< getVariable from mapping
+  void updateVariable(const std::string & variable_name, double & new_value);
+  virtual double pdf(std::vector<double> x) = 0; ///< pdf function at coordinate x
+  virtual double cdf(std::vector<double> x) = 0; ///< cdf function at coordinate x
+  virtual std::vector<double> inverseCdf(double f, double g) = 0;
 
-   BasicDistributionND();
-   virtual ~BasicDistributionND();
-   double  getVariable(const std::string & variable_name);                       ///< getVariable from mapping
-   void updateVariable(const std::string & variable_name, double & new_value);
-   virtual double  pdf(std::vector<double> x) = 0;                              ///< pdf function at coordinate x
-   virtual double  cdf(std::vector<double> x) = 0;                              ///< cdf function at coordinate x
-   virtual std::vector<double> inverseCdf(double f, double g) = 0;
+  virtual double inverseMarginal(double f, int dimension) = 0;
+  virtual int returnDimensionality() = 0;
+  double cellIntegral(std::vector<double> center, std::vector<double> dx);
 
-   virtual double inverseMarginal(double f, int dimension) = 0;
-   virtual int returnDimensionality() = 0;
-   double cellIntegral(std::vector<double> center, std::vector<double> dx);
+  virtual double returnUpperBound(int dimension) = 0;
+  virtual double returnLowerBound(int dimension) = 0;
 
-   virtual double returnUpperBound(int dimension) = 0;
-   virtual double returnLowerBound(int dimension) = 0;
+  std::string & getType();
 
-   std::string & getType();
-
-   std::vector<int> oneDtoNDconverter(int one_d_coordinate, std::vector<int> indexes);
+  std::vector<int> oneDtoNDconverter(int one_d_coordinate, std::vector<int> indexes);
 
 protected:
-   std::string _type; ///< Distribution type
-   std::string _data_filename;
-   EPbFunctionType _function_type;
-   std::map <std::string,double> _dis_parameters;
-   bool _check_status;
+  std::string _type; ///< Distribution type
+  std::string _data_filename;
+  EPbFunctionType _function_type;
+  std::map<std::string, double> _dis_parameters;
+  bool _check_status;
 
-   double _tolerance;
-   int _initial_divisions;
+  double _tolerance;
+  int _initial_divisions;
 
-   //marginal distribution functions
-   //std::vector<NDInterpolation> marginalDistributions;
+  // marginal distribution functions
+  // std::vector<NDInterpolation> marginalDistributions;
 };
 
-//class BasicMultiDimensionalLinear: public  virtual BasicDistributionND
+// class BasicMultiDimensionalLinear: public  virtual BasicDistributionND
 //{
-//public:
+// public:
 //  BasicMultiDimensionalLinear(std::string data_filename): _interpolator(data_filename)
 //  {
 //   bool LBcheck = _interpolator.checkLB(0.0);
 //   if (LBcheck == false)
-//    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+//    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input
+//    contain element below 0.0 in file: " << data_filename);
 //
 //   bool UBcheck = _interpolator.checkUB(1.0);
 //   if (UBcheck == false)
-//    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+//    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input
+//    contain element above 1.0 in file: " << data_filename);
 //  };
 //  BasicMultiDimensionalLinear(): _interpolator()
 //  {
@@ -114,9 +123,8 @@ protected:
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };
-//protected:
+// protected:
 //  NDlinear _interpolator;
 //};
-
 
 #endif /* DISTRIBUTION_ND_BASE_H */

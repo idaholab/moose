@@ -10,33 +10,36 @@
 #ifndef BOOST_FUSION_ADAPTED_STRUCT_DETAIL_CATEGORY_OF_IMPL_HPP
 #define BOOST_FUSION_ADAPTED_STRUCT_DETAIL_CATEGORY_OF_IMPL_HPP
 
-namespace boost { namespace fusion
+namespace boost
 {
-    namespace extension
-    {
-        template<typename>
-        struct category_of_impl;
+namespace fusion
+{
+namespace extension
+{
+template <typename>
+struct category_of_impl;
 
-        template<>
-        struct category_of_impl<struct_tag>
-        {
-            template<typename Seq>
-            struct apply
-            {
-                typedef random_access_traversal_tag type;
-            };
-        };
+template <>
+struct category_of_impl<struct_tag>
+{
+  template <typename Seq>
+  struct apply
+  {
+    typedef random_access_traversal_tag type;
+  };
+};
 
-        template<>
-        struct category_of_impl<assoc_struct_tag>
-        {
-            template<typename Seq>
-            struct apply
-            {
-                typedef assoc_struct_category type;
-            };
-        };
-    }
-}}
+template <>
+struct category_of_impl<assoc_struct_tag>
+{
+  template <typename Seq>
+  struct apply
+  {
+    typedef assoc_struct_category type;
+  };
+};
+}
+}
+}
 
 #endif

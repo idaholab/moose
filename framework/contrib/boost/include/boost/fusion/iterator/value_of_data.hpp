@@ -11,33 +11,36 @@
 #include <boost/fusion/support/config.hpp>
 #include <boost/fusion/support/tag_of.hpp>
 
-namespace boost { namespace fusion
+namespace boost
 {
-    struct iterator_facade_tag;
+namespace fusion
+{
+struct iterator_facade_tag;
 
-    namespace extension
-    {
-        template <typename>
-        struct value_of_data_impl;
+namespace extension
+{
+template <typename>
+struct value_of_data_impl;
 
-        template <>
-        struct value_of_data_impl<iterator_facade_tag>
-        {
-            template <typename It>
-            struct apply
-              : It::template value_of_data<It>
-            {};
-        };
-    }
+template <>
+struct value_of_data_impl<iterator_facade_tag>
+{
+  template <typename It>
+  struct apply : It::template value_of_data<It>
+  {
+  };
+};
+}
 
-    namespace result_of
-    {
-        template <typename It>
-        struct value_of_data
-          : extension::value_of_data_impl<typename traits::tag_of<It>::type>::
-                template apply<It>
-        {};
-    }
-}}
+namespace result_of
+{
+template <typename It>
+struct value_of_data
+    : extension::value_of_data_impl<typename traits::tag_of<It>::type>::template apply<It>
+{
+};
+}
+}
+}
 
 #endif
