@@ -11,10 +11,10 @@ InputParameters
 validParams<CoupledSusceptibilityTimeDerivative>()
 {
   InputParameters params = validParams<CoupledTimeDerivative>();
-  params.addClassDescription("A modified coupled time derivative Kernel that multiply the time "
-                             "derivative of a coupled variable by a function of the variables");
+  params.addClassDescription("A modified coupled time derivative Kernel that multiplies the time "
+                             "derivative of a coupled variable by a generalized susceptibility");
   params.addRequiredParam<MaterialPropertyName>(
-      "f_name", "Base name of the function F defined in a DerivativeParsedMaterial");
+      "f_name", "Susceptibility function F defined in a FunctionMaterial");
   params.addCoupledVar("args", "Vector of arguments of the susceptibility");
   return params;
 }

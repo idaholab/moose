@@ -11,8 +11,9 @@ InputParameters
 validParams<CoupledSwitchingTimeDerivative>()
 {
   InputParameters params = validParams<CoupledTimeDerivative>();
-  params.addClassDescription("Coupled time derivative Kernel that multiplies time derivative by "
-                             "(dh_a/deta_i * Fa + dh_b/deta_i * Fb + ..)");
+  params.addClassDescription(
+      "Coupled time derivative Kernel that multiplies the time derivative by "
+      "$\\frac{dh_\\alpha}{d\\eta_i} F_\\alpha + \\frac{dh_\\beta}{d\\eta_i} F_\\beta + \\dots)");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "Fj_names", "List of functions for each phase. Place in same order as hj_names!");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(

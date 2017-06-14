@@ -11,6 +11,8 @@ InputParameters
 validParams<PFCTradMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription(
+      "Polynomial coefficients for a phase field crystal correlation function");
   MooseEnum order("FOURTH=4 EIGHTH=8");
   params.addRequiredParam<MooseEnum>(
       "order", order, "This is the order of the polynomial used for correlation function");

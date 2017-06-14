@@ -5,6 +5,8 @@ InputParameters
 validParams<CHBulkPFCTrad>()
 {
   InputParameters params = CHBulk<Real>::validParams();
+  params.addClassDescription(
+      "Cahn-Hilliard kernel for a polynomial phase field crystal free energy.");
   return params;
 }
 
