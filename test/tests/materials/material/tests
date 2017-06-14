@@ -36,7 +36,7 @@
   [./mat_cyclic_dep_error_test]
     type = 'RunException'
     input = 'mat_cyclic_coupling.i'
-    expect_err = 'Cyclic dependency detected'
+    expect_err = 'Cyclic dependency detected in object ordering:\nmat2 -> mat1'
   [../]
 
   [./three_coupled_mat_test]

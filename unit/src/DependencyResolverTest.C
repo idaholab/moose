@@ -144,3 +144,21 @@ TEST_F(DependencyResolverTest, dependsOnTest)
   EXPECT_FALSE(_tree.dependsOn("m1", "something_else"));
   EXPECT_FALSE(_tree.dependsOn("something_else", "k0"));
 }
+
+TEST_F(DependencyResolverTest, cyclicTest)
+{
+  try
+  {
+    // Attempt to insert a dependency that results in cyclicity
+    _resolver.insertDependency("a", "b");
+    FAIL() << "missing expected exception";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("DependencyResolver: attempt to insert dependency will result in cyclic graph") !=
+        std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
