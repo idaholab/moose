@@ -53,7 +53,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
 
   const Real & old_thermal_strain = _thermal_strain_old[_qp];
 
-  const Real & old_temp = (_step_one ? _stress_free_temperature : _temperature_old[_qp]);
+  const Real & old_temp = (_step_one ? _stress_free_temperature[_qp] : _temperature_old[_qp]);
   const Real delta_T = current_temp - old_temp;
 
   const Point p;
