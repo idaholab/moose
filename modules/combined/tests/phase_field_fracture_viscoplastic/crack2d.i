@@ -77,7 +77,7 @@
     variable = b
   [../]
   [./pfintcoupled]
-    type = PFFracCoupledInterface
+    type = LaplacianSplit
     variable = b
     c = c
   [../]

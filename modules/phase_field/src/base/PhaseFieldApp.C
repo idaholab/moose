@@ -354,8 +354,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MatReaction);
   registerKernel(MultiGrainRigidBodyMotion);
   registerKernel(PFFracBulkRate);
-  registerDeprecatedObjectWithReplacement(
-      PFFracCoupledInterface, "LaplacianSplit", "07/14/2017 16:00");
+  registerKernel(PFFracCoupledInterface);
   registerKernel(SimpleACInterface);
   registerKernel(SimpleCHInterface);
   registerKernel(SimpleCoupledACInterface);
