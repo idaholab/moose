@@ -26,6 +26,9 @@ validParams<CLSHPlasticMaterial>()
       "relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
   params.addParam<Real>(
       "absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
+  params.addParam<Real>("max_inelastic_increment",
+                        1e-4,
+                        "The maximum inelastic strain increment allowed in a time step");
   return params;
 }
 

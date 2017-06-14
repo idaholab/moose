@@ -26,8 +26,9 @@ validParams<ReturnMappingModel>()
       "relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
   params.addParam<Real>(
       "absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
-  params.addParam<Real>(
-      "max_inelastic_incr", 1e-4, "The maximum inelastic strain increment allowed in a time step");
+  params.addParam<Real>("max_inelastic_increment",
+                        1e-4,
+                        "The maximum inelastic strain increment allowed in a time step");
 
   return params;
 }
@@ -45,8 +46,7 @@ ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters,
         declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
     _effective_inelastic_strain_old(
         declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
-    _max_inelastic_incr(isParamValid("max_inelastic_incr") ? getParam<Real>("max_inelastic_incr")
-                                                           : 0.)
+    _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment"))
 {
 }
 
@@ -194,12 +194,12 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/,
 Real
 ReturnMappingModel::computeTimeStepLimit(unsigned qp)
 {
-  Real tmp_max_incr;
   Real scalar_inelastic_strain_incr;
 
   scalar_inelastic_strain_incr =
       _effective_inelastic_strain[qp] - _effective_inelastic_strain_old[qp];
-  tmp_max_incr = _max_inelastic_incr * 1e-10;
-  _max_inc = std::max(scalar_inelastic_strain_incr, tmp_max_incr);
-  return _dt * _max_inelastic_incr / _max_inc;
+  if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
+    return std::numeric_limits<Real>::max();
+
+  return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
 }

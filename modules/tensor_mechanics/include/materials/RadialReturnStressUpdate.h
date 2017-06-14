@@ -74,8 +74,7 @@ protected:
 
   MaterialProperty<Real> & _effective_inelastic_strain;
   MaterialProperty<Real> & _effective_inelastic_strain_old;
-  Real _max_inelastic_incr;
-  Real _max_inc;
+  Real _max_inelastic_increment;
 };
 
 #endif // RECOMPUTERADIALRETURN_H

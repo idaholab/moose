@@ -36,8 +36,9 @@ validParams<RadialReturnStressUpdate>()
       "Absolute convergence tolerance for newton iteration within the radial return material");
   params.addParam<unsigned int>(
       "max_iterations", 30, "Maximum number of newton iterations in the radial return material");
-  params.addParam<Real>(
-      "max_inelastic_incr", 1e-4, "The maximum inelastic strain increment allowed in a time step");
+  params.addParam<Real>("max_inelastic_increment",
+                        1e-4,
+                        "The maximum inelastic strain increment allowed in a time step");
   return params;
 }
 
@@ -53,8 +54,7 @@ RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & param
         declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
     _effective_inelastic_strain_old(
         declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
-    _max_inelastic_incr(isParamValid("max_inelastic_incr") ? getParam<Real>("max_inelastic_incr")
-                                                           : 0.)
+    _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment"))
 {
 }
 
@@ -201,12 +201,12 @@ RadialReturnStressUpdate::getIsotropicBulkModulus(const RankFourTensor & elastic
 Real
 RadialReturnStressUpdate::computeTimeStepLimit()
 {
-  Real tmp_max_incr;
   Real scalar_inelastic_strain_incr;
 
   scalar_inelastic_strain_incr =
       _effective_inelastic_strain[_qp] - _effective_inelastic_strain_old[_qp];
-  tmp_max_incr = _max_inelastic_incr * 1e-10;
-  _max_inc = std::max(scalar_inelastic_strain_incr, tmp_max_incr);
-  return _dt * _max_inelastic_incr / _max_inc;
+  if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
+    return std::numeric_limits<Real>::max();
+
+  return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
 }
