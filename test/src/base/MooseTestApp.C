@@ -104,6 +104,7 @@
 #include "CheckCurrentExecAux.h"
 #include "FunctionDerivativeAux.h"
 
+#include "ChannelGradientBC.h"
 #include "RobinBC.h"
 #include "InflowBC.h"
 #include "OutflowBC.h"
@@ -122,6 +123,7 @@
 #include "CoupledDirichletBC.h"
 #include "TestLapBC.h"
 #include "ExampleShapeSideIntegratedBC.h"
+#include "ChannelGradientBC.h"
 
 // ICs
 #include "TEIC.h"
@@ -219,6 +221,7 @@
 #include "NumAdaptivityCycles.h"
 #include "TestDiscontinuousValuePP.h"
 #include "RandomPostprocessor.h"
+#include "ChannelGradientVectorPostprocessor.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -406,6 +409,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerInterfaceKernel(InterfaceDiffusion);
 
   // Boundary Conditions
+  registerBoundaryCondition(ChannelGradientBC);
   registerBoundaryCondition(ExampleShapeSideIntegratedBC);
   registerBoundaryCondition(RobinBC);
   registerBoundaryCondition(InflowBC);
@@ -546,6 +550,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(RandomPostprocessor);
 
   registerVectorPostprocessor(LateDeclarationVectorPostprocessor);
+  registerVectorPostprocessor(ChannelGradientVectorPostprocessor);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);
