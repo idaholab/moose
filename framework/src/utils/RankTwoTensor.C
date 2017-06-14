@@ -77,6 +77,7 @@ RankTwoTensor::RankTwoTensor(const InitMethod init)
   }
 }
 
+/// TODO: deprecate this method in favor of initializeFromRows
 RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1,
                              const TypeVector<Real> & row2,
                              const TypeVector<Real> & row3)
@@ -91,6 +92,24 @@ RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1,
   const unsigned int two_n = N * 2;
   for (unsigned int i = 0; i < N; i++)
     _vals[two_n + i] = row3(i);
+}
+
+RankTwoTensor
+RankTwoTensor::initializeFromRows(const TypeVector<Real> & row0,
+                                  const TypeVector<Real> & row1,
+                                  const TypeVector<Real> & row2)
+{
+  return RankTwoTensor(
+      row0(0), row1(0), row2(0), row0(1), row1(1), row2(1), row0(2), row1(2), row2(2));
+}
+
+RankTwoTensor
+RankTwoTensor::initializeFromColumns(const TypeVector<Real> & col0,
+                                     const TypeVector<Real> & col1,
+                                     const TypeVector<Real> & col2)
+{
+  return RankTwoTensor(
+      col0(0), col0(1), col0(2), col1(0), col1(1), col1(2), col2(0), col2(1), col2(2));
 }
 
 RankTwoTensor::RankTwoTensor(const TypeTensor<Real> & a)
