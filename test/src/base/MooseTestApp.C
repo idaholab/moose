@@ -123,7 +123,6 @@
 #include "CoupledDirichletBC.h"
 #include "TestLapBC.h"
 #include "ExampleShapeSideIntegratedBC.h"
-#include "ChannelGradientBC.h"
 
 // ICs
 #include "TEIC.h"

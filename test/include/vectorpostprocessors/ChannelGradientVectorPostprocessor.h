@@ -34,9 +34,14 @@ public:
   virtual void execute() override;
 
 protected:
+  /// The line value sampler names
   VectorPostprocessorName _lv1_name;
   VectorPostprocessorName _lv2_name;
 
+  /**
+   * The axis the line value samplers sampled along; this vpps will not work
+   * if the line value samplers varied more than one coordinate
+   */
   std::string _axis;
 
   /// The variable values from the line value samplers
