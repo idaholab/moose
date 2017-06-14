@@ -10,8 +10,8 @@ template <>
 InputParameters validParams<ChannelGradientVectorPostprocessor>();
 
 /**
- *  ChannelGradientVectorPostprocessor is a VectorPostprocessor that performs a least squares
- *  fit on data calculated in another VectorPostprocessor.
+ *  ChannelGradientVectorPostprocessor is a VectorPostprocessor that calculates
+ *  the difference between two LineValueSampler vector postprocessors.
  */
 
 class ChannelGradientVectorPostprocessor : public GeneralVectorPostprocessor
@@ -29,7 +29,7 @@ public:
   virtual void initialize() override;
 
   /**
-   * Perform the least squares fit
+   * Perform the difference operation
    */
   virtual void execute() override;
 
@@ -39,12 +39,17 @@ protected:
 
   std::string _axis;
 
-  /// The variables with the x, y data to be fit
+  /// The variable values from the line value samplers
   const VectorPostprocessorValue & _lv1_variable_values;
   const VectorPostprocessorValue & _lv2_variable_values;
+
+  /// The axis coordinate values for the line value samplers
   const VectorPostprocessorValue & _lv1_axis_values;
 
+  /// Axis coordinate values; corresponds to values from _lv1_axis_values
   VectorPostprocessorValue * _axis_values;
+
+  /// The vector holding the difference between the two line value samplers
   VectorPostprocessorValue * _gradient_values;
 };
 
