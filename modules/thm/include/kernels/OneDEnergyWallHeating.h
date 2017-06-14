@@ -26,7 +26,7 @@ protected:
   const MaterialProperty<Real> & _dT_drhouA;
   const MaterialProperty<Real> & _dT_drhoEA;
 
-  const VariableValue & _heat_transfer_coefficient;
+  const VariableValue & _Hw;
   const VariableValue & _T_wall;
   const VariableValue & _P_hf;
 
