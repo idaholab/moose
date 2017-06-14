@@ -224,7 +224,7 @@
     relative_tolerance = 1.e-12
     max_its = 100
     output_iteration_info = false
-    max_inelastic_incr = 0.01
+    max_inelastic_increment = 0.01
   [../]
 []
 

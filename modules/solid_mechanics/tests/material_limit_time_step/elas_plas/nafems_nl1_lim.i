@@ -188,7 +188,7 @@
     hardening_constant = 0.0
     relative_tolerance = 1e-20
     absolute_tolerance = 1e-8
-    max_inelastic_incr = 0.000001
+    max_inelastic_increment = 0.000001
   [../]
 [] # Materials
 

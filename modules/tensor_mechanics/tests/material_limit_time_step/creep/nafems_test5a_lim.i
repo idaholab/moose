@@ -235,7 +235,7 @@
     activation_energy = 0.0
     max_iterations = 100
     relative_tolerance = 1e-12
-    max_inelastic_incr = 0.01
+    max_inelastic_increment = 0.01
   [../]
 []
 
