@@ -1,3 +1,16 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 #include "ChannelGradientVectorPostprocessor.h"
 #include "VectorPostprocessorInterface.h"
 
@@ -52,9 +65,12 @@ ChannelGradientVectorPostprocessor::execute()
     mooseError("The two vector postprocessors that we're taking the difference of must be the same "
                "length.");
 
+  _axis_values.resize(_lv1_axis_values.size());
+  _gradient_values.resize(_lv1_axis_values.size());
+
   for (auto i = beginIndex(_lv1_axis_values); i < _lv1_axis_values.size(); ++i)
   {
-    _axis_values->push_back(_lv1_axis_values[i]);
-    _gradient_values->push_back(_lv1_variable_values[i] - _lv2_variable_values[i]);
+    _axis_values[i] = _lv1_axis_values[i];
+    _gradient_values[i] = _lv1_variable_values[i] - _lv2_variable_values[i];
   }
 }
