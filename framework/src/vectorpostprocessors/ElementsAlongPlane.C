@@ -34,7 +34,6 @@ ElementsAlongPlane::ElementsAlongPlane(const InputParameters & parameters)
     _normal(getParam<Point>("normal")),
     _elem_ids(declareVector("elem_ids"))
 {
-  _fe_problem.mesh().errorIfDistributedMesh("ElementsAlongPlane");
 }
 
 void
