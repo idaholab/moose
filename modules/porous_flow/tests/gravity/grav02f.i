@@ -261,8 +261,8 @@
   [./smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol'
-    petsc_options_value = 'bcgs bjacobi 1E-12 1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -snes_stol -snes_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-13 15'
   [../]
 []
 

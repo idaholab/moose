@@ -20,6 +20,9 @@ InputParameters validParams<PorousFlowDarcyBase>();
  * Darcy advective flux.
  * A fully-updwinded version is implemented, where the mobility
  * of the upstream nodes is used.
+ * Alternately, after some number of upwind-downwind swaps,
+ * another type of handling of the mobility may be employed
+ * (see fallback_scheme, below)
  */
 class PorousFlowDarcyBase : public Kernel
 {
@@ -27,6 +30,7 @@ public:
   PorousFlowDarcyBase(const InputParameters & parameters);
 
 protected:
+  virtual void timestepSetup() override;
   virtual Real computeQpResidual() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -59,7 +63,7 @@ protected:
   };
 
   /**
-   * Full upwinding of both the residual and Jacobians.
+   * Computation of the residual and Jacobian.
    *
    * If res_or_jac=CALCULATE_JACOBIAN then the residual
    * gets calculated anyway (becuase we have to know which
@@ -73,7 +77,7 @@ protected:
    * @param res_or_jac Whether to calculate the residual or the jacobian.
    * @param jvar PorousFlow variable to take derivatives wrt to
    */
-  void upwind(JacRes res_or_jac, unsigned int jvar);
+  void computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar);
 
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
@@ -122,6 +126,78 @@ protected:
 
   /// Gravity. Defaults to 9.81 m/s^2
   const RealVectorValue _gravity;
+
+  /**
+   * If the number of upwind-downwind swaps is less than this amount then
+   * full upwinding is used.  Otherwise the fallback scheme is employed
+   */
+  const unsigned _full_upwind_threshold;
+
+  /**
+   * If full upwinding is failing due to nodes swapping between upwind
+   * and downwind in successive nonlinear iterations (within one timestep
+   * and element) a fallback scheme is used instead.
+   * QUICK: use the nodal mobilities, as in full upwinding, but do not
+   * attempt to conserve fluid mass.
+   * HARMONIC: assign the harmonic mean of the mobilities to the entire
+   * element.
+   */
+  const enum class FallbackEnum { QUICK, HARMONIC } _fallback_scheme;
+
+  /**
+   * The Darcy flux.  When multiplied by the mobility, this is the
+   * mass flux of fluid moving out of a node.  This multiplication occurs
+   * during the formation of the residual and Jacobian.
+   * _proto_flux[num_phases][num_nodes]
+   */
+  std::vector<std::vector<Real>> _proto_flux;
+
+  /**
+   * Derivative of _proto_flux with respect to nodal variables.
+   * This gets modified with the mobility and its derivative during
+   * computation of MOOSE's Jacobian
+   */
+  std::vector<std::vector<std::vector<Real>>> _jacobian;
+
+  /**
+   * Number of nonlinear iterations (in this timestep and this element)
+   * that a node is an upwind node for a given fluid phase.
+   * _num_upwinds[element_number][phase][node_number_in_element]
+   */
+  std::unordered_map<unsigned, std::vector<std::vector<unsigned>>> _num_upwinds;
+
+  /**
+   * Number of nonlinear iterations (in this timestep and this element)
+   * that a node is an downwind node for a given fluid phase.
+   * _num_upwinds[element_number][phase][node_number_in_element]
+   */
+  std::unordered_map<unsigned, std::vector<std::vector<unsigned>>> _num_downwinds;
+
+  /**
+   * Calculate the residual or Jacobian using full upwinding
+   * @param res_or_jac whether to compute the residual or jacobian
+   * @param ph fluid phase number
+   * @param pvar differentiate wrt to this PorousFlow variable (when computing the jacobian)
+   */
+  void fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
+
+  /**
+   * Calculate the residual or Jacobian using the nodal mobilities,
+   * but without conserving fluid mass.
+   * @param res_or_jac whether to compute the residual or jacobian
+   * @param ph fluid phase number
+   * @param pvar differentiate wrt to this PorousFlow variable (when computing the jacobian)
+   */
+  void quickUpwind(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
+
+  /**
+   * Calculate the residual or Jacobian by using the harmonic mean
+   * of the nodal mobilities for the entire element
+   * @param res_or_jac whether to compute the residual or jacobian
+   * @param ph fluid phase number
+   * @param pvar differentiate wrt to this PorousFlow variable (when computing the jacobian)
+   */
+  void harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
 };
 
 #endif // POROUSFLOWDARCYBASE_H
