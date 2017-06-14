@@ -260,17 +260,13 @@
     type = PorousFlowVolumetricStrain
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     at_nodes = true
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
@@ -396,8 +392,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
+    petsc_options_iname = '-ksp_type -pc_type -snes_max_it -snes_stol'
+    petsc_options_value = 'bcgs bjacobi 10000 1E-11'
   [../]
 []
 
