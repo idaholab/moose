@@ -9,7 +9,7 @@ $$
 
 $F$ is the free energy functional of the system that is defined as $F=\int f(c) d\Omega$.
 
-$\eta$ is the variable the kernel is acting on, $M$ (`mob_name`) is a scalar (isotropic)
+$c$ is the variable the kernel is acting on, $M$ (`mob_name`) is a scalar (isotropic)
 mobility, and $f$ (`f_name`) is a free energy density
 provided by the [function material](../../introduction/FunctionMaterials).
 

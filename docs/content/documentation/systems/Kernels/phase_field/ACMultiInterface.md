@@ -5,11 +5,11 @@ Implements Allen-Cahn interface terms for a multiphase system. This includes
 cross terms of the form
 
 $$
-\sum_j\frac12\kappa_{ij}^2\left( \eta_i\nabla\eta_j - \eta_j\nabla\eta_i \right)^2
+\sum_j\frac12\kappa_{ij}\left( \eta_i\nabla\eta_j - \eta_j\nabla\eta_i \right)^2
 $$
 
 where $\eta_i$ is the non-linear variable the kernel is acting on, $\eta_j$ (`etas`
-are all non-conserved order parameters in teh system, $\kappa_ij$ (`kappa_name`)
+are all non-conserved order parameters in the system, $\kappa_{ij}$ (`kappa_name`)
 are the gradient energy coefficents, and $L_i$ (`mob_name`) is the scalar (isotropic)
 mobility associated with the $\eta_i$ order parameter.
 

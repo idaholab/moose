@@ -4,7 +4,7 @@
 Implements the term
 
 $$
-L(a,b,\dots)\frac{\delta F}{\delta\eta} = L(\etas,a,b,\dots)\frac{\partial f(\eta,a,b,\dots)}{\partial\eta}
+L(\eta,a,b,\dots)\frac{\delta F}{\delta\eta} = L(\eta,a,b,\dots)\frac{\partial f(\eta,a,b,\dots)}{\partial\eta}
 $$
 
 $F$ is the free energy functional of the system that is defined as $F=\int f(\eta) d\Omega$.

@@ -5,7 +5,7 @@ Implements the Allen-Cahn term for the $\frac{\kappa_i}2|\nabla \eta_i|^2$ gradi
 energy contribution for the isotropic mobility case. Its weak form is
 
 $$
-\left( \kappa_i \nabla^2 \eta_i, \nabla \cdot (L_i \nabla \psi_m ) \right),
+\left( \kappa_i \nabla \eta_i, \nabla \cdot (L_i \psi_m ) \right),
 $$
 
 where $\kappa_i$ (`kappa_name`) is the gradient energy coefficent, $\eta_i$ the non-conserved

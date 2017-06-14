@@ -7,7 +7,7 @@ $$
 \pm P u,
 $$
 
-where the sign is determined by teh `positive` parameter, $P$ (`prop_name`) is a
+where the sign is determined by the `positive` parameter, $P$ (`prop_name`) is a
 material property, and $u$ is either a coupled variable (`coupled_var`)
 or - if not explicitly specified - the non-linear variable the kernel is operating on.
 
