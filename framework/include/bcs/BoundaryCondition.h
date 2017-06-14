@@ -24,6 +24,7 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "BoundaryRestrictableRequired.h"
 #include "Restartable.h"
@@ -53,6 +54,7 @@ class BoundaryCondition : public MooseObject,
                           public UserObjectInterface,
                           public TransientInterface,
                           public PostprocessorInterface,
+                          public VectorPostprocessorInterface,
                           public GeometricSearchInterface,
                           public Restartable,
                           public ZeroInterface,
