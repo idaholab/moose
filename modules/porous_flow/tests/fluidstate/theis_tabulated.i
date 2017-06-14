@@ -114,12 +114,7 @@
     [./tabulated]
       type = TabulatedFluidProperties
       fp = co2
-      temperature_min = 280
-      temperature_max = 350
-      pressure_min = 19e6
-      pressure_max = 22e6
-      num_T = 50
-      num_p = 50
+      fluid_property_file = fluid_properties.csv
     [../]
     [./water]
       type = Water97FluidProperties
