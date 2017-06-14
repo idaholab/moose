@@ -28,12 +28,13 @@ ComputeMeanThermalExpansionEigenstrainBase::ComputeMeanThermalExpansionEigenstra
 void
 ComputeMeanThermalExpansionEigenstrainBase::initialSetup()
 {
-  _alphabar_stress_free_temperature = meanThermalExpansionCoefficient(_stress_free_temperature);
+  _alphabar_stress_free_temperature =
+      meanThermalExpansionCoefficient(_stress_free_temperature[_qp]);
   _thexp_stress_free_temperature =
-      _alphabar_stress_free_temperature * (_stress_free_temperature - referenceTemperature());
+      _alphabar_stress_free_temperature * (_stress_free_temperature[_qp] - referenceTemperature());
 
   // Evaluate the derivative so it will error out early on if there are any issues with that
-  meanThermalExpansionCoefficientDerivative(_stress_free_temperature);
+  meanThermalExpansionCoefficientDerivative(_stress_free_temperature[_qp]);
 }
 
 void
@@ -58,7 +59,8 @@ ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_
   const Real dalphabar_dT = meanThermalExpansionCoefficientDerivative(current_temp);
   const Real numerator = dalphabar_dT * (current_temp - reference_temperature) + current_alphabar;
   const Real denominator =
-      1.0 + _alphabar_stress_free_temperature * (_stress_free_temperature - reference_temperature);
+      1.0 +
+      _alphabar_stress_free_temperature * (_stress_free_temperature[_qp] - reference_temperature);
   if (denominator < small)
     mooseError("Denominator too small in thermal strain calculation");
   instantaneous_cte = numerator / denominator;

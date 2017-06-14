@@ -29,6 +29,6 @@ void
 ComputeThermalExpansionEigenstrain::computeThermalStrain(Real & thermal_strain,
                                                          Real & instantaneous_cte)
 {
-  thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature);
+  thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
   instantaneous_cte = _thermal_expansion_coeff;
 }

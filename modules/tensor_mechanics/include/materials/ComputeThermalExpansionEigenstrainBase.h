@@ -28,6 +28,7 @@ public:
 
 protected:
   virtual void computeQpEigenstrain() override;
+  virtual void initQpStatefulProperties() override;
   /*
    * Compute the total thermal strain relative to the stress-free temperature at the
    * current temperature, as well as the current instantaneous thermal expansion coefficient.
@@ -39,7 +40,13 @@ protected:
 
   const VariableValue & _temperature;
   MaterialProperty<RankTwoTensor> & _deigenstrain_dT;
-  Real _stress_free_temperature;
+  Real _stress_free_temperature_user;
+  bool _provided_stress_free_temperature;
+  /// Propagates stress free temperature through time steps
+  //@{
+  MaterialProperty<Real> & _stress_free_temperature;
+  MaterialProperty<Real> & _stress_free_temperature_old;
+  //@}
 };
 
 #endif // COMPUTETHERMALEXPANSIONEIGENSTRAINBASE_H

@@ -26,12 +26,32 @@ ComputeThermalExpansionEigenstrainBase::ComputeThermalExpansionEigenstrainBase(
   : DerivativeMaterialInterface<ComputeEigenstrainBase>(parameters),
     _temperature(coupledValue("temperature")),
     _deigenstrain_dT(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name,
-                                                              getVar("temperature", 0)->name()))
+                                                              getVar("temperature", 0)->name())),
+    _stress_free_temperature(declareProperty<Real>("stress_free_temperature")),
+    _stress_free_temperature_old(declarePropertyOld<Real>("stress_free_temperature"))
 {
   if (isParamValid("stress_free_temperature"))
-    _stress_free_temperature = getParam<Real>("stress_free_temperature");
+  {
+    _stress_free_temperature_user = getParam<Real>("stress_free_temperature");
+    _provided_stress_free_temperature = true;
+  }
   else
-    mooseError("Please specify 'stress_free_temperature'.");
+  {
+    _provided_stress_free_temperature = false;
+  }
+}
+
+void
+ComputeThermalExpansionEigenstrainBase::initQpStatefulProperties()
+{
+  if (_provided_stress_free_temperature)
+  {
+    _stress_free_temperature[_qp] = _stress_free_temperature_user;
+  }
+  else
+  {
+    _stress_free_temperature[_qp] = _temperature[_qp];
+  }
 }
 
 void
@@ -39,6 +59,8 @@ ComputeThermalExpansionEigenstrainBase::computeQpEigenstrain()
 {
   Real thermal_strain = 0.0;
   Real instantaneous_cte = 0.0;
+
+  _stress_free_temperature[_qp] = _stress_free_temperature_old[_qp];
   computeThermalStrain(thermal_strain, instantaneous_cte);
 
   _eigenstrain[_qp].zero();
