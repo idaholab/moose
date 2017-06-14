@@ -12,15 +12,18 @@ validParams<OneDEnergyWallHeating>()
                                "convective heat transfer coefficient, W/m^2-K");
   params.addRequiredCoupledVar("P_hf", "heat flux perimeter");
   params.addCoupledVar("T_wall", 0, "Wall temperature (const)");
+
+  params.addRequiredParam<MaterialPropertyName>("T", "Temperature material property");
+
   return params;
 }
 
 OneDEnergyWallHeating::OneDEnergyWallHeating(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
-    _temperature(getMaterialPropertyByName<Real>("temperature")),
-    _dT_drhoA(getMaterialPropertyDerivativeRelap<Real>("temperature", "rhoA")),
-    _dT_drhouA(getMaterialPropertyDerivativeRelap<Real>("temperature", "rhouA")),
-    _dT_drhoEA(getMaterialPropertyDerivativeRelap<Real>("temperature", "rhoEA")),
+    _temperature(getMaterialProperty<Real>("T")),
+    _dT_drhoA(getMaterialPropertyDerivativeRelap<Real>("T", "rhoA")),
+    _dT_drhouA(getMaterialPropertyDerivativeRelap<Real>("T", "rhouA")),
+    _dT_drhoEA(getMaterialPropertyDerivativeRelap<Real>("T", "rhoEA")),
     _heat_transfer_coefficient(coupledValue("heat_transfer_coefficient")),
     _T_wall(coupledValue("T_wall")),
     _P_hf(coupledValue("P_hf")),
