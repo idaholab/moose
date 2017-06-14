@@ -30,7 +30,6 @@ InputParameters validParams<ChannelGradientVectorPostprocessor>();
 class ChannelGradientVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
-
   ChannelGradientVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;

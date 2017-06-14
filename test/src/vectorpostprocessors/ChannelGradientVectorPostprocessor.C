@@ -65,12 +65,12 @@ ChannelGradientVectorPostprocessor::execute()
     mooseError("The two vector postprocessors that we're taking the difference of must be the same "
                "length.");
 
-  _axis_values.resize(_lv1_axis_values.size());
-  _gradient_values.resize(_lv1_axis_values.size());
+  _axis_values->resize(_lv1_axis_values.size());
+  _gradient_values->resize(_lv1_axis_values.size());
 
   for (auto i = beginIndex(_lv1_axis_values); i < _lv1_axis_values.size(); ++i)
   {
-    _axis_values[i] = _lv1_axis_values[i];
-    _gradient_values[i] = _lv1_variable_values[i] - _lv2_variable_values[i];
+    (*_axis_values)[i] = _lv1_axis_values[i];
+    (*_gradient_values)[i] = _lv1_variable_values[i] - _lv2_variable_values[i];
   }
 }
