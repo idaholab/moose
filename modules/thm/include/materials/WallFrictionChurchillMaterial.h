@@ -21,6 +21,7 @@ protected:
   virtual void computeQpProperties();
 
   /// The wall friction coefficient
+  const MaterialPropertyName _Cw_name;
   MaterialProperty<Real> & _Cw;
   MaterialProperty<Real> & _dCw_drhoA;
   MaterialProperty<Real> & _dCw_drhouA;

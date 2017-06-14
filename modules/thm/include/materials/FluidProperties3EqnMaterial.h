@@ -59,9 +59,17 @@ protected:
 
   /// Sound speed
   MaterialProperty<Real> & _c;
+
+  /// Constant-pressure specific heat
   MaterialProperty<Real> & _cp;
+
+  /// Constant-volume specific heat
   MaterialProperty<Real> & _cv;
+
+  /// Dynamic viscosity
   MaterialProperty<Real> & _mu;
+
+  /// Thermal conductivity
   MaterialProperty<Real> & _k;
 
   /// Fluid properties

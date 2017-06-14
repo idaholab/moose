@@ -7,11 +7,14 @@ InputParameters
 validParams<FluidProperties3EqnMaterial>()
 {
   InputParameters params = validParams<Material>();
+
   params.addRequiredCoupledVar("area", "Cross-sectional area");
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
+
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+
   return params;
 }
 
@@ -25,17 +28,17 @@ FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters &
     _rho(declareProperty<Real>("rho")),
     _drho_drhoA(declarePropertyDerivativeRelap<Real>("rho", "rhoA")),
 
-    _v(declareProperty<Real>("v")),
-    _dv_drhoA(declarePropertyDerivativeRelap<Real>("v", "rhoA")),
+    _v(declareProperty<Real>("specific_volume")),
+    _dv_drhoA(declarePropertyDerivativeRelap<Real>("specific_volume", "rhoA")),
 
     _vel(declareProperty<Real>("vel")),
     _dvel_drhoA(declarePropertyDerivativeRelap<Real>("vel", "rhoA")),
     _dvel_drhouA(declarePropertyDerivativeRelap<Real>("vel", "rhouA")),
 
-    _e(declareProperty<Real>("e")),
-    _de_drhoA(declarePropertyDerivativeRelap<Real>("e", "rhoA")),
-    _de_drhouA(declarePropertyDerivativeRelap<Real>("e", "rhouA")),
-    _de_drhoEA(declarePropertyDerivativeRelap<Real>("e", "rhoEA")),
+    _e(declareProperty<Real>("specific_internal_energy")),
+    _de_drhoA(declarePropertyDerivativeRelap<Real>("specific_internal_energy", "rhoA")),
+    _de_drhouA(declarePropertyDerivativeRelap<Real>("specific_internal_energy", "rhouA")),
+    _de_drhoEA(declarePropertyDerivativeRelap<Real>("specific_internal_energy", "rhoEA")),
 
     _p(declareProperty<Real>("pressure")),
     _dp_drhoA(declarePropertyDerivativeRelap<Real>("pressure", "rhoA")),
@@ -48,9 +51,13 @@ FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters &
     _dT_drhoEA(declarePropertyDerivativeRelap<Real>("temperature", "rhoEA")),
 
     _c(declareProperty<Real>("c")),
+
     _cp(declareProperty<Real>("cp")),
+
     _cv(declareProperty<Real>("cv")),
+
     _mu(declareProperty<Real>("mu")),
+
     _k(declareProperty<Real>("k")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))

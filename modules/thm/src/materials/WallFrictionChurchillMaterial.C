@@ -13,16 +13,22 @@ validParams<WallFrictionChurchillMaterial>()
   params.addRequiredCoupledVar("rho", "density");
   params.addRequiredCoupledVar("vel", "x-component of the velocity");
   params.addRequiredCoupledVar("D_h", "hydraulic diameter");
+
+  params.addRequiredParam<MaterialPropertyName>("Cw", "Drag coefficient material property");
+  params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
+
   params.addRequiredParam<Real>("roughness", "Surface roughness");
   return params;
 }
 
 WallFrictionChurchillMaterial::WallFrictionChurchillMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Material>(parameters),
-    _Cw(declareProperty<Real>("Cw")),
-    _dCw_drhoA(declarePropertyDerivativeRelap<Real>("Cw", "rhoA")),
-    _dCw_drhouA(declarePropertyDerivativeRelap<Real>("Cw", "rhouA")),
-    _dCw_drhoEA(declarePropertyDerivativeRelap<Real>("Cw", "rhoEA")),
+    _Cw_name(getParam<MaterialPropertyName>("Cw")),
+    _Cw(declareProperty<Real>(_Cw_name)),
+    _dCw_drhoA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhoA")),
+    _dCw_drhouA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhouA")),
+    _dCw_drhoEA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhoEA")),
+
     _mu(getMaterialProperty<Real>("mu")),
     _rho(coupledValue("rho")),
     _vel(coupledValue("vel")),
