@@ -15,7 +15,8 @@ InputParameters
 validParams<HHPFCRFFSplitKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Set up kernels for the RFF phase field crystal model");
+  params.addClassDescription(
+      "Set up kernels for the rational function fit (RFF) phase field crystal model");
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<VariableName>("n_name", "Variable name used for the n variable");

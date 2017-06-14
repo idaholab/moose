@@ -1,4 +1,3 @@
-
 # CahnHilliardAniso
 !description /Kernels/CahnHilliardAniso
 

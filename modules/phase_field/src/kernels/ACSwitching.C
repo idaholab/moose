@@ -12,7 +12,7 @@ validParams<ACSwitching>()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription(
-      "Kernel for Allen-Cahn equation that adds derivatives of switching functions * energies");
+      "Kernel for Allen-Cahn equation that adds derivatives of switching functions and energies");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "Fj_names", "List of free energies for each phase. Place in same order as hj_names!");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(

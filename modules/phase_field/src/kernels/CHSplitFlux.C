@@ -11,8 +11,7 @@ InputParameters
 validParams<CHSplitFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription(
-      "Computes flux as nodal variable - flux = -mobility * grad(chemical_potential)");
+  params.addClassDescription("Computes flux $j$ as nodal variable $j = -M\\nabla\\mu$");
   params.addRequiredParam<unsigned int>("component", "Flux component");
   params.addRequiredParam<MaterialPropertyName>("mobility_name", "Mobility property name");
   params.addRequiredCoupledVar("mu", "Chemical Potential");

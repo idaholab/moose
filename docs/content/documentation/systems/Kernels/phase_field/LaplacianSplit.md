@@ -1,13 +1,14 @@
 # LaplacianSplit
 !description /Kernels/LaplacianSplit
 
-Sets the kernel variable $v$ to the Laplacian of a chosen variable $c$.
+Sets the kernel variable $u$ to the Laplacian of a chosen variable $c$ (`c`).
+Implements the residual
 
 $$
-v = \nabla^2c
+u - \nabla^2c.
 $$
 
-This allows the construction of split formulations, where $v$ can be substituted
+This allows the construction of split formulations, where $u$ can be substituted
 to reduce the order of a PDE.
 
 !parameters /Kernels/LaplacianSplit
