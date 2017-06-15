@@ -527,7 +527,7 @@ public:
    */
   virtual void
   addDistribution(std::string type, const std::string & name, InputParameters parameters);
-  virtual Distribution & getDistribution(const std::string & name, THREAD_ID tid = 0);
+  virtual Distribution & getDistribution(const std::string & name);
 
   /**
    * The following functions will enable MOOSE to have the capability to import Samplers
@@ -1268,6 +1268,11 @@ public:
   void executeControls(const ExecFlagType & exec_type);
 
   /**
+   * Performs setup and execute calls for Sampler objects.
+   */
+  void executeSamplers(const ExecFlagType & exec_type);
+
+  /**
    * Update the active objects in the warehouses
    */
   void updateActiveObjects();
@@ -1320,7 +1325,7 @@ protected:
   MooseObjectWarehouseBase<Distribution> _distributions;
 
   /// Samplers
-  MooseObjectWarehouseBase<Sampler> _samplers;
+  ExecuteMooseObjectWarehouse<Sampler> _samplers;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;

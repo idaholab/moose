@@ -13,102 +13,72 @@
 /****************************************************************/
 
 #include "Sampler.h"
+#include "MooseRandom.h"
 #include "Distribution.h"
-#include <limits>
 
 template <>
 InputParameters
 validParams<Sampler>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<RandomInterface>();
-  params.addParam<bool>("reseed", false, "Reseed for each new sample if this value is true");
-  params.addRequiredParam<std::vector<std::string>>(
-      "perturb_parameters", "The names of the parameters that you want to perturb");
+  params += validParams<SetupInterface>();
+  params += validParams<DistributionInterface>();
+
+  params.addClassDescription("A base class for distribution sampling.");
+  params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.addRequiredParam<std::vector<DistributionName>>(
-      "distributions",
-      "The names of distributions that you want to use to perturb the given parameters");
+      "distributions", "The names of distributions that you want to sample.");
+  params.addParam<std::vector<unsigned int>>("seeds",
+                                             std::vector<unsigned int>(1, 19800624),
+                                             "Random number generator initial seed(s), "
+                                             "each seed will initialize a new generator "
+                                             "in the MooseRandom object.");
   params.registerBase("Sampler");
   return params;
 }
 
 Sampler::Sampler(const InputParameters & parameters)
   : MooseObject(parameters),
-    RandomInterface(parameters,
-                    *parameters.get<FEProblemBase *>("_fe_problem_base"),
-                    parameters.get<THREAD_ID>("_tid"),
-                    false),
+    SetupInterface(this),
     DistributionInterface(this),
-    Restartable(parameters, "Samplers"),
-    _tid(getParam<THREAD_ID>("_tid")),
-    _reseed_for_new_sample(getParam<bool>("reseed")),
-    _dist_names(getParam<std::vector<DistributionName>>("distributions")),
-    _var_names(getParam<std::vector<std::string>>("perturb_parameters")),
-    _current_sample(0),
-    _failed_runs(true)
+    _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
+    _seeds(getParam<std::vector<unsigned int>>("seeds"))
 {
-  _var_dist_map.clear();
-  _probability_weight.clear();
-  _var_value_hist.clear();
-  if (_var_names.size() != _dist_names.size())
-    mooseError("The size of perturb_parameters (",
-               _var_names.size(),
-               ") != the size of distributions (",
-               _dist_names.size(),
-               ").");
-  if (!_var_names.empty())
-  {
-    for (unsigned int i = 0; i < _var_names.size(); ++i)
-    {
-      _var_dist_map[_var_names[i]] = &getDistributionByName(_dist_names[i]);
-      _var_value_map[_var_names[i]] = 0.0;
-      _var_value_hist[_var_names[i]] = std::vector<Real>();
-    }
-  }
+  for (std::size_t i = 0; i < _seeds.size(); ++i)
+    _generator.seed(i, _seeds[i]);
+
+  for (const DistributionName & name : _distribution_names)
+    _distributions.push_back(&getDistributionByName(name));
 }
 
 void
-Sampler::generateSamples()
+Sampler::execute()
 {
+  // Get the samples then save the state so that subsequent calls to getSamples returns the same
+  // random numbers until this execute command is called again.
+  getSamples();
+  _generator.saveState();
 }
 
-std::vector<std::string>
-Sampler::getSampledVariableNames()
+std::vector<std::vector<Real>>
+Sampler::getSamples()
 {
-  return _var_names;
+  _generator.restoreState();
+  std::vector<std::vector<Real>> output(_distributions.size());
+  for (std::size_t i = 0; i < _distributions.size(); ++i)
+    output[i] = sampleDistribution(*_distributions[i]);
+  return output;
 }
 
-std::vector<Real>
-Sampler::getSampledValues(const std::vector<std::string> & variableNames)
+void
+Sampler::checkSeedNumber(unsigned int required) const
 {
-  std::vector<Real> vals;
-  for (auto & var_name : variableNames)
-  {
-    Real val = getSampledValue(var_name);
-    vals.push_back(val);
-  }
-  return vals;
-}
-
-Real
-Sampler::getSampledValue(const std::string & variableName)
-{
-  std::map<std::string, Real>::iterator it;
-  it = _var_value_map.find(variableName);
-  if (it == _var_value_map.end())
-    mooseError(
-        "Could not find the parameter: ", variableName, " in the list of perturbed parameters!");
-  return it->second;
-}
-
-std::vector<Real>
-Sampler::getProbabilityWeights()
-{
-  return _probability_weight;
-}
-
-bool
-Sampler::checkRuns()
-{
-  return _failed_runs;
+  if (_seeds.size() < required)
+    mooseError("The '",
+               name(),
+               "' sampler requires ",
+               required,
+               " seeds but only ",
+               _seeds.size(),
+               " was provided.");
 }

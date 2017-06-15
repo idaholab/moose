@@ -1,0 +1,17 @@
+[Tests]
+  [./seed_error]
+    type = RunException
+    input = seed_error.i
+    expect_err = "The 'sample' sampler requires \d+ seeds but only 1 was provided."
+  [../]
+  [./threads]
+    type = RunApp
+    input = threads.i
+    min_threads = 2
+  [../]
+  [./mpi]
+    type = RunApp
+    input = mpi.i
+    min_parallel = 2
+  [../]
+[]

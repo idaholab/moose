@@ -166,6 +166,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _nl(NULL),
     _aux(NULL),
     _coupling(Moose::COUPLING_DIAG),
+    _distributions(/*threaded=*/false),
     _scalar_ics(/*threaded=*/false),
     _material_props(
         declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
@@ -1594,20 +1595,17 @@ FEProblemBase::addDistribution(std::string type,
                                InputParameters parameters)
 {
   setInputParametersFEProblem(parameters);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters, tid);
-    _distributions.addObject(dist, tid);
-  }
+  std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters);
+  _distributions.addObject(dist);
 }
 
 Distribution &
-FEProblemBase::getDistribution(const std::string & name, THREAD_ID tid)
+FEProblemBase::getDistribution(const std::string & name)
 {
-  if (!_distributions.hasActiveObject(name, tid))
+  if (!_distributions.hasActiveObject(name))
     mooseError("Unable to find distribution " + name);
 
-  return *(_distributions.getActiveObject(name, tid));
+  return *(_distributions.getActiveObject(name));
 }
 
 void
@@ -2754,6 +2752,9 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
 
+  // Samplers
+  executeSamplers(exec_type);
+
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
 
@@ -2893,6 +2894,25 @@ FEProblemBase::executeControls(const ExecFlagType & exec_type)
 }
 
 void
+FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
+{
+  // TODO: This should be done in a threaded loop, but this should be super quick so for now
+  // do a serial loop.
+  Moose::perf_log.push("executeSamplers()", "Execution");
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    const auto & objects = _samplers[exec_type].getActiveObjects(tid);
+    if (!objects.empty())
+    {
+      _samplers.setup(exec_type);
+      for (const auto & sampler : objects)
+        sampler->execute();
+    }
+  }
+  Moose::perf_log.pop("executeSamplers()", "Execution");
+}
+
+void
 FEProblemBase::updateActiveObjects()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -2909,6 +2929,7 @@ FEProblemBase::updateActiveObjects()
     _elemental_user_objects.updateActive(tid);
     _side_user_objects.updateActive(tid);
     _internal_side_user_objects.updateActive(tid);
+    _samplers.updateActive(tid);
   }
 
   _general_user_objects.updateActive();

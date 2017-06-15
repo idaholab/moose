@@ -6,14 +6,21 @@
 #include "StateSimTester.h"
 #include "StateSimRunner.h"
 
-// distributions
+// Distributions
 #include "UniformDistribution.h"
-// samplers
+#ifdef LIBMESH_HAVE_BOOST
+#include "WeibullDistribution.h"
+#endif
+
+// Samplers
 #include "MonteCarloSampler.h"
+
+// VectorPostprocessors
+#include "SamplerData.h"
+
 // for test purpose only
 #include "TestDistributionPostprocessor.h"
-#include "TestSamplerDiffMKernel.h"
-#include "TestSamplerMaterial.h"
+#include "TestSampler.h"
 
 template <>
 InputParameters
@@ -58,16 +65,21 @@ StochasticToolsApp::registerObjects(Factory & factory)
   registerUserObject(StateSimRunner);
   registerPostprocessor(StateSimTester);
 
-  // distributions
+  // Distributions
   registerDistribution(UniformDistribution);
+#ifdef LIBMESH_HAVE_BOOST
+  registerDistribution(WeibullDistribution);
+#endif
 
-  // samplers
+  // Samplers
   registerSampler(MonteCarloSampler);
+
+  // VectorPostprocessors
+  registerVectorPostprocessor(SamplerData);
 
   // for test purpose only
   registerPostprocessor(TestDistributionPostprocessor);
-  registerKernel(TestSamplerDiffMKernel);
-  registerMaterial(TestSamplerMaterial);
+  registerUserObject(TestSampler);
 }
 
 // External entry point for dynamic syntax association

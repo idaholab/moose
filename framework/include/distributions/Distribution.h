@@ -16,8 +16,6 @@
 #define DISTRIBUTION_H
 
 #include "MooseObject.h"
-#include "MooseRandom.h"
-#include "Restartable.h"
 
 class Distribution;
 
@@ -27,7 +25,7 @@ InputParameters validParams<Distribution>();
 /**
  * All Distributions should inherit from this class
  */
-class Distribution : public MooseObject, public Restartable
+class Distribution : public MooseObject
 {
 public:
   Distribution(const InputParameters & parameters);
@@ -35,34 +33,16 @@ public:
    * Compute the probability with given probability distribution function (PDF) at x
    */
   virtual Real pdf(const Real & x) = 0;
+
   /**
    * Compute the cumulative probability with given cumulative probability distribution (CDF) at x
    */
   virtual Real cdf(const Real & x) = 0;
-  /**
-   * Compute the inverse CDF value for given variable value y
-   */
-  virtual Real inverseCdf(const Real & y) = 0;
-  /**
-   * Get the random number from given distribution
-   */
-  virtual Real getRandomNumber();
-  /**
-   * Get the seed of random number generator
-   */
-  unsigned int getSeed();
-  /**
-   * Set the seed for the random number generator
-   */
-  virtual void setSeed(unsigned int seed);
 
-protected:
-  THREAD_ID _tid;
-
-  /// the seed for the random number generator
-  unsigned int _seed;
-  /// Object of random number generator
-  MooseRandom & _random;
+  /**
+   * Compute the inverse CDF (quantile function) value for given variable value y
+   */
+  virtual Real quantile(const Real & y) = 0;
 };
 
 #endif /* DISTRIBUTION_H */

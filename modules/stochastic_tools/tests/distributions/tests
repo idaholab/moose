@@ -1,0 +1,13 @@
+[Tests]
+  [./uniform]
+    type = CSVDiff
+    input = uniform.i
+    csvdiff = 'uniform_out.csv'
+  [../]
+  [./weibull]
+    type = CSVDiff
+    input = weibull.i
+    csvdiff = 'weibull_out.csv'
+    boost = TRUE
+  [../]
+[]
