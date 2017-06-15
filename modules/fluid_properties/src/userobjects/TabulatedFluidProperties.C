@@ -18,8 +18,8 @@ validParams<TabulatedFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
   params.addParam<FileName>("fluid_property_file",
-                            "fluid_properties.txt",
-                            "Name of the file containing the tabulated fluid property data");
+                            "fluid_properties.csv",
+                            "Name of the csv file containing the tabulated fluid property data");
   params.addRangeCheckedParam<Real>("temperature_min",
                                     300.0,
                                     "temperature_min >= 273.15",
