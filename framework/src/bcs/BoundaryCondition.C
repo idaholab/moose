@@ -52,6 +52,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
+    VectorPostprocessorInterface(this),
     GeometricSearchInterface(this),
     Restartable(parameters, "BCs"),
     ZeroInterface(parameters),
