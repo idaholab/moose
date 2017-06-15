@@ -30,6 +30,14 @@ LIBMESH_OPTIONS = {
       'FALSE' : '0'
       }
                      },
+  'boost' :        { 're_option' : r'#define\s+LIBMESH_HAVE_BOOST\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   :
+                       {
+      'TRUE'  : '1',
+      'FALSE' : '0'
+      }
+                     },
   'vtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_VTK\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   :

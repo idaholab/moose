@@ -100,6 +100,7 @@ class TestHarness:
             self.checks['unique_id'] = set(['ALL'])
             self.checks['cxx11'] = set(['ALL'])
             self.checks['asio'] =  set(['ALL'])
+            self.checks['boost'] = set(['ALL'])
         else:
             self.checks['compiler'] = getCompilers(self.libmesh_dir)
             self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
@@ -118,6 +119,7 @@ class TestHarness:
             self.checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
             self.checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
             self.checks['asio'] =  getIfAsioExists(self.moose_dir)
+            self.checks['boost'] =  getLibMeshConfigOption(self.libmesh_dir, 'boost')
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
