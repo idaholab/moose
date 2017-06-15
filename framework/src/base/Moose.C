@@ -320,6 +320,7 @@
 
 // time steppers
 #include "ConstantDT.h"
+#include "LogConstantDT.h"
 #include "FunctionDT.h"
 #include "TimeSequenceStepper.h"
 #include "ExodusTimeSequenceStepper.h"
@@ -772,6 +773,7 @@ registerObjects(Factory & factory)
 
   // time steppers
   registerTimeStepper(ConstantDT);
+  registerTimeStepper(LogConstantDT);
   registerTimeStepper(FunctionDT);
   registerTimeStepper(TimeSequenceStepper);
   registerTimeStepper(ExodusTimeSequenceStepper);

@@ -1,0 +1,7 @@
+[Tests]
+  [./logconstant_dt]
+    type = 'Exodiff'
+    input = 'logconstant_dt.i'
+    exodiff = 'logconstant_dt_out.e'
+  [../]
+[]
