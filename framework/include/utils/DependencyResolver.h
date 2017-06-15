@@ -196,6 +196,11 @@ template <typename T>
 void
 DependencyResolver<T>::insertDependency(const T & key, const T & value)
 {
+  if (dependsOn(value, key))
+  {
+    throw CyclicDependencyException<T>(
+        "DependencyResolver: attempt to insert dependency will result in cyclic graph", _depends);
+  }
   _depends.insert(std::make_pair(key, value));
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
     _ordering_vector.push_back(key);
