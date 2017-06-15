@@ -15,7 +15,9 @@ validParams<LinearIsoElasticPFDamage>()
   params.addClassDescription("Phase-field fracture model energy contribution to damage "
                              "growth-isotropic elasticity and undamaged stress under compressive "
                              "strain");
-  params.addRequiredCoupledVar("c", "Order parameter for damage");
+  params.addRequiredCoupledVar("c",
+                               "Order parameter for damage, continuous between 0 and 1, 0 "
+                               "represents no damage, 1 represents fully cracked");
   params.addParam<Real>("kdamage", 1e-6, "Stiffness of damaged matrix");
 
   return params;
