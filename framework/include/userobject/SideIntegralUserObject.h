@@ -25,7 +25,7 @@ template <>
 InputParameters validParams<SideIntegralUserObject>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
+ * This postprocessor computes a side integral of the specified variable over a given boundary.
  *
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
