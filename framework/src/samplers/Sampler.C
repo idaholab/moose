@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Sampler.h"
 #include "MooseRandom.h"
 #include "Distribution.h"
@@ -60,11 +61,11 @@ Sampler::execute()
   _generator.saveState();
 }
 
-std::vector<std::vector<Real>>
+std::vector<DenseMatrix<Real>>
 Sampler::getSamples()
 {
   _generator.restoreState();
-  std::vector<std::vector<Real>> output(_distributions.size());
+  std::vector<DenseMatrix<Real>> output(_distributions.size());
   for (std::size_t i = 0; i < _distributions.size(); ++i)
     output[i] = sampleDistribution(*_distributions[i]);
   return output;

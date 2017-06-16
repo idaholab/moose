@@ -39,7 +39,7 @@ SamplerData::initialize()
 void
 SamplerData::execute()
 {
-  std::vector<std::vector<Real>> data = _sampler.getSamples();
+  std::vector<DenseMatrix<Real>> data = _sampler.getSamples();
   for (std::size_t i = 0; i < _sample_vectors.size(); ++i)
-    _sample_vectors[i]->assign(data[i].begin(), data[i].end());
+    _sample_vectors[i]->assign(data[i].get_values().begin(), data[i].get_values().end());
 }
