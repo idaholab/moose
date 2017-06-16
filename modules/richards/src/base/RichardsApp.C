@@ -118,6 +118,9 @@ RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(paramete
 
   Moose::associateSyntax(_syntax, _action_factory);
   RichardsApp::associateSyntax(_syntax, _action_factory);
+
+  mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
+                  "not included in PorousFlow, please contact the moose-users google group");
 }
 
 RichardsApp::~RichardsApp() {}
