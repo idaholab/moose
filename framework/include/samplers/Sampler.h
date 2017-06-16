@@ -50,6 +50,14 @@ public:
    */
   const std::vector<DistributionName> & getDistributionNames() const { return _distribution_names; }
 
+  ///@{
+  /**
+   * Setup method called prior and after looping through distributions.
+   */
+  virtual void sampleSetUp(){};
+  virtual void sampleTearDown(){};
+  ///@}
+
   /**
    * Return the sampled distribution data.
    */
@@ -70,7 +78,7 @@ protected:
   /**
    * Base class must override this method to supply the sample distribution data.
    */
-  virtual DenseMatrix<Real> sampleDistribution(Distribution & distribution) = 0;
+  virtual DenseMatrix<Real> sampleDistribution(Distribution &, unsigned int) = 0;
 
   /// Map used to store the perturbed parameters and their corresponding distributions
   std::vector<Distribution *> _distributions;

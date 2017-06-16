@@ -14,6 +14,7 @@
 
 // Samplers
 #include "MonteCarloSampler.h"
+#include "SobolSampler.h"
 
 // VectorPostprocessors
 #include "SamplerData.h"
@@ -73,6 +74,7 @@ StochasticToolsApp::registerObjects(Factory & factory)
 
   // Samplers
   registerSampler(MonteCarloSampler);
+  registerSampler(SobolSampler);
 
   // VectorPostprocessors
   registerVectorPostprocessor(SamplerData);
