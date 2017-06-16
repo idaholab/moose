@@ -228,7 +228,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceRZTensors);
   registerKernel(StressDivergenceRSphericalTensors);
   registerKernel(MomentBalancing);
-  registerDeprecatedObject(StressDivergencePFFracTensors, "06/01/2017 09:00");
   registerKernel(PoroMechanicsCoupling);
   registerKernel(InertialForce);
   registerKernel(Gravity);
