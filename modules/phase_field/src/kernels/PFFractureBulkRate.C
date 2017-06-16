@@ -38,7 +38,8 @@ PFFractureBulkRate::computeQpResidual()
    * expression is positive we use the original form that is _not_ integrated by parts.
    * The residual we return, however, replaces x1 with the expression that is integrated by parts
    * once (_second_u[_qp].tr() * _test[_i][_qp] -> -_grad_u[_qp] * _grad_test[_i][_qp]).
-   * This allows the user to use C1 shape functions (such as second order Lagrange).
+   * This allows the user to use H1 (square integrable first derivatives) shape
+   * functions (such as Lagrange).
    */
   if (x1 + x2 > 0)
     return -(-_width * _grad_u[_qp] * _grad_test[_i][_qp] + x2 * _test[_i][_qp]) / _viscosity;
