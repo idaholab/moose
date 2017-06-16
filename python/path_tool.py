@@ -10,7 +10,7 @@ def activate_module(module):
     module_dir = os.path.join(base_dir, module)
 
     if not os.path.exists(module_dir):
-        print '"' + module_dir + '" is not a valid module'
+        print('"' + module_dir + '" is not a valid module')
         sys.exit(1)
 
     # Add all directories within the requested module to the system path
