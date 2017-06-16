@@ -177,28 +177,6 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 }
 
 Real
-RadialReturnStressUpdate::getIsotropicShearModulus(const RankFourTensor & elasticity_tensor)
-{
-  const Real shear_modulus = elasticity_tensor(0, 1, 0, 1);
-  if (_mesh.dimension() == 3 && shear_modulus != elasticity_tensor(0, 2, 0, 2))
-    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
-  return shear_modulus;
-}
-
-Real
-RadialReturnStressUpdate::getIsotropicBulkModulus(const RankFourTensor & elasticity_tensor)
-{
-  const Real shear_modulus = getIsotropicShearModulus(elasticity_tensor);
-  // dilatational modulus is defined as lambda plus two mu
-  const Real dilatational_modulus = elasticity_tensor(0, 0, 0, 0);
-  if (_mesh.dimension() == 3 && dilatational_modulus != elasticity_tensor(2, 2, 2, 2))
-    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
-  const Real lambda = dilatational_modulus - 2.0 * shear_modulus;
-  const Real bulk_modulus = lambda + 2.0 * shear_modulus / 3.0;
-  return bulk_modulus;
-}
-
-Real
 RadialReturnStressUpdate::computeTimeStepLimit()
 {
   Real scalar_inelastic_strain_incr;
