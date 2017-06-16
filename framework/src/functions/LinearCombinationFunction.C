@@ -61,3 +61,21 @@ LinearCombinationFunction::value(Real t, const Point & p)
     val += _w[i] * _f[i]->value(t, p);
   return val;
 }
+
+RealGradient
+LinearCombinationFunction::gradient(Real t, const Point & p)
+{
+  RealGradient g;
+  for (unsigned i = 0; i < _f.size(); ++i)
+    g += _w[i] * _f[i]->gradient(t, p);
+  return g;
+}
+
+RealVectorValue
+LinearCombinationFunction::vectorValue(Real t, const Point & p)
+{
+  RealVectorValue v;
+  for (unsigned i = 0; i < _f.size(); ++i)
+    v += _w[i] * _f[i]->vectorValue(t, p);
+  return v;
+}

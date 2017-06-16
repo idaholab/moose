@@ -32,6 +32,8 @@ public:
   LinearCombinationFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & pt) override;
+  virtual RealVectorValue vectorValue(Real t, const Point & p) override;
+  virtual RealGradient gradient(Real t, const Point & p) override;
 
 private:
   std::vector<Real> _w;
