@@ -65,9 +65,11 @@ std::vector<DenseMatrix<Real>>
 Sampler::getSamples()
 {
   _generator.restoreState();
+  sampleSetUp();
   std::vector<DenseMatrix<Real>> output(_distributions.size());
   for (std::size_t i = 0; i < _distributions.size(); ++i)
-    output[i] = sampleDistribution(*_distributions[i]);
+    output[i] = sampleDistribution(*_distributions[i], i);
+  sampleTearDown();
   return output;
 }
 

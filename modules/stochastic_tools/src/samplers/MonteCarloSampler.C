@@ -25,7 +25,7 @@ MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
 }
 
 DenseMatrix<Real>
-MonteCarloSampler::sampleDistribution(Distribution & distribution)
+MonteCarloSampler::sampleDistribution(Distribution & distribution, unsigned int)
 {
   DenseMatrix<Real> output(_num_samples, 1);
   for (std::size_t i = 0; i < _num_samples; ++i)
