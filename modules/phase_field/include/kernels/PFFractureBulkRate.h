@@ -4,35 +4,34 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef SPLITPFFRACTUREBULKRATE_H
-#define SPLITPFFRACTUREBULKRATE_H
+#ifndef PFFRACTUREBULKRATE_H
+#define PFFRACTUREBULKRATE_H
 
 #include "PFFractureBulkRateBase.h"
 
 // Forward Declarations
-class SplitPFFractureBulkRate;
+class PFFractureBulkRate;
 
 template <>
-InputParameters validParams<SplitPFFractureBulkRate>();
+InputParameters validParams<PFFractureBulkRate>();
 
 /**
- * Phase field based fracture model, split form where beta = laplace(c)
+ * Phase field based fracture model, non-split form
  * This kernel computes the residual and Jacobian for bulk free energy contribution to c
  * Refer to Formulation: Miehe et. al., Int. J. Num. Methods Engg., 2010, 83. 1273-1311 Equation 63
  */
-class SplitPFFractureBulkRate : public PFFractureBulkRateBase
+class PFFractureBulkRate : public PFFractureBulkRateBase
 {
 public:
-  SplitPFFractureBulkRate(const InputParameters & parameters);
+  PFFractureBulkRate(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// Auxiliary variable: beta = Laplacian of c
-  const VariableValue & _beta;
-  const unsigned int _beta_var;
+  /// second derivative of the kernel variable
+  const VariableSecond & _second_u;
 };
 
-#endif // SPLITPFFRACTUREBULKRATE_H
+#endif // PFFRACTUREBULKRATE_H

@@ -5,73 +5,44 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SplitPFFractureBulkRate.h"
+#include "RankTwoTensor.h"
 #include "MathUtils.h"
 
 template <>
 InputParameters
 validParams<SplitPFFractureBulkRate>()
 {
-  InputParameters params = validParams<KernelValue>();
+  InputParameters params = validParams<PFFractureBulkRateBase>();
   params.addClassDescription(
       "Kernel to compute bulk energy contribution to damage order parameter residual equation");
-  params.addRequiredParam<Real>("width", "Width of the smooth crack representation");
-  params.addRequiredParam<Real>(
-      "viscosity", "Viscosity parameter, which reflects the transition right at crack stress");
-  params.addRequiredParam<MaterialPropertyName>(
-      "gc", "Material property which provides the maximum stress/crack stress");
-  params.addRequiredParam<MaterialPropertyName>(
-      "G0", "Material property name with undamaged strain energy driving damage (G0_pos)");
-  params.addParam<MaterialPropertyName>(
-      "dG0_dstrain", "Material property name with derivative of G0_pos with strain");
   params.addRequiredCoupledVar("beta", "Laplacian of the kernel variable");
-
-  params.addCoupledVar(
-      "displacements",
-      "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<std::string>("base_name",
-                               "Optional parameter that allows the user to define "
-                               "multiple mechanics material systems on the same "
-                               "block, i.e. for multiple phases");
   return params;
 }
 
 SplitPFFractureBulkRate::SplitPFFractureBulkRate(const InputParameters & parameters)
-  : KernelValue(parameters),
-    _gc_prop(getMaterialProperty<Real>("gc")),
-    _G0_pos(getMaterialProperty<Real>("G0")),
-    _dG0_pos_dstrain(
-        isParamValid("dG0_dstrain") ? &getMaterialProperty<RankTwoTensor>("dG0_dstrain") : NULL),
-    _beta(coupledValue("beta")),
-    _beta_var(coupled("beta")),
-    _ndisp(coupledComponents("displacements")),
-    _disp_var(_ndisp),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _width(getParam<Real>("width")),
-    _viscosity(getParam<Real>("viscosity"))
+  : PFFractureBulkRateBase(parameters), _beta(coupledValue("beta")), _beta_var(coupled("beta"))
 {
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = coupled("displacements", i);
 }
 
 Real
-SplitPFFractureBulkRate::precomputeQpResidual()
+SplitPFFractureBulkRate::computeQpResidual()
 {
-  const Real gc = _gc_prop[_qp];
-  const Real c = _u[_qp];
+  const Real & gc = _gc_prop[_qp];
+  const Real & c = _u[_qp];
   const Real x = _width * _beta[_qp] + 2.0 * (1.0 - c) * _G0_pos[_qp] / gc - c / _width;
 
-  return -MathUtils::positivePart(x) / _viscosity;
+  return -MathUtils::positivePart(x) / _viscosity * _test[_i][_qp];
 }
 
 Real
-SplitPFFractureBulkRate::precomputeQpJacobian()
+SplitPFFractureBulkRate::computeQpJacobian()
 {
-  const Real gc = _gc_prop[_qp];
-  const Real c = _u[_qp];
+  const Real & gc = _gc_prop[_qp];
+  const Real & c = _u[_qp];
   const Real x = _width * _beta[_qp] + 2.0 * (1.0 - c) * _G0_pos[_qp] / gc - c / _width;
   const Real dx = -2.0 * _G0_pos[_qp] / gc - 1.0 / _width;
 
-  return -MathUtils::heavyside(x) / _viscosity * dx * _phi[_j][_qp];
+  return -MathUtils::heavyside(x) / _viscosity * dx * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
@@ -81,11 +52,13 @@ SplitPFFractureBulkRate::computeQpOffDiagJacobian(unsigned int jvar)
   const Real & c = _u[_qp];
   const Real & gc = _gc_prop[_qp];
   const Real x = _width * _beta[_qp] + 2.0 * (1.0 - c) * (_G0_pos[_qp] / gc) - c / _width;
-  const Real xfacbeta = -MathUtils::heavyside(x) / _viscosity * _width;
 
   // Contribution of Laplacian split variable
   if (jvar == _beta_var)
+  {
+    const Real xfacbeta = -MathUtils::heavyside(x) / _viscosity * _width;
     return xfacbeta * _phi[_j][_qp] * _test[_i][_qp];
+  }
 
   // bail out early if no stress derivative has been provided
   if (_dG0_pos_dstrain == NULL)
