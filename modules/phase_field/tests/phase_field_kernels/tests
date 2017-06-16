@@ -48,6 +48,7 @@
     resize_mesh = true
     recover = false
     #skip = 'see #3847'
+    cli_args = 'Outputs/exodus=false'
   [../]
 
   [./ParsedMaterial]

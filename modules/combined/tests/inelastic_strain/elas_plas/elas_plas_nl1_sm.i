@@ -369,7 +369,7 @@
 [Outputs]
   exodus = true
   csv = true
-  file_base=elas_plas_nl1_out
+  file_base=elas_plas_nl1_sm_out
   [./console]
     type = Console
     perf_log = true

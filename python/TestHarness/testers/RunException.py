@@ -1,3 +1,4 @@
+import os
 import util
 from RunApp import RunApp
 
@@ -26,15 +27,17 @@ class RunException(RunApp):
         return RunApp.checkRunnable(self, options)
 
     def prepare(self, options):
-        if self.getProcs(options) > 1:
-            file_paths = []
-            for processor_id in xrange(self.getProcs(options)):
-                file_paths.append(self.name() + '.processor.{}'.format(processor_id))
-            util.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
+        if self.hasRedirectedOutput(options):
+            file_paths = self.getRedirectedOutputFiles(options)
+            util.deleteFilesAndFolders(self.getTestDir(), file_paths, False)
 
     def processResults(self, moose_dir, retcode, options, output):
         reason = ''
         specs = self.specs
+
+        if self.hasRedirectedOutput(options):
+            redirected_output = util.getOutputFromFiles(self, options)
+            output += redirected_output
 
         # Expected errors and assertions might do a lot of things including crash so we
         # will handle them seperately
@@ -52,6 +55,6 @@ class RunException(RunApp):
         if reason != '':
             self.setStatus(reason, self.bucket_fail)
         else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.getSuccessMessage(), self.bucket_success)
 
         return output

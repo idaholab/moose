@@ -213,5 +213,5 @@
 
 [Outputs]
   exodus = true
-  file_base = power_law_creep_out
+  file_base = power_law_creep_sm_out
 []

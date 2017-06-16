@@ -1,6 +1,7 @@
 import re, os, sys, time
 from Tester import Tester
-from RunParallel import RunParallel # For TIMEOUT value
+from util import *
+from Scheduler import Scheduler # For TIMEOUT value
 
 class RunCommand(Tester):
 
@@ -23,5 +24,5 @@ class RunCommand(Tester):
         if retcode != 0 :
             self.setStatus('CODE %d' % retcode, self.bucket_fail)
         else:
-            self.setStatus(retcode, self.bucket_success)
+            self.setStatus(self.getSuccessMessage(), self.bucket_success)
         return output
