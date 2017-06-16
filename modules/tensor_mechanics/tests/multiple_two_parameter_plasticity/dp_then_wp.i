@@ -254,6 +254,7 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.2
     youngs_modulus = 1E7
+    compute_compliance_tensor = true
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

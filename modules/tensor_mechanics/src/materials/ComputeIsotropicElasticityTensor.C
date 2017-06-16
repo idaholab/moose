@@ -18,7 +18,11 @@ validParams<ComputeIsotropicElasticityTensor>()
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
-  params.addParam<bool>("compute_compliance_tensor", false, "Compute the compliance tensor during construction of the elasticity tensor.  This can slightly reduce runtime when using complicated plasticity models, but adds to the memory used by MOOSE.");
+  params.addParam<bool>("compute_compliance_tensor",
+                        false,
+                        "Compute the compliance tensor during construction of the elasticity "
+                        "tensor.  This can slightly reduce runtime when using complicated "
+                        "plasticity models, but adds to the memory used by MOOSE.");
   return params;
 }
 
@@ -36,7 +40,9 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
     _shear_modulus(_shear_modulus_set ? getParam<Real>("shear_modulus") : -1),
     _youngs_modulus(_youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1),
     _compute_compliance_tensor(getParam<bool>("compute_compliance_tensor")),
-    _compliance_tensor(_compute_compliance_tensor ? &declareProperty<RankFourTensor>(_base_name + "compliance_tensor") : nullptr)
+    _compliance_tensor(_compute_compliance_tensor
+                           ? &declareProperty<RankFourTensor>(_base_name + "compliance_tensor")
+                           : nullptr)
 {
   unsigned int num_elastic_constants = _bulk_modulus_set + _lambda_set + _poissons_ratio_set +
                                        _shear_modulus_set + _youngs_modulus_set;
