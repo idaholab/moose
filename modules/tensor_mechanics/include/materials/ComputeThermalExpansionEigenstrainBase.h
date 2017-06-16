@@ -29,17 +29,20 @@ public:
 protected:
   virtual void computeQpEigenstrain() override;
   /*
-   * Compute the total thermal strain relative to the stress-free temperature at the
-   * current temperature, as well as the current instantaneous thermal expansion coefficient.
-   * param thermal_strain    The current total linear thermal strain (\delta L / L)
-   * param instantaneous_cte The current instantaneous coefficient of thermal expansion
-   *                         (derivative of thermal_strain wrt temperature
+   * Compute the total thermal strain relative to the stress-free temperature at
+   * the current temperature, as well as the current instantaneous thermal
+   * expansion coefficient.
+   * param thermal_strain    The current total linear thermal strain
+   *                         (\delta L / L)
+   * param instantaneous_cte The current instantaneous coefficient of thermal
+   *                         expansion (derivative of thermal_strain wrt
+   *                         temperature
    */
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) = 0;
 
   const VariableValue & _temperature;
   MaterialProperty<RankTwoTensor> & _deigenstrain_dT;
-  Real _stress_free_temperature;
+  const VariableValue & _stress_free_temperature;
 };
 
 #endif // COMPUTETHERMALEXPANSIONEIGENSTRAINBASE_H
