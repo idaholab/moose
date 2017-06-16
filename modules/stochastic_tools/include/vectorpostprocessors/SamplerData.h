@@ -17,6 +17,9 @@ class SamplerData;
 template <>
 InputParameters validParams<SamplerData>();
 
+/**
+ * A tool for output Sampler data.
+ */
 class SamplerData : public GeneralVectorPostprocessor, SamplerInterface
 {
 public:
@@ -24,8 +27,10 @@ public:
   void virtual initialize() override;
   void virtual execute() override;
 
+  /// Storage for declared vectors
   std::vector<VectorPostprocessorValue *> _sample_vectors;
 
+  /// The sampler to extract data
   Sampler & _sampler;
 };
 

@@ -53,7 +53,7 @@ public:
   /**
    * Return the sampled distribution data.
    */
-  std::vector<std::vector<Real>> getSamples();
+  std::vector<DenseMatrix<Real>> getSamples();
 
   /**
    * Error if the supplied number of seeds was not specified.
@@ -70,7 +70,7 @@ protected:
   /**
    * Base class must override this method to supply the sample distribution data.
    */
-  virtual std::vector<Real> sampleDistribution(Distribution & distribution) = 0;
+  virtual DenseMatrix<Real> sampleDistribution(Distribution & distribution) = 0;
 
   /// Map used to store the perturbed parameters and their corresponding distributions
   std::vector<Distribution *> _distributions;

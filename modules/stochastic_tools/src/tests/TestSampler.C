@@ -38,7 +38,7 @@ TestSampler::finalize()
     std::vector<Real> samples;
     if (_communicator.rank() == 0)
     {
-      samples = _sampler.getSamples()[0];
+      samples = _sampler.getSamples()[0].get_values();
       vec_size = samples.size();
     }
 
@@ -46,7 +46,7 @@ TestSampler::finalize()
     samples.resize(vec_size);
     _communicator.broadcast(samples);
 
-    if (_sampler.getSamples()[0] != samples)
+    if (_sampler.getSamples()[0].get_values() != samples)
       mooseError("The sample generation is not working correctly with MPI.");
   }
 }
