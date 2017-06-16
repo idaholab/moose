@@ -4,5 +4,6 @@
     input = 'nafems_test5a_lim.i'
     exodiff = 'nafems_test5a_lim_out.e'
     abs_zero = 1e-8
+    superlu = true
   [../]
 []
