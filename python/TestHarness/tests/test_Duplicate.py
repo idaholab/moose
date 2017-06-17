@@ -11,8 +11,10 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
+        self.assertRegexpMatches(e.output, r'tests/test_harness\.a.*?FAILED \(OUTFILE RACE CONDITION\)')
+
         # skip case
-        self.assertRegexpMatches(e.output, 'FATAL TEST HARNESS ERROR')
+        # self.assertRegexpMatches(e.output, 'FATAL TEST HARNESS ERROR')
 
     def testDuplicateOutputsOK(self):
         """

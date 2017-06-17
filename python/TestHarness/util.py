@@ -3,6 +3,8 @@ import subprocess
 from mooseutils import colorText
 from collections import namedtuple
 import json
+from tempfile import TemporaryFile
+from timeit import default_timer as clock
 
 TERM_COLS = 110
 
@@ -118,17 +120,36 @@ def runCommand(cmd, cwd=None):
         output = 'ERROR: ' + output
     return output
 
+# Execute a command and return the process, temporary output_file and time the process was launched
+def returnCommand(tester, command):
+    # It seems that using PIPE doesn't work very well when launching multiple jobs.
+    # It deadlocks rather easy.  Instead we will use temporary files
+    # to hold the output as it is produced
+    try:
+        f = TemporaryFile()
+        # On Windows, there is an issue with path translation when the command is passed in
+        # as a list.
+        if platform.system() == "Windows":
+            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=CREATE_NEW_PROCESS_GROUP, cwd=tester.getTestDir())
+        else:
+            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=tester.getTestDir())
+    except:
+        print "Error in launching a new task", command
+        raise
+
+    return (process, f, clock())
+
 ## print an optionally colorified test result
 #
 # The test will not be colored if
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def printResult(tester, result, timing, start, end, options, color=True):
+def printResult(tester, result, timing, options, color=True):
     f_result = ''
     caveats = ''
     first_directory = tester.specs['first_directory']
-    test_name = tester.specs['test_name']
+    test_name = tester.getTestName()
     status = tester.getStatus()
 
     cnt = (TERM_COLS-2) - len(test_name + result)
@@ -155,13 +176,12 @@ def printResult(tester, result, timing, start, end, options, color=True):
     if timing:
         f_result += ' [' + '%0.3f' % float(timing) + 's]'
     if options.debug_harness:
-        f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % end
+        f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % tester.getEndTime()
     return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
 # supports weirded html for more advanced coloring schemes. \verbatim<r>,<g>,<y>,<b>\endverbatim All colors are bolded.
-
 
 def getPlatforms():
     # We'll use uname to figure this out.  platform.uname() is available on all platforms
@@ -488,6 +508,46 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     # TL;DR; Just pass...
                     pass
 
+# Check if test has any redirected output, and if its ready to be read
+def checkOutputReady(tester, options):
+    for redirected_file in tester.getRedirectedOutputFiles(options):
+        file_path = os.path.join(tester.getTestDir(), redirected_file)
+        if not os.access(file_path, os.R_OK):
+            return False
+
+    return True
+
+# return concatenated output from tests with redirected output
+def getOutputFromFiles(tester, options):
+    file_output = ''
+    if checkOutputReady(tester, options):
+        for iteration, redirected_file in enumerate(tester.getRedirectedOutputFiles(options)):
+            file_path = os.path.join(tester.getTestDir(), redirected_file)
+            with open(file_path, 'r') as f:
+                file_output += "#"*80 + "\nOutput from processor " + str(iteration) + "\n" + "#"*80 + "\n" + readOutput(f, options)
+    return file_output
+
+# This function reads output from the file (i.e. the test output)
+# but trims it down to the specified size.  It'll save the first two thirds
+# of the requested size and the last third trimming from the middle
+def readOutput(f, options, max_size=100000):
+    first_part = int(max_size*(2.0/3.0))
+    second_part = int(max_size*(1.0/3.0))
+    output = ''
+
+    f.seek(0)
+    if options.sep_files != True:
+        output = f.read(first_part)     # Limit the output to 1MB
+        if len(output) == first_part:   # This means we didn't read the whole file yet
+            output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
+            f.seek(-second_part, 2)       # Skip the middle part of the file
+
+            if (f.tell() <= first_part):  # Don't re-read some of what you've already read
+                f.seek(first_part+1, 0)
+
+    output += f.read()              # Now read the rest
+    return output
+
 # See http://code.activestate.com/recipes/576570-dependency-resolver/
 class DependencyResolver:
     """
@@ -592,29 +652,29 @@ class TestStatus(object):
     ###### bucket status discriptions
     ## The following is a list of statuses possible in the TestHarness
     ##
-    ## PASS    =  Passing tests 'OK'
-    ## FAIL    =  Failing tests
-    ## DIFF    =  Failing tests due to Exodiff, CSVDiff
-    ## PBS     =  Any statuses belonging to messages generated by PBS
-    ## PENDING =  A pending status applied by the TestHarness (RUNNING...)
-    ## DELETED =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
-    ##            is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
-    ##            printed to stdout) when the user has specifically asked for more information while
-    ##            running tests (-e)
-    ## SKIP    =  Any test reported as skipped
-    ## SILENT  =  Any test reported as skipped and should not alert the user (deleted, tests not
-    ##            matching '--re=' options, etc)
+    ## PASS     =  Passing tests
+    ## FAIL     =  Failing tests
+    ## DIFF     =  Failing tests due to Exodiff, CSVDiff
+    ## PENDING  =  A pending status applied by the TestHarness (RUNNING...)
+    ## FINISHED =  A status that can mean it finished _in_ a pending status (like a queued status type)
+    ## DELETED  =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
+    ##             is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
+    ##             printed to stdout) when the user has specifically asked for more information while
+    ##             running tests (-e)
+    ## SKIP     =  Any test reported as skipped
+    ## SILENT   =  Any test reported as skipped and should not alert the user (deleted, tests not
+    ##             matching '--re=' options, etc)
     ######
 
-    test_status    = namedtuple('test_status', 'status color')
-    bucket_success = test_status(status='PASS', color='GREEN')
-    bucket_fail    = test_status(status='FAIL', color='RED')
-    bucket_deleted = test_status(status='DELETED', color='RED')
-    bucket_diff    = test_status(status='DIFF', color='YELLOW')
-    bucket_pbs     = test_status(status='PBS', color='CYAN')
-    bucket_pending = test_status(status='PENDING', color='CYAN')
-    bucket_skip    = test_status(status='SKIP', color='RESET')
-    bucket_silent  = test_status(status='SILENT', color='RESET')
+    test_status     = namedtuple('test_status', 'status color')
+    bucket_success  = test_status(status='PASS', color='GREEN')
+    bucket_fail     = test_status(status='FAIL', color='RED')
+    bucket_deleted  = test_status(status='DELETED', color='RED')
+    bucket_diff     = test_status(status='DIFF', color='YELLOW')
+    bucket_pending  = test_status(status='PENDING', color='CYAN')
+    bucket_finished = test_status(status='FINISHED', color='CYAN')
+    bucket_skip     = test_status(status='SKIP', color='RESET')
+    bucket_silent   = test_status(status='SILENT', color='RESET')
 
     # Initialize the class with a pending status
     # TODO: don't do this? Initialize instead with None type? If we do
@@ -662,9 +722,138 @@ class TestStatus(object):
         status = self.getStatus()
         return status == self.bucket_fail or status == self.bucket_diff
 
-    def getRunnable(self):
+    def didDiff(self):
         """
-        Return boolean whether the test should be allowed to run or not
+        Return boolean diff status (True if diff'd)
         """
         status = self.getStatus()
-        return not (status == self.bucket_deleted or status == self.bucket_skip or status == self.bucket_silent)
+        return status == self.bucket_diff
+
+    def isPending(self):
+        """
+        Return boolean pending status
+        """
+        status = self.getStatus()
+        return status == self.bucket_pending
+
+    def isSkipped(self):
+        """
+        Return boolean skipped status
+        """
+        status = self.getStatus()
+        return status == self.bucket_skip
+
+    def isSilent(self):
+        """
+        Return boolean silent status
+        """
+        status = self.getStatus()
+        return status == self.bucket_silent
+
+    def isDeleted(self):
+        """
+        Return boolean deleted status
+        """
+        status = self.getStatus()
+        return status == self.bucket_deleted
+
+    def isFinished(self):
+        """
+        Return boolean finished status
+        """
+        status = self.getStatus()
+        return (status == self.bucket_finished or status is not self.bucket_pending)
+
+class StatusDependency():
+    """
+    A class used to determine if a tester can run based on other current tester statuses.
+
+    """
+
+    def __init__(self, tester, testers, options):
+        self.tester = tester
+        self.__testers = set(testers) - set([tester])
+        self.options = options
+
+    # A method that returns bool if the test can run or sets the appropriate status why it could not run
+    # or does nothing if the test needs to be placed back into the queue
+    def checkAndSetStatus(self):
+        if self.noRaceConditions():
+            if self.isRunnable():
+                return True
+            elif not self.isAppendable() and self.prereqsExists():
+                self.tester.setStatus('skipped dependency', self.tester.bucket_skip)
+            elif not self.prereqsExists():
+                self.tester.setStatus('unknown dependency', self.tester.bucket_fail)
+            else:
+                return
+        else:
+            self.tester.setStatus('OUTFILE RACE CONDITION', self.tester.bucket_fail)
+
+    # check if all prereq tests have passed and none were skipped/failed
+    def isRunnable(self):
+        if len(set(self.tester.getPrereqs()) - self._passing_tests()) == 0 or self.skipPrereqs():
+            return True
+
+    # check if any prereqs are not yet complete (means this test _will_ be runnable... just not right now)
+    def isAppendable(self):
+        if len(set(self.tester.getPrereqs()).intersection(self._skipped_tests())) == 0 or self.skipPrereqs():
+            return True
+
+    # check if all prereqs are available
+    def prereqsExists(self):
+        if len(set(self.tester.getPrereqs()) - set([x.getTestName() for x in self.__testers])) == 0:
+            return True
+
+    # return a set of passing tests
+    def _passing_tests(self):
+        passing = set([])
+        for tester in self.__testers:
+            if tester.didPass():
+                passing.add(tester.getTestName())
+        return passing
+
+    # return a set of finished non-passing or will be skipped tests
+    def _skipped_tests(self):
+        skipped_failed = set([])
+        for tmp_tester in self.__testers:
+            if (tmp_tester.isFinished() and not tmp_tester.didPass()) \
+               or not tmp_tester.getRunnable(self.options) \
+               or not tmp_tester.shouldExecute():
+                skipped_failed.add(tmp_tester.getTestName())
+        return skipped_failed
+
+    # return bool if we want to ignore prereqs requirements
+    def skipPrereqs(self):
+        if self.options.ignored_caveats:
+            caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
+            if 'all' in self.options.ignored_caveats or 'prereq' in self.options.ignored_caveats:
+                return True
+        return False
+
+    # return bool for output file race conditions
+    # NOTE: we return True for exceptions, but they are handled later (because we set a failure status)
+    def noRaceConditions(self):
+        d = DependencyResolver()
+        name_to_object = {}
+        all_testers = set(self.__testers).union(set([self.tester]))
+
+        for tester in all_testers:
+            name_to_object[tester.getTestName()] = tester
+            d.insertDependency(tester.getTestName(), tester.getPrereqs())
+        try:
+            # May fail, which will trigger an exception due cyclic dependencies
+            concurrent_tester_sets = d.getSortedValuesSets()
+            for concurrent_testers in concurrent_tester_sets:
+                output_files_in_dir = set()
+                for tester in concurrent_testers:
+                    if self.prereqsExists() and name_to_object[tester].getTestName() not in self._skipped_tests():
+                        output_files = name_to_object[tester].getOutputFiles()
+                        duplicate_files = output_files_in_dir.intersection(output_files)
+                        if len(duplicate_files):
+                            return False
+                        output_files_in_dir.update(output_files)
+        except:
+            self.tester.setStatus('Cyclic or Invalid Dependency Detected!', self.tester.bucket_fail)
+
+        return True

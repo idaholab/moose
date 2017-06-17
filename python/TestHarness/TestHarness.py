@@ -10,7 +10,9 @@ path_tool.activate_module('FactorySystem')
 
 from socket import gethostname
 from util import *
-from RunParallel import RunParallel
+from Scheduler import Scheduler
+from CSVDiffer import CSVDiffer
+from XMLDiffer import XMLDiffer
 from Tester import Tester
 from Factory import Factory
 from Parser import Parser
@@ -76,55 +78,49 @@ class TestHarness:
         # Parse arguments
         self.parseCLArgs(argv)
 
-        self.checks = {}
-        self.checks['platform'] = getPlatforms()
-        self.checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
-        self.checks['exe_objects'] = None # This gets calculated on demand
+        checks = {}
+        checks['platform'] = getPlatforms()
+        checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
+        checks['exe_objects'] = None # This gets calculated on demand
 
         # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
         # to select whether they want to probe for libMesh configuration options.
         if self.options.skip_config_checks:
-            self.checks['compiler'] = set(['ALL'])
-            self.checks['petsc_version'] = 'N/A'
-            self.checks['petsc_version_release'] = 'N/A'
-            self.checks['slepc_version'] = 'N/A'
-            self.checks['library_mode'] = set(['ALL'])
-            self.checks['mesh_mode'] = set(['ALL'])
-            self.checks['dtk'] = set(['ALL'])
-            self.checks['unique_ids'] = set(['ALL'])
-            self.checks['vtk'] = set(['ALL'])
-            self.checks['tecplot'] = set(['ALL'])
-            self.checks['dof_id_bytes'] = set(['ALL'])
-            self.checks['petsc_debug'] = set(['ALL'])
-            self.checks['curl'] = set(['ALL'])
-            self.checks['tbb'] = set(['ALL'])
-            self.checks['superlu'] = set(['ALL'])
-            self.checks['slepc'] = set(['ALL'])
-            self.checks['unique_id'] = set(['ALL'])
-            self.checks['cxx11'] = set(['ALL'])
-            self.checks['asio'] =  set(['ALL'])
-            self.checks['boost'] = set(['ALL'])
+            checks['compiler'] = set(['ALL'])
+            checks['petsc_version'] = 'N/A'
+            checks['library_mode'] = set(['ALL'])
+            checks['mesh_mode'] = set(['ALL'])
+            checks['dtk'] = set(['ALL'])
+            checks['unique_ids'] = set(['ALL'])
+            checks['vtk'] = set(['ALL'])
+            checks['tecplot'] = set(['ALL'])
+            checks['dof_id_bytes'] = set(['ALL'])
+            checks['petsc_debug'] = set(['ALL'])
+            checks['curl'] = set(['ALL'])
+            checks['tbb'] = set(['ALL'])
+            checks['superlu'] = set(['ALL'])
+            checks['slepc'] = set(['ALL'])
+            checks['unique_id'] = set(['ALL'])
+            checks['cxx11'] = set(['ALL'])
+            checks['asio'] =  set(['ALL'])
         else:
-            self.checks['compiler'] = getCompilers(self.libmesh_dir)
-            self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
-            self.checks['petsc_version_release'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_version_release')
-            self.checks['slepc_version'] = getSlepcVersion(self.libmesh_dir)
-            self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
-            self.checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
-            self.checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
-            self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
-            self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
-            self.checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
-            self.checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
-            self.checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
-            self.checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
-            self.checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
-            self.checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
-            self.checks['slepc'] =  getLibMeshConfigOption(self.libmesh_dir, 'slepc')
-            self.checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
-            self.checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
-            self.checks['asio'] =  getIfAsioExists(self.moose_dir)
-            self.checks['boost'] =  getLibMeshConfigOption(self.libmesh_dir, 'boost')
+            checks['compiler'] = getCompilers(self.libmesh_dir)
+            checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
+            checks['library_mode'] = getSharedOption(self.libmesh_dir)
+            checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
+            checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
+            checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
+            checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
+            checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
+            checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
+            checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
+            checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
+            checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
+            checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
+            checks['slepc'] =  getLibMeshConfigOption(self.libmesh_dir, 'slepc')
+            checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
+            checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
+            checks['asio'] =  getIfAsioExists(self.moose_dir)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
@@ -133,10 +129,13 @@ class TestHarness:
                (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
 
             option_set = set(['ALL', 'PARALLEL'])
-            self.checks['mesh_mode'] = option_set
+            checks['mesh_mode'] = option_set
 
         method = set(['ALL', self.options.method.upper()])
-        self.checks['method'] = method
+        checks['method'] = method
+
+        # This is so we can easily pass checks around to any scheduler plugin
+        self.options._checks = checks
 
         self.initialize(argv, app_name)
 
@@ -151,78 +150,73 @@ class TestHarness:
         self.error_code = 0x0
         self.preRun()
         self.start_time = clock()
+        launched_tests = []
 
         try:
-            # PBS STUFF
-            if self.options.pbs:
-                # Check to see if we are using the PBS Emulator.
-                # Its expensive, so it must remain outside of the os.walk for loop.
-                self.options.PBSEmulator = self.checkPBSEmulator()
-            if self.options.pbs and os.path.exists(self.options.pbs):
-                self.options.processingPBS = True
-                self.processPBSResults()
-            else:
-                self.options.processingPBS = False
-                self.base_dir = os.getcwd()
-                for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
-                    # Prune submdule paths when searching for tests
-                    if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
-                        dirnames[:] = []
+            self.base_dir = os.getcwd()
+            for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
+                # Prune submdule paths when searching for tests
+                if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
+                    dirnames[:] = []
 
-                    # walk into directories that aren't contrib directories
-                    if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
-                        for file in filenames:
-                            # set cluster_handle to be None initially (happens for each test)
-                            self.options.cluster_handle = None
-                            # See if there were other arguments (test names) passed on the command line
-                            if file == self.options.input_file_name: #and self.test_match.search(file):
-                                saved_cwd = os.getcwd()
-                                sys.path.append(os.path.abspath(dirpath))
-                                os.chdir(dirpath)
+                # walk into directories that aren't contrib directories
+                if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
+                    for file in filenames:
+                        # set cluster_handle to be None initially (happens for each test)
+                        self.options.cluster_handle = None
+                        # See if there were other arguments (test names) passed on the command line
+                        if file == self.options.input_file_name \
+                               and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
-                                if self.prunePath(file):
-                                    continue
+                            saved_cwd = os.getcwd()
+                            sys.path.append(os.path.abspath(dirpath))
+                            os.chdir(dirpath)
 
-                                # Build a Parser to parse the objects
-                                parser = Parser(self.factory, self.warehouse)
+                            # Get the testers for this test
+                            testers = self.createTesters(dirpath, file, find_only)
 
-                                # Parse it
-                                self.error_code = self.error_code | parser.parse(file)
+                            # Schedule the testers for immediate execution
+                            self.scheduler.schedule(testers)
 
-                                # Retrieve the tests from the warehouse
-                                testers = self.warehouse.getActiveObjects()
+                            # record this launched test to prevent this test from launching again
+                            # due to os.walk following symbolic links
+                            launched_tests.append(os.path.join(dirpath, file))
 
-                                # Pass control to launchTest (refactored)
-                                self.launchTest(find_only, file, dirpath, testers)
+                            os.chdir(saved_cwd)
+                            sys.path.pop()
 
-                                # See if any tests have colliding outputs
-                                self.checkForRaceConditionOutputs(testers, dirpath)
+            # Wait for all the tests to complete
+            self.scheduler.waitFinish()
 
-                                os.chdir(saved_cwd)
-                                sys.path.pop()
+            self.cleanup()
+
+            # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
+            if self.num_failed:
+                self.error_code = self.error_code | 0x80
 
         except KeyboardInterrupt:
             if self.writeFailedTest != None:
                 self.writeFailedTest.close()
-            print('\nExiting due to keyboard interrupt...')
-            sys.exit(0)
-
-        self.runner.join()
-        # Wait for all tests to finish
-        if self.options.pbs and self.options.processingPBS == False:
-            print('\n< checking batch status >\n')
-            self.options.processingPBS = True
-            self.processPBSResults()
-
-        self.cleanup()
-
-        # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
-        if self.num_failed:
-            self.error_code = self.error_code | 0x80
+            print '\nExiting due to keyboard interrupt...'
+            sys.exit(1)
 
         return
 
-    def launchTest(self, find_only, file, dirpath, testers):
+   # Create and return list of tester objects. A tester is created by providing
+    # abspath to basename (dirpath), and the test file in queustion (file)
+    def createTesters(self, dirpath, file, find_only):
+        if self.prunePath(file):
+            return
+
+        # Build a Parser to parse the objects
+        parser = Parser(self.factory, self.warehouse)
+
+        # Parse it
+        self.error_code = self.error_code | parser.parse(file)
+
+        # Retrieve the tests from the warehouse
+        testers = self.warehouse.getActiveObjects()
+
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
             self.augmentParameters(file, tester)
@@ -239,85 +233,7 @@ class TestHarness:
         if self.options.enable_recover:
             testers = self.appendRecoverableTests(testers)
 
-        # Handle PBS tests.cluster file
-        if self.options.pbs:
-            (tester, command) = self.createClusterLauncher(dirpath, testers)
-            if command is not None:
-                tester.setStatus('LAUNCHED', tester.bucket_pbs)
-                self.runner.run(tester, command)
-        else:
-            # Go through the Testers and run them
-            for tester in testers:
-                # Double the alloted time for tests when running with the valgrind option
-                tester.setValgrindMode(self.options.valgrind_mode)
-
-                # When running in valgrind mode, we end up with a ton of output for each failed
-                # test.  Therefore, we limit the number of fails...
-                if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
-                    tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
-                elif self.num_failed > self.options.max_fails:
-                    tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
-                elif tester.parameters().isValid('error_code'):
-                    tester.setStatus('Parser Error', tester.bucket_skip)
-                else:
-                    should_run = tester.checkRunnableBase(self.options, self.checks, self.test_list)
-                    # check for deprecated tuple
-                    if type(should_run) == type(()):
-                        (should_run, reason) = should_run
-                        if not should_run:
-                            reason = 'deprected checkRunnableBase #8037'
-                            tester.setStatus(reason, tester.bucket_skip)
-                    if should_run:
-                        command = tester.getCommand(self.options)
-                        # This method spawns another process and allows this loop to continue looking for tests
-                        # RunParallel will call self.testOutputAndFinish when the test has completed running
-                        # This method will block when the maximum allowed parallel processes are running
-                        self.runner.run(tester, command)
-                    else: # This job is skipped - notify the runner
-                        status = tester.getStatus()
-                        if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
-                            if (self.options.report_skipped and status == tester.bucket_skip) \
-                               or status == tester.bucket_skip:
-                                self.handleTestStatus(tester)
-                            elif status == tester.bucket_deleted and self.options.extra_info:
-                                self.handleTestStatus(tester)
-                        self.runner.jobSkipped(tester.parameters()['test_name'])
-
-    def createClusterLauncher(self, dirpath, testers):
-        self.options.test_serial_number = 0
-        command = None
-        tester = None
-        # Create the tests.cluster input file
-        # Loop through each tester and create a job
-        for tester in testers:
-            should_run = tester.checkRunnableBase(self.options, self.checks)
-            if should_run:
-                if self.options.cluster_handle == None:
-                    self.options.cluster_handle = open(dirpath + '/' + self.options.pbs + '.cluster', 'w')
-                self.options.cluster_handle.write('[Jobs]\n')
-                # This returns the command to run as well as builds the parameters of the test
-                # The resulting command once this loop has completed is sufficient to launch
-                # all previous jobs
-                command = tester.getCommand(self.options)
-                self.options.cluster_handle.write('[]\n')
-                self.options.test_serial_number += 1
-            else: # This job is skipped - notify the runner
-                status = tester.getStatus()
-                if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
-                    if (self.options.report_skipped and status == tester.bucket_skip) or status == tester.bucket_skip:
-                        self.handleTestStatus(tester)
-                    elif status == tester.bucket_deleted and self.options.extra_info:
-                        self.handleTestStatus(tester)
-                self.runner.jobSkipped(tester.parameters()['test_name'])
-
-        # Close the tests.cluster file
-        if self.options.cluster_handle is not None:
-            self.options.cluster_handle.close()
-            self.options.cluster_handle = None
-
-        # Return the final tester/command (sufficient to run all tests)
-        return (tester, command)
-
+        return testers
 
     def prunePath(self, filename):
         test_dir = os.path.abspath(os.path.dirname(filename))
@@ -365,6 +281,18 @@ class TestHarness:
                 sys.exit(1)
             params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
+        # Double the alloted time for tests when running with the valgrind option
+        tester.setValgrindMode(self.options.valgrind_mode)
+
+        # When running in valgrind mode, we end up with a ton of output for each failed
+        # test.  Therefore, we limit the number of fails...
+        if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
+            tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
+        elif self.num_failed > self.options.max_fails:
+            tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
+        elif tester.parameters().isValid('error_code'):
+            tester.setStatus('Parser Error', tester.bucket_skip)
+
     # This method splits a lists of tests into two pieces each, the first piece will run the test for
     # approx. half the number of timesteps and will write out a restart file.  The second test will
     # then complete the run using the MOOSE recover option.
@@ -399,51 +327,12 @@ class TestHarness:
         testers.extend(new_tests)
         return testers
 
-    ## Finish the test by inspecting the raw output
-    def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
-        caveats = []
-        test = tester.specs  # Need to refactor
-
-        if test.isValid('caveats'):
-            caveats = test['caveats']
-
-        # Check for test failure using the status bucket
-        did_pass = tester.didPass()
-        status = tester.getStatus()
-        result = ''
-
-        # PASS and DRY_RUN fall into this catagory
-        if did_pass:
-            if self.options.extra_info:
-                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'slepc_version']
-                for check in checks:
-                    if not 'ALL' in test[check]:
-                        caveats.append(', '.join(test[check]))
-            if len(caveats):
-                result = '[' + ', '.join(caveats).upper() + '] ' + tester.getSuccessMessage()
-            else:
-                result = tester.getSuccessMessage()
-
-        # FAIL, DIFF and DELETED fall into this catagory
-        elif status == tester.bucket_fail or status == tester.bucket_diff or status == tester.bucket_deleted:
-            result = 'FAILED (%s)' % tester.getStatusMessage()
-
-        # PBS and any other possibly unknown statuses fall into this catagory.
-        # Note: SKIP and RUNNING messages are handled in handleTestResult because the
-        # TestHarness does not call 'testOutputAndFinish' for SKIP/RUNNING statuses.
-        else:
-            result = tester.getStatusMessage()
-
-        self.handleTestResult(tester, output, result, start, end)
-
     def getTiming(self, output):
-        time = ''
         m = re.search(r"Active time=(\S+)", output)
         if m != None:
             return m.group(1)
 
     def getSolveTime(self, output):
-        time = ''
         m = re.search(r"solve().*", output)
         if m != None:
             return m.group().split()[5]
@@ -455,207 +344,69 @@ class TestHarness:
         else:
             return True
 
-    # PBS Defs
-    def checkPBSEmulator(self):
-        try:
-            qstat_process = subprocess.Popen(['qstat', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            qstat_output = qstat_process.communicate()
-        except OSError:
-            # qstat binary is not available
-            print('qstat not available. Perhaps you need to load the PBS module?')
-            sys.exit(1)
-        if len(qstat_output[1]):
-            # The PBS Emulator has no --version argument, and thus returns output to stderr
-            return True
-        else:
-            return False
-
-    def processPBSResults(self):
-        # If batch file exists, check the contents for pending tests.
-        if os.path.exists(self.options.pbs):
-            # Build a list of launched jobs
-            batch_file = open(self.options.pbs)
-            batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
-            batch_file.close()
-            del batch_list[-1:]
-
-            # Loop through launched jobs and match the TEST_NAME to determin correct stdout (Output_Path)
-            for job in batch_list:
-                file = '/'.join(job[2].split('/')[:-2]) + '/' + job[3]
-
-                # Populate the input_file_name argument so augmentParameters can format the test_name
-                self.options.input_file_name = job[-1]
-
-                # Build a Warehouse to hold the MooseObjects
-                warehouse = Warehouse()
-
-                # Build a Parser to parse the objects
-                parser = Parser(self.factory, warehouse)
-
-                # Parse it
-                parser.parse(file)
-
-                # Retrieve the tests from the warehouse
-                testers = warehouse.getAllObjects()
-                for tester in testers:
-                    self.augmentParameters(file, tester)
-
-                for tester in testers:
-                    reason = ''
-                    # Build the requested Tester object
-                    if job[1] == tester.parameters()['test_name']:
-                        # Create Test Type
-                        # test = self.factory.create(tester.parameters()['type'], tester)
-
-                        # Get job status via qstat
-                        qstat = ['qstat', '-f', '-x', str(job[0])]
-                        qstat_command = subprocess.Popen(qstat, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                        qstat_stdout = qstat_command.communicate()[0]
-                        if qstat_stdout != None:
-                            output_value = re.search(r'job_state = (\w+)', qstat_stdout).group(1)
-                        else:
-                            return ('QSTAT NOT FOUND', '')
-
-                        # Report the current status of JOB_ID
-                        if output_value == 'F':
-                            # F = Finished. Get the exit code reported by qstat
-                            exit_code = int(re.search(r'Exit_status = (-?\d+)', qstat_stdout).group(1))
-                            # Read the stdout file
-                            if os.path.exists(job[2]):
-                                output_file = open(job[2], 'r')
-                                # Not sure I am doing this right: I have to change the TEST_DIR to match the temporary cluster_launcher TEST_DIR location, thus violating the tester.specs...
-                                tester.parameters()['test_dir'] = '/'.join(job[2].split('/')[:-1])
-                                outfile = output_file.read()
-                                output_file.close()
-                                output = tester.processResults(tester.specs['moose_dir'], exit_code, self.options, outfile)
-                                self.testOutputAndFinish(tester, exit_code, outfile)
-                                continue
-                            else:
-                                # I ran into this scenario when the cluster went down, but launched/completed my job :)
-                                reason = 'FAILED (NO STDOUT FILE)'
-                                tester.setStatus(reason, tester.bucket_fail)
-                        elif output_value == 'R':
-                            # Job is currently running
-                            reason = 'RUNNING'
-                        elif output_value == 'E':
-                            # Job is exiting
-                            reason = 'EXITING'
-                        elif output_value == 'Q':
-                            # Job is currently queued
-                            reason = 'QUEUED'
-
-                        if reason != '' and tester.getStatus() != tester.bucket_fail:
-                            tester.setStatus(reason, tester.bucket_pbs)
-                            self.handleTestStatus(tester)
-
-        else:
-            return ('BATCH FILE NOT FOUND', '')
-
-    def buildPBSBatch(self, output, tester):
-        # Create/Update the batch file
-        if 'command not found' in output:
-            tester.setStatus('QSUB NOT FOUND', tester.bucket_fail)
-        else:
-            # Get the Job information from the ClusterLauncher
-            results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output)
-            if len(results) != 0:
-                file_name = self.options.pbs
-                job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
-                for result in results:
-                    (test_dir, job_id, test_name) = result
-                    qstat_command = subprocess.Popen(['qstat', '-f', '-x', str(job_id)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    qstat_stdout = qstat_command.communicate()[0]
-                    # Get the Output_Path from qstat stdout
-                    if qstat_stdout != None:
-                        output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
-                        output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '').strip()
-                    else:
-                        job_list.close()
-                        tester.setStatus('QSTAT NOT FOUND', tester.bucket_fail)
-                    # Write job_id, test['test_name'], and Ouput_Path to the batch file
-                    job_list.write(str(job_id) + ':' + test_name + ':' + output_value + ':' + self.options.input_file_name  + '\n')
-                # Return to TestHarness and inform we have launched the job
-                job_list.close()
-                tester.setStatus('LAUNCHED', tester.bucket_pbs)
+    # handleTestStatus is the entry point the testers will use to print status to the screen
+    def handleTestStatus(self, tester):
+        # The test has finished regardless of status
+        if tester.isFinished():
+            if tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
+                return
             else:
-                tester.setStatus('QSTAT INVALID RESULTS', tester.bucket_fail)
-        return
+                self.testOutputAndFinish(tester)
 
-    def cleanPBSBatch(self):
-        # Open the PBS batch file and assign it to a list
-        if os.path.exists(self.options.pbs_cleanup):
-            batch_file = open(self.options.pbs_cleanup, 'r')
-            batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
-            batch_file.close()
-            del batch_list[-1:]
+        # The test has not yet finished and but there is a status change we want to display
         else:
-            print('PBS batch file not found:', self.options.pbs_cleanup)
-            sys.exit(1)
+            print printResult(tester, tester.getStatusMessage(), clock() - tester.getStartTime(), self.options)
 
-        # Loop through launched jobs and delete whats found.
-        for job in batch_list:
-            if os.path.exists(job[2]):
-                batch_dir = os.path.abspath(os.path.join(job[2], os.pardir)).split('/')
-                if os.path.exists('/'.join(batch_dir)):
-                    shutil.rmtree('/'.join(batch_dir))
-                if os.path.exists('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster'):
-                    os.remove('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster')
-        os.remove(self.options.pbs_cleanup)
-    # END PBS Defs
+    # Finish the test by inspecting the raw output
+    ### TODO: refactor handleTestResult and testOutputAndFinish into a single method.
+    ###       The testers are carrying all the information we need now, so no need to pass so many variables.
+    def testOutputAndFinish(self, tester):
+        caveats = []
+        result = ''
+        test = tester.specs  # Need to refactor
 
-    ## Method to print output generated by the TestHarness while attempting to run a tester
-    def handleTestStatus(self, tester, output=None):
-        status = tester.getStatus()
-        test_completed = False
+        if test.isValid('caveats'):
+            caveats = test['caveats']
 
-        # Statuses that inform the TestHarness, that this test is still running.
-        if status == tester.bucket_pending:
-            print(printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options))
+        # PASS and DRY_RUN fall into this catagory
+        if tester.didPass():
+            if self.options.extra_info:
+                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
+                for check in checks:
+                    if not 'ALL' in test[check]:
+                        caveats.append(', '.join(test[check]))
+            if len(caveats):
+                result = '[' + ', '.join(caveats).upper() + '] ' + tester.getSuccessMessage()
+            else:
+                result = tester.getSuccessMessage()
 
-        # Statuses generated when using PBS options
-        elif status == tester.bucket_pbs:
-            # TestHarness wants to check on a PBS job that was launched (qstat)
-            if self.options.pbs and self.options.processingPBS == False:
-                self.buildPBSBatch(output, tester)
-                # This can potentially cause a failure (qstat issues), so handle that case separately
-                if status == tester.bucket_fail:
-                    self.handleTestResult(tester, '', tester.getStatusMessage(), 0, 0, True)
-                    test_completed = True
-                else:
-                    print(printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options))
+        # FAIL, DIFF and DELETED fall into this catagory
+        elif tester.didFail() or tester.didDiff() or tester.isDeleted():
+            result = 'FAILED (%s)' % tester.getStatusMessage()
 
-            # Job was launched during a previous run, so instead of printing to the screen
-            # add the statuses obtained on _this_ run to the 'Final Test Result' table.
-            elif self.options.pbs and self.options.processingPBS == True:
-                self.handleTestResult(tester, '', tester.getStatusMessage(), 0, 0, True)
-
-        # All other statuses will be testers that exited prematurely (according to the TestHarness)
-        # So populate the result now based on status, and send the test to the result method to be
-        # printed to the screen
         else:
             result = tester.getStatusMessage()
-            self.handleTestResult(tester, '', result, 0, 0, True)
-            test_completed = True
 
-        return test_completed
+        self.handleTestResult(tester, result)
 
     ## Update global variables and print output based on the test result
-    def handleTestResult(self, tester, output, result, start=0, end=0, add_to_table=True):
+    def handleTestResult(self, tester, result):
         caveats = []
         timing = ''
-        status = tester.getStatus()
-        did_pass = tester.didPass()
+        output = ''
+        if tester.getOutput():
+            output = tester.getOutput()
 
         if tester.specs.isValid('caveats'):
             caveats = tester.specs['caveats']
 
         if self.options.timing:
-            timing = self.getTiming(output)
+            timing = self.getTiming(tester.getOutput())
         elif self.options.store_time:
-            timing = self.getSolveTime(output)
+            timing = self.getSolveTime(tester.getOutput())
 
         # format the SKIP messages received
-        if status == tester.bucket_skip:
+        if tester.isSkipped():
             # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
             # but Exodiff is instructed to 'SKIP' on scaled tests.
             if len(caveats):
@@ -666,29 +417,29 @@ class TestHarness:
         # result is normally populated by a tester object when a test has failed. But in this case
         # checkRunnableBase determined the test a failure before it even ran. So we need to set the
         # results here, so they are printed if the extra_info argument was supplied
-        elif status == tester.bucket_deleted:
+        elif tester.isDeleted():
             result = tester.getStatusMessage()
 
         # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
         # in the 'Final Test Results' area.
-        if add_to_table:
-            self.test_table.append( (tester, output, result, timing, start, end) )
-            if status == tester.bucket_skip:
-                self.num_skipped += 1
-            elif status == tester.bucket_success:
-                self.num_passed += 1
-            elif status == tester.bucket_pending or status == tester.bucket_pbs:
-                self.num_pending += 1
-            else:
-                # Dump everything else into the failure status (neccessary due to PBS launch failures
-                # not being stored in the tester status bucket)
-                self.num_failed += 1
+
+        self.test_table.append( (tester, result, timing) )
+        if tester.isSkipped():
+            self.num_skipped += 1
+        elif tester.didPass():
+            self.num_passed += 1
+        elif tester.isPending():
+            self.num_pending += 1
+        else:
+            # Dump everything else into the failure status (neccessary due to PBS launch failures
+            # not being stored in the tester status bucket)
+            self.num_failed += 1
 
         self.postRun(tester.specs, timing)
 
-        print(printResult(tester, result, timing, start, end, self.options))
+        print printResult(tester, result, timing, self.options)
 
-        if self.options.verbose or (not did_pass and not self.options.quiet):
+        if self.options.verbose or (not tester.didPass() and not self.options.quiet):
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n');
 
@@ -701,20 +452,20 @@ class TestHarness:
                 print(output)
 
                 # Print result line again at the bottom of the output for failed tests
-                print("%s(reprint)" % printResult(tester, result, timing, start, end, self.options))
+                print("%s(reprint)" % printResult(tester, result, timing, self.options))
 
-        if status != tester.bucket_skip:
-            if not did_pass and not self.options.failed_tests:
+        if not tester.isSkipped():
+            if not tester.didPass() and not self.options.failed_tests:
                 self.writeFailedTest.write(tester.specs['test_name'] + '\n')
 
             if self.options.file:
-                self.file.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
+                self.file.write(printResult( tester, result, timing, self.options, color=False) + '\n')
                 self.file.write(output)
 
-            if self.options.sep_files or (self.options.fail_files and not did_pass) or (self.options.ok_files and did_pass):
+            if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
                 fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
                 f = open(fname, 'w')
-                f.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
+                f.write(printResult( tester, result, timing, self.options, color=False) + '\n')
                 f.write(output)
                 f.close()
 
@@ -723,9 +474,9 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print('\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1)))
-            for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
-                print(printResult(test, result, timing, start, end, self.options))
+            print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
+            for (test, result, timing) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
+                print printResult(test, result, timing, self.options)
 
         time = clock() - self.start_time
 
@@ -765,10 +516,8 @@ class TestHarness:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print(colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
-            if self.options.pbs:
-                print('\nYour PBS batch file:', self.options.pbs)
+            print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )
 
         if self.file:
             self.file.close()
@@ -778,8 +527,14 @@ class TestHarness:
             self.writeFailedTest.close()
 
     def initialize(self, argv, app_name):
-        # Initialize the parallel runner with how many tests to run in parallel
-        self.runner = RunParallel(self, self.options.jobs, self.options.load)
+        # Load the scheduler plugins
+        self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
+
+        # Populate params
+        scheduler_params = self.factory.validParams('RunParallel')
+
+        # Create the scheduler
+        self.scheduler = self.factory.create(scheduler_params['scheduler'], self, scheduler_params)
 
         ## Save executable-under-test name to self.executable
         self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
@@ -835,9 +590,6 @@ class TestHarness:
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
         parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
         parser.add_argument('--max-fails', nargs=1, type=int, dest='max_fails', default=50, help='The number of tests allowed to fail before any additional tests will run')
-        parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
-        parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
-        parser.add_argument('--pbs-project', nargs=1, default='moose', help='Identify PBS job submission to specified project')
         parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
@@ -885,14 +637,13 @@ class TestHarness:
 
         # If attempting to test only failed_tests, open the .failed_tests file and create a list object
         # otherwise, open the failed_tests file object for writing (clobber).
-        self.test_list = []
+        test_list = []
         failed_tests_file = os.path.join(os.getcwd(), '.failed_tests')
         if self.options.failed_tests:
             with open(failed_tests_file, 'r') as tmp_failed_tests:
-                self.test_list = tmp_failed_tests.read().split('\n')
+                self.options._test_list = tmp_failed_tests.read().split('\n')
         else:
             self.writeFailedTest = open(failed_tests_file, 'w')
-
 
         self.checkAndUpdateCLArgs()
 
@@ -931,59 +682,9 @@ class TestHarness:
         if opts.libmesh_dir:
             self.libmesh_dir = opts.libmesh_dir
 
-        # Generate a batch file if PBS argument supplied with out a file
-        if opts.pbs == 'generate':
-            largest_serial_num = 0
-            for name in os.listdir('.'):
-                m = re.search('pbs_(\d{3})', name)
-                if m != None and int(m.group(1)) > largest_serial_num:
-                    largest_serial_num = int(m.group(1))
-            opts.pbs = "pbs_" +  str(largest_serial_num+1).zfill(3)
-
         # When running heavy tests, we'll make sure we use --no-report
         if opts.heavy_tests:
             self.options.report_skipped = False
-
-
-    def checkForRaceConditionOutputs(self, testers, dirpath):
-        d = DependencyResolver()
-
-        # Create a dictionary of test_names to Tester objects
-        # We'll use this to retrieve the Tester objects by
-        # name to call additional methods while determining
-        # depedencies.
-        name_to_object = {}
-        for tester in testers:
-            name_to_object[tester.getTestName()] = tester
-
-        # Now build up our tester dependencies
-        try:
-            for tester in testers:
-                # Now we need to see which dependencies are real
-                # We don't really care about skipped tests, heavy tests, etc.
-                for name in tester.getPrereqs():
-                    if not name_to_object[name].getRunnable():
-                        tester.setStatus('skipped dependency', tester.bucket_skip)
-
-                prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
-                d.insertDependency(tester, prereq_objects)
-
-            concurrent_tester_sets = d.getSortedValuesSets()
-            for concurrent_testers in concurrent_tester_sets:
-                output_files_in_dir = set()
-                for tester in concurrent_testers:
-                    if tester.getRunnable():
-                        output_files = tester.getOutputFiles()
-                        duplicate_files = output_files_in_dir.intersection(output_files)
-                        if len(duplicate_files):
-                            print('Duplicate output files detected in directory:\n', dirpath, '\n\t', '\n\t'.join(duplicate_files))
-                            self.error_code = self.error_code | 0x80
-                        output_files_in_dir.update(output_files)
-
-        except:
-            # Cyclic or invalid dependency, we'll let RunParallel deal with that
-            # That condition won't effect the output file check
-            pass
 
     def postRun(self, specs, timing):
         return
@@ -994,9 +695,6 @@ class TestHarness:
             sys.exit(0)
         elif self.options.dump:
             self.factory.printDump("Tests")
-            sys.exit(0)
-        if self.options.pbs_cleanup:
-            self.cleanPBSBatch()
             sys.exit(0)
 
     def getOptions(self):

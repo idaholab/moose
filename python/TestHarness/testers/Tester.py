@@ -65,21 +65,27 @@ class Tester(MooseObject):
         MooseObject.__init__(self, name, params)
         self.specs = params
 
+        # Bool if test can run
+        self._runnable = None
+
+        ### several variables needed when performing processResults
+        self.exit_code = None
+        self.start_time = None
+        self.end_time = None
+        self.std_out = None
+
         # Initialize the status bucket class
         self.status = util.TestStatus()
 
         # Enumerate the buckets here so ther are easier to work with in the tester class
-        self.bucket_success = self.status.bucket_success
-        self.bucket_fail    = self.status.bucket_fail
-        self.bucket_diff    = self.status.bucket_diff
-        self.bucket_pbs     = self.status.bucket_pbs
-        self.bucket_pending = self.status.bucket_pending
-        self.bucket_deleted = self.status.bucket_deleted
-        self.bucket_skip    = self.status.bucket_skip
-        self.bucket_silent  = self.status.bucket_silent
-
-        # Initialize the tester with a pending status
-        self.setStatus('launched', self.bucket_pending)
+        self.bucket_success  = self.status.bucket_success
+        self.bucket_fail     = self.status.bucket_fail
+        self.bucket_diff     = self.status.bucket_diff
+        self.bucket_pending  = self.status.bucket_pending
+        self.bucket_finished = self.status.bucket_finished
+        self.bucket_deleted  = self.status.bucket_deleted
+        self.bucket_skip     = self.status.bucket_skip
+        self.bucket_silent   = self.status.bucket_silent
 
         # Set the status message
         if self.specs['check_input']:
@@ -97,9 +103,38 @@ class Tester(MooseObject):
     def getPrereqs(self):
         return self.specs['prereq']
 
-    # Method to return if the test can run
-    def getRunnable(self):
-        return self.status.getRunnable()
+    def getMooseDir(self):
+        return self.specs['moose_dir']
+
+    def getTestDir(self):
+        return self.specs['test_dir']
+
+    def getExitCode(self):
+        return self.exit_code
+
+    def getOutput(self):
+        return self.std_out
+
+    def setOutput(self, adjusted_text):
+        self.std_out = adjusted_text
+
+    def getStartTime(self):
+        return self.start_time
+
+    def getEndTime(self):
+        return self.end_time
+
+    def getMinReportTime(self):
+        return self.specs['min_reported_time']
+
+    def getMaxTime(self):
+        return self.specs['max_time']
+
+    # A cached method to return if the test can run
+    def getRunnable(self, options):
+        if self._runnable is None:
+            self._runnable = self.checkRunnableBase(options)
+        return self._runnable
 
     # Method to return text color based on current test status
     def getColor(self):
@@ -149,6 +184,30 @@ class Tester(MooseObject):
     def didPass(self):
         return self.status.didPass()
 
+    # Method to check if this test has diff'd
+    def didDiff(self):
+        return self.status.didDiff()
+
+    # Method to check if this test is pending
+    def isPending(self):
+        return self.status.isPending()
+
+    # Method to check if this test is pending
+    def isFinished(self):
+        return self.status.isFinished()
+
+    # Method to check if this test is skipped
+    def isSkipped(self):
+        return self.status.isSkipped()
+
+    # Method to check if this test is silent
+    def isSilent(self):
+        return self.status.isSilent()
+
+    # Method to check if this test is deleted
+    def isDeleted(self):
+        return self.status.isDeleted()
+
     def getCheckInput(self):
         return self.check_input
 
@@ -197,10 +256,19 @@ class Tester(MooseObject):
     def processResults(self, moose_dir, retcode, options, output):
         return
 
+    # Return boolean on test having redirected output
+    def hasRedirectedOutput(self, options):
+        return (self.specs.isValid('redirect_output') and self.specs['redirect_output'] == True and self.getProcs(options) > 1)
+
+    # Return a list of redirected output
+    def getRedirectedOutputFiles(self, options):
+        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
+
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"
-    def checkRunnableBase(self, options, checks, test_list=None):
+    def checkRunnableBase(self, options):
         reasons = {}
+        checks = options._checks
 
         # If --dry-run set the test status to pass and DO NOT return.
         # This will allow additional checks to perform and report tests
@@ -211,7 +279,7 @@ class Tester(MooseObject):
 
         # Check if we only want to run failed tests
         if options.failed_tests:
-            if self.specs['test_name'] not in test_list:
+            if self.specs['test_name'] not in options._test_list:
                 self.setStatus('not failed', self.bucket_silent)
                 return False
 
@@ -383,4 +451,5 @@ class Tester(MooseObject):
             return False
 
         # Check the return values of the derived classes
-        return self.checkRunnable(options)
+        self._runnable = self.checkRunnable(options)
+        return self._runnable
