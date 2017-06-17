@@ -1,0 +1,26 @@
+[Tests]
+  [./Nonconserved_1var]
+    # Test nonconserved action
+    type = Exodiff
+    input = 'Nonconserved_1var.i'
+    exodiff = 'Nonconserved_1var_out.e'
+  [../]
+  [./Nonconserved_highorder]
+    # Test nonconserved action with higher order elements
+    type = Exodiff
+    input = 'Nonconserved_highorder.i'
+    exodiff = 'Nonconserved_highorder_out.e'
+  [../]
+  [./Nonconserved_variableL]
+    # Test nonconserved action with a variable mobility
+    type = Exodiff
+    input = 'Nonconserved_variableL.i'
+    exodiff = 'Nonconserved_variableL_out.e'
+  [../]
+  [./Nonconserved_2vars]
+    # Test nonconserved action with 2 nonconserved variables
+    type = Exodiff
+    input = 'Nonconserved_2vars.i'
+    exodiff = 'Nonconserved_2vars_out.e'
+  [../]
+[]
