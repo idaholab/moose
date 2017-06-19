@@ -16,7 +16,6 @@
 #define DOFMAPOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "FileOutput.h"
 
 // Forward declarations
@@ -29,7 +28,7 @@ InputParameters validParams<DOFMapOutput>();
 /**
  * An output object for writing the DOF map of the system in a machine parsable format
  */
-class DOFMapOutput : public BasicOutput<FileOutput>
+class DOFMapOutput : public FileOutput
 {
 public:
   DOFMapOutput(const InputParameters & parameters);

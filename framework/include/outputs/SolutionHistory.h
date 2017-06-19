@@ -16,7 +16,6 @@
 #define SOLUTIONHISTORY_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "FileOutput.h"
 
 // Forward declerations
@@ -30,7 +29,7 @@ InputParameters validParams<SolutionHistory>();
  *
  * @see Exodus
  */
-class SolutionHistory : public BasicOutput<FileOutput>
+class SolutionHistory : public FileOutput
 {
 public:
   /**

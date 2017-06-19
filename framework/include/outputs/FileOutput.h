@@ -74,7 +74,7 @@ protected:
   /**
    * Checks if the output method should be executed
    */
-  bool shouldOutput(const ExecFlagType & type);
+  virtual bool shouldOutput(const ExecFlagType & type) override;
 
   /**
    * Checks the filename for output

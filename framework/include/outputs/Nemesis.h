@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "AdvancedOutput.h"
-#include "OversampleOutput.h"
 
 // Forward declarations
 class Nemesis;
@@ -34,7 +33,7 @@ InputParameters validParams<Nemesis>();
 /**
  * Class for output data to the Nemesis format
  */
-class Nemesis : public AdvancedOutput<OversampleOutput>
+class Nemesis : public AdvancedOutput
 {
 public:
   /**
@@ -48,12 +47,6 @@ public:
   virtual ~Nemesis();
 
   /**
-   * Overload the Output::output method, this is required for Nemesis
-   * output due to the method utilized for outputing single/global parameters
-   */
-  virtual void output(const ExecFlagType & type) override;
-
-  /**
    * Sets up the libMesh::NemesisII_IO object used for outputting to the Nemesis format
    */
   virtual void initialSetup() override;
@@ -64,6 +57,12 @@ public:
   virtual void meshChanged() override;
 
 protected:
+  /**
+   * Overload the Output::output method, this is required for Nemesis
+   * output due to the method utilized for outputing single/global parameters
+   */
+  virtual void output(const ExecFlagType & type) override;
+
   /**
    * Writes postprocessor values to global output parameters
    */

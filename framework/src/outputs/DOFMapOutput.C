@@ -33,7 +33,7 @@ InputParameters
 validParams<DOFMapOutput>()
 {
   // Get the parameters from the base class
-  InputParameters params = validParams<BasicOutput<FileOutput>>();
+  InputParameters params = validParams<FileOutput>();
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", false, "Output to the screen");
@@ -47,7 +47,7 @@ validParams<DOFMapOutput>()
 }
 
 DOFMapOutput::DOFMapOutput(const InputParameters & parameters)
-  : BasicOutput<FileOutput>(parameters),
+  : FileOutput(parameters),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _system_name(getParam<std::string>("system_name")),

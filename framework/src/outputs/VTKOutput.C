@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<VTKOutput>()
 {
-  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Set default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -35,7 +35,7 @@ validParams<VTKOutput>()
 }
 
 VTKOutput::VTKOutput(const InputParameters & parameters)
-  : BasicOutput<OversampleOutput>(parameters), _binary(getParam<bool>("binary"))
+  : OversampleOutput(parameters), _binary(getParam<bool>("binary"))
 {
 }
 

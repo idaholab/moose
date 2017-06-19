@@ -28,8 +28,8 @@ InputParameters
 validParams<Nemesis>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput<OversampleOutput>>();
-  params += AdvancedOutput<OversampleOutput>::enableOutputTypes("scalar postprocessor input");
+  InputParameters params = validParams<AdvancedOutput>();
+  params += AdvancedOutput::enableOutputTypes("scalar postprocessor input");
 
   // Add description for the Nemesis class
   params.addClassDescription("Object for output data in the Nemesis format");
@@ -39,7 +39,7 @@ validParams<Nemesis>()
 }
 
 Nemesis::Nemesis(const InputParameters & parameters)
-  : AdvancedOutput<OversampleOutput>(parameters),
+  : AdvancedOutput(parameters),
     _nemesis_io_ptr(nullptr),
     _file_num(0),
     _nemesis_num(0),
@@ -52,8 +52,8 @@ Nemesis::~Nemesis() {}
 void
 Nemesis::initialSetup()
 {
-  // Call the base class method
-  AdvancedOutput<OversampleOutput>::initialSetup();
+
+  AdvancedOutput::initialSetup();
 
   // Make certain that a Nemesis_IO object exists
   meshChanged();
@@ -62,9 +62,6 @@ Nemesis::initialSetup()
 void
 Nemesis::meshChanged()
 {
-  // Maintain Oversample::meshChanged() functionality
-  OversampleOutput::meshChanged();
-
   // Do not delete the Nemesis_IO object if it has not been used; also there is no need to setup
   // the object in this case, so just return
   if (_nemesis_io_ptr != nullptr && !_nemesis_initialized)
@@ -77,7 +74,7 @@ Nemesis::meshChanged()
   _nemesis_num = 1;
 
   // Create the new NemesisIO object
-  _nemesis_io_ptr = libmesh_make_unique<Nemesis_IO>(_mesh_ptr->getMesh());
+  _nemesis_io_ptr = libmesh_make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
   _nemesis_initialized = false;
 }
 
@@ -132,7 +129,7 @@ Nemesis::outputScalarVariables()
 void
 Nemesis::output(const ExecFlagType & type)
 {
-  if (!OversampleOutput::shouldOutput(type))
+  if (!shouldOutput(type))
     return;
 
   // Clear the global variables (postprocessors and scalars)
@@ -140,7 +137,7 @@ Nemesis::output(const ExecFlagType & type)
   _global_values.clear();
 
   // Call the output methods
-  AdvancedOutput<OversampleOutput>::output(type);
+  AdvancedOutput::output(type);
 
   // Write the data
   _nemesis_io_ptr->write_timestep(
