@@ -232,6 +232,10 @@ class Scheduler(MooseObject):
             # place this job back in the runner queue because it was not ready to launch (prereqs)
             self._runnerGo(tester.getTestName())
 
+            # We should spin here for just a bit; A runner and status thread will rapidly hand off a
+            # job to each other for tests that can't run yet due to a prereq not being ready.
+            sleep(0.1)
+
     # Runner processing (blocking calls to the run method)
     def jobRunner(self, queue):
         # Get a job

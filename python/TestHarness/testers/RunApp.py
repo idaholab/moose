@@ -177,7 +177,8 @@ class RunApp(Tester):
 
         return command
 
-    def processResults(self, moose_dir, retcode, options, output):
+    # Set a failure status for expressions found in output
+    def testFileOutput(self, moose_dir, retcode, options, output):
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
@@ -208,6 +209,14 @@ class RunApp(Tester):
             # Valgrind runs
             elif retcode == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
                 reason = 'MEMORY ERROR'
+
+        if reason != '':
+            self.setStatus(reason, self.bucket_fail)
+
+        return reason
+
+    def processResults(self, moose_dir, retcode, options, output):
+        reason = self.testFileOutput(moose_dir, retcode, options, output)
 
         # Populate the bucket
         if reason != '':

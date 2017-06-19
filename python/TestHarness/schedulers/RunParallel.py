@@ -23,7 +23,7 @@ class RunParallel(Scheduler):
         Scheduler.__init__(self, harness, params)
 
     ## Run the test!
-    ## Note: use thread_lock when writing changes to the tester object
+    ## Note: use thread_lock where necessary
     #
     #  with thread_lock:
     #      do protected stuff
@@ -38,34 +38,33 @@ class RunParallel(Scheduler):
             # Ask if this test is allowed to run based on other test's circumstances
             status_check = StatusDependency(tester, testers, options)
             if status_check.checkAndSetStatus():
-                with thread_lock:
-                    # Get the command needed to run this test
-                    command = tester.getCommand(options)
+                # Get the command needed to run this test
+                command = tester.getCommand(options)
 
-                    # Prepare to run the test
-                    tester.prepare(options)
+                # Prepare to run the test
+                tester.prepare(options)
 
-                    # If shouldExecute was false, there is process or output to work with so pass
-                    # control over to testOutput now, to run processResults and complete the test
-                    if not tester.shouldExecute() or options.dry_run:
-                        tester.start_time = clock()
-                        tester.exit_code = 0
-                        tester.end_time = clock()
-                        tester.std_out = ''
-                        self.testOutput(tester, testers, '', options, thread_lock)
-                        return
-                    else:
-                        # Launch the command and start the clock
-                        (process, output_file, start_time) = returnCommand(tester, command)
+                # If shouldExecute was false, there is process or output to work with so pass
+                # control over to testOutput now, to run processResults and complete the test
+                if not tester.shouldExecute() or options.dry_run:
+                    tester.start_time = clock()
+                    tester.exit_code = 0
+                    tester.end_time = clock()
+                    tester.std_out = ''
+                    self.testOutput(tester, testers, '', options)
+                    return
+                else:
+                    # Launch the command and start the clock
+                    (process, output_file, start_time) = returnCommand(tester, command)
 
-                    # Set the tester's start time
-                    tester.start_time = start_time
+                # Set the tester's start time
+                tester.start_time = start_time
 
-                # We're a thread so wait for the process to complete outside the thread_lock
+                # We're a thread so wait for the process to complete
                 process.wait()
                 tester.end_time = clock()
 
-                # Did the process fail and we didn't know it (timeouts)?
+                # Did the process fail and we didn't know it (someone told the testharness we timed out)?
                 if tester.didFail():
                     return
 
@@ -78,7 +77,7 @@ class RunParallel(Scheduler):
                     output_file.close()
 
                     # Process the results and beautify the output
-                    self.testOutput(tester, testers, results, options, thread_lock)
+                    self.testOutput(tester, testers, results, options)
 
                 # This test failed to launch properly
                 else:
@@ -94,7 +93,7 @@ class RunParallel(Scheduler):
             return True
 
     # Modify the output the way we want it. Run processResults
-    def testOutput(self, tester, testers, results, options, thread_lock):
+    def testOutput(self, tester, testers, results, options):
         # create verbose header
         output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(options) + '\n'
 
@@ -104,14 +103,8 @@ class RunParallel(Scheduler):
             tester.setStatus(tester.getSuccessMessage(), tester.bucket_success)
             return
 
-        # We need to know if we should lock the thread pool while we run processResults
-        if self.getDependents(tester, testers):
-            with thread_lock:
-                # process and append the test results to output
-                output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)
-        else:
-            # process and append the test results to output
-            output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)
+        # process and append the test results to output
+        output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)
 
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
