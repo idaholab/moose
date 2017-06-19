@@ -75,7 +75,7 @@ FlowJunction::addMooseObjects()
     params.set<MultiMooseEnum>("execute_on") = execute_options;
     params.set<std::string>("r7:output") = "none";
     // coupling
-    params.set<std::vector<VariableName>>("area") = cv_area;
+    params.set<std::vector<VariableName>>("A") = cv_area;
 
     _sim.addPostprocessor("PressureCB", c_pps, params);
   }
@@ -96,7 +96,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
       params.set<std::vector<VariableName>>("vel") = cv_vel;
-      params.set<std::vector<VariableName>>("area") = cv_area;
+      params.set<std::vector<VariableName>>("A") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
       params.set<std::vector<VariableName>>("H") = cv_enthalpy;
       params.set<MaterialPropertyName>("p") = FlowModel::PRESSURE;
@@ -114,7 +114,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
       params.set<std::vector<VariableName>>("vel") = cv_vel;
-      params.set<std::vector<VariableName>>("area") = cv_area;
+      params.set<std::vector<VariableName>>("A") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
       params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
       params.set<std::vector<VariableName>>("H") = cv_enthalpy;
@@ -134,7 +134,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
       params.set<std::vector<VariableName>>("vel") = cv_vel;
       params.set<std::vector<VariableName>>("H") = cv_enthalpy;
-      params.set<std::vector<VariableName>>("area") = cv_area;
+      params.set<std::vector<VariableName>>("A") = cv_area;
       params.set<MaterialPropertyName>("p") = FlowModel::PRESSURE;
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real>>("scaling_factors") = _scaling_factor_bcs;
@@ -161,7 +161,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<VariableName>>("v") = cv_v;
     params.set<std::vector<VariableName>>("vel") = cv_vel;
     params.set<std::vector<VariableName>>("p") = cv_pressure;
-    params.set<std::vector<VariableName>>("area") = cv_area;
+    params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
     params.set<std::vector<VariableName>>("H") = cv_enthalpy;
 
