@@ -10,7 +10,7 @@ validParams<OneDMomentumFlux>()
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("vel", "Velocity");
-  params.addRequiredCoupledVar("area", "cross-sectional area");
+  params.addRequiredCoupledVar("A", "cross-sectional area");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   return params;
@@ -26,7 +26,7 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoA")),
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "rhouA")),
     _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoEA")),
-    _area(coupledValue("area")),
+    _area(coupledValue("A")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(coupled("rhoEA")),
     _beta(coupledValue("beta")),

@@ -8,7 +8,7 @@ validParams<OneDMomentumAreaGradient>()
   params.addRequiredCoupledVar("arhoA", "The density of the kth phase");
   params.addRequiredCoupledVar("arhouA", "The momentum of the kth phase");
   params.addRequiredCoupledVar("arhoEA", "The total energy of the kth phase");
-  params.addRequiredCoupledVar("area", "Cross-sectional area");
+  params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
@@ -21,8 +21,8 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
     _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
                                     : nullptr),
 
-    _area(coupledValue("area")),
-    _area_grad(coupledGradient("area")),
+    _area(coupledValue("A")),
+    _area_grad(coupledGradient("A")),
     _pressure(getMaterialProperty<Real>("p")),
     _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoA")),
