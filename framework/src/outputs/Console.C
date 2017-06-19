@@ -297,7 +297,7 @@ Console::initialSetup()
   _allow_changing_sysinfo_flag = false;
 
   // If execute_on = 'initial' perform the output
-  if (shouldOutput("system_information", EXEC_INITIAL))
+  if (wantOutput("system_information", EXEC_INITIAL))
     outputSystemInformation();
 
   // Call the base class method
@@ -346,11 +346,11 @@ Console::output(const ExecFlagType & type)
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the
   // user
-  if (shouldOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
+  if (wantOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
     outputSystemInformation();
 
   // Write the input
-  if (shouldOutput("input", type))
+  if (wantOutput("input", type))
     outputInput();
 
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
@@ -391,10 +391,10 @@ Console::output(const ExecFlagType & type)
   }
 
   // Write Postprocessors and Scalars
-  if (shouldOutput("postprocessors", type))
+  if (wantOutput("postprocessors", type))
     outputPostprocessors();
 
-  if (shouldOutput("scalars", type))
+  if (wantOutput("scalars", type))
     outputScalarVariables();
 
   // Write the file

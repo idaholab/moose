@@ -16,7 +16,6 @@
 #define CONTROLOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "Output.h"
 
 // Forward declarations
@@ -28,7 +27,7 @@ InputParameters validParams<ControlOutput>();
 /**
  * Class for output information regarding Controls to the screen
  */
-class ControlOutput : public BasicOutput<Output>
+class ControlOutput : public Output
 {
 public:
   /**

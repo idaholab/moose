@@ -24,7 +24,7 @@ InputParameters
 validParams<GMVOutput>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");
@@ -38,7 +38,7 @@ validParams<GMVOutput>()
 }
 
 GMVOutput::GMVOutput(const InputParameters & parameters)
-  : BasicOutput<OversampleOutput>(parameters), _binary(getParam<bool>("binary"))
+  : OversampleOutput(parameters), _binary(getParam<bool>("binary"))
 {
 }
 

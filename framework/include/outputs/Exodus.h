@@ -16,7 +16,6 @@
 #define EXODUS_H
 
 // MOOSE includes
-#include "AdvancedOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declarations
@@ -34,7 +33,7 @@ InputParameters validParams<Exodus>();
 /**
  * Class for output data to the ExodusII format
  */
-class Exodus : public AdvancedOutput<OversampleOutput>
+class Exodus : public OversampleOutput
 {
 public:
   /**

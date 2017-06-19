@@ -16,7 +16,6 @@
 #define MATERIALPROPERTYDEBUGOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "Output.h"
 
 // Forward declerations
@@ -31,7 +30,7 @@ InputParameters validParams<MaterialPropertyDebugOutput>();
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class MaterialPropertyDebugOutput : public BasicOutput<Output>
+class MaterialPropertyDebugOutput : public Output
 {
 public:
   /**

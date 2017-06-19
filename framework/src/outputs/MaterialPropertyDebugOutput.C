@@ -26,7 +26,7 @@ template <>
 InputParameters
 validParams<MaterialPropertyDebugOutput>()
 {
-  InputParameters params = validParams<BasicOutput<Output>>();
+  InputParameters params = validParams<Output>();
 
   // This object only outputs data once, in the constructor, so disable fine control
   params.suppressParameter<MultiMooseEnum>("execute_on");
@@ -35,7 +35,7 @@ validParams<MaterialPropertyDebugOutput>()
 }
 
 MaterialPropertyDebugOutput::MaterialPropertyDebugOutput(const InputParameters & parameters)
-  : BasicOutput<Output>(parameters)
+  : Output(parameters)
 {
   printMaterialMap();
 }

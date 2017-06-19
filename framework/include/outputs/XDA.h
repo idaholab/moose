@@ -16,7 +16,6 @@
 #define XDA_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declearations
@@ -28,7 +27,7 @@ InputParameters validParams<XDA>();
 /**
  * Class for output data to the XDAII format
  */
-class XDA : public BasicOutput<OversampleOutput>
+class XDA : public OversampleOutput
 {
 public:
   /**

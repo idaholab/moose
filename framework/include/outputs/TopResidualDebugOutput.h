@@ -16,7 +16,6 @@
 #define TOPRESIDUALEBUGOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "PetscOutput.h"
 
 // libMesh includes
@@ -55,7 +54,7 @@ struct TopResidualDebugOutputTopResidualData
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class TopResidualDebugOutput : public BasicOutput<PetscOutput>
+class TopResidualDebugOutput : public PetscOutput
 {
 public:
   /**

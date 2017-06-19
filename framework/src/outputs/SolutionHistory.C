@@ -22,16 +22,13 @@ InputParameters
 validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<BasicOutput<FileOutput>>();
+  InputParameters params = validParams<FileOutput>();
 
   // Return the parameters
   return params;
 }
 
-SolutionHistory::SolutionHistory(const InputParameters & parameters)
-  : BasicOutput<FileOutput>(parameters)
-{
-}
+SolutionHistory::SolutionHistory(const InputParameters & parameters) : FileOutput(parameters) {}
 
 std::string
 SolutionHistory::filename()

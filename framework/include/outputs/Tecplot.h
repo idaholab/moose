@@ -16,7 +16,6 @@
 #define TECPLOT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declarations
@@ -28,7 +27,7 @@ InputParameters validParams<Tecplot>();
 /**
  * Class for output data to the TecplotII format
  */
-class Tecplot : public BasicOutput<OversampleOutput>
+class Tecplot : public OversampleOutput
 {
 public:
   /**

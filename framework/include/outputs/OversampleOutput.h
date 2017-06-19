@@ -16,7 +16,7 @@
 #define OVERSAMPLEOUTPUT_H
 
 // MOOSE includes
-#include "FileOutput.h"
+#include "AdvancedOutput.h"
 
 // Forward declerations
 class OversampleOutput;
@@ -48,7 +48,7 @@ InputParameters validParams<OversampleOutput>();
  *
  * @see Exodus
  */
-class OversampleOutput : public FileOutput
+class OversampleOutput : public AdvancedOutput
 {
 public:
   /**
@@ -78,6 +78,8 @@ protected:
    * Performs the update of the solution vector for the oversample/re-positioned mesh
    */
   virtual void updateOversample();
+
+  virtual void outputStep(const ExecFlagType & type) override;
 
   /**
    * A convenience pointer to the current mesh (reference or displaced depending on "use_displaced")

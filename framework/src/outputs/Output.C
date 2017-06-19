@@ -24,6 +24,8 @@
 #include "Restartable.h"
 #include "FileMesh.h"
 #include "MooseUtils.h"
+#include "MooseApp.h"
+#include "Console.h"
 
 // libMesh includes
 #include "libmesh/equation_systems.h"
@@ -139,9 +141,32 @@ Output::solveSetup()
 {
 }
 
+void
+Output::outputStep(const ExecFlagType & type)
+{
+  // Output is not allowed
+  if (!_allow_output && type != EXEC_FORCED)
+    return;
+
+  // If recovering disable output of initial condition, it was already output
+  if (type == EXEC_INITIAL && _app.isRecovering())
+    return;
+
+  // Return if the current output is not on the desired interval
+  if (type != EXEC_FINAL && !onInterval())
+    return;
+
+  // Call the output method
+  if (shouldOutput(type))
+    output(type);
+}
+
 bool
 Output::shouldOutput(const ExecFlagType & type)
 {
+  // Note that in older versions of MOOSE, this was overloaded (unintentionally) to always return
+  // true for the Console output subclass - basically ignoring execute_on options specified for
+  // the console (e.g. via the input file).
   if (_execute_on.contains(type) || type == EXEC_FORCED)
     return true;
   return false;

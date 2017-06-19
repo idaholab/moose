@@ -31,9 +31,8 @@ InputParameters
 validParams<Exodus>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput<OversampleOutput>>();
-  params += AdvancedOutput<OversampleOutput>::enableOutputTypes(
-      "nodal elemental scalar postprocessor input");
+  InputParameters params = validParams<OversampleOutput>();
+  params += AdvancedOutput::enableOutputTypes("nodal elemental scalar postprocessor input");
 
   // Enable sequential file output (do not set default, the use_displace criteria relies on
   // isParamValid, see Constructor)
@@ -67,7 +66,7 @@ validParams<Exodus>()
 }
 
 Exodus::Exodus(const InputParameters & parameters)
-  : AdvancedOutput<OversampleOutput>(parameters),
+  : OversampleOutput(parameters),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
@@ -82,7 +81,7 @@ void
 Exodus::initialSetup()
 {
   // Call base class setup method
-  AdvancedOutput<OversampleOutput>::initialSetup();
+  AdvancedOutput::initialSetup();
 
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
@@ -312,7 +311,7 @@ Exodus::output(const ExecFlagType & type)
   _global_values.clear();
 
   // Call the individual output methods
-  AdvancedOutput<OversampleOutput>::output(type);
+  AdvancedOutput::output(type);
 
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())

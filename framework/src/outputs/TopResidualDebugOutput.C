@@ -30,7 +30,7 @@ template <>
 InputParameters
 validParams<TopResidualDebugOutput>()
 {
-  InputParameters params = validParams<BasicOutput<PetscOutput>>();
+  InputParameters params = validParams<PetscOutput>();
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<unsigned int>(
@@ -42,7 +42,7 @@ validParams<TopResidualDebugOutput>()
 }
 
 TopResidualDebugOutput::TopResidualDebugOutput(const InputParameters & parameters)
-  : BasicOutput<PetscOutput>(parameters),
+  : PetscOutput(parameters),
     _num_residuals(getParam<unsigned int>("num_residuals")),
     _sys(_problem_ptr->getNonlinearSystemBase().system())
 {
