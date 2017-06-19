@@ -7,7 +7,7 @@ validParams<SpecificVolumeIC>()
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredCoupledVar("rhoA",
                                "Density of the phase (conserved), \alpha \rho A for 2-phase model");
-  params.addRequiredCoupledVar("area", "Cross-sectional area");
+  params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("alpha", 1., "Volume fraction");
   return params;
 }
@@ -15,7 +15,7 @@ validParams<SpecificVolumeIC>()
 SpecificVolumeIC::SpecificVolumeIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _rhoA(coupledValue("rhoA")),
-    _area(coupledValue("area")),
+    _area(coupledValue("A")),
     _alpha(coupledValue("alpha"))
 {
 }
