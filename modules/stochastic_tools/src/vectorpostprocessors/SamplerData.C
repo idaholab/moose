@@ -16,6 +16,8 @@ InputParameters
 validParams<SamplerData>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
+  params.addClassDescription(
+      "Tool for extracting Sampler object data and storing in VectorPostprocessor vectors.");
   params += validParams<SamplerInterface>();
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");

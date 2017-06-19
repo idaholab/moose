@@ -10,14 +10,17 @@
 
 #include "Distribution.h"
 
-#ifdef LIBMESH_HAVE_BOOST
-
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 #include <boost/math/distributions.hpp>
+#endif
 
 /**
  * A class used to as a base for distributions defined by Boost.
+ *
+ * The default type is set to double to allow for derived classes to compile without Boost and
+ * trigger the mooseError in the constructor.
  */
-template <typename T>
+template <typename T = Real>
 class BoostDistribution : public Distribution
 {
 public:
@@ -29,38 +32,57 @@ protected:
   virtual Real quantile(const Real & y) override;
 
   /// This must be defined by the child class in the constructor
-  std::unique_ptr<T> _boost_distribution;
+  std::unique_ptr<T> _distribution_unique_ptr;
 };
 
 template <typename T>
 BoostDistribution<T>::BoostDistribution(const InputParameters & parameters)
   : Distribution(parameters)
 {
+#ifndef LIBMESH_HAVE_EXTERNAL_BOOST
+  mooseError("The ",
+             getParam<std::string>("type"),
+             " distribution named '",
+             name(),
+             "' requires that libMesh be compiled with an external Boost library, this may be done "
+             "using the --with-boost configure option.");
+#endif
 }
 
 template <typename T>
 Real
 BoostDistribution<T>::pdf(const Real & x)
 {
-  mooseAssert(_boost_distribution, "Boost distribution pointer not defined.");
-  return boost::math::pdf(*_boost_distribution, x);
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+  mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  return boost::math::pdf(*_distribution_unique_ptr, x);
+#else
+  return x; // unreachable
+#endif
 }
 
 template <typename T>
 Real
 BoostDistribution<T>::cdf(const Real & x)
 {
-  mooseAssert(_boost_distribution, "Boost distribution pointer not defined.");
-  return boost::math::cdf(*_boost_distribution, x);
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+  mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  return boost::math::cdf(*_distribution_unique_ptr, x);
+#else
+  return x; // unreachable
+#endif
 }
 
 template <typename T>
 Real
 BoostDistribution<T>::quantile(const Real & y)
 {
-  mooseAssert(_boost_distribution, "Boost distribution pointer not defined.");
-  return boost::math::quantile(*_boost_distribution, y);
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+  mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  return boost::math::quantile(*_distribution_unique_ptr, y);
+#else
+  return y; // unreachable
+#endif
 }
 
-#endif // LIBMESH_HAVE_BOOST
 #endif // BOOSTDISTRIBUTION_H

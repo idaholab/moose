@@ -1595,6 +1595,7 @@ FEProblemBase::addDistribution(std::string type,
                                InputParameters parameters)
 {
   setInputParametersFEProblem(parameters);
+  parameters.set<std::string>("type") = type;
   std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters);
   _distributions.addObject(dist);
 }
