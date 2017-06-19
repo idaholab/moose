@@ -28,22 +28,22 @@ FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters &
     _rho(declareProperty<Real>("rho")),
     _drho_drhoA(declarePropertyDerivativeRelap<Real>("rho", "rhoA")),
 
-    _v(declareProperty<Real>("specific_volume")),
-    _dv_drhoA(declarePropertyDerivativeRelap<Real>("specific_volume", "rhoA")),
+    _v(declareProperty<Real>("v")),
+    _dv_drhoA(declarePropertyDerivativeRelap<Real>("v", "rhoA")),
 
     _vel(declareProperty<Real>("vel")),
     _dvel_drhoA(declarePropertyDerivativeRelap<Real>("vel", "rhoA")),
     _dvel_drhouA(declarePropertyDerivativeRelap<Real>("vel", "rhouA")),
 
-    _e(declareProperty<Real>("specific_internal_energy")),
-    _de_drhoA(declarePropertyDerivativeRelap<Real>("specific_internal_energy", "rhoA")),
-    _de_drhouA(declarePropertyDerivativeRelap<Real>("specific_internal_energy", "rhouA")),
-    _de_drhoEA(declarePropertyDerivativeRelap<Real>("specific_internal_energy", "rhoEA")),
+    _e(declareProperty<Real>("e")),
+    _de_drhoA(declarePropertyDerivativeRelap<Real>("e", "rhoA")),
+    _de_drhouA(declarePropertyDerivativeRelap<Real>("e", "rhouA")),
+    _de_drhoEA(declarePropertyDerivativeRelap<Real>("e", "rhoEA")),
 
-    _p(declareProperty<Real>("pressure")),
-    _dp_drhoA(declarePropertyDerivativeRelap<Real>("pressure", "rhoA")),
-    _dp_drhouA(declarePropertyDerivativeRelap<Real>("pressure", "rhouA")),
-    _dp_drhoEA(declarePropertyDerivativeRelap<Real>("pressure", "rhoEA")),
+    _p(declareProperty<Real>("p")),
+    _dp_drhoA(declarePropertyDerivativeRelap<Real>("p", "rhoA")),
+    _dp_drhouA(declarePropertyDerivativeRelap<Real>("p", "rhouA")),
+    _dp_drhoEA(declarePropertyDerivativeRelap<Real>("p", "rhoEA")),
 
     _T(declareProperty<Real>("temperature")),
     _dT_drhoA(declarePropertyDerivativeRelap<Real>("temperature", "rhoA")),
