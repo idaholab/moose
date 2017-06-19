@@ -1,7 +1,5 @@
-# Tests correct calculation of properties derivatives in PorousFlowFluidStateWaterNCG.
-# This test is run three times, with the initial condition of z (the total mass
-# fraction of NCG in all phases) varied to give either a single phase liquid, a
-# single phase gas, or two phases.
+# Tests correct calculation of properties derivatives in PorousFlowFluidStateWaterNCG
+# for conditions for two phases
 
 [Mesh]
   type = GeneratedMesh
@@ -23,29 +21,16 @@
 []
 
 [ICs]
-  active = 'pgas z_twophase'
   [./pgas]
     type = RandomIC
     min = 1e5
-    max = 2e5
+    max = 5e5
     variable = pgas
   [../]
-  [./z_twophase]
+  [./z]
     type = RandomIC
-    min = 0.2
-    max = 0.8
-    variable = z
-  [../]
-  [./z_liquid]
-    type = RandomIC
-    min = 0.0001
-    max = 0.0005
-    variable = z
-  [../]
-  [./z_gas]
-    type = RandomIC
-    min = 0.97
-    max = 0.99
+    min = 0.01
+    max = 0.2
     variable = z
   [../]
 []
@@ -160,5 +145,34 @@
   [./smp]
     type = SMP
     full = true
+  [../]
+[]
+
+[AuxVariables]
+  [./sgas]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./sgas]
+    type = PorousFlowPropertyAux
+    property = saturation
+    phase = 1
+    variable = sgas
+  [../]
+[]
+
+[Postprocessors]
+  [./sgas_min]
+    type = ElementExtremeValue
+    variable = sgas
+    value_type = min
+  [../]
+  [./sgas_max]
+    type = ElementExtremeValue
+    variable = sgas
+    value_type = max
   [../]
 []
