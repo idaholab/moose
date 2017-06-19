@@ -52,6 +52,10 @@ LIBMESH_OPTIONS = {
   'petsc_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_MINOR\s+(\d+)',
                      'default'   : '1'
                    },
+  'petsc_version_release' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_RELEASE\s+(\d+)',
+                     'default'   : 'TRUE',
+                     'options'   : {'TRUE'  : '1', 'FALSE' : '0'}
+                   },
   'slepc_major' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_SLEPC_VERSION_MAJOR\s+(\d+)',
                      'default'   : '1'
                    },

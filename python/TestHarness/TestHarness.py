@@ -86,6 +86,7 @@ class TestHarness:
         if self.options.skip_config_checks:
             self.checks['compiler'] = set(['ALL'])
             self.checks['petsc_version'] = 'N/A'
+            self.checks['petsc_version_release'] = 'N/A'
             self.checks['slepc_version'] = 'N/A'
             self.checks['library_mode'] = set(['ALL'])
             self.checks['mesh_mode'] = set(['ALL'])
@@ -105,6 +106,7 @@ class TestHarness:
         else:
             self.checks['compiler'] = getCompilers(self.libmesh_dir)
             self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
+            self.checks['petsc_version_release'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_version_release')
             self.checks['slepc_version'] = getSlepcVersion(self.libmesh_dir)
             self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
             self.checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
