@@ -30,7 +30,7 @@ LIBMESH_OPTIONS = {
       'FALSE' : '0'
       }
                      },
-  'boost' :        { 're_option' : r'#define\s+LIBMESH_HAVE_BOOST\s+(\d+)',
+  'boost' :        { 're_option' : r'#define\s+LIBMESH_HAVE_EXTERNAL_BOOST\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   :
                        {

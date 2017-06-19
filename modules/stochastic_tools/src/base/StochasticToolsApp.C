@@ -8,9 +8,7 @@
 
 // Distributions
 #include "UniformDistribution.h"
-#ifdef LIBMESH_HAVE_BOOST
 #include "WeibullDistribution.h"
-#endif
 
 // Samplers
 #include "MonteCarloSampler.h"
@@ -68,9 +66,7 @@ StochasticToolsApp::registerObjects(Factory & factory)
 
   // Distributions
   registerDistribution(UniformDistribution);
-#ifdef LIBMESH_HAVE_BOOST
   registerDistribution(WeibullDistribution);
-#endif
 
   // Samplers
   registerSampler(MonteCarloSampler);

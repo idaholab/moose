@@ -21,14 +21,13 @@ validParams<MonteCarloSampler>()
 MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
   : Sampler(parameters), _num_samples(getParam<unsigned int>("n_samples"))
 {
-  checkSeedNumber(1);
 }
 
 DenseMatrix<Real>
-MonteCarloSampler::sampleDistribution(Distribution & distribution, unsigned int)
+MonteCarloSampler::sampleDistribution(Distribution & distribution, std::size_t)
 {
   DenseMatrix<Real> output(_num_samples, 1);
   for (std::size_t i = 0; i < _num_samples; ++i)
-    output(i, 0) = distribution.quantile(_generator.rand(0));
+    output(i, 0) = distribution.quantile(rand());
   return output;
 }

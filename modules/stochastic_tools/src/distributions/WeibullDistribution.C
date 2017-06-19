@@ -7,8 +7,6 @@
 
 #include "WeibullDistribution.h"
 
-#ifdef LIBMESH_HAVE_BOOST
-
 template <>
 InputParameters
 validParams<WeibullDistribution>()
@@ -23,7 +21,8 @@ validParams<WeibullDistribution>()
 WeibullDistribution::WeibullDistribution(const InputParameters & parameters)
   : BoostDistribution(parameters)
 {
-  _boost_distribution = libmesh_make_unique<boost::math::weibull_distribution<Real>>(
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+  _distribution_unique_ptr = libmesh_make_unique<boost::math::weibull_distribution<Real>>(
       getParam<Real>("shape"), getParam<Real>("scale"));
-}
 #endif
+}

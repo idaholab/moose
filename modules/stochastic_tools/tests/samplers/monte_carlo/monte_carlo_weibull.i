@@ -23,7 +23,6 @@
     type = MonteCarloSampler
     n_samples = 10
     distributions = 'weibull'
-    outputs = 'csv'
     execute_on = 'initial timestep_end'
   [../]
 []

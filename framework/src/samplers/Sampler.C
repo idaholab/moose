@@ -26,14 +26,9 @@ validParams<Sampler>()
   params += validParams<DistributionInterface>();
 
   params.addClassDescription("A base class for distribution sampling.");
-  params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "The names of distributions that you want to sample.");
-  params.addParam<std::vector<unsigned int>>("seeds",
-                                             std::vector<unsigned int>(1, 19800624),
-                                             "Random number generator initial seed(s), "
-                                             "each seed will initialize a new generator "
-                                             "in the MooseRandom object.");
+  params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
   return params;
 }
@@ -43,13 +38,12 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
-    _seeds(getParam<std::vector<unsigned int>>("seeds"))
+    _seed(getParam<unsigned int>("seed"))
 {
-  for (std::size_t i = 0; i < _seeds.size(); ++i)
-    _generator.seed(i, _seeds[i]);
-
+  _generator.seed(0, _seed);
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
+  setNumberOfRequiedRandomSeeds(1);
 }
 
 void
@@ -73,15 +67,24 @@ Sampler::getSamples()
   return output;
 }
 
-void
-Sampler::checkSeedNumber(unsigned int required) const
+double
+Sampler::rand(const unsigned int index)
 {
-  if (_seeds.size() < required)
-    mooseError("The '",
-               name(),
-               "' sampler requires ",
-               required,
-               " seeds but only ",
-               _seeds.size(),
-               " was provided.");
+  mooseAssert(index < _seeds.size(), "The seed number index does not exists.");
+  return _generator.rand(_seeds[index]);
+}
+
+void
+Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
+{
+  if (number == 0)
+    mooseError("The number of seeds must be larger than zero.");
+  _seeds.resize(number);
+  _seeds[0] = _seed;
+  _generator.seed(0, _seed);
+  for (std::size_t i = 1; i < number; ++i)
+  {
+    _seeds[i] = _seeds[0] + 1;
+    _generator.seed(i, _seeds[i]);
+  }
 }

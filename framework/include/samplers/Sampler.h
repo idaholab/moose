@@ -15,6 +15,10 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
+// libMesh includes
+#include "libmesh/dense_matrix.h"
+
+// MOOSE includes
 #include "MooseObject.h"
 #include "MooseRandom.h"
 #include "SetupInterface.h"
@@ -64,11 +68,6 @@ public:
   std::vector<DenseMatrix<Real>> getSamples();
 
   /**
-   * Error if the supplied number of seeds was not specified.
-   */
-  void checkSeedNumber(unsigned int required) const;
-
-  /**
    * Store the state of the MooseRandom generator so that new calls to getSamples will create
    * new numbers.
    */
@@ -76,9 +75,25 @@ public:
 
 protected:
   /**
+   * Get the next random number from the generator.
+   * @param offset The index of the seed, by default this is zero. To add additional seeds
+   *               indices call the setNumberOfRequiedRandomSeeds method.
+   *
+   * Returns a double for the random number, this is double because MooseRandom class uses double.
+   */
+  double rand(unsigned int index = 0);
+
+  /**
    * Base class must override this method to supply the sample distribution data.
    */
   virtual DenseMatrix<Real> sampleDistribution(Distribution &, unsigned int) = 0;
+
+  /**
+   * Set the number of seeds required by the sampler. The Sampler will generate
+   * additional seeds as needed. This function should be called in the constructor
+   * of child objects.
+   */
+  void setNumberOfRequiedRandomSeeds(const std::size_t & number);
 
   /// Map used to store the perturbed parameters and their corresponding distributions
   std::vector<Distribution *> _distributions;
@@ -86,11 +101,16 @@ protected:
   /// Distribution names
   const std::vector<DistributionName> & _distribution_names;
 
-  /// Generator seeds from the input parameters
-  const std::vector<unsigned int> & _seeds;
-
-  /// Random number generator
+private:
+  /// Random number generator, don't give users access we want to control it via the interface
+  /// from this class.
   MooseRandom _generator;
+
+  /// Initial random number seed
+  const unsigned int & _seed;
+
+  /// Generated list of seeds
+  std::vector<unsigned int> _seeds;
 };
 
 #endif /* SAMPLER_H */

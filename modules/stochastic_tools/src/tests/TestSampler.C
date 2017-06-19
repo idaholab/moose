@@ -14,7 +14,7 @@ validParams<TestSampler>()
   InputParameters params = validParams<ElementUserObject>();
   params.addRequiredParam<SamplerName>("sampler", "The sampler to test.");
 
-  MooseEnum test_type("mpi thread check_seed_error");
+  MooseEnum test_type("mpi thread");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   return params;
 }
@@ -25,8 +25,6 @@ TestSampler::TestSampler(const InputParameters & parameters)
     _sampler(getSampler("sampler")),
     _test_type(getParam<MooseEnum>("test_type"))
 {
-  if (_test_type == "check_seed_error")
-    _sampler.checkSeedNumber(std::numeric_limits<unsigned int>::max());
 }
 
 void

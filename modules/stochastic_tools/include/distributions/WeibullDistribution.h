@@ -10,10 +10,6 @@
 
 #include "BoostDistribution.h"
 
-#ifdef LIBMESH_HAVE_BOOST
-
-#include <boost/math/distributions/weibull.hpp>
-
 class WeibullDistribution;
 
 template <>
@@ -22,11 +18,14 @@ InputParameters validParams<WeibullDistribution>();
 /**
  * A class used to generate Weibull distribution via Boost
  */
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 class WeibullDistribution : public BoostDistribution<boost::math::weibull_distribution<Real>>
+#else
+class WeibullDistribution : public BoostDistribution<>
+#endif
 {
 public:
   WeibullDistribution(const InputParameters & parameters);
 };
 
-#endif // LIBMESH_HAVE_BOOST
 #endif // WEIBULLDISTRIBUTION_H

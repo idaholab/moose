@@ -15,11 +15,6 @@ validParams<SobolSampler>()
   params.addClassDescription("Sobol variance-based sensitivity analysis Sampler.");
   params.addRequiredParam<unsigned int>(
       "n_samples", "Number of Monte Carlo samples to perform for each distribution.");
-  params.addParam<std::vector<unsigned int>>("seeds",
-                                             std::vector<unsigned int>({19800624, 19801009}),
-                                             "Seeds for the Sobol Monte Carlo matrices , there "
-                                             "should be two seeds one for each matrix A and B.");
-
   return params;
 }
 
@@ -29,7 +24,7 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
     _a_matrix(0, 0),
     _b_matrix(0, 0)
 {
-  checkSeedNumber(2);
+  setNumberOfRequiedRandomSeeds(2);
 }
 
 void
@@ -37,11 +32,11 @@ SobolSampler::sampleSetUp()
 {
   _a_matrix.resize(_num_samples, _distributions.size());
   _b_matrix.resize(_num_samples, _distributions.size());
-  for (unsigned int i = 0; i < _num_samples; ++i)
-    for (unsigned int j = 0; j < _distributions.size(); ++j)
+  for (std::size_t i = 0; i < _num_samples; ++i)
+    for (std::size_t j = 0; j < _distributions.size(); ++j)
     {
-      _a_matrix(i, j) = _distributions[j]->quantile(_generator.rand(0));
-      _b_matrix(i, j) = _distributions[j]->quantile(_generator.rand(1));
+      _a_matrix(i, j) = _distributions[j]->quantile(rand(0));
+      _b_matrix(i, j) = _distributions[j]->quantile(rand(1));
     }
 }
 
@@ -53,10 +48,10 @@ SobolSampler::sampleTearDown()
 }
 
 DenseMatrix<Real>
-SobolSampler::sampleDistribution(Distribution &, unsigned int dist_index)
+SobolSampler::sampleDistribution(Distribution &, std::size_t dist_index)
 {
   DenseMatrix<Real> output = _a_matrix;
-  for (unsigned int i = 0; i < _num_samples; ++i)
+  for (std::size_t i = 0; i < _num_samples; ++i)
     output(i, dist_index) = _b_matrix(i, dist_index);
   return output;
 }
