@@ -10,7 +10,7 @@ validParams<OneDMomentumAreaGradient>()
   params.addRequiredCoupledVar("arhoEA", "The total energy of the kth phase");
   params.addRequiredCoupledVar("area", "Cross-sectional area");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
-  params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
+  params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   return params;
 }
@@ -23,12 +23,11 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
 
     _area(coupledValue("area")),
     _area_grad(coupledGradient("area")),
-    _pressure(getMaterialProperty<Real>("pressure")),
-    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta")
-                                : nullptr),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoA")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhouA")),
-    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("pressure", "arhoEA")),
+    _pressure(getMaterialProperty<Real>("p")),
+    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "arhouA")),
+    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoEA")),
 
     _alpha_rhoA_var_number(coupled("arhoA")),
     _alpha_rhoE_var_number(coupled("arhoEA")),

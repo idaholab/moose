@@ -12,7 +12,7 @@ validParams<OneDMomentumFlux>()
   params.addRequiredCoupledVar("vel", "velocity");
   params.addRequiredCoupledVar("area", "cross-sectional area");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
-  params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
+  params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   return params;
 }
 
@@ -22,17 +22,16 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
     _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
                                     : nullptr),
     _vel(coupledValue("vel")),
-    _pressure(getMaterialProperty<Real>("pressure")),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
-    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoEA")),
+    _pressure(getMaterialProperty<Real>("p")),
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "rhouA")),
+    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoEA")),
     _area(coupledValue("area")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(coupled("rhoEA")),
     _beta(coupledValue("beta")),
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
-    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta")
-                                : nullptr)
+    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr)
 {
 }
 
