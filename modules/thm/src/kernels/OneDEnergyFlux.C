@@ -10,7 +10,7 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("vel", "velocity");
-  params.addRequiredCoupledVar("enthalpy", "enthalpy");
+  params.addRequiredCoupledVar("H", "Specific total enthalpy");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
@@ -23,7 +23,7 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _rhouA(coupledValue("rhouA")),
     _area(coupledValue("area")),
     _vel(coupledValue("vel")),
-    _enthalpy(coupledValue("enthalpy")),
+    _enthalpy(coupledValue("H")),
     _pressure(getMaterialProperty<Real>("pressure")),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
