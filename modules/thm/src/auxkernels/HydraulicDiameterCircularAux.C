@@ -5,12 +5,12 @@ InputParameters
 validParams<HydraulicDiameterCircularAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredCoupledVar("area", "Cross-sectional area");
+  params.addRequiredCoupledVar("A", "Cross-sectional area");
   return params;
 }
 
 HydraulicDiameterCircularAux::HydraulicDiameterCircularAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _area(coupledValue("area"))
+  : AuxKernel(parameters), _area(coupledValue("A"))
 {
 }
 
