@@ -1,25 +1,23 @@
-import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil, time, copy, unittest
-import path_tool
+import sys
+if sys.version_info[0:2] != (2, 7):
+    print("python 2.7 is required to run the test harness")
+    sys.exit(1)
 
+import os, re, inspect, errno, subprocess, shutil, time, copy
+
+import path_tool
 path_tool.activate_module('FactorySystem')
 path_tool.activate_module('argparse')
 
-from ParseGetPot import ParseGetPot
 from socket import gethostname
-#from options import *
 from util import *
 from RunParallel import RunParallel
-from CSVDiffer import CSVDiffer
-from XMLDiffer import XMLDiffer
 from Tester import Tester
-from PetscJacobianTester import PetscJacobianTester
-from InputParameters import InputParameters
 from Factory import Factory
 from Parser import Parser
 from Warehouse import Warehouse
 
 import argparse
-from optparse import OptionParser, OptionGroup, Values
 from timeit import default_timer as clock
 
 class TestHarness:
@@ -200,13 +198,13 @@ class TestHarness:
         except KeyboardInterrupt:
             if self.writeFailedTest != None:
                 self.writeFailedTest.close()
-            print '\nExiting due to keyboard interrupt...'
+            print('\nExiting due to keyboard interrupt...')
             sys.exit(0)
 
         self.runner.join()
         # Wait for all tests to finish
         if self.options.pbs and self.options.processingPBS == False:
-            print '\n< checking batch status >\n'
+            print('\n< checking batch status >\n')
             self.options.processingPBS = True
             self.processPBSResults()
 
@@ -357,7 +355,7 @@ class TestHarness:
 
         if params.isValid('prereq'):
             if type(params['prereq']) != list:
-                print "Option 'prereq' needs to be of type list in " + params['test_name']
+                print("Option 'prereq' needs to be of type list in " + params['test_name'])
                 sys.exit(1)
             params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
@@ -453,7 +451,7 @@ class TestHarness:
             qstat_output = qstat_process.communicate()
         except OSError:
             # qstat binary is not available
-            print 'qstat not available. Perhaps you need to load the PBS module?'
+            print('qstat not available. Perhaps you need to load the PBS module?')
             sys.exit(1)
         if len(qstat_output[1]):
             # The PBS Emulator has no --version argument, and thus returns output to stderr
@@ -580,7 +578,7 @@ class TestHarness:
             batch_file.close()
             del batch_list[-1:]
         else:
-            print 'PBS batch file not found:', self.options.pbs_cleanup
+            print('PBS batch file not found:', self.options.pbs_cleanup)
             sys.exit(1)
 
         # Loop through launched jobs and delete whats found.
@@ -601,7 +599,7 @@ class TestHarness:
 
         # Statuses that inform the TestHarness, that this test is still running.
         if status == tester.bucket_pending:
-            print printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options)
+            print(printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options))
 
         # Statuses generated when using PBS options
         elif status == tester.bucket_pbs:
@@ -613,7 +611,7 @@ class TestHarness:
                     self.handleTestResult(tester, '', tester.getStatusMessage(), 0, 0, True)
                     test_completed = True
                 else:
-                    print printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options)
+                    print(printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options))
 
             # Job was launched during a previous run, so instead of printing to the screen
             # add the statuses obtained on _this_ run to the 'Final Test Result' table.
@@ -677,7 +675,7 @@ class TestHarness:
 
         self.postRun(tester.specs, timing)
 
-        print printResult(tester, result, timing, start, end, self.options)
+        print(printResult(tester, result, timing, start, end, self.options))
 
         if self.options.verbose or (not did_pass and not self.options.quiet):
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
@@ -689,10 +687,10 @@ class TestHarness:
             if output != '': # PBS Failures can result in empty output, so lets not print that stuff twice
                 test_name = colorText(tester.specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
                 output = test_name + ("\n" + test_name).join(lines)
-                print output
+                print(output)
 
                 # Print result line again at the bottom of the output for failed tests
-                print printResult(tester, result, timing, start, end, self.options), "(reprint)"
+                print(printResult(tester, result, timing, start, end, self.options), "(reprint)")
 
         if status != tester.bucket_skip:
             if not did_pass and not self.options.failed_tests:
@@ -714,13 +712,13 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
+            print('\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1)))
             for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
-                print printResult(test, result, timing, start, end, self.options)
+                print(printResult(test, result, timing, start, end, self.options))
 
         time = clock() - self.start_time
 
-        print '-' * (TERM_COLS-1)
+        print('-' * (TERM_COLS-1))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
@@ -731,15 +729,15 @@ class TestHarness:
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
-            print 'Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time)
+            print('Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time))
             summary = '<b>%d would run</b>'
             summary += ', <b>%d would be skipped</b>'
             summary += fatal_error
-            print colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code )
+            print(colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code ))
 
         else:
-            print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
+            print('Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time))
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
@@ -756,10 +754,10 @@ class TestHarness:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code )
+            print(colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code ))
             if self.options.pbs:
-                print '\nYour PBS batch file:', self.options.pbs
+                print('\nYour PBS batch file:', self.options.pbs)
 
         if self.file:
             self.file.close()
@@ -782,7 +780,7 @@ class TestHarness:
         if self.options.output_dir:
             try:
                 os.makedirs(self.output_dir)
-            except OSError, ex:
+            except OSError as ex:
                 if ex.errno == errno.EEXIST: pass
                 else: raise
 
@@ -891,12 +889,12 @@ class TestHarness:
     def checkAndUpdateCLArgs(self):
         opts = self.options
         if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
-            print 'WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option'
+            print('WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option')
         if opts.group == opts.not_group:
-            print 'ERROR: The group and not_group options cannot specify the same group'
+            print('ERROR: The group and not_group options cannot specify the same group')
             sys.exit(1)
         if opts.store_time and not (opts.revision):
-            print 'ERROR: --store-timing is specified but no revision'
+            print('ERROR: --store-timing is specified but no revision')
             sys.exit(1)
         if opts.store_time:
             # timing returns Active Time, while store_timing returns Solve Time.
@@ -904,7 +902,7 @@ class TestHarness:
             opts.timing = False
             opts.scaling = True
         if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
-            print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
+            print('ERROR: --parallel and/or --threads can not be used with --valgrind')
             sys.exit(1)
 
         # Update any keys from the environment as necessary
@@ -966,7 +964,7 @@ class TestHarness:
                         output_files = tester.getOutputFiles()
                         duplicate_files = output_files_in_dir.intersection(output_files)
                         if len(duplicate_files):
-                            print 'Duplicate output files detected in directory:\n', dirpath, '\n\t', '\n\t'.join(duplicate_files)
+                            print('Duplicate output files detected in directory:\n', dirpath, '\n\t', '\n\t'.join(duplicate_files))
                             self.error_code = self.error_code | 0x80
                         output_files_in_dir.update(output_files)
 
@@ -1014,7 +1012,7 @@ class TestTimer(TestHarness):
         try:
             from sqlite3 import dbapi2 as sqlite
         except:
-            print 'Error: --store-timing requires the sqlite3 python module.'
+            print('Error: --store-timing requires the sqlite3 python module.')
             sys.exit(1)
         self.app_name = app_name
         self.db_file = self.options.dbFile
@@ -1022,14 +1020,14 @@ class TestTimer(TestHarness):
             home = os.environ['HOME']
             self.db_file = os.path.join(home, 'timingDB/timing.sqlite')
             if not os.path.exists(self.db_file):
-                print 'Warning: creating new database at default location: ' + str(self.db_file)
+                print('Warning: creating new database at default location: ' + str(self.db_file))
                 self.createDB(self.db_file)
             else:
-                print 'Warning: Assuming database location ' + self.db_file
+                print('Warning: Assuming database location ' + self.db_file)
 
     def createDB(self, fname):
         from sqlite3 import dbapi2 as sqlite
-        print 'Creating empty database at ' + fname
+        print('Creating empty database at ' + fname)
         con = sqlite.connect(fname)
         cr = con.cursor()
         cr.execute(CREATE_TABLE)
