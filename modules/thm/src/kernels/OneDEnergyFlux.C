@@ -9,7 +9,7 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
-  params.addRequiredCoupledVar("vel", "velocity");
+  params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("H", "Specific total enthalpy");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
