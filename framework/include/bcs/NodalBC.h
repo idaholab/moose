@@ -46,6 +46,8 @@ public:
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
+  void setBCOnEigen(bool iseigen) { _is_eigen = iseigen; }
+
 protected:
   /// current node being processed
   const Node *& _current_node;
@@ -64,6 +66,10 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariable *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
+
+  /// Indicate whether or not the boundary condition is applied to the right
+  /// hand side of eigenvalue problems
+  bool _is_eigen;
 
   virtual Real computeQpResidual() = 0;
 
