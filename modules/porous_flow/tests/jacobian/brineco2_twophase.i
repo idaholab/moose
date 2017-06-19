@@ -1,13 +1,11 @@
-# Tests correct calculation of properties derivatives in PorousFlowFluidStateBrineCO2.
-# This test is run three times, with the initial condition of z (the total mass
-# fraction of CO2 in all phases) varied to give either a single phase liquid, a
-# single phase gas, or two phases.
+# Tests correct calculation of properties derivatives in PorousFlowFluidStateBrineCO2
+# for conditions that are appropriate for two phases
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 1
-  ny = 1
+  nx = 2
+  ny = 2
 []
 
 [GlobalParams]
@@ -29,29 +27,16 @@
 []
 
 [ICs]
-  active = 'pgas z_twophase'
   [./pgas]
     type = RandomIC
     min = 1e6
-    max = 2e6
+    max = 4e6
     variable = pgas
   [../]
-  [./z_twophase]
+  [./z]
     type = RandomIC
     min = 0.2
     max = 0.8
-    variable = zi
-  [../]
-  [./z_liquid]
-    type = RandomIC
-    min = 0.001
-    max = 0.005
-    variable = zi
-  [../]
-  [./z_gas]
-    type = RandomIC
-    min = 0.995
-    max = 0.999
     variable = zi
   [../]
 []
@@ -171,5 +156,34 @@
   [./smp]
     type = SMP
     full = true
+  [../]
+[]
+
+[AuxVariables]
+  [./sgas]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./sgas]
+    type = PorousFlowPropertyAux
+    property = saturation
+    phase = 1
+    variable = sgas
+  [../]
+[]
+
+[Postprocessors]
+  [./sgas_min]
+    type = ElementExtremeValue
+    variable = sgas
+    value_type = min
+  [../]
+  [./sgas_max]
+    type = ElementExtremeValue
+    variable = sgas
+    value_type = max
   [../]
 []
