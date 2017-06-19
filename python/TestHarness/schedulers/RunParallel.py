@@ -83,6 +83,9 @@ class RunParallel(Scheduler):
                 else:
                     tester.setStatus('ERROR LAUNCHING JOB', tester.bucket_fail)
 
+        else:
+            tester.end_time = clock()
+
     def getDependents(self, tester, testers):
         r = ReverseReachability()
         for test in testers:

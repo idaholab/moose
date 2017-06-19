@@ -402,6 +402,14 @@ class TestHarness:
 
         if self.options.timing:
             timing = self.getTiming(tester.getOutput())
+
+            # Run exception tests return no output on a 'success'. So for these cases, we will use the time when the
+            # thread started and exited the job.
+            # NOTE: tester.getEndTime() includes the time it takes to run processResults. Therfor, do not use
+            #       end_time for accuracy. Continue to use perftime gathered from output.
+            if timing is None:
+                timing = tester.getEndTime() - tester.getStartTime()
+
         elif self.options.store_time:
             timing = self.getSolveTime(tester.getOutput())
 
@@ -413,6 +421,9 @@ class TestHarness:
                 result = '[' + ', '.join(caveats).upper() + '] skipped (' + tester.getStatusMessage() + ')'
             else:
                 result = 'skipped (' + tester.getStatusMessage() + ')'
+
+            if self.options.timing:
+                timing = '0'
 
         # result is normally populated by a tester object when a test has failed. But in this case
         # checkRunnableBase determined the test a failure before it even ran. So we need to set the
@@ -431,7 +442,8 @@ class TestHarness:
         elif tester.isPending():
             self.num_pending += 1
         else:
-            # Dump everything else into the failure status
+            # Dump everything else into the failure status (neccessary due to PBS launch failures
+            # not being stored in the tester status bucket)
             self.num_failed += 1
 
         self.postRun(tester.specs, timing)

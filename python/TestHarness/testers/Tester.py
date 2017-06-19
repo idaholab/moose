@@ -72,7 +72,7 @@ class Tester(MooseObject):
         self.exit_code = None
         self.start_time = None
         self.end_time = None
-        self.std_out = None
+        self.std_out = ''
 
         # Initialize the status bucket class
         self.status = util.TestStatus()
