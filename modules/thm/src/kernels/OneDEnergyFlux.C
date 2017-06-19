@@ -5,7 +5,7 @@ InputParameters
 validParams<OneDEnergyFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("area", "Cross-sectional area");
+  params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
@@ -21,7 +21,7 @@ validParams<OneDEnergyFlux>()
 OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
     _rhouA(coupledValue("rhouA")),
-    _area(coupledValue("area")),
+    _area(coupledValue("A")),
     _vel(coupledValue("vel")),
     _enthalpy(coupledValue("H")),
     _pressure(getMaterialProperty<Real>("p")),

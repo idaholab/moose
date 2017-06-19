@@ -7,12 +7,12 @@ validParams<OneDEnergyHeatSource>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<FunctionName>("q", "Volumetric heat source given by a function");
-  params.addRequiredCoupledVar("area", "Cross sectional area");
+  params.addRequiredCoupledVar("A", "Cross sectional area");
   return params;
 }
 
 OneDEnergyHeatSource::OneDEnergyHeatSource(const InputParameters & parameters)
-  : Kernel(parameters), _q(getFunction("q")), _area(coupledValue("area"))
+  : Kernel(parameters), _q(getFunction("q")), _area(coupledValue("A"))
 {
 }
 
