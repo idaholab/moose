@@ -6,9 +6,9 @@ validParams<OneDEnergyFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("A", "Cross-sectional area");
-  params.addRequiredCoupledVar("rhoA", "density multiplied by area");
-  params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
-  params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
+  params.addRequiredCoupledVar("rhoA", "alpha*rho*A");
+  params.addRequiredCoupledVar("rhouA", "alpha*rho*u*A");
+  params.addRequiredCoupledVar("rhoEA", "alpha*rho*E*A");
   params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("H", "Specific total enthalpy");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
