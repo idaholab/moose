@@ -12,18 +12,19 @@ import threading # for thread locking
 
 class Scheduler(MooseObject):
     """
-    Base class for handling how jobs are launched
-
-    To use this class, call .schedule() and supply a list of testers to schedule
+    Base class for handling how jobs are launched. To use this class, call .schedule()
+    and supply a list of testers to schedule.
 
     Syntax:
-       Scheduler.schedule([list of tester objects])
+       .schedule([list of tester objects])
 
-    Those testers will be added to a queue. You can continue to add testers to the queue
-    in this fashion.
+    A list of testers will be added to a queue and begin running immediately. You can
+    continue to add more testers to the queue in this fashion.
 
-    Once you schedule all the testers you wish to test, call .join() to begin executing them.
-    As tests complete (or are skipped), the Scheduler will call the call back the harness.testOutputAndFinish() method
+    Once you schedule all the testers you wish to test, call .waitFinish() to wait until
+    all tests have finished.
+
+    As tests finish individually, the scheduler will call back handleTestStatus(tester)
     """
 
     @staticmethod
@@ -173,7 +174,7 @@ class Scheduler(MooseObject):
                 self.handleActiveTests()
 
             # sleep for just a tick or two
-            sleep(0.05)
+            sleep(0.1)
 
         self.runner_pool.close()
         self.runner_pool.join()

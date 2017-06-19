@@ -10,8 +10,7 @@ import os
 
 ## This class provides an interface to run commands in parallel
 #
-# To use this class, call the .run() method with the tester
-# options. When the test is finished running it will call returnToTestHarness
+# To use this class, call the .run() method with the tester options
 class RunParallel(Scheduler):
     @staticmethod
     def validParams():
@@ -29,9 +28,9 @@ class RunParallel(Scheduler):
     #  with thread_lock:
     #      do protected stuff
     #
-    # The run method should be blocking. When we return from this method, this test should be considered
-    # finished as we will lose our thread running this job. Apon which a new single processing thread will
-    # add our finished job to a new queue, to print the results (harness.handleTestStatus)
+    # The run method should be blocking until the test has completed _and_ the results have been
+    # processed (processResults()). When we return from this method, this test will be considered
+    # finished and added to the status pool for printing out the final results.
     def run(self, tester, testers, thread_lock, options):
         # Ask the tester if its allowed to run on this machine
         if tester.checkRunnableBase(options):
@@ -53,7 +52,7 @@ class RunParallel(Scheduler):
                         tester.exit_code = 0
                         tester.end_time = clock()
                         tester.std_out = ''
-                        self.testOutput(tester, options, thread_lock)
+                        self.testOutput(tester, '', options, thread_lock)
                         return
                     else:
                         # Launch the command and start the clock
@@ -74,34 +73,25 @@ class RunParallel(Scheduler):
                     # set the exit code
                     tester.exit_code = process.poll()
 
-                    # set the output (trimmed)
-                    tester.std_out = readOutput(output_file, options)
+                    # set the tester output (trimmed)
+                    results = readOutput(output_file, options)
+                    output_file.close()
 
                     # Process the results and beautify the output
-                    output = self.testOutput(tester, options, thread_lock)
-                    output_file.close()
+                    self.testOutput(tester, results, options, thread_lock)
 
                 # This test failed to launch properly
                 else:
                     tester.setStatus('ERROR LAUNCHING JOB', tester.bucket_fail)
 
-            # This test can not run due to statuses from the other testers
-            else:
-                # No need to set any statuses. The appropriate status has already been set
-                return
-        # This job is skipped, deleted, or silent as deemed by the tester, but after it was scheduled
-        else:
-            # No need to set any statuses. checkRunnable does that for us, so just return
-            return
-
     # Modify the output the way we want it. Run processResults
-    def testOutput(self, tester, options, thread_lock):
+    def testOutput(self, tester, results, options, thread_lock):
         # create verbose header
         output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(options) + '\n'
 
         # dry run? cool, just return
-        if options.dry_run:
-            tester.setOutput(output)
+        if options.dry_run or not tester.shouldExecute():
+            tester.std_out = output
             tester.setStatus(tester.getSuccessMessage(), tester.bucket_success)
             return
 
@@ -110,10 +100,10 @@ class RunParallel(Scheduler):
         if tester.getPrereqs():
             with thread_lock:
                 # process and append the test results to output
-                output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, tester.getOutput())
+                output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)
         else:
             # process and append the test results to output
-            output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, tester.getOutput())
+            output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)
 
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
@@ -132,5 +122,5 @@ class RunParallel(Scheduler):
         else:
             output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
-        # Adjust testers output with modifications made above
-        tester.setOutput(output)
+        # Set testers output with modifications made above
+        tester.std_out = output

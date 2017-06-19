@@ -13,9 +13,6 @@ class TestHarnessTester(TestHarnessTestCase):
 
         self.assertRegexpMatches(e.output, r'tests/test_harness\.a.*?FAILED \(OUTFILE RACE CONDITION\)')
 
-        # skip case
-        # self.assertRegexpMatches(e.output, 'FATAL TEST HARNESS ERROR')
-
     def testDuplicateOutputsOK(self):
         """
         Test for duplicate output files in the same directory

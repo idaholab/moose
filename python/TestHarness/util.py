@@ -766,7 +766,7 @@ class TestStatus(object):
 
 class StatusDependency():
     """
-    A class used to determine if a tester can run based on other current tester statuses.
+    A class used to determine if a tester can run based on other tester statuses.
 
     """
 
@@ -776,7 +776,8 @@ class StatusDependency():
         self.options = options
 
     # A method that returns bool if the test can run or sets the appropriate status why it could not run
-    # or does nothing if the test needs to be placed back into the queue
+    # or does nothing if the test needs to be placed back into the queue (leaves the tester in a pending
+    # status)
     def checkAndSetStatus(self):
         if self.noRaceConditions():
             if self.isRunnable():
@@ -847,7 +848,7 @@ class StatusDependency():
             for concurrent_testers in concurrent_tester_sets:
                 output_files_in_dir = set()
                 for tester in concurrent_testers:
-                    if self.prereqsExists() and name_to_object[tester].getTestName() not in self._skipped_tests():
+                    if name_to_object[tester].getTestName() not in self._skipped_tests():
                         output_files = name_to_object[tester].getOutputFiles()
                         duplicate_files = output_files_in_dir.intersection(output_files)
                         if len(duplicate_files):

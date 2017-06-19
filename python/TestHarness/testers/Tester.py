@@ -115,9 +115,6 @@ class Tester(MooseObject):
     def getOutput(self):
         return self.std_out
 
-    def setOutput(self, adjusted_text):
-        self.std_out = adjusted_text
-
     def getStartTime(self):
         return self.start_time
 
@@ -192,7 +189,7 @@ class Tester(MooseObject):
     def isPending(self):
         return self.status.isPending()
 
-    # Method to check if this test is pending
+    # Method to check if this test is finished
     def isFinished(self):
         return self.status.isFinished()
 
