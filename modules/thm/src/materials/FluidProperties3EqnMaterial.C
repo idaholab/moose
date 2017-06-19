@@ -8,7 +8,7 @@ validParams<FluidProperties3EqnMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredCoupledVar("area", "Cross-sectional area");
+  params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
@@ -20,7 +20,7 @@ validParams<FluidProperties3EqnMaterial>()
 
 FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterfaceRelap<Material>(parameters),
-    _area(coupledValue("area")),
+    _area(coupledValue("A")),
     _rhoA(coupledValue("rhoA")),
     _rhouA(coupledValue("rhouA")),
     _rhoEA(coupledValue("rhoEA")),
