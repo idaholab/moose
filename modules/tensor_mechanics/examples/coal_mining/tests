@@ -1,0 +1,18 @@
+[Tests]
+  [./cosserat_wp_only_run]
+    type = RunApp
+    input = 'cosserat_wp_only.i'
+    check_input = True
+  [../]
+  [./cosserat_elastic_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_elastic.i'
+    csvdiff = 'cosserat_elastic.csv'
+  [../]
+  [./cosserat_wp_only_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_wp_only.i'
+    csvdiff = 'cosserat_wp_only.csv'
+    heavy = true
+  [../]
+[]
