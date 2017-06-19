@@ -9,7 +9,7 @@ validParams<OneDMomentumFlux>()
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
-  params.addRequiredCoupledVar("vel", "velocity");
+  params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("area", "cross-sectional area");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
