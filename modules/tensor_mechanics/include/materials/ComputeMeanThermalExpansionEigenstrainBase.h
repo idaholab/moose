@@ -31,8 +31,6 @@ public:
   ComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup() override;
-
   /*
    * Compute the total thermal strain relative to the stress-free temperature at the
    * current temperature, as well as the current instantaneous thermal expansion coefficient.
@@ -49,7 +47,7 @@ protected:
   virtual Real referenceTemperature() = 0;
 
   /*
-   * Compute the total mean thermal expansion relative to the reference temperature.
+   * Compute the mean thermal expansion coefficient relative to the reference temperature.
    * This is the linear thermal strain divided by the temperature difference:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
@@ -57,21 +55,11 @@ protected:
   virtual Real meanThermalExpansionCoefficient(const Real temperature) = 0;
 
   /*
-   * Compute the derivative of the total mean thermal expansion coefficient \f$\bar{\alpha}\f$
+   * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
    * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
    */
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
-
-  /// Mean linear thermal expansion coefficient relative to the reference temperature
-  /// evaluated at stress_free_temperature.  This is
-  /// \f$\bar{\alpha} = (\delta L(T_{sf}) / L) / (T_{sf} - T_{ref})\f$
-  /// where \f$T_sf\f$ is the stress-free temperature and \f$T_{ref}\f$ is the reference temperature.
-  Real _alphabar_stress_free_temperature;
-
-  /// Thermal expansion relative to the reference temperature evaluated at stress_free_temperature
-  /// \f$(\delta L(T_sf) / L)\f$, where \f$T_sf\f$ is the stress-free temperature.
-  Real _thexp_stress_free_temperature;
 };
 
 #endif // COMPUTEMEANTHERMALEXPANSIONEIGENSTRAINBASE_H
