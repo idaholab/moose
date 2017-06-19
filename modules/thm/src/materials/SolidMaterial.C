@@ -6,7 +6,7 @@ validParams<SolidMaterial>()
 {
   InputParameters params = validParams<Material>();
   // Coupled variables
-  params.addRequiredCoupledVar("temperature", "Temperature in the solid");
+  params.addRequiredCoupledVar("T", "Temperature in the solid");
 
   params.addRequiredParam<UserObjectName>(
       "properties", "The name of an user object describing material conductivity");
@@ -18,7 +18,7 @@ SolidMaterial::SolidMaterial(const InputParameters & parameters)
     _thermal_conductivity(declareProperty<Real>("k_solid")),
     _specific_heat(declareProperty<Real>("cp_solid")),
     _density(declareProperty<Real>("rho_solid")),
-    _temp(coupledValue("temperature")),
+    _temp(coupledValue("T")),
     _props(getUserObject<SolidMaterialProperties>("properties"))
 {
 }

@@ -45,10 +45,10 @@ FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters &
     _dp_drhouA(declarePropertyDerivativeRelap<Real>("p", "rhouA")),
     _dp_drhoEA(declarePropertyDerivativeRelap<Real>("p", "rhoEA")),
 
-    _T(declareProperty<Real>("temperature")),
-    _dT_drhoA(declarePropertyDerivativeRelap<Real>("temperature", "rhoA")),
-    _dT_drhouA(declarePropertyDerivativeRelap<Real>("temperature", "rhouA")),
-    _dT_drhoEA(declarePropertyDerivativeRelap<Real>("temperature", "rhoEA")),
+    _T(declareProperty<Real>("T")),
+    _dT_drhoA(declarePropertyDerivativeRelap<Real>("T", "rhoA")),
+    _dT_drhouA(declarePropertyDerivativeRelap<Real>("T", "rhouA")),
+    _dT_drhoEA(declarePropertyDerivativeRelap<Real>("T", "rhoEA")),
 
     _c(declareProperty<Real>("c")),
 
