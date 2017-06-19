@@ -23,4 +23,46 @@
     input = 'Nonconserved_2vars.i'
     exodiff = 'Nonconserved_2vars_out.e'
   [../]
+  [./conserved_direct_1var]
+    # Test conserved action with direct solve and 1 variable
+    type = Exodiff
+    input = 'conserved_direct_1var.i'
+    exodiff = 'conserved_direct_1var_out.e'
+  [../]
+  [./conserved_split_1var]
+    # Test conserved action with split solve and 1 variable
+    type = Exodiff
+    input = 'conserved_split_1var.i'
+    exodiff = 'conserved_split_1var_out.e'
+  [../]
+  [./conserved_split_1var_high_order]
+    # Test conserved action with split solve and 1 variable with high order element
+    type = Exodiff
+    input = 'conserved_split_1var_high_order.i'
+    exodiff = 'conserved_split_1var_high_order_out.e'
+  [../]
+  [./conserved_direct_1var_variable_mob]
+    # Test conserved action with direct solve, 1 variable, and a variable mobility
+    type = Exodiff
+    input = 'conserved_direct_1var_variable_mob.i'
+    exodiff = 'conserved_direct_1var_variable_mob_out.e'
+  [../]
+  [./conserved_split_1var_variable_mob]
+    # Test conserved action with split solve, 1 variable, and a variable mobility
+    type = Exodiff
+    input = 'conserved_split_1var_variable_mob.i'
+    exodiff = 'conserved_split_1var_variable_mob_out.e'
+  [../]
+  [./both_split_2vars]
+    # Test conserved and nonconserved actions with split solve
+    type = Exodiff
+    input = 'both_split_2vars.i'
+    exodiff = 'both_split_2vars_out.e'
+  [../]
+  [./both_direct_2vars]
+    # Test conserved and nonconserved actions with direct solve
+    type = Exodiff
+    input = 'both_direct_2vars.i'
+    exodiff = 'both_direct_2vars_out.e'
+  [../]
 []

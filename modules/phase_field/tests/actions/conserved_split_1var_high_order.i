@@ -1,28 +1,27 @@
 #
-# Test the parsed function free enery Allen-Cahn Bulk kernel
+# Test the conserved action with split solve and 1 variable
 #
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
-  xmax = 40
-  ymax = 40
+  nx = 25
+  ny = 25
+  xmax = 50
+  ymax = 50
   elem_type = QUAD
   second_order = true
 []
 
 [Modules]
   [./PhaseField]
-    [./Nonconserved]
-      [./eta]
+    [./Conserved]
+      [./cv]
+        solve_type = split
         family = LAGRANGE
         order = SECOND
         free_energy = F
         kappa = 2.0
         mobility = 1.0
-        variable_mobility = false
       [../]
     [../]
   [../]
@@ -30,14 +29,12 @@
 
 [ICs]
   [./InitialCondition]
-    type = SmoothCircleIC
-    variable = eta
-    x1 = 20.0
-    y1 = 20.0
-    radius = 6.0
-    invalue = 0.9
-    outvalue = 0.1
-    int_width = 3.0
+    type = CrossIC
+    x1 = 5.0
+    y1 = 5.0
+    x2 = 45.0
+    y2 = 45.0
+    variable = cv
   [../]
 []
 
@@ -45,9 +42,15 @@
   [./free_energy]
     type = DerivativeParsedMaterial
     f_name = F
-    args = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
-    derivative_order = 2
+    args = 'cv'
+    function = '(1-cv)^2 * (1+cv)^2'
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
@@ -57,17 +60,16 @@
 
   solve_type = 'NEWTON'
 
-  l_max_its = 15
+  l_max_its = 30
   l_tol = 1.0e-4
-
   nl_max_its = 10
-  nl_rel_tol = 1.0e-11
+  nl_rel_tol = 1.0e-10
 
-  num_steps = 10
-  dt = 1.0
+  start_time = 0.0
+  num_steps = 5
+  dt = 0.7
 []
 
 [Outputs]
   exodus = true
-  print_perf_log = true
 []

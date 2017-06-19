@@ -16,7 +16,6 @@
   [./PhaseField]
     [./Nonconserved]
       [./eta1]
-        variable_name = eta1
         free_energy = F
         kappa = 2.0
         mobility = 1.0
@@ -24,7 +23,6 @@
         args = 'eta2'
       [../]
       [./eta2]
-        variable_name = eta2
         free_energy = F
         kappa = 2.0
         mobility = 1.0
