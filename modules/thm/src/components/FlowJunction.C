@@ -98,7 +98,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("vel") = cv_vel;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
-      params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
+      params.set<std::vector<VariableName>>("H") = cv_enthalpy;
       params.set<MaterialPropertyName>("p") = FlowModel::PRESSURE;
 
       _sim.addBoundaryCondition("OneDFreeMassBC", genName(name(), _bnd_id[i], "mass_bc"), params);
@@ -117,7 +117,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<std::vector<VariableName>>("lambda") = cv_lambda;
       params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
-      params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
+      params.set<std::vector<VariableName>>("H") = cv_enthalpy;
       params.set<MaterialPropertyName>("p") = FlowModel::PRESSURE;
 
       _sim.addBoundaryCondition(
@@ -133,7 +133,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
       params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
       params.set<std::vector<VariableName>>("vel") = cv_vel;
-      params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
+      params.set<std::vector<VariableName>>("H") = cv_enthalpy;
       params.set<std::vector<VariableName>>("area") = cv_area;
       params.set<MaterialPropertyName>("p") = FlowModel::PRESSURE;
       params.set<PostprocessorName>("c") = c_pps;
@@ -163,7 +163,7 @@ FlowJunction::addMooseObjects()
     params.set<std::vector<VariableName>>("p") = cv_pressure;
     params.set<std::vector<VariableName>>("area") = cv_area;
     params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
-    params.set<std::vector<VariableName>>("enthalpy") = cv_enthalpy;
+    params.set<std::vector<VariableName>>("H") = cv_enthalpy;
 
     _sim.addScalarKernel("FlowConstraint", genName(name(), "flow_c0"), params);
   }
