@@ -10,7 +10,7 @@ validParams<WallFrictionChurchillMaterial>()
   params.addRequiredCoupledVar("rhoA", "Mass equation variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Momentum equation variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Total energy equation variable: rho*E*A");
-  params.addRequiredCoupledVar("rho", "density");
+  params.addRequiredCoupledVar("rho", "Density");
   params.addRequiredCoupledVar("vel", "x-component of the velocity");
   params.addRequiredCoupledVar("D_h", "hydraulic diameter");
 
