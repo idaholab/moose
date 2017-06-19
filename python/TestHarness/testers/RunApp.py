@@ -100,6 +100,11 @@ class RunApp(Tester):
         # Create the command line string to run
         command = ''
 
+        # Check for built application
+        if not options.dry_run and not os.path.exists(specs['executable']):
+            self.setStatus('Application not found', self.bucket_fail)
+            return ''
+
         if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option

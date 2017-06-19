@@ -281,12 +281,6 @@ class TestHarness:
                 sys.exit(1)
             params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
-        # Check for built application
-        if not self.options.dry_run and not os.path.exists(params['executable']):
-            print os.getcwd()
-            print 'Application not found: ' + str(params['executable'])
-            sys.exit(1)
-
         # Double the alloted time for tests when running with the valgrind option
         tester.setValgrindMode(self.options.valgrind_mode)
 

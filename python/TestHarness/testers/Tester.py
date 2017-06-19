@@ -267,6 +267,10 @@ class Tester(MooseObject):
         reasons = {}
         checks = options._checks
 
+        # If the something has already deemed this test a failure, return now
+        if self.didFail():
+            return False
+
         # If --dry-run set the test status to pass and DO NOT return.
         # This will allow additional checks to perform and report tests
         # that would normally be skipped (and return as False).
