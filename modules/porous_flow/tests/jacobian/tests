@@ -396,9 +396,9 @@
   [./waterncg_liqiud]
     type = 'PetscJacobianTester'
     input = 'waterncg.i'
-    ratio_tol = 1e-8
+    ratio_tol = 1e-5
     difference_tol = 1e10
-    cli_args = 'ICs/active='pgas z_liquid''
+    cli_args = 'ICs/active='pgas z_liquid' -mat_fd_type ds'
   [../]
   [./waterncg_gas]
     type = 'PetscJacobianTester'
@@ -419,7 +419,7 @@
     input = 'brineco2.i'
     ratio_tol = 1e-5 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = 'ICs/active='pgas z_liquid''
+    cli_args = 'ICs/active='pgas z_liquid'  -mat_fd_type ds'
   [../]
   [./brineco2_gas]
     type = 'PetscJacobianTester'
