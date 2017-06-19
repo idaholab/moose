@@ -6,9 +6,9 @@ validParams<OneDMomentumFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
-  params.addRequiredCoupledVar("rhoA", "density multiplied by area");
-  params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
-  params.addRequiredCoupledVar("rhoEA", "total energy multiplied by area");
+  params.addRequiredCoupledVar("rhoA", "alpha*rho*A");
+  params.addRequiredCoupledVar("rhouA", "alpha*rho*u*A");
+  params.addRequiredCoupledVar("rhoEA", "alpha*rho*E*A");
   params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("A", "cross-sectional area");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
