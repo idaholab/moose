@@ -12,7 +12,7 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("vel", "velocity");
   params.addRequiredCoupledVar("H", "Specific total enthalpy");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
-  params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
+  params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
 
   return params;
@@ -24,15 +24,15 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _area(coupledValue("area")),
     _vel(coupledValue("vel")),
     _enthalpy(coupledValue("H")),
-    _pressure(getMaterialProperty<Real>("pressure")),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
-    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoEA")),
+    _pressure(getMaterialProperty<Real>("p")),
+    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "rhouA")),
+    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "rhoEA")),
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
     _has_beta(isCoupled("beta")),
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
-    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta") : nullptr),
+    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
     _alpha(getMaterialProperty<Real>("alpha")),
     _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr)
 {
