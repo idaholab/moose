@@ -32,7 +32,7 @@ class NodalNormalBC : public NodalBC
 public:
   NodalNormalBC(const InputParameters & parameters);
 
-  virtual void computeResidual(NumericVector<Number> & residual) override;
+  virtual void computeResidual(NumericVector<Number> & residual, Moose::KernelType kernel_type = Moose::KT_ALL) override;
 
 protected:
   const VariableValue & _nx;

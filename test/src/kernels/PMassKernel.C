@@ -11,34 +11,31 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "NodalNormalBC.h"
+#include "PMassKernel.h"
 
 template <>
 InputParameters
-validParams<NodalNormalBC>()
+validParams<PMassKernel>()
 {
-  InputParameters params = validParams<NodalBC>();
-  params.addCoupledVar("nx", "x-component of the normal");
-  params.addCoupledVar("ny", "y-component of the normal");
-  params.addCoupledVar("nz", "z-component of the normal");
-
-  params.set<std::vector<VariableName>>("nx") = {"nodal_normal_x"};
-  params.set<std::vector<VariableName>>("ny") = {"nodal_normal_y"};
-  params.set<std::vector<VariableName>>("nz") = {"nodal_normal_z"};
-
+  InputParameters params = validParams<Kernel>();
+  params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The exponent p");
   return params;
 }
 
-NodalNormalBC::NodalNormalBC(const InputParameters & parameters)
-  : NodalBC(parameters), _nx(coupledValue("nx")), _ny(coupledValue("ny")), _nz(coupledValue("nz"))
+PMassKernel::PMassKernel(const InputParameters & parameters)
+  : Kernel(parameters), _p(getParam<Real>("p") - 2.0)
 {
 }
 
-void
-NodalNormalBC::computeResidual(NumericVector<Number> & residual, Moose::KernelType kernel_type)
+Real
+PMassKernel::computeQpResidual()
 {
-  _qp = 0;
-  _normal = Point(_nx[_qp], _ny[_qp], _nz[_qp]);
-  NodalBC::computeResidual(residual, kernel_type);
+  return std::pow(std::fabs(_u[_qp]), _p) * _u[_qp] * _test[_i][_qp];
+}
+
+Real
+PMassKernel::computeQpJacobian()
+{
+  // Note: this jacobian evaluation is not exact when p!=2.
+  return std::pow(std::fabs(_phi[_j][_qp]), _p) * _phi[_j][_qp] * _test[_i][_qp];
 }
