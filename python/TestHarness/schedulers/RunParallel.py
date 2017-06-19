@@ -52,7 +52,7 @@ class RunParallel(Scheduler):
                         tester.exit_code = 0
                         tester.end_time = clock()
                         tester.std_out = ''
-                        self.testOutput(tester, '', options, thread_lock)
+                        self.testOutput(tester, testers, '', options, thread_lock)
                         return
                     else:
                         # Launch the command and start the clock
@@ -78,14 +78,23 @@ class RunParallel(Scheduler):
                     output_file.close()
 
                     # Process the results and beautify the output
-                    self.testOutput(tester, results, options, thread_lock)
+                    self.testOutput(tester, testers, results, options, thread_lock)
 
                 # This test failed to launch properly
                 else:
                     tester.setStatus('ERROR LAUNCHING JOB', tester.bucket_fail)
 
+    def getDependents(self, tester, testers):
+        r = ReverseReachability()
+        for test in testers:
+            r.insertDependency(test.getTestName(), test.getPrereqs())
+        reverse_sets = r.getReverseReachabilitySets()
+
+        if len(reverse_sets[tester.getTestName()]):
+            return True
+
     # Modify the output the way we want it. Run processResults
-    def testOutput(self, tester, results, options, thread_lock):
+    def testOutput(self, tester, testers, results, options, thread_lock):
         # create verbose header
         output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(options) + '\n'
 
@@ -95,9 +104,8 @@ class RunParallel(Scheduler):
             tester.setStatus(tester.getSuccessMessage(), tester.bucket_success)
             return
 
-        # OKAY! so, here is where we need a thread_lock :). Some of the restart tests collide during tester.prepare and this method.
-        # processResults is _very_ expensive. Enough to warrant a check if we need to lock it (32 cores Locked: 43sec, Not locked: 27sec)
-        if tester.getPrereqs():
+        # We need to know if we should lock the thread pool while we run processResults
+        if self.getDependents(tester, testers):
             with thread_lock:
                 # process and append the test results to output
                 output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)

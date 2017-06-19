@@ -18,8 +18,8 @@ class Scheduler(MooseObject):
     Syntax:
        .schedule([list of tester objects])
 
-    A list of testers will be added to a queue and begin running immediately. You can
-    continue to add more testers to the queue in this fashion.
+    A list of testers will be added to a queue and begin calling the derived run method
+    immediately. You can continue to add more testers to the queue in this fashion.
 
     Once you schedule all the testers you wish to test, call .waitFinish() to wait until
     all tests have finished.
@@ -161,7 +161,8 @@ class Scheduler(MooseObject):
             # { tester_name : tester_object } name to object map
             self.scheduled_name_to_object[tester.getTestName()] = tester
 
-        # Add a test to the Runner Queue, and ask a thread to do some work (the thread pool has built in methods which prevent oversubscribing)
+        # Add a test to the Runner Queue, and ask a thread to do some work (the thread pool has built in methods
+        # which prevent oversubscribing)
         for tester in testers:
             results = self._runnerGo(tester.getTestName())
             # DEBUG this thread by using the get method. (Note: this is a blocking call)
@@ -235,19 +236,17 @@ class Scheduler(MooseObject):
     def jobRunner(self, queue):
         # Get a job
         tester_name = queue.get()
+        tester = self.scheduled_name_to_object[tester_name]
+
+        # get associated testers
+        testers =  self.scheduled_groups[tester_name]
+
+        # immediately set the tester start time so its available
+        tester.start_time = clock()
 
         with self.thread_lock:
-            # convert tester_name to the tester object
-            tester = self.scheduled_name_to_object[tester_name]
-
             # Add this job to our active set
             self.active_jobs.add(tester.getTestName())
-
-            # get associated testers
-            testers =  self.scheduled_groups[tester_name]
-
-            # immediately set the tester start time so its available
-            tester.start_time = clock()
 
         # Call derived run methods (blocking)
         self.run(tester,  testers, self.thread_lock, self.options)
