@@ -7,6 +7,9 @@
     dof_id_bytes = 4
     min_parallel = 4
     max_parallel = 4
+    # do not run this test against development version of PETSc
+    # metis and parmetis will generate different partitions
+    petsc_version_release = true
   [../]
   [./subdomain_partitioner_linux]
     type = 'Exodiff'
@@ -17,5 +20,6 @@
     dof_id_bytes = 4
     min_parallel = 4
     max_parallel = 4
+    petsc_version_release = true
   [../]
 []
