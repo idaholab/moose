@@ -130,7 +130,7 @@ Real dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid);
 Real dv_darhoA(Real area, Real arhoA);
 
 /**
- * Derivative of specific internal energy wrt density of the phase (rho_A or alpha_rho_A)
+ * Derivative of specific internal energy wrt density of the phase (rhoA or arhoA)
  *
  * @param arhoA - density equation solution variable: alpha*rho*A
  * @param arhouA - momentum equation solution variable: alpha*rho*u*A
@@ -139,7 +139,7 @@ Real dv_darhoA(Real area, Real arhoA);
 Real de_darhoA(Real arhoA, Real arhouA, Real arhoEA);
 
 /**
- * Derivative of specific internal energy wrt momentum of the phase (rhou_A or alpha_rhou_A)
+ * Derivative of specific internal energy wrt momentum of the phase (rhouA or arhouA)
  *
  * @param arhoA - density equation solution variable: alpha*rho*A
  * @param arhouA - momentum equation solution variable: alpha*rho*u*A
@@ -147,7 +147,7 @@ Real de_darhoA(Real arhoA, Real arhouA, Real arhoEA);
 Real de_darhouA(Real arhoA, Real arhouA);
 
 /**
- * Derivative of specific internal energy wrt total energy of the phase (rhoE_A or alpha_rhoE_A)
+ * Derivative of specific internal energy wrt total energy of the phase (rhoEA or arhoEA)
  *
  * @param arhoA - density equation solution variable: alpha*rho*A
  */
