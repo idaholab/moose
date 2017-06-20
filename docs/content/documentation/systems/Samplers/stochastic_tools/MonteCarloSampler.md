@@ -1,15 +1,11 @@
 # MonteCarloSampler
 
-Monte Carlo Sampler is a computational algorithm based on random sampling a probability density function (PDF)
-to obtain numerical results. The general procedure is:
+MonteCarloSampler samples the provided distribution using a traditional [Monte
+Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) sampling.
 
-1. Define a domain of possible input paramters;
-2. Generate input paramters randomly from a prescribed PDF over the domain;
-3. Perform a model calculations with the sampled input parameters;
-4. Aggregate the outputs.
 
 ## Example Input Syntax
-!listing modules/stochastic_tools/tests/samplers/monte_carlo/sampler_materials_test.i block=Samplers
+!listing modules/stochastic_tools/tests/samplers/monte_carlo/monte_carlo_uniform.i block=Samplers
 
 !parameters /Samplers/MonteCarloSampler
 
