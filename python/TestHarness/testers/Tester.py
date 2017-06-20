@@ -69,10 +69,10 @@ class Tester(MooseObject):
         self._runnable = None
 
         ### several variables needed when performing processResults
-        self.exit_code = None
-        self.start_time = None
-        self.end_time = None
-        self.std_out = ''
+        self.__start_time = None
+        self.__end_time = None
+        self.__exit_code = 0
+        self.__std_out = ''
 
         # Initialize the status bucket class
         self.status = util.TestStatus()
@@ -110,16 +110,39 @@ class Tester(MooseObject):
         return self.specs['test_dir']
 
     def getExitCode(self):
-        return self.exit_code
+        return self.__exit_code
+
+    def setExitCode(self, exit_code):
+        self.__exit_code = exit_code
+        return self.__exit_code
 
     def getOutput(self):
-        return self.std_out
+        return self.__std_out
+
+    def setOutput(self, output):
+        self.__std_out = output
+        return self.__std_out
 
     def getStartTime(self):
-        return self.start_time
+        return self.__start_time
+
+    def setStartTime(self, start_time):
+        self.__start_time = start_time
+        return self.__start_time
 
     def getEndTime(self):
-        return self.end_time
+        return self.__end_time
+
+    def setEndTime(self, end_time):
+        self.__end_time = end_time
+        return self.__end_time
+
+    def getPerfTime(self):
+        return self.__perf_time
+
+    def setPerfTime(self, perf_time):
+        self.perf_time = perf_time
+        return self.__perf_time
 
     def getMinReportTime(self):
         return self.specs['min_reported_time']
@@ -260,6 +283,89 @@ class Tester(MooseObject):
     # Return a list of redirected output
     def getRedirectedOutputFiles(self, options):
         return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
+
+    # Return active time
+    def getActiveTime(self):
+        m = re.search(r"Active time=(\S+)", self.getOutput())
+        if m != None:
+            return m.group(1)
+
+    # Return solve time
+    def getSolveTime(self):
+        m = re.search(r"solve().*", self.getOutput())
+        if m != None:
+            return m.group().split()[5]
+
+    # Return active time if available, if not return a comparison of start and end time (RunException tests do not support active time)
+    def getTiming(self):
+        if self.getActiveTime():
+            return self.getActiveTime()
+        elif self.getEndTime():
+            return self.getEndTime() - self.getStartTime()
+        else:
+            return 0.0
+
+    # Format the status message to make any caveats easy to read when they are printed
+    def formatCaveats(self, options):
+        caveats = []
+        result = ''
+
+        if self.specs.isValid('caveats'):
+            caveats = self.specs['caveats']
+
+        # PASS and DRY_RUN fall into this catagory
+        if self.didPass():
+            if options.extra_info:
+                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
+                for check in checks:
+                    if not 'ALL' in self.specs[check]:
+                        caveats.append(', '.join(self.specs[check]))
+            if len(caveats):
+                result = '[' + ', '.join(caveats).upper() + '] ' + self.getSuccessMessage()
+            else:
+                result = self.getSuccessMessage()
+
+        # FAIL, DIFF and DELETED fall into this catagory
+        elif self.didFail() or self.didDiff() or self.isDeleted():
+            result = 'FAILED (%s)' % self.getStatusMessage()
+
+        elif self.isSkipped():
+            # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
+            # but Exodiff is instructed to 'SKIP' on scaled tests.
+            if len(caveats):
+                result = '[' + ', '.join(caveats).upper() + '] skipped (' + self.getStatusMessage() + ')'
+            else:
+                result = 'skipped (' + self.getStatusMessage() + ')'
+        else:
+            result = self.getStatusMessage()
+        return result
+
+    # Print and return formatted current tester status output
+    def printResult(self, options):
+        # The test has no status to print
+        if self.isSilent() or (self.isDeleted() and not options.extra_info):
+            caveat_formatted_results = None
+        # Print what ever status the tester has at the time
+        else:
+            if options.verbose or (self.didFail() and not options.quiet):
+                output = 'Working Directory: ' + self.getTestDir() + '\nRunning command: ' + self.getCommand(options) + '\n'
+
+                if self.getOutput():
+                    output += self.getOutput()
+                output = output.replace('\r', '\n')  # replace the carriage returns with newlines
+                lines = output.split('\n')
+
+                # Obtain color based on test status
+                color = self.getColor()
+
+                if output != '':
+                    test_name = util.colorText(self.getTestName()  + ": ", color, colored=options.colored, code=options.code)
+                    output = test_name + ("\n" + test_name).join(lines)
+                    print(output)
+
+            caveat_formatted_results = self.formatCaveats(options)
+            print util.printResult(self, caveat_formatted_results, self.getTiming(), options)
+        return caveat_formatted_results
 
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"

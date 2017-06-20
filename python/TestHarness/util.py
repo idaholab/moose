@@ -173,7 +173,7 @@ def printResult(tester, result, timing, options, color=True):
         f_result = test_name + '.'*cnt + ' ' + result
 
     # Tack on the timing if it exists
-    if timing:
+    if options.timing:
         f_result += ' [' + '%0.3f' % float(timing) + 's]'
     if options.debug_harness:
         f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % tester.getEndTime()
@@ -656,7 +656,7 @@ class TestStatus(object):
     ## FAIL     =  Failing tests
     ## DIFF     =  Failing tests due to Exodiff, CSVDiff
     ## PENDING  =  A pending status applied by the TestHarness (RUNNING...)
-    ## FINISHED =  A status that can mean it finished _in_ a pending status (like a queued status type)
+    ## FINISHED =  A status that can mean it finished in any status (like a pending queued status type)
     ## DELETED  =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
     ##             is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
     ##             printed to stdout) when the user has specifically asked for more information while
@@ -762,9 +762,9 @@ class TestStatus(object):
         Return boolean finished status
         """
         status = self.getStatus()
-        return (status == self.bucket_finished or status is not self.bucket_pending)
+        return (status == self.bucket_finished or status != self.bucket_pending)
 
-class StatusDependency():
+class TesterDependency():
     """
     A class used to determine if a tester can run based on other tester statuses.
 
@@ -775,10 +775,10 @@ class StatusDependency():
         self.__testers = set(testers) - set([tester])
         self.options = options
 
-    # A method that returns bool if the test can run or sets the appropriate status why it could not run
-    # or does nothing if the test needs to be placed back into the queue (leaves the tester in a pending
-    # status)
-    def checkAndSetStatus(self):
+    # A method that returns bool if the test can run.
+    # This check also sets the appropriate status why it could not run or does nothing if the test needs to be
+    # placed back into the queue (leaves the tester alone, which leaves it in a pending state)
+    def checkRunnable(self):
         if self.noRaceConditions():
             if self.isRunnable():
                 return True

@@ -11,8 +11,6 @@ path_tool.activate_module('FactorySystem')
 from socket import gethostname
 from util import *
 from Scheduler import Scheduler
-from CSVDiffer import CSVDiffer
-from XMLDiffer import XMLDiffer
 from Tester import Tester
 from Factory import Factory
 from Parser import Parser
@@ -58,7 +56,6 @@ class TestHarness:
         self.num_passed = 0
         self.num_failed = 0
         self.num_skipped = 0
-        self.num_pending = 0
         self.host_name = gethostname()
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
@@ -162,8 +159,6 @@ class TestHarness:
                 # walk into directories that aren't contrib directories
                 if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
                     for file in filenames:
-                        # set cluster_handle to be None initially (happens for each test)
-                        self.options.cluster_handle = None
                         # See if there were other arguments (test names) passed on the command line
                         if file == self.options.input_file_name \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
@@ -197,7 +192,7 @@ class TestHarness:
         except KeyboardInterrupt:
             if self.writeFailedTest != None:
                 self.writeFailedTest.close()
-            print '\nExiting due to keyboard interrupt...'
+            print('\nExiting due to keyboard interrupt...')
             sys.exit(1)
 
         return
@@ -327,16 +322,6 @@ class TestHarness:
         testers.extend(new_tests)
         return testers
 
-    def getTiming(self, output):
-        m = re.search(r"Active time=(\S+)", output)
-        if m != None:
-            return m.group(1)
-
-    def getSolveTime(self, output):
-        m = re.search(r"solve().*", output)
-        if m != None:
-            return m.group().split()[5]
-
     def checkExpectError(self, output, expect_error):
         if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
             #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
@@ -344,141 +329,43 @@ class TestHarness:
         else:
             return True
 
-    # handleTestStatus is the entry point the testers will use to print statuses to the screen
+    # handleTestStatus calls the tester's ability to print its current status to the screen, and handles
+    # the finalized status for tallying up the totals based on those statuses (failed, success, etc)
     def handleTestStatus(self, tester):
-        # The test has finished regardless of status
-        if tester.isFinished():
-            if tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
-                return
+        # print and store those results
+        result = tester.printResult(self.options)
+
+        # Test is finished and had some results to print
+        if result and tester.isFinished():
+            # Store these results to a table we will use when we print final results
+            self.test_table.append( (tester, result, tester.getTiming()) )
+
+            # Tally the results of this test to be used in our Final Test Results footer
+            if tester.isSkipped():
+                self.num_skipped += 1
+            elif tester.didPass():
+                self.num_passed += 1
             else:
-                self.testOutputAndFinish(tester)
+                self.num_failed += 1
 
-        # The test has not yet finished but there is a status change we want to display
-        else:
-            print printResult(tester, tester.getStatusMessage(), clock() - tester.getStartTime(), self.options)
+            # Write results to a file if asked to do so
+            if not tester.isSkipped():
+                if not tester.didPass() and not self.options.failed_tests:
+                    self.writeFailedTest.write(tester.specs['test_name'] + '\n')
 
-    # Finish the test by inspecting the raw output
-    ### TODO: refactor handleTestResult and testOutputAndFinish into a single method.
-    ###       The testers are carrying all the information we need now, so no need to pass so many variables.
-    def testOutputAndFinish(self, tester):
-        caveats = []
-        result = ''
-        test = tester.specs  # Need to refactor
+                if self.options.file:
+                    self.file.write(printResult( tester, result, timing, self.options, color=False) + '\n')
+                    self.file.write(output)
 
-        if test.isValid('caveats'):
-            caveats = test['caveats']
+                if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
+                    fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
+                    f = open(fname, 'w')
+                    f.write(printResult( tester, result, timing, self.options, color=False) + '\n')
+                    f.write(output)
+                    f.close()
 
-        # PASS and DRY_RUN fall into this catagory
-        if tester.didPass():
-            if self.options.extra_info:
-                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
-                for check in checks:
-                    if not 'ALL' in test[check]:
-                        caveats.append(', '.join(test[check]))
-            if len(caveats):
-                result = '[' + ', '.join(caveats).upper() + '] ' + tester.getSuccessMessage()
-            else:
-                result = tester.getSuccessMessage()
-
-        # FAIL, DIFF and DELETED fall into this catagory
-        elif tester.didFail() or tester.didDiff() or tester.isDeleted():
-            result = 'FAILED (%s)' % tester.getStatusMessage()
-
-        else:
-            result = tester.getStatusMessage()
-
-        self.handleTestResult(tester, result)
-
-    ## Update global variables and print output based on the test result
-    def handleTestResult(self, tester, result):
-        caveats = []
-        timing = ''
-        output = ''
-        if tester.getOutput():
-            output = tester.getOutput()
-
-        if tester.specs.isValid('caveats'):
-            caveats = tester.specs['caveats']
-
-        if self.options.timing:
-            timing = self.getTiming(tester.getOutput())
-
-            # Run exception tests return no output on a 'success'. So for these cases, we will use the time when the
-            # thread started and exited the job.
-            # NOTE: tester.getEndTime() includes the time it takes to run processResults. Therfor, do not use
-            #       end_time for accuracy. Continue to use perftime gathered from output.
-            if timing is None:
-                timing = tester.getEndTime() - tester.getStartTime()
-
-        elif self.options.store_time:
-            timing = self.getSolveTime(tester.getOutput())
-
-        # format the SKIP messages received
-        if tester.isSkipped():
-            # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
-            # but Exodiff is instructed to 'SKIP' on scaled tests.
-            if len(caveats):
-                result = '[' + ', '.join(caveats).upper() + '] skipped (' + tester.getStatusMessage() + ')'
-            else:
-                result = 'skipped (' + tester.getStatusMessage() + ')'
-
-            if self.options.timing:
-                timing = '0'
-
-        # result is normally populated by a tester object when a test has failed. But in this case
-        # checkRunnableBase determined the test a failure before it even ran. So we need to set the
-        # results here, so they are printed if the extra_info argument was supplied
-        elif tester.isDeleted():
-            result = tester.getStatusMessage()
-
-        # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
-        # in the 'Final Test Results' area.
-
-        self.test_table.append( (tester, result, timing) )
-        if tester.isSkipped():
-            self.num_skipped += 1
-        elif tester.didPass():
-            self.num_passed += 1
-        elif tester.isPending():
-            self.num_pending += 1
-        else:
-            # Dump everything else into the failure status (neccessary due to PBS launch failures
-            # not being stored in the tester status bucket)
-            self.num_failed += 1
-
-        self.postRun(tester.specs, timing)
-
-        print printResult(tester, result, timing, self.options)
-
-        if self.options.verbose or (not tester.didPass() and not self.options.quiet):
-            output = output.replace('\r', '\n')  # replace the carriage returns with newlines
-            lines = output.split('\n');
-
-            # Obtain color based on test status
-            color = tester.getColor()
-
-            if output != '': # PBS Failures can result in empty output, so lets not print that stuff twice
-                test_name = colorText(tester.specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
-                output = test_name + ("\n" + test_name).join(lines)
-                print(output)
-
-                # Print result line again at the bottom of the output for failed tests
-                print("%s(reprint)" % printResult(tester, result, timing, self.options))
-
-        if not tester.isSkipped():
-            if not tester.didPass() and not self.options.failed_tests:
-                self.writeFailedTest.write(tester.specs['test_name'] + '\n')
-
-            if self.options.file:
-                self.file.write(printResult( tester, result, timing, self.options, color=False) + '\n')
-                self.file.write(output)
-
-            if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
-                fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
-                f = open(fname, 'w')
-                f.write(printResult( tester, result, timing, self.options, color=False) + '\n')
-                f.write(output)
-                f.close()
+            # Allow derived classes to perfrom post runs on this test
+            self.postRun(tester.specs, timing)
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
@@ -517,17 +404,13 @@ class TestHarness:
             else:
                 summary = '<b>%d passed</b>'
             summary += ', <b>%d skipped</b>'
-            if self.num_pending:
-                summary += ', <c>%d pending</c>'
-            else:
-                summary += ', <b>%d pending</b>'
             if self.num_failed:
                 summary += ', <r>%d FAILED</r>'
             else:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+            print colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code )
 
         if self.file:

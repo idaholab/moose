@@ -35,9 +35,9 @@ class RunParallel(Scheduler):
         # Ask the tester if its allowed to run on this machine
         if tester.checkRunnableBase(options):
 
-            # Ask if this test is allowed to run based on other test's circumstances
-            status_check = StatusDependency(tester, testers, options)
-            if status_check.checkAndSetStatus():
+            # Ask if this test is allowed to run based on other tester's circumstances
+            check = TesterDependency(tester, testers, options)
+            if check.checkRunnable():
                 # Get the command needed to run this test
                 command = tester.getCommand(options)
 
@@ -47,10 +47,10 @@ class RunParallel(Scheduler):
                 # If shouldExecute was false, there is process or output to work with so pass
                 # control over to testOutput now, to run processResults and complete the test
                 if not tester.shouldExecute() or options.dry_run:
-                    tester.start_time = clock()
-                    tester.exit_code = 0
-                    tester.end_time = clock()
-                    tester.std_out = ''
+                    tester.setStartTime(clock())
+                    tester.setExitCode(0)
+                    tester.setEndTime(clock())
+                    tester.setOutput('')
                     self.testOutput(tester, testers, '', options)
                     return
                 else:
@@ -58,11 +58,11 @@ class RunParallel(Scheduler):
                     (process, output_file, start_time) = returnCommand(tester, command)
 
                 # Set the tester's start time
-                tester.start_time = start_time
+                tester.setStartTime(start_time)
 
                 # We're a thread so wait for the process to complete
                 process.wait()
-                tester.end_time = clock()
+                tester.setEndTime(clock())
 
                 # Did the process fail and we didn't know it (someone told the testharness we timed out)?
                 if tester.didFail():
@@ -70,44 +70,32 @@ class RunParallel(Scheduler):
 
                 if process.poll() is not None:
                     # set the exit code
-                    tester.exit_code = process.poll()
+                    tester.setExitCode(process.poll())
 
                     # set the tester output (trimmed)
-                    results = readOutput(output_file, options)
+                    output = readOutput(output_file, options)
                     output_file.close()
 
                     # Process the results and beautify the output
-                    self.testOutput(tester, testers, results, options)
+                    self.testOutput(tester, testers, output, options)
 
                 # This test failed to launch properly
                 else:
                     tester.setStatus('ERROR LAUNCHING JOB', tester.bucket_fail)
 
         else:
-            tester.end_time = clock()
-
-    def getDependents(self, tester, testers):
-        r = ReverseReachability()
-        for test in testers:
-            r.insertDependency(test.getTestName(), test.getPrereqs())
-        reverse_sets = r.getReverseReachabilitySets()
-
-        if len(reverse_sets[tester.getTestName()]):
-            return True
+            tester.setEndTime(clock())
 
     # Modify the output the way we want it. Run processResults
-    def testOutput(self, tester, testers, results, options):
-        # create verbose header
-        output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(options) + '\n'
-
+    def testOutput(self, tester, testers, output, options):
         # dry run? cool, just return
         if options.dry_run or not tester.shouldExecute():
-            tester.std_out = output
+            tester.setOutput(output)
             tester.setStatus(tester.getSuccessMessage(), tester.bucket_success)
             return
 
-        # process and append the test results to output
-        output += tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, results)
+        # process and store new results from output
+        output = tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, output)
 
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
@@ -127,4 +115,4 @@ class RunParallel(Scheduler):
             output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
         # Set testers output with modifications made above
-        tester.std_out = output
+        tester.setOutput(output)

@@ -53,16 +53,14 @@ class Scheduler(MooseObject):
         params['max_processes'] = self.options.jobs
         params['average_load'] = self.options.load
 
-        # For backwards compatibitliy the RunParallel class can be initialized
+        # For backwards compatibitliy the Scheduler class can be initialized
         # with no "max_processes" argument and it'll default to a soft limit.
         # If however a max_processes  is passed we'll treat it as a hard limit.
         # The difference is whether or not we allow single jobs to exceed
         # the number of slots.
         if params['max_processes'] == None:
-            self.soft_limit = True
             self.job_slots = 1
         else:
-            self.soft_limit = False
             self.job_slots = params['max_processes'] # hard limit
 
         # Requested average load level to stay below
@@ -85,6 +83,9 @@ class Scheduler(MooseObject):
 
     ## Clear and Initialize the scheduler queue
     def clearAndInitializeJobs(self):
+        # Workers in use
+        self.workers_in_use = 0
+
         # A test name to object dictionary containing all tests that are scheduled for execution
         self.scheduled_name_to_object = {}
 
@@ -140,13 +141,13 @@ class Scheduler(MooseObject):
 
     # private methods to add a tester to a queue and assign a thread to it
     # TODO: refactor runnerGo and statusGo
-    def _runnerGo(self, tester_name):
+    def runnerGo(self, tester_name):
         self.runner_queue.put(tester_name)
         return self.runner_pool.apply_async(self.jobRunner, (self.runner_queue,))
 
     # private methods to add a tester to a queue and assign a thread to it
     # TODO: refactor runnerGo and statusGo
-    def _statusGo(self, tester_name):
+    def statusGo(self, tester_name):
         self.status_queue.put(tester_name)
         return self.status_pool.apply_async(self.statusRunner, (self.status_queue,))
 
@@ -164,22 +165,35 @@ class Scheduler(MooseObject):
         # Add a test to the Runner Queue, and ask a thread to do some work (the thread pool has built in methods
         # which prevent oversubscribing)
         for tester in testers:
-            results = self._runnerGo(tester.getTestName())
+            results = self.runnerGo(tester.getTestName())
             # DEBUG this thread by using the get method. (Note: this is a blocking call)
             # print results.get()
 
-    # Launch jobs stored in our queues. Method is blocked until both queue(s) are empty
+    # Launch jobs stored in our queues. Method is blocked until both queue(s) and active jobs are empty
     def waitFinish(self):
         while len(self.active_jobs) != 0 or not self.runner_queue.empty() or not self.status_queue.empty():
+            # Using a thread lock, check and do things every iteration
             with self.thread_lock:
                 self.handleActiveTests()
 
             # sleep for just a tick or two
             sleep(0.1)
 
+        ### Runner Pool
+        # Wait for the runner pool to empty before waiting on the status pool
+        # The runner pool and status pool can exhange jobs between each other but it is always the status pool
+        # that will have items in the queue last (that last job with a finished status to be printed)
+
+        # Close the runner_pool so jobs can no longer be scheduled for launching
         self.runner_pool.close()
+
+        # Wait for the runner_pool to empty
         self.runner_pool.join()
+
+        # Close the status_pool so jobs can no longer be scheduled for status printing
         self.status_pool.close()
+
+        # Wait for the status_pool to empty
         self.status_pool.join()
 
     # Method to do things needed to actively running tests.
@@ -190,12 +204,12 @@ class Scheduler(MooseObject):
             tester = self.scheduled_name_to_object[tester_name]
 
             # Handle long running tests
-            self.do_LongRunningTests(tester)
+            self.doLongRunningTests(tester)
 
             # Handle timeouts
-            self.do_TimeoutTests(tester)
+            self.doTimeoutTests(tester)
 
-    def do_LongRunningTests(self, tester):
+    def doLongRunningTests(self, tester):
         if tester.getTestName() not in self.reported_jobs:
             min_time = self.default_reported_time
             if tester.specs.isValid('min_reported_time'):
@@ -206,7 +220,7 @@ class Scheduler(MooseObject):
                 tester.setStatus('RUNNING...', tester.bucket_pending)
                 self.harness.handleTestStatus(tester)
 
-    def do_TimeoutTests(self, tester):
+    def doTimeoutTests(self, tester):
         if tester.getTestName() not in self.reported_jobs:
             if clock() - tester.getStartTime() > float(tester.getMaxTime()):
                 self.reported_jobs.add(tester.getTestName())
@@ -221,7 +235,7 @@ class Scheduler(MooseObject):
         # check to see if this test is complete
         if tester.isFinished():
             # And the running caveat and
-            if tester.getTestName() in self.reported_jobs and tester.didPass():
+            if tester_name in self.reported_jobs and tester.didPass():
                 tester.specs.addParam('caveats', ['FINISHED'], "")
 
             # Print finalized results
@@ -229,12 +243,19 @@ class Scheduler(MooseObject):
             self.harness.handleTestStatus(tester)
 
         else:
-            # place this job back in the runner queue because it was not ready to launch (prereqs)
-            self._runnerGo(tester.getTestName())
+            # place this job back in the runner/status queue because it was not ready to launch or is pending
+            with self.thread_lock:
+                # Make sure the job isn't already in the runner queue (job that is not skipped)
+                if tester.getTestName() not in self.active_jobs:
+                    self.runnerGo(tester_name)
+
+                # Place this job back in the status queue (job is running and is not done)
+                else:
+                    self.statusGo(tester_name)
 
             # We should spin here for just a bit; A runner and status thread will rapidly hand off a
             # job to each other for tests that can't run yet due to a prereq not being ready.
-            sleep(0.1)
+            sleep(0.01)
 
     # Runner processing (blocking calls to the run method)
     def jobRunner(self, queue):
@@ -245,19 +266,35 @@ class Scheduler(MooseObject):
         # get associated testers
         testers =  self.scheduled_groups[tester_name]
 
-        # immediately set the tester start time so its available
-        tester.start_time = clock()
-
         with self.thread_lock:
-            # Add this job to our active set
-            self.active_jobs.add(tester.getTestName())
+            # Check if we have enough slots available
+            if self.workers_in_use + tester.getProcs(self.options) > self.job_slots:
+                # We do not have enough slots available
+                self.statusGo(tester_name)
+                return
+            else:
+                # Tally the workers this job is about to use
+                self.workers_in_use = self.workers_in_use + tester.getProcs(self.options)
+
+                # Add this job to our active set
+                self.active_jobs.add(tester_name)
+
+        # Start the clock (in case a derived scheduler plugin method fails to set this)
+        tester.setStartTime(clock())
+
+        # Add this job to the status queue to handle an immediate skipped tests
+        self.statusGo(tester_name)
 
         # Call derived run methods (blocking)
         self.run(tester,  testers, self.thread_lock, self.options)
 
+        # Stop the clock (in case a derived scheduler plugin method fails to set this)
+        if tester.getEndTime() is None:
+            tester.setEndTime(clock())
+
         with self.thread_lock:
             # Remove this job from our active set
-            self.active_jobs.remove(tester.getTestName())
+            self.active_jobs.remove(tester_name)
 
-        # Add this job to the status queue for printing results
-        self._statusGo(tester_name)
+            # Recover our available slots
+            self.workers_in_use = max(0, self.workers_in_use - tester.getProcs(self.options))
