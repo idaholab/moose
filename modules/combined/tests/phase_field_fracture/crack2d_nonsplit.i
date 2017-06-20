@@ -1,10 +1,24 @@
 [Mesh]
-  type = FileMesh
-  file = void2d_mesh.xda
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 5
+  ymax = 0.5
+  second_order = true
+[]
+
+[MeshModifiers]
+  [./noncrack]
+    type = BoundingBoxNodeSet
+    new_boundary = noncrack
+    bottom_left = '0.5 0 0'
+    top_right = '1 0 0'
+  [../]
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+  order = SECOND
 []
 
 [Variables]
@@ -13,8 +27,6 @@
   [./disp_y]
   [../]
   [./c]
-  [../]
-  [./b]
   [../]
 []
 
@@ -38,10 +50,9 @@
 
 [Kernels]
   [./pfbulk]
-    type = SplitPFFractureBulkRate
+    type = PFFractureBulkRate
     variable = c
-    width = 0.01
-    beta = b
+    width = 0.08
     viscosity = 1e-1
     gc = 'gc_prop'
     G0 = 'G0_pos'
@@ -67,15 +78,6 @@
     type = TimeDerivative
     variable = c
   [../]
-  [./pfintvar]
-    type = Reaction
-    variable = b
-  [../]
-  [./pfintcoupled]
-    type = LaplacianSplit
-    variable = b
-    c = c
-  [../]
 []
 
 [AuxKernels]
@@ -99,51 +101,34 @@
   [./yfix]
     type = PresetBC
     variable = disp_y
-    boundary = bottom
+    boundary = noncrack
     value = 0
   [../]
   [./xfix]
     type = PresetBC
     variable = disp_x
-    boundary = left
+    boundary = top
     value = 0
   [../]
 []
 
-[Functions]
-  [./void_prop_func]
-    type = ParsedFunction
-    value = 'rad:=0.2;m:=50;r:=sqrt(x^2+y^2);1-exp(-(r/rad)^m)+1e-8'
-  [../]
-  [./gb_prop_func]
-    type = ParsedFunction
-    value = 'rad:=0.2;thk:=0.05;m:=50;sgnx:=1-exp(-(x/rad)^m);v:=sgnx*exp(-(y/thk)^m);0.005*(1-v)+0.001*v'
-  [../]
-[../]
-
 [Materials]
   [./pfbulkmat]
     type = PFFracBulkRateMaterial
-    block = 0
-    function = gb_prop_func
+    gc = 1e-3
   [../]
   [./elastic]
     type = LinearIsoElasticPFDamage
-    block = 0
     c = c
     kdamage = 1e-8
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
-    elasticity_tensor_prefactor = void_prop_func
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -151,12 +136,12 @@
   [./resid_x]
     type = NodalSum
     variable = resid_x
-    boundary = left
+    boundary = 2
   [../]
   [./resid_y]
     type = NodalSum
     variable = resid_y
-    boundary = top
+    boundary = 2
   [../]
 []
 
@@ -174,9 +159,9 @@
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      lu           1'
 
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-12
-  l_max_its = 15
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-10
+  l_max_its = 35
   nl_max_its = 10
 
   dt = 1e-4
@@ -184,7 +169,8 @@
 []
 
 [Outputs]
-  exodus = true
-  csv = true
-  gnuplot = true
+  [./out]
+    type = Exodus
+    refinements = 1
+  [../]
 []

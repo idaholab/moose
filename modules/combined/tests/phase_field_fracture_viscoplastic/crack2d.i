@@ -40,14 +40,14 @@
 
 [Kernels]
   [./pfbulk]
-    type = PFFracBulkRate
+    type = SplitPFFractureBulkRate
     variable = c
-    l = 0.08
+    width = 0.08
     beta = b
-    visco =1
-    gc_prop_var = 'gc_prop'
-    G0_var = 'G0'
-    dG0_dstrain_var = 'dG0_dstrain'
+    viscosity =1
+    gc = 'gc_prop'
+    G0 = 'G0'
+    dG0_dstrain = 'dG0_dstrain'
   [../]
   [./TensorMechanics]
     displacements = 'disp_x disp_y'

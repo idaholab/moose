@@ -51,6 +51,8 @@ PFFracBulkRate::PFFracBulkRate(const InputParameters & parameters)
     _l(getParam<Real>("l")),
     _visco(getParam<Real>("visco"))
 {
+  mooseDeprecated("Use 'SplitPFFractureBulkRate'. Parameter name changes: l->width, "
+                  "visco->viscosity, gc_prop_var->gc, G0_var->G0, dG0_dstrain_var->dG0_dstrain");
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var[i] = coupled("displacements", i);
 }
