@@ -39,8 +39,8 @@ protected:
   const MaterialProperty<Real> & _dp_darhouA;
   const MaterialProperty<Real> & _dp_darhoEA;
 
-  unsigned int _alpha_rhoA_var_number;
-  unsigned int _alpha_rhoE_var_number;
+  unsigned int _arhoA_var_number;
+  unsigned int _arhoE_var_number;
   unsigned int _beta_var_number;
 };
 

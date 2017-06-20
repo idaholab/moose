@@ -29,8 +29,8 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
     _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "arhouA")),
     _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoEA")),
 
-    _alpha_rhoA_var_number(coupled("arhoA")),
-    _alpha_rhoE_var_number(coupled("arhoEA")),
+    _arhoA_var_number(coupled("arhoA")),
+    _arhoE_var_number(coupled("arhoEA")),
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint)
 {
 }
@@ -50,11 +50,11 @@ OneDMomentumAreaGradient::computeQpJacobian()
 Real
 OneDMomentumAreaGradient::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _alpha_rhoA_var_number)
+  if (jvar == _arhoA_var_number)
   {
     return -_dp_darhoA[_qp] * _alpha[_qp] * _area_grad[_qp](0) * _phi[_j][_qp] * _test[_i][_qp];
   }
-  else if (jvar == _alpha_rhoE_var_number)
+  else if (jvar == _arhoE_var_number)
   {
     return -_dp_darhoEA[_qp] * _alpha[_qp] * _area_grad[_qp](0) * _phi[_j][_qp] * _test[_i][_qp];
   }
