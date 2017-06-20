@@ -189,6 +189,12 @@ protected:
   virtual void initialSetup();
 
   /**
+   * Handles logic for determining if a step should be output
+   * @return True if a call if output should be preformed
+   */
+  virtual bool shouldOutput(const ExecFlagType & type);
+
+  /**
    * A single call to this function should output all the necessary data for a single timestep. By
    * default this function performs calls each of the four virtual output methods:
    * outputScalarVariables(),
