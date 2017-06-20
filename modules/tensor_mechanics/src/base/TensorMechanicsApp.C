@@ -146,7 +146,6 @@
 #include "AccumulateAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "RankTwoScalarAux.h"
-#include "StressDivergencePFFracTensors.h"
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
 #include "RadialDisplacementCylinderAux.h"
@@ -228,7 +227,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceRZTensors);
   registerKernel(StressDivergenceRSphericalTensors);
   registerKernel(MomentBalancing);
-  registerDeprecatedObject(StressDivergencePFFracTensors, "06/01/2017 09:00");
   registerKernel(PoroMechanicsCoupling);
   registerKernel(InertialForce);
   registerKernel(Gravity);

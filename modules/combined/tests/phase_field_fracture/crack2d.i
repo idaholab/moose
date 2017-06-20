@@ -1,7 +1,18 @@
 [Mesh]
-  type = FileMesh
-  file = crack_mesh.e
-  uniform_refine = 0
+  type = GeneratedMesh
+  dim = 2
+  nx = 20
+  ny = 10
+  ymax = 0.5
+[]
+
+[MeshModifiers]
+  [./noncrack]
+    type = BoundingBoxNodeSet
+    new_boundary = noncrack
+    bottom_left = '0.5 0 0'
+    top_right = '1 0 0'
+  [../]
 []
 
 [GlobalParams]
@@ -39,14 +50,14 @@
 
 [Kernels]
   [./pfbulk]
-    type = PFFracBulkRate
+    type = SplitPFFractureBulkRate
     variable = c
-    l = 0.08
+    width = 0.08
     beta = b
-    visco =1e-4
-    gc_prop_var = 'gc_prop'
-    G0_var = 'G0_pos'
-    dG0_dstrain_var = 'dG0_pos_dstrain'
+    viscosity = 1e-1
+    gc = 'gc_prop'
+    G0 = 'G0_pos'
+    dG0_dstrain = 'dG0_pos_dstrain'
   [../]
   [./DynamicTensorMechanics]
     displacements = 'disp_x disp_y'
@@ -94,19 +105,19 @@
   [./ydisp]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 2
+    boundary = top
     function = tfunc
   [../]
   [./yfix]
     type = PresetBC
     variable = disp_y
-    boundary = 1
+    boundary = noncrack
     value = 0
   [../]
   [./xfix]
     type = PresetBC
     variable = disp_x
-    boundary = '1 2'
+    boundary = top
     value = 0
   [../]
 []
@@ -145,7 +156,6 @@
 []
 
 [Preconditioning]
-  active = 'smp'
   [./smp]
     type = SMP
     full = true
@@ -170,6 +180,4 @@
 
 [Outputs]
   exodus = true
-  csv = true
-  gnuplot = true
 []

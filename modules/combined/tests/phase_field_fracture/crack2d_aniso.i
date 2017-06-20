@@ -1,10 +1,22 @@
-[GlobalParams]
-  displacements = 'disp_x disp_y'
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 20
+  ny = 10
+  ymax = 0.5
 []
 
-[Mesh]
-  type = FileMesh
-  file = crack_mesh.e
+[MeshModifiers]
+  [./noncrack]
+    type = BoundingBoxNodeSet
+    new_boundary = noncrack
+    bottom_left = '0.5 0 0'
+    top_right = '1 0 0'
+  [../]
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -32,7 +44,6 @@
     beta = b
   [../]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y'
   [../]
   [./solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
@@ -76,19 +87,19 @@
   [./ydisp]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 2
+    boundary = top
     function = 't'
   [../]
   [./yfix]
     type = PresetBC
     variable = disp_y
-    boundary = 1
+    boundary = noncrack
     value = 0
   [../]
   [./xfix]
     type = PresetBC
     variable = disp_x
-    boundary = '3'
+    boundary = top
     value = 0
   [../]
 []

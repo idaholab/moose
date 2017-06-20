@@ -34,6 +34,22 @@ Real taylorLog(Real x);
 
 Real pow(Real x, unsigned int e);
 
+inline Real
+heavyside(Real x)
+{
+  return x < 0.0 ? 0.0 : 1.0;
+}
+inline Real
+positivePart(Real x)
+{
+  return x > 0.0 ? x : 0.0;
+}
+inline Real
+negativePart(Real x)
+{
+  return x < 0.0 ? x : 0.0;
+}
+
 } // namespace MathUtils
 
 #endif // MATHUTILS_H

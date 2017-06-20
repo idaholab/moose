@@ -1,8 +1,8 @@
-# PFFracBulkRate
-!description /Kernels/PFFracBulkRate
+# SplitPFFractureBulkRate
+!description /Kernels/SplitPFFractureBulkRate
 
 The kernel implements second equation substituted into the third equation in (63)
-from \cite{Miehe10}
+from \cite{Miehe10} in a split form
 
 $$
 - \frac1\eta \langle l \cdot \beta + 2 (1-c) \frac{\psi^+_0}{g_c} - \frac cl \rangle_+,
@@ -20,10 +20,14 @@ Note that $\beta$ is defined differently in the paper, $\eta$ in the paper corre
 to $\frac{\eta}{g_c}$ in MOOSE, and $\dot d$ in the paper corresponds
 to [TimeDerivative](/TimeDerivative.md) on the kernel variable $c$.
 
-!parameters /Kernels/PFFracBulkRate
+A non-split version of this kernel is [PFFractureBulkRate](/PFFractureBulkRate.md),
+which requires higher order shape functions (e.g. second order Lagrange and third
+order Hermite).
 
-!inputfiles /Kernels/PFFracBulkRate
+!parameters /Kernels/SplitPFFractureBulkRate
 
-!childobjects /Kernels/PFFracBulkRate
+!inputfiles /Kernels/SplitPFFractureBulkRate
+
+!childobjects /Kernels/SplitPFFractureBulkRate
 
 \bibliography{docs/bib/phase_field.bib}

@@ -70,6 +70,8 @@
 #include "SplitCHParsed.h"
 #include "SplitCHWRes.h"
 #include "SplitCHWResAniso.h"
+#include "SplitPFFractureBulkRate.h"
+#include "PFFractureBulkRate.h"
 #include "SusceptibilityTimeDerivative.h"
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
@@ -355,8 +357,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MatDiffusion);
   registerKernel(MatReaction);
   registerKernel(MultiGrainRigidBodyMotion);
-  registerKernel(PFFracBulkRate);
-  registerKernel(PFFracCoupledInterface);
+  registerDeprecatedObject(PFFracBulkRate, "08/01/2017 09:00");
+  registerKernel(PFFractureBulkRate);
+  registerDeprecatedObject(PFFracCoupledInterface, "08/01/2017 09:00");
   registerKernel(SimpleACInterface);
   registerKernel(SimpleCHInterface);
   registerKernel(SimpleCoupledACInterface);
@@ -367,6 +370,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SplitCHParsed);
   registerKernel(SplitCHWRes);
   registerKernel(SplitCHWResAniso);
+  registerKernel(SplitPFFractureBulkRate);
   registerKernel(SusceptibilityTimeDerivative);
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);

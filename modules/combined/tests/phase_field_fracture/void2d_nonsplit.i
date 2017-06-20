@@ -13,8 +13,8 @@
   [./disp_y]
   [../]
   [./c]
-  [../]
-  [./b]
+    order = THIRD
+    family = HERMITE
   [../]
 []
 
@@ -38,17 +38,15 @@
 
 [Kernels]
   [./pfbulk]
-    type = SplitPFFractureBulkRate
+    type = PFFractureBulkRate
     variable = c
     width = 0.01
-    beta = b
     viscosity = 1e-1
     gc = 'gc_prop'
     G0 = 'G0_pos'
     dG0_dstrain = 'dG0_pos_dstrain'
   [../]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y'
     save_in = 'resid_x resid_y'
   [../]
   [./solid_x]
@@ -66,15 +64,6 @@
   [./dcdt]
     type = TimeDerivative
     variable = c
-  [../]
-  [./pfintvar]
-    type = Reaction
-    variable = b
-  [../]
-  [./pfintcoupled]
-    type = LaplacianSplit
-    variable = b
-    c = c
   [../]
 []
 
@@ -124,26 +113,21 @@
 [Materials]
   [./pfbulkmat]
     type = PFFracBulkRateMaterial
-    block = 0
     function = gb_prop_func
   [../]
   [./elastic]
     type = LinearIsoElasticPFDamage
-    block = 0
     c = c
     kdamage = 1e-8
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
     elasticity_tensor_prefactor = void_prop_func
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -173,9 +157,11 @@
 
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      lu           1'
+  #petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  #petsc_options_value = 'hypre    boomeramg      4'
 
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-10
   l_max_its = 15
   nl_max_its = 10
 
@@ -185,6 +171,4 @@
 
 [Outputs]
   exodus = true
-  csv = true
-  gnuplot = true
 []
