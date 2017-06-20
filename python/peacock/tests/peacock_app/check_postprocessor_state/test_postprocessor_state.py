@@ -15,10 +15,8 @@ class TestPostprocessorState(Testing.PeacockImageTestCase):
         Creates the peacock application.
         """
 
-        args = ["-size", "1024", "768", "-i", "../../common/time_data.i", "-e", Testing.find_moose_test_exe()]
-        working_dir = os.getcwd()
+        args = ["-size", "1024", "768", "-i", "../../common/time_data.i", "-e", Testing.find_moose_test_exe(), "-w", os.getcwd()]
         self._app = PeacockApp.PeacockApp(args, self.qapp)
-        os.chdir(working_dir)
         self._window = self._app.main_widget.tab_plugin.VectorPostprocessorViewer.currentWidget().FigurePlugin
         Testing.set_window_size(self._window)
         Testing.remove_file('peacock_run_exe_tmp_out.e')
