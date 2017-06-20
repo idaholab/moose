@@ -17,13 +17,37 @@ def shellCommand( command, cwd=None ):
 
     return p.communicate()[0]
 
+
+def gitSHA1( cwd=None ):
+  try:
+    # The SHA1 should always be available if we have a git repo.
+    return shellCommand( 'git show -s --format=%h', cwd ).strip()
+  except: # subprocess.CalledProcessError:
+    return None
+
+
+def gitTag( cwd=None ):
+    try:
+        # The tag should always be available if we have a git repo.
+        return shellCommand( 'git describe --tags', cwd).strip()
+    except: # subprocess.CalledProcessError:
+        return None
+
+
+def gitDate( cwd=None ):
+    try:
+        # The date should always be available if we have a git repo.
+        return shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
+    except: # subprocess.CalledProcessError:
+        return None
+
+
 def gitVersionString( cwd=None ):
     SHA1 = ''
     date = ''
     try:
-        # The SHA1 and date should always be available if we have a git repo.
-        SHA1 = shellCommand( 'git show -s --format=%h', cwd ).strip()
-        date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
+        SHA1 = gitSHA1( cwd )
+        date = gitDate( cwd )
     except: # subprocess.CalledProcessError:
         return None
 
@@ -74,9 +98,18 @@ def repoVersionString( cwd=None ):
     return version
 
 
-def writeRevision( app_name, app_revision, revision_header ):
+def writeRevision( repo_location, app_name, revision_header ):
     # Use all caps for app name (by convention).
-    app_definition = app_name.upper() + '_REVISION'
+    app_def_name = app_name.upper()
+    app_def_name = re.sub( '[^a-zA-Z0-9]', '', app_def_name )
+    app_definition = app_def_name + '_REVISION'
+
+    app_revision = repoVersionString( repo_location )
+
+    # Version is the tag. If empty, we use the sha1 hash
+    app_version = gitTag(repo_location)
+    if app_version == None:
+        app_version = gitSHA1(repo_location)
 
     # see if the revision is different
     revision_changed = False
@@ -107,6 +140,7 @@ def writeRevision( app_name, app_revision, revision_header ):
                  '#define ' + app_definition + '_H\n'
                  '\n'
                  '#define ' + app_definition + ' "' + app_revision + '"\n'
+                 '#define ' + app_def_name + '_VERSION "' + app_version + '"\n'
                  '\n'
                  '#endif // ' + app_definition + '_H\n')
         f.close()
@@ -117,5 +151,4 @@ if len(sys.argv) == 4:
     header_file = sys.argv[2]
     app_name = sys.argv[3]
 
-    revision = repoVersionString( repo_location )
-    writeRevision( app_name, revision, header_file )
+    writeRevision( repo_location, app_name, header_file )
