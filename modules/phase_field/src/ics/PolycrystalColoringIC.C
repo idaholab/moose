@@ -37,7 +37,7 @@ Real
 PolycrystalColoringIC::value(const Point & p)
 {
   if (_current_node)
-    return _poly_ic_uo.getVariableValue(_op_index, *_current_node);
+    return _poly_ic_uo.getNodalVariableValue(_op_index, *_current_node);
   else
     return _poly_ic_uo.getVariableValue(_op_index, p);
 }
