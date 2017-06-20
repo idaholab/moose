@@ -3,10 +3,12 @@ from peacock.Input.ParamsTable import ParamsTable
 from peacock.utils import Testing, InputTesting
 from peacock.Input.ParameterInfo import ParameterInfo
 from peacock.Input.BlockInfo import BlockInfo
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QApplication
 from mock import patch
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.table = None

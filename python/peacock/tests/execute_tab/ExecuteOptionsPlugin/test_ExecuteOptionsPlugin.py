@@ -2,12 +2,13 @@
 from peacock.Execute.ExecuteOptionsPlugin import ExecuteOptionsPlugin
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QMainWindow
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QApplication
 from peacock.utils import Testing
 from mock import patch
 import os
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()

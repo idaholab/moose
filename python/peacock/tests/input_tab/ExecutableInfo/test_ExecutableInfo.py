@@ -2,8 +2,11 @@
 import unittest
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def checkFile(self, output, gold_file, write_output=False):
         if write_output:
             with open("tmp_out.txt", "w") as f:

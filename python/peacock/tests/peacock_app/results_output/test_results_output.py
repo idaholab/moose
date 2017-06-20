@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
 import os
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.oversample_filename = "check_oversample.png"
@@ -34,7 +37,7 @@ class Tests(Testing.PeacockTester):
         # make sure we are finished
         while not self.finished:
             self.qapp.processEvents()
-        Testing.process_events(self.qapp, t=2)
+        Testing.process_events(t=3)
         Testing.set_window_size(vtkwin)
         vtkwin.onWrite(image_name)
         self.assertFalse(Testing.gold_diff(image_name))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from PyQt5.QtCore import Qt, QMimeData
-from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMenu, QApplication
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
@@ -9,6 +9,8 @@ from peacock.Input.BlockTree import BlockTree
 from mock import patch
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()
@@ -122,7 +124,7 @@ class Tests(Testing.PeacockTester):
         mime.setData(w._mime_type, "some data")
         ee = QDragEnterEvent(w.mapToGlobal(point), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
         w.dragEnterEvent(ee)
-        #Testing.process_events(self.qapp, t=1)
+        #Testing.process_events(t=1)
         de = QDropEvent(w.mapToGlobal(point1), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
         w.dropEvent(de)
         # This doesn't seem to work for some reason

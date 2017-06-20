@@ -148,7 +148,7 @@ class TestLineGroupWidgetPostprocessor(Testing.PeacockImageTestCase):
         self.assertFalse(self._control.NoDataMessage.isVisible())
         self._control._toggles[var].CheckBox.setCheckState(QtCore.Qt.Checked)
         self._control._toggles[var].clicked.emit()
-        self.assertImage('testDelayLoadPlot2.png') # The line color/style is different because the cycle keeps going
+        self.assertImage('testDelayLoadPlot2.png', allowed=0.98) # The line color/style is different because the cycle keeps going
 
     def testRepr(self):
         """

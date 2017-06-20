@@ -2,8 +2,11 @@
 from peacock.utils.ExeLauncher import runExe
 from peacock.PeacockException import FileExistsException, BadExecutableException
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def test_runexe(self):
         with self.assertRaises(FileExistsException):
             runExe("/no_exist.exe", "")

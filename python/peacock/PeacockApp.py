@@ -1,4 +1,5 @@
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication
 from PeacockMainWindow import PeacockMainWindow
 import argparse, os, sys
 from peacock.utils import qtutils
@@ -8,7 +9,7 @@ class PeacockApp(object):
     Main Peacock application.
     Builds the Qt main window and processes any command line arguments.
     """
-    def __init__(self, args, qapp, **kwds):
+    def __init__(self, args, qapp=None, **kwds):
         """
         Constructor.
         Takes a QApplication in the constructor to allow for easier testing with unittest.
@@ -25,6 +26,8 @@ class PeacockApp(object):
 
         peacock_dir = os.path.dirname(os.path.realpath(__file__))
         icon_path = os.path.join(peacock_dir, "icons", "peacock_logo.ico")
+        if qapp is None:
+            qapp = QApplication.instance()
         qapp.setWindowIcon(QIcon(icon_path))
 
         qtutils.setAppInformation("peacock_peacockapp")

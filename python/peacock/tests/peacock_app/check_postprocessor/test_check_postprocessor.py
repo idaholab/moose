@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from PyQt5.QtCore import Qt
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         Testing.clean_files()
@@ -22,7 +25,7 @@ class Tests(Testing.PeacockTester):
         app.main_widget.setTab(pp_plugin.tabName())
         pp = pp_plugin.currentWidget()
 
-        Testing.process_events(self.qapp, t=3)
+        Testing.process_events(t=3)
         self.assertEqual(len(pp.PostprocessorSelectPlugin._groups), 1)
         self.assertEqual(len(pp.PostprocessorSelectPlugin._groups[0]._toggles), 3)
 

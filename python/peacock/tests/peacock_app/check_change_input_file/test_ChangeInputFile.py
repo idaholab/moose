@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class TestChangeInputFile(Testing.PeacockAppImageTestCase):
     """
     Tests that if the input file changes the VTKWindow is reset.
     """
+    qapp = QtWidgets.QApplication([])
+
     def testInputReset(self):
         """
         Test that changing the input file resets the VTK window correctly.

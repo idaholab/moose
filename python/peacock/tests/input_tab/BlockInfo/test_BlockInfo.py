@@ -2,8 +2,11 @@
 from peacock.utils import Testing
 from peacock.Input.BlockInfo import BlockInfo
 from peacock.Input.ParameterInfo import ParameterInfo
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def testBasic(self):
         b = BlockInfo(None, "/Foo", False, "")
 

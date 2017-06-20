@@ -3,8 +3,11 @@ from peacock.Input.ParamsByType import ParamsByType
 from peacock.utils import Testing, InputTesting
 from peacock.Input.ParameterInfo import ParameterInfo
 from peacock.Input.BlockInfo import BlockInfo
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.block_list_requested = 0

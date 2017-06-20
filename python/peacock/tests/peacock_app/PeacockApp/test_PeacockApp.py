@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
 import os
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def create_app(self, args):
         self.createPeacockApp(args)
         self.postprocessor = self.app.main_widget.tab_plugin.PostprocessorViewer
@@ -71,10 +74,10 @@ class Tests(Testing.PeacockTester):
         Testing.remove_file(fname)
         self.assertEqual(self.vector_postprocessor.count(), 1)
         w = self.vector_postprocessor.currentWidget()
-        Testing.process_events(self.qapp, t=1)
+        Testing.process_events(t=1)
         self.assertEqual(len(w.PostprocessorSelectPlugin._groups), 1)
         self.assertEqual(len(w.PostprocessorSelectPlugin._groups[0]._toggles), 7)
-        Testing.process_events(self.qapp)
+        Testing.process_events()
 
         Testing.set_window_size(w.FigurePlugin)
         w.FigurePlugin.onWrite(fname)
@@ -105,10 +108,10 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.vector_postprocessor.tabName())
         self.check_vector_postprocessor()
         self.app.main_widget.setTab(self.result.tabName())
-        Testing.process_events(self.qapp, t=1)
+        Testing.process_events(t=1)
         self.check_result()
         self.app.main_widget.setTab(self.postprocessor.tabName())
-        Testing.process_events(self.qapp, t=2)
+        Testing.process_events(t=2)
         self.check_postprocessor()
 
     def testOnlyInputFileWithExeInPath(self):
@@ -191,7 +194,7 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.input.tabName())
         self.app.main_widget.setTab(self.exe.tabName())
         self.exe.ExecuteRunnerPlugin.runClicked()
-        Testing.process_events(self.qapp, t=2)
+        Testing.process_events(t=2)
         self.app.main_widget.setTab(self.result.tabName())
         mesh = self.result.currentWidget().MeshPlugin
 
@@ -213,7 +216,7 @@ class Tests(Testing.PeacockTester):
         self.app.main_widget.setTab(self.exe.tabName())
         self.exe.ExecuteOptionsPlugin.setWorkingDir(cwd)
         self.exe.ExecuteRunnerPlugin.runClicked()
-        Testing.process_events(self.qapp, t=2)
+        Testing.process_events(t=2)
         self.app.main_widget.setTab(self.result.tabName())
 
         self.assertTrue(mesh.isEnabled())

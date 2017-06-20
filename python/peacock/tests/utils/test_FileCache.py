@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.utils.FileCache import FileCache
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def checkFileCache(self, fc, dirty=True, val={}, path_data={}):
         self.assertEqual(fc.dirty, dirty)
         self.assertEqual(fc.val, val)
