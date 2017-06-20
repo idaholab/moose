@@ -690,7 +690,7 @@ class TestHarness:
                 print(output)
 
                 # Print result line again at the bottom of the output for failed tests
-                print(printResult(tester, result, timing, start, end, self.options), "(reprint)")
+                print("%s(reprint)" % printResult(tester, result, timing, start, end, self.options))
 
         if status != tester.bucket_skip:
             if not did_pass and not self.options.failed_tests:
