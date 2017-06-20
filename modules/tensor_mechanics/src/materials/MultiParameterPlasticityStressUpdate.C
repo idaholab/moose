@@ -1,0 +1,949 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#include "MultiParameterPlasticityStressUpdate.h"
+
+#include "Conversion.h"      // for stringify
+#include "libmesh/utility.h" // for Utility::pow
+
+template <>
+InputParameters
+validParams<MultiParameterPlasticityStressUpdate>()
+{
+  InputParameters params = validParams<StressUpdateBase>();
+  params.addClassDescription("Return-map and Jacobian algorithms for plastic models where the "
+                             "yield function and flow directions depend on multiple functions of "
+                             "stress");
+  params.addParam<std::string>("name_prepender",
+                               "Optional parameter that allows the user to define "
+                               "multiple plastic models on the same block, and the "
+                               "plastic_internal_parameter, plastic_yield_function, "
+                               "plastic_NR_iterations and plastic_linesearch_needed Material "
+                               "Properties will be prepended by this string");
+  params.addRangeCheckedParam<unsigned int>(
+      "max_NR_iterations",
+      20,
+      "max_NR_iterations>0",
+      "Maximum number of Newton-Raphson iterations allowed during the return-map algorithm");
+  params.addParam<bool>("perform_finite_strain_rotations",
+                        false,
+                        "Tensors are correctly rotated "
+                        "in finite-strain simulations.  "
+                        "For optimal performance you can "
+                        "set this to 'false' if you are "
+                        "only ever using small strains");
+  params.addRequiredParam<Real>(
+      "smoothing_tol",
+      "Intersections of the yield surfaces will be smoothed by this amount (this "
+      "is measured in units of stress).  Often this is related to other physical "
+      "parameters (eg, 0.1*cohesion) but it is important to set this small enough "
+      "so that the individual yield surfaces do not mix together in the smoothing "
+      "process to produce a result where no stress is admissible (for example, "
+      "mixing together tensile and compressive failure envelopes).");
+  params.addRequiredParam<Real>("yield_function_tol",
+                                "The return-map process will be deemed to have converged if all "
+                                "yield functions are within yield_function_tol of zero.  If this "
+                                "is set very low then precision-loss might be encountered: if the "
+                                "code detects precision loss then it also deems the return-map "
+                                "process has converged.");
+  MooseEnum tangent_operator("elastic nonlinear", "nonlinear");
+  params.addParam<Real>("min_step_size",
+                        1.0,
+                        "In order to help the Newton-Raphson procedure, the applied strain "
+                        "increment may be applied in sub-increments of size greater than this "
+                        "value.  Usually it is better for Moose's nonlinear convergence to "
+                        "increase max_NR_iterations rather than decrease this parameter.");
+  params.addParam<bool>("warn_about_precision_loss",
+                        false,
+                        "Output a message to the console every "
+                        "time precision-loss is encountered "
+                        "during the Newton-Raphson process");
+  params.addParam<std::vector<Real>>("admissible_stress",
+                                     "A single admissible value of the value of the stress "
+                                     "parameters for internal parameters = 0.  This is used "
+                                     "to initialise the return-mapping algorithm during the first "
+                                     "nonlinear iteration.  If not given then it is assumed that "
+                                     "stress parameters = 0 is admissible.");
+  return params;
+}
+
+MultiParameterPlasticityStressUpdate::MultiParameterPlasticityStressUpdate(
+    const InputParameters & parameters, unsigned num_sp, unsigned num_yf, unsigned num_intnl)
+  : StressUpdateBase(parameters),
+    _num_sp(num_sp),
+    _definitely_ok_sp(isParamValid("admissible_stress")
+                          ? getParam<std::vector<Real>>("admissible_stress")
+                          : std::vector<Real>(_num_sp, 0.0)),
+    _Eij(num_sp, std::vector<Real>(num_sp)),
+    _En(1.0),
+    _Cij(num_sp, std::vector<Real>(num_sp)),
+    _num_yf(num_yf),
+    _num_intnl(num_intnl),
+    _name_prepender(isParamValid("name_prepender") ? getParam<std::string>("name_prepender") + "_"
+                                                   : ""),
+    _max_nr_its(getParam<unsigned>("max_NR_iterations")),
+    _perform_finite_strain_rotations(getParam<bool>("perform_finite_strain_rotations")),
+    _smoothing_tol(getParam<Real>("smoothing_tol")),
+    _f_tol(getParam<Real>("yield_function_tol")),
+    _f_tol2(Utility::pow<2>(getParam<Real>("yield_function_tol"))),
+    _min_step_size(getParam<Real>("min_step_size")),
+    _step_one(declareRestartableData<bool>("step_one", true)),
+    _warn_about_precision_loss(getParam<bool>("warn_about_precision_loss")),
+
+    _plastic_strain(declareProperty<RankTwoTensor>(_name_prepender + "plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_name_prepender + "plastic_strain")),
+    _intnl(declareProperty<std::vector<Real>>(_name_prepender + "plastic_internal_parameter")),
+    _intnl_old(
+        getMaterialPropertyOld<std::vector<Real>>(_name_prepender + "plastic_internal_parameter")),
+    _yf(declareProperty<std::vector<Real>>(_name_prepender + "plastic_yield_function")),
+    _iter(declareProperty<Real>(_name_prepender +
+                                "plastic_NR_iterations")), // this is really an unsigned int, but
+                                                           // for visualisation i convert it to Real
+    _linesearch_needed(
+        declareProperty<Real>(_name_prepender + "plastic_linesearch_needed")) // this is really a
+                                                                              // boolean, but for
+                                                                              // visualisation i
+                                                                              // convert it to Real
+{
+  if (_definitely_ok_sp.size() != _num_sp)
+    mooseError("MultiParameterPlasticityStressUpdate: admissible_stress parameter must consist of ",
+               _num_sp,
+               " numbers");
+}
+
+void
+MultiParameterPlasticityStressUpdate::initQpStatefulProperties()
+{
+  _plastic_strain[_qp].zero();
+  _intnl[_qp].assign(_num_intnl, 0);
+  _yf[_qp].assign(_num_yf, 0);
+  _iter[_qp] = 0.0;
+  _linesearch_needed[_qp] = 0.0;
+}
+
+void
+MultiParameterPlasticityStressUpdate::propagateQpStatefulProperties()
+{
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+  for (unsigned i = 0; i < _num_intnl; ++i)
+    _intnl[_qp][i] = _intnl_old[_qp][i];
+}
+
+void
+MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increment,
+                                                  RankTwoTensor & inelastic_strain_increment,
+                                                  const RankTwoTensor & rotation_increment,
+                                                  RankTwoTensor & stress_new,
+                                                  const RankTwoTensor & stress_old,
+                                                  const RankFourTensor & elasticity_tensor,
+                                                  const RankTwoTensor & /*elastic_strain_old*/,
+                                                  bool compute_full_tangent_operator,
+                                                  RankFourTensor & tangent_operator)
+{
+  initialiseReturnProcess();
+
+  if (_t_step >= 2)
+    _step_one = false;
+
+  // initially assume an elastic deformation
+  std::copy(_intnl_old[_qp].begin(), _intnl_old[_qp].end(), _intnl[_qp].begin());
+  _iter[_qp] = 0.0;
+  _linesearch_needed[_qp] = 0.0;
+
+  /**
+   * "Trial" value of stress_params that initialises the return-map process
+   * This is derived from stress = stress_old + Eijkl * strain_increment.
+   * However, since the return-map process can fail and be restarted by
+   * applying strain_increment in multiple substeps, _trial_sp can vary
+   * from substep to substep.
+   */
+  std::vector<Real> trial_sp(_num_sp);
+
+  computeStressParams(stress_new, trial_sp);
+  yieldFunctionValuesV(trial_sp, _intnl[_qp], _yf[_qp]);
+
+  /* Need to consider smoothing_tol, not just yf<=0, because
+   * some yield functions might mix.  However, if some yield
+   * functions are -smoothing_tol <= yf, then the smoothed
+   * yield function must be computed and checked vs f_tol
+   */
+  bool elastic = true;
+  for (auto yf : _yf[_qp])
+    if (yf > -_smoothing_tol)
+    {
+      elastic = false;
+      break;
+    }
+  if (!elastic && yieldF(trial_sp, _intnl[_qp]) <= _f_tol)
+    elastic = true;
+  if (elastic)
+  {
+    _plastic_strain[_qp] = _plastic_strain_old[_qp];
+    if (_fe_problem.currentlyComputingJacobian())
+    {
+      inelastic_strain_increment.zero();
+      tangent_operator = elasticity_tensor;
+    }
+    return;
+  }
+
+  const RankTwoTensor stress_trial = stress_new;
+  /* The trial stress must be inadmissible
+   * so we need to return to the yield surface.  The following
+   * equations must be satisfied.
+   *
+   * 0 = rhs[0] = S[0] - S[0]^trial + ga * E[0, i] * dg/dS[i]
+   * 0 = rhs[1] = S[1] - S[1]^trial + ga * E[1, i] * dg/dS[i]
+   * ...
+   * 0 = rhs[N-1] = S[N-1] - S[N-1]^trial + ga * E[N-1, i] * dg/dS[i]
+   * 0 = rhs[N] = f(S, intnl)
+   *
+   * as well as equations defining intnl parameters as functions of
+   * stress_params, trial_stress_params and intnl_old
+   *
+   * The unknowns are S[0], ..., S[N-1], gaE, and the intnl parameters.
+   * Here gaE = ga * _En (the _En serves to make gaE similar magnitude to S)
+   * I find it convenient to solve the first N+1 equations for p, q and gaE,
+   * while substituting the "intnl parameters" equations into these during the solve process
+   */
+  std::vector<Real> rhs(_num_sp + 1);
+
+  std::vector<std::vector<Real>> dvar_dtrial(_num_sp + 1, std::vector<Real>(_num_sp, 0.0));
+
+  preReturnMapV(trial_sp, stress_new, _intnl_old[_qp], _yf[_qp], elasticity_tensor);
+
+  setEffectiveElasticity(elasticity_tensor);
+
+  // The state (ok_sp, ok_intnl) is known to be admissible, so
+  // ok_sp are stress_params that are "OK".  If the strain_increment
+  // is applied in substeps then ok_sp is updated after each
+  // sub strain_increment is applied and the return-map is successful.
+  // At the end of the entire return-map process _ok_sp will contain
+  // the stress_params where (_ok_sp, _intnl) is admissible.
+  std::vector<Real> ok_sp(_num_sp);
+  std::vector<Real> ok_intnl(_num_intnl);
+  if (_step_one)
+    std::copy(_definitely_ok_sp.begin(), _definitely_ok_sp.end(), ok_sp.begin());
+  else
+    computeStressParams(stress_old, ok_sp);
+  std::copy(_intnl_old[_qp].begin(), _intnl_old[_qp].end(), ok_intnl.begin());
+
+  // d(Newton-Raphson params)/d(trial_stress_params) that are used in Jacobian calculations
+  // Here the first _num_sp - 1 Newton-Raphson params are the stress_params
+  // and the _num_sp Newton-Raphson param is gaE
+  std::vector<std::vector<Real>> dnrp_dtrialsp(_num_sp + 1, std::vector<Real>(_num_sp, 0.0));
+
+  // Return-map problem: must apply the following changes in stress_params,
+  // and find the returned stress_params and gaE
+  std::vector<Real> del_stress_params(_num_sp);
+  for (unsigned i = 0; i < _num_sp; ++i)
+    del_stress_params[i] = trial_sp[i] - ok_sp[i];
+
+  Real step_taken = 0.0; // amount of del_stress_params that we've applied and the return-map
+                         // problem has succeeded
+  Real step_size = 1.0;  // potentially can apply del_stress_params in substeps
+  Real gaE_total = 0.0;
+
+  // current values of the yield function, derivatives, etc
+  yieldAndFlow smoothed_q;
+
+  // In the following sub-stepping procedure it is possible that
+  // the last step is an elastic step, and therefore smoothed_q won't
+  // be computed on the last step, so we have to compute it.
+  bool smoothed_q_calculated = false;
+
+  while (step_taken < 1.0 && step_size >= _min_step_size)
+  {
+    if (1.0 - step_taken < step_size)
+      // prevent over-shoots of substepping
+      step_size = 1.0 - step_taken;
+
+    // trial variables in terms of admissible variables
+    for (unsigned i = 0; i < _num_sp; ++i)
+      trial_sp[i] = ok_sp[i] + step_size * del_stress_params[i];
+
+    // initialise variables that are to be found via Newton-Raphson
+    std::vector<Real> current_sp = trial_sp;
+    Real gaE = 0.0;
+
+    // flags indicating failure of Newton-Raphson and line-search
+    int nr_failure = 0;
+    int ls_failure = 0;
+
+    // NR iterations taken in this substep
+    Real step_iter = 0.0;
+
+    // The residual-squared for the line-search
+    Real res2 = 0.0;
+
+    if (step_size < 1.0 && yieldF(trial_sp, ok_intnl) <= _f_tol)
+      // This is an elastic step
+      // The "step_size < 1.0" in above condition is for efficiency: we definitely
+      // know that this is a plastic step if step_size = 1.0
+      smoothed_q_calculated = false;
+    else
+    {
+      // this is a plastic step
+
+      // initialise current_sp, gaE and current_intnl based on the non-smoothed situation
+      std::vector<Real> current_intnl(_num_intnl);
+      initialiseVarsV(trial_sp, ok_intnl, current_sp, gaE, current_intnl);
+      // and find the smoothed yield function, flow potential and derivatives
+      smoothed_q = smoothAllQuantities(current_sp, current_intnl);
+      smoothed_q_calculated = true;
+      calculateRHS(trial_sp, current_sp, gaE, smoothed_q, rhs);
+      res2 = calculateRes2(rhs);
+
+      // Perform a Newton-Raphson with linesearch to get current_sp, gaE, and also smoothed_q
+      while (res2 > _f_tol2 && step_iter < (float)_max_nr_its && nr_failure == 0 && ls_failure == 0)
+      {
+        // solve the linear system and store the answer (the "updates") in rhs
+        nr_failure = nrStep(smoothed_q, trial_sp, current_sp, current_intnl, gaE, rhs);
+        if (nr_failure != 0)
+          break;
+
+        // check for precision loss
+        bool precision_loss = true;
+        for (unsigned i = 0; i < _num_sp; ++i)
+          if (std::abs(rhs[i]) > 1E-13 * std::abs(current_sp[i]))
+          {
+            precision_loss = false;
+            break;
+          }
+        if (std::abs(rhs[_num_sp]) > 1E-13 * std::abs(gaE))
+          precision_loss = false;
+        if (precision_loss)
+        {
+          if (_warn_about_precision_loss)
+          {
+            Moose::err << "MultiParameterPlasticityStressUpdate: precision-loss in element "
+                       << _current_elem->id() << " quadpoint=" << _qp << ".  Stress_params =";
+            for (unsigned i = 0; i < _num_sp; ++i)
+              Moose::err << " " << current_sp[i];
+            Moose::err << " gaE = " << gaE << "\n";
+          }
+          res2 = 0.0;
+          break;
+        }
+
+        // apply (parts of) the updates, re-calculate smoothed_q, and res2
+        ls_failure = lineSearch(res2,
+                                current_sp,
+                                gaE,
+                                trial_sp,
+                                smoothed_q,
+                                ok_intnl,
+                                current_intnl,
+                                rhs,
+                                _linesearch_needed[_qp]);
+        step_iter++;
+      }
+    }
+
+    if (res2 <= _f_tol2 && step_iter < (float)_max_nr_its && nr_failure == 0 && ls_failure == 0 &&
+        gaE >= 0.0)
+    {
+      // this Newton-Raphson worked fine, or this was an elastic step
+      std::copy(current_sp.begin(), current_sp.end(), ok_sp.begin());
+      gaE_total += gaE;
+      step_taken += step_size;
+      setIntnlValuesV(trial_sp, ok_sp, ok_intnl, _intnl[_qp]);
+      std::copy(_intnl[_qp].begin(), _intnl[_qp].end(), ok_intnl.begin());
+      // calculate dp/dp_trial, dp/dq_trial, etc, for Jacobian
+      dVardTrial(!smoothed_q_calculated,
+                 trial_sp,
+                 ok_sp,
+                 gaE,
+                 ok_intnl,
+                 smoothed_q,
+                 step_size,
+                 compute_full_tangent_operator,
+                 dvar_dtrial);
+      if (step_iter > _iter[_qp])
+        _iter[_qp] = step_iter;
+      step_size *= 1.1;
+    }
+    else
+    {
+      // Newton-Raphson + line-search process failed
+      step_size *= 0.5;
+    }
+  }
+
+  if (step_size < _min_step_size)
+    errorHandler("MultiParameterPlasticityStressUpdate: Minimum step-size violated");
+
+  // success!
+  finalizeReturnProcess(rotation_increment);
+  yieldFunctionValuesV(ok_sp, _intnl[_qp], _yf[_qp]);
+
+  if (!smoothed_q_calculated)
+    smoothed_q = smoothAllQuantities(ok_sp, _intnl[_qp]);
+
+  setStressAfterReturnV(
+      stress_trial, ok_sp, gaE_total, _intnl[_qp], smoothed_q, elasticity_tensor, stress_new);
+
+  setInelasticStrainIncrementAfterReturn(stress_trial,
+                                         gaE_total,
+                                         smoothed_q,
+                                         elasticity_tensor,
+                                         stress_new,
+                                         inelastic_strain_increment);
+
+  strain_increment = strain_increment - inelastic_strain_increment;
+  _plastic_strain[_qp] = _plastic_strain_old[_qp] + inelastic_strain_increment;
+
+  consistentTangentOperatorV(stress_trial,
+                             trial_sp,
+                             stress_new,
+                             ok_sp,
+                             gaE_total,
+                             smoothed_q,
+                             elasticity_tensor,
+                             compute_full_tangent_operator,
+                             dvar_dtrial,
+                             tangent_operator);
+}
+
+MultiParameterPlasticityStressUpdate::yieldAndFlow
+MultiParameterPlasticityStressUpdate::smoothAllQuantities(const std::vector<Real> & stress_params,
+                                                          const std::vector<Real> & intnl) const
+{
+  std::vector<yieldAndFlow> all_q(_num_yf, yieldAndFlow(_num_sp, _num_intnl));
+  computeAllQV(stress_params, intnl, all_q);
+
+  std::sort(all_q.begin(), all_q.end());
+
+  /* This is the key to my smoothing strategy.  While the two
+   * biggest yield functions are closer to each other than
+   * _smoothing_tol, make a linear combination of them:
+   * all_q[num - 2].f = the second-biggest yield function
+   * = all_q[num - 1].f + ismoother(all_q[num - 2].f - all_q[num - 1].f);
+   * = biggest yield function + ismoother(second-biggest - biggest)
+   * Then pop off the biggest yield function, and repeat this
+   * strategy.
+   * Of course all the derivatives must also be smoothed.
+   * I assume that d(flow potential)/dstress gets smoothed by the *yield function*, viz
+   * d(second-biggest-g) = d(biggest-g) + smoother(second-biggest-f -
+   * biggest-f)*(d(second-biggest-g) - d(biggest-g))
+   * Only time will tell whether this is a good strategy.
+   */
+  unsigned num = all_q.size();
+  while (num > 1 && all_q[num - 1].f < all_q[num - 2].f + _smoothing_tol)
+  {
+    const Real ism = ismoother(all_q[num - 2].f - all_q[num - 1].f);
+    const Real sm = smoother(all_q[num - 2].f - all_q[num - 1].f);
+    const Real dsm = dsmoother(all_q[num - 2].f - all_q[num - 1].f);
+    for (unsigned i = 0; i < _num_sp; ++i)
+    {
+      for (unsigned j = 0; j < _num_sp; ++j)
+        all_q[num - 2].d2g[i][j] = all_q[num - 1].d2g[i][j] +
+                                   dsm * (all_q[num - 2].df[j] - all_q[num - 1].df[j]) *
+                                       (all_q[num - 2].dg[i] - all_q[num - 1].dg[i]) +
+                                   sm * (all_q[num - 2].d2g[i][j] - all_q[num - 1].d2g[i][j]);
+      for (unsigned j = 0; j < _num_intnl; ++j)
+        all_q[num - 2].d2g_di[i][j] =
+            all_q[num - 1].d2g_di[i][j] +
+            dsm * (all_q[num - 2].df_di[j] - all_q[num - 1].df_di[j]) *
+                (all_q[num - 2].dg[i] - all_q[num - 1].dg[i]) +
+            sm * (all_q[num - 2].d2g_di[i][j] - all_q[num - 1].d2g_di[i][j]);
+    }
+    for (unsigned i = 0; i < _num_sp; ++i)
+    {
+      all_q[num - 2].dg[i] =
+          all_q[num - 1].dg[i] + sm * (all_q[num - 2].dg[i] - all_q[num - 1].dg[i]);
+      all_q[num - 2].df[i] =
+          all_q[num - 1].df[i] + sm * (all_q[num - 2].df[i] - all_q[num - 1].df[i]);
+    }
+    for (unsigned i = 0; i < _num_intnl; ++i)
+      all_q[num - 2].df_di[i] =
+          all_q[num - 1].df_di[i] + sm * (all_q[num - 2].df_di[i] - all_q[num - 1].df_di[i]);
+    all_q[num - 2].f = all_q[num - 1].f + ism;
+    all_q.pop_back();
+    num = all_q.size();
+  }
+  return all_q.back();
+}
+
+Real
+MultiParameterPlasticityStressUpdate::ismoother(Real f_diff) const
+{
+  mooseAssert(f_diff <= 0.0,
+              "MultiParameterPlasticityStressUpdate: ismoother called with positive argument");
+  if (f_diff <= -_smoothing_tol)
+    return 0.0;
+  return 0.5 * (f_diff + _smoothing_tol) -
+         _smoothing_tol / M_PI * std::cos(0.5 * M_PI * f_diff / _smoothing_tol);
+}
+
+Real
+MultiParameterPlasticityStressUpdate::smoother(Real f_diff) const
+{
+  if (f_diff >= _smoothing_tol)
+    return 1.0;
+  else if (f_diff <= -_smoothing_tol)
+    return 0.0;
+  return 0.5 * (1.0 + std::sin(f_diff * M_PI * 0.5 / _smoothing_tol));
+}
+
+Real
+MultiParameterPlasticityStressUpdate::dsmoother(Real f_diff) const
+{
+  if (f_diff >= _smoothing_tol)
+    return 0.0;
+  else if (f_diff <= -_smoothing_tol)
+    return 0.0;
+  return 0.25 * M_PI / _smoothing_tol * std::cos(f_diff * M_PI * 0.5 / _smoothing_tol);
+}
+
+int
+MultiParameterPlasticityStressUpdate::lineSearch(Real & res2,
+                                                 std::vector<Real> & stress_params,
+                                                 Real & gaE,
+                                                 const std::vector<Real> & trial_stress_params,
+                                                 yieldAndFlow & smoothed_q,
+                                                 const std::vector<Real> & intnl_ok,
+                                                 std::vector<Real> & intnl,
+                                                 std::vector<Real> & rhs,
+                                                 Real & linesearch_needed) const
+{
+  const Real res2_old = res2;
+  const std::vector<Real> sp_params_old = stress_params;
+  const Real gaE_old = gaE;
+  const std::vector<Real> delta_nr_params = rhs;
+
+  Real lam = 1.0;                     // line-search parameter
+  const Real lam_min = 1E-10;         // minimum value of lam allowed
+  const Real slope = -2.0 * res2_old; // "Numerical Recipes" uses -b*A*x, in order to check for
+                                      // roundoff, but i hope the nrStep would warn if there were
+                                      // problems
+  Real tmp_lam;                       // cached value of lam used in quadratic & cubic line search
+  Real f2 = res2_old; // cached value of f = residual2 used in the cubic in the line search
+  Real lam2 = lam;    // cached value of lam used in the cubic in the line search
+
+  while (true)
+  {
+    // update variables using the current line-search parameter
+    for (unsigned i = 0; i < _num_sp; ++i)
+      stress_params[i] = sp_params_old[i] + lam * delta_nr_params[i];
+    gaE = gaE_old + lam * delta_nr_params[_num_sp];
+
+    // and internal parameters
+    setIntnlValuesV(trial_stress_params, stress_params, intnl_ok, intnl);
+
+    smoothed_q = smoothAllQuantities(stress_params, intnl);
+
+    // update rhs for next-time through
+    calculateRHS(trial_stress_params, stress_params, gaE, smoothed_q, rhs);
+    res2 = calculateRes2(rhs);
+
+    // do the line-search
+    if (res2 < res2_old + 1E-4 * lam * slope)
+      break;
+    else if (lam < lam_min)
+      return 1;
+    else if (lam == 1.0)
+    {
+      // model as a quadratic
+      tmp_lam = -0.5 * slope / (res2 - res2_old - slope);
+    }
+    else
+    {
+      // model as a cubic
+      const Real rhs1 = res2 - res2_old - lam * slope;
+      const Real rhs2 = f2 - res2_old - lam2 * slope;
+      const Real a = (rhs1 / Utility::pow<2>(lam) - rhs2 / Utility::pow<2>(lam2)) / (lam - lam2);
+      const Real b =
+          (-lam2 * rhs1 / Utility::pow<2>(lam) + lam * rhs2 / Utility::pow<2>(lam2)) / (lam - lam2);
+      if (a == 0.0)
+        tmp_lam = -slope / (2.0 * b);
+      else
+      {
+        const Real disc = Utility::pow<2>(b) - 3.0 * a * slope;
+        if (disc < 0)
+          tmp_lam = 0.5 * lam;
+        else if (b <= 0)
+          tmp_lam = (-b + std::sqrt(disc)) / (3.0 * a);
+        else
+          tmp_lam = -slope / (b + std::sqrt(disc));
+      }
+      if (tmp_lam > 0.5 * lam)
+        tmp_lam = 0.5 * lam;
+    }
+    lam2 = lam;
+    f2 = res2;
+    lam = std::max(tmp_lam, 0.1 * lam);
+  }
+
+  if (lam < 1.0)
+    linesearch_needed = 1.0;
+  return 0;
+}
+
+int
+MultiParameterPlasticityStressUpdate::nrStep(const yieldAndFlow & smoothed_q,
+                                             const std::vector<Real> & trial_stress_params,
+                                             const std::vector<Real> & stress_params,
+                                             const std::vector<Real> & intnl,
+                                             Real gaE,
+                                             std::vector<Real> & rhs) const
+{
+  std::vector<std::vector<Real>> dintnl(_num_intnl, std::vector<Real>(_num_sp));
+  setIntnlDerivativesV(trial_stress_params, stress_params, intnl, dintnl);
+
+  std::vector<double> jac((_num_sp + 1) * (_num_sp + 1));
+  dnRHSdVar(smoothed_q, dintnl, stress_params, gaE, jac);
+
+  // use LAPACK to solve the linear system
+  const int nrhs = 1;
+  std::vector<int> ipiv(_num_sp + 1);
+  int info;
+  const int gesv_num_rhs = _num_sp + 1;
+  LAPACKgesv_(
+      &gesv_num_rhs, &nrhs, &jac[0], &gesv_num_rhs, &ipiv[0], &rhs[0], &gesv_num_rhs, &info);
+  return info;
+}
+
+void
+MultiParameterPlasticityStressUpdate::errorHandler(const std::string & message) const
+{
+  throw MooseException(message);
+}
+
+void
+MultiParameterPlasticityStressUpdate::initialiseReturnProcess()
+{
+  return;
+}
+
+void
+MultiParameterPlasticityStressUpdate::finalizeReturnProcess(
+    const RankTwoTensor & /*rotation_increment*/)
+{
+  return;
+}
+
+void
+MultiParameterPlasticityStressUpdate::preReturnMapV(
+    const std::vector<Real> & /*trial_stress_params*/,
+    const RankTwoTensor & /*stress_trial*/,
+    const std::vector<Real> & /*intnl_old*/,
+    const std::vector<Real> & /*yf*/,
+    const RankFourTensor & /*Eijkl*/)
+{
+  return;
+}
+
+Real
+MultiParameterPlasticityStressUpdate::yieldF(const std::vector<Real> & stress_params,
+                                             const std::vector<Real> & intnl) const
+{
+  std::vector<Real> yf(_num_yf);
+  yieldFunctionValuesV(stress_params, intnl, yf);
+  std::sort(yf.begin(), yf.end());
+  unsigned num = yf.size();
+  while (num > 1 && yf[num - 1] < yf[num - 2] + _smoothing_tol)
+  {
+    yf[num - 2] = yf[num - 1] + ismoother(yf[num - 2] - yf[num - 1]);
+    yf.pop_back();
+    num = yf.size();
+  }
+  return yf.back();
+}
+
+void
+MultiParameterPlasticityStressUpdate::initialiseVarsV(const std::vector<Real> & trial_stress_params,
+                                                      const std::vector<Real> & intnl_old,
+                                                      std::vector<Real> & stress_params,
+                                                      Real & gaE,
+                                                      std::vector<Real> & intnl) const
+{
+  gaE = 0.0;
+  std::copy(trial_stress_params.begin(), trial_stress_params.end(), stress_params.begin());
+  std::copy(intnl_old.begin(), intnl_old.end(), intnl.begin());
+}
+
+void
+MultiParameterPlasticityStressUpdate::consistentTangentOperatorV(
+    const RankTwoTensor & stress_trial,
+    const std::vector<Real> & /*trial_stress_params*/,
+    const RankTwoTensor & stress,
+    const std::vector<Real> & /*stress_params*/,
+    Real gaE,
+    const yieldAndFlow & smoothed_q,
+    const RankFourTensor & elasticity_tensor,
+    bool compute_full_tangent_operator,
+    const std::vector<std::vector<Real>> & dvar_dtrial,
+    RankFourTensor & cto)
+{
+  if (!_fe_problem.currentlyComputingJacobian())
+    return;
+
+  cto = elasticity_tensor;
+  if (!compute_full_tangent_operator)
+    return;
+
+  const Real ga = gaE / _En;
+
+  const std::vector<RankTwoTensor> dsp = dstress_param_dstress(stress);
+  const std::vector<RankTwoTensor> dsp_trial = dstress_param_dstress(stress_trial);
+
+  for (unsigned a = 0; a < _num_sp; ++a)
+  {
+    for (unsigned b = 0; b < _num_sp; ++b)
+    {
+      const RankTwoTensor t = elasticity_tensor * dsp_trial[a];
+      RankTwoTensor s = _Cij[b][a] * dsp[b];
+      for (unsigned c = 0; c < _num_sp; ++c)
+        s -= dsp[b] * _Cij[b][c] * dvar_dtrial[c][a];
+      s = elasticity_tensor * s;
+      for (unsigned i = 0; i < _tensor_dimensionality; ++i)
+        for (unsigned j = 0; j < _tensor_dimensionality; ++j)
+          for (unsigned k = 0; k < _tensor_dimensionality; ++k)
+            for (unsigned l = 0; l < _tensor_dimensionality; ++l)
+              cto(i, j, k, l) -= s(i, j) * t(k, l);
+    }
+  }
+
+  const std::vector<RankFourTensor> d2sp = d2stress_param_dstress(stress);
+  RankFourTensor Tijab;
+  for (unsigned i = 0; i < _num_sp; ++i)
+    Tijab += smoothed_q.dg[i] * d2sp[i];
+  Tijab = ga * elasticity_tensor * Tijab;
+
+  RankFourTensor inv = RankFourTensor(RankFourTensor::initIdentityFour) + Tijab;
+  try
+  {
+    inv = inv.transposeMajor().invSymm();
+  }
+  catch (const MooseException & e)
+  {
+    // Cannot form the inverse, so probably at some degenerate place in stress space.
+    // Just return with the "best estimate" of the cto.
+    mooseWarning("MultiParameterPlasticityStressUpdate: Cannot invert 1+T in consistent tangent "
+                 "operator computation at quadpoint ",
+                 _qp,
+                 " of element ",
+                 _current_elem->id());
+    return;
+  }
+
+  cto = (cto.transposeMajor() * inv).transposeMajor();
+}
+
+void
+MultiParameterPlasticityStressUpdate::setStressAfterReturnV(
+    const RankTwoTensor & stress_trial,
+    const std::vector<Real> & /*stress_params*/,
+    Real gaE,
+    const std::vector<Real> & /*intnl*/,
+    const yieldAndFlow & smoothed_q,
+    const RankFourTensor & elasticity_tensor,
+    RankTwoTensor & stress) const
+{
+  const std::vector<RankTwoTensor> dsp_dstress = dstress_param_dstress(stress);
+  RankTwoTensor correction;
+  for (unsigned i = 0; i < _num_sp; ++i)
+    correction += smoothed_q.dg[i] * dsp_dstress[i];
+  correction = elasticity_tensor * correction;
+  stress = stress_trial - gaE / _En * correction;
+}
+
+void
+MultiParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
+    const RankTwoTensor & /*stress_trial*/,
+    Real gaE,
+    const yieldAndFlow & smoothed_q,
+    const RankFourTensor & /*elasticity_tensor*/,
+    const RankTwoTensor & returned_stress,
+    RankTwoTensor & inelastic_strain_increment) const
+{
+  const std::vector<RankTwoTensor> dsp_dstress = dstress_param_dstress(returned_stress);
+  inelastic_strain_increment = RankTwoTensor();
+  for (unsigned i = 0; i < _num_sp; ++i)
+    inelastic_strain_increment += smoothed_q.dg[i] * dsp_dstress[i];
+  inelastic_strain_increment *= gaE / _En;
+}
+
+Real
+MultiParameterPlasticityStressUpdate::calculateRes2(const std::vector<Real> & rhs) const
+{
+  Real res2 = 0.0;
+  for (const auto & r : rhs)
+    res2 += r * r;
+  return res2;
+}
+
+void
+MultiParameterPlasticityStressUpdate::calculateRHS(const std::vector<Real> & trial_stress_params,
+                                                   const std::vector<Real> & stress_params,
+                                                   Real gaE,
+                                                   const yieldAndFlow & smoothed_q,
+                                                   std::vector<Real> & rhs) const
+{
+  const Real ga = gaE / _En;
+  for (unsigned i = 0; i < _num_sp; ++i)
+  {
+    rhs[i] = stress_params[i] - trial_stress_params[i];
+    for (unsigned j = 0; j < _num_sp; ++j)
+      rhs[i] += ga * _Eij[i][j] * smoothed_q.dg[j];
+  }
+  rhs[_num_sp] = smoothed_q.f;
+}
+
+void
+MultiParameterPlasticityStressUpdate::dnRHSdVar(const yieldAndFlow & smoothed_q,
+                                                const std::vector<std::vector<Real>> & dintnl,
+                                                const std::vector<Real> & /*stress_params*/,
+                                                Real gaE,
+                                                std::vector<double> & jac) const
+{
+  for (auto & jac_entry : jac)
+    jac_entry = 0.0;
+
+  const Real ga = gaE / _En;
+
+  unsigned ind = 0;
+  for (unsigned var = 0; var < _num_sp; ++var)
+  {
+    for (unsigned rhs = 0; rhs < _num_sp; ++rhs)
+    {
+      if (var == rhs)
+        jac[ind] -= 1.0;
+      for (unsigned j = 0; j < _num_sp; ++j)
+      {
+        jac[ind] -= ga * _Eij[rhs][j] * smoothed_q.d2g[j][var];
+        for (unsigned k = 0; k < _num_intnl; ++k)
+          jac[ind] -= ga * _Eij[rhs][j] * smoothed_q.d2g_di[j][k] * dintnl[k][var];
+      }
+      ind++;
+    }
+    // now rhs = _num_sp (that is, the yield function)
+    jac[ind] -= smoothed_q.df[var];
+    for (unsigned k = 0; k < _num_intnl; ++k)
+      jac[ind] -= smoothed_q.df_di[k] * dintnl[k][var];
+    ind++;
+  }
+
+  // now var = _num_sp (that is, gaE)
+  for (unsigned rhs = 0; rhs < _num_sp; ++rhs)
+  {
+    for (unsigned j = 0; j < _num_sp; ++j)
+      jac[ind] -= (1.0 / _En) * _Eij[rhs][j] * smoothed_q.dg[j];
+    ind++;
+  }
+  // now rhs = _num_sp (that is, the yield function)
+  jac[ind] = 0.0;
+}
+
+void
+MultiParameterPlasticityStressUpdate::dVardTrial(bool elastic_only,
+                                                 const std::vector<Real> & trial_stress_params,
+                                                 const std::vector<Real> & stress_params,
+                                                 Real gaE,
+                                                 const std::vector<Real> & intnl,
+                                                 const yieldAndFlow & smoothed_q,
+                                                 Real step_size,
+                                                 bool compute_full_tangent_operator,
+                                                 std::vector<std::vector<Real>> & dvar_dtrial) const
+{
+  if (!_fe_problem.currentlyComputingJacobian())
+    return;
+
+  if (!compute_full_tangent_operator)
+    return;
+
+  if (elastic_only)
+  {
+    // no change to gaE, and all off-diag stuff remains unchanged from previous step
+    for (unsigned v = 0; v < _num_sp; ++v)
+      dvar_dtrial[v][v] += step_size;
+    return;
+  }
+
+  const Real ga = gaE / _En;
+
+  std::vector<std::vector<Real>> dintnl(_num_intnl, std::vector<Real>(_num_sp));
+  setIntnlDerivativesV(trial_stress_params, stress_params, intnl, dintnl);
+
+  // rhs is described elsewhere, the following are changes in rhs wrt the trial_stress_param values
+  // In the following we use d(intnl)/d(trial variable) = - d(intnl)/d(variable)
+  std::vector<Real> rhs_cto((_num_sp + 1) * _num_sp);
+
+  unsigned ind = 0;
+  for (unsigned a = 0; a < _num_sp; ++a)
+  {
+    // change in RHS[b] wrt changes in stress_param_trial[a]
+    for (unsigned b = 0; b < _num_sp; ++b)
+    {
+      if (a == b)
+        rhs_cto[ind] -= 1.0;
+      for (unsigned j = 0; j < _num_sp; ++j)
+        for (unsigned k = 0; k < _num_intnl; ++k)
+          rhs_cto[ind] -= ga * _Eij[b][j] * smoothed_q.d2g_di[j][k] * dintnl[k][a];
+      ind++;
+    }
+    // now b = _num_sp (that is, the yield function)
+    for (unsigned k = 0; k < _num_intnl; ++k)
+      rhs_cto[ind] -= smoothed_q.df_di[k] * dintnl[k][a];
+    ind++;
+  }
+
+  // jac = d(-rhs)/d(var)
+  std::vector<double> jac((_num_sp + 1) * (_num_sp + 1));
+  dnRHSdVar(smoothed_q, dintnl, stress_params, gaE, jac);
+
+  std::vector<int> ipiv(_num_sp + 1);
+  int info;
+  const int gesv_num_rhs = _num_sp + 1;
+  const int gesv_num_pq = _num_sp;
+  LAPACKgesv_(&gesv_num_rhs,
+              &gesv_num_pq,
+              &jac[0],
+              &gesv_num_rhs,
+              &ipiv[0],
+              &rhs_cto[0],
+              &gesv_num_rhs,
+              &info);
+  if (info != 0)
+    errorHandler("MultiParameterPlasticityStressUpdate: PETSC LAPACK gsev routine returned with "
+                 "error code " +
+                 Moose::stringify(info));
+
+  ind = 0;
+  std::vector<std::vector<Real>> dvarn_dtrialn(_num_sp + 1, std::vector<Real>(_num_sp, 0.0));
+  for (unsigned spt = 0; spt < _num_sp; ++spt) // loop over trial stress-param variables
+  {
+    for (unsigned v = 0; v < _num_sp; ++v) // loop over variables in NR procedure
+    {
+      dvarn_dtrialn[v][spt] = rhs_cto[ind];
+      ind++;
+    }
+    // the final NR variable is gaE
+    dvarn_dtrialn[_num_sp][spt] = rhs_cto[ind];
+    ind++;
+  }
+
+  const std::vector<std::vector<Real>> dvar_dtrial_old = dvar_dtrial;
+
+  for (unsigned v = 0; v < _num_sp; ++v) // loop over variables in NR procedure
+  {
+    for (unsigned spt = 0; spt < _num_sp; ++spt) // loop over trial stress-param variables
+    {
+      dvar_dtrial[v][spt] = step_size * dvarn_dtrialn[v][spt];
+      for (unsigned a = 0; a < _num_sp; ++a)
+        dvar_dtrial[v][spt] += dvarn_dtrialn[v][a] * dvar_dtrial_old[a][spt];
+    }
+  }
+  // for gaE the formulae are a little different
+  const unsigned v = _num_sp;
+  for (unsigned spt = 0; spt < _num_sp; ++spt)
+  {
+    dvar_dtrial[v][spt] += step_size * dvarn_dtrialn[v][spt]; // note +=
+    for (unsigned a = 0; a < _num_sp; ++a)
+      dvar_dtrial[v][spt] += dvarn_dtrialn[v][a] * dvar_dtrial_old[a][spt];
+  }
+}
