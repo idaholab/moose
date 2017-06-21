@@ -1622,24 +1622,49 @@ FEProblemBase::getSampler(const std::string & name, THREAD_ID tid)
   return *(_samplers.getActiveObject(name, tid));
 }
 
+bool
+FEProblemBase::duplicateVariableCheck(const std::string & var_name,
+                                      const FEType & type,
+                                      bool is_aux)
+{
+  SystemBase * curr_sys_ptr = _nl;
+  SystemBase * other_sys_ptr = _aux;
+  std::string error_prefix = "";
+  if (is_aux)
+  {
+    curr_sys_ptr = _aux;
+    other_sys_ptr = _nl;
+    error_prefix = "Aux";
+  }
+
+  if (other_sys_ptr->hasVariable(var_name))
+    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name: ",
+               var_name);
+
+  if (curr_sys_ptr->hasVariable(var_name))
+  {
+    const Variable & var =
+        curr_sys_ptr->system().variable(curr_sys_ptr->system().variable_number(var_name));
+    if (var.type() != type)
+      mooseError(error_prefix,
+                 "Variable with name '",
+                 var_name,
+                 "' already exists but is of a differing type!");
+
+    return true;
+  }
+
+  return false;
+}
+
 void
 FEProblemBase::addVariable(const std::string & var_name,
                            const FEType & type,
                            Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains /* = NULL*/)
+                           const std::set<SubdomainID> * const active_subdomains)
 {
-  if (_aux->hasVariable(var_name))
-    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name: ",
-               var_name);
-
-  if (_nl->hasVariable(var_name))
-  {
-    const Variable & var = _nl->system().variable(_nl->system().variable_number(var_name));
-    if (var.type() != type)
-      mooseError("Variable with name '", var_name, "' already exists but is of a differing type!");
-
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
-  }
 
   _nl->addVariable(var_name, type, scale_factor, active_subdomains);
   if (_displaced_problem)
@@ -1654,6 +1679,10 @@ FEProblemBase::addScalarVariable(const std::string & var_name,
 {
   if (order > _max_scalar_order)
     _max_scalar_order = order;
+
+  FEType type(order, SCALAR);
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
+    return;
 
   _nl->addScalarVariable(var_name, order, scale_factor, active_subdomains);
   if (_displaced_problem)
@@ -1809,20 +1838,10 @@ FEProblemBase::addConstraint(const std::string & c_name,
 void
 FEProblemBase::addAuxVariable(const std::string & var_name,
                               const FEType & type,
-                              const std::set<SubdomainID> * const active_subdomains /* = NULL*/)
+                              const std::set<SubdomainID> * const active_subdomains)
 {
-  if (_nl->hasVariable(var_name))
-    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name!");
-
-  if (_aux->hasVariable(var_name))
-  {
-    const Variable & var = _aux->sys().variable(_aux->sys().variable_number(var_name));
-    if (var.type() != type)
-      mooseError(
-          "AuxVariable with name '", var_name, "' already exists but is of a differing type!");
-
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
     return;
-  }
 
   _aux->addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
@@ -1835,6 +1854,13 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
                                     Real scale_factor,
                                     const std::set<SubdomainID> * const active_subdomains)
 {
+  if (order > _max_scalar_order)
+    _max_scalar_order = order;
+
+  FEType type(order, SCALAR);
+  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+    return;
+
   _aux->addScalarVariable(var_name, order, scale_factor, active_subdomains);
   if (_displaced_problem)
     _displaced_problem->addAuxScalarVariable(var_name, order, scale_factor, active_subdomains);
