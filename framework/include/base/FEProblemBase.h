@@ -534,6 +534,7 @@ public:
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
   virtual NonlinearSystem & getNonlinearSystem();
+
   void addVariable(const std::string & var_name,
                    const FEType & type,
                    Real scale_factor,
@@ -1421,6 +1422,9 @@ protected:
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
+
+  /// Helper to check for duplicate variable names across systems or within a single system
+  bool duplicateVariableCheck(const std::string & var_name, const FEType & type, bool is_aux);
 
   /// Verify that SECOND order mesh uses SECOND order displacements.
   void checkDisplacementOrders();

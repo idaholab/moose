@@ -23,6 +23,13 @@
     expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
   [../]
 
+  [./add_aux_scalar_variable_multiple_test]
+    type = 'RunException'
+    input = 'add_aux_variable_multiple_test.i'
+    cli_args = 'Variables/q/family=SCALAR MoreAuxVariables/q/family=SCALAR'
+    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+  [../]
+
   [./bad_bc_test]
     type = 'RunException'
     input = 'bad_bc_test.i'

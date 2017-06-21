@@ -11,6 +11,8 @@
 
 [AuxVariables]
   [./q]
+    family = MONOMIAL
+    order = third
   [../]
 []
 
