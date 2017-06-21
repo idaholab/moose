@@ -17,6 +17,7 @@
     type = 'Exodiff'
     input = '2d-quadratic.i'
     exodiff = '2d-quadratic_out.e'
+    abs_zero = 1e-8
   [../]
 
   [./2d-quadratic_num-of-jacobian-calls]
