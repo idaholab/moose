@@ -73,6 +73,7 @@
 #include "MassEigenKernel.h"
 #include "NullKernel.h"
 #include "MaterialDerivativeTestKernel.h"
+#include "ElementDiffusionReaction.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -521,6 +522,7 @@ registerObjects(Factory & factory)
   registerKernel(MassEigenKernel);
   registerKernel(NullKernel);
   registerKernel(MaterialDerivativeTestKernel);
+  registerKernel(ElementDiffusionReaction);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);

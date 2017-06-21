@@ -848,6 +848,17 @@ MooseVariable::restoreUnperturbedElemValues()
 void
 MooseVariable::computeElemValues()
 {
+  unsigned int num_dofs = _dof_indices.size();
+  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+  _nodal_u.resize(num_dofs);
+  for (unsigned int i = 0; i < num_dofs; i++)
+    _nodal_u[i] = current_solution(_dof_indices[i]);
+}
+
+/*
+void
+MooseVariable::computeElemValues()
+{
 
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule->n_points();
@@ -1094,6 +1105,7 @@ MooseVariable::computeElemValues()
     }
   }
 }
+*/
 
 void
 MooseVariable::computeElemValuesFace()

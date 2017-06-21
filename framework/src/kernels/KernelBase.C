@@ -13,12 +13,11 @@
 /****************************************************************/
 
 #include "KernelBase.h"
-#include "Assembly.h"
-#include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
+#include "MooseVariable.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -86,25 +85,9 @@ KernelBase::KernelBase(const InputParameters & parameters)
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _mesh(_subproblem.mesh()),
-    _current_elem(_var.currentElem()),
-    _current_elem_volume(_assembly.elemVolume()),
-    _q_point(_assembly.qPoints()),
-    _qrule(_assembly.qRule()),
-    _JxW(_assembly.JxW()),
-    _coord(_assembly.coordTransformation()),
-
-    _test(_var.phi()),
-    _grad_test(_var.gradPhi()),
-
-    _phi(_assembly.phi()),
-    _grad_phi(_assembly.gradPhi()),
-
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
-
     _eigen_kernel(getParam<bool>("eigen_kernel"))
 {
   _save_in.resize(_save_in_strings.size());

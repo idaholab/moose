@@ -824,6 +824,10 @@ public:
    */
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
+  const Real & elemVolume(const Elem * el) const;
+  const Real & elemAspectRatio(const Elem * el, unsigned int i) const;
+  const std::vector<Real> & elemAspectRatio(const Elem * el) const;
+
 protected:
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
 
@@ -1089,6 +1093,8 @@ private:
                             int child,
                             int child_side);
 
+  void evaluateElemQuantities();
+
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
 
@@ -1108,6 +1114,9 @@ private:
 
   /// Whether or not to allow generation of nodesets from sidesets
   bool _construct_node_list_from_side_list;
+
+  std::vector<Real> _volumes;
+  std::vector<std::vector<Real>> _aspect_ratios;
 };
 
 /**

@@ -419,6 +419,7 @@ MooseMesh::update()
   buildNodeList();
   buildBndElemList();
   cacheInfo();
+  evaluateElemQuantities();
 }
 
 const Node &
@@ -625,6 +626,30 @@ public:
     return false;
   }
 };
+
+void
+MooseMesh::evaluateElemQuantities()
+{
+  _volumes.clear();
+  _aspect_ratios.clear();
+
+  _volumes.resize(getMesh().max_elem_id() + 1);
+  _aspect_ratios.resize(getMesh().max_elem_id() + 1);
+  MeshBase::const_element_iterator el = getMesh().elements_begin();
+  const MeshBase::const_element_iterator end = getMesh().elements_end();
+
+  for (; el != end; ++el)
+  {
+    const Elem * elem = *el;
+    _volumes[elem->id()] = elem->volume();
+    _aspect_ratios[elem->id()].resize(elem->n_sides());
+    for (unsigned int side = 0; side < elem->n_sides(); side++)
+    {
+      Real side_size = elem->side_ptr(side)->volume();
+      _aspect_ratios[elem->id()][side] = side_size * side_size / _volumes[elem->id()] / 4;
+    }
+  }
+}
 
 void
 MooseMesh::buildNodeList()
@@ -2627,4 +2652,22 @@ MooseMesh::addMortarInterface(const std::string & name,
   _mortar_interface_by_name[name] = _mortar_interface.back().get();
   _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] =
       _mortar_interface.back().get();
+}
+
+const Real &
+MooseMesh::elemVolume(const Elem * el) const
+{
+  return _volumes[el->id()];
+}
+
+const Real &
+MooseMesh::elemAspectRatio(const Elem * el, unsigned int i) const
+{
+  return _aspect_ratios[el->id()][i];
+}
+
+const std::vector<Real> &
+MooseMesh::elemAspectRatio(const Elem * el) const
+{
+  return _aspect_ratios[el->id()];
 }

@@ -40,6 +40,20 @@ validParams<EigenKernel>()
 
 EigenKernel::EigenKernel(const InputParameters & parameters)
   : KernelBase(parameters),
+    _assembly(_subproblem.assembly(_tid)),
+    _mesh(_subproblem.mesh()),
+    _current_elem(_var.currentElem()),
+    _current_elem_volume(_assembly.elemVolume()),
+    _q_point(_assembly.qPoints()),
+    _qrule(_assembly.qRule()),
+    _JxW(_assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
+
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
+
+    _phi(_assembly.phi()),
+    _grad_phi(_assembly.gradPhi()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
