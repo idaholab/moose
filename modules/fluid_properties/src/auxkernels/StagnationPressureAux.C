@@ -17,7 +17,8 @@ validParams<StagnationPressureAux>()
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-
+  params.addClassDescription(
+      "Computes stagnation pressure from specific volume, specific internal energy, and velocity");
   return params;
 }
 

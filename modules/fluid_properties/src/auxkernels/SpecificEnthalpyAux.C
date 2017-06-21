@@ -16,7 +16,7 @@ validParams<SpecificEnthalpyAux>()
   params.addRequiredCoupledVar("p", "Pressure");
   params.addRequiredCoupledVar("T", "Temperature");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-
+  params.addClassDescription("Computes specific enthalpy from pressure and temperature");
   return params;
 }
 
