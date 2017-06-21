@@ -16,6 +16,7 @@ validParams<FluidPropertiesMaterial>()
   params.addRequiredCoupledVar("e", "Specific internal energy");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+  params.addClassDescription("Computes fluid properties using (u, v) formulation");
   return params;
 }
 

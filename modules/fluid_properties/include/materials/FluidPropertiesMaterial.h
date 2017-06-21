@@ -17,7 +17,7 @@ template <>
 InputParameters validParams<FluidPropertiesMaterial>();
 
 /**
- * Computes values of pressure and its derivatives using (u, v) formulation
+ * Computes fluid properties using (u, v) formulation
  */
 class FluidPropertiesMaterial : public Material
 {
@@ -26,7 +26,7 @@ public:
   virtual ~FluidPropertiesMaterial();
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// Specific internal energy
   const VariableValue & _e;
@@ -36,11 +36,15 @@ protected:
   MaterialProperty<Real> & _p;
   /// Temperature
   MaterialProperty<Real> & _T;
-  /// Sound speed
+  /// Speed of sound
   MaterialProperty<Real> & _c;
+  /// Isobaric specific heat capacity
   MaterialProperty<Real> & _cp;
+  /// Isochoric specific heat capacity
   MaterialProperty<Real> & _cv;
+  /// Dynamic viscosity
   MaterialProperty<Real> & _mu;
+  /// Thermal conductivity
   MaterialProperty<Real> & _k;
 
   /// Fluid properties

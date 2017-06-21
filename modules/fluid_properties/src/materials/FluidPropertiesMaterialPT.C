@@ -13,10 +13,9 @@ validParams<FluidPropertiesMaterialPT>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("pressure", "Fluid pressure (Pa)");
-  params.addRequiredCoupledVar("temperature", "Fluid temperature (C)");
+  params.addRequiredCoupledVar("temperature", "Fluid temperature (K)");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  params.addClassDescription(
-      "Material properties for a fluid using the (pressure, temperature) formulation");
+  params.addClassDescription("Fluid properties using the (pressure, temperature) formulation");
   return params;
 }
 

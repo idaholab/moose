@@ -14,10 +14,11 @@ validParams<MultiComponentFluidPropertiesMaterialPT>()
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("pressure", "pressure (Pa)");
   params.addRequiredCoupledVar("temperature", "temperature (K)");
-  params.addRequiredCoupledVar("xnacl", "NaCl mass fraction (-)");
+  params.addRequiredCoupledVar("xmass", "Solute mass fraction (-)");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addParam<bool>("vapor", false, "Flag to calculate vapor pressure");
-  params.addClassDescription("Material to test brine properties");
+  params.addClassDescription(
+      "Fluid properties of a multicomponent fluid using the (pressure, temperature) formulation");
   return params;
 }
 
@@ -26,7 +27,7 @@ MultiComponentFluidPropertiesMaterialPT::MultiComponentFluidPropertiesMaterialPT
   : Material(parameters),
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
-    _xnacl(coupledValue("xnacl")),
+    _xmass(coupledValue("xmass")),
 
     _rho(declareProperty<Real>("density")),
     _h(declareProperty<Real>("enthalpy")),
@@ -42,8 +43,8 @@ MultiComponentFluidPropertiesMaterialPT::~MultiComponentFluidPropertiesMaterialP
 void
 MultiComponentFluidPropertiesMaterialPT::computeQpProperties()
 {
-  _rho[_qp] = _fp.rho(_pressure[_qp], _temperature[_qp], _xnacl[_qp]);
-  _h[_qp] = _fp.h(_pressure[_qp], _temperature[_qp], _xnacl[_qp]);
-  _cp[_qp] = _fp.cp(_pressure[_qp], _temperature[_qp], _xnacl[_qp]);
-  _e[_qp] = _fp.e(_pressure[_qp], _temperature[_qp], _xnacl[_qp]);
+  _rho[_qp] = _fp.rho(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _h[_qp] = _fp.h(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _cp[_qp] = _fp.cp(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _e[_qp] = _fp.e(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
 }
