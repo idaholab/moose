@@ -15,6 +15,14 @@ $$
 g(\eta) = \eta(1-\eta)
 $$
 
+and with the  `g_order` parameter set to `HIGH` it is defined as
+
+$$
+g(\eta) = \eta^2(1-\eta^2)^2
+$$
+
+
+
 
 !parameters /Materials/BarrierFunctionMaterial
 

@@ -69,5 +69,10 @@
     type = 'Exodiff'
     input = 'mixedswitchingfunctionmaterial.i'
     exodiff = 'mixedswitchingfunctionmaterial_out.e'
-  []
+  [../]
+  [./barrierfunctionmaterial]
+    type = 'Exodiff'
+    input = 'barrierfunctionmaterial.i'
+    exodiff = 'barrierfunctionmaterial_out.e'
+  [../]
 []
