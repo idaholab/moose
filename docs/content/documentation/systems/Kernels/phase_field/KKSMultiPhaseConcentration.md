@@ -2,20 +2,20 @@
 !description /Kernels/KKSMultiPhaseConcentration
 
 ### Residual
-The residual of the phase concentration constraint equation is
+For a KKS model with $n$ phases, the residual of the phase concentration constraint equation is
 $$
-R = \left( h_1 c_1 + h_2 c_2 + h_3 c_3 - c  \right)
+R = \left( h_1 c_1 + h_2 c_2 + h_3 c_3 + \dots + h_n c_n - c  \right)
 $$
 where $c_i$ is the phase concentration for phase $i$, $c$ is the physical solute concentration, and $h_i$ is the interpolation function for phase $i$ defined in \cite{Folch05} (referred to as $g_i$ there, but we use $h_i$ to maintain consistency with other interpolation functions in MOOSE).
 
 ### Jacobian
 
 #### On-diagonal
-Since the non-linear variable for this kernel is $c_3$, the on-diagonal Jacobian is
+Since the non-linear variable for this kernel is $c_n$, the on-diagonal Jacobian is
 $$
 \begin{eqnarray*}
-J &=& \phi_j \frac{\partial R}{\partial c_3} \\
-&=& \phi_j h_3
+J &=& \phi_j \frac{\partial R}{\partial c_n} \\
+&=& \phi_j h_n
 \end{eqnarray*}
 $$
 
@@ -27,14 +27,13 @@ J &=& \phi_j \frac{\partial R}{\partial c} \\
 &=& - \phi_j
 \end{eqnarray*}
 $$
-For phase concentrations other than $c_3$, such as $c_1$:
+For phase concentrations $c_i$ other than $c_n$,:
 $$
 \begin{eqnarray*}
-J &=& \phi_j \frac{\partial R}{\partial c_1} \\
-&=& \phi_j h_1
+J &=& \phi_j \frac{\partial R}{\partial c_i} \\
+&=& \phi_j h_i
 \end{eqnarray*}
 $$
-and similar for $c_2$.
 
 Finally for the order parameters, such as $\eta_1$,
 $$
