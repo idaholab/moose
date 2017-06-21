@@ -58,7 +58,7 @@ PolycrystalEBSD::getNumGrains() const
 }
 
 Real
-PolycrystalEBSD::getVariableValue(unsigned int op_index, const Node & n) const
+PolycrystalEBSD::getNodalVariableValue(unsigned int op_index, const Node & n) const
 {
   // Make sure the _current_node is in the node_to_grain_weight_map (return error if not in map)
   const auto it = _node_to_grain_weight_map.find(n.id());
