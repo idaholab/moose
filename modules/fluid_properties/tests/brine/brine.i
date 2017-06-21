@@ -136,7 +136,7 @@
     type = MultiComponentFluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
-    xnacl = xnacl
+    xmass = xnacl
     fp = brine
   [../]
 []

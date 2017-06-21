@@ -42,7 +42,7 @@ SinglePhaseFluidPropertiesPT::henryConstantIAPWS(Real temperature, Real A, Real 
   std::vector<Real> b{1.0, 1.5, 3.0, 3.5, 4.0, 7.5};
   Real sum = 0.0;
 
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     sum += a[i] * std::pow(tau, b[i]);
 
   return 22.064e6 * std::exp(sum / Tr) * std::exp(lnkh);
@@ -70,7 +70,7 @@ SinglePhaseFluidPropertiesPT::henryConstantIAPWS_dT(
   Real sum = 0.0;
   Real dsum = 0.0;
 
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
   {
     sum += a[i] * std::pow(tau, b[i]);
     dsum += a[i] * b[i] * std::pow(tau, b[i] - 1.0);

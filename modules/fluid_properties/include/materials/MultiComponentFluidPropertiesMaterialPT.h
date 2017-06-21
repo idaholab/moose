@@ -17,10 +17,9 @@ template <>
 InputParameters validParams<MultiComponentFluidPropertiesMaterialPT>();
 
 /**
- * Material for testing the BrineFluidProperties UserObject.
- * Note: This material is for testing purposes only and shouldn't be
- * used for actual simulations. It provides access to internal functions
- * as well as the functions provided by the base FluidProperties class
+ * Material for calculating fluid properties for a fluid comprised of two components:
+ * the solute (eg, NaCl), and the solution (eg, water). This material uses the
+ * pressure - temperature formulation.
  */
 class MultiComponentFluidPropertiesMaterialPT : public Material
 {
@@ -35,8 +34,8 @@ protected:
   const VariableValue & _pressure;
   /// Temperature (K)
   const VariableValue & _temperature;
-  /// Mass fraction (-)
-  const VariableValue & _xnacl;
+  /// Mass fraction of solute (-)
+  const VariableValue & _xmass;
   /// Density (kg/m^3)
   MaterialProperty<Real> & _rho;
   /// Enthalpy (kJ/kg)
