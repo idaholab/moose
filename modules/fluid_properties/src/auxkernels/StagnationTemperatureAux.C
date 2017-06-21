@@ -17,7 +17,8 @@ validParams<StagnationTemperatureAux>()
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-
+  params.addClassDescription("Computes stagnation temperature from specific volume, specific "
+                             "internal energy, and velocity");
   return params;
 }
 

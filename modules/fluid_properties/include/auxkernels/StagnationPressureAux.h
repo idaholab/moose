@@ -25,7 +25,7 @@ public:
   StagnationPressureAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   const VariableValue & _specific_volume;
   const VariableValue & _specific_internal_energy;

@@ -17,7 +17,7 @@ template <>
 InputParameters validParams<FluidPropertiesMaterialPT>();
 
 /**
- * Computes values of pressure and its derivatives using (pressure, temperature) formulation
+ * Computes fluid properties using (pressure, temperature) formulation
  */
 class FluidPropertiesMaterialPT : public Material
 {
@@ -30,7 +30,7 @@ protected:
 
   /// Pressure (Pa)
   const VariableValue & _pressure;
-  /// Temperature (C)
+  /// Temperature (K)
   const VariableValue & _temperature;
   /// Density (kg/m^3)
   MaterialProperty<Real> & _rho;

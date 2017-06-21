@@ -29,7 +29,7 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
     _mu(getParam<Real>("mu")),
     _k(getParam<Real>("k"))
 {
-  _cp = _gamma * _R / (_gamma - 1);
+  _cp = _gamma * _R / (_gamma - 1.0);
   _cv = _cp / _gamma;
 }
 
@@ -43,7 +43,7 @@ IdealGasFluidProperties::pressure(Real v, Real u) const
 
   // The std::max function serves as a hard limiter, which will guarantee non-negative pressure
   // when resolving strongly nonlinear waves
-  return std::max(1e-8, (_gamma - 1.) * u / v);
+  return std::max(1.0e-8, (_gamma - 1.0) * u / v);
 }
 
 Real
@@ -57,9 +57,8 @@ IdealGasFluidProperties::c(Real v, Real u) const
 {
   Real temp = temperature(v, u);
   // The std::max function serves as a hard limiter, which will guarantee non-negative speed of
-  // sound
-  // when resolving strongly nonlinear waves
-  return std::sqrt(std::max(1e-8, _gamma * _R * temp));
+  // sound when resolving strongly nonlinear waves
+  return std::sqrt(std::max(1.0e-8, _gamma * _R * temp));
 }
 
 Real IdealGasFluidProperties::cp(Real, Real) const { return _cp; }
@@ -75,17 +74,17 @@ Real IdealGasFluidProperties::k(Real, Real) const { return _k; }
 Real IdealGasFluidProperties::s(Real, Real) const
 {
   mooseError(name(), ": s() not implemented.");
-  return 0;
+  return 0.0;
 }
 
 void
 IdealGasFluidProperties::dp_duv(
     Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const
 {
-  dp_dv = -(_gamma - 1) * u / v / v;
-  dp_du = (_gamma - 1) / v;
-  dT_dv = 0;
-  dT_du = 1 / _cv;
+  dp_dv = -(_gamma - 1.0) * u / v / v;
+  dp_du = (_gamma - 1.0) / v;
+  dT_dv = 0.0;
+  dT_du = 1.0 / _cv;
 }
 
 void
@@ -112,7 +111,7 @@ IdealGasFluidProperties::rho_e(Real pressure, Real temperature, Real & rho, Real
 Real
 IdealGasFluidProperties::rho(Real pressure, Real temperature) const
 {
-  if ((_gamma - 1) * pressure == 0.)
+  if ((_gamma - 1.0) * pressure == 0.0)
     mooseError(name(),
                ": Invalid gamma or pressure detected in rho(pressure = ",
                pressure,
@@ -129,7 +128,7 @@ IdealGasFluidProperties::rho_dpT(
 {
   Real temp2 = temperature * temperature;
   rho = pressure / (_gamma - 1.0) / _cv / temperature;
-  drho_dp = 1 / (_gamma - 1.0) / _cv / temperature;
+  drho_dp = 1.0 / (_gamma - 1.0) / _cv / temperature;
   drho_dT = -pressure / (_gamma - 1.0) / _cv / temp2;
 }
 
@@ -137,14 +136,14 @@ void
 IdealGasFluidProperties::e_dpT(Real, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   e = temperature * _cv;
-  de_dp = 0;
+  de_dp = 0.0;
   de_dT = _cv;
 }
 
 Real
 IdealGasFluidProperties::e(Real pressure, Real rho) const
 {
-  return pressure / (_gamma - 1) / rho;
+  return pressure / (_gamma - 1.0) / rho;
 }
 
 void
@@ -152,8 +151,8 @@ IdealGasFluidProperties::e_dprho(
     Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
   e = this->e(pressure, rho);
-  de_dp = 1 / (_gamma - 1) / rho;
-  de_drho = -pressure / (_gamma - 1) / rho / rho;
+  de_dp = 1.0 / (_gamma - 1.0) / rho;
+  de_drho = -pressure / (_gamma - 1.0) / rho / rho;
 }
 
 Real
@@ -170,18 +169,18 @@ IdealGasFluidProperties::h_dpT(
 {
   h = this->h(pressure, temperature);
   Real rho = this->rho(pressure, temperature);
-  dh_dp = 0;
+  dh_dp = 0.0;
   dh_dT = _cv + pressure / rho / temperature;
 }
 
 Real IdealGasFluidProperties::p_from_h_s(Real /*h*/, Real /*s*/) const
 {
   mooseError(name(), ": p_from_h_s() not implemented.");
-  return 0;
+  return 0.0;
 }
 
 Real IdealGasFluidProperties::dpdh_from_h_s(Real /*h*/, Real /*s*/) const
 {
   mooseError(name(), ": dpdh_from_h_s() not implemented.");
-  return 0;
+  return 0.0;
 }

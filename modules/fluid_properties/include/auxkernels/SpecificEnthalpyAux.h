@@ -25,7 +25,7 @@ public:
   SpecificEnthalpyAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   const VariableValue & _pressure;
   const VariableValue & _temperature;
