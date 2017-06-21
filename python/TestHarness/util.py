@@ -145,7 +145,7 @@ def returnCommand(tester, command):
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def printResult(tester, result, timing, options, color=True):
+def formatResult(tester, result, timing, options, color=True):
     f_result = ''
     caveats = ''
     first_directory = tester.specs['first_directory']

@@ -354,13 +354,13 @@ class TestHarness:
                     self.writeFailedTest.write(tester.specs['test_name'] + '\n')
 
                 if self.options.file:
-                    self.file.write(printResult( tester, result, timing, self.options, color=False) + '\n')
+                    self.file.write(formatResult( tester, result, timing, self.options, color=False) + '\n')
                     self.file.write(output)
 
                 if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
                     fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
                     f = open(fname, 'w')
-                    f.write(printResult( tester, result, timing, self.options, color=False) + '\n')
+                    f.write(formatResult( tester, result, timing, self.options, color=False) + '\n')
                     f.write(output)
                     f.close()
 
@@ -374,7 +374,7 @@ class TestHarness:
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
             for (test, result, timing) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
-                print printResult(test, result, timing, self.options)
+                print formatResult(test, result, timing, self.options)
 
         time = clock() - self.start_time
 

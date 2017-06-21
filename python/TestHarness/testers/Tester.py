@@ -364,7 +364,7 @@ class Tester(MooseObject):
                     print(output)
 
             caveat_formatted_results = self.formatCaveats(options)
-            print util.printResult(self, caveat_formatted_results, self.getTiming(), options)
+            print util.formatResult(self, caveat_formatted_results, self.getTiming(), options)
         return caveat_formatted_results
 
     # This is the base level runnable check common to all Testers.  DO NOT override
