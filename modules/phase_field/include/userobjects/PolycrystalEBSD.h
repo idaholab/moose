@@ -24,7 +24,7 @@ public:
   virtual void getGrainsBasedOnPoint(const Point & point,
                                      std::vector<unsigned int> & grains) const override;
   virtual Real getVariableValue(unsigned int op_index, const Point & p) const override;
-  virtual Real getVariableValue(unsigned int op_index, const Node & n) const override;
+  virtual Real getNodalVariableValue(unsigned int op_index, const Node & n) const override;
   virtual unsigned int getNumGrains() const override;
 
 protected:

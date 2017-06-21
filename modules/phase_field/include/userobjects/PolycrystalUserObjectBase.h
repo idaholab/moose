@@ -58,8 +58,19 @@ public:
    */
   virtual unsigned int getNumGrains() const = 0;
 
+  /**
+   * Returns the variable value for a given op_index and mesh point. This is the method used by the
+   * initial condition after the Polycrystal grain structure has be setup. Those grains are
+   * then distributed to the typically smaller number of order parameters by this class.
+   * This method is then used to return those values but it may be overridden in a derived class.
+   */
   virtual Real getVariableValue(unsigned int op_index, const Point & p) const = 0;
-  virtual Real getVariableValue(unsigned int op_index, const Node & n) const
+
+  /**
+   * Similarly to the getVariableValue method, this method also returns values but may be optimized
+   * for returning nodal values.
+   */
+  virtual Real getNodalVariableValue(unsigned int op_index, const Node & n) const
   {
     return getVariableValue(op_index, static_cast<const Point &>(n));
   }
