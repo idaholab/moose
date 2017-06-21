@@ -242,7 +242,7 @@ public:
    */
   Real haliteSolubility(Real temperature) const;
 
-  /// Proved access to UserObject for specified component
+  /// Provides access to UserObject for specified component
   virtual const SinglePhaseFluidPropertiesPT & getComponent(unsigned int component) const override;
 
   /// Fluid component numbers for water and NaCl

@@ -134,7 +134,7 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
     a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real specific_heat = 0.0;
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     specific_heat += a[i] * std::pow(temperature, i);
 
   // convert to J/kg/K by multiplying by 1000
@@ -158,7 +158,7 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
       2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
 
   Real viscosity = 0.0;
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     viscosity += a[i] * std::pow(temperature, i);
 
   return viscosity * 1.e-6;
@@ -175,7 +175,7 @@ MethaneFluidProperties::mu_drhoT(
   dmu_drho = 0.0;
 
   Real dmudt = 0.0;
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     dmudt += i * a[i] * std::pow(temperature, i - 1.0);
   dmu_dT = dmudt * 1.e-6;
 }
@@ -196,7 +196,7 @@ MethaneFluidProperties::k(Real /*density*/, Real temperature) const
                             -1.95048736e-18};
 
   Real kt = 0.0;
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     kt += a[i] * std::pow(temperature, i);
 
   return kt;
@@ -216,7 +216,7 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
     a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real entropy = a[0] * std::log(temperature);
-  for (unsigned int i = 1; i < a.size(); ++i)
+  for (std::size_t i = 1; i < a.size(); ++i)
     entropy += a[i] * std::pow(temperature, i) / static_cast<Real>(i);
 
   // convert to J/kg/K by multiplying by 1000
@@ -237,7 +237,7 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
     a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real enthalpy = 0.0;
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     enthalpy += a[i] * std::pow(temperature, i + 1) / (i + 1.0);
 
   // convert to J/kg by multiplying by 1000
@@ -259,7 +259,7 @@ MethaneFluidProperties::h_dpT(
     a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real dhdt = 0.0;
-  for (unsigned int i = 0; i < a.size(); ++i)
+  for (std::size_t i = 0; i < a.size(); ++i)
     dhdt += a[i] * std::pow(temperature, i);
 
   // convert to J/kg/K by multiplying by 1000
