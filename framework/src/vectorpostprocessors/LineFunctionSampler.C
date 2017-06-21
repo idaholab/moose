@@ -92,11 +92,3 @@ LineFunctionSampler::finalize()
 {
   SamplerBase::finalize();
 }
-
-void
-LineFunctionSampler::threadJoin(const UserObject & y)
-{
-  const LineFunctionSampler & vpp = static_cast<const LineFunctionSampler &>(y);
-
-  SamplerBase::threadJoin(vpp);
-}

@@ -51,8 +51,8 @@ public:
   /**
    * This method is not used and should not be used in a custom GeneralUserObject.
    */
-  virtual void threadJoin(const UserObject &) override; /*final*/
-  virtual void subdomainSetup() override;               /*final*/
+  virtual void threadJoin(const UserObject &) final;
+  virtual void subdomainSetup() final;
   ///@}
 
   ///@{
