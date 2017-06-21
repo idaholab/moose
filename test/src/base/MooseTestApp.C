@@ -243,6 +243,7 @@
 #include "RandomHitMarker.h"
 #include "QPointMarker.h"
 #include "CircleMarker.h"
+#include "TwoCircleMarker.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -554,6 +555,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);
   registerMarker(CircleMarker);
+  registerMarker(TwoCircleMarker);
 
   registerExecutioner(TestSteady);
   registerExecutioner(AdaptAndModify);
