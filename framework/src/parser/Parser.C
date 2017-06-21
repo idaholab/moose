@@ -992,6 +992,15 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           long, long, it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalarValueType(
           unsigned int, long, it.second, full_name, it.first, in_global, global_params_block);
+
+      /**
+       * Note: There is no C++ standard literal that can represent the largest size_t numbers.
+       * However, you can use numeric_limits to get the largest value which can be useful in certain
+       * contexts.
+       */
+      dynamicCastAndExtractScalarValueType(
+          std::size_t, std::size_t, it.second, full_name, it.first, in_global, global_params_block);
+
       dynamicCastAndExtractScalar(
           bool, it.second, full_name, it.first, in_global, global_params_block);
 
