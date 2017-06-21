@@ -137,8 +137,6 @@ Checkpoint::output(const ExecFlagType & /*type*/)
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
-  int ret = 0; // return code for file operations
-
   // Update the list of stored files
   _file_names.push_back(file_struct);
 
@@ -155,33 +153,56 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     processor_id_type proc_id = processor_id();
 
     // Delete checkpoint files (_mesh.cpr)
+    if (proc_id == 0)
+    {
+      std::ostringstream oss;
+      oss << delete_files.checkpoint;
+      std::string file_name = oss.str();
+      int ret = remove(file_name.c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
+    }
+
     if (_parallel_mesh)
     {
       std::ostringstream oss;
       oss << delete_files.checkpoint << '-' << n_processors() << '-' << proc_id;
-      ret = remove(oss.str().c_str());
+      std::string file_name = oss.str();
+      int ret = remove(file_name.c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '", oss.str().c_str(), "': ", ret);
+        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
     }
-    else if (proc_id == 0)
+    else
     {
-      ret = remove(delete_files.checkpoint.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", delete_files.checkpoint, "': ", ret);
-
-      // Delete the system files (xdr and xdr.0000, ...)
-      ret = remove(delete_files.system.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", delete_files.system, "': ", ret);
+      if (proc_id == 0)
+      {
+        std::ostringstream oss;
+        oss << delete_files.checkpoint << "-1-0";
+        std::string file_name = oss.str();
+        int ret = remove(file_name.c_str());
+        if (ret != 0)
+          mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
+      }
     }
 
+    // Delete the system files (xdr and xdr.0000, ...)
+    if (proc_id == 0)
+    {
+      std::ostringstream oss;
+      oss << delete_files.system;
+      std::string file_name = oss.str();
+      int ret = remove(file_name.c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
+    }
     {
       std::ostringstream oss;
       oss << delete_files.system << "." << std::setw(4) << std::setprecision(0) << std::setfill('0')
           << proc_id;
-      ret = remove(oss.str().c_str());
+      std::string file_name = oss.str();
+      int ret = remove(file_name.c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '", oss.str().c_str(), "': ", ret);
+        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
     }
 
     unsigned int n_threads = libMesh::n_threads();
@@ -194,9 +215,10 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
         oss << delete_files.restart << "-" << proc_id;
         if (n_threads > 1)
           oss << "-" << tid;
-        ret = remove(oss.str().c_str());
+        std::string file_name = oss.str();
+        int ret = remove(file_name.c_str());
         if (ret != 0)
-          mooseWarning("Error during the deletion of file '", oss.str().c_str(), "': ", ret);
+          mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
       }
     }
   }
