@@ -110,6 +110,12 @@ protected:
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   ///@}
 
+  /// whether a compliance_tensor Material Property has been defined
+  const bool _has_compliance;
+
+  /// the compliance tensor, if it is defined, otherwise nullptr
+  const MaterialProperty<RankFourTensor> * _compliance_tensor;
+
   /// The sum of the inelastic strains that come from the plastic models
   MaterialProperty<RankTwoTensor> & _inelastic_strain;
 

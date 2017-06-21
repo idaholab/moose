@@ -36,7 +36,16 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
+  /// whether to compute the compliance tensor
+  bool _compute_compliance_tensor;
+
+  /// Compliance tensor at the quadpoints, if _compute_compliance_tensor = true
+  MaterialProperty<RankFourTensor> * _compliance_tensor;
+
   /// Individual elasticity tensor
+  RankFourTensor _Eijkl;
+
+  /// The compliance tensor
   RankFourTensor _Cijkl;
 };
 

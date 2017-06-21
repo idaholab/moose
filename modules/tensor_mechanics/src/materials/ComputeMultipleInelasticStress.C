@@ -75,6 +75,10 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _has_compliance(hasMaterialProperty<RankFourTensor>(_base_name + "compliance_tensor")),
+    _compliance_tensor(_has_compliance
+                           ? &getMaterialProperty<RankFourTensor>(_base_name + "compliance_tensor")
+                           : nullptr),
     _inelastic_strain(declareProperty<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
     _inelastic_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
@@ -276,9 +280,12 @@ ComputeMultipleInelasticStress::computeQpJacobianMult()
 {
   if (_tangent_operator_type == TangentOperatorEnum::elastic)
     _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  else if (_num_models == 1)
+    _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
   else
   {
-    const RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
+    const RankFourTensor E_inv =
+        (_has_compliance ? (*_compliance_tensor)[_qp] : _elasticity_tensor[_qp].invSymm());
     _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
     for (unsigned i_rmm = 1; i_rmm < _num_models; ++i_rmm)
       _Jacobian_mult[_qp] = _consistent_tangent_operator[i_rmm] * E_inv * _Jacobian_mult[_qp];
