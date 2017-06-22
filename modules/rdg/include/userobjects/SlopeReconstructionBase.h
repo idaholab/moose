@@ -28,7 +28,6 @@ public:
 
   virtual void initialize();
   virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
 
   virtual void computeElement();
 

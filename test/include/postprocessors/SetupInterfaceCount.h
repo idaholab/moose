@@ -40,10 +40,6 @@ InputParameters validParams<InternalSideSetupInterfaceCount>();
 template <>
 InputParameters validParams<NodalSetupInterfaceCount>();
 
-namespace
-{
-}
-
 /**
  * A class for testing the number of calls to the various SetupInterface methods.
  */

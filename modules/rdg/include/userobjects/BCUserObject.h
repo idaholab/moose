@@ -47,7 +47,6 @@ public:
   virtual void initialize();
   virtual void execute();
   virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
 
   /**
    * compute the ghost cell variable values
