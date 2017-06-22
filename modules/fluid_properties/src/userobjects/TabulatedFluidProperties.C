@@ -123,7 +123,7 @@ TabulatedFluidProperties::initialSetup()
     _num_p = _pressure.size();
 
     // Check that the number of rows in the csv file is equal to _num_p * _num_T
-    if (column_data[0].size() != _num_p * num_T)
+    if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
       mooseError("The number of rows in ",
                  _file_name,
                  " is not equal to the number of unique pressure values ",
