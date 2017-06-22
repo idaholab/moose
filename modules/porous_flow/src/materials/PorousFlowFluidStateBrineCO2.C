@@ -8,6 +8,7 @@
 #include "PorousFlowFluidStateBrineCO2.h"
 #include "BrineFluidProperties.h"
 #include "SinglePhaseFluidPropertiesPT.h"
+#include "PorousFlowCapillaryPressure.h"
 
 template <>
 InputParameters
@@ -163,11 +164,17 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
   // fraction
   if (is_twophase)
   {
-    // Liquid density is approximated by the brine density. Note: calculated
-    // using gas pressure as liquid saturation is not known yet
+    // Liquid density
     Real co2_partial_density, dco2_partial_density_dT;
     partialDensityCO2(Tk, co2_partial_density, dco2_partial_density_dT);
-    liquid_density = 1.0 / (X0 / co2_partial_density + X1 / _brine_fp.rho(pressure, Tk, xnacl));
+    // Use old value of gas saturation to estimate liquid saturation
+    Real liqsat = 1.0;
+    if (!_is_initqp)
+      liqsat -= _saturation_old[_qp][_gas_phase_number];
+
+    liquid_density =
+        1.0 / (X0 / co2_partial_density +
+               X1 / _brine_fp.rho(pressure + _pc_uo.capillaryPressure(liqsat), Tk, xnacl));
 
     // The gas saturation in the two phase case
     gas_saturation = vapor_mass_fraction * liquid_density /
@@ -176,8 +183,7 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
 
   // Calculate the saturations and pressures for each phase
   liquid_saturation = 1.0 - gas_saturation;
-  Real seff = effectiveSaturation(liquid_saturation);
-  Real liquid_porepressure = pressure + capillaryPressure(seff);
+  Real liquid_porepressure = pressure + _pc_uo.capillaryPressure(liquid_saturation);
 
   // Calculate liquid density and viscosity if in the two phase or single phase
   // liquid region, including a density correction due to the presence of dissolved

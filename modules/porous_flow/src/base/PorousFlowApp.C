@@ -14,6 +14,8 @@
 // UserObjects
 #include "PorousFlowDictator.h"
 #include "PorousFlowSumQuantity.h"
+#include "PorousFlowCapillaryPressureConst.h"
+#include "PorousFlowCapillaryPressureVG.h"
 
 // DiracKernels
 #include "PorousFlowSquarePulsePointSource.h"
@@ -156,6 +158,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   // UserObjects
   registerUserObject(PorousFlowDictator);
   registerUserObject(PorousFlowSumQuantity);
+  registerUserObject(PorousFlowCapillaryPressureConst);
+  registerUserObject(PorousFlowCapillaryPressureVG);
 
   // DiracKernels
   registerDiracKernel(PorousFlowSquarePulsePointSource);
