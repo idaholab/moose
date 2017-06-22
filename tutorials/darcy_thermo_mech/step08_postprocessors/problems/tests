@@ -1,0 +1,7 @@
+[Tests]
+  [./step]
+    type = RunApp
+    input = 'step8.i'
+    cli_args = Executioner/num_steps=1
+  [../]
+[]

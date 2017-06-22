@@ -1,0 +1,6 @@
+[Tests]
+  [./step]
+    type = RunApp
+    input = 'step3.i'
+  [../]
+[]
