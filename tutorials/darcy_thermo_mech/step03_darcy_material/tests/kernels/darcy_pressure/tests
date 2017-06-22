@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'darcy_pressure.i'
-    exodiff = 'darcy_pressure_out.e'
-  [../]
-[]
+../../../../step02_darcy_pressure/tests/kernels/darcy_pressure/tests

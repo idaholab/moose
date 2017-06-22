@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'velocity_aux.i'
-    exodiff = 'velocity_aux_out.e'
-  [../]
-[]
+../../../../step06_coupled_darcy_heat_conduction/tests/auxkernels/velocity_aux/tests
