@@ -194,7 +194,6 @@
 #include "NodalVariableValue.h"
 #include "NumDOFs.h"
 #include "TimestepSize.h"
-#include "RunTime.h"
 #include "PerformanceData.h"
 #include "MemoryUsage.h"
 #include "NumElems.h"
@@ -640,7 +639,6 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(NumDOFs);
   registerPostprocessor(TimestepSize);
-  registerPostprocessor(RunTime);
   registerPostprocessor(PerformanceData);
   registerPostprocessor(MemoryUsage);
   registerPostprocessor(NumElems);

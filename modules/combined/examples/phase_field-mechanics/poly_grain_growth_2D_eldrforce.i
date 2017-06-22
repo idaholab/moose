@@ -246,8 +246,8 @@
     type = TimestepSize
   [../]
   [./run_time]
-    type = RunTime
-    time_type = active
+    type = PerformanceData
+    event = active
   [../]
 []
 
