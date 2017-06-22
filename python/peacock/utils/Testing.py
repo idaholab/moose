@@ -7,6 +7,7 @@ import unittest
 import glob
 from PyQt5 import QtCore, QtWidgets
 from peacock import PeacockApp
+import inspect
 
 def find_moose_test_exe(dirname="test", exe_base="moose_test"):
     moose_dir = os.environ.get("MOOSE_DIR", "")
@@ -127,9 +128,12 @@ class PeacockTester(unittest.TestCase):
         self.finished = False
         self.app = None
         message.MOOSE_TESTING_MODE = True
-        qtutils.setAppInformation()
+        qtutils.setAppInformation(app_name=self._appPrefix())
         self.starting_directory = os.getcwd()
         self.clearSettings()
+
+    def _appPrefix(self):
+        return os.path.splitext(os.path.basename(inspect.getfile(self.__class__)))[0]
 
     def clearSettings(self):
         settings = QtCore.QSettings()
