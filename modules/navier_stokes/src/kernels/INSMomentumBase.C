@@ -121,7 +121,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {
-    Real convective_part = _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
+    Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
 
     // Call derived class to compute the viscous contribution.
     Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
@@ -131,7 +131,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _v_vel_var_number)
   {
-    Real convective_part = _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
+    Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
 
     // Call derived class to compute the viscous contribution.
     Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
@@ -141,7 +141,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _w_vel_var_number)
   {
-    Real convective_part = _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
+    Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
 
     // Call derived class to compute the viscous contribution.
     Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
