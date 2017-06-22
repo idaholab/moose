@@ -2,6 +2,7 @@ import re, os
 import util
 from InputParameters import InputParameters
 from MooseObject import MooseObject
+from timeit import default_timer as clock
 
 class Tester(MooseObject):
 
@@ -69,7 +70,7 @@ class Tester(MooseObject):
         self._runnable = None
 
         ### several variables needed when performing processResults
-        self.__start_time = None
+        self.__start_time = clock()
         self.__end_time = None
         self.__exit_code = 0
         self.__std_out = ''
@@ -78,14 +79,15 @@ class Tester(MooseObject):
         self.status = util.TestStatus()
 
         # Enumerate the buckets here so ther are easier to work with in the tester class
-        self.bucket_success  = self.status.bucket_success
-        self.bucket_fail     = self.status.bucket_fail
-        self.bucket_diff     = self.status.bucket_diff
-        self.bucket_pending  = self.status.bucket_pending
-        self.bucket_finished = self.status.bucket_finished
-        self.bucket_deleted  = self.status.bucket_deleted
-        self.bucket_skip     = self.status.bucket_skip
-        self.bucket_silent   = self.status.bucket_silent
+        self.bucket_initialized  = self.status.bucket_initialized
+        self.bucket_success      = self.status.bucket_success
+        self.bucket_fail         = self.status.bucket_fail
+        self.bucket_diff         = self.status.bucket_diff
+        self.bucket_pending      = self.status.bucket_pending
+        self.bucket_finished     = self.status.bucket_finished
+        self.bucket_deleted      = self.status.bucket_deleted
+        self.bucket_skip         = self.status.bucket_skip
+        self.bucket_silent       = self.status.bucket_silent
 
         # Set the status message
         if self.specs['check_input']:
@@ -207,6 +209,10 @@ class Tester(MooseObject):
     # Method to check if this test has diff'd
     def didDiff(self):
         return self.status.didDiff()
+
+    # Method to check if this test is Initialized
+    def isInitialized(self):
+        return self.status.isInitialized()
 
     # Method to check if this test is pending
     def isPending(self):
@@ -366,6 +372,50 @@ class Tester(MooseObject):
             caveat_formatted_results = self.formatCaveats(options)
             print util.formatResult(self, caveat_formatted_results, self.getTiming(), options)
         return caveat_formatted_results
+
+    # return bool if we want to ignore prereqs requirements
+    def skipPrereqs(self, options):
+        if options.ignored_caveats:
+            caveat_list = [x.lower() for x in options.ignored_caveats.split()]
+            if 'all' in options.ignored_caveats or 'prereq' in options.ignored_caveats:
+                return True
+        return False
+
+    # return bool for output file race conditions
+    # NOTE: we return True for exceptions, but they are handled later (because we set a failure status)
+    def checkRaceConditions(self, testers, options):
+        d = util.DependencyResolver()
+        name_to_object = {}
+        all_testers = set(testers).union(set([self]))
+
+        for tester in all_testers:
+            name_to_object[tester.getTestName()] = tester
+            d.insertDependency(tester.getTestName(), tester.getPrereqs())
+        try:
+            # May fail, which will trigger an exception due cyclic dependencies
+            concurrent_tester_sets = d.getSortedValuesSets()
+            for concurrent_testers in concurrent_tester_sets:
+                output_files_in_dir = set()
+                for tester in concurrent_testers:
+                    if name_to_object[tester].getTestName() not in self._skipped_tests(testers, options):
+                        output_files = name_to_object[tester].getOutputFiles()
+                        duplicate_files = output_files_in_dir.intersection(output_files)
+                        if len(duplicate_files):
+                            return False
+                        output_files_in_dir.update(output_files)
+        except:
+            self.setStatus('Cyclic or Invalid Dependency Detected!', self.bucket_fail)
+        return True
+
+    # return a set of finished non-passing or will be skipped tests
+    def _skipped_tests(self, testers, options):
+        skipped_failed = set([])
+        for tester in testers:
+            if (tester.isFinished() and not tester.didPass()) \
+               or not tester.getRunnable(options) \
+               or not tester.shouldExecute():
+                skipped_failed.add(tester.getTestName())
+        return skipped_failed
 
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"

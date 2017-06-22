@@ -11,5 +11,5 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         self.assertRegexpMatches(e.output, r'tests/test_harness.testA.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')
-        self.assertRegexpMatches(e.output, r'tests/test_harness.testB.*?skipped \(skipped dependency\)')
-        self.assertRegexpMatches(e.output, r'tests/test_harness.testC.*?skipped \(skipped dependency\)')
+        self.assertRegexpMatches(e.output, r'tests/test_harness.testB.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')
+        self.assertRegexpMatches(e.output, r'tests/test_harness.testC.*?FAILED \(Cyclic or Invalid Dependency Detected!\)')

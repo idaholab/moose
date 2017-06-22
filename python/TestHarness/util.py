@@ -652,34 +652,36 @@ class TestStatus(object):
     ###### bucket status discriptions
     ## The following is a list of statuses possible in the TestHarness
     ##
-    ## PASS     =  Passing tests
-    ## FAIL     =  Failing tests
-    ## DIFF     =  Failing tests due to Exodiff, CSVDiff
-    ## PENDING  =  A pending status applied by the TestHarness (RUNNING...)
-    ## FINISHED =  A status that can mean it finished in any status (like a pending queued status type)
-    ## DELETED  =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
-    ##             is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
-    ##             printed to stdout) when the user has specifically asked for more information while
-    ##             running tests (-e)
-    ## SKIP     =  Any test reported as skipped
-    ## SILENT   =  Any test reported as skipped and should not alert the user (deleted, tests not
-    ##             matching '--re=' options, etc)
+    ## INITIALIZED   =  The default tester status when it is instanced
+    ## PASS          =  Passing tests
+    ## FAIL          =  Failing tests
+    ## DIFF          =  Failing tests due to Exodiff, CSVDiff
+    ## PENDING       =  A pending status applied by the TestHarness (RUNNING...)
+    ## FINISHED      =  A status that can mean it finished in any status (like a pending queued status type)
+    ## DELETED       =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
+    ##                  is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
+    ##                  printed to stdout) when the user has specifically asked for more information while
+    ##                  running tests (-e)
+    ## SKIP          =  Any test reported as skipped
+    ## SILENT        =  Any test reported as skipped and should not alert the user (deleted, tests not
+    ##                  matching '--re=' options, etc)
     ######
 
-    test_status     = namedtuple('test_status', 'status color')
-    bucket_success  = test_status(status='PASS', color='GREEN')
-    bucket_fail     = test_status(status='FAIL', color='RED')
-    bucket_deleted  = test_status(status='DELETED', color='RED')
-    bucket_diff     = test_status(status='DIFF', color='YELLOW')
-    bucket_pending  = test_status(status='PENDING', color='CYAN')
-    bucket_finished = test_status(status='FINISHED', color='CYAN')
-    bucket_skip     = test_status(status='SKIP', color='RESET')
-    bucket_silent   = test_status(status='SILENT', color='RESET')
+    test_status         = namedtuple('test_status', 'status color')
+    bucket_initialized  = test_status(status='INITIALIZED', color='CYAN')
+    bucket_success      = test_status(status='PASS', color='GREEN')
+    bucket_fail         = test_status(status='FAIL', color='RED')
+    bucket_deleted      = test_status(status='DELETED', color='RED')
+    bucket_diff         = test_status(status='DIFF', color='YELLOW')
+    bucket_pending      = test_status(status='PENDING', color='CYAN')
+    bucket_finished     = test_status(status='FINISHED', color='CYAN')
+    bucket_skip         = test_status(status='SKIP', color='RESET')
+    bucket_silent       = test_status(status='SILENT', color='RESET')
 
     # Initialize the class with a pending status
     # TODO: don't do this? Initialize instead with None type? If we do
     # and forget to set a status, getStatus will fail with None type errors
-    def __init__(self, status_message='initialized', status=bucket_pending):
+    def __init__(self, status_message='initialized', status=bucket_initialized):
         self.__status_message = status_message
         self.__status = status
 
@@ -729,6 +731,13 @@ class TestStatus(object):
         status = self.getStatus()
         return status == self.bucket_diff
 
+    def isInitialized(self):
+        """
+        Return boolean initialized status
+        """
+        status = self.getStatus()
+        return status == self.bucket_initialized
+
     def isPending(self):
         """
         Return boolean pending status
@@ -762,99 +771,4 @@ class TestStatus(object):
         Return boolean finished status
         """
         status = self.getStatus()
-        return (status == self.bucket_finished or status != self.bucket_pending)
-
-class TesterDependency():
-    """
-    A class used to determine if a tester can run based on other tester statuses.
-
-    """
-
-    def __init__(self, tester, testers, options):
-        self.tester = tester
-        self.__testers = set(testers) - set([tester])
-        self.options = options
-
-    # A method that returns bool if the test can run.
-    # This check also sets the appropriate status why it could not run or does nothing if the test needs to be
-    # placed back into the queue (leaves the tester alone, which leaves it in a pending state)
-    def checkRunnable(self):
-        if self.noRaceConditions():
-            if self.isRunnable():
-                return True
-            elif not self.isAppendable() and self.prereqsExists():
-                self.tester.setStatus('skipped dependency', self.tester.bucket_skip)
-            elif not self.prereqsExists():
-                self.tester.setStatus('unknown dependency', self.tester.bucket_fail)
-            else:
-                return
-        else:
-            self.tester.setStatus('OUTFILE RACE CONDITION', self.tester.bucket_fail)
-
-    # check if all prereq tests have passed and none were skipped/failed
-    def isRunnable(self):
-        if len(set(self.tester.getPrereqs()) - self._passing_tests()) == 0 or self.skipPrereqs():
-            return True
-
-    # check if any prereqs are not yet complete (means this test _will_ be runnable... just not right now)
-    def isAppendable(self):
-        if len(set(self.tester.getPrereqs()).intersection(self._skipped_tests())) == 0 or self.skipPrereqs():
-            return True
-
-    # check if all prereqs are available
-    def prereqsExists(self):
-        if len(set(self.tester.getPrereqs()) - set([x.getTestName() for x in self.__testers])) == 0:
-            return True
-
-    # return a set of passing tests
-    def _passing_tests(self):
-        passing = set([])
-        for tester in self.__testers:
-            if tester.didPass():
-                passing.add(tester.getTestName())
-        return passing
-
-    # return a set of finished non-passing or will be skipped tests
-    def _skipped_tests(self):
-        skipped_failed = set([])
-        for tmp_tester in self.__testers:
-            if (tmp_tester.isFinished() and not tmp_tester.didPass()) \
-               or not tmp_tester.getRunnable(self.options) \
-               or not tmp_tester.shouldExecute():
-                skipped_failed.add(tmp_tester.getTestName())
-        return skipped_failed
-
-    # return bool if we want to ignore prereqs requirements
-    def skipPrereqs(self):
-        if self.options.ignored_caveats:
-            caveat_list = [x.lower() for x in self.options.ignored_caveats.split()]
-            if 'all' in self.options.ignored_caveats or 'prereq' in self.options.ignored_caveats:
-                return True
-        return False
-
-    # return bool for output file race conditions
-    # NOTE: we return True for exceptions, but they are handled later (because we set a failure status)
-    def noRaceConditions(self):
-        d = DependencyResolver()
-        name_to_object = {}
-        all_testers = set(self.__testers).union(set([self.tester]))
-
-        for tester in all_testers:
-            name_to_object[tester.getTestName()] = tester
-            d.insertDependency(tester.getTestName(), tester.getPrereqs())
-        try:
-            # May fail, which will trigger an exception due cyclic dependencies
-            concurrent_tester_sets = d.getSortedValuesSets()
-            for concurrent_testers in concurrent_tester_sets:
-                output_files_in_dir = set()
-                for tester in concurrent_testers:
-                    if name_to_object[tester].getTestName() not in self._skipped_tests():
-                        output_files = name_to_object[tester].getOutputFiles()
-                        duplicate_files = output_files_in_dir.intersection(output_files)
-                        if len(duplicate_files):
-                            return False
-                        output_files_in_dir.update(output_files)
-        except:
-            self.tester.setStatus('Cyclic or Invalid Dependency Detected!', self.tester.bucket_fail)
-
-        return True
+        return (status == self.bucket_finished or status != self.bucket_pending and status != self.bucket_initialized)

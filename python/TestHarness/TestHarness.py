@@ -364,9 +364,6 @@ class TestHarness:
                     f.write(output)
                     f.close()
 
-            # Allow derived classes to perfrom post runs on this test
-            self.postRun(tester.specs, timing)
-
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
         # Print the results table again if a bunch of output was spewed to the screen between
