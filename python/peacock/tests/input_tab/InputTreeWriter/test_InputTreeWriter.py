@@ -3,8 +3,11 @@ from peacock.Input.InputTree import InputTree
 from peacock.Input import InputTreeWriter
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.basic_input = "../../common/simple_diffusion.i"

@@ -7,6 +7,7 @@ import unittest
 import glob
 from PyQt5 import QtCore, QtWidgets
 from peacock import PeacockApp
+import inspect
 
 def find_moose_test_exe(dirname="test", exe_base="moose_test"):
     moose_dir = os.environ.get("MOOSE_DIR", "")
@@ -68,11 +69,11 @@ def compareFiles(test_file, gold_file):
 def set_window_size(vtk_window, size=[640,640]):
     vtk_window.setFixedSize(QtCore.QSize(*size))
 
-def process_events(qapp, t=1):
+def process_events(t=1):
     start = time.time()
     end = start + t
     while(time.time() < end):
-        qapp.processEvents()
+        QtWidgets.QApplication.processEvents()
 
 def remove_file(filename):
     try:
@@ -123,15 +124,16 @@ def findQObjectsByType(top_qobject, type_name):
     return matched
 
 class PeacockTester(unittest.TestCase):
-    qapp = QtWidgets.QApplication([])
-
     def setUp(self):
         self.finished = False
         self.app = None
         message.MOOSE_TESTING_MODE = True
-        qtutils.setAppInformation()
+        qtutils.setAppInformation(app_name=self._appPrefix())
         self.starting_directory = os.getcwd()
         self.clearSettings()
+
+    def _appPrefix(self):
+        return os.path.splitext(os.path.basename(inspect.getfile(self.__class__)))[0]
 
     def clearSettings(self):
         settings = QtCore.QSettings()
@@ -151,8 +153,8 @@ class PeacockTester(unittest.TestCase):
 
     def createPeacockApp(self, args):
         from peacock import PeacockApp
-        self.app = PeacockApp.PeacockApp(["-size", "1024", "1024", "-w", os.getcwd()] + args, self.qapp)
-        process_events(self.qapp, 4)
+        self.app = PeacockApp.PeacockApp(["-size", "1024", "1024", "-w", os.getcwd()] + args)
+        process_events(4)
         self.app.main_widget.tab_plugin.ExecuteTabPlugin.ExecuteRunnerPlugin.runProgress.connect(self.run_finished)
         return self.app
 
@@ -225,14 +227,12 @@ class PeacockAppImageTestCase(PeacockImageTestCase):
     """
     Base class for testing complete Peacock gui.
     """
-    qapp = QtWidgets.QApplication([])
-
     def setUp(self):
         """
         Creates the peacock application.cd
         """
         args = ["-size", "1024", "768", "-w", os.getcwd(), "-i", "../../common/simple_diffusion.i", "-e", find_moose_test_exe()]
-        self._app = PeacockApp.PeacockApp(args, self.qapp)
+        self._app = PeacockApp.PeacockApp(args)
         self._window = self._app.main_widget.tab_plugin.ExodusViewer.currentWidget().VTKWindowPlugin
         set_window_size(self._window)
         remove_file('peacock_run_exe_tmp_out.e')
@@ -243,7 +243,7 @@ class PeacockAppImageTestCase(PeacockImageTestCase):
         """
         self._app.main_widget.tab_plugin.setCurrentWidget(tab)
         self._app.main_widget.tab_plugin.currentChanged.emit(self._app.main_widget.tab_plugin.currentIndex())
-        process_events(self.qapp, t=1)
+        process_events(t=1)
 
     def execute(self):
         """
@@ -252,4 +252,4 @@ class PeacockAppImageTestCase(PeacockImageTestCase):
         execute = self._app.main_widget.tab_plugin.ExecuteTabPlugin
         execute.ExecuteRunnerPlugin.runClicked()
         execute.ExecuteRunnerPlugin.runner.process.waitForFinished()
-        process_events(self.qapp, t=1)
+        process_events(t=1)

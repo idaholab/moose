@@ -3,8 +3,11 @@ from peacock.utils import Testing
 from peacock.PythonConsoleWidget import PythonConsoleWidget
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def testPythonConsoleWidget(self):
         w = PythonConsoleWidget()
         w.show()

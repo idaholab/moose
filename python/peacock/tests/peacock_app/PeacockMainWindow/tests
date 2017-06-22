@@ -2,6 +2,6 @@
   [./PeacockMainWindow]
     type = PythonUnitTest
     input = test_PeacockMainWindow.py
-    display_required = True    
+    display_required = True
   [../]
 []

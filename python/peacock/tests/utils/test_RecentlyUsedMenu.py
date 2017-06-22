@@ -5,6 +5,8 @@ from PyQt5.QtCore import QSettings
 from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         settings = QSettings()

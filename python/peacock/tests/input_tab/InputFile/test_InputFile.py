@@ -2,8 +2,11 @@
 from peacock.Input.InputFile import InputFile
 from peacock.utils import Testing
 from peacock import PeacockException
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.tmp_file = "tmp_input.i"

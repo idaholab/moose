@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from peacock.Input.BlockEditor import BlockEditor
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QApplication
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
 from peacock.Input.ParamsTable import ParamsTable
@@ -12,6 +12,8 @@ from peacock.utils import Testing
 
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.test_input_file = "../../common/fsp_test.i"

@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.Input.JsonData import JsonData
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.json_changed_count = 0

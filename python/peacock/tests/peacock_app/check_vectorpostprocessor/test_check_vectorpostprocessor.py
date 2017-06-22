@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.filename = "check_vectorpostprocessor.png"
@@ -25,7 +28,7 @@ class Tests(Testing.PeacockTester):
             # make sure we are finished
             while not self.finished:
                 self.qapp.processEvents()
-            Testing.process_events(self.qapp, t=3)
+            Testing.process_events(t=3)
 
             self.assertEqual(vpp_plugin.count(), 1)
             w = vpp_plugin.currentWidget()

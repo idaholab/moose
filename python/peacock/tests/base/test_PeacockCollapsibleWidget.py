@@ -8,9 +8,8 @@ class TestPeacockCollapsibleWidget(unittest.TestCase):
     """
     Test collapsible regions.
     """
+    qapp = QtWidgets.QApplication(sys.argv)
     def testCollapseDefault(self):
-        app = QtWidgets.QApplication(sys.argv)
-        self.assertIsNotNone(app)
         collapse = peacock.base.PeacockCollapsibleWidget(title='The Title')
         main = collapse.collapsibleLayout()
 
@@ -26,9 +25,6 @@ class TestPeacockCollapsibleWidget(unittest.TestCase):
         self.assertEqual(collapse._title_widget.text(), 'The Title')
 
     def testCollapseStartCollapse(self):
-        app = QtWidgets.QApplication(sys.argv)
-        self.assertIsNotNone(app)
-
         collapse = peacock.base.PeacockCollapsibleWidget(collapsed=True, title='The Title')
         main = collapse.collapsibleLayout()
 

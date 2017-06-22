@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from peacock.Execute.TerminalTextEdit import TerminalTextEdit
 from PyQt5 import QtTest
-from PyQt5.QtWidgets import QMenu, QFileDialog
+from PyQt5.QtWidgets import QMenu, QFileDialog, QApplication
 from mock import patch
 import tempfile
 from peacock.utils import Testing
@@ -11,6 +11,8 @@ class MockEvent(object):
         return None
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
+
     def testClear(self):
         t = TerminalTextEdit()
         QtTest.QTest.keyClicks(t, "Test input")

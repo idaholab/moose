@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
 from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.transient_png = "check_transient.png"
@@ -16,6 +19,7 @@ class Tests(Testing.PeacockTester):
         exe_plugin.ExecuteOptionsPlugin.csv_checkbox.setCheckState(Qt.Checked)
         result_plugin = app.main_widget.tab_plugin.ExodusViewer
         app.main_widget.setTab(exe_plugin.tabName())
+        exe_plugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         exe_plugin.ExecuteRunnerPlugin.runClicked()
 
         vtkwin = result_plugin.currentWidget().VTKWindowPlugin
@@ -23,10 +27,10 @@ class Tests(Testing.PeacockTester):
         # make sure we are finished
         while not self.finished:
             self.qapp.processEvents()
-        Testing.process_events(self.qapp, t=5)
+        Testing.process_events(t=5)
         app.main_widget.setTab(result_plugin.tabName())
         Testing.set_window_size(vtkwin)
-        Testing.process_events(self.qapp, t=1)
+        Testing.process_events(t=1)
         vtkwin.onWrite(filename)
         self.assertFalse(Testing.gold_diff(filename))
         return app
@@ -43,7 +47,6 @@ class Tests(Testing.PeacockTester):
     def testChangeResultFilename(self):
         app = self.checkTransient()
         app.main_widget.tab_plugin.InputFileEditorWithMesh.setInputFile("../../common/simple_diffusion.i")
-        app.main_widget.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         self.run_and_check(app, self.diffusion_png)
 
 if __name__ == '__main__':

@@ -2,8 +2,11 @@
 from peacock.utils import WidgetUtils
 from peacock.utils import Testing
 from PyQt5.QtCore import QObject
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def callback(self):
         pass
 

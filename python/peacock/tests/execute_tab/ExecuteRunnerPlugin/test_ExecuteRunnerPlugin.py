@@ -2,12 +2,14 @@
 from peacock.Execute.ExecuteRunnerPlugin import ExecuteRunnerPlugin
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets
 from peacock.utils import Testing
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
 from peacock.Input import TimeStepEstimate
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()
