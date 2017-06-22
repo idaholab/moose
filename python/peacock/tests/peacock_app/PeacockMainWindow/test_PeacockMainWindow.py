@@ -31,6 +31,8 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(runner._total_steps, 0)
 
         w.tab_plugin.InputFileEditorWithMesh.setInputFile("../../common/transient.i")
+        w.setTab(w.tab_plugin.ExecuteTabPlugin.tabName())
+        w.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         self.assertIn("transient.i", w.windowTitle())
 
         self.assertEqual(runner._total_steps, 8)

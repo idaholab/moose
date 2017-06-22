@@ -19,6 +19,7 @@ class Tests(Testing.PeacockTester):
         exe_plugin.ExecuteOptionsPlugin.csv_checkbox.setCheckState(Qt.Checked)
         result_plugin = app.main_widget.tab_plugin.ExodusViewer
         app.main_widget.setTab(exe_plugin.tabName())
+        exe_plugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         exe_plugin.ExecuteRunnerPlugin.runClicked()
 
         vtkwin = result_plugin.currentWidget().VTKWindowPlugin
@@ -46,7 +47,6 @@ class Tests(Testing.PeacockTester):
     def testChangeResultFilename(self):
         app = self.checkTransient()
         app.main_widget.tab_plugin.InputFileEditorWithMesh.setInputFile("../../common/simple_diffusion.i")
-        app.main_widget.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         self.run_and_check(app, self.diffusion_png)
 
 if __name__ == '__main__':

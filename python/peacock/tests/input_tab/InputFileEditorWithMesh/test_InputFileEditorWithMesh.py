@@ -23,6 +23,7 @@ class BaseTests(Testing.PeacockTester):
         Testing.remove_file(self.highlight_block)
         Testing.remove_file(self.highlight_nodes)
         Testing.remove_file(self.basic_mesh)
+        Testing.clean_files()
         self.num_time_steps = None
         self.time_step_changed_count = 0
 

@@ -20,19 +20,26 @@ class Tests(Testing.PeacockTester):
 
     def checkInputFile(self, input_file, image_name, exe_path=None, cwd=None):
         Testing.remove_file(image_name)
-        args = [input_file]
+        args = ["-w"]
+        if cwd:
+            args.append(cwd)
+            args.append(os.path.join(cwd, input_file))
+        else:
+            args.append(self.starting_directory)
+            args.append(input_file)
+
         if exe_path:
             args.append(exe_path)
         else:
             args.append(Testing.find_moose_test_exe())
+
         app = self.createPeacockApp(args)
-        if cwd:
-            os.chdir(cwd)
         result_plugin = app.main_widget.tab_plugin.ExodusViewer
         exe_plugin = app.main_widget.tab_plugin.ExecuteTabPlugin
         vtkwin = result_plugin.currentWidget().VTKWindowPlugin
         app.main_widget.setTab(result_plugin.tabName())
         Testing.set_window_size(vtkwin)
+        Testing.remove_file("peacock_run_exe_tmp_out.e")
         exe_plugin.ExecuteRunnerPlugin.runClicked()
         # make sure we are finished
         while not self.finished:
@@ -58,9 +65,7 @@ class Tests(Testing.PeacockTester):
         with Testing.remember_cwd():
             pressure_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "tensor_mechanics", "tests", "pressure")
             exe = Testing.find_moose_test_exe("modules/combined", "combined")
-            os.chdir(pressure_dir)
-            Testing.remove_file("peacock_run_exe_tmp_out.e")
-            self.checkInputFile("pressure_test.i", image_name, exe_path=exe, cwd=os.getcwd())
+            self.checkInputFile("pressure_test.i", image_name, exe_path=exe, cwd=pressure_dir)
 
     def testGlobalParams(self):
         """
@@ -72,9 +77,7 @@ class Tests(Testing.PeacockTester):
         with Testing.remember_cwd():
             reconstruct_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "phase_field", "tests", "reconstruction")
             exe = Testing.find_moose_test_exe("modules/combined", "combined")
-            os.chdir(reconstruct_dir)
-            Testing.remove_file("peacock_run_exe_tmp_out.e")
-            self.checkInputFile("2phase_reconstruction2.i", image_name, exe_path=exe, cwd=os.getcwd())
+            self.checkInputFile("2phase_reconstruction2.i", image_name, exe_path=exe, cwd=reconstruct_dir)
 
 if __name__ == '__main__':
     Testing.run_tests()
