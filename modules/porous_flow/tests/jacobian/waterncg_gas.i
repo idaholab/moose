@@ -65,6 +65,12 @@
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1
+    pc_max = -1e3
+  [../]
 []
 
 [Modules]
@@ -96,6 +102,7 @@
     water_fp = water
     at_nodes = true
     temperature_unit = Celsius
+    capillary_pressure = pc
   [../]
   [./waterncg_qp]
     type = PorousFlowFluidStateWaterNCG
@@ -104,6 +111,7 @@
     gas_fp = co2
     water_fp = water
     temperature_unit = Celsius
+    capillary_pressure = pc
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
