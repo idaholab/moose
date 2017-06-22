@@ -7,7 +7,6 @@ import os, re, inspect, errno, subprocess, shutil, time, copy
 
 import path_tool
 path_tool.activate_module('FactorySystem')
-path_tool.activate_module('argparse')
 
 from socket import gethostname
 from util import *
