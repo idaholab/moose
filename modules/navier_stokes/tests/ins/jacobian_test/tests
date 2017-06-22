@@ -1,0 +1,9 @@
+[Tests]
+  [./laplace_kernels]
+    type = AnalyzeJacobian
+    input = laplace_kernels.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
+[]
