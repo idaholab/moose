@@ -73,13 +73,13 @@ public:
    */
   virtual void meshChanged() override;
 
+  virtual void outputStep(const ExecFlagType & type) override;
+
 protected:
   /**
    * Performs the update of the solution vector for the oversample/re-positioned mesh
    */
   virtual void updateOversample();
-
-  virtual void outputStep(const ExecFlagType & type) override;
 
   /**
    * A convenience pointer to the current mesh (reference or displaced depending on "use_displaced")

@@ -129,7 +129,6 @@ public:
    */
   static void addDeprecatedInputParameters(InputParameters & params);
 
-protected:
   /**
    * A single call to this function should output all the necessary data for a single timestep.
    * @param type The type execution flag (see Moose.h)
@@ -138,6 +137,7 @@ protected:
    */
   virtual void outputStep(const ExecFlagType & type);
 
+protected:
   /**
    * Overload this function with the desired output activities
    */
