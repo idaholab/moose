@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from peacock.Execute.ExecuteTabPlugin import ExecuteTabPlugin
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt, QSettings
 from peacock.utils import Testing
@@ -10,6 +10,8 @@ import argparse
 import re
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()

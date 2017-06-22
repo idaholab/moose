@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from peacock.Execute.ConsoleOutputViewerPlugin import ConsoleOutputViewerPlugin
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
     def setUp(self):
         super(Tests, self).setUp()
 

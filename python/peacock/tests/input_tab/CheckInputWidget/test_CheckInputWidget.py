@@ -3,8 +3,11 @@ from peacock.Input.CheckInputWidget import CheckInputWidget
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.input_count = 0

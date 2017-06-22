@@ -5,8 +5,11 @@ from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
 from peacock.Execute.ExecuteTabPlugin import ExecuteTabPlugin
 import argparse
 from mooseutils import message
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.input_count = 0

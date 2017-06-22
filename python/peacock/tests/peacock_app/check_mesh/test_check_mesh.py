@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
+
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.filename = "check_mesh.png"
@@ -13,9 +17,9 @@ class Tests(Testing.PeacockTester):
         input_plugin = tabs.InputFileEditorWithMesh
         self.assertEqual(str(tabs.tabText(tabs.currentIndex())), input_plugin.tabName())
         vtkwin = input_plugin.vtkwin
-        Testing.process_events(self.qapp, t=2)
+        Testing.process_events(t=2)
         Testing.set_window_size(vtkwin)
-        Testing.process_events(self.qapp, t=2)
+        Testing.process_events(t=2)
         vtkwin.onWrite(self.filename)
         self.assertFalse(Testing.gold_diff(self.filename))
 

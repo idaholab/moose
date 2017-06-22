@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.Execute.JobRunner import JobRunner
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.runner = JobRunner()

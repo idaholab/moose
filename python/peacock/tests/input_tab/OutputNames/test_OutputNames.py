@@ -2,8 +2,11 @@
 from peacock.Input import OutputNames, InputTree, ExecutableInfo
 from peacock.utils import Testing
 import datetime
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def create_tree(self, input_file):
         app_info = ExecutableInfo.ExecutableInfo()
         app_info.setPath(Testing.find_moose_test_exe())

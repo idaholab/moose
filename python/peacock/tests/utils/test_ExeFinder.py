@@ -2,8 +2,11 @@
 from peacock.utils import ExeFinder
 from peacock.utils import Testing
 import os
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def test_searchForExe(self):
         exe = ExeFinder.searchForExe()
         self.assertEqual(exe, None)

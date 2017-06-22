@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from peacock.Input.InputFileEditorPlugin import InputFileEditorPlugin
-from PyQt5.QtWidgets import QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 import os
@@ -8,6 +8,8 @@ from mock import patch
 from PyQt5.QtCore import QSettings
 
 class Tests(Testing.PeacockTester):
+    qapp = QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.block_changed_count = 0

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PyQt5 import QtCore
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
@@ -8,9 +8,6 @@ import argparse, os
 from mock import patch
 
 class BaseTests(Testing.PeacockTester):
-
-
-
     def setUp(self):
         super(BaseTests, self).setUp()
         self.input_file = "../../common/transient.i"
@@ -26,6 +23,7 @@ class BaseTests(Testing.PeacockTester):
         Testing.remove_file(self.highlight_block)
         Testing.remove_file(self.highlight_nodes)
         Testing.remove_file(self.basic_mesh)
+        Testing.clean_files()
         self.num_time_steps = None
         self.time_step_changed_count = 0
 
@@ -67,6 +65,8 @@ class BaseTests(Testing.PeacockTester):
         self.assertEqual(test_data, gold_data)
 
 class Tests(BaseTests):
+    qapp = QApplication([])
+
     def testBasic(self):
         main_win, w = self.newWidget()
         w.setInputFile(self.input_file)

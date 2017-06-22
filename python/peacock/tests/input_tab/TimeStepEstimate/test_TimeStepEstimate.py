@@ -3,8 +3,11 @@ from peacock.Input import TimeStepEstimate
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def create_tree(self):
         app_info = ExecutableInfo()
         app_info.setPath(Testing.find_moose_test_exe())

@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
+import os
 
 class TestChangeInputFile(Testing.PeacockAppImageTestCase):
     """
     Tests that if the input file changes the VTKWindow is reset.
     """
+    qapp = QtWidgets.QApplication([])
+
     def testInputReset(self):
         """
         Test that changing the input file resets the VTK window correctly.
         """
 
         # The tabs to switch between
+        start_dir = os.getcwd()
         input_ = self._app.main_widget.tab_plugin.InputFileEditorWithMesh
         exodus = self._app.main_widget.tab_plugin.ExodusViewer
         execute = self._app.main_widget.tab_plugin.ExecuteTabPlugin
@@ -38,6 +43,7 @@ class TestChangeInputFile(Testing.PeacockAppImageTestCase):
 
         # Run and check output
         self.selectTab(execute)
+        execute.ExecuteOptionsPlugin.setWorkingDir(start_dir)
         self.execute()
         self.selectTab(exodus)
         self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['aux', 'not_u', 'u'])

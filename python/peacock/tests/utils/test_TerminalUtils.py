@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 from peacock.utils import TerminalUtils
 from peacock.utils import Testing
+from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
+    qapp = QtWidgets.QApplication([])
+
     def test_convert(self):
         output = "\33[1m\33[31mred <&> text\33[39m"
         html_output = TerminalUtils.terminalOutputToHtml(output)

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from peacock.utils import Testing
 
 class TestExodusState(Testing.PeacockAppImageTestCase):
     """
     Test for ExodusViewer state when executable is re-run.
     """
+    qapp = QtWidgets.QApplication([])
+
     def testState(self):
         """
         Tests that re-executing doesn't change the state of the exodus viewer.

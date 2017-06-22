@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 from peacock.utils import Testing
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from peacock.Input.ParameterInfo import ParameterInfo
 
 class TestAddVariableAndBlock(Testing.PeacockAppImageTestCase):
     """
     Tests that if variables are added that GUI maintains it selections
     """
+    qapp = QtWidgets.QApplication([])
+
     def testAdd(self):
         """
         Test that changing the input file resets the VTK window correctly.

@@ -29,7 +29,7 @@ class TestExodusState(Testing.PeacockImageTestCase):
         """
         self._app.main_widget.tab_plugin.setCurrentWidget(tab)
         self._app.main_widget.tab_plugin.currentChanged.emit(self._app.main_widget.tab_plugin.currentIndex())
-        Testing.process_events(self.qapp, t=1)
+        Testing.process_events(t=1)
 
     def execute(self):
         """
@@ -37,7 +37,7 @@ class TestExodusState(Testing.PeacockImageTestCase):
         """
         execute = self._app.main_widget.tab_plugin.ExecuteTabPlugin
         execute.ExecuteRunnerPlugin.runClicked()
-        Testing.process_events(self.qapp, t=5)
+        Testing.process_events(t=5)
 
     def testAutoRangeUpdate(self):
         """
