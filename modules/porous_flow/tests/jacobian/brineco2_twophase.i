@@ -71,6 +71,13 @@
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1e1
+    pc_max = -1e4
+    sat_lr = 0.1
+  [../]
 []
 
 [Modules]
@@ -106,6 +113,7 @@
     at_nodes = true
     temperature_unit = Celsius
     xnacl = xnacl
+    capillary_pressure = pc
   [../]
   [./brineco2_qp]
     type = PorousFlowFluidStateBrineCO2
@@ -115,6 +123,7 @@
     brine_fp = brine
     temperature_unit = Celsius
     xnacl = xnacl
+    capillary_pressure = pc
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst

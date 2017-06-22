@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "PorousFlowFluidStateWaterNCG.h"
+#include "PorousFlowCapillaryPressure.h"
 
 template <>
 InputParameters
@@ -27,6 +28,9 @@ PorousFlowFluidStateWaterNCG::PorousFlowFluidStateWaterNCG(const InputParameters
     _Mh2o(_water_fp.molarMass()),
     _Mncg(_ncg_fp.molarMass())
 {
+  // Check that the correct FluidProperties UserObjects have been provided
+  if (_water_fp.fluidName() != "water")
+    mooseError("Only a valid water FluidProperties UserObject can be provided in water_fp");
 }
 
 void
@@ -185,9 +189,12 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
   // fraction
   if (is_twophase)
   {
-    // Liquid density is approximated by the water density. Note: calculated
-    // using gas pressure as liquid saturation is not known yet
-    liquid_density = _water_fp.rho(_gas_porepressure[_qp], Tk);
+    // Liquid density is approximated by the water density.
+    // Use old value of gas saturation to estimate liquid saturation
+    Real liqsat = 1.0;
+    if (!_is_initqp)
+      liqsat -= _saturation_old[_qp][_gas_phase_number];
+    liquid_density = _water_fp.rho(_gas_porepressure[_qp] + _pc_uo.capillaryPressure(liqsat), Tk);
 
     // The gas saturation in the two phase case
     gas_saturation = vapor_mass_fraction * liquid_density /
@@ -196,8 +203,7 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
 
   // Calculate the saturations and pressures for each phase
   liquid_saturation = 1.0 - gas_saturation;
-  Real seff = effectiveSaturation(liquid_saturation);
-  Real liquid_porepressure = _gas_porepressure[_qp] + capillaryPressure(seff);
+  Real liquid_porepressure = _gas_porepressure[_qp] + _pc_uo.capillaryPressure(liquid_saturation);
 
   // Calculate liquid density and viscosity if in the two phase or single phase
   // liquid region, assuming they are not affected by the presence of dissolved
