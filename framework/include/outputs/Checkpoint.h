@@ -66,7 +66,6 @@ public:
    */
   std::string directory();
 
-protected:
   /**
    * Outputs a checkpoint file.
    * Each call to this function creates various files associated with
