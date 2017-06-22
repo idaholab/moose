@@ -189,9 +189,6 @@ private:
   /// Flag for allowing dual restriction with BlockRestrictable
   const bool _bnd_dual_restrictable;
 
-  /// Invalid BoundaryID for case when FEProblemBase
-  const BoundaryID _invalid_boundary_id;
-
   /// An empty set for referencing when block_ids is not included
   const std::set<SubdomainID> _empty_block_ids;
 
@@ -218,9 +215,6 @@ protected:
    * @see hasBoundaryMaterialProperty
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
-
-  /// Reference to active boundary id
-  const BoundaryID & _current_boundary_id;
 };
 
 template <typename T>

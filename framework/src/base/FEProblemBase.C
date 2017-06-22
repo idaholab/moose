@@ -154,7 +154,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _eq(_mesh),
     _initialized(false),
     _kernel_type(Moose::KT_ALL),
-    _current_boundary_id(Moose::INVALID_BOUNDARY_ID),
     _solve(getParam<bool>("solve")),
 
     _transient(false),

@@ -113,9 +113,6 @@ ProjectMaterialProperties::onBoundary(const Elem * elem, unsigned int side, Boun
 {
   if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
   {
-    // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-    _fe_problem.setCurrentBoundaryID(bnd_id);
-
     _assembly[_tid]->reinit(elem, side);
 
     if (_refine)
@@ -147,9 +144,6 @@ ProjectMaterialProperties::onBoundary(const Elem * elem, unsigned int side, Boun
                                                 *elem,
                                                 side);
     }
-
-    // Set the active boundary id to invalid
-    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
   }
 }
 
