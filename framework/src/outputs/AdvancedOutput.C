@@ -236,6 +236,18 @@ AdvancedOutput::outputInput()
              "'");
 }
 
+bool
+AdvancedOutput::shouldOutput(const ExecFlagType & type)
+{
+  if (!checkFilename())
+    return false;
+
+  if (hasOutput(type))
+    return true;
+  else
+    return Output::shouldOutput(type);
+}
+
 void
 AdvancedOutput::output(const ExecFlagType & type)
 {
@@ -687,4 +699,3 @@ AdvancedOutput::advancedExecuteOn() const
 {
   return _advanced_execute_on;
 }
-

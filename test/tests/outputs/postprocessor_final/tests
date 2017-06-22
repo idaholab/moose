@@ -4,4 +4,10 @@
     input = postprocessor_final.i
     csvdiff = postprocessor_final_test_vpp_0021.csv
   [../]
+
+  [./execute_pps_on_final]
+    type = CSVDiff
+    input = execute_pps_on_final.i
+    csvdiff = execute_pps_on_final_out.csv
+  [../]
 []
