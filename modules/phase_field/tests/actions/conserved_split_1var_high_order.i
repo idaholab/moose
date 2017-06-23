@@ -16,7 +16,7 @@
   [./PhaseField]
     [./Conserved]
       [./cv]
-        solve_type = split
+        solve_type = REVERSE_SPLIT
         family = LAGRANGE
         order = SECOND
         free_energy = F

@@ -15,7 +15,7 @@
   [./PhaseField]
     [./Conserved]
       [./cv]
-        solve_type = split
+        solve_type = REVERSE_SPLIT
         free_energy = F
         kappa = 2.0
         mobility = 1.0

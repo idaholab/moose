@@ -30,7 +30,7 @@ void
 SwitchingFunctionMaterial::computeQpProperties()
 {
   Real n = _eta[_qp];
-  n = n > 1 ? 1 : (n < 0 ? 0 : n);
+  // n = n > 1 ? 1 : (n < 0 ? 0 : n);
 
   switch (_h_order)
   {

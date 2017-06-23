@@ -26,7 +26,7 @@ validParams<ConservedAction>()
       "Set up the variable(s) and the kernels needed for a conserved phase field variable."
       " Note that for a direct solve, the element family and order are overwritten with hermite "
       "and third.");
-  MooseEnum solves("DIRECT SPLIT");
+  MooseEnum solves("DIRECT REVERSE_SPLIT FORWARD_SPLIT");
   params.addRequiredParam<MooseEnum>("solve_type", solves, "Split or direct solve?");
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
@@ -69,9 +69,12 @@ ConservedAction::ConservedAction(const InputParameters & params)
           !parameters().isParamSetByAddParam("family"))
         mooseWarning("Order and family autoset to third and hermite in ConservedAction");
       break;
-    case SolveType::SPLIT:
+    case SolveType::REVERSE_SPLIT:
+    case SolveType::FORWARD_SPLIT:
       _fe_type = FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
+      // Set name of chemical potential variable
+      _chempot_name = "chem_pot_" + _var_name;
       break;
     default:
       mooseError("Incorrect solve_type in ConservedAction");
@@ -94,11 +97,9 @@ ConservedAction::act()
     {
       case SolveType::DIRECT:
         break;
-      case SolveType::SPLIT:
-      {
-        std::string chempot_name = "chem_pot_" + _var_name;
-        _problem->addVariable(chempot_name, _fe_type, _scaling);
-      }
+      case SolveType::REVERSE_SPLIT:
+      case SolveType::FORWARD_SPLIT:
+        _problem->addVariable(_chempot_name, _fe_type, _scaling);
     }
   }
 
@@ -110,81 +111,159 @@ ConservedAction::act()
     switch (_solve_type)
     {
       case SolveType::DIRECT:
-      {
         // Add time derivative kernel
-        std::string kernel_type = "TimeDerivative";
+        {
+          std::string kernel_type = "TimeDerivative";
 
-        std::string kernel_name = _var_name + "_" + kernel_type;
-        InputParameters params1 = _factory.getValidParams(kernel_type);
-        params1.set<NonlinearVariableName>("variable") = _var_name;
-        params1.applyParameters(parameters());
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _var_name;
+          params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params1);
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
 
         // Add CahnHilliard kernel
-        kernel_type = "CahnHilliard";
+        {
+          std::string kernel_type = "CahnHilliard";
 
-        kernel_name = _var_name + "_" + kernel_type;
-        InputParameters params2 = _factory.getValidParams(kernel_type);
-        params2.set<NonlinearVariableName>("variable") = _var_name;
-        params2.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
-        params2.set<MaterialPropertyName>("f_name") = getParam<MaterialPropertyName>("free_energy");
-        params2.applyParameters(parameters());
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _var_name;
+          params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
+          params.set<MaterialPropertyName>("f_name") =
+              getParam<MaterialPropertyName>("free_energy");
+          params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params2);
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
 
         // Add ACInterface kernel
-        kernel_type = "CHInterface";
+        {
+          std::string kernel_type = "CHInterface";
 
-        kernel_name = _var_name + "_" + kernel_type;
-        InputParameters params3 = _factory.getValidParams(kernel_type);
-        params3.set<NonlinearVariableName>("variable") = _var_name;
-        params3.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
-        params3.set<MaterialPropertyName>("kappa_name") = getParam<MaterialPropertyName>("kappa");
-        params3.applyParameters(parameters());
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _var_name;
+          params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
+          params.set<MaterialPropertyName>("kappa_name") = getParam<MaterialPropertyName>("kappa");
+          params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params3);
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
         break;
-      }
-      case SolveType::SPLIT:
-      {
-        std::string chempot_name = "chem_pot_" + _var_name;
 
+      case SolveType::REVERSE_SPLIT:
         // Add time derivative kernel
-        std::string kernel_type = "CoupledTimeDerivative";
+        {
+          std::string kernel_type = "CoupledTimeDerivative";
 
-        std::string kernel_name = _var_name + "_" + kernel_type;
-        InputParameters params1 = _factory.getValidParams(kernel_type);
-        params1.set<NonlinearVariableName>("variable") = chempot_name;
-        params1.set<std::vector<VariableName>>("v") = {_var_name};
-        params1.applyParameters(parameters());
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _chempot_name;
+          params.set<std::vector<VariableName>>("v") = {_var_name};
+          params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params1);
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
 
         // Add SplitCHWRes kernel
-        kernel_type = "SplitCHWRes";
+        {
+          std::string kernel_type = "SplitCHWRes";
 
-        kernel_name = _var_name + "_" + kernel_type;
-        InputParameters params2 = _factory.getValidParams(kernel_type);
-        params2.set<NonlinearVariableName>("variable") = chempot_name;
-        params2.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
-        params2.applyParameters(parameters());
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _chempot_name;
+          params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
+          params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params2);
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
 
         // Add SplitCHParsed kernel
-        kernel_type = "SplitCHParsed";
+        {
+          std::string kernel_type = "SplitCHParsed";
 
-        kernel_name = _var_name + "_" + kernel_type;
-        InputParameters params3 = _factory.getValidParams(kernel_type);
-        params3.set<NonlinearVariableName>("variable") = _var_name;
-        params3.set<std::vector<VariableName>>("w") = {chempot_name};
-        params3.set<MaterialPropertyName>("f_name") = getParam<MaterialPropertyName>("free_energy");
-        params3.set<MaterialPropertyName>("kappa_name") = getParam<MaterialPropertyName>("kappa");
-        params3.applyParameters(parameters());
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _var_name;
+          params.set<std::vector<VariableName>>("w") = {_chempot_name};
+          params.set<MaterialPropertyName>("f_name") =
+              getParam<MaterialPropertyName>("free_energy");
+          params.set<MaterialPropertyName>("kappa_name") = getParam<MaterialPropertyName>("kappa");
+          params.applyParameters(parameters());
 
-        _problem->addKernel(kernel_type, kernel_name, params3);
-      }
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
+        break;
+
+      case SolveType::FORWARD_SPLIT:
+        // Add time derivative kernel
+        {
+          std::string kernel_type = "TimeDerivative";
+
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _var_name;
+          params.applyParameters(parameters());
+
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
+
+        // Add MatDiffusion kernel for c residual
+        {
+          std::string kernel_type = "MatDiffusion";
+
+          std::string kernel_name = _var_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _var_name;
+          params.set<std::vector<VariableName>>("conc") = {_chempot_name};
+          params.set<MaterialPropertyName>("D_name") = getParam<MaterialPropertyName>("mobility");
+          params.applyParameters(parameters());
+
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
+        // Add MatDiffusion kernel for chemical potential residual
+        {
+          std::string kernel_type = "MatDiffusion";
+
+          std::string kernel_name = _chempot_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _chempot_name;
+          params.set<std::vector<VariableName>>("conc") = {_var_name};
+          params.set<MaterialPropertyName>("D_name") = getParam<MaterialPropertyName>("kappa");
+          params.applyParameters(parameters());
+
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
+
+        // Add CoupledMaterialDerivative kernel
+        {
+          std::string kernel_type = "CoupledMaterialDerivative";
+
+          std::string kernel_name = _chempot_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _chempot_name;
+          params.set<std::vector<VariableName>>("v") = {_var_name};
+          params.set<MaterialPropertyName>("f_name") =
+              getParam<MaterialPropertyName>("free_energy");
+          params.applyParameters(parameters());
+
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
+
+        // Add CoefReaction kernel
+        {
+          std::string kernel_type = "CoefReaction";
+
+          std::string kernel_name = _chempot_name + "_" + kernel_type;
+          InputParameters params = _factory.getValidParams(kernel_type);
+          params.set<NonlinearVariableName>("variable") = _chempot_name;
+          params.set<Real>("coefficient") = -1.0;
+          params.applyParameters(parameters());
+
+          _problem->addKernel(kernel_type, kernel_name, params);
+        }
     }
   }
 }

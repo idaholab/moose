@@ -35,12 +35,13 @@
 #include "CHSplitChemicalPotential.h"
 #include "CHSplitConcentration.h"
 #include "CHSplitFlux.h"
-#include "LaplacianSplit.h"
 #include "CoefCoupledTimeDerivative.h"
+#include "CoefReaction.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
 #include "CoupledSusceptibilityTimeDerivative.h"
 #include "CoupledSwitchingTimeDerivative.h"
+#include "CoupledMaterialDerivative.h"
 #include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
@@ -53,6 +54,7 @@
 #include "KKSPhaseConcentration.h"
 #include "KKSSplitCHCRes.h"
 #include "LangevinNoise.h"
+#include "LaplacianSplit.h"
 #include "MaskedBodyForce.h"
 #include "MatAnisoDiffusion.h"
 #include "MatDiffusion.h"
@@ -336,12 +338,13 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHSplitChemicalPotential);
   registerKernel(CHSplitConcentration);
   registerKernel(CHSplitFlux);
-  registerKernel(LaplacianSplit);
   registerKernel(CoefCoupledTimeDerivative);
+  registerKernel(CoefReaction);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
   registerKernel(CoupledSusceptibilityTimeDerivative);
   registerKernel(CoupledSwitchingTimeDerivative);
+  registerKernel(CoupledMaterialDerivative);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
@@ -354,6 +357,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(KKSPhaseConcentration);
   registerKernel(KKSSplitCHCRes);
   registerKernel(LangevinNoise);
+  registerKernel(LaplacianSplit);
   registerKernel(MaskedBodyForce);
   registerKernel(MatAnisoDiffusion);
   registerKernel(MatDiffusion);
