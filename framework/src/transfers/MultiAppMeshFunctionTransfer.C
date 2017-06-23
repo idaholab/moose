@@ -244,7 +244,7 @@ MultiAppMeshFunctionTransfer::execute()
 
   // Create these here so that they live the entire life of this function
   // and are NOT reused per processor.
-  std::vector<std::vector<Real> > processor_outgoing_evals(n_processors());
+  std::vector<std::vector<Real>> processor_outgoing_evals(n_processors());
 
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {

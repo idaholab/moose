@@ -1,3 +1,6 @@
+# This test was introduced for Issue #804 which saw data corruption
+# during NearestNodeTransfer when running in parallel
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -15,10 +18,6 @@
 
 [AuxVariables]
   [./from_sub]
-  [../]
-  [./pid]
-    order = constant
-    family = monomial
   [../]
 []
 
@@ -66,7 +65,7 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 1.0 0.0'
-    input_files = sub.i
+    input_files = parallel_sub.i
     execute_on = 'timestep_end'
    [../]
 []
@@ -80,12 +79,5 @@
     source_variable = u
     variable = from_sub
     execute_on = 'timestep_end'
-  [../]
-[]
-
-[AuxKernels]
-  [./pid]
-    type = ProcessorIDAux
-    variable = pid
   [../]
 []
