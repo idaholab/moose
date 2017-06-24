@@ -298,6 +298,7 @@
 
 // ScalarKernels
 #include "ODETimeDerivative.h"
+#include "CoupledODETimeDerivative.h"
 #include "FunctionScalarAux.h"
 #include "NodalEqualValueConstraint.h"
 #include "ParsedODEKernel.h"
@@ -744,6 +745,7 @@ registerObjects(Factory & factory)
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
+  registerScalarKernel(CoupledODETimeDerivative);
   registerScalarKernel(NodalEqualValueConstraint);
   registerScalarKernel(ParsedODEKernel);
   registerScalarKernel(QuotientScalarAux);
