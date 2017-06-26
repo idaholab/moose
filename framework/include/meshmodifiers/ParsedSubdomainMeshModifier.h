@@ -41,13 +41,13 @@ public:
 
 private:
   /// function expression
-  std::string _function;
+  const std::string _function;
 
   /// Block ID to assign to the region
-  SubdomainID _block_id;
+  const SubdomainID _block_id;
 
   /// A list of excluded subdomain ids that will not be changed even if they are in the combinatorial geometry
-  std::vector<SubdomainID> _excluded_ids;
+  const std::vector<SubdomainID> _excluded_ids;
 
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;

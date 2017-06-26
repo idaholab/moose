@@ -54,8 +54,8 @@ MeshSideSet::modify()
   if (isParamValid("boundaries"))
   {
     auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
-    for (auto i = beginIndex(boundary_names); i < boundary_names.size(); ++i)
-      mesh_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_names[i]));
+    for (auto & boundary_name : boundary_names)
+      mesh_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_name));
   }
   else
     mesh_boundary_ids = boundary_info.get_boundary_ids();
@@ -65,7 +65,7 @@ MeshSideSet::modify()
     if (mesh_boundary_ids.count((*it)->_bnd_id) > 0)
     {
       Elem * elem = (*it)->_elem;
-      unsigned short int s = (*it)->_side;
+      auto s = (*it)->_side;
 
       // build element from the side
       std::unique_ptr<Elem> side(elem->build_side(s, false));

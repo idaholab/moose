@@ -68,7 +68,7 @@ MortarPeriodicMesh::buildMesh()
         if ((*it)->_bnd_id == current_boundary_id)
         {
           Elem * elem = (*it)->_elem;
-          unsigned short int s = (*it)->_side;
+          auto s = (*it)->_side;
 
           // build element from the side
           std::unique_ptr<Elem> side(elem->build_side(s, false));

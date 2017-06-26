@@ -34,7 +34,7 @@ public:
 
 protected:
   /// Block ID to assign to the region
-  SubdomainID _block_id;
+  const SubdomainID _block_id;
 };
 
 #endif // MESHSIDESET_H
