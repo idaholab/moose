@@ -66,23 +66,45 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
             data[list]: A list of PostprocessorDataWidget files.
         """
         # Remove existing widgets
+        current_groups = {}
+        filenames = [d.filename() for d in data]
         for group in self._groups:
-            self.LineGroupsLayout.removeWidget(group)
-            group.setParent(None)
+            group.clear()
+            if group.filename() not in filenames:
+                self.LineGroupsLayout.removeWidget(group)
+                group.setParent(None)
+                group.disconnect()
+            else:
+                current_groups[group.filename()] = group
         self._groups = []
 
         self.color_cycle = itertools.product(['-', '--', '-.', ':'], plt.cm.Paired(np.linspace(0, 1, 11)))
 
         # Create the group widgets for each available variable
         for d in data:
-            group = LineGroupWidget(self.axes(), d, self.color_cycle)
-            self.LineGroupsLayout.addWidget(group)
-            self._groups.append(group)
-            group.initialized.connect(self.updateGeometry)
-            group.variablesChanged.connect(self.updateVariables)
-            group.axesModified.connect(self.axesModified)
+            if d.filename() in current_groups and not current_groups[d.filename()].sameData(d):
+                group = current_groups[d.filename()]
+                self.LineGroupsLayout.removeWidget(group)
+                group.setParent(None)
+                group.disconnect()
+                self._newGroup(d)
+            elif d.filename() in current_groups:
+                group = current_groups[d.filename()]
+                group.setData(self.axes(), d)
+                self._groups.append(group)
+                self.updateVariables()
+            else:
+                self._newGroup(d)
 
         self.updateGeometry()
+
+    def _newGroup(self, d):
+        group = LineGroupWidget(self.axes(), d, self.color_cycle)
+        self.LineGroupsLayout.addWidget(group)
+        self._groups.append(group)
+        group.initialized.connect(self.updateGeometry)
+        group.variablesChanged.connect(self.updateVariables)
+        group.axesModified.connect(self.axesModified)
 
     def onTimeChanged(self, time):
         """

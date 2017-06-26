@@ -240,7 +240,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         # Enable re-initialization
         self._initialized = False
 
-    def _initialize(self):
+    def _initialize(self, create=True):
         """
         Creates LineSettingsWidget for postprocessor data. (protected)
         """
@@ -250,13 +250,14 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         self.AxisVariable.setVisible(True)
         self.AxisVariableLabel.setVisible(True)
 
-        # Create a toggle control for each piece of data
-        for var in self._data.variables():
-            style, color = next(self._cycle, ('-', [0, 0, 0]))
-            toggle = LineSettingsWidget(var, linestyle=style, color=color)
-            toggle.clicked.connect(self.plot)
-            self.MainLayout.addWidget(toggle)
-            self._toggles[var] = toggle
+        if create:
+            # Create a toggle control for each piece of data
+            for var in self._data.variables():
+                style, color = next(self._cycle, ('-', [0, 0, 0]))
+                toggle = LineSettingsWidget(var, linestyle=style, color=color)
+                toggle.clicked.connect(self.plot)
+                self.MainLayout.addWidget(toggle)
+                self._toggles[var] = toggle
 
         # The widget is initialized after all the toggles have been added, so it is time to finish the setup
         self._initialized = True
@@ -292,6 +293,31 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         self.clear()
         self.plot()
 
+    def filename(self):
+        """
+        Just get the filename of the data
+        """
+        return self._data.filename()
+
+    def sameData(self, d):
+        """
+        Just returns a bool on whether the incoming data has the same
+        variables as the current variables.
+        """
+        variable_names = [str(v) for v in d.variables()]
+        return sorted(self._toggles.keys()) == sorted(variable_names)
+
+    def setData(self, axes, d):
+        """
+        Set new data, keeping all the current LineSettingsWidget
+        """
+        self.clear()
+        self._data.disconnect()
+        self._data = d
+        self._axes = axes
+        self._data.dataChanged.connect(self.onDataChanged)
+        self.axesModified.emit()
+        self.plot()
 
 def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     """
