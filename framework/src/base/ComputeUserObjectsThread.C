@@ -131,8 +131,6 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, Bound
   _fe_problem.reinitMaterialsFace(_subdomain, _tid);
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
-  _fe_problem.setCurrentBoundaryID(bnd_id);
-
   const auto & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & uo : objects)
     uo->execute();
@@ -158,8 +156,6 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, Bound
       }
     }
   }
-
-  _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
 }
 
 void
