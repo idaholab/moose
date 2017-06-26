@@ -250,6 +250,11 @@ MultiAppNearestNodeTransfer::execute()
   std::vector<std::vector<Real>> incoming_evals(n_processors());
   std::vector<Parallel::Request> send_qps(n_processors());
   std::vector<Parallel::Request> send_evals(n_processors());
+
+  // Create these here so that they live the entire life of this function
+  // and are NOT reused per processor.
+  std::vector<std::vector<Real>> processor_outgoing_evals(n_processors());
+
   if (!_neighbors_cached)
   {
     for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
@@ -289,7 +294,9 @@ MultiAppNearestNodeTransfer::execute()
         _cached_dof_ids[i_proc].resize(incoming_qps.size());
       }
 
-      std::vector<Real> outgoing_evals(2 * incoming_qps.size());
+      std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
+      outgoing_evals.resize(2 * incoming_qps.size());
+
       for (unsigned int qp = 0; qp < incoming_qps.size(); qp++)
       {
         Point qpt = incoming_qps[qp];
@@ -340,7 +347,9 @@ MultiAppNearestNodeTransfer::execute()
   {
     for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
     {
-      std::vector<Real> outgoing_evals(_cached_froms[i_proc].size());
+      std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
+      outgoing_evals.resize(_cached_froms[i_proc].size());
+
       for (unsigned int qp = 0; qp < outgoing_evals.size(); qp++)
       {
         MooseVariable & from_var =

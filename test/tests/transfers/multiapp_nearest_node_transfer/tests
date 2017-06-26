@@ -41,10 +41,18 @@
     input = 'boundary_tomaster_master.i'
     exodiff = 'boundary_tomaster_master_out.e'
   [../]
-  
+
   [./two_way_many_apps]
     type = 'Exodiff'
     input = 'two_way_many_apps_master.i'
     exodiff = 'two_way_many_apps_master_out.e two_way_many_apps_master_out_sub0.e two_way_many_apps_master_out_sub4.e'
+  [../]
+
+  [./parallel]
+    type = 'Exodiff'
+    input = 'parallel_master.i'
+    exodiff = 'parallel_master_out.e'
+    min_parallel = 2
+    max_parallel = 2
   [../]
 []
