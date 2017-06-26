@@ -27,14 +27,20 @@ validParams<PerformanceData>()
                            "average_time_with_sub percent_of_active_time "
                            "percent_of_active_time_with_sub",
                            "total_time_with_sub");
-
   params.addParam<MooseEnum>(
       "column", column_options, "The column you want the value of (Default: total_time_with_sub).");
-  params.addParam<std::string>("category", "Execution", "The category or \"Header\" for the event");
-  params.addRequiredParam<std::string>("event",
-                                       "The name or \"label\" of the event (\"ALIVE\" and "
-                                       "\"ACTIVE\" are also valid events, category and "
-                                       "column are ignored for these cases).");
+
+  MooseEnum common_categories("Application Execution Output Setup Utility", "Execution", true);
+  params.addParam<MooseEnum>("category", common_categories, "The category for the event");
+
+  MooseEnum common_events("ACTIVE ALIVE solve() compute_residual() compute_jacobian()", "", true);
+  params.addRequiredParam<MooseEnum>(
+      "event",
+      common_events,
+      "The name or \"label\" of the event. Must match event name exactly "
+      "including parenthesis if applicable. (\"ALIVE\" and \"ACTIVE\" are "
+      "also valid events, category and column are ignored for these "
+      "cases).");
 
   return params;
 }
@@ -42,8 +48,8 @@ validParams<PerformanceData>()
 PerformanceData::PerformanceData(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _column(getParam<MooseEnum>("column").getEnum<PerfLogCols>()),
-    _category(getParam<std::string>("category")),
-    _event(getParam<std::string>("event"))
+    _category(getParam<MooseEnum>("category")),
+    _event(getParam<MooseEnum>("event"))
 {
   // Notify the OutputWarehouse that logging has been requested
   _app.getOutputWarehouse().setLoggingRequested();

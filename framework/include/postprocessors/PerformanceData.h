@@ -50,8 +50,8 @@ public:
 protected:
   PerfLogCols _column;
 
-  std::string _category;
-  std::string _event;
+  MooseEnum _category;
+  MooseEnum _event;
 };
 
 #endif // PERFORMANCEDATA_H
