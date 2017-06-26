@@ -119,7 +119,6 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem, unsigned int side, B
 {
   if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
   {
-    _fe_problem.setCurrentBoundaryID(bnd_id);
     _assembly[_tid]->reinit(elem, side);
     unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
 
@@ -157,7 +156,6 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem, unsigned int side, B
                                               *elem,
                                               side);
     }
-    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
   }
 }
 

@@ -1113,26 +1113,6 @@ public:
   void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
 
   /**
-   * Updates the active boundary id
-   * @param id The BoundaryID to set as active
-   *
-   * The BoundaryRestrictable class has a member, _boundary_id, that is set
-   * to the boundary id that is being operated on, this method is used to set the value
-   * to which the BoundaryRestrictable class references.
-   *
-   * @see BoundaryRestrictable ComputeUserObjectThread::onBoundary
-   */
-  void setCurrentBoundaryID(BoundaryID id) { _current_boundary_id = id; }
-
-  /**
-   * Return a reference to the active BoundaryID
-   * @return constant reference to the active BoundaryID
-   *
-   * @see setActiveBoundaryID
-   */
-  const BoundaryID & getCurrentBoundaryID() { return _current_boundary_id; }
-
-  /**
    * Calls parentOutputPositionChanged() on all sub apps.
    */
   void parentOutputPositionChanged();
@@ -1307,12 +1287,6 @@ protected:
   EquationSystems _eq;
   bool _initialized;
   Moose::KernelType _kernel_type;
-
-  /** Storage for current boundary id
-   * getActiveBoundaryID returns a reference to this
-   * @see setActiveBoundaryID BoundaryRestrictable
-   */
-  BoundaryID _current_boundary_id;
 
   /// Whether or not to actually solve the nonlinear system
   bool _solve;

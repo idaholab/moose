@@ -86,9 +86,6 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
           _problem.reinitMaterialsBoundary(boundary_id, _tid);
         }
 
-        // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-        _problem.setCurrentBoundaryID(boundary_id);
-
         for (const auto & aux : iter->second)
           aux->compute();
 
@@ -97,9 +94,6 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
           _problem.swapBackMaterialsFace(_tid);
           _problem.clearActiveMaterialProperties(_tid);
         }
-
-        // Set active boundary id to invalid
-        _problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
       }
 
       // update the solution vector

@@ -190,8 +190,6 @@
 #include "VerifyNodalUniqueID.h"
 #include "RandomElementalUserObject.h"
 #include "TrackDiracFront.h"
-#include "BoundaryUserObject.h"
-#include "TestBoundaryRestrictableAssert.h"
 #include "GetMaterialPropertyBoundaryBlockNamesTest.h"
 #include "SetupInterfaceCount.h"
 #include "ReadDoubleIndex.h"
@@ -208,7 +206,6 @@
 #include "TestCopyInitialSolution.h"
 #include "TestSerializedSolution.h"
 #include "InsideValuePPS.h"
-#include "BoundaryValuePPS.h"
 #include "NumInternalSides.h"
 #include "NumElemQPs.h"
 #include "NumSideQPs.h"
@@ -514,8 +511,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(VerifyNodalUniqueID);
   registerUserObject(RandomElementalUserObject);
   registerUserObject(TrackDiracFront);
-  registerUserObject(BoundaryUserObject);
-  registerUserObject(TestBoundaryRestrictableAssert);
   registerUserObject(GetMaterialPropertyBoundaryBlockNamesTest);
   registerUserObject(GeneralSetupInterfaceCount);
   registerUserObject(ElementSetupInterfaceCount);
@@ -535,7 +530,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
   registerPostprocessor(TestSerializedSolution);
-  registerPostprocessor(BoundaryValuePPS);
   registerPostprocessor(NumInternalSides);
   registerPostprocessor(NumElemQPs);
   registerPostprocessor(NumSideQPs);

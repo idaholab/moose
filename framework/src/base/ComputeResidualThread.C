@@ -142,17 +142,11 @@ ComputeResidualThread::onBoundary(const Elem * elem, unsigned int side, Boundary
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
-    // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-    _fe_problem.setCurrentBoundaryID(bnd_id);
-
     for (const auto & bc : bcs)
     {
       if (bc->shouldApply())
         bc->computeResidual();
     }
-
-    // Set active boundary id to invalid
-    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
   }
 }
 
