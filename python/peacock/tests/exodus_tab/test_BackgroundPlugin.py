@@ -88,49 +88,6 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         self._widget.BackgroundPlugin.Extents.setChecked(False)
         self.assertImage('testInitial.png')
 
-    def testElementLabels(self):
-        """
-        Test the element label toggle.
-        """
-        self.createWidget()
-        self._widget.BackgroundPlugin.Elements.setChecked(True)
-        self.assertImage('testElements.png')
-        self._widget.BackgroundPlugin.Elements.setChecked(False)
-        self.assertImage('testInitial.png')
-
-    def testNodeLabels(self):
-        """
-        Test the node label toggle.
-        """
-        self.createWidget()
-        self._widget.BackgroundPlugin.Nodes.setChecked(True)
-        self.assertImage('testNodes.png')
-        self._widget.BackgroundPlugin.Nodes.setChecked(False)
-        self.assertImage('testInitial.png')
-
-    def testNodalValueLabels(self):
-        """
-        Test the label of nodal data toggle.
-        """
-        self.createWidget()
-        self._widget.BackgroundPlugin.Values.setChecked(True)
-        self.assertImage('testNodalValues.png')
-        self._widget.BackgroundPlugin.Values.setChecked(False)
-        self.assertImage('testInitial.png')
-
-    def testElementalValueLabels(self):
-        """
-        Test the label of elemental data toggle.
-        """
-        self.createWidget()
-        self._window.onResultOptionsChanged({'variable':'aux_elem'})
-        self._window.onWindowRequiresUpdate()
-        self.assertImage('testElementalInitial.png')
-        self._widget.BackgroundPlugin.Values.setChecked(True)
-        self.assertImage('testElementalValues.png')
-        self._widget.BackgroundPlugin.Values.setChecked(False)
-        self.assertImage('testElementalInitial.png')
-
     def testTopColorPrefs(self):
         """
         Test that the preferences work
