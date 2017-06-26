@@ -4,8 +4,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 150
-  ny = 150
+  nx = 100
+  ny = 100
   parallel_type = replicated
 []
 
