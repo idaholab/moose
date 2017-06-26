@@ -75,20 +75,7 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self.Extents = QtWidgets.QCheckBox('Extents')
         self.MainLayout.addWidget(self.Extents, 0, 3)
 
-        # Node/Element labels
-        self.Elements = QtWidgets.QCheckBox('Label Elements')
-        self.MainLayout.addWidget(self.Elements, 1, 3)
-        self.Nodes = QtWidgets.QCheckBox('Label Nodes')
-        self.MainLayout.addWidget(self.Nodes, 2, 3)
-
-        if values:
-            self.Values = QtWidgets.QCheckBox('Label Values')
-            self.MainLayout.addWidget(self.Values, 3, 3)
-
         # Storage for Chigger objects that are toggled by this plugin
-        self._cell_labels = None
-        self._node_labels = None
-        self._variable_labels = None
         self._volume_axes = None
         self.setup()
 
@@ -208,62 +195,6 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
             self.removeResult.emit(self._volume_axes)
 
         self.windowRequiresUpdate.emit()
-
-    def _setupElements(self, qobject):
-        """
-        Setup method for the element labels.
-        """
-        qobject.stateChanged.connect(self._callbackElements)
-
-    def _callbackElements(self, value):
-        """
-        Enables/disables the element labels.
-        """
-        if value == QtCore.Qt.Checked:
-            self._cell_labels = chigger.exodus.LabelExodusResult(self._result, label_type='cell', font_size=12)
-            self.appendResult.emit(self._cell_labels)
-        else:
-            self._cell_labels.reset()
-            self.removeResult.emit(self._cell_labels)
-        self.windowRequiresUpdate.emit()
-
-    def _setupNodes(self, qobject):
-        """
-        Setup method for the node labels.
-        """
-        qobject.stateChanged.connect(self._callbackNodes)
-
-    def _callbackNodes(self, value):
-        """
-        Enables/disables the node labels.
-        """
-        if value == QtCore.Qt.Checked:
-            self._node_labels = chigger.exodus.LabelExodusResult(self._result, label_type='point', font_size=12)
-            self.appendResult.emit(self._node_labels)
-        else:
-            self._node_labels.reset()
-            self.removeResult.emit(self._node_labels)
-        self.windowRequiresUpdate.emit()
-
-    def _setupValues(self, qobject):
-        """
-        Setup method for the variable value labels.
-        """
-        qobject.stateChanged.connect(self._callbackValues)
-
-    def _callbackValues(self, value):
-        """
-        Enables/disables the variable value labels.
-        """
-        if value == QtCore.Qt.Checked:
-            self._variable_labels = chigger.exodus.LabelExodusResult(self._result, label_type='variable', font_size=12)
-            self.appendResult.emit(self._variable_labels)
-        else:
-            self._variable_labels.reset()
-            self.removeResult.emit(self._variable_labels)
-
-        self.windowRequiresUpdate.emit()
-
 
 def main(size=None):
     """
