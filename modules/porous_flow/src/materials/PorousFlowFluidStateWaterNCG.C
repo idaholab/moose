@@ -26,7 +26,9 @@ PorousFlowFluidStateWaterNCG::PorousFlowFluidStateWaterNCG(const InputParameters
     _water_fp(getUserObject<Water97FluidProperties>("water_fp")),
     _ncg_fp(getUserObject<SinglePhaseFluidPropertiesPT>("gas_fp")),
     _Mh2o(_water_fp.molarMass()),
-    _Mncg(_ncg_fp.molarMass())
+    _Mncg(_ncg_fp.molarMass()),
+    _water_triple_temperature(_water_fp.triplePointTemperature()),
+    _water_critical_temperature(_water_fp.criticalTemperature())
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_water_fp.fluidName() != "water")
@@ -39,11 +41,19 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
   // The FluidProperty objects use temperature in K
   Real Tk = _temperature[_qp] + _T_c2k;
 
+  // Check whether the input temperature is within the region of validity of this equation
+  // of state (T_triple <= T <= T_critical)
+  if (Tk < _water_triple_temperature || Tk > _water_critical_temperature)
+    mooseError("PorousFlowFluidStateWaterNCG: Temperature is outside range 273.16 K <= T "
+               "<= 647.096 K");
+
   // Equilibrium constants for each component (Henry's law for the NCG
   // component, and Raoult's law for water).
   // Note: these are in terms of mole fraction
+  Real psat, dpsat_dT;
+  _water_fp.vaporPressure_dT(Tk, psat, dpsat_dT);
   Real K0 = _ncg_fp.henryConstant(Tk) / _gas_porepressure[_qp];
-  Real K1 = _water_fp.vaporPressure(Tk) / _gas_porepressure[_qp];
+  Real K1 = psat / _gas_porepressure[_qp];
 
   // The mole fractions for the NCG component in the two component
   // case can be expressed in terms of the equilibrium constants only
@@ -115,8 +125,6 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
     Real dK0_dp = -Kh / _gas_porepressure[_qp] / _gas_porepressure[_qp];
     Real dK0_dT = dKh_dT / _gas_porepressure[_qp];
 
-    Real psat, dpsat_dT;
-    _water_fp.vaporPressure_dT(Tk, psat, dpsat_dT);
     Real dK1_dp = -psat / _gas_porepressure[_qp] / _gas_porepressure[_qp];
     Real dK1_dT = dpsat_dT / _gas_porepressure[_qp];
 
@@ -152,18 +160,17 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
   {
     Real ncg_density, dncg_density_dp, dncg_density_dT;
     Real vapor_density, dvapor_density_dp, dvapor_density_dT;
+    // NCG density calculated using partial pressure Y0 * gas_poreressure (Dalton's law)
     _ncg_fp.rho_dpT(Y0 * _gas_porepressure[_qp], Tk, ncg_density, dncg_density_dp, dncg_density_dT);
-    _water_fp.rho_dpT((1.0 - Y0) * _gas_porepressure[_qp],
-                      Tk,
-                      vapor_density,
-                      dvapor_density_dp,
-                      dvapor_density_dT);
+    // Vapor density calculated using partial pressure X1 * psat (Raoult's law)
+    _water_fp.rho_dpT((1.0 - X0) * psat, Tk, vapor_density, dvapor_density_dp, dvapor_density_dT);
 
+    // The derivatives wrt pressure above must be multiplied by the derivative of the pressure
+    // variable using the chain rule
     gas_density = ncg_density + vapor_density;
-    dgas_density_dp = (dncg_density_dp) * (Y0 + dY0_dp * _gas_porepressure[_qp]) +
-                      dvapor_density_dp * (1.0 - Y0 - dY0_dp * _gas_porepressure[_qp]);
+    dgas_density_dp = (Y0 + dY0_dp * _gas_porepressure[_qp]) * dncg_density_dp -
+                      dX0_dp * psat * dvapor_density_dp;
     dgas_density_dT = dncg_density_dT + dvapor_density_dT;
-    dgas_density_dz = _gas_porepressure[_qp] * dY0_dz * (dncg_density_dp - dvapor_density_dp);
 
     Real ncg_viscosity, dncg_viscosity_drho, dncg_viscosity_dT;
     Real vapor_viscosity, dvapor_viscosity_drho, dvapor_viscosity_dT;
@@ -174,19 +181,27 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
     // Assume that the viscosity of the gas phase is a weighted sum of the
     // individual viscosities
     gas_viscosity = Y0 * ncg_viscosity + (1.0 - Y0) * vapor_viscosity;
-    dgas_viscosity_dp = dY0_dp * (ncg_viscosity - vapor_viscosity) +
-                        Y0 * dncg_viscosity_drho * dncg_density_dp +
-                        (1.0 - Y0) * dvapor_viscosity_drho * dvapor_density_dp;
+    dgas_viscosity_dp =
+        dY0_dp * (ncg_viscosity - vapor_viscosity) +
+        Y0 * (Y0 + dY0_dp * _gas_porepressure[_qp]) * dncg_viscosity_drho * dncg_density_dp -
+        dX0_dp * psat * (1.0 - Y0) * dvapor_viscosity_drho * dvapor_density_dp;
     dgas_viscosity_dT = dY0_dT * (ncg_viscosity - vapor_viscosity) + Y0 * dncg_viscosity_dT +
                         (1.0 - Y0) * dvapor_density_dT;
-    dgas_viscosity_dz =
-        dY0_dz * (ncg_viscosity - vapor_viscosity) +
-        Y0 * dncg_viscosity_drho * dncg_density_dp * dY0_dz * _gas_porepressure[_qp] -
-        (1.0 - Y0) * dvapor_viscosity_drho * dvapor_density_dp * dY0_dz * _gas_porepressure[_qp];
+
+    // Also calculate derivatives wrt z in the gas phase (these are 0 in the two phase region)
+    if (is_gas)
+    {
+      dgas_density_dz =
+          dY0_dz * _gas_porepressure[_qp] * dncg_density_dp - dX0_dz * psat * dvapor_density_dp;
+
+      dgas_viscosity_dz =
+          dY0_dz * (ncg_viscosity - vapor_viscosity) +
+          Y0 * dncg_viscosity_drho * dncg_density_dp * dY0_dz * _gas_porepressure[_qp] -
+          dX0_dz * psat * (1.0 - Y0) * dvapor_viscosity_drho * dvapor_density_dp;
+    }
   }
 
-  // Calculate the saturation in the two phase case using the vapor mass
-  // fraction
+  // Calculate the saturation in the two phase case using the vapor mass fraction
   if (is_twophase)
   {
     // Liquid density is approximated by the water density.
@@ -207,7 +222,8 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
 
   // Calculate liquid density and viscosity if in the two phase or single phase
   // liquid region, assuming they are not affected by the presence of dissolved
-  // NCG
+  // NCG. Note: the (small) contribution due to derivative of capillary pressure
+  //  wrt pressure (using the chain rule) is not implemented.
   if (is_liquid || is_twophase)
   {
     Real dliquid_viscosity_drho;
@@ -262,8 +278,6 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
       Real dK0_dp = -Kh / _gas_porepressure[_qp] / _gas_porepressure[_qp];
       Real dK0_dT = dKh_dT / _gas_porepressure[_qp];
 
-      Real psat, dpsat_dT;
-      _water_fp.vaporPressure_dT(Tk, psat, dpsat_dT);
       Real dK1_dp = -psat / _gas_porepressure[_qp] / _gas_porepressure[_qp];
       Real dK1_dT = dpsat_dT / _gas_porepressure[_qp];
 

@@ -23,8 +23,8 @@
 [ICs]
   [./pgas]
     type = RandomIC
-    min = 3e4
-    max = 1e5
+    min = 1e4
+    max = 4e4
     variable = pgas
   [../]
   [./z]
