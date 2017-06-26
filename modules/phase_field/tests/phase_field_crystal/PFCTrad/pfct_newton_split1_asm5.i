@@ -33,16 +33,16 @@
     variable = n
   [../]
   [./u_term]
-    type = CHCpldPFCTrad
+    type = MatDiffusion
     variable = n
-    c = u
-    coeff_name = C2
+    conc = u
+    D_name = C2
   [../]
   [./v_term]
-    type = CHCpldPFCTrad
+    type = MatDiffusion
     variable = n
-    c = v
-    coeff_name = C4
+    conc = v
+    D_name = C4
   [../]
   [./u_rctn]
     type = Reaction
@@ -79,7 +79,6 @@
   [../]
 []
 
-
 [Preconditioning]
   [./SMP]
     type = SMP
@@ -89,15 +88,18 @@
 
 [Executioner]
   type = Transient
-  num_steps = 2
-  dt = 0.1
-  l_max_its = 100
   solve_type = 'NEWTON'
+
+  l_max_its = 100
   l_tol = 1e-04
   nl_rel_tol = 1e-09
   nl_abs_tol = 1e-11
+
   splitting = 'nuv'
   petsc_options = '-snes_view'
+
+  num_steps = 2
+  dt = 0.1
 []
 
 [Splits]
@@ -122,10 +124,9 @@
     #full = true
   [../]
 []
+
 [Outputs]
-  file_base = pfct_newton_split1_asm5_out
   execute_on = 'initial timestep_end linear'
-  file_base = out
   exodus = true
   perf_log = true
 []
