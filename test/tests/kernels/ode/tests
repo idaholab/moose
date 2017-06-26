@@ -22,4 +22,10 @@
     max_parallel = 2
     max_threads = 2
   [../]
+
+  [./test_coupled_ode_td]
+    type = 'CSVDiff'
+    input = 'coupled_ode_td.i'
+    csvdiff = 'coupled_ode_td_out.csv'
+  [../]
 []
