@@ -22,6 +22,8 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         self.setEnabled(False)
         self.setMainLayoutName('RightLayout') # used by plugin system to place widget
         self._data = []
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+        self.setFixedWidth(QtWidgets.QWIDGETSIZE_MAX) # reset the fixed width so it can be resized
 
     @QtCore.pyqtSlot()
     def onDataChanged(self):
