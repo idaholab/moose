@@ -56,11 +56,15 @@ AuxiliarySystem::init()
 }
 
 void
-AuxiliarySystem::initialSetup()
+AuxiliarySystem::addExtraVectors()
 {
   if (_fe_problem.needsPreviousNewtonIteration())
     _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
+}
 
+void
+AuxiliarySystem::initialSetup()
+{
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.sort(tid);

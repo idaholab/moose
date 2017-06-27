@@ -123,6 +123,12 @@ public:
   virtual void initializeObjects(){};
 
   /**
+   * Method called during initialSetup to add extra system vector if they are required by
+   * the simulation
+   */
+  virtual void addExtraVectors();
+
+  /**
    * Update the system (doing libMesh magic)
    */
   virtual void update();
