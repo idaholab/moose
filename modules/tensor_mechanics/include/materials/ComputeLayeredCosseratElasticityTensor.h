@@ -42,6 +42,9 @@ protected:
 
   /// Compliance tensor (_Eijkl^-1) at the qps
   MaterialProperty<RankFourTensor> & _compliance;
+
+  /// Flag for variable elasticity isotropic tensors
+  MaterialProperty<bool> & _elasticity_tensor_is_constant;
 };
 
 #endif // COMPUTELAYEREDCOSSERATELASTICITYTENSOR_H

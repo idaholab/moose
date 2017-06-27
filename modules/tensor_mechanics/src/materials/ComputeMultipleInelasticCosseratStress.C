@@ -42,6 +42,9 @@ ComputeMultipleInelasticCosseratStress::initQpStatefulProperties()
 void
 ComputeMultipleInelasticCosseratStress::computeQpStress()
 {
+  if (!_elasticity_tensor_is_constant[_qp])
+    mooseError("The Cosserat stress classes assume constant elasticity tensors");
+
   ComputeMultipleInelasticStress::computeQpStress();
 
   _couple_stress[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];

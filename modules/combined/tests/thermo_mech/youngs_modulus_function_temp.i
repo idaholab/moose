@@ -1,5 +1,6 @@
 # ---------------------------------------------------------------------------
-# This test is designed to verify the ComputeVariableElasticConstantStress
+# This test is designed to verify the variable elasticity tensor functionality in the
+# ComputeFiniteStrainElasticStress class with the elasticity_tensor_has_changed flag
 # by varying the young's modulus with temperature. A constant strain is applied
 # to the mesh in this case, and the stress varies with the changing elastic constants.
 #
@@ -159,7 +160,6 @@
     block = 0
   [../]
   [./stress]
-    type = ComputeVariableElasticConstantStress
     block = 0
   [../]
   [./heat1]

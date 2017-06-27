@@ -115,9 +115,16 @@ ComputeMultipleInelasticStress::initialSetup()
     if (rrr)
     {
       _models.push_back(rrr);
+<<<<<<< HEAD
       if (rrr->requiresIsotropicTensor() && !_is_elasticity_tensor_guaranteed_isotropic)
         mooseError("Model " + models[i] + " requires an isotropic elasticity tensor, but the one "
                                           "supplied is not guaranteed isotropic");
+=======
+      if (rrr->requiresIsotropicTensor() && !isElasticityTensorGuaranteedIsotropic())
+        mooseError("Model " + models[i] +
+                   " requires an isotropic elasticity tensor, but the one supplied is not "
+                   "guaranteed isotropic");
+>>>>>>> Change old stress calculation based on elasticity_tensor_has_changed flag. Refs #8616
     }
     else
       mooseError("Model " + models[i] + " is not compatible with ComputeMultipleInelasticStress");
@@ -127,13 +134,26 @@ ComputeMultipleInelasticStress::initialSetup()
 void
 ComputeMultipleInelasticStress::computeQpStress()
 {
+  if ((isParamValid("initial_stress")) && !_elasticity_tensor_is_constant[_qp])
+    mooseError("A finite stress material cannot both have an initial stress and an elasticity "
+               "tensor with varying values; please use a defined constant elasticity tensor, "
+               "such as ComputeIsotropicElasticityTensor, if your model defines an initial "
+               "stress, or apply an initial strain instead.");
+
   RankTwoTensor elastic_strain_increment;
   RankTwoTensor combined_inelastic_strain_increment;
 
   if (_num_models == 0)
   {
     _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+
+    // If the elasticity tensor values have changed and the tensor is isotropic,
+    // use the old strain to calculate the old stress
+    if (!_elasticity_tensor_is_constant[_qp] && isElasticityTensorGuaranteedIsotropic())
+      _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+    else
+      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+
     if (_fe_problem.currentlyComputingJacobian())
       _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
   }
@@ -198,8 +218,12 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
         if (i_rmm != j_rmm)
           elastic_strain_increment -= inelastic_strain_increment[j_rmm];
 
-      // form the trial stress
-      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      // form the trial stress, with the check for changed elasticity constants
+      if (!_elasticity_tensor_is_constant[_qp] && isElasticityTensorGuaranteedIsotropic())
+        _stress[_qp] =
+            _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+      else
+        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
       // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
@@ -298,7 +322,12 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
 
   elastic_strain_increment = _strain_increment[_qp];
 
-  _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  // If the elasticity tensor values have changed and the tensor is isotropic,
+  // use the old strain to calculate the old stress
+  if (!_elasticity_tensor_is_constant[_qp] && isElasticityTensorGuaranteedIsotropic())
+    _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+  else
+    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
   computeAdmissibleState(model_number,
                          elastic_strain_increment,

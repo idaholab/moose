@@ -28,6 +28,9 @@ protected:
 
   /// Flexural rigidity tensor at the qps
   MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
+
+  /// Flag for variable elasticity isotropic tensors
+  MaterialProperty<bool> & _elasticity_tensor_is_constant;
 };
 
 #endif // COMPUTECOSSERATELASTICITYTENSOR_H

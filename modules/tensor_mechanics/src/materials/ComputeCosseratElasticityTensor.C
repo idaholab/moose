@@ -29,13 +29,18 @@ ComputeCosseratElasticityTensor::ComputeCosseratElasticityTensor(const InputPara
     _Bijkl(getParam<std::vector<Real>>("B_ijkl"),
            (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method_bending")),
     _elastic_flexural_rigidity_tensor(
-        declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor"))
+        declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
+    _elasticity_tensor_is_constant(
+        declareProperty<bool>(_base_name + "elasticity_tensor_is_constant"))
 {
 }
 
 void
 ComputeCosseratElasticityTensor::computeQpElasticityTensor()
 {
+  // Let the Stress Calculator classes know that this class only has constant values
+  _elasticity_tensor_is_constant[_qp] = true;
+
   _elasticity_tensor[_qp] = _Eijkl;
   _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
 }

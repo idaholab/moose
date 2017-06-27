@@ -27,6 +27,8 @@ ComputeVariableIsotropicElasticityTensor::ComputeVariableIsotropicElasticityTens
   : ComputeElasticityTensorBase(parameters),
     _youngs_modulus(getMaterialProperty<Real>("youngs_modulus")),
     _poissons_ratio(getMaterialProperty<Real>("poissons_ratio")),
+    _elasticity_tensor_is_constant(
+        declareProperty<bool>(_base_name + "elasticity_tensor_is_constant")),
     _num_args(coupledComponents("args")),
     _dyoungs_modulus(_num_args),
     _d2youngs_modulus(_num_args),
@@ -97,6 +99,9 @@ ComputeVariableIsotropicElasticityTensor::initQpStatefulProperties()
 void
 ComputeVariableIsotropicElasticityTensor::computeQpElasticityTensor()
 {
+  // Let the Stress Calculator classes know that this class changes the elasticity tensor values
+  _elasticity_tensor_is_constant[_qp] = false;
+
   _elasticity_tensor[_qp].fillFromInputVector({_youngs_modulus[_qp], _poissons_ratio[_qp]},
                                               RankFourTensor::symmetric_isotropic_E_nu);
 

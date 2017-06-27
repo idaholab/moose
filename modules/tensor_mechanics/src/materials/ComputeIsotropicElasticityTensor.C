@@ -11,7 +11,7 @@ InputParameters
 validParams<ComputeIsotropicElasticityTensor>()
 {
   InputParameters params = validParams<ComputeElasticityTensorBase>();
-  params.addClassDescription("Compute an isotropic elasticity tensor.");
+  params.addClassDescription("Compute a constant isotropic elasticity tensor.");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first constant for the material.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
@@ -32,7 +32,9 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
     _lambda(_lambda_set ? getParam<Real>("lambda") : -1),
     _poissons_ratio(_poissons_ratio_set ? getParam<Real>("poissons_ratio") : -1),
     _shear_modulus(_shear_modulus_set ? getParam<Real>("shear_modulus") : -1),
-    _youngs_modulus(_youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1)
+    _youngs_modulus(_youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1),
+    _elasticity_tensor_is_constant(
+        declareProperty<bool>(_base_name + "elasticity_tensor_is_constant"))
 {
   unsigned int num_elastic_constants = _bulk_modulus_set + _lambda_set + _poissons_ratio_set +
                                        _shear_modulus_set + _youngs_modulus_set;
@@ -127,6 +129,9 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
 void
 ComputeIsotropicElasticityTensor::computeQpElasticityTensor()
 {
+  // Let the Stress Calculator classes know that this class only has constant values
+  _elasticity_tensor_is_constant[_qp] = true;
+
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
 }
