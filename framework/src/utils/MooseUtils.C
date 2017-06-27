@@ -177,7 +177,9 @@ serialEnd(const libMesh::Parallel::Communicator & comm)
     int dummy = 0;
     comm.send(comm.rank() + 1, dummy);
   }
-  else
+
+  comm.barrier();
+  if (comm.rank() == 0)
     mooseWarning("Leaving serial execution block (use only for debugging)");
 }
 
