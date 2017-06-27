@@ -65,6 +65,7 @@ public:
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
+  virtual void addExtraVectors() override;
   virtual void solve() override = 0;
   virtual void restoreSolutions() override;
 

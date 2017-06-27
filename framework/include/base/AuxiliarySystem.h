@@ -48,6 +48,7 @@ public:
   virtual ~AuxiliarySystem();
 
   virtual void init() override;
+  virtual void addExtraVectors() override;
 
   virtual void initialSetup();
   virtual void timestepSetup();

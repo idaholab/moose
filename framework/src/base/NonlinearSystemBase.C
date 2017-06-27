@@ -173,6 +173,13 @@ NonlinearSystemBase::init()
 }
 
 void
+NonlinearSystemBase::addExtraVectors()
+{
+  if (_fe_problem.needsPreviousNewtonIteration())
+    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
+}
+
+void
 NonlinearSystemBase::restoreSolutions()
 {
   // call parent
@@ -184,9 +191,6 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
-  if (_fe_problem.needsPreviousNewtonIteration())
-    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.initialSetup(tid);

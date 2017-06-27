@@ -333,6 +333,10 @@ public:
    */
   virtual std::vector<VariableName> getVariableNames();
 
+  /**
+   * A place to add extra vectors to the simulation. It is called early during initialSetup.
+   */
+  virtual void addExtraVectors();
   virtual void initialSetup();
   virtual void timestepSetup();
 
