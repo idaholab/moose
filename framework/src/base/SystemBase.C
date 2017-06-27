@@ -651,6 +651,11 @@ SystemBase::copyVars(ExodusII_IO & io)
 }
 
 void
+SystemBase::addExtraVectors()
+{
+}
+
+void
 SystemBase::update()
 {
   system().update();

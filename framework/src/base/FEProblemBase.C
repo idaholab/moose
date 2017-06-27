@@ -409,6 +409,13 @@ FEProblemBase::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 }
 
 void
+FEProblemBase::addExtraVectors()
+{
+  _nl->addExtraVectors();
+  _aux->addExtraVectors();
+}
+
+void
 FEProblemBase::initialSetup()
 {
   Moose::perf_log.push("initialSetup()", "Setup");
@@ -416,6 +423,8 @@ FEProblemBase::initialSetup()
   // set state flag indicating that we are in or beyond initialSetup.
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
+
+  addExtraVectors();
 
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
