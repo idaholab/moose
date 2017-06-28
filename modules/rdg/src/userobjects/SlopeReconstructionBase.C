@@ -79,16 +79,6 @@ SlopeReconstructionBase::meshChanged()
   _bnd_side_area.clear();
 }
 
-void
-SlopeReconstructionBase::threadJoin(const UserObject & y)
-{
-  const SlopeReconstructionBase & pps = static_cast<const SlopeReconstructionBase &>(y);
-
-  _rslope.insert(pps._rslope.begin(), pps._rslope.end());
-
-  _avars.insert(pps._avars.begin(), pps._avars.end());
-}
-
 const std::vector<RealGradient> &
 SlopeReconstructionBase::getElementSlope(dof_id_type elementid) const
 {

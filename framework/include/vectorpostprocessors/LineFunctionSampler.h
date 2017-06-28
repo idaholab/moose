@@ -39,9 +39,6 @@ public:
   // overloaded virtual functions and "hiding" in debug mode.
   using SamplerBase::threadJoin;
 
-  // TODO: Is this even called (threadJoin on a general object)?
-  virtual void threadJoin(const UserObject & y) override;
-
 protected:
   /// Beginning of the line
   Point _start_point;
