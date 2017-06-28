@@ -329,16 +329,83 @@ class TestHarness:
         else:
             return True
 
+    # Format the status message to make any caveats easy to read when they are printed
+    def formatCaveats(self, tester):
+        caveats = []
+        result = ''
+
+        if tester.specs.isValid('caveats'):
+            caveats = tester.specs['caveats']
+
+        # PASS and DRY_RUN fall into this catagory
+        if tester.didPass():
+            if self.options.extra_info:
+                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
+                for check in checks:
+                    if not 'ALL' in tester.specs[check]:
+                        caveats.append(', '.join(tester.specs[check]))
+            if len(caveats):
+                result = '[' + ', '.join(caveats).upper() + '] ' + tester.getSuccessMessage()
+            else:
+                result = tester.getSuccessMessage()
+
+        # FAIL, DIFF and DELETED fall into this catagory
+        elif tester.didFail() or tester.didDiff() or tester.isDeleted():
+            result = 'FAILED (%s)' % tester.getStatusMessage()
+
+        elif tester.isSkipped():
+            # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
+            # but Exodiff is instructed to 'SKIP' on scaled tests.
+            if len(caveats):
+                result = '[' + ', '.join(caveats).upper() + '] skipped (' + tester.getStatusMessage() + ')'
+            else:
+                result = 'skipped (' + tester.getStatusMessage() + ')'
+        else:
+            result = tester.getStatusMessage()
+        return result
+
+    # Print and return formatted current tester status output
+    def printResult(self, tester_data):
+        tester = tester_data.getTester()
+
+        # The test has no status to print
+        if tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
+            caveat_formatted_results = None
+        # Print what ever status the tester has at the time
+        else:
+            if self.options.verbose or (tester.didFail() and not self.options.quiet):
+                output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
+
+                output += tester_data.getOutput()
+                output = output.replace('\r', '\n')  # replace the carriage returns with newlines
+                lines = output.split('\n')
+
+                # Obtain color based on test status
+                color = tester.getColor()
+
+                if output != '':
+                    test_name = colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
+                    output = test_name + ("\n" + test_name).join(lines)
+                    print(output)
+
+            caveat_formatted_results = self.formatCaveats(tester)
+            print formatResult(tester, caveat_formatted_results, tester_data.getTiming(), self.options)
+        return caveat_formatted_results
+
     # handleTestStatus calls the tester's ability to print its current status to the screen, and handles
     # the finalized status for tallying up the totals based on those statuses (failed, success, etc)
-    def handleTestStatus(self, tester):
+    def handleTestStatus(self, tester_data):
+        tester = tester_data.getTester()
+
         # print and store those results
-        result = tester.printResult(self.options)
+        result = self.printResult(tester_data)
 
         # Test is finished and had some results to print
         if result and tester.isFinished():
+            timing = tester_data.getTiming()
+
             # Store these results to a table we will use when we print final results
-            self.test_table.append( (tester, result, tester.getTiming()) )
+            self.test_table.append( (tester, result, timing) )
 
             # Tally the results of this test to be used in our Final Test Results footer
             if tester.isSkipped():
@@ -351,14 +418,14 @@ class TestHarness:
             # Write results to a file if asked to do so
             if not tester.isSkipped():
                 if not tester.didPass() and not self.options.failed_tests:
-                    self.writeFailedTest.write(tester.specs['test_name'] + '\n')
+                    self.writeFailedTest.write(tester.getTestName() + '\n')
 
                 if self.options.file:
                     self.file.write(formatResult( tester, result, timing, self.options, color=False) + '\n')
                     self.file.write(output)
 
                 if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
-                    fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
+                    fname = os.path.join(tester.getTestDir(), tester.getTestName().split('/')[-1] + '.' + result[:6] + '.txt')
                     f = open(fname, 'w')
                     f.write(formatResult( tester, result, timing, self.options, color=False) + '\n')
                     f.write(output)

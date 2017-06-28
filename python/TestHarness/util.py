@@ -137,7 +137,7 @@ def returnCommand(tester, command):
         print "Error in launching a new task", command
         raise
 
-    return (process, f, clock())
+    return (process, f)
 
 ## print an optionally colorified test result
 #

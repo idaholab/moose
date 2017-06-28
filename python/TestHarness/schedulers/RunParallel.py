@@ -8,9 +8,9 @@ import platform, time
 
 import os
 
-## This class provides an interface to run commands in parallel
+## This class provides an interface to run tester commands and do something with the output
 #
-# To use this class, call the .run() method with the tester options
+# To use this class, call the .run() method with the tester_data container
 class RunParallel(Scheduler):
     @staticmethod
     def validParams():
@@ -25,78 +25,54 @@ class RunParallel(Scheduler):
     ## Run the test!
     ## Note: use thread_lock where necessary
     #
-    #  with thread_lock:
+    #  with self.thread_lock:
     #      do protected stuff
     #
     # The run method should be blocking until the test has completed _and_ the results have been
     # processed (with tester.processResults()). When we return from this method, this test will
-    # be considered finished and added to the status pool for printing out the final results.
-    def run(self, tester, thread_lock, options):
+    # be considered finished, the output file will be closed, and worker will immediately place
+    # this job on the status queue, to have its status printed to the screen.
+    def run(self, tester_data):
+        tester = tester_data.getTester()
+
         # Get the command needed to run this test
-        command = tester.getCommand(options)
+        command = tester.getCommand(self.options)
 
         # Prepare to run the test
-        tester.prepare(options)
+        tester.prepare(self.options)
 
-        # If shouldExecute is false, there is no process or output to work with so pass
-        # control over to testOutput now, to run processResults and complete the test
-        if not tester.shouldExecute() or options.dry_run:
-            tester.setStartTime(clock())
-            tester.setExitCode(0)
-            tester.setEndTime(clock())
-            tester.setOutput('')
-            self.testOutput(tester, '', options)
-            return
+        # Launch and wait for the command to finish
+        process = tester_data.runCommand(command)
 
-        # Launch the command and start the clock
-        (process, output_file, start_time) = returnCommand(tester, command)
-
-        # Set the tester's start time
-        tester.setStartTime(start_time)
-
-        # We're a thread so wait for the process to complete
-        process.wait()
-
-        # Test is finished so set the end time
-        tester.setEndTime(clock())
-
-        # Did the process fail and we didn't know it (someone told the testharness we timed out)?
-        if tester.didFail():
+        # Was this test already considered finished? (Timeouts, Dry Run)
+        if tester.isFinished():
             return
 
         if process.poll() is not None:
-            # set the exit code
-            tester.setExitCode(process.poll())
-
-            # set the tester output (trimmed)
-            output = readOutput(output_file, options)
-            output_file.close()
+            # get the output for this test
+            output = tester_data.getOutput()
 
             # Process the results and beautify the output
-            self.testOutput(tester, output, options)
+            self.testOutput(tester_data, output)
 
         # This test failed to launch properly
         else:
             tester.setStatus('ERROR LAUNCHING JOB', tester.bucket_fail)
 
     # Modify the output the way we want it. Run processResults
-    def testOutput(self, tester, output, options):
-        # dry run? cool, just return
-        if options.dry_run or not tester.shouldExecute():
-            tester.setOutput(output)
-            tester.setStatus(tester.getSuccessMessage(), tester.bucket_success)
-            return
+    def testOutput(self, tester_data, output):
+        tester = tester_data.getTester()
 
         # process and store new results from output
-        output = tester.processResults(tester.getMooseDir(), tester.getExitCode(), options, output)
+        output = tester.processResults(tester.getMooseDir(), tester_data.getExitCode(), self.options, output)
 
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
         # status yet in the postprocessing stage. We'll inspect didPass() after processing results
         if not tester.didFail():
             # Read the output either from the temporary file or redirected files
-            if tester.hasRedirectedOutput(options):
-                redirected_output = getOutputFromFiles(tester, options)
+            if tester.hasRedirectedOutput(self.options):
+                redirected_output = getOutputFromFiles(tester, self.options)
                 output += redirected_output
 
                 # If we asked for redirected output but none was found, we'll call that a failure
@@ -107,5 +83,5 @@ class RunParallel(Scheduler):
         else:
             output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
-        # Set testers output with modifications made above
-        tester.setOutput(output)
+        # Set testers output with modifications made above so it prints the way we want it
+        tester_data.setOutput(output)
