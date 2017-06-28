@@ -13,12 +13,14 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
+import os
 import logging
-
+import collections
 import markdown
-
+import anytree
 import mooseutils
-from MooseDocs.commands.MarkdownNode import MarkdownNode
+import MooseDocs
+from . import common
 
 LOG = logging.getLogger(__name__)
 
@@ -30,20 +32,65 @@ class MooseMarkdown(markdown.Markdown):
     that the extension objects, namely MooseTemplate, could have access to the node object to allow
     for searching the tree for other pages. This should allow for cross page figure, equation, and
     table links to be created.
+
+    Args:
+        config[dict]: The configure dict, if not provided getDefaultExtensions is used.
+        config_file[str]: The name of the configuration file to import, this is applied to the
+                          supplied or default 'config'.
     """
     CODE_BLOCK_COUNT = 0 # counter for code block copy buttons
 
-    def __init__(self, extensions=None, extension_configs=None):
+    @staticmethod
+    def getDefaultExtensions():
+        """
+        Return an OrderedDict that defines the default configuration for extensions.
 
-        # Initialize member variables
-        self.current = None # member for holding the current MarkdownNode object
-        if extensions is None:
-            extensions = []
-        if extension_configs is None:
-            extension_configs = dict()
+        It returns an OrderedDict such that the dict() can serve to populate the list of extensions
+        (i.e., the keys) in the desired instantiate order as well as the configuration settings.
 
-        super(MooseMarkdown, self).__init__(extensions=extensions,
-                                            extension_configs=extension_configs)
+        If no settings are needed for the entry simply set the entry to contain an empty dict()
+
+        """
+        ext = collections.OrderedDict() # used to maintain insert order
+
+        # http://pythonhosted.org/Markdown/extensions/index.html
+        ext['toc'] = dict()
+        ext['smarty'] = dict()
+        ext['admonition'] = dict()
+        ext['extra'] = dict()
+        ext['meta'] = dict()
+
+        # pip install python-markdown-math
+        ext['mdx_math'] = dict(enable_dollar_delimiter=True)
+
+        # MooseDocs
+        ext['MooseDocs.extensions.global'] = dict()
+        ext['MooseDocs.extensions.include'] = dict()
+        ext['MooseDocs.extensions.bibtex'] = dict()
+        ext['MooseDocs.extensions.css'] = dict()
+        ext['MooseDocs.extensions.devel'] = dict()
+        ext['MooseDocs.extensions.misc'] = dict()
+        ext['MooseDocs.extensions.media'] = dict()
+        ext['MooseDocs.extensions.tables'] = dict()
+        ext['MooseDocs.extensions.listings'] = dict()
+        ext['MooseDocs.extensions.refs'] = dict()
+        ext['MooseDocs.extensions.app_syntax'] = dict()
+        ext['MooseDocs.extensions.template'] = dict()
+        return ext
+
+    def __init__(self, config=None, default=True):
+
+        # Create the default configuration
+        ext_config = self.getDefaultExtensions() if default else collections.OrderedDict()
+
+        # Apply the supplied configuration
+        if config is not None:
+            ext_config.update(config)
+
+        # Define storage for the current MarkdownNode
+        self.current = None
+        super(MooseMarkdown, self).__init__(extensions=ext_config.keys(),
+                                            extension_configs=ext_config)
 
     def requireExtension(self, required):
         """
@@ -77,9 +124,43 @@ class MooseMarkdown(markdown.Markdown):
         MooseMarkdown.CODE_BLOCK_COUNT = 0
         self.current = None
 
-        if isinstance(md, MarkdownNode):
+        if isinstance(md, str):
+            self.current = common.nodes.MarkdownNode('', content=md)
+        elif isinstance(md, common.nodes.MarkdownFileNodeBase):
             self.current = md
+            LOG.debug('Converting %s to html.', self.current.filename) #pylint: disable=no-member
         else:
-            self.current = MarkdownNode(md, name='')
+            raise mooseutils.MooseException("The supplied content must be a markdown str or a "
+                                            "MarkdownFileNodeBase object.")
 
         return super(MooseMarkdown, self).convert(self.current.content)
+
+    def getFilename(self, desired, check_local=True):
+        """
+        Locate nodes with a filename ending with provided string.
+        """
+        if check_local:
+            local = os.path.join(MooseDocs.ROOT_DIR, desired)
+            if os.path.exists(local):
+                return local, None
+
+        nodes = self.find(self.current.root, desired)
+        if len(nodes) > 1:
+            msg = "Multiple filenames matching '{}' found:".format(desired)
+            for n in nodes:
+                msg += '\n    {}'.format(n.filename)
+            LOG.error(msg)
+
+        if nodes:
+            return nodes[0].filename, nodes[0]
+
+        return None, None
+
+    @staticmethod
+    def find(node, desired):
+        """
+        Find method for filenames (mainly for testing).
+        """
+        types = (common.nodes.FileNodeBase)
+        filter_ = lambda n: isinstance(n, types) and n.filename.endswith(desired)
+        return [n for n in anytree.iterators.PreOrderIter(node, filter_=filter_)]

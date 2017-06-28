@@ -1,14 +1,6 @@
 [Tests]
-  [./ApplicationSyntax]
+  [./basic]
     type = PythonUnitTest
-    input = test_application_syntax_object.py
-  [../]
-  [./objects]
-    type = PythonUnitTest
-    input = test_object_syntax.py
-  [../]
-  [./systems]
-    type = PythonUnitTest
-    input = test_system_syntax.py
+    input = test_app_syntax.py
   [../]
 []

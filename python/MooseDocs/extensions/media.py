@@ -16,7 +16,6 @@
 
 import os
 import re
-import glob
 import collections
 
 import logging
@@ -25,7 +24,6 @@ from markdown.inlinepatterns import Pattern
 from markdown.blockprocessors import BlockProcessor
 from markdown.util import etree
 
-import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
 
@@ -95,21 +93,8 @@ class MediaPatternBase(MooseMarkdownCommon, Pattern):
         """
 
         # Extract the filename and settings from regex
-        rel_filename = match.group('filename')
+        filename = match.group('filename')
         settings = self.getSettings(match.group('settings'))
-
-        # Determine the filename
-        filename = None
-        repo = MooseDocs.abspath(rel_filename)
-        local = os.path.abspath(os.path.join(os.getcwd(), rel_filename))
-        if rel_filename.startswith('http'):
-            filename = rel_filename
-        elif os.path.exists(repo):
-            filename = os.path.relpath(repo, os.getcwd())
-        elif os.path.exists(local):
-            filename = os.path.relpath(local, os.getcwd())
-        else:
-            return self.createErrorElement('File not found: {}'.format(rel_filename))
 
         # Create content
         div = self.createFloatElement(settings)
@@ -276,7 +261,6 @@ class SliderBlockProcessor(BlockProcessor, MooseMarkdownCommon):
         Expected input is similar to:
           images/1.png caption=My caption color=blue
           images/2.png background-color=gray caption= Another caption color=red
-          images/other*.png
 
         Input:
          filenames_block[str]: String block to parse
@@ -308,13 +292,8 @@ class SliderBlockProcessor(BlockProcessor, MooseMarkdownCommon):
             img_settings.pop('counter')
             caption_settings.pop('counter')
 
-            new_files = sorted(glob.glob(MooseDocs.abspath(fname)))
-            if not new_files:
-                LOG.error('Parser unable to detect file(s) %s in media.py', fname)
-                return []
-            for f in new_files:
-                files.append(SliderBlockProcessor.ImageInfo(os.path.relpath(f), img_settings,
-                                                            caption_settings))
+            files.append(SliderBlockProcessor.ImageInfo(fname, img_settings,
+                                                        caption_settings))
 
         return files
 

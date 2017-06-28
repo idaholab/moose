@@ -15,14 +15,13 @@
 #pylint: enable=missing-docstring
 
 import os
-import shutil
 import logging
 
 import livereload
-import bs4
 
 import MooseDocs
-from MarkdownNode import MarkdownNode
+from MooseDocs.MooseMarkdown import MooseMarkdown
+from MooseDocs.common import nodes, Builder
 
 LOG = logging.getLogger(__name__)
 
@@ -41,14 +40,11 @@ def presentation_options(parser):
     parser.add_argument('--config-file', type=str, default=yaml_default,
                         help="The configuration file to use for building the documentation using "
                              "MOOSE. (Default: %(default)s)")
-    parser.add_argument('--output', '-o', default=None, type=str,
-                        help="The default html file to create, defaults to input filename with "
-                             "html extension.")
     parser.add_argument('--template', type=str, default='presentation.html',
                         help="The template html file to utilize (default: %(default)s).")
     parser.add_argument('--title', type=str, default="MOOSE Presentation",
                         help="The title of the document.")
-    css_default = [os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'css', 'moose.css')]
+    css_default = [os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', 'css', 'moose.css')]
     parser.add_argument('--css', type=str, nargs='+', default=css_default,
                         help="A list of additional css files to inject into the presentation html "
                              "file (%(default)s).")
@@ -59,43 +55,76 @@ def presentation_options(parser):
                              "file (%(default)s).")
     return presentation
 
-class PresentationBuilder(MarkdownNode):
-    """
-    Adds a copy of image files to the destination directory.
-    """
-    def build(self, lock=None):
-        content = self.convert()
-        soup = bs4.BeautifulSoup(content, 'html.parser')
-        for img in soup('img'):
-            name = os.path.basename(img['src'])
-            dest = os.path.join(self.path(), name)
-            dirname = os.path.dirname(dest)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            LOG.debug('Copying images: %s to %s', img['src'], dest)
-            shutil.copyfile(img['src'], dest)
-            img['src'] = name
 
-        self.write(soup.prettify())
+class MarkdownPresentationNode(nodes.MarkdownFilePageNode):
+    """
+    A node based on a single markdown file for building presentations.
 
-def presentation(config_file=None, md_file=None, serve=None, port=None, host=None,
-                 template=None, **template_args):
+    Inputs:
+        markdown[str]: The markdown file to convert.
+    """
+    def __init__(self, markdown):
+        name = os.path.basename(markdown)[:-3]
+        base = os.path.dirname(markdown)
+        super(MarkdownPresentationNode, self).__init__(name, base=base)
+
+class PresentationBuilder(Builder):
+    """
+    A builder for presentation markdown files.
+
+    Inputs:
+        md_file[str]: The path of the markdown file relative to the repository root directory.
+        kwargs[dict]: See Builder
+    """
+
+    def __init__(self, md_file=None, **kwargs):
+        kwargs['site_dir'] = os.path.join(MooseDocs.ROOT_DIR, os.path.dirname(md_file))
+        super(PresentationBuilder, self).__init__(**kwargs)
+        self._md_file = md_file
+
+    def buildNodes(self):
+        """
+        Create the markdown node objects to build.
+        """
+        # Check if file exists
+        full = os.path.join(MooseDocs.ROOT_DIR, self._md_file)
+        if not os.path.isfile(full):
+            raise IOError("The presentation markdown file does not exist: {}.".format(full))
+
+        # Return the node for converting.
+        return MarkdownPresentationNode(self._md_file)
+
+    def rootDirectory(self):
+        """
+        Return the directory to the presentation index.html
+        """
+        return os.path.join(self._site_dir, self._root.destination)
+
+def presentation(config_file=None, md_file=None, serve=None, port=None, host=None, template=None,
+                 **template_args):
     """
     MOOSE markdown presentation blaster.
     """
 
-    # Load the YAML configuration file
-    config = MooseDocs.load_config(config_file, template=template, template_args=template_args)
-    parser = MooseDocs.MooseMarkdown(extensions=config.keys(), extension_configs=config)
+    # The markdown file is provided via the command line, thus it is provided relative to the
+    # current working directory. The internals of MooseDocs are setup to always work from the
+    # repository root directory (i.e., MooseDocs.ROOT_DIR), thus the path of this file must be
+    # converted to be relative to MooseDocs.ROOT_DIR.
+    md_file = os.path.relpath(os.path.abspath(md_file), MooseDocs.ROOT_DIR)
 
-    site_dir, _ = os.path.splitext(md_file)
-    if not os.path.isdir(site_dir):
-        os.mkdir(site_dir)
-    root = PresentationBuilder(name='', markdown=md_file, parser=parser, site_dir=site_dir)
-    root.build()
+    # Create the markdown parser
+    config = MooseDocs.load_config(config_file, template=template, template_args=template_args)
+    parser = MooseMarkdown(config)
+
+    # Build the html
+    builder = PresentationBuilder(md_file=md_file, parser=parser)
+    builder.init()
+    builder.build(num_threads=1)
 
     if serve:
         server = livereload.Server()
-        server.watch(md_file, root.build)
-        server.serve(root=site_dir, host=host, port=port, restart_delay=0)
-    return None
+        server.watch(os.path.join(MooseDocs.ROOT_DIR, md_file),
+                     lambda: builder.build(num_threads=1))
+        server.serve(root=builder.rootDirectory(), host=host, port=port, restart_delay=0)
+
+    return 0

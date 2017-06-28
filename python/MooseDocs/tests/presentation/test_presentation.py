@@ -54,5 +54,6 @@ class TestPresentation(unittest.TestCase):
         subprocess.check_output(['./moosedocs.py', 'presentation', 'examples/presentation.md'])
         self.assertTrue(os.path.exists(self.html_file))
 
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

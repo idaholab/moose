@@ -1,6 +1,8 @@
 import os
 import re
+import math
 import errno
+import multiprocessing
 
 def colorText(string, color, **kwargs):
     """
@@ -20,7 +22,7 @@ def colorText(string, color, **kwargs):
     colored = kwargs.pop('colored', True)
 
     # ANSI color codes for colored terminal output
-    color_codes = {'RESET':'\033[0m','BOLD':'\033[1m','RED':'\033[31m','GREEN':'\033[35m','CYAN':'\033[34m','YELLOW':'\033[33m','MAGENTA':'\033[32m'}
+    color_codes = dict(RESET='\033[0m', BOLD='\033[1m',RED='\033[31m', MAGENTA='\033[32m', YELLOW='\033[33m', BLUE='\033[34m', GREEN='\033[35m', CYAN='\033[36m')
     if code:
         color_codes['GREEN'] = '\033[32m'
         color_codes['CYAN']  = '\033[36m'
@@ -54,7 +56,6 @@ def str2bool(string):
     else:
         return False
 
-
 def find_moose_executable(loc, **kwargs):
     """
 
@@ -72,9 +73,7 @@ def find_moose_executable(loc, **kwargs):
 
     # Handle 'combined' and 'tests'
     if os.path.isdir(loc):
-        if name == 'combined':
-            name = 'modules'
-        elif name == 'tests':
+        if name == 'test':
             name = 'moose_test'
 
     # Check that the location exists and that it is a directory
@@ -101,7 +100,7 @@ def runExe(app_path, args):
 
     Args:
         app_path[str]: The application to execute.
-        args[list]: The arguuments to pass to the executable.
+        args[list]: The arguments to pass to the executable.
     """
     import subprocess
 
@@ -134,6 +133,9 @@ def check_configuration(packages):
         print "The following packages are missing but required:"
         for m in missing:
             print ' '*4, '-', m
+        print 'It may be possible to install them using "pip", but you likely need to ' \
+              'the MOOSE environment package on your system.\n'
+        print 'Using pip:\n    pip install package-name-here --user'
         return 1
 
     return 0
@@ -167,3 +169,15 @@ def unique_list(output, input):
     for item in input:
         if item not in output:
             output.append(item)
+
+def make_chunks(local, num=multiprocessing.cpu_count()):
+    """
+    Divides objects into equal size containers for parallel execution.
+
+    Input:
+        local[list]: A list of objects to break into chunks.
+        num[int]: The number of chunks (defaults to number of threads available)
+    """
+    num = int(math.ceil(len(local)/float(num)))
+    for i in range(0, len(local), num):
+        yield local[i:i + num]

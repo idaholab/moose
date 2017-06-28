@@ -13,13 +13,10 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
-
 import re
 import copy
 import logging
-
 from markdown.util import etree
-
 LOG = logging.getLogger(__name__)
 
 class MooseMarkdownCommon(object):
@@ -79,6 +76,11 @@ class MooseMarkdownCommon(object):
 
         return options
 
+    def getFilename(self, *args, **kwargs):
+        """
+        Locate nodes with a filename ending with provided string.
+        """
+        return self.markdown.getFilename(*args, **kwargs) #pylint: disable=no-member
 
     @staticmethod
     def applyElementSettings(element, settings, keys=None):
@@ -171,7 +173,7 @@ class MooseMarkdownCommon(object):
         msg = etree.SubElement(el, 'p')
         msg.text = message
         if error:
-            LOG.error('%s: %s', title, message)
+            LOG.error('%s: %s', str(title), str(message))
         return el
 
     @staticmethod

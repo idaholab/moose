@@ -22,13 +22,11 @@ import multiprocessing
 import collections
 import logging
 
-from MooseMarkdown import MooseMarkdown
-
 import mooseutils
 
 # Check for the necessary packages, this does a load so they should all get loaded.
-if mooseutils.check_configuration(['yaml', 'jinja2', 'markdown', 'mdx_math', 'bs4', 'lxml',
-                                   'pylatexenc']):
+if mooseutils.check_configuration(['yaml', 'jinja2', 'markdown', 'mdx_math', 'pybtex',
+                                   'jinja2', 'livereload', 'bs4', 'lxml', 'pylatexenc', 'anytree']):
     sys.exit(1)
 
 import yaml #pylint: disable=wrong-import-position
@@ -43,25 +41,14 @@ ROOT_DIR = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
 
 TEMP_DIR = os.path.abspath(os.path.join(os.getenv('HOME'), '.local', 'share', 'moose'))
 
-def abspath(*args):
-    """
-    Create an absolute path from paths that are given relative to the ROOT_DIR.
-
-    Inputs:
-      *args: Path(s) defined relative to the git repository root directory as defined in ROOT_DIR.
-    """
-    return os.path.abspath(os.path.join(ROOT_DIR, *args))
-
-
-def relpath(abs_path):
-    """
-    Create a relative path from the absolute path given relative to the ROOT_DIR.
-
-    Inputs:
-      abs_path[str]: Absolute path that to be converted to a relative path to the git repository
-                     root directory as defined in ROOT_DIR
-    """
-    return os.path.relpath(abs_path, ROOT_DIR)
+DEPRECATED_MARKDOWN = [(re.compile(r'(?P<command>^!input|!text|!clang)\s'), '!listing'),
+                       (re.compile(r'(?P<command>^!figure|!image|!video)\s'), '!media'),
+                       (re.compile(r'(?P<command>^!description)\s'), '!syntax description'),
+                       (re.compile(r'(?P<command>^!parameters)\s'), '!syntax parameters'),
+                       (re.compile(r'(?P<command>^!inputfiles)\s'), '!syntax inputs'),
+                       (re.compile(r'(?P<command>^!childobjects)\s'), '!syntax children'),
+                       (re.compile(r'(?P<command>^!systems)\s'), '!syntax complete'),
+                       (re.compile(r'(?P<command>^!subsystems)\s'), '!syntax subsystems')]
 
 def html_id(string):
     """
@@ -80,13 +67,28 @@ class Loader(yaml.Loader):
         Allow for the embedding of yaml files.
         http://stackoverflow.com/questions/528281/how-can-i-include-an-yaml-file-inside-another
         """
-        filename = abspath(self.construct_scalar(node))
+        filename = os.path.join(ROOT_DIR, self.construct_scalar(node))
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 return yaml.load(f, Loader)
         else:
             raise IOError("Unknown included file: {}".format(filename))
 
+    def importer(self, node):
+        """
+        Method for importing top-level entry from another file
+        """
+        filename, key = self.construct_scalar(node).split(' ')
+        filename = os.path.join(ROOT_DIR, filename)
+        if not os.path.exists(filename):
+            raise IOError("Unknown import file: {}".format(filename))
+
+        data = load_config(filename)
+        if not isinstance(data, dict):
+            raise IOError("The imported YAML data must contain a dict() at the top level.")
+        if key not in data:
+            raise IOError("The imported YAML data does not contain the desired key.")
+        return data[key]
 
 def yaml_load(filename):
     """
@@ -99,6 +101,7 @@ def yaml_load(filename):
 
     # Attach the include constructor to our custom loader.
     Loader.add_constructor('!include', Loader.include)
+    Loader.add_constructor('!import', Loader.importer)
 
     if not os.path.exists(filename):
         raise IOError("The supplied configuration file was not found: {}".format(filename))
@@ -123,5 +126,8 @@ def load_config(config_file, **kwargs):
     for value in out.itervalues():
         for k, v in kwargs.iteritems():
             if k in value:
-                value[k] = v
+                if hasattr(value[k], 'update'):
+                    value[k].update(v)
+                else:
+                    value[k] = v
     return out

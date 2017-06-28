@@ -30,11 +30,11 @@ class Item(object):
     List item object.
 
     Args:
-      filename[str]: The absoulte path to the file.
+      filename[str]: The absolute path to the file.
       repo[str]: The repository url to append the relative path.
     """
     def __init__(self, filename, repo):
-        self.filename = MooseDocs.relpath(filename).lstrip('/')
+        self.filename = filename.replace(MooseDocs.ROOT_DIR, '').lstrip('/')
         self.remote = '{}/{}'.format(repo.rstrip('/'), self.filename)
 
     def html(self):
@@ -47,13 +47,11 @@ class Item(object):
         a.text = self.filename
         return el
 
-
 class MooseLinkDatabase(object):
     """
     Creates a database for creating links to input files and source code.
 
     Args:
-      root[str]: The repository root directory.
       repo[str]: The GitHub/GitLab url to append filename for creating hyperlink.
       links[dict]: A dictionary of paths to search, with the key being the heading and the
                    value being a list of paths.
@@ -63,7 +61,7 @@ class MooseLinkDatabase(object):
     HEADER_RE = re.compile(r'\bpublic\s+(?P<key>\w+)\b')
 
     # This object is passed a general config dict() to it may have other arguments.
-    def __init__(self, repo=None, links=None, **kwargs): #pylint: disable=unused-argument
+    def __init__(self, repo=None, links=None):
         self._repo = repo
         self.inputs = collections.OrderedDict()
         self.children = collections.OrderedDict()
@@ -73,7 +71,7 @@ class MooseLinkDatabase(object):
             self.children[key] = dict()
 
             for path in paths:
-                for base, _, files in os.walk(MooseDocs.abspath(path), topdown=False):
+                for base, _, files in os.walk(os.path.join(MooseDocs.ROOT_DIR, path)):
                     for filename in files:
                         full_name = os.path.join(base, filename)
                         if filename.endswith('.i'):
@@ -96,5 +94,5 @@ class MooseLinkDatabase(object):
             for match in re.finditer(regex, fid.read()):
                 key = match.group('key')
                 if key not in database:
-                    database[key] = []
-                database[key].append(Item(filename, self._repo))
+                    database[key] = set()
+                database[key].add(Item(filename, self._repo))
