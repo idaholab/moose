@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVWENOSlopeLimiting
+!syntax description /UserObjects/CNSFVWENOSlopeLimiting
 
-!parameters /UserObjects/CNSFVWENOSlopeLimiting
+!syntax parameters /UserObjects/CNSFVWENOSlopeLimiting
 
-!inputfiles /UserObjects/CNSFVWENOSlopeLimiting
+!syntax inputs /UserObjects/CNSFVWENOSlopeLimiting
 
-!childobjects /UserObjects/CNSFVWENOSlopeLimiting
+!syntax children /UserObjects/CNSFVWENOSlopeLimiting

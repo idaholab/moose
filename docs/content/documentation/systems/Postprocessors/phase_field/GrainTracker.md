@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainTracker
-!description /Postprocessors/GrainTracker
+!syntax description /Postprocessors/GrainTracker
 
-!parameters /Postprocessors/GrainTracker
+!syntax parameters /Postprocessors/GrainTracker
 
-!inputfiles /Postprocessors/GrainTracker
+!syntax inputs /Postprocessors/GrainTracker
 
-!childobjects /Postprocessors/GrainTracker
+!syntax children /Postprocessors/GrainTracker

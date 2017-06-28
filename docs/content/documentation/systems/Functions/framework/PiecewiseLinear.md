@@ -1,6 +1,5 @@
 # PiecewiseLinear
-
-!description /Functions/PiecewiseLinear
+!syntax description /Functions/PiecewiseLinear
 
 ## Description
 
@@ -22,8 +21,8 @@ x data, it returns the y value associated with the closest x data point.
 ## Example Input Syntax
 !listing test/tests/misc/check_error/function_file_test1.i block=Functions
 
-!parameters /Functions/PiecewiseLinear
+!syntax parameters /Functions/PiecewiseLinear
 
-!inputfiles /Functions/PiecewiseLinear
+!syntax inputs /Functions/PiecewiseLinear
 
-!childobjects /Functions/PiecewiseLinear
+!syntax children /Functions/PiecewiseLinear

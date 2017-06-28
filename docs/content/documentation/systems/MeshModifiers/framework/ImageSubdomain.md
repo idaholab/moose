@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ImageSubdomain
-!description /MeshModifiers/ImageSubdomain
+!syntax description /MeshModifiers/ImageSubdomain
 
-!parameters /MeshModifiers/ImageSubdomain
+!syntax parameters /MeshModifiers/ImageSubdomain
 
-!inputfiles /MeshModifiers/ImageSubdomain
+!syntax inputs /MeshModifiers/ImageSubdomain
 
-!childobjects /MeshModifiers/ImageSubdomain
+!syntax children /MeshModifiers/ImageSubdomain

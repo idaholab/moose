@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialRealDenseMatrixAux
-!description /AuxKernels/MaterialRealDenseMatrixAux
+!syntax description /AuxKernels/MaterialRealDenseMatrixAux
 
-!parameters /AuxKernels/MaterialRealDenseMatrixAux
+!syntax parameters /AuxKernels/MaterialRealDenseMatrixAux
 
-!inputfiles /AuxKernels/MaterialRealDenseMatrixAux
+!syntax inputs /AuxKernels/MaterialRealDenseMatrixAux
 
-!childobjects /AuxKernels/MaterialRealDenseMatrixAux
+!syntax children /AuxKernels/MaterialRealDenseMatrixAux

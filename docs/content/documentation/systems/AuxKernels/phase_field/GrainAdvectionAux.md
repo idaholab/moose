@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainAdvectionAux
-!description /AuxKernels/GrainAdvectionAux
+!syntax description /AuxKernels/GrainAdvectionAux
 
-!parameters /AuxKernels/GrainAdvectionAux
+!syntax parameters /AuxKernels/GrainAdvectionAux
 
-!inputfiles /AuxKernels/GrainAdvectionAux
+!syntax inputs /AuxKernels/GrainAdvectionAux
 
-!childobjects /AuxKernels/GrainAdvectionAux
+!syntax children /AuxKernels/GrainAdvectionAux

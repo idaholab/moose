@@ -1,5 +1,5 @@
 # KKSACBulkF
-!description /Kernels/KKSACBulkF
+!syntax description /Kernels/KKSACBulkF
 
 KKS Allen-Cahn kernel for the terms without a direct composition dependence.
 
@@ -53,8 +53,8 @@ which is computed using the same code. The off-diagonal Jacobian contribution is
 also multiplied by the Allen-Cahn mobility $L$ at each point for consistency with
 the other terms in the Allen-Cahn equation.
 
-!parameters /Kernels/KKSACBulkF
+!syntax parameters /Kernels/KKSACBulkF
 
-!inputfiles /Kernels/KKSACBulkF
+!syntax inputs /Kernels/KKSACBulkF
 
-!childobjects /Kernels/KKSACBulkF
+!syntax children /Kernels/KKSACBulkF

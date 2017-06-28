@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeRSphericalSmallStrain
-!description /Materials/ComputeRSphericalSmallStrain
+!syntax description /Materials/ComputeRSphericalSmallStrain
 
-!parameters /Materials/ComputeRSphericalSmallStrain
+!syntax parameters /Materials/ComputeRSphericalSmallStrain
 
-!inputfiles /Materials/ComputeRSphericalSmallStrain
+!syntax inputs /Materials/ComputeRSphericalSmallStrain
 
-!childobjects /Materials/ComputeRSphericalSmallStrain
+!syntax children /Materials/ComputeRSphericalSmallStrain

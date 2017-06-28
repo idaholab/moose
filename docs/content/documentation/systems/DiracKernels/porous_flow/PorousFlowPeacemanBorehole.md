@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPeacemanBorehole
-!description /DiracKernels/PorousFlowPeacemanBorehole
+!syntax description /DiracKernels/PorousFlowPeacemanBorehole
 
-!parameters /DiracKernels/PorousFlowPeacemanBorehole
+!syntax parameters /DiracKernels/PorousFlowPeacemanBorehole
 
-!inputfiles /DiracKernels/PorousFlowPeacemanBorehole
+!syntax inputs /DiracKernels/PorousFlowPeacemanBorehole
 
-!childobjects /DiracKernels/PorousFlowPeacemanBorehole
+!syntax children /DiracKernels/PorousFlowPeacemanBorehole

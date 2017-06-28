@@ -1,5 +1,5 @@
 #TabulatedFluidProperties
-!description /Modules/FluidProperties/TabulatedFluidProperties
+!syntax description /Modules/FluidProperties/TabulatedFluidProperties
 
 The TabulatedFluidProperties UserObject calculates the density, internal energy
 and enthalpy of the fluid using bicubic spline interpolation on data provided
@@ -70,8 +70,8 @@ A function to write generated data to file using the correct format is provided
 to allow suitable files of fluid property data to be generated using the FluidProperties
 module UserObjects.
 
-!parameters /Modules/FluidProperties/TabulatedFluidProperties
+!syntax parameters /Modules/FluidProperties/TabulatedFluidProperties
 
-!inputfiles /Modules/FluidProperties/TabulatedFluidProperties
+!syntax inputs /Modules/FluidProperties/TabulatedFluidProperties
 
-!childobjects /Modules/FluidProperties/TabulatedFluidProperties
+!syntax children /Modules/FluidProperties/TabulatedFluidProperties

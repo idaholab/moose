@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # OutOfPlanePressure
-!description /Kernels/OutOfPlanePressure
+!syntax description /Kernels/OutOfPlanePressure
 
-!parameters /Kernels/OutOfPlanePressure
+!syntax parameters /Kernels/OutOfPlanePressure
 
-!inputfiles /Kernels/OutOfPlanePressure
+!syntax inputs /Kernels/OutOfPlanePressure
 
-!childobjects /Kernels/OutOfPlanePressure
+!syntax children /Kernels/OutOfPlanePressure

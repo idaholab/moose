@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsHardeningConstant
-!description /UserObjects/TensorMechanicsHardeningConstant
+!syntax description /UserObjects/TensorMechanicsHardeningConstant
 
-!parameters /UserObjects/TensorMechanicsHardeningConstant
+!syntax parameters /UserObjects/TensorMechanicsHardeningConstant
 
-!inputfiles /UserObjects/TensorMechanicsHardeningConstant
+!syntax inputs /UserObjects/TensorMechanicsHardeningConstant
 
-!childobjects /UserObjects/TensorMechanicsHardeningConstant
+!syntax children /UserObjects/TensorMechanicsHardeningConstant

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDiffusivityConst
-!description /Materials/PorousFlowDiffusivityConst
+!syntax description /Materials/PorousFlowDiffusivityConst
 
-!parameters /Materials/PorousFlowDiffusivityConst
+!syntax parameters /Materials/PorousFlowDiffusivityConst
 
-!inputfiles /Materials/PorousFlowDiffusivityConst
+!syntax inputs /Materials/PorousFlowDiffusivityConst
 
-!childobjects /Materials/PorousFlowDiffusivityConst
+!syntax children /Materials/PorousFlowDiffusivityConst

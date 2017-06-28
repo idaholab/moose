@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPiecewiseLinearSink
-!description /BCs/PorousFlowPiecewiseLinearSink
+!syntax description /BCs/PorousFlowPiecewiseLinearSink
 
-!parameters /BCs/PorousFlowPiecewiseLinearSink
+!syntax parameters /BCs/PorousFlowPiecewiseLinearSink
 
-!inputfiles /BCs/PorousFlowPiecewiseLinearSink
+!syntax inputs /BCs/PorousFlowPiecewiseLinearSink
 
-!childobjects /BCs/PorousFlowPiecewiseLinearSink
+!syntax children /BCs/PorousFlowPiecewiseLinearSink

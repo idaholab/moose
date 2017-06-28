@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HyperElasticPhaseFieldIsoDamage
-!description /Materials/HyperElasticPhaseFieldIsoDamage
+!syntax description /Materials/HyperElasticPhaseFieldIsoDamage
 
-!parameters /Materials/HyperElasticPhaseFieldIsoDamage
+!syntax parameters /Materials/HyperElasticPhaseFieldIsoDamage
 
-!inputfiles /Materials/HyperElasticPhaseFieldIsoDamage
+!syntax inputs /Materials/HyperElasticPhaseFieldIsoDamage
 
-!childobjects /Materials/HyperElasticPhaseFieldIsoDamage
+!syntax children /Materials/HyperElasticPhaseFieldIsoDamage

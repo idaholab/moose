@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ParsedAux
-!description /AuxKernels/ParsedAux
+!syntax description /AuxKernels/ParsedAux
 
-!parameters /AuxKernels/ParsedAux
+!syntax parameters /AuxKernels/ParsedAux
 
-!inputfiles /AuxKernels/ParsedAux
+!syntax inputs /AuxKernels/ParsedAux
 
-!childobjects /AuxKernels/ParsedAux
+!syntax children /AuxKernels/ParsedAux

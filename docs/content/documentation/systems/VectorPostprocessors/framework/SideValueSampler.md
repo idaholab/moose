@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideValueSampler
-!description /VectorPostprocessors/SideValueSampler
+!syntax description /VectorPostprocessors/SideValueSampler
 
-!parameters /VectorPostprocessors/SideValueSampler
+!syntax parameters /VectorPostprocessors/SideValueSampler
 
-!inputfiles /VectorPostprocessors/SideValueSampler
+!syntax inputs /VectorPostprocessors/SideValueSampler
 
-!childobjects /VectorPostprocessors/SideValueSampler
+!syntax children /VectorPostprocessors/SideValueSampler

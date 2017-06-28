@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FeatureFloodCountAux
-!description /AuxKernels/FeatureFloodCountAux
+!syntax description /AuxKernels/FeatureFloodCountAux
 
-!parameters /AuxKernels/FeatureFloodCountAux
+!syntax parameters /AuxKernels/FeatureFloodCountAux
 
-!inputfiles /AuxKernels/FeatureFloodCountAux
+!syntax inputs /AuxKernels/FeatureFloodCountAux
 
-!childobjects /AuxKernels/FeatureFloodCountAux
+!syntax children /AuxKernels/FeatureFloodCountAux

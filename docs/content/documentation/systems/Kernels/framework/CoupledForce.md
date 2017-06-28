@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CoupledForce
-!description /Kernels/CoupledForce
+!syntax description /Kernels/CoupledForce
 
-!parameters /Kernels/CoupledForce
+!syntax parameters /Kernels/CoupledForce
 
-!inputfiles /Kernels/CoupledForce
+!syntax inputs /Kernels/CoupledForce
 
-!childobjects /Kernels/CoupledForce
+!syntax children /Kernels/CoupledForce

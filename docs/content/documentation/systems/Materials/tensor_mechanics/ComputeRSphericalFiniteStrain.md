@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeRSphericalFiniteStrain
-!description /Materials/ComputeRSphericalFiniteStrain
+!syntax description /Materials/ComputeRSphericalFiniteStrain
 
-!parameters /Materials/ComputeRSphericalFiniteStrain
+!syntax parameters /Materials/ComputeRSphericalFiniteStrain
 
-!inputfiles /Materials/ComputeRSphericalFiniteStrain
+!syntax inputs /Materials/ComputeRSphericalFiniteStrain
 
-!childobjects /Materials/ComputeRSphericalFiniteStrain
+!syntax children /Materials/ComputeRSphericalFiniteStrain

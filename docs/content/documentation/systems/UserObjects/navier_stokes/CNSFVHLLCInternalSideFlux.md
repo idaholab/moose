@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVHLLCInternalSideFlux
+!syntax description /UserObjects/CNSFVHLLCInternalSideFlux
 
-!parameters /UserObjects/CNSFVHLLCInternalSideFlux
+!syntax parameters /UserObjects/CNSFVHLLCInternalSideFlux
 
-!inputfiles /UserObjects/CNSFVHLLCInternalSideFlux
+!syntax inputs /UserObjects/CNSFVHLLCInternalSideFlux
 
-!childobjects /UserObjects/CNSFVHLLCInternalSideFlux
+!syntax children /UserObjects/CNSFVHLLCInternalSideFlux

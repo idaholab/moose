@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowMassVolumetricExpansion
-!description /Kernels/PorousFlowMassVolumetricExpansion
+!syntax description /Kernels/PorousFlowMassVolumetricExpansion
 
-!parameters /Kernels/PorousFlowMassVolumetricExpansion
+!syntax parameters /Kernels/PorousFlowMassVolumetricExpansion
 
-!inputfiles /Kernels/PorousFlowMassVolumetricExpansion
+!syntax inputs /Kernels/PorousFlowMassVolumetricExpansion
 
-!childobjects /Kernels/PorousFlowMassVolumetricExpansion
+!syntax children /Kernels/PorousFlowMassVolumetricExpansion

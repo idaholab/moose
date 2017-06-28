@@ -70,9 +70,9 @@ $$ (\nabla \phi_j, \nabla \psi_i)\quad \forall\,\psi_i$$
 
 The diffusion kernel header and implementation files are:
 
-!text framework/include/kernels/Diffusion.h max-height=400px overflow-y=scroll
+!listing framework/include/kernels/Diffusion.h max-height=400px overflow-y=scroll
 
-!text framework/src/kernels/Diffusion.C max-height=400px overflow-y=scroll
+!listing framework/src/kernels/Diffusion.C max-height=400px overflow-y=scroll
 
 Before a custom physics kernel is available for use, it must be registered in your application.
 This is done in e.g. `src/base/YourApp.C` for the YourApp application.
@@ -165,4 +165,4 @@ return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 Several specialized kernel types exist in MOOSE each with useful
 functionality.  Details for each are in the sections below.
 
-!subobjects /Kernels
+!syntax objects /Kernels

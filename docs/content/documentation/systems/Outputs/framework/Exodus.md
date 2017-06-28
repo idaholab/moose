@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Exodus
-!description /Outputs/Exodus
+!syntax description /Outputs/Exodus
 
-!parameters /Outputs/Exodus
+!syntax parameters /Outputs/Exodus
 
-!inputfiles /Outputs/Exodus
+!syntax inputs /Outputs/Exodus
 
-!childobjects /Outputs/Exodus
+!syntax children /Outputs/Exodus

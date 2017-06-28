@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticIsotropicSD
-!description /UserObjects/TensorMechanicsPlasticIsotropicSD
+!syntax description /UserObjects/TensorMechanicsPlasticIsotropicSD
 
-!parameters /UserObjects/TensorMechanicsPlasticIsotropicSD
+!syntax parameters /UserObjects/TensorMechanicsPlasticIsotropicSD
 
-!inputfiles /UserObjects/TensorMechanicsPlasticIsotropicSD
+!syntax inputs /UserObjects/TensorMechanicsPlasticIsotropicSD
 
-!childobjects /UserObjects/TensorMechanicsPlasticIsotropicSD
+!syntax children /UserObjects/TensorMechanicsPlasticIsotropicSD

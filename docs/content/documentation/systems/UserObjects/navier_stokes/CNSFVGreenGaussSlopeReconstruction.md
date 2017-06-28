@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVGreenGaussSlopeReconstruction
+!syntax description /UserObjects/CNSFVGreenGaussSlopeReconstruction
 
-!parameters /UserObjects/CNSFVGreenGaussSlopeReconstruction
+!syntax parameters /UserObjects/CNSFVGreenGaussSlopeReconstruction
 
-!inputfiles /UserObjects/CNSFVGreenGaussSlopeReconstruction
+!syntax inputs /UserObjects/CNSFVGreenGaussSlopeReconstruction
 
-!childobjects /UserObjects/CNSFVGreenGaussSlopeReconstruction
+!syntax children /UserObjects/CNSFVGreenGaussSlopeReconstruction

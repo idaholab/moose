@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # KKSGlobalFreeEnergy
-!description /AuxKernels/KKSGlobalFreeEnergy
+!syntax description /AuxKernels/KKSGlobalFreeEnergy
 
-!parameters /AuxKernels/KKSGlobalFreeEnergy
+!syntax parameters /AuxKernels/KKSGlobalFreeEnergy
 
-!inputfiles /AuxKernels/KKSGlobalFreeEnergy
+!syntax inputs /AuxKernels/KKSGlobalFreeEnergy
 
-!childobjects /AuxKernels/KKSGlobalFreeEnergy
+!syntax children /AuxKernels/KKSGlobalFreeEnergy

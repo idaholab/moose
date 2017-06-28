@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConservativeAdvection
-!description /Kernels/ConservativeAdvection
+!syntax description /Kernels/ConservativeAdvection
 
-!parameters /Kernels/ConservativeAdvection
+!syntax parameters /Kernels/ConservativeAdvection
 
-!inputfiles /Kernels/ConservativeAdvection
+!syntax inputs /Kernels/ConservativeAdvection
 
-!childobjects /Kernels/ConservativeAdvection
+!syntax children /Kernels/ConservativeAdvection

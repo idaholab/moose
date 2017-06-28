@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlow1PhaseP_BW
-!description /Materials/PorousFlow1PhaseP_BW
+!syntax description /Materials/PorousFlow1PhaseP_BW
 
-!parameters /Materials/PorousFlow1PhaseP_BW
+!syntax parameters /Materials/PorousFlow1PhaseP_BW
 
-!inputfiles /Materials/PorousFlow1PhaseP_BW
+!syntax inputs /Materials/PorousFlow1PhaseP_BW
 
-!childobjects /Materials/PorousFlow1PhaseP_BW
+!syntax children /Materials/PorousFlow1PhaseP_BW

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # IterationAdaptiveDT
-!description /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax description /Executioner/TimeStepper/IterationAdaptiveDT
 
-!parameters /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax parameters /Executioner/TimeStepper/IterationAdaptiveDT
 
-!inputfiles /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax inputs /Executioner/TimeStepper/IterationAdaptiveDT
 
-!childobjects /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax children /Executioner/TimeStepper/IterationAdaptiveDT

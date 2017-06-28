@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PolycrystalElasticDrivingForce System
-!parameters /Kernels/PolycrystalElasticDrivingForce
+!syntax objects /Kernels/PolycrystalElasticDrivingForce
 
+!syntax subsystems /Kernels/PolycrystalElasticDrivingForce
+
+!syntax actions /Kernels/PolycrystalElasticDrivingForce

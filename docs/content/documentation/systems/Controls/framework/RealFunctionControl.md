@@ -17,8 +17,8 @@ Notice that the "parameter" input parameter is expecting a parameter name which 
 in various forms.
 !include docs/content/documentation/systems/Controls/framework/TimePeriod.md re=For a dis(.*?)section\.
 
-!parameters /Controls/RealFunctionControl
+!syntax parameters /Controls/RealFunctionControl
 
-!inputfiles /Controls/RealFunctionControl
+!syntax inputs /Controls/RealFunctionControl
 
-!childobjects /Controls/RealFunctionControl
+!syntax children /Controls/RealFunctionControl

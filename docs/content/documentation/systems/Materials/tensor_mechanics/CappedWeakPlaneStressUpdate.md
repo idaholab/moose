@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CappedWeakPlaneStressUpdate
-!description /Materials/CappedWeakPlaneStressUpdate
+!syntax description /Materials/CappedWeakPlaneStressUpdate
 
-!parameters /Materials/CappedWeakPlaneStressUpdate
+!syntax parameters /Materials/CappedWeakPlaneStressUpdate
 
-!inputfiles /Materials/CappedWeakPlaneStressUpdate
+!syntax inputs /Materials/CappedWeakPlaneStressUpdate
 
-!childobjects /Materials/CappedWeakPlaneStressUpdate
+!syntax children /Materials/CappedWeakPlaneStressUpdate

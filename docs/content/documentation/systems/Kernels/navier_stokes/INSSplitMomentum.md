@@ -1,7 +1,7 @@
-!description /Kernels/INSSplitMomentum
+!syntax description /Kernels/INSSplitMomentum
 
-!parameters /Kernels/INSSplitMomentum
+!syntax parameters /Kernels/INSSplitMomentum
 
-!inputfiles /Kernels/INSSplitMomentum
+!syntax inputs /Kernels/INSSplitMomentum
 
-!childobjects /Kernels/INSSplitMomentum
+!syntax children /Kernels/INSSplitMomentum

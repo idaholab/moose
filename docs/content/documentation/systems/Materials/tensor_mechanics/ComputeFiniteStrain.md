@@ -1,6 +1,6 @@
 #ComputeFiniteStrain
 
-!description /Materials/ComputeFiniteStrain
+!syntax description /Materials/ComputeFiniteStrain
 
 ##Description
 The finite strain mechanics approach used in the MOOSE tensor_mechanics module is the incremental corotational form from [Rashid 1993](http://onlinelibrary.wiley.com/doi/10.1002/nme.1620362302/abstract).
@@ -81,10 +81,10 @@ $$
 where $\mathrm{av}_{el}()$ is the average value for the entire element. The strain increment and the rotation increment are calculated in `computeQpStrain()`. Once the strain increment is calculated, it is added to the total strain from $t_n$. The total strain from $t_{n+1}$ must then be rotated using the rotation increment.
 
 
-!parameters /Materials/ComputeFiniteStrain
+!syntax parameters /Materials/ComputeFiniteStrain
 
-!inputfiles /Materials/ComputeFiniteStrain
+!syntax inputs /Materials/ComputeFiniteStrain
 
 !listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress
 
-!childobjects /Materials/ComputeFiniteStrain
+!syntax children /Materials/ComputeFiniteStrain

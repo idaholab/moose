@@ -1,5 +1,5 @@
 # LangevinNoise
-!description /Kernels/LangevinNoise
+!syntax description /Kernels/LangevinNoise
 
 Adds a uniform noise source term with the weak form
 
@@ -14,8 +14,8 @@ as a location dependent mask for the source term.
 !!! warning
     This kernel does not produce parallel reproducible results.
 
-!parameters /Kernels/LangevinNoise
+!syntax parameters /Kernels/LangevinNoise
 
-!inputfiles /Kernels/LangevinNoise
+!syntax inputs /Kernels/LangevinNoise
 
-!childobjects /Kernels/LangevinNoise
+!syntax children /Kernels/LangevinNoise

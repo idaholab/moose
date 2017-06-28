@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialRealVectorValueAux
-!description /AuxKernels/MaterialRealVectorValueAux
+!syntax description /AuxKernels/MaterialRealVectorValueAux
 
-!parameters /AuxKernels/MaterialRealVectorValueAux
+!syntax parameters /AuxKernels/MaterialRealVectorValueAux
 
-!inputfiles /AuxKernels/MaterialRealVectorValueAux
+!syntax inputs /AuxKernels/MaterialRealVectorValueAux
 
-!childobjects /AuxKernels/MaterialRealVectorValueAux
+!syntax children /AuxKernels/MaterialRealVectorValueAux

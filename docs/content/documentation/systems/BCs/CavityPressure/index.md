@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CavityPressure System
-!parameters /BCs/CavityPressure
+!syntax objects /BCs/CavityPressure
 
+!syntax subsystems /BCs/CavityPressure
+
+!syntax actions /BCs/CavityPressure

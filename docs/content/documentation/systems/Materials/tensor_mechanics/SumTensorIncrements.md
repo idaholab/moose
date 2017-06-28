@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SumTensorIncrements
-!description /Materials/SumTensorIncrements
+!syntax description /Materials/SumTensorIncrements
 
-!parameters /Materials/SumTensorIncrements
+!syntax parameters /Materials/SumTensorIncrements
 
-!inputfiles /Materials/SumTensorIncrements
+!syntax inputs /Materials/SumTensorIncrements
 
-!childobjects /Materials/SumTensorIncrements
+!syntax children /Materials/SumTensorIncrements

@@ -1,7 +1,7 @@
-!description /BCs/NSEnergyInviscidSpecifiedBC
+!syntax description /BCs/NSEnergyInviscidSpecifiedBC
 
-!parameters /BCs/NSEnergyInviscidSpecifiedBC
+!syntax parameters /BCs/NSEnergyInviscidSpecifiedBC
 
-!inputfiles /BCs/NSEnergyInviscidSpecifiedBC
+!syntax inputs /BCs/NSEnergyInviscidSpecifiedBC
 
-!childobjects /BCs/NSEnergyInviscidSpecifiedBC
+!syntax children /BCs/NSEnergyInviscidSpecifiedBC

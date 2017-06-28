@@ -52,7 +52,7 @@ The tensor mechanics materials use a modular system where the main tensors used 
 !!! info "Three Tensors Are Required for a Mechanics Problem"
     The three tensors that must be defined for any mechanics problem are the the strain $\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mathcal{C}}$, and the stress $\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain) $\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.
 
-!media docs/media/tensor_mechanics-IntroPlugNPlay.png width=800 float=right caption=Figure 1: Tensors required to fully describe a mechanics material.
+!media media/tensor_mechanics-IntroPlugNPlay.png width=800 float=right caption=Figure 1: Tensors required to fully describe a mechanics material.
 
 
 At times, a user may need to define multiple mechanics properties over a single block. For this reason, all material properties can be prepended by a name defined by the input parameter `base_name`.

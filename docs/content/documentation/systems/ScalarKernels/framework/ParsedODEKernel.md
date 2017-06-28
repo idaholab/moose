@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ParsedODEKernel
-!description /ScalarKernels/ParsedODEKernel
+!syntax description /ScalarKernels/ParsedODEKernel
 
-!parameters /ScalarKernels/ParsedODEKernel
+!syntax parameters /ScalarKernels/ParsedODEKernel
 
-!inputfiles /ScalarKernels/ParsedODEKernel
+!syntax inputs /ScalarKernels/ParsedODEKernel
 
-!childobjects /ScalarKernels/ParsedODEKernel
+!syntax children /ScalarKernels/ParsedODEKernel

@@ -1,7 +1,7 @@
-!description /ICs/CNSFVPressureIC
+!syntax description /ICs/CNSFVPressureIC
 
-!parameters /ICs/CNSFVPressureIC
+!syntax parameters /ICs/CNSFVPressureIC
 
-!inputfiles /ICs/CNSFVPressureIC
+!syntax inputs /ICs/CNSFVPressureIC
 
-!childobjects /ICs/CNSFVPressureIC
+!syntax children /ICs/CNSFVPressureIC

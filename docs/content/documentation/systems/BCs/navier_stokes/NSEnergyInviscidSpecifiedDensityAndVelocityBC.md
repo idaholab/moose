@@ -1,7 +1,7 @@
-!description /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
+!syntax description /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
 
-!parameters /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
+!syntax parameters /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
 
-!inputfiles /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
+!syntax inputs /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
 
-!childobjects /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
+!syntax children /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC

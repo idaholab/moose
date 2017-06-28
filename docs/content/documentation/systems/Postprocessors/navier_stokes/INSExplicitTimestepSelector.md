@@ -1,7 +1,7 @@
-!description /Postprocessors/INSExplicitTimestepSelector
+!syntax description /Postprocessors/INSExplicitTimestepSelector
 
-!parameters /Postprocessors/INSExplicitTimestepSelector
+!syntax parameters /Postprocessors/INSExplicitTimestepSelector
 
-!inputfiles /Postprocessors/INSExplicitTimestepSelector
+!syntax inputs /Postprocessors/INSExplicitTimestepSelector
 
-!childobjects /Postprocessors/INSExplicitTimestepSelector
+!syntax children /Postprocessors/INSExplicitTimestepSelector

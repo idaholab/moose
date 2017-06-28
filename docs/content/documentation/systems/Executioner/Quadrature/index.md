@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Quadrature System
-!parameters /Executioner/Quadrature
+!syntax objects /Executioner/Quadrature
 
+!syntax subsystems /Executioner/Quadrature
+
+!syntax actions /Executioner/Quadrature

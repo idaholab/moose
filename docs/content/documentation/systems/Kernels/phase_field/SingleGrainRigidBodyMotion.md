@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SingleGrainRigidBodyMotion
-!description /Kernels/SingleGrainRigidBodyMotion
+!syntax description /Kernels/SingleGrainRigidBodyMotion
 
-!parameters /Kernels/SingleGrainRigidBodyMotion
+!syntax parameters /Kernels/SingleGrainRigidBodyMotion
 
-!inputfiles /Kernels/SingleGrainRigidBodyMotion
+!syntax inputs /Kernels/SingleGrainRigidBodyMotion
 
-!childobjects /Kernels/SingleGrainRigidBodyMotion
+!syntax children /Kernels/SingleGrainRigidBodyMotion

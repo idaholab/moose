@@ -1,6 +1,6 @@
 
 # DerivativeTwoPhaseMaterial
-!description /Materials/DerivativeTwoPhaseMaterial
+!syntax description /Materials/DerivativeTwoPhaseMaterial
 
 The simplified **two-phase model** uses a single order parameter to switch between the two phases. A global free energy is constructed using a meta material class that combines the phase free energies.
 
@@ -12,11 +12,11 @@ $$
 F = \left(1-h(\eta)\right) F_a + h(\eta)F_b + Wg(\eta)
 $$
 
-!parameters /Materials/DerivativeTwoPhaseMaterial
+!syntax parameters /Materials/DerivativeTwoPhaseMaterial
 
-!inputfiles /Materials/DerivativeTwoPhaseMaterial
+!syntax inputs /Materials/DerivativeTwoPhaseMaterial
 
 Note that the phase free energies usually have single well character. The global free energy
 landscape will however have a double well character in the examples above.
 
-!childobjects /Materials/DerivativeTwoPhaseMaterial
+!syntax children /Materials/DerivativeTwoPhaseMaterial

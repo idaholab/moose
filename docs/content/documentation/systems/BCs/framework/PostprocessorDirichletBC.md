@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PostprocessorDirichletBC
-!description /BCs/PostprocessorDirichletBC
+!syntax description /BCs/PostprocessorDirichletBC
 
-!parameters /BCs/PostprocessorDirichletBC
+!syntax parameters /BCs/PostprocessorDirichletBC
 
-!inputfiles /BCs/PostprocessorDirichletBC
+!syntax inputs /BCs/PostprocessorDirichletBC
 
-!childobjects /BCs/PostprocessorDirichletBC
+!syntax children /BCs/PostprocessorDirichletBC

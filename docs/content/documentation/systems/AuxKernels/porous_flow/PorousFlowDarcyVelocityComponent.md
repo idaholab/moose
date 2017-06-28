@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDarcyVelocityComponent
-!description /AuxKernels/PorousFlowDarcyVelocityComponent
+!syntax description /AuxKernels/PorousFlowDarcyVelocityComponent
 
-!parameters /AuxKernels/PorousFlowDarcyVelocityComponent
+!syntax parameters /AuxKernels/PorousFlowDarcyVelocityComponent
 
-!inputfiles /AuxKernels/PorousFlowDarcyVelocityComponent
+!syntax inputs /AuxKernels/PorousFlowDarcyVelocityComponent
 
-!childobjects /AuxKernels/PorousFlowDarcyVelocityComponent
+!syntax children /AuxKernels/PorousFlowDarcyVelocityComponent

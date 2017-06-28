@@ -1,5 +1,5 @@
 # KKSPhaseConcentration
-!description /Kernels/KKSPhaseConcentration
+!syntax description /Kernels/KKSPhaseConcentration
 
 Enforces the split of the
 concentration into the phase concentrations, weighted by the switching function.
@@ -45,8 +45,8 @@ $$
 J= \phi_j \frac{\partial R}{\partial \eta} = \phi_j \frac{dh}{d\eta}(c_b-c_a)
 $$
 
-!parameters /Kernels/KKSPhaseConcentration
+!syntax parameters /Kernels/KKSPhaseConcentration
 
-!inputfiles /Kernels/KKSPhaseConcentration
+!syntax inputs /Kernels/KKSPhaseConcentration
 
-!childobjects /Kernels/KKSPhaseConcentration
+!syntax children /Kernels/KKSPhaseConcentration

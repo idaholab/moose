@@ -1,5 +1,5 @@
 # MatReaction
-!description /Kernels/MatReaction
+!syntax description /Kernels/MatReaction
 
 Implements
 
@@ -10,8 +10,8 @@ $$
 where $L$ (`mob_name`) is a reaction rate, $v$ is either a coupled variable (`v`)
 or - if not explicitly specified - the non-linear variable the kernel is operating on.
 
-!parameters /Kernels/MatReaction
+!syntax parameters /Kernels/MatReaction
 
-!inputfiles /Kernels/MatReaction
+!syntax inputs /Kernels/MatReaction
 
-!childobjects /Kernels/MatReaction
+!syntax children /Kernels/MatReaction

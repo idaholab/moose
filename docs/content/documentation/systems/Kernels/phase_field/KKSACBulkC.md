@@ -1,5 +1,5 @@
 # KKSACBulkC
-!description /Kernels/KKSACBulkC
+!syntax description /Kernels/KKSACBulkC
 
 KKS Allen-Cahn kernel for the terms with a direct composition dependence.
 An instance of this kernel is needed for each solute species of the problem.
@@ -67,8 +67,8 @@ The off-diagonal Jacobian contributions are again multiplied by the Allen-Cahn
 mobility $L$ at each point for consistency with the other terms in the Allen-Cahn
 equation.
 
-!parameters /Kernels/KKSACBulkC
+!syntax parameters /Kernels/KKSACBulkC
 
-!inputfiles /Kernels/KKSACBulkC
+!syntax inputs /Kernels/KKSACBulkC
 
-!childobjects /Kernels/KKSACBulkC
+!syntax children /Kernels/KKSACBulkC

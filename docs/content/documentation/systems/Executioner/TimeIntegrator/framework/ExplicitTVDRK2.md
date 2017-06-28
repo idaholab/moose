@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ExplicitTVDRK2
-!description /Executioner/TimeIntegrator/ExplicitTVDRK2
+!syntax description /Executioner/TimeIntegrator/ExplicitTVDRK2
 
-!parameters /Executioner/TimeIntegrator/ExplicitTVDRK2
+!syntax parameters /Executioner/TimeIntegrator/ExplicitTVDRK2
 
-!inputfiles /Executioner/TimeIntegrator/ExplicitTVDRK2
+!syntax inputs /Executioner/TimeIntegrator/ExplicitTVDRK2
 
-!childobjects /Executioner/TimeIntegrator/ExplicitTVDRK2
+!syntax children /Executioner/TimeIntegrator/ExplicitTVDRK2

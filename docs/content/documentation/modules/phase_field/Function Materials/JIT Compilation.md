@@ -1,6 +1,6 @@
 # Just in Time Compilation
 
-!media docs/media/phase_field/jitgraph_white.png width=50% padding-left=20px float=right caption=Performance test results for the JIT compile FParser module
+!media media/phase_field/jitgraph_white.png width=50% padding-left=20px float=right caption=Performance test results for the JIT compile FParser module
 
 The version of the _Function Parser_ library that ships with MOOSE contains a just in time (JIT) compilation  feature that is not present in the [upstream version](http://warp.povusers.org/FunctionParser/).
 

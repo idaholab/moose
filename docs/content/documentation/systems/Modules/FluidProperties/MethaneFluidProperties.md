@@ -1,5 +1,5 @@
 # MethaneFluidProperties
-!description /Modules/FluidProperties/MethaneFluidProperties
+!syntax description /Modules/FluidProperties/MethaneFluidProperties
 
 Density of methane is calculated assuming an ideal gas, while all other properties are calculated using
 the formulations provided in \citet{irvine1984}.
@@ -23,11 +23,11 @@ The MethaneFluidProperties UserObject is valid for:
 
 - 280.0 K $\le$ T $\le$ 1080 K
 
-!parameters /Modules/FluidProperties/MethaneFluidProperties
+!syntax parameters /Modules/FluidProperties/MethaneFluidProperties
 
-!inputfiles /Modules/FluidProperties/MethaneFluidProperties
+!syntax inputs /Modules/FluidProperties/MethaneFluidProperties
 
-!childobjects /Modules/FluidProperties/MethaneFluidProperties
+!syntax children /Modules/FluidProperties/MethaneFluidProperties
 
 
 ## References

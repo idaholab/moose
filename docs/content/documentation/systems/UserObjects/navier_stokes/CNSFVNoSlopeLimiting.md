@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVNoSlopeLimiting
+!syntax description /UserObjects/CNSFVNoSlopeLimiting
 
-!parameters /UserObjects/CNSFVNoSlopeLimiting
+!syntax parameters /UserObjects/CNSFVNoSlopeLimiting
 
-!inputfiles /UserObjects/CNSFVNoSlopeLimiting
+!syntax inputs /UserObjects/CNSFVNoSlopeLimiting
 
-!childobjects /UserObjects/CNSFVNoSlopeLimiting
+!syntax children /UserObjects/CNSFVNoSlopeLimiting

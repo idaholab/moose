@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LinearElasticTruss
-!description /Materials/LinearElasticTruss
+!syntax description /Materials/LinearElasticTruss
 
-!parameters /Materials/LinearElasticTruss
+!syntax parameters /Materials/LinearElasticTruss
 
-!inputfiles /Materials/LinearElasticTruss
+!syntax inputs /Materials/LinearElasticTruss
 
-!childobjects /Materials/LinearElasticTruss
+!syntax children /Materials/LinearElasticTruss

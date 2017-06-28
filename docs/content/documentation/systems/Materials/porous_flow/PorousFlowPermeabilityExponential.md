@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPermeabilityExponential
-!description /Materials/PorousFlowPermeabilityExponential
+!syntax description /Materials/PorousFlowPermeabilityExponential
 
-!parameters /Materials/PorousFlowPermeabilityExponential
+!syntax parameters /Materials/PorousFlowPermeabilityExponential
 
-!inputfiles /Materials/PorousFlowPermeabilityExponential
+!syntax inputs /Materials/PorousFlowPermeabilityExponential
 
-!childobjects /Materials/PorousFlowPermeabilityExponential
+!syntax children /Materials/PorousFlowPermeabilityExponential

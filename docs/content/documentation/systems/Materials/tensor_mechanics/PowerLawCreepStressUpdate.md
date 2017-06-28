@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PowerLawCreepStressUpdate
-!description /Materials/PowerLawCreepStressUpdate
+!syntax description /Materials/PowerLawCreepStressUpdate
 
-!parameters /Materials/PowerLawCreepStressUpdate
+!syntax parameters /Materials/PowerLawCreepStressUpdate
 
-!inputfiles /Materials/PowerLawCreepStressUpdate
+!syntax inputs /Materials/PowerLawCreepStressUpdate
 
-!childobjects /Materials/PowerLawCreepStressUpdate
+!syntax children /Materials/PowerLawCreepStressUpdate

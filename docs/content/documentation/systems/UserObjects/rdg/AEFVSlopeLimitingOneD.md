@@ -1,7 +1,7 @@
-!description /UserObjects/AEFVSlopeLimitingOneD
+!syntax description /UserObjects/AEFVSlopeLimitingOneD
 
-!parameters /UserObjects/AEFVSlopeLimitingOneD
+!syntax parameters /UserObjects/AEFVSlopeLimitingOneD
 
-!inputfiles /UserObjects/AEFVSlopeLimitingOneD
+!syntax inputs /UserObjects/AEFVSlopeLimitingOneD
 
-!childobjects /UserObjects/AEFVSlopeLimitingOneD
+!syntax children /UserObjects/AEFVSlopeLimitingOneD

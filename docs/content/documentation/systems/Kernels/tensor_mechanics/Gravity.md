@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Gravity
-!description /Kernels/Gravity
+!syntax description /Kernels/Gravity
 
-!parameters /Kernels/Gravity
+!syntax parameters /Kernels/Gravity
 
-!inputfiles /Kernels/Gravity
+!syntax inputs /Kernels/Gravity
 
-!childobjects /Kernels/Gravity
+!syntax children /Kernels/Gravity

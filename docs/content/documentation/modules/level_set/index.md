@@ -10,7 +10,7 @@ detailed information on the theory and use of the level set module:
 For reference the following tables list the objects contained within the level set module and a brief description
 of there purpose, each object may be selected to navigate to a detailed page.
 
-!systems groups=level_set
+!syntax complete groups=level_set
 
 ## Level Set Module Tasks
 The following additional tasks should be completed to make the level

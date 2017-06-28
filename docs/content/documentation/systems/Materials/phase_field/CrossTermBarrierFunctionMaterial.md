@@ -1,6 +1,6 @@
 
 # CrossTermBarrierFunctionMaterial
-!description /Materials/CrossTermBarrierFunctionMaterial
+!syntax description /Materials/CrossTermBarrierFunctionMaterial
 
 The material provides a function $g(\vec\eta)$ that is parameterized by all
 phase order parameters $\eta$. It calculates a phase transformation barrier energy
@@ -20,8 +20,8 @@ $$
 
 The $W_{ij}$ is a matrix of all coefficients for the pair terms.
 
-!parameters /Materials/CrossTermBarrierFunctionMaterial
+!syntax parameters /Materials/CrossTermBarrierFunctionMaterial
 
-!inputfiles /Materials/CrossTermBarrierFunctionMaterial
+!syntax inputs /Materials/CrossTermBarrierFunctionMaterial
 
-!childobjects /Materials/CrossTermBarrierFunctionMaterial
+!syntax children /Materials/CrossTermBarrierFunctionMaterial

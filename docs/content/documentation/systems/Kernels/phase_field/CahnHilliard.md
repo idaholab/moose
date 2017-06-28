@@ -1,5 +1,5 @@
 # CahnHilliard
-!description /Kernels/CahnHilliard
+!syntax description /Kernels/CahnHilliard
 
 Implements the term
 
@@ -16,8 +16,8 @@ provided by the [function material](../../introduction/FunctionMaterials).
 Note that this makes the assumption that $F$ is _not_ depending on $\nabla c$. The $\nabla c$ dependent terms
 that arise from the gradient interface energy are handled separately in the [`CHInterface`](/CHInterface.md) kernel.
 
-!parameters /Kernels/CahnHilliard
+!syntax parameters /Kernels/CahnHilliard
 
-!inputfiles /Kernels/CahnHilliard
+!syntax inputs /Kernels/CahnHilliard
 
-!childobjects /Kernels/CahnHilliard
+!syntax children /Kernels/CahnHilliard

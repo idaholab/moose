@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FiniteStrainUObasedCP
-!description /Materials/FiniteStrainUObasedCP
+!syntax description /Materials/FiniteStrainUObasedCP
 
-!parameters /Materials/FiniteStrainUObasedCP
+!syntax parameters /Materials/FiniteStrainUObasedCP
 
-!inputfiles /Materials/FiniteStrainUObasedCP
+!syntax inputs /Materials/FiniteStrainUObasedCP
 
-!childobjects /Materials/FiniteStrainUObasedCP
+!syntax children /Materials/FiniteStrainUObasedCP

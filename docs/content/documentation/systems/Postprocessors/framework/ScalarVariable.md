@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ScalarVariable
-!description /Postprocessors/ScalarVariable
+!syntax description /Postprocessors/ScalarVariable
 
-!parameters /Postprocessors/ScalarVariable
+!syntax parameters /Postprocessors/ScalarVariable
 
-!inputfiles /Postprocessors/ScalarVariable
+!syntax inputs /Postprocessors/ScalarVariable
 
-!childobjects /Postprocessors/ScalarVariable
+!syntax children /Postprocessors/ScalarVariable

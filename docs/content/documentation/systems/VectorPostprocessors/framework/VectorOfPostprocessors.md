@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VectorOfPostprocessors
-!description /VectorPostprocessors/VectorOfPostprocessors
+!syntax description /VectorPostprocessors/VectorOfPostprocessors
 
-!parameters /VectorPostprocessors/VectorOfPostprocessors
+!syntax parameters /VectorPostprocessors/VectorOfPostprocessors
 
-!inputfiles /VectorPostprocessors/VectorOfPostprocessors
+!syntax inputs /VectorPostprocessors/VectorOfPostprocessors
 
-!childobjects /VectorPostprocessors/VectorOfPostprocessors
+!syntax children /VectorPostprocessors/VectorOfPostprocessors

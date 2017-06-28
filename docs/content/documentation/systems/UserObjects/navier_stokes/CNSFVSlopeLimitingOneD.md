@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVSlopeLimitingOneD
+!syntax description /UserObjects/CNSFVSlopeLimitingOneD
 
-!parameters /UserObjects/CNSFVSlopeLimitingOneD
+!syntax parameters /UserObjects/CNSFVSlopeLimitingOneD
 
-!inputfiles /UserObjects/CNSFVSlopeLimitingOneD
+!syntax inputs /UserObjects/CNSFVSlopeLimitingOneD
 
-!childobjects /UserObjects/CNSFVSlopeLimitingOneD
+!syntax children /UserObjects/CNSFVSlopeLimitingOneD

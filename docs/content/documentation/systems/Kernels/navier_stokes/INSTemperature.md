@@ -1,7 +1,7 @@
-!description /Kernels/INSTemperature
+!syntax description /Kernels/INSTemperature
 
-!parameters /Kernels/INSTemperature
+!syntax parameters /Kernels/INSTemperature
 
-!inputfiles /Kernels/INSTemperature
+!syntax inputs /Kernels/INSTemperature
 
-!childobjects /Kernels/INSTemperature
+!syntax children /Kernels/INSTemperature

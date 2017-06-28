@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Problem System
-!parameters /Problem
+!syntax objects /Problem
 
-!subsystems /Problem
+!syntax subsystems /Problem
 
+!syntax actions /Problem

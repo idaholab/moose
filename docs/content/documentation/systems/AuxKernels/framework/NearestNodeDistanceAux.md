@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NearestNodeDistanceAux
-!description /AuxKernels/NearestNodeDistanceAux
+!syntax description /AuxKernels/NearestNodeDistanceAux
 
-!parameters /AuxKernels/NearestNodeDistanceAux
+!syntax parameters /AuxKernels/NearestNodeDistanceAux
 
-!inputfiles /AuxKernels/NearestNodeDistanceAux
+!syntax inputs /AuxKernels/NearestNodeDistanceAux
 
-!childobjects /AuxKernels/NearestNodeDistanceAux
+!syntax children /AuxKernels/NearestNodeDistanceAux

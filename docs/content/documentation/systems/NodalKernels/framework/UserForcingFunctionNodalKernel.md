@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # UserForcingFunctionNodalKernel
-!description /NodalKernels/UserForcingFunctionNodalKernel
+!syntax description /NodalKernels/UserForcingFunctionNodalKernel
 
-!parameters /NodalKernels/UserForcingFunctionNodalKernel
+!syntax parameters /NodalKernels/UserForcingFunctionNodalKernel
 
-!inputfiles /NodalKernels/UserForcingFunctionNodalKernel
+!syntax inputs /NodalKernels/UserForcingFunctionNodalKernel
 
-!childobjects /NodalKernels/UserForcingFunctionNodalKernel
+!syntax children /NodalKernels/UserForcingFunctionNodalKernel

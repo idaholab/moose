@@ -1,7 +1,7 @@
-!description /BCs/ImplicitNeumannBC
+!syntax description /BCs/ImplicitNeumannBC
 
-!parameters /BCs/ImplicitNeumannBC
+!syntax parameters /BCs/ImplicitNeumannBC
 
-!inputfiles /BCs/ImplicitNeumannBC
+!syntax inputs /BCs/ImplicitNeumannBC
 
-!childobjects /BCs/ImplicitNeumannBC
+!syntax children /BCs/ImplicitNeumannBC

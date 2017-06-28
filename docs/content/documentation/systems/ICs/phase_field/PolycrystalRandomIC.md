@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PolycrystalRandomIC
-!description /ICs/PolycrystalRandomIC
+!syntax description /ICs/PolycrystalRandomIC
 
-!parameters /ICs/PolycrystalRandomIC
+!syntax parameters /ICs/PolycrystalRandomIC
 
-!inputfiles /ICs/PolycrystalRandomIC
+!syntax inputs /ICs/PolycrystalRandomIC
 
-!childobjects /ICs/PolycrystalRandomIC
+!syntax children /ICs/PolycrystalRandomIC

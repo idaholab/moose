@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AsymmetricCrossTermBarrierFunctionMaterial
-!description /Materials/AsymmetricCrossTermBarrierFunctionMaterial
+!syntax description /Materials/AsymmetricCrossTermBarrierFunctionMaterial
 
-!parameters /Materials/AsymmetricCrossTermBarrierFunctionMaterial
+!syntax parameters /Materials/AsymmetricCrossTermBarrierFunctionMaterial
 
-!inputfiles /Materials/AsymmetricCrossTermBarrierFunctionMaterial
+!syntax inputs /Materials/AsymmetricCrossTermBarrierFunctionMaterial
 
-!childobjects /Materials/AsymmetricCrossTermBarrierFunctionMaterial
+!syntax children /Materials/AsymmetricCrossTermBarrierFunctionMaterial

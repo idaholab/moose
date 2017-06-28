@@ -1,6 +1,6 @@
 
 # DiscreteNucleation
-!description /Materials/DiscreteNucleation
+!syntax description /Materials/DiscreteNucleation
 
 The nucleation material computes a local free energy density contribution
 
@@ -10,8 +10,8 @@ $$
 
 The `DiscreteNucleation` material is part of the [Discrete Nucleation system](Nucleation/Discrete Nucleation.md).
 
-!parameters /Materials/DiscreteNucleation
+!syntax parameters /Materials/DiscreteNucleation
 
-!inputfiles /Materials/DiscreteNucleation
+!syntax inputs /Materials/DiscreteNucleation
 
-!childobjects /Materials/DiscreteNucleation
+!syntax children /Materials/DiscreteNucleation

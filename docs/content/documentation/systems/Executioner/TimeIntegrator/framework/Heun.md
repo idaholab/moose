@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Heun
-!description /Executioner/TimeIntegrator/Heun
+!syntax description /Executioner/TimeIntegrator/Heun
 
-!parameters /Executioner/TimeIntegrator/Heun
+!syntax parameters /Executioner/TimeIntegrator/Heun
 
-!inputfiles /Executioner/TimeIntegrator/Heun
+!syntax inputs /Executioner/TimeIntegrator/Heun
 
-!childobjects /Executioner/TimeIntegrator/Heun
+!syntax children /Executioner/TimeIntegrator/Heun

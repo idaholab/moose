@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElasticEnergyAux
-!description /AuxKernels/ElasticEnergyAux
+!syntax description /AuxKernels/ElasticEnergyAux
 
-!parameters /AuxKernels/ElasticEnergyAux
+!syntax parameters /AuxKernels/ElasticEnergyAux
 
-!inputfiles /AuxKernels/ElasticEnergyAux
+!syntax inputs /AuxKernels/ElasticEnergyAux
 
-!childobjects /AuxKernels/ElasticEnergyAux
+!syntax children /AuxKernels/ElasticEnergyAux

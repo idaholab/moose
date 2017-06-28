@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantDamper
-!description /Dampers/ConstantDamper
+!syntax description /Dampers/ConstantDamper
 
-!parameters /Dampers/ConstantDamper
+!syntax parameters /Dampers/ConstantDamper
 
-!inputfiles /Dampers/ConstantDamper
+!syntax inputs /Dampers/ConstantDamper
 
-!childobjects /Dampers/ConstantDamper
+!syntax children /Dampers/ConstantDamper

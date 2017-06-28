@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PolynomialFreeEnergy
-!description /Materials/PolynomialFreeEnergy
+!syntax description /Materials/PolynomialFreeEnergy
 
-!parameters /Materials/PolynomialFreeEnergy
+!syntax parameters /Materials/PolynomialFreeEnergy
 
-!inputfiles /Materials/PolynomialFreeEnergy
+!syntax inputs /Materials/PolynomialFreeEnergy
 
-!childobjects /Materials/PolynomialFreeEnergy
+!syntax children /Materials/PolynomialFreeEnergy

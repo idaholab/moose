@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementPropertyReadFile
-!description /UserObjects/ElementPropertyReadFile
+!syntax description /UserObjects/ElementPropertyReadFile
 
-!parameters /UserObjects/ElementPropertyReadFile
+!syntax parameters /UserObjects/ElementPropertyReadFile
 
-!inputfiles /UserObjects/ElementPropertyReadFile
+!syntax inputs /UserObjects/ElementPropertyReadFile
 
-!childobjects /UserObjects/ElementPropertyReadFile
+!syntax children /UserObjects/ElementPropertyReadFile

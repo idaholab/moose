@@ -1,7 +1,7 @@
-!description /BCs/NSStagnationPressureBC
+!syntax description /BCs/NSStagnationPressureBC
 
-!parameters /BCs/NSStagnationPressureBC
+!syntax parameters /BCs/NSStagnationPressureBC
 
-!inputfiles /BCs/NSStagnationPressureBC
+!syntax inputs /BCs/NSStagnationPressureBC
 
-!childobjects /BCs/NSStagnationPressureBC
+!syntax children /BCs/NSStagnationPressureBC

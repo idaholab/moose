@@ -1,5 +1,5 @@
 # SplitPFFractureBulkRate
-!description /Kernels/SplitPFFractureBulkRate
+!syntax description /Kernels/SplitPFFractureBulkRate
 
 The kernel implements second equation substituted into the third equation in (63)
 from \cite{Miehe10} in a split form
@@ -24,10 +24,10 @@ A non-split version of this kernel is [PFFractureBulkRate](/PFFractureBulkRate.m
 which requires higher order shape functions (e.g. second order Lagrange and third
 order Hermite).
 
-!parameters /Kernels/SplitPFFractureBulkRate
+!syntax parameters /Kernels/SplitPFFractureBulkRate
 
-!inputfiles /Kernels/SplitPFFractureBulkRate
+!syntax inputs /Kernels/SplitPFFractureBulkRate
 
-!childobjects /Kernels/SplitPFFractureBulkRate
+!syntax children /Kernels/SplitPFFractureBulkRate
 
 \bibliography{docs/bib/phase_field.bib}

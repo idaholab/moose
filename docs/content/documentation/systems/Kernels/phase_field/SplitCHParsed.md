@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SplitCHParsed
-!description /Kernels/SplitCHParsed
+!syntax description /Kernels/SplitCHParsed
 
-!parameters /Kernels/SplitCHParsed
+!syntax parameters /Kernels/SplitCHParsed
 
-!inputfiles /Kernels/SplitCHParsed
+!syntax inputs /Kernels/SplitCHParsed
 
-!childobjects /Kernels/SplitCHParsed
+!syntax children /Kernels/SplitCHParsed

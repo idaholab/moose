@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFCRFFMaterial
-!description /Materials/PFCRFFMaterial
+!syntax description /Materials/PFCRFFMaterial
 
-!parameters /Materials/PFCRFFMaterial
+!syntax parameters /Materials/PFCRFFMaterial
 
-!inputfiles /Materials/PFCRFFMaterial
+!syntax inputs /Materials/PFCRFFMaterial
 
-!childobjects /Materials/PFCRFFMaterial
+!syntax children /Materials/PFCRFFMaterial

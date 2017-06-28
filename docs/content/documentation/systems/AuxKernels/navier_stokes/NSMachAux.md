@@ -1,7 +1,7 @@
-!description /AuxKernels/NSMachAux
+!syntax description /AuxKernels/NSMachAux
 
-!parameters /AuxKernels/NSMachAux
+!syntax parameters /AuxKernels/NSMachAux
 
-!inputfiles /AuxKernels/NSMachAux
+!syntax inputs /AuxKernels/NSMachAux
 
-!childobjects /AuxKernels/NSMachAux
+!syntax children /AuxKernels/NSMachAux

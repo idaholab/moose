@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticWeakPlaneShear
-!description /UserObjects/TensorMechanicsPlasticWeakPlaneShear
+!syntax description /UserObjects/TensorMechanicsPlasticWeakPlaneShear
 
-!parameters /UserObjects/TensorMechanicsPlasticWeakPlaneShear
+!syntax parameters /UserObjects/TensorMechanicsPlasticWeakPlaneShear
 
-!inputfiles /UserObjects/TensorMechanicsPlasticWeakPlaneShear
+!syntax inputs /UserObjects/TensorMechanicsPlasticWeakPlaneShear
 
-!childobjects /UserObjects/TensorMechanicsPlasticWeakPlaneShear
+!syntax children /UserObjects/TensorMechanicsPlasticWeakPlaneShear

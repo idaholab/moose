@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVFreeOutflowBCUserObject
+!syntax description /UserObjects/CNSFVFreeOutflowBCUserObject
 
-!parameters /UserObjects/CNSFVFreeOutflowBCUserObject
+!syntax parameters /UserObjects/CNSFVFreeOutflowBCUserObject
 
-!inputfiles /UserObjects/CNSFVFreeOutflowBCUserObject
+!syntax inputs /UserObjects/CNSFVFreeOutflowBCUserObject
 
-!childobjects /UserObjects/CNSFVFreeOutflowBCUserObject
+!syntax children /UserObjects/CNSFVFreeOutflowBCUserObject

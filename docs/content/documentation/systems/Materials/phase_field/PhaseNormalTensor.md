@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PhaseNormalTensor
-!description /Materials/PhaseNormalTensor
+!syntax description /Materials/PhaseNormalTensor
 
-!parameters /Materials/PhaseNormalTensor
+!syntax parameters /Materials/PhaseNormalTensor
 
-!inputfiles /Materials/PhaseNormalTensor
+!syntax inputs /Materials/PhaseNormalTensor
 
-!childobjects /Materials/PhaseNormalTensor
+!syntax children /Materials/PhaseNormalTensor

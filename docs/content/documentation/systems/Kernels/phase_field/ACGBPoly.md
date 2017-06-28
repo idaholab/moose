@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ACGBPoly
-!description /Kernels/ACGBPoly
+!syntax description /Kernels/ACGBPoly
 
-!parameters /Kernels/ACGBPoly
+!syntax parameters /Kernels/ACGBPoly
 
-!inputfiles /Kernels/ACGBPoly
+!syntax inputs /Kernels/ACGBPoly
 
-!childobjects /Kernels/ACGBPoly
+!syntax children /Kernels/ACGBPoly

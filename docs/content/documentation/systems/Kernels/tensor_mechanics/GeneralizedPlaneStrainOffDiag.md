@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GeneralizedPlaneStrainOffDiag
-!description /Kernels/GeneralizedPlaneStrainOffDiag
+!syntax description /Kernels/GeneralizedPlaneStrainOffDiag
 
-!parameters /Kernels/GeneralizedPlaneStrainOffDiag
+!syntax parameters /Kernels/GeneralizedPlaneStrainOffDiag
 
-!inputfiles /Kernels/GeneralizedPlaneStrainOffDiag
+!syntax inputs /Kernels/GeneralizedPlaneStrainOffDiag
 
-!childobjects /Kernels/GeneralizedPlaneStrainOffDiag
+!syntax children /Kernels/GeneralizedPlaneStrainOffDiag

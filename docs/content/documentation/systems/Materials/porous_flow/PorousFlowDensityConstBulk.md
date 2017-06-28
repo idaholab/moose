@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDensityConstBulk
-!description /Materials/PorousFlowDensityConstBulk
+!syntax description /Materials/PorousFlowDensityConstBulk
 
-!parameters /Materials/PorousFlowDensityConstBulk
+!syntax parameters /Materials/PorousFlowDensityConstBulk
 
-!inputfiles /Materials/PorousFlowDensityConstBulk
+!syntax inputs /Materials/PorousFlowDensityConstBulk
 
-!childobjects /Materials/PorousFlowDensityConstBulk
+!syntax children /Materials/PorousFlowDensityConstBulk

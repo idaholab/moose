@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VariableResidualNormsDebugOutput
-!description /Outputs/VariableResidualNormsDebugOutput
+!syntax description /Outputs/VariableResidualNormsDebugOutput
 
-!parameters /Outputs/VariableResidualNormsDebugOutput
+!syntax parameters /Outputs/VariableResidualNormsDebugOutput
 
-!inputfiles /Outputs/VariableResidualNormsDebugOutput
+!syntax inputs /Outputs/VariableResidualNormsDebugOutput
 
-!childobjects /Outputs/VariableResidualNormsDebugOutput
+!syntax children /Outputs/VariableResidualNormsDebugOutput

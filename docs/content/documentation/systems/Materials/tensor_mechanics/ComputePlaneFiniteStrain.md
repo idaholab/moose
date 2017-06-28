@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputePlaneFiniteStrain
-!description /Materials/ComputePlaneFiniteStrain
+!syntax description /Materials/ComputePlaneFiniteStrain
 
-!parameters /Materials/ComputePlaneFiniteStrain
+!syntax parameters /Materials/ComputePlaneFiniteStrain
 
-!inputfiles /Materials/ComputePlaneFiniteStrain
+!syntax inputs /Materials/ComputePlaneFiniteStrain
 
-!childobjects /Materials/ComputePlaneFiniteStrain
+!syntax children /Materials/ComputePlaneFiniteStrain

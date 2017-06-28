@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVCharacteristicBCUserObject
+!syntax description /UserObjects/CNSFVCharacteristicBCUserObject
 
-!parameters /UserObjects/CNSFVCharacteristicBCUserObject
+!syntax parameters /UserObjects/CNSFVCharacteristicBCUserObject
 
-!inputfiles /UserObjects/CNSFVCharacteristicBCUserObject
+!syntax inputs /UserObjects/CNSFVCharacteristicBCUserObject
 
-!childobjects /UserObjects/CNSFVCharacteristicBCUserObject
+!syntax children /UserObjects/CNSFVCharacteristicBCUserObject

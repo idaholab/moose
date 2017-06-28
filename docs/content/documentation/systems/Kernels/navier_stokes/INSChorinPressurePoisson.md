@@ -1,7 +1,7 @@
-!description /Kernels/INSChorinPressurePoisson
+!syntax description /Kernels/INSChorinPressurePoisson
 
-!parameters /Kernels/INSChorinPressurePoisson
+!syntax parameters /Kernels/INSChorinPressurePoisson
 
-!inputfiles /Kernels/INSChorinPressurePoisson
+!syntax inputs /Kernels/INSChorinPressurePoisson
 
-!childobjects /Kernels/INSChorinPressurePoisson
+!syntax children /Kernels/INSChorinPressurePoisson

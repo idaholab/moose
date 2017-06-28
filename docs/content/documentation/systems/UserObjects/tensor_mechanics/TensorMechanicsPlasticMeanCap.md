@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticMeanCap
-!description /UserObjects/TensorMechanicsPlasticMeanCap
+!syntax description /UserObjects/TensorMechanicsPlasticMeanCap
 
-!parameters /UserObjects/TensorMechanicsPlasticMeanCap
+!syntax parameters /UserObjects/TensorMechanicsPlasticMeanCap
 
-!inputfiles /UserObjects/TensorMechanicsPlasticMeanCap
+!syntax inputs /UserObjects/TensorMechanicsPlasticMeanCap
 
-!childobjects /UserObjects/TensorMechanicsPlasticMeanCap
+!syntax children /UserObjects/TensorMechanicsPlasticMeanCap

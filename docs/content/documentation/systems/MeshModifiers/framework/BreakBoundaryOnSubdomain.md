@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BreakBoundaryOnSubdomain
-!description /MeshModifiers/BreakBoundaryOnSubdomain
+!syntax description /MeshModifiers/BreakBoundaryOnSubdomain
 
-!parameters /MeshModifiers/BreakBoundaryOnSubdomain
+!syntax parameters /MeshModifiers/BreakBoundaryOnSubdomain
 
-!inputfiles /MeshModifiers/BreakBoundaryOnSubdomain
+!syntax inputs /MeshModifiers/BreakBoundaryOnSubdomain
 
-!childobjects /MeshModifiers/BreakBoundaryOnSubdomain
+!syntax children /MeshModifiers/BreakBoundaryOnSubdomain

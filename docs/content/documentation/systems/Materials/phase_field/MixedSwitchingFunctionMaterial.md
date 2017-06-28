@@ -1,6 +1,6 @@
 
 # MixedSwitchingFunctionMaterial
-!description /Materials/MixedSwitchingFunctionMaterial
+!syntax description /Materials/MixedSwitchingFunctionMaterial
 
 MIX234: It is a switching function represented by 234-order polynomial, which is the general form with an adjustable parameter k (0<k<1).
 $$
@@ -12,8 +12,8 @@ $$
 k(2\eta^2-\eta^4)+(1-k)(3\eta^4-2\eta^6)
 $$
 
-!parameters /Materials/MixedSwitchingFunctionMaterial
+!syntax parameters /Materials/MixedSwitchingFunctionMaterial
 
-!inputfiles /Materials/MixedSwitchingFunctionMaterial
+!syntax inputs /Materials/MixedSwitchingFunctionMaterial
 
-!childobjects /Materials/MixedSwitchingFunctionMaterial
+!syntax children /Materials/MixedSwitchingFunctionMaterial

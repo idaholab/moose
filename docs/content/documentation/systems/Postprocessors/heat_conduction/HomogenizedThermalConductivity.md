@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HomogenizedThermalConductivity
-!description /Postprocessors/HomogenizedThermalConductivity
+!syntax description /Postprocessors/HomogenizedThermalConductivity
 
-!parameters /Postprocessors/HomogenizedThermalConductivity
+!syntax parameters /Postprocessors/HomogenizedThermalConductivity
 
-!inputfiles /Postprocessors/HomogenizedThermalConductivity
+!syntax inputs /Postprocessors/HomogenizedThermalConductivity
 
-!childobjects /Postprocessors/HomogenizedThermalConductivity
+!syntax children /Postprocessors/HomogenizedThermalConductivity

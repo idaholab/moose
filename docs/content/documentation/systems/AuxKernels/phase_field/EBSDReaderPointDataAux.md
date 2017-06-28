@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # EBSDReaderPointDataAux
-!description /AuxKernels/EBSDReaderPointDataAux
+!syntax description /AuxKernels/EBSDReaderPointDataAux
 
-!parameters /AuxKernels/EBSDReaderPointDataAux
+!syntax parameters /AuxKernels/EBSDReaderPointDataAux
 
-!inputfiles /AuxKernels/EBSDReaderPointDataAux
+!syntax inputs /AuxKernels/EBSDReaderPointDataAux
 
-!childobjects /AuxKernels/EBSDReaderPointDataAux
+!syntax children /AuxKernels/EBSDReaderPointDataAux

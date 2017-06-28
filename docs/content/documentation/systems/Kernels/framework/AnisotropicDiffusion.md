@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AnisotropicDiffusion
-!description /Kernels/AnisotropicDiffusion
+!syntax description /Kernels/AnisotropicDiffusion
 
-!parameters /Kernels/AnisotropicDiffusion
+!syntax parameters /Kernels/AnisotropicDiffusion
 
-!inputfiles /Kernels/AnisotropicDiffusion
+!syntax inputs /Kernels/AnisotropicDiffusion
 
-!childobjects /Kernels/AnisotropicDiffusion
+!syntax children /Kernels/AnisotropicDiffusion

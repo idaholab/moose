@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Transform
-!description /MeshModifiers/Transform
+!syntax description /MeshModifiers/Transform
 
-!parameters /MeshModifiers/Transform
+!syntax parameters /MeshModifiers/Transform
 
-!inputfiles /MeshModifiers/Transform
+!syntax inputs /MeshModifiers/Transform
 
-!childobjects /MeshModifiers/Transform
+!syntax children /MeshModifiers/Transform

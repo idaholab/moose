@@ -1,7 +1,7 @@
-!description /Kernels/INSMassRZ
+!syntax description /Kernels/INSMassRZ
 
-!parameters /Kernels/INSMassRZ
+!syntax parameters /Kernels/INSMassRZ
 
-!inputfiles /Kernels/INSMassRZ
+!syntax inputs /Kernels/INSMassRZ
 
-!childobjects /Kernels/INSMassRZ
+!syntax children /Kernels/INSMassRZ

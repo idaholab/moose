@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CoefCoupledTimeDerivative
-!description /Kernels/CoefCoupledTimeDerivative
+!syntax description /Kernels/CoefCoupledTimeDerivative
 
-!parameters /Kernels/CoefCoupledTimeDerivative
+!syntax parameters /Kernels/CoefCoupledTimeDerivative
 
-!inputfiles /Kernels/CoefCoupledTimeDerivative
+!syntax inputs /Kernels/CoefCoupledTimeDerivative
 
-!childobjects /Kernels/CoefCoupledTimeDerivative
+!syntax children /Kernels/CoefCoupledTimeDerivative

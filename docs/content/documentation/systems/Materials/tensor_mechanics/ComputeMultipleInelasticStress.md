@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeMultipleInelasticStress
-!description /Materials/ComputeMultipleInelasticStress
+!syntax description /Materials/ComputeMultipleInelasticStress
 
-!parameters /Materials/ComputeMultipleInelasticStress
+!syntax parameters /Materials/ComputeMultipleInelasticStress
 
-!inputfiles /Materials/ComputeMultipleInelasticStress
+!syntax inputs /Materials/ComputeMultipleInelasticStress
 
-!childobjects /Materials/ComputeMultipleInelasticStress
+!syntax children /Materials/ComputeMultipleInelasticStress

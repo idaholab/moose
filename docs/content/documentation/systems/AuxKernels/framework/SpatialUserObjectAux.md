@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SpatialUserObjectAux
-!description /AuxKernels/SpatialUserObjectAux
+!syntax description /AuxKernels/SpatialUserObjectAux
 
-!parameters /AuxKernels/SpatialUserObjectAux
+!syntax parameters /AuxKernels/SpatialUserObjectAux
 
-!inputfiles /AuxKernels/SpatialUserObjectAux
+!syntax inputs /AuxKernels/SpatialUserObjectAux
 
-!childobjects /AuxKernels/SpatialUserObjectAux
+!syntax children /AuxKernels/SpatialUserObjectAux

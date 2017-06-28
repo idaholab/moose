@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # EBSDReaderAvgDataAux
-!description /AuxKernels/EBSDReaderAvgDataAux
+!syntax description /AuxKernels/EBSDReaderAvgDataAux
 
-!parameters /AuxKernels/EBSDReaderAvgDataAux
+!syntax parameters /AuxKernels/EBSDReaderAvgDataAux
 
-!inputfiles /AuxKernels/EBSDReaderAvgDataAux
+!syntax inputs /AuxKernels/EBSDReaderAvgDataAux
 
-!childobjects /AuxKernels/EBSDReaderAvgDataAux
+!syntax children /AuxKernels/EBSDReaderAvgDataAux

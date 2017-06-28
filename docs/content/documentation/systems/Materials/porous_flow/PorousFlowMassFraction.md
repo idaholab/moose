@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowMassFraction
-!description /Materials/PorousFlowMassFraction
+!syntax description /Materials/PorousFlowMassFraction
 
-!parameters /Materials/PorousFlowMassFraction
+!syntax parameters /Materials/PorousFlowMassFraction
 
-!inputfiles /Materials/PorousFlowMassFraction
+!syntax inputs /Materials/PorousFlowMassFraction
 
-!childobjects /Materials/PorousFlowMassFraction
+!syntax children /Materials/PorousFlowMassFraction

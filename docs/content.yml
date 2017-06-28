@@ -1,0 +1,4 @@
+framework:
+    base: docs/content
+    include:
+      - docs/content/*

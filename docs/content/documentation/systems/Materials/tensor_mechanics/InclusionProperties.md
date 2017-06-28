@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # InclusionProperties
-!description /Materials/InclusionProperties
+!syntax description /Materials/InclusionProperties
 
-!parameters /Materials/InclusionProperties
+!syntax parameters /Materials/InclusionProperties
 
-!inputfiles /Materials/InclusionProperties
+!syntax inputs /Materials/InclusionProperties
 
-!childobjects /Materials/InclusionProperties
+!syntax children /Materials/InclusionProperties

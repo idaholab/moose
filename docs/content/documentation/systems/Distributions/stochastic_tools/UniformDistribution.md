@@ -15,10 +15,11 @@ f(x) = 0
 where $a$ and $b$ are the lower bound and upper bound for the uniform distribution, respectively.
 
 ## Example Input Syntax
-!input modules/stochastic_tools/tests/distributions/uniform.i block=Distributions
 
-!parameters /Distributions/UniformDistribution
+!listing modules/stochastic_tools/tests/distributions/uniform.i block=Distributions
 
-!inputfiles /Distributions/UniformDistribution
+!syntax parameters /Distributions/UniformDistribution
 
-!childobjects /Distributions/UniformDistribution
+!syntax inputs /Distributions/UniformDistribution
+
+!syntax children /Distributions/UniformDistribution

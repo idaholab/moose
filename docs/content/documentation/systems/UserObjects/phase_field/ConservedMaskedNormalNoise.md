@@ -1,11 +1,11 @@
 # ConservedMaskedNormalNoise
 
-!description /UserObjects/ConservedMaskedNormalNoise
+!syntax description /UserObjects/ConservedMaskedNormalNoise
 
 `ConservedMaskedNormalNoise` can be used for [fluctuation based nucleation](Nucleation/Langevin Noise.md)
 
-!parameters /UserObjects/ConservedMaskedNormalNoise
+!syntax parameters /UserObjects/ConservedMaskedNormalNoise
 
-!inputfiles /UserObjects/ConservedMaskedNormalNoise
+!syntax inputs /UserObjects/ConservedMaskedNormalNoise
 
-!childobjects /UserObjects/ConservedMaskedNormalNoise
+!syntax children /UserObjects/ConservedMaskedNormalNoise

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowEffectiveFluidPressure
-!description /Materials/PorousFlowEffectiveFluidPressure
+!syntax description /Materials/PorousFlowEffectiveFluidPressure
 
-!parameters /Materials/PorousFlowEffectiveFluidPressure
+!syntax parameters /Materials/PorousFlowEffectiveFluidPressure
 
-!inputfiles /Materials/PorousFlowEffectiveFluidPressure
+!syntax inputs /Materials/PorousFlowEffectiveFluidPressure
 
-!childobjects /Materials/PorousFlowEffectiveFluidPressure
+!syntax children /Materials/PorousFlowEffectiveFluidPressure

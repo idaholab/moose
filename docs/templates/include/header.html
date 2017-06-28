@@ -16,7 +16,7 @@ Page header including the "sidebar" navigation.
 
 <nav>
   <div class="nav-wrapper container">
-    <a href="{{current.relpath('index.html')}}" class="page-title">{{title|default("MOOSE")}}</a>
+    <a href="{{relpath('index.html', current.destination)}}" class="page-title">{{title|default("MOOSE")}}</a>
     <ul class="right">
       {% for nav in navigation %}
         {% set nav_key=nav.keys()[0] %}
@@ -40,9 +40,9 @@ Page header including the "sidebar" navigation.
       <li>
         <a class="github-mark-label" href="{{repo_url}}">
           {% if 'gitlab' in repo_url %}
-            <img class="github-mark" src={{current.relpath('media/gitlab-logo.png')}}>GitLab
+            <img class="github-mark" src=media/gitlab-logo.png>GitLab
           {% else %}
-            <img class="github-mark" src={{current.relpath('media/github-mark-light.png')}}>GitHub
+            <img class="github-mark" src=media/github-mark-light.png>GitHub
           {% endif %}
         </a>
       </li>

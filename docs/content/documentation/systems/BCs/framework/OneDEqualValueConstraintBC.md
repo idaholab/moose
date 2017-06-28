@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # OneDEqualValueConstraintBC
-!description /BCs/OneDEqualValueConstraintBC
+!syntax description /BCs/OneDEqualValueConstraintBC
 
-!parameters /BCs/OneDEqualValueConstraintBC
+!syntax parameters /BCs/OneDEqualValueConstraintBC
 
-!inputfiles /BCs/OneDEqualValueConstraintBC
+!syntax inputs /BCs/OneDEqualValueConstraintBC
 
-!childobjects /BCs/OneDEqualValueConstraintBC
+!syntax children /BCs/OneDEqualValueConstraintBC

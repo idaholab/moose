@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVHLLCSlipBoundaryFlux
+!syntax description /UserObjects/CNSFVHLLCSlipBoundaryFlux
 
-!parameters /UserObjects/CNSFVHLLCSlipBoundaryFlux
+!syntax parameters /UserObjects/CNSFVHLLCSlipBoundaryFlux
 
-!inputfiles /UserObjects/CNSFVHLLCSlipBoundaryFlux
+!syntax inputs /UserObjects/CNSFVHLLCSlipBoundaryFlux
 
-!childobjects /UserObjects/CNSFVHLLCSlipBoundaryFlux
+!syntax children /UserObjects/CNSFVHLLCSlipBoundaryFlux

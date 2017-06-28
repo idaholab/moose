@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CrystalPlasticitySlipResistanceGSS
-!description /UserObjects/CrystalPlasticitySlipResistanceGSS
+!syntax description /UserObjects/CrystalPlasticitySlipResistanceGSS
 
-!parameters /UserObjects/CrystalPlasticitySlipResistanceGSS
+!syntax parameters /UserObjects/CrystalPlasticitySlipResistanceGSS
 
-!inputfiles /UserObjects/CrystalPlasticitySlipResistanceGSS
+!syntax inputs /UserObjects/CrystalPlasticitySlipResistanceGSS
 
-!childobjects /UserObjects/CrystalPlasticitySlipResistanceGSS
+!syntax children /UserObjects/CrystalPlasticitySlipResistanceGSS

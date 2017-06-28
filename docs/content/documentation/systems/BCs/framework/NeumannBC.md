@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NeumannBC
-!description /BCs/NeumannBC
+!syntax description /BCs/NeumannBC
 
-!parameters /BCs/NeumannBC
+!syntax parameters /BCs/NeumannBC
 
-!inputfiles /BCs/NeumannBC
+!syntax inputs /BCs/NeumannBC
 
-!childobjects /BCs/NeumannBC
+!syntax children /BCs/NeumannBC

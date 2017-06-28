@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FeatureVolumeVectorPostprocessor
-!description /VectorPostprocessors/FeatureVolumeVectorPostprocessor
+!syntax description /VectorPostprocessors/FeatureVolumeVectorPostprocessor
 
-!parameters /VectorPostprocessors/FeatureVolumeVectorPostprocessor
+!syntax parameters /VectorPostprocessors/FeatureVolumeVectorPostprocessor
 
-!inputfiles /VectorPostprocessors/FeatureVolumeVectorPostprocessor
+!syntax inputs /VectorPostprocessors/FeatureVolumeVectorPostprocessor
 
-!childobjects /VectorPostprocessors/FeatureVolumeVectorPostprocessor
+!syntax children /VectorPostprocessors/FeatureVolumeVectorPostprocessor

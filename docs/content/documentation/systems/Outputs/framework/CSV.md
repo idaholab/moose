@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CSV
-!description /Outputs/CSV
+!syntax description /Outputs/CSV
 
-!parameters /Outputs/CSV
+!syntax parameters /Outputs/CSV
 
-!inputfiles /Outputs/CSV
+!syntax inputs /Outputs/CSV
 
-!childobjects /Outputs/CSV
+!syntax children /Outputs/CSV

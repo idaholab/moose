@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaskedGrainForceAndTorque
-!description /UserObjects/MaskedGrainForceAndTorque
+!syntax description /UserObjects/MaskedGrainForceAndTorque
 
-!parameters /UserObjects/MaskedGrainForceAndTorque
+!syntax parameters /UserObjects/MaskedGrainForceAndTorque
 
-!inputfiles /UserObjects/MaskedGrainForceAndTorque
+!syntax inputs /UserObjects/MaskedGrainForceAndTorque
 
-!childobjects /UserObjects/MaskedGrainForceAndTorque
+!syntax children /UserObjects/MaskedGrainForceAndTorque

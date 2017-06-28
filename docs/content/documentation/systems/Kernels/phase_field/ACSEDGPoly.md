@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ACSEDGPoly
-!description /Kernels/ACSEDGPoly
+!syntax description /Kernels/ACSEDGPoly
 
-!parameters /Kernels/ACSEDGPoly
+!syntax parameters /Kernels/ACSEDGPoly
 
-!inputfiles /Kernels/ACSEDGPoly
+!syntax inputs /Kernels/ACSEDGPoly
 
-!childobjects /Kernels/ACSEDGPoly
+!syntax children /Kernels/ACSEDGPoly

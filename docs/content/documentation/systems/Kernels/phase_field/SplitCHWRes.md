@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SplitCHWRes
-!description /Kernels/SplitCHWRes
+!syntax description /Kernels/SplitCHWRes
 
-!parameters /Kernels/SplitCHWRes
+!syntax parameters /Kernels/SplitCHWRes
 
-!inputfiles /Kernels/SplitCHWRes
+!syntax inputs /Kernels/SplitCHWRes
 
-!childobjects /Kernels/SplitCHWRes
+!syntax children /Kernels/SplitCHWRes

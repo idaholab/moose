@@ -23,11 +23,11 @@ with SUPG stabilization.
 
 !listing modules/level_set/examples/vortex/vortex_supg.i block=Kernels label=False
 
-!parameters /Kernels/LevelSetTimeDerivativeSUPG
+!syntax parameters /Kernels/LevelSetTimeDerivativeSUPG
 
-!inputfiles /Kernels/LevelSetTimeDerivativeSUPG
+!syntax inputs /Kernels/LevelSetTimeDerivativeSUPG
 
-!childobjects /Kernels/LevelSetTimeDerivativeSUPG
+!syntax children /Kernels/LevelSetTimeDerivativeSUPG
 
 ## References
 

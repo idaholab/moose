@@ -1,5 +1,5 @@
 # LaplacianSplit
-!description /Kernels/LaplacianSplit
+!syntax description /Kernels/LaplacianSplit
 
 Sets the kernel variable $u$ to the Laplacian of a chosen variable $c$ (`c`).
 Implements the residual
@@ -11,8 +11,8 @@ $$
 This allows the construction of split formulations, where $u$ can be substituted
 to reduce the order of a PDE.
 
-!parameters /Kernels/LaplacianSplit
+!syntax parameters /Kernels/LaplacianSplit
 
-!inputfiles /Kernels/LaplacianSplit
+!syntax inputs /Kernels/LaplacianSplit
 
-!childobjects /Kernels/LaplacianSplit
+!syntax children /Kernels/LaplacianSplit

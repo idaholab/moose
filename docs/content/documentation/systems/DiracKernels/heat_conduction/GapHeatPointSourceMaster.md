@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GapHeatPointSourceMaster
-!description /DiracKernels/GapHeatPointSourceMaster
+!syntax description /DiracKernels/GapHeatPointSourceMaster
 
-!parameters /DiracKernels/GapHeatPointSourceMaster
+!syntax parameters /DiracKernels/GapHeatPointSourceMaster
 
-!inputfiles /DiracKernels/GapHeatPointSourceMaster
+!syntax inputs /DiracKernels/GapHeatPointSourceMaster
 
-!childobjects /DiracKernels/GapHeatPointSourceMaster
+!syntax children /DiracKernels/GapHeatPointSourceMaster

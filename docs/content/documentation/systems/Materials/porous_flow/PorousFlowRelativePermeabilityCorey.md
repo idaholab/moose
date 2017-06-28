@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowRelativePermeabilityCorey
-!description /Materials/PorousFlowRelativePermeabilityCorey
+!syntax description /Materials/PorousFlowRelativePermeabilityCorey
 
-!parameters /Materials/PorousFlowRelativePermeabilityCorey
+!syntax parameters /Materials/PorousFlowRelativePermeabilityCorey
 
-!inputfiles /Materials/PorousFlowRelativePermeabilityCorey
+!syntax inputs /Materials/PorousFlowRelativePermeabilityCorey
 
-!childobjects /Materials/PorousFlowRelativePermeabilityCorey
+!syntax children /Materials/PorousFlowRelativePermeabilityCorey

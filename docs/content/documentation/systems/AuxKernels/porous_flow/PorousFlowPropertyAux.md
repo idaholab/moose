@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPropertyAux
-!description /AuxKernels/PorousFlowPropertyAux
+!syntax description /AuxKernels/PorousFlowPropertyAux
 
-!parameters /AuxKernels/PorousFlowPropertyAux
+!syntax parameters /AuxKernels/PorousFlowPropertyAux
 
-!inputfiles /AuxKernels/PorousFlowPropertyAux
+!syntax inputs /AuxKernels/PorousFlowPropertyAux
 
-!childobjects /AuxKernels/PorousFlowPropertyAux
+!syntax children /AuxKernels/PorousFlowPropertyAux

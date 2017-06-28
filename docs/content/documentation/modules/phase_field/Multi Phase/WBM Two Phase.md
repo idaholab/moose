@@ -12,7 +12,7 @@ $$
 F = \left(1-h(\eta)\right) F_a + h(\eta)F_b + Wg(\eta)
 $$
 
-!parameters /Materials/DerivativeTwoPhaseMaterial
+!syntax parameters /Materials/DerivativeTwoPhaseMaterial
 
 Check out the example input at ```modules/phase_field/tests/MultiPhase/derivativetwophasematerial.i``` to see it in action.
 

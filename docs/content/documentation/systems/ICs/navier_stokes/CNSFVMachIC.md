@@ -1,7 +1,7 @@
-!description /ICs/CNSFVMachIC
+!syntax description /ICs/CNSFVMachIC
 
-!parameters /ICs/CNSFVMachIC
+!syntax parameters /ICs/CNSFVMachIC
 
-!inputfiles /ICs/CNSFVMachIC
+!syntax inputs /ICs/CNSFVMachIC
 
-!childobjects /ICs/CNSFVMachIC
+!syntax children /ICs/CNSFVMachIC

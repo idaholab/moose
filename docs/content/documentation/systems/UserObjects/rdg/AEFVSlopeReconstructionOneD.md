@@ -1,7 +1,7 @@
-!description /UserObjects/AEFVSlopeReconstructionOneD
+!syntax description /UserObjects/AEFVSlopeReconstructionOneD
 
-!parameters /UserObjects/AEFVSlopeReconstructionOneD
+!syntax parameters /UserObjects/AEFVSlopeReconstructionOneD
 
-!inputfiles /UserObjects/AEFVSlopeReconstructionOneD
+!syntax inputs /UserObjects/AEFVSlopeReconstructionOneD
 
-!childobjects /UserObjects/AEFVSlopeReconstructionOneD
+!syntax children /UserObjects/AEFVSlopeReconstructionOneD

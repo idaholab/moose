@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDesorpedMassTimeDerivative
-!description /Kernels/PorousFlowDesorpedMassTimeDerivative
+!syntax description /Kernels/PorousFlowDesorpedMassTimeDerivative
 
-!parameters /Kernels/PorousFlowDesorpedMassTimeDerivative
+!syntax parameters /Kernels/PorousFlowDesorpedMassTimeDerivative
 
-!inputfiles /Kernels/PorousFlowDesorpedMassTimeDerivative
+!syntax inputs /Kernels/PorousFlowDesorpedMassTimeDerivative
 
-!childobjects /Kernels/PorousFlowDesorpedMassTimeDerivative
+!syntax children /Kernels/PorousFlowDesorpedMassTimeDerivative

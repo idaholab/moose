@@ -1,7 +1,7 @@
-!description /BCs/AEFVBC
+!syntax description /BCs/AEFVBC
 
-!parameters /BCs/AEFVBC
+!syntax parameters /BCs/AEFVBC
 
-!inputfiles /BCs/AEFVBC
+!syntax inputs /BCs/AEFVBC
 
-!childobjects /BCs/AEFVBC
+!syntax children /BCs/AEFVBC

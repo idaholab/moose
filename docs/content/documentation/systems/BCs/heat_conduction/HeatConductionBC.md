@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HeatConductionBC
-!description /BCs/HeatConductionBC
+!syntax description /BCs/HeatConductionBC
 
-!parameters /BCs/HeatConductionBC
+!syntax parameters /BCs/HeatConductionBC
 
-!inputfiles /BCs/HeatConductionBC
+!syntax inputs /BCs/HeatConductionBC
 
-!childobjects /BCs/HeatConductionBC
+!syntax children /BCs/HeatConductionBC

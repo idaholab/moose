@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DashpotBC
-!description /BCs/DashpotBC
+!syntax description /BCs/DashpotBC
 
-!parameters /BCs/DashpotBC
+!syntax parameters /BCs/DashpotBC
 
-!inputfiles /BCs/DashpotBC
+!syntax inputs /BCs/DashpotBC
 
-!childobjects /BCs/DashpotBC
+!syntax children /BCs/DashpotBC

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TopResidualDebugOutput
-!description /Outputs/TopResidualDebugOutput
+!syntax description /Outputs/TopResidualDebugOutput
 
-!parameters /Outputs/TopResidualDebugOutput
+!syntax parameters /Outputs/TopResidualDebugOutput
 
-!inputfiles /Outputs/TopResidualDebugOutput
+!syntax inputs /Outputs/TopResidualDebugOutput
 
-!childobjects /Outputs/TopResidualDebugOutput
+!syntax children /Outputs/TopResidualDebugOutput

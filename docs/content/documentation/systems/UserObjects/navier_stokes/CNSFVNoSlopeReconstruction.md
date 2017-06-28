@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVNoSlopeReconstruction
+!syntax description /UserObjects/CNSFVNoSlopeReconstruction
 
-!parameters /UserObjects/CNSFVNoSlopeReconstruction
+!syntax parameters /UserObjects/CNSFVNoSlopeReconstruction
 
-!inputfiles /UserObjects/CNSFVNoSlopeReconstruction
+!syntax inputs /UserObjects/CNSFVNoSlopeReconstruction
 
-!childobjects /UserObjects/CNSFVNoSlopeReconstruction
+!syntax children /UserObjects/CNSFVNoSlopeReconstruction

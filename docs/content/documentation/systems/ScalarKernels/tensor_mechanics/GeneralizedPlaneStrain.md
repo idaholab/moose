@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GeneralizedPlaneStrain
-!description /ScalarKernels/GeneralizedPlaneStrain
+!syntax description /ScalarKernels/GeneralizedPlaneStrain
 
-!parameters /ScalarKernels/GeneralizedPlaneStrain
+!syntax parameters /ScalarKernels/GeneralizedPlaneStrain
 
-!inputfiles /ScalarKernels/GeneralizedPlaneStrain
+!syntax inputs /ScalarKernels/GeneralizedPlaneStrain
 
-!childobjects /ScalarKernels/GeneralizedPlaneStrain
+!syntax children /ScalarKernels/GeneralizedPlaneStrain

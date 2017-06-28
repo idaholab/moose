@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ExodusTimeSequenceStepper
-!description /Executioner/TimeStepper/ExodusTimeSequenceStepper
+!syntax description /Executioner/TimeStepper/ExodusTimeSequenceStepper
 
-!parameters /Executioner/TimeStepper/ExodusTimeSequenceStepper
+!syntax parameters /Executioner/TimeStepper/ExodusTimeSequenceStepper
 
-!inputfiles /Executioner/TimeStepper/ExodusTimeSequenceStepper
+!syntax inputs /Executioner/TimeStepper/ExodusTimeSequenceStepper
 
-!childobjects /Executioner/TimeStepper/ExodusTimeSequenceStepper
+!syntax children /Executioner/TimeStepper/ExodusTimeSequenceStepper

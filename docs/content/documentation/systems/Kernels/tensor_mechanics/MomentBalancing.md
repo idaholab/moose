@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MomentBalancing
-!description /Kernels/MomentBalancing
+!syntax description /Kernels/MomentBalancing
 
-!parameters /Kernels/MomentBalancing
+!syntax parameters /Kernels/MomentBalancing
 
-!inputfiles /Kernels/MomentBalancing
+!syntax inputs /Kernels/MomentBalancing
 
-!childobjects /Kernels/MomentBalancing
+!syntax children /Kernels/MomentBalancing

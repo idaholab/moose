@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeStrainIncrementBasedStress
-!description /Materials/ComputeStrainIncrementBasedStress
+!syntax description /Materials/ComputeStrainIncrementBasedStress
 
-!parameters /Materials/ComputeStrainIncrementBasedStress
+!syntax parameters /Materials/ComputeStrainIncrementBasedStress
 
-!inputfiles /Materials/ComputeStrainIncrementBasedStress
+!syntax inputs /Materials/ComputeStrainIncrementBasedStress
 
-!childobjects /Materials/ComputeStrainIncrementBasedStress
+!syntax children /Materials/ComputeStrainIncrementBasedStress

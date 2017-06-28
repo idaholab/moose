@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HeatSource
-!description /Kernels/HeatSource
+!syntax description /Kernels/HeatSource
 
-!parameters /Kernels/HeatSource
+!syntax parameters /Kernels/HeatSource
 
-!inputfiles /Kernels/HeatSource
+!syntax inputs /Kernels/HeatSource
 
-!childobjects /Kernels/HeatSource
+!syntax children /Kernels/HeatSource

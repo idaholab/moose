@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GBRelaxationStrainIncrement
-!description /Materials/GBRelaxationStrainIncrement
+!syntax description /Materials/GBRelaxationStrainIncrement
 
-!parameters /Materials/GBRelaxationStrainIncrement
+!syntax parameters /Materials/GBRelaxationStrainIncrement
 
-!inputfiles /Materials/GBRelaxationStrainIncrement
+!syntax inputs /Materials/GBRelaxationStrainIncrement
 
-!childobjects /Materials/GBRelaxationStrainIncrement
+!syntax children /Materials/GBRelaxationStrainIncrement

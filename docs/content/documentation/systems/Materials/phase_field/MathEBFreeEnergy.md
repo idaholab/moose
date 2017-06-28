@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MathEBFreeEnergy
-!description /Materials/MathEBFreeEnergy
+!syntax description /Materials/MathEBFreeEnergy
 
-!parameters /Materials/MathEBFreeEnergy
+!syntax parameters /Materials/MathEBFreeEnergy
 
-!inputfiles /Materials/MathEBFreeEnergy
+!syntax inputs /Materials/MathEBFreeEnergy
 
-!childobjects /Materials/MathEBFreeEnergy
+!syntax children /Materials/MathEBFreeEnergy

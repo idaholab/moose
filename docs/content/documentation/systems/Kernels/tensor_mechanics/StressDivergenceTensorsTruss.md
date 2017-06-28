@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # StressDivergenceTensorsTruss
-!description /Kernels/StressDivergenceTensorsTruss
+!syntax description /Kernels/StressDivergenceTensorsTruss
 
-!parameters /Kernels/StressDivergenceTensorsTruss
+!syntax parameters /Kernels/StressDivergenceTensorsTruss
 
-!inputfiles /Kernels/StressDivergenceTensorsTruss
+!syntax inputs /Kernels/StressDivergenceTensorsTruss
 
-!childobjects /Kernels/StressDivergenceTensorsTruss
+!syntax children /Kernels/StressDivergenceTensorsTruss

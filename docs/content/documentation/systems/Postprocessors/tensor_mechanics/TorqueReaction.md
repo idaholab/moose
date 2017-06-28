@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TorqueReaction
-!description /Postprocessors/TorqueReaction
+!syntax description /Postprocessors/TorqueReaction
 
-!parameters /Postprocessors/TorqueReaction
+!syntax parameters /Postprocessors/TorqueReaction
 
-!inputfiles /Postprocessors/TorqueReaction
+!syntax inputs /Postprocessors/TorqueReaction
 
-!childobjects /Postprocessors/TorqueReaction
+!syntax children /Postprocessors/TorqueReaction

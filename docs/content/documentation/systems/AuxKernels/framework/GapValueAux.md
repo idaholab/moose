@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GapValueAux
-!description /AuxKernels/GapValueAux
+!syntax description /AuxKernels/GapValueAux
 
-!parameters /AuxKernels/GapValueAux
+!syntax parameters /AuxKernels/GapValueAux
 
-!inputfiles /AuxKernels/GapValueAux
+!syntax inputs /AuxKernels/GapValueAux
 
-!childobjects /AuxKernels/GapValueAux
+!syntax children /AuxKernels/GapValueAux

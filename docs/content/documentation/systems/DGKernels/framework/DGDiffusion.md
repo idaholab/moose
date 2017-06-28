@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DGDiffusion
-!description /DGKernels/DGDiffusion
+!syntax description /DGKernels/DGDiffusion
 
-!parameters /DGKernels/DGDiffusion
+!syntax parameters /DGKernels/DGDiffusion
 
-!inputfiles /DGKernels/DGDiffusion
+!syntax inputs /DGKernels/DGDiffusion
 
-!childobjects /DGKernels/DGDiffusion
+!syntax children /DGKernels/DGDiffusion

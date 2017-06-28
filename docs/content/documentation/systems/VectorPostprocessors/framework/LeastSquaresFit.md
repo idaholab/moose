@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LeastSquaresFit
-!description /VectorPostprocessors/LeastSquaresFit
+!syntax description /VectorPostprocessors/LeastSquaresFit
 
-!parameters /VectorPostprocessors/LeastSquaresFit
+!syntax parameters /VectorPostprocessors/LeastSquaresFit
 
-!inputfiles /VectorPostprocessors/LeastSquaresFit
+!syntax inputs /VectorPostprocessors/LeastSquaresFit
 
-!childobjects /VectorPostprocessors/LeastSquaresFit
+!syntax children /VectorPostprocessors/LeastSquaresFit

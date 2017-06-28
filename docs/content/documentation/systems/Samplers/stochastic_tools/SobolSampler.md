@@ -3,11 +3,11 @@
 The SobolSampler object generates the necessary matrices of Monte Carlo samples to perform a
 variance-based sensitivity analysis, refer to \citet{saltelli2002making} for complete details.
 
-!parameters /Samplers/SobolSampler
+!syntax parameters /Samplers/SobolSampler
 
-!inputfiles /Samplers/SobolSampler
+!syntax input /Samplers/SobolSampler
 
-!childobjects /Samplers/SobolSampler
+!syntax children /Samplers/SobolSampler
 
 ## References
 \bibliographystyle{unsrt}

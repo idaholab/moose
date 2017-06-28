@@ -1,0 +1,157 @@
+all:
+    - /Modules
+    - /Modules/TensorMechanicss
+    - /Modules/PhaseField
+    - /Modules/HeatConduction
+    - /Modules/rdg
+    - /Modules/NavierStokes
+    - /Modules/LevelSet
+    - /Modules/PorousFlow
+    - /Modules/StochasticTools
+framework:
+    - /Adaptivity/SetAdaptivityOptionsAction
+    - /Adaptivity/Markers/AddMarkerAction
+    - /Adaptivity/Markers/AddElementalFieldAction
+    - /Controls/AddControlAction
+    - /Distributions/AddDistributionAction
+    - /Mesh/CreateDisplacedProblemAction
+    - /Mesh/SetupMeshAction
+    - /Mesh/SetupMeshCompleteAction
+    - /Samplers/AddSamplerAction
+    - /AuxVariables/*/InitialCondition/
+    - /Variables/*/InitialCondition/
+    - /Bounds
+    - /Adaptivity/Indicators
+    - /AuxKernels
+    - /AuxScalarKernels
+    - /AuxVariables
+    - /BCs
+    - /Constraints
+    - /DGKernels
+    - /Dampers
+    - /Debug
+    - /DeprecatedBlock
+    - /DiracKernels
+    - /Executioner
+    - /Functions
+    - /GlobalParams
+    - /ICs
+    - /InterfaceKernels
+    - /Kernels
+    - /Materials
+    - /Mesh/Partitioner
+    - /Mesh/MortarInterfaces
+    - /MeshModifiers
+    - /MultiApps
+    - /NodalKernels
+    - /NodalNormals
+    - /Outputs
+    - /Postprocessors
+    - /Preconditioning
+    - /Problem
+    - /ScalarKernels
+    - /Transfers
+    - /Variables
+    - /VectorPostprocessors
+    - /UserObjects
+phase_field:
+    - /Kernels/PFFracIntVar # deprecated
+    - /AuxVariables/*/InitialCondition
+    - /Variables/*/InitialCondition
+    - /Bounds
+    - /AuxKernels
+    - /AuxVariables
+    - /BCs
+    - /ICs
+    - /Kernels
+    - /Materials
+    - /Mesh
+    - /Postprocessors
+    - /UserObjects
+    - /Variables
+    - /VectorPostprocessors
+    - /InterfaceKernels
+tensor_mechanics:
+    - /AuxVariables/*/InitialCondition/
+    - /Variables/*/InitialCondition/
+    - /Bounds
+    - /AuxKernels
+    - /BCs
+    - /Kernels
+    - /Materials
+    - /Postprocessors
+    - /ScalarKernels
+    - /UserObjects
+    - /VectorPostprocessors
+    - /ICs
+    - /DomainIntegral
+heat_conduction:
+    - /AuxVariables/*/InitialCondition/
+    - /Variables/*/InitialCondition/
+    - /Bounds
+    - /BCs
+    - /Constraints
+    - /DiracKernels
+    - /Kernels
+    - /Materials
+    - /Postprocessors
+    - /UserObjects
+    - /ThermalContact
+rdg:
+    - /AuxVariables/*/InitialCondition/
+    - /Variables/*/InitialCondition/
+    - /Bounds
+    - /BCs
+    - /DGKernels
+    - /Materials
+    - /UserObjects
+navier_stokes:
+    - /AuxVariables/*/InitialCondition/
+    - /Variables/*/InitialCondition/
+    - /AuxKernels
+    - /BCs
+    - /Bounds
+    - /DGKernels
+    - /Functions
+    - /ICs
+    - /Kernels
+    - /Materials
+    - /Postprocessors
+    - /UserObjects
+level_set:
+    - /UserObjects/LevelSetCFLCondition
+    - /UserObjects/LevelSetVolume
+porous_flow:
+    - /Bounds
+    - /UserObjects
+    - /Kernels
+    - /Materials
+    - /Postprocessors
+    - /AuxKernels
+    - /BCs
+    - /DiracKernels
+    - /Functions
+    - /PorousFlowFullySaturated
+    - /PorousFlowUnsaturated
+    - /PorousFlowBasicTHM
+stochastic_tools:
+    - /UserObjects
+    - /Postprocessors
+    - /Kernels
+    - /Materials
+richards:
+    - /
+solid_mechanics:
+    - /
+chemical_reactions:
+    - /
+contact:
+    - /
+fluid_properties:
+    - /
+misc:
+    - /
+water_steam_eos:
+    - /
+xfem:
+    - /

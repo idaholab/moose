@@ -1,5 +1,5 @@
 # GradientComponent
-!description /Kernels/GradientComponent
+!syntax description /Kernels/GradientComponent
 
 Implements
 
@@ -10,8 +10,8 @@ $$
 where $u$ is the kernel variable, $\alpha$ (`component`) is a coordinate system
 direction, and $v$ is a coupled variable.
 
-!parameters /Kernels/GradientComponent
+!syntax parameters /Kernels/GradientComponent
 
-!inputfiles /Kernels/GradientComponent
+!syntax inputs /Kernels/GradientComponent
 
-!childobjects /Kernels/GradientComponent
+!syntax children /Kernels/GradientComponent

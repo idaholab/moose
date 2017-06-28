@@ -1,7 +1,7 @@
-!description /Kernels/INSTemperatureTimeDerivative
+!syntax description /Kernels/INSTemperatureTimeDerivative
 
-!parameters /Kernels/INSTemperatureTimeDerivative
+!syntax parameters /Kernels/INSTemperatureTimeDerivative
 
-!inputfiles /Kernels/INSTemperatureTimeDerivative
+!syntax inputs /Kernels/INSTemperatureTimeDerivative
 
-!childobjects /Kernels/INSTemperatureTimeDerivative
+!syntax children /Kernels/INSTemperatureTimeDerivative

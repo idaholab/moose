@@ -1,7 +1,7 @@
-!description /AuxKernels/NSVelocityAux
+!syntax description /AuxKernels/NSVelocityAux
 
-!parameters /AuxKernels/NSVelocityAux
+!syntax parameters /AuxKernels/NSVelocityAux
 
-!inputfiles /AuxKernels/NSVelocityAux
+!syntax inputs /AuxKernels/NSVelocityAux
 
-!childobjects /AuxKernels/NSVelocityAux
+!syntax children /AuxKernels/NSVelocityAux

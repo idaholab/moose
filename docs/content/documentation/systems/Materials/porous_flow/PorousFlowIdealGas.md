@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowIdealGas
-!description /Materials/PorousFlowIdealGas
+!syntax description /Materials/PorousFlowIdealGas
 
-!parameters /Materials/PorousFlowIdealGas
+!syntax parameters /Materials/PorousFlowIdealGas
 
-!inputfiles /Materials/PorousFlowIdealGas
+!syntax inputs /Materials/PorousFlowIdealGas
 
-!childobjects /Materials/PorousFlowIdealGas
+!syntax children /Materials/PorousFlowIdealGas

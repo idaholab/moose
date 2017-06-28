@@ -1,5 +1,5 @@
 #RadialReturnStressUpdate
-!description /Materials/RadialReturnStressUpdate
+!syntax description /Materials/RadialReturnStressUpdate
 
 
 ###Algorithm References
@@ -11,7 +11,7 @@ In addition to the Sumo and Hughes textbook \cite{simo2006computational}, _Intro
 The stress update materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method.  For the `RadialReturnStressUpdate` materials, this calling material is [ComputeMultipleInelasticStress](ComputeMultipleInelasticStress.md).  Separating the call to the stress update materials from MOOSE allows us to iteratively call the stress update materials as is required to achieve convergence.
 
 ##Radial Return Algorithm Overview
-!media docs/media/tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the deviatoric yield surface and the radial return stress which is normal to the yield surface.
+!media media/tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the deviatoric yield surface and the radial return stress which is normal to the yield surface.
 
 !include docs/content/documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
@@ -61,7 +61,7 @@ Additionally, new radial return methods must also overwrite a single method from
 More details on how to write the equivalent yield surface equation for a creep model are given in Dunne and Petrinic.
 
 
-!childobjects /Materials/RadialReturnStressUpdate
+!syntax children /Materials/RadialReturnStressUpdate
 
 ## References
 \bibliographystyle{unsrt}

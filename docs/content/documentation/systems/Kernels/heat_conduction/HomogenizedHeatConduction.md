@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HomogenizedHeatConduction
-!description /Kernels/HomogenizedHeatConduction
+!syntax description /Kernels/HomogenizedHeatConduction
 
-!parameters /Kernels/HomogenizedHeatConduction
+!syntax parameters /Kernels/HomogenizedHeatConduction
 
-!inputfiles /Kernels/HomogenizedHeatConduction
+!syntax inputs /Kernels/HomogenizedHeatConduction
 
-!childobjects /Kernels/HomogenizedHeatConduction
+!syntax children /Kernels/HomogenizedHeatConduction

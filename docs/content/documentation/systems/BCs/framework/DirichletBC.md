@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DirichletBC
-!description /BCs/DirichletBC
+!syntax description /BCs/DirichletBC
 
-!parameters /BCs/DirichletBC
+!syntax parameters /BCs/DirichletBC
 
-!inputfiles /BCs/DirichletBC
+!syntax inputs /BCs/DirichletBC
 
-!childobjects /BCs/DirichletBC
+!syntax children /BCs/DirichletBC

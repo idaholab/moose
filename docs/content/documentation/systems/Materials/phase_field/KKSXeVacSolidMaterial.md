@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # KKSXeVacSolidMaterial
-!description /Materials/KKSXeVacSolidMaterial
+!syntax description /Materials/KKSXeVacSolidMaterial
 
-!parameters /Materials/KKSXeVacSolidMaterial
+!syntax parameters /Materials/KKSXeVacSolidMaterial
 
-!inputfiles /Materials/KKSXeVacSolidMaterial
+!syntax inputs /Materials/KKSXeVacSolidMaterial
 
-!childobjects /Materials/KKSXeVacSolidMaterial
+!syntax children /Materials/KKSXeVacSolidMaterial

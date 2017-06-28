@@ -28,11 +28,11 @@ as follows.
 !listing modules/level_set/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing_supg label=False
 
 
-!parameters /Kernels/LevelSetForcingFunctionSUPG
+!syntax parameters /Kernels/LevelSetForcingFunctionSUPG
 
-!inputfiles /Kernels/LevelSetForcingFunctionSUPG
+!syntax inputs /Kernels/LevelSetForcingFunctionSUPG
 
-!childobjects /Kernels/LevelSetForcingFunctionSUPG
+!syntax children /Kernels/LevelSetForcingFunctionSUPG
 
 ## References
 

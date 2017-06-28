@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VariableGradientComponent
-!description /AuxKernels/VariableGradientComponent
+!syntax description /AuxKernels/VariableGradientComponent
 
-!parameters /AuxKernels/VariableGradientComponent
+!syntax parameters /AuxKernels/VariableGradientComponent
 
-!inputfiles /AuxKernels/VariableGradientComponent
+!syntax inputs /AuxKernels/VariableGradientComponent
 
-!childobjects /AuxKernels/VariableGradientComponent
+!syntax children /AuxKernels/VariableGradientComponent

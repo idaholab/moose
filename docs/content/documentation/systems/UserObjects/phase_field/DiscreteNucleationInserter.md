@@ -1,6 +1,6 @@
 
 # DiscreteNucleationInserter
-!description /UserObjects/DiscreteNucleationInserter
+!syntax description /UserObjects/DiscreteNucleationInserter
 
 The inserter manages the global list of currently active nucleus stabilization sites. This user object takes two parameters
 * `hold_time` - the duration in time for which a stabilization site remains active
@@ -10,8 +10,8 @@ The inserter object keeps track if any changes to the nucleus list occurred in t
 
 The `DiscreteNucleationInserter` is part of the [Discrete Nucleation system](Nucleation/Discrete Nucleation.md).
 
-!parameters /UserObjects/DiscreteNucleationInserter
+!syntax parameters /UserObjects/DiscreteNucleationInserter
 
-!inputfiles /UserObjects/DiscreteNucleationInserter
+!syntax inputs /UserObjects/DiscreteNucleationInserter
 
-!childobjects /UserObjects/DiscreteNucleationInserter
+!syntax children /UserObjects/DiscreteNucleationInserter

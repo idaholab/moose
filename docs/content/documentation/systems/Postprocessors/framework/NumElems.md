@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumElems
-!description /Postprocessors/NumElems
+!syntax description /Postprocessors/NumElems
 
-!parameters /Postprocessors/NumElems
+!syntax parameters /Postprocessors/NumElems
 
-!inputfiles /Postprocessors/NumElems
+!syntax inputs /Postprocessors/NumElems
 
-!childobjects /Postprocessors/NumElems
+!syntax children /Postprocessors/NumElems

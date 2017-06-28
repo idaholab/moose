@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SolutionHistory
-!description /Outputs/SolutionHistory
+!syntax description /Outputs/SolutionHistory
 
-!parameters /Outputs/SolutionHistory
+!syntax parameters /Outputs/SolutionHistory
 
-!inputfiles /Outputs/SolutionHistory
+!syntax inputs /Outputs/SolutionHistory
 
-!childobjects /Outputs/SolutionHistory
+!syntax children /Outputs/SolutionHistory

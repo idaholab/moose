@@ -17,15 +17,15 @@ of the reinitialization case (Figure \ref{vortex_reinit_out}) is obviously lacki
 behaving in the manner is not fully understood, with respect to the level set module. This is an something that needs
 to be investigated further.
 
-!figure docs/media/level_set/vortex_out.gif id=vortex_out width=32% margin-right=2% float=left caption=Results from solving the vortex problem with the level set equation alone.
+!media media/level_set/vortex_out.gif id=vortex_out width=32% margin-right=2% float=left caption=Results from solving the vortex problem with the level set equation alone.
 
-!figure docs/media/level_set/vortex_out.gif id=vortex_supg_out width=32% margin-right=2% float=left caption=Results from solving the vortex problem with the level set equation using SUPG stabilization.
+!media media/level_set/vortex_out.gif id=vortex_supg_out width=32% margin-right=2% float=left caption=Results from solving the vortex problem with the level set equation using SUPG stabilization.
 
-!figure docs/media/level_set/vortex_reinit_out.gif id=vortex_reinit_out width=32% float=left caption=Results from solving the vortex problem with the level set equation with reinitialization.
+!media media/level_set/vortex_reinit_out.gif id=vortex_reinit_out width=32% float=left caption=Results from solving the vortex problem with the level set equation with reinitialization.
 
 The area comparison of the three methods is shown in Figure \ref{area_comparison}, again the reinitialization example
 is not performing as expected. The area results shown here indicates that reinitialization step as implemented in
 this module may be lacking. Additional work should be done to add additional stabilization and reinitialization schemes
 and uncover the inconsistencies seen here.
 
-!figure docs/media/level_set/example_vortex_area.png id=area_comparison caption=Comparison of area inside the vortex during simulations. float=right width=100%
+!media media/level_set/example_vortex_area.png id=area_comparison caption=Comparison of area inside the vortex during simulations. float=right width=100%

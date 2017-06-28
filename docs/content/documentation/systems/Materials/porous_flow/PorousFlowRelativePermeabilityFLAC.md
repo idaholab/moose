@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowRelativePermeabilityFLAC
-!description /Materials/PorousFlowRelativePermeabilityFLAC
+!syntax description /Materials/PorousFlowRelativePermeabilityFLAC
 
-!parameters /Materials/PorousFlowRelativePermeabilityFLAC
+!syntax parameters /Materials/PorousFlowRelativePermeabilityFLAC
 
-!inputfiles /Materials/PorousFlowRelativePermeabilityFLAC
+!syntax inputs /Materials/PorousFlowRelativePermeabilityFLAC
 
-!childobjects /Materials/PorousFlowRelativePermeabilityFLAC
+!syntax children /Materials/PorousFlowRelativePermeabilityFLAC

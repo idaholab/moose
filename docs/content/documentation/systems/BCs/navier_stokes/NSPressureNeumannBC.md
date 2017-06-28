@@ -1,7 +1,7 @@
-!description /BCs/NSPressureNeumannBC
+!syntax description /BCs/NSPressureNeumannBC
 
-!parameters /BCs/NSPressureNeumannBC
+!syntax parameters /BCs/NSPressureNeumannBC
 
-!inputfiles /BCs/NSPressureNeumannBC
+!syntax inputs /BCs/NSPressureNeumannBC
 
-!childobjects /BCs/NSPressureNeumannBC
+!syntax children /BCs/NSPressureNeumannBC

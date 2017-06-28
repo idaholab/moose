@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # KKSMultiFreeEnergy
-!description /AuxKernels/KKSMultiFreeEnergy
+!syntax description /AuxKernels/KKSMultiFreeEnergy
 
-!parameters /AuxKernels/KKSMultiFreeEnergy
+!syntax parameters /AuxKernels/KKSMultiFreeEnergy
 
-!inputfiles /AuxKernels/KKSMultiFreeEnergy
+!syntax inputs /AuxKernels/KKSMultiFreeEnergy
 
-!childobjects /AuxKernels/KKSMultiFreeEnergy
+!syntax children /AuxKernels/KKSMultiFreeEnergy

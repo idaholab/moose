@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GapConductance
-!description /Materials/GapConductance
+!syntax description /Materials/GapConductance
 
-!parameters /Materials/GapConductance
+!syntax parameters /Materials/GapConductance
 
-!inputfiles /Materials/GapConductance
+!syntax inputs /Materials/GapConductance
 
-!childobjects /Materials/GapConductance
+!syntax children /Materials/GapConductance

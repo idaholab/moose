@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HEVPLinearHardening
-!description /UserObjects/HEVPLinearHardening
+!syntax description /UserObjects/HEVPLinearHardening
 
-!parameters /UserObjects/HEVPLinearHardening
+!syntax parameters /UserObjects/HEVPLinearHardening
 
-!inputfiles /UserObjects/HEVPLinearHardening
+!syntax inputs /UserObjects/HEVPLinearHardening
 
-!childobjects /UserObjects/HEVPLinearHardening
+!syntax children /UserObjects/HEVPLinearHardening

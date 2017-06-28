@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantGrainForceAndTorque
-!description /UserObjects/ConstantGrainForceAndTorque
+!syntax description /UserObjects/ConstantGrainForceAndTorque
 
-!parameters /UserObjects/ConstantGrainForceAndTorque
+!syntax parameters /UserObjects/ConstantGrainForceAndTorque
 
-!inputfiles /UserObjects/ConstantGrainForceAndTorque
+!syntax inputs /UserObjects/ConstantGrainForceAndTorque
 
-!childobjects /UserObjects/ConstantGrainForceAndTorque
+!syntax children /UserObjects/ConstantGrainForceAndTorque

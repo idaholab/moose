@@ -1,7 +1,7 @@
-!description /AuxKernels/NSEnthalpyAux
+!syntax description /AuxKernels/NSEnthalpyAux
 
-!parameters /AuxKernels/NSEnthalpyAux
+!syntax parameters /AuxKernels/NSEnthalpyAux
 
-!inputfiles /AuxKernels/NSEnthalpyAux
+!syntax inputs /AuxKernels/NSEnthalpyAux
 
-!childobjects /AuxKernels/NSEnthalpyAux
+!syntax children /AuxKernels/NSEnthalpyAux

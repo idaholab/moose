@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DGFunctionDiffusionDirichletBC
-!description /BCs/DGFunctionDiffusionDirichletBC
+!syntax description /BCs/DGFunctionDiffusionDirichletBC
 
-!parameters /BCs/DGFunctionDiffusionDirichletBC
+!syntax parameters /BCs/DGFunctionDiffusionDirichletBC
 
-!inputfiles /BCs/DGFunctionDiffusionDirichletBC
+!syntax inputs /BCs/DGFunctionDiffusionDirichletBC
 
-!childobjects /BCs/DGFunctionDiffusionDirichletBC
+!syntax children /BCs/DGFunctionDiffusionDirichletBC

@@ -1,5 +1,5 @@
 # ComputeInterfaceStress
-!description /Materials/ComputeInterfaceStress
+!syntax description /Materials/ComputeInterfaceStress
 
 The resulting stress tensor has the property of having one Eigenvector in the
 direction of the order parameter gradient, with an Eigenvalue of zero, and two
@@ -52,8 +52,8 @@ The $|\nabla\eta|$ factor causes the integral over the stress tensor across the 
 to evaluate the same value, regardless of interfacial width (provided the order parameter
 range is well defined - commonly 0 and 1 on the two sides of the interface).
 
-!parameters /Materials/ComputeInterfaceStress
+!syntax parameters /Materials/ComputeInterfaceStress
 
-!inputfiles /Materials/ComputeInterfaceStress
+!syntax inputs /Materials/ComputeInterfaceStress
 
-!childobjects /Materials/ComputeInterfaceStress
+!syntax children /Materials/ComputeInterfaceStress

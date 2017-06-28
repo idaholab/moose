@@ -1,5 +1,5 @@
 # ImageMesh
-!description /Mesh/ImageMesh
+!syntax description /Mesh/ImageMesh
 
 ## Description
 The `ImageMesh` object is a convenience tool for setting up a mesh to match the pixel structure of a two or three
@@ -10,8 +10,8 @@ the generated mesh is sized to the dimensions of the images and creates one elem
 ## Example Syntax
 !listing test/tests/functions/image_function/image_mesh_3d.i block=Mesh
 
-!parameters /Mesh/ImageMesh
+!syntax parameters /Mesh/ImageMesh
 
-!inputfiles /Mesh/ImageMesh
+!syntax inputs /Mesh/ImageMesh
 
-!childobjects /Mesh/ImageMesh
+!syntax children /Mesh/ImageMesh

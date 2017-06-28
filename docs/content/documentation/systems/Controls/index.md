@@ -82,6 +82,6 @@ In both cases there is an alternative form for defining an object and parameter 
 `base::object/name`. In this case "base" is the [MOOSE] base system that the object is derived from.
 For example, `Kernel::diff/coef`.
 
-!parameters /Controls
+!syntax objects /Controls
 
-!subobjects /Controls
+!syntax actions /Controls

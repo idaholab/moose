@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ThirdPhaseSuppressionMaterial
-!description /Materials/ThirdPhaseSuppressionMaterial
+!syntax description /Materials/ThirdPhaseSuppressionMaterial
 
-!parameters /Materials/ThirdPhaseSuppressionMaterial
+!syntax parameters /Materials/ThirdPhaseSuppressionMaterial
 
-!inputfiles /Materials/ThirdPhaseSuppressionMaterial
+!syntax inputs /Materials/ThirdPhaseSuppressionMaterial
 
-!childobjects /Materials/ThirdPhaseSuppressionMaterial
+!syntax children /Materials/ThirdPhaseSuppressionMaterial

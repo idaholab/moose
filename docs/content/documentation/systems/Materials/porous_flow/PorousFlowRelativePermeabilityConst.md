@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowRelativePermeabilityConst
-!description /Materials/PorousFlowRelativePermeabilityConst
+!syntax description /Materials/PorousFlowRelativePermeabilityConst
 
-!parameters /Materials/PorousFlowRelativePermeabilityConst
+!syntax parameters /Materials/PorousFlowRelativePermeabilityConst
 
-!inputfiles /Materials/PorousFlowRelativePermeabilityConst
+!syntax inputs /Materials/PorousFlowRelativePermeabilityConst
 
-!childobjects /Materials/PorousFlowRelativePermeabilityConst
+!syntax children /Materials/PorousFlowRelativePermeabilityConst

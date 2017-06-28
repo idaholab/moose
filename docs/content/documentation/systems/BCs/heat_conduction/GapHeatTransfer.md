@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GapHeatTransfer
-!description /BCs/GapHeatTransfer
+!syntax description /BCs/GapHeatTransfer
 
-!parameters /BCs/GapHeatTransfer
+!syntax parameters /BCs/GapHeatTransfer
 
-!inputfiles /BCs/GapHeatTransfer
+!syntax inputs /BCs/GapHeatTransfer
 
-!childobjects /BCs/GapHeatTransfer
+!syntax children /BCs/GapHeatTransfer

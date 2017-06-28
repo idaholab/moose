@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AssignElementSubdomainID
-!description /MeshModifiers/AssignElementSubdomainID
+!syntax description /MeshModifiers/AssignElementSubdomainID
 
-!parameters /MeshModifiers/AssignElementSubdomainID
+!syntax parameters /MeshModifiers/AssignElementSubdomainID
 
-!inputfiles /MeshModifiers/AssignElementSubdomainID
+!syntax inputs /MeshModifiers/AssignElementSubdomainID
 
-!childobjects /MeshModifiers/AssignElementSubdomainID
+!syntax children /MeshModifiers/AssignElementSubdomainID

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LineMaterialRankTwoScalarSampler
-!description /VectorPostprocessors/LineMaterialRankTwoScalarSampler
+!syntax description /VectorPostprocessors/LineMaterialRankTwoScalarSampler
 
-!parameters /VectorPostprocessors/LineMaterialRankTwoScalarSampler
+!syntax parameters /VectorPostprocessors/LineMaterialRankTwoScalarSampler
 
-!inputfiles /VectorPostprocessors/LineMaterialRankTwoScalarSampler
+!syntax inputs /VectorPostprocessors/LineMaterialRankTwoScalarSampler
 
-!childobjects /VectorPostprocessors/LineMaterialRankTwoScalarSampler
+!syntax children /VectorPostprocessors/LineMaterialRankTwoScalarSampler

@@ -1,7 +1,7 @@
-!description /AuxKernels/NSPressureAux
+!syntax description /AuxKernels/NSPressureAux
 
-!parameters /AuxKernels/NSPressureAux
+!syntax parameters /AuxKernels/NSPressureAux
 
-!inputfiles /AuxKernels/NSPressureAux
+!syntax inputs /AuxKernels/NSPressureAux
 
-!childobjects /AuxKernels/NSPressureAux
+!syntax children /AuxKernels/NSPressureAux

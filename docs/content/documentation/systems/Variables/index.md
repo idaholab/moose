@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Variables System
-!parameters /Variables
+!syntax objects /Variables
 
+!syntax subsystems /Variables
+
+!syntax actions /Variables

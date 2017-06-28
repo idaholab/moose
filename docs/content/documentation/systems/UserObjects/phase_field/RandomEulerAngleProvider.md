@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RandomEulerAngleProvider
-!description /UserObjects/RandomEulerAngleProvider
+!syntax description /UserObjects/RandomEulerAngleProvider
 
-!parameters /UserObjects/RandomEulerAngleProvider
+!syntax parameters /UserObjects/RandomEulerAngleProvider
 
-!inputfiles /UserObjects/RandomEulerAngleProvider
+!syntax inputs /UserObjects/RandomEulerAngleProvider
 
-!childobjects /UserObjects/RandomEulerAngleProvider
+!syntax children /UserObjects/RandomEulerAngleProvider

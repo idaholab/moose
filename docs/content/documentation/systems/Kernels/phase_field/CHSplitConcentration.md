@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CHSplitConcentration
-!description /Kernels/CHSplitConcentration
+!syntax description /Kernels/CHSplitConcentration
 
-!parameters /Kernels/CHSplitConcentration
+!syntax parameters /Kernels/CHSplitConcentration
 
-!inputfiles /Kernels/CHSplitConcentration
+!syntax inputs /Kernels/CHSplitConcentration
 
-!childobjects /Kernels/CHSplitConcentration
+!syntax children /Kernels/CHSplitConcentration

@@ -1,5 +1,5 @@
 # BrineFluidProperties
-!description /Modules/FluidProperties/BrineFluidProperties
+!syntax description /Modules/FluidProperties/BrineFluidProperties
 
 
 A high-precision and consistent formulation for fluid properties for binary salt (NaCl) and water
@@ -21,11 +21,11 @@ The BrineFluidProperties UserObject is valid for:
 - 0.1 MPa $\le$ p $\le$ 50 MPa,
 - 0 $\le$ x$_{\mathrm{nacl}}$ $\le$ 1
 
-!parameters /Modules/FluidProperties/BrineFluidProperties
+!syntax parameters /Modules/FluidProperties/BrineFluidProperties
 
-!inputfiles /Modules/FluidProperties/BrineFluidProperties
+!syntax inputs /Modules/FluidProperties/BrineFluidProperties
 
-!childobjects /Modules/FluidProperties/BrineFluidProperties
+!syntax children /Modules/FluidProperties/BrineFluidProperties
 
 ## References
 \bibliographystyle{unsrt}

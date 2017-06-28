@@ -1,6 +1,6 @@
 
 # OrientedBoxMarker
-!description /Adaptivity/Markers/OrientedBoxMarker
+!syntax description /Adaptivity/Markers/OrientedBoxMarker
 
 ## Description
 The `OrientedBoxMarker` operates the in a similar
@@ -15,8 +15,8 @@ then defined.
 ## Example Input Syntax
 !listing test/tests/markers/oriented_box_marker/obm.i block=Adaptivity
 
-!parameters /Adaptivity/Markers/OrientedBoxMarker
+!syntax parameters /Adaptivity/Markers/OrientedBoxMarker
 
-!inputfiles /Adaptivity/Markers/OrientedBoxMarker
+!syntax inputs /Adaptivity/Markers/OrientedBoxMarker
 
-!childobjects /Adaptivity/Markers/OrientedBoxMarker
+!syntax children /Adaptivity/Markers/OrientedBoxMarker

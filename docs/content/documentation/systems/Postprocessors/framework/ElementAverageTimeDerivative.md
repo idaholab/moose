@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementAverageTimeDerivative
-!description /Postprocessors/ElementAverageTimeDerivative
+!syntax description /Postprocessors/ElementAverageTimeDerivative
 
-!parameters /Postprocessors/ElementAverageTimeDerivative
+!syntax parameters /Postprocessors/ElementAverageTimeDerivative
 
-!inputfiles /Postprocessors/ElementAverageTimeDerivative
+!syntax inputs /Postprocessors/ElementAverageTimeDerivative
 
-!childobjects /Postprocessors/ElementAverageTimeDerivative
+!syntax children /Postprocessors/ElementAverageTimeDerivative

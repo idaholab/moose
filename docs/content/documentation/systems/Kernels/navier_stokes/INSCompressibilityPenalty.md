@@ -1,7 +1,7 @@
-!description /Kernels/INSCompressibilityPenalty
+!syntax description /Kernels/INSCompressibilityPenalty
 
-!parameters /Kernels/INSCompressibilityPenalty
+!syntax parameters /Kernels/INSCompressibilityPenalty
 
-!inputfiles /Kernels/INSCompressibilityPenalty
+!syntax inputs /Kernels/INSCompressibilityPenalty
 
-!childobjects /Kernels/INSCompressibilityPenalty
+!syntax children /Kernels/INSCompressibilityPenalty

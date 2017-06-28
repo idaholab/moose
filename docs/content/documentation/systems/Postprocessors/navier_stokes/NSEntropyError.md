@@ -1,7 +1,7 @@
-!description /Postprocessors/NSEntropyError
+!syntax description /Postprocessors/NSEntropyError
 
-!parameters /Postprocessors/NSEntropyError
+!syntax parameters /Postprocessors/NSEntropyError
 
-!inputfiles /Postprocessors/NSEntropyError
+!syntax inputs /Postprocessors/NSEntropyError
 
-!childobjects /Postprocessors/NSEntropyError
+!syntax children /Postprocessors/NSEntropyError

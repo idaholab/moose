@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPlotQuantity
-!description /Postprocessors/PorousFlowPlotQuantity
+!syntax description /Postprocessors/PorousFlowPlotQuantity
 
-!parameters /Postprocessors/PorousFlowPlotQuantity
+!syntax parameters /Postprocessors/PorousFlowPlotQuantity
 
-!inputfiles /Postprocessors/PorousFlowPlotQuantity
+!syntax inputs /Postprocessors/PorousFlowPlotQuantity
 
-!childobjects /Postprocessors/PorousFlowPlotQuantity
+!syntax children /Postprocessors/PorousFlowPlotQuantity

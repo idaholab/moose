@@ -8,8 +8,8 @@ This object is primarily designed to test the Sampler output.
 ## Example Syntax
 !listing modules/stochastic_tools/tests/samplers/monte_carlo/monte_carlo_uniform.i block=VectorPostprocessors
 
-!parameters /VectorPostprocessors/SamplerData
+!syntax parameters /VectorPostprocessors/SamplerData
 
-!inputfiles /VectorPostprocessors/SamplerData
+!syntax input /VectorPostprocessors/SamplerData
 
-!childobjects /VectorPostprocessors/SamplerData
+!syntax children /VectorPostprocessors/SamplerData

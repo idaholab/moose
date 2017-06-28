@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VariableInnerProduct
-!description /Postprocessors/VariableInnerProduct
+!syntax description /Postprocessors/VariableInnerProduct
 
-!parameters /Postprocessors/VariableInnerProduct
+!syntax parameters /Postprocessors/VariableInnerProduct
 
-!inputfiles /Postprocessors/VariableInnerProduct
+!syntax inputs /Postprocessors/VariableInnerProduct
 
-!childobjects /Postprocessors/VariableInnerProduct
+!syntax children /Postprocessors/VariableInnerProduct

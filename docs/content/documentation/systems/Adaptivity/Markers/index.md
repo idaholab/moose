@@ -28,4 +28,6 @@ following table.
 ## Example Syntax
 !listing test/tests/markers/combo_marker/combo_marker_test.i block=Adaptivity
 
-!subobjects /Adaptivity/Markers title=Available Marker Objects
+!syntax objects /Adaptivity/Markers title=Available Marker Objects
+
+!syntax actions /Adaptivity/Markers title=Available Marker Actions

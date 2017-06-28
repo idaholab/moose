@@ -1,1 +1,1 @@
-!systems groups=tensor_mechanics
+!syntax complete groups=tensor_mechanics

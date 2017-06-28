@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RankTwoScalarAux
-!description /AuxKernels/RankTwoScalarAux
+!syntax description /AuxKernels/RankTwoScalarAux
 
-!parameters /AuxKernels/RankTwoScalarAux
+!syntax parameters /AuxKernels/RankTwoScalarAux
 
-!inputfiles /AuxKernels/RankTwoScalarAux
+!syntax inputs /AuxKernels/RankTwoScalarAux
 
-!childobjects /AuxKernels/RankTwoScalarAux
+!syntax children /AuxKernels/RankTwoScalarAux

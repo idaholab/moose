@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialPropertyDebugOutput
-!description /Outputs/MaterialPropertyDebugOutput
+!syntax description /Outputs/MaterialPropertyDebugOutput
 
-!parameters /Outputs/MaterialPropertyDebugOutput
+!syntax parameters /Outputs/MaterialPropertyDebugOutput
 
-!inputfiles /Outputs/MaterialPropertyDebugOutput
+!syntax inputs /Outputs/MaterialPropertyDebugOutput
 
-!childobjects /Outputs/MaterialPropertyDebugOutput
+!syntax children /Outputs/MaterialPropertyDebugOutput

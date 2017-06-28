@@ -1,5 +1,5 @@
 # AllenCahn
-!description /Kernels/AllenCahn
+!syntax description /Kernels/AllenCahn
 
 Implements the term
 
@@ -16,8 +16,8 @@ $a,b,\dots$ (`args`) are additional variable dependencies of the mobility and fr
 Note that this makes the assumption that $F$ is _not_ depending on $\nabla\eta$. The $\nabla \eta$ dependent terms
 that arise from the gradient interface energy are handled separately in the [`ACInterface`](/ACInterface.md) kernel.
 
-!parameters /Kernels/AllenCahn
+!syntax parameters /Kernels/AllenCahn
 
-!inputfiles /Kernels/AllenCahn
+!syntax inputs /Kernels/AllenCahn
 
-!childobjects /Kernels/AllenCahn
+!syntax children /Kernels/AllenCahn

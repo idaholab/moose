@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FiniteStrainHyperElasticViscoPlastic
-!description /Materials/FiniteStrainHyperElasticViscoPlastic
+!syntax description /Materials/FiniteStrainHyperElasticViscoPlastic
 
-!parameters /Materials/FiniteStrainHyperElasticViscoPlastic
+!syntax parameters /Materials/FiniteStrainHyperElasticViscoPlastic
 
-!inputfiles /Materials/FiniteStrainHyperElasticViscoPlastic
+!syntax inputs /Materials/FiniteStrainHyperElasticViscoPlastic
 
-!childobjects /Materials/FiniteStrainHyperElasticViscoPlastic
+!syntax children /Materials/FiniteStrainHyperElasticViscoPlastic

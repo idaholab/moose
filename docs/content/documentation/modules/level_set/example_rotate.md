@@ -56,11 +56,11 @@ solve when steady-state is achieved according to the criteria defined by \citet{
 \ref{circle_rotate_master_out} shows the results of the bubble problem with reinitialization, the result looks
 similar to the SUPG result. However, if you consider the area conservation discussed in the [Area Comparison](#area_comparison) section, the reinitialization scheme yields the superior solution for this problem.
 
-!media docs/media/level_set/circle_rotate_out.gif id=circle_rotate_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation alone.
+!media media/level_set/circle_rotate_out.gif id=circle_rotate_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation alone.
 
-!media docs/media/level_set/circle_rotate_supg_out.gif id=circle_rotate_supg_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation using SUPG stabilization.
+!media media/level_set/circle_rotate_supg_out.gif id=circle_rotate_supg_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation using SUPG stabilization.
 
-!media docs/media/level_set/circle_rotate_master_out.gif id=circle_rotate_master_out width=32% float=left caption=Results from solving the rotating circle problem with the level set equation with reinitialization.
+!media media/level_set/circle_rotate_master_out.gif id=circle_rotate_master_out width=32% float=left caption=Results from solving the rotating circle problem with the level set equation with reinitialization.
 
 ## Area Comparison
 
@@ -74,7 +74,7 @@ field. Adding SUPG stabilization helps ameliorate the stability
 concern but it suffers from loss of area conservation. The
 re-initialization scheme is both stable and area-conserving.
 
-!media docs/media/level_set/area_comparison.png id=area_comparison caption=Comparison of area inside the bubble during simulations. width=50% float=right margin-left=20px
+!media media/level_set/area_comparison.png id=area_comparison caption=Comparison of area inside the bubble during simulations. width=50% float=right margin-left=20px
 
 The re-initialization methods performs well, but it is computationally
 expensive and picking the pseudo timestep size $\Delta \tau$, steady-state

@@ -1,7 +1,7 @@
-!description /BCs/NSMomentumConvectiveWeakStagnationBC
+!syntax description /BCs/NSMomentumConvectiveWeakStagnationBC
 
-!parameters /BCs/NSMomentumConvectiveWeakStagnationBC
+!syntax parameters /BCs/NSMomentumConvectiveWeakStagnationBC
 
-!inputfiles /BCs/NSMomentumConvectiveWeakStagnationBC
+!syntax inputs /BCs/NSMomentumConvectiveWeakStagnationBC
 
-!childobjects /BCs/NSMomentumConvectiveWeakStagnationBC
+!syntax children /BCs/NSMomentumConvectiveWeakStagnationBC

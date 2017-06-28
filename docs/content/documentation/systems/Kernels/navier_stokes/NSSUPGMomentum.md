@@ -1,7 +1,7 @@
-!description /Kernels/NSSUPGMomentum
+!syntax description /Kernels/NSSUPGMomentum
 
-!parameters /Kernels/NSSUPGMomentum
+!syntax parameters /Kernels/NSSUPGMomentum
 
-!inputfiles /Kernels/NSSUPGMomentum
+!syntax inputs /Kernels/NSSUPGMomentum
 
-!childobjects /Kernels/NSSUPGMomentum
+!syntax children /Kernels/NSSUPGMomentum

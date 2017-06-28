@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NewmarkVelAux
-!description /AuxKernels/NewmarkVelAux
+!syntax description /AuxKernels/NewmarkVelAux
 
-!parameters /AuxKernels/NewmarkVelAux
+!syntax parameters /AuxKernels/NewmarkVelAux
 
-!inputfiles /AuxKernels/NewmarkVelAux
+!syntax inputs /AuxKernels/NewmarkVelAux
 
-!childobjects /AuxKernels/NewmarkVelAux
+!syntax children /AuxKernels/NewmarkVelAux

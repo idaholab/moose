@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GlobalParams System
-!parameters /GlobalParams
+!syntax objects /GlobalParams
 
+!syntax subsystems /GlobalParams
+
+!syntax actions /GlobalParams

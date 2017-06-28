@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDiffusivityMillingtonQuirk
-!description /Materials/PorousFlowDiffusivityMillingtonQuirk
+!syntax description /Materials/PorousFlowDiffusivityMillingtonQuirk
 
-!parameters /Materials/PorousFlowDiffusivityMillingtonQuirk
+!syntax parameters /Materials/PorousFlowDiffusivityMillingtonQuirk
 
-!inputfiles /Materials/PorousFlowDiffusivityMillingtonQuirk
+!syntax inputs /Materials/PorousFlowDiffusivityMillingtonQuirk
 
-!childobjects /Materials/PorousFlowDiffusivityMillingtonQuirk
+!syntax children /Materials/PorousFlowDiffusivityMillingtonQuirk

@@ -5,8 +5,8 @@ each matrix returned from the [Sampler](stochastic_tools/index.md#samplers) obje
 ## Example Syntax
 !listing modules/stochastic_tools/tests/multiapps/sampler_multiapp/master.i block=MultiApps label=False
 
-!parameters /MultiApps/SamplerMultiApp
+!syntax parameters /MultiApps/SamplerMultiApp
 
-!inputfiles /MultiApps/SamplerMultiApp
+!syntax input /MultiApps/SamplerMultiApp
 
-!childobjects /MultiApps/SamplerMultiApp
+!syntax children /MultiApps/SamplerMultiApp

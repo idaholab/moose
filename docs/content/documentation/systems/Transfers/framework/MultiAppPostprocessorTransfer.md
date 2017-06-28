@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppPostprocessorTransfer
-!description /Transfers/MultiAppPostprocessorTransfer
+!syntax description /Transfers/MultiAppPostprocessorTransfer
 
-!parameters /Transfers/MultiAppPostprocessorTransfer
+!syntax parameters /Transfers/MultiAppPostprocessorTransfer
 
-!inputfiles /Transfers/MultiAppPostprocessorTransfer
+!syntax inputs /Transfers/MultiAppPostprocessorTransfer
 
-!childobjects /Transfers/MultiAppPostprocessorTransfer
+!syntax children /Transfers/MultiAppPostprocessorTransfer

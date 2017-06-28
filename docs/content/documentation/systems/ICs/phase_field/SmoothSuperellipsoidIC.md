@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SmoothSuperellipsoidIC
-!description /ICs/SmoothSuperellipsoidIC
+!syntax description /ICs/SmoothSuperellipsoidIC
 
-!parameters /ICs/SmoothSuperellipsoidIC
+!syntax parameters /ICs/SmoothSuperellipsoidIC
 
-!inputfiles /ICs/SmoothSuperellipsoidIC
+!syntax inputs /ICs/SmoothSuperellipsoidIC
 
-!childobjects /ICs/SmoothSuperellipsoidIC
+!syntax children /ICs/SmoothSuperellipsoidIC

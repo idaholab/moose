@@ -1,5 +1,5 @@
 # CHInterfaceAniso
-!description /Kernels/CHInterfaceAniso
+!syntax description /Kernels/CHInterfaceAniso
 
 Implements the Cahn-Hilliard term for the $\frac{\kappa_i}2|\nabla c_i|^2$ gradient
 energy contribution for the anisotropic mobility case. Its weak form is
@@ -13,8 +13,8 @@ non-linear order parameter variable the kernel is acting on, $M_i$ (`mob_name`) 
 the tensorial (anisotropic) mobility associated with the order parameter, and $\psi_m$
 is the test function.
 
-!parameters /Kernels/CHInterfaceAniso
+!syntax parameters /Kernels/CHInterfaceAniso
 
-!inputfiles /Kernels/CHInterfaceAniso
+!syntax inputs /Kernels/CHInterfaceAniso
 
-!childobjects /Kernels/CHInterfaceAniso
+!syntax children /Kernels/CHInterfaceAniso

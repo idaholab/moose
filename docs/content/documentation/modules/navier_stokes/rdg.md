@@ -106,7 +106,7 @@ $$
 $$
 Although the total number of stencils for each cell depends on the shape of the cell, the presented choice is unique and compact, as only the von Neumann neighbors are involved. This idea has also been extended to higher-order discontinuous Galerkin (DG) methods, where the curvatures of polynomial solutions are reconstructed in a similar fashion \cite{luo2012hermite,luo2013reconstructed}.
 
-!media docs/media/navier_stokes/rdg/weno_stencil.png width=50% padding-right=20px caption=Neighborhood defined by von Neumann neighbors of cell $\Omega_e$ used for HWENO reconstruction on unstructured cells.
+!media media/navier_stokes/rdg/weno_stencil.png width=50% padding-right=20px caption=Neighborhood defined by von Neumann neighbors of cell $\Omega_e$ used for HWENO reconstruction on unstructured cells.
 
 The calculation of $\nabla q^{\rm WENO}_i$ consists of the following steps:
 
@@ -153,7 +153,7 @@ All of the Kernels are required to supply a residual,
 which usually involves summing products of finite element shape functions.
 The basic architecture of the code allows convenient coupling of different processes and incorporation of new physics. The following figure displays a rough sketch of the basic code architecture, with the Kernels at the uppermost level, directly underlain by the framework and solver libraries used to couple the Kernels and perform the simulations. This code also enjoys an abundance of existing capabilities in the framework. For example, by inheriting the dimension agnostic design from the baseline libMesh finite element library \cite{kirk2006libmesh}, the code is allowed to run on arbitrary types of unstructured meshes in 1D, 2D, and 3D. Moreover, a large selection of explicit and implicit time integration schemes are readily available for the code too.
 
-!media docs/media/navier_stokes/rdg/code_structure.png width=70% padding-right=20px caption=The object-oriented architecture used to develop the CFD code.
+!media media/navier_stokes/rdg/code_structure.png width=70% padding-right=20px caption=The object-oriented architecture used to develop the CFD code.
 
 ##Examples in 1D
 
@@ -179,9 +179,9 @@ $\rho = 0.5$, $u = 0$, $p = 0.571$ for $x = (0.5, 0.1]$.
 The computed instantaneous density and pressure profiles at $t = 0.15$
 are compared with the analytical solution data, and plotted in the following figures.
 
-!media docs/media/navier_stokes/rdg/fig_lax_dens.png width=50% padding-right=20px float=right caption=Lax-Harten shock tube: density profiles at $t = 0.15$.
+!media media/navier_stokes/rdg/fig_lax_dens.png width=50% padding-right=20px float=right caption=Lax-Harten shock tube: density profiles at $t = 0.15$.
 
-!media docs/media/navier_stokes/rdg/fig_lax_pres.png width=50% padding-right=20px float=right caption=Lax-Harten shock tube: pressure profiles at $t = 0.15$.
+!media media/navier_stokes/rdg/fig_lax_pres.png width=50% padding-right=20px float=right caption=Lax-Harten shock tube: pressure profiles at $t = 0.15$.
 
 
 ###Input File
@@ -283,7 +283,7 @@ The problems listed above can be found in the navier_stokes test directory. The 
 ###Supersonic Flow Over a Wedge
 
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_mesh.png width=45% padding-left=20px float=right caption=An unstructured mesh with 11,024 triangular cells and 5,656 points.
+!media media/navier_stokes/rdg/2d_obliqueshock_mesh.png width=45% padding-left=20px float=right caption=An unstructured mesh with 11,024 triangular cells and 5,656 points.
 
 This is a standard problem in compressible, invicid shock theory, with details to be found in \cite{anderson1990modern}.
 In this test case, a relatively coarse unstructured mesh is used for simulations;
@@ -301,7 +301,7 @@ $\rho_{\tt post}/\rho_{\infty}=2.03$ and $p_{\tt post}/p_{\infty}=2.82$.
 The Mach number just behind the shock should be $2.25$.
 
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_expl_hist.png width=45% padding-left=20px float=right caption=Computed density residual norms versus time steps.
+!media media/navier_stokes/rdg/2d_obliqueshock_expl_hist.png width=45% padding-left=20px float=right caption=Computed density residual norms versus time steps.
 
 The explicit TVDRK2 time-stepping scheme was used for time integration in this test case.
 As shown in the figure on the right, convergence was monitored with regard to density residual norms.
@@ -312,20 +312,20 @@ indicating the difficulty for FV(1) to reach convergence with the minmax limiter
 
 The defect associated to the minmax limited FV(1) solution is also exposed by the oscillations in the density and pressure contours computed at the end of simulations, as shown in the figures below. Although not significant, those oscillations in the post-shock region can be observed near the leading edge of the wedge. In comparison, FV(1) with the HWENO limiter resulted in fully converged smooth solutions in the post-shock region. Therefore, to solve problems containing strong shockwaves or discontinuities, we recommend the HWENO limiter over the minmax limiter.
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_expl_minmax_dens.png width=50% padding-right=20px float=left caption=Density contours by FV(1) with minmax limiter.
+!media media/navier_stokes/rdg/2d_obliqueshock_expl_minmax_dens.png width=50% padding-right=20px float=left caption=Density contours by FV(1) with minmax limiter.
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_expl_weno_dens.png   width=50% padding-right=20px float=left caption=Density contours by FV(1) with HWENO limiter.
+!media media/navier_stokes/rdg/2d_obliqueshock_expl_weno_dens.png   width=50% padding-right=20px float=left caption=Density contours by FV(1) with HWENO limiter.
 
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_expl_minmax_pres.png width=50% padding-right=20px float=left caption=Pressure contours by FV(1) with minmax limiter.
+!media media/navier_stokes/rdg/2d_obliqueshock_expl_minmax_pres.png width=50% padding-right=20px float=left caption=Pressure contours by FV(1) with minmax limiter.
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_expl_weno_pres.png   width=50% padding-right=20px float=left caption=Pressure contours by FV(1) with HWENO limiter.
+!media media/navier_stokes/rdg/2d_obliqueshock_expl_weno_pres.png   width=50% padding-right=20px float=left caption=Pressure contours by FV(1) with HWENO limiter.
 
 Lastly, accuracy of the numerical schemes were examined through comparison between the numerical solutions and the analytical data in the figure below, where the computed density and pressure values are plotted along the horizontal line of $y = 0.35$. The minmax-based and HWENO-based FV(1) solutions agree well, and they have both resolved the shock with adequate accuracy, considering the coarseness of the mesh used in the simulations. Nevertheless, the HWENO limiter is more advantageous than the minmax limiter in this test problem, as the former is able to deliver oscillation-free solution over the whole post-shock region.
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_dens_profile.png width=50% padding-right=20px float=left caption=Density profiles along the horizontal line of $y = 0.35$.
+!media media/navier_stokes/rdg/2d_obliqueshock_dens_profile.png width=50% padding-right=20px float=left caption=Density profiles along the horizontal line of $y = 0.35$.
 
-!media docs/media/navier_stokes/rdg/2d_obliqueshock_pres_profile.png width=50% padding-right=20px float=left caption=Pressure profiles along the horizontal line of $y = 0.35$.
+!media media/navier_stokes/rdg/2d_obliqueshock_pres_profile.png width=50% padding-right=20px float=left caption=Pressure profiles along the horizontal line of $y = 0.35$.
 
 ###Input File
 

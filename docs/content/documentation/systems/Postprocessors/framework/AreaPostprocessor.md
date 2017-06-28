@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AreaPostprocessor
-!description /Postprocessors/AreaPostprocessor
+!syntax description /Postprocessors/AreaPostprocessor
 
-!parameters /Postprocessors/AreaPostprocessor
+!syntax parameters /Postprocessors/AreaPostprocessor
 
-!inputfiles /Postprocessors/AreaPostprocessor
+!syntax inputs /Postprocessors/AreaPostprocessor
 
-!childobjects /Postprocessors/AreaPostprocessor
+!syntax children /Postprocessors/AreaPostprocessor

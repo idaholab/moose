@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowEffectiveStressCoupling
-!description /Kernels/PorousFlowEffectiveStressCoupling
+!syntax description /Kernels/PorousFlowEffectiveStressCoupling
 
-!parameters /Kernels/PorousFlowEffectiveStressCoupling
+!syntax parameters /Kernels/PorousFlowEffectiveStressCoupling
 
-!inputfiles /Kernels/PorousFlowEffectiveStressCoupling
+!syntax inputs /Kernels/PorousFlowEffectiveStressCoupling
 
-!childobjects /Kernels/PorousFlowEffectiveStressCoupling
+!syntax children /Kernels/PorousFlowEffectiveStressCoupling

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PiecewiseMultilinear
-!description /Functions/PiecewiseMultilinear
+!syntax description /Functions/PiecewiseMultilinear
 
-!parameters /Functions/PiecewiseMultilinear
+!syntax parameters /Functions/PiecewiseMultilinear
 
-!inputfiles /Functions/PiecewiseMultilinear
+!syntax inputs /Functions/PiecewiseMultilinear
 
-!childobjects /Functions/PiecewiseMultilinear
+!syntax children /Functions/PiecewiseMultilinear

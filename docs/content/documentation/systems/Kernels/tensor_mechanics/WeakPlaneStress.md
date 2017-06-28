@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # WeakPlaneStress
-!description /Kernels/WeakPlaneStress
+!syntax description /Kernels/WeakPlaneStress
 
-!parameters /Kernels/WeakPlaneStress
+!syntax parameters /Kernels/WeakPlaneStress
 
-!inputfiles /Kernels/WeakPlaneStress
+!syntax inputs /Kernels/WeakPlaneStress
 
-!childobjects /Kernels/WeakPlaneStress
+!syntax children /Kernels/WeakPlaneStress

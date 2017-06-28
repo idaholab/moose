@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GBDependentDiffusivity
-!description /Materials/GBDependentDiffusivity
+!syntax description /Materials/GBDependentDiffusivity
 
-!parameters /Materials/GBDependentDiffusivity
+!syntax parameters /Materials/GBDependentDiffusivity
 
-!inputfiles /Materials/GBDependentDiffusivity
+!syntax inputs /Materials/GBDependentDiffusivity
 
-!childobjects /Materials/GBDependentDiffusivity
+!syntax children /Materials/GBDependentDiffusivity

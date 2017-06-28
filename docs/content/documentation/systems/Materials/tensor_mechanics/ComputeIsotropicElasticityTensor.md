@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeIsotropicElasticityTensor
-!description /Materials/ComputeIsotropicElasticityTensor
+!syntax description /Materials/ComputeIsotropicElasticityTensor
 
-!parameters /Materials/ComputeIsotropicElasticityTensor
+!syntax parameters /Materials/ComputeIsotropicElasticityTensor
 
-!inputfiles /Materials/ComputeIsotropicElasticityTensor
+!syntax inputs /Materials/ComputeIsotropicElasticityTensor
 
-!childobjects /Materials/ComputeIsotropicElasticityTensor
+!syntax children /Materials/ComputeIsotropicElasticityTensor

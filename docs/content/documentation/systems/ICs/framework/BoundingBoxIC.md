@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BoundingBoxIC
-!description /ICs/BoundingBoxIC
+!syntax description /ICs/BoundingBoxIC
 
-!parameters /ICs/BoundingBoxIC
+!syntax parameters /ICs/BoundingBoxIC
 
-!inputfiles /ICs/BoundingBoxIC
+!syntax inputs /ICs/BoundingBoxIC
 
-!childobjects /ICs/BoundingBoxIC
+!syntax children /ICs/BoundingBoxIC

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantVectorPostprocessor
-!description /VectorPostprocessors/ConstantVectorPostprocessor
+!syntax description /VectorPostprocessors/ConstantVectorPostprocessor
 
-!parameters /VectorPostprocessors/ConstantVectorPostprocessor
+!syntax parameters /VectorPostprocessors/ConstantVectorPostprocessor
 
-!inputfiles /VectorPostprocessors/ConstantVectorPostprocessor
+!syntax inputs /VectorPostprocessors/ConstantVectorPostprocessor
 
-!childobjects /VectorPostprocessors/ConstantVectorPostprocessor
+!syntax children /VectorPostprocessors/ConstantVectorPostprocessor

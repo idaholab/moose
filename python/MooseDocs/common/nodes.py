@@ -172,14 +172,6 @@ class FileNodeBase(FileTreeNodeBase):
         """
         return os.path.join(self.full_name.strip('/'), 'index.html')
 
-#    def __repr__(self):
-#        """
-#        Print the node name.
-#        """
-#        oname = self.__class__.__name__[:-4]
-#        msg = super(FileTreeNodeBase, self).__repr__()
-#        return msg + ' filename={}'.format(self.filename)
-
 class MarkdownFileNodeBase(FileNodeBase): #pylint: disable=abstract-method
     """
     Base class for node that is part of the markdown file tree and has an associated markdown file.

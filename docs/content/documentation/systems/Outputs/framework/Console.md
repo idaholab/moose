@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Console
-!description /Outputs/Console
+!syntax description /Outputs/Console
 
-!parameters /Outputs/Console
+!syntax parameters /Outputs/Console
 
-!inputfiles /Outputs/Console
+!syntax inputs /Outputs/Console
 
-!childobjects /Outputs/Console
+!syntax children /Outputs/Console

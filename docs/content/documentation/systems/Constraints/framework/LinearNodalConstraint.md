@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LinearNodalConstraint
-!description /Constraints/LinearNodalConstraint
+!syntax description /Constraints/LinearNodalConstraint
 
-!parameters /Constraints/LinearNodalConstraint
+!syntax parameters /Constraints/LinearNodalConstraint
 
-!inputfiles /Constraints/LinearNodalConstraint
+!syntax inputs /Constraints/LinearNodalConstraint
 
-!childobjects /Constraints/LinearNodalConstraint
+!syntax children /Constraints/LinearNodalConstraint

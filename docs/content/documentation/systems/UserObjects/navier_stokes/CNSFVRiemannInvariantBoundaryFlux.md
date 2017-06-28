@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVRiemannInvariantBoundaryFlux
+!syntax description /UserObjects/CNSFVRiemannInvariantBoundaryFlux
 
-!parameters /UserObjects/CNSFVRiemannInvariantBoundaryFlux
+!syntax parameters /UserObjects/CNSFVRiemannInvariantBoundaryFlux
 
-!inputfiles /UserObjects/CNSFVRiemannInvariantBoundaryFlux
+!syntax inputs /UserObjects/CNSFVRiemannInvariantBoundaryFlux
 
-!childobjects /UserObjects/CNSFVRiemannInvariantBoundaryFlux
+!syntax children /UserObjects/CNSFVRiemannInvariantBoundaryFlux

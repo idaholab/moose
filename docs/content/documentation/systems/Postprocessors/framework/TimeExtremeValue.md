@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TimeExtremeValue
-!description /Postprocessors/TimeExtremeValue
+!syntax description /Postprocessors/TimeExtremeValue
 
-!parameters /Postprocessors/TimeExtremeValue
+!syntax parameters /Postprocessors/TimeExtremeValue
 
-!inputfiles /Postprocessors/TimeExtremeValue
+!syntax inputs /Postprocessors/TimeExtremeValue
 
-!childobjects /Postprocessors/TimeExtremeValue
+!syntax children /Postprocessors/TimeExtremeValue

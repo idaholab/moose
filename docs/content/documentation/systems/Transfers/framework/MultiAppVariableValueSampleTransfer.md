@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppVariableValueSampleTransfer
-!description /Transfers/MultiAppVariableValueSampleTransfer
+!syntax description /Transfers/MultiAppVariableValueSampleTransfer
 
-!parameters /Transfers/MultiAppVariableValueSampleTransfer
+!syntax parameters /Transfers/MultiAppVariableValueSampleTransfer
 
-!inputfiles /Transfers/MultiAppVariableValueSampleTransfer
+!syntax inputs /Transfers/MultiAppVariableValueSampleTransfer
 
-!childobjects /Transfers/MultiAppVariableValueSampleTransfer
+!syntax children /Transfers/MultiAppVariableValueSampleTransfer

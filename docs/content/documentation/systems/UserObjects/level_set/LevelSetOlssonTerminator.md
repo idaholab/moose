@@ -14,8 +14,8 @@ is repeated at time $t+\Delta t$.
 ## Example Syntax
 !listing modules/level_set/tests/reinitialization/reinit.i block=UserObjects
 
-!parameters /UserObjects/LevelSetOlssonTerminator
+!syntax parameters /UserObjects/LevelSetOlssonTerminator
 
-!inputfiles /UserObjects/LevelSetOlssonTerminator
+!syntax inputs /UserObjects/LevelSetOlssonTerminator
 
-!childobjects /UserObjects/LevelSetOlssonTerminator
+!syntax children /UserObjects/LevelSetOlssonTerminator

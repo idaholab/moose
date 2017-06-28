@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MovingPlanarFront
-!description /Functions/MovingPlanarFront
+!syntax description /Functions/MovingPlanarFront
 
-!parameters /Functions/MovingPlanarFront
+!syntax parameters /Functions/MovingPlanarFront
 
-!inputfiles /Functions/MovingPlanarFront
+!syntax inputs /Functions/MovingPlanarFront
 
-!childobjects /Functions/MovingPlanarFront
+!syntax children /Functions/MovingPlanarFront

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AddExtraNodeset
-!description /MeshModifiers/AddExtraNodeset
+!syntax description /MeshModifiers/AddExtraNodeset
 
-!parameters /MeshModifiers/AddExtraNodeset
+!syntax parameters /MeshModifiers/AddExtraNodeset
 
-!inputfiles /MeshModifiers/AddExtraNodeset
+!syntax inputs /MeshModifiers/AddExtraNodeset
 
-!childobjects /MeshModifiers/AddExtraNodeset
+!syntax children /MeshModifiers/AddExtraNodeset

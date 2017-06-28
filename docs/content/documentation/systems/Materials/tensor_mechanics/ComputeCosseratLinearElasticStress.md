@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeCosseratLinearElasticStress
-!description /Materials/ComputeCosseratLinearElasticStress
+!syntax description /Materials/ComputeCosseratLinearElasticStress
 
-!parameters /Materials/ComputeCosseratLinearElasticStress
+!syntax parameters /Materials/ComputeCosseratLinearElasticStress
 
-!inputfiles /Materials/ComputeCosseratLinearElasticStress
+!syntax inputs /Materials/ComputeCosseratLinearElasticStress
 
-!childobjects /Materials/ComputeCosseratLinearElasticStress
+!syntax children /Materials/ComputeCosseratLinearElasticStress

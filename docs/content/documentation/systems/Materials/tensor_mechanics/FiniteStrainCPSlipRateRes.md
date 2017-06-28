@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FiniteStrainCPSlipRateRes
-!description /Materials/FiniteStrainCPSlipRateRes
+!syntax description /Materials/FiniteStrainCPSlipRateRes
 
-!parameters /Materials/FiniteStrainCPSlipRateRes
+!syntax parameters /Materials/FiniteStrainCPSlipRateRes
 
-!inputfiles /Materials/FiniteStrainCPSlipRateRes
+!syntax inputs /Materials/FiniteStrainCPSlipRateRes
 
-!childobjects /Materials/FiniteStrainCPSlipRateRes
+!syntax children /Materials/FiniteStrainCPSlipRateRes
