@@ -86,7 +86,10 @@ findContactPoint(PenetrationInfo & p_info,
       p_info._normal *= -1.0;
     p_info._normal /= p_info._normal.norm();
 
-    p_info._distance = (p_info._closest_point - slave_point) * p_info._normal;
+    Point from_slave_to_closest = p_info._closest_point - slave_point;
+    p_info._distance = from_slave_to_closest * p_info._normal;
+    Point tangential = from_slave_to_closest - p_info._distance * p_info._normal;
+    p_info._tangential_distance = tangential.norm();
     p_info._dxyzdxi = dxyz_dxi;
     p_info._dxyzdeta = dxyz_deta;
     p_info._d2xyzdxideta = d2xyz_dxieta;
