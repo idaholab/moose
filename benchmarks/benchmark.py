@@ -265,7 +265,12 @@ class BenchComp:
 
     @classmethod
     def header(cls, revold, revnew):
-        revstr = ' {} to {} '.format(revold, revnew)
+        oldstr, newstr = revold, revnew
+        if len(oldstr) > 12:
+            oldstr = oldstr[:12]
+        if len(newstr) > 12:
+            newstr = newstr[:12]
+        revstr = ' {} to {} '.format(oldstr, newstr)
         revstr = revstr.center(30,'-')
         return '' \
             + '--------------------------------{}--------------------------------'.format(revstr) \
