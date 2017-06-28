@@ -26,7 +26,7 @@ protected:
   virtual DenseMatrix<Real> sampleDistribution(Distribution & distribution, std::size_t) override;
 
   /// Number of monte carlo samples to create for each distribution
-  const std::size_t & _num_samples;
+  const std::size_t _num_samples;
 };
 
 #endif /* MONTECARLOSAMPLER_H */

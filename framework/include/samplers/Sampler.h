@@ -86,7 +86,7 @@ protected:
   /**
    * Base class must override this method to supply the sample distribution data.
    */
-  virtual DenseMatrix<Real> sampleDistribution(Distribution &, unsigned int) = 0;
+  virtual DenseMatrix<Real> sampleDistribution(Distribution &, std::size_t) = 0;
 
   /**
    * Set the number of seeds required by the sampler. The Sampler will generate

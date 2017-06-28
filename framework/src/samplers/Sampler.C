@@ -61,7 +61,7 @@ Sampler::getSamples()
   _generator.restoreState();
   sampleSetUp();
   std::vector<DenseMatrix<Real>> output(_distributions.size());
-  for (std::size_t i = 0; i < _distributions.size(); ++i)
+  for (auto i = beginIndex(_distributions); i < _distributions.size(); ++i)
     output[i] = sampleDistribution(*_distributions[i], i);
   sampleTearDown();
   return output;
@@ -84,7 +84,7 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
   _generator.seed(0, _seed);
   for (std::size_t i = 1; i < number; ++i)
   {
-    _seeds[i] = _seeds[0] + 1;
+    _seeds[i] = _seeds[i - 1] + 1;
     _generator.seed(i, _seeds[i]);
   }
 }
