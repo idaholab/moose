@@ -75,6 +75,21 @@ std::string stringify(const SolveType & t);
 template <>
 std::string stringify(const ExecFlagType & t);
 
+/// Add no-op stringify if the argument already is a string
+template <>
+std::string stringify(const std::string & t);
+
+/// Convert a vector to a comma separated string
+template <typename T>
+std::string
+stringify(const std::vector<T> & v)
+{
+  std::string str;
+  for (std::size_t j = 0; j < v.size(); ++j)
+    str += (j ? "," : "") + stringify(v[j]);
+  return str;
+}
+
 /**
  * Stringify Reals with enough precision to guarantee lossless
  * Real -> string -> Real roundtrips.

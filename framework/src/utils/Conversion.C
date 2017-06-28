@@ -351,6 +351,13 @@ stringify(const ExecFlagType & t)
   return "";
 }
 
+template <>
+std::string
+stringify(const std::string & t)
+{
+  return t;
+}
+
 std::string
 stringifyExact(Real t)
 {
