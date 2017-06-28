@@ -52,14 +52,6 @@ SlopeLimitingBase::initialize()
   _lslope.clear();
 }
 
-void
-SlopeLimitingBase::threadJoin(const UserObject & y)
-{
-  const SlopeLimitingBase & pps = static_cast<const SlopeLimitingBase &>(y);
-
-  _lslope.insert(pps._lslope.begin(), pps._lslope.end());
-}
-
 const std::vector<RealGradient> &
 SlopeLimitingBase::getElementSlope(dof_id_type elementid) const
 {

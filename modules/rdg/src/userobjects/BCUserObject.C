@@ -31,8 +31,3 @@ void
 BCUserObject::finalize()
 {
 }
-
-void
-BCUserObject::threadJoin(const UserObject & /*y*/)
-{
-}

@@ -27,7 +27,6 @@ public:
   SlopeLimitingBase(const InputParameters & parameters);
 
   virtual void initialize();
-  virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 
   virtual void computeElement();
