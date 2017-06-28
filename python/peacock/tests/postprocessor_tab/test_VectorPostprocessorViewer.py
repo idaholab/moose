@@ -95,6 +95,27 @@ class TestVectorPostprocessorViewer(Testing.PeacockImageTestCase):
         self.assertFalse(self._widget.cornerWidget().CloseButton.isEnabled())
         self.assertEqual(self._widget.tabText(self._widget.currentIndex()), 'Results')
 
+    def testReload(self):
+        """
+        Test that onSetFilenames() draws the correct figure
+        """
+        self.copyfiles()
+        self.plot()
+        self.assertImage('testWidgets.png')
+        self.assertFalse(self._widget.cornerWidget().CloseButton.isEnabled())
+        self.assertEqual(self._widget.tabText(self._widget.currentIndex()), 'Results')
+        # Test clearing the figure after one is already drawn
+        self._widget.onSetFilenames([])
+        self.assertImage('testEmpty.png')
+
+        # redraw the standard figure
+        self._widget.onSetFilenames([self._filename])
+        self.plot()
+        self.assertImage('testWidgets.png')
+        # Simulate a re-run of the input file
+        self._widget.onSetFilenames([self._filename])
+        self.assertImage('testWidgets.png', allowed=.97) # The image is displaced a little bit for some reason
+
     def testCloneClose(self):
         """
         Test clone button works.
