@@ -23,7 +23,7 @@ public:
   SobolSampler(const InputParameters & parameters);
 
 protected:
-  virtual DenseMatrix<Real> sampleDistribution(Distribution &, std::size_t dist_index) override;
+  virtual std::vector<DenseMatrix<Real>> sample() override;
   virtual void sampleSetUp() override;
   virtual void sampleTearDown() override;
 

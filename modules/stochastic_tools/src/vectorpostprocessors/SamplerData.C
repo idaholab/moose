@@ -27,8 +27,6 @@ validParams<SamplerData>()
 SamplerData::SamplerData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters), SamplerInterface(this), _sampler(getSampler("sampler"))
 {
-  for (auto & name : _sampler.getDistributionNames())
-    _sample_vectors.push_back(&declareVector(name));
 }
 
 void
@@ -42,6 +40,17 @@ void
 SamplerData::execute()
 {
   std::vector<DenseMatrix<Real>> data = _sampler.getSamples();
-  for (std::size_t i = 0; i < _sample_vectors.size(); ++i)
+  auto n = data.size();
+  if (_sample_vectors.empty())
+  {
+    _sample_vectors.resize(n);
+    for (auto i = beginIndex(data); i < n; ++i)
+    {
+      std::string name = "mat_" + std::to_string(i);
+      _sample_vectors[i] = &declareVector(name);
+    }
+  }
+
+  for (auto i = beginIndex(data); i < n; ++i)
     _sample_vectors[i]->assign(data[i].get_values().begin(), data[i].get_values().end());
 }

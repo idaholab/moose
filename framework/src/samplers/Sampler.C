@@ -40,7 +40,6 @@ Sampler::Sampler(const InputParameters & parameters)
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _seed(getParam<unsigned int>("seed"))
 {
-  _generator.seed(0, _seed);
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
   setNumberOfRequiedRandomSeeds(1);
@@ -60,9 +59,7 @@ Sampler::getSamples()
 {
   _generator.restoreState();
   sampleSetUp();
-  std::vector<DenseMatrix<Real>> output(_distributions.size());
-  for (auto i = beginIndex(_distributions); i < _distributions.size(); ++i)
-    output[i] = sampleDistribution(*_distributions[i], i);
+  std::vector<DenseMatrix<Real>> output = sample();
   sampleTearDown();
   return output;
 }
@@ -70,8 +67,8 @@ Sampler::getSamples()
 double
 Sampler::rand(const unsigned int index)
 {
-  mooseAssert(index < _seeds.size(), "The seed number index does not exists.");
-  return _generator.rand(_seeds[index]);
+  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  return _generator.rand(index);
 }
 
 void
@@ -79,12 +76,9 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
 {
   if (number == 0)
     mooseError("The number of seeds must be larger than zero.");
-  _seeds.resize(number);
-  _seeds[0] = _seed;
-  _generator.seed(0, _seed);
-  for (std::size_t i = 1; i < number; ++i)
-  {
-    _seeds[i] = _seeds[i - 1] + 1;
-    _generator.seed(i, _seeds[i]);
-  }
+
+  for (std::size_t i = 0; i < number; ++i)
+    _generator.seed(i, _seed + i);
+
+  _generator.saveState();
 }

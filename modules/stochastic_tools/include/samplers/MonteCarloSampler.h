@@ -23,7 +23,7 @@ public:
   MonteCarloSampler(const InputParameters & parameters);
 
 protected:
-  virtual DenseMatrix<Real> sampleDistribution(Distribution & distribution, std::size_t) override;
+  virtual std::vector<DenseMatrix<Real>> sample() override;
 
   /// Number of monte carlo samples to create for each distribution
   const std::size_t _num_samples;
