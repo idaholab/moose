@@ -47,14 +47,12 @@ The following lists the available Distribution objects within the Stochastic Too
 Sampler objects in [MOOSE] are designed to generate an arbitrary set of data sampled from
 any number of Distribution objects.
 
-The sampler operators by iterating over each Distribution object assigned to the sampler via the
-"distributions" input parameter. From each distribution a matrix (`libMesh::DenseVector<Real>`)
-is returned, such that objects using the sampler (via the SamplerInterface) will call the
-"getSamples" method and receive a vector of the matrix objects, one for each distribution object.
+The sampler operators by returning a vector of matrices (`std::vector<DenseMatrix>`) from the
+`getSamples` method. The application developer is responsible for creating this output as needed
+depending on the type of sampler.
 
-Application developers that require a custom sampling strategy must create an object that inherits
-from Sampler and overrides the "sampleDistribution" method. This method has two inputs a reference
-to the current distribution and the index of that same distribution.
+However, in general, the system is designed such that each row in the matrices represents a
+complete set of samples that could be passed to sub-applications via the [SamplerMultiApp](/stochastic_tools/SamplerMultiApp.md).
 
 ## Sampler Objects
 The following lists the available Sampler objects within the Stochastic Tools module.
