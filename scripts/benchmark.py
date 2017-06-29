@@ -15,6 +15,16 @@ import csv
 import matplotlib.pyplot as plt
 import jinja2
 
+def find_moose_python():
+    moosedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    if os.environ.has_key('MOOSE_DIR'):
+        moosedir = os.environ['MOOSE_DIR']
+    moosepython = os.path.join(moosedir, 'python')
+
+    if not os.path.exists(moosepython):
+        raise Exception('Unable to locate moose/python directory, please set MOOSE_DIR environment variable')
+    sys.path.append(moosepython)
+
 def build_args():
     p = argparse.ArgumentParser()
     p.add_argument('--db', type=str, default='benchmarks.sqlite', help='benchmark timings database')
@@ -461,5 +471,7 @@ def read_benchmarks(benchlist):
     return benches
 
 if __name__ == '__main__':
+    find_moose_python()
+    from FactorySystem import ParseGetPot
     main()
 
