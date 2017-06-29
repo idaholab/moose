@@ -3,15 +3,18 @@
     type = 'Exodiff'
     input = 'never.i'
     exodiff = 'never_out.e'
+    use_old_floor = True
   [../]
   [./auto]
     type = 'Exodiff'
     input = 'auto.i'
     exodiff = 'auto_out.e'
+    use_old_floor = True
   [../]
   [./always]
     type = 'Exodiff'
     input = 'always.i'
     exodiff = 'always_out.e'
+    use_old_floor = True
   [../]
 []
