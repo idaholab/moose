@@ -198,9 +198,10 @@ Split::setup(const std::string & prefix)
 
   // Now we set the user-specified petsc options for this split, possibly overriding the above
   // settings.
-  for (const auto & op : _petsc_options.flags)
+  for (const auto & item : _petsc_options.flags)
   {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
+    std::string op(item);
     if (op[0] != '-')
       mooseError("Invalid PETSc option name ", op, " for Split ", _name);
 

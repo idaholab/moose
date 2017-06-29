@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 
 #include "MooseEnumItem.h"
+#include "MooseException.h"
 
 TEST(MooseEnumItem, construction)
 {
@@ -44,11 +45,6 @@ TEST(MooseEnumItem, comparison)
 
   EXPECT_EQ(item, 1949);
   EXPECT_NE(item, 1989);
-
-  EXPECT_NE(item, MooseEnumItem("Andrew", 1980));
-  EXPECT_EQ(item, MooseEnumItem("EDWarD", 1949));
-  EXPECT_NE(item, MooseEnumItem("Dan", 1949));
-  EXPECT_NE(item, MooseEnumItem("Edward", 1950));
 }
 
 TEST(MooseEnumItem, assignment_and_copy)

@@ -63,14 +63,14 @@ public:
   bool operator==(unsigned short value) const { return _id == value; }
   bool operator!=(unsigned short value) const { return _id != value; }
 
-  bool operator==(const MooseEnumItem & value) const { return _unique == value._unique; }
-  bool operator!=(const MooseEnumItem & value) const { return _unique != value._unique; }
+  bool operator==(const MooseEnumItem &) const;
+  bool operator!=(const MooseEnumItem &) const;
   ///@}
 
   /**
    * Less than operator. This is required for this class to work in maps and sets.
    */
-  bool operator<(const MooseEnumItem & other) const { return _unique < other._unique; }
+  bool operator<(const MooseEnumItem & other) const { return _id < other._id; }
 
 private:
   /// The name as provided in constructor
@@ -81,11 +81,6 @@ private:
 
   /// The numeric value for item
   int _id;
-
-  /// Unique identifier (hash) created from the id and name combined. This allows items with the
-  /// same name but different number and vice versa. It also makes the operator< more robust as well
-  /// when storing MooseEnumItem in maps or sets.
-  std::size_t _unique;
 };
 
 #endif

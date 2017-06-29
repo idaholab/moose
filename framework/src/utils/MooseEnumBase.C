@@ -113,7 +113,7 @@ MooseEnumBase::getNames() const
 {
   std::vector<std::string> out;
   out.reserve(_items.size());
-  for (std::set<MooseEnumItem>::const_iterator it = _items.begin(); it != _items.end(); ++it)
+  for (auto it = _items.begin(); it != _items.end(); ++it)
     out.push_back(it->name());
   return out;
 }
@@ -121,7 +121,9 @@ MooseEnumBase::getNames() const
 std::string
 MooseEnumBase::getRawNames() const
 {
-  return MooseUtils::join(_items.begin(), _items.end(), " ");
+  std::ostringstream oss;
+  std::copy(_items.begin(), _items.end(), infix_ostream_iterator<std::string>(oss, " "));
+  return oss.str();
 }
 
 std::set<MooseEnumItem>::const_iterator

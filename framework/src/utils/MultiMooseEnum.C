@@ -71,7 +71,7 @@ bool
 MultiMooseEnum::contains(const std::string & value) const
 {
   std::string upper(MooseUtils::toUpper(value));
-  return std::find_if(_current.begin(), _current.end(), [upper](MooseEnumItem const & item) {
+  return std::find_if(_current.begin(), _current.end(), [upper](const MooseEnumItem & item) {
            return item.name() == upper;
          }) != _current.end();
 }
@@ -79,7 +79,7 @@ MultiMooseEnum::contains(const std::string & value) const
 bool
 MultiMooseEnum::contains(int value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [value](MooseEnumItem const & item) {
+  return std::find_if(_current.begin(), _current.end(), [value](const MooseEnumItem & item) {
            return item.id() == value;
          }) != _current.end();
 }
@@ -87,7 +87,7 @@ MultiMooseEnum::contains(int value) const
 bool
 MultiMooseEnum::contains(unsigned short value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [value](MooseEnumItem const & item) {
+  return std::find_if(_current.begin(), _current.end(), [value](const MooseEnumItem & item) {
            return item.id() == value;
          }) != _current.end();
 }
@@ -104,8 +104,8 @@ MultiMooseEnum::contains(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const MooseEnumItem & value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [value](MooseEnumItem const & item) {
-           return item == value;
+  return std::find_if(_current.begin(), _current.end(), [value](const MooseEnumItem & item) {
+           return item.id() == value.id();
          }) != _current.end();
 }
 
@@ -199,7 +199,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
   {
     std::string upper(MooseUtils::toUpper(*it));
     checkDeprecatedBase(upper);
-    std::set<MooseEnumItem>::const_iterator iter = find(upper);
+    const auto iter = find(upper);
 
     if (iter == _items.end())
     {
@@ -232,7 +232,7 @@ MultiMooseEnum::remove(InputIterator first, InputIterator last)
     // Values stored as upper case
     std::string upper(MooseUtils::toUpper(*it));
     std::vector<MooseEnumItem>::iterator iter =
-        std::find_if(_current.begin(), _current.end(), [upper](MooseEnumItem const & item) {
+        std::find_if(_current.begin(), _current.end(), [upper](const MooseEnumItem & item) {
           return item.name() == upper;
         });
     if (iter != _current.end())

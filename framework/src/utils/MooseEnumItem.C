@@ -17,15 +17,12 @@
 #include "MooseUtils.h"
 
 MooseEnumItem::MooseEnumItem(const std::string & name, const int & id)
-  : _raw_name(MooseUtils::trim(name)),
-    _name(MooseUtils::toUpper(_raw_name)),
-    _id(id),
-    _unique(std::hash<std::string>()(std::to_string(_id) + _name))
+  : _raw_name(MooseUtils::trim(name)), _name(MooseUtils::toUpper(_raw_name)), _id(id)
 {
 }
 
 MooseEnumItem::MooseEnumItem(const MooseEnumItem & other)
-  : _raw_name(other._raw_name), _name(other._name), _id(other._id), _unique(other._unique)
+  : _raw_name(other._raw_name), _name(other._name), _id(other._id)
 {
 }
 
@@ -35,7 +32,6 @@ MooseEnumItem::operator=(const MooseEnumItem & other)
   _raw_name = other._raw_name;
   _name = other._name;
   _id = other._id;
-  _unique = other._unique;
   return *this;
 }
 
@@ -65,4 +61,16 @@ MooseEnumItem::operator!=(const std::string & value) const
 {
   std::string name(MooseUtils::toUpper(value));
   return _name != name;
+}
+
+bool
+MooseEnumItem::operator==(const MooseEnumItem &) const
+{
+  mooseError("Direct comparison between MooseEnumItems is not supported.");
+}
+
+bool
+MooseEnumItem::operator!=(const MooseEnumItem &) const
+{
+  mooseError("Direct comparison between MooseEnumItems is not supported.");
 }

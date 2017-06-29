@@ -388,20 +388,10 @@ tokenizeAndConvert(const std::string & str,
 
 /**
  * Convert supplied string to upper case.
+ * @params name The string to convert upper case, this is pass by value because the conversion
+ *              to upper case must modify the string.
  */
 std::string toUpper(std::string name);
-
-/**
- * Join strings similar to python join.
- */
-template <typename InputIterator>
-std::string
-join(InputIterator begin, InputIterator end, const std::string & delimiter)
-{
-  std::ostringstream oss;
-  std::copy(begin, end, infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
-  return oss.str();
-}
 }
 
 #endif // MOOSEUTILS_H

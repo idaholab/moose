@@ -630,7 +630,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     }
 
     // Update the stored items, but do not create duplicates
-    if (find(po.flags.begin(), po.flags.end(), option) == po.flags.end())
+    if (!po.flags.contains(option))
       po.flags.push_back(option);
   }
 
