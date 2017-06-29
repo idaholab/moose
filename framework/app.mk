@@ -166,7 +166,7 @@ app_HEADER_deps := $(wildcard $(app_GIT_DIR)/.git/HEAD $(app_GIT_DIR)/.git/index
 $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
 $(app_HEADER): curr_app    := $(APPLICATION_NAME)
 $(app_HEADER): $(app_HEADER_deps)
-	@echo "MOOSE Updating header "$@"..."
+	@echo "MOOSE Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
 
 # Target-specific Variable Values (See GNU-make manual)
