@@ -14,6 +14,7 @@ import collections
 import csv
 import matplotlib.pyplot as plt
 import jinja2
+import pprint
 
 def find_moose_python():
     moosedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -454,24 +455,21 @@ class BenchEntry:
 def read_benchmarks(benchlist):
     if not os.path.exists(benchlist):
         raise ValueError('benchmark list file "{}" does not exist'.format(benchlist))
+
     benches = []
-    with open(benchlist, 'r') as f:
-        for line in f:
-            if line.strip() == '' or line.strip()[0] == '#':
-                continue
-            parts = line.split('|')
-            ex = parts[1].strip()
-            infile = parts[2].strip()
-            args = ''
-            if len(parts) == 4:
-                args = parts[3].strip()
-            elif len(parts) != 3:
-                raise RuntimeError('improperly formatted benchmark list file')
-            benches.append(BenchEntry(parts[0].strip(), ex, infile, args))
+    root = readInputFile(benchlist).children['benchmarks']
+    for benchname in root.children_list:
+        child = root.children[benchname]
+        ex = child.params['binary'].strip()
+        infile = child.params['infile'].strip()
+        args = ''
+        if 'args' in child.params:
+            args = child.params['args']
+        benches.append(BenchEntry(benchname, ex, infile, args))
     return benches
 
 if __name__ == '__main__':
     find_moose_python()
-    from FactorySystem import ParseGetPot
+    from FactorySystem.ParseGetPot import readInputFile
     main()
 
