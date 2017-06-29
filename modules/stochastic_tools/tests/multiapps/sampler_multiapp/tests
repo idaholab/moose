@@ -1,0 +1,7 @@
+[Tests]
+  [./run]
+    type = CheckFiles
+    input = master.i
+    check_files = 'master_out_runner0.e master_out_runner1.e master_out_runner2.e master_out_runner3.e master_out_runner4.e'
+  [../]
+[]

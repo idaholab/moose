@@ -17,6 +17,9 @@
 // VectorPostprocessors
 #include "SamplerData.h"
 
+// MultiApps
+#include "SamplerMultiApp.h"
+
 // for test purpose only
 #include "TestDistributionPostprocessor.h"
 #include "TestSampler.h"
@@ -74,6 +77,9 @@ StochasticToolsApp::registerObjects(Factory & factory)
 
   // VectorPostprocessors
   registerVectorPostprocessor(SamplerData);
+
+  // MultiApps
+  registerMultiApp(SamplerMultiApp);
 
   // for test purpose only
   registerPostprocessor(TestDistributionPostprocessor);
