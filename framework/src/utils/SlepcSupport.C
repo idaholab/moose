@@ -43,7 +43,8 @@ getSlepcValidParams()
   InputParameters params = emptyInputParameters();
 
   MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
-                             "NONLINEAR_POWER MONOLITH_NEWTON");
+                             "NONLINEAR_POWER MF_NONLINEAR_POWER "
+                             "MONOLITH_NEWTON MF_MONOLITH_NEWTON");
   params.addParam<MooseEnum>("eigen_solve_type",
                              eigen_solve_type,
                              "POWER: Power / Inverse / RQI "
@@ -247,6 +248,16 @@ setEigenSolverOptions(SolverParams & solver_params)
 #endif
       break;
 
+    case Moose::EST_MF_NONLINEAR_POWER:
+#if !SLEPC_VERSION_LESS_THAN(3, 7, 3)
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+#else
+      mooseError("Matrix-free nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
+#endif
+      break;
+
     case Moose::EST_MONOLITH_NEWTON:
 #if !SLEPC_VERSION_LESS_THAN(3, 7, 3)
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
@@ -254,6 +265,18 @@ setEigenSolverOptions(SolverParams & solver_params)
       Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
 #else
       mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
+#endif
+      break;
+
+    case Moose::EST_MF_MONOLITH_NEWTON:
+#if !SLEPC_VERSION_LESS_THAN(3, 7, 3)
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
+#else
+      mooseError("Matrix-free Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
       break;
 

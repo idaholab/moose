@@ -50,7 +50,7 @@
 
 [Executioner]
   type = Steady
-  eigen_solve_type = MONOLITH_NEWTON
+  eigen_solve_type = MF_MONOLITH_NEWTON
 []
 
 [VectorPostprocessors]

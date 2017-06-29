@@ -54,9 +54,7 @@
 
 [Executioner]
   type = Steady
-  eigen_solve_type = MONOLITH_NEWTON
-  petsc_options_iname = '-eps_power_snes_mf_operator'
-  petsc_options_value = '1'
+  eigen_solve_type = MF_MONOLITH_NEWTON
 []
 
 
