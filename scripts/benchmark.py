@@ -51,9 +51,11 @@ def main():
 
     elif args.run: # run all benchmarks
         benches = read_benchmarks(args.benchlist)
+        rootdir = os.path.dirname(args.benchlist)
         with BenchmarkDB(args.db) as db:
             for bench in benches:
-                t = Test(bench.executable, bench.infile, args=bench.args)
+                print('running "{}"...'.format(bench.name))
+                t = Test(bench.executable, bench.infile, args=bench.args, rootdir=rootdir)
                 b = Benchmark(bench.name, test=t, cum_dur=args.cum_dur, min_runs=args.min_runs)
                 b.run()
                 if args.rev != '':
@@ -171,7 +173,8 @@ def plot(revisions, benchmarks, subdir='.'):
     #plt.show()
 
 class Test:
-    def __init__(self, executable, infile, args=None):
+    def __init__(self, executable, infile, rootdir='.', args=None):
+        self.rootdir = rootdir
         self.executable = executable
         self.infile = infile
         self.args = args
@@ -180,7 +183,9 @@ class Test:
         self.perflog = []
 
     def run(self):
-        cmd = [os.path.join('..', self.executable), '-i', os.path.join('..', self.infile)]
+        cmdpath = os.path.abspath(os.path.join(self.rootdir, self.executable))
+        infilepath = os.path.abspath(os.path.join(self.rootdir, self.infile))
+        cmd = [cmdpath, '-i', infilepath]
         if self.args is not None:
             cmd.extend(self.args)
         cmd.append('Outputs/console=false')
@@ -196,6 +201,12 @@ class Test:
             (_, retcode, ru) = os.wait4(p.pid, 0) # do this hack to retrieve the usertime of the subprocess
             end = time.time()
 
+        if retcode != 0:
+            raise RuntimeError('command {} returned nonzero exit code'.format(cmd))
+
+        self.dur_secs = end - start
+        self.user_dur_secs = ru.ru_utime
+
         # write perflog
         with open(os.path.join(tmpdir, 'perflog.csv'), 'r') as csvfile:
             reader = csv.reader(csvfile)
@@ -208,10 +219,6 @@ class Test:
 
         shutil.rmtree('tmp')
 
-        if retcode != 0:
-            raise RuntimeError('command {} returned nonzero exit code'.format(cmd))
-        self.dur_secs = end - start
-        self.user_dur_secs = ru.ru_utime
 
 class Benchmark:
     def __init__(self, name, realruns=None, userruns=None, test=None, cum_dur=60, min_runs=10, max_runs=1000):
@@ -388,6 +395,7 @@ class BenchmarkDB:
         ex = benchmark.test.executable
         infile = benchmark.test.infile
         timestamp = time.time()
+        date = timestamp
         if rev is None:
             rev, date = git_revision()
         load = os.getloadavg()[0]
@@ -440,8 +448,8 @@ def read_benchmarks(benchlist):
             if line.strip() == '' or line.strip()[0] == '#':
                 continue
             parts = line.split('|')
-            ex = os.path.join('..', parts[1].strip())
-            infile = os.path.join('..', parts[2].strip())
+            ex = parts[1].strip()
+            infile = parts[2].strip()
             args = ''
             if len(parts) == 4:
                 args = parts[3].strip()

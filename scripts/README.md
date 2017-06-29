@@ -1,11 +1,10 @@
 
-MOOSE Benchmarking
+benchmark.py
 -------------------
 
-This directory holds files/scripts relevant to benchmarking and tracking MOOSE performance.  The
-primary tool provided is the ``benchmark.py`` script which is used to run benchmarks, generate
-trend visualizations, and look at stats comparing bencharks between various revisions.  To run all
-benchmarks, just do:
+This script provides functionality for benchmarking and tracking MOOSE performance.  It can be
+used to run benchmarks, generate trend visualizations, and look at stats comparing bencharks
+between various revisions.  To run all benchmarks, just do:
 
 ```
 $ ./benchmark.py --run
@@ -21,9 +20,9 @@ file has the following format:
 ```
 
 Note that the ``|`` characters are literal bars used as field delimiters.  Each line defines a
-named benchmark by specifying paths to a binary and input file (paths rooted at the base of the
-MOOSE repository) along with optional arguments that are appended to the end of the invocation of
-the binary.  A sample ``bench.list`` file might look like this:
+named benchmark by specifying paths to a binary and input file (paths rooted in the same directory
+holding the ``bench.list`` file) along with optional arguments that are appended to the end of the
+invocation of the binary.  A sample ``bench.list`` file might look like this:
 
 ```
 simple diffusion (refine3)|test/moose_test-opt|test/tests/kernels/simple_diffusion/simple_diffusion.i|Mesh/uniform_refine=3
