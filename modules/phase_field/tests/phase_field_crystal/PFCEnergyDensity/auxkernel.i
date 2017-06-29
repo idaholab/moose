@@ -54,16 +54,16 @@
     variable = n
   [../]
   [./u_term]
-    type = CHCpldPFCTrad
+    type = MatDiffusion
     variable = n
-    c = u
-    coeff_name = C2
+    conc = u
+    D_name = C2
   [../]
   [./v_term]
-    type = CHCpldPFCTrad
+    type = MatDiffusion
     variable = n
-    c = v
-    coeff_name = C4
+    conc = v
+    D_name = C4
   [../]
   [./u_rctn]
     type = Reaction
@@ -154,20 +154,23 @@
 []
 
 [Executioner]
+  type = Transient
+  solve_type = NEWTON
+
   # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   # petsc_options_value = 'hypre boomeramg 101'
   # petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   # petsc_options_value = 'asm         101   preonly   lu      1'
-  type = Transient
-  num_steps = 1
-  dt = 0.1
-  l_max_its = 100
-  solve_type = NEWTON
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu '
+
+  l_max_its = 100
   l_tol = 1e-04
   nl_rel_tol = 1e-09
   nl_abs_tol = 1e-11
+
+  num_steps = 1
+  dt = 0.1
 []
 
 [Outputs]
