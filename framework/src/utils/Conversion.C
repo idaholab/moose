@@ -299,7 +299,6 @@ vectorStringsToEnum<ExecFlagType>(const MultiMooseEnum & v)
   return exec_flags;
 }
 
-template <>
 std::string
 stringify(const SolveType & t)
 {
@@ -319,7 +318,6 @@ stringify(const SolveType & t)
   return "";
 }
 
-template <>
 std::string
 stringify(const ExecFlagType & t)
 {
@@ -349,6 +347,12 @@ stringify(const ExecFlagType & t)
       return "NONE";
   }
   return "";
+}
+
+std::string
+stringify(const std::string & s)
+{
+  return s;
 }
 
 std::string

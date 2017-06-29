@@ -68,12 +68,33 @@ stringify(const T & t)
 }
 
 /// Convert solve type into human readable string
-template <>
 std::string stringify(const SolveType & t);
 
 /// Convert execute flags type into human readable string
-template <>
 std::string stringify(const ExecFlagType & t);
+
+/// Add no-op stringify if the argument already is a string (must use overloading)
+std::string stringify(const std::string & s);
+
+/// Add pair stringify to support maps
+template <typename T, typename U>
+std::string
+stringify(const std::pair<T, U> & p)
+{
+  return stringify(p.first) + ':' + stringify(p.second);
+}
+
+/// Convert a container to a flat comma (or otherwise) separated string
+template <template <typename...> class T, typename... U>
+std::string
+stringify(const T<U...> & c, const std::string & delim = ",")
+{
+  std::string str;
+  const auto begin = c.begin(), end = c.end();
+  for (auto i = begin; i != end; ++i)
+    str += (i != begin ? delim : "") + stringify(*i);
+  return str;
+}
 
 /**
  * Stringify Reals with enough precision to guarantee lossless
