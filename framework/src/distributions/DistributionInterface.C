@@ -26,8 +26,7 @@ validParams<DistributionInterface>()
 
 DistributionInterface::DistributionInterface(const MooseObject * moose_object)
   : _dni_params(moose_object->parameters()),
-    _dni_feproblem(*_dni_params.get<FEProblemBase *>("_fe_problem_base")),
-    _dni_tid(_dni_params.have_parameter<THREAD_ID>("_tid") ? _dni_params.get<THREAD_ID>("_tid") : 0)
+    _dni_feproblem(*_dni_params.get<FEProblemBase *>("_fe_problem_base"))
 {
 }
 
@@ -35,11 +34,11 @@ Distribution &
 DistributionInterface::getDistribution(const std::string & name)
 {
   DistributionName dist_name = _dni_params.get<DistributionName>(name);
-  return _dni_feproblem.getDistribution(dist_name, _dni_tid);
+  return _dni_feproblem.getDistribution(dist_name);
 }
 
 Distribution &
 DistributionInterface::getDistributionByName(const DistributionName & name)
 {
-  return _dni_feproblem.getDistribution(name, _dni_tid);
+  return _dni_feproblem.getDistribution(name);
 }

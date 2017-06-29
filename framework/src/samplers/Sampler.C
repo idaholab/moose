@@ -12,103 +12,79 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Sampler.h"
+#include "MooseRandom.h"
 #include "Distribution.h"
-#include <limits>
 
 template <>
 InputParameters
 validParams<Sampler>()
 {
   InputParameters params = validParams<MooseObject>();
-  params += validParams<RandomInterface>();
-  params.addParam<bool>("reseed", false, "Reseed for each new sample if this value is true");
-  params.addRequiredParam<std::vector<std::string>>(
-      "perturb_parameters", "The names of the parameters that you want to perturb");
+  params += validParams<SetupInterface>();
+  params += validParams<DistributionInterface>();
+
+  params.addClassDescription("A base class for distribution sampling.");
   params.addRequiredParam<std::vector<DistributionName>>(
-      "distributions",
-      "The names of distributions that you want to use to perturb the given parameters");
+      "distributions", "The names of distributions that you want to sample.");
+  params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
   return params;
 }
 
 Sampler::Sampler(const InputParameters & parameters)
   : MooseObject(parameters),
-    RandomInterface(parameters,
-                    *parameters.get<FEProblemBase *>("_fe_problem_base"),
-                    parameters.get<THREAD_ID>("_tid"),
-                    false),
+    SetupInterface(this),
     DistributionInterface(this),
-    Restartable(parameters, "Samplers"),
-    _tid(getParam<THREAD_ID>("_tid")),
-    _reseed_for_new_sample(getParam<bool>("reseed")),
-    _dist_names(getParam<std::vector<DistributionName>>("distributions")),
-    _var_names(getParam<std::vector<std::string>>("perturb_parameters")),
-    _current_sample(0),
-    _failed_runs(true)
+    _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
+    _seed(getParam<unsigned int>("seed"))
 {
-  _var_dist_map.clear();
-  _probability_weight.clear();
-  _var_value_hist.clear();
-  if (_var_names.size() != _dist_names.size())
-    mooseError("The size of perturb_parameters (",
-               _var_names.size(),
-               ") != the size of distributions (",
-               _dist_names.size(),
-               ").");
-  if (!_var_names.empty())
-  {
-    for (unsigned int i = 0; i < _var_names.size(); ++i)
-    {
-      _var_dist_map[_var_names[i]] = &getDistributionByName(_dist_names[i]);
-      _var_value_map[_var_names[i]] = 0.0;
-      _var_value_hist[_var_names[i]] = std::vector<Real>();
-    }
-  }
+  _generator.seed(0, _seed);
+  for (const DistributionName & name : _distribution_names)
+    _distributions.push_back(&getDistributionByName(name));
+  setNumberOfRequiedRandomSeeds(1);
 }
 
 void
-Sampler::generateSamples()
+Sampler::execute()
 {
+  // Get the samples then save the state so that subsequent calls to getSamples returns the same
+  // random numbers until this execute command is called again.
+  getSamples();
+  _generator.saveState();
 }
 
-std::vector<std::string>
-Sampler::getSampledVariableNames()
+std::vector<DenseMatrix<Real>>
+Sampler::getSamples()
 {
-  return _var_names;
+  _generator.restoreState();
+  sampleSetUp();
+  std::vector<DenseMatrix<Real>> output(_distributions.size());
+  for (auto i = beginIndex(_distributions); i < _distributions.size(); ++i)
+    output[i] = sampleDistribution(*_distributions[i], i);
+  sampleTearDown();
+  return output;
 }
 
-std::vector<Real>
-Sampler::getSampledValues(const std::vector<std::string> & variableNames)
+double
+Sampler::rand(const unsigned int index)
 {
-  std::vector<Real> vals;
-  for (auto & var_name : variableNames)
+  mooseAssert(index < _seeds.size(), "The seed number index does not exists.");
+  return _generator.rand(_seeds[index]);
+}
+
+void
+Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
+{
+  if (number == 0)
+    mooseError("The number of seeds must be larger than zero.");
+  _seeds.resize(number);
+  _seeds[0] = _seed;
+  _generator.seed(0, _seed);
+  for (std::size_t i = 1; i < number; ++i)
   {
-    Real val = getSampledValue(var_name);
-    vals.push_back(val);
+    _seeds[i] = _seeds[i - 1] + 1;
+    _generator.seed(i, _seeds[i]);
   }
-  return vals;
-}
-
-Real
-Sampler::getSampledValue(const std::string & variableName)
-{
-  std::map<std::string, Real>::iterator it;
-  it = _var_value_map.find(variableName);
-  if (it == _var_value_map.end())
-    mooseError(
-        "Could not find the parameter: ", variableName, " in the list of perturbed parameters!");
-  return it->second;
-}
-
-std::vector<Real>
-Sampler::getProbabilityWeights()
-{
-  return _probability_weight;
-}
-
-bool
-Sampler::checkRuns()
-{
-  return _failed_runs;
 }

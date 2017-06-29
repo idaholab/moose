@@ -1,14 +1,5 @@
 # Distributions System
-
-The distribution system is a new statistical libraries in MOOSE.
-It provides support for several probability distributions.
-
-## Example Syntax
-!input modules/stochastic_tools/tests/distributions/distribution_pps/distribution_pps.i block=Distributions
-
-!parameters /Distributions
-
-!subobjects /Distributions
-
-!subsystems /Distributions
-
+The distribution system within MOOSE provides an API for defining and retrieving distribution  
+function objects in C++, primarily for use with the [Stochastic Tools](stochastic_tools/index.md)
+module. For additional details see the [Distributions](stochastic_tools/index.md#distributions)
+section.

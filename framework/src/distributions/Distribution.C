@@ -20,36 +20,8 @@ InputParameters
 validParams<Distribution>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<unsigned int>("seed", 10318691, "Random number generator seed");
   params.registerBase("Distribution");
-
   return params;
 }
 
-Distribution::Distribution(const InputParameters & parameters)
-  : MooseObject(parameters),
-    Restartable(parameters, "Distributions"),
-    _tid(getParam<THREAD_ID>("_tid")),
-    _seed(getParam<unsigned int>("seed")),
-    _random(declareRestartableData<MooseRandom>("random"))
-{
-  setSeed(_seed);
-}
-
-Real
-Distribution::getRandomNumber()
-{
-  return inverseCdf(_random.rand(_tid));
-}
-
-unsigned int
-Distribution::getSeed()
-{
-  return _seed;
-}
-
-void
-Distribution::setSeed(unsigned int seed)
-{
-  _random.seed(_tid, seed);
-}
+Distribution::Distribution(const InputParameters & parameters) : MooseObject(parameters) {}

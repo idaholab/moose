@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 #ifndef TESTDISTRIBUTIONPOSTPROCESSOR_H
 #define TESTDISTRIBUTIONPOSTPROCESSOR_H
@@ -29,18 +22,19 @@ class TestDistributionPostprocessor : public GeneralPostprocessor
 {
 public:
   TestDistributionPostprocessor(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override;
+  virtual void initialize() override {}
+  virtual void execute() override {}
   virtual PostprocessorValue getValue() override;
 
 protected:
   /// Object of statistics distribution
   Distribution & _distribution;
-  /// The value of cdf for given distribution
-  const Real & _cdf_value;
-  /// The value for the random variable of given distribution
-  const Real & _sample_value;
+
+  /// The value to supply to method
+  const Real & _value;
+
+  /// The distribution method to call
+  const MooseEnum & _distribution_method;
 };
 
 #endif /* TESTDISTRIBUTIONPOSTPROCESSOR_H */
