@@ -161,7 +161,7 @@ def plot(revisions, benchmarks, subdir='.'):
     labels = []
     for rev, bench in zip(revisions, benchmarks):
         data.append(bench.realruns)
-        labels.append(rev[:5])
+        labels.append(rev[:6])
 
     plt.boxplot(data, labels=labels)
     plt.xticks(rotation=90)
@@ -442,6 +442,8 @@ class BenchEntry:
         self.args = args.split(' ')
 
 def read_benchmarks(benchlist):
+    if not os.path.exists(benchlist):
+        raise ValueError('benchmark list file "{}" does not exist'.format(benchlist))
     benches = []
     with open(benchlist, 'r') as f:
         for line in f:
