@@ -123,8 +123,4 @@
   csv = true
   file_base = ne_coupled
   execute_on = 'timestep_end'
-  [./console]
-    type = Console
-    outlier_variable_norms = false
-  [../]
 []

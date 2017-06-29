@@ -64,8 +64,4 @@
   csv = true
   file_base = monolith_newton
   execute_on = 'timestep_end'
-  [./console]
-    type = Console
-    outlier_variable_norms = false
-  [../]
 []
