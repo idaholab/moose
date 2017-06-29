@@ -163,6 +163,9 @@ class TestHarness:
                         if file == self.options.input_file_name \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
+                            if self.prunePath(file):
+                                continue
+
                             saved_cwd = os.getcwd()
                             sys.path.append(os.path.abspath(dirpath))
                             os.chdir(dirpath)
@@ -200,9 +203,6 @@ class TestHarness:
    # Create and return list of tester objects. A tester is created by providing
     # abspath to basename (dirpath), and the test file in queustion (file)
     def createTesters(self, dirpath, file, find_only):
-        if self.prunePath(file):
-            return
-
         # Build a Parser to parse the objects
         parser = Parser(self.factory, self.warehouse)
 
@@ -488,11 +488,20 @@ class TestHarness:
         # Load the scheduler plugins
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
 
-        # Populate params
-        scheduler_params = self.factory.validParams('RunParallel')
+        # Add our scheduler plugins
+        # Note: for now, we only have one: 'RunParallel'. In the future this will be an options.argument
+        #       comparison
+        scheduler_plugin = 'RunParallel'
+
+        # Augment the Scheduler params with plugin params
+        plugin_params = self.factory.validParams(scheduler_plugin)
+
+        # Set Scheduler specific params based on some provided options.arguments
+        plugin_params['max_processes'] = self.options.jobs
+        plugin_params['average_load'] = self.options.load
 
         # Create the scheduler
-        self.scheduler = self.factory.create(scheduler_params['scheduler'], self, scheduler_params)
+        self.scheduler = self.factory.create(scheduler_plugin, self, plugin_params)
 
         ## Save executable-under-test name to self.executable
         self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method

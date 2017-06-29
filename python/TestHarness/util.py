@@ -121,7 +121,7 @@ def runCommand(cmd, cwd=None):
     return output
 
 # Execute a command and return the process, temporary output_file and time the process was launched
-def returnCommand(tester, command):
+def launchCommand(tester, command):
     # It seems that using PIPE doesn't work very well when launching multiple jobs.
     # It deadlocks rather easy.  Instead we will use temporary files
     # to hold the output as it is produced

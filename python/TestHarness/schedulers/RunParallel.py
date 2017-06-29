@@ -15,8 +15,6 @@ class RunParallel(Scheduler):
     @staticmethod
     def validParams():
         params = Scheduler.validParams()
-        params.addRequiredParam('scheduler',    'RunParallel', "The name of this scheduler")
-
         return params
 
     def __init__(self, harness, params):
@@ -52,8 +50,13 @@ class RunParallel(Scheduler):
             # get the output for this test
             output = tester_data.getOutput()
 
-            # Process the results and beautify the output
-            self.testOutput(tester_data, output)
+            # If we are doing recover tests
+            if self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
+                tester.setStatus('PART1', tester.bucket_success)
+                return
+            else:
+                # Process the results and beautify the output
+                self.testOutput(tester_data, output)
 
         # This test failed to launch properly
         else:

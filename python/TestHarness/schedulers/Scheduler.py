@@ -45,7 +45,7 @@ class TesterData:
             return
 
         # Run a command and get the process, tempfile and start time
-        (process, output_file) = returnCommand(self.__tester, command)
+        (process, output_file) = launchCommand(self.__tester, command)
 
         # Save this information before waiting, so
         self.__process = process
@@ -164,13 +164,8 @@ class Scheduler(MooseObject):
 
         return params
 
-    ## Return this return code if the process must be killed because of timeout
-    TIMEOUT = -999999
-
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
-
-        self.specs = params
 
         ## The test harness to run callbacks on
         self.harness = harness
@@ -178,13 +173,8 @@ class Scheduler(MooseObject):
         # Retrieve and store the TestHarness options for use in this object
         self.options = harness.getOptions()
 
-        # Set max jobs to allow
-        params['max_processes'] = self.options.jobs
-        params['average_load'] = self.options.load
-
-        # For backwards compatibitliy the Scheduler class can be initialized
-        # with no "max_processes" argument and it'll default to a soft limit.
-        # If however a max_processes  is passed we'll treat it as a hard limit.
+        # The Scheduler class can be initialized with no "max_processes" argument and it'll default
+        # to a soft limit. If however a max_processes  is passed we'll treat it as a hard limit.
         # The difference is whether or not we allow single jobs to exceed
         # the number of slots.
         if params['max_processes'] == None:
@@ -206,11 +196,6 @@ class Scheduler(MooseObject):
         # Thread Locking
         self.thread_lock = threading.RLock()
 
-        # Initialize Scheduler queue objects
-        self.clearAndInitializeJobs()
-
-    ## Clear and Initialize the scheduler queue
-    def clearAndInitializeJobs(self):
         # Workers in use
         self.workers_in_use = 0
 
@@ -358,10 +343,6 @@ class Scheduler(MooseObject):
 
     # Loop through the testers and add them to the runner pool for execution
     def schedule(self, testers):
-        # We didn't recieve anything... pesky TestHarness
-        if testers == []:
-            return
-
         # Check for race conditions and cyclic dependencies and return if these issues exist
         if self.groupFailure(testers):
             return
@@ -417,38 +398,38 @@ class Scheduler(MooseObject):
             if not tester.getRunnable(self.options):
                 skipped_or_failed_tests.add(tester_data)
 
-        # Discover skipped tests and remove downstream tests that require this skipped test
+        # Discover skipped tests and remove downstream tests that require this skipped test. Any
+        # discovered downstream nodes will have 'skipped dependency' set as their status.
         for skipped_tester_data in skipped_or_failed_tests:
             tmp_tester = skipped_tester_data.getTester()
-            # Delete and return downstream nodes (prints 'skipped dependency' tests to the screen)
+
+            # Delete downstream nodes
             self.deleteDownstreamTests(skipped_tester_data)
 
-            # Delete this test
+            # Delete this node
             tester_dag.delete_node_if_exists(tmp_tester.getTestName())
 
-            # Inform the user it was skipped by adding it to the queue
+            # Inform the user this node was skipped by adding it to the queue
             self.statusGo(tmp_tester.getTestName())
 
-        # Get top level jobs we can launch
-        ind_jobs = tester_dag.ind_nodes()
-
-        # Maybe all jobs in this group got skipped?
-        if ind_jobs == []:
+        # Is there anything to do? All tests were skipped?
+        if tester_dag.size() == 0:
             return
 
-        # Adjust all the jobs we're about to launch as QUEUED before we actually launch them so as to
-        # prevent a very fast finishing job from getting the next available job _this_ method is about
-        # iterate over and launch (the status runner launches jobs that are INITIALIZED and not already
-        # QUEUED)
+        # Get top level nodes we can launch now
+        ind_jobs = tester_dag.ind_nodes()
+
+        # Set the status on all the nodes (jobs) this method is about to launch as QUEUED before we actually
+        # launch them so as to prevent a very fast finishing job from asking for the next available job(s) this
+        # method is about to launch (in other words; the status runner launches jobs that are set as INITIALIZED
+        # and not already QUEUED while this method makes no comparison and 'just goes')
         for job in ind_jobs:
             tester = self.scheduled_tester_data[job].getTester()
             tester.setStatus('QUEUED', tester.bucket_pending)
 
-        # With the job properly statused above... launch them
+        # With the job properly status'd above... launch them all asynchronously
         for job in ind_jobs:
-            results = self.runnerGo(job)
-            # DEBUG: remove following comment to print thread results (serially)
-            # print results.get()
+            self.runnerGo(job)
 
     # Launch jobs stored in our queues. Method is blocked until both queue(s) and active jobs are empty
     def waitFinish(self):
@@ -510,8 +491,24 @@ class Scheduler(MooseObject):
         tester.setStatus('TIMEOUT', tester.bucket_fail)
         tester_data.killProcess()
 
+    def satisfyLoad(self):
+        # We'll always run at least one job regardless of load or we'll starve!
+        while self.workers_in_use > 1 and self.currentLoad() >= self.average_load:
+            sleep(0.5)
+
+    def currentLoad(self):
+        loadAverage = 0.0
+        try:
+            loadAverage = os.getloadavg()[0]
+        except AttributeError:
+            pass      # getloadavg() not available in this implementation of os
+        return loadAverage
+
     # TODO: Possibly look into semaphore functionality for slot allocation
     def checkAvailableSlots(self, tester):
+        # Make sure we are complying with the requested load average
+        self.satisfyLoad()
+
         with self.thread_lock:
             # See if we can fit this job into our busy schedule
             if self.workers_in_use + tester.getProcs(self.options) <= self.job_slots:

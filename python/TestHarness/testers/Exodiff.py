@@ -46,10 +46,6 @@ class Exodiff(FileTester):
     def processResults(self, moose_dir, retcode, options, output):
         reason = FileTester.processResults(self, moose_dir, retcode, options, output)
 
-        if options.enable_recover and self.specs['skip_checks']:
-            self.setStatus('PART1', self.bucket_success)
-            return output
-
         if self.getStatus() == self.bucket_fail or self.specs['skip_checks']:
             return output
 

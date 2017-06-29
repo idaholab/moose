@@ -20,9 +20,6 @@ class CSVDiff(FileTester):
         reason = FileTester.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
-        if options.enable_recover and self.specs['skip_checks']:
-            self.setStatus('PART1', self.bucket_success)
-            return output
 
         if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output

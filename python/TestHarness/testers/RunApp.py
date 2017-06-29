@@ -200,8 +200,6 @@ class RunApp(Tester):
             # in the derived class.
             if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
                 reason = 'ERRMSG'
-            elif retcode == Scheduler.TIMEOUT:
-                reason = 'TIMEOUT'
             elif retcode == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
             elif retcode != 0 and specs['should_crash'] == False:
