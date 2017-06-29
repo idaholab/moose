@@ -3,7 +3,7 @@ from timeit import default_timer as clock
 from Tester import Tester
 from Scheduler import Scheduler
 from MooseObject import MooseObject
-from util import *
+import util
 import platform, time
 
 import os
@@ -75,7 +75,7 @@ class RunParallel(Scheduler):
         if not tester.didFail():
             # Read the output either from the temporary file or redirected files
             if tester.hasRedirectedOutput(self.options):
-                redirected_output = getOutputFromFiles(tester, self.options)
+                redirected_output = util.getOutputFromFiles(tester, self.options)
                 output += redirected_output
 
                 # If we asked for redirected output but none was found, we'll call that a failure

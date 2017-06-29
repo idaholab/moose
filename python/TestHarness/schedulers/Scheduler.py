@@ -1,143 +1,15 @@
 from time import sleep
-from timeit import default_timer as clock
 from collections import deque
 from MooseObject import MooseObject
+from TesterData import TesterData
 from Queue import Queue
 from signal import SIGTERM
-from util import *
-import os, sys
-from contribs import dag
+import os, sys, re
+from contrib import dag
 
+import util
 from multiprocessing.pool import ThreadPool
 import threading # for thread locking
-
-class TesterData:
-    """
-    The TesterData class is a simple container for the tester and its associated output file objects, the DAG,
-    and the subprocess object, the exit codes, the start and end time, etc
-    """
-    def __init__(self, tester, dag_object, options):
-        self.options = options
-        self.__tester = tester
-        self.__dag = dag_object
-        self.__outfile = None
-        self.__process = None
-        self.__exit_code = None
-        self.__start_time = None
-        self.__end_time = None
-        self.__std_out = ''
-
-    # Return the tester object
-    def getTester(self):
-        return self.__tester
-
-    # Return the DAG object associated with this tester
-    def getDAG(self):
-        return self.__dag
-
-    # Run a tester specific command (changes into test_dir before execution)
-    def runCommand(self, command):
-        if self.options.dry_run or not self.__tester.shouldExecute():
-            self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
-            self.__exit_code = 0
-            self.__start_time = clock()
-            self.__end_time = clock()
-            return
-
-        # Run a command and get the process, tempfile and start time
-        (process, output_file) = launchCommand(self.__tester, command)
-
-        # Save this information before waiting, so
-        self.__process = process
-        self.__outfile = output_file
-        self.__start_time = clock()
-
-        # Wait for the process to finish
-        process.wait()
-
-        # Record some information about this finished command
-        self.__end_time = clock()
-        self.__exit_code = process.poll()
-
-        # This saves the trimmed output to std_out, and closes the file
-        self.__std_out = self.getOutput()
-
-        # Return the process object
-        return process
-
-    # Return the process object
-    def getProcess(self):
-        return self.__process
-
-    # Kill the process
-    def killProcess(self):
-        if self.__process:
-            self.__process.kill()
-
-    # Return Exit code
-    def getExitCode(self):
-        return self.__exit_code
-
-    # Return start time
-    def getStartTime(self):
-        return self.__start_time
-
-    # Return end time
-    def getEndTime(self):
-        return self.__end_time
-
-    # Return the output file handler object
-    def getOutFile(self):
-        return self.__outfile
-
-    # Close the OutFile object
-    def closeFile(self):
-        if not self.__outfile.closed:
-            self.__outfile.close()
-
-    ######
-    # Set or override the output
-    # NOTE: This does nothing if there is a valid file handler and its opened (a running non-skipped
-    #       test). This is to protect the output that the running process is busy creating.
-    #
-    #       Proper usage would be to; wait for procsess to finish, getOutput(), modify it, and then
-    #       setOutput(<modified output>). Concurrent getOutput()'s would then return your modified
-    #       output.
-    def setOutput(self, output):
-        if self.__outfile is not None and not self.__outfile.closed:
-            return
-        self.__std_out = output
-
-    # Read and return the output, then close the file
-    def getOutput(self):
-        if self.__outfile is not None and not self.__outfile.closed:
-            self.__std_out = readOutput(self.__outfile, self.options)
-            self.__outfile.close()
-        return self.__std_out
-    #
-    #
-    ######
-
-    # Return active time
-    def getActiveTime(self):
-        m = re.search(r"Active time=(\S+)", self.__std_out)
-        if m != None:
-            return m.group(1)
-
-    # Return solve time
-    def getSolveTime(self):
-        m = re.search(r"solve().*", self.__std_out)
-        if m != None:
-            return m.group().split()[5]
-
-    # Return active time if available, if not return a comparison of start and end time
-    def getTiming(self):
-        if self.getActiveTime():
-            return self.getActiveTime()
-        elif self.getEndTime() and self.getStartTime():
-            return self.getEndTime() - self.getStartTime()
-        else:
-            return 0.0
 
 class Scheduler(MooseObject):
     """
@@ -213,11 +85,11 @@ class Scheduler(MooseObject):
         self.reported_jobs = set([])
 
         # Runner Queue (we put jobs we want to run asyncronously in this)
-        # runner_queue.put( (tester) )
+        # runner_queue.put( tester_name )
         self.runner_queue = Queue()
 
         # Status queue (we put jobs we want to display a status for in this)
-        # status_queue.put( (tester, clock(), subprocess_object) )
+        # status_queue.put( tester_name )
         self.status_queue = Queue()
 
     ## Run the command asynchronously
@@ -263,7 +135,7 @@ class Scheduler(MooseObject):
     # return bool for output file race conditions
     # NOTE: we return True for exceptions, but they are handled later (because we set a failure status)
     def checkRaceConditions(self, testers):
-        d = DependencyResolver()
+        d = util.DependencyResolver()
         name_to_object = {}
 
         for tester in testers:
@@ -275,7 +147,7 @@ class Scheduler(MooseObject):
             for concurrent_testers in concurrent_tester_sets:
                 output_files_in_dir = set()
                 for tester in concurrent_testers:
-                    if name_to_object[tester].getTestName() not in self._skipped_tests(testers):
+                    if name_to_object[tester].getTestName() not in self.skipped_tests(testers):
                         output_files = name_to_object[tester].getOutputFiles()
                         duplicate_files = output_files_in_dir.intersection(output_files)
                         if len(duplicate_files):
@@ -287,7 +159,7 @@ class Scheduler(MooseObject):
         return True
 
     # return a set of finished non-passing or will be skipped tests
-    def _skipped_tests(self, testers):
+    def skipped_tests(self, testers):
         skipped_failed = set([])
         for tester in testers:
             if (tester.isFinished() and not tester.didPass()) \
@@ -333,7 +205,7 @@ class Scheduler(MooseObject):
                         deleted_tester_set.add(dwn_tester)
 
                         # Ask a status thread to print our results
-                        self.statusGo(downstream_test_name)
+                        self.assignStatus(downstream_test_name)
 
                     if not self.skipPrereqs():
                         dag_object.delete_node_if_exists(downstream_test_name)
@@ -409,8 +281,8 @@ class Scheduler(MooseObject):
             # Delete this node
             tester_dag.delete_node_if_exists(tmp_tester.getTestName())
 
-            # Inform the user this node was skipped by adding it to the queue
-            self.statusGo(tmp_tester.getTestName())
+            # Inform the user this node was skipped by adding it to the status queue
+            self.assignStatus(tmp_tester.getTestName())
 
         # Is there anything to do? All tests were skipped?
         if tester_dag.size() == 0:
@@ -429,13 +301,13 @@ class Scheduler(MooseObject):
 
         # With the job properly status'd above... launch them all asynchronously
         for job in ind_jobs:
-            self.runnerGo(job)
+            self.assignRunner(job)
 
     # Launch jobs stored in our queues. Method is blocked until both queue(s) and active jobs are empty
     def waitFinish(self):
         while len(self.active_jobs) != 0 or not self.runner_queue.empty() or not self.status_queue.empty():
             # sleep for just a tick or two
-            sleep(0.2)
+            sleep(0.5)
 
         ### Runner Pool
         # Wait for the runner pool to empty before waiting on the status pool
@@ -483,7 +355,7 @@ class Scheduler(MooseObject):
     def doLongRunningJobs(self, tester):
         tester.specs.addParam('caveats', ['FINISHED'], "")
         tester.setStatus('RUNNING...', tester.bucket_pending)
-        self.statusGo(tester.getTestName())
+        self.assignStatus(tester.getTestName())
 
     # Handle jobs that are timing out
     def doTimeoutJobs(self, tester_data):
@@ -492,17 +364,15 @@ class Scheduler(MooseObject):
         tester_data.killProcess()
 
     def satisfyLoad(self):
-        # We'll always run at least one job regardless of load or we'll starve!
-        while self.workers_in_use > 1 and self.currentLoad() >= self.average_load:
-            sleep(0.5)
-
-    def currentLoad(self):
         loadAverage = 0.0
         try:
             loadAverage = os.getloadavg()[0]
         except AttributeError:
             pass      # getloadavg() not available in this implementation of os
-        return loadAverage
+        # We'll always run at least one job regardless of load or we'll starve!
+        while self.workers_in_use > 1 and loadAverage >= self.average_load:
+            sleep(0.5)
+            self.satisfyLoad()
 
     # TODO: Possibly look into semaphore functionality for slot allocation
     def checkAvailableSlots(self, tester):
@@ -551,15 +421,13 @@ class Scheduler(MooseObject):
 
         return next_group
 
-    # private methods to add a tester to a queue and assign a thread to it
-    # TODO: refactor runnerGo and statusGo
-    def runnerGo(self, job):
+    # put a job in the runner queue and assign a runner thread to do some work
+    def assignRunner(self, job):
         self.runner_queue.put(job)
         return self.runner_pool.apply_async(self.jobRunner, (self.runner_queue,))
 
-    # private methods to add a tester to a queue and assign a thread to it
-    # TODO: refactor runnerGo and statusGo
-    def statusGo(self, job):
+    # put a job in the status queue and assign a status thread to do some work
+    def assignStatus(self, job):
         self.status_queue.put(job)
         return self.status_pool.apply_async(self.statusRunner, (self.status_queue,))
 
@@ -587,7 +455,7 @@ class Scheduler(MooseObject):
         # We can not run just yet (slots full)
         else:
             sleep(0.03)
-            self.runnerGo(job)
+            self.assignRunner(job)
             return
 
         # Get a timer tuple of started thread timers
@@ -605,7 +473,7 @@ class Scheduler(MooseObject):
             raise SchedulerError('Derived Scheduler can not return a pending status!')
 
         # Add this job to the status queue for finished work to be printed to the screen
-        self.statusGo(job)
+        self.assignStatus(job)
 
         # This job is finished, prepare to launch other avialable jobs out of the DAG
         with self.thread_lock:
@@ -620,4 +488,4 @@ class Scheduler(MooseObject):
 
         # Launch these next set of jobs
         for next_job in next_job_group:
-            self.runnerGo(next_job)
+            self.assignRunner(next_job)

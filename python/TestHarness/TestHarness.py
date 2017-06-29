@@ -9,12 +9,12 @@ import path_tool
 path_tool.activate_module('FactorySystem')
 
 from socket import gethostname
-from util import *
 from Scheduler import Scheduler
 from Tester import Tester
 from Factory import Factory
 from Parser import Parser
 from Warehouse import Warehouse
+import util
 
 import argparse
 from timeit import default_timer as clock
@@ -76,8 +76,8 @@ class TestHarness:
         self.parseCLArgs(argv)
 
         checks = {}
-        checks['platform'] = getPlatforms()
-        checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
+        checks['platform'] = util.getPlatforms()
+        checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
         checks['exe_objects'] = None # This gets calculated on demand
 
         # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
@@ -101,23 +101,23 @@ class TestHarness:
             checks['cxx11'] = set(['ALL'])
             checks['asio'] =  set(['ALL'])
         else:
-            checks['compiler'] = getCompilers(self.libmesh_dir)
-            checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
-            checks['library_mode'] = getSharedOption(self.libmesh_dir)
-            checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
-            checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
-            checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
-            checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
-            checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
-            checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
-            checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
-            checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
-            checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
-            checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
-            checks['slepc'] =  getLibMeshConfigOption(self.libmesh_dir, 'slepc')
-            checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
-            checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
-            checks['asio'] =  getIfAsioExists(self.moose_dir)
+            checks['compiler'] = util.getCompilers(self.libmesh_dir)
+            checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
+            checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
+            checks['mesh_mode'] = util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
+            checks['dtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'dtk')
+            checks['unique_ids'] = util.getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
+            checks['vtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'vtk')
+            checks['tecplot'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
+            checks['dof_id_bytes'] = util.getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
+            checks['petsc_debug'] = util.getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
+            checks['curl'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'curl')
+            checks['tbb'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'tbb')
+            checks['superlu'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'superlu')
+            checks['slepc'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'slepc')
+            checks['unique_id'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
+            checks['cxx11'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
+            checks['asio'] =  util.getIfAsioExists(self.moose_dir)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
@@ -384,12 +384,12 @@ class TestHarness:
                 color = tester.getColor()
 
                 if output != '':
-                    test_name = colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
+                    test_name = util.colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
                     output = test_name + ("\n" + test_name).join(lines)
                     print(output)
 
             caveat_formatted_results = self.formatCaveats(tester)
-            print formatResult(tester, caveat_formatted_results, tester_data.getTiming(), self.options)
+            print util.formatResult(tester, caveat_formatted_results, tester_data.getTiming(), self.options)
         return caveat_formatted_results
 
     # handleTestStatus calls the tester's ability to print its current status to the screen, and handles
@@ -421,13 +421,13 @@ class TestHarness:
                     self.writeFailedTest.write(tester.getTestName() + '\n')
 
                 if self.options.file:
-                    self.file.write(formatResult( tester, result, timing, self.options, color=False) + '\n')
+                    self.file.write(util.formatResult( tester, result, timing, self.options, color=False) + '\n')
                     self.file.write(output)
 
                 if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
                     fname = os.path.join(tester.getTestDir(), tester.getTestName().split('/')[-1] + '.' + result[:6] + '.txt')
                     f = open(fname, 'w')
-                    f.write(formatResult( tester, result, timing, self.options, color=False) + '\n')
+                    f.write(util.formatResult( tester, result, timing, self.options, color=False) + '\n')
                     f.write(output)
                     f.close()
 
@@ -436,13 +436,13 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
+            print '\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS-1))
             for (test, result, timing) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
-                print formatResult(test, result, timing, self.options)
+                print util.formatResult(test, result, timing, self.options)
 
         time = clock() - self.start_time
 
-        print('-' * (TERM_COLS-1))
+        print('-' * (util.TERM_COLS-1))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
@@ -457,7 +457,7 @@ class TestHarness:
             summary = '<b>%d would run</b>'
             summary += ', <b>%d would be skipped</b>'
             summary += fatal_error
-            print(colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
+            print(util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
                              colored=self.options.colored, code=self.options.code ))
 
         else:
@@ -474,7 +474,7 @@ class TestHarness:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
+            print util.colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code )
 
         if self.file:

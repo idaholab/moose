@@ -1,5 +1,4 @@
 from RunApp import RunApp
-from util import runCommand
 import os, re
 
 class PetscJacobianTester(RunApp):
