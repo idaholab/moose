@@ -121,6 +121,12 @@ def writeRevision( repo_location, app_name, revision_header ):
         if m is not None and m.group(1) != app_revision:
             revision_changed = True
 
+        if m is None:
+            # If the above RE doesn't match anything then we have
+            # a bad _REVISION define and we need to rewrite
+            # out a new file.
+            revision_changed = True
+
         f.close()
     else:
         # Count it as changed if the header does not exist.
