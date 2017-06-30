@@ -39,6 +39,11 @@ InputParameters getSlepcEigenProblemValidParams();
 void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params);
 void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params);
 void slepcSetOptions(FEProblemBase & problem);
+
+PetscErrorCode mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
+PetscErrorCode mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
+PetscErrorCode mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx);
+PetscErrorCode mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx);
 } // namespace SlepcSupport
 } // namespace moose
 

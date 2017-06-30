@@ -551,7 +551,7 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
       residual += *_Re_non_time;
     residual.close();
 
-    computeNodalBCs(residual);
+    computeNodalBCs(residual, type);
 
     // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
     if (_need_residual_ghosted && _debugging_residuals)
@@ -1235,7 +1235,8 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 }
 
 void
-NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
+NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
+                                     Moose::KernelType kernel_type)
 {
   // We need to close the diag_save_in variables on the aux system before NodalBCs clear the dofs on
   // boundary nodes
@@ -1265,7 +1266,14 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
             const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
             for (const auto & nbc : bcs)
               if (nbc->shouldApply())
+              {
+                if (kernel_type == Moose::KT_EIGEN)
+                  nbc->setBCOnEigen(true);
+                else
+                  nbc->setBCOnEigen(false);
+
                 nbc->computeResidual(residual);
+              }
           }
         }
       }
@@ -1855,7 +1863,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
       default:
       case Moose::COUPLING_CUSTOM:
       {
-        ComputeFullJacobianThread cj(_fe_problem, jacobian);
+        ComputeFullJacobianThread cj(_fe_problem, jacobian, kernel_type);
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
 

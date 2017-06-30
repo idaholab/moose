@@ -32,5 +32,9 @@
     method = 'OPT OPROF'
     valgrind = 'HEAVY'
     min_reported_time = 20
+    # this test has unknown issue with PETSc-master
+    # It is related to communcators in VTK
+    # We will fix it in the new release
+    petsc_version_release = true
   [../]
 []

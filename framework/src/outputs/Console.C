@@ -16,6 +16,7 @@
 #include "Console.h"
 #include "ConsoleUtils.h"
 #include "FEProblem.h"
+#include "EigenProblem.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
 #include "Executioner.h"
@@ -483,6 +484,11 @@ Console::writeVariableNorms()
   // if we are not priting anything, let's not waste time computing the norms below and just exit
   // this call
   if ((_all_variable_norms == false) && (_outlier_variable_norms == false))
+    return;
+
+  // if it is an eigenvalue prolblem, we do not know to define RHS,
+  // and then we do not know how to compute variable norms
+  if (dynamic_cast<EigenProblem *>(_problem_ptr) != nullptr)
     return;
 
   // Flag set when header prints

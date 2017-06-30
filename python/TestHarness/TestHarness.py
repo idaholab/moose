@@ -85,6 +85,8 @@ class TestHarness:
         if self.options.skip_config_checks:
             self.checks['compiler'] = set(['ALL'])
             self.checks['petsc_version'] = 'N/A'
+            self.checks['petsc_version_release'] = 'N/A'
+            self.checks['slepc_version'] = 'N/A'
             self.checks['library_mode'] = set(['ALL'])
             self.checks['mesh_mode'] = set(['ALL'])
             self.checks['dtk'] = set(['ALL'])
@@ -103,6 +105,8 @@ class TestHarness:
         else:
             self.checks['compiler'] = getCompilers(self.libmesh_dir)
             self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
+            self.checks['petsc_version_release'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_version_release')
+            self.checks['slepc_version'] = getSlepcVersion(self.libmesh_dir)
             self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
             self.checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
             self.checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
@@ -403,7 +407,7 @@ class TestHarness:
         # PASS and DRY_RUN fall into this catagory
         if did_pass:
             if self.options.extra_info:
-                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
+                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'slepc_version']
                 for check in checks:
                     if not 'ALL' in test[check]:
                         caveats.append(', '.join(test[check]))

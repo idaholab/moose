@@ -27,14 +27,41 @@
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
-                                                     SparseMatrix<Number> & jacobian)
+                                                     SparseMatrix<Number> & jacobian,
+                                                     Moose::KernelType kernel_type)
   : ComputeJacobianThread(fe_problem, jacobian),
     _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
-    _kernels(_nl.getKernelWarehouse())
+    _kernel_type(kernel_type),
+    _warehouse(NULL)
 {
+  switch (_kernel_type)
+  {
+    case Moose::KT_ALL:
+      _warehouse = &_nl.getKernelWarehouse();
+      break;
+
+    case Moose::KT_TIME:
+      _warehouse = &_nl.getTimeKernelWarehouse();
+      break;
+
+    case Moose::KT_NONTIME:
+      _warehouse = &_nl.getNonTimeKernelWarehouse();
+      break;
+
+    case Moose::KT_EIGEN:
+      _warehouse = &_nl.getEigenKernelWarehouse();
+      break;
+
+    case Moose::KT_NONEIGEN:
+      _warehouse = &_nl.getNonEigenKernelWarehouse();
+      break;
+
+    default:
+      mooseError("Unknown kernel type \n");
+  }
 }
 
 // Splitting Constructor
@@ -45,7 +72,8 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
-    _kernels(x._kernels)
+    _kernel_type(x._kernel_type),
+    _warehouse(x._warehouse)
 {
 }
 
@@ -64,12 +92,12 @@ ComputeFullJacobianThread::computeJacobian()
     unsigned int jvar = jvariable.number();
 
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
-        _kernels.hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
+        _warehouse->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
       // any)
       const std::vector<std::shared_ptr<KernelBase>> & kernels =
-          _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+          _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
@@ -93,10 +121,10 @@ ComputeFullJacobianThread::computeJacobian()
       unsigned int jvar = jvariable.number();
 
       if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
-          _kernels.hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
+          _warehouse->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
       {
         const std::vector<std::shared_ptr<KernelBase>> & kernels =
-            _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+            _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
         for (const auto & kernel : kernels)
         {
           std::shared_ptr<NonlocalKernel> nonlocal_kernel =
@@ -119,11 +147,11 @@ ComputeFullJacobianThread::computeJacobian()
     const std::vector<MooseVariable *> & vars = _nl.getVariables(_tid);
     for (const auto & ivariable : vars)
       if (ivariable->activeOnSubdomain(_subdomain) > 0 &&
-          _kernels.hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
+          _warehouse->hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
       {
         // for each variable get the list of active kernels
         const std::vector<std::shared_ptr<KernelBase>> & kernels =
-            _kernels.getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
+            _warehouse->getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
         for (const auto & kernel : kernels)
           if (kernel->isImplicit())
           {

@@ -71,6 +71,7 @@
 #include "MaterialEigenKernel.h"
 #include "PHarmonic.h"
 #include "PMassEigenKernel.h"
+#include "PMassKernel.h"
 #include "CoupledEigenKernel.h"
 #include "ConsoleMessageKernel.h"
 #include "WrongJacobianDiffusion.h"
@@ -368,6 +369,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(MaterialEigenKernel);
   registerKernel(PHarmonic);
   registerKernel(PMassEigenKernel);
+  registerKernel(PMassKernel);
   registerKernel(CoupledEigenKernel);
   registerKernel(ConsoleMessageKernel);
   registerKernel(WrongJacobianDiffusion);

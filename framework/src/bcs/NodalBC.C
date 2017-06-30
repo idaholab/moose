@@ -45,7 +45,8 @@ NodalBC::NodalBC(const InputParameters & parameters)
     _current_node(_var.node()),
     _u(_var.nodalSln()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
+    _is_eigen(false)
 {
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
@@ -90,7 +91,11 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
   {
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    Real res = computeQpResidual();
+    Real res = 0;
+
+    if (!_is_eigen)
+      res = computeQpResidual();
+
     residual.set(dof_idx, res);
 
     if (_has_save_in)
