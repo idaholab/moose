@@ -11,37 +11,31 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#ifndef COUPLEDFORCE_H
-#define COUPLEDFORCE_H
+#ifndef PMASSKERNEL_H
+#define PMASSKERNEL_H
 
 #include "Kernel.h"
 
-// Forward Declaration
-class CoupledForce;
+// Forward Declarations
+class PMassKernel;
 
 template <>
-InputParameters validParams<CoupledForce>();
+InputParameters validParams<PMassKernel>();
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * This kernel implements (v, |u|^(p-2) u)/k, where u is the variable, v is the test function
+ * and k is the eigenvalue. When p=2, this kernel is equivalent with MassEigenKernel.
  */
-class CoupledForce : public Kernel
+class PMassKernel : public Kernel
 {
 public:
-  CoupledForce(const InputParameters & parameters);
+  PMassKernel(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 
-  virtual Real computeQpJacobian() override;
-
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-private:
-  unsigned int _v_var;
-  const VariableValue & _v;
-  Real _coef;
+  Real _p;
 };
 
-#endif // COUPLEDFORCE_H
+#endif // PMASSKERNEL_H
