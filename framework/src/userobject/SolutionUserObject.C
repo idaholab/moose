@@ -136,8 +136,8 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   Real a;
   Real b;
 
-  a = std::cos(halfPi * _rotation0_angle / 90);
-  b = std::sin(halfPi * _rotation0_angle / 90);
+  a = std::cos(halfPi * -_rotation0_angle / 90);
+  b = std::sin(halfPi * -_rotation0_angle / 90);
   // the following is an anticlockwise rotation about z
   RealTensorValue rot0_z(a, -b, 0, b, a, 0, 0, 0, 1);
   // form the rotation matrix that will take rotation0_vector to the z axis
@@ -146,8 +146,8 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   // back
   _r0 = vec0_to_z.transpose() * (rot0_z * vec0_to_z);
 
-  a = std::cos(halfPi * _rotation1_angle / 90);
-  b = std::sin(halfPi * _rotation1_angle / 90);
+  a = std::cos(halfPi * -_rotation1_angle / 90);
+  b = std::sin(halfPi * -_rotation1_angle / 90);
   // the following is an anticlockwise rotation about z
   RealTensorValue rot1_z(a, -b, 0, b, a, 0, 0, 0, 1);
   // form the rotation matrix that will take rotation1_vector to the z axis
