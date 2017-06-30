@@ -28,10 +28,13 @@ fi
 # set old/new app name variables
 srcname='Stork'
 dstname=$1
-srcnamelow=$(echo "$srcname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[A-Z]/[a-z]/')
-srcnameup=$(echo "$srcname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[a-z]/[A-Z]/')
-dstnamelow=$(echo "$dstname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[A-Z]/[a-z]/')
-dstnameup=$(echo "$dstname" | perl -pe 's/(?!^)([A-Z]+)/_\1/; tr/[a-z]/[A-Z]/')
+
+regex='s/([A-Z][a-z])/_\1/g; s/([a-z])([A-Z])/\1_\2/g; s/^_//;'
+
+srcnamelow=$(echo "$srcname" | perl -pe "${regex}"'tr/[A-Z]/[a-z]/')
+srcnameup=$(echo "$srcname" | perl -pe "${regex}"'tr/[a-z]/[A-Z]/')
+dstnamelow=$(echo "$dstname" | perl -pe "${regex}"'tr/[A-Z]/[a-z]/')
+dstnameup=$(echo "$dstname" | perl -pe "${regex}"'tr/[a-z]/[A-Z]/')
 dir="$dstnamelow"
 if [[ -z $MOOSE_DIR ]]; then
     MOOSE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
