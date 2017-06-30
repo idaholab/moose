@@ -12,45 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PARSEDSUBDOMAINMESHMODIFIER_H
-#define PARSEDSUBDOMAINMESHMODIFIER_H
+#ifndef MESHSIDESET_H
+#define MESHSIDESET_H
 
-// MOOSE includes
 #include "MeshModifier.h"
-#include "FunctionParserUtils.h"
 
-// Forward declerations
-class ParsedSubdomainMeshModifier;
+class MeshSideSet;
 
 template <>
-InputParameters validParams<ParsedSubdomainMeshModifier>();
+InputParameters validParams<MeshSideSet>();
 
 /**
- * MeshModifier for defining a Subdomain inside or outside of combinatorial geometry
+ * Add lower dimensional elements along the faces contained in a side set
  */
-class ParsedSubdomainMeshModifier : public MeshModifier, public FunctionParserUtils
+class MeshSideSet : public MeshModifier
 {
 public:
-  /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
-  ParsedSubdomainMeshModifier(const InputParameters & parameters);
+  MeshSideSet(const InputParameters & parameters);
 
   virtual void modify() override;
 
-private:
-  /// function expression
-  const std::string _function;
-
+protected:
   /// Block ID to assign to the region
   const SubdomainID _block_id;
-
-  /// A list of excluded subdomain ids that will not be changed even if they are in the combinatorial geometry
-  const std::vector<SubdomainID> _excluded_ids;
-
-  /// function parser object describing the combinatorial geometry
-  ADFunctionPtr _func_F;
 };
 
-#endif // SUBDOMAINBOUDINGBOX_H
+#endif // MESHSIDESET_H

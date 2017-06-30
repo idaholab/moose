@@ -43,10 +43,10 @@ private:
   virtual void modify() override;
 
   /// ID location (inside of outside of box)
-  MooseEnum _location;
+  const MooseEnum _location;
 
   /// Block ID to assign to the region
-  SubdomainID _block_id;
+  const SubdomainID _block_id;
 };
 
 #endif // ORIENTEDSUBDOMAINBOUNDINGBOX_H
