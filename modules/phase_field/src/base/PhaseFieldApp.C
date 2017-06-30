@@ -326,7 +326,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
   registerKernel(CHBulkPFCTrad);
-  registerKernel(CHCpldPFCTrad);
+  registerDeprecatedObject(CHCpldPFCTrad, "08/15/2017 09:00");
   registerKernel(CHInterface);
   registerKernel(CHInterfaceAniso);
   registerKernel(CHMath);

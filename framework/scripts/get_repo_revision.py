@@ -43,12 +43,11 @@ def gitDate( cwd=None ):
 
 
 def gitVersionString( cwd=None ):
-    SHA1 = ''
-    date = ''
-    try:
-        SHA1 = gitSHA1( cwd )
-        date = gitDate( cwd )
-    except: # subprocess.CalledProcessError:
+    SHA1 = gitSHA1( cwd )
+    date = gitDate( cwd )
+
+    if not SHA1 or not date:
+        # Can happen if we aren't in a valid repo
         return None
 
     # The tag check will always succeed if the repo starts with a v0.0 tag. To find only tags that
@@ -108,8 +107,10 @@ def writeRevision( repo_location, app_name, revision_header ):
 
     # Version is the tag. If empty, we use the sha1 hash
     app_version = gitTag(repo_location)
-    if app_version == None:
+    if app_version is None:
         app_version = gitSHA1(repo_location)
+        if app_version is None:
+            app_version = "unknown"
 
     # see if the revision is different
     revision_changed = False
