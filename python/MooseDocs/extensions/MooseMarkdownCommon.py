@@ -44,15 +44,18 @@ class MooseMarkdownCommon(object):
         for key, value in self.defaultSettings().iteritems():
             self.__settings[key] = value[0]
 
-    def getSettings(self, settings_line):
+    def getSettings(self, settings_line, legacy_style=True):
         """
         Parses a string of space separated key=value pairs. This supports having values with spaces
         in them. So something like "key0=foo bar key1=value1" is supported.
 
         Input:
-          settings_line[str]: Line to parse
+            settings_line[str]: Line to parse
+            legacy_style[bool]: When True all unknown parameters are but into the "style", this
+                                assumption needs to go away and this parameter will allow it to
+                                be deprecated.
         Returns:
-          dict of values that were parsed
+            dict of values that were parsed
         """
 
         # Crazy RE capable of many things like understanding key=value pairs with spaces in them!
@@ -64,18 +67,21 @@ class MooseMarkdownCommon(object):
         for entry in matches:
             key = entry[0].strip()
             value = entry[1].strip()
-            if key in options.keys():
-                if value.lower() == 'true':
-                    value = True
-                elif value.lower() == 'false':
-                    value = False
-                elif value.lower() == 'none':
-                    value = None
-                elif all([v.isdigit() for v in value]):
-                    value = float(value) #pylint: disable=redefined-variable-type
+            if value.lower() == 'true':
+                value = True
+            elif value.lower() == 'false':
+                value = False
+            elif value.lower() == 'none':
+                value = None
+            elif all([v.isdigit() for v in value]):
+                value = float(value) #pylint: disable=redefined-variable-type
+
+            if legacy_style and (key in options.keys()):
                 options[key] = value
-            else:
+            elif legacy_style:
                 options['style'] += '{}:{};'.format(key, value)
+            else:
+                options[key] = value
 
         return options
 
@@ -111,11 +117,11 @@ class MooseMarkdownCommon(object):
         div = self.applyElementSettings(etree.Element('div'), settings)
         div.set('class', 'moose-float-div moose-{}-div'.format(cname))
 
-        if settings.get('id', None) or settings.get('caption', None):
+        if settings.get('id', False) or settings.get('caption', False):
             p = etree.SubElement(div, 'p')
             p.set('class', 'moose-float-caption')
 
-            if settings.get('id', None):
+            if settings.get('id', None) is not None:
                 div.set('data-moose-float-name', cname.title())
                 h_span = etree.SubElement(p, 'span')
                 h_span.set('class', 'moose-float-caption-heading')
@@ -132,7 +138,7 @@ class MooseMarkdownCommon(object):
                 h_span_suffix.set('class', 'moose-float-caption-heading-suffix')
                 h_span_suffix.text = ': '
 
-            if settings.get('caption', None):
+            if settings.get('caption', None) is not None:
                 t_span = etree.SubElement(p, 'span')
                 t_span.set('class', 'moose-float-caption-text')
                 t_span.text = settings['caption']

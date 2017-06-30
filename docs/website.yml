@@ -15,6 +15,7 @@
 - MooseDocs.extensions.misc
 - MooseDocs.extensions.media
 - MooseDocs.extensions.tables
+- MooseDocs.extensions.gchart
 - MooseDocs.extensions.listings:
     repo: https://github.com/idaholab/moose/blob/master
     make_dir: modules/combined

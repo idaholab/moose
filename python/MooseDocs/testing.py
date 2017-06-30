@@ -17,8 +17,10 @@ import os
 import inspect
 import unittest
 import difflib
+import StringIO
 import bs4
 import MooseDocs
+from MooseDocs.main import init_logging
 from MooseDocs.html2latex import Translator, BasicExtension, MooseExtension
 
 def text_diff(text, gold):
@@ -45,6 +47,10 @@ class MarkdownTestCase(unittest.TestCase):
         """
         Create the markdown parser using the configuration file.
         """
+
+        # Setup logging
+        cls._stream = StringIO.StringIO()
+        cls._formatter = init_logging(stream=cls._stream)
 
         # Define the local directory
         cls._path = os.path.abspath(os.path.dirname(inspect.getfile(cls)))
@@ -168,6 +174,18 @@ class MarkdownTestCase(unittest.TestCase):
 
         # Compare against gold
         self.assertTextFile(name)
+
+    def assertInLogError(self, msg):
+        """
+        Test that an error was logged.
+        """
+        self.assertIn(msg, self._formatter.messages('ERROR')[-1])
+
+    def assertInLogWarning(self, msg):
+        """
+        Test that an error was logged.
+        """
+        self.assertIn(msg, self._formatter.messages('WARNING')[-1])
 
 class TestLatexBase(MarkdownTestCase):
     """

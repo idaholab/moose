@@ -32,6 +32,7 @@ commands add associated settings defined in the extension.
 | [refs](extensions/refs.md) | Implements latex style references to numbered floats (e.g., figures and tables) |
 | [templates](extensions/templates.md) | Allows for converted markdown to be applied to arbitrary templates. |
 | [app_syntax](extensions/app_syntax.md) | Adds markdown syntax for extracting content from MOOSE source code. |
+| [gchart](extensions/gchart.md) | Adds [Google chart](https://developers.google.com/chart/) capability to MOOSE markdown. |
 
 ## Python-Markdown Extensions
 
