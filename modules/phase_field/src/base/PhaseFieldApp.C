@@ -100,6 +100,7 @@
 #include "RndBoundingBoxIC.h"
 #include "RndSmoothCircleIC.h"
 #include "SmoothCircleIC.h"
+#include "SmoothCircleFromFileIC.h"
 #include "SmoothSuperellipsoidIC.h"
 #include "SpecifiedSmoothCircleIC.h"
 #include "SpecifiedSmoothSuperellipsoidIC.h"
@@ -217,6 +218,7 @@
 #include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
+#include "PolycrystalCircles.h"
 #include "PolycrystalHex.h"
 #include "PolycrystalVoronoi.h"
 #include "PolycrystalEBSD.h"
@@ -393,6 +395,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(SmoothCircleIC);
+  registerInitialCondition(SmoothCircleFromFileIC);
   registerInitialCondition(SmoothSuperellipsoidIC);
   registerInitialCondition(SpecifiedSmoothCircleIC);
   registerInitialCondition(SpecifiedSmoothSuperellipsoidIC);
@@ -488,6 +491,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(EulerAngleUpdater);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
+  registerUserObject(PolycrystalCircles);
   registerUserObject(PolycrystalHex);
   registerUserObject(PolycrystalVoronoi);
   registerUserObject(PolycrystalEBSD);

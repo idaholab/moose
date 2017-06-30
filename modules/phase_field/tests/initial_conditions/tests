@@ -170,4 +170,22 @@
     input = 'TricrystalTripleJunctionIC.i'
     exodiff = 'TricrystalTripleJunctionIC_out.e'
   [../]
+
+  [./PolycrystalCircles_FromFile]
+    type = Exodiff
+    input = 'polycrystalcircles_fromfile.i'
+    exodiff = 'polycrystalcircles_fromfile_out.e'
+  [../]
+
+  [./PolycrystalCircles_FromVector]
+    type = Exodiff
+    input = 'polycrystalcircles_fromvector.i'
+    exodiff = 'polycrystalcircles_fromvector_out.e'
+  [../]
+
+  [./SmoothCirclesFromFile]
+    type = Exodiff
+    input = 'circles_from_file_ic.i'
+    exodiff = 'circles_from_file_ic_out.e'
+  [../]
 []
