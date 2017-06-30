@@ -50,8 +50,8 @@ BreakBoundaryOnSubdomain::modify()
   if (isParamValid("boundaries"))
   {
     auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
-    for (auto i = beginIndex(boundary_names); i < boundary_names.size(); ++i)
-      breaking_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_names[i]));
+    for (auto & boundary_name : boundary_names)
+      breaking_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_name));
   }
   else
     breaking_boundary_ids = boundary_info.get_boundary_ids();
