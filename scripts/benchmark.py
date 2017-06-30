@@ -14,17 +14,21 @@ import collections
 import csv
 import matplotlib.pyplot as plt
 import jinja2
-import pprint
+import tempfile
+import threading
 
 def find_moose_python():
     moosedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    if os.environ.has_key('MOOSE_DIR'):
+    if 'MOOSE_DIR' in os.environ:
         moosedir = os.environ['MOOSE_DIR']
     moosepython = os.path.join(moosedir, 'python')
 
     if not os.path.exists(moosepython):
         raise Exception('Unable to locate moose/python directory, please set MOOSE_DIR environment variable')
     sys.path.append(moosepython)
+
+find_moose_python()
+from FactorySystem.ParseGetPot import readInputFile
 
 def build_args():
     p = argparse.ArgumentParser()
@@ -33,7 +37,6 @@ def build_args():
     # options for comparing benchmarks
     p.add_argument('--old', type=str, default='', help='compare benchmark runs from the given revision (default prev of most recent)')
     p.add_argument('--new', type=str, default='', help='compare benchmark runs to the given revision (default most recent)')
-    p.add_argument('--usertime', action='store_true', help='use user time instead of real time for comparisons')
 
     # options for running benchmarks
     p.add_argument('--run', action='store_true', help='run all benchmarks on the current checked out revision')
@@ -119,7 +122,7 @@ def main():
                 old = old_times[name]
                 new = new_times[name]
                 if len(old.realruns) > 0 and len(new.realruns) > 0:
-                    cmp = BenchComp(old, new, usertime=args.usertime)
+                    cmp = BenchComp(old, new)
                     print(cmp)
             print(BenchComp.footer())
 
@@ -183,15 +186,25 @@ def plot(revisions, benchmarks, subdir='.'):
     plt.clf()
     #plt.show()
 
+def process_timeout(proc, timeout_sec):
+  kill_proc = lambda p: p.kill()
+  timer = threading.Timer(timeout_sec, kill_proc, [proc])
+  try:
+    timer.start()
+    proc.wait()
+  finally:
+    timer.cancel()
+
 class Test:
-    def __init__(self, executable, infile, rootdir='.', args=None):
+    def __init__(self, executable, infile, rootdir='.', args=None, timeout=300):
         self.rootdir = rootdir
         self.executable = executable
         self.infile = infile
         self.args = args
         self.dur_secs = 0
-        self.user_dur_secs = 0
         self.perflog = []
+        self.timeout = timeout
+        self.getpot_options = ['Outputs/console=false', 'UserObjects/perflog/type=PerfLogDumper']
 
     def run(self):
         cmdpath = os.path.abspath(os.path.join(self.rootdir, self.executable))
@@ -199,24 +212,22 @@ class Test:
         cmd = [cmdpath, '-i', infilepath]
         if self.args is not None:
             cmd.extend(self.args)
-        cmd.append('Outputs/console=false')
-        cmd.append('UserObjects/perflog/type=PerfLogDumper')
+        cmd.extend(self.getpot_options)
 
-        tmpdir = 'tmp'
+        tmpdir =  tempfile.mkdtemp()
         shutil.rmtree(tmpdir, ignore_errors=True)
         os.makedirs(tmpdir)
 
         with open(os.devnull, 'w') as devnull:
             p = subprocess.Popen(cmd, cwd=tmpdir, stdout=devnull)
             start = time.time()
-            (_, retcode, ru) = os.wait4(p.pid, 0) # do this hack to retrieve the usertime of the subprocess
+            process_timeout(p, self.timeout)
             end = time.time()
 
-        if retcode != 0:
+        if p.returncode != 0:
             raise RuntimeError('command {} returned nonzero exit code'.format(cmd))
 
         self.dur_secs = end - start
-        self.user_dur_secs = ru.ru_utime
 
         # write perflog
         with open(os.path.join(tmpdir, 'perflog.csv'), 'r') as csvfile:
@@ -228,20 +239,16 @@ class Test:
                 else:
                     skip = False
 
-        shutil.rmtree('tmp')
-
+        shutil.rmtree(tmpdir)
 
 class Benchmark:
-    def __init__(self, name, realruns=None, userruns=None, test=None, cum_dur=60, min_runs=10, max_runs=1000):
+    def __init__(self, name, realruns=None, test=None, cum_dur=60, min_runs=10, max_runs=1000):
         self.name = name
         self.test = test
         self.realruns = []
-        self.userruns = []
         self.perflogruns = []
         if realruns is not None:
             self.realruns.extend(realruns)
-        if userruns is not None:
-            self.userruns.extend(userruns)
         self._cum_dur = cum_dur
         self._min_runs = min_runs
         self._max_runs = max_runs
@@ -252,21 +259,17 @@ class Benchmark:
         while True:
             self.test.run()
             self.realruns.append(self.test.dur_secs)
-            self.userruns.append(self.test.user_dur_secs)
             self.perflogruns.append(self.test.perflog)
             tot += self.test.dur_secs
             if (len(self.realruns) >= self._min_runs and tot >= self._cum_dur) or len(self.realruns) >= self._max_runs:
                 break
 
 class BenchComp:
-    def __init__(self, oldbench, newbench, psig=0.05, usertime=False):
+    def __init__(self, oldbench, newbench, psig=0.05):
         self.name = oldbench.name
         self.psig = psig
         self.old = oldbench.realruns
         self.new = newbench.realruns
-        if usertime:
-            self.old = oldbench.userruns
-            self.new = newbench.userruns
 
         self.iqr_old = _iqr(self.old)
         self.iqr_new = _iqr(self.new)
@@ -336,8 +339,7 @@ class BenchmarkDB:
         (
           benchmark_id INTEGER,
           run INTEGER,
-          realtime_secs REAL,
-          usertime_secs REAL
+          realtime_secs REAL
         );'''
 
         CREATE_PERFLOG_TABLE = '''CREATE TABLE IF NOT EXISTS perflog
@@ -386,20 +388,19 @@ class BenchmarkDB:
 
     def load_times(self, bench_id):
         c = self.conn.cursor()
-        c.execute('SELECT realtime_secs,usertime_secs FROM timings WHERE benchmark_id=?', (bench_id,))
+        c.execute('SELECT realtime_secs FROM timings WHERE benchmark_id=?', (bench_id,))
         ents = c.fetchall()
-        real, user = [], []
+        real = []
         for ent in ents:
             real.append(float(ent[0]))
-            user.append(float(ent[1]))
-        return real, user
+        return real
 
     def load(self, revision, bench_name):
         """loads and returns a Benchmark object for the given revision and benchmark name"""
         entries = self.list(revision, benchmark=bench_name)
         b = entries[0]
-        real, user = self.load_times(b[0])
-        return Benchmark(b[1], test=Test(b[2], b[3]), realruns=real, userruns=user)
+        real = self.load_times(b[0])
+        return Benchmark(b[1], test=Test(b[2], b[3]), realruns=real)
 
     def store(self, benchmark, rev=None):
         """stores a (run/executed) Benchmark in the database. if rev is None, git revision is retrieved from git"""
@@ -420,8 +421,8 @@ class BenchmarkDB:
         bench_id = int(c.fetchone()[0])
 
         i = 0
-        for real, user, perflog in zip(benchmark.realruns, benchmark.userruns, benchmark.perflogruns):
-            c.execute('INSERT INTO timings (benchmark_id, run, realtime_secs, usertime_secs) VALUES (?,?,?,?)', (bench_id, i, real, user))
+        for real, perflog in zip(benchmark.realruns, benchmark.perflogruns):
+            c.execute('INSERT INTO timings (benchmark_id, run, realtime_secs) VALUES (?,?,?)', (bench_id, i, real))
             i += 1
             for entry in perflog:
                 cat, subcat, nruns, selftime, cumtime = entry
@@ -463,13 +464,11 @@ def read_benchmarks(benchlist):
         ex = child.params['binary'].strip()
         infile = child.params['infile'].strip()
         args = ''
-        if 'args' in child.params:
-            args = child.params['args']
+        if 'cli_args' in child.params:
+            args = child.params['cli_args']
         benches.append(BenchEntry(benchname, ex, infile, args))
     return benches
 
 if __name__ == '__main__':
-    find_moose_python()
-    from FactorySystem.ParseGetPot import readInputFile
     main()
 

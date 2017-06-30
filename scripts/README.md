@@ -15,20 +15,25 @@ corresponding (benchmark) names for them along with any optional arguments.  The
 file has the following format:
 
 ```
-[benchmark-name]|[binary]|[input-file]|[optional-args]
-...
-```
+[benchmarks]
+    [./simple_diffusion_refine3]
+        binary = test/moose_test-opt
+        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        cli_args = 'Mesh/uniform_refine=3'
+    [../]
+    [./simple_diffusion_refine4]
+        binary = test/moose_test-opt
+        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        cli_args = 'Mesh/uniform_refine=4'
+    [../]
+    [./simple_diffusion_ref5]
+        binary = test/moose_test-opt
+        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        cli_args = 'Mesh/uniform_refine=5'
+    [../]
+    # ... add as many as you want
+[]
 
-Note that the ``|`` characters are literal bars used as field delimiters.  Each line defines a
-named benchmark by specifying paths to a binary and input file (paths rooted in the same directory
-holding the ``bench.list`` file) along with optional arguments that are appended to the end of the
-invocation of the binary.  A sample ``bench.list`` file might look like this:
-
-```
-simple diffusion (refine3)|test/moose_test-opt|test/tests/kernels/simple_diffusion/simple_diffusion.i|Mesh/uniform_refine=3
-simple diffusion (refine4)|test/moose_test-opt|test/tests/kernels/simple_diffusion/simple_diffusion.i|Mesh/uniform_refine=4
-simple diffusion (refine5)|test/moose_test-opt|test/tests/kernels/simple_diffusion/simple_diffusion.i|Mesh/uniform_refine=5
-...
 ```
 
 When benchmarks are run, the binaries specified in ``bench.list`` must already exist.  Benchmark
