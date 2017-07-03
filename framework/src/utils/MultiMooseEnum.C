@@ -252,13 +252,6 @@ MultiMooseEnum::size() const
   return _current.size();
 }
 
-unsigned int
-MultiMooseEnum::unique_items_size() const
-{
-  std::set<MooseEnumItem> unique_ids(_current.begin(), _current.end());
-  return unique_ids.size();
-}
-
 void
 MultiMooseEnum::checkDeprecated() const
 {

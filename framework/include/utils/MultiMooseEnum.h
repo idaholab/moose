@@ -162,11 +162,6 @@ public:
   unsigned int size() const;
 
   /**
-   * Returns the number of unique items in the MultiMooseEnum
-   */
-  unsigned int unique_items_size() const;
-
-  /**
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */

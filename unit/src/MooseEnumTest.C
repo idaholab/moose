@@ -89,7 +89,6 @@ TEST(MooseEnum, multiTestOne)
 
   // Size
   EXPECT_EQ(mme.size(), 4);
-  EXPECT_EQ(mme.unique_items_size(), 3);
 
   // All but "two" should be in the Enum
   std::set<std::string> compare_set, return_set, difference;
