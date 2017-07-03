@@ -353,7 +353,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
                << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*act_iter)->type() << COLOR_DEFAULT
                << ") "
                << "NAME (" << COLOR_YELLOW << std::setw(16) << (*act_iter)->name() << COLOR_DEFAULT
-               << ") \n";
+               << ")" << std::endl;
 
       (*act_iter)->act();
     }
