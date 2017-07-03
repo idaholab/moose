@@ -40,7 +40,8 @@ protected:
     Z,
     R
   };
-  std::array<int, 4> _col_map = {-1, -1, -1, -1};
+  // Double braces in array initializer are workaround for bug in gcc 4.9.2
+  std::array<int, 4> _col_map = {{-1, -1, -1, -1}};
   std::vector<std::vector<Real>> _data;
   FileName _file_name;
   MooseUtils::DelimitedFileReader _txt_reader;
