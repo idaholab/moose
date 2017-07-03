@@ -10,12 +10,18 @@
     type = CSVDiff
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
+    # The SumNodalValuesAux postprocessor currently is unreliable at
+    # high processor counts; see
+    # https://github.com/idaholab/moose/issues/9026
+    max_parallel = 1
   [../]
   [./no_time]
     # Tests output of postprocessors and scalars to CSV files for transient propblems without a time column
     type = CSVDiff
     input = 'csv_no_time.i'
     csvdiff = 'csv_no_time_out.csv'
+    # SumNodalValuesAux is unreliable at high processor counts
+    max_parallel = 1
   [../]
   [./transient_exodus]
     # Tests output of postprocessors and scalars to Exodus files for transient propblems
