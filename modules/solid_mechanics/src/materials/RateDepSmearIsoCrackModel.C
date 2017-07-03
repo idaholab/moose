@@ -36,18 +36,14 @@ RateDepSmearIsoCrackModel::RateDepSmearIsoCrackModel(const InputParameters & par
 }
 
 void
-RateDepSmearIsoCrackModel::initStatefulProperties(unsigned int n_points)
+RateDepSmearIsoCrackModel::initQpStatefulProperties()
 {
+  RateDepSmearCrackModel::initQpStatefulProperties();
 
-  RateDepSmearCrackModel::initStatefulProperties(n_points);
+  _intvar[_qp][1] = _intvar_old[_qp][1] = _crit_energy;
 
-  for (unsigned int qp = 0; qp < n_points; qp++)
-  {
-    _intvar[qp][1] = _intvar_old[qp][1] = _crit_energy;
-
-    _energy[qp] = 0.0;
-    _energy_old[qp] = 0.0;
-  }
+  _energy[_qp] = 0.0;
+  _energy_old[_qp] = 0.0;
 }
 
 void

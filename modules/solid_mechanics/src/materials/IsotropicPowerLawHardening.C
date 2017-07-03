@@ -45,14 +45,13 @@ IsotropicPowerLawHardening::IsotropicPowerLawHardening(const InputParameters & p
 }
 
 void
-IsotropicPowerLawHardening::computeYieldStress(unsigned /*qp*/)
+IsotropicPowerLawHardening::computeYieldStress()
 {
   _yield_stress = std::pow(_K / pow(_youngs_modulus, _n), 1.0 / (1.0 - _n));
 }
 
 void
-IsotropicPowerLawHardening::computeStressInitialize(unsigned qp,
-                                                    Real effectiveTrialStress,
+IsotropicPowerLawHardening::computeStressInitialize(Real effectiveTrialStress,
                                                     const SymmElasticityTensor & elasticityTensor)
 {
   _effectiveTrialStress = effectiveTrialStress;
@@ -64,14 +63,14 @@ IsotropicPowerLawHardening::computeStressInitialize(unsigned qp,
   }
   _shear_modulus = eT->shearModulus();
   _youngs_modulus = eT->youngsModulus();
-  computeYieldStress(qp);
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[qp] - _yield_stress;
-  _hardening_variable[qp] = _hardening_variable_old[qp];
-  _plastic_strain[qp] = _plastic_strain_old[qp];
+  computeYieldStress();
+  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 Real
-IsotropicPowerLawHardening::computeHardeningDerivative(unsigned /*qp*/, Real scalar)
+IsotropicPowerLawHardening::computeHardeningDerivative(Real scalar)
 {
   Real stress = _effectiveTrialStress - 3.0 * _shear_modulus * scalar;
   Real slope = std::pow(stress, 1.0 / _n - 1.0) / _n * (1.0 / std::pow(_K, 1.0 / _n)) -

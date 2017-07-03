@@ -36,13 +36,12 @@ public:
 
 protected:
   virtual void computeStress(const Elem & current_elem,
-                             unsigned qp,
                              const SymmElasticityTensor & elasticity_tensor,
                              const SymmTensor & stress_old,
                              SymmTensor & strain_increment,
                              SymmTensor & stress_new);
 
-  virtual void initStatefulProperties(unsigned int n_points);
+  virtual void initQpStatefulProperties();
 
   virtual void initVariables();
 
@@ -120,7 +119,6 @@ protected:
   SymmTensor _stress_old, _dstrain, _stress_new;
   SymmTensor _stress0, _dstress0;
   bool _nconv; ///Convergence flag
-  unsigned int _qp;
   bool _err_tol; ///Flag to indicate that increment size has exceeded tolerance and needs cutback
 
 private:

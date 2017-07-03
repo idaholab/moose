@@ -40,8 +40,7 @@ PowerLawCreepModel::PowerLawCreepModel(const InputParameters & parameters)
 }
 
 void
-PowerLawCreepModel::computeStressInitialize(unsigned qp,
-                                            Real /*effectiveTrialStress*/,
+PowerLawCreepModel::computeStressInitialize(Real /*effectiveTrialStress*/,
                                             const SymmElasticityTensor & elasticityTensor)
 {
   const SymmIsotropicElasticityTensor * eT =
@@ -55,33 +54,47 @@ PowerLawCreepModel::computeStressInitialize(unsigned qp,
   _exponential = 1;
   if (_has_temp)
   {
-    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[qp]));
+    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
   }
 
   _expTime = std::pow(_t - _start_time, _m_exponent);
 
-  _creep_strain[qp] = _creep_strain_old[qp];
+  _creep_strain[_qp] = _creep_strain_old[_qp];
 }
 
 void
-PowerLawCreepModel::computeStressFinalize(unsigned qp, const SymmTensor & plasticStrainIncrement)
+PowerLawCreepModel::computeStressFinalize(const SymmTensor & plasticStrainIncrement)
 {
-  _creep_strain[qp] += plasticStrainIncrement;
+  _creep_strain[_qp] += plasticStrainIncrement;
 }
 
 Real
-PowerLawCreepModel::computeResidual(unsigned /*qp*/, Real effectiveTrialStress, Real scalar)
+PowerLawCreepModel::computeResidual(const Real effectiveTrialStress, const Real scalar)
 {
-  return _coefficient * std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent) *
-             _exponential * _expTime -
-         scalar / _dt;
+  if (_legacy_return_mapping)
+    return _coefficient *
+               std::pow(effectiveTrialStress - 3.0 * _shear_modulus * scalar, _n_exponent) *
+               _exponential * _expTime -
+           scalar / _dt;
+  else
+  {
+    const Real stress_delta = effectiveTrialStress - 3.0 * _shear_modulus * scalar;
+    Real creep_rate = _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _expTime;
+    return creep_rate * _dt - scalar;
+  }
 }
 
 Real
-PowerLawCreepModel::computeDerivative(unsigned /*qp*/, Real effectiveTrialStress, Real scalar)
+PowerLawCreepModel::computeDerivative(const Real effectiveTrialStress, const Real scalar)
 {
-  return -3 * _coefficient * _shear_modulus * _n_exponent *
-             std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent - 1) *
-             _exponential * _expTime -
-         1 / _dt;
+  if (_legacy_return_mapping)
+    return -3 * _coefficient * _shear_modulus * _n_exponent *
+               std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent - 1) *
+               _exponential * _expTime -
+           1 / _dt;
+  else
+    return -3.0 * _coefficient * _shear_modulus * _n_exponent *
+               std::pow(effectiveTrialStress - 3.0 * _shear_modulus * scalar, _n_exponent - 1.0) *
+               _exponential * _expTime * _dt -
+           1.0;
 }

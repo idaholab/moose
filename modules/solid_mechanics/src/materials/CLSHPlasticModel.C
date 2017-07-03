@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<CLSHPlasticModel>()
 {
-  InputParameters params = validParams<ConstitutiveModel>();
+  InputParameters params = validParams<ReturnMappingModel>();
   params.addRequiredParam<Real>("yield_stress",
                                 "The point at which plastic strain begins accumulating");
   params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
@@ -36,19 +36,15 @@ CLSHPlasticModel::CLSHPlasticModel(const InputParameters & parameters)
 }
 
 void
-CLSHPlasticModel::initStatefulProperties(unsigned n_points)
+CLSHPlasticModel::initQpStatefulProperties()
 {
-  for (unsigned qp = 0; qp < n_points; ++qp)
-  {
-    _hardening_variable[qp] = 0;
-    _hardening_variable_old[qp] = 0;
-  }
-  ReturnMappingModel::initStatefulProperties(n_points);
+  _hardening_variable[_qp] = 0;
+  _hardening_variable_old[_qp] = 0;
+  ReturnMappingModel::initQpStatefulProperties();
 }
 
 void
-CLSHPlasticModel::computeStressInitialize(unsigned qp,
-                                          Real effectiveTrialStress,
+CLSHPlasticModel::computeStressInitialize(Real effectiveTrialStress,
                                           const SymmElasticityTensor & elasticityTensor)
 {
   const SymmIsotropicElasticityTensor * eT =
@@ -58,46 +54,54 @@ CLSHPlasticModel::computeStressInitialize(unsigned qp,
     mooseError("CLSHPlasticModel requires a SymmIsotropicElasticityTensor");
   }
   _shear_modulus = eT->shearModulus();
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[qp] - _yield_stress;
-  _hardening_variable[qp] = _hardening_variable_old[qp];
-  _plastic_strain[qp] = _plastic_strain_old[qp];
+  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 Real
-CLSHPlasticModel::computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar)
+CLSHPlasticModel::computeResidual(const Real effectiveTrialStress, const Real scalar)
 {
-  Real residual(0);
+  Real residual = 0.0;
   if (_yield_condition > 0)
   {
-    Real xflow = _c_beta * (effectiveTrialStress - (3. * _shear_modulus * scalar) -
-                            _hardening_variable[qp] - _yield_stress);
+    const Real xflow = _c_beta * (effectiveTrialStress - (3. * _shear_modulus * scalar) -
+                                  _hardening_variable[_qp] - _yield_stress);
     Real xphi = _c_alpha * std::sinh(xflow);
     _xphidp = -3. * _shear_modulus * _c_alpha * _c_beta * std::cosh(xflow);
     _xphir = -_c_alpha * _c_beta * std::cosh(xflow);
-    residual = xphi - scalar / _dt;
+    if (_legacy_return_mapping)
+      residual = xphi - scalar / _dt;
+    else
+      residual = xphi * _dt - scalar;
   }
+
   return residual;
 }
 
 void
-CLSHPlasticModel::iterationFinalize(unsigned qp, Real scalar)
+CLSHPlasticModel::iterationFinalize(Real scalar)
 {
-  _hardening_variable[qp] = _hardening_variable_old[qp] + (_hardening_constant * scalar);
+  _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_constant * scalar);
 }
 
 Real
-CLSHPlasticModel::computeDerivative(unsigned /*qp*/, Real /*effectiveTrialStress*/, Real /*scalar*/)
+CLSHPlasticModel::computeDerivative(const Real /*effectiveTrialStress*/, const Real /*scalar*/)
 {
-  Real derivative(1);
+  Real derivative = 1.0;
   if (_yield_condition > 0)
   {
-    derivative = _xphidp + _hardening_constant * _xphir - 1 / _dt;
+    if (_legacy_return_mapping)
+      derivative = _xphidp + _hardening_constant * _xphir - 1.0 / _dt;
+    else
+      derivative = _xphidp * _dt + _hardening_constant * _xphir * _dt - 1.0;
   }
+
   return derivative;
 }
 
 void
-CLSHPlasticModel::computeStressFinalize(unsigned qp, const SymmTensor & plasticStrainIncrement)
+CLSHPlasticModel::computeStressFinalize(const SymmTensor & plasticStrainIncrement)
 {
-  _plastic_strain[qp] += plasticStrainIncrement;
+  _plastic_strain[_qp] += plasticStrainIncrement;
 }

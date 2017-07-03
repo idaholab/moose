@@ -88,8 +88,8 @@
     coefficient = 3.0e-26
     n_exponent = 4
     activation_energy = 0.0
-    relative_tolerance = 1e-08
-    absolute_tolerance = 1e-20
+    relative_tolerance = 1e-14
+    absolute_tolerance = 1e-14
     max_iterations = 100
   [../]
 []

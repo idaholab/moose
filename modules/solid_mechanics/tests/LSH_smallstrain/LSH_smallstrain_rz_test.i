@@ -128,9 +128,6 @@
     poissons_ratio = 0.3
     yield_stress = 2.4e2
     hardening_constant = 1206
-    relative_tolerance = 1e-25
-    absolute_tolerance = 1e-5
-
     disp_r = disp_x
     disp_z = disp_y
   [../]

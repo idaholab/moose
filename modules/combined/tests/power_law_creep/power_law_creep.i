@@ -99,8 +99,8 @@
     coefficient = 1.0e-15
     n_exponent = 4
     activation_energy = 3.0e5
-    relative_tolerance = 1e-10
-    absolute_tolerance = 1e-12
+    relative_tolerance = 1e-14
+    absolute_tolerance = 1e-14
     max_iterations = 50
     temperature = temp
   [../]
@@ -118,8 +118,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp'
