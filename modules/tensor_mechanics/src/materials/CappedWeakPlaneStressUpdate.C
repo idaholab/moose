@@ -132,7 +132,7 @@ CappedWeakPlaneStressUpdate::setStressAfterReturn(const RankTwoTensor & stress_t
                                                   Real q_ok,
                                                   Real gaE,
                                                   const std::vector<Real> & /*intnl*/,
-                                                  const f_and_derivs & smoothed_q,
+                                                  const yieldAndFlow & smoothed_q,
                                                   const RankFourTensor & Eijkl,
                                                   RankTwoTensor & stress) const
 {
@@ -175,7 +175,7 @@ CappedWeakPlaneStressUpdate::consistentTangentOperator(const RankTwoTensor & /*s
                                                        Real /*p*/,
                                                        Real q,
                                                        Real gaE,
-                                                       const f_and_derivs & smoothed_q,
+                                                       const yieldAndFlow & smoothed_q,
                                                        const RankFourTensor & Eijkl,
                                                        bool compute_full_tangent_operator,
                                                        RankFourTensor & cto) const
@@ -280,7 +280,7 @@ void
 CappedWeakPlaneStressUpdate::computeAllQ(Real p,
                                          Real q,
                                          const std::vector<Real> & intnl,
-                                         std::vector<f_and_derivs> & all_q) const
+                                         std::vector<yieldAndFlow> & all_q) const
 {
   // yield function values
   all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) -

@@ -29,7 +29,7 @@ CappedWeakPlaneCosseratStressUpdate::setStressAfterReturn(const RankTwoTensor & 
                                                           Real q_ok,
                                                           Real gaE,
                                                           const std::vector<Real> & /*intnl*/,
-                                                          const f_and_derivs & smoothed_q,
+                                                          const yieldAndFlow & smoothed_q,
                                                           const RankFourTensor & Eijkl,
                                                           RankTwoTensor & stress) const
 {
@@ -57,7 +57,7 @@ CappedWeakPlaneCosseratStressUpdate::consistentTangentOperator(
     Real /*p*/,
     Real q,
     Real gaE,
-    const f_and_derivs & smoothed_q,
+    const yieldAndFlow & smoothed_q,
     const RankFourTensor & Eijkl,
     bool compute_full_tangent_operator,
     RankFourTensor & cto) const
