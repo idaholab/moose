@@ -64,6 +64,7 @@ public:
     symmetric21,
     general_isotropic,
     symmetric_isotropic,
+    symmetric_isotropic_E_nu,
     antisymmetric_isotropic,
     axisymmetric_rz,
     general,
@@ -238,19 +239,19 @@ protected:
   Real _vals[N4];
 
   /**
-  * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
-  * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
-  * C_ijkl = C_ijlk, C_ijkl = C_jikl
-  * @param input If all==true then this is
-  *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
-  *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
-  * Lame constant)
-  *                la+2mu la la la+2mu la la+2mu mu mu mu
-  *              If all==false then this is
-  *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
-  * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
-  * @param all Determines the compoinents passed in vis the input parameter
-  */
+   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
+   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
+   * C_ijkl = C_ijlk, C_ijkl = C_jikl
+   * @param input If all==true then this is
+   *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
+   *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
+   * Lame constant)
+   *                la+2mu la la la+2mu la la+2mu mu mu mu
+   *              If all==false then this is
+   *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
+   * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
+   * @param all Determines the compoinents passed in vis the input parameter
+   */
   void fillSymmetricFromInputVector(const std::vector<Real> & input, bool all);
 
   /**
@@ -282,11 +283,22 @@ protected:
   /**
    * fillSymmetricIsotropicFromInputVector takes 2 inputs to fill the
    * the symmetric Rank-4 tensor with the appropriate symmetries maintained.
-   * C_ijkl = la*de_ij*de_kl + mu*(de_ik*de_jl + de_il*de_jk)
-   * where la is the first Lame modulus, mu is the second (shear) Lame modulus,
-   * @param input this is la and mu in the above formula
+   * C_ijkl = lambda*de_ij*de_kl + mu*(de_ik*de_jl + de_il*de_jk)
+   * where lambda is the first Lame modulus, mu is the second (shear) Lame modulus,
+   * @param input this is lambda and mu in the above formula
    */
   void fillSymmetricIsotropicFromInputVector(const std::vector<Real> & input);
+
+  /**
+   * fillSymmetricIsotropicEandNuFromInputVector is a variation of the
+   * fillSymmetricIsotropicFromInputVector which takes as inputs the
+   * more commonly used Young's modulus (E) and Poissin's ratio (nu)
+   * constants to fill the isotropic elasticity tensor. Using well-known formulas,
+   * E and nu are used to calculate lambda and mu and then the vector is passed
+   * to fillSymmetricIsotropicFromInputVector.
+   * @param input Young's modulus (E) and Poisson's ratio (nu)
+   */
+  void fillSymmetricIsotropicEandNuFromInputVector(const std::vector<Real> & input);
 
   /**
    * fillGeneralFromInputVector takes 81 inputs to fill the Rank-4 tensor

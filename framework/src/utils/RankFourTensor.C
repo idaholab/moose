@@ -47,7 +47,8 @@ MooseEnum
 RankFourTensor::fillMethodEnum()
 {
   return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic "
-                   "antisymmetric_isotropic axisymmetric_rz general principal");
+                   "symmetric_isotropic_E_nu antisymmetric_isotropic axisymmetric_rz general "
+                   "principal");
 }
 
 RankFourTensor::RankFourTensor()
@@ -575,6 +576,9 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
     case symmetric_isotropic:
       fillSymmetricIsotropicFromInputVector(input);
       break;
+    case symmetric_isotropic_E_nu:
+      fillSymmetricIsotropicEandNuFromInputVector(input);
+      break;
     case antisymmetric_isotropic:
       fillAntisymmetricIsotropicFromInputVector(input);
       break;
@@ -737,6 +741,23 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & 
                "has size ",
                input.size());
   fillGeneralIsotropicFromInputVector({input[0], input[1], 0.0});
+}
+
+void
+RankFourTensor::fillSymmetricIsotropicEandNuFromInputVector(const std::vector<Real> & input)
+{
+  if (input.size() != 2)
+    mooseError(
+        "To use fillSymmetricIsotropicEandNuFromInputVector, your input must have size 2. Yours "
+        "has size ",
+        input.size());
+
+  // Calculate lambda and the shear modulus from the given young's modulus and poisson's ratio
+  std::vector<Real> isotropic_constants(2);
+  isotropic_constants[0] = input[0] * input[1] / ((1.0 + input[1]) * (1.0 - 2.0 * input[1]));
+  isotropic_constants[1] = input[0] / (2.0 * (1.0 + input[1]));
+
+  fillGeneralIsotropicFromInputVector({isotropic_constants[0], isotropic_constants[1], 0.0});
 }
 
 void
