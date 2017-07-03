@@ -16,7 +16,9 @@ template <>
 InputParameters validParams<TestDistributionPostprocessor>();
 
 /**
- * This postprocessor is used to test the distribution capabilities.
+ * Test object for testing distribution capabilities.
+ *
+ * WARNING! This object is only for testing and should not be used in general.
  */
 class TestDistributionPostprocessor : public GeneralPostprocessor
 {

@@ -17,7 +17,7 @@
 /**
  * A class used to as a base for distributions defined by Boost.
  *
- * The default type is set to double to allow for derived classes to compile without Boost and
+ * The default type is set to Real to allow for derived classes to compile without Boost and
  * trigger the mooseError in the constructor.
  */
 template <typename T = Real>

@@ -32,7 +32,7 @@ SamplerData::SamplerData(const InputParameters & parameters)
 void
 SamplerData::initialize()
 {
-  for (VectorPostprocessorValue * ptr : _sample_vectors)
+  for (auto ptr : _sample_vectors)
     ptr->clear();
 }
 

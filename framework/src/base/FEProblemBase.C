@@ -2899,18 +2899,18 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
 {
   // TODO: This should be done in a threaded loop, but this should be super quick so for now
   // do a serial loop.
-  Moose::perf_log.push("executeSamplers()", "Execution");
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     const auto & objects = _samplers[exec_type].getActiveObjects(tid);
     if (!objects.empty())
     {
+      Moose::perf_log.push("executeSamplers()", "Execution");
       _samplers.setup(exec_type);
-      for (const auto & sampler : objects)
+      for (auto & sampler : objects)
         sampler->execute();
+      Moose::perf_log.pop("executeSamplers()", "Execution");
     }
   }
-  Moose::perf_log.pop("executeSamplers()", "Execution");
 }
 
 void

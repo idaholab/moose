@@ -111,9 +111,6 @@ private:
 
   /// Initial random number seed
   const unsigned int & _seed;
-
-  /// Generated list of seeds
-  std::vector<unsigned int> _seeds;
 };
 
 #endif /* SAMPLER_H */
