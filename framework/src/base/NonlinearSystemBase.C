@@ -1157,14 +1157,17 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
-      _fe_problem.reinitNode(*range.begin(), 0);
+      if (range.begin() != range.end())
+      {
+        _fe_problem.reinitNode(*range.begin(), 0);
 
-      Threads::parallel_reduce(range, cnk);
+        Threads::parallel_reduce(range, cnk);
 
-      unsigned int n_threads = libMesh::n_threads();
-      for (unsigned int i = 0; i < n_threads;
-           i++) // Add any cached residuals that might be hanging around
-        _fe_problem.addCachedResidual(i);
+        unsigned int n_threads = libMesh::n_threads();
+        for (unsigned int i = 0; i < n_threads;
+             i++) // Add any cached residuals that might be hanging around
+          _fe_problem.addCachedResidual(i);
+      }
 
       Moose::perf_log.pop("computNodalKernels()", "Execution");
     }
