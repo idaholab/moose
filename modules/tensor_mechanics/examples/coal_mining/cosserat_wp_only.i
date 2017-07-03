@@ -447,7 +447,7 @@
     warn_about_precision_loss = false
     host_youngs_modulus = 8E3
     host_poissons_ratio = 0.25
-    name_prepender = dp
+    base_name = dp
     DP_model = drucker_prager_model
     tensile_strength = dp_tensile_str_strong_harden
     compressive_strength = dp_compressive_str
@@ -462,7 +462,7 @@
     type = CappedWeakPlaneCosseratStressUpdate
     block = 0
     warn_about_precision_loss = false
-    name_prepender = wp
+    base_name = wp
     cohesion = wp_coh_harden
     tan_friction_angle = wp_tan_fric
     tan_dilation_angle = wp_tan_dil

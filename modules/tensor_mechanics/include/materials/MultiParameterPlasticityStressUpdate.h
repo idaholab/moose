@@ -137,7 +137,7 @@ protected:
   const unsigned _num_intnl;
 
   /// String prepended to various MaterialProperties that are defined by this class
-  const std::string _name_prepender;
+  const std::string _base_name;
 
   /// Maximum number of Newton-Raphson iterations allowed in the return-map process
   const unsigned _max_nr_its;
@@ -620,6 +620,83 @@ protected:
                   Real step_size,
                   bool compute_full_tangent_operator,
                   std::vector<std::vector<Real>> & dvar_dtrial) const;
+
+  /**
+   * Check whether precision loss has occurred
+   * @param[in] solution The solution to the Newton-Raphson system
+   * @param[in] stress_params The currect values of the stress_params for this (sub)strain increment
+   * @param[in] gaE The currenct value of gaE for this (sub)strain increment
+   * @return true if precision loss has occurred
+   */
+  bool precisionLoss(const std::vector<Real> & solution,
+                     const std::vector<Real> & stress_params,
+                     Real gaE) const;
+
+private:
+  /**
+   * "Trial" value of stress_params that initialises the return-map process
+   * This is derived from stress = stress_old + Eijkl * strain_increment.
+   * However, since the return-map process can fail and be restarted by
+   * applying strain_increment in multiple substeps, _trial_sp can vary
+   * from substep to substep.
+   */
+  std::vector<Real> _trial_sp;
+
+  /**
+   * "Trial" value of stress that is set at the beginning of the
+   * return-map process.  It is fixed at stress_old + Eijkl * strain_increment
+   * irrespective of any sub-stepping
+   */
+  RankTwoTensor _stress_trial;
+
+  /**
+   * 0 = rhs[0] = S[0] - S[0]^trial + ga * E[0, i] * dg/dS[i]
+   * 0 = rhs[1] = S[1] - S[1]^trial + ga * E[1, i] * dg/dS[i]
+   * ...
+   * 0 = rhs[N-1] = S[N-1] - S[N-1]^trial + ga * E[N-1, i] * dg/dS[i]
+   * 0 = rhs[N] = f(S, intnl)
+   * Here N = num_sp
+   */
+  std::vector<Real> _rhs;
+
+  /**
+   * d({stress_param[i], gaE})/d(trial_stress_param[j])
+   */
+  std::vector<std::vector<Real>> _dvar_dtrial;
+
+  /**
+   * The state (ok_sp, ok_intnl) is known to be admissible, so
+   * ok_sp are stress_params that are "OK".  If the strain_increment
+   * is applied in substeps then ok_sp is updated after each
+   * sub strain_increment is applied and the return-map is successful.
+   * At the end of the entire return-map process _ok_sp will contain
+   * the stress_params where (_ok_sp, _intnl) is admissible.
+   */
+  std::vector<Real> _ok_sp;
+
+  /**
+   * The state (ok_sp, ok_intnl) is known to be admissible
+   */
+  std::vector<Real> _ok_intnl;
+
+  /**
+   * _del_stress_params = trial_stress_params - ok_sp
+   * This is fixed at the beginning of the return-map process,
+   * irrespective of substepping.  The return-map problem is:
+   * apply del_stress_params to stress_prams, and then find
+   * an admissible (returned) stress_params and gaE
+   */
+  std::vector<Real> _del_stress_params;
+
+  /**
+   * The current values of the stress params during the Newton-Raphson
+   */
+  std::vector<Real> _current_sp;
+
+  /**
+   * The current values of the internal params during the Newton-Raphson
+   */
+  std::vector<Real> _current_intnl;
 };
 
 #endif // MULTIPARAMETERPLASTICITYSTRESSUPDATE_H

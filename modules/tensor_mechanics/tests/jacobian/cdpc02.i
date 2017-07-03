@@ -133,7 +133,7 @@
     type = CappedDruckerPragerCosseratStressUpdate
     host_youngs_modulus = 10.0
     host_poissons_ratio = 0.25
-    name_prepender = dp
+    base_name = dp
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs

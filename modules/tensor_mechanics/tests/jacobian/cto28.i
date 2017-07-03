@@ -15,7 +15,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  Cosserat_rotations = 'wc_x wc_y wc_z'
 []
 
 [Variables]
@@ -25,56 +24,23 @@
   [../]
   [./disp_z]
   [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
 []
 
 [Kernels]
   [./cx_elastic]
-    type = CosseratStressDivergenceTensors
+    type = StressDivergenceTensors
     variable = disp_x
     component = 0
   [../]
   [./cy_elastic]
-    type = CosseratStressDivergenceTensors
+    type = StressDivergenceTensors
     variable = disp_y
     component = 1
   [../]
   [./cz_elastic]
-    type = CosseratStressDivergenceTensors
+    type = StressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
-    type = StressDivergenceTensors
-    variable = wc_x
-    displacements = 'wc_x wc_y wc_z'
-    component = 0
-    base_name = couple
-  [../]
-  [./y_couple]
-    type = StressDivergenceTensors
-    variable = wc_y
-    displacements = 'wc_x wc_y wc_z'
-    component = 1
-    base_name = couple
-  [../]
-  [./x_moment]
-    type = MomentBalancing
-    variable = wc_x
-    component = 0
-  [../]
-  [./y_moment]
-    type = MomentBalancing
-    variable = wc_y
-    component = 1
-  [../]
-[]
-
-[AuxVariables]
-  [./wc_z]
   [../]
 []
 
@@ -107,54 +73,27 @@
     yield_function_tolerance = 1E-11     # irrelevant here
     internal_constraint_tolerance = 1E-9 # irrelevant here
   [../]
-
-  [./coh]
-    type = TensorMechanicsHardeningConstant
-    value = 2
-  [../]
-  [./tanphi]
-    type = TensorMechanicsHardeningConstant
-    value = 0.5
-  [../]
-  [./tanpsi]
-    type = TensorMechanicsHardeningConstant
-    value = 2.055555555556E-01
-  [../]
-  [./t_strength]
-    type = TensorMechanicsHardeningConstant
-    value = 1
-  [../]
-  [./c_strength]
-    type = TensorMechanicsHardeningConstant
-    value = 100
-  [../]
-
 []
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeLayeredCosseratElasticityTensor
-    young = 10.0
-    poisson = 0.25
-    layer_thickness = 10.0
-    joint_normal_stiffness = 2.5
-    joint_shear_stiffness = 2.0
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 10.0
+    poissons_ratio = 0.25
   [../]
   [./strain]
-    type = ComputeCosseratIncrementalSmallStrain
+    type = ComputeIncrementalSmallStrain
   [../]
   [./admissible]
-    type = ComputeMultipleInelasticCosseratStress
-    inelastic_models = 'dp wp'
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'dp'
     initial_stress = '10 0 0  0 10 0  0 0 10'
     relative_tolerance = 2.0
     absolute_tolerance = 1E6
     max_iterations = 1
   [../]
   [./dp]
-    type = CappedDruckerPragerCosseratStressUpdate
-    host_youngs_modulus = 10.0
-    host_poissons_ratio = 0.25
+    type = CappedDruckerPragerStressUpdate
     base_name = dp
     DP_model = dp
     tensile_strength = ts
@@ -163,25 +102,12 @@
     tip_smoother = 1
     smoothing_tol = 1
   [../]
-  [./wp]
-    type = CappedWeakPlaneCosseratStressUpdate
-    base_name = wp
-    cohesion = coh
-    tan_friction_angle = tanphi
-    tan_dilation_angle = tanpsi
-    tensile_strength = t_strength
-    compressive_strength = c_strength
-    tip_smoother = 0.1
-    smoothing_tol = 0.1
-    yield_function_tol = 1E-11
-  [../]
 []
 
 [Preconditioning]
   [./andy]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]
