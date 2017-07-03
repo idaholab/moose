@@ -129,7 +129,7 @@
   [../]
   [./dp]
     type = CappedDruckerPragerStressUpdate
-    name_prepender = cdp
+    base_name = cdp
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs
@@ -139,7 +139,7 @@
   [../]
   [./wp]
     type = CappedWeakPlaneStressUpdate
-    name_prepender = cwp
+    base_name = cwp
     cohesion = wp_coh
     tan_friction_angle = wp_tanphi
     tan_dilation_angle = wp_tanpsi

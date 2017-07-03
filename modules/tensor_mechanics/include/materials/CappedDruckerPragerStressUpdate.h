@@ -119,7 +119,7 @@ protected:
   virtual void computeAllQ(Real p,
                            Real q,
                            const std::vector<Real> & intnl,
-                           std::vector<f_and_derivs> & all_q) const override;
+                           std::vector<yieldAndFlow> & all_q) const override;
 
   virtual void preReturnMap(Real p_trial,
                             Real q_trial,
@@ -163,7 +163,7 @@ protected:
                                     Real q_ok,
                                     Real gaE,
                                     const std::vector<Real> & intnl,
-                                    const f_and_derivs & smoothed_q,
+                                    const yieldAndFlow & smoothed_q,
                                     const RankFourTensor & Eijkl,
                                     RankTwoTensor & stress) const override;
 
@@ -174,7 +174,7 @@ protected:
                                          Real p,
                                          Real q,
                                          Real gaE,
-                                         const f_and_derivs & smoothed_q,
+                                         const yieldAndFlow & smoothed_q,
                                          const RankFourTensor & Eijkl,
                                          bool compute_full_tangent_operator,
                                          RankFourTensor & cto) const override;
