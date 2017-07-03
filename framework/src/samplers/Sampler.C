@@ -77,8 +77,12 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
   if (number == 0)
     mooseError("The number of seeds must be larger than zero.");
 
+  // Seed the "master" seed generator
+  _seed_generator.seed(0, _seed);
+
+  // See the "slave" generator that will be used for the random number generation
   for (std::size_t i = 0; i < number; ++i)
-    _generator.seed(i, _seed + i);
+    _generator.seed(i, _seed_generator.randl(0));
 
   _generator.saveState();
 }

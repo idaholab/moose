@@ -106,6 +106,9 @@ private:
   /// from this class.
   MooseRandom _generator;
 
+  /// Seed generator
+  MooseRandom _seed_generator;
+
   /// Initial random number seed
   const unsigned int & _seed;
 
