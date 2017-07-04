@@ -24,16 +24,19 @@ class ConservedAction : public Action
 public:
   ConservedAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
   /// Type of solve
   enum class SolveType
   {
     DIRECT,
-    SPLIT,
+    REVERSE_SPLIT,
+    FORWARD_SPLIT
   };
-
+  /// Name of chemical potential variable for split solves
+  std::string _chempot_name;
+  /// Type of solve to use used in the action
   const SolveType _solve_type;
   /// Name of the variable being created
   const NonlinearVariableName _var_name;

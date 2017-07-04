@@ -18,7 +18,7 @@
         mobility = 1.0
         kappa = 20.0
         args = 'eta'
-        solve_type = split
+        solve_type = REVERSE_SPLIT
       [../]
     [../]
     [./Nonconserved]

@@ -65,4 +65,10 @@
     input = 'both_direct_2vars.i'
     exodiff = 'both_direct_2vars_out.e'
   [../]
+  [./conserved_forward_split_1var]
+    # Test conserved action with forward split solve
+    type = Exodiff
+    input = 'conserved_forward_split_1var.i'
+    exodiff = 'conserved_forward_split_1var_out.e'
+  [../]
 []
