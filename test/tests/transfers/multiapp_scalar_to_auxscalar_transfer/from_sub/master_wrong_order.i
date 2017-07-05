@@ -1,0 +1,52 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+[]
+
+[AuxVariables]
+  [./a]
+    family = SCALAR
+    order = SIXTH
+  [../]
+[]
+
+[Variables]
+  [./dummy]
+  [../]
+[]
+
+[Kernels]
+  [./dummy]
+    type = Diffusion
+    variable = dummy
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  num_steps = 1
+[]
+
+[MultiApps]
+  [./sub]
+    type = TransientMultiApp
+    positions = '0 0 0'
+    input_files = 'sub_wrong_order.i'
+  [../]
+[]
+
+[Transfers]
+  [./from_sub]
+    type = MultiAppScalarToAuxScalarTransfer
+    multi_app = sub
+    source_variable = 'b'
+    to_aux_scalar = 'a'
+    direction = from_multiapp
+  [../]
+[]
+
+[Outputs]
+    exodus = true
+[]
