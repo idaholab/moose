@@ -126,15 +126,35 @@ MooseEnum::operator!=(unsigned short value) const
 }
 
 bool
+MooseEnum::compareCurrent(const MooseEnum & other, CompareMode mode) const
+{
+
+  if (mode == COMPARE_BOTH)
+    return (_current.id() == other._current.id()) && (_current.name() == other._current.name());
+
+  else if (mode == COMPARE_NAME)
+    return _current.name() == other._current.name();
+
+  else if (mode == COMPARE_ID)
+    return _current.id() == other._current.id();
+
+  return false;
+}
+
+bool
 MooseEnum::operator==(const MooseEnum & value) const
 {
-  return value._current == _current;
+  mooseDeprecated("This method will be removed becuase the meaning is not well defined, please use "
+                  "the 'compareCurrent' method instead.");
+  return value._current.name() == _current.name();
 }
 
 bool
 MooseEnum::operator!=(const MooseEnum & value) const
 {
-  return value._current != _current;
+  mooseDeprecated("This method will be removed becuase the meaning is not well defined, please use "
+                  "the 'compareCurrent' method instead.");
+  return value._current.name() != _current.name();
 }
 
 void

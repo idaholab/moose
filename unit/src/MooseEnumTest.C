@@ -273,3 +273,33 @@ TEST(MooseEnum, testErrors)
         << "failed with unexpected error: " << msg;
   }
 }
+
+TEST(MooseEnum, compareCurrent)
+{
+  MooseEnum a("a=1 b=2", "a");
+  MooseEnum b("a=1 b=2 c=3", "a");
+  MooseEnum c("a=2 b=1", "a");
+
+  EXPECT_TRUE(a.compareCurrent(b));
+  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::COMPARE_ID));
+  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::COMPARE_BOTH));
+
+  b = "b";
+  EXPECT_FALSE(a.compareCurrent(b));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_BOTH));
+
+  b = "c";
+  EXPECT_FALSE(a.compareCurrent(b));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_BOTH));
+
+  EXPECT_TRUE(a.compareCurrent(c));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::COMPARE_BOTH));
+
+  c = "b";
+  EXPECT_FALSE(a.compareCurrent(c));
+  EXPECT_TRUE(a.compareCurrent(c, MooseEnum::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::COMPARE_BOTH));
+}

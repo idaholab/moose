@@ -38,6 +38,16 @@ class MooseEnum : public MooseEnumBase
 {
 public:
   /**
+   * Enum item for controlling comparison in the compareCurrent method.
+   */
+  enum CompareMode
+  {
+    COMPARE_NAME,
+    COMPARE_ID,
+    COMPARE_BOTH
+  };
+
+  /**
    * Constructor that takes a list of enumeration values, and a separate string to set a default for
    * this instance
    * @param names - a list of names for this enumeration
@@ -87,6 +97,11 @@ public:
 
   bool operator==(const MooseEnum & value) const;
   bool operator!=(const MooseEnum & value) const;
+
+  /**
+   * Method for comparing currently set values between MooseEnum.
+   */
+  bool compareCurrent(const MooseEnum & other, CompareMode mode = COMPARE_NAME) const;
 
   /**
    * Assignment operators
