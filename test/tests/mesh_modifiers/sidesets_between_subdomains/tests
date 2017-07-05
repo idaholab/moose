@@ -13,4 +13,11 @@
     exodiff = 'sidesets_between_vectors_of_subdomains_in.e'
     recover = false
   [../]
+  [./between_created_subdomain]
+    type = 'Exodiff'
+    input = 'between_created_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'between_created_subdomain_in.e'
+    recover = false
+  [../]
 []
