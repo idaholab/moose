@@ -101,11 +101,21 @@ public:
   const std::list<Action *> & getActionListByName(const std::string & task) const;
 
   /**
-   * Retrieve an action with its name and the desired type.
+   * Retrieve a const reference of an action with its name and the desired type.
    * @param name The action name.
    */
   template <class T>
   const T & getAction(const std::string & name)
+  {
+    return getActionNonConst<T>(name);
+  }
+
+  /**
+   * Retrieve an action with its name and the desired type.
+   * @param name The action name.
+   */
+  template <class T>
+  T & getActionNonConst(const std::string & name)
   {
     T * p = NULL;
     for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
