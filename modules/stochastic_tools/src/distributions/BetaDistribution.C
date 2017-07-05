@@ -12,44 +12,53 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UniformDistribution.h"
+#include "BetaDistribution.h"
 
 template <>
 InputParameters
-validParams<UniformDistribution>()
+validParams<BetaDistribution>()
 {
   InputParameters params = validParams<Distribution>();
-  params.addClassDescription("Continuous uniform distribution.");
+  params.addClassDescription("Continuous beta distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
   params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
+  params.addParam<Real>("alpha", "Distribution alpha coefficient");
+  params.addParam<Real>("beta", "Distribution beta coefficient");
+  params.addParam<Real>("scale", 1.0, "Distribution scale factor");
   return params;
 }
 
-UniformDistribution::UniformDistribution(const InputParameters & parameters)
+BetaDistribution::BetaDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicUniformDistribution(getParam<Real>("lower_bound"), getParam<Real>("upper_bound"))
+    BasicBetaDistribution(getParam<Real>("alpha"),
+                          getParam<Real>("beta"),
+                          getParam<Real>("scale"),
+                          getParam<Real>("lower_bound"),
+                          getParam<Real>("upper_bound"),
+                          getParam<Real>("lower_bound") // this is done on purpose
+                          )
 {
 }
 
-UniformDistribution::~UniformDistribution() {}
+BetaDistribution::~BetaDistribution() {}
 
 Real
-UniformDistribution::pdf(const Real & x)
+BetaDistribution::pdf(const Real & x)
 {
-  return BasicUniformDistribution::pdf(x);
+  return BasicBetaDistribution::pdf(x);
 }
 
 Real
-UniformDistribution::cdf(const Real & x)
+BetaDistribution::cdf(const Real & x)
 {
-  return BasicUniformDistribution::cdf(x);
+  return BasicBetaDistribution::cdf(x);
 }
 
 Real
-UniformDistribution::inverseCdf(const Real & y)
+BetaDistribution::inverseCdf(const Real & y)
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");
   else
-    return BasicUniformDistribution::inverseCdf(y);
+    return BasicBetaDistribution::inverseCdf(y);
 }

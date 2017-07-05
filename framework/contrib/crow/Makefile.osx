@@ -1,0 +1,48 @@
+###############################################################################
+################### MOOSE Application Standard Makefile #######################
+###############################################################################
+#
+# Optional Environment variables
+# MOOSE_DIR        - Root directory of the MOOSE project 
+# HERD_TRUNK_DIR   - Location of the HERD repository
+# FRAMEWORK_DIR    - Location of the MOOSE framework
+#
+###############################################################################
+MOOSE_DIR          ?= $(shell dirname `pwd`)/moose
+HERD_TRUNK_DIR     ?= $(shell dirname `pwd`)
+FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+###############################################################################
+
+CURR_DIR    := $(shell pwd)
+ROOT_DIR    := $(HERD_TRUNK_DIR)
+
+# framework
+# include $(FRAMEWORK_DIR)/build.mk
+#include $(FRAMEWORK_DIR)/moose.mk
+
+################################## MODULES ####################################
+#ALL_MODULES := yes
+#include           $(MOOSE_DIR)/modules/modules.mk
+###############################################################################
+
+libmesh_CXX = g++
+libmesh_LIBTOOL = glibtool
+obj-suffix = o
+libmesh_CPPFLAGS = -fPIC
+
+all::
+
+#include $(FRAMEWORK_DIR)/build.mk
+# deps
+#include $(FRAMEWORK_DIR)/moose.mk
+include $(HERD_TRUNK_DIR)/crow/config.mk
+include $(HERD_TRUNK_DIR)/crow/crow_python_modules.mk
+
+$(warning PYTHON_MODULES $(PYTHON_MODULES))
+all:: $(PYTHON_MODULES)
+
+clean::
+	rm -fv $(HERD_TRUNK_DIR)/crow/src/distributions/*.o $(HERD_TRUNK_DIR)/crow/src/utilities/*.o $(HERD_TRUNK_DIR)/crow/src/tools/*.o $(HERD_TRUNK_DIR)/crow/python_modules/*.o $(HERD_TRUNK_DIR)/crow/python_modules/*.so*
+###############################################################################
+# Additional special case targets should be added here
+

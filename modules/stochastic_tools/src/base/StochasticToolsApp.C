@@ -8,6 +8,11 @@
 
 // distributions
 #include "UniformDistribution.h"
+#include "NormalDistribution.h"
+#include "LogNormalDistribution.h"
+#include "TriangularDistribution.h"
+#include "WeibullDistribution.h"
+#include "BetaDistribution.h"
 // samplers
 #include "MonteCarloSampler.h"
 // for test purpose only
@@ -60,6 +65,11 @@ StochasticToolsApp::registerObjects(Factory & factory)
 
   // distributions
   registerDistribution(UniformDistribution);
+  registerDistribution(NormalDistribution);
+  registerDistribution(LogNormalDistribution);
+  registerDistribution(TriangularDistribution);
+  registerDistribution(WeibullDistribution);
+  registerDistribution(BetaDistribution);
 
   // samplers
   registerSampler(MonteCarloSampler);

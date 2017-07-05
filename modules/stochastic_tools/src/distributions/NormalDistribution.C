@@ -12,44 +12,51 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "UniformDistribution.h"
+#include "NormalDistribution.h"
 
 template <>
 InputParameters
-validParams<UniformDistribution>()
+validParams<NormalDistribution>()
 {
   InputParameters params = validParams<Distribution>();
-  params.addClassDescription("Continuous uniform distribution.");
-  params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
-  params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
+  params.addClassDescription("Continuous normal distribution.");
+  params.addParam<Real>(
+      "lower_bound", -std::numeric_limits<Real>::max(), "Distribution lower bound");
+  params.addParam<Real>(
+      "upper_bound", std::numeric_limits<Real>::max(), "Distribution upper bound");
+  params.addParam<Real>("mu", 0.0, "Distribution mu");
+  params.addParam<Real>("sigma", 1.0, "Distribution sigma");
   return params;
 }
 
-UniformDistribution::UniformDistribution(const InputParameters & parameters)
+NormalDistribution::NormalDistribution(const InputParameters & parameters)
   : Distribution(parameters),
-    BasicUniformDistribution(getParam<Real>("lower_bound"), getParam<Real>("upper_bound"))
+    BasicNormalDistribution(getParam<Real>("mu"),
+                            getParam<Real>("sigma"),
+                            getParam<Real>("lower_bound"),
+                            getParam<Real>("upper_bound"))
 {
 }
 
-UniformDistribution::~UniformDistribution() {}
+NormalDistribution::~NormalDistribution() {}
 
 Real
-UniformDistribution::pdf(const Real & x)
+NormalDistribution::pdf(const Real & x)
 {
-  return BasicUniformDistribution::pdf(x);
+  return BasicNormalDistribution::pdf(x);
 }
 
 Real
-UniformDistribution::cdf(const Real & x)
+NormalDistribution::cdf(const Real & x)
 {
-  return BasicUniformDistribution::cdf(x);
+  return BasicNormalDistribution::cdf(x);
 }
 
 Real
-UniformDistribution::inverseCdf(const Real & y)
+NormalDistribution::inverseCdf(const Real & y)
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");
   else
-    return BasicUniformDistribution::inverseCdf(y);
+    return BasicNormalDistribution::inverseCdf(y);
 }

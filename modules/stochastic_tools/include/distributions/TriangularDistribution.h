@@ -12,34 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef UNIFORMDISTRIBUTION_H
-#define UNIFORMDISTRIBUTION_H
+#ifndef TRIANGULARDISTRIBUTION_H
+#define TRIANGULARDISTRIBUTION_H
 
 #include "Distribution.h"
-//#include "distribution.h"
 #include "distribution_1D.h"
 
 class UniformDistribution;
 
 template <>
-InputParameters validParams<UniformDistribution>();
+InputParameters validParams<TriangularDistribution>();
 /**
- * A class used to generate uniform distribution
+ * A class used to generate a triangular distribution from contrib RAVEN crow
  */
-class UniformDistribution : public Distribution, BasicUniformDistribution
+class TriangularDistribution : public Distribution, BasicTriangularDistribution
 {
 public:
-  UniformDistribution(const InputParameters & parameters);
-  virtual ~UniformDistribution();
+  TriangularDistribution(const InputParameters & parameters);
+  virtual ~TriangularDistribution();
 
 protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real inverseCdf(const Real & y) override;
-  /// The lower bound for the uniform distribution
-  // const Real & _lower_bound;
-  /// The upper bound for the uniform distribution
-  // const Real & _upper_bound;
 };
 
-#endif /* UNIFORMDISTRIBUTION_H */
+#endif /* TRIANGULARDISTRIBUTION_H */
