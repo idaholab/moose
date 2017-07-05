@@ -311,3 +311,15 @@ de_darhoEA(Real arhoA)
 {
   return (1 / arhoA);
 }
+
+bool
+isInlet(Real vel, Real normal)
+{
+  return (vel * normal) < 0;
+}
+
+bool
+isOutlet(Real vel, Real normal)
+{
+  return (vel * normal) >= 0;
+}

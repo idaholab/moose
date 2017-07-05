@@ -153,4 +153,22 @@ Real de_darhouA(Real arhoA, Real arhouA);
  */
 Real de_darhoEA(Real arhoA);
 
+/**
+ * Determine if inlet boundary condition should be applied
+ *
+ * @return true if the flow conditions are inlet, false otherwise
+ * @param vel Velocity of the phase
+ * @param normal Outward normal vector
+ */
+bool isInlet(Real vel, Real normal);
+
+/**
+ * Determine if outlet boundary condition should be applied
+ *
+ * @return true if the flow conditions are outlet, false otherwise
+ * @param vel Velocity of the phase
+ * @param normal Outward normal vector
+ */
+bool isOutlet(Real vel, Real normal);
+
 #endif // NUMERICS_H
