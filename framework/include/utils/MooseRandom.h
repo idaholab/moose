@@ -130,6 +130,7 @@ public:
    */
   void saveState()
   {
+    _saved = true;
     std::for_each(_states.begin(),
                   _states.end(),
                   [](std::pair<const unsigned int, std::pair<mt_state, mt_state>> & pair) {
@@ -142,12 +143,18 @@ public:
    */
   void restoreState()
   {
+    mooseAssert(_saved, "saveState() must be called prior to restoreState().");
     std::for_each(_states.begin(),
                   _states.end(),
                   [](std::pair<const unsigned int, std::pair<mt_state, mt_state>> & pair) {
                     pair.second.first = pair.second.second;
                   });
   }
+
+  /**
+   * Return the number of states.
+   */
+  inline unsigned int size() { return _states.size(); }
 
 private:
   /**
@@ -160,6 +167,9 @@ private:
   // for restart capability
   friend void dataStore<MooseRandom>(std::ostream & stream, MooseRandom & v, void * context);
   friend void dataLoad<MooseRandom>(std::istream & stream, MooseRandom & v, void * context);
+
+  /// Flag to make certain that saveState is called prior to restoreState
+  bool _saved = false;
 };
 
 template <>

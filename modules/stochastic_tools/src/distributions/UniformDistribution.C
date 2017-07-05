@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 
 #include "UniformDistribution.h"
@@ -34,8 +27,6 @@ UniformDistribution::UniformDistribution(const InputParameters & parameters)
     mooseError("The lower bound is larger than the upper bound!");
 }
 
-UniformDistribution::~UniformDistribution() {}
-
 Real
 UniformDistribution::pdf(const Real & x)
 {
@@ -57,7 +48,7 @@ UniformDistribution::cdf(const Real & x)
 }
 
 Real
-UniformDistribution::inverseCdf(const Real & y)
+UniformDistribution::quantile(const Real & y)
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");

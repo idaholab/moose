@@ -63,9 +63,6 @@ private:
 
   /// Reference to FEProblemBase instance
   FEProblemBase & _dni_feproblem;
-
-  /// Thread ID
-  THREAD_ID _dni_tid;
 };
 
 #endif /* DISTRIBUTIONINTERFACE_H */

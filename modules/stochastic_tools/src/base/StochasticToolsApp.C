@@ -6,14 +6,23 @@
 #include "StateSimTester.h"
 #include "StateSimRunner.h"
 
-// distributions
+// Distributions
 #include "UniformDistribution.h"
-// samplers
+#include "WeibullDistribution.h"
+
+// Samplers
 #include "MonteCarloSampler.h"
+#include "SobolSampler.h"
+
+// VectorPostprocessors
+#include "SamplerData.h"
+
+// MultiApps
+#include "SamplerMultiApp.h"
+
 // for test purpose only
 #include "TestDistributionPostprocessor.h"
-#include "TestSamplerDiffMKernel.h"
-#include "TestSamplerMaterial.h"
+#include "TestSampler.h"
 
 template <>
 InputParameters
@@ -58,16 +67,23 @@ StochasticToolsApp::registerObjects(Factory & factory)
   registerUserObject(StateSimRunner);
   registerPostprocessor(StateSimTester);
 
-  // distributions
+  // Distributions
   registerDistribution(UniformDistribution);
+  registerDistribution(WeibullDistribution);
 
-  // samplers
+  // Samplers
   registerSampler(MonteCarloSampler);
+  registerSampler(SobolSampler);
+
+  // VectorPostprocessors
+  registerVectorPostprocessor(SamplerData);
+
+  // MultiApps
+  registerMultiApp(SamplerMultiApp);
 
   // for test purpose only
   registerPostprocessor(TestDistributionPostprocessor);
-  registerKernel(TestSamplerDiffMKernel);
-  registerMaterial(TestSamplerMaterial);
+  registerUserObject(TestSampler);
 }
 
 // External entry point for dynamic syntax association

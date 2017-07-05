@@ -15,11 +15,15 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
+// libMesh includes
+#include "libmesh/dense_matrix.h"
+
+// MOOSE includes
 #include "MooseObject.h"
-#include "Distribution.h"
-#include "Restartable.h"
+#include "MooseRandom.h"
+#include "SetupInterface.h"
 #include "DistributionInterface.h"
-#include "RandomInterface.h"
+#include "Distribution.h"
 
 class Sampler;
 
@@ -27,59 +31,86 @@ template <>
 InputParameters validParams<Sampler>();
 
 /**
- * This is the base class for Samplers and all Samplers should inherit from this class
+ * This is the base class for Samplers.
+ *
+ * A sampler is responsible for sampling distributions and providing an interface for providing
+ * the samples to objects. The sampler is designed to handle any number of random number generators.
+ *
+ * The main method in this object is the getSamples method which returns the distribution samples.
+ * This method will return the same results for each call when the "_generator" from this class
+ * is used by child classes.
+ *
+ * Samplers support the use of "execute_on", which when called results in new set of random numbers,
+ * thus after execute() runs the getSamples() method will now produces a new set of random numbers
+ * from calls prior to the execute() call.
  */
-class Sampler : public MooseObject,
-                public RandomInterface,
-                public DistributionInterface,
-                public Restartable
+class Sampler : public MooseObject, public SetupInterface, public DistributionInterface
 {
 public:
   Sampler(const InputParameters & parameters);
+
   /**
-   * Draw the values from given distributions for all the perturbed parameters
+   * Return the list of distribution names.
    */
-  virtual void generateSamples();
+  const std::vector<DistributionName> & getDistributionNames() const { return _distribution_names; }
+
+  ///@{
   /**
-   * Return a vector of variable names
+   * Setup method called prior and after looping through distributions.
    */
-  virtual std::vector<std::string> getSampledVariableNames();
+  virtual void sampleSetUp(){};
+  virtual void sampleTearDown(){};
+  ///@}
+
   /**
-   * Return a vector of current sampled values of given parameters
+   * Return the sampled distribution data.
    */
-  virtual std::vector<Real> getSampledValues(const std::vector<std::string> & variableNames);
+  std::vector<DenseMatrix<Real>> getSamples();
+
   /**
-   * Return the current sampled value of given parameter
+   * Store the state of the MooseRandom generator so that new calls to getSamples will create
+   * new numbers.
    */
-  virtual Real getSampledValue(const std::string & variableName);
-  /**
-   * Return the probability weights for all samples
-   */
-  virtual std::vector<Real> getProbabilityWeights();
-  /**
-   * Return true if there were failed runs
-   */
-  virtual bool checkRuns();
+  void execute();
 
 protected:
-  THREAD_ID _tid;
-  /// control whether the user wants to reseed the distributions at each new sample or not
-  const bool _reseed_for_new_sample;
-  /// vector of distributions names
-  const std::vector<DistributionName> & _dist_names;
-  /// vector of perturbed parameters names
-  const std::vector<std::string> & _var_names;
-  /// counter used to record the index of current samples
-  unsigned int _current_sample;
-  /// map used to store the perturbed parameters names and values of current samples
-  std::map<std::string, Real> _var_value_map;
-  /// map used to store the perturbed parameters names and values of all samples
-  std::map<std::string, std::vector<Real>> _var_value_hist;
-  /// map used to store the perturbed paramters and their corresponding distributions
-  std::map<std::string, Distribution *> _var_dist_map;
-  /// vector used to store the probability weights of all set of samples
-  std::vector<Real> _probability_weight;
-  bool _failed_runs;
+  /**
+   * Get the next random number from the generator.
+   * @param offset The index of the seed, by default this is zero. To add additional seeds
+   *               indices call the setNumberOfRequiedRandomSeeds method.
+   *
+   * Returns a double for the random number, this is double because MooseRandom class uses double.
+   */
+  double rand(unsigned int index = 0);
+
+  /**
+   * Base class must override this method to supply the sample distribution data.
+   */
+  virtual std::vector<DenseMatrix<Real>> sample() = 0;
+
+  /**
+   * Set the number of seeds required by the sampler. The Sampler will generate
+   * additional seeds as needed. This function should be called in the constructor
+   * of child objects.
+   */
+  void setNumberOfRequiedRandomSeeds(const std::size_t & number);
+
+  /// Map used to store the perturbed parameters and their corresponding distributions
+  std::vector<Distribution *> _distributions;
+
+  /// Distribution names
+  const std::vector<DistributionName> & _distribution_names;
+
+private:
+  /// Random number generator, don't give users access we want to control it via the interface
+  /// from this class.
+  MooseRandom _generator;
+
+  /// Seed generator
+  MooseRandom _seed_generator;
+
+  /// Initial random number seed
+  const unsigned int & _seed;
 };
 
 #endif /* SAMPLER_H */

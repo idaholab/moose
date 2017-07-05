@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TestDistributionPostprocessor.h"
 #include "Distribution.h"
@@ -21,37 +14,30 @@ validParams<TestDistributionPostprocessor>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<DistributionName>(
       "distribution", "The distribution which supplies the postprocessor value.");
-  params.addParam<Real>(
-      "cdf_value", 0.5, "A cdf value that used to determine the value of sampled parameter");
-  params.addParam<Real>("sample_value",
-                        0.5,
-                        "A given sampled value that can be used to determine "
-                        "the probability and cumulative probability.");
+  params.addRequiredParam<Real>(
+      "value", "A value to pass to the cdf, pdf, or quantile function of the given distribution.");
 
+  MooseEnum method("cdf pdf quantile");
+  params.addParam<MooseEnum>("method", method, "The distribution method to call.");
   return params;
 }
 
 TestDistributionPostprocessor::TestDistributionPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _distribution(getDistribution("distribution")),
-    _cdf_value(getParam<Real>("cdf_value")),
-    _sample_value(getParam<Real>("sample_value"))
-{
-}
-
-void
-TestDistributionPostprocessor::initialize()
-{
-}
-
-void
-TestDistributionPostprocessor::execute()
+    _value(getParam<Real>("value")),
+    _distribution_method(getParam<MooseEnum>("method"))
 {
 }
 
 PostprocessorValue
 TestDistributionPostprocessor::getValue()
 {
-  return _distribution.cdf(_sample_value) * _distribution.pdf(_sample_value) *
-         _distribution.inverseCdf(_cdf_value) * _distribution.getRandomNumber();
+  if (_distribution_method == "pdf")
+    return _distribution.pdf(_value);
+  else if (_distribution_method == "cdf")
+    return _distribution.cdf(_value);
+  else if (_distribution_method == "quantile")
+    return _distribution.quantile(_value);
+  mooseError("This should be possible to reach, what did you do!");
 }

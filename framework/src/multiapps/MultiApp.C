@@ -133,6 +133,7 @@ validParams<MultiApp>()
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");
 
+  params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
   params.registerBase("MultiApp");
 
@@ -146,6 +147,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
+    _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _total_num_apps(0),
     _my_num_apps(0),
@@ -166,25 +168,20 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
-  if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for "
-               "MultiApp ",
-               _name);
+  if (_use_positions)
+  {
+    // Fill in the _positions vector and initialize
+    fillPositions();
+    init(_positions.size());
+  }
+}
 
-  // Fill in the _positions vector
-  fillPositions();
-
-  _total_num_apps = _positions.size();
-
-  mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(),
-              "Number of positions and input files are not the same!");
-
-  /// Set up our Comm and set the number of apps we're going to be working on
+void
+MultiApp::init(unsigned int num)
+{
+  _total_num_apps = num;
   buildComm();
-
   _backups.reserve(_my_num_apps);
-
-  // Initialize the backups
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
 }
@@ -213,6 +210,11 @@ MultiApp::initialSetup()
 void
 MultiApp::fillPositions()
 {
+  if (_move_apps.size() != _move_positions.size())
+    mooseError("The number of apps to move and the positions to move them to must be the same for "
+               "MultiApp ",
+               _name);
+
   if (isParamValid("positions") && isParamValid("positions_file"))
     mooseError(
         "Both 'positions' and 'positions_file' cannot be specified simultaneously in MultiApp ",
@@ -294,6 +296,9 @@ MultiApp::fillPositions()
       mooseError("Not enough positions for the number of input files provided in MultiApp ",
                  name());
   }
+
+  mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(),
+              "Number of positions and input files are not the same!");
 }
 
 void
@@ -308,7 +313,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   }
 
   // Now move any apps that should be moved
-  if (!_move_happened && target_time + 1e-14 >= _move_time)
+  if (_use_positions && !_move_happened && target_time + 1e-14 >= _move_time)
   {
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)
@@ -490,22 +495,24 @@ MultiApp::resetApp(unsigned int global_app, Real time)
 void
 MultiApp::moveApp(unsigned int global_app, Point p)
 {
-
-  _positions[global_app] = p;
-
-  if (hasLocalApp(global_app))
+  if (_use_positions)
   {
-    unsigned int local_app = globalAppToLocal(global_app);
+    _positions[global_app] = p;
 
-    if (_output_in_position)
-      _apps[local_app]->setOutputPosition(p);
+    if (hasLocalApp(global_app))
+    {
+      unsigned int local_app = globalAppToLocal(global_app);
+
+      if (_output_in_position)
+        _apps[local_app]->setOutputPosition(p);
+    }
   }
 }
 
 void
 MultiApp::parentOutputPositionChanged()
 {
-  if (_output_in_position)
+  if (_use_positions && _output_in_position)
     for (unsigned int i = 0; i < _apps.size(); i++)
       _apps[i]->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 }
@@ -569,7 +576,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (_app.isRestarting() || _app.isRecovering())
     app->restore(_backups[i]);
 
-  if (getParam<bool>("output_in_position"))
+  if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 
   // Update the MultiApp level for the app that was just created

@@ -455,7 +455,7 @@ public:
                        InputParameters parameters);
 
   /**
-   * Get a mesh modifer with its name
+   * Get a mesh modifier with its name
    */
   const MeshModifier & getMeshModifier(const std::string & name) const;
 
