@@ -78,29 +78,29 @@ MooseVariableScalar::reinit()
   }
   else
   {
-    for (std::size_t i=0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i)
     {
       const dof_id_type dof_index = _dof_indices[i];
       std::vector<dof_id_type> one_dof_index(1, dof_index);
       if (_dof_map.all_semilocal_indices(one_dof_index))
-        {
-          libmesh_assert_less (i, _u.size());
+      {
+        libmesh_assert_less(i, _u.size());
 
-          current_solution.get(one_dof_index, &_u[i]);
-          solution_old.get(one_dof_index, &_u_old[i]);
-          solution_older.get(one_dof_index, &_u_older[i]);
-          u_dot.get(one_dof_index, &_u_dot[i]);
-        }
+        current_solution.get(one_dof_index, &_u[i]);
+        solution_old.get(one_dof_index, &_u_old[i]);
+        solution_older.get(one_dof_index, &_u_older[i]);
+        u_dot.get(one_dof_index, &_u_dot[i]);
+      }
 #ifdef DEBUG
       else
-        {
-          // Let's make it possible to catch invalid accesses to these
-          // variables, at least with libstdc++ in dbg mode.
-          _u.resize(i);
-          _u_old.resize(i);
-          _u_older.resize(i);
-          _u_dot.resize(i);
-        }
+      {
+        // Let's make it possible to catch invalid accesses to these
+        // variables, at least with libstdc++ in dbg mode.
+        _u.resize(i);
+        _u_old.resize(i);
+        _u_older.resize(i);
+        _u_dot.resize(i);
+      }
 #endif
     }
   }
