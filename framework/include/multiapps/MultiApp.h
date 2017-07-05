@@ -287,6 +287,13 @@ protected:
   /// call back executed right before app->runInputFile()
   virtual void preRunInputFile();
 
+  /**
+   * Initialize the MultiApp by creating the provided number of apps.
+   *
+   * This is called in the constructor, by default it utilizes the 'positions' input parameters.
+   */
+  void init(unsigned int num);
+
   /// The FEProblemBase this MultiApp is part of
   FEProblemBase & _fe_problem;
 
@@ -295,6 +302,9 @@ protected:
 
   /// The positions of all of the apps
   std::vector<Point> _positions;
+
+  /// Toggle use of "positions"
+  const bool _use_positions;
 
   /// The input file for each app's simulation
   std::vector<FileName> _input_files;

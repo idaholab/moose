@@ -1,0 +1,7 @@
+[Tests]
+  [./initial]
+    type = CSVDiff
+    input = initial.i
+    csvdiff = 'initial_out_data_0000.csv initial_out_data_0001.csv initial_out_data_0002.csv initial_out_data_0003.csv'
+  [../]
+[]

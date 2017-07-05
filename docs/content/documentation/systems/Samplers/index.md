@@ -1,15 +1,4 @@
 # Samplers System
-
-The Sampler system provides different sampling strategies which can be use to perform sensitivity and
-uncertainty analysis, probability risk analysis and data assimilation for MOOSE and MOOSE-based applications.
-Input parameters will be perturbed using associated distributions from the Distribution System.
-
-## Example Syntax
-!listing modules/stochastic_tools/tests/samplers/monte_carlo/sampler_materials_test.i block=Samplers
-
-!parameters /Samplers
-
-!subobjects /Samplers
-
-!subsystems /Samplers
-
+The sampler system within MOOSE provides an API for creating samples of distributions, primarily for use with the [Stochastic Tools](stochastic_tools/index.md)
+module. For additional details see the [Samplers](stochastic_tools/index.md#samplers)
+section.
