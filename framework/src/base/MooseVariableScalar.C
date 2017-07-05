@@ -23,6 +23,9 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 
+// C++
+#include <limits>
+
 MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
                                          const FEType & fe_type,
                                          SystemBase & sys,
@@ -65,13 +68,41 @@ MooseVariableScalar::reinit()
   // If we have an empty partition, or if we have a partition which
   // does not include any of the subdomains of a subdomain-restricted
   // variable, then we do not have access to that variable!  Hopefully
-  // we won't need it.
+  // we won't need the indices we lack.
   if (_dof_map.all_semilocal_indices(_dof_indices))
   {
     current_solution.get(_dof_indices, &_u[0]);
     solution_old.get(_dof_indices, &_u_old[0]);
     solution_older.get(_dof_indices, &_u_older[0]);
     u_dot.get(_dof_indices, &_u_dot[0]);
+  }
+  else
+  {
+    for (std::size_t i=0; i != n; ++i)
+    {
+      const dof_id_type dof_index = _dof_indices[i];
+      std::vector<dof_id_type> one_dof_index(1, dof_index);
+      if (_dof_map.all_semilocal_indices(one_dof_index))
+        {
+          libmesh_assert_less (i, _u.size());
+
+          current_solution.get(one_dof_index, &_u[i]);
+          solution_old.get(one_dof_index, &_u_old[i]);
+          solution_older.get(one_dof_index, &_u_older[i]);
+          u_dot.get(one_dof_index, &_u_dot[i]);
+        }
+#ifdef DEBUG
+      else
+        {
+          // Let's make it possible to catch invalid accesses to these
+          // variables, at least with libstdc++ in dbg mode.
+          _u.resize(i);
+          _u_old.resize(i);
+          _u_older.resize(i);
+          _u_dot.resize(i);
+        }
+#endif
+    }
   }
 }
 
