@@ -106,10 +106,10 @@ protected:
                                                 unsigned int comp = 0);
 
   /**
-   * Returns the older (two time steps previous) value of a scalar coupled variable
+   * Returns the time derivative of a scalar coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a older VariableValue for the coupled variable
+   * @return Reference to a time derivative VariableValue for the coupled variable
    */
   virtual VariableValue & coupledScalarDot(const std::string & var_name, unsigned int comp = 0);
 
