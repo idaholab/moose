@@ -24,7 +24,9 @@ class MooseMarkdownCommon(object):
     Class containing commonly used routines, which should always be used with a markdown instance
     such as a Pattern or other object that has a "self.markdown" attribute.
     """
+    SETTINGS_RE = r'([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))'
     COPY_BUTTON_COUNT = 0
+    HELP_CONTENT_HELP = 0
 
     @staticmethod
     def defaultSettings():
@@ -53,7 +55,7 @@ class MooseMarkdownCommon(object):
         """
 
         # Crazy RE capable of many things like understanding key=value pairs with spaces in them!
-        matches = re.findall(r'([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))', settings_line.strip())
+        matches = re.findall(self.SETTINGS_RE, settings_line.strip())
 
         options = copy.copy(self.__settings)
         if len(matches) == 0:
@@ -142,7 +144,8 @@ class MooseMarkdownCommon(object):
         return div
 
     @staticmethod
-    def createErrorElement(message, title='Markdown Parsing Error', parent=None, error=True):
+    def createErrorElement(message, title='Markdown Parsing Error', parent=None, error=True,
+                           help_button=None, markdown=False):
         """
         Returns a tree element containing error message.
 
@@ -155,25 +158,61 @@ class MooseMarkdownCommon(object):
         </div>
 
         Args:
-            message[str]: The message to display in the alert box.
+            message[str]: The message to display in the alert box
             title[str]: Set the title (default: "Markdown Parsing Error")
             parent[etree.Element]: The parent element that should contain the error message
-            error[bool]: LOG an error (default: True).
+            error[bool]: LOG an error (default: True)
+            help_button[etree.Element]: The html button to use for creating a help pop-up
+            markdown[bool]: When true this will enable markdown parsing within html
         """
+
+        # Create the basic admonition HTML
         if parent:
             el = etree.SubElement(parent, 'div')
         else:
             el = etree.Element('div')
         el.set('class', "admonition error")
 
-        title_el = etree.SubElement(el, 'p')
+        title_div = etree.SubElement(el, 'div')
+        title_el = etree.SubElement(title_div, 'p')
         title_el.set('class', "admonition-title")
         title_el.text = title
 
-        msg = etree.SubElement(el, 'p')
+        msg_div = etree.SubElement(el, 'div')
+        msg_div.set('class', 'admonition-message')
+
+        msg = etree.SubElement(msg_div, 'p')
         msg.text = message
+        if markdown:
+            msg.set('markdown', '1')
+
+        # Add the help button
+        if help_button is not None:
+            id_ = 'moose-modal-help-data-{}'.format(MooseMarkdownCommon.HELP_CONTENT_HELP)
+
+            a = etree.SubElement(title_el, 'a')
+            a.set('class', 'waves-effect waves-light btn-floating red')
+            a.set('data-target', id_)
+            a.set('style', 'float:right')
+            i = etree.SubElement(a, 'i')
+            i.set('class', 'material-icons')
+            i.text = 'help'
+
+            modal = etree.SubElement(el, 'div')
+            modal.set('id', id_)
+            modal.set('class', 'modal')
+
+            content = etree.SubElement(modal, 'div')
+            content.set('class', 'modal-content')
+            content.append(help_button)
+
+            MooseMarkdownCommon.HELP_CONTENT_HELP += 1
+
+
+
         if error:
             LOG.error('%s: %s', str(title), str(message))
+
         return el
 
     @staticmethod

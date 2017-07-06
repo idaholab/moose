@@ -47,6 +47,11 @@ def build_options(parser):
                         help="Specify the number of threads to build pages with.")
     parser.add_argument('--template', type=str, default='website.html',
                         help="The template html file to utilize (Default: %(default)s).")
+#    parser.add_argument('--include', type=str, default=None, nargs='+',
+#                        help="Override the --content YAML file with the given directory patterns, "
+#                             "this is mainly for increasing render times by limiting the pages to "
+#                             "build. This option assumes the 'base' to be the local 'content'
+#                             "directory.")
 
     parser.add_argument('--host', default='127.0.0.1', type=str,
                         help="The local host location for live web server (default: %(default)s).")

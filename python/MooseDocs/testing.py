@@ -50,23 +50,24 @@ class LogTestCase(unittest.TestCase):
         cls._stream = StringIO.StringIO()
         cls._formatter = init_logging(stream=cls._stream)
 
-    def assertInLogInfo(self, msg):
+    def assertInLogInfo(self, msg, index=-1):
         """
         Test that info was logged.
         """
-        self.assertIn(msg, self._formatter.messages('INFO')[-1])
+        self.assertIn(msg, self._formatter.messages('INFO')[index])
 
-    def assertInLogError(self, msg):
+    def assertInLogError(self, msg, index=-1):
         """
         Test that an error was logged.
         """
-        self.assertIn(msg, self._formatter.messages('ERROR')[-1])
+        print self._formatter.messages('ERROR')
+        self.assertIn(msg, self._formatter.messages('ERROR')[index])
 
-    def assertInLogWarning(self, msg):
+    def assertInLogWarning(self, msg, index=-1):
         """
         Test that a warning was logged.
         """
-        self.assertIn(msg, self._formatter.messages('WARNING')[-1])
+        self.assertIn(msg, self._formatter.messages('WARNING')[index])
 
 class MarkdownTestCase(LogTestCase):
     """

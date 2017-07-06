@@ -1,0 +1,7 @@
+default:
+    base: 'docs/content'
+    include:
+        - 'docs/content/js/*'
+        - 'docs/content/css/*'
+        - 'docs/content/index.md'
+        - 'docs/content/documentation/sqa/*'

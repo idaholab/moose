@@ -3,6 +3,8 @@ framework:
   include:
     - 'docs/content/documentation/systems/Functions/framework/*'
     - 'docs/content/documentation/systems/Adaptivity/Markers/framework/BoxMarker.md'
+    - 'docs/content/js/*'
+    - 'docs/content/css/*'
   exclude:
     - 'docs/content/documentation/systems/Functions/framework/ParsedFunction.md'
 test:
