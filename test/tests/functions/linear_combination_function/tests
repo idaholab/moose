@@ -9,4 +9,14 @@
     input = 'lcf1.i'
     csvdiff = 'lcf1.csv'
   [../]
+  [./lcf_grad]
+    type = 'CSVDiff'
+    input = 'lcf_grad.i'
+    csvdiff = 'lcf_grad.csv'
+  [../]
+  [./lcf_vector]
+    type = 'Exodiff'
+    input = 'lcf_vector.i'
+    exodiff = 'lcf_vector_out.e'
+  [../]
 []
