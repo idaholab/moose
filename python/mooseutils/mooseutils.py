@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import re
 import math
@@ -79,7 +80,7 @@ def find_moose_executable(loc, **kwargs):
     # Check that the location exists and that it is a directory
     loc = os.path.abspath(loc)
     if not os.path.isdir(loc):
-        print 'ERROR: The supplied path must be a valid directory:', loc
+        print('ERROR: The supplied path must be a valid directory:', loc)
         return errno.ENOTDIR
 
     # Search for executable with the given name
@@ -91,7 +92,7 @@ def find_moose_executable(loc, **kwargs):
 
     # Returns the executable or error code
     if not errno.ENOENT:
-        print 'ERROR: Unable to locate a valid MOOSE executable in directory'
+        print('ERROR: Unable to locate a valid MOOSE executable in directory')
     return exe
 
 def runExe(app_path, args):
@@ -130,12 +131,12 @@ def check_configuration(packages):
             missing.append(package)
 
     if missing:
-        print "The following packages are missing but required:"
+        print("The following packages are missing but required:")
         for m in missing:
-            print ' '*4, '-', m
-        print 'It may be possible to install them using "pip", but you likely need to ' \
-              'the MOOSE environment package on your system.\n'
-        print 'Using pip:\n    pip install package-name-here --user'
+            print(' '*4, '-', m)
+        print('It may be possible to install them using "pip", but you likely need to ' \
+              'the MOOSE environment package on your system.\n')
+        print('Using pip:\n    pip install package-name-here --user')
         return 1
 
     return 0

@@ -39,7 +39,7 @@ def tree_builder(files, root, base, node, directory):
         # Complete path to the directory item (path or filename)
         path = os.path.join(directory, item)
 
-        # Move along if path not in list of filesg
+        # Move along if path not in list of files
         if path in files:
             # Special case when the supplied node is the root, this maintains the root node
             # and creates an index node from which everything will stem.

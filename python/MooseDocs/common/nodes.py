@@ -61,11 +61,11 @@ class NodeCore(anytree.NodeMixin):
         Args:
             name[str]: (optional) When the 'filter_' options is not supplied, this name is used
                        in the default filter (default: '').
-            filter[function]: A filter function, if it returns true keep the node.  If not supplied
-                              the default is to search for all nodes that have a "full_name" that
-                              ends with the name provided in the 'name' argument. If the 'name'
-                              argument is not set the default will return all nodes. The supplied
-                              function should accept the node as an argument.
+            filter_[function]: A filter function, if it returns true keep the node.  If not supplied
+                               the default is to search for all nodes that have a "full_name" that
+                               ends with the name provided in the 'name' argument. If the 'name'
+                               argument is not set the default will return all nodes. The supplied
+                               function should accept the node as an argument.
         """
         if filter_ is None:
             filter_ = lambda n: n.full_name.endswith(name)

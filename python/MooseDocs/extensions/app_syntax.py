@@ -134,9 +134,9 @@ class MooseSyntaxBase(MooseMarkdownCommon, Pattern):
         """Default settings for MooseSyntaxBase."""
         settings = MooseMarkdownCommon.defaultSettings()
         settings['actions'] = (True, "Enable/disable action syntax lookup (this is used for "
-                                     "shared syntax such as BCs/Pressue).")
+                                     "shared syntax such as BCs/Pressure).")
         settings['objects'] = (True, "Enable/disable MooseObject syntax lookup (this is used for "
-                                     "shared syntax such as BCs/Pressue).")
+                                     "shared syntax such as BCs/Pressure).")
         settings['syntax'] = (True, "Enable/disable SyntaxNode lookup (this is needed for shared "
                                     "syntax).")
         return settings
