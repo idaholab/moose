@@ -65,6 +65,12 @@ public:
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
+
+  /**
+   * Turn off the Jacobian (must be called before equation system initialization)
+   */
+  void turnOffJacobian();
+
   virtual void addExtraVectors() override;
   virtual void solve() override = 0;
   virtual void restoreSolutions() override;
