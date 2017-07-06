@@ -197,7 +197,7 @@ OutputWarehouse::mooseConsole()
       std::string message = _console_buffer.str();
       if (_app.multiAppLevel() > 0)
         MooseUtils::indentMessage(_app.name(), message);
-      Moose::out << message;
+      Moose::out << message << std::flush;
       _console_buffer.clear();
       _console_buffer.str("");
     }
