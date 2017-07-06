@@ -27,7 +27,7 @@ LockFile::LockFile(const std::string & filename, bool do_lock)
     if (_fd == -1)
       mooseError("Failed to open file", filename);
     if (flock(_fd, LOCK_EX) != 0)
-      mooseError("Failed to lock file ", filename);
+      mooseWarning("Failed to lock file ", filename);
   }
 }
 
@@ -36,7 +36,7 @@ LockFile::~LockFile()
   if (_do_lock)
   {
     if (flock(_fd, LOCK_UN) != 0)
-      mooseError("Failed to unlock file ", _filename);
+      mooseWarning("Failed to unlock file ", _filename);
     close(_fd);
   }
 }
