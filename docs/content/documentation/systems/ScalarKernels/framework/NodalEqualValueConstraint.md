@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalEqualValueConstraint
-!description /ScalarKernels/NodalEqualValueConstraint
+!syntax description /ScalarKernels/NodalEqualValueConstraint
 
-!parameters /ScalarKernels/NodalEqualValueConstraint
+!syntax parameters /ScalarKernels/NodalEqualValueConstraint
 
-!inputfiles /ScalarKernels/NodalEqualValueConstraint
+!syntax inputs /ScalarKernels/NodalEqualValueConstraint
 
-!childobjects /ScalarKernels/NodalEqualValueConstraint
+!syntax children /ScalarKernels/NodalEqualValueConstraint

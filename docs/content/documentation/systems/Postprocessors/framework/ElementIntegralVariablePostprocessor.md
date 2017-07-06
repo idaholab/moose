@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementIntegralVariablePostprocessor
-!description /Postprocessors/ElementIntegralVariablePostprocessor
+!syntax description /Postprocessors/ElementIntegralVariablePostprocessor
 
-!parameters /Postprocessors/ElementIntegralVariablePostprocessor
+!syntax parameters /Postprocessors/ElementIntegralVariablePostprocessor
 
-!inputfiles /Postprocessors/ElementIntegralVariablePostprocessor
+!syntax inputs /Postprocessors/ElementIntegralVariablePostprocessor
 
-!childobjects /Postprocessors/ElementIntegralVariablePostprocessor
+!syntax children /Postprocessors/ElementIntegralVariablePostprocessor

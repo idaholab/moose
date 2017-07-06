@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDispersiveFlux
-!description /Kernels/PorousFlowDispersiveFlux
+!syntax description /Kernels/PorousFlowDispersiveFlux
 
-!parameters /Kernels/PorousFlowDispersiveFlux
+!syntax parameters /Kernels/PorousFlowDispersiveFlux
 
-!inputfiles /Kernels/PorousFlowDispersiveFlux
+!syntax inputs /Kernels/PorousFlowDispersiveFlux
 
-!childobjects /Kernels/PorousFlowDispersiveFlux
+!syntax children /Kernels/PorousFlowDispersiveFlux

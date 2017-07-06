@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CHSplitFlux
-!description /Kernels/CHSplitFlux
+!syntax description /Kernels/CHSplitFlux
 
-!parameters /Kernels/CHSplitFlux
+!syntax parameters /Kernels/CHSplitFlux
 
-!inputfiles /Kernels/CHSplitFlux
+!syntax inputs /Kernels/CHSplitFlux
 
-!childobjects /Kernels/CHSplitFlux
+!syntax children /Kernels/CHSplitFlux

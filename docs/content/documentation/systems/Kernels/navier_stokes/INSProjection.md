@@ -1,7 +1,7 @@
-!description /Kernels/INSProjection
+!syntax description /Kernels/INSProjection
 
-!parameters /Kernels/INSProjection
+!syntax parameters /Kernels/INSProjection
 
-!inputfiles /Kernels/INSProjection
+!syntax inputs /Kernels/INSProjection
 
-!childobjects /Kernels/INSProjection
+!syntax children /Kernels/INSProjection

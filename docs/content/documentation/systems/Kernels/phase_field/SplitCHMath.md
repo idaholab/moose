@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SplitCHMath
-!description /Kernels/SplitCHMath
+!syntax description /Kernels/SplitCHMath
 
-!parameters /Kernels/SplitCHMath
+!syntax parameters /Kernels/SplitCHMath
 
-!inputfiles /Kernels/SplitCHMath
+!syntax inputs /Kernels/SplitCHMath
 
-!childobjects /Kernels/SplitCHMath
+!syntax children /Kernels/SplitCHMath

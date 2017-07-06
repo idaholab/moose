@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowVariableBase
-!description /Materials/PorousFlowVariableBase
+!syntax description /Materials/PorousFlowVariableBase
 
-!parameters /Materials/PorousFlowVariableBase
+!syntax parameters /Materials/PorousFlowVariableBase
 
-!inputfiles /Materials/PorousFlowVariableBase
+!syntax inputs /Materials/PorousFlowVariableBase
 
-!childobjects /Materials/PorousFlowVariableBase
+!syntax children /Materials/PorousFlowVariableBase

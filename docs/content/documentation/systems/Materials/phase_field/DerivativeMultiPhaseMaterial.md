@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DerivativeMultiPhaseMaterial
-!description /Materials/DerivativeMultiPhaseMaterial
+!syntax description /Materials/DerivativeMultiPhaseMaterial
 
-!parameters /Materials/DerivativeMultiPhaseMaterial
+!syntax parameters /Materials/DerivativeMultiPhaseMaterial
 
-!inputfiles /Materials/DerivativeMultiPhaseMaterial
+!syntax inputs /Materials/DerivativeMultiPhaseMaterial
 
-!childobjects /Materials/DerivativeMultiPhaseMaterial
+!syntax children /Materials/DerivativeMultiPhaseMaterial

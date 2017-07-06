@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Gnuplot
-!description /Outputs/Gnuplot
+!syntax description /Outputs/Gnuplot
 
-!parameters /Outputs/Gnuplot
+!syntax parameters /Outputs/Gnuplot
 
-!inputfiles /Outputs/Gnuplot
+!syntax inputs /Outputs/Gnuplot
 
-!childobjects /Outputs/Gnuplot
+!syntax children /Outputs/Gnuplot

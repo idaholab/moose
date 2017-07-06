@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowJoiner
-!description /Materials/PorousFlowJoiner
+!syntax description /Materials/PorousFlowJoiner
 
-!parameters /Materials/PorousFlowJoiner
+!syntax parameters /Materials/PorousFlowJoiner
 
-!inputfiles /Materials/PorousFlowJoiner
+!syntax inputs /Materials/PorousFlowJoiner
 
-!childobjects /Materials/PorousFlowJoiner
+!syntax children /Materials/PorousFlowJoiner

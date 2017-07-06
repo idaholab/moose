@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFCTradMaterial
-!description /Materials/PFCTradMaterial
+!syntax description /Materials/PFCTradMaterial
 
-!parameters /Materials/PFCTradMaterial
+!syntax parameters /Materials/PFCTradMaterial
 
-!inputfiles /Materials/PFCTradMaterial
+!syntax inputs /Materials/PFCTradMaterial
 
-!childobjects /Materials/PFCTradMaterial
+!syntax children /Materials/PFCTradMaterial

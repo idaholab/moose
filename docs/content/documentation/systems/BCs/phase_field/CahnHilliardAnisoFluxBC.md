@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CahnHilliardAnisoFluxBC
-!description /BCs/CahnHilliardAnisoFluxBC
+!syntax description /BCs/CahnHilliardAnisoFluxBC
 
-!parameters /BCs/CahnHilliardAnisoFluxBC
+!syntax parameters /BCs/CahnHilliardAnisoFluxBC
 
-!inputfiles /BCs/CahnHilliardAnisoFluxBC
+!syntax inputs /BCs/CahnHilliardAnisoFluxBC
 
-!childobjects /BCs/CahnHilliardAnisoFluxBC
+!syntax children /BCs/CahnHilliardAnisoFluxBC

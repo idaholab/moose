@@ -1,5 +1,5 @@
 # CoupledSusceptibilityTimeDerivative
-!description /Kernels/CoupledSusceptibilityTimeDerivative
+!syntax description /Kernels/CoupledSusceptibilityTimeDerivative
 
 Implements
 
@@ -15,8 +15,8 @@ function $F$ which should contribute to off-diagonal Jacobian entries.
 
 See also [CoupledTimeDerivative](/CoupledTimeDerivative.md).s
 
-!parameters /Kernels/CoupledSusceptibilityTimeDerivative
+!syntax parameters /Kernels/CoupledSusceptibilityTimeDerivative
 
-!inputfiles /Kernels/CoupledSusceptibilityTimeDerivative
+!syntax inputs /Kernels/CoupledSusceptibilityTimeDerivative
 
-!childobjects /Kernels/CoupledSusceptibilityTimeDerivative
+!syntax children /Kernels/CoupledSusceptibilityTimeDerivative

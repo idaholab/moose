@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticDruckerPragerHyperbolic
-!description /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
+!syntax description /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
 
-!parameters /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
+!syntax parameters /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
 
-!inputfiles /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
+!syntax inputs /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
 
-!childobjects /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic
+!syntax children /UserObjects/TensorMechanicsPlasticDruckerPragerHyperbolic

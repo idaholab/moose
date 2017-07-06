@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantAnisotropicMobility
-!description /Materials/ConstantAnisotropicMobility
+!syntax description /Materials/ConstantAnisotropicMobility
 
-!parameters /Materials/ConstantAnisotropicMobility
+!syntax parameters /Materials/ConstantAnisotropicMobility
 
-!inputfiles /Materials/ConstantAnisotropicMobility
+!syntax inputs /Materials/ConstantAnisotropicMobility
 
-!childobjects /Materials/ConstantAnisotropicMobility
+!syntax children /Materials/ConstantAnisotropicMobility

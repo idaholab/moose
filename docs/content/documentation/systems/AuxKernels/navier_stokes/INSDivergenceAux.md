@@ -1,7 +1,7 @@
-!description /AuxKernels/INSDivergenceAux
+!syntax description /AuxKernels/INSDivergenceAux
 
-!parameters /AuxKernels/INSDivergenceAux
+!syntax parameters /AuxKernels/INSDivergenceAux
 
-!inputfiles /AuxKernels/INSDivergenceAux
+!syntax inputs /AuxKernels/INSDivergenceAux
 
-!childobjects /AuxKernels/INSDivergenceAux
+!syntax children /AuxKernels/INSDivergenceAux

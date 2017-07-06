@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SplineFunction
-!description /Functions/SplineFunction
+!syntax description /Functions/SplineFunction
 
-!parameters /Functions/SplineFunction
+!syntax parameters /Functions/SplineFunction
 
-!inputfiles /Functions/SplineFunction
+!syntax inputs /Functions/SplineFunction
 
-!childobjects /Functions/SplineFunction
+!syntax children /Functions/SplineFunction

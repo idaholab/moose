@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ScalarL2Error
-!description /Postprocessors/ScalarL2Error
+!syntax description /Postprocessors/ScalarL2Error
 
-!parameters /Postprocessors/ScalarL2Error
+!syntax parameters /Postprocessors/ScalarL2Error
 
-!inputfiles /Postprocessors/ScalarL2Error
+!syntax inputs /Postprocessors/ScalarL2Error
 
-!childobjects /Postprocessors/ScalarL2Error
+!syntax children /Postprocessors/ScalarL2Error

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantDT
-!description /Executioner/TimeStepper/ConstantDT
+!syntax description /Executioner/TimeStepper/ConstantDT
 
-!parameters /Executioner/TimeStepper/ConstantDT
+!syntax parameters /Executioner/TimeStepper/ConstantDT
 
-!inputfiles /Executioner/TimeStepper/ConstantDT
+!syntax inputs /Executioner/TimeStepper/ConstantDT
 
-!childobjects /Executioner/TimeStepper/ConstantDT
+!syntax children /Executioner/TimeStepper/ConstantDT

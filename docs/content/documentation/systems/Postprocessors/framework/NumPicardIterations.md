@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumPicardIterations
-!description /Postprocessors/NumPicardIterations
+!syntax description /Postprocessors/NumPicardIterations
 
-!parameters /Postprocessors/NumPicardIterations
+!syntax parameters /Postprocessors/NumPicardIterations
 
-!inputfiles /Postprocessors/NumPicardIterations
+!syntax inputs /Postprocessors/NumPicardIterations
 
-!childobjects /Postprocessors/NumPicardIterations
+!syntax children /Postprocessors/NumPicardIterations

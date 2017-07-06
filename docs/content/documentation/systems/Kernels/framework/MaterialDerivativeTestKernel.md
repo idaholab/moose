@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialDerivativeTestKernel
-!description /Kernels/MaterialDerivativeTestKernel
+!syntax description /Kernels/MaterialDerivativeTestKernel
 
-!parameters /Kernels/MaterialDerivativeTestKernel
+!syntax parameters /Kernels/MaterialDerivativeTestKernel
 
-!inputfiles /Kernels/MaterialDerivativeTestKernel
+!syntax inputs /Kernels/MaterialDerivativeTestKernel
 
-!childobjects /Kernels/MaterialDerivativeTestKernel
+!syntax children /Kernels/MaterialDerivativeTestKernel

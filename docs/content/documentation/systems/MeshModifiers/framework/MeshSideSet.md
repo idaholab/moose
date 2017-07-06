@@ -1,5 +1,5 @@
 # MeshSideSet
-!description /MeshModifiers/MeshSideSet
+!syntax description /MeshModifiers/MeshSideSet
 
 Element sides are not explicitly meshed in MOOSE/libmesh, i.e. no shape functions
 live on the lower dimensional sides. To run kernels on lower dimensional manifolds
@@ -21,8 +21,8 @@ variables exist on some nodes of the adjacent volume elements. The volume kernel
 will run on the volume quadrature points at which _tapered off_ values from the
 adjacent edges van be found. Use at your own risk.
 
-!parameters /MeshModifiers/MeshSideSet
+!syntax parameters /MeshModifiers/MeshSideSet
 
-!inputfiles /MeshModifiers/MeshSideSet
+!syntax input /MeshModifiers/MeshSideSet
 
-!childobjects /MeshModifiers/MeshSideSet
+!syntax children /MeshModifiers/MeshSideSet

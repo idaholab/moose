@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionSideIntegral
-!description /Postprocessors/FunctionSideIntegral
+!syntax description /Postprocessors/FunctionSideIntegral
 
-!parameters /Postprocessors/FunctionSideIntegral
+!syntax parameters /Postprocessors/FunctionSideIntegral
 
-!inputfiles /Postprocessors/FunctionSideIntegral
+!syntax inputs /Postprocessors/FunctionSideIntegral
 
-!childobjects /Postprocessors/FunctionSideIntegral
+!syntax children /Postprocessors/FunctionSideIntegral

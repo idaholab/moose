@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NearestPointLayeredAverage
-!description /UserObjects/NearestPointLayeredAverage
+!syntax description /UserObjects/NearestPointLayeredAverage
 
-!parameters /UserObjects/NearestPointLayeredAverage
+!syntax parameters /UserObjects/NearestPointLayeredAverage
 
-!inputfiles /UserObjects/NearestPointLayeredAverage
+!syntax inputs /UserObjects/NearestPointLayeredAverage
 
-!childobjects /UserObjects/NearestPointLayeredAverage
+!syntax children /UserObjects/NearestPointLayeredAverage

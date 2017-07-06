@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFCElementEnergyIntegral
-!description /Postprocessors/PFCElementEnergyIntegral
+!syntax description /Postprocessors/PFCElementEnergyIntegral
 
-!parameters /Postprocessors/PFCElementEnergyIntegral
+!syntax parameters /Postprocessors/PFCElementEnergyIntegral
 
-!inputfiles /Postprocessors/PFCElementEnergyIntegral
+!syntax inputs /Postprocessors/PFCElementEnergyIntegral
 
-!childobjects /Postprocessors/PFCElementEnergyIntegral
+!syntax children /Postprocessors/PFCElementEnergyIntegral

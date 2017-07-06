@@ -1,5 +1,5 @@
 # ConsistentHeatCapacityTimeDerivative
-!description /Kernels/ConsistentHeatCapacityTimeDerivative
+!syntax description /Kernels/ConsistentHeatCapacityTimeDerivative
 
 This kernel is similar to HeatCapacityConductionTimeDerivative. The heat capacity $C_p = \rho c_p$ is
 expected as material property. The difference to HeatCapacityConductionTimeDerivative is that
@@ -10,8 +10,8 @@ the derivative of $C_p$ with respect to temperature is included:
 This makes this kernel consistent where HeatCapacityConductionTimeDerivative is not. It is, however, only conservative as $\Delta t \rightarrow 0$. Consistency was shown via Method of Manufactured
 Solution test.
 
-!parameters /Kernels/ConsistentHeatCapacityTimeDerivative
+!syntax parameters /Kernels/ConsistentHeatCapacityTimeDerivative
 
-!inputfiles /Kernels/ConsistentHeatCapacityTimeDerivative
+!syntax inputs /Kernels/ConsistentHeatCapacityTimeDerivative
 
-!childobjects /Kernels/ConsistentHeatCapacityTimeDerivative
+!syntax children /Kernels/ConsistentHeatCapacityTimeDerivative

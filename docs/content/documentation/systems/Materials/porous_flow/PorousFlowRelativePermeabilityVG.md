@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowRelativePermeabilityVG
-!description /Materials/PorousFlowRelativePermeabilityVG
+!syntax description /Materials/PorousFlowRelativePermeabilityVG
 
-!parameters /Materials/PorousFlowRelativePermeabilityVG
+!syntax parameters /Materials/PorousFlowRelativePermeabilityVG
 
-!inputfiles /Materials/PorousFlowRelativePermeabilityVG
+!syntax inputs /Materials/PorousFlowRelativePermeabilityVG
 
-!childobjects /Materials/PorousFlowRelativePermeabilityVG
+!syntax children /Materials/PorousFlowRelativePermeabilityVG

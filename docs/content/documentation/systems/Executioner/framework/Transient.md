@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Transient
-!description /Executioner/Transient
+!syntax description /Executioner/Transient
 
-!parameters /Executioner/Transient
+!syntax parameters /Executioner/Transient
 
-!inputfiles /Executioner/Transient
+!syntax inputs /Executioner/Transient
 
-!childobjects /Executioner/Transient
+!syntax children /Executioner/Transient

@@ -1,7 +1,7 @@
-!description /Kernels/NSMassInviscidFlux
+!syntax description /Kernels/NSMassInviscidFlux
 
-!parameters /Kernels/NSMassInviscidFlux
+!syntax parameters /Kernels/NSMassInviscidFlux
 
-!inputfiles /Kernels/NSMassInviscidFlux
+!syntax inputs /Kernels/NSMassInviscidFlux
 
-!childobjects /Kernels/NSMassInviscidFlux
+!syntax children /Kernels/NSMassInviscidFlux

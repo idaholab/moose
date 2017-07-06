@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Residual
-!description /Postprocessors/Residual
+!syntax description /Postprocessors/Residual
 
-!parameters /Postprocessors/Residual
+!syntax parameters /Postprocessors/Residual
 
-!inputfiles /Postprocessors/Residual
+!syntax inputs /Postprocessors/Residual
 
-!childobjects /Postprocessors/Residual
+!syntax children /Postprocessors/Residual

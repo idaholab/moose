@@ -20,8 +20,8 @@ kernel ([TimeDerivative](framework/TimeDerivative.md)).
 
 !listing modules/level_set/tests/reinitialization/master.i block=Kernels label=False
 
-!parameters /Kernels/LevelSetAdvection
+!syntax parameters /Kernels/LevelSetAdvection
 
-!inputfiles /Kernels/LevelSetAdvection
+!syntax inputs /Kernels/LevelSetAdvection
 
-!childobjects /Kernels/LevelSetAdvection
+!syntax children /Kernels/LevelSetAdvection

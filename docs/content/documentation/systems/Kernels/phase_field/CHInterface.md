@@ -1,5 +1,5 @@
 # CHInterface
-!description /Kernels/CHInterface
+!syntax description /Kernels/CHInterface
 
 Implements the Cahn-Hilliard term for the $\frac{\kappa_i}2|\nabla c_i|^2$ gradient
 energy contribution for the isotropic mobility case. Its weak form is
@@ -13,8 +13,8 @@ non-linear order parameter variable the kernel is acting on, $M_i$ (`mob_name`) 
 the scalar (isotropic) mobility associated with the order parameter, and $\psi_m$
 is the test function.
 
-!parameters /Kernels/CHInterface
+!syntax parameters /Kernels/CHInterface
 
-!inputfiles /Kernels/CHInterface
+!syntax inputs /Kernels/CHInterface
 
-!childobjects /Kernels/CHInterface
+!syntax children /Kernels/CHInterface

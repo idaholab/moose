@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BndsCalcAux
-!description /AuxKernels/BndsCalcAux
+!syntax description /AuxKernels/BndsCalcAux
 
-!parameters /AuxKernels/BndsCalcAux
+!syntax parameters /AuxKernels/BndsCalcAux
 
-!inputfiles /AuxKernels/BndsCalcAux
+!syntax inputs /AuxKernels/BndsCalcAux
 
-!childobjects /AuxKernels/BndsCalcAux
+!syntax children /AuxKernels/BndsCalcAux

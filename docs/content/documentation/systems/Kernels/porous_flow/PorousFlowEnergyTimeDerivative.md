@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowEnergyTimeDerivative
-!description /Kernels/PorousFlowEnergyTimeDerivative
+!syntax description /Kernels/PorousFlowEnergyTimeDerivative
 
-!parameters /Kernels/PorousFlowEnergyTimeDerivative
+!syntax parameters /Kernels/PorousFlowEnergyTimeDerivative
 
-!inputfiles /Kernels/PorousFlowEnergyTimeDerivative
+!syntax inputs /Kernels/PorousFlowEnergyTimeDerivative
 
-!childobjects /Kernels/PorousFlowEnergyTimeDerivative
+!syntax children /Kernels/PorousFlowEnergyTimeDerivative

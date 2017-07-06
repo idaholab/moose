@@ -1,6 +1,6 @@
 
 # ElementLengthAux
-!description /AuxKernels/ElementLengthAux
+!syntax description /AuxKernels/ElementLengthAux
 
 ## Description
 The element "length" is often needed for creating stabilization coefficients or when adapting the mesh. This will compute the minimum or maximum element length and populate an [AuxVariable](/AuxVariables/index.md)
@@ -10,8 +10,8 @@ from the [`Elem`](https://libmesh.github.io/doxygen/classlibMesh_1_1Elem.html) c
 ## Example Syntax
 !listing test/tests/auxkernels/element_length/element_length.i block=AuxKernels
 
-!parameters /AuxKernels/ElementLengthAux
+!syntax parameters /AuxKernels/ElementLengthAux
 
-!inputfiles /AuxKernels/ElementLengthAux
+!syntax inputs /AuxKernels/ElementLengthAux
 
-!childobjects /AuxKernels/ElementLengthAux
+!syntax children /AuxKernels/ElementLengthAux

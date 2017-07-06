@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SplitCHWResAniso
-!description /Kernels/SplitCHWResAniso
+!syntax description /Kernels/SplitCHWResAniso
 
-!parameters /Kernels/SplitCHWResAniso
+!syntax parameters /Kernels/SplitCHWResAniso
 
-!inputfiles /Kernels/SplitCHWResAniso
+!syntax inputs /Kernels/SplitCHWResAniso
 
-!childobjects /Kernels/SplitCHWResAniso
+!syntax children /Kernels/SplitCHWResAniso

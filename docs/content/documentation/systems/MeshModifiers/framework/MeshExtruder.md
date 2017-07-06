@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MeshExtruder
-!description /MeshModifiers/MeshExtruder
+!syntax description /MeshModifiers/MeshExtruder
 
-!parameters /MeshModifiers/MeshExtruder
+!syntax parameters /MeshModifiers/MeshExtruder
 
-!inputfiles /MeshModifiers/MeshExtruder
+!syntax inputs /MeshModifiers/MeshExtruder
 
-!childobjects /MeshModifiers/MeshExtruder
+!syntax children /MeshModifiers/MeshExtruder

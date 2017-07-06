@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPorosityConst
-!description /Materials/PorousFlowPorosityConst
+!syntax description /Materials/PorousFlowPorosityConst
 
-!parameters /Materials/PorousFlowPorosityConst
+!syntax parameters /Materials/PorousFlowPorosityConst
 
-!inputfiles /Materials/PorousFlowPorosityConst
+!syntax inputs /Materials/PorousFlowPorosityConst
 
-!childobjects /Materials/PorousFlowPorosityConst
+!syntax children /Materials/PorousFlowPorosityConst

@@ -1,5 +1,5 @@
 # ComputeVolumetricEigenstrain
-!description /Materials/ComputeVolumetricEigenstrain
+!syntax description /Materials/ComputeVolumetricEigenstrain
 
 This material computes the eigenstrain tensor based on a set of scalar material properties
 which when summed together define the volumetric strain. The materials taken as input to this
@@ -10,8 +10,8 @@ In models that use finite strain
 formulations, the volume change resulting from this eigenstrain will exactly equal the
 specified volumetric strain.
 
-!parameters /Materials/ComputeVolumetricEigenstrain
+!syntax parameters /Materials/ComputeVolumetricEigenstrain
 
-!inputfiles /Materials/ComputeVolumetricEigenstrain
+!syntax inputs /Materials/ComputeVolumetricEigenstrain
 
-!childobjects /Materials/ComputeVolumetricEigenstrain
+!syntax children /Materials/ComputeVolumetricEigenstrain

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PresetAcceleration
-!description /BCs/PresetAcceleration
+!syntax description /BCs/PresetAcceleration
 
-!parameters /BCs/PresetAcceleration
+!syntax parameters /BCs/PresetAcceleration
 
-!inputfiles /BCs/PresetAcceleration
+!syntax inputs /BCs/PresetAcceleration
 
-!childobjects /BCs/PresetAcceleration
+!syntax children /BCs/PresetAcceleration

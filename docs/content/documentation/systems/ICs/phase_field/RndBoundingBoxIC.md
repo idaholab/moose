@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RndBoundingBoxIC
-!description /ICs/RndBoundingBoxIC
+!syntax description /ICs/RndBoundingBoxIC
 
-!parameters /ICs/RndBoundingBoxIC
+!syntax parameters /ICs/RndBoundingBoxIC
 
-!inputfiles /ICs/RndBoundingBoxIC
+!syntax inputs /ICs/RndBoundingBoxIC
 
-!childobjects /ICs/RndBoundingBoxIC
+!syntax children /ICs/RndBoundingBoxIC

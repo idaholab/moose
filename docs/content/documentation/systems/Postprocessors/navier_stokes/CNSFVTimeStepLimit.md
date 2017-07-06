@@ -1,7 +1,7 @@
-!description /Postprocessors/CNSFVTimeStepLimit
+!syntax description /Postprocessors/CNSFVTimeStepLimit
 
-!parameters /Postprocessors/CNSFVTimeStepLimit
+!syntax parameters /Postprocessors/CNSFVTimeStepLimit
 
-!inputfiles /Postprocessors/CNSFVTimeStepLimit
+!syntax inputs /Postprocessors/CNSFVTimeStepLimit
 
-!childobjects /Postprocessors/CNSFVTimeStepLimit
+!syntax children /Postprocessors/CNSFVTimeStepLimit

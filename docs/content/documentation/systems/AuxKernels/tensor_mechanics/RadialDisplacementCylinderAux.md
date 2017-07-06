@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RadialDisplacementCylinderAux
-!description /AuxKernels/RadialDisplacementCylinderAux
+!syntax description /AuxKernels/RadialDisplacementCylinderAux
 
-!parameters /AuxKernels/RadialDisplacementCylinderAux
+!syntax parameters /AuxKernels/RadialDisplacementCylinderAux
 
-!inputfiles /AuxKernels/RadialDisplacementCylinderAux
+!syntax inputs /AuxKernels/RadialDisplacementCylinderAux
 
-!childobjects /AuxKernels/RadialDisplacementCylinderAux
+!syntax children /AuxKernels/RadialDisplacementCylinderAux

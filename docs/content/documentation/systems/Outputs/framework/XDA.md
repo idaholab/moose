@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # XDA
-!description /Outputs/XDA
+!syntax description /Outputs/XDA
 
-!parameters /Outputs/XDA
+!syntax parameters /Outputs/XDA
 
-!inputfiles /Outputs/XDA
+!syntax inputs /Outputs/XDA
 
-!childobjects /Outputs/XDA
+!syntax children /Outputs/XDA

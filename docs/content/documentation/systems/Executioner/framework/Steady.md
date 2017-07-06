@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Steady
-!description /Executioner/Steady
+!syntax description /Executioner/Steady
 
-!parameters /Executioner/Steady
+!syntax parameters /Executioner/Steady
 
-!inputfiles /Executioner/Steady
+!syntax inputs /Executioner/Steady
 
-!childobjects /Executioner/Steady
+!syntax children /Executioner/Steady

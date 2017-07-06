@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LayeredAverage
-!description /UserObjects/LayeredAverage
+!syntax description /UserObjects/LayeredAverage
 
-!parameters /UserObjects/LayeredAverage
+!syntax parameters /UserObjects/LayeredAverage
 
-!inputfiles /UserObjects/LayeredAverage
+!syntax inputs /UserObjects/LayeredAverage
 
-!childobjects /UserObjects/LayeredAverage
+!syntax children /UserObjects/LayeredAverage

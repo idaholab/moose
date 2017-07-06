@@ -87,10 +87,10 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
         """
 
         if self._macro_files:
-            t_bib_path = MooseDocs.abspath("tBib.bib")
+            t_bib_path = os.path.join(MooseDocs.ROOT_DIR, "tBib.bib")
             with open(t_bib_path, "wb") as t_bib:
                 for t_file in self._macro_files:
-                    with open(MooseDocs.abspath(t_file.strip()), "rb") as in_file:
+                    with open(os.path.join(MooseDocs.ROOT_DIR, t_file.strip()), "rb") as in_file:
                         shutil.copyfileobj(in_file, t_bib)
                 with open(bibfile, "rb") as in_file:
                     shutil.copyfileobj(in_file, t_bib)
@@ -118,7 +118,8 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
         if match:
             for bfile in match.group(1).split(','):
                 try:
-                    bibfiles.append(MooseDocs.abspath(bfile.strip()))
+                    filename, _ = self.getFilename(bfile.strip())
+                    bibfiles.append(filename)
                     data = self.parseBibtexFile(bibfiles[-1])
                 except UndefinedMacro:
                     LOG.error('Undefined macro in bibtex file: %s, specify macro_files arguments ' \

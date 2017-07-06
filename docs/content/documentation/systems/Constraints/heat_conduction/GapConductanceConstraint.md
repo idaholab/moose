@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GapConductanceConstraint
-!description /Constraints/GapConductanceConstraint
+!syntax description /Constraints/GapConductanceConstraint
 
-!parameters /Constraints/GapConductanceConstraint
+!syntax parameters /Constraints/GapConductanceConstraint
 
-!inputfiles /Constraints/GapConductanceConstraint
+!syntax inputs /Constraints/GapConductanceConstraint
 
-!childobjects /Constraints/GapConductanceConstraint
+!syntax children /Constraints/GapConductanceConstraint

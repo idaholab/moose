@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TotalFreeEnergy
-!description /AuxKernels/TotalFreeEnergy
+!syntax description /AuxKernels/TotalFreeEnergy
 
-!parameters /AuxKernels/TotalFreeEnergy
+!syntax parameters /AuxKernels/TotalFreeEnergy
 
-!inputfiles /AuxKernels/TotalFreeEnergy
+!syntax inputs /AuxKernels/TotalFreeEnergy
 
-!childobjects /AuxKernels/TotalFreeEnergy
+!syntax children /AuxKernels/TotalFreeEnergy

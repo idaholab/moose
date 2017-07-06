@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideAverageValue
-!description /Postprocessors/SideAverageValue
+!syntax description /Postprocessors/SideAverageValue
 
-!parameters /Postprocessors/SideAverageValue
+!syntax parameters /Postprocessors/SideAverageValue
 
-!inputfiles /Postprocessors/SideAverageValue
+!syntax inputs /Postprocessors/SideAverageValue
 
-!childobjects /Postprocessors/SideAverageValue
+!syntax children /Postprocessors/SideAverageValue

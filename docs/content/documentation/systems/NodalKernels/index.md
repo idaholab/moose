@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalKernels System
-!parameters /NodalKernels
+!syntax objects /NodalKernels
 
-!subobjects /NodalKernels
+!syntax subsystems /NodalKernels
 
+!syntax actions /NodalKernels

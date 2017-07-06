@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AnisoHeatConduction
-!description /Kernels/AnisoHeatConduction
+!syntax description /Kernels/AnisoHeatConduction
 
-!parameters /Kernels/AnisoHeatConduction
+!syntax parameters /Kernels/AnisoHeatConduction
 
-!inputfiles /Kernels/AnisoHeatConduction
+!syntax inputs /Kernels/AnisoHeatConduction
 
-!childobjects /Kernels/AnisoHeatConduction
+!syntax children /Kernels/AnisoHeatConduction

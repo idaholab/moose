@@ -11,7 +11,7 @@ The first step is to add documentation for your application in the `validParams`
 and parameter documentation strings and calling the class description method.
 
 A description of each parameter should also be provided when they are added with the various add methods
-of the `InputParameters` object. For example, in the [FunctionIC](framework/FunctionIC.md)
+of the `InputParameters` object. For example, in the [FunctionIC](/Variables/InitialCondition/framework/FunctionIC.md)
 the following parameter documentation is added, which is then present in the parameter summary table of the
 generated site.
 

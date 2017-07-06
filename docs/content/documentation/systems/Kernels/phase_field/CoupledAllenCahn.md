@@ -1,5 +1,5 @@
 # CoupledAllenCahn
-!description /Kernels/CoupledAllenCahn
+!syntax description /Kernels/CoupledAllenCahn
 
 Implements the term
 
@@ -13,8 +13,8 @@ $\eta$ (`v`) is a coupled non-conserved order parameter, $L$ (`mob_name`) its as
 $f$ (`f_name`) is a free energy density provided by a [function material](../../introduction/FunctionMaterials), and
 $a,b,\dots$ (`args`) are additional variable dependencied of the mobility and free energy density.
 
-!parameters /Kernels/CoupledAllenCahn
+!syntax parameters /Kernels/CoupledAllenCahn
 
-!inputfiles /Kernels/CoupledAllenCahn
+!syntax inputs /Kernels/CoupledAllenCahn
 
-!childobjects /Kernels/CoupledAllenCahn
+!syntax children /Kernels/CoupledAllenCahn

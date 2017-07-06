@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # UserObjects System
-!parameters /UserObjects
+!syntax objects /UserObjects
 
-!subobjects /UserObjects
+!syntax subsystems /UserObjects
 
+!syntax actions /UserObjects

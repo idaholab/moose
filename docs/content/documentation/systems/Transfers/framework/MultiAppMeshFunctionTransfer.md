@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppMeshFunctionTransfer
-!description /Transfers/MultiAppMeshFunctionTransfer
+!syntax description /Transfers/MultiAppMeshFunctionTransfer
 
-!parameters /Transfers/MultiAppMeshFunctionTransfer
+!syntax parameters /Transfers/MultiAppMeshFunctionTransfer
 
-!inputfiles /Transfers/MultiAppMeshFunctionTransfer
+!syntax inputs /Transfers/MultiAppMeshFunctionTransfer
 
-!childobjects /Transfers/MultiAppMeshFunctionTransfer
+!syntax children /Transfers/MultiAppMeshFunctionTransfer

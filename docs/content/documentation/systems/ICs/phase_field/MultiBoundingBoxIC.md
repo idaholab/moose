@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiBoundingBoxIC
-!description /ICs/MultiBoundingBoxIC
+!syntax description /ICs/MultiBoundingBoxIC
 
-!parameters /ICs/MultiBoundingBoxIC
+!syntax parameters /ICs/MultiBoundingBoxIC
 
-!inputfiles /ICs/MultiBoundingBoxIC
+!syntax inputs /ICs/MultiBoundingBoxIC
 
-!childobjects /ICs/MultiBoundingBoxIC
+!syntax children /ICs/MultiBoundingBoxIC

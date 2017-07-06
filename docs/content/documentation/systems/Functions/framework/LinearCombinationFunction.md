@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LinearCombinationFunction
-!description /Functions/LinearCombinationFunction
+!syntax description /Functions/LinearCombinationFunction
 
-!parameters /Functions/LinearCombinationFunction
+!syntax parameters /Functions/LinearCombinationFunction
 
-!inputfiles /Functions/LinearCombinationFunction
+!syntax inputs /Functions/LinearCombinationFunction
 
-!childobjects /Functions/LinearCombinationFunction
+!syntax children /Functions/LinearCombinationFunction

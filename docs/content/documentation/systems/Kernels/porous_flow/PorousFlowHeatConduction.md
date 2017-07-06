@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowHeatConduction
-!description /Kernels/PorousFlowHeatConduction
+!syntax description /Kernels/PorousFlowHeatConduction
 
-!parameters /Kernels/PorousFlowHeatConduction
+!syntax parameters /Kernels/PorousFlowHeatConduction
 
-!inputfiles /Kernels/PorousFlowHeatConduction
+!syntax inputs /Kernels/PorousFlowHeatConduction
 
-!childobjects /Kernels/PorousFlowHeatConduction
+!syntax children /Kernels/PorousFlowHeatConduction

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Nemesis
-!description /Outputs/Nemesis
+!syntax description /Outputs/Nemesis
 
-!parameters /Outputs/Nemesis
+!syntax parameters /Outputs/Nemesis
 
-!inputfiles /Outputs/Nemesis
+!syntax inputs /Outputs/Nemesis
 
-!childobjects /Outputs/Nemesis
+!syntax children /Outputs/Nemesis

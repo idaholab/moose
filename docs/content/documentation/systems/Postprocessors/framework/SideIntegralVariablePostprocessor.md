@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideIntegralVariablePostprocessor
-!description /Postprocessors/SideIntegralVariablePostprocessor
+!syntax description /Postprocessors/SideIntegralVariablePostprocessor
 
-!parameters /Postprocessors/SideIntegralVariablePostprocessor
+!syntax parameters /Postprocessors/SideIntegralVariablePostprocessor
 
-!inputfiles /Postprocessors/SideIntegralVariablePostprocessor
+!syntax inputs /Postprocessors/SideIntegralVariablePostprocessor
 
-!childobjects /Postprocessors/SideIntegralVariablePostprocessor
+!syntax children /Postprocessors/SideIntegralVariablePostprocessor

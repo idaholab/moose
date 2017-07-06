@@ -1,5 +1,5 @@
 #Stress Divergence RZ Tensors
-!description /Kernels/StressDivergenceRZTensors
+!syntax description /Kernels/StressDivergenceRZTensors
 
 
 
@@ -30,8 +30,8 @@ $$
 The calculation of the Jacobian is similarly complex, requiring up to four terms in the calculation of the diagonal entries.
 
 
-!parameters /Kernels/StressDivergenceRZTensors
+!syntax parameters /Kernels/StressDivergenceRZTensors
 
-!inputfiles /Kernels/StressDivergenceRZTensors
+!syntax inputs /Kernels/StressDivergenceRZTensors
 
-!childobjects /Kernels/StressDivergenceRZTensors
+!syntax children /Kernels/StressDivergenceRZTensors

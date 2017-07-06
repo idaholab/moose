@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CHSplitChemicalPotential
-!description /Kernels/CHSplitChemicalPotential
+!syntax description /Kernels/CHSplitChemicalPotential
 
-!parameters /Kernels/CHSplitChemicalPotential
+!syntax parameters /Kernels/CHSplitChemicalPotential
 
-!inputfiles /Kernels/CHSplitChemicalPotential
+!syntax inputs /Kernels/CHSplitChemicalPotential
 
-!childobjects /Kernels/CHSplitChemicalPotential
+!syntax children /Kernels/CHSplitChemicalPotential

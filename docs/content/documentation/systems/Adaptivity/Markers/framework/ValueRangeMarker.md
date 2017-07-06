@@ -1,6 +1,6 @@
 
 # ValueRangeMarker
-!description /Adaptivity/Markers/ValueRangeMarker
+!syntax description /Adaptivity/Markers/ValueRangeMarker
 
 ## Description
 The `ValueRangeMarker` utilizes an
@@ -22,8 +22,8 @@ refinement.
 
 !listing test/tests/markers/value_range_marker/value_range_marker_test.i block=Adaptivity
 
-!parameters /Adaptivity/Markers/ValueRangeMarker
+!syntax parameters /Adaptivity/Markers/ValueRangeMarker
 
-!inputfiles /Adaptivity/Markers/ValueRangeMarker
+!syntax inputs /Adaptivity/Markers/ValueRangeMarker
 
-!childobjects /Adaptivity/Markers/ValueRangeMarker
+!syntax children /Adaptivity/Markers/ValueRangeMarker

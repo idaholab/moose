@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CrystalPlasticityStateVarRateComponentGSS
-!description /UserObjects/CrystalPlasticityStateVarRateComponentGSS
+!syntax description /UserObjects/CrystalPlasticityStateVarRateComponentGSS
 
-!parameters /UserObjects/CrystalPlasticityStateVarRateComponentGSS
+!syntax parameters /UserObjects/CrystalPlasticityStateVarRateComponentGSS
 
-!inputfiles /UserObjects/CrystalPlasticityStateVarRateComponentGSS
+!syntax inputs /UserObjects/CrystalPlasticityStateVarRateComponentGSS
 
-!childobjects /UserObjects/CrystalPlasticityStateVarRateComponentGSS
+!syntax children /UserObjects/CrystalPlasticityStateVarRateComponentGSS

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainForcesPostprocessor
-!description /VectorPostprocessors/GrainForcesPostprocessor
+!syntax description /VectorPostprocessors/GrainForcesPostprocessor
 
-!parameters /VectorPostprocessors/GrainForcesPostprocessor
+!syntax parameters /VectorPostprocessors/GrainForcesPostprocessor
 
-!inputfiles /VectorPostprocessors/GrainForcesPostprocessor
+!syntax inputs /VectorPostprocessors/GrainForcesPostprocessor
 
-!childobjects /VectorPostprocessors/GrainForcesPostprocessor
+!syntax children /VectorPostprocessors/GrainForcesPostprocessor

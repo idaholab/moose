@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ParsedGradFunction
-!description /Functions/ParsedGradFunction
+!syntax description /Functions/ParsedGradFunction
 
-!parameters /Functions/ParsedGradFunction
+!syntax parameters /Functions/ParsedGradFunction
 
-!inputfiles /Functions/ParsedGradFunction
+!syntax inputs /Functions/ParsedGradFunction
 
-!childobjects /Functions/ParsedGradFunction
+!syntax children /Functions/ParsedGradFunction

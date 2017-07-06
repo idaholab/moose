@@ -13,8 +13,9 @@
 #                                                                                                  #
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
-
+import re
 import unittest
+import MooseDocs
 from MooseDocs.testing import MarkdownTestCase
 
 class TestDevelExtension(MarkdownTestCase):
@@ -36,6 +37,12 @@ class TestDevelExtension(MarkdownTestCase):
     def testSettings(self):
         md = '!extension-settings moose_extension_config'
         self.assertConvert('test_Settings.html', md)
+
+    def testDeprecated(self):
+        MooseDocs.DEPRECATED_MARKDOWN = [(re.compile(r'(?P<command>!testing!)'), '!replace!')]
+        md = 'This is a test\nof deprecated commands !testing!'
+        self.convert(md)
+        self.assertInLogError('!testing!')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

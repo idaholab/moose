@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeElasticSmearedCrackingStress
-!description /Materials/ComputeElasticSmearedCrackingStress
+!syntax description /Materials/ComputeElasticSmearedCrackingStress
 
-!parameters /Materials/ComputeElasticSmearedCrackingStress
+!syntax parameters /Materials/ComputeElasticSmearedCrackingStress
 
-!inputfiles /Materials/ComputeElasticSmearedCrackingStress
+!syntax inputs /Materials/ComputeElasticSmearedCrackingStress
 
-!childobjects /Materials/ComputeElasticSmearedCrackingStress
+!syntax children /Materials/ComputeElasticSmearedCrackingStress

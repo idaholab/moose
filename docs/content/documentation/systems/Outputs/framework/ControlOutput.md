@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ControlOutput
-!description /Outputs/ControlOutput
+!syntax description /Outputs/ControlOutput
 
-!parameters /Outputs/ControlOutput
+!syntax parameters /Outputs/ControlOutput
 
-!inputfiles /Outputs/ControlOutput
+!syntax inputs /Outputs/ControlOutput
 
-!childobjects /Outputs/ControlOutput
+!syntax children /Outputs/ControlOutput

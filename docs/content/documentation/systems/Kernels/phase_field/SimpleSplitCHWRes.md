@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SimpleSplitCHWRes
-!description /Kernels/SimpleSplitCHWRes
+!syntax description /Kernels/SimpleSplitCHWRes
 
-!parameters /Kernels/SimpleSplitCHWRes
+!syntax parameters /Kernels/SimpleSplitCHWRes
 
-!inputfiles /Kernels/SimpleSplitCHWRes
+!syntax inputs /Kernels/SimpleSplitCHWRes
 
-!childobjects /Kernels/SimpleSplitCHWRes
+!syntax children /Kernels/SimpleSplitCHWRes

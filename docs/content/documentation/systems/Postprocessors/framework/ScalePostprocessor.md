@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ScalePostprocessor
-!description /Postprocessors/ScalePostprocessor
+!syntax description /Postprocessors/ScalePostprocessor
 
-!parameters /Postprocessors/ScalePostprocessor
+!syntax parameters /Postprocessors/ScalePostprocessor
 
-!inputfiles /Postprocessors/ScalePostprocessor
+!syntax inputs /Postprocessors/ScalePostprocessor
 
-!childobjects /Postprocessors/ScalePostprocessor
+!syntax children /Postprocessors/ScalePostprocessor

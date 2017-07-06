@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVFreeOutflowBoundaryFlux
+!syntax description /UserObjects/CNSFVFreeOutflowBoundaryFlux
 
-!parameters /UserObjects/CNSFVFreeOutflowBoundaryFlux
+!syntax parameters /UserObjects/CNSFVFreeOutflowBoundaryFlux
 
-!inputfiles /UserObjects/CNSFVFreeOutflowBoundaryFlux
+!syntax inputs /UserObjects/CNSFVFreeOutflowBoundaryFlux
 
-!childobjects /UserObjects/CNSFVFreeOutflowBoundaryFlux
+!syntax children /UserObjects/CNSFVFreeOutflowBoundaryFlux

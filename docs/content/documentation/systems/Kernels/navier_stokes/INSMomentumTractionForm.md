@@ -1,7 +1,7 @@
-!description /Kernels/INSMomentumTractionForm
+!syntax description /Kernels/INSMomentumTractionForm
 
-!parameters /Kernels/INSMomentumTractionForm
+!syntax parameters /Kernels/INSMomentumTractionForm
 
-!inputfiles /Kernels/INSMomentumTractionForm
+!syntax inputs /Kernels/INSMomentumTractionForm
 
-!childobjects /Kernels/INSMomentumTractionForm
+!syntax children /Kernels/INSMomentumTractionForm

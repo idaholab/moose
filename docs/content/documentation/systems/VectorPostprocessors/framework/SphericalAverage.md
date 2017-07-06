@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SphericalAverage
-!description /VectorPostprocessors/SphericalAverage
+!syntax description /VectorPostprocessors/SphericalAverage
 
-!parameters /VectorPostprocessors/SphericalAverage
+!syntax parameters /VectorPostprocessors/SphericalAverage
 
-!inputfiles /VectorPostprocessors/SphericalAverage
+!syntax inputs /VectorPostprocessors/SphericalAverage
 
-!childobjects /VectorPostprocessors/SphericalAverage
+!syntax children /VectorPostprocessors/SphericalAverage

@@ -1,7 +1,7 @@
-!description /Kernels/INSChorinPredictor
+!syntax description /Kernels/INSChorinPredictor
 
-!parameters /Kernels/INSChorinPredictor
+!syntax parameters /Kernels/INSChorinPredictor
 
-!inputfiles /Kernels/INSChorinPredictor
+!syntax inputs /Kernels/INSChorinPredictor
 
-!childobjects /Kernels/INSChorinPredictor
+!syntax children /Kernels/INSChorinPredictor

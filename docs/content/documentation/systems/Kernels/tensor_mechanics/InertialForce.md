@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # InertialForce
-!description /Kernels/InertialForce
+!syntax description /Kernels/InertialForce
 
-!parameters /Kernels/InertialForce
+!syntax parameters /Kernels/InertialForce
 
-!inputfiles /Kernels/InertialForce
+!syntax inputs /Kernels/InertialForce
 
-!childobjects /Kernels/InertialForce
+!syntax children /Kernels/InertialForce

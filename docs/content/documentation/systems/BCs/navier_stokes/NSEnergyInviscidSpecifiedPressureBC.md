@@ -1,7 +1,7 @@
-!description /BCs/NSEnergyInviscidSpecifiedPressureBC
+!syntax description /BCs/NSEnergyInviscidSpecifiedPressureBC
 
-!parameters /BCs/NSEnergyInviscidSpecifiedPressureBC
+!syntax parameters /BCs/NSEnergyInviscidSpecifiedPressureBC
 
-!inputfiles /BCs/NSEnergyInviscidSpecifiedPressureBC
+!syntax inputs /BCs/NSEnergyInviscidSpecifiedPressureBC
 
-!childobjects /BCs/NSEnergyInviscidSpecifiedPressureBC
+!syntax children /BCs/NSEnergyInviscidSpecifiedPressureBC

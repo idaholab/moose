@@ -1,7 +1,7 @@
-!description /BCs/NSImposedVelocityDirectionBC
+!syntax description /BCs/NSImposedVelocityDirectionBC
 
-!parameters /BCs/NSImposedVelocityDirectionBC
+!syntax parameters /BCs/NSImposedVelocityDirectionBC
 
-!inputfiles /BCs/NSImposedVelocityDirectionBC
+!syntax inputs /BCs/NSImposedVelocityDirectionBC
 
-!childobjects /BCs/NSImposedVelocityDirectionBC
+!syntax children /BCs/NSImposedVelocityDirectionBC

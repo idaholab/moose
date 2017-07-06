@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CavityPressureUserObject
-!description /UserObjects/CavityPressureUserObject
+!syntax description /UserObjects/CavityPressureUserObject
 
-!parameters /UserObjects/CavityPressureUserObject
+!syntax parameters /UserObjects/CavityPressureUserObject
 
-!inputfiles /UserObjects/CavityPressureUserObject
+!syntax inputs /UserObjects/CavityPressureUserObject
 
-!childobjects /UserObjects/CavityPressureUserObject
+!syntax children /UserObjects/CavityPressureUserObject

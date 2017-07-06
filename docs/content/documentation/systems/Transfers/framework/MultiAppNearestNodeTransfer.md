@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppNearestNodeTransfer
-!description /Transfers/MultiAppNearestNodeTransfer
+!syntax description /Transfers/MultiAppNearestNodeTransfer
 
-!parameters /Transfers/MultiAppNearestNodeTransfer
+!syntax parameters /Transfers/MultiAppNearestNodeTransfer
 
-!inputfiles /Transfers/MultiAppNearestNodeTransfer
+!syntax inputs /Transfers/MultiAppNearestNodeTransfer
 
-!childobjects /Transfers/MultiAppNearestNodeTransfer
+!syntax children /Transfers/MultiAppNearestNodeTransfer

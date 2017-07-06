@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TimeIntegrator System
-!parameters /Executioner/TimeIntegrator
+!syntax objects /Executioner/TimeIntegrator
 
-!subsystems /Executioner/TimeIntegrator
+!syntax subsystems /Executioner/TimeIntegrator
 
+!syntax actions /Executioner/TimeIntegrator

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputePlaneSmallStrain
-!description /Materials/ComputePlaneSmallStrain
+!syntax description /Materials/ComputePlaneSmallStrain
 
-!parameters /Materials/ComputePlaneSmallStrain
+!syntax parameters /Materials/ComputePlaneSmallStrain
 
-!inputfiles /Materials/ComputePlaneSmallStrain
+!syntax inputs /Materials/ComputePlaneSmallStrain
 
-!childobjects /Materials/ComputePlaneSmallStrain
+!syntax children /Materials/ComputePlaneSmallStrain

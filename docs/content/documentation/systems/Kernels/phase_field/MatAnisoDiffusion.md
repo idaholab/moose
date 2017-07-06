@@ -1,11 +1,11 @@
 # MatAnisoDiffusion
-!description /Kernels/MatAnisoDiffusion
+!syntax description /Kernels/MatAnisoDiffusion
 
 This is anisotropic version of [`MatDiffusion`](/MatDiffusion.md), which expects a tensor valued diffusion
 coefficient $D$.
 
-!parameters /Kernels/MatAnisoDiffusion
+!syntax parameters /Kernels/MatAnisoDiffusion
 
-!inputfiles /Kernels/MatAnisoDiffusion
+!syntax inputs /Kernels/MatAnisoDiffusion
 
-!childobjects /Kernels/MatAnisoDiffusion
+!syntax children /Kernels/MatAnisoDiffusion

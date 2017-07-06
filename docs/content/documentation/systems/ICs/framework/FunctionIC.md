@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionIC
-!description /ICs/FunctionIC
+!syntax description /ICs/FunctionIC
 
-!parameters /ICs/FunctionIC
+!syntax parameters /ICs/FunctionIC
 
-!inputfiles /ICs/FunctionIC
+!syntax inputs /ICs/FunctionIC
 
-!childobjects /ICs/FunctionIC
+!syntax children /ICs/FunctionIC

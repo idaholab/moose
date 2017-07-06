@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionPresetBC
-!description /BCs/FunctionPresetBC
+!syntax description /BCs/FunctionPresetBC
 
-!parameters /BCs/FunctionPresetBC
+!syntax parameters /BCs/FunctionPresetBC
 
-!inputfiles /BCs/FunctionPresetBC
+!syntax inputs /BCs/FunctionPresetBC
 
-!childobjects /BCs/FunctionPresetBC
+!syntax children /BCs/FunctionPresetBC

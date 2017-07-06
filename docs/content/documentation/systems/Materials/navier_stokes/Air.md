@@ -1,7 +1,7 @@
-!description /Materials/Air
+!syntax description /Materials/Air
 
-!parameters /Materials/Air
+!syntax parameters /Materials/Air
 
-!inputfiles /Materials/Air
+!syntax inputs /Materials/Air
 
-!childobjects /Materials/Air
+!syntax children /Materials/Air

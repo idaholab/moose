@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TimeDerivativeNodalKernel
-!description /NodalKernels/TimeDerivativeNodalKernel
+!syntax description /NodalKernels/TimeDerivativeNodalKernel
 
-!parameters /NodalKernels/TimeDerivativeNodalKernel
+!syntax parameters /NodalKernels/TimeDerivativeNodalKernel
 
-!inputfiles /NodalKernels/TimeDerivativeNodalKernel
+!syntax inputs /NodalKernels/TimeDerivativeNodalKernel
 
-!childobjects /NodalKernels/TimeDerivativeNodalKernel
+!syntax children /NodalKernels/TimeDerivativeNodalKernel

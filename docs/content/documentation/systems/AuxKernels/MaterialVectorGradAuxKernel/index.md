@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialVectorGradAuxKernel System
-!parameters /AuxKernels/MaterialVectorGradAuxKernel
+!syntax objects /AuxKernels/MaterialVectorGradAuxKernel
 
+!syntax subsystems /AuxKernels/MaterialVectorGradAuxKernel
+
+!syntax actions /AuxKernels/MaterialVectorGradAuxKernel

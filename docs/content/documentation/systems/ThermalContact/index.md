@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ThermalContact System
-!parameters /ThermalContact
+!syntax objects /ThermalContact
 
+!syntax subsystems /ThermalContact
+
+!syntax actions /ThermalContact

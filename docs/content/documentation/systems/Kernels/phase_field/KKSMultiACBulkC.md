@@ -1,5 +1,5 @@
 # KKSMultiACBulkC
-!description /Kernels/KKSMultiACBulkC
+!syntax description /Kernels/KKSMultiACBulkC
 
 ### Residual
 
@@ -68,13 +68,10 @@ J &=& \phi_j \frac{\partial R}{\partial v} \\
 $$
 (This handles everything except for $c_1$, $c_2$, $c_3$, which are handled separately first). For the off-diagonal Jacobians we also need to multiply by $L$, the Allen-Cahn mobility.
 
+!syntax parameters /Kernels/KKSMultiACBulkC
 
+!syntax inputs /Kernels/KKSMultiACBulkC
 
-
-!parameters /Kernels/KKSMultiACBulkC
-
-!inputfiles /Kernels/KKSMultiACBulkC
-
-!childobjects /Kernels/KKSMultiACBulkC
+!syntax children /Kernels/KKSMultiACBulkC
 
 \bibliography{docs/bib/phase_field.bib}

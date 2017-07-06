@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Constraints System
-!parameters /Constraints
+!syntax objects /Constraints
 
-!subobjects /Constraints
+!syntax subsystems /Constraints
 
+!syntax actions /Constraints

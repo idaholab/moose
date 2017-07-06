@@ -1,7 +1,7 @@
-!description /Kernels/NSMomentumViscousFlux
+!syntax description /Kernels/NSMomentumViscousFlux
 
-!parameters /Kernels/NSMomentumViscousFlux
+!syntax parameters /Kernels/NSMomentumViscousFlux
 
-!inputfiles /Kernels/NSMomentumViscousFlux
+!syntax inputs /Kernels/NSMomentumViscousFlux
 
-!childobjects /Kernels/NSMomentumViscousFlux
+!syntax children /Kernels/NSMomentumViscousFlux

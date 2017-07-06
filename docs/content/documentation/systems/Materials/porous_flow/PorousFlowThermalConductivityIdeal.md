@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowThermalConductivityIdeal
-!description /Materials/PorousFlowThermalConductivityIdeal
+!syntax description /Materials/PorousFlowThermalConductivityIdeal
 
-!parameters /Materials/PorousFlowThermalConductivityIdeal
+!syntax parameters /Materials/PorousFlowThermalConductivityIdeal
 
-!inputfiles /Materials/PorousFlowThermalConductivityIdeal
+!syntax inputs /Materials/PorousFlowThermalConductivityIdeal
 
-!childobjects /Materials/PorousFlowThermalConductivityIdeal
+!syntax children /Materials/PorousFlowThermalConductivityIdeal

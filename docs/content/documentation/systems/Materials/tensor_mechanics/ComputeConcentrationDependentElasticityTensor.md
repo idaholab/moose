@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeConcentrationDependentElasticityTensor
-!description /Materials/ComputeConcentrationDependentElasticityTensor
+!syntax description /Materials/ComputeConcentrationDependentElasticityTensor
 
-!parameters /Materials/ComputeConcentrationDependentElasticityTensor
+!syntax parameters /Materials/ComputeConcentrationDependentElasticityTensor
 
-!inputfiles /Materials/ComputeConcentrationDependentElasticityTensor
+!syntax inputs /Materials/ComputeConcentrationDependentElasticityTensor
 
-!childobjects /Materials/ComputeConcentrationDependentElasticityTensor
+!syntax children /Materials/ComputeConcentrationDependentElasticityTensor

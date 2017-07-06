@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HeatConduction
-!description /Kernels/HeatConduction
+!syntax description /Kernels/HeatConduction
 
-!parameters /Kernels/HeatConduction
+!syntax parameters /Kernels/HeatConduction
 
-!inputfiles /Kernels/HeatConduction
+!syntax inputs /Kernels/HeatConduction
 
-!childobjects /Kernels/HeatConduction
+!syntax children /Kernels/HeatConduction

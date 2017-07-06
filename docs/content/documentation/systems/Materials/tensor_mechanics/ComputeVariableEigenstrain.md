@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeVariableEigenstrain
-!description /Materials/ComputeVariableEigenstrain
+!syntax description /Materials/ComputeVariableEigenstrain
 
-!parameters /Materials/ComputeVariableEigenstrain
+!syntax parameters /Materials/ComputeVariableEigenstrain
 
-!inputfiles /Materials/ComputeVariableEigenstrain
+!syntax inputs /Materials/ComputeVariableEigenstrain
 
-!childobjects /Materials/ComputeVariableEigenstrain
+!syntax children /Materials/ComputeVariableEigenstrain

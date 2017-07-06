@@ -15,9 +15,8 @@ list of object names, which are defined in two different ways. For a discussion 
 of objects and parameters see
 [Object and Parameter Names](systems/Controls/index.md#object-and-parameter-names) section.
 
+!syntax parameters /Controls/TimePeriod
 
-!parameters /Controls/TimePeriod
+!syntax inputs /Controls/TimePeriod
 
-!inputfiles /Controls/TimePeriod
-
-!childobjects /Controls/TimePeriod
+!syntax children /Controls/TimePeriod

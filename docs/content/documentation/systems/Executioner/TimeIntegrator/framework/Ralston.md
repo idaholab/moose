@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Ralston
-!description /Executioner/TimeIntegrator/Ralston
+!syntax description /Executioner/TimeIntegrator/Ralston
 
-!parameters /Executioner/TimeIntegrator/Ralston
+!syntax parameters /Executioner/TimeIntegrator/Ralston
 
-!inputfiles /Executioner/TimeIntegrator/Ralston
+!syntax inputs /Executioner/TimeIntegrator/Ralston
 
-!childobjects /Executioner/TimeIntegrator/Ralston
+!syntax children /Executioner/TimeIntegrator/Ralston

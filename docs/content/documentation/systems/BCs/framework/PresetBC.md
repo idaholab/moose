@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PresetBC
-!description /BCs/PresetBC
+!syntax description /BCs/PresetBC
 
-!parameters /BCs/PresetBC
+!syntax parameters /BCs/PresetBC
 
-!inputfiles /BCs/PresetBC
+!syntax inputs /BCs/PresetBC
 
-!childobjects /BCs/PresetBC
+!syntax children /BCs/PresetBC

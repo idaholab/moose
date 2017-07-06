@@ -17,8 +17,13 @@ import os
 import inspect
 import unittest
 import difflib
+import StringIO
+
 import bs4
+
 import MooseDocs
+from MooseDocs.MooseMarkdown import MooseMarkdown
+from MooseDocs.main import init_logging
 from MooseDocs.html2latex import Translator, BasicExtension, MooseExtension
 
 def text_diff(text, gold):
@@ -31,7 +36,39 @@ def text_diff(text, gold):
          .format('~'*n, '\n'.join(result).encode('utf-8'))
     return msg
 
-class MarkdownTestCase(unittest.TestCase):
+class LogTestCase(unittest.TestCase):
+    """
+    Provides asserts for checking logged warnings and errors.
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Create the markdown parser using the configuration file.
+        """
+
+        # Setup logging
+        cls._stream = StringIO.StringIO()
+        cls._formatter = init_logging(stream=cls._stream)
+
+    def assertInLogInfo(self, msg):
+        """
+        Test that info was logged.
+        """
+        self.assertIn(msg, self._formatter.messages('INFO')[-1])
+
+    def assertInLogError(self, msg):
+        """
+        Test that an error was logged.
+        """
+        self.assertIn(msg, self._formatter.messages('ERROR')[-1])
+
+    def assertInLogWarning(self, msg):
+        """
+        Test that a warning was logged.
+        """
+        self.assertIn(msg, self._formatter.messages('WARNING')[-1])
+
+class MarkdownTestCase(LogTestCase):
     """
     Provides functions for converting markdown to html and asserting conversion against
     gold html files.
@@ -45,15 +82,14 @@ class MarkdownTestCase(unittest.TestCase):
         """
         Create the markdown parser using the configuration file.
         """
+        super(MarkdownTestCase, cls).setUpClass()
 
         # Define the local directory
         cls._path = os.path.abspath(os.path.dirname(inspect.getfile(cls)))
 
-        # Create the markdown object
-        os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
-
         # Read the YAML configurations
-        config = MooseDocs.load_config(cls.CONFIG)
+        config = MooseMarkdown.getDefaultExtensions()
+        config.update(MooseDocs.load_config(os.path.join(MooseDocs.MOOSE_DIR, 'docs', cls.CONFIG)))
 
         # Update extension list
         if cls.EXTENSIONS:
@@ -62,8 +98,7 @@ class MarkdownTestCase(unittest.TestCase):
                     config.pop(key)
 
         cls.updateExtensions(config)
-        cls.parser = MooseDocs.MooseMarkdown(extensions=config.keys(), extension_configs=config)
-        os.chdir(cls.WORKING_DIR)
+        cls.parser = MooseMarkdown(config, default=False)
 
     @classmethod
     def updateExtensions(cls, configs):
@@ -168,6 +203,8 @@ class MarkdownTestCase(unittest.TestCase):
 
         # Compare against gold
         self.assertTextFile(name)
+
+
 
 class TestLatexBase(MarkdownTestCase):
     """

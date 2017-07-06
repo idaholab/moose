@@ -50,7 +50,7 @@
 
 ## MOOSE: Multiphysics Object Oriented Simulation Environment
 
-!media docs/media/bison_pellet_stack.png float=right width=19%
+!media media/bison_pellet_stack.png float=right width=19%
 
 !css class="moose-two-column" float=left width=80%
 * A framework for solving computational engineering problems in a well-planned, managed, and coordinated way
@@ -62,7 +62,7 @@
 
 --
 
-!media docs/media/moose_full_core.png
+!media media/moose_full_core.png
 
 --
 
@@ -93,7 +93,7 @@
 * Uses well-established libraries
 * Implements robust and state-of-the-art solution methods
 
-!media docs/media/moose_arch.png width=80%
+!media media/moose_arch.png width=80%
 
 --
 
@@ -115,13 +115,13 @@
 
 ## MOOSE Application Architecture
 
-!media docs/media/moose_blocks.png
+!media media/moose_blocks.png
 
 --
 
 ## MOOSE Code Example
 
-!media docs/media/code_example.png
+!media media/code_example.png
 
 --
 
@@ -136,4 +136,4 @@
 
 --
 
-!media docs/media/revised_moose_devel.png
+!media media/revised_moose_devel.png

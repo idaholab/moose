@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConvectiveFluxFunction
-!description /BCs/ConvectiveFluxFunction
+!syntax description /BCs/ConvectiveFluxFunction
 
-!parameters /BCs/ConvectiveFluxFunction
+!syntax parameters /BCs/ConvectiveFluxFunction
 
-!inputfiles /BCs/ConvectiveFluxFunction
+!syntax inputs /BCs/ConvectiveFluxFunction
 
-!childobjects /BCs/ConvectiveFluxFunction
+!syntax children /BCs/ConvectiveFluxFunction

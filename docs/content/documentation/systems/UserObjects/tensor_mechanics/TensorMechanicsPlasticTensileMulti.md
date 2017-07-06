@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticTensileMulti
-!description /UserObjects/TensorMechanicsPlasticTensileMulti
+!syntax description /UserObjects/TensorMechanicsPlasticTensileMulti
 
-!parameters /UserObjects/TensorMechanicsPlasticTensileMulti
+!syntax parameters /UserObjects/TensorMechanicsPlasticTensileMulti
 
-!inputfiles /UserObjects/TensorMechanicsPlasticTensileMulti
+!syntax inputs /UserObjects/TensorMechanicsPlasticTensileMulti
 
-!childobjects /UserObjects/TensorMechanicsPlasticTensileMulti
+!syntax children /UserObjects/TensorMechanicsPlasticTensileMulti

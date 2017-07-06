@@ -1,7 +1,7 @@
-!description /AuxKernels/CNSFVSpecificTotalEnthalpyAux
+!syntax description /AuxKernels/CNSFVSpecificTotalEnthalpyAux
 
-!parameters /AuxKernels/CNSFVSpecificTotalEnthalpyAux
+!syntax parameters /AuxKernels/CNSFVSpecificTotalEnthalpyAux
 
-!inputfiles /AuxKernels/CNSFVSpecificTotalEnthalpyAux
+!syntax inputs /AuxKernels/CNSFVSpecificTotalEnthalpyAux
 
-!childobjects /AuxKernels/CNSFVSpecificTotalEnthalpyAux
+!syntax children /AuxKernels/CNSFVSpecificTotalEnthalpyAux

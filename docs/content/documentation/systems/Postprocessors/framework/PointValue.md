@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PointValue
-!description /Postprocessors/PointValue
+!syntax description /Postprocessors/PointValue
 
-!parameters /Postprocessors/PointValue
+!syntax parameters /Postprocessors/PointValue
 
-!inputfiles /Postprocessors/PointValue
+!syntax inputs /Postprocessors/PointValue
 
-!childobjects /Postprocessors/PointValue
+!syntax children /Postprocessors/PointValue

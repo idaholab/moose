@@ -13,7 +13,14 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
-
+from MooseCollapsible import MooseCollapsible
 from MarkdownTable import MarkdownTable
-from MooseApplicationSyntax import MooseApplicationSyntax
 from MooseLinkDatabase import MooseLinkDatabase
+from MooseClassDatabase import MooseClassDatabase
+from Builder import Builder
+from moose_docs_file_tree import moose_docs_file_tree
+from moose_docs_import import moose_docs_import
+from moose_docs_app_syntax import moose_docs_app_syntax
+
+EXTENSIONS = ('.md', '.png', '.bmp', '.jpeg', '.svg', '.gif', '.webm', '.ogg', '.mp4', '.js',
+              '.css', '.bib')

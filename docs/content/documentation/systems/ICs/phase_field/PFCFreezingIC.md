@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFCFreezingIC
-!description /ICs/PFCFreezingIC
+!syntax description /ICs/PFCFreezingIC
 
-!parameters /ICs/PFCFreezingIC
+!syntax parameters /ICs/PFCFreezingIC
 
-!inputfiles /ICs/PFCFreezingIC
+!syntax inputs /ICs/PFCFreezingIC
 
-!childobjects /ICs/PFCFreezingIC
+!syntax children /ICs/PFCFreezingIC

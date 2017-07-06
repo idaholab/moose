@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeCosseratIncrementalSmallStrain
-!description /Materials/ComputeCosseratIncrementalSmallStrain
+!syntax description /Materials/ComputeCosseratIncrementalSmallStrain
 
-!parameters /Materials/ComputeCosseratIncrementalSmallStrain
+!syntax parameters /Materials/ComputeCosseratIncrementalSmallStrain
 
-!inputfiles /Materials/ComputeCosseratIncrementalSmallStrain
+!syntax inputs /Materials/ComputeCosseratIncrementalSmallStrain
 
-!childobjects /Materials/ComputeCosseratIncrementalSmallStrain
+!syntax children /Materials/ComputeCosseratIncrementalSmallStrain

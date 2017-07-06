@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeLinearElasticStress
-!description /Materials/ComputeLinearElasticStress
+!syntax description /Materials/ComputeLinearElasticStress
 
-!parameters /Materials/ComputeLinearElasticStress
+!syntax parameters /Materials/ComputeLinearElasticStress
 
-!inputfiles /Materials/ComputeLinearElasticStress
+!syntax inputs /Materials/ComputeLinearElasticStress
 
-!childobjects /Materials/ComputeLinearElasticStress
+!syntax children /Materials/ComputeLinearElasticStress

@@ -1,5 +1,5 @@
 # HHPFCRFF
-!description /Kernels/HHPFCRFF
+!syntax description /Kernels/HHPFCRFF
 
 Implements
 
@@ -11,8 +11,8 @@ where the sign is determined by the `positive` parameter, $P$ (`prop_name`) is a
 material property, and $u$ is either a coupled variable (`coupled_var`)
 or - if not explicitly specified - the non-linear variable the kernel is operating on.
 
-!parameters /Kernels/HHPFCRFF
+!syntax parameters /Kernels/HHPFCRFF
 
-!inputfiles /Kernels/HHPFCRFF
+!syntax inputs /Kernels/HHPFCRFF
 
-!childobjects /Kernels/HHPFCRFF
+!syntax children /Kernels/HHPFCRFF

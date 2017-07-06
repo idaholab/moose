@@ -1,10 +1,10 @@
 
 # SolutionRasterizer
-!description /UserObjects/SolutionRasterizer
+!syntax description /UserObjects/SolutionRasterizer
 
 Mesoscale microstructure simulations using the phase field method can be utilized to generate initial structures for large sacle molecular dynamics simulations. One application is the construction of nano-foam atomistic samples from simulations of spinodal decomposition.
 
-!media docs/media/phase_field/solutionrasterizer.png width=30% padding-left=20px float=right caption=Nano foam atomistic configuration generated using the `SolutionRasterizer`.
+!media media/phase_field/solutionrasterizer.png width=30% padding-left=20px float=right caption=Nano foam atomistic configuration generated using the `SolutionRasterizer`.
 
 MOOSE provides a built in system to template an atomic coordinate file in the `.xyz` format from the simulation result in a given mesh file. The workflow is as follows
 
@@ -35,8 +35,8 @@ The following input can be executed with the MOOSE Phase Field module executable
 
 !listing modules/phase_field/tests/solution_rasterizer/raster.i
 
-!parameters /UserObjects/SolutionRasterizer
+!syntax parameters /UserObjects/SolutionRasterizer
 
-!inputfiles /UserObjects/SolutionRasterizer
+!syntax inputs /UserObjects/SolutionRasterizer
 
-!childobjects /UserObjects/SolutionRasterizer
+!syntax children /UserObjects/SolutionRasterizer

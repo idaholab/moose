@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DynamicStressDivergenceTensors
-!description /Kernels/DynamicStressDivergenceTensors
+!syntax description /Kernels/DynamicStressDivergenceTensors
 
-!parameters /Kernels/DynamicStressDivergenceTensors
+!syntax parameters /Kernels/DynamicStressDivergenceTensors
 
-!inputfiles /Kernels/DynamicStressDivergenceTensors
+!syntax inputs /Kernels/DynamicStressDivergenceTensors
 
-!childobjects /Kernels/DynamicStressDivergenceTensors
+!syntax children /Kernels/DynamicStressDivergenceTensors

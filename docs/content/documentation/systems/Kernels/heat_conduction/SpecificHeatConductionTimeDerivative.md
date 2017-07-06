@@ -1,6 +1,6 @@
 
 # SpecificHeatConductionTimeDerivative
-!description /Kernels/SpecificHeatConductionTimeDerivative
+!syntax description /Kernels/SpecificHeatConductionTimeDerivative
 
 !!! note
     This kernel uses the [DerivativeMaterialInterface](/DerivativeMaterialInterface.md)
@@ -9,8 +9,8 @@
 # See also
 * [[/HeatCapacityConductionTimeDerivative.md]]
 
-!parameters /Kernels/SpecificHeatConductionTimeDerivative
+!syntax parameters /Kernels/SpecificHeatConductionTimeDerivative
 
-!inputfiles /Kernels/SpecificHeatConductionTimeDerivative
+!syntax inputs /Kernels/SpecificHeatConductionTimeDerivative
 
-!childobjects /Kernels/SpecificHeatConductionTimeDerivative
+!syntax children /Kernels/SpecificHeatConductionTimeDerivative

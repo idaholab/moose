@@ -22,7 +22,6 @@ commands add associated settings defined in the extension.
 | [global](extensions/global.md) | Implements a global list of Markdown hyperlinks. |
 | [bibtex](extensions/bibtex.md) | Allows LaTeX/BibTeX style citations and bibliographies. |
 | [css](extensions/css.md) | Enables [CSS](https://en.wikipedia.org/wiki/Cascading_Style_Sheets) settings to be applied via markdown |
-| [diagram](extensions/diagram.md) | Automatically generates DOT/GraphVIZ diagrams. |
 | [devel](extensions/devel.md) | Adds the ability to extract configuration and commands settings in addition to build status and MOOSE package information (MOOSE developer tools). |
 | [include](extensions/include.md) | Adds ability to include complete or partial markdown files. |
 | [misc](extensions/misc.md) | Adds code copy button and scrolling contents to html. |

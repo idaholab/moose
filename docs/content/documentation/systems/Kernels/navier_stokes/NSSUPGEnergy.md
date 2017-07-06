@@ -1,7 +1,7 @@
-!description /Kernels/NSSUPGEnergy
+!syntax description /Kernels/NSSUPGEnergy
 
-!parameters /Kernels/NSSUPGEnergy
+!syntax parameters /Kernels/NSSUPGEnergy
 
-!inputfiles /Kernels/NSSUPGEnergy
+!syntax inputs /Kernels/NSSUPGEnergy
 
-!childobjects /Kernels/NSSUPGEnergy
+!syntax children /Kernels/NSSUPGEnergy

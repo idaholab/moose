@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # IntersectionPointsAlongLine
-!description /VectorPostprocessors/IntersectionPointsAlongLine
+!syntax description /VectorPostprocessors/IntersectionPointsAlongLine
 
-!parameters /VectorPostprocessors/IntersectionPointsAlongLine
+!syntax parameters /VectorPostprocessors/IntersectionPointsAlongLine
 
-!inputfiles /VectorPostprocessors/IntersectionPointsAlongLine
+!syntax inputs /VectorPostprocessors/IntersectionPointsAlongLine
 
-!childobjects /VectorPostprocessors/IntersectionPointsAlongLine
+!syntax children /VectorPostprocessors/IntersectionPointsAlongLine

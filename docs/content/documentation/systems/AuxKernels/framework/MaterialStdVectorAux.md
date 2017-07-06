@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialStdVectorAux
-!description /AuxKernels/MaterialStdVectorAux
+!syntax description /AuxKernels/MaterialStdVectorAux
 
-!parameters /AuxKernels/MaterialStdVectorAux
+!syntax parameters /AuxKernels/MaterialStdVectorAux
 
-!inputfiles /AuxKernels/MaterialStdVectorAux
+!syntax inputs /AuxKernels/MaterialStdVectorAux
 
-!childobjects /AuxKernels/MaterialStdVectorAux
+!syntax children /AuxKernels/MaterialStdVectorAux

@@ -1,7 +1,7 @@
-!description /BCs/NSStagnationTemperatureBC
+!syntax description /BCs/NSStagnationTemperatureBC
 
-!parameters /BCs/NSStagnationTemperatureBC
+!syntax parameters /BCs/NSStagnationTemperatureBC
 
-!inputfiles /BCs/NSStagnationTemperatureBC
+!syntax inputs /BCs/NSStagnationTemperatureBC
 
-!childobjects /BCs/NSStagnationTemperatureBC
+!syntax children /BCs/NSStagnationTemperatureBC

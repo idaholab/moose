@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsHardeningGaussian
-!description /UserObjects/TensorMechanicsHardeningGaussian
+!syntax description /UserObjects/TensorMechanicsHardeningGaussian
 
-!parameters /UserObjects/TensorMechanicsHardeningGaussian
+!syntax parameters /UserObjects/TensorMechanicsHardeningGaussian
 
-!inputfiles /UserObjects/TensorMechanicsHardeningGaussian
+!syntax inputs /UserObjects/TensorMechanicsHardeningGaussian
 
-!childobjects /UserObjects/TensorMechanicsHardeningGaussian
+!syntax children /UserObjects/TensorMechanicsHardeningGaussian

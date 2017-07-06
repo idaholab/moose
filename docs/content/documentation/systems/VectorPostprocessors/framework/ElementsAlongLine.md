@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementsAlongLine
-!description /VectorPostprocessors/ElementsAlongLine
+!syntax description /VectorPostprocessors/ElementsAlongLine
 
-!parameters /VectorPostprocessors/ElementsAlongLine
+!syntax parameters /VectorPostprocessors/ElementsAlongLine
 
-!inputfiles /VectorPostprocessors/ElementsAlongLine
+!syntax inputs /VectorPostprocessors/ElementsAlongLine
 
-!childobjects /VectorPostprocessors/ElementsAlongLine
+!syntax children /VectorPostprocessors/ElementsAlongLine

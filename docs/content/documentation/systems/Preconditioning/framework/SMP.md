@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SMP
-!description /Preconditioning/SMP
+!syntax description /Preconditioning/SMP
 
-!parameters /Preconditioning/SMP
+!syntax parameters /Preconditioning/SMP
 
-!inputfiles /Preconditioning/SMP
+!syntax inputs /Preconditioning/SMP
 
-!childobjects /Preconditioning/SMP
+!syntax children /Preconditioning/SMP

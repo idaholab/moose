@@ -1,7 +1,7 @@
-!description /BCs/INSMomentumNoBCBCTractionForm
+!syntax description /BCs/INSMomentumNoBCBCTractionForm
 
-!parameters /BCs/INSMomentumNoBCBCTractionForm
+!syntax parameters /BCs/INSMomentumNoBCBCTractionForm
 
-!inputfiles /BCs/INSMomentumNoBCBCTractionForm
+!syntax inputs /BCs/INSMomentumNoBCBCTractionForm
 
-!childobjects /BCs/INSMomentumNoBCBCTractionForm
+!syntax children /BCs/INSMomentumNoBCBCTractionForm

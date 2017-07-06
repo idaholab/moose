@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementLpNormAux
-!description /AuxKernels/ElementLpNormAux
+!syntax description /AuxKernels/ElementLpNormAux
 
-!parameters /AuxKernels/ElementLpNormAux
+!syntax parameters /AuxKernels/ElementLpNormAux
 
-!inputfiles /AuxKernels/ElementLpNormAux
+!syntax inputs /AuxKernels/ElementLpNormAux
 
-!childobjects /AuxKernels/ElementLpNormAux
+!syntax children /AuxKernels/ElementLpNormAux

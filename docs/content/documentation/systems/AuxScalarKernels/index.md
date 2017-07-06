@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AuxScalarKernels System
-!parameters /AuxScalarKernels
+!syntax objects /AuxScalarKernels
 
-!subobjects /AuxScalarKernels
+!syntax subsystems /AuxScalarKernels
 
+!syntax actions /AuxScalarKernels

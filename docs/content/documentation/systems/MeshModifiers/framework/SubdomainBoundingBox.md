@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SubdomainBoundingBox
-!description /MeshModifiers/SubdomainBoundingBox
+!syntax description /MeshModifiers/SubdomainBoundingBox
 
-!parameters /MeshModifiers/SubdomainBoundingBox
+!syntax parameters /MeshModifiers/SubdomainBoundingBox
 
-!inputfiles /MeshModifiers/SubdomainBoundingBox
+!syntax inputs /MeshModifiers/SubdomainBoundingBox
 
-!childobjects /MeshModifiers/SubdomainBoundingBox
+!syntax children /MeshModifiers/SubdomainBoundingBox

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LayeredSideFluxAverage
-!description /UserObjects/LayeredSideFluxAverage
+!syntax description /UserObjects/LayeredSideFluxAverage
 
-!parameters /UserObjects/LayeredSideFluxAverage
+!syntax parameters /UserObjects/LayeredSideFluxAverage
 
-!inputfiles /UserObjects/LayeredSideFluxAverage
+!syntax inputs /UserObjects/LayeredSideFluxAverage
 
-!childobjects /UserObjects/LayeredSideFluxAverage
+!syntax children /UserObjects/LayeredSideFluxAverage

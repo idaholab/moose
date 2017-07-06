@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowBrine
-!description /Materials/PorousFlowBrine
+!syntax description /Materials/PorousFlowBrine
 
-!parameters /Materials/PorousFlowBrine
+!syntax parameters /Materials/PorousFlowBrine
 
-!inputfiles /Materials/PorousFlowBrine
+!syntax inputs /Materials/PorousFlowBrine
 
-!childobjects /Materials/PorousFlowBrine
+!syntax children /Materials/PorousFlowBrine

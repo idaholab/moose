@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PolycrystalKernel System
-!parameters /Kernels/PolycrystalKernel
+!syntax objects /Kernels/PolycrystalKernel
 
+!syntax subsystems /Kernels/PolycrystalKernel
+
+!syntax actions /Kernels/PolycrystalKernel

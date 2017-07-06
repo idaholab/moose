@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SolutionUserObject
-!description /UserObjects/SolutionUserObject
+!syntax description /UserObjects/SolutionUserObject
 
-!parameters /UserObjects/SolutionUserObject
+!syntax parameters /UserObjects/SolutionUserObject
 
-!inputfiles /UserObjects/SolutionUserObject
+!syntax inputs /UserObjects/SolutionUserObject
 
-!childobjects /UserObjects/SolutionUserObject
+!syntax children /UserObjects/SolutionUserObject

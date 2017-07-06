@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConservedLangevinNoise
-!description /Kernels/ConservedLangevinNoise
+!syntax description /Kernels/ConservedLangevinNoise
 
-!parameters /Kernels/ConservedLangevinNoise
+!syntax parameters /Kernels/ConservedLangevinNoise
 
-!inputfiles /Kernels/ConservedLangevinNoise
+!syntax inputs /Kernels/ConservedLangevinNoise
 
-!childobjects /Kernels/ConservedLangevinNoise
+!syntax children /Kernels/ConservedLangevinNoise

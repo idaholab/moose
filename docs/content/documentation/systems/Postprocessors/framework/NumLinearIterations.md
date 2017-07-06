@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumLinearIterations
-!description /Postprocessors/NumLinearIterations
+!syntax description /Postprocessors/NumLinearIterations
 
-!parameters /Postprocessors/NumLinearIterations
+!syntax parameters /Postprocessors/NumLinearIterations
 
-!inputfiles /Postprocessors/NumLinearIterations
+!syntax inputs /Postprocessors/NumLinearIterations
 
-!childobjects /Postprocessors/NumLinearIterations
+!syntax children /Postprocessors/NumLinearIterations

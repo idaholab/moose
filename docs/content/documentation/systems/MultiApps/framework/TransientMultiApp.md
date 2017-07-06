@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TransientMultiApp
-!description /MultiApps/TransientMultiApp
+!syntax description /MultiApps/TransientMultiApp
 
-!parameters /MultiApps/TransientMultiApp
+!syntax parameters /MultiApps/TransientMultiApp
 
-!inputfiles /MultiApps/TransientMultiApp
+!syntax inputs /MultiApps/TransientMultiApp
 
-!childobjects /MultiApps/TransientMultiApp
+!syntax children /MultiApps/TransientMultiApp

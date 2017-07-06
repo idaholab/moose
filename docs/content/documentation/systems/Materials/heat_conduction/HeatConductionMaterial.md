@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HeatConductionMaterial
-!description /Materials/HeatConductionMaterial
+!syntax description /Materials/HeatConductionMaterial
 
-!parameters /Materials/HeatConductionMaterial
+!syntax parameters /Materials/HeatConductionMaterial
 
-!inputfiles /Materials/HeatConductionMaterial
+!syntax inputs /Materials/HeatConductionMaterial
 
-!childobjects /Materials/HeatConductionMaterial
+!syntax children /Materials/HeatConductionMaterial

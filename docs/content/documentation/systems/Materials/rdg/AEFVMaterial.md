@@ -1,7 +1,7 @@
-!description /Materials/AEFVMaterial
+!syntax description /Materials/AEFVMaterial
 
-!parameters /Materials/AEFVMaterial
+!syntax parameters /Materials/AEFVMaterial
 
-!inputfiles /Materials/AEFVMaterial
+!syntax inputs /Materials/AEFVMaterial
 
-!childobjects /Materials/AEFVMaterial
+!syntax children /Materials/AEFVMaterial

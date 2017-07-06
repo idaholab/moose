@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TimeStepMaterial
-!description /Materials/TimeStepMaterial
+!syntax description /Materials/TimeStepMaterial
 
-!parameters /Materials/TimeStepMaterial
+!syntax parameters /Materials/TimeStepMaterial
 
-!inputfiles /Materials/TimeStepMaterial
+!syntax inputs /Materials/TimeStepMaterial
 
-!childobjects /Materials/TimeStepMaterial
+!syntax children /Materials/TimeStepMaterial

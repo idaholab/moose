@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RegularSolutionFreeEnergy
-!description /Materials/RegularSolutionFreeEnergy
+!syntax description /Materials/RegularSolutionFreeEnergy
 
-!parameters /Materials/RegularSolutionFreeEnergy
+!syntax parameters /Materials/RegularSolutionFreeEnergy
 
-!inputfiles /Materials/RegularSolutionFreeEnergy
+!syntax inputs /Materials/RegularSolutionFreeEnergy
 
-!childobjects /Materials/RegularSolutionFreeEnergy
+!syntax children /Materials/RegularSolutionFreeEnergy

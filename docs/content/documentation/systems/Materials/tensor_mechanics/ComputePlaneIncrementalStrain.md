@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputePlaneIncrementalStrain
-!description /Materials/ComputePlaneIncrementalStrain
+!syntax description /Materials/ComputePlaneIncrementalStrain
 
-!parameters /Materials/ComputePlaneIncrementalStrain
+!syntax parameters /Materials/ComputePlaneIncrementalStrain
 
-!inputfiles /Materials/ComputePlaneIncrementalStrain
+!syntax inputs /Materials/ComputePlaneIncrementalStrain
 
-!childobjects /Materials/ComputePlaneIncrementalStrain
+!syntax children /Materials/ComputePlaneIncrementalStrain

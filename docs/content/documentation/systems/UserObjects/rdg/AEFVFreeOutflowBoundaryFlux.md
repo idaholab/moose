@@ -1,7 +1,7 @@
-!description /UserObjects/AEFVFreeOutflowBoundaryFlux
+!syntax description /UserObjects/AEFVFreeOutflowBoundaryFlux
 
-!parameters /UserObjects/AEFVFreeOutflowBoundaryFlux
+!syntax parameters /UserObjects/AEFVFreeOutflowBoundaryFlux
 
-!inputfiles /UserObjects/AEFVFreeOutflowBoundaryFlux
+!syntax inputs /UserObjects/AEFVFreeOutflowBoundaryFlux
 
-!childobjects /UserObjects/AEFVFreeOutflowBoundaryFlux
+!syntax children /UserObjects/AEFVFreeOutflowBoundaryFlux

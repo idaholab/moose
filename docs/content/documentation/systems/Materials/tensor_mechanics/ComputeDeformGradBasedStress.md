@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeDeformGradBasedStress
-!description /Materials/ComputeDeformGradBasedStress
+!syntax description /Materials/ComputeDeformGradBasedStress
 
-!parameters /Materials/ComputeDeformGradBasedStress
+!syntax parameters /Materials/ComputeDeformGradBasedStress
 
-!inputfiles /Materials/ComputeDeformGradBasedStress
+!syntax inputs /Materials/ComputeDeformGradBasedStress
 
-!childobjects /Materials/ComputeDeformGradBasedStress
+!syntax children /Materials/ComputeDeformGradBasedStress

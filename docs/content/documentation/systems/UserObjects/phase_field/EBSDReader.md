@@ -1,6 +1,6 @@
 # EBSDReader
 
-!description /UserObjects/EBSDReader
+!syntax description /UserObjects/EBSDReader
 
 The EBSDReader user object reads in data from [electron backscatter diffraction (EBSD)](https://en.wikipedia.org/wiki/Electron_backscatter_diffraction)
 to set initial conditions for phase field simulations. EBSD identifies the grain and
@@ -14,7 +14,7 @@ orientation information by use by the phase field and mechanics models.
 field variable initial conditions. To reconstruct a mesh of the microstructure,
 we recommend using [OOF](http://www.ctcms.nist.gov/oof/).
 
-!parameters /UserObjects/EBSDReader
+!syntax parameters /UserObjects/EBSDReader
 
 # EBSD Data File Format
 
@@ -66,6 +66,6 @@ be on a square grid rather than a hex grid.
 
 The `EBSDReader` supports additional custom data columns.
 
-!inputfiles /UserObjects/EBSDReader
+!syntax inputs /UserObjects/EBSDReader
 
-!childobjects /UserObjects/EBSDReader
+!syntax children /UserObjects/EBSDReader

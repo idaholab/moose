@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaskedBodyForce
-!description /Kernels/MaskedBodyForce
+!syntax description /Kernels/MaskedBodyForce
 
-!parameters /Kernels/MaskedBodyForce
+!syntax parameters /Kernels/MaskedBodyForce
 
-!inputfiles /Kernels/MaskedBodyForce
+!syntax inputs /Kernels/MaskedBodyForce
 
-!childobjects /Kernels/MaskedBodyForce
+!syntax children /Kernels/MaskedBodyForce

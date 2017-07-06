@@ -1,7 +1,7 @@
-!description /BCs/NSEnergyViscousBC
+!syntax description /BCs/NSEnergyViscousBC
 
-!parameters /BCs/NSEnergyViscousBC
+!syntax parameters /BCs/NSEnergyViscousBC
 
-!inputfiles /BCs/NSEnergyViscousBC
+!syntax inputs /BCs/NSEnergyViscousBC
 
-!childobjects /BCs/NSEnergyViscousBC
+!syntax children /BCs/NSEnergyViscousBC

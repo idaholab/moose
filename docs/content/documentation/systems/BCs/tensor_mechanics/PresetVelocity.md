@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PresetVelocity
-!description /BCs/PresetVelocity
+!syntax description /BCs/PresetVelocity
 
-!parameters /BCs/PresetVelocity
+!syntax parameters /BCs/PresetVelocity
 
-!inputfiles /BCs/PresetVelocity
+!syntax inputs /BCs/PresetVelocity
 
-!childobjects /BCs/PresetVelocity
+!syntax children /BCs/PresetVelocity

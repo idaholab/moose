@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # XDR
-!description /Outputs/XDR
+!syntax description /Outputs/XDR
 
-!parameters /Outputs/XDR
+!syntax parameters /Outputs/XDR
 
-!inputfiles /Outputs/XDR
+!syntax inputs /Outputs/XDR
 
-!childobjects /Outputs/XDR
+!syntax children /Outputs/XDR

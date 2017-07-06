@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SolutionAux
-!description /AuxKernels/SolutionAux
+!syntax description /AuxKernels/SolutionAux
 
-!parameters /AuxKernels/SolutionAux
+!syntax parameters /AuxKernels/SolutionAux
 
-!inputfiles /AuxKernels/SolutionAux
+!syntax inputs /AuxKernels/SolutionAux
 
-!childobjects /AuxKernels/SolutionAux
+!syntax children /AuxKernels/SolutionAux

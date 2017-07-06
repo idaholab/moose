@@ -1,5 +1,5 @@
 #HyperbolicViscoplasticityStressUpdate
-!description /Materials/HyperbolicViscoplasticityStressUpdate
+!syntax description /Materials/HyperbolicViscoplasticityStressUpdate
 
 
 ## Description
@@ -12,11 +12,11 @@ $$
 
 This class is based on the implicit integration algorithm in \cite{dunne2005introduction} pg. 162 - 163.
 
-!parameters /Materials/HyperbolicViscoplasticityStressUpdate
+!syntax parameters /Materials/HyperbolicViscoplasticityStressUpdate
 
-!inputfiles /Materials/HyperbolicViscoplasticityStressUpdate
+!syntax inputs /Materials/HyperbolicViscoplasticityStressUpdate
 
-!childobjects /Materials/HyperbolicViscoplasticityStressUpdate
+!syntax children /Materials/HyperbolicViscoplasticityStressUpdate
 
 ## References
 \bibliographystyle{unsrt}

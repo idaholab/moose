@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Terminator
-!description /UserObjects/Terminator
+!syntax description /UserObjects/Terminator
 
-!parameters /UserObjects/Terminator
+!syntax parameters /UserObjects/Terminator
 
-!inputfiles /UserObjects/Terminator
+!syntax inputs /UserObjects/Terminator
 
-!childobjects /UserObjects/Terminator
+!syntax children /UserObjects/Terminator

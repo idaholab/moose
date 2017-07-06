@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LatticeSmoothCircleIC
-!description /ICs/LatticeSmoothCircleIC
+!syntax description /ICs/LatticeSmoothCircleIC
 
-!parameters /ICs/LatticeSmoothCircleIC
+!syntax parameters /ICs/LatticeSmoothCircleIC
 
-!inputfiles /ICs/LatticeSmoothCircleIC
+!syntax inputs /ICs/LatticeSmoothCircleIC
 
-!childobjects /ICs/LatticeSmoothCircleIC
+!syntax children /ICs/LatticeSmoothCircleIC

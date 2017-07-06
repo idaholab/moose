@@ -1,7 +1,7 @@
-!description /Materials/CNSFVMaterial
+!syntax description /Materials/CNSFVMaterial
 
-!parameters /Materials/CNSFVMaterial
+!syntax parameters /Materials/CNSFVMaterial
 
-!inputfiles /Materials/CNSFVMaterial
+!syntax inputs /Materials/CNSFVMaterial
 
-!childobjects /Materials/CNSFVMaterial
+!syntax children /Materials/CNSFVMaterial

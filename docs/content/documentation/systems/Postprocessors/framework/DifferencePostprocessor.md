@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DifferencePostprocessor
-!description /Postprocessors/DifferencePostprocessor
+!syntax description /Postprocessors/DifferencePostprocessor
 
-!parameters /Postprocessors/DifferencePostprocessor
+!syntax parameters /Postprocessors/DifferencePostprocessor
 
-!inputfiles /Postprocessors/DifferencePostprocessor
+!syntax inputs /Postprocessors/DifferencePostprocessor
 
-!childobjects /Postprocessors/DifferencePostprocessor
+!syntax children /Postprocessors/DifferencePostprocessor

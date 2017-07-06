@@ -1,7 +1,7 @@
-!description /AuxKernels/NSSpecificVolumeAux
+!syntax description /AuxKernels/NSSpecificVolumeAux
 
-!parameters /AuxKernels/NSSpecificVolumeAux
+!syntax parameters /AuxKernels/NSSpecificVolumeAux
 
-!inputfiles /AuxKernels/NSSpecificVolumeAux
+!syntax inputs /AuxKernels/NSSpecificVolumeAux
 
-!childobjects /AuxKernels/NSSpecificVolumeAux
+!syntax children /AuxKernels/NSSpecificVolumeAux

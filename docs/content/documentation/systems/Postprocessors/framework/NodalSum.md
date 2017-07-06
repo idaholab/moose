@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalSum
-!description /Postprocessors/NodalSum
+!syntax description /Postprocessors/NodalSum
 
-!parameters /Postprocessors/NodalSum
+!syntax parameters /Postprocessors/NodalSum
 
-!inputfiles /Postprocessors/NodalSum
+!syntax inputs /Postprocessors/NodalSum
 
-!childobjects /Postprocessors/NodalSum
+!syntax children /Postprocessors/NodalSum

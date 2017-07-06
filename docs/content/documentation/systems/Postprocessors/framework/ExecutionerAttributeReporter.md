@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ExecutionerAttributeReporter
-!description /Postprocessors/ExecutionerAttributeReporter
+!syntax description /Postprocessors/ExecutionerAttributeReporter
 
-!parameters /Postprocessors/ExecutionerAttributeReporter
+!syntax parameters /Postprocessors/ExecutionerAttributeReporter
 
-!inputfiles /Postprocessors/ExecutionerAttributeReporter
+!syntax inputs /Postprocessors/ExecutionerAttributeReporter
 
-!childobjects /Postprocessors/ExecutionerAttributeReporter
+!syntax children /Postprocessors/ExecutionerAttributeReporter

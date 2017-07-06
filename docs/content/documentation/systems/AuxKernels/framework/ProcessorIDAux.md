@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ProcessorIDAux
-!description /AuxKernels/ProcessorIDAux
+!syntax description /AuxKernels/ProcessorIDAux
 
-!parameters /AuxKernels/ProcessorIDAux
+!syntax parameters /AuxKernels/ProcessorIDAux
 
-!inputfiles /AuxKernels/ProcessorIDAux
+!syntax inputs /AuxKernels/ProcessorIDAux
 
-!childobjects /AuxKernels/ProcessorIDAux
+!syntax children /AuxKernels/ProcessorIDAux

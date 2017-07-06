@@ -1,6 +1,6 @@
 
 # ErrorToleranceMarker
-!description /Adaptivity/Markers/ErrorToleranceMarker
+!syntax description /Adaptivity/Markers/ErrorToleranceMarker
 
 ## Description
 The `ErrorTolerenceMarker` requires an approximation of
@@ -14,8 +14,8 @@ element is define for coarsening or refinement using a hard tolerances:
 ## Example Input Syntax
 !listing test/tests/markers/error_tolerance_marker/error_tolerance_marker_test.i block=Adaptivity
 
-!parameters /Adaptivity/Markers/ErrorToleranceMarker
+!syntax parameters /Adaptivity/Markers/ErrorToleranceMarker
 
-!inputfiles /Adaptivity/Markers/ErrorToleranceMarker
+!syntax inputs /Adaptivity/Markers/ErrorToleranceMarker
 
-!childobjects /Adaptivity/Markers/ErrorToleranceMarker
+!syntax children /Adaptivity/Markers/ErrorToleranceMarker

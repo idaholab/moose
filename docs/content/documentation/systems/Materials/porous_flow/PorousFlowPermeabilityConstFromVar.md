@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPermeabilityConstFromVar
-!description /Materials/PorousFlowPermeabilityConstFromVar
+!syntax description /Materials/PorousFlowPermeabilityConstFromVar
 
-!parameters /Materials/PorousFlowPermeabilityConstFromVar
+!syntax parameters /Materials/PorousFlowPermeabilityConstFromVar
 
-!inputfiles /Materials/PorousFlowPermeabilityConstFromVar
+!syntax inputs /Materials/PorousFlowPermeabilityConstFromVar
 
-!childobjects /Materials/PorousFlowPermeabilityConstFromVar
+!syntax children /Materials/PorousFlowPermeabilityConstFromVar

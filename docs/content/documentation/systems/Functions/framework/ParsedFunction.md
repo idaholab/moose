@@ -1,6 +1,5 @@
 # ParsedFunction
-
-!description /Functions/ParsedFunction
+!syntax description /Functions/ParsedFunction
 
 ## Description
 
@@ -18,8 +17,8 @@ Further information can be found at the
 ## Example Input Syntax
 !listing examples/ex04_bcs/trapezoid.i block=Functions
 
-!parameters /Functions/ParsedFunction
+!syntax parameters /Functions/ParsedFunction
 
-!inputfiles /Functions/ParsedFunction
+!syntax inputs /Functions/ParsedFunction
 
-!childobjects /Functions/ParsedFunction
+!syntax children /Functions/ParsedFunction

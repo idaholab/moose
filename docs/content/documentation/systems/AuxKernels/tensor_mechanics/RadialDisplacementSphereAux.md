@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RadialDisplacementSphereAux
-!description /AuxKernels/RadialDisplacementSphereAux
+!syntax description /AuxKernels/RadialDisplacementSphereAux
 
-!parameters /AuxKernels/RadialDisplacementSphereAux
+!syntax parameters /AuxKernels/RadialDisplacementSphereAux
 
-!inputfiles /AuxKernels/RadialDisplacementSphereAux
+!syntax inputs /AuxKernels/RadialDisplacementSphereAux
 
-!childobjects /AuxKernels/RadialDisplacementSphereAux
+!syntax children /AuxKernels/RadialDisplacementSphereAux

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalNormalsPreprocessor
-!description /UserObjects/NodalNormalsPreprocessor
+!syntax description /UserObjects/NodalNormalsPreprocessor
 
-!parameters /UserObjects/NodalNormalsPreprocessor
+!syntax parameters /UserObjects/NodalNormalsPreprocessor
 
-!inputfiles /UserObjects/NodalNormalsPreprocessor
+!syntax inputs /UserObjects/NodalNormalsPreprocessor
 
-!childobjects /UserObjects/NodalNormalsPreprocessor
+!syntax children /UserObjects/NodalNormalsPreprocessor

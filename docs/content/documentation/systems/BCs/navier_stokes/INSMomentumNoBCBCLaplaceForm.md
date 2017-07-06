@@ -1,7 +1,7 @@
-!description /BCs/INSMomentumNoBCBCLaplaceForm
+!syntax description /BCs/INSMomentumNoBCBCLaplaceForm
 
-!parameters /BCs/INSMomentumNoBCBCLaplaceForm
+!syntax parameters /BCs/INSMomentumNoBCBCLaplaceForm
 
-!inputfiles /BCs/INSMomentumNoBCBCLaplaceForm
+!syntax inputs /BCs/INSMomentumNoBCBCLaplaceForm
 
-!childobjects /BCs/INSMomentumNoBCBCLaplaceForm
+!syntax children /BCs/INSMomentumNoBCBCLaplaceForm

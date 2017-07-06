@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # UserForcingFunction
-!description /Kernels/UserForcingFunction
+!syntax description /Kernels/UserForcingFunction
 
-!parameters /Kernels/UserForcingFunction
+!syntax parameters /Kernels/UserForcingFunction
 
-!inputfiles /Kernels/UserForcingFunction
+!syntax inputs /Kernels/UserForcingFunction
 
-!childobjects /Kernels/UserForcingFunction
+!syntax children /Kernels/UserForcingFunction

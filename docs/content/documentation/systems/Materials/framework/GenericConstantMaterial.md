@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GenericConstantMaterial
-!description /Materials/GenericConstantMaterial
+!syntax description /Materials/GenericConstantMaterial
 
-!parameters /Materials/GenericConstantMaterial
+!syntax parameters /Materials/GenericConstantMaterial
 
-!inputfiles /Materials/GenericConstantMaterial
+!syntax inputs /Materials/GenericConstantMaterial
 
-!childobjects /Materials/GenericConstantMaterial
+!syntax children /Materials/GenericConstantMaterial

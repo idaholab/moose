@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CavityPressurePostprocessor
-!description /Postprocessors/CavityPressurePostprocessor
+!syntax description /Postprocessors/CavityPressurePostprocessor
 
-!parameters /Postprocessors/CavityPressurePostprocessor
+!syntax parameters /Postprocessors/CavityPressurePostprocessor
 
-!inputfiles /Postprocessors/CavityPressurePostprocessor
+!syntax inputs /Postprocessors/CavityPressurePostprocessor
 
-!childobjects /Postprocessors/CavityPressurePostprocessor
+!syntax children /Postprocessors/CavityPressurePostprocessor

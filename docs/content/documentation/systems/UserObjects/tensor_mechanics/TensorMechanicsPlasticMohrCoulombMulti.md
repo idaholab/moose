@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticMohrCoulombMulti
-!description /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
+!syntax description /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
 
-!parameters /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
+!syntax parameters /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
 
-!inputfiles /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
+!syntax inputs /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
 
-!childobjects /UserObjects/TensorMechanicsPlasticMohrCoulombMulti
+!syntax children /UserObjects/TensorMechanicsPlasticMohrCoulombMulti

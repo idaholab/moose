@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantPointSource
-!description /DiracKernels/ConstantPointSource
+!syntax description /DiracKernels/ConstantPointSource
 
-!parameters /DiracKernels/ConstantPointSource
+!syntax parameters /DiracKernels/ConstantPointSource
 
-!inputfiles /DiracKernels/ConstantPointSource
+!syntax inputs /DiracKernels/ConstantPointSource
 
-!childobjects /DiracKernels/ConstantPointSource
+!syntax children /DiracKernels/ConstantPointSource

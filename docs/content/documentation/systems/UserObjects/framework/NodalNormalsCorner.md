@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalNormalsCorner
-!description /UserObjects/NodalNormalsCorner
+!syntax description /UserObjects/NodalNormalsCorner
 
-!parameters /UserObjects/NodalNormalsCorner
+!syntax parameters /UserObjects/NodalNormalsCorner
 
-!inputfiles /UserObjects/NodalNormalsCorner
+!syntax inputs /UserObjects/NodalNormalsCorner
 
-!childobjects /UserObjects/NodalNormalsCorner
+!syntax children /UserObjects/NodalNormalsCorner

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RampIC
-!description /ICs/RampIC
+!syntax description /ICs/RampIC
 
-!parameters /ICs/RampIC
+!syntax parameters /ICs/RampIC
 
-!inputfiles /ICs/RampIC
+!syntax inputs /ICs/RampIC
 
-!childobjects /ICs/RampIC
+!syntax children /ICs/RampIC

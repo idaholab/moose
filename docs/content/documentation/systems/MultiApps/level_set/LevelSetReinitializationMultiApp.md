@@ -7,8 +7,8 @@ reseting of the pseudo reinitialization time.
 ## Example Syntax
 !listing modules/level_set/tests/reinitialization/master.i block=MultiApps label=False
 
-!parameters /MultiApps/LevelSetReinitializationMultiApp
+!syntax parameters /MultiApps/LevelSetReinitializationMultiApp
 
-!inputfiles /MultiApps/LevelSetReinitializationMultiApp
+!syntax inputs /MultiApps/LevelSetReinitializationMultiApp
 
-!childobjects /MultiApps/LevelSetReinitializationMultiApp
+!syntax children /MultiApps/LevelSetReinitializationMultiApp

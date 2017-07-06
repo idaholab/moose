@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PostprocessorNeumannBC
-!description /BCs/PostprocessorNeumannBC
+!syntax description /BCs/PostprocessorNeumannBC
 
-!parameters /BCs/PostprocessorNeumannBC
+!syntax parameters /BCs/PostprocessorNeumannBC
 
-!inputfiles /BCs/PostprocessorNeumannBC
+!syntax inputs /BCs/PostprocessorNeumannBC
 
-!childobjects /BCs/PostprocessorNeumannBC
+!syntax children /BCs/PostprocessorNeumannBC

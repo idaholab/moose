@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ParsedSubdomainMeshModifier
-!description /MeshModifiers/ParsedSubdomainMeshModifier
+!syntax description /MeshModifiers/ParsedSubdomainMeshModifier
 
-!parameters /MeshModifiers/ParsedSubdomainMeshModifier
+!syntax parameters /MeshModifiers/ParsedSubdomainMeshModifier
 
-!inputfiles /MeshModifiers/ParsedSubdomainMeshModifier
+!syntax inputs /MeshModifiers/ParsedSubdomainMeshModifier
 
-!childobjects /MeshModifiers/ParsedSubdomainMeshModifier
+!syntax children /MeshModifiers/ParsedSubdomainMeshModifier

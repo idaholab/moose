@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CrossTermGradientFreeEnergy
-!description /AuxKernels/CrossTermGradientFreeEnergy
+!syntax description /AuxKernels/CrossTermGradientFreeEnergy
 
-!parameters /AuxKernels/CrossTermGradientFreeEnergy
+!syntax parameters /AuxKernels/CrossTermGradientFreeEnergy
 
-!inputfiles /AuxKernels/CrossTermGradientFreeEnergy
+!syntax inputs /AuxKernels/CrossTermGradientFreeEnergy
 
-!childobjects /AuxKernels/CrossTermGradientFreeEnergy
+!syntax children /AuxKernels/CrossTermGradientFreeEnergy

@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MatVecRealGradAuxKernel System
-!parameters /AuxKernels/MatVecRealGradAuxKernel
+!syntax objects /AuxKernels/MatVecRealGradAuxKernel
 
+!syntax subsystems /AuxKernels/MatVecRealGradAuxKernel
+
+!syntax actions /AuxKernels/MatVecRealGradAuxKernel

@@ -27,6 +27,8 @@ import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
 from app_syntax import AppSyntaxExtension
 
+from .. import common
+
 LOG = logging.getLogger(__name__)
 
 class TemplateExtension(MooseMarkdownExtension):
@@ -40,6 +42,10 @@ class TemplateExtension(MooseMarkdownExtension):
         config['template'] = ['', "The jinja2 template to apply."]
         config['template_args'] = [dict(), "Arguments passed to the MooseTemplate Postprocessor."]
         config['environment_args'] = [dict(), "Arguments passed to the jinja2.Environment."]
+        config['doxygen'] = ['', "Provide a URL to append with Doxygen link to class."]
+        config['repo'] = ['', "The remote repository to create hyperlinks "
+                              "(e.g., http://github.com/idaholab/moose)."]
+        config['branch'] = ['master', "The branch name to consider in repository links."]
         return config
 
     def extendMarkdown(self, md, md_globals):
@@ -102,6 +108,8 @@ class TemplatePostprocessorBase(Postprocessor):
             env[jinja2.Environment]: Template object for adding global functions.
         """
         env.globals['insert_files'] = self._insertFiles
+        env.globals['relpath'] = self._relpath
+        env.globals['breadcrumbs'] = self._breadcrumbs
 
     def arguments(self, template_args, text): #pylint: disable=no-self-use
         """
@@ -111,11 +119,8 @@ class TemplatePostprocessorBase(Postprocessor):
             template_args[dict]: Template arguments to be applied to jinja2 template.
             text[str]: Convert markdown to be applied via the 'content' template argument.
         """
-        template_args['content'] = text
-
-        if 'navigation' in template_args:
-            template_args['navigation'] = \
-                MooseDocs.yaml_load(MooseDocs.abspath(template_args['navigation']))
+        template_args.setdefault('content', text)
+        template_args.setdefault('navigation', [])
 
     def run(self, text):
         """
@@ -158,7 +163,7 @@ class TemplatePostprocessorBase(Postprocessor):
 
         out = []
         for filename in filenames:
-            with open(MooseDocs.abspath(filename), 'r') as fid:
+            with open(os.path.join(MooseDocs.ROOT_DIR, filename), 'r') as fid:
                 out += [fid.read().strip('\n')]
         return '\n'.join(out)
 
@@ -169,86 +174,97 @@ class TemplatePostprocessorBase(Postprocessor):
         """
         for img in soup('img'):
             if 'src' in img.attrs:
-                img['src'] = node.relpath(img['src'])
+                img['src'] = os.path.relpath(img['src'], os.path.dirname(node.destination))
 
-    @staticmethod
-    def _markdownLinks(node, soup):
+    def _markdownLinks(self, node, soup):
         """
         Performs auto linking of markdown files.
         """
-        def finder(node, desired, pages):
-            """
-            Locate nodes for the 'desired' filename
-            """
-            if node.source() and node.source().endswith(desired):
-                pages.append(node)
-            for child in node:
-                finder(child, desired, pages)
-            return pages
-
         # Loop over <a> tags and update links containing .md to point to .html
         for link in soup('a'):
             href = link.get('href')
-            if href and (not href.startswith('http')) and ('.md' in href):
+            if href and (not href.startswith('http')) \
+                    and href.endswith(MooseDocs.common.EXTENSIONS):
 
                 # Split filename from section link (#)
                 parts = href.split('#')
 
                 # Populate the list of found files
-                found = []
-                finder(node.root(), parts[0], found)
+                filename, found = self.markdown.getFilename(parts[0], check_local=False)
 
                 # Error if file not found or if multiple files found
-                if not found:
-                    LOG.error('Failed to locate page for markdown file %s in %s',
-                              href, node.source())
+                if not filename:
+                    if link.get('data-moose-disable-link-error', None) is None:
+                        if isinstance(node, common.nodes.MarkdownFileNodeBase):
+                            LOG.error('Failed to locate file %s in %s',
+                                      href, node.filename)
+                        else:
+                            LOG.error('Failed to locate file %s.', href)
                     link['class'] = 'moose-bad-link'
                     continue
 
-                elif len(found) > 1:
-                    msg = 'Found multiple pages matching the supplied markdown file {} in {}:' \
-                          .format(href, node.source())
-                    for f in found:
-                        msg += '\n    {}'.format(f.source())
-                    LOG.error(msg)
-
                 # Update the link with the located page
-                url = node.relpath(found[0].url())
+                url = os.path.relpath(found.destination, os.path.dirname(node.destination))
                 if len(parts) == 2:
                     url += '#' + parts[1]
                 LOG.debug('Converting link: %s --> %s', href, url)
                 link['href'] = url
 
+    @staticmethod
+    def _relpath(path, start):
+        if path.startswith('http'):
+            return path
+        return os.path.relpath(path, os.path.dirname(start))
+
+    @staticmethod
+    def _breadcrumbs(current):
+        """
+        Return a list of all the parent nodes.
+        """
+        crumbs = []
+        def breadcrumb_helper(node):
+            """Function for building list of parent nodes."""
+            crumbs.insert(0, node)
+            if node.parent:
+                breadcrumb_helper(node.parent)
+        breadcrumb_helper(current)
+        return crumbs
 
 class TemplatePostprocessor(TemplatePostprocessorBase):
     """
     A template extension that works with the 'MooseDocs.extensions.app_syntax' extension.
     """
     def __init__(self, *args, **kwargs):
+        self._doxygen_url = kwargs.pop('doxygen')
+
         super(TemplatePostprocessor, self).__init__(*args, **kwargs)
 
         # The 'MooseDocs.extensions.app_syntax' are required
         self.markdown.requireExtension(AppSyntaxExtension)
-
-        # Store the MooseApplicationSyntax object for use later.
         ext = self.markdown.getExtension(AppSyntaxExtension)
-        self._syntax = ext.syntax
+        self._repo = ext.getConfig('repo')
+        self._database = common.MooseClassDatabase(os.path.join(self._repo,
+                                                                'blob',
+                                                                ext.getConfig('branch')))
+        self._syntax = ext.getMooseAppSyntax()
 
     def globals(self, env):
         """
         Add MOOSE syntax related functions for the template.
         """
         super(TemplatePostprocessor, self).globals(env)
-        env.globals['editMarkdown'] = self._editMarkdown
-        env.globals['mooseCode'] = self._code
 
     def arguments(self, template_args, text):
         """
         Add MOOSE syntax related arguments to the template arguments.
         """
         super(TemplatePostprocessor, self).arguments(template_args, text)
-        template_args['tableofcontents'] = self._tableofcontents(text)
-        template_args['doxygen'] = self._doxygen()
+        template_args.setdefault('tableofcontents', self._tableofcontents(text))
+        template_args.setdefault('doxygen', self._doxygen())
+        template_args.setdefault('github_edit', True)
+        template_args.setdefault('code', self._code())
+        template_args.setdefault('repo_url', self._repo)
+        template_args.setdefault('edit_markdown', self._editMarkdown())
 
     @staticmethod
     def _tableofcontents(text, level='h2'):
@@ -260,42 +276,37 @@ class TemplatePostprocessor(TemplatePostprocessorBase):
             if 'id' in tag.attrs and tag.contents:
                 yield (tag.contents[0], tag.attrs['id'])
 
-    def _editMarkdown(self, repo_url):
+    def _editMarkdown(self):
         """
         Return the url to the markdown file for this object.
         """
-        return os.path.join(repo_url, 'edit', 'devel', MooseDocs.relpath(self.node.source()))
+        if isinstance(self.node, common.nodes.MarkdownFileNodeBase):
+            return os.path.join(self._repo, 'edit', 'devel',
+                                os.path.relpath(self.node.filename, self.node.root_directory))
+        return None
 
     def _doxygen(self):
         """
         Return the doxygen link, if it exists.
         """
-        for syntax in self._syntax.itervalues():
-            for obj in syntax.objects().itervalues():
-                if obj.name == self.node.name():
-                    return syntax.doxygen(obj.name)
+        if self._doxygen_url:
+            nodes = self._syntax.findall('/' + self.node.name)
+            if nodes and isinstance(nodes[0], common.nodes.ObjectNode):
+                return os.path.join(self._doxygen_url,
+                                    'class{}.html'.format(nodes[0].class_name))
 
-    def _code(self, repo_url):
+    def _code(self):
         """
         Return the GitHub/GitLab addresses for the associated C/h files.
 
         Args:
           repo_url[str]: Web address to use as the base for creating the edit link
         """
-        info = []
-        for syntax in self._syntax.itervalues():
-            for obj in syntax.objects().itervalues():
-                if obj.name == self.node.name():
-                    info.append(obj)
-            for obj in syntax.actions().itervalues():
-                if obj.name == self.node.name():
-                    info.append(obj)
-
-        output = []
-        for obj in info:
-            for filename in obj.code:
-                rel_filename = MooseDocs.relpath(filename)
-                output.append((os.path.basename(rel_filename),
-                               os.path.join(repo_url, 'blob', 'master', rel_filename)))
-
-        return output
+        out = set()
+        nodes = self._syntax.findall('/' + self.node.name)
+        for node in nodes:
+            if isinstance(node, common.nodes.ObjectNode):
+                if node.class_name in self._database:
+                    for item in self._database[node.class_name]:
+                        out.add((item.remote, item.filename, os.path.basename(item.filename)))
+        return out

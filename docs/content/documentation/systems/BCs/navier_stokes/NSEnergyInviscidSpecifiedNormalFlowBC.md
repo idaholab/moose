@@ -1,7 +1,7 @@
-!description /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
+!syntax description /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
 
-!parameters /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
+!syntax parameters /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
 
-!inputfiles /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
+!syntax inputs /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
 
-!childobjects /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
+!syntax children /BCs/NSEnergyInviscidSpecifiedNormalFlowBC

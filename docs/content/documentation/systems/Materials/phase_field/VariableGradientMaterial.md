@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VariableGradientMaterial
-!description /Materials/VariableGradientMaterial
+!syntax description /Materials/VariableGradientMaterial
 
-!parameters /Materials/VariableGradientMaterial
+!syntax parameters /Materials/VariableGradientMaterial
 
-!inputfiles /Materials/VariableGradientMaterial
+!syntax inputs /Materials/VariableGradientMaterial
 
-!childobjects /Materials/VariableGradientMaterial
+!syntax children /Materials/VariableGradientMaterial

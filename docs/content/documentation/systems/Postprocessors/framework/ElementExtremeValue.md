@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementExtremeValue
-!description /Postprocessors/ElementExtremeValue
+!syntax description /Postprocessors/ElementExtremeValue
 
-!parameters /Postprocessors/ElementExtremeValue
+!syntax parameters /Postprocessors/ElementExtremeValue
 
-!inputfiles /Postprocessors/ElementExtremeValue
+!syntax inputs /Postprocessors/ElementExtremeValue
 
-!childobjects /Postprocessors/ElementExtremeValue
+!syntax children /Postprocessors/ElementExtremeValue

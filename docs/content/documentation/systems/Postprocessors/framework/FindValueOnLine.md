@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FindValueOnLine
-!description /Postprocessors/FindValueOnLine
+!syntax description /Postprocessors/FindValueOnLine
 
-!parameters /Postprocessors/FindValueOnLine
+!syntax parameters /Postprocessors/FindValueOnLine
 
-!inputfiles /Postprocessors/FindValueOnLine
+!syntax inputs /Postprocessors/FindValueOnLine
 
-!childobjects /Postprocessors/FindValueOnLine
+!syntax children /Postprocessors/FindValueOnLine

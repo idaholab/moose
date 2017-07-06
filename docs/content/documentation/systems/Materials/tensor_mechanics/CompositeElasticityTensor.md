@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CompositeElasticityTensor
-!description /Materials/CompositeElasticityTensor
+!syntax description /Materials/CompositeElasticityTensor
 
-!parameters /Materials/CompositeElasticityTensor
+!syntax parameters /Materials/CompositeElasticityTensor
 
-!inputfiles /Materials/CompositeElasticityTensor
+!syntax inputs /Materials/CompositeElasticityTensor
 
-!childobjects /Materials/CompositeElasticityTensor
+!syntax children /Materials/CompositeElasticityTensor

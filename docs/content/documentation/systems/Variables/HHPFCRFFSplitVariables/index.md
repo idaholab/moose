@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HHPFCRFFSplitVariables System
-!parameters /Variables/HHPFCRFFSplitVariables
+!syntax objects /Variables/HHPFCRFFSplitVariables
 
+!syntax subsystems /Variables/HHPFCRFFSplitVariables
+
+!syntax actions /Variables/HHPFCRFFSplitVariables

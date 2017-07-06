@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # OutputEulerAngles
-!description /AuxKernels/OutputEulerAngles
+!syntax description /AuxKernels/OutputEulerAngles
 
-!parameters /AuxKernels/OutputEulerAngles
+!syntax parameters /AuxKernels/OutputEulerAngles
 
-!inputfiles /AuxKernels/OutputEulerAngles
+!syntax inputs /AuxKernels/OutputEulerAngles
 
-!childobjects /AuxKernels/OutputEulerAngles
+!syntax children /AuxKernels/OutputEulerAngles

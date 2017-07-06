@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TimeStepper System
-!parameters /Executioner/TimeStepper
+!syntax objects /Executioner/TimeStepper
 
-!subsystems /Executioner/TimeStepper
+!syntax subsystems /Executioner/TimeStepper
 
+!syntax actions /Executioner/TimeStepper

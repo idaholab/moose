@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # WeakGradientBC
-!description /BCs/WeakGradientBC
+!syntax description /BCs/WeakGradientBC
 
-!parameters /BCs/WeakGradientBC
+!syntax parameters /BCs/WeakGradientBC
 
-!inputfiles /BCs/WeakGradientBC
+!syntax inputs /BCs/WeakGradientBC
 
-!childobjects /BCs/WeakGradientBC
+!syntax children /BCs/WeakGradientBC

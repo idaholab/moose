@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputePolycrystalElasticityTensor
-!description /Materials/ComputePolycrystalElasticityTensor
+!syntax description /Materials/ComputePolycrystalElasticityTensor
 
-!parameters /Materials/ComputePolycrystalElasticityTensor
+!syntax parameters /Materials/ComputePolycrystalElasticityTensor
 
-!inputfiles /Materials/ComputePolycrystalElasticityTensor
+!syntax inputs /Materials/ComputePolycrystalElasticityTensor
 
-!childobjects /Materials/ComputePolycrystalElasticityTensor
+!syntax children /Materials/ComputePolycrystalElasticityTensor

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # QuotientAux
-!description /AuxKernels/QuotientAux
+!syntax description /AuxKernels/QuotientAux
 
-!parameters /AuxKernels/QuotientAux
+!syntax parameters /AuxKernels/QuotientAux
 
-!inputfiles /AuxKernels/QuotientAux
+!syntax inputs /AuxKernels/QuotientAux
 
-!childobjects /AuxKernels/QuotientAux
+!syntax children /AuxKernels/QuotientAux

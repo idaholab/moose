@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SimpleCHInterface
-!description /Kernels/SimpleCHInterface
+!syntax description /Kernels/SimpleCHInterface
 
-!parameters /Kernels/SimpleCHInterface
+!syntax parameters /Kernels/SimpleCHInterface
 
-!inputfiles /Kernels/SimpleCHInterface
+!syntax inputs /Kernels/SimpleCHInterface
 
-!childobjects /Kernels/SimpleCHInterface
+!syntax children /Kernels/SimpleCHInterface

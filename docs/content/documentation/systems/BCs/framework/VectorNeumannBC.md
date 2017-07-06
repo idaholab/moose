@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VectorNeumannBC
-!description /BCs/VectorNeumannBC
+!syntax description /BCs/VectorNeumannBC
 
-!parameters /BCs/VectorNeumannBC
+!syntax parameters /BCs/VectorNeumannBC
 
-!inputfiles /BCs/VectorNeumannBC
+!syntax inputs /BCs/VectorNeumannBC
 
-!childobjects /BCs/VectorNeumannBC
+!syntax children /BCs/VectorNeumannBC

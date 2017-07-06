@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalProxyMaxValue
-!description /Postprocessors/NodalProxyMaxValue
+!syntax description /Postprocessors/NodalProxyMaxValue
 
-!parameters /Postprocessors/NodalProxyMaxValue
+!syntax parameters /Postprocessors/NodalProxyMaxValue
 
-!inputfiles /Postprocessors/NodalProxyMaxValue
+!syntax inputs /Postprocessors/NodalProxyMaxValue
 
-!childobjects /Postprocessors/NodalProxyMaxValue
+!syntax children /Postprocessors/NodalProxyMaxValue

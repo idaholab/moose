@@ -1,5 +1,5 @@
 # TiledMesh
-!description /Mesh/TiledMesh
+!syntax description /Mesh/TiledMesh
 
 ## Example
 As the name suggests, the `TiledMesh` object may be utilized to repeat a mesh multiple times. The test, [tiled_mesh_test.i](test/tests/mesh/tiled_mesh/tiled_mesh_test.i), will be used to illustrate the use of
@@ -17,9 +17,9 @@ Then navigate to the location of the test:
 cd tests/mesh/tiled_mesh
 ```
 
-!media docs/media/mesh/tiled_mesh_output.png float=right width=25% margin-left=2% caption=Fig. 2: Tiled cube created from the cube input.
+!media media/mesh/tiled_mesh_output.png float=right width=25% margin-left=2% caption=Fig. 2: Tiled cube created from the cube input.
 
-!media docs/media/mesh/tiled_mesh_input.png float=right width=25% margin-left=3% caption=Fig. 1: Cube utilized as input to `TiledMesh` object.
+!media media/mesh/tiled_mesh_input.png float=right width=25% margin-left=3% caption=Fig. 1: Cube utilized as input to `TiledMesh` object.
 
 The example utilizes a cube (cube.e) mesh as input as shown in Figure 1, which is a regular cube on the domain from
 0 to 10 in the x, y, and z-directions.
@@ -38,8 +38,8 @@ complete simulation.
 
 
 
-!parameters /Mesh/TiledMesh
+!syntax parameters /Mesh/TiledMesh
 
-!inputfiles /Mesh/TiledMesh
+!syntax inputs /Mesh/TiledMesh
 
-!childobjects /Mesh/TiledMesh
+!syntax children /Mesh/TiledMesh

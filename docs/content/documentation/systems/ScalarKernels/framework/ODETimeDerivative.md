@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ODETimeDerivative
-!description /ScalarKernels/ODETimeDerivative
+!syntax description /ScalarKernels/ODETimeDerivative
 
-!parameters /ScalarKernels/ODETimeDerivative
+!syntax parameters /ScalarKernels/ODETimeDerivative
 
-!inputfiles /ScalarKernels/ODETimeDerivative
+!syntax inputs /ScalarKernels/ODETimeDerivative
 
-!childobjects /ScalarKernels/ODETimeDerivative
+!syntax children /ScalarKernels/ODETimeDerivative

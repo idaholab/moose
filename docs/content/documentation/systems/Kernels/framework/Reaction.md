@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Reaction
-!description /Kernels/Reaction
+!syntax description /Kernels/Reaction
 
-!parameters /Kernels/Reaction
+!syntax parameters /Kernels/Reaction
 
-!inputfiles /Kernels/Reaction
+!syntax inputs /Kernels/Reaction
 
-!childobjects /Kernels/Reaction
+!syntax children /Kernels/Reaction

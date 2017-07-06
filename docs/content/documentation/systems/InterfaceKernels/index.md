@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # InterfaceKernels System
-!parameters /InterfaceKernels
+!syntax objects /InterfaceKernels
 
+!syntax subsystems /InterfaceKernels
+
+!syntax actions /InterfaceKernels

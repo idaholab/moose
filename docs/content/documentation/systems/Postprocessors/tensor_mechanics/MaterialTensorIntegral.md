@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialTensorIntegral
-!description /Postprocessors/MaterialTensorIntegral
+!syntax description /Postprocessors/MaterialTensorIntegral
 
-!parameters /Postprocessors/MaterialTensorIntegral
+!syntax parameters /Postprocessors/MaterialTensorIntegral
 
-!inputfiles /Postprocessors/MaterialTensorIntegral
+!syntax inputs /Postprocessors/MaterialTensorIntegral
 
-!childobjects /Postprocessors/MaterialTensorIntegral
+!syntax children /Postprocessors/MaterialTensorIntegral

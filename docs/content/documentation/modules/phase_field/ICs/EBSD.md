@@ -1,12 +1,12 @@
 # Reading EBSD Data
 
-!media docs/media/phase_field/EBSDReader_example.png width=200px padding-left=20px float=right caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
+!media media/phase_field/EBSDReader_example.png width=200px padding-left=20px float=right caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
 
-!media docs/media/phase_field/EBSDReader_stress.png width=200px padding-left=20px float=right clear=both caption=Reconstructed microstructure with stress, created using the combined module example file `EBSD_reconstruction_grain_growth_mech.i`
+!media media/phase_field/EBSDReader_stress.png width=200px padding-left=20px float=right clear=both caption=Reconstructed microstructure with stress, created using the combined module example file `EBSD_reconstruction_grain_growth_mech.i`
 
 <!--!slider max-width=75% left=220px
-     docs/media/phase_field/EBSDReader_example.png caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
-     docs/media/phase_field/EBSDReader_stress.png caption=Reconstructed microstructure with stress, created using the combined module example file `EBSD_reconstruction_grain_growth_mech.i`-->
+     media/phase_field/EBSDReader_example.png caption=Reconstructed microstructure using EBSDReader, created using the phase_field module example file `IN100-111grn.i`
+     media/phase_field/EBSDReader_stress.png caption=Reconstructed microstructure with stress, created using the combined module example file `EBSD_reconstruction_grain_growth_mech.i`-->
 
 To read experimental [electron backscatter diffraction (EBSD)](https://en.wikipedia.org/wiki/Electron_backscatter_diffraction)
 data three components are needed
@@ -102,7 +102,7 @@ _centerpoints[gr] = d.p;
 
 ## Plotting Color Representation of Crystal Orientations
 
-!media docs/media/phase_field/RGB_plot.png width=200px padding-left=20px float=right caption=Reconstructed microstructure with the color representation of the inverse polefigure description of the crystyal orientations. Image created using the phase_field module example file `IN100-111grn.i`.
+!media media/phase_field/RGB_plot.png width=200px padding-left=20px float=right caption=Reconstructed microstructure with the color representation of the inverse polefigure description of the crystyal orientations. Image created using the phase_field module example file `IN100-111grn.i`.
 
 It is common to use an inverse pole figure representation of the crystal orientations
 to color the grains to represent EBSD data. To simplify the comparison with experiments,

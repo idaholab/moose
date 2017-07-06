@@ -1,5 +1,5 @@
 # KKSPhaseChemicalPotential
-!description /Kernels/KKSPhaseChemicalPotential
+!syntax description /Kernels/KKSPhaseChemicalPotential
 
 Enforces the point wise
 equality of the phase chemical potentials
@@ -46,8 +46,8 @@ $$
 
 Note that in the code `jvar` is not an index into `_coupled_moose_vars[]` but has to be resolved through the `_jvar_map`.
 
-!parameters /Kernels/KKSPhaseChemicalPotential
+!syntax parameters /Kernels/KKSPhaseChemicalPotential
 
-!inputfiles /Kernels/KKSPhaseChemicalPotential
+!syntax inputs /Kernels/KKSPhaseChemicalPotential
 
-!childobjects /Kernels/KKSPhaseChemicalPotential
+!syntax children /Kernels/KKSPhaseChemicalPotential

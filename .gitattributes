@@ -17,9 +17,11 @@ contrib/* linguist-vendored
 *.xml linguist-vendored
 
 *.C linguist-language=C++
-docs/media/**/*.png filter=lfs diff=lfs merge=lfs -text
-docs/media/**/*.gif filter=lfs diff=lfs merge=lfs -text
-docs/media/**/*.svg filter=lfs diff=lfs merge=lfs -text
+
+# GIT LFS
+docs/content/media/**/*.png filter=lfs diff=lfs merge=lfs -text
+docs/content/media/**/*.gif filter=lfs diff=lfs merge=lfs -text
+docs/content/media/**/*.svg filter=lfs diff=lfs merge=lfs -text
 
 # TODO(rwcarlsen): Remove this after a while.
 framework/include/**/*.h merge=clang-format

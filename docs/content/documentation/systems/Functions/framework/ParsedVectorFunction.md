@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ParsedVectorFunction
-!description /Functions/ParsedVectorFunction
+!syntax description /Functions/ParsedVectorFunction
 
-!parameters /Functions/ParsedVectorFunction
+!syntax parameters /Functions/ParsedVectorFunction
 
-!inputfiles /Functions/ParsedVectorFunction
+!syntax inputs /Functions/ParsedVectorFunction
 
-!childobjects /Functions/ParsedVectorFunction
+!syntax children /Functions/ParsedVectorFunction

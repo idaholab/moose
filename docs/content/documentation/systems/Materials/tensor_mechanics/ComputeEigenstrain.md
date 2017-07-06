@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeEigenstrain
-!description /Materials/ComputeEigenstrain
+!syntax description /Materials/ComputeEigenstrain
 
-!parameters /Materials/ComputeEigenstrain
+!syntax parameters /Materials/ComputeEigenstrain
 
-!inputfiles /Materials/ComputeEigenstrain
+!syntax inputs /Materials/ComputeEigenstrain
 
-!childobjects /Materials/ComputeEigenstrain
+!syntax children /Materials/ComputeEigenstrain

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppProjectionTransfer
-!description /Transfers/MultiAppProjectionTransfer
+!syntax description /Transfers/MultiAppProjectionTransfer
 
-!parameters /Transfers/MultiAppProjectionTransfer
+!syntax parameters /Transfers/MultiAppProjectionTransfer
 
-!inputfiles /Transfers/MultiAppProjectionTransfer
+!syntax inputs /Transfers/MultiAppProjectionTransfer
 
-!childobjects /Transfers/MultiAppProjectionTransfer
+!syntax children /Transfers/MultiAppProjectionTransfer

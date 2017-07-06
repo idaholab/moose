@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainAdvectionVelocity
-!description /Materials/GrainAdvectionVelocity
+!syntax description /Materials/GrainAdvectionVelocity
 
-!parameters /Materials/GrainAdvectionVelocity
+!syntax parameters /Materials/GrainAdvectionVelocity
 
-!inputfiles /Materials/GrainAdvectionVelocity
+!syntax inputs /Materials/GrainAdvectionVelocity
 
-!childobjects /Materials/GrainAdvectionVelocity
+!syntax children /Materials/GrainAdvectionVelocity

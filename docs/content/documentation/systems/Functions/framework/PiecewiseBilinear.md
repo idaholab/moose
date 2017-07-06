@@ -1,6 +1,5 @@
 # PiecewiseBilinear
-
-!description /Functions/PiecewiseBilinear
+!syntax description /Functions/PiecewiseBilinear
 
 ## Description
 
@@ -14,8 +13,8 @@ will be the radial coordinate and time.
 ## Example Input Syntax
 !listing test/tests/utils/2d_linear_interpolation/xyz_error.i block=Functions
 
-!parameters /Functions/PiecewiseBilinear
+!syntax parameters /Functions/PiecewiseBilinear
 
-!inputfiles /Functions/PiecewiseBilinear
+!syntax inputs /Functions/PiecewiseBilinear
 
-!childobjects /Functions/PiecewiseBilinear
+!syntax children /Functions/PiecewiseBilinear

@@ -1,7 +1,7 @@
-!description /Kernels/NSEnergyInviscidFlux
+!syntax description /Kernels/NSEnergyInviscidFlux
 
-!parameters /Kernels/NSEnergyInviscidFlux
+!syntax parameters /Kernels/NSEnergyInviscidFlux
 
-!inputfiles /Kernels/NSEnergyInviscidFlux
+!syntax inputs /Kernels/NSEnergyInviscidFlux
 
-!childobjects /Kernels/NSEnergyInviscidFlux
+!syntax children /Kernels/NSEnergyInviscidFlux

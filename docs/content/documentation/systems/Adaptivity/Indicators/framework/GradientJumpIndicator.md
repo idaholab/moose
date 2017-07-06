@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GradientJumpIndicator
-!description /Adaptivity/Indicators/GradientJumpIndicator
+!syntax description /Adaptivity/Indicators/GradientJumpIndicator
 
-!parameters /Adaptivity/Indicators/GradientJumpIndicator
+!syntax parameters /Adaptivity/Indicators/GradientJumpIndicator
 
-!inputfiles /Adaptivity/Indicators/GradientJumpIndicator
+!syntax inputs /Adaptivity/Indicators/GradientJumpIndicator
 
-!childobjects /Adaptivity/Indicators/GradientJumpIndicator
+!syntax children /Adaptivity/Indicators/GradientJumpIndicator

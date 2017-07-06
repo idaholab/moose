@@ -25,11 +25,11 @@ The LevelSetOlssonReinitialization kernel is typically employed in a reinitializ
 
 !listing modules/level_set/tests/reinitialization/reinit.i block=Kernels label=False
 
-!parameters /Kernels/LevelSetOlssonReinitialization
+!syntax parameters /Kernels/LevelSetOlssonReinitialization
 
-!inputfiles /Kernels/LevelSetOlssonReinitialization
+!syntax inputs /Kernels/LevelSetOlssonReinitialization
 
-!childobjects /Kernels/LevelSetOlssonReinitialization
+!syntax children /Kernels/LevelSetOlssonReinitialization
 
 ## References
 

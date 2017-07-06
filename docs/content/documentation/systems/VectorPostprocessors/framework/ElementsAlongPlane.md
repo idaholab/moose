@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementsAlongPlane
-!description /VectorPostprocessors/ElementsAlongPlane
+!syntax description /VectorPostprocessors/ElementsAlongPlane
 
-!parameters /VectorPostprocessors/ElementsAlongPlane
+!syntax parameters /VectorPostprocessors/ElementsAlongPlane
 
-!inputfiles /VectorPostprocessors/ElementsAlongPlane
+!syntax inputs /VectorPostprocessors/ElementsAlongPlane
 
-!childobjects /VectorPostprocessors/ElementsAlongPlane
+!syntax children /VectorPostprocessors/ElementsAlongPlane

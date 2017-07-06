@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SinDirichletBC
-!description /BCs/SinDirichletBC
+!syntax description /BCs/SinDirichletBC
 
-!parameters /BCs/SinDirichletBC
+!syntax parameters /BCs/SinDirichletBC
 
-!inputfiles /BCs/SinDirichletBC
+!syntax inputs /BCs/SinDirichletBC
 
-!childobjects /BCs/SinDirichletBC
+!syntax children /BCs/SinDirichletBC

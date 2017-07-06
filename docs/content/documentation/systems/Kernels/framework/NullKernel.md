@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NullKernel
-!description /Kernels/NullKernel
+!syntax description /Kernels/NullKernel
 
-!parameters /Kernels/NullKernel
+!syntax parameters /Kernels/NullKernel
 
-!inputfiles /Kernels/NullKernel
+!syntax inputs /Kernels/NullKernel
 
-!childobjects /Kernels/NullKernel
+!syntax children /Kernels/NullKernel

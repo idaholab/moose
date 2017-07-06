@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ForceDensityMaterial
-!description /Materials/ForceDensityMaterial
+!syntax description /Materials/ForceDensityMaterial
 
-!parameters /Materials/ForceDensityMaterial
+!syntax parameters /Materials/ForceDensityMaterial
 
-!inputfiles /Materials/ForceDensityMaterial
+!syntax inputs /Materials/ForceDensityMaterial
 
-!childobjects /Materials/ForceDensityMaterial
+!syntax children /Materials/ForceDensityMaterial

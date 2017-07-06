@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Receiver
-!description /Postprocessors/Receiver
+!syntax description /Postprocessors/Receiver
 
-!parameters /Postprocessors/Receiver
+!syntax parameters /Postprocessors/Receiver
 
-!inputfiles /Postprocessors/Receiver
+!syntax inputs /Postprocessors/Receiver
 
-!childobjects /Postprocessors/Receiver
+!syntax children /Postprocessors/Receiver

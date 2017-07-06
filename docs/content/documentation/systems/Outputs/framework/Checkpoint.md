@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Checkpoint
-!description /Outputs/Checkpoint
+!syntax description /Outputs/Checkpoint
 
-!parameters /Outputs/Checkpoint
+!syntax parameters /Outputs/Checkpoint
 
-!inputfiles /Outputs/Checkpoint
+!syntax inputs /Outputs/Checkpoint
 
-!childobjects /Outputs/Checkpoint
+!syntax children /Outputs/Checkpoint

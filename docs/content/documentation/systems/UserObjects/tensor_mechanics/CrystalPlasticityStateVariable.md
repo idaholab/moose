@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CrystalPlasticityStateVariable
-!description /UserObjects/CrystalPlasticityStateVariable
+!syntax description /UserObjects/CrystalPlasticityStateVariable
 
-!parameters /UserObjects/CrystalPlasticityStateVariable
+!syntax parameters /UserObjects/CrystalPlasticityStateVariable
 
-!inputfiles /UserObjects/CrystalPlasticityStateVariable
+!syntax inputs /UserObjects/CrystalPlasticityStateVariable
 
-!childobjects /UserObjects/CrystalPlasticityStateVariable
+!syntax children /UserObjects/CrystalPlasticityStateVariable

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppInterpolationTransfer
-!description /Transfers/MultiAppInterpolationTransfer
+!syntax description /Transfers/MultiAppInterpolationTransfer
 
-!parameters /Transfers/MultiAppInterpolationTransfer
+!syntax parameters /Transfers/MultiAppInterpolationTransfer
 
-!inputfiles /Transfers/MultiAppInterpolationTransfer
+!syntax inputs /Transfers/MultiAppInterpolationTransfer
 
-!childobjects /Transfers/MultiAppInterpolationTransfer
+!syntax children /Transfers/MultiAppInterpolationTransfer

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFFracBulkRateMaterial
-!description /Materials/PFFracBulkRateMaterial
+!syntax description /Materials/PFFracBulkRateMaterial
 
-!parameters /Materials/PFFracBulkRateMaterial
+!syntax parameters /Materials/PFFracBulkRateMaterial
 
-!inputfiles /Materials/PFFracBulkRateMaterial
+!syntax inputs /Materials/PFFracBulkRateMaterial
 
-!childobjects /Materials/PFFracBulkRateMaterial
+!syntax children /Materials/PFFracBulkRateMaterial

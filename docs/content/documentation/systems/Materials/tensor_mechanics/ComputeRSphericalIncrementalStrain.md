@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeRSphericalIncrementalStrain
-!description /Materials/ComputeRSphericalIncrementalStrain
+!syntax description /Materials/ComputeRSphericalIncrementalStrain
 
-!parameters /Materials/ComputeRSphericalIncrementalStrain
+!syntax parameters /Materials/ComputeRSphericalIncrementalStrain
 
-!inputfiles /Materials/ComputeRSphericalIncrementalStrain
+!syntax inputs /Materials/ComputeRSphericalIncrementalStrain
 
-!childobjects /Materials/ComputeRSphericalIncrementalStrain
+!syntax children /Materials/ComputeRSphericalIncrementalStrain

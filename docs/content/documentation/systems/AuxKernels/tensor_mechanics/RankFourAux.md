@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RankFourAux
-!description /AuxKernels/RankFourAux
+!syntax description /AuxKernels/RankFourAux
 
-!parameters /AuxKernels/RankFourAux
+!syntax parameters /AuxKernels/RankFourAux
 
-!inputfiles /AuxKernels/RankFourAux
+!syntax inputs /AuxKernels/RankFourAux
 
-!childobjects /AuxKernels/RankFourAux
+!syntax children /AuxKernels/RankFourAux

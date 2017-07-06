@@ -27,6 +27,7 @@ class MiscExtension(MooseMarkdownExtension):
     def defaultConfig():
         """Configuration for MiscExtension"""
         config = MooseMarkdownExtension.defaultConfig()
+        config['scrollspy'] = [True, "Toggle the use of the scrolling contents."]
         return config
 
     def extendMarkdown(self, md, md_globals):
@@ -35,8 +36,9 @@ class MiscExtension(MooseMarkdownExtension):
         """
         md.registerExtension(self)
         config = self.getConfigs()
-        md.treeprocessors.add('moose_content_scroll',
-                              ScrollContents(markdown_instance=md, **config), '_end')
+        if config['scrollspy']:
+            md.treeprocessors.add('moose_content_scroll',
+                                  ScrollContents(markdown_instance=md, **config), '_end')
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """Create MiscExtension"""
@@ -55,7 +57,13 @@ class ScrollContents(Treeprocessor):
         """
         Adds section for materialize scrollspy
         """
+        self.addScrollSpy(root)
 
+    @staticmethod
+    def addScrollSpy(root):
+        """
+        Helper method for apply scrollspy sections to an element.
+        """
         section = root
         for el in list(root):
             if el.tag == 'h2':

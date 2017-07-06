@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # StressBasedChemicalPotential
-!description /Materials/StressBasedChemicalPotential
+!syntax description /Materials/StressBasedChemicalPotential
 
-!parameters /Materials/StressBasedChemicalPotential
+!syntax parameters /Materials/StressBasedChemicalPotential
 
-!inputfiles /Materials/StressBasedChemicalPotential
+!syntax inputs /Materials/StressBasedChemicalPotential
 
-!childobjects /Materials/StressBasedChemicalPotential
+!syntax children /Materials/StressBasedChemicalPotential

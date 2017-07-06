@@ -1,6 +1,6 @@
 
 # MatDiffusion
-!description /Kernels/MatDiffusion
+!syntax description /Kernels/MatDiffusion
 
 Implements the term
 
@@ -14,8 +14,8 @@ or - if not explicitly specified - the non-linear variable the kernel is operati
 $D$ can depend on arbitrary non-linear variables $a,b,\dots$ (`args`).
 The complete Jacobian contributions are provided by the kernel.
 
-!parameters /Kernels/MatDiffusion
+!syntax parameters /Kernels/MatDiffusion
 
-!inputfiles /Kernels/MatDiffusion
+!syntax inputs /Kernels/MatDiffusion
 
-!childobjects /Kernels/MatDiffusion
+!syntax children /Kernels/MatDiffusion

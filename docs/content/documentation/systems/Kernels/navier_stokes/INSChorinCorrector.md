@@ -1,7 +1,7 @@
-!description /Kernels/INSChorinCorrector
+!syntax description /Kernels/INSChorinCorrector
 
-!parameters /Kernels/INSChorinCorrector
+!syntax parameters /Kernels/INSChorinCorrector
 
-!inputfiles /Kernels/INSChorinCorrector
+!syntax inputs /Kernels/INSChorinCorrector
 
-!childobjects /Kernels/INSChorinCorrector
+!syntax children /Kernels/INSChorinCorrector

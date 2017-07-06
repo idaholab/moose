@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeVolumetricDeformGrad
-!description /Materials/ComputeVolumetricDeformGrad
+!syntax description /Materials/ComputeVolumetricDeformGrad
 
-!parameters /Materials/ComputeVolumetricDeformGrad
+!syntax parameters /Materials/ComputeVolumetricDeformGrad
 
-!inputfiles /Materials/ComputeVolumetricDeformGrad
+!syntax inputs /Materials/ComputeVolumetricDeformGrad
 
-!childobjects /Materials/ComputeVolumetricDeformGrad
+!syntax children /Materials/ComputeVolumetricDeformGrad

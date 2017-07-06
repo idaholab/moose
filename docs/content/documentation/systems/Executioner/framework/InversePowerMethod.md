@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # InversePowerMethod
-!description /Executioner/InversePowerMethod
+!syntax description /Executioner/InversePowerMethod
 
-!parameters /Executioner/InversePowerMethod
+!syntax parameters /Executioner/InversePowerMethod
 
-!inputfiles /Executioner/InversePowerMethod
+!syntax inputs /Executioner/InversePowerMethod
 
-!childobjects /Executioner/InversePowerMethod
+!syntax children /Executioner/InversePowerMethod

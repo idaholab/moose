@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalMaxValue
-!description /Postprocessors/NodalMaxValue
+!syntax description /Postprocessors/NodalMaxValue
 
-!parameters /Postprocessors/NodalMaxValue
+!syntax parameters /Postprocessors/NodalMaxValue
 
-!inputfiles /Postprocessors/NodalMaxValue
+!syntax inputs /Postprocessors/NodalMaxValue
 
-!childobjects /Postprocessors/NodalMaxValue
+!syntax children /Postprocessors/NodalMaxValue

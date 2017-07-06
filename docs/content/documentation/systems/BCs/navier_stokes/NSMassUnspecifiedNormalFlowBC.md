@@ -1,7 +1,7 @@
-!description /BCs/NSMassUnspecifiedNormalFlowBC
+!syntax description /BCs/NSMassUnspecifiedNormalFlowBC
 
-!parameters /BCs/NSMassUnspecifiedNormalFlowBC
+!syntax parameters /BCs/NSMassUnspecifiedNormalFlowBC
 
-!inputfiles /BCs/NSMassUnspecifiedNormalFlowBC
+!syntax inputs /BCs/NSMassUnspecifiedNormalFlowBC
 
-!childobjects /BCs/NSMassUnspecifiedNormalFlowBC
+!syntax children /BCs/NSMassUnspecifiedNormalFlowBC

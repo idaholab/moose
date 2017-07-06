@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GenericFunctionMaterial
-!description /Materials/GenericFunctionMaterial
+!syntax description /Materials/GenericFunctionMaterial
 
-!parameters /Materials/GenericFunctionMaterial
+!syntax parameters /Materials/GenericFunctionMaterial
 
-!inputfiles /Materials/GenericFunctionMaterial
+!syntax inputs /Materials/GenericFunctionMaterial
 
-!childobjects /Materials/GenericFunctionMaterial
+!syntax children /Materials/GenericFunctionMaterial

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MatchedValueBC
-!description /BCs/MatchedValueBC
+!syntax description /BCs/MatchedValueBC
 
-!parameters /BCs/MatchedValueBC
+!syntax parameters /BCs/MatchedValueBC
 
-!inputfiles /BCs/MatchedValueBC
+!syntax inputs /BCs/MatchedValueBC
 
-!childobjects /BCs/MatchedValueBC
+!syntax children /BCs/MatchedValueBC

@@ -1,6 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Indicators System
-!parameters /Adaptivity/Indicators
+!syntax objects /Adaptivity/Indicators
 
-!subobjects /Adaptivity/Indicators
+!syntax subsystems /Adaptivity/Indicators
+
+!syntax actions /Adaptivity/Indicators

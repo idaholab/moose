@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SimplePredictor
-!description /Executioner/Predictor/SimplePredictor
+!syntax description /Executioner/Predictor/SimplePredictor
 
-!parameters /Executioner/Predictor/SimplePredictor
+!syntax parameters /Executioner/Predictor/SimplePredictor
 
-!inputfiles /Executioner/Predictor/SimplePredictor
+!syntax inputs /Executioner/Predictor/SimplePredictor
 
-!childobjects /Executioner/Predictor/SimplePredictor
+!syntax children /Executioner/Predictor/SimplePredictor

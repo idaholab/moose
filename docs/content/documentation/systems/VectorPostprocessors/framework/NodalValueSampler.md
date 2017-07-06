@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalValueSampler
-!description /VectorPostprocessors/NodalValueSampler
+!syntax description /VectorPostprocessors/NodalValueSampler
 
-!parameters /VectorPostprocessors/NodalValueSampler
+!syntax parameters /VectorPostprocessors/NodalValueSampler
 
-!inputfiles /VectorPostprocessors/NodalValueSampler
+!syntax inputs /VectorPostprocessors/NodalValueSampler
 
-!childobjects /VectorPostprocessors/NodalValueSampler
+!syntax children /VectorPostprocessors/NodalValueSampler

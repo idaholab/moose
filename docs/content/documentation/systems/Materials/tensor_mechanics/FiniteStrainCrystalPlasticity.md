@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FiniteStrainCrystalPlasticity
-!description /Materials/FiniteStrainCrystalPlasticity
+!syntax description /Materials/FiniteStrainCrystalPlasticity
 
-!parameters /Materials/FiniteStrainCrystalPlasticity
+!syntax parameters /Materials/FiniteStrainCrystalPlasticity
 
-!inputfiles /Materials/FiniteStrainCrystalPlasticity
+!syntax inputs /Materials/FiniteStrainCrystalPlasticity
 
-!childobjects /Materials/FiniteStrainCrystalPlasticity
+!syntax children /Materials/FiniteStrainCrystalPlasticity

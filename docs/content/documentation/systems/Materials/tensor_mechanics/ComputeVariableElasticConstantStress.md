@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeVariableElasticConstantStress
-!description /Materials/ComputeVariableElasticConstantStress
+!syntax description /Materials/ComputeVariableElasticConstantStress
 
-!parameters /Materials/ComputeVariableElasticConstantStress
+!syntax parameters /Materials/ComputeVariableElasticConstantStress
 
-!inputfiles /Materials/ComputeVariableElasticConstantStress
+!syntax inputs /Materials/ComputeVariableElasticConstantStress
 
-!childobjects /Materials/ComputeVariableElasticConstantStress
+!syntax children /Materials/ComputeVariableElasticConstantStress

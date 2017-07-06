@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VariableTimeIntegrationAux
-!description /AuxKernels/VariableTimeIntegrationAux
+!syntax description /AuxKernels/VariableTimeIntegrationAux
 
-!parameters /AuxKernels/VariableTimeIntegrationAux
+!syntax parameters /AuxKernels/VariableTimeIntegrationAux
 
-!inputfiles /AuxKernels/VariableTimeIntegrationAux
+!syntax inputs /AuxKernels/VariableTimeIntegrationAux
 
-!childobjects /AuxKernels/VariableTimeIntegrationAux
+!syntax children /AuxKernels/VariableTimeIntegrationAux

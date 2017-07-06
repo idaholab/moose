@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementalVariableValue
-!description /Postprocessors/ElementalVariableValue
+!syntax description /Postprocessors/ElementalVariableValue
 
-!parameters /Postprocessors/ElementalVariableValue
+!syntax parameters /Postprocessors/ElementalVariableValue
 
-!inputfiles /Postprocessors/ElementalVariableValue
+!syntax inputs /Postprocessors/ElementalVariableValue
 
-!childobjects /Postprocessors/ElementalVariableValue
+!syntax children /Postprocessors/ElementalVariableValue

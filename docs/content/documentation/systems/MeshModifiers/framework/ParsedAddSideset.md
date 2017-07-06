@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ParsedAddSideset
-!description /MeshModifiers/ParsedAddSideset
+!syntax description /MeshModifiers/ParsedAddSideset
 
-!parameters /MeshModifiers/ParsedAddSideset
+!syntax parameters /MeshModifiers/ParsedAddSideset
 
-!inputfiles /MeshModifiers/ParsedAddSideset
+!syntax inputs /MeshModifiers/ParsedAddSideset
 
-!childobjects /MeshModifiers/ParsedAddSideset
+!syntax children /MeshModifiers/ParsedAddSideset

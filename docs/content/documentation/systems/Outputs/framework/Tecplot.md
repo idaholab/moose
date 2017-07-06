@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Tecplot
-!description /Outputs/Tecplot
+!syntax description /Outputs/Tecplot
 
-!parameters /Outputs/Tecplot
+!syntax parameters /Outputs/Tecplot
 
-!inputfiles /Outputs/Tecplot
+!syntax inputs /Outputs/Tecplot
 
-!childobjects /Outputs/Tecplot
+!syntax children /Outputs/Tecplot

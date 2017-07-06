@@ -1,5 +1,5 @@
 # EBSDMesh
-!description /Mesh/EBSDMesh
+!syntax description /Mesh/EBSDMesh
 
 The mesh is generated from the EBSD information, to get an optimal reconstruction
 of the data. This is accomplished in the mesh block using the EBSDMesh type. The
@@ -15,8 +15,8 @@ be divisible by $2^u$ where $u$ is the value of the ```uniform_refine``` paramet
     affect the resolution of the final mesh. It sets the levels of coarsening
     that can be applied to the EBSD data.
 
-!parameters /Mesh/EBSDMesh
+!syntax parameters /Mesh/EBSDMesh
 
-!inputfiles /Mesh/EBSDMesh
+!syntax inputs /Mesh/EBSDMesh
 
-!childobjects /Mesh/EBSDMesh
+!syntax children /Mesh/EBSDMesh

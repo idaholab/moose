@@ -1,7 +1,7 @@
-!description /BCs/NSEnergyWeakStagnationBC
+!syntax description /BCs/NSEnergyWeakStagnationBC
 
-!parameters /BCs/NSEnergyWeakStagnationBC
+!syntax parameters /BCs/NSEnergyWeakStagnationBC
 
-!inputfiles /BCs/NSEnergyWeakStagnationBC
+!syntax inputs /BCs/NSEnergyWeakStagnationBC
 
-!childobjects /BCs/NSEnergyWeakStagnationBC
+!syntax children /BCs/NSEnergyWeakStagnationBC

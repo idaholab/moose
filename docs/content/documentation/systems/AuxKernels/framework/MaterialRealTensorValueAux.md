@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialRealTensorValueAux
-!description /AuxKernels/MaterialRealTensorValueAux
+!syntax description /AuxKernels/MaterialRealTensorValueAux
 
-!parameters /AuxKernels/MaterialRealTensorValueAux
+!syntax parameters /AuxKernels/MaterialRealTensorValueAux
 
-!inputfiles /AuxKernels/MaterialRealTensorValueAux
+!syntax inputs /AuxKernels/MaterialRealTensorValueAux
 
-!childobjects /AuxKernels/MaterialRealTensorValueAux
+!syntax children /AuxKernels/MaterialRealTensorValueAux

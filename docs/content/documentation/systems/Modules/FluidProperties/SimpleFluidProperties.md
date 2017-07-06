@@ -1,5 +1,5 @@
 #SimpleFluidProperties
-!description /Modules/FluidProperties/SimpleFluidProperties
+!syntax description /Modules/FluidProperties/SimpleFluidProperties
 
 This is a computationally simple fluid based on a constant bulk modulus density fluid,
 with density given by
@@ -21,8 +21,8 @@ and
 \end{equation}
 respectively.
 
-!parameters /Modules/FluidProperties/SimpleFluidProperties
+!syntax parameters /Modules/FluidProperties/SimpleFluidProperties
 
-!inputfiles /Modules/FluidProperties/SimpleFluidProperties
+!syntax inputs /Modules/FluidProperties/SimpleFluidProperties
 
-!childobjects /Modules/FluidProperties/SimpleFluidProperties
+!syntax children /Modules/FluidProperties/SimpleFluidProperties

@@ -1,7 +1,7 @@
-!description /DGKernels/CNSFVKernel
+!syntax description /DGKernels/CNSFVKernel
 
-!parameters /DGKernels/CNSFVKernel
+!syntax parameters /DGKernels/CNSFVKernel
 
-!inputfiles /DGKernels/CNSFVKernel
+!syntax inputs /DGKernels/CNSFVKernel
 
-!childobjects /DGKernels/CNSFVKernel
+!syntax children /DGKernels/CNSFVKernel

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CompositeEigenstrain
-!description /Materials/CompositeEigenstrain
+!syntax description /Materials/CompositeEigenstrain
 
-!parameters /Materials/CompositeEigenstrain
+!syntax parameters /Materials/CompositeEigenstrain
 
-!inputfiles /Materials/CompositeEigenstrain
+!syntax inputs /Materials/CompositeEigenstrain
 
-!childobjects /Materials/CompositeEigenstrain
+!syntax children /Materials/CompositeEigenstrain

@@ -1,7 +1,7 @@
-!description /AuxKernels/CNSFVEntropyProductionAux
+!syntax description /AuxKernels/CNSFVEntropyProductionAux
 
-!parameters /AuxKernels/CNSFVEntropyProductionAux
+!syntax parameters /AuxKernels/CNSFVEntropyProductionAux
 
-!inputfiles /AuxKernels/CNSFVEntropyProductionAux
+!syntax inputs /AuxKernels/CNSFVEntropyProductionAux
 
-!childobjects /AuxKernels/CNSFVEntropyProductionAux
+!syntax children /AuxKernels/CNSFVEntropyProductionAux

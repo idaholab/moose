@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainTrackerElasticity
-!description /Postprocessors/GrainTrackerElasticity
+!syntax description /Postprocessors/GrainTrackerElasticity
 
-!parameters /Postprocessors/GrainTrackerElasticity
+!syntax parameters /Postprocessors/GrainTrackerElasticity
 
-!inputfiles /Postprocessors/GrainTrackerElasticity
+!syntax inputs /Postprocessors/GrainTrackerElasticity
 
-!childobjects /Postprocessors/GrainTrackerElasticity
+!syntax children /Postprocessors/GrainTrackerElasticity

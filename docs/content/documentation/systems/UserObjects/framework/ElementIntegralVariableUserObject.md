@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementIntegralVariableUserObject
-!description /UserObjects/ElementIntegralVariableUserObject
+!syntax description /UserObjects/ElementIntegralVariableUserObject
 
-!parameters /UserObjects/ElementIntegralVariableUserObject
+!syntax parameters /UserObjects/ElementIntegralVariableUserObject
 
-!inputfiles /UserObjects/ElementIntegralVariableUserObject
+!syntax inputs /UserObjects/ElementIntegralVariableUserObject
 
-!childobjects /UserObjects/ElementIntegralVariableUserObject
+!syntax children /UserObjects/ElementIntegralVariableUserObject

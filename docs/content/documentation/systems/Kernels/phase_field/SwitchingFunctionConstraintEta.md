@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SwitchingFunctionConstraintEta
-!description /Kernels/SwitchingFunctionConstraintEta
+!syntax description /Kernels/SwitchingFunctionConstraintEta
 
-!parameters /Kernels/SwitchingFunctionConstraintEta
+!syntax parameters /Kernels/SwitchingFunctionConstraintEta
 
-!inputfiles /Kernels/SwitchingFunctionConstraintEta
+!syntax inputs /Kernels/SwitchingFunctionConstraintEta
 
-!childobjects /Kernels/SwitchingFunctionConstraintEta
+!syntax children /Kernels/SwitchingFunctionConstraintEta

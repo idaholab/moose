@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TiedValueConstraint
-!description /Constraints/TiedValueConstraint
+!syntax description /Constraints/TiedValueConstraint
 
-!parameters /Constraints/TiedValueConstraint
+!syntax parameters /Constraints/TiedValueConstraint
 
-!inputfiles /Constraints/TiedValueConstraint
+!syntax inputs /Constraints/TiedValueConstraint
 
-!childobjects /Constraints/TiedValueConstraint
+!syntax children /Constraints/TiedValueConstraint

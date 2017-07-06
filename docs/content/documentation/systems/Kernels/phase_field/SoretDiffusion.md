@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SoretDiffusion
-!description /Kernels/SoretDiffusion
+!syntax description /Kernels/SoretDiffusion
 
-!parameters /Kernels/SoretDiffusion
+!syntax parameters /Kernels/SoretDiffusion
 
-!inputfiles /Kernels/SoretDiffusion
+!syntax inputs /Kernels/SoretDiffusion
 
-!childobjects /Kernels/SoretDiffusion
+!syntax children /Kernels/SoretDiffusion

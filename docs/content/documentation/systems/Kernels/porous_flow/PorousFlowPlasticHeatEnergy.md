@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPlasticHeatEnergy
-!description /Kernels/PorousFlowPlasticHeatEnergy
+!syntax description /Kernels/PorousFlowPlasticHeatEnergy
 
-!parameters /Kernels/PorousFlowPlasticHeatEnergy
+!syntax parameters /Kernels/PorousFlowPlasticHeatEnergy
 
-!inputfiles /Kernels/PorousFlowPlasticHeatEnergy
+!syntax inputs /Kernels/PorousFlowPlasticHeatEnergy
 
-!childobjects /Kernels/PorousFlowPlasticHeatEnergy
+!syntax children /Kernels/PorousFlowPlasticHeatEnergy

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TemperatureDependentHardeningStressUpdate
-!description /Materials/TemperatureDependentHardeningStressUpdate
+!syntax description /Materials/TemperatureDependentHardeningStressUpdate
 
-!parameters /Materials/TemperatureDependentHardeningStressUpdate
+!syntax parameters /Materials/TemperatureDependentHardeningStressUpdate
 
-!inputfiles /Materials/TemperatureDependentHardeningStressUpdate
+!syntax inputs /Materials/TemperatureDependentHardeningStressUpdate
 
-!childobjects /Materials/TemperatureDependentHardeningStressUpdate
+!syntax children /Materials/TemperatureDependentHardeningStressUpdate

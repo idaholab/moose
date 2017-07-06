@@ -1,6 +1,6 @@
 
 # DerivativeParsedMaterial
-!description /Materials/DerivativeParsedMaterial
+!syntax description /Materials/DerivativeParsedMaterial
 
 This material class does everything the `ParsedMaterial` does, plus automatic symbolic differentiation of the function expression. The function material property derivatives follow a naming scheme defined in `DerivativeMaterialPropertyNameInterface`. The maximum order of derivatives generated is set using the `derivative_order` parameter.
 
@@ -50,8 +50,8 @@ The `material_property_names` are parsed by the [`FunctionMaterialPropertyDescri
 
 Add `outputs=exodus` to the material block to automatically write all derivatives and the free energy to the exodus output.
 
-!parameters /Materials/DerivativeParsedMaterial
+!syntax parameters /Materials/DerivativeParsedMaterial
 
-!inputfiles /Materials/DerivativeParsedMaterial
+!syntax inputs /Materials/DerivativeParsedMaterial
 
-!childobjects /Materials/DerivativeParsedMaterial
+!syntax children /Materials/DerivativeParsedMaterial

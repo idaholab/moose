@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanics System
-!parameters /Kernels/TensorMechanics
+!syntax objects /Kernels/TensorMechanics
 
+!syntax subsystems /Kernels/TensorMechanics
+
+!syntax actions /Kernels/TensorMechanics

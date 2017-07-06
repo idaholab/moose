@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PointValueSampler
-!description /VectorPostprocessors/PointValueSampler
+!syntax description /VectorPostprocessors/PointValueSampler
 
-!parameters /VectorPostprocessors/PointValueSampler
+!syntax parameters /VectorPostprocessors/PointValueSampler
 
-!inputfiles /VectorPostprocessors/PointValueSampler
+!syntax inputs /VectorPostprocessors/PointValueSampler
 
-!childobjects /VectorPostprocessors/PointValueSampler
+!syntax children /VectorPostprocessors/PointValueSampler

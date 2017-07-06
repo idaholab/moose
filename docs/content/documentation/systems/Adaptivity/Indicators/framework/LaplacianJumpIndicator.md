@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LaplacianJumpIndicator
-!description /Adaptivity/Indicators/LaplacianJumpIndicator
+!syntax description /Adaptivity/Indicators/LaplacianJumpIndicator
 
-!parameters /Adaptivity/Indicators/LaplacianJumpIndicator
+!syntax parameters /Adaptivity/Indicators/LaplacianJumpIndicator
 
-!inputfiles /Adaptivity/Indicators/LaplacianJumpIndicator
+!syntax inputs /Adaptivity/Indicators/LaplacianJumpIndicator
 
-!childobjects /Adaptivity/Indicators/LaplacianJumpIndicator
+!syntax children /Adaptivity/Indicators/LaplacianJumpIndicator

@@ -18,8 +18,24 @@ from MooseDocs.testing import MarkdownTestCase
 
 class TestGlobalExtension(MarkdownTestCase):
     EXTENSIONS = ['MooseDocs.extensions.global']
-    def testLink(self):
-        self.assertConvert('test_Link.html', '[libMesh]')
+
+    @classmethod
+    def updateExtensions(cls, configs):
+        """
+        Add a import filename.
+        """
+        configs['MooseDocs.extensions.global']['import'] = \
+            ['python/MooseDocs/tests/globals/test_import.yml']
+
+    def testGlobalConfig(self):
+        md = '[libMesh]'
+        html = self.convert(md)
+        self.assertIn('<a href="http://libmesh.github.io/">libMesh</a>', html)
+
+    def testImportConfig(self):
+        md = '[Google]'
+        html = self.convert(md)
+        self.assertIn('<a href="http://www.google.com">Google</a>', html)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

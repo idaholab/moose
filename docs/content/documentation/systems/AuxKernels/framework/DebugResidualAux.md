@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DebugResidualAux
-!description /AuxKernels/DebugResidualAux
+!syntax description /AuxKernels/DebugResidualAux
 
-!parameters /AuxKernels/DebugResidualAux
+!syntax parameters /AuxKernels/DebugResidualAux
 
-!inputfiles /AuxKernels/DebugResidualAux
+!syntax inputs /AuxKernels/DebugResidualAux
 
-!childobjects /AuxKernels/DebugResidualAux
+!syntax children /AuxKernels/DebugResidualAux

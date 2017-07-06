@@ -1,7 +1,7 @@
-!description /ICs/NSInitialCondition
+!syntax description /ICs/NSInitialCondition
 
-!parameters /ICs/NSInitialCondition
+!syntax parameters /ICs/NSInitialCondition
 
-!inputfiles /ICs/NSInitialCondition
+!syntax inputs /ICs/NSInitialCondition
 
-!childobjects /ICs/NSInitialCondition
+!syntax children /ICs/NSInitialCondition

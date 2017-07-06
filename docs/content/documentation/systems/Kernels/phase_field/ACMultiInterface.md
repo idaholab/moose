@@ -1,5 +1,5 @@
 # ACMultiInterface
-!description /Kernels/ACMultiInterface
+!syntax description /Kernels/ACMultiInterface
 
 Implements Allen-Cahn interface terms for a multiphase system. This includes
 cross terms of the form
@@ -163,10 +163,10 @@ $$
 
 which is the familiar form implemented by [ACInterface](/ACInterface.md).
 
-!parameters /Kernels/ACMultiInterface
+!syntax parameters /Kernels/ACMultiInterface
 
-!inputfiles /Kernels/ACMultiInterface
+!syntax inputs /Kernels/ACMultiInterface
 
-!childobjects /Kernels/ACMultiInterface
+!syntax children /Kernels/ACMultiInterface
 
 \bibliography{docs/bib/phase_field.bib}

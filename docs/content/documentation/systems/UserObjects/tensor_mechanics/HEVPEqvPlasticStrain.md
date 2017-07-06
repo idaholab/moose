@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HEVPEqvPlasticStrain
-!description /UserObjects/HEVPEqvPlasticStrain
+!syntax description /UserObjects/HEVPEqvPlasticStrain
 
-!parameters /UserObjects/HEVPEqvPlasticStrain
+!syntax parameters /UserObjects/HEVPEqvPlasticStrain
 
-!inputfiles /UserObjects/HEVPEqvPlasticStrain
+!syntax inputs /UserObjects/HEVPEqvPlasticStrain
 
-!childobjects /UserObjects/HEVPEqvPlasticStrain
+!syntax children /UserObjects/HEVPEqvPlasticStrain

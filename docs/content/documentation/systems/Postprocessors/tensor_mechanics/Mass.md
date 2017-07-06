@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Mass
-!description /Postprocessors/Mass
+!syntax description /Postprocessors/Mass
 
-!parameters /Postprocessors/Mass
+!syntax parameters /Postprocessors/Mass
 
-!inputfiles /Postprocessors/Mass
+!syntax inputs /Postprocessors/Mass
 
-!childobjects /Postprocessors/Mass
+!syntax children /Postprocessors/Mass

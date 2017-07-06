@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FDP
-!description /Preconditioning/FDP
+!syntax description /Preconditioning/FDP
 
-!parameters /Preconditioning/FDP
+!syntax parameters /Preconditioning/FDP
 
-!inputfiles /Preconditioning/FDP
+!syntax inputs /Preconditioning/FDP
 
-!childobjects /Preconditioning/FDP
+!syntax children /Preconditioning/FDP
