@@ -5,6 +5,20 @@
     exodiff = 'coupled_scalar_out.e'
   [../]
 
+  [./old]
+    type = 'Exodiff'
+    input = 'coupled_scalar_old.i'
+    cli_args = 'AuxKernels/coupled/lag=old AuxKernels/coupled_1/lag=old Outputs/file_base=coupled_scalar_old_out'
+    exodiff = 'coupled_scalar_old_out.e'
+  [../]
+
+  [./older]
+    type = 'Exodiff'
+    input = 'coupled_scalar_old.i'
+    cli_args = 'AuxKernels/coupled/lag=older AuxKernels/coupled_1/lag=older Outputs/file_base=coupled_scalar_older_out'
+    exodiff = 'coupled_scalar_older_out.e'
+  [../]
+
   [./test_default]
     type = 'Exodiff'
     input = 'coupled_scalar_default.i'
