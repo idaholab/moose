@@ -145,6 +145,19 @@ ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned i
 }
 
 VariableValue &
+ScalarCoupleable::coupledScalarValueOlder(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupledScalar(var_name, comp))
+    return *getDefaultValue(var_name);
+
+  MooseVariableScalar * var = getScalarVar(var_name, comp);
+  if (_sc_is_implicit)
+    return var->slnOlder();
+  else
+    mooseError("Older values not available for explicit schemes");
+}
+
+VariableValue &
 ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariableScalar * var = getScalarVar(var_name, comp);
