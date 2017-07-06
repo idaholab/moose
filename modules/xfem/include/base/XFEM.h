@@ -11,10 +11,13 @@
 #include "ElementPairLocator.h"
 #include "ElementFragmentAlgorithm.h"
 #include "XFEMInterface.h"
+#include "XFEMCrackGrowthIncrement2DCut.h"
 
 // libMesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/quadrature.h"
+
+#include "GeometricCutUserObject.h"
 
 // Forward declarations
 class SystemBase;
@@ -40,7 +43,7 @@ enum XFEM_QRULE
 } // namespace Xfem
 
 class XFEMCutElem;
-class XFEMGeometricCut;
+class XFEMCrackGrowthIncrement2DCut;
 class EFANode;
 class EFAEdge;
 class EFAElement;
@@ -62,7 +65,7 @@ public:
 
   ~XFEM();
 
-  void addGeometricCut(XFEMGeometricCut * geometric_cut);
+  void addGeometricCut(const GeometricCutUserObject * geometric_cut);
 
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal);
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigned int marked_side);
@@ -172,12 +175,6 @@ private:
                         std::vector<std::vector<Point>> & frag_faces) const;
 
 private:
-  /**
-   * XFEM cut type and data
-   */
-  std::vector<Real> _XFEM_cut_data;
-  std::string _XFEM_cut_type;
-
   bool _has_secondary_cut;
 
   Xfem::XFEM_QRULE _XFEM_qrule;
@@ -185,7 +182,7 @@ private:
   bool _use_crack_growth_increment;
   Real _crack_growth_increment;
 
-  std::vector<XFEMGeometricCut *> _geometric_cuts;
+  std::vector<const GeometricCutUserObject *> _geometric_cuts;
 
   std::map<unique_id_type, XFEMCutElem *> _cut_elem_map;
   std::set<const Elem *> _crack_tip_elems;

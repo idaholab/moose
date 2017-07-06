@@ -5,32 +5,41 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "XFEMGeometricCut2D.h"
+#include "XFEMCrackGrowthIncrement2DCut.h"
 #include "XFEMFuncs.h"
+#include "GeometricCutUserObject.h"
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
 
-XFEMGeometricCut2D::XFEMGeometricCut2D(Real x0, Real y0, Real x1, Real y1, Real t_start, Real t_end)
-  : XFEMGeometricCut(t_start, t_end), _cut_line_start(x0, y0, 0.0), _cut_line_end(x1, y1, 0.0)
+XFEMCrackGrowthIncrement2DCut::XFEMCrackGrowthIncrement2DCut(
+    Real x0, Real y0, Real x1, Real y1, Real t0, Real t1)
+  : _t_start(t0), _t_end(t1), _cut_line_start(x0, y0, 0.0), _cut_line_end(x1, y1, 0.0)
 {
 }
 
-XFEMGeometricCut2D::~XFEMGeometricCut2D() {}
+XFEMCrackGrowthIncrement2DCut::~XFEMCrackGrowthIncrement2DCut() {}
 
-bool
-XFEMGeometricCut2D::active(Real time)
+Real
+XFEMCrackGrowthIncrement2DCut::cutCompletionFraction(Real time)
 {
-  return cutFraction(time) > 0;
+  Real fraction = 0.0;
+  if (time >= _t_start)
+  {
+    if (time >= _t_end)
+      fraction = 1.0;
+    else
+      fraction = (time - _t_start) / (_t_end - _t_start);
+  }
+  return fraction;
 }
 
 bool
-XFEMGeometricCut2D::cutElementByGeometry(const Elem * elem,
-                                         std::vector<CutEdge> & cut_edges,
-                                         Real time)
+XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
+    const Elem * elem, std::vector<CutEdgeForCrackGrowthIncr> & cut_edges, Real time)
 {
   bool cut_elem = false;
 
-  Real fraction = cutFraction(time);
+  Real fraction = cutCompletionFraction(time);
 
   if (fraction > 0.0)
   {
@@ -55,7 +64,7 @@ XFEMGeometricCut2D::cutElementByGeometry(const Elem * elem,
               *node1, *node2, _cut_line_start, _cut_line_end, fraction, seg_int_frac))
       {
         cut_elem = true;
-        CutEdge mycut;
+        CutEdgeForCrackGrowthIncr mycut;
         mycut.id1 = node1->id();
         mycut.id2 = node2->id();
         mycut.distance = seg_int_frac;
@@ -68,68 +77,12 @@ XFEMGeometricCut2D::cutElementByGeometry(const Elem * elem,
 }
 
 bool
-XFEMGeometricCut2D::cutElementByGeometry(const Elem * /*elem*/,
-                                         std::vector<CutFace> & /*cut_faces*/,
-                                         Real /*time*/)
-{
-  mooseError("invalid method for 2D mesh cutting");
-  return false;
-}
-
-bool
-XFEMGeometricCut2D::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                          std::vector<CutEdge> & cut_edges,
-                                          Real time)
-{
-  bool cut_frag = false;
-
-  const Real fraction = cutFraction(time);
-
-  if (fraction > 0.0)
-  {
-    unsigned int n_sides = frag_edges.size();
-
-    for (unsigned int i = 0; i < n_sides; ++i)
-    {
-      Real seg_int_frac = 0.0;
-
-      if (IntersectSegmentWithCutLine(frag_edges[i][0],
-                                      frag_edges[i][1],
-                                      _cut_line_start,
-                                      _cut_line_end,
-                                      fraction,
-                                      seg_int_frac))
-      {
-        cut_frag = true;
-        CutEdge mycut;
-        mycut.id1 = i;
-        mycut.id2 = (i < (n_sides - 1) ? (i + 1) : 0);
-        mycut.distance = seg_int_frac;
-        mycut.host_side_id = i;
-        cut_edges.push_back(mycut);
-      }
-    }
-  }
-
-  return cut_frag;
-}
-
-bool
-XFEMGeometricCut2D::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                          std::vector<CutFace> & /*cut_faces*/,
-                                          Real /*time*/)
-{
-  mooseError("invalid method for 2D mesh cutting");
-  return false;
-}
-
-bool
-XFEMGeometricCut2D::IntersectSegmentWithCutLine(const Point & segment_point1,
-                                                const Point & segment_point2,
-                                                const Point & cutting_line_point1,
-                                                const Point & cutting_line_point2,
-                                                const Real & cutting_line_fraction,
-                                                Real & segment_intersection_fraction)
+XFEMCrackGrowthIncrement2DCut::IntersectSegmentWithCutLine(const Point & segment_point1,
+                                                           const Point & segment_point2,
+                                                           const Point & cutting_line_point1,
+                                                           const Point & cutting_line_point2,
+                                                           const Real & cutting_line_fraction,
+                                                           Real & segment_intersection_fraction)
 {
   // Use the algorithm described here to determine whether a line segment is intersected
   // by a cutting line, and to compute the fraction along that line where the intersection
@@ -167,4 +120,10 @@ XFEMGeometricCut2D::IntersectSegmentWithCutLine(const Point & segment_point1,
     }
   }
   return cut_segment;
+}
+
+Real
+XFEMCrackGrowthIncrement2DCut::crossProduct2D(Real ax, Real ay, Real bx, Real by)
+{
+  return (ax * by - bx * ay);
 }

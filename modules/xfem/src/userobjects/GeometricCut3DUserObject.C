@@ -5,34 +5,54 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "XFEMGeometricCut3D.h"
+#include "GeometricCut3DUserObject.h"
 
+// MOOSE includes
 #include "MooseError.h"
-#include "XFEMFuncs.h"
+
+// libMesh includes
 #include "libmesh/string_to_enum.h"
 
-XFEMGeometricCut3D::XFEMGeometricCut3D(Real t0, Real t1)
-  : XFEMGeometricCut(t0, t1), _center(), _normal()
+// XFEM includes
+#include "XFEMFuncs.h"
+
+template <>
+InputParameters
+validParams<GeometricCut3DUserObject>()
 {
+  // Get input parameters from parent class
+  InputParameters params = validParams<GeometricCutUserObject>();
+
+  // Class description
+  params.addClassDescription("Base class for 3D XFEM Geometric Cut UserObjects");
+  // Return the parameters
+  return params;
 }
 
-XFEMGeometricCut3D::~XFEMGeometricCut3D() {}
+GeometricCut3DUserObject::GeometricCut3DUserObject(const InputParameters & parameters)
+  : GeometricCutUserObject(parameters), _center(), _normal()
+{
+  _start_times.push_back(0.0);
+  _end_times.push_back(0.0);
+}
 
-bool XFEMGeometricCut3D::active(Real /*time*/) { return true; }
+GeometricCut3DUserObject::~GeometricCut3DUserObject() {}
+
+bool GeometricCut3DUserObject::active(Real /*time*/) const { return true; }
 
 bool
-XFEMGeometricCut3D::cutElementByGeometry(const Elem * /*elem*/,
-                                         std::vector<CutEdge> & /*cut_edges*/,
-                                         Real /*time*/)
+GeometricCut3DUserObject::cutElementByGeometry(const Elem * /*elem*/,
+                                               std::vector<CutEdge> & /*cut_edges*/,
+                                               Real /*time*/) const
 {
-  mooseError("invalid method for 3D mesh cutting");
+  mooseError("Invalid method: must use vector of element faces for 3D mesh cutting");
   return false;
 }
 
 bool
-XFEMGeometricCut3D::cutElementByGeometry(const Elem * elem,
-                                         std::vector<CutFace> & cut_faces,
-                                         Real /*time*/)
+GeometricCut3DUserObject::cutElementByGeometry(const Elem * elem,
+                                               std::vector<CutFace> & cut_faces,
+                                               Real /*time*/) const
 // TODO: Time evolving cuts not yet supported in 3D (hence the lack of use of the time variable)
 {
   bool cut_elem = false;
@@ -86,18 +106,18 @@ XFEMGeometricCut3D::cutElementByGeometry(const Elem * elem,
 }
 
 bool
-XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
-                                          std::vector<CutEdge> & /*cut_edges*/,
-                                          Real /*time*/)
+GeometricCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
+                                                std::vector<CutEdge> & /*cut_edges*/,
+                                                Real /*time*/) const
 {
-  mooseError("invalid method for 3D mesh cutting");
+  mooseError("Invalid method: must use vector of element faces for 3D mesh cutting");
   return false;
 }
 
 bool
-XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                          std::vector<CutFace> & /*cut_faces*/,
-                                          Real /*time*/)
+GeometricCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
+                                                std::vector<CutFace> & /*cut_faces*/,
+                                                Real /*time*/) const
 {
   // TODO: Need this for branching in 3D
   mooseError("cutFragmentByGeometry not yet implemented for 3D mesh cutting");
@@ -105,7 +125,7 @@ XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*fr
 }
 
 bool
-XFEMGeometricCut3D::intersectWithEdge(const Point & p1, const Point & p2, Point & pint)
+GeometricCut3DUserObject::intersectWithEdge(const Point & p1, const Point & p2, Point & pint) const
 {
   bool has_intersection = false;
   double plane_point[3] = {_center(0), _center(1), _center(2)};
@@ -128,7 +148,7 @@ XFEMGeometricCut3D::intersectWithEdge(const Point & p1, const Point & p2, Point 
 }
 
 bool
-XFEMGeometricCut3D::isInsideEdge(const Point & p1, const Point & p2, const Point & p)
+GeometricCut3DUserObject::isInsideEdge(const Point & p1, const Point & p2, const Point & p) const
 {
   Real dotp1 = (p1 - p) * (p2 - p1);
   Real dotp2 = (p2 - p) * (p2 - p1);
@@ -136,7 +156,9 @@ XFEMGeometricCut3D::isInsideEdge(const Point & p1, const Point & p2, const Point
 }
 
 Real
-XFEMGeometricCut3D::getRelativePosition(const Point & p1, const Point & p2, const Point & p)
+GeometricCut3DUserObject::getRelativePosition(const Point & p1,
+                                              const Point & p2,
+                                              const Point & p) const
 {
   // get the relative position of p from p1
   Real full_len = (p2 - p1).norm();

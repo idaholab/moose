@@ -1,0 +1,33 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+#ifndef LINE_SEGMENT_CUT_SET_USER_OBJECT_H
+#define LINE_SEGMENT_CUT_SET_USER_OBJECT_H
+
+#include "GeometricCut2DUserObject.h"
+
+// Forward declarations
+class LineSegmentCutSetUserObject;
+
+template <>
+InputParameters validParams<LineSegmentCutSetUserObject>();
+
+class LineSegmentCutSetUserObject : public GeometricCut2DUserObject
+{
+public:
+  LineSegmentCutSetUserObject(const InputParameters & parameters);
+  ~LineSegmentCutSetUserObject();
+
+  virtual void initialize(){};
+  virtual void execute(){};
+  virtual void finalize(){};
+
+protected:
+  std::vector<Real> _cut_data;
+};
+
+#endif // LINE_SEGMENT_CUT_SET_USER_OBJECT_H

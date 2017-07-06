@@ -16,9 +16,18 @@
 []
 
 [XFEM]
-  cut_data = '0.5 1.0 0.5 0.0 0 2'
+  geometric_cut_userobjects = 'line_seg_cut_uo'
   qrule = volfrac
   output_cut_plane = true
+[]
+
+[UserObjects]
+  [./line_seg_cut_uo]
+    type = LineSegmentCutUserObject
+    cut_data = '0.5 1.0 0.5 0.0'
+    time_start_cut = 0.0
+    time_end_cut = 2.0
+  [../]
 []
 
 [Variables]
