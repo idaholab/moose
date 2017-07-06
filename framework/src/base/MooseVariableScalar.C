@@ -116,14 +116,14 @@ MooseVariableScalar::isNodal() const
 void
 MooseVariableScalar::setValue(unsigned int i, Number value)
 {
-  // In debug modes, we might have set a "trap" to catch reads of
-  // uninitialized values, but this trap shouldn't prevent setting
-  // values.
+// In debug modes, we might have set a "trap" to catch reads of
+// uninitialized values, but this trap shouldn't prevent setting
+// values.
 #ifdef DEBUG
   if (i >= _u.size())
   {
-    libmesh_assert_less (i, _dof_indices.size());
-    _u.resize(i+1);
+    libmesh_assert_less(i, _dof_indices.size());
+    _u.resize(i + 1);
   }
 #endif
   _u[i] = value; // update variable value
@@ -133,9 +133,9 @@ void
 MooseVariableScalar::setValues(Number value)
 {
   unsigned int n = _dof_indices.size();
-  // In debug modes, we might have set a "trap" to catch reads of
-  // uninitialized values, but this trap shouldn't prevent setting
-  // values.
+// In debug modes, we might have set a "trap" to catch reads of
+// uninitialized values, but this trap shouldn't prevent setting
+// values.
 #ifdef DEBUG
   _u.resize(n);
 #endif
