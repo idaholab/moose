@@ -38,6 +38,8 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// The time level of the coupled variable
+  MooseEnum _lag;
   /// Coupled variable
   VariableValue & _coupled_val;
 

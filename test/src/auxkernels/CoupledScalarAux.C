@@ -25,12 +25,18 @@ validParams<CoupledScalarAux>()
   params.addParam<unsigned int>(
       "component", 0, "The individual component of the scalar variable to output");
 
+  MooseEnum lag("CURRENT OLD OLDER", "CURRENT", false);
+  params.addParam<MooseEnum>("lag", lag, "Determine the time level of the coupled value");
+
   return params;
 }
 
 CoupledScalarAux::CoupledScalarAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _coupled_val(coupledScalarValue("coupled")),
+    _lag(getParam<MooseEnum>("lag")),
+    _coupled_val(_lag == 0 ? coupledScalarValue("coupled")
+                           : (_lag == 1 ? coupledScalarValueOld("coupled")
+                                        : coupledScalarValueOlder("coupled"))),
     _component(getParam<unsigned int>("component"))
 {
   if (_component >= coupledScalarOrder("coupled"))
