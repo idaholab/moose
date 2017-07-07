@@ -123,8 +123,12 @@ public:
   /// Viscosity
   virtual Real mu(Real density, Real temperature) const override;
   /// Derivatives of viscosity wrt density and temperature
-  virtual void mu_drhoT(
-      Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void mu_drhoT(Real density,
+                        Real temperature,
+                        Real ddensity_dT,
+                        Real & mu,
+                        Real & dmu_drho,
+                        Real & dmu_dT) const override;
   /// Specific isobaric heat capacity
   virtual Real cp(Real pressure, Real temperature) const override;
   /// Specific isochoric heat capacity

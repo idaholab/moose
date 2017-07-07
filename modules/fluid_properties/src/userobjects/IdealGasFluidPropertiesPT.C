@@ -138,8 +138,12 @@ Real IdealGasFluidPropertiesPT::mu(Real /*density*/, Real /*temperature*/) const
 }
 
 void
-IdealGasFluidPropertiesPT::mu_drhoT(
-    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+IdealGasFluidPropertiesPT::mu_drhoT(Real density,
+                                    Real temperature,
+                                    Real /*ddensity_dT*/,
+                                    Real & mu,
+                                    Real & dmu_drho,
+                                    Real & dmu_dT) const
 {
   mu = this->mu(density, temperature);
   dmu_drho = 0.0;

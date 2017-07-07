@@ -59,8 +59,12 @@ public:
   /// Dynamic viscosity (Pa s)
   virtual Real mu(Real density, Real temperature) const = 0;
   /// Dynamic viscosity and its derivatives wrt density and temperature
-  virtual void
-  mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const = 0;
+  virtual void mu_drhoT(Real density,
+                        Real temperature,
+                        Real ddensity_dT,
+                        Real & mu,
+                        Real & dmu_drho,
+                        Real & dmu_dT) const = 0;
   /// Thermal conductivity (W/m/K)
   virtual Real k(Real density, Real temperature) const = 0;
   /// Specific entropy (J/kg/K)

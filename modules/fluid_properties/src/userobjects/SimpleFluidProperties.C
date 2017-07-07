@@ -146,8 +146,12 @@ SimpleFluidProperties::rho_e_dpT(Real pressure,
 Real SimpleFluidProperties::mu(Real /*density*/, Real /*temperature*/) const { return _viscosity; }
 
 void
-SimpleFluidProperties::mu_drhoT(
-    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+SimpleFluidProperties::mu_drhoT(Real density,
+                                Real temperature,
+                                Real /*ddensity_dT*/,
+                                Real & mu,
+                                Real & dmu_drho,
+                                Real & dmu_dT) const
 {
   mu = this->mu(density, temperature);
   dmu_drho = 0.0;

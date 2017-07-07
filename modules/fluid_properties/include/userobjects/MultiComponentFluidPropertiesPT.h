@@ -44,6 +44,7 @@ public:
   virtual void mu_drhoTx(Real density,
                          Real temperature,
                          Real xmass,
+                         Real ddensity_dT,
                          Real & mu,
                          Real & dmu_dp,
                          Real & dmu_dT,
