@@ -100,7 +100,7 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   Real dmu_drho_fd = (_fp->mu(rho + drho, T) - _fp->mu(rho - drho, T)) / (2.0 * drho);
   Real dmu_dT_fd = (_fp->mu(rho, T + dT) - _fp->mu(rho, T - dT)) / (2.0 * dT);
   Real mu = 0.0, dmu_drho = 0.0, dmu_dT = 0.0;
-  _fp->mu_drhoT(rho, T, mu, dmu_drho, dmu_dT);
+  _fp->mu_drhoT(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
 
   ABS_TEST("mu", mu, _fp->mu(rho, T), 1.0e-15);
   ABS_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-15);

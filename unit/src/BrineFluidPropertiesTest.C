@@ -159,15 +159,23 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   Real drho = 1.0e-4;
 
   Real dmu_drho_fd = (_fp->mu(rho + drho, T, x) - _fp->mu(rho - drho, T, x)) / (2.0 * drho);
-  Real dmu_dT_fd = (_fp->mu(rho, T + dT, x) - _fp->mu(rho, T - dT, x)) / (2.0 * dT);
   Real dmu_dx_fd = (_fp->mu(rho, T, x + dx) - _fp->mu(rho, T, x - dx)) / (2.0 * dx);
   Real mu = 0.0, dmu_drho = 0.0, dmu_dT = 0.0, dmu_dx = 0.0;
-  _fp->mu_drhoTx(rho, T, x, mu, dmu_drho, dmu_dT, dmu_dx);
+  _fp->mu_drhoTx(rho, T, x, drho_dT, mu, dmu_drho, dmu_dT, dmu_dx);
 
   ABS_TEST("mu", mu, _fp->mu(rho, T, x), 1.0e-15);
-  REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-3);
-  REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-3);
-  REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-3);
+  REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-6);
+  REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-6);
+
+  // To properly test derivative wrt temperature, use p and T and calculate density,
+  // so that the change in density wrt temperature is included
+  _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  _fp->mu_drhoTx(rho, T, x, drho_dT, mu, dmu_drho, dmu_dT, dmu_dx);
+  Real dmu_dT_fd =
+      (_fp->mu(_fp->rho(p, T + dT, x), T + dT, x) - _fp->mu(_fp->rho(p, T - dT, x), T - dT, x)) /
+      (2.0 * dT);
+
+  REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
 
   // Verify that derivatives wrt x are defined when x = 0
   x = 0.0;
@@ -192,7 +200,7 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
 
   // Viscosity
   dmu_dx_fd = (_fp->mu(rho, T, x + dx) - _fp->mu(rho, T, x)) / dx;
-  _fp->mu_drhoTx(rho, T, x, mu, dmu_drho, dmu_dT, dmu_dx);
+  _fp->mu_drhoTx(rho, T, x, drho_dT, mu, dmu_drho, dmu_dT, dmu_dx);
 
   REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-3);
 }
