@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SwitchingFunctionConstraintLagrange
-!description /Kernels/SwitchingFunctionConstraintLagrange
+!syntax description /Kernels/SwitchingFunctionConstraintLagrange
 
-!parameters /Kernels/SwitchingFunctionConstraintLagrange
+!syntax parameters /Kernels/SwitchingFunctionConstraintLagrange
 
-!inputfiles /Kernels/SwitchingFunctionConstraintLagrange
+!syntax inputs /Kernels/SwitchingFunctionConstraintLagrange
 
-!childobjects /Kernels/SwitchingFunctionConstraintLagrange
+!syntax children /Kernels/SwitchingFunctionConstraintLagrange

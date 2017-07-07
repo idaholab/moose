@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VolumePostprocessor
-!description /Postprocessors/VolumePostprocessor
+!syntax description /Postprocessors/VolumePostprocessor
 
-!parameters /Postprocessors/VolumePostprocessor
+!syntax parameters /Postprocessors/VolumePostprocessor
 
-!inputfiles /Postprocessors/VolumePostprocessor
+!syntax inputs /Postprocessors/VolumePostprocessor
 
-!childobjects /Postprocessors/VolumePostprocessor
+!syntax children /Postprocessors/VolumePostprocessor

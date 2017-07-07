@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BoundingValueElementDamper
-!description /Dampers/BoundingValueElementDamper
+!syntax description /Dampers/BoundingValueElementDamper
 
-!parameters /Dampers/BoundingValueElementDamper
+!syntax parameters /Dampers/BoundingValueElementDamper
 
-!inputfiles /Dampers/BoundingValueElementDamper
+!syntax inputs /Dampers/BoundingValueElementDamper
 
-!childobjects /Dampers/BoundingValueElementDamper
+!syntax children /Dampers/BoundingValueElementDamper

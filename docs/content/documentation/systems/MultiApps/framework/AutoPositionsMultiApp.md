@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AutoPositionsMultiApp
-!description /MultiApps/AutoPositionsMultiApp
+!syntax description /MultiApps/AutoPositionsMultiApp
 
-!parameters /MultiApps/AutoPositionsMultiApp
+!syntax parameters /MultiApps/AutoPositionsMultiApp
 
-!inputfiles /MultiApps/AutoPositionsMultiApp
+!syntax inputs /MultiApps/AutoPositionsMultiApp
 
-!childobjects /MultiApps/AutoPositionsMultiApp
+!syntax children /MultiApps/AutoPositionsMultiApp

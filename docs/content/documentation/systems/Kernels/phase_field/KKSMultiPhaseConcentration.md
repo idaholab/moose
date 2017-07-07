@@ -1,5 +1,5 @@
 # KKSMultiPhaseConcentration
-!description /Kernels/KKSMultiPhaseConcentration
+!syntax description /Kernels/KKSMultiPhaseConcentration
 
 ### Residual
 For a KKS model with $n$ phases, the residual of the phase concentration constraint equation is
@@ -45,10 +45,10 @@ $$
 For the off-diagonal Jacobians we also need to multiply by $L$, the Allen-Cahn mobility.
 
 
-!parameters /Kernels/KKSMultiPhaseConcentration
+!syntax parameters /Kernels/KKSMultiPhaseConcentration
 
-!inputfiles /Kernels/KKSMultiPhaseConcentration
+!syntax inputs /Kernels/KKSMultiPhaseConcentration
 
-!childobjects /Kernels/KKSMultiPhaseConcentration
+!syntax children /Kernels/KKSMultiPhaseConcentration
 
 \bibliography{docs/bib/phase_field.bib}

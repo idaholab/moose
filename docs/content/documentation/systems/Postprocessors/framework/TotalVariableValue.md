@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TotalVariableValue
-!description /Postprocessors/TotalVariableValue
+!syntax description /Postprocessors/TotalVariableValue
 
-!parameters /Postprocessors/TotalVariableValue
+!syntax parameters /Postprocessors/TotalVariableValue
 
-!inputfiles /Postprocessors/TotalVariableValue
+!syntax inputs /Postprocessors/TotalVariableValue
 
-!childobjects /Postprocessors/TotalVariableValue
+!syntax children /Postprocessors/TotalVariableValue

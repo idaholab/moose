@@ -8,6 +8,4 @@
 * [CentOS](installation/centos.md)
 * [Windows 10](installation/windows10.md)
 * [HPC Cluster](installation/cluster.md)
-
-
 * [Manual Install](installation/manual_installation.md)

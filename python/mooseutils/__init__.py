@@ -1,4 +1,4 @@
-from mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration, touch, unique_list, gold
+from mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration, touch, unique_list, gold, make_chunks
 from message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from MooseException import MooseException
 try:

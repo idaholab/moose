@@ -1,7 +1,7 @@
-!description /DGKernels/AEFVKernel
+!syntax description /DGKernels/AEFVKernel
 
-!parameters /DGKernels/AEFVKernel
+!syntax parameters /DGKernels/AEFVKernel
 
-!inputfiles /DGKernels/AEFVKernel
+!syntax inputs /DGKernels/AEFVKernel
 
-!childobjects /DGKernels/AEFVKernel
+!syntax children /DGKernels/AEFVKernel

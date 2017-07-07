@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LineFunctionSampler
-!description /VectorPostprocessors/LineFunctionSampler
+!syntax description /VectorPostprocessors/LineFunctionSampler
 
-!parameters /VectorPostprocessors/LineFunctionSampler
+!syntax parameters /VectorPostprocessors/LineFunctionSampler
 
-!inputfiles /VectorPostprocessors/LineFunctionSampler
+!syntax inputs /VectorPostprocessors/LineFunctionSampler
 
-!childobjects /VectorPostprocessors/LineFunctionSampler
+!syntax children /VectorPostprocessors/LineFunctionSampler

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PoroMechanicsCoupling
-!description /Kernels/PoroMechanicsCoupling
+!syntax description /Kernels/PoroMechanicsCoupling
 
-!parameters /Kernels/PoroMechanicsCoupling
+!syntax parameters /Kernels/PoroMechanicsCoupling
 
-!inputfiles /Kernels/PoroMechanicsCoupling
+!syntax inputs /Kernels/PoroMechanicsCoupling
 
-!childobjects /Kernels/PoroMechanicsCoupling
+!syntax children /Kernels/PoroMechanicsCoupling

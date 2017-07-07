@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DOFMap
-!description /Outputs/DOFMap
+!syntax description /Outputs/DOFMap
 
-!parameters /Outputs/DOFMap
+!syntax parameters /Outputs/DOFMap
 
-!inputfiles /Outputs/DOFMap
+!syntax inputs /Outputs/DOFMap
 
-!childobjects /Outputs/DOFMap
+!syntax children /Outputs/DOFMap

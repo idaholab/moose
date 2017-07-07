@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowMatrixInternalEnergy
-!description /Materials/PorousFlowMatrixInternalEnergy
+!syntax description /Materials/PorousFlowMatrixInternalEnergy
 
-!parameters /Materials/PorousFlowMatrixInternalEnergy
+!syntax parameters /Materials/PorousFlowMatrixInternalEnergy
 
-!inputfiles /Materials/PorousFlowMatrixInternalEnergy
+!syntax inputs /Materials/PorousFlowMatrixInternalEnergy
 
-!childobjects /Materials/PorousFlowMatrixInternalEnergy
+!syntax children /Materials/PorousFlowMatrixInternalEnergy

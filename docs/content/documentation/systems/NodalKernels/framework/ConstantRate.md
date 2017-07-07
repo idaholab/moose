@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantRate
-!description /NodalKernels/ConstantRate
+!syntax description /NodalKernels/ConstantRate
 
-!parameters /NodalKernels/ConstantRate
+!syntax parameters /NodalKernels/ConstantRate
 
-!inputfiles /NodalKernels/ConstantRate
+!syntax inputs /NodalKernels/ConstantRate
 
-!childobjects /NodalKernels/ConstantRate
+!syntax children /NodalKernels/ConstantRate

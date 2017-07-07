@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MortarInterfaces System
-!parameters /Mesh/MortarInterfaces
+!syntax objects /Mesh/MortarInterfaces
 
+!syntax subsystems /Mesh/MortarInterfaces
+
+!syntax actions /Mesh/MortarInterfaces

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticOrthotropic
-!description /UserObjects/TensorMechanicsPlasticOrthotropic
+!syntax description /UserObjects/TensorMechanicsPlasticOrthotropic
 
-!parameters /UserObjects/TensorMechanicsPlasticOrthotropic
+!syntax parameters /UserObjects/TensorMechanicsPlasticOrthotropic
 
-!inputfiles /UserObjects/TensorMechanicsPlasticOrthotropic
+!syntax inputs /UserObjects/TensorMechanicsPlasticOrthotropic
 
-!childobjects /UserObjects/TensorMechanicsPlasticOrthotropic
+!syntax children /UserObjects/TensorMechanicsPlasticOrthotropic

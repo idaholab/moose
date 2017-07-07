@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ACGrGrElasticDrivingForce
-!description /Kernels/ACGrGrElasticDrivingForce
+!syntax description /Kernels/ACGrGrElasticDrivingForce
 
-!parameters /Kernels/ACGrGrElasticDrivingForce
+!syntax parameters /Kernels/ACGrGrElasticDrivingForce
 
-!inputfiles /Kernels/ACGrGrElasticDrivingForce
+!syntax inputs /Kernels/ACGrGrElasticDrivingForce
 
-!childobjects /Kernels/ACGrGrElasticDrivingForce
+!syntax children /Kernels/ACGrGrElasticDrivingForce

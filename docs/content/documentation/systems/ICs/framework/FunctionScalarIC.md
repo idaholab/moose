@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionScalarIC
-!description /ICs/FunctionScalarIC
+!syntax description /ICs/FunctionScalarIC
 
-!parameters /ICs/FunctionScalarIC
+!syntax parameters /ICs/FunctionScalarIC
 
-!inputfiles /ICs/FunctionScalarIC
+!syntax inputs /ICs/FunctionScalarIC
 
-!childobjects /ICs/FunctionScalarIC
+!syntax children /ICs/FunctionScalarIC

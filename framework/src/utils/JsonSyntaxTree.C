@@ -170,6 +170,9 @@ JsonSyntaxTree::addParameters(const std::string & parent,
   }
   else if (params)
   {
+    if (params->isParamValid("_moose_base"))
+      json["moose_base"] = params->get<std::string>("_moose_base");
+
     json["parameters"] = all_params;
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;

@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVLeastSquaresSlopeReconstruction
+!syntax description /UserObjects/CNSFVLeastSquaresSlopeReconstruction
 
-!parameters /UserObjects/CNSFVLeastSquaresSlopeReconstruction
+!syntax parameters /UserObjects/CNSFVLeastSquaresSlopeReconstruction
 
-!inputfiles /UserObjects/CNSFVLeastSquaresSlopeReconstruction
+!syntax inputs /UserObjects/CNSFVLeastSquaresSlopeReconstruction
 
-!childobjects /UserObjects/CNSFVLeastSquaresSlopeReconstruction
+!syntax children /UserObjects/CNSFVLeastSquaresSlopeReconstruction

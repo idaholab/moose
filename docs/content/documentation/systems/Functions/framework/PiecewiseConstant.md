@@ -1,6 +1,5 @@
 # PiecewiseConstant
-
-!description /Functions/PiecewiseConstant
+!syntax description /Functions/PiecewiseConstant
 
 ## Description
 
@@ -13,8 +12,8 @@ user-provided point to the right or left of the value at which the function is e
 ## Example Input Syntax
 !listing test/tests/functions/piecewise_constant/piecewise_constant.i block=Functions
 
-!parameters /Functions/PiecewiseConstant
+!syntax parameters /Functions/PiecewiseConstant
 
-!inputfiles /Functions/PiecewiseConstant
+!syntax inputs /Functions/PiecewiseConstant
 
-!childobjects /Functions/PiecewiseConstant
+!syntax children /Functions/PiecewiseConstant

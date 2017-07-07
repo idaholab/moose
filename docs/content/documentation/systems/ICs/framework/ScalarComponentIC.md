@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ScalarComponentIC
-!description /ICs/ScalarComponentIC
+!syntax description /ICs/ScalarComponentIC
 
-!parameters /ICs/ScalarComponentIC
+!syntax parameters /ICs/ScalarComponentIC
 
-!inputfiles /ICs/ScalarComponentIC
+!syntax inputs /ICs/ScalarComponentIC
 
-!childobjects /ICs/ScalarComponentIC
+!syntax children /ICs/ScalarComponentIC

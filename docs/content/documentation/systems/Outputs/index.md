@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Outputs System
-!parameters /Outputs
+!syntax objects /Outputs
 
-!subobjects /Outputs
+!syntax subsystems /Outputs
 
+!syntax actions /Outputs

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantScalarAux
-!description /AuxScalarKernels/ConstantScalarAux
+!syntax description /AuxScalarKernels/ConstantScalarAux
 
-!parameters /AuxScalarKernels/ConstantScalarAux
+!syntax parameters /AuxScalarKernels/ConstantScalarAux
 
-!inputfiles /AuxScalarKernels/ConstantScalarAux
+!syntax inputs /AuxScalarKernels/ConstantScalarAux
 
-!childobjects /AuxScalarKernels/ConstantScalarAux
+!syntax children /AuxScalarKernels/ConstantScalarAux

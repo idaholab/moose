@@ -1,5 +1,5 @@
 # FileMesh
-!description /Mesh/FileMesh
+!syntax description /Mesh/FileMesh
 
 ## Support File Formats
 The `FileMesh` is the default type for MOOSE and as the name suggests it reads the mesh from an external file. MOOSE
@@ -23,8 +23,8 @@ Extension   | Description
 .xda, .xdr  | libMesh formats
 .vtk, .pvtu | Visualization Toolkit
 
-!parameters /Mesh/FileMesh
+!syntax parameters /Mesh/FileMesh
 
-!inputfiles /Mesh/FileMesh
+!syntax inputs /Mesh/FileMesh
 
-!childobjects /Mesh/FileMesh
+!syntax children /Mesh/FileMesh

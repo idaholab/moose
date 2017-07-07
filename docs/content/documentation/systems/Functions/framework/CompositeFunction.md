@@ -1,6 +1,5 @@
 # CompositeFunction
-
-!description /Functions/CompositeFunction
+!syntax description /Functions/CompositeFunction
 
 ## Description
 
@@ -14,8 +13,8 @@ parameter.
 
 !listing test/tests/bcs/function_dirichlet_bc/function_dirichlet_bc_test.i block=Functions
 
-!parameters /Functions/CompositeFunction
+!syntax parameters /Functions/CompositeFunction
 
-!inputfiles /Functions/CompositeFunction
+!syntax inputs /Functions/CompositeFunction
 
-!childobjects /Functions/CompositeFunction
+!syntax children /Functions/CompositeFunction

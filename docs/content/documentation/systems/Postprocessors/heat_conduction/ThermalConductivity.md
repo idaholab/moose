@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ThermalConductivity
-!description /Postprocessors/ThermalConductivity
+!syntax description /Postprocessors/ThermalConductivity
 
-!parameters /Postprocessors/ThermalConductivity
+!syntax parameters /Postprocessors/ThermalConductivity
 
-!inputfiles /Postprocessors/ThermalConductivity
+!syntax inputs /Postprocessors/ThermalConductivity
 
-!childobjects /Postprocessors/ThermalConductivity
+!syntax children /Postprocessors/ThermalConductivity

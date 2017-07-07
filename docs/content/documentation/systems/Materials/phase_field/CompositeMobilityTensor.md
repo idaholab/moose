@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CompositeMobilityTensor
-!description /Materials/CompositeMobilityTensor
+!syntax description /Materials/CompositeMobilityTensor
 
-!parameters /Materials/CompositeMobilityTensor
+!syntax parameters /Materials/CompositeMobilityTensor
 
-!inputfiles /Materials/CompositeMobilityTensor
+!syntax inputs /Materials/CompositeMobilityTensor
 
-!childobjects /Materials/CompositeMobilityTensor
+!syntax children /Materials/CompositeMobilityTensor

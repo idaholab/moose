@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumNodes
-!description /Postprocessors/NumNodes
+!syntax description /Postprocessors/NumNodes
 
-!parameters /Postprocessors/NumNodes
+!syntax parameters /Postprocessors/NumNodes
 
-!inputfiles /Postprocessors/NumNodes
+!syntax inputs /Postprocessors/NumNodes
 
-!childobjects /Postprocessors/NumNodes
+!syntax children /Postprocessors/NumNodes

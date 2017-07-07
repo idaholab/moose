@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FeatureFloodCount
-!description /Postprocessors/FeatureFloodCount
+!syntax description /Postprocessors/FeatureFloodCount
 
-!parameters /Postprocessors/FeatureFloodCount
+!syntax parameters /Postprocessors/FeatureFloodCount
 
-!inputfiles /Postprocessors/FeatureFloodCount
+!syntax inputs /Postprocessors/FeatureFloodCount
 
-!childobjects /Postprocessors/FeatureFloodCount
+!syntax children /Postprocessors/FeatureFloodCount

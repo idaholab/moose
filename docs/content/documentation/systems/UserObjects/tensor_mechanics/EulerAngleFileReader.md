@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # EulerAngleFileReader
-!description /UserObjects/EulerAngleFileReader
+!syntax description /UserObjects/EulerAngleFileReader
 
-!parameters /UserObjects/EulerAngleFileReader
+!syntax parameters /UserObjects/EulerAngleFileReader
 
-!inputfiles /UserObjects/EulerAngleFileReader
+!syntax inputs /UserObjects/EulerAngleFileReader
 
-!childobjects /UserObjects/EulerAngleFileReader
+!syntax children /UserObjects/EulerAngleFileReader

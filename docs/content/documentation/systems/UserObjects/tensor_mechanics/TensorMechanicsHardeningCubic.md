@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsHardeningCubic
-!description /UserObjects/TensorMechanicsHardeningCubic
+!syntax description /UserObjects/TensorMechanicsHardeningCubic
 
-!parameters /UserObjects/TensorMechanicsHardeningCubic
+!syntax parameters /UserObjects/TensorMechanicsHardeningCubic
 
-!inputfiles /UserObjects/TensorMechanicsHardeningCubic
+!syntax inputs /UserObjects/TensorMechanicsHardeningCubic
 
-!childobjects /UserObjects/TensorMechanicsHardeningCubic
+!syntax children /UserObjects/TensorMechanicsHardeningCubic

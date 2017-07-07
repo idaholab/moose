@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaxIncrement
-!description /Dampers/MaxIncrement
+!syntax description /Dampers/MaxIncrement
 
-!parameters /Dampers/MaxIncrement
+!syntax parameters /Dampers/MaxIncrement
 
-!inputfiles /Dampers/MaxIncrement
+!syntax inputs /Dampers/MaxIncrement
 
-!childobjects /Dampers/MaxIncrement
+!syntax children /Dampers/MaxIncrement

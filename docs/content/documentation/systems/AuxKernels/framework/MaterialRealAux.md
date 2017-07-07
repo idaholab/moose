@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialRealAux
-!description /AuxKernels/MaterialRealAux
+!syntax description /AuxKernels/MaterialRealAux
 
-!parameters /AuxKernels/MaterialRealAux
+!syntax parameters /AuxKernels/MaterialRealAux
 
-!inputfiles /AuxKernels/MaterialRealAux
+!syntax inputs /AuxKernels/MaterialRealAux
 
-!childobjects /AuxKernels/MaterialRealAux
+!syntax children /AuxKernels/MaterialRealAux

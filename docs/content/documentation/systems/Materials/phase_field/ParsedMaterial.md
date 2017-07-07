@@ -1,6 +1,6 @@
 
 # ParsedMaterial
-!description /Materials/ParsedMaterial
+!syntax description /Materials/ParsedMaterial
 
 Sets up a single material property that is computed using a parsed function expression.
 
@@ -13,8 +13,8 @@ It will be 0 for phase 1, -1 for phase 2, and 1 for phase 3
 
 !listing modules/combined/examples/phase_field-mechanics/Pattern1.i start=phasemap end=matrix
 
-!parameters /Materials/ParsedMaterial
+!syntax parameters /Materials/ParsedMaterial
 
-!inputfiles /Materials/ParsedMaterial
+!syntax inputs /Materials/ParsedMaterial
 
-!childobjects /Materials/ParsedMaterial
+!syntax children /Materials/ParsedMaterial

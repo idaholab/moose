@@ -1,5 +1,5 @@
 # GeneratedMesh
-!description /Mesh/GeneratedMesh
+!syntax description /Mesh/GeneratedMesh
 
 ## Description
 
@@ -17,8 +17,8 @@ independently.
 
 !listing test/tests/kernels/simple_diffusion/simple_diffusion.i block=Mesh
 
-!parameters /Mesh/GeneratedMesh
+!syntax parameters /Mesh/GeneratedMesh
 
-!inputfiles /Mesh/GeneratedMesh
+!syntax inputs /Mesh/GeneratedMesh
 
-!childobjects /Mesh/GeneratedMesh
+!syntax children /Mesh/GeneratedMesh

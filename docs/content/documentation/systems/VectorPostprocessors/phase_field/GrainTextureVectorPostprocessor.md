@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainTextureVectorPostprocessor
-!description /VectorPostprocessors/GrainTextureVectorPostprocessor
+!syntax description /VectorPostprocessors/GrainTextureVectorPostprocessor
 
-!parameters /VectorPostprocessors/GrainTextureVectorPostprocessor
+!syntax parameters /VectorPostprocessors/GrainTextureVectorPostprocessor
 
-!inputfiles /VectorPostprocessors/GrainTextureVectorPostprocessor
+!syntax inputs /VectorPostprocessors/GrainTextureVectorPostprocessor
 
-!childobjects /VectorPostprocessors/GrainTextureVectorPostprocessor
+!syntax children /VectorPostprocessors/GrainTextureVectorPostprocessor

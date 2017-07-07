@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFParamsPolyFreeEnergy
-!description /Materials/PFParamsPolyFreeEnergy
+!syntax description /Materials/PFParamsPolyFreeEnergy
 
-!parameters /Materials/PFParamsPolyFreeEnergy
+!syntax parameters /Materials/PFParamsPolyFreeEnergy
 
-!inputfiles /Materials/PFParamsPolyFreeEnergy
+!syntax inputs /Materials/PFParamsPolyFreeEnergy
 
-!childobjects /Materials/PFParamsPolyFreeEnergy
+!syntax children /Materials/PFParamsPolyFreeEnergy

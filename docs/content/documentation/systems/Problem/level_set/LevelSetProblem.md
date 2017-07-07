@@ -10,8 +10,8 @@ input file.
 
 !listing modules/level_set/tests/transfers/markers/multi_level/master.i start=[Problem] end=[Executioner] label=False
 
-!parameters /Problem/LevelSetProblem
+!syntax parameters /Problem/LevelSetProblem
 
-!inputfiles /Problem/LevelSetProblem
+!syntax inputs /Problem/LevelSetProblem
 
-!childobjects /Problem/LevelSetProblem
+!syntax children /Problem/LevelSetProblem

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SmoothCircleIC
-!description /ICs/SmoothCircleIC
+!syntax description /ICs/SmoothCircleIC
 
-!parameters /ICs/SmoothCircleIC
+!syntax parameters /ICs/SmoothCircleIC
 
-!inputfiles /ICs/SmoothCircleIC
+!syntax inputs /ICs/SmoothCircleIC
 
-!childobjects /ICs/SmoothCircleIC
+!syntax children /ICs/SmoothCircleIC

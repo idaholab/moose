@@ -73,7 +73,7 @@ Vertical slides are prefixed with the top-level name.
 
 [Markdown Math](#moose-flavored-markdown-math)
 
-    [Markdown Math](#moose-flavored-markdown-math)`
+    [Markdown Math](#moose-flavored-markdown-math)
 
 ---
 <!-- .slide data-background="#ff6700" -->
@@ -90,7 +90,7 @@ so do not attempt to use the syntax provided by the reveal.js system.
 Generate a markdown file. The file should be located inside the
 repository that you are working.
 
-For example, this demo is generated from the 'moose/docs/examples/presentation.md' file.
+For example, this demo is generated from the `moose/docs/examples/presentation.md` file.
 
 --
 

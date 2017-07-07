@@ -1,7 +1,7 @@
-!description /AuxKernels/CNSFVMachAux
+!syntax description /AuxKernels/CNSFVMachAux
 
-!parameters /AuxKernels/CNSFVMachAux
+!syntax parameters /AuxKernels/CNSFVMachAux
 
-!inputfiles /AuxKernels/CNSFVMachAux
+!syntax inputs /AuxKernels/CNSFVMachAux
 
-!childobjects /AuxKernels/CNSFVMachAux
+!syntax children /AuxKernels/CNSFVMachAux

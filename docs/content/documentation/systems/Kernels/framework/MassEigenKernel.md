@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MassEigenKernel
-!description /Kernels/MassEigenKernel
+!syntax description /Kernels/MassEigenKernel
 
-!parameters /Kernels/MassEigenKernel
+!syntax parameters /Kernels/MassEigenKernel
 
-!inputfiles /Kernels/MassEigenKernel
+!syntax inputs /Kernels/MassEigenKernel
 
-!childobjects /Kernels/MassEigenKernel
+!syntax children /Kernels/MassEigenKernel

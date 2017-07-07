@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumDOFs
-!description /Postprocessors/NumDOFs
+!syntax description /Postprocessors/NumDOFs
 
-!parameters /Postprocessors/NumDOFs
+!syntax parameters /Postprocessors/NumDOFs
 
-!inputfiles /Postprocessors/NumDOFs
+!syntax inputs /Postprocessors/NumDOFs
 
-!childobjects /Postprocessors/NumDOFs
+!syntax children /Postprocessors/NumDOFs

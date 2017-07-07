@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeFiniteStrainElasticStress
-!description /Materials/ComputeFiniteStrainElasticStress
+!syntax description /Materials/ComputeFiniteStrainElasticStress
 
-!parameters /Materials/ComputeFiniteStrainElasticStress
+!syntax parameters /Materials/ComputeFiniteStrainElasticStress
 
-!inputfiles /Materials/ComputeFiniteStrainElasticStress
+!syntax inputs /Materials/ComputeFiniteStrainElasticStress
 
-!childobjects /Materials/ComputeFiniteStrainElasticStress
+!syntax children /Materials/ComputeFiniteStrainElasticStress

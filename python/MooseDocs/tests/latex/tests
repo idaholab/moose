@@ -2,7 +2,6 @@
   [./generation]
     type = PythonUnitTest
     input = test_generation.py
-    skip = 'WIP'
   [../]
   [./elements]
     type = PythonUnitTest

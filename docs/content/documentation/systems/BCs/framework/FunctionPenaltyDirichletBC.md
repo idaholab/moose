@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionPenaltyDirichletBC
-!description /BCs/FunctionPenaltyDirichletBC
+!syntax description /BCs/FunctionPenaltyDirichletBC
 
-!parameters /BCs/FunctionPenaltyDirichletBC
+!syntax parameters /BCs/FunctionPenaltyDirichletBC
 
-!inputfiles /BCs/FunctionPenaltyDirichletBC
+!syntax inputs /BCs/FunctionPenaltyDirichletBC
 
-!childobjects /BCs/FunctionPenaltyDirichletBC
+!syntax children /BCs/FunctionPenaltyDirichletBC

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalNormalsEvaluator
-!description /UserObjects/NodalNormalsEvaluator
+!syntax description /UserObjects/NodalNormalsEvaluator
 
-!parameters /UserObjects/NodalNormalsEvaluator
+!syntax parameters /UserObjects/NodalNormalsEvaluator
 
-!inputfiles /UserObjects/NodalNormalsEvaluator
+!syntax inputs /UserObjects/NodalNormalsEvaluator
 
-!childobjects /UserObjects/NodalNormalsEvaluator
+!syntax children /UserObjects/NodalNormalsEvaluator

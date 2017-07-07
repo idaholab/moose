@@ -1,7 +1,7 @@
-!description /BCs/NSMomentumViscousBC
+!syntax description /BCs/NSMomentumViscousBC
 
-!parameters /BCs/NSMomentumViscousBC
+!syntax parameters /BCs/NSMomentumViscousBC
 
-!inputfiles /BCs/NSMomentumViscousBC
+!syntax inputs /BCs/NSMomentumViscousBC
 
-!childobjects /BCs/NSMomentumViscousBC
+!syntax children /BCs/NSMomentumViscousBC

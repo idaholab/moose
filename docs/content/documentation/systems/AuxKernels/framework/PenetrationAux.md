@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PenetrationAux
-!description /AuxKernels/PenetrationAux
+!syntax description /AuxKernels/PenetrationAux
 
-!parameters /AuxKernels/PenetrationAux
+!syntax parameters /AuxKernels/PenetrationAux
 
-!inputfiles /AuxKernels/PenetrationAux
+!syntax inputs /AuxKernels/PenetrationAux
 
-!childobjects /AuxKernels/PenetrationAux
+!syntax children /AuxKernels/PenetrationAux

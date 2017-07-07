@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BlockDeleter
-!description /MeshModifiers/BlockDeleter
+!syntax description /MeshModifiers/BlockDeleter
 
-!parameters /MeshModifiers/BlockDeleter
+!syntax parameters /MeshModifiers/BlockDeleter
 
-!inputfiles /MeshModifiers/BlockDeleter
+!syntax inputs /MeshModifiers/BlockDeleter
 
-!childobjects /MeshModifiers/BlockDeleter
+!syntax children /MeshModifiers/BlockDeleter

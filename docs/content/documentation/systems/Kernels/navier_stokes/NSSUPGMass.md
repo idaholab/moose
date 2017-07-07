@@ -1,7 +1,7 @@
-!description /Kernels/NSSUPGMass
+!syntax description /Kernels/NSSUPGMass
 
-!parameters /Kernels/NSSUPGMass
+!syntax parameters /Kernels/NSSUPGMass
 
-!inputfiles /Kernels/NSSUPGMass
+!syntax inputs /Kernels/NSSUPGMass
 
-!childobjects /Kernels/NSSUPGMass
+!syntax children /Kernels/NSSUPGMass

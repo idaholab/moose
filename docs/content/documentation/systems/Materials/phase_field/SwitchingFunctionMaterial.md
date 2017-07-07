@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SwitchingFunctionMaterial
-!description /Materials/SwitchingFunctionMaterial
+!syntax description /Materials/SwitchingFunctionMaterial
 
-!parameters /Materials/SwitchingFunctionMaterial
+!syntax parameters /Materials/SwitchingFunctionMaterial
 
-!inputfiles /Materials/SwitchingFunctionMaterial
+!syntax inputs /Materials/SwitchingFunctionMaterial
 
-!childobjects /Materials/SwitchingFunctionMaterial
+!syntax children /Materials/SwitchingFunctionMaterial

@@ -1,5 +1,5 @@
 # KKSSplitCHCRes
-!description /Kernels/KKSSplitCHCRes
+!syntax description /Kernels/KKSSplitCHCRes
 
 [`KKSSplitCHCRes`](/KKSSplitCHCRes.md) is the split version. In this kernel, we calculate the chemical potential
 $\mu$ from $\frac{\partial F}{\partial c}$. The non-linear variable for this Kernel
@@ -47,8 +47,8 @@ J &=& \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a
 \end{eqnarray*}
 $$
 
-!parameters /Kernels/KKSSplitCHCRes
+!syntax parameters /Kernels/KKSSplitCHCRes
 
-!inputfiles /Kernels/KKSSplitCHCRes
+!syntax inputs /Kernels/KKSSplitCHCRes
 
-!childobjects /Kernels/KKSSplitCHCRes
+!syntax children /Kernels/KKSSplitCHCRes

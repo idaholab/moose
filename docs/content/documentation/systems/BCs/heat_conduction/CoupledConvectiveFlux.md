@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CoupledConvectiveFlux
-!description /BCs/CoupledConvectiveFlux
+!syntax description /BCs/CoupledConvectiveFlux
 
-!parameters /BCs/CoupledConvectiveFlux
+!syntax parameters /BCs/CoupledConvectiveFlux
 
-!inputfiles /BCs/CoupledConvectiveFlux
+!syntax inputs /BCs/CoupledConvectiveFlux
 
-!childobjects /BCs/CoupledConvectiveFlux
+!syntax children /BCs/CoupledConvectiveFlux

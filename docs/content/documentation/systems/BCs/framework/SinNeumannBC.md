@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SinNeumannBC
-!description /BCs/SinNeumannBC
+!syntax description /BCs/SinNeumannBC
 
-!parameters /BCs/SinNeumannBC
+!syntax parameters /BCs/SinNeumannBC
 
-!inputfiles /BCs/SinNeumannBC
+!syntax inputs /BCs/SinNeumannBC
 
-!childobjects /BCs/SinNeumannBC
+!syntax children /BCs/SinNeumannBC

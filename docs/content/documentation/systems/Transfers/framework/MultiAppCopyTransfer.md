@@ -1,7 +1,7 @@
 # MultiAppCopyTransfer
 
 
-!description /Transfers/MultiAppCopyTransfer
+!syntax description /Transfers/MultiAppCopyTransfer
 
 ## Description
 The MultiAppCopyTransfer allows for copying variables (both [nonlinear](/Variables/index.md) and [auxiliary](/AuxVariables/index.md)) between [MultiApps](/MultiApps/index.md). All types of
@@ -11,8 +11,8 @@ meshes in the master and sub application must be identical.
 ## Example Syntax
 !listing test/tests/transfers/multiapp_copy_transfer/linear_lagrange_to_sub/master.i block=Transfers
 
-!parameters /Transfers/MultiAppCopyTransfer
+!syntax parameters /Transfers/MultiAppCopyTransfer
 
-!inputfiles /Transfers/MultiAppCopyTransfer
+!syntax inputs /Transfers/MultiAppCopyTransfer
 
-!childobjects /Transfers/MultiAppCopyTransfer
+!syntax children /Transfers/MultiAppCopyTransfer

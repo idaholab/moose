@@ -1,6 +1,6 @@
 
 # ComboMarker
-!description /Adaptivity/Markers/ComboMarker
+!syntax description /Adaptivity/Markers/ComboMarker
 
 ## Description
 The `ComboMarker` is used to combine multiple markers into a single marker. This is done by
@@ -10,8 +10,8 @@ of an element takes precedence.
 ## Example Input Syntax
 !listing test/tests/markers/combo_marker/combo_marker_test.i block=Adaptivity
 
-!parameters /Adaptivity/Markers/ComboMarker
+!syntax parameters /Adaptivity/Markers/ComboMarker
 
-!inputfiles /Adaptivity/Markers/ComboMarker
+!syntax inputs /Adaptivity/Markers/ComboMarker
 
-!childobjects /Adaptivity/Markers/ComboMarker
+!syntax children /Adaptivity/Markers/ComboMarker

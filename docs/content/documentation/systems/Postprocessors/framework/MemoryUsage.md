@@ -1,5 +1,5 @@
 # MemoryUsage
-!description /Postprocessors/MemoryUsage
+!syntax description /Postprocessors/MemoryUsage
 
 This postprocessor collects various memory usage metrics:
 
@@ -21,8 +21,8 @@ This postporcessor can be executed multiple times per timestep and by default
 aggregates the per-process peak value of the chosen metric, which then cam be output
 on `TIMESTEP_END`.
 
-!parameters /Postprocessors/MemoryUsage
+!syntax parameters /Postprocessors/MemoryUsage
 
-!inputfiles /Postprocessors/MemoryUsage
+!syntax inputs /Postprocessors/MemoryUsage
 
-!childobjects /Postprocessors/MemoryUsage
+!syntax children /Postprocessors/MemoryUsage

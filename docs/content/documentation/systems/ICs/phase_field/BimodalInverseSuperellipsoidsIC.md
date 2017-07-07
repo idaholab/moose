@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BimodalInverseSuperellipsoidsIC
-!description /ICs/BimodalInverseSuperellipsoidsIC
+!syntax description /ICs/BimodalInverseSuperellipsoidsIC
 
-!parameters /ICs/BimodalInverseSuperellipsoidsIC
+!syntax parameters /ICs/BimodalInverseSuperellipsoidsIC
 
-!inputfiles /ICs/BimodalInverseSuperellipsoidsIC
+!syntax inputs /ICs/BimodalInverseSuperellipsoidsIC
 
-!childobjects /ICs/BimodalInverseSuperellipsoidsIC
+!syntax children /ICs/BimodalInverseSuperellipsoidsIC

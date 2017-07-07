@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GrainForceAndTorqueSum
-!description /UserObjects/GrainForceAndTorqueSum
+!syntax description /UserObjects/GrainForceAndTorqueSum
 
-!parameters /UserObjects/GrainForceAndTorqueSum
+!syntax parameters /UserObjects/GrainForceAndTorqueSum
 
-!inputfiles /UserObjects/GrainForceAndTorqueSum
+!syntax inputs /UserObjects/GrainForceAndTorqueSum
 
-!childobjects /UserObjects/GrainForceAndTorqueSum
+!syntax children /UserObjects/GrainForceAndTorqueSum

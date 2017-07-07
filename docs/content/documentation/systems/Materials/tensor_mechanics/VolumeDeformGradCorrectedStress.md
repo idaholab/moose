@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VolumeDeformGradCorrectedStress
-!description /Materials/VolumeDeformGradCorrectedStress
+!syntax description /Materials/VolumeDeformGradCorrectedStress
 
-!parameters /Materials/VolumeDeformGradCorrectedStress
+!syntax parameters /Materials/VolumeDeformGradCorrectedStress
 
-!inputfiles /Materials/VolumeDeformGradCorrectedStress
+!syntax inputs /Materials/VolumeDeformGradCorrectedStress
 
-!childobjects /Materials/VolumeDeformGradCorrectedStress
+!syntax children /Materials/VolumeDeformGradCorrectedStress

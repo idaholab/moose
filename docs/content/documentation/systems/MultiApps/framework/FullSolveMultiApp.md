@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FullSolveMultiApp
-!description /MultiApps/FullSolveMultiApp
+!syntax description /MultiApps/FullSolveMultiApp
 
-!parameters /MultiApps/FullSolveMultiApp
+!syntax parameters /MultiApps/FullSolveMultiApp
 
-!inputfiles /MultiApps/FullSolveMultiApp
+!syntax inputs /MultiApps/FullSolveMultiApp
 
-!childobjects /MultiApps/FullSolveMultiApp
+!syntax children /MultiApps/FullSolveMultiApp

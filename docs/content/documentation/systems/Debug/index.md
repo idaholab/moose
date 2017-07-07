@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Debug System
-!parameters /Debug
+!syntax objects /Debug
 
+!syntax subsystems /Debug
+
+!syntax actions /Debug

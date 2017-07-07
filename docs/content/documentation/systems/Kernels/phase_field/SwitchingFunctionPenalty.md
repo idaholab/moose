@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SwitchingFunctionPenalty
-!description /Kernels/SwitchingFunctionPenalty
+!syntax description /Kernels/SwitchingFunctionPenalty
 
-!parameters /Kernels/SwitchingFunctionPenalty
+!syntax parameters /Kernels/SwitchingFunctionPenalty
 
-!inputfiles /Kernels/SwitchingFunctionPenalty
+!syntax inputs /Kernels/SwitchingFunctionPenalty
 
-!childobjects /Kernels/SwitchingFunctionPenalty
+!syntax children /Kernels/SwitchingFunctionPenalty

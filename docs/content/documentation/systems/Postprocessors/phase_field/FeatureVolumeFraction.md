@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FeatureVolumeFraction
-!description /Postprocessors/FeatureVolumeFraction
+!syntax description /Postprocessors/FeatureVolumeFraction
 
-!parameters /Postprocessors/FeatureVolumeFraction
+!syntax parameters /Postprocessors/FeatureVolumeFraction
 
-!inputfiles /Postprocessors/FeatureVolumeFraction
+!syntax inputs /Postprocessors/FeatureVolumeFraction
 
-!childobjects /Postprocessors/FeatureVolumeFraction
+!syntax children /Postprocessors/FeatureVolumeFraction

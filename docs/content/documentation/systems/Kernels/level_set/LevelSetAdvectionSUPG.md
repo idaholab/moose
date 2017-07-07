@@ -24,11 +24,11 @@ with SUPG stabilization.
 !listing modules/level_set/examples/vortex/vortex_supg.i block=Kernels label=False
 
 
-!parameters /Kernels/LevelSetAdvectionSUPG
+!syntax parameters /Kernels/LevelSetAdvectionSUPG
 
-!inputfiles /Kernels/LevelSetAdvectionSUPG
+!syntax inputs /Kernels/LevelSetAdvectionSUPG
 
-!childobjects /Kernels/LevelSetAdvectionSUPG
+!syntax children /Kernels/LevelSetAdvectionSUPG
 
 ## References
 

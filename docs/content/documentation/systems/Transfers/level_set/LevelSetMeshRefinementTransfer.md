@@ -11,8 +11,8 @@ this transfer is performed by the [LevelSetMeshRefinementTransfer](#).
 
 !listing modules/level_set/tests/transfers/markers/multi_level/master.i block=Transfers
 
-!parameters /Transfers/LevelSetMeshRefinementTransfer
+!syntax parameters /Transfers/LevelSetMeshRefinementTransfer
 
-!inputfiles /Transfers/LevelSetMeshRefinementTransfer
+!syntax inputs /Transfers/LevelSetMeshRefinementTransfer
 
-!childobjects /Transfers/LevelSetMeshRefinementTransfer
+!syntax children /Transfers/LevelSetMeshRefinementTransfer

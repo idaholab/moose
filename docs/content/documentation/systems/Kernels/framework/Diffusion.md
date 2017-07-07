@@ -1,5 +1,5 @@
 # Diffusion
-!description /Kernels/Diffusion
+!syntax description /Kernels/Diffusion
 
 ## Description
 
@@ -13,8 +13,8 @@ where $\phi_i$ are the test functions and $u_h$ is the finite element solution o
 The Jacobian is defined as:
 $$\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \phi_i, \nabla \psi_j).$$
 
-!parameters /Kernels/Diffusion
+!syntax parameters /Kernels/Diffusion
 
-!inputfiles /Kernels/Diffusion
+!syntax inputs /Kernels/Diffusion
 
-!childobjects /Kernels/Diffusion
+!syntax children /Kernels/Diffusion

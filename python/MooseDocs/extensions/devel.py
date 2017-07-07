@@ -18,6 +18,7 @@ import logging
 
 from markdown.util import etree, AtomicString
 from markdown.inlinepatterns import Pattern
+from markdown.preprocessors import Preprocessor
 
 import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
@@ -60,6 +61,10 @@ class DevelExtension(MooseMarkdownExtension):
         md.inlinePatterns.add('moose_extension_component_settings',
                               ExtensionSettingsPattern(markdown_instance=md, **config),
                               '_begin')
+
+        md.preprocessors.add('moose_deprecated',
+                             DeprecatedPreprocessor(markdown_instance=md),
+                             '_begin')
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """Create DevelExtension"""
@@ -271,3 +276,24 @@ class ExtensionSettingsPattern(MooseMarkdownCommon, Pattern):
             if name in container:
                 return container[name]
         return None
+
+class DeprecatedPreprocessor(Preprocessor):
+    """
+    Reports deprecated commands as warning/error on console.
+    """
+    def run(self, lines):
+        for regex, replace in MooseDocs.DEPRECATED_MARKDOWN:
+            for i, line in enumerate(lines):
+                match = regex.search(line)
+                if match:
+                    if isinstance(self.markdown.current, common.nodes.MarkdownFileNodeBase):
+                        msg = "The '{}' command on line {} of {} is deprecated. " \
+                              "It should be replaced with {}" \
+                              .format(match.group('command'), i, self.markdown.current.filename,
+                                      replace)
+                    else:
+                        msg = "The '{}' command on line {} is deprecated. " \
+                              "It should be replaced with {}" \
+                              .format(match.group('command'), i, replace)
+                    LOG.error(msg)
+        return lines

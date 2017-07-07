@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DiffusionFluxBC
-!description /BCs/DiffusionFluxBC
+!syntax description /BCs/DiffusionFluxBC
 
-!parameters /BCs/DiffusionFluxBC
+!syntax parameters /BCs/DiffusionFluxBC
 
-!inputfiles /BCs/DiffusionFluxBC
+!syntax inputs /BCs/DiffusionFluxBC
 
-!childobjects /BCs/DiffusionFluxBC
+!syntax children /BCs/DiffusionFluxBC

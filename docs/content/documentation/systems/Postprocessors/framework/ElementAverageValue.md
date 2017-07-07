@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementAverageValue
-!description /Postprocessors/ElementAverageValue
+!syntax description /Postprocessors/ElementAverageValue
 
-!parameters /Postprocessors/ElementAverageValue
+!syntax parameters /Postprocessors/ElementAverageValue
 
-!inputfiles /Postprocessors/ElementAverageValue
+!syntax inputs /Postprocessors/ElementAverageValue
 
-!childobjects /Postprocessors/ElementAverageValue
+!syntax children /Postprocessors/ElementAverageValue

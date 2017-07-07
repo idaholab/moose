@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ACGrGrPoly
-!description /Kernels/ACGrGrPoly
+!syntax description /Kernels/ACGrGrPoly
 
-!parameters /Kernels/ACGrGrPoly
+!syntax parameters /Kernels/ACGrGrPoly
 
-!inputfiles /Kernels/ACGrGrPoly
+!syntax inputs /Kernels/ACGrGrPoly
 
-!childobjects /Kernels/ACGrGrPoly
+!syntax children /Kernels/ACGrGrPoly

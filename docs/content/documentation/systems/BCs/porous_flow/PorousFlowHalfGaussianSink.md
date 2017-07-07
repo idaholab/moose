@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowHalfGaussianSink
-!description /BCs/PorousFlowHalfGaussianSink
+!syntax description /BCs/PorousFlowHalfGaussianSink
 
-!parameters /BCs/PorousFlowHalfGaussianSink
+!syntax parameters /BCs/PorousFlowHalfGaussianSink
 
-!inputfiles /BCs/PorousFlowHalfGaussianSink
+!syntax inputs /BCs/PorousFlowHalfGaussianSink
 
-!childobjects /BCs/PorousFlowHalfGaussianSink
+!syntax children /BCs/PorousFlowHalfGaussianSink

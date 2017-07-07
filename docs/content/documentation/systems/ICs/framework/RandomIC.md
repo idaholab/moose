@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RandomIC
-!description /ICs/RandomIC
+!syntax description /ICs/RandomIC
 
-!parameters /ICs/RandomIC
+!syntax parameters /ICs/RandomIC
 
-!inputfiles /ICs/RandomIC
+!syntax inputs /ICs/RandomIC
 
-!childobjects /ICs/RandomIC
+!syntax children /ICs/RandomIC

@@ -1,5 +1,5 @@
 #IsotropicPlasticityStressUpdate
-!description /Materials/IsotropicPlasticityStressUpdate
+!syntax description /Materials/IsotropicPlasticityStressUpdate
 
 
 ## Description
@@ -15,11 +15,11 @@ This class calculates an effective trial stress, an effective scalar plastic str
 
 This class is based on the implicit integration algorithm in \cite{dunne2005introduction} pg. 146 - 149.
 
-!parameters /Materials/IsotropicPlasticityStressUpdate
+!syntax parameters /Materials/IsotropicPlasticityStressUpdate
 
-!inputfiles /Materials/IsotropicPlasticityStressUpdate
+!syntax inputs /Materials/IsotropicPlasticityStressUpdate
 
-!childobjects /Materials/IsotropicPlasticityStressUpdate
+!syntax children /Materials/IsotropicPlasticityStressUpdate
 
 ## References
 \bibliographystyle{unsrt}

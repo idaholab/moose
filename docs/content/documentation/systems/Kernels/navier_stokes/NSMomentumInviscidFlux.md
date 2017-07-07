@@ -1,7 +1,7 @@
-!description /Kernels/NSMomentumInviscidFlux
+!syntax description /Kernels/NSMomentumInviscidFlux
 
-!parameters /Kernels/NSMomentumInviscidFlux
+!syntax parameters /Kernels/NSMomentumInviscidFlux
 
-!inputfiles /Kernels/NSMomentumInviscidFlux
+!syntax inputs /Kernels/NSMomentumInviscidFlux
 
-!childobjects /Kernels/NSMomentumInviscidFlux
+!syntax children /Kernels/NSMomentumInviscidFlux

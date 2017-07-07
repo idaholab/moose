@@ -94,7 +94,7 @@ class MooseObjectParameterTable(object):
         return ul
 
     @staticmethod
-    def _formatParam(parameter, key):
+    def _formatParam(parameter, key, default=''):
         """
         Convert the supplied parameter into a format suitable for output.
 
@@ -105,7 +105,7 @@ class MooseObjectParameterTable(object):
 
         # Make sure that supplied parameter is a string
         ptype = parameter['cpp_type']
-        param = str(parameter[key]).strip()
+        param = str(parameter.get(key, default)).strip()
 
         # The c++ types returned by the yaml dump are raw and contain "allocator" stuff. This script
         # attempts to present the types in a more readable fashion.

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideSetsFromPoints
-!description /MeshModifiers/SideSetsFromPoints
+!syntax description /MeshModifiers/SideSetsFromPoints
 
-!parameters /MeshModifiers/SideSetsFromPoints
+!syntax parameters /MeshModifiers/SideSetsFromPoints
 
-!inputfiles /MeshModifiers/SideSetsFromPoints
+!syntax inputs /MeshModifiers/SideSetsFromPoints
 
-!childobjects /MeshModifiers/SideSetsFromPoints
+!syntax children /MeshModifiers/SideSetsFromPoints

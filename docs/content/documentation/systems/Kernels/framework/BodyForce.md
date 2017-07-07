@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BodyForce
-!description /Kernels/BodyForce
+!syntax description /Kernels/BodyForce
 
-!parameters /Kernels/BodyForce
+!syntax parameters /Kernels/BodyForce
 
-!inputfiles /Kernels/BodyForce
+!syntax inputs /Kernels/BodyForce
 
-!childobjects /Kernels/BodyForce
+!syntax children /Kernels/BodyForce

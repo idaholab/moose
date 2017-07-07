@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowDictator
-!description /UserObjects/PorousFlowDictator
+!syntax description /UserObjects/PorousFlowDictator
 
-!parameters /UserObjects/PorousFlowDictator
+!syntax parameters /UserObjects/PorousFlowDictator
 
-!inputfiles /UserObjects/PorousFlowDictator
+!syntax inputs /UserObjects/PorousFlowDictator
 
-!childobjects /UserObjects/PorousFlowDictator
+!syntax children /UserObjects/PorousFlowDictator

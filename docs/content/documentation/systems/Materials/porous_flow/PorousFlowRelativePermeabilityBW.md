@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowRelativePermeabilityBW
-!description /Materials/PorousFlowRelativePermeabilityBW
+!syntax description /Materials/PorousFlowRelativePermeabilityBW
 
-!parameters /Materials/PorousFlowRelativePermeabilityBW
+!syntax parameters /Materials/PorousFlowRelativePermeabilityBW
 
-!inputfiles /Materials/PorousFlowRelativePermeabilityBW
+!syntax inputs /Materials/PorousFlowRelativePermeabilityBW
 
-!childobjects /Materials/PorousFlowRelativePermeabilityBW
+!syntax children /Materials/PorousFlowRelativePermeabilityBW

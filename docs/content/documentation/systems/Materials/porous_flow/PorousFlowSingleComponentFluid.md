@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowSingleComponentFluid
-!description /Materials/PorousFlowSingleComponentFluid
+!syntax description /Materials/PorousFlowSingleComponentFluid
 
-!parameters /Materials/PorousFlowSingleComponentFluid
+!syntax parameters /Materials/PorousFlowSingleComponentFluid
 
-!inputfiles /Materials/PorousFlowSingleComponentFluid
+!syntax inputs /Materials/PorousFlowSingleComponentFluid
 
-!childobjects /Materials/PorousFlowSingleComponentFluid
+!syntax children /Materials/PorousFlowSingleComponentFluid

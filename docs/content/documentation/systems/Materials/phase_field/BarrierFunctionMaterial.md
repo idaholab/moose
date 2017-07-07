@@ -1,6 +1,6 @@
 
 # BarrierFunctionMaterial
-!description /Materials/BarrierFunctionMaterial
+!syntax description /Materials/BarrierFunctionMaterial
 
 Two phase free energy phase transformation barrier term.
 With the `g_order` parameter set to `SIMPLE` the function is defined as
@@ -24,8 +24,8 @@ $$
 
 
 
-!parameters /Materials/BarrierFunctionMaterial
+!syntax parameters /Materials/BarrierFunctionMaterial
 
-!inputfiles /Materials/BarrierFunctionMaterial
+!syntax inputs /Materials/BarrierFunctionMaterial
 
-!childobjects /Materials/BarrierFunctionMaterial
+!syntax children /Materials/BarrierFunctionMaterial

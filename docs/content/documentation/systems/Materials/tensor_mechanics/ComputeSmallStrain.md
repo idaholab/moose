@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeSmallStrain
-!description /Materials/ComputeSmallStrain
+!syntax description /Materials/ComputeSmallStrain
 
-!parameters /Materials/ComputeSmallStrain
+!syntax parameters /Materials/ComputeSmallStrain
 
-!inputfiles /Materials/ComputeSmallStrain
+!syntax inputs /Materials/ComputeSmallStrain
 
-!childobjects /Materials/ComputeSmallStrain
+!syntax children /Materials/ComputeSmallStrain

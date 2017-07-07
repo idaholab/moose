@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFCRFFEnergyDensity
-!description /AuxKernels/PFCRFFEnergyDensity
+!syntax description /AuxKernels/PFCRFFEnergyDensity
 
-!parameters /AuxKernels/PFCRFFEnergyDensity
+!syntax parameters /AuxKernels/PFCRFFEnergyDensity
 
-!inputfiles /AuxKernels/PFCRFFEnergyDensity
+!syntax inputs /AuxKernels/PFCRFFEnergyDensity
 
-!childobjects /AuxKernels/PFCRFFEnergyDensity
+!syntax children /AuxKernels/PFCRFFEnergyDensity

@@ -1,7 +1,7 @@
-!description /UserObjects/AEFVUpwindInternalSideFlux
+!syntax description /UserObjects/AEFVUpwindInternalSideFlux
 
-!parameters /UserObjects/AEFVUpwindInternalSideFlux
+!syntax parameters /UserObjects/AEFVUpwindInternalSideFlux
 
-!inputfiles /UserObjects/AEFVUpwindInternalSideFlux
+!syntax inputs /UserObjects/AEFVUpwindInternalSideFlux
 
-!childobjects /UserObjects/AEFVUpwindInternalSideFlux
+!syntax children /UserObjects/AEFVUpwindInternalSideFlux

@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAuxVariables System
-!parameters /AuxVariables/MultiAuxVariables
+!syntax objects /AuxVariables/MultiAuxVariables
 
+!syntax subsystems /AuxVariables/MultiAuxVariables
+
+!syntax actions /AuxVariables/MultiAuxVariables

@@ -1,7 +1,7 @@
-!description /Kernels/INSMomentumLaplaceForm
+!syntax description /Kernels/INSMomentumLaplaceForm
 
-!parameters /Kernels/INSMomentumLaplaceForm
+!syntax parameters /Kernels/INSMomentumLaplaceForm
 
-!inputfiles /Kernels/INSMomentumLaplaceForm
+!syntax inputs /Kernels/INSMomentumLaplaceForm
 
-!childobjects /Kernels/INSMomentumLaplaceForm
+!syntax children /Kernels/INSMomentumLaplaceForm

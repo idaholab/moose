@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PFCRFFKernel System
-!parameters /Kernels/PFCRFFKernel
+!syntax objects /Kernels/PFCRFFKernel
 
+!syntax subsystems /Kernels/PFCRFFKernel
+
+!syntax actions /Kernels/PFCRFFKernel

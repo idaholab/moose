@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ElementIntegralMaterialProperty
-!description /Postprocessors/ElementIntegralMaterialProperty
+!syntax description /Postprocessors/ElementIntegralMaterialProperty
 
-!parameters /Postprocessors/ElementIntegralMaterialProperty
+!syntax parameters /Postprocessors/ElementIntegralMaterialProperty
 
-!inputfiles /Postprocessors/ElementIntegralMaterialProperty
+!syntax inputs /Postprocessors/ElementIntegralMaterialProperty
 
-!childobjects /Postprocessors/ElementIntegralMaterialProperty
+!syntax children /Postprocessors/ElementIntegralMaterialProperty

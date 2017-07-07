@@ -24,7 +24,7 @@ from markdown.util import etree
 from markdown.extensions.fenced_code import FencedBlockPreprocessor
 
 import MooseDocs
-from MooseDocs import MooseMarkdown
+from MooseDocs.MooseMarkdown import MooseMarkdown
 from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
 
@@ -46,6 +46,7 @@ class ListingExtension(MooseMarkdownExtension):
     def defaultConfig():
         config = MooseMarkdownExtension.defaultConfig()
         config['repo'] = ['', "The remote repository to create hyperlinks."]
+        config['branch'] = ['master', "The branch name to consider in repository links."]
         config['make_dir'] = [MooseDocs.ROOT_DIR,
                               "The location of the MakeFile for determining the include " \
                               "paths when using clang parser."]
@@ -128,6 +129,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
 
         # The root/repo settings
         self._repo = kwargs.pop('repo')
+        self._branch = kwargs.pop('branch')
 
     def handleMatch(self, match):
         """
@@ -138,7 +140,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
 
         # Read the file
         rel_filename = match.group('filename').lstrip('/')
-        filename = MooseDocs.abspath(rel_filename)
+        filename = os.path.join(self.markdown.current.root_directory, rel_filename)
         if not os.path.exists(filename):
             return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
 
@@ -237,7 +239,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         if settings['link']:
             link = etree.Element('div')
             a = etree.SubElement(link, 'a')
-            a.set('href', os.path.join(self._repo, rel_filename))
+            a.set('href', os.path.join(self._repo, 'blob', self._branch, rel_filename))
             a.text = '({})'.format(os.path.basename(rel_filename))
             a.set('class', 'moose-listing-link tooltipped')
             a.set('data-tooltip', rel_filename)
@@ -386,7 +388,7 @@ class ListingClangPattern(ListingPattern):
         super(ListingClangPattern, self).__init__(**kwargs)
 
         # The make command to execute
-        self._make_dir = MooseDocs.abspath(kwargs.pop('make_dir'))
+        self._make_dir = os.path.join(MooseDocs.ROOT_DIR, kwargs.pop('make_dir'))
         if not os.path.exists(os.path.join(self._make_dir, 'Makefile')):
             LOG.error("Invalid path provided for make: %s", self._make_dir)
 

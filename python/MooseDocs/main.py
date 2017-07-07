@@ -19,6 +19,7 @@ import argparse
 import logging
 import multiprocessing
 import subprocess
+import collections
 
 import mooseutils
 
@@ -40,6 +41,7 @@ class MooseDocsFormatter(logging.Formatter):
              'CRITICAL':'MAGENTA'}
     COUNTS = {'ERROR': multiprocessing.Value('I', 0, lock=True),
               'WARNING': multiprocessing.Value('I', 0, lock=True)}
+    MESSAGES = collections.defaultdict(list)
 
     def format(self, record):
         msg = logging.Formatter.format(self, record)
@@ -50,7 +52,14 @@ class MooseDocsFormatter(logging.Formatter):
             with self.COUNTS[record.levelname].get_lock():
                 self.COUNTS[record.levelname].value += 1
 
+        self.MESSAGES[record.levelname].append(msg)
         return msg
+
+    def messages(self, level):
+        """
+        Return the messages for the given level. This is for testing.
+        """
+        return self.MESSAGES[level]
 
     def counts(self):
         """
@@ -58,7 +67,7 @@ class MooseDocsFormatter(logging.Formatter):
         """
         return self.COUNTS['WARNING'].value, self.COUNTS['ERROR'].value
 
-def init_logging(verbose=False):
+def init_logging(verbose=False, stream=None):
     """
     Call this function to initialize the MooseDocs logging formatter.
     """
@@ -71,7 +80,10 @@ def init_logging(verbose=False):
 
     # Custom format that colors and counts errors/warnings
     formatter = MooseDocsFormatter()
-    handler = logging.StreamHandler()
+    if stream is not None:
+        handler = logging.StreamHandler(stream)
+    else:
+        handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
     # The markdown package dumps way too much information in debug mode (so always set it to INFO)
@@ -179,22 +191,22 @@ def run():
         LOG.error('Deprecated command, please used "~/projects/moose/python/run_tests ' \
                   '-j8 --re=MooseDocs" instead.')
     elif cmd == 'check':
-        retcode = commands.check(**options) #pylint: disable=assignment-from-none
+        retcode = commands.check(**options)
     elif cmd == 'generate':
-        retcode = None
+        retcode = 0
         LOG.error('Deprecated command, please used "check --generate" instead.')
     elif cmd == 'serve':
-        retcode = None
+        retcode = 0
         LOG.error('Deprecated command, please used "build --serve" instead.')
     elif cmd == 'build':
-        retcode = commands.build(**options) #pylint: disable=assignment-from-none
+        retcode = commands.build(**options)
     elif cmd == 'latex':
-        retcode = commands.latex(**options) #pylint: disable=assignment-from-none
+        retcode = commands.latex(**options)
     elif cmd == 'presentation':
-        retcode = commands.presentation(**options) #pylint: disable=assignment-from-none
+        retcode = commands.presentation(**options)
 
     # Check retcode
-    if retcode is not None:
+    if retcode:
         return retcode
 
     # Display logging results

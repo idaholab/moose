@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FluxBasedStrainIncrement
-!description /Materials/FluxBasedStrainIncrement
+!syntax description /Materials/FluxBasedStrainIncrement
 
-!parameters /Materials/FluxBasedStrainIncrement
+!syntax parameters /Materials/FluxBasedStrainIncrement
 
-!inputfiles /Materials/FluxBasedStrainIncrement
+!syntax inputs /Materials/FluxBasedStrainIncrement
 
-!childobjects /Materials/FluxBasedStrainIncrement
+!syntax children /Materials/FluxBasedStrainIncrement

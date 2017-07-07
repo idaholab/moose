@@ -15,10 +15,9 @@
 #pylint: enable=missing-docstring
 
 import os
-import collections
-import cPickle as pickle
 import logging
-import mooseutils
+import collections
+import copy
 
 from markdown.util import etree
 from markdown.inlinepatterns import Pattern
@@ -26,6 +25,8 @@ from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
 from MooseObjectParameterTable import MooseObjectParameterTable
 import MooseDocs
+from MooseDocs.common.nodes import SyntaxNode, ActionNode, MooseObjectNode, MarkdownFileNodeBase
+from . import misc   # used for addScrollSpy function
 from .. import common
 
 LOG = logging.getLogger(__name__)
@@ -39,53 +40,27 @@ class AppSyntaxExtension(MooseMarkdownExtension):
         """Default settings for MooseMarkdownCommon."""
 
         config = MooseMarkdownExtension.defaultConfig()
-        config['executable'] = ['', "The executable to utilize for generating application syntax."]
-        config['locations'] = [dict(), "The locations to parse for syntax."]
+        config['executable'] = [MooseDocs.ROOT_DIR, "The executable or directory to utilize for "
+                                                    "generating application syntax."]
         config['repo'] = ['', "The remote repository to create hyperlinks."]
+        config['branch'] = ['master', "The branch name to consider in repository links."]
         config['links'] = [dict(), "The set of paths for generating input file and source code "
                                    "links to objects."]
         config['install'] = ['', "The location to install system and object documentation."]
+        config['hide'] = [dict(), "Suppress warnings for syntax listed in this dictionary."]
         return config
 
     def __init__(self, **kwargs):
         super(AppSyntaxExtension, self).__init__(**kwargs)
 
-        # Storage for the MooseLinkDatabase object
-        self.syntax = None
+        # Storage for the MooseApp syntax tree
+        self.__app_syntax = None
 
-        # Create the absolute path to the executable
-        self.setConfig('executable', MooseDocs.abspath(self.getConfig('executable')))
-
-    def execute(self):
+    def getMooseAppSyntax(self):
         """
-        Execute the supplied MOOSE application and return the YAML.
+        Return the MooseAppSyntax object.
         """
-
-        cache = os.path.join(MooseDocs.TEMP_DIR, 'moosedocs.yaml')
-        exe = self.getConfig('executable')
-
-        if os.path.exists(cache) and (os.path.getmtime(cache) >= os.path.getmtime(exe)):
-            with open(cache, 'r') as fid:
-                LOG.debug('Reading MooseYaml Pickle: ' + cache)
-                return mooseutils.MooseYaml(pickle.load(fid))
-
-        elif not (exe or os.path.exists(exe)):
-            LOG.critical('The executable does not exist: %s', exe)
-            raise Exception('Critical Error')
-
-        else:
-            LOG.debug("Executing %s to extract syntax.", exe)
-            try:
-                raw = mooseutils.runExe(exe, '--yaml')
-                with open(cache, 'w') as fid:
-                    LOG.debug('Writing MooseYaml Pickle: ' + cache)
-                    pickle.dump(raw, fid)
-                return mooseutils.MooseYaml(raw)
-            except:
-                LOG.critical('Failed to read YAML file, MOOSE and modules are likely not compiled'
-                             ' correctly.')
-                raise
-
+        return self.__app_syntax
 
     def extendMarkdown(self, md, md_globals):
         """
@@ -96,41 +71,48 @@ class AppSyntaxExtension(MooseMarkdownExtension):
         # Create a config object
         config = self.getConfigs()
 
-        # Extract YAML
-        exe_yaml = self.execute()
+        # Build syntax from JSON
+        exe = os.path.join(MooseDocs.ROOT_DIR, self.getConfig('executable'))
+        self.__app_syntax = common.moose_docs_app_syntax(exe, hide=config['hide'])
+        config['syntax'] = self.__app_syntax
 
-        # Generate YAML data from application
         # Populate the database for input file and children objects
         LOG.debug('Creating input file and source code use database.')
-        database = common.MooseLinkDatabase(**config)
-
-        # Populate the syntax
-        self.syntax = collections.OrderedDict()
-        for item in config['locations']:
-            key = item.keys()[0]
-            options = item.values()[0]
-            options.setdefault('group', key)
-            options.setdefault('name', key.replace('_', ' ').title())
-            options.setdefault('install', config['install'])
-            self.syntax[key] = common.MooseApplicationSyntax(exe_yaml, **options)
+        repo = os.path.join(config['repo'], 'blob', config['branch'])
+        database = common.MooseLinkDatabase(repo=repo, links=config['links'])
 
         # Inline Patterns
-        params = MooseParameters(markdown_instance=md, syntax=self.syntax, **config)
-        md.inlinePatterns.add('moose_parameters', params, '_begin')
+        system = MooseCompleteSyntax(markdown_instance=md, **config)
+        md.inlinePatterns.add('moose_complete_syntax', system, '_begin')
 
-        desc = MooseDescription(markdown_instance=md, syntax=self.syntax, **config)
-        md.inlinePatterns.add('moose_description', desc, '_begin')
+        params = MooseParameters(markdown_instance=md, **config)
+        md.inlinePatterns.add('moose_syntax_parameters', params, '_begin')
 
-        object_markdown = MooseObjectSyntax(markdown_instance=md, syntax=self.syntax,
-                                            database=database, **config)
-        md.inlinePatterns.add('moose_object_syntax', object_markdown, '_begin')
+        desc = MooseDescription(markdown_instance=md, **config)
+        md.inlinePatterns.add('moose_syntax_description', desc, '_begin')
 
-        system_markdown = MooseActionSyntax(markdown_instance=md, syntax=self.syntax, **config)
-        md.inlinePatterns.add('moose_system_syntax', system_markdown, '_begin')
+        child_list = MooseFileList(markdown_instance=md,
+                                   database=database.children,
+                                   title='Child Objects',
+                                   command='children',
+                                   **config)
+        md.inlinePatterns.add('moose_child_list', child_list, '_begin')
 
-        system_list = MooseActionList(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax,
-                                      **config)
-        md.inlinePatterns.add('moose_system_list', system_list, '_begin')
+        input_list = MooseFileList(markdown_instance=md,
+                                   database=database.inputs,
+                                   title='Input Files',
+                                   command='inputs',
+                                   **config)
+        md.inlinePatterns.add('moose_input_list', input_list, '_begin')
+
+        object_list = MooseObjectList(markdown_instance=md, **config)
+        md.inlinePatterns.add('moose_object_list', object_list, '_begin')
+
+        action_list = MooseActionList(markdown_instance=md, **config)
+        md.inlinePatterns.add('moose_action_list', action_list, '_begin')
+
+        subsystem_list = MooseSubSystemList(markdown_instance=md, **config)
+        md.inlinePatterns.add('moose_subsystem_list', subsystem_list, '_begin')
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """
@@ -147,42 +129,84 @@ class MooseSyntaxBase(MooseMarkdownCommon, Pattern):
       yaml[MooseYaml]: The MooseYaml object for the application.
       syntax[dict]: A dictionary of MooseApplicatinSyntax objects.
     """
+    @staticmethod
+    def defaultSettings():
+        """Default settings for MooseSyntaxBase."""
+        settings = MooseMarkdownCommon.defaultSettings()
+        settings['actions'] = (True, "Enable/disable action syntax lookup (this is used for "
+                                     "shared syntax such as BCs/Pressure).")
+        settings['objects'] = (True, "Enable/disable MooseObject syntax lookup (this is used for "
+                                     "shared syntax such as BCs/Pressure).")
+        settings['syntax'] = (True, "Enable/disable SyntaxNode lookup (this is needed for shared "
+                                    "syntax).")
+        return settings
 
     def __init__(self, regex, markdown_instance=None, syntax=None, **kwargs):
         MooseMarkdownCommon.__init__(self, **kwargs)
         Pattern.__init__(self, regex, markdown_instance)
-
         self._syntax = syntax
 
-        # Error if the syntax was not supplied
-        if not isinstance(self._syntax, dict):
-            LOG.error("A dictionary of MooseApplicationSyntax objects must be supplied.")
+    def initMatch(self, match):
+        """
+        Initialize method for return the nodes and settings.
+        """
 
-    def getInfo(self, name):
-        """
-        Return the information object.
-        """
-        info = self.getObject(name)
-        if info is None:
-            return self.getAction(name)
-        return info
+        # Extract Syntax and Settings
+        syntax = match.group('syntax')
+        settings = self.getSettings(match.group('settings'))
 
-    def getObject(self, name):
-        """
-        Return an MooseObject info object.
-        """
-        for syntax in self._syntax.itervalues():
-            if syntax.hasObject(name):
-                return syntax.getObject(name)
-        return None
+        # Types to search for
+        types = []
+        if settings.get('actions', False):
+            types.append(ActionNode)
+        if settings.get('objects', False):
+            types.append(MooseObjectNode)
+        if settings.get('syntax', False):
+            types.append(SyntaxNode)
 
-    def getAction(self, name):
+        if not types:
+            return self.createErrorElement("The 'actions', 'objects', and 'syntax' flags cannot "
+                                           "all be False.")
+
+        # Locate the node
+        filter_ = lambda n: syntax == n.full_name and isinstance(n, tuple(types))
+        nodes = self._syntax.findall(filter_=filter_)
+        return nodes, settings
+
+    def checkForErrors(self, nodes, match, settings, unique=True):
         """
-        Return an Action info object.
+        Perform error checking on the nodes.
         """
-        for syntax in self._syntax.itervalues():
-            if syntax.hasAction(name):
-                return syntax.getAction(name)
+        syntax = match.group('syntax')
+        command = match.group('command')
+
+        # Failed to locate syntax
+        if not nodes:
+            items = []
+            if settings.get('actions', False):
+                items.append('Action')
+            if settings.get('objects', False):
+                items.append('MooseObject')
+            if settings.get('syntax', False):
+                items.append('syntax')
+
+            msg = 'Failed to locate {} for the command: `!syntax {} {}`' \
+                  .format(' or '.join(items), str(command), str(syntax))
+            if isinstance(self.markdown.current, MarkdownFileNodeBase):
+                msg += ' in the file {}'.format(self.markdown.current.filename)
+            return msg + '.'
+
+        # Non-unique
+        if unique and len(nodes) > 1:
+            msg = 'The syntax provided is not unique, the following objects were located for the ' \
+                  'command `!syntax {} {}`'.format(str(command), str(syntax))
+            if isinstance(self.markdown.current, MarkdownFileNodeBase):
+                msg += ' in the file {}'.format(self.markdown.current.filename)
+            msg += ':'
+            for node in nodes:
+                msg += '\n    {}'.format(repr(node))
+            return msg
+
         return None
 
 class MooseParameters(MooseSyntaxBase):
@@ -190,7 +214,7 @@ class MooseParameters(MooseSyntaxBase):
     Creates parameter tables for Actions and MooseObjects.
     """
 
-    RE = r'^!parameters\s+(.*?)(?:$|\s+)(.*)'
+    RE = r'^!syntax\s+(?P<command>parameters)\s+(?P<syntax>.*?)(?:$|\s+)(?P<settings>.*)'
 
     @staticmethod
     def defaultSettings():
@@ -198,6 +222,7 @@ class MooseParameters(MooseSyntaxBase):
         settings = MooseSyntaxBase.defaultSettings()
         settings['title'] = ('Input Parameters', "Title to include prior to the parameter table.")
         settings['title_level'] = (2, "The HTML heading level to apply to the title")
+        settings.pop('syntax') # syntax nodes do not have parameters
         return settings
 
     def __init__(self, **kwargs):
@@ -207,16 +232,20 @@ class MooseParameters(MooseSyntaxBase):
         """
         Return table(s) of input parameters.
         """
+        nodes, settings = self.initMatch(match)
+        msg = self.checkForErrors(nodes, match, settings)
+        if msg:
+            return self.createErrorElement(msg)
+        info = nodes[0]
 
-        # Extract Syntax and Settings
-        syntax = match.group(2)
-        settings = self.getSettings(match.group(3))
-
-        # Locate description
-        info = self.getInfo(syntax)
-        if not info:
-            return self.createErrorElement('Failed to locate MooseObject or Action for the '
-                                           'command: !parameters {}'.format(syntax))
+        # Parameters dict()
+        parameters = dict()
+        if isinstance(info, SyntaxNode):
+            for action in info.actions():
+                if action.parameters is not None:
+                    parameters.update(action.parameters)
+        elif info.parameters:
+            parameters.update(info.parameters)
 
         # Create the tables (generate 'Required' and 'Optional' initially so that they come out in
         # the proper order)
@@ -225,7 +254,7 @@ class MooseParameters(MooseSyntaxBase):
         tables['Optional'] = MooseObjectParameterTable()
 
         # Loop through the parameters in yaml object
-        for param in info.parameters or []:
+        for param in parameters.itervalues() or []:
             name = param['group_name']
             if not name and param['required']:
                 name = 'Required'
@@ -253,113 +282,18 @@ class MooseParameters(MooseSyntaxBase):
                     el.append(table.html())
             return el
 
-class MooseObjectSyntax(MooseSyntaxBase):
-    """
-    Extracts the description from a MooseObject parameters.
-
-    Markdown Syntax:
-    !<Keyword> <YAML Syntax> key=value, key1=value1, etc...
-
-    Keywords Available:
-      !inputfiles: Returns a set of lists containing links to the input files that use the syntax
-      !childobjects: Returns a set of lists containing links to objects that inherit from this class
-    """
-
-    RE = r'^!(inputfiles|childobjects)\s+(.*?)(?:$|\s+)(.*)'
-
-    def __init__(self, database=None, repo=None, **kwargs):
-        super(MooseObjectSyntax, self).__init__(self.RE, **kwargs)
-
-        # Input arguments
-        self._input_files = database.inputs
-        self._child_objects = database.children
-        self._repo = repo
-
-    def handleMatch(self, match):
-        """
-        Create a <p> tag containing the supplied description from the YAML dump.
-        """
-
-        # Extract match options and settings
-        action = match.group(2)
-        syntax = match.group(3)
-
-        # Extract Settings
-        settings = self.getSettings(match.group(4))
-
-        # Locate description
-        info = self.getObject(syntax)
-        if not info:
-            el = self.createErrorElement('Failed to locate MooseObject with syntax in command: '
-                                         '!{} {}'.format(action, syntax), error=False)
-        elif action == 'inputfiles':
-            el = self.inputfilesElement(info, settings)
-        elif action == 'childobjects':
-            el = self.childobjectsElement(info, settings)
-        return el
-
-    def inputfilesElement(self, info, settings):
-        """
-        Return the links to input files and child objects.
-
-        Args:
-          node[dict]: YAML data node.
-          styles[dict]: Styles from markdown.
-        """
-        # Print the item information
-        el = self.applyElementSettings(etree.Element('div'), settings)
-        el.set('id', '#input-files')
-        el.set('class', 'section scrollspy')
-        self._listhelper(info, 'Input Files', el, self._input_files)
-        return el
-
-    def childobjectsElement(self, info, settings):
-        """
-        Return the links to input files and child objects.
-
-        Args:
-          node[dict]: YAML data node.
-          styles[dict]: Styles from markdown.
-        """
-        # Print the item information
-        el = self.applyElementSettings(etree.Element('div'), settings)
-        el.set('id', '#child-objects')
-        el.set('class', 'section scrollspy')
-        self._listhelper(info, 'Child Objects', el, self._child_objects)
-        return el
-
-    @staticmethod
-    def _listhelper(info, title, parent, items):
-        """
-        Helper method for dumping link lists.
-
-        Args:
-          info: MooseObjectInfo object.
-          title[str]: The level two header to apply to lists.
-          parent[etree.Element]: The parent element the headers and lists are to be applied
-          items[dict]: Dictionary of databases containing link information
-        """
-        has_items = False
-        for k, db in items.iteritems():
-            if info.name in db:
-                has_items = True
-                h3 = etree.SubElement(parent, 'h3')
-                h3.text = k
-                ul = etree.SubElement(parent, 'ul')
-                ul.set('style', "max-height:350px;overflow-y:Scroll")
-                for j in db[info.name]:
-                    ul.append(j.html())
-
-        if has_items:
-            h2 = etree.Element('h2')
-            h2.text = title
-            parent.insert(0, h2)
-
 class MooseDescription(MooseSyntaxBase):
     """
     Creates parameter tables for Actions and MooseObjects.
     """
-    RE = r'^!description\s+(.*?)(?:$|\s+)(.*)'
+    RE = r'^!syntax\s+(?P<command>description)\s+(?P<syntax>.*?)(?:$|\s+)(?P<settings>.*)'
+
+    @staticmethod
+    def defaultSettings():
+        """Default settings for MooseDescription."""
+        settings = MooseSyntaxBase.defaultSettings()
+        settings.pop('syntax') # 'syntax nodes do not have descriptions'
+        return settings
 
     def __init__(self, **kwargs):
         super(MooseDescription, self).__init__(self.RE, **kwargs)
@@ -368,206 +302,369 @@ class MooseDescription(MooseSyntaxBase):
         """
         Return the class description html element.
         """
-
         # Extract Syntax and Settings
-        syntax = match.group(2)
-        settings = self.getSettings(match.group(3))
+        nodes, settings = self.initMatch(match)
+        msg = self.checkForErrors(nodes, match, settings)
+        if msg:
+            return self.createErrorElement(msg)
+        info = nodes[0]
 
-        # Locate description
-        info = self.getInfo(syntax)
-        if not info:
-            return self.createErrorElement('Failed to locate MooseObject or Action for the '
-                                           'command: !description {}'.format(syntax))
-
-        # Create an Error element, but do not produce warning/error LOG because the
-        # moosedocs check/generate commands produce errors.
+        # Create an Error element, but only produce warning/error LOG if the object is not hidden
         if info.description is None:
-            return self.createErrorElement('Failed to locate class description for {} '
-                                           'syntax.'.format(info.name), error=False)
+            msg = "Failed to locate class description for {} syntax".format(info.name)
+            if isinstance(self.markdown.current, MarkdownFileNodeBase):
+                msg += " in the file {}".format(self.markdown.current.filename)
+            return self.createErrorElement(msg + '.', error=not self.markdown.current.hidden)
 
         # Create the html element with supplied styles
         el = self.applyElementSettings(etree.Element('p'), settings)
         el.text = info.description
         return el
 
-class MooseActionList(MooseSyntaxBase):
+class MooseFileList(MooseSyntaxBase):
     """
-    Creates dynamic lists for Moose syntax.
+    A file list creation object designed to work with MooseLinkDatabase information.
 
-    Examples:
-    !systems
-    !systems framework phase_field
+    Args:
+        database[dict]: The MooseLinkDatabase dictionary to consider.
+        repo[str]: The repository for creating links to GitHub/GitLab.
+        title[str]: The default title.
+        command[str]: The command to associate with the "!syntax" keyword.
     """
-
-    RE = r'^!systems\s*(.*)'
+    RE = r'^!syntax\s+(?P<command>{})\s+(?P<syntax>.*?)(?:$|\s+)(?P<settings>.*)'
 
     @staticmethod
     def defaultSettings():
         settings = MooseSyntaxBase.defaultSettings()
-        settings['groups'] = (None, "The configured 'groups' to include.")
-        settings['show_hidden'] = (False, "Show hidden syntax.")
+        settings['title'] = ('default', "The title display prior to tables ('default' will apply "
+                                        "a generic title.).")
+        settings['title_level'] = (2, "The HTML heading level to apply to the title.")
+        settings['syntax'] = (False, settings['syntax'][1])
+        settings['actions'] = (False, settings['actions'][1])
         return settings
 
-    def __init__(self, yaml=None, syntax=None, **kwargs):
-        MooseSyntaxBase.__init__(self, self.RE, syntax=syntax, **kwargs)
-        self._yaml = yaml
+    def __init__(self, database=None, title=None, command=None, **kwargs):
+        super(MooseFileList, self).__init__(self.RE.format(command), **kwargs)
+        self._database = database
+        self._title = title
+
+    def handleMatch(self, match):
+        """
+        Create the list element.
+        """
+
+        # Extract the desired node.
+        nodes, settings = self.initMatch(match)
+        msg = self.checkForErrors(nodes, match, settings)
+        if msg:
+            return self.createErrorElement(msg)
+        info = nodes[0]
+
+        # Update title
+        if (settings['title'] is not None) and (settings['title'].lower() == 'default'):
+            settings['title'] = self._title
+
+        # Print the item information
+        el = self.applyElementSettings(etree.Element('div'), settings)
+        if settings['title'] is not None:
+            el.set('id', '#{}'.format(settings['title'].lower().replace(' ', '-')))
+        if settings['title_level'] == 2:
+            el.set('class', 'section scrollspy')
+        self._listhelper(el, info, settings)
+        return el
+
+    def _listhelper(self, parent, info, settings):
+        """
+        Helper method for dumping link lists.
+
+        Args:
+          parent[etree.Element]: The parent element the headers and lists are to be applied
+          info[SyntaxNode]: The desired object from which the list will be created.
+          settings[dict]: The current settings.
+        """
+        level = int(settings['title_level'])
+
+        has_items = False
+        for k, db in self._database.iteritems():
+            if info.name in db:
+                has_items = True
+                h3 = etree.SubElement(parent, 'h{}'.format(level + 1))
+                h3.text = k
+                ul = etree.SubElement(parent, 'ul')
+                ul.set('style', "max-height:350px;overflow-y:Scroll")
+                for j in db[info.name]:
+                    ul.append(j.html())
+
+        if has_items and settings['title'] is not None:
+            h2 = etree.Element('h{}'.format(level))
+            h2.text = settings['title']
+            parent.insert(0, h2)
+
+
+class MooseCompleteSyntax(MooseMarkdownCommon, Pattern):
+    """
+    Display the complete system syntax for the compiled application.
+
+    The static methods of this class are used by the 'objects' and 'actions' command as well.
+    """
+    RE = r'^!syntax\s+complete(?:$|\s+)(?P<settings>.*)'
+
+    @staticmethod
+    def defaultSettings():
+        settings = MooseMarkdownCommon.defaultSettings()
+        settings['groups'] = (None, "The configured 'groups' to include.")
+        return settings
+
+    def __init__(self, markdown_instance=None, syntax=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
+        self._syntax = syntax
+        self._install = kwargs.get('install')
+
+    def handleMatch(self, match):
+        """
+        Creates complete list of objects.
+        """
+        settings = self.getSettings(match.group('settings'))
+        groups = self.sortGroups(self._syntax, settings)
+
+        div = etree.Element('div')
+        div.set('class', 'moose-system-list')
+
+        for obj in self._syntax.syntax(recursive=True):
+            if obj.name and obj.hasGroups(set(g[0] for g in groups)):
+                self.addHeader(div, obj)
+                self.addObjects(div, obj, groups)
+
+        misc.ScrollContents.addScrollSpy(div)
+        return div
+
+    @staticmethod
+    def sortGroups(node, settings):
+        """
+        Re-order groups to begin with 'framework' and limit groups based on settings.
+        """
+
+        # Create a set() of all groups
+        groups = set()
+        for n in node.findall():
+            for key, value in n.groups.iteritems():
+                groups.add((key, value))
+
+        # Remove groups not in 'groups' settings
+        if settings['groups'] is not None:
+            for pair in copy.copy(groups):
+                if pair[0] not in settings['groups']:
+                    groups.remove(pair)
+
+        # Remove framework
+        groups = groups
+        has_framework = False
+        framework = ('framework', 'Framework')
+        if framework in groups:
+            groups.remove(framework)
+            has_framework = True
+
+        # Sort and restore framework at beginning
+        groups = sorted(groups)
+        if has_framework:
+            groups.insert(0, framework)
+
+        return groups
+
+    @staticmethod
+    def addHeader(div, obj):
+        """
+        Adds syntax header.
+        """
+        level = obj.full_name.count('/') + 1
+        hid = obj.full_name.strip('/').replace('/', '-').lower()
+
+        h = etree.SubElement(div, 'h{}'.format(level))
+        h.text = obj.full_name.strip('/')
+        h.set('id', hid)
+
+        a = etree.SubElement(h, 'a')
+        a.set('href', obj.markdown('systems', absolute=False))
+        if obj.hidden:
+            a.set('data-moose-disable-link-error', '1')
+
+        i = etree.SubElement(a, 'i')
+        i.set('class', 'material-icons')
+        i.text = 'input'
+
+        for group in obj.groups.itervalues():
+            chip = etree.SubElement(h, 'div')
+            chip.set('class', 'chip moose-chip')
+            chip.text = group
+
+    @staticmethod
+    def addObjects(div, node, groups):
+        """
+        Add all MooseObject to the <div> container.
+        """
+        return MooseCompleteSyntax._addItemsHelper(div, groups, node.objects, 'Objects')
+
+    @staticmethod
+    def addActions(div, node, groups):
+        """
+        Add all Actions to the <div> container.
+        """
+        return MooseCompleteSyntax._addItemsHelper(div, groups, node.actions, 'Actions')
+
+    @staticmethod
+    def addSyntax(div, node, groups):
+        """
+        Add all SyntaxNode (i.e., subsystems) to the <div> container.
+        """
+        return MooseCompleteSyntax._addItemsHelper(div, groups, node.syntax, 'Systems')
+
+    @staticmethod
+    def _addItemsHelper(div, groups, func, title):
+        """
+        Helper for adding objects/actions to the supplied div object.
+        """
+        el = MooseDocs.common.MooseCollapsible()
+        for folder, group in groups:
+            objects = func(group=folder)
+            if objects:
+                el.addHeader('{} {}'.format(group, title))
+                for obj in objects:
+                    a = etree.Element('a')
+                    a.text = obj.name
+                    a.set('href', '/' + obj.markdown('', absolute=False))
+                    if obj.hidden:
+                        a.set('data-moose-disable-link-error', '1')
+
+                    if hasattr(obj, 'description'):
+                        el.addItem(a, obj.description)
+                    else:
+                        el.addItem(a)
+
+        if el:
+            div.append(el.element())
+            return True
+        return False
+
+class MoosePartialSyntax(MooseSyntaxBase):
+    """
+    Creates dynamic lists for MooseObjects or Actions.
+    """
+    RE = r'^!syntax\s+(?P<command>{})\s+(?P<syntax>.*?)(?:$|\s+)(?P<settings>.*)'
+
+    @staticmethod
+    def defaultSettings():
+        settings = MooseSyntaxBase.defaultSettings()
+        settings['title'] = (None, "Title to include prior to the syntax list.")
+        settings['title_level'] = (2, "The HTML heading level to apply to the title")
+        settings['groups'] = (None, "The configured 'groups' to include.")
+        return settings
+
+    def __init__(self, syntax=None, command=None, **kwargs):
+        MooseSyntaxBase.__init__(self, self.RE.format(command), syntax=syntax, **kwargs)
+        self._install = kwargs.get('install')
+
+    def addSyntax(self, div, info, groups): #pylint: disable=unused-argument,no-self-use
+        """
+        Abstract method for the adding either the action or object list.
+        """
+        return False
 
     def handleMatch(self, match):
         """
         Handle the regex match for this extension.
         """
 
-        # Extract settings
-        settings = self.getSettings(match.group(2))
+        # Extract the desired nodes
+        syntax = match.group('syntax')
+        nodes, settings = self.initMatch(match)
+        msg = self.checkForErrors(nodes, match, settings)
+        if msg:
+            return self.createErrorElement(msg)
+        info = nodes[0]
 
-        # Extract the data to consider
-        groups = self._syntax.keys()
-        if settings['groups']:
-            groups = settings['groups'].split()
+        # Error if not a SyntaxNode
+        if not isinstance(info, SyntaxNode):
+            msg = "The given syntax '{}' did not return a SyntaxNode in file {}." \
+                  .format(syntax, self.markdown.current.filename)
+            return self.createErrorElement(msg)
 
-        # Build complete list of unique action objects
-        actions = []
-        keys = set()
-        for syn in self._syntax.itervalues():
-            for value in syn.actions().values():
-                if value.key not in keys:
-                    actions.append(value)
-                    keys.add(value.key)
+        # Create and return the element
+        div = etree.Element('div')
+        div.set('class', 'moose-system-list')
+        groups = MooseCompleteSyntax.sortGroups(info, settings)
+        added_items = self.addSyntax(div, info, groups)
 
-        # Create the primary element
-        el = etree.Element('div')
-        el.set('class', 'moose-system-list')
+        # Add the title if data was added
+        if added_items and settings['title'] is not None:
+            h = etree.Element('h{}'.format(int(settings['title_level'])))
+            h.text = settings['title']
+            div.insert(0, h)
 
-        # Alphabetize actions
-        actions.sort(key=lambda action: action.name)
+        return div
 
-        # Storage structure for <div> tags to allow for nested item creation without
-        # the need for complete actions tree or sorted action objects.
-        folder_divs = dict()
-
-        # Loop over keys
-        for action in actions:
-
-            # Do nothing if the syntax is hidden
-            if (action.group in groups) and action.hidden and (not settings['show_hidden']):
-                continue
-
-            # Attempt to build the sub-objects table
-            collection = MooseDocs.extensions.create_object_collection(action.key, \
-                            self._syntax, groups=groups, show_hidden=settings['show_hidden'])
-
-            # Do nothing if the table is empty or the supplied group is not desired
-            if (not collection) and (action.group not in groups):
-                continue
-
-            # Loop through the syntax ("folders") and create the necessary html element
-            folder = tuple(action.key.strip('/').split('/'))
-            div = el
-            for i in range(len(folder)):
-                current = '/'.join(folder[0:i+1])
-
-                 # If a <div> with the current name exists, use it, otherwise create the <div> and
-                 # associated heading
-                if current in folder_divs:
-                    div = folder_divs[current]
-                else:
-                    div = etree.SubElement(div, 'div')
-                    folder_divs[current] = div
-
-                    h = etree.SubElement(div, 'h{}'.format(str(i+2)))
-                    h.text = current
-                    h_id = current.replace(' ', '_').lower()
-                    h.set('id', h_id)
-
-                    if i == 0:
-                        div.set('class', 'section scrollspy')
-                        div.set('id', h_id)
-
-                    # Add link to action pages
-                    a = etree.SubElement(h, 'a')
-                    a.set('href', action.markdown)
-                    i = etree.SubElement(a, 'i')
-                    i.set('class', 'material-icons')
-                    i.text = 'input'
-
-                    # Create a chip showing where the action is defined
-                    tag = etree.SubElement(h, 'div')
-                    tag.set('class', 'chip moose-chip')
-                    tag.text = action.group
-
-            if collection:
-                div.append(collection)
-
-        return el
-
-class MooseActionSyntax(MooseSyntaxBase):
+class MooseObjectList(MoosePartialSyntax):
     """
-    Creates tables of sub-object/systems.
-
-    !subobjects = A list of subobjects /* and /<type>
-    !subsystems = A list of sub-syntax (e.g, Markers and Indicators)
-
-    Available Settings:
-      title[str]: Set the title of the section defined above the table.
+    Create the "!syntax objects" command.
     """
-
-    RE = r'^!(subobjects|subsystems)\s+(.*?)(?:$|\s+)(.*)'
-
     @staticmethod
     def defaultSettings():
-        settings = MooseSyntaxBase.defaultSettings()
-        settings['title'] = ('default', "The title display prior to tables ('default' provides a "
-                                        "title with the action name)")
-        settings['title_level'] = (2, "The HTML heading level to apply to the title.")
+        """Add default settings for object lists."""
+        settings = MoosePartialSyntax.defaultSettings()
+        settings['title'] = ("Available Sub-Objects", settings['title'][1])
+        settings['actions'] = (False, settings['actions'][1])
+        settings['objects'] = (False, settings['objects'][1])
         return settings
 
-    def __init__(self, yaml=None, syntax=None, **kwargs):
-        MooseSyntaxBase.__init__(self, self.RE, yaml=yaml, syntax=syntax, **kwargs)
+    def __init__(self, **kwargs):
+        super(MooseObjectList, self).__init__(command='objects', **kwargs)
 
-    def handleMatch(self, match):
+    def addSyntax(self, div, info, groups):
         """
-        Handle the regex match.
+        Adds objects.
         """
-        # Extract match options and settings
-        action = match.group(2)
-        syntax = match.group(3)
-        settings = self.getSettings(match.group(4))
+        return MooseCompleteSyntax.addObjects(div, info, groups)
 
-        if settings['title'] == 'default':
-            settings['title'] = 'Available {}-{}'.format(action[:3].title(), action[3:].title())
+class MooseActionList(MoosePartialSyntax):
+    """
+    Create the "!syntax actions" command.
+    """
+    @staticmethod
+    def defaultSettings():
+        """Add default settings for action lists."""
+        settings = MoosePartialSyntax.defaultSettings()
+        settings['title'] = ("Associated Actions", settings['title'][1])
+        settings['actions'] = (False, settings['actions'][1])
+        settings['objects'] = (False, settings['objects'][1])
+        return settings
 
-        if action == 'subobjects':
-            el = self.subobjectsElement(syntax, settings)
-        elif action == 'subsystems':
-            el = self.subsystemsElement(syntax, settings)
-        return el
+    def __init__(self, **kwargs):
+        super(MooseActionList, self).__init__(command='actions', **kwargs)
 
-    def subobjectsElement(self, sys_name, settings):
+    def addSyntax(self, div, info, groups):
         """
-        Create table of sub-objects.
+        Adds actions.
         """
-        collection = MooseDocs.extensions.create_object_collection(sys_name, self._syntax)
-        if collection:
-            el = self.applyElementSettings(etree.Element('div'), settings)
-            if settings['title']:
-                h2 = etree.SubElement(el, 'h2')
-                h2.text = settings['title']
-            el.append(collection)
-        else:
-            el = etree.Element('p')
-        return el
+        return MooseCompleteSyntax.addActions(div, info, groups)
 
-    def subsystemsElement(self, sys_name, settings):
+class MooseSubSystemList(MoosePartialSyntax):
+    """
+    Create the "!syntax subsystems" command.
+    """
+    @staticmethod
+    def defaultSettings():
+        """Add default settings for subsystem lists."""
+        settings = MoosePartialSyntax.defaultSettings()
+        settings['title'] = ("Available Sub-Systems", settings['title'][1])
+        settings['actions'] = (False, settings['actions'][1])
+        settings['objects'] = (False, settings['objects'][1])
+        return settings
+
+    def __init__(self, **kwargs):
+        super(MooseSubSystemList, self).__init__(command='subsystems', **kwargs)
+
+    def addSyntax(self, div, info, groups):
         """
-        Create table of sub-systems.
+        Adds Sub-Systems.
         """
-        collection = MooseDocs.extensions.create_system_collection(sys_name, self._syntax)
-        if collection:
-            el = self.applyElementSettings(etree.Element('div'), settings)
-            if settings['title']:
-                h2 = etree.SubElement(el, 'h{}'.format(settings['title_level']))
-                h2.text = settings['title']
-            el.append(collection)
-        else:
-            el = etree.Element('p')
-        return el
+        return MooseCompleteSyntax.addSyntax(div, info, groups)

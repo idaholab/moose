@@ -240,10 +240,10 @@ For simplicity, the wave speed is set to $1$.
 To demonstrate the oscillation-free solution quality during wave propagation, an animation is presented below.
 In addition, the numerical results at $t=0.2$ are presented in the following figure.
 
-!media docs/media/rdg/fig_1d_aefv_square_wave.png width=50% padding-right=20px float=right caption=Instantaneous rDG solution for simulating a right-going square-shaped wave in 1D.
+!media media/rdg/fig_1d_aefv_square_wave.png width=50% padding-right=20px float=right caption=Instantaneous rDG solution for simulating a right-going square-shaped wave in 1D.
 
 
-!media docs/media/rdg/anim_1d_aefv_square_wave.gif width=50% padding-right=20px float=right caption=Time evolution of rDG solution for simulating a right-going square-shaped wave in 1D.
+!media media/rdg/anim_1d_aefv_square_wave.gif width=50% padding-right=20px float=right caption=Time evolution of rDG solution for simulating a right-going square-shaped wave in 1D.
 
 ###Input File
 

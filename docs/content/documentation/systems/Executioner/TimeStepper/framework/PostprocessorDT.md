@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PostprocessorDT
-!description /Executioner/TimeStepper/PostprocessorDT
+!syntax description /Executioner/TimeStepper/PostprocessorDT
 
-!parameters /Executioner/TimeStepper/PostprocessorDT
+!syntax parameters /Executioner/TimeStepper/PostprocessorDT
 
-!inputfiles /Executioner/TimeStepper/PostprocessorDT
+!syntax inputs /Executioner/TimeStepper/PostprocessorDT
 
-!childobjects /Executioner/TimeStepper/PostprocessorDT
+!syntax children /Executioner/TimeStepper/PostprocessorDT

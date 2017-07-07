@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantFunction
-!description /Functions/ConstantFunction
+!syntax description /Functions/ConstantFunction
 
-!parameters /Functions/ConstantFunction
+!syntax parameters /Functions/ConstantFunction
 
-!inputfiles /Functions/ConstantFunction
+!syntax inputs /Functions/ConstantFunction
 
-!childobjects /Functions/ConstantFunction
+!syntax children /Functions/ConstantFunction

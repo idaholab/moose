@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeGrainForceAndTorque
-!description /UserObjects/ComputeGrainForceAndTorque
+!syntax description /UserObjects/ComputeGrainForceAndTorque
 
-!parameters /UserObjects/ComputeGrainForceAndTorque
+!syntax parameters /UserObjects/ComputeGrainForceAndTorque
 
-!inputfiles /UserObjects/ComputeGrainForceAndTorque
+!syntax inputs /UserObjects/ComputeGrainForceAndTorque
 
-!childobjects /UserObjects/ComputeGrainForceAndTorque
+!syntax children /UserObjects/ComputeGrainForceAndTorque

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowInternalEnergyIdeal
-!description /Materials/PorousFlowInternalEnergyIdeal
+!syntax description /Materials/PorousFlowInternalEnergyIdeal
 
-!parameters /Materials/PorousFlowInternalEnergyIdeal
+!syntax parameters /Materials/PorousFlowInternalEnergyIdeal
 
-!inputfiles /Materials/PorousFlowInternalEnergyIdeal
+!syntax inputs /Materials/PorousFlowInternalEnergyIdeal
 
-!childobjects /Materials/PorousFlowInternalEnergyIdeal
+!syntax children /Materials/PorousFlowInternalEnergyIdeal

@@ -1,7 +1,7 @@
-!description /BCs/NSPenalizedNormalFlowBC
+!syntax description /BCs/NSPenalizedNormalFlowBC
 
-!parameters /BCs/NSPenalizedNormalFlowBC
+!syntax parameters /BCs/NSPenalizedNormalFlowBC
 
-!inputfiles /BCs/NSPenalizedNormalFlowBC
+!syntax inputs /BCs/NSPenalizedNormalFlowBC
 
-!childobjects /BCs/NSPenalizedNormalFlowBC
+!syntax children /BCs/NSPenalizedNormalFlowBC

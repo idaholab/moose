@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BoundsAux
-!description /AuxKernels/BoundsAux
+!syntax description /AuxKernels/BoundsAux
 
-!parameters /AuxKernels/BoundsAux
+!syntax parameters /AuxKernels/BoundsAux
 
-!inputfiles /AuxKernels/BoundsAux
+!syntax inputs /AuxKernels/BoundsAux
 
-!childobjects /AuxKernels/BoundsAux
+!syntax children /AuxKernels/BoundsAux

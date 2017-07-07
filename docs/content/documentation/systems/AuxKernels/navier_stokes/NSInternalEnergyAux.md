@@ -1,7 +1,7 @@
-!description /AuxKernels/NSInternalEnergyAux
+!syntax description /AuxKernels/NSInternalEnergyAux
 
-!parameters /AuxKernels/NSInternalEnergyAux
+!syntax parameters /AuxKernels/NSInternalEnergyAux
 
-!inputfiles /AuxKernels/NSInternalEnergyAux
+!syntax inputs /AuxKernels/NSInternalEnergyAux
 
-!childobjects /AuxKernels/NSInternalEnergyAux
+!syntax children /AuxKernels/NSInternalEnergyAux

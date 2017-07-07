@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppPostprocessorToAuxScalarTransfer
-!description /Transfers/MultiAppPostprocessorToAuxScalarTransfer
+!syntax description /Transfers/MultiAppPostprocessorToAuxScalarTransfer
 
-!parameters /Transfers/MultiAppPostprocessorToAuxScalarTransfer
+!syntax parameters /Transfers/MultiAppPostprocessorToAuxScalarTransfer
 
-!inputfiles /Transfers/MultiAppPostprocessorToAuxScalarTransfer
+!syntax inputs /Transfers/MultiAppPostprocessorToAuxScalarTransfer
 
-!childobjects /Transfers/MultiAppPostprocessorToAuxScalarTransfer
+!syntax children /Transfers/MultiAppPostprocessorToAuxScalarTransfer

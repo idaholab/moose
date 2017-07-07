@@ -153,7 +153,7 @@ class SlideContentsPostprocessor(Postprocessor):
                     elif item in headings:
                         headings.remove(item)
 
-        return soup.prettify()
+        return str(soup)
 
     @staticmethod
     def _contents(headings):

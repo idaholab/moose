@@ -1,7 +1,7 @@
-!description /Kernels/NSMomentumInviscidFluxWithGradP
+!syntax description /Kernels/NSMomentumInviscidFluxWithGradP
 
-!parameters /Kernels/NSMomentumInviscidFluxWithGradP
+!syntax parameters /Kernels/NSMomentumInviscidFluxWithGradP
 
-!inputfiles /Kernels/NSMomentumInviscidFluxWithGradP
+!syntax inputs /Kernels/NSMomentumInviscidFluxWithGradP
 
-!childobjects /Kernels/NSMomentumInviscidFluxWithGradP
+!syntax children /Kernels/NSMomentumInviscidFluxWithGradP

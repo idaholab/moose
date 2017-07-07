@@ -14,12 +14,10 @@
 ####################################################################################################
 #pylint: enable=missing-docstring
 import re
-import os
 
 from markdown.preprocessors import Preprocessor
 from markdown.util import etree
 
-import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
 from listings import ListingPattern
@@ -66,21 +64,23 @@ class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
         settings['include-end'] = l_settings['include-end']
         return settings
 
-    def __init__(self, *args, **kwargs):
-        super(MarkdownPreprocessor, self).__init__(*args, **kwargs)
+    def __init__(self, markdown_instance=None, **kwargs):
+        super(MarkdownPreprocessor, self).__init__(markdown_instance=markdown_instance, **kwargs)
+        self.markdown = markdown_instance
         self._found = False
 
     def replace(self, match):
         """
         Substitution function for the re.sub function.
         """
-        filename = MooseDocs.abspath(match.group(1))
-        settings = self.getSettings(match.group(2))
-        if not os.path.exists(filename):
-            msg = "Failed to located filename in following command.\n{}"
-            el = self.createErrorElement(msg.format(match.group(0)), title="Unknown Markdown File")
+        filename, _ = self.getFilename(match.group(1))
+        if not filename:
+            msg = "Failed to located filename in following command in file {}.\n    {}"
+            el = self.createErrorElement(msg.format(self.markdown.current.filename, match.group(0)),
+                                         title="Unknown Markdown File")
             return etree.tostring(el)
 
+        settings = self.getSettings(match.group(2))
         if settings['start'] or settings['end']:
             content = ListingPattern.extractLineRange(filename, settings['start'],
                                                       settings['end'], settings['include-end'])

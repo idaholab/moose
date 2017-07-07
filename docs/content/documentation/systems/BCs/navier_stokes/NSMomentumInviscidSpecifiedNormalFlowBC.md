@@ -1,7 +1,7 @@
-!description /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+!syntax description /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
 
-!parameters /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+!syntax parameters /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
 
-!inputfiles /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+!syntax inputs /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
 
-!childobjects /BCs/NSMomentumInviscidSpecifiedNormalFlowBC
+!syntax children /BCs/NSMomentumInviscidSpecifiedNormalFlowBC

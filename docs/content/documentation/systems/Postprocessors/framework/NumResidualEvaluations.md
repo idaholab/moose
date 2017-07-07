@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumResidualEvaluations
-!description /Postprocessors/NumResidualEvaluations
+!syntax description /Postprocessors/NumResidualEvaluations
 
-!parameters /Postprocessors/NumResidualEvaluations
+!syntax parameters /Postprocessors/NumResidualEvaluations
 
-!inputfiles /Postprocessors/NumResidualEvaluations
+!syntax inputs /Postprocessors/NumResidualEvaluations
 
-!childobjects /Postprocessors/NumResidualEvaluations
+!syntax children /Postprocessors/NumResidualEvaluations

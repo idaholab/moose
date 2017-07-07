@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CHPFCRFF
-!description /Kernels/CHPFCRFF
+!syntax description /Kernels/CHPFCRFF
 
-!parameters /Kernels/CHPFCRFF
+!syntax parameters /Kernels/CHPFCRFF
 
-!inputfiles /Kernels/CHPFCRFF
+!syntax inputs /Kernels/CHPFCRFF
 
-!childobjects /Kernels/CHPFCRFF
+!syntax children /Kernels/CHPFCRFF

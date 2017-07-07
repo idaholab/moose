@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPolyLineSink
-!description /DiracKernels/PorousFlowPolyLineSink
+!syntax description /DiracKernels/PorousFlowPolyLineSink
 
-!parameters /DiracKernels/PorousFlowPolyLineSink
+!syntax parameters /DiracKernels/PorousFlowPolyLineSink
 
-!inputfiles /DiracKernels/PorousFlowPolyLineSink
+!syntax inputs /DiracKernels/PorousFlowPolyLineSink
 
-!childobjects /DiracKernels/PorousFlowPolyLineSink
+!syntax children /DiracKernels/PorousFlowPolyLineSink

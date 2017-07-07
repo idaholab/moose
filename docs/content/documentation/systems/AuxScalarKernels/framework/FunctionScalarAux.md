@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionScalarAux
-!description /AuxScalarKernels/FunctionScalarAux
+!syntax description /AuxScalarKernels/FunctionScalarAux
 
-!parameters /AuxScalarKernels/FunctionScalarAux
+!syntax parameters /AuxScalarKernels/FunctionScalarAux
 
-!inputfiles /AuxScalarKernels/FunctionScalarAux
+!syntax inputs /AuxScalarKernels/FunctionScalarAux
 
-!childobjects /AuxScalarKernels/FunctionScalarAux
+!syntax children /AuxScalarKernels/FunctionScalarAux

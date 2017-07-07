@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideFluxIntegral
-!description /Postprocessors/SideFluxIntegral
+!syntax description /Postprocessors/SideFluxIntegral
 
-!parameters /Postprocessors/SideFluxIntegral
+!syntax parameters /Postprocessors/SideFluxIntegral
 
-!inputfiles /Postprocessors/SideFluxIntegral
+!syntax inputs /Postprocessors/SideFluxIntegral
 
-!childobjects /Postprocessors/SideFluxIntegral
+!syntax children /Postprocessors/SideFluxIntegral

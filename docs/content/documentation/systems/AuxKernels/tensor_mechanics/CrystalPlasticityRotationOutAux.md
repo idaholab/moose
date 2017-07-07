@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CrystalPlasticityRotationOutAux
-!description /AuxKernels/CrystalPlasticityRotationOutAux
+!syntax description /AuxKernels/CrystalPlasticityRotationOutAux
 
-!parameters /AuxKernels/CrystalPlasticityRotationOutAux
+!syntax parameters /AuxKernels/CrystalPlasticityRotationOutAux
 
-!inputfiles /AuxKernels/CrystalPlasticityRotationOutAux
+!syntax inputs /AuxKernels/CrystalPlasticityRotationOutAux
 
-!childobjects /AuxKernels/CrystalPlasticityRotationOutAux
+!syntax children /AuxKernels/CrystalPlasticityRotationOutAux

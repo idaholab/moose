@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BoundingBoxNodeSet
-!description /MeshModifiers/BoundingBoxNodeSet
+!syntax description /MeshModifiers/BoundingBoxNodeSet
 
-!parameters /MeshModifiers/BoundingBoxNodeSet
+!syntax parameters /MeshModifiers/BoundingBoxNodeSet
 
-!inputfiles /MeshModifiers/BoundingBoxNodeSet
+!syntax inputs /MeshModifiers/BoundingBoxNodeSet
 
-!childobjects /MeshModifiers/BoundingBoxNodeSet
+!syntax children /MeshModifiers/BoundingBoxNodeSet

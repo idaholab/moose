@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionAux
-!description /AuxKernels/FunctionAux
+!syntax description /AuxKernels/FunctionAux
 
-!parameters /AuxKernels/FunctionAux
+!syntax parameters /AuxKernels/FunctionAux
 
-!inputfiles /AuxKernels/FunctionAux
+!syntax inputs /AuxKernels/FunctionAux
 
-!childobjects /AuxKernels/FunctionAux
+!syntax children /AuxKernels/FunctionAux

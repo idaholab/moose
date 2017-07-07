@@ -1,10 +1,8 @@
 # SimpleACInterface
-!description /Kernels/SimpleACInterface
+!syntax description /Kernels/SimpleACInterface
 
+!syntax parameters /Kernels/SimpleACInterface
 
+!syntax inputs /Kernels/SimpleACInterface
 
-!parameters /Kernels/SimpleACInterface
-
-!inputfiles /Kernels/SimpleACInterface
-
-!childobjects /Kernels/SimpleACInterface
+!syntax children /Kernels/SimpleACInterface

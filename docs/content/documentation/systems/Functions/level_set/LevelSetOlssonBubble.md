@@ -9,11 +9,11 @@ For example, the following code creates a "bubble" in the lower left corner in a
 
 !listing modules/level_set/tests/functions/olsson_bubble/olsson_bubble.i block=Functions
 
-!parameters /Functions/LevelSetOlssonBubble
+!syntax parameters /Functions/LevelSetOlssonBubble
 
-!inputfiles /Functions/LevelSetOlssonBubble
+!syntax inputs /Functions/LevelSetOlssonBubble
 
-!childobjects /Functions/LevelSetOlssonBubble
+!syntax children /Functions/LevelSetOlssonBubble
 References
 
 \bibliographystyle{unsrt} \bibliography{docs/bib/level_set.bib}

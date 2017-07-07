@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FiniteStrainPlasticMaterial
-!description /Materials/FiniteStrainPlasticMaterial
+!syntax description /Materials/FiniteStrainPlasticMaterial
 
-!parameters /Materials/FiniteStrainPlasticMaterial
+!syntax parameters /Materials/FiniteStrainPlasticMaterial
 
-!inputfiles /Materials/FiniteStrainPlasticMaterial
+!syntax inputs /Materials/FiniteStrainPlasticMaterial
 
-!childobjects /Materials/FiniteStrainPlasticMaterial
+!syntax children /Materials/FiniteStrainPlasticMaterial

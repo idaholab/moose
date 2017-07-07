@@ -1,5 +1,5 @@
 # SusceptibilityTimeDerivative
-!description /Kernels/SusceptibilityTimeDerivative
+!syntax description /Kernels/SusceptibilityTimeDerivative
 
 Implements
 
@@ -15,8 +15,8 @@ off-diagonal Jacobian entries.
 
 See also [TimeDerivative](/TimeDerivative.md).
 
-!parameters /Kernels/SusceptibilityTimeDerivative
+!syntax parameters /Kernels/SusceptibilityTimeDerivative
 
-!inputfiles /Kernels/SusceptibilityTimeDerivative
+!syntax inputs /Kernels/SusceptibilityTimeDerivative
 
-!childobjects /Kernels/SusceptibilityTimeDerivative
+!syntax children /Kernels/SusceptibilityTimeDerivative

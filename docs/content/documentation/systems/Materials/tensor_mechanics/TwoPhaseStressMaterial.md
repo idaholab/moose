@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TwoPhaseStressMaterial
-!description /Materials/TwoPhaseStressMaterial
+!syntax description /Materials/TwoPhaseStressMaterial
 
-!parameters /Materials/TwoPhaseStressMaterial
+!syntax parameters /Materials/TwoPhaseStressMaterial
 
-!inputfiles /Materials/TwoPhaseStressMaterial
+!syntax inputs /Materials/TwoPhaseStressMaterial
 
-!childobjects /Materials/TwoPhaseStressMaterial
+!syntax children /Materials/TwoPhaseStressMaterial

@@ -1,5 +1,5 @@
 #ComputeAxisymmetricRZFiniteStrain
-!description /Materials/ComputeAxisymmetricRZFiniteStrain
+!syntax description /Materials/ComputeAxisymmetricRZFiniteStrain
 
 
 ## Description
@@ -10,8 +10,8 @@ Only minimal changes are required to adapt a plane strain problem to an axisymme
 
 Once the deformation gradient is calculated for the specific 2D geometry, the deformation gradient is passed to the strain and rotation methods used by default 3D Cartesian simulations, as described in the [Finite Strain Class](ComputeFiniteStrain.md) page.
 
-!parameters /Materials/ComputeAxisymmetricRZFiniteStrain
+!syntax parameters /Materials/ComputeAxisymmetricRZFiniteStrain
 
-!inputfiles /Materials/ComputeAxisymmetricRZFiniteStrain
+!syntax inputs /Materials/ComputeAxisymmetricRZFiniteStrain
 
-!childobjects /Materials/ComputeAxisymmetricRZFiniteStrain
+!syntax children /Materials/ComputeAxisymmetricRZFiniteStrain

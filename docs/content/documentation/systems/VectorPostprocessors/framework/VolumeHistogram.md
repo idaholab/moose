@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VolumeHistogram
-!description /VectorPostprocessors/VolumeHistogram
+!syntax description /VectorPostprocessors/VolumeHistogram
 
-!parameters /VectorPostprocessors/VolumeHistogram
+!syntax parameters /VectorPostprocessors/VolumeHistogram
 
-!inputfiles /VectorPostprocessors/VolumeHistogram
+!syntax inputs /VectorPostprocessors/VolumeHistogram
 
-!childobjects /VectorPostprocessors/VolumeHistogram
+!syntax children /VectorPostprocessors/VolumeHistogram

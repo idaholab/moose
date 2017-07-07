@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # EqualValueBoundaryConstraint
-!description /Constraints/EqualValueBoundaryConstraint
+!syntax description /Constraints/EqualValueBoundaryConstraint
 
-!parameters /Constraints/EqualValueBoundaryConstraint
+!syntax parameters /Constraints/EqualValueBoundaryConstraint
 
-!inputfiles /Constraints/EqualValueBoundaryConstraint
+!syntax inputs /Constraints/EqualValueBoundaryConstraint
 
-!childobjects /Constraints/EqualValueBoundaryConstraint
+!syntax children /Constraints/EqualValueBoundaryConstraint

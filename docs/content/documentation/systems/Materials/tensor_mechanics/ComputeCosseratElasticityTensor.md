@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeCosseratElasticityTensor
-!description /Materials/ComputeCosseratElasticityTensor
+!syntax description /Materials/ComputeCosseratElasticityTensor
 
-!parameters /Materials/ComputeCosseratElasticityTensor
+!syntax parameters /Materials/ComputeCosseratElasticityTensor
 
-!inputfiles /Materials/ComputeCosseratElasticityTensor
+!syntax inputs /Materials/ComputeCosseratElasticityTensor
 
-!childobjects /Materials/ComputeCosseratElasticityTensor
+!syntax children /Materials/ComputeCosseratElasticityTensor

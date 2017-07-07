@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RenameBlock
-!description /MeshModifiers/RenameBlock
+!syntax description /MeshModifiers/RenameBlock
 
-!parameters /MeshModifiers/RenameBlock
+!syntax parameters /MeshModifiers/RenameBlock
 
-!inputfiles /MeshModifiers/RenameBlock
+!syntax inputs /MeshModifiers/RenameBlock
 
-!childobjects /MeshModifiers/RenameBlock
+!syntax children /MeshModifiers/RenameBlock

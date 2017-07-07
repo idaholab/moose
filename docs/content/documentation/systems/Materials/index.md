@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Materials System
-!parameters /Materials
+!syntax objects /Materials
 
-!subobjects /Materials
+!syntax subsystems /Materials
 
+!syntax actions /Materials

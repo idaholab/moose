@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NormalizationAux
-!description /AuxKernels/NormalizationAux
+!syntax description /AuxKernels/NormalizationAux
 
-!parameters /AuxKernels/NormalizationAux
+!syntax parameters /AuxKernels/NormalizationAux
 
-!inputfiles /AuxKernels/NormalizationAux
+!syntax inputs /AuxKernels/NormalizationAux
 
-!childobjects /AuxKernels/NormalizationAux
+!syntax children /AuxKernels/NormalizationAux

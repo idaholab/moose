@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionNeumannBC
-!description /BCs/FunctionNeumannBC
+!syntax description /BCs/FunctionNeumannBC
 
-!parameters /BCs/FunctionNeumannBC
+!syntax parameters /BCs/FunctionNeumannBC
 
-!inputfiles /BCs/FunctionNeumannBC
+!syntax inputs /BCs/FunctionNeumannBC
 
-!childobjects /BCs/FunctionNeumannBC
+!syntax children /BCs/FunctionNeumannBC

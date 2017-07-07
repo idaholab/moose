@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # VacuumBC
-!description /BCs/VacuumBC
+!syntax description /BCs/VacuumBC
 
-!parameters /BCs/VacuumBC
+!syntax parameters /BCs/VacuumBC
 
-!inputfiles /BCs/VacuumBC
+!syntax inputs /BCs/VacuumBC
 
-!childobjects /BCs/VacuumBC
+!syntax children /BCs/VacuumBC

@@ -1,5 +1,5 @@
 # LinearIsoElasticPFDamage
-!description /Materials/LinearIsoElasticPFDamage
+!syntax description /Materials/LinearIsoElasticPFDamage
 
 This part defines the positive part of strain energy and positive part of stress
 that drive the crack propagation, and total stress is represented as a function
@@ -35,8 +35,8 @@ The material provides the following material properties:
 * `G0_pos` Positive part of strain energy
 * `dG0_pos_dstrain` Tensile stress, which is the derivative of positive part of strain energy wrt strain tensor
 
-!parameters /Materials/LinearIsoElasticPFDamage
+!syntax parameters /Materials/LinearIsoElasticPFDamage
 
-!inputfiles /Materials/LinearIsoElasticPFDamage
+!syntax inputs /Materials/LinearIsoElasticPFDamage
 
-!childobjects /Materials/LinearIsoElasticPFDamage
+!syntax children /Materials/LinearIsoElasticPFDamage

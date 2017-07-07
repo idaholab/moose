@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPermeabilityKozenyCarman
-!description /Materials/PorousFlowPermeabilityKozenyCarman
+!syntax description /Materials/PorousFlowPermeabilityKozenyCarman
 
-!parameters /Materials/PorousFlowPermeabilityKozenyCarman
+!syntax parameters /Materials/PorousFlowPermeabilityKozenyCarman
 
-!inputfiles /Materials/PorousFlowPermeabilityKozenyCarman
+!syntax inputs /Materials/PorousFlowPermeabilityKozenyCarman
 
-!childobjects /Materials/PorousFlowPermeabilityKozenyCarman
+!syntax children /Materials/PorousFlowPermeabilityKozenyCarman

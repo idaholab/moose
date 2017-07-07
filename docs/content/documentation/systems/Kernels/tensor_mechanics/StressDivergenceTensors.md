@@ -1,5 +1,5 @@
 #StressDivergenceTensors
-!description /Kernels/StressDivergenceTensors
+!syntax description /Kernels/StressDivergenceTensors
 
 
 ##Description
@@ -8,8 +8,8 @@
 
 For a detailed explanation of the settings for `use_displaced_mesh` in mechanics problems, see the [StressDivergence](/tensor_mechanics/StressDivergence.md) page.
 
-!parameters /Kernels/StressDivergenceTensors
+!syntax parameters /Kernels/StressDivergenceTensors
 
-!inputfiles /Kernels/StressDivergenceTensors
+!syntax inputs /Kernels/StressDivergenceTensors
 
-!childobjects /Kernels/StressDivergenceTensors
+!syntax children /Kernels/StressDivergenceTensors

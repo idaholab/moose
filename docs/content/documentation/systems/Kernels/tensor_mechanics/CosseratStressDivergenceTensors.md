@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CosseratStressDivergenceTensors
-!description /Kernels/CosseratStressDivergenceTensors
+!syntax description /Kernels/CosseratStressDivergenceTensors
 
-!parameters /Kernels/CosseratStressDivergenceTensors
+!syntax parameters /Kernels/CosseratStressDivergenceTensors
 
-!inputfiles /Kernels/CosseratStressDivergenceTensors
+!syntax inputs /Kernels/CosseratStressDivergenceTensors
 
-!childobjects /Kernels/CosseratStressDivergenceTensors
+!syntax children /Kernels/CosseratStressDivergenceTensors

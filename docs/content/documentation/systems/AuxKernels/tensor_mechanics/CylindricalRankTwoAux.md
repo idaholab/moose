@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CylindricalRankTwoAux
-!description /AuxKernels/CylindricalRankTwoAux
+!syntax description /AuxKernels/CylindricalRankTwoAux
 
-!parameters /AuxKernels/CylindricalRankTwoAux
+!syntax parameters /AuxKernels/CylindricalRankTwoAux
 
-!inputfiles /AuxKernels/CylindricalRankTwoAux
+!syntax inputs /AuxKernels/CylindricalRankTwoAux
 
-!childobjects /AuxKernels/CylindricalRankTwoAux
+!syntax children /AuxKernels/CylindricalRankTwoAux

@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVSlipBCUserObject
+!syntax description /UserObjects/CNSFVSlipBCUserObject
 
-!parameters /UserObjects/CNSFVSlipBCUserObject
+!syntax parameters /UserObjects/CNSFVSlipBCUserObject
 
-!inputfiles /UserObjects/CNSFVSlipBCUserObject
+!syntax inputs /UserObjects/CNSFVSlipBCUserObject
 
-!childobjects /UserObjects/CNSFVSlipBCUserObject
+!syntax children /UserObjects/CNSFVSlipBCUserObject

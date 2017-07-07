@@ -1,3 +1,9 @@
 <html>
   {{content}}
+  {% if doxygen|default(false) %}
+    <a href="{{doxygen}}">Doxygen</a>
+  {% endif %}
+  {% for item in code %}
+    <a href="{{item[0]}}" class="moose-code-links waves-effect waves-light btn tooltipped" data-tooltip={{item[1]}}>{{item[2]}}</a>
+  {% endfor %}
 </html>

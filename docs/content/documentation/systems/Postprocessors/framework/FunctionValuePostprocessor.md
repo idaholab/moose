@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FunctionValuePostprocessor
-!description /Postprocessors/FunctionValuePostprocessor
+!syntax description /Postprocessors/FunctionValuePostprocessor
 
-!parameters /Postprocessors/FunctionValuePostprocessor
+!syntax parameters /Postprocessors/FunctionValuePostprocessor
 
-!inputfiles /Postprocessors/FunctionValuePostprocessor
+!syntax inputs /Postprocessors/FunctionValuePostprocessor
 
-!childobjects /Postprocessors/FunctionValuePostprocessor
+!syntax children /Postprocessors/FunctionValuePostprocessor

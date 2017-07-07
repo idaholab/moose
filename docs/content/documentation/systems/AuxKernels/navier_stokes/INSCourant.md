@@ -1,7 +1,7 @@
-!description /AuxKernels/INSCourant
+!syntax description /AuxKernels/INSCourant
 
-!parameters /AuxKernels/INSCourant
+!syntax parameters /AuxKernels/INSCourant
 
-!inputfiles /AuxKernels/INSCourant
+!syntax inputs /AuxKernels/INSCourant
 
-!childobjects /AuxKernels/INSCourant
+!syntax children /AuxKernels/INSCourant

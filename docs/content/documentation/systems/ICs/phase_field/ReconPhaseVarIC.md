@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ReconPhaseVarIC
-!description /ICs/ReconPhaseVarIC
+!syntax description /ICs/ReconPhaseVarIC
 
-!parameters /ICs/ReconPhaseVarIC
+!syntax parameters /ICs/ReconPhaseVarIC
 
-!inputfiles /ICs/ReconPhaseVarIC
+!syntax inputs /ICs/ReconPhaseVarIC
 
-!childobjects /ICs/ReconPhaseVarIC
+!syntax children /ICs/ReconPhaseVarIC

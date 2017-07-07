@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NewmarkAccelAux
-!description /AuxKernels/NewmarkAccelAux
+!syntax description /AuxKernels/NewmarkAccelAux
 
-!parameters /AuxKernels/NewmarkAccelAux
+!syntax parameters /AuxKernels/NewmarkAccelAux
 
-!inputfiles /AuxKernels/NewmarkAccelAux
+!syntax inputs /AuxKernels/NewmarkAccelAux
 
-!childobjects /AuxKernels/NewmarkAccelAux
+!syntax children /AuxKernels/NewmarkAccelAux

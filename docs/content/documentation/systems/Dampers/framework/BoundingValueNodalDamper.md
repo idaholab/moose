@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # BoundingValueNodalDamper
-!description /Dampers/BoundingValueNodalDamper
+!syntax description /Dampers/BoundingValueNodalDamper
 
-!parameters /Dampers/BoundingValueNodalDamper
+!syntax parameters /Dampers/BoundingValueNodalDamper
 
-!inputfiles /Dampers/BoundingValueNodalDamper
+!syntax inputs /Dampers/BoundingValueNodalDamper
 
-!childobjects /Dampers/BoundingValueNodalDamper
+!syntax children /Dampers/BoundingValueNodalDamper

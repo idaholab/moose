@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ExternalForceDensityMaterial
-!description /Materials/ExternalForceDensityMaterial
+!syntax description /Materials/ExternalForceDensityMaterial
 
-!parameters /Materials/ExternalForceDensityMaterial
+!syntax parameters /Materials/ExternalForceDensityMaterial
 
-!inputfiles /Materials/ExternalForceDensityMaterial
+!syntax inputs /Materials/ExternalForceDensityMaterial
 
-!childobjects /Materials/ExternalForceDensityMaterial
+!syntax children /Materials/ExternalForceDensityMaterial

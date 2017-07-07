@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # EqualGradientConstraint
-!description /Constraints/EqualGradientConstraint
+!syntax description /Constraints/EqualGradientConstraint
 
-!parameters /Constraints/EqualGradientConstraint
+!syntax parameters /Constraints/EqualGradientConstraint
 
-!inputfiles /Constraints/EqualGradientConstraint
+!syntax inputs /Constraints/EqualGradientConstraint
 
-!childobjects /Constraints/EqualGradientConstraint
+!syntax children /Constraints/EqualGradientConstraint

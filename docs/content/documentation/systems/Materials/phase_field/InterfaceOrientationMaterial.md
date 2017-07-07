@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # InterfaceOrientationMaterial
-!description /Materials/InterfaceOrientationMaterial
+!syntax description /Materials/InterfaceOrientationMaterial
 
-!parameters /Materials/InterfaceOrientationMaterial
+!syntax parameters /Materials/InterfaceOrientationMaterial
 
-!inputfiles /Materials/InterfaceOrientationMaterial
+!syntax inputs /Materials/InterfaceOrientationMaterial
 
-!childobjects /Materials/InterfaceOrientationMaterial
+!syntax children /Materials/InterfaceOrientationMaterial

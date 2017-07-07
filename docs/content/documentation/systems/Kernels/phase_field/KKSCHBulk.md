@@ -1,5 +1,5 @@
 # KKSCHBulk
-!description /Kernels/KKSCHBulk
+!syntax description /Kernels/KKSCHBulk
 
 Non-split KKS Cahn-Hilliard bulk kernel, which is **not fully implemented**.
 The non-linear variable for this Kernel is the concentration $c$.
@@ -94,8 +94,8 @@ J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
 \end{eqnarray*}
 $$
 
-!parameters /Kernels/KKSCHBulk
+!syntax parameters /Kernels/KKSCHBulk
 
-!inputfiles /Kernels/KKSCHBulk
+!syntax inputs /Kernels/KKSCHBulk
 
-!childobjects /Kernels/KKSCHBulk
+!syntax children /Kernels/KKSCHBulk

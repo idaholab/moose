@@ -1,7 +1,7 @@
-!description /BCs/NSMassWeakStagnationBC
+!syntax description /BCs/NSMassWeakStagnationBC
 
-!parameters /BCs/NSMassWeakStagnationBC
+!syntax parameters /BCs/NSMassWeakStagnationBC
 
-!inputfiles /BCs/NSMassWeakStagnationBC
+!syntax inputs /BCs/NSMassWeakStagnationBC
 
-!childobjects /BCs/NSMassWeakStagnationBC
+!syntax children /BCs/NSMassWeakStagnationBC

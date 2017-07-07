@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SolutionFunction
-!description /Functions/SolutionFunction
+!syntax description /Functions/SolutionFunction
 
-!parameters /Functions/SolutionFunction
+!syntax parameters /Functions/SolutionFunction
 
-!inputfiles /Functions/SolutionFunction
+!syntax inputs /Functions/SolutionFunction
 
-!childobjects /Functions/SolutionFunction
+!syntax children /Functions/SolutionFunction

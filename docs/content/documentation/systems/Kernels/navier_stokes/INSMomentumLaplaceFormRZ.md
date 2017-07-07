@@ -1,7 +1,7 @@
-!description /Kernels/INSMomentumLaplaceFormRZ
+!syntax description /Kernels/INSMomentumLaplaceFormRZ
 
-!parameters /Kernels/INSMomentumLaplaceFormRZ
+!syntax parameters /Kernels/INSMomentumLaplaceFormRZ
 
-!inputfiles /Kernels/INSMomentumLaplaceFormRZ
+!syntax inputs /Kernels/INSMomentumLaplaceFormRZ
 
-!childobjects /Kernels/INSMomentumLaplaceFormRZ
+!syntax children /Kernels/INSMomentumLaplaceFormRZ

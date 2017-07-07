@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPorosityHMBiotModulus
-!description /Materials/PorousFlowPorosityHMBiotModulus
+!syntax description /Materials/PorousFlowPorosityHMBiotModulus
 
-!parameters /Materials/PorousFlowPorosityHMBiotModulus
+!syntax parameters /Materials/PorousFlowPorosityHMBiotModulus
 
-!inputfiles /Materials/PorousFlowPorosityHMBiotModulus
+!syntax inputs /Materials/PorousFlowPorosityHMBiotModulus
 
-!childobjects /Materials/PorousFlowPorosityHMBiotModulus
+!syntax children /Materials/PorousFlowPorosityHMBiotModulus

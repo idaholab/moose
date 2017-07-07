@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AnalyticalIndicator
-!description /Adaptivity/Indicators/AnalyticalIndicator
+!syntax description /Adaptivity/Indicators/AnalyticalIndicator
 
-!parameters /Adaptivity/Indicators/AnalyticalIndicator
+!syntax parameters /Adaptivity/Indicators/AnalyticalIndicator
 
-!inputfiles /Adaptivity/Indicators/AnalyticalIndicator
+!syntax inputs /Adaptivity/Indicators/AnalyticalIndicator
 
-!childobjects /Adaptivity/Indicators/AnalyticalIndicator
+!syntax children /Adaptivity/Indicators/AnalyticalIndicator

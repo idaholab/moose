@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MassLumpedTimeDerivative
-!description /Kernels/MassLumpedTimeDerivative
+!syntax description /Kernels/MassLumpedTimeDerivative
 
-!parameters /Kernels/MassLumpedTimeDerivative
+!syntax parameters /Kernels/MassLumpedTimeDerivative
 
-!inputfiles /Kernels/MassLumpedTimeDerivative
+!syntax inputs /Kernels/MassLumpedTimeDerivative
 
-!childobjects /Kernels/MassLumpedTimeDerivative
+!syntax children /Kernels/MassLumpedTimeDerivative

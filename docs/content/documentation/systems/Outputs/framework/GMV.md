@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GMV
-!description /Outputs/GMV
+!syntax description /Outputs/GMV
 
-!parameters /Outputs/GMV
+!syntax parameters /Outputs/GMV
 
-!inputfiles /Outputs/GMV
+!syntax inputs /Outputs/GMV
 
-!childobjects /Outputs/GMV
+!syntax children /Outputs/GMV

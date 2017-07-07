@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Pressure System
-!parameters /BCs/Pressure
+!syntax objects /BCs/Pressure
 
+!syntax subsystems /BCs/Pressure
+
+!syntax actions /BCs/Pressure

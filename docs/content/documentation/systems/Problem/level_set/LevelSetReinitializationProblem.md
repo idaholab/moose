@@ -9,8 +9,8 @@ input file.
 
 !listing modules/level_set/tests/transfers/markers/single_level/sub.i block=Problem label=False
 
-!parameters /Problem/LevelSetReinitializationProblem
+!syntax parameters /Problem/LevelSetReinitializationProblem
 
-!inputfiles /Problem/LevelSetReinitializationProblem
+!syntax inputs /Problem/LevelSetReinitializationProblem
 
-!childobjects /Problem/LevelSetReinitializationProblem
+!syntax children /Problem/LevelSetReinitializationProblem

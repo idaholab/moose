@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # LineMaterialRealSampler
-!description /VectorPostprocessors/LineMaterialRealSampler
+!syntax description /VectorPostprocessors/LineMaterialRealSampler
 
-!parameters /VectorPostprocessors/LineMaterialRealSampler
+!syntax parameters /VectorPostprocessors/LineMaterialRealSampler
 
-!inputfiles /VectorPostprocessors/LineMaterialRealSampler
+!syntax inputs /VectorPostprocessors/LineMaterialRealSampler
 
-!childobjects /VectorPostprocessors/LineMaterialRealSampler
+!syntax children /VectorPostprocessors/LineMaterialRealSampler

@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVRiemannInvariantBCUserObject
+!syntax description /UserObjects/CNSFVRiemannInvariantBCUserObject
 
-!parameters /UserObjects/CNSFVRiemannInvariantBCUserObject
+!syntax parameters /UserObjects/CNSFVRiemannInvariantBCUserObject
 
-!inputfiles /UserObjects/CNSFVRiemannInvariantBCUserObject
+!syntax inputs /UserObjects/CNSFVRiemannInvariantBCUserObject
 
-!childobjects /UserObjects/CNSFVRiemannInvariantBCUserObject
+!syntax children /UserObjects/CNSFVRiemannInvariantBCUserObject

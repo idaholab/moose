@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TricrystalTripleJunctionIC
-!description /ICs/TricrystalTripleJunctionIC
+!syntax description /ICs/TricrystalTripleJunctionIC
 
-!parameters /ICs/TricrystalTripleJunctionIC
+!syntax parameters /ICs/TricrystalTripleJunctionIC
 
-!inputfiles /ICs/TricrystalTripleJunctionIC
+!syntax inputs /ICs/TricrystalTripleJunctionIC
 
-!childobjects /ICs/TricrystalTripleJunctionIC
+!syntax children /ICs/TricrystalTripleJunctionIC

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TimestepSize
-!description /Postprocessors/TimestepSize
+!syntax description /Postprocessors/TimestepSize
 
-!parameters /Postprocessors/TimestepSize
+!syntax parameters /Postprocessors/TimestepSize
 
-!inputfiles /Postprocessors/TimestepSize
+!syntax inputs /Postprocessors/TimestepSize
 
-!childobjects /Postprocessors/TimestepSize
+!syntax children /Postprocessors/TimestepSize

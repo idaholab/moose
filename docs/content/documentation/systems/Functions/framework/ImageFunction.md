@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ImageFunction
-!description /Functions/ImageFunction
+!syntax description /Functions/ImageFunction
 
-!parameters /Functions/ImageFunction
+!syntax parameters /Functions/ImageFunction
 
-!inputfiles /Functions/ImageFunction
+!syntax inputs /Functions/ImageFunction
 
-!childobjects /Functions/ImageFunction
+!syntax children /Functions/ImageFunction

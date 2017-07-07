@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GBAnisotropy
-!description /Materials/GBAnisotropy
+!syntax description /Materials/GBAnisotropy
 
-!parameters /Materials/GBAnisotropy
+!syntax parameters /Materials/GBAnisotropy
 
-!inputfiles /Materials/GBAnisotropy
+!syntax inputs /Materials/GBAnisotropy
 
-!childobjects /Materials/GBAnisotropy
+!syntax children /Materials/GBAnisotropy

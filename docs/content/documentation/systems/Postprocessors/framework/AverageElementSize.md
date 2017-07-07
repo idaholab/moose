@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AverageElementSize
-!description /Postprocessors/AverageElementSize
+!syntax description /Postprocessors/AverageElementSize
 
-!parameters /Postprocessors/AverageElementSize
+!syntax parameters /Postprocessors/AverageElementSize
 
-!inputfiles /Postprocessors/AverageElementSize
+!syntax inputs /Postprocessors/AverageElementSize
 
-!childobjects /Postprocessors/AverageElementSize
+!syntax children /Postprocessors/AverageElementSize

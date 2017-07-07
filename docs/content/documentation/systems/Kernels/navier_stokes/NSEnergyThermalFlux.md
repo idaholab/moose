@@ -1,7 +1,7 @@
-!description /Kernels/NSEnergyThermalFlux
+!syntax description /Kernels/NSEnergyThermalFlux
 
-!parameters /Kernels/NSEnergyThermalFlux
+!syntax parameters /Kernels/NSEnergyThermalFlux
 
-!inputfiles /Kernels/NSEnergyThermalFlux
+!syntax inputs /Kernels/NSEnergyThermalFlux
 
-!childobjects /Kernels/NSEnergyThermalFlux
+!syntax children /Kernels/NSEnergyThermalFlux

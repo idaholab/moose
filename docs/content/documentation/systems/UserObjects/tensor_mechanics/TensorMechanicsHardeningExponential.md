@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsHardeningExponential
-!description /UserObjects/TensorMechanicsHardeningExponential
+!syntax description /UserObjects/TensorMechanicsHardeningExponential
 
-!parameters /UserObjects/TensorMechanicsHardeningExponential
+!syntax parameters /UserObjects/TensorMechanicsHardeningExponential
 
-!inputfiles /UserObjects/TensorMechanicsHardeningExponential
+!syntax inputs /UserObjects/TensorMechanicsHardeningExponential
 
-!childobjects /UserObjects/TensorMechanicsHardeningExponential
+!syntax children /UserObjects/TensorMechanicsHardeningExponential

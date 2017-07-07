@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GBEvolution
-!description /Materials/GBEvolution
+!syntax description /Materials/GBEvolution
 
-!parameters /Materials/GBEvolution
+!syntax parameters /Materials/GBEvolution
 
-!inputfiles /Materials/GBEvolution
+!syntax inputs /Materials/GBEvolution
 
-!childobjects /Materials/GBEvolution
+!syntax children /Materials/GBEvolution

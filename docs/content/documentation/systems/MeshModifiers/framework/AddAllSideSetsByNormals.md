@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AddAllSideSetsByNormals
-!description /MeshModifiers/AddAllSideSetsByNormals
+!syntax description /MeshModifiers/AddAllSideSetsByNormals
 
-!parameters /MeshModifiers/AddAllSideSetsByNormals
+!syntax parameters /MeshModifiers/AddAllSideSetsByNormals
 
-!inputfiles /MeshModifiers/AddAllSideSetsByNormals
+!syntax inputs /MeshModifiers/AddAllSideSetsByNormals
 
-!childobjects /MeshModifiers/AddAllSideSetsByNormals
+!syntax children /MeshModifiers/AddAllSideSetsByNormals

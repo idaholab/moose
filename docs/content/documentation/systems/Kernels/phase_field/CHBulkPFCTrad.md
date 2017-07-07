@@ -1,5 +1,5 @@
 # CHBulkPFCTrad
-!description /Kernels/CHBulkPFCTrad
+!syntax description /Kernels/CHBulkPFCTrad
 
 Cahn-Hilliard kernel implementing the free energy density
 
@@ -10,8 +10,8 @@ $$
 where $c$ is a PFC density and the coefficients $C_0,a,b$ are provided by
 the [PFCTradMaterial](PFCTradMaterial.md).
 
-!parameters /Kernels/CHBulkPFCTrad
+!syntax parameters /Kernels/CHBulkPFCTrad
 
-!inputfiles /Kernels/CHBulkPFCTrad
+!syntax inputs /Kernels/CHBulkPFCTrad
 
-!childobjects /Kernels/CHBulkPFCTrad
+!syntax children /Kernels/CHBulkPFCTrad

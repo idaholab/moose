@@ -1,7 +1,7 @@
-!description /AuxKernels/NSTemperatureAux
+!syntax description /AuxKernels/NSTemperatureAux
 
-!parameters /AuxKernels/NSTemperatureAux
+!syntax parameters /AuxKernels/NSTemperatureAux
 
-!inputfiles /AuxKernels/NSTemperatureAux
+!syntax inputs /AuxKernels/NSTemperatureAux
 
-!childobjects /AuxKernels/NSTemperatureAux
+!syntax children /AuxKernels/NSTemperatureAux

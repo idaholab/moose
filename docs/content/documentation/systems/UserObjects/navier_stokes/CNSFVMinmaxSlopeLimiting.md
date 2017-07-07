@@ -1,7 +1,7 @@
-!description /UserObjects/CNSFVMinmaxSlopeLimiting
+!syntax description /UserObjects/CNSFVMinmaxSlopeLimiting
 
-!parameters /UserObjects/CNSFVMinmaxSlopeLimiting
+!syntax parameters /UserObjects/CNSFVMinmaxSlopeLimiting
 
-!inputfiles /UserObjects/CNSFVMinmaxSlopeLimiting
+!syntax inputs /UserObjects/CNSFVMinmaxSlopeLimiting
 
-!childobjects /UserObjects/CNSFVMinmaxSlopeLimiting
+!syntax children /UserObjects/CNSFVMinmaxSlopeLimiting

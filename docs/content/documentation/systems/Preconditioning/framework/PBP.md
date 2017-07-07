@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PBP
-!description /Preconditioning/PBP
+!syntax description /Preconditioning/PBP
 
-!parameters /Preconditioning/PBP
+!syntax parameters /Preconditioning/PBP
 
-!inputfiles /Preconditioning/PBP
+!syntax inputs /Preconditioning/PBP
 
-!childobjects /Preconditioning/PBP
+!syntax children /Preconditioning/PBP

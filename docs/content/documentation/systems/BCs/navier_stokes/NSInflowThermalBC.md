@@ -1,7 +1,7 @@
-!description /BCs/NSInflowThermalBC
+!syntax description /BCs/NSInflowThermalBC
 
-!parameters /BCs/NSInflowThermalBC
+!syntax parameters /BCs/NSInflowThermalBC
 
-!inputfiles /BCs/NSInflowThermalBC
+!syntax inputs /BCs/NSInflowThermalBC
 
-!childobjects /BCs/NSInflowThermalBC
+!syntax children /BCs/NSInflowThermalBC

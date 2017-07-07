@@ -1,7 +1,7 @@
-!description /BCs/CNSFVBC
+!syntax description /BCs/CNSFVBC
 
-!parameters /BCs/CNSFVBC
+!syntax parameters /BCs/CNSFVBC
 
-!inputfiles /BCs/CNSFVBC
+!syntax inputs /BCs/CNSFVBC
 
-!childobjects /BCs/CNSFVBC
+!syntax children /BCs/CNSFVBC

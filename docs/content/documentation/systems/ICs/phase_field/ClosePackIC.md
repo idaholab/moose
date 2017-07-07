@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ClosePackIC
-!description /ICs/ClosePackIC
+!syntax description /ICs/ClosePackIC
 
-!parameters /ICs/ClosePackIC
+!syntax parameters /ICs/ClosePackIC
 
-!inputfiles /ICs/ClosePackIC
+!syntax inputs /ICs/ClosePackIC
 
-!childobjects /ICs/ClosePackIC
+!syntax children /ICs/ClosePackIC

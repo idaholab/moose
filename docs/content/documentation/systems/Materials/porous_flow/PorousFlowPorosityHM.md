@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowPorosityHM
-!description /Materials/PorousFlowPorosityHM
+!syntax description /Materials/PorousFlowPorosityHM
 
-!parameters /Materials/PorousFlowPorosityHM
+!syntax parameters /Materials/PorousFlowPorosityHM
 
-!inputfiles /Materials/PorousFlowPorosityHM
+!syntax inputs /Materials/PorousFlowPorosityHM
 
-!childobjects /Materials/PorousFlowPorosityHM
+!syntax children /Materials/PorousFlowPorosityHM

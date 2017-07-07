@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NumVars
-!description /Postprocessors/NumVars
+!syntax description /Postprocessors/NumVars
 
-!parameters /Postprocessors/NumVars
+!syntax parameters /Postprocessors/NumVars
 
-!inputfiles /Postprocessors/NumVars
+!syntax inputs /Postprocessors/NumVars
 
-!childobjects /Postprocessors/NumVars
+!syntax children /Postprocessors/NumVars

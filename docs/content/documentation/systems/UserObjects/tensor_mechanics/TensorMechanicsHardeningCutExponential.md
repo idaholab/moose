@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsHardeningCutExponential
-!description /UserObjects/TensorMechanicsHardeningCutExponential
+!syntax description /UserObjects/TensorMechanicsHardeningCutExponential
 
-!parameters /UserObjects/TensorMechanicsHardeningCutExponential
+!syntax parameters /UserObjects/TensorMechanicsHardeningCutExponential
 
-!inputfiles /UserObjects/TensorMechanicsHardeningCutExponential
+!syntax inputs /UserObjects/TensorMechanicsHardeningCutExponential
 
-!childobjects /UserObjects/TensorMechanicsHardeningCutExponential
+!syntax children /UserObjects/TensorMechanicsHardeningCutExponential

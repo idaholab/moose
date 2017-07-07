@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalExtremeValue
-!description /Postprocessors/NodalExtremeValue
+!syntax description /Postprocessors/NodalExtremeValue
 
-!parameters /Postprocessors/NodalExtremeValue
+!syntax parameters /Postprocessors/NodalExtremeValue
 
-!inputfiles /Postprocessors/NodalExtremeValue
+!syntax inputs /Postprocessors/NodalExtremeValue
 
-!childobjects /Postprocessors/NodalExtremeValue
+!syntax children /Postprocessors/NodalExtremeValue

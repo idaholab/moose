@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CrossIC
-!description /ICs/CrossIC
+!syntax description /ICs/CrossIC
 
-!parameters /ICs/CrossIC
+!syntax parameters /ICs/CrossIC
 
-!inputfiles /ICs/CrossIC
+!syntax inputs /ICs/CrossIC
 
-!childobjects /ICs/CrossIC
+!syntax children /ICs/CrossIC

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HEVPEqvPlasticStrainRate
-!description /UserObjects/HEVPEqvPlasticStrainRate
+!syntax description /UserObjects/HEVPEqvPlasticStrainRate
 
-!parameters /UserObjects/HEVPEqvPlasticStrainRate
+!syntax parameters /UserObjects/HEVPEqvPlasticStrainRate
 
-!inputfiles /UserObjects/HEVPEqvPlasticStrainRate
+!syntax inputs /UserObjects/HEVPEqvPlasticStrainRate
 
-!childobjects /UserObjects/HEVPEqvPlasticStrainRate
+!syntax children /UserObjects/HEVPEqvPlasticStrainRate

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RelativeSolutionDifferenceNorm
-!description /Postprocessors/RelativeSolutionDifferenceNorm
+!syntax description /Postprocessors/RelativeSolutionDifferenceNorm
 
-!parameters /Postprocessors/RelativeSolutionDifferenceNorm
+!syntax parameters /Postprocessors/RelativeSolutionDifferenceNorm
 
-!inputfiles /Postprocessors/RelativeSolutionDifferenceNorm
+!syntax inputs /Postprocessors/RelativeSolutionDifferenceNorm
 
-!childobjects /Postprocessors/RelativeSolutionDifferenceNorm
+!syntax children /Postprocessors/RelativeSolutionDifferenceNorm

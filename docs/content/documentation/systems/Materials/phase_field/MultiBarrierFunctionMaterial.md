@@ -1,6 +1,6 @@
 
 # MultiBarrierFunctionMaterial
-!description /Materials/MultiBarrierFunctionMaterial
+!syntax description /Materials/MultiBarrierFunctionMaterial
 
 The material provides a function $g(\vec\eta)$ that is parameterized by all
 phase order parameters $\eta$. It calculates a phase transformation barrier energy
@@ -12,8 +12,8 @@ $$
 g(\vec\eta) = \sum_i \eta_i^2(1-\eta_i)^2
 $$
 
-!parameters /Materials/MultiBarrierFunctionMaterial
+!syntax parameters /Materials/MultiBarrierFunctionMaterial
 
-!inputfiles /Materials/MultiBarrierFunctionMaterial
+!syntax inputs /Materials/MultiBarrierFunctionMaterial
 
-!childobjects /Materials/MultiBarrierFunctionMaterial
+!syntax children /Materials/MultiBarrierFunctionMaterial

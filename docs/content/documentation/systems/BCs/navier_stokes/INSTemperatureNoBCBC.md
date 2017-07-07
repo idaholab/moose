@@ -1,7 +1,7 @@
-!description /BCs/INSTemperatureNoBCBC
+!syntax description /BCs/INSTemperatureNoBCBC
 
-!parameters /BCs/INSTemperatureNoBCBC
+!syntax parameters /BCs/INSTemperatureNoBCBC
 
-!inputfiles /BCs/INSTemperatureNoBCBC
+!syntax inputs /BCs/INSTemperatureNoBCBC
 
-!childobjects /BCs/INSTemperatureNoBCBC
+!syntax children /BCs/INSTemperatureNoBCBC

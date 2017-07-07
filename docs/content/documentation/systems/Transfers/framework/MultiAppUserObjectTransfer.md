@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MultiAppUserObjectTransfer
-!description /Transfers/MultiAppUserObjectTransfer
+!syntax description /Transfers/MultiAppUserObjectTransfer
 
-!parameters /Transfers/MultiAppUserObjectTransfer
+!syntax parameters /Transfers/MultiAppUserObjectTransfer
 
-!inputfiles /Transfers/MultiAppUserObjectTransfer
+!syntax inputs /Transfers/MultiAppUserObjectTransfer
 
-!childobjects /Transfers/MultiAppUserObjectTransfer
+!syntax children /Transfers/MultiAppUserObjectTransfer

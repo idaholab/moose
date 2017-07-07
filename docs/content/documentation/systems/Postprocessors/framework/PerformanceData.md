@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PerformanceData
-!description /Postprocessors/PerformanceData
+!syntax description /Postprocessors/PerformanceData
 
-!parameters /Postprocessors/PerformanceData
+!syntax parameters /Postprocessors/PerformanceData
 
-!inputfiles /Postprocessors/PerformanceData
+!syntax inputs /Postprocessors/PerformanceData
 
-!childobjects /Postprocessors/PerformanceData
+!syntax children /Postprocessors/PerformanceData

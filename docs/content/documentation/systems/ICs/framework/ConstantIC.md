@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ConstantIC
-!description /ICs/ConstantIC
+!syntax description /ICs/ConstantIC
 
-!parameters /ICs/ConstantIC
+!syntax parameters /ICs/ConstantIC
 
-!inputfiles /ICs/ConstantIC
+!syntax inputs /ICs/ConstantIC
 
-!childobjects /ICs/ConstantIC
+!syntax children /ICs/ConstantIC

@@ -7,8 +7,8 @@ of the file.
 ## Example Input Syntax
 !listing test/tests/vectorpostprocessors/csv_reader/read.i block=VectorPostprocessors
 
-!parameters /VectorPostprocessors/CSVReader
+!syntax parameters /VectorPostprocessors/CSVReader
 
-!inputfiles /VectorPostprocessors/CSVReader
+!syntax inputs /VectorPostprocessors/CSVReader
 
-!childobjects /VectorPostprocessors/CSVReader
+!syntax children /VectorPostprocessors/CSVReader

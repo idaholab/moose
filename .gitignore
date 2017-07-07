@@ -180,11 +180,13 @@ site
 *.moose.md
 *.moose.yml
 *.moose.svg
+tmp_*.dot
 docs/.moosedocs
+docs/examples/*.tex
 !docs/index.html
 !docs/templates/**/*.html
-!docs/media/**/*.png
-!docs/media/**/*.gif
+!docs/content/media/**/*.png
+!docs/content/media/**/*.gif
 !python/MooseDocs/tests/**/gold/*.html
 
 # Chigger

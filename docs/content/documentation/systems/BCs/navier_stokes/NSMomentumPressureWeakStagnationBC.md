@@ -1,7 +1,7 @@
-!description /BCs/NSMomentumPressureWeakStagnationBC
+!syntax description /BCs/NSMomentumPressureWeakStagnationBC
 
-!parameters /BCs/NSMomentumPressureWeakStagnationBC
+!syntax parameters /BCs/NSMomentumPressureWeakStagnationBC
 
-!inputfiles /BCs/NSMomentumPressureWeakStagnationBC
+!syntax inputs /BCs/NSMomentumPressureWeakStagnationBC
 
-!childobjects /BCs/NSMomentumPressureWeakStagnationBC
+!syntax children /BCs/NSMomentumPressureWeakStagnationBC

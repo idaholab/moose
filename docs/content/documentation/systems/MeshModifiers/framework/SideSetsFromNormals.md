@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideSetsFromNormals
-!description /MeshModifiers/SideSetsFromNormals
+!syntax description /MeshModifiers/SideSetsFromNormals
 
-!parameters /MeshModifiers/SideSetsFromNormals
+!syntax parameters /MeshModifiers/SideSetsFromNormals
 
-!inputfiles /MeshModifiers/SideSetsFromNormals
+!syntax inputs /MeshModifiers/SideSetsFromNormals
 
-!childobjects /MeshModifiers/SideSetsFromNormals
+!syntax children /MeshModifiers/SideSetsFromNormals

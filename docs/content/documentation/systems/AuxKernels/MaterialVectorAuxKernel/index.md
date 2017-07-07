@@ -1,5 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialVectorAuxKernel System
-!parameters /AuxKernels/MaterialVectorAuxKernel
+!syntax objects /AuxKernels/MaterialVectorAuxKernel
 
+!syntax subsystems /AuxKernels/MaterialVectorAuxKernel
+
+!syntax actions /AuxKernels/MaterialVectorAuxKernel

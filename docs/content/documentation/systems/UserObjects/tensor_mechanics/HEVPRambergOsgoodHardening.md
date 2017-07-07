@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # HEVPRambergOsgoodHardening
-!description /UserObjects/HEVPRambergOsgoodHardening
+!syntax description /UserObjects/HEVPRambergOsgoodHardening
 
-!parameters /UserObjects/HEVPRambergOsgoodHardening
+!syntax parameters /UserObjects/HEVPRambergOsgoodHardening
 
-!inputfiles /UserObjects/HEVPRambergOsgoodHardening
+!syntax inputs /UserObjects/HEVPRambergOsgoodHardening
 
-!childobjects /UserObjects/HEVPRambergOsgoodHardening
+!syntax children /UserObjects/HEVPRambergOsgoodHardening

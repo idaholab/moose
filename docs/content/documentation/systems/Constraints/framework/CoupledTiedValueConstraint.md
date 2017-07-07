@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # CoupledTiedValueConstraint
-!description /Constraints/CoupledTiedValueConstraint
+!syntax description /Constraints/CoupledTiedValueConstraint
 
-!parameters /Constraints/CoupledTiedValueConstraint
+!syntax parameters /Constraints/CoupledTiedValueConstraint
 
-!inputfiles /Constraints/CoupledTiedValueConstraint
+!syntax inputs /Constraints/CoupledTiedValueConstraint
 
-!childobjects /Constraints/CoupledTiedValueConstraint
+!syntax children /Constraints/CoupledTiedValueConstraint

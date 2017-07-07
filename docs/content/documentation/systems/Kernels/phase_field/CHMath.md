@@ -1,6 +1,5 @@
-
 # CHMath
-!description /Kernels/CHMath
+!syntax description /Kernels/CHMath
 
 Cahn-Hilliard bulk kernel with a hardcoded free energy density $f$
 
@@ -11,8 +10,8 @@ $$
 where $c$ is the conserved non-linear order parameter variable the kernel is acting
 on. The free energy density is minimized at $c=\pm1$.
 
-!parameters /Kernels/CHMath
+!syntax parameters /Kernels/CHMath
 
-!inputfiles /Kernels/CHMath
+!syntax inputs /Kernels/CHMath
 
-!childobjects /Kernels/CHMath
+!syntax children /Kernels/CHMath

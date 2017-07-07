@@ -1,7 +1,7 @@
-!description /Kernels/INSMass
+!syntax description /Kernels/INSMass
 
-!parameters /Kernels/INSMass
+!syntax parameters /Kernels/INSMass
 
-!inputfiles /Kernels/INSMass
+!syntax inputs /Kernels/INSMass
 
-!childobjects /Kernels/INSMass
+!syntax children /Kernels/INSMass

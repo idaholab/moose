@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # OrientedSubdomainBoundingBox
-!description /MeshModifiers/OrientedSubdomainBoundingBox
+!syntax description /MeshModifiers/OrientedSubdomainBoundingBox
 
-!parameters /MeshModifiers/OrientedSubdomainBoundingBox
+!syntax parameters /MeshModifiers/OrientedSubdomainBoundingBox
 
-!inputfiles /MeshModifiers/OrientedSubdomainBoundingBox
+!syntax inputs /MeshModifiers/OrientedSubdomainBoundingBox
 
-!childobjects /MeshModifiers/OrientedSubdomainBoundingBox
+!syntax children /MeshModifiers/OrientedSubdomainBoundingBox

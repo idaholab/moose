@@ -1,7 +1,7 @@
-!description /Kernels/INSMomentumTimeDerivative
+!syntax description /Kernels/INSMomentumTimeDerivative
 
-!parameters /Kernels/INSMomentumTimeDerivative
+!syntax parameters /Kernels/INSMomentumTimeDerivative
 
-!inputfiles /Kernels/INSMomentumTimeDerivative
+!syntax inputs /Kernels/INSMomentumTimeDerivative
 
-!childobjects /Kernels/INSMomentumTimeDerivative
+!syntax children /Kernels/INSMomentumTimeDerivative

@@ -1,7 +1,7 @@
-!description /Kernels/NSGravityForce
+!syntax description /Kernels/NSGravityForce
 
-!parameters /Kernels/NSGravityForce
+!syntax parameters /Kernels/NSGravityForce
 
-!inputfiles /Kernels/NSGravityForce
+!syntax inputs /Kernels/NSGravityForce
 
-!childobjects /Kernels/NSGravityForce
+!syntax children /Kernels/NSGravityForce

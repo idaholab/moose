@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeMultiPlasticityStress
-!description /Materials/ComputeMultiPlasticityStress
+!syntax description /Materials/ComputeMultiPlasticityStress
 
-!parameters /Materials/ComputeMultiPlasticityStress
+!syntax parameters /Materials/ComputeMultiPlasticityStress
 
-!inputfiles /Materials/ComputeMultiPlasticityStress
+!syntax inputs /Materials/ComputeMultiPlasticityStress
 
-!childobjects /Materials/ComputeMultiPlasticityStress
+!syntax children /Materials/ComputeMultiPlasticityStress

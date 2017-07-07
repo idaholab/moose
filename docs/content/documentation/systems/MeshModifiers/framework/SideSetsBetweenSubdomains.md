@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SideSetsBetweenSubdomains
-!description /MeshModifiers/SideSetsBetweenSubdomains
+!syntax description /MeshModifiers/SideSetsBetweenSubdomains
 
-!parameters /MeshModifiers/SideSetsBetweenSubdomains
+!syntax parameters /MeshModifiers/SideSetsBetweenSubdomains
 
-!inputfiles /MeshModifiers/SideSetsBetweenSubdomains
+!syntax inputs /MeshModifiers/SideSetsBetweenSubdomains
 
-!childobjects /MeshModifiers/SideSetsBetweenSubdomains
+!syntax children /MeshModifiers/SideSetsBetweenSubdomains

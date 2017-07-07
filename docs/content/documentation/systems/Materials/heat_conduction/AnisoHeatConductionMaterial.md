@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AnisoHeatConductionMaterial
-!description /Materials/AnisoHeatConductionMaterial
+!syntax description /Materials/AnisoHeatConductionMaterial
 
-!parameters /Materials/AnisoHeatConductionMaterial
+!syntax parameters /Materials/AnisoHeatConductionMaterial
 
-!inputfiles /Materials/AnisoHeatConductionMaterial
+!syntax inputs /Materials/AnisoHeatConductionMaterial
 
-!childobjects /Materials/AnisoHeatConductionMaterial
+!syntax children /Materials/AnisoHeatConductionMaterial

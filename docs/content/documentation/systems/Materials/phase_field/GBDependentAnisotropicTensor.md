@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GBDependentAnisotropicTensor
-!description /Materials/GBDependentAnisotropicTensor
+!syntax description /Materials/GBDependentAnisotropicTensor
 
-!parameters /Materials/GBDependentAnisotropicTensor
+!syntax parameters /Materials/GBDependentAnisotropicTensor
 
-!inputfiles /Materials/GBDependentAnisotropicTensor
+!syntax inputs /Materials/GBDependentAnisotropicTensor
 
-!childobjects /Materials/GBDependentAnisotropicTensor
+!syntax children /Materials/GBDependentAnisotropicTensor

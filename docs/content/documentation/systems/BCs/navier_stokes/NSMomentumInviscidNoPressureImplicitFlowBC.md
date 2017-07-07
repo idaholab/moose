@@ -1,7 +1,7 @@
-!description /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
+!syntax description /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
 
-!parameters /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
+!syntax parameters /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
 
-!inputfiles /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
+!syntax inputs /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
 
-!childobjects /BCs/NSMomentumInviscidNoPressureImplicitFlowBC
+!syntax children /BCs/NSMomentumInviscidNoPressureImplicitFlowBC

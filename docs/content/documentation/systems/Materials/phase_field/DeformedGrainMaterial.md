@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # DeformedGrainMaterial
-!description /Materials/DeformedGrainMaterial
+!syntax description /Materials/DeformedGrainMaterial
 
-!parameters /Materials/DeformedGrainMaterial
+!syntax parameters /Materials/DeformedGrainMaterial
 
-!inputfiles /Materials/DeformedGrainMaterial
+!syntax inputs /Materials/DeformedGrainMaterial
 
-!childobjects /Materials/DeformedGrainMaterial
+!syntax children /Materials/DeformedGrainMaterial

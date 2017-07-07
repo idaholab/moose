@@ -36,8 +36,8 @@ Q(p;k,\lambda) = \lambda {(-\ln(1-p))}^{1/k} \quad 0 \leq p < 1.
 
 !listing /modules/stochastic_tools/tests/distributions/weibull.i block=Distributions
 
-!parameters /Distributions/WeibullDistribution
+!syntax parameters /Distributions/WeibullDistribution
 
-!inputfiles /Distributions/WeibullDistribution
+!syntax input /Distributions/WeibullDistribution
 
-!childobjects /Distributions/WeibullDistribution
+!syntax children /Distributions/WeibullDistribution

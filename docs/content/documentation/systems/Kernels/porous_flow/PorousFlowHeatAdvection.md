@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowHeatAdvection
-!description /Kernels/PorousFlowHeatAdvection
+!syntax description /Kernels/PorousFlowHeatAdvection
 
-!parameters /Kernels/PorousFlowHeatAdvection
+!syntax parameters /Kernels/PorousFlowHeatAdvection
 
-!inputfiles /Kernels/PorousFlowHeatAdvection
+!syntax inputs /Kernels/PorousFlowHeatAdvection
 
-!childobjects /Kernels/PorousFlowHeatAdvection
+!syntax children /Kernels/PorousFlowHeatAdvection

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # RndSmoothCircleIC
-!description /ICs/RndSmoothCircleIC
+!syntax description /ICs/RndSmoothCircleIC
 
-!parameters /ICs/RndSmoothCircleIC
+!syntax parameters /ICs/RndSmoothCircleIC
 
-!inputfiles /ICs/RndSmoothCircleIC
+!syntax inputs /ICs/RndSmoothCircleIC
 
-!childobjects /ICs/RndSmoothCircleIC
+!syntax children /ICs/RndSmoothCircleIC

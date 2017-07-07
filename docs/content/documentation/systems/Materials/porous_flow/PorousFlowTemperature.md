@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowTemperature
-!description /Materials/PorousFlowTemperature
+!syntax description /Materials/PorousFlowTemperature
 
-!parameters /Materials/PorousFlowTemperature
+!syntax parameters /Materials/PorousFlowTemperature
 
-!inputfiles /Materials/PorousFlowTemperature
+!syntax inputs /Materials/PorousFlowTemperature
 
-!childobjects /Materials/PorousFlowTemperature
+!syntax children /Materials/PorousFlowTemperature

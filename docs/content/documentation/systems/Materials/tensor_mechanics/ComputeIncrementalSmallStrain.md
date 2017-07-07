@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeIncrementalSmallStrain
-!description /Materials/ComputeIncrementalSmallStrain
+!syntax description /Materials/ComputeIncrementalSmallStrain
 
-!parameters /Materials/ComputeIncrementalSmallStrain
+!syntax parameters /Materials/ComputeIncrementalSmallStrain
 
-!inputfiles /Materials/ComputeIncrementalSmallStrain
+!syntax inputs /Materials/ComputeIncrementalSmallStrain
 
-!childobjects /Materials/ComputeIncrementalSmallStrain
+!syntax children /Materials/ComputeIncrementalSmallStrain

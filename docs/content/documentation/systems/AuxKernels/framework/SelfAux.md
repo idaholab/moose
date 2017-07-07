@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # SelfAux
-!description /AuxKernels/SelfAux
+!syntax description /AuxKernels/SelfAux
 
-!parameters /AuxKernels/SelfAux
+!syntax parameters /AuxKernels/SelfAux
 
-!inputfiles /AuxKernels/SelfAux
+!syntax inputs /AuxKernels/SelfAux
 
-!childobjects /AuxKernels/SelfAux
+!syntax children /AuxKernels/SelfAux

@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ComputeExternalGrainForceAndTorque
-!description /UserObjects/ComputeExternalGrainForceAndTorque
+!syntax description /UserObjects/ComputeExternalGrainForceAndTorque
 
-!parameters /UserObjects/ComputeExternalGrainForceAndTorque
+!syntax parameters /UserObjects/ComputeExternalGrainForceAndTorque
 
-!inputfiles /UserObjects/ComputeExternalGrainForceAndTorque
+!syntax inputs /UserObjects/ComputeExternalGrainForceAndTorque
 
-!childobjects /UserObjects/ComputeExternalGrainForceAndTorque
+!syntax children /UserObjects/ComputeExternalGrainForceAndTorque

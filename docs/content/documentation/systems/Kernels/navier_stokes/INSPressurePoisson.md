@@ -1,7 +1,7 @@
-!description /Kernels/INSPressurePoisson
+!syntax description /Kernels/INSPressurePoisson
 
-!parameters /Kernels/INSPressurePoisson
+!syntax parameters /Kernels/INSPressurePoisson
 
-!inputfiles /Kernels/INSPressurePoisson
+!syntax inputs /Kernels/INSPressurePoisson
 
-!childobjects /Kernels/INSPressurePoisson
+!syntax children /Kernels/INSPressurePoisson

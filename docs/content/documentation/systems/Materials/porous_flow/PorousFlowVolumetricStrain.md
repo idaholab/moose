@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowVolumetricStrain
-!description /Materials/PorousFlowVolumetricStrain
+!syntax description /Materials/PorousFlowVolumetricStrain
 
-!parameters /Materials/PorousFlowVolumetricStrain
+!syntax parameters /Materials/PorousFlowVolumetricStrain
 
-!inputfiles /Materials/PorousFlowVolumetricStrain
+!syntax inputs /Materials/PorousFlowVolumetricStrain
 
-!childobjects /Materials/PorousFlowVolumetricStrain
+!syntax children /Materials/PorousFlowVolumetricStrain

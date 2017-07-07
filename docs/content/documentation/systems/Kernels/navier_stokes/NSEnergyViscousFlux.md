@@ -1,7 +1,7 @@
-!description /Kernels/NSEnergyViscousFlux
+!syntax description /Kernels/NSEnergyViscousFlux
 
-!parameters /Kernels/NSEnergyViscousFlux
+!syntax parameters /Kernels/NSEnergyViscousFlux
 
-!inputfiles /Kernels/NSEnergyViscousFlux
+!syntax inputs /Kernels/NSEnergyViscousFlux
 
-!childobjects /Kernels/NSEnergyViscousFlux
+!syntax children /Kernels/NSEnergyViscousFlux

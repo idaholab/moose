@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # FSP
-!description /Preconditioning/FSP
+!syntax description /Preconditioning/FSP
 
-!parameters /Preconditioning/FSP
+!syntax parameters /Preconditioning/FSP
 
-!inputfiles /Preconditioning/FSP
+!syntax inputs /Preconditioning/FSP
 
-!childobjects /Preconditioning/FSP
+!syntax children /Preconditioning/FSP

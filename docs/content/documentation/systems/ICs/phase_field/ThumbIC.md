@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # ThumbIC
-!description /ICs/ThumbIC
+!syntax description /ICs/ThumbIC
 
-!parameters /ICs/ThumbIC
+!syntax parameters /ICs/ThumbIC
 
-!inputfiles /ICs/ThumbIC
+!syntax inputs /ICs/ThumbIC
 
-!childobjects /ICs/ThumbIC
+!syntax children /ICs/ThumbIC

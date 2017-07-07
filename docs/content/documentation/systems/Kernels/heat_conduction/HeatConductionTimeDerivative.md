@@ -1,6 +1,6 @@
 
 #HeatConductionTimeDerivative
-!description /Kernels/HeatConductionTimeDerivative
+!syntax description /Kernels/HeatConductionTimeDerivative
 
 !!! warning
     This Kernel will not generate the correct on-diagonal Jacobians for temperature
@@ -11,8 +11,8 @@
 * [[/HeatCapacityConductionTimeDerivative.md]]
 * [[/SpecificHeatConductionTimeDerivative.md]]
 
-!parameters /Kernels/HeatConductionTimeDerivative
+!syntax parameters /Kernels/HeatConductionTimeDerivative
 
-!inputfiles /Kernels/HeatConductionTimeDerivative
+!syntax inputs /Kernels/HeatConductionTimeDerivative
 
-!childobjects /Kernels/HeatConductionTimeDerivative
+!syntax children /Kernels/HeatConductionTimeDerivative

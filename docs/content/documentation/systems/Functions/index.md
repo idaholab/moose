@@ -1,7 +1,8 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # Functions System
-!parameters /Functions
+!syntax objects /Functions
 
-!subobjects /Functions
+!syntax subsystems /Functions
 
+!syntax actions /Functions

@@ -1,7 +1,7 @@
-!description /AuxKernels/CNSFVPressureAux
+!syntax description /AuxKernels/CNSFVPressureAux
 
-!parameters /AuxKernels/CNSFVPressureAux
+!syntax parameters /AuxKernels/CNSFVPressureAux
 
-!inputfiles /AuxKernels/CNSFVPressureAux
+!syntax inputs /AuxKernels/CNSFVPressureAux
 
-!childobjects /AuxKernels/CNSFVPressureAux
+!syntax children /AuxKernels/CNSFVPressureAux

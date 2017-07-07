@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # MaterialStdVectorRealGradientAux
-!description /AuxKernels/MaterialStdVectorRealGradientAux
+!syntax description /AuxKernels/MaterialStdVectorRealGradientAux
 
-!parameters /AuxKernels/MaterialStdVectorRealGradientAux
+!syntax parameters /AuxKernels/MaterialStdVectorRealGradientAux
 
-!inputfiles /AuxKernels/MaterialStdVectorRealGradientAux
+!syntax inputs /AuxKernels/MaterialStdVectorRealGradientAux
 
-!childobjects /AuxKernels/MaterialStdVectorRealGradientAux
+!syntax children /AuxKernels/MaterialStdVectorRealGradientAux

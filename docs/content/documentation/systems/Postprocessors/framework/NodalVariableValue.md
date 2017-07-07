@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # NodalVariableValue
-!description /Postprocessors/NodalVariableValue
+!syntax description /Postprocessors/NodalVariableValue
 
-!parameters /Postprocessors/NodalVariableValue
+!syntax parameters /Postprocessors/NodalVariableValue
 
-!inputfiles /Postprocessors/NodalVariableValue
+!syntax inputs /Postprocessors/NodalVariableValue
 
-!childobjects /Postprocessors/NodalVariableValue
+!syntax children /Postprocessors/NodalVariableValue

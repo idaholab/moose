@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # TensorMechanicsPlasticSimpleTester
-!description /UserObjects/TensorMechanicsPlasticSimpleTester
+!syntax description /UserObjects/TensorMechanicsPlasticSimpleTester
 
-!parameters /UserObjects/TensorMechanicsPlasticSimpleTester
+!syntax parameters /UserObjects/TensorMechanicsPlasticSimpleTester
 
-!inputfiles /UserObjects/TensorMechanicsPlasticSimpleTester
+!syntax inputs /UserObjects/TensorMechanicsPlasticSimpleTester
 
-!childobjects /UserObjects/TensorMechanicsPlasticSimpleTester
+!syntax children /UserObjects/TensorMechanicsPlasticSimpleTester

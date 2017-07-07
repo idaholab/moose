@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # PorousFlowAdvectiveFlux
-!description /Kernels/PorousFlowAdvectiveFlux
+!syntax description /Kernels/PorousFlowAdvectiveFlux
 
-!parameters /Kernels/PorousFlowAdvectiveFlux
+!syntax parameters /Kernels/PorousFlowAdvectiveFlux
 
-!inputfiles /Kernels/PorousFlowAdvectiveFlux
+!syntax inputs /Kernels/PorousFlowAdvectiveFlux
 
-!childobjects /Kernels/PorousFlowAdvectiveFlux
+!syntax children /Kernels/PorousFlowAdvectiveFlux

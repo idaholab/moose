@@ -1,10 +1,10 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AverageNodalVariableValue
-!description /Postprocessors/AverageNodalVariableValue
+!syntax description /Postprocessors/AverageNodalVariableValue
 
-!parameters /Postprocessors/AverageNodalVariableValue
+!syntax parameters /Postprocessors/AverageNodalVariableValue
 
-!inputfiles /Postprocessors/AverageNodalVariableValue
+!syntax inputs /Postprocessors/AverageNodalVariableValue
 
-!childobjects /Postprocessors/AverageNodalVariableValue
+!syntax children /Postprocessors/AverageNodalVariableValue
