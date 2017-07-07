@@ -174,9 +174,14 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
 
     Real ncg_viscosity, dncg_viscosity_drho, dncg_viscosity_dT;
     Real vapor_viscosity, dvapor_viscosity_drho, dvapor_viscosity_dT;
-    _ncg_fp.mu_drhoT(ncg_density, Tk, ncg_viscosity, dncg_viscosity_drho, dncg_viscosity_dT);
-    _water_fp.mu_drhoT(
-        vapor_density, Tk, vapor_viscosity, dvapor_viscosity_drho, dvapor_viscosity_dT);
+    _ncg_fp.mu_drhoT(
+        ncg_density, Tk, dncg_density_dT, ncg_viscosity, dncg_viscosity_drho, dncg_viscosity_dT);
+    _water_fp.mu_drhoT(vapor_density,
+                       Tk,
+                       dvapor_density_dT,
+                       vapor_viscosity,
+                       dvapor_viscosity_drho,
+                       dvapor_viscosity_dT);
 
     // Assume that the viscosity of the gas phase is a weighted sum of the
     // individual viscosities
@@ -229,8 +234,12 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
     Real dliquid_viscosity_drho;
     _water_fp.rho_dpT(
         liquid_porepressure, Tk, liquid_density, dliquid_density_dp, dliquid_density_dT);
-    _water_fp.mu_drhoT(
-        liquid_density, Tk, liquid_viscosity, dliquid_viscosity_drho, dliquid_viscosity_dT);
+    _water_fp.mu_drhoT(liquid_density,
+                       Tk,
+                       dliquid_density_dT,
+                       liquid_viscosity,
+                       dliquid_viscosity_drho,
+                       dliquid_viscosity_dT);
 
     // The derivative of viscosity wrt pressure is given by the chain rule
     dliquid_viscosity_dp = dliquid_viscosity_drho * dliquid_density_dp;

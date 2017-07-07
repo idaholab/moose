@@ -126,7 +126,7 @@ PorousFlowBrine::computeQpProperties()
   // Viscosity calculation requires water density
   Real rhow, drhow_dp, drhow_dT;
   _water_fp->rho_dpT(_porepressure[_qp][_phase_num], Tk, rhow, drhow_dp, drhow_dT);
-  _brine_fp->mu_drhoTx(rhow, Tk, _xnacl[_qp], mu, dmu_drho, dmu_dT, dmu_dx);
+  _brine_fp->mu_drhoTx(rhow, Tk, _xnacl[_qp], drhow_dT, mu, dmu_drho, dmu_dT, dmu_dx);
   _viscosity[_qp] = mu;
   _dviscosity_dp[_qp] = dmu_drho * drhow_dp;
   _dviscosity_dT[_qp] = dmu_dT;
