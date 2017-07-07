@@ -54,18 +54,19 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
   if (_youngs_modulus_set && _youngs_modulus <= 0.0)
     mooseError("Youngs modulus must be positive in material '" + name() + "'.");
 
+  if (_youngs_modulus_set && _poissons_ratio_set)
+  {
+    _Cijkl.fillFromInputVector({_youngs_modulus, _poissons_ratio},
+                               RankFourTensor::symmetric_isotropic_E_nu);
+    return;
+  }
+
   std::vector<Real> iso_const(2);
 
   if (_lambda_set && _shear_modulus_set)
   {
     iso_const[0] = _lambda;
     iso_const[1] = _shear_modulus;
-  }
-  else if (_youngs_modulus_set && _poissons_ratio_set)
-  {
-    iso_const[0] = _youngs_modulus * _poissons_ratio /
-                   ((1.0 + _poissons_ratio) * (1.0 - 2.0 * _poissons_ratio));
-    iso_const[1] = _youngs_modulus / (2.0 * (1.0 + _poissons_ratio));
   }
   else if (_shear_modulus_set && _bulk_modulus_set)
   {

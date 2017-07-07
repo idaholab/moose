@@ -95,15 +95,8 @@ ComputeVariableIsotropicElasticityTensor::initQpStatefulProperties()
 void
 ComputeVariableIsotropicElasticityTensor::computeQpElasticityTensor()
 {
-  // lambda
-  _isotropic_elastic_constants[0] =
-      _youngs_modulus[_qp] * _poissons_ratio[_qp] /
-      ((1.0 + _poissons_ratio[_qp]) * (1.0 - 2.0 * _poissons_ratio[_qp]));
-  // shear modulus
-  _isotropic_elastic_constants[1] = _youngs_modulus[_qp] / (2.0 * (1.0 + _poissons_ratio[_qp]));
-
-  _elasticity_tensor[_qp].fillFromInputVector(_isotropic_elastic_constants,
-                                              RankFourTensor::symmetric_isotropic);
+  _elasticity_tensor[_qp].fillFromInputVector({_youngs_modulus[_qp], _poissons_ratio[_qp]},
+                                              RankFourTensor::symmetric_isotropic_E_nu);
 
   // Define derivatives of the elasticity tensor
   for (unsigned int i = 0; i < _num_args; ++i)
