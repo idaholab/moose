@@ -11,6 +11,7 @@
 #include "PorousFlowVariableBase.h"
 
 // Forward Declarations
+class PorousFlowCapillaryPressure;
 class PorousFlow2PhasePP;
 
 template <>
@@ -69,27 +70,24 @@ protected:
 
   /// Nodal or quadpoint value of porepressure of the zero phase (eg, the water phase)
   const VariableValue & _phase0_porepressure;
-
   /// Gradient(phase0_porepressure) at the qps
   const VariableGradient & _phase0_gradp_qp;
-
   /// Moose variable number of the phase0 porepressure
   const unsigned int _phase0_porepressure_varnum;
-
   /// PorousFlow variable number of the phase0 porepressure
   const unsigned int _p0var;
-
   /// Nodal or quadpoint value of porepressure of the one phase (eg, the gas phase)
   const VariableValue & _phase1_porepressure;
-
   /// Gradient(phase1_porepressure) at the qps
   const VariableGradient & _phase1_gradp_qp;
-
   /// Moose variable number of the phase1 porepressure
   const unsigned int _phase1_porepressure_varnum;
-
   /// PorousFlow variable number of the phase1 porepressure
   const unsigned int _p1var;
+  /// Capillary pressure UserObject
+  /// Note: This pointer can be replaced with a reference once the deprecated PP
+  /// materials have been removed
+  const PorousFlowCapillaryPressure * _pc_uo;
 };
 
 #endif // POROUSFLOW2PHASEPP_H

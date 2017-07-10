@@ -100,6 +100,12 @@
     number_fluid_phases = 2
     number_fluid_components = 3
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureRSC
+    shift = -0.1
+    scale_ratio = 3
+    oil_viscosity = 2
+  [../]
 []
 
 [Modules]
@@ -131,22 +137,18 @@
     at_nodes = true
   [../]
   [./ppss]
-    type = PorousFlow2PhasePP_RSC
+    type = PorousFlow2PhasePP
     at_nodes = false
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
-    shift = -0.1
-    scale_ratio = 3
-    oil_viscosity = 2
+    capillary_pressure = pc
   [../]
   [./ppss_nodal]
-    type = PorousFlow2PhasePP_RSC
+    type = PorousFlow2PhasePP
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
     at_nodes = true
-    shift = -0.1
-    scale_ratio = 3
-    oil_viscosity = 2
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

@@ -6,19 +6,21 @@
 /****************************************************************/
 
 #include "PorousFlow2PhasePP.h"
+#include "PorousFlowCapillaryPressure.h"
 
 template <>
 InputParameters
 validParams<PorousFlow2PhasePP>()
 {
   InputParameters params = validParams<PorousFlowVariableBase>();
-
   params.addRequiredCoupledVar("phase0_porepressure",
                                "Variable that is the porepressure of phase "
                                "0 (eg, the water phase).  It will be <= "
                                "phase1_porepressure.");
   params.addRequiredCoupledVar("phase1_porepressure",
                                "Variable that is the porepressure of phase 1 (eg, the gas phase)");
+  params.addParam<UserObjectName>("capillary_pressure",
+                                  "Name of the UserObject defining the capillary pressure");
   params.addClassDescription("This Material calculates the 2 porepressures and the 2 saturations "
                              "in a 2-phase isothermal situation, and derivatives of these with "
                              "respect to the PorousFlowVariables");
@@ -42,7 +44,10 @@ PorousFlow2PhasePP::PorousFlow2PhasePP(const InputParameters & parameters)
     _phase1_porepressure_varnum(coupled("phase1_porepressure")),
     _p1var(_dictator.isPorousFlowVariable(_phase1_porepressure_varnum)
                ? _dictator.porousFlowVariableNum(_phase1_porepressure_varnum)
-               : 0)
+               : 0),
+    _pc_uo(parameters.isParamSetByUser("capillary_pressure")
+               ? &getUserObject<PorousFlowCapillaryPressure>("capillary_pressure")
+               : nullptr)
 {
   if (_num_phases != 2)
     mooseError("The Dictator announces that the number of phases is ",
@@ -137,8 +142,20 @@ PorousFlow2PhasePP::buildQpPPSS()
   return pc;
 }
 
-Real PorousFlow2PhasePP::effectiveSaturation(Real /* pressure */) const { return 1.0; }
+Real
+PorousFlow2PhasePP::effectiveSaturation(Real pc) const
+{
+  return _pc_uo->effectiveSaturation(pc);
+}
 
-Real PorousFlow2PhasePP::dEffectiveSaturation_dP(Real /* pressure */) const { return 0.0; }
+Real
+PorousFlow2PhasePP::dEffectiveSaturation_dP(Real pc) const
+{
+  return _pc_uo->dEffectiveSaturation(pc);
+}
 
-Real PorousFlow2PhasePP::d2EffectiveSaturation_dP2(Real /* pressure */) const { return 0.0; }
+Real
+PorousFlow2PhasePP::d2EffectiveSaturation_dP2(Real pc) const
+{
+  return _pc_uo->d2EffectiveSaturation(pc);
+}

@@ -65,7 +65,7 @@ PorousFlowCapillaryPressureRSC::effectiveSaturation(Real pc) const
 Real
 PorousFlowCapillaryPressureRSC::dEffectiveSaturation(Real pc) const
 {
-  return PorousFlowRogersStallybrassClements::dEffectiveSaturation(-pc, _shift, _scale);
+  return -PorousFlowRogersStallybrassClements::dEffectiveSaturation(-pc, _shift, _scale);
 }
 
 Real
