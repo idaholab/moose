@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlow1PhaseMD_Gaussian
 !syntax description /Materials/PorousFlow1PhaseMD_Gaussian
 

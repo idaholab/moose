@@ -19,6 +19,8 @@ validParams<PorousFlowPiecewiseLinearSink>()
       "values");
   params.addRequiredParam<std::vector<Real>>(
       "multipliers", "Tuple of multiplying values.  The flux values are multiplied by these.");
+  params.addClassDescription("Applies a flux sink to a boundary. The base flux defined by "
+                             "PorousFlowSink is multiplied by a piecewise linear function.");
   return params;
 }
 

@@ -72,6 +72,7 @@ validParams<PorousFlowSink>()
       "for spatially or temporally varying sinks.  Without any use_*, this "
       "function is measured in kg.m^-2.s^-1 (or J.m^-2.s^-1 for the case "
       "with only heat and no fluids)");
+  params.addClassDescription("Applies a flux sink to a boundary.");
   return params;
 }
 

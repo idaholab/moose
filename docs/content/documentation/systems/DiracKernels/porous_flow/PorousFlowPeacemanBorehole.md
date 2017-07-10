@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowPeacemanBorehole
 !syntax description /DiracKernels/PorousFlowPeacemanBorehole
 

@@ -1,7 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowDensityConstBulk
 !syntax description /Materials/PorousFlowDensityConstBulk
+
+!!! note
+    This material is deprecated. Please use [`SimpleFluidProperties`](/SimpleFluidProperties.md) and [`PorousFlowSingleComponentFluid`](/porous_flow/PorousFlowSingleComponentFluid.md) instead.
 
 !syntax parameters /Materials/PorousFlowDensityConstBulk
 

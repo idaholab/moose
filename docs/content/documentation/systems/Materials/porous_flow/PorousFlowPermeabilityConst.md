@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowPermeabilityConst
 !syntax description /Materials/PorousFlowPermeabilityConst
 

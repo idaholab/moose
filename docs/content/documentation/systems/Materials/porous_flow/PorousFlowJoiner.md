@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowJoiner
 !syntax description /Materials/PorousFlowJoiner
 
