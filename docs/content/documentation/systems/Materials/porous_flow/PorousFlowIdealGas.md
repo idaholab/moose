@@ -1,7 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowIdealGas
 !syntax description /Materials/PorousFlowIdealGas
+
+!!! note
+    This material is deprecated. Please use [`IdealGasFluidPropertiesPT`](/IdealGasFluidPropertiesPT.md) and [`PorousFlowSingleComponentFluid`](/porous_flow/PorousFlowSingleComponentFluid.md) instead.
 
 !syntax parameters /Materials/PorousFlowIdealGas
 

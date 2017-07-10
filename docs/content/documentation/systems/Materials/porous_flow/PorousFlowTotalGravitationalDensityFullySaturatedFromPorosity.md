@@ -1,6 +1,4 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
+#PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
 !syntax description /Materials/PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
 
 !syntax parameters /Materials/PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity

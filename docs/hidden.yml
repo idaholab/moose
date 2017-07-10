@@ -123,13 +123,11 @@ level_set:
     - /UserObjects/LevelSetVolume
 porous_flow:
     - /Bounds
-    - /UserObjects
-    - /Kernels
-    - /Materials
-    - /Postprocessors
-    - /AuxKernels
-    - /BCs
-    - /DiracKernels
+    - /Materials/PorousFlowEnthalpy #deprecated
+    - /Materials/PorousFlowIdealGas #deprecated
+    - /Materials/PorousFlowEnthalpy #deprecated
+    - /Materials/PorousFlowInternalEnergyIdeal #deprecated
+    - /Materials/PorousFlowViscosityConst #deprecated
     - /Functions
     - /PorousFlowFullySaturated
     - /PorousFlowUnsaturated

@@ -33,7 +33,7 @@ validParams<PorousFlowHeatEnergy>()
                                 "the heat-energy kernel.  This is required only in the unusual "
                                 "situation where a variety of different finite-element "
                                 "interpolation schemes are employed in the simulation");
-  params.addClassDescription("Calculates the sum of heat energy of fluid component(s) and/or the "
+  params.addClassDescription("Calculates the sum of heat energy of fluid phase(s) and/or the "
                              "porous skeleton in a region");
   return params;
 }

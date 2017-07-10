@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowEffectiveStressCoupling
 !syntax description /Kernels/PorousFlowEffectiveStressCoupling
 

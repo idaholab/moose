@@ -25,6 +25,8 @@ validParams<PorousFlowHalfCubicSink>()
                                         "zero.");
   params.addRequiredParam<Real>(
       "center", "Center of the cubic flux multiplier (measured in Pa (or K for temperature BCs)).");
+  params.addClassDescription("Applies a flux sink to a boundary. The base flux defined by "
+                             "PorousFlowSink is multiplied by a cubic.");
   return params;
 }
 

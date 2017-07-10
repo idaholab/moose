@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowDiffusivityConst
 !syntax description /Materials/PorousFlowDiffusivityConst
 

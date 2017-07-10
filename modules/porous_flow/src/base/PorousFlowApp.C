@@ -38,11 +38,9 @@
 #include "PorousFlow1PhaseP_VG.h"
 #include "PorousFlow1PhaseP_BW.h"
 #include "PorousFlow2PhasePS.h"
-#include "PorousFlowVariableBase.h"
 #include "PorousFlowBrine.h"
 #include "PorousFlowDensityConstBulk.h"
 #include "PorousFlowEffectiveFluidPressure.h"
-#include "PorousFlowFluidPropertiesBase.h"
 #include "PorousFlowIdealGas.h"
 #include "PorousFlowPermeabilityConst.h"
 #include "PorousFlowPermeabilityConstFromVar.h"
@@ -182,11 +180,9 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow1PhaseP_VG);
   registerMaterial(PorousFlow1PhaseP_BW);
   registerMaterial(PorousFlow2PhasePS);
-  registerMaterial(PorousFlowVariableBase);
   registerMaterial(PorousFlowBrine);
   registerMaterial(PorousFlowDensityConstBulk);
   registerMaterial(PorousFlowEffectiveFluidPressure);
-  registerMaterial(PorousFlowFluidPropertiesBase);
   registerMaterial(PorousFlowIdealGas);
   registerMaterial(PorousFlowPermeabilityConst);
   registerMaterial(PorousFlowPermeabilityConstFromVar);

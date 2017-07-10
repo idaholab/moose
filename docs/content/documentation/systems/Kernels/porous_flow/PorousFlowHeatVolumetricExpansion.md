@@ -1,7 +1,12 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowHeatVolumetricExpansion
 !syntax description /Kernels/PorousFlowHeatVolumetricExpansion
+
+This `Kernel` implements the weak form of
+\begin{equation}
+  \mathcal{E}\nabla\cdot\mathbf{v}_{s}
+  \nonumber
+\end{equation}
+where all parameters are defined in the [nomenclature](/porous_flow/nomenclature.md).
 
 !syntax parameters /Kernels/PorousFlowHeatVolumetricExpansion
 
