@@ -106,6 +106,7 @@ public:
    * @param water_density water density (kg/m^3)
    * @param temperature brine temperature (K)
    * @param xnacl salt mass fraction (-)
+   * @param dwater_density_dT derivative of water density wrt temperature
    * @param[out] mu viscosity (Pa.s)
    * @param[out] dmu_drho derivative of viscosity wrt water density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
@@ -114,6 +115,7 @@ public:
   virtual void mu_drhoTx(Real water_density,
                          Real temperature,
                          Real xnacl,
+                         Real dwater_density_dT,
                          Real & mu,
                          Real & dmu_drho,
                          Real & dmu_dT,

@@ -536,45 +536,55 @@ CO2FluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-CO2FluidProperties::mu_drhoT(
-    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+CO2FluidProperties::mu_drhoT(Real density,
+                             Real temperature,
+                             Real ddensity_dT,
+                             Real & mu,
+                             Real & dmu_drho,
+                             Real & dmu_dT) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
     mooseError("Parameters out of range in CO2FLuidProperties::mu_drhoT");
 
   Real Tstar = temperature / 251.196;
+  Real dTstar_dT = 1.0 / 251.196;
   const std::vector<Real> a{0.235156, -0.491266, 5.211155e-2, 5.347906e-2, -1.537102e-2};
   const std::vector<Real> d{
       0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
 
-  // Viscosity in the zero-density limit. Note this is only a function of T
-  Real sum0 = 0.0;
+  // Viscosity in the zero-density limit. Note this is only a function of T.
+  // Start the sum at i = 1 so the derivative is defined
+  Real sum0 = a[0], dsum0_dTstar = 0.0;
 
-  for (std::size_t i = 0; i < a.size(); ++i)
+  for (std::size_t i = 1; i < a.size(); ++i)
+  {
     sum0 += a[i] * std::pow(std::log(Tstar), i);
+    dsum0_dTstar += i * a[i] * std::pow(std::log(Tstar), i - 1) / Tstar;
+  }
 
   Real mu0 = 1.00697 * std::sqrt(temperature) / std::exp(sum0);
+  Real dmu0_dT = (0.5 * 1.00697 / std::sqrt(temperature) -
+                  1.00697 * std::sqrt(temperature) * dsum0_dTstar * dTstar_dT) /
+                 std::exp(sum0);
 
   // Excess viscosity due to finite density
   Real mue = d[0] * density + d[1] * std::pow(density, 2) +
              d[2] * std::pow(density, 6) / std::pow(Tstar, 3) + d[3] * std::pow(density, 8) +
              d[4] * std::pow(density, 8) / Tstar;
 
-  Real dmuedrho = d[0] + 2.0 * d[1] * density +
-                  6.0 * d[2] * std::pow(density, 5) / std::pow(Tstar, 3) +
-                  8.0 * d[3] * std::pow(density, 7) + 8.0 * d[4] * std::pow(density, 7) / Tstar;
+  Real dmue_drho = d[0] + 2.0 * d[1] * density +
+                   6.0 * d[2] * std::pow(density, 5) / std::pow(Tstar, 3) +
+                   8.0 * d[3] * std::pow(density, 7) + 8.0 * d[4] * std::pow(density, 7) / Tstar;
 
-  // Use finite difference for derivative wrt T for now, as drho_dT is required
-  // to calculate analytical derivative
-  Real eps = 1.0e-8;
-  Real Teps = temperature * eps;
-  Real mu2T = this->mu(density, temperature + Teps);
+  Real dmue_dT = (-3.0 * d[2] * std::pow(density, 6) / std::pow(Tstar, 4) -
+                  d[4] * std::pow(density, 8) / Tstar / Tstar) *
+                 dTstar_dT;
 
   // Viscosity in Pa.s is
   mu = (mu0 + mue) * 1.0e-6;
-  dmu_drho = dmuedrho * 1.0e-6;
-  dmu_dT = (mu2T - mu) / Teps;
+  dmu_drho = dmue_drho * 1.0e-6;
+  dmu_dT = (dmu0_dT + dmue_dT) * 1.0e-6 + dmu_drho * ddensity_dT;
 }
 
 Real

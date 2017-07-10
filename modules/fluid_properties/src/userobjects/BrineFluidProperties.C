@@ -173,6 +173,7 @@ void
 BrineFluidProperties::mu_drhoTx(Real water_density,
                                 Real temperature,
                                 Real xnacl,
+                                Real dwater_density_dT,
                                 Real & mu,
                                 Real & dmu_drho,
                                 Real & dmu_dT,
@@ -180,7 +181,7 @@ BrineFluidProperties::mu_drhoTx(Real water_density,
 {
   // Viscosity of water and derivatives wrt water density and temperature
   Real muw, dmuw_drhow, dmuw_dT;
-  _water_fp->mu_drhoT(water_density, temperature, muw, dmuw_drhow, dmuw_dT);
+  _water_fp->mu_drhoT(water_density, temperature, dwater_density_dT, muw, dmuw_drhow, dmuw_dT);
 
   // Correlation requires molal concentration (mol/kg)
   Real mol = massFractionToMolalConc(xnacl);
@@ -195,17 +196,12 @@ BrineFluidProperties::mu_drhoTx(Real water_density,
            0.629e-3 * Tc * (1.0 - std::exp(-0.7 * mol));
   Real da_dx =
       (0.0816 + 0.0244 * mol + 3.84e-4 * mol2 + 4.403e-4 * Tc * std::exp(-0.7 * mol)) * dmol_dx;
+  Real da_dT = 0.629e-3 * (1.0 - std::exp(-0.7 * mol));
 
   mu = a * muw;
   dmu_drho = a * dmuw_drhow;
   dmu_dx = da_dx * muw;
-
-  // Use finite difference for derivative wrt T for now, as drho_dT is required
-  // to calculate analytical derivative
-  Real eps = 1.0e-8;
-  Real Teps = temperature * eps;
-  Real mu2T = this->mu(water_density, temperature + Teps, xnacl);
-  dmu_dT = (mu2T - mu) / Teps;
+  dmu_dT = da_dT * muw + a * dmuw_dT;
 }
 
 Real

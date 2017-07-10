@@ -79,12 +79,17 @@ public:
    *
    * @param density fluid density (kg/m^3)
    * @param temperature fluid temperature (K)
+   * @param ddensity_dT derivative of density wrt temperature
    * @param[out] mu viscosity (Pa.s)
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(
-      Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void mu_drhoT(Real density,
+                        Real temperature,
+                        Real ddensity_dT,
+                        Real & mu,
+                        Real & dmu_drho,
+                        Real & dmu_dT) const override;
 
   /**
    * Fluid name

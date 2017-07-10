@@ -151,7 +151,7 @@ PorousFlowSingleComponentFluid::computeQpProperties()
     // Viscosity and derivatives wrt pressure and temperature at the nodes.
     // Note that dmu_dp = dmu_drho * drho_dp
     Real mu, dmu_drho, dmu_dT;
-    _fp.mu_drhoT(rho, Tk, mu, dmu_drho, dmu_dT);
+    _fp.mu_drhoT(rho, Tk, drho_dT, mu, dmu_drho, dmu_dT);
     (*_viscosity)[_qp] = mu;
     (*_dviscosity_dp)[_qp] = dmu_drho * drho_dp;
     (*_dviscosity_dT)[_qp] = dmu_dT;

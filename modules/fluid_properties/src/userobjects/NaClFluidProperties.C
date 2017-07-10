@@ -170,6 +170,7 @@ Real NaClFluidProperties::mu(Real /*density*/, Real /*temperature*/) const
 void
 NaClFluidProperties::mu_drhoT(Real /*density*/,
                               Real /*temperature*/,
+                              Real /*ddensity_dT*/,
                               Real & /*mu*/,
                               Real & /*dmu_drho*/,
                               Real & /*dmu_dT*/) const

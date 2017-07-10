@@ -506,8 +506,12 @@ Water97FluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-Water97FluidProperties::mu_drhoT(
-    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+Water97FluidProperties::mu_drhoT(Real density,
+                                 Real temperature,
+                                 Real ddensity_dT,
+                                 Real & mu,
+                                 Real & dmu_drho,
+                                 Real & dmu_dT) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
@@ -523,37 +527,39 @@ Water97FluidProperties::mu_drhoT(
   Real rhobar = density / _rho_critical;
   Real Tbar = temperature / _T_critical;
   Real drhobar_drho = 1.0 / _rho_critical;
+  Real dTbar_dT = 1.0 / _T_critical;
 
   // Limit of zero density. Derivative wrt rho is 0
-  Real sum0 = 0.0;
+  Real sum0 = 0.0, dsum0_dTbar = 0.0;
   for (std::size_t i = 0; i < H0.size(); ++i)
+  {
     sum0 += H0[i] / std::pow(Tbar, i);
+    dsum0_dTbar -= i * H0[i] / std::pow(Tbar, i + 1);
+  }
 
   Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
+  Real dmu0_dTbar =
+      50.0 / std::sqrt(Tbar) / sum0 - 100.0 * std::sqrt(Tbar) * dsum0_dTbar / sum0 / sum0;
 
   // Residual component due to finite density
-  Real sum1 = 0.0;
-  Real dsum1_drho = 0.0;
+  Real sum1 = 0.0, dsum1_drho = 0.0, dsum1_dTbar = 0.0;
   for (std::size_t i = 0; i < H1.size(); ++i)
   {
     sum1 += std::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * std::pow(rhobar - 1.0, J[i]);
     dsum1_drho +=
         std::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * J[i] * std::pow(rhobar - 1.0, J[i] - 1);
+    dsum1_dTbar -= I[i] * std::pow(1.0 / Tbar - 1.0, I[i] - 1) * H1[i] *
+                   std::pow(rhobar - 1.0, J[i]) / Tbar / Tbar;
   }
 
   Real mu1 = std::exp(rhobar * sum1);
   Real dmu1_drho = (sum1 + rhobar * dsum1_drho) * mu1;
-
-  // Use finite difference for derivative wrt T for now, as drho_dT is required
-  // to calculate analytical derivative
-  Real eps = 1.0e-8;
-  Real Teps = temperature * eps;
-  Real mu2T = this->mu(density, temperature + Teps);
+  Real dmu1_dTbar = (rhobar * dsum1_dTbar) * mu1;
 
   // Viscosity and its derivatives are then
   mu = mu_star * mu0 * mu1;
   dmu_drho = mu_star * mu0 * dmu1_drho * drhobar_drho;
-  dmu_dT = (mu2T - mu) / Teps;
+  dmu_dT = mu_star * (dmu0_dTbar * mu1 + mu0 * dmu1_dTbar) * dTbar_dT + dmu_drho * ddensity_dT;
 }
 
 Real
