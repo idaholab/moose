@@ -147,6 +147,14 @@ protected:
   addRelativePermeabilityFLAC(bool at_nodes, unsigned phase, Real m, Real s_res, Real sum_s_res);
 
   /**
+   * Adds a van Genuchten capillary pressure UserObject
+   * @param m van Genuchten exponent
+   * @param alpha van Genuchten alpha
+   * @param userobject_name name of the user object
+   */
+  void addCapillaryPressureVG(Real m, Real alpha, std::string userobject_name);
+
+  /**
    * Adds a PorousFlowJoiner for the material_property Material
    * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
    * material

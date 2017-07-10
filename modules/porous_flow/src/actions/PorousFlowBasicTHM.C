@@ -96,7 +96,7 @@ PorousFlowBasicTHM::act()
   // add Materials
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_qp") && _current_task == "add_material")
   {
-    std::string material_type = "PorousFlow1PhaseP";
+    std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowBasicTHM_1PhaseP_qp";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -105,7 +105,7 @@ PorousFlowBasicTHM::act()
   }
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_nodal") && _current_task == "add_material")
   {
-    std::string material_type = "PorousFlow1PhaseP";
+    std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowBasicTHM_1PhaseP";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
