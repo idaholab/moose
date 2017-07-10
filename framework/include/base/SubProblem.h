@@ -357,6 +357,11 @@ public:
   virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string & prop_name);
 
   /**
+   * Check if a material property is defined on a block.
+   */
+  virtual bool hasBlockMaterialProperty(SubdomainID block_id, const std::string & prop_name);
+
+  /**
    * Get a vector containing the block ids the material property is defined on.
    */
   virtual std::set<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & prop_name);
@@ -365,6 +370,11 @@ public:
    * Get a vector of block id equivalences that the material property is defined on.
    */
   virtual std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & prop_name);
+
+  /**
+   * Check if a material property is defined on a block.
+   */
+  virtual bool hasBoundaryMaterialProperty(BoundaryID boundary_id, const std::string & prop_name);
 
   /**
    * Returns true if the problem is in the process of computing it's initial residual.

@@ -144,6 +144,19 @@ SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
   return block_names;
 }
 
+bool
+SubProblem::hasBlockMaterialProperty(SubdomainID bid, const std::string & prop_name)
+{
+  auto it = _map_block_material_props.find(bid);
+  if (it == _map_block_material_props.end())
+    return false;
+
+  if (it->second.count(prop_name) > 0)
+    return true;
+  else
+    return false;
+}
+
 // TODO: remove code duplication by templating
 std::set<BoundaryID>
 SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
@@ -188,6 +201,19 @@ SubProblem::getMaterialPropertyBoundaryNames(const std::string & prop_name)
   }
 
   return boundary_names;
+}
+
+bool
+SubProblem::hasBoundaryMaterialProperty(BoundaryID bid, const std::string & prop_name)
+{
+  auto it = _map_boundary_material_props.find(bid);
+  if (it == _map_boundary_material_props.end())
+    return false;
+
+  if (it->second.count(prop_name) > 0)
+    return true;
+  else
+    return false;
 }
 
 void
