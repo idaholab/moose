@@ -37,6 +37,9 @@ PorousFlow2PhasePS_VG::PorousFlow2PhasePS_VG(const InputParameters & parameters)
     _pc_max(getParam<Real>("pc_max")),
     _p0(getParam<Real>("p0"))
 {
+  mooseDeprecated("PorousFlow2PhasePS_VG is deprecated. Please use PorousFlow2PhasePS and a "
+                  "PorousFlowCapillaryPressureVG UserObject instead");
+
   if (_dictator.numPhases() != 2)
     mooseError("The Dictator proclaims that the number of phases is ",
                _dictator.numPhases(),
@@ -45,19 +48,23 @@ PorousFlow2PhasePS_VG::PorousFlow2PhasePS_VG(const InputParameters & parameters)
 }
 
 Real
-PorousFlow2PhasePS_VG::capillaryPressure(Real seff) const
+PorousFlow2PhasePS_VG::capillaryPressure(Real saturation) const
 {
+  Real seff = effectiveSaturation(saturation);
   return PorousFlowVanGenuchten::capillaryPressure(seff, _m, _p0, _pc_max);
 }
 
 Real
-PorousFlow2PhasePS_VG::dCapillaryPressure_dS(Real seff) const
+PorousFlow2PhasePS_VG::dCapillaryPressure_dS(Real saturation) const
 {
-  return PorousFlowVanGenuchten::dCapillaryPressure(seff, _m, _p0, _pc_max);
+  Real seff = effectiveSaturation(saturation);
+  return PorousFlowVanGenuchten::dCapillaryPressure(seff, _m, _p0, _pc_max) * _dseff_ds;
 }
 
 Real
-PorousFlow2PhasePS_VG::d2CapillaryPressure_dS2(Real seff) const
+PorousFlow2PhasePS_VG::d2CapillaryPressure_dS2(Real saturation) const
 {
-  return PorousFlowVanGenuchten::d2CapillaryPressure(seff, _m, _p0, _pc_max);
+  Real seff = effectiveSaturation(saturation);
+  return PorousFlowVanGenuchten::d2CapillaryPressure(seff, _m, _p0, _pc_max) * _dseff_ds *
+         _dseff_ds;
 }

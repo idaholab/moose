@@ -27,9 +27,7 @@ public:
 
 protected:
   virtual Real capillaryPressure(Real seff) const override;
-
   virtual Real dCapillaryPressure_dS(Real seff) const override;
-
   virtual Real d2CapillaryPressure_dS2(Real seff) const override;
 
   /// van Genuchten exponent m
