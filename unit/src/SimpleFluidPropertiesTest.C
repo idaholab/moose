@@ -113,7 +113,7 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   Real mu, dmu_drho, dmu_dT;
   dens = 1000;
   T = 10;
-  _fp->mu_drhoT(dens, T, mu, dmu_drho, dmu_dT);
+  _fp->mu_drhoT(dens, T, drho_dT, mu, dmu_drho, dmu_dT);
   fd = (_fp->mu(dens + ddens, T) - _fp->mu(dens - ddens, T)) / (2.0 * ddens);
   ABS_TEST("dmu_ddens", dmu_drho, fd, 1.0E-8);
   fd = (_fp->mu(dens, T + dT) - _fp->mu(dens, T - dT)) / (2.0 * dT);
@@ -121,7 +121,7 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
 
   dens = 2000;
   T = 80;
-  _fp->mu_drhoT(dens, T, mu, dmu_drho, dmu_dT);
+  _fp->mu_drhoT(dens, T, drho_dT, mu, dmu_drho, dmu_dT);
   fd = (_fp->mu(dens + ddens, T) - _fp->mu(dens - ddens, T)) / (2.0 * ddens);
   ABS_TEST("dmu_ddens", dmu_drho, fd, 1.0E-8);
   fd = (_fp->mu(dens, T + dT) - _fp->mu(dens, T - dT)) / (2.0 * dT);

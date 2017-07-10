@@ -87,8 +87,12 @@ public:
   virtual Real mu(Real density, Real temperature) const override;
 
   /// Dynamic viscosity and its derivatives wrt density and temperature
-  virtual void mu_drhoT(
-      Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void mu_drhoT(Real density,
+                        Real temperature,
+                        Real ddensity_dT,
+                        Real & mu,
+                        Real & dmu_drho,
+                        Real & dmu_dT) const override;
 
   /// Specific enthalpy (J/kg)
   virtual Real h(Real p, Real T) const override;

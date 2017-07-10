@@ -165,8 +165,12 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::mu_drhoT(
-    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+MethaneFluidProperties::mu_drhoT(Real density,
+                                 Real temperature,
+                                 Real /*ddensity_dT*/,
+                                 Real & mu,
+                                 Real & dmu_drho,
+                                 Real & dmu_dT) const
 {
   const std::vector<Real> a{
       2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};

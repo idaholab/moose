@@ -279,10 +279,14 @@ TabulatedFluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::mu_drhoT(
-    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+TabulatedFluidProperties::mu_drhoT(Real density,
+                                   Real temperature,
+                                   Real ddensity_dT,
+                                   Real & mu,
+                                   Real & dmu_drho,
+                                   Real & dmu_dT) const
 {
-  _fp.mu_drhoT(density, temperature, mu, dmu_drho, dmu_dT);
+  _fp.mu_drhoT(density, temperature, ddensity_dT, mu, dmu_drho, dmu_dT);
 }
 
 Real
