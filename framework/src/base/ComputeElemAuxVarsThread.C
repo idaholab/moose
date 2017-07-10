@@ -48,6 +48,8 @@ ComputeElemAuxVarsThread::~ComputeElemAuxVarsThread() {}
 void
 ComputeElemAuxVarsThread::subdomainChanged()
 {
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+
   // prepare variables
   for (const auto & it : _aux_sys._elem_vars[_tid])
   {

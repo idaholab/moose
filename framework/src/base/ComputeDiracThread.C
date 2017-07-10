@@ -56,6 +56,8 @@ ComputeDiracThread::pre()
 void
 ComputeDiracThread::subdomainChanged()
 {
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+
   std::set<MooseVariable *> needed_moose_vars;
   _dirac_kernels.updateVariableDependency(needed_moose_vars, _tid);
 
