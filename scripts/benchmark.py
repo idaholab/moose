@@ -328,6 +328,8 @@ class BenchmarkDB:
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT,
           executable TEXT,
+          executable_name TEXT,
+          executable_method TEXT,
           input_file TEXT,
           timestamp INTEGER,
           revision TEXT,
@@ -405,6 +407,7 @@ class BenchmarkDB:
     def store(self, benchmark, rev=None):
         """stores a (run/executed) Benchmark in the database. if rev is None, git revision is retrieved from git"""
         ex = benchmark.test.executable
+        (ex_name, ex.method) = os.path.basename(ex).rsplit('-', 1)
         infile = benchmark.test.infile
         timestamp = time.time()
         date = timestamp
@@ -413,8 +416,8 @@ class BenchmarkDB:
         load = os.getloadavg()[0]
 
         c = self.conn.cursor()
-        c.execute('INSERT INTO benchmarks (name,executable,input_file,timestamp,revision,date,load) VALUES (?,?,?,?,?,?,?)',
-                (benchmark.name, ex, infile, timestamp, rev, date, load))
+        c.execute('INSERT INTO benchmarks (name,executable,executable_name,executable_method,input_file,timestamp,revision,date,load) VALUES (?,?,?,?,?,?,?,?,?)',
+                (benchmark.name, ex, ex_name, ex_method, infile, timestamp, rev, date, load))
         self.conn.commit()
 
         c.execute('SELECT max(id) from benchmarks')
