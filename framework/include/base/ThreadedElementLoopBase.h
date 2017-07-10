@@ -53,6 +53,13 @@ public:
   virtual void onElement(const Elem * elem);
 
   /**
+   * Called before the element assembly
+   *
+   * @param elem - active element
+   */
+  virtual void preElement(const Elem * elem);
+
+  /**
    * Called after the element assembly is done (including surface assembling)
    *
    * @param elem - active element
@@ -145,7 +152,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
 
     pre();
 
-    _subdomain = std::numeric_limits<SubdomainID>::max();
+    _subdomain = Moose::INVALID_BLOCK_ID;
     typename RangeType::const_iterator el = range.begin();
     for (el = range.begin(); el != range.end(); ++el)
     {
@@ -153,10 +160,11 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
         break;
 
       const Elem * elem = *el;
-      unsigned int cur_subdomain = elem->subdomain_id();
+
+      preElement(elem);
 
       _old_subdomain = _subdomain;
-      _subdomain = cur_subdomain;
+      _subdomain = elem->subdomain_id();
 
       if (_subdomain != _old_subdomain)
         subdomainChanged();
@@ -210,6 +218,12 @@ ThreadedElementLoopBase<RangeType>::post()
 template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onElement(const Elem * /*elem*/)
+{
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::preElement(const Elem * /*elem*/)
 {
 }
 

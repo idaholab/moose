@@ -14,6 +14,7 @@
 
 #include "ComputeInitialConditionThread.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 #include "InitialCondition.h"
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
@@ -40,6 +41,7 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
   {
     SubdomainID subdomain = elem->subdomain_id();
 
+    _fe_problem.assembly(_tid).setCurrentSubdomainID(subdomain);
     _fe_problem.prepare(elem, _tid);
 
     if (warehouse.hasActiveBlockObjects(subdomain, _tid))
