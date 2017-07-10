@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlow2PhasePS
 !syntax description /Materials/PorousFlow2PhasePS
 

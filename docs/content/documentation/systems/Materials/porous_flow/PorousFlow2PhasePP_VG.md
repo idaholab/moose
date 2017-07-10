@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlow2PhasePP_VG
 !syntax description /Materials/PorousFlow2PhasePP_VG
 

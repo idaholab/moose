@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowTemperature
 !syntax description /Materials/PorousFlowTemperature
 
