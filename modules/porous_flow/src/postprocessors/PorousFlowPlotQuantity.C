@@ -15,7 +15,7 @@ validParams<PorousFlowPlotQuantity>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>(
       "uo", "PorousFlowSumQuantity user object name that holds the required information");
-
+  params.addClassDescription("Extracts the value from the PorousFlowSumQuantity UserObject");
   return params;
 }
 

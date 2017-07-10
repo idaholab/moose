@@ -20,6 +20,8 @@ validParams<PorousFlowSquarePulsePointSource>()
       "start_time", 0.0, "The time at which the source will start (Default is 0)");
   params.addParam<Real>(
       "end_time", 1.0e30, "The time at which the source will end (Default is 1e30)");
+  params.addClassDescription("Point source (or sink) that adds (removes) fluid at a constant mass "
+                             "flux rate for times between the specified start and end times.");
   return params;
 }
 

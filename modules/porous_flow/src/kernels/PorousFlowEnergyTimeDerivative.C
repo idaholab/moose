@@ -24,7 +24,7 @@ validParams<PorousFlowEnergyTimeDerivative>()
                         "true for related Kernels and Materials");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addClassDescription("derivative of heat-energy-density wrt time");
+  params.addClassDescription("Derivative of heat-energy-density wrt time");
   return params;
 }
 

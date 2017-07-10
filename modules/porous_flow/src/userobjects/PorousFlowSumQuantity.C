@@ -12,6 +12,7 @@ InputParameters
 validParams<PorousFlowSumQuantity>()
 {
   InputParameters params = validParams<GeneralUserObject>();
+  params.addClassDescription("Records total mass flowing into a borehole");
   return params;
 }
 

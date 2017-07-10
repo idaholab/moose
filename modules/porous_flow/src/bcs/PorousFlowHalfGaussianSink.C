@@ -23,6 +23,8 @@ validParams<PorousFlowHalfGaussianSink>()
                                 "(measured in Pa (or K for heat fluxes)).");
   params.addRequiredParam<Real>(
       "center", "Center of the Gaussian flux multiplier (measured in Pa (or K for heat fluxes)).");
+  params.addClassDescription("Applies a flux sink to a boundary. The base flux defined by "
+                             "PorousFlowSink is multiplied by a Gaussian.");
   return params;
 }
 
