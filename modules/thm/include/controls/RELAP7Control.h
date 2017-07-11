@@ -16,6 +16,11 @@ class RELAP7Control : public Control, public Restartable
 public:
   RELAP7Control(const InputParameters & parameters);
 
+  /**
+   * Return the Controls that must run before this Control
+   */
+  std::vector<std::string> & getControlDataDependencies() { return _control_data_depends_on; }
+
 protected:
   /**
    * Declare control data with name 'data_name'
@@ -34,6 +39,9 @@ protected:
   const T & getControlData(const std::string & param_name);
 
   Simulation & _sim;
+
+  /// A list of control data that are required to run before this control may run
+  std::vector<std::string> _control_data_depends_on;
 };
 
 template <typename T>
@@ -41,7 +49,7 @@ T &
 RELAP7Control::declareControlData(const std::string & data_name)
 {
   std::string full_name = name() + ":" + data_name;
-  ControlData<T> * data_ptr = _sim.getControlData<T>(full_name, true);
+  ControlData<T> * data_ptr = _sim.declareControlData<T>(full_name, *this);
   return data_ptr->set();
 }
 
@@ -55,6 +63,13 @@ RELAP7Control::getControlData(const std::string & param_name)
     mooseError("Trying to get control data '",
                data_name,
                "', but it does not exist in the system. Check your spelling.");
+
+  // set up dependencies for this control object
+  auto & deps = getControlDataDependencies();
+  auto it = std::find(deps.begin(), deps.end(), data_name);
+  if (it == deps.end())
+    deps.push_back(data_name);
+
   return data_ptr->get();
 }
 
