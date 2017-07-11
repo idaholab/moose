@@ -10,6 +10,11 @@ except:
 class DAGValidationError(Exception):
     pass
 
+class DAGEdgeDepError(Exception):
+    pass
+
+class DAGEdgeIndError(Exception):
+    pass
 
 class DAG(object):
     """ Directed acyclic graph implementation. """
@@ -61,14 +66,14 @@ class DAG(object):
         """ Add an edge (dependency) between the specified nodes. """
         if not graph:
             graph = self.graph
-        if ind_node not in graph or dep_node not in graph:
-            raise KeyError('one or more nodes do not exist in graph')
-        test_graph = deepcopy(graph)
-        test_graph[ind_node].add(dep_node)
-        is_valid, message = self.validate(test_graph)
-        if is_valid:
-            graph[ind_node].add(dep_node)
-        else:
+        if dep_node not in graph:
+            raise DAGEdgeDepError()
+        if ind_node not in graph:
+            raise DAGEdgeIndError()
+        graph[ind_node].add(dep_node)
+        is_valid, message = self.validate(graph)
+        if not is_valid:
+            self.delete_edge(ind_node, dep_node)
             raise DAGValidationError()
 
     def delete_edge(self, ind_node, dep_node, graph=None):
@@ -125,6 +130,17 @@ class DAG(object):
                     nodes.append(downstream_node)
             i += 1
         return filter(lambda node: node in nodes_seen, self.topological_sort(graph=graph))
+
+    def delete_downstreams(self, node, graph=None):
+        """ Delete and return all nodes this node has edges towards. """
+        if graph is None:
+            graph = self.graph
+        deleted_nodes = set([])
+        if self.node_exists(node):
+            for edge in self.all_downstreams(node):
+                deleted_nodes.add(edge)
+                self.delete_node_if_exists(edge)
+        return deleted_nodes
 
     def all_leaves(self, graph=None):
         """ Return a list of all leaves (nodes with no downstreams) """

@@ -85,6 +85,8 @@ class TestHarness:
         if self.options.skip_config_checks:
             checks['compiler'] = set(['ALL'])
             checks['petsc_version'] = 'N/A'
+            checks['petsc_version_release'] = 'N/A'
+            checks['slepc_version'] = 'N/A'
             checks['library_mode'] = set(['ALL'])
             checks['mesh_mode'] = set(['ALL'])
             checks['dtk'] = set(['ALL'])
@@ -100,9 +102,12 @@ class TestHarness:
             checks['unique_id'] = set(['ALL'])
             checks['cxx11'] = set(['ALL'])
             checks['asio'] =  set(['ALL'])
+            checks['boost'] = set(['ALL'])
         else:
             checks['compiler'] = util.getCompilers(self.libmesh_dir)
             checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
+            checks['petsc_version_release'] = util.getLibMeshConfigOption(self.libmesh_dir, 'petsc_version_release')
+            checks['slepc_version'] = util.getSlepcVersion(self.libmesh_dir)
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
             checks['mesh_mode'] = util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
             checks['dtk'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'dtk')
@@ -118,6 +123,7 @@ class TestHarness:
             checks['unique_id'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
             checks['cxx11'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
             checks['asio'] =  util.getIfAsioExists(self.moose_dir)
+            checks['boost'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'boost')
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.

@@ -10,32 +10,37 @@ class TesterData:
     The TesterData class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, the start and end time, etc
     """
-    def __init__(self, tester, dag_object, options):
+    def __init__(self, tester, tester_dag, options):
         self.options = options
         self.__tester = tester
-        self.__dag = dag_object
+        self.__dag = tester_dag
         self.__outfile = None
         self.__process = None
-        self.__exit_code = None
-        self.__start_time = None
-        self.__end_time = None
+        self.__exit_code = 0
+        self.__start_time = clock()
+        self.__end_time = clock()
         self.__std_out = ''
 
     # Return the tester object
     def getTester(self):
         return self.__tester
 
-    # Return the DAG object associated with this tester
+    # Return the DAG object
     def getDAG(self):
         return self.__dag
+
+    # Return the tester name
+    def getTestName(self):
+        return self.__tester.getTestName()
+
+    # # Return list of tester prereqs
+    # def getPrereqs(self):
+    #     return self.__tester.getPrereqs()
 
     # Run a tester specific command (changes into test_dir before execution)
     def runCommand(self, command):
         if self.options.dry_run or not self.__tester.shouldExecute():
             self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
-            self.__exit_code = 0
-            self.__start_time = clock()
-            self.__end_time = clock()
             return
 
         # Run a command and get the process and tempfile
