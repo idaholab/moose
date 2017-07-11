@@ -59,13 +59,6 @@ public:
   }
 
   /**
-   * Determines whether a particular block is marked as active
-   * in the input file
-   */
-  bool isSectionActive(const std::string & section_name,
-                       const std::map<std::string, std::vector<std::string>> & active_lists);
-
-  /**
    * Return the filename that was parsed
    */
   std::string getFileName(bool stripLeadingPath = true) const;
@@ -75,13 +68,6 @@ public:
    * in the MOOSE derived application
    */
   void parse(const std::string & input_filename);
-
-  /**
-   * This function checks to make sure that the active lists (active=*) are used up in the supplied
-   * input file.
-   */
-  void checkActiveUsed(std::vector<std::string> & sections,
-                       const std::map<std::string, std::vector<std::string>> & active_lists);
 
   /**
    * Return a reference to the getpot object to extract options from the input file
@@ -127,6 +113,32 @@ public:
   void checkOverriddenParams(bool error_on_warn) const;
 
 protected:
+  /// Helper struct to hold the active and inactive lists for each parsed block
+  struct BlockLists
+  {
+    BlockLists(std::vector<std::string> && active_list, std::vector<std::string> && inactive_list)
+      : active(std::move(active_list)), inactive(std::move(inactive_list))
+    {
+    }
+
+    const std::vector<std::string> active;
+    const std::vector<std::string> inactive;
+  };
+
+  /**
+   * Determines whether a particular block is marked as active
+   * in the input file
+   */
+  bool isSectionActive(const std::string & section_name,
+                       const std::map<std::string, BlockLists> & block_lists) const;
+
+  /**
+   * This function checks to make sure that the active lists (active=*) are used up in the supplied
+   * input file.
+   */
+  void checkExplicitBlocksUsed(std::vector<std::string> & sections,
+                               const std::map<std::string, BlockLists> & block_lists) const;
+
   /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins
   void appendAndReorderSectionNames(std::vector<std::string> & section_names);
 
@@ -198,7 +210,7 @@ protected:
   Syntax & _syntax;
 
   /// Object for holding the syntax parse tree
-  SyntaxTree * _syntax_formatter;
+  std::unique_ptr<SyntaxTree> _syntax_formatter;
 
   /// Contains all of the sections that are not active during the parse phase so that blocks
   /// nested more than one level deep can detect that the grandparent is not active

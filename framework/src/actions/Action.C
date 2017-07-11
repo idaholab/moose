@@ -23,11 +23,19 @@ InputParameters
 validParams<Action>()
 {
   InputParameters params;
-  std::vector<std::string> blocks = {"__all__"};
-  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on
-  // and off without comments)
+
+  /**
+   * Add the "active" and "inactive" parameters so that all blocks in the input file can selectively
+   * create white or black lists of active/inactive sub-blocks.
+   */
   params.addParam<std::vector<std::string>>(
-      "active", blocks, "If specified only the blocks named will be visited and made active");
+      "active",
+      std::vector<std::string>({"__all__"}),
+      "If specified only the blocks named will be visited and made active");
+  params.addParam<std::vector<std::string>>(
+      "inactive",
+      std::vector<std::string>(),
+      "If specified blocks matching these identifiers will be skipped.");
 
   params.addPrivateParam<std::string>("_moose_docs_type",
                                       "action"); // the type of syntax for documentation system

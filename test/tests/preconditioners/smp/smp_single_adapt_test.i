@@ -106,7 +106,7 @@
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  []
+  [../]
 []
 
 [Outputs]

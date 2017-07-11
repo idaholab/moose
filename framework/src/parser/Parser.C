@@ -36,6 +36,7 @@
 #include "MooseTypes.h"
 #include "CommandLine.h"
 #include "JsonSyntaxTree.h"
+#include "Conversion.h"
 
 // libMesh includes
 #include "libmesh/getpot.h"
@@ -50,13 +51,6 @@
 #include <iomanip>
 #include <algorithm>
 
-// Free function for removing cli flags
-bool
-isFlag(const std::string s)
-{
-  return s.length() && s[0] == '-';
-}
-
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
   : ConsoleStreamInterface(app),
     _app(app),
@@ -64,35 +58,43 @@ Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
     _action_wh(action_wh),
     _action_factory(app.getActionFactory()),
     _syntax(_action_wh.syntax()),
-    _syntax_formatter(NULL),
+    _syntax_formatter(nullptr),
     _getpot_initialized(false),
     _sections_read(false),
-    _current_params(NULL),
-    _current_error_stream(NULL)
+    _current_params(nullptr),
+    _current_error_stream(nullptr)
 {
 }
 
-Parser::~Parser() { delete _syntax_formatter; }
+Parser::~Parser() {}
 
 bool
 Parser::isSectionActive(const std::string & s,
-                        const std::map<std::string, std::vector<std::string>> & active_lists)
+                        const std::map<std::string, BlockLists> & block_lists) const
 {
+  /**
+   * The default return value is false to support the case where the active list is explicitly set
+   * to empty (active = ''). It's also possible to have an empty inactive list (default) in which
+   * case we don't change this value throughout this routine.
+   */
   bool retValue = false;
-  size_t found = s.find_last_of('/');
+  auto found = s.find_last_of('/');
 
-  // Base Level is always active
+  // Base Level is always active (skip the rest of the routine)
   if (found == std::string::npos)
     return true;
 
   std::string parent = s.substr(0, found);
   std::string short_name = s.substr(found + 1);
 
-  std::map<std::string, std::vector<std::string>>::const_iterator pos = active_lists.find(parent);
-  if (pos == active_lists.end()) // If value is missing them the current block is active
+  auto it = block_lists.find(parent);
+
+  // If value is missing, then the CLI injected something out of order. This is fine, just go!
+  if (it == block_lists.end())
     return true;
 
-  std::vector<std::string> active = pos->second;
+  auto active = it->second.active;
+  auto inactive = it->second.inactive;
 
   if (!active.empty())
   {
@@ -102,15 +104,20 @@ Parser::isSectionActive(const std::string & s,
       retValue = std::find(active.begin(), active.end(), short_name) != active.end();
   }
 
+  /**
+   * At this point we may have decided that a block is active because it appeared in the active list
+   * or the active list has the default value of __all__. It's this latter case that requires us
+   * to now look through the inactive list to see if the object is explicitly listed as inactive.
+   */
+  if (!inactive.empty() &&
+      std::find(inactive.begin(), inactive.end(), short_name) != inactive.end())
+    retValue = false;
+
   // Finally see if any of the inactive strings are partially contained in this path (matching from
   // the beginning)
   for (const auto & search_string : _inactive_strings)
     if (s.find(search_string) == 0)
       retValue = false;
-
-  // If this section is not active - then keep track of it for future checks
-  if (!retValue)
-    _inactive_strings.insert(s + "/");
 
   return retValue;
 }
@@ -134,17 +141,8 @@ Parser::getFileName(bool stripLeadingPath) const
 void
 Parser::parse(const std::string & input_filename)
 {
-  std::string curr_identifier;
-  std::map<std::string, std::vector<std::string>> active_lists;
-  std::vector<std::string> section_names;
-  InputParameters active_list_params = validParams<Action>();
-  InputParameters params = validParams<EmptyAction>();
-
-  // Save the filename
+  // Save the filename in a member variable for use in other methods
   _input_filename = input_filename;
-
-  // vector for initializing active blocks
-  std::vector<std::string> all = {"__all__"};
 
   MooseUtils::checkFileReadable(input_filename, true);
 
@@ -207,21 +205,23 @@ Parser::parse(const std::string & input_filename)
     }
   }
 
-  section_names = _getpot_file.get_section_names();
+  std::vector<std::string> section_names = _getpot_file.get_section_names();
   appendAndReorderSectionNames(section_names);
 
   // Set the class variable to indicate that sections names have been read, this is used later by
   // the checkOverriddenParams function
   _sections_read = true;
 
+  // A map containing all of the section names and active/inactive subblocks
+  std::map<std::string, BlockLists> block_lists;
   for (auto & section_name : section_names)
   {
-    curr_identifier = section_name.erase(section_name.size() -
-                                         1); // Chop off the last character (the trailing slash)
+    // Chop off the last character (the trailing slash)
+    std::string curr_identifier = section_name.erase(section_name.size() - 1);
 
     // Before we retrieve any actions or build any objects, make sure that the section they are in
     // is active
-    if (isSectionActive(curr_identifier, active_lists))
+    if (isSectionActive(curr_identifier, block_lists))
     {
       // Extract the block parameters before constructing the action
       // There may be more than one Action registered for a given section in which case we need to
@@ -230,18 +230,14 @@ Parser::parse(const std::string & input_filename)
       std::string registered_identifier = _syntax.isAssociated(section_name, &is_parent);
 
       // We need to retrieve a list of Actions associated with the current identifier
-      std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
-                std::multimap<std::string, Syntax::ActionInfo>::iterator>
-          iters = _syntax.getActions(registered_identifier);
+      auto iters = _syntax.getActions(registered_identifier);
 
       if (iters.first == iters.second)
         mooseError(std::string("A '") + curr_identifier +
                    "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" "
                    "in one of your nested blocks?\n");
 
-      for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = iters.first;
-           it != iters.second;
-           ++it)
+      for (auto it = iters.first; it != iters.second; ++it)
       {
         if (!is_parent)
         {
@@ -249,7 +245,7 @@ Parser::parse(const std::string & input_filename)
             mooseDeprecated(
                 "The input file syntax \"[", registered_identifier, "]\" is deprecated.");
 
-          params = _action_factory.getValidParams(it->second._action);
+          InputParameters params = _action_factory.getValidParams(it->second._action);
 
           params.set<ActionWarehouse *>("awh") = &_action_wh;
 
@@ -280,49 +276,72 @@ Parser::parse(const std::string & input_filename)
         }
       }
     }
+    else // If this section is not active - then keep track of it for future checks
+      _inactive_strings.insert(curr_identifier + "/");
 
-    // Extract and save the current "active" list in the data structure
-    active_list_params.set<std::vector<std::string>>("active") = all;
-    extractParams(curr_identifier, active_list_params);
-    active_lists[curr_identifier] = active_list_params.get<std::vector<std::string>>("active");
+    // If this is the first time we've seen this syntax, save the active/inactive lists
+    auto block_list_it = block_lists.find(curr_identifier);
+    if (block_list_it == block_lists.end())
+    {
+      InputParameters params = validParams<Action>();
+      extractParams(curr_identifier, params);
+
+      if (!params.isParamSetByAddParam("active") && !params.isParamSetByAddParam("inactive"))
+        mooseError("The params \"active\" and \"inactive\" are both provided on block: ",
+                   curr_identifier,
+                   ". That is prohibited!");
+
+      auto active_subblocks = params.get<std::vector<std::string>>("active");
+      auto inactive_subblocks = params.get<std::vector<std::string>>("inactive");
+
+      block_lists.insert(std::make_pair(
+          curr_identifier, BlockLists(std::move(active_subblocks), std::move(inactive_subblocks))));
+    }
   }
 
-  // Check to make sure that all sections in the input file that are explicitly listed are actually
-  // present
-  checkActiveUsed(section_names, active_lists);
+  /**
+   * Check to make sure that all sections in the input file that are explicitly listed as active or
+   * inactive are explicitly present.
+   */
+  checkExplicitBlocksUsed(section_names, block_lists);
 }
 
 void
-Parser::checkActiveUsed(std::vector<std::string> & sections,
-                        const std::map<std::string, std::vector<std::string>> & active_lists)
+Parser::checkExplicitBlocksUsed(std::vector<std::string> & sections,
+                                const std::map<std::string, BlockLists> & block_lists) const
 {
-  std::set<std::string> active_lists_set;
+  std::set<std::string> explicit_blocks;
   std::vector<std::string> difference;
 
-  for (const auto & i : active_lists)
-    for (const auto & j : i.second)
+  for (const auto & block_list_pair : block_lists)
+  {
+    auto block_list = block_list_pair.second;
+
+    for (const auto & active_item : block_list.active)
     {
-      active_lists_set.insert(i.first);
-      if (j != "__all__")
-        active_lists_set.insert(i.first + "/" + j);
+      explicit_blocks.insert(block_list_pair.first);
+      if (active_item != "__all__")
+        explicit_blocks.insert(block_list_pair.first + "/" + active_item);
     }
+    for (const auto & inactive_item : block_list.inactive)
+    {
+      explicit_blocks.insert(block_list_pair.first);
+      explicit_blocks.insert(block_list_pair.first + "/" + inactive_item);
+    }
+  }
 
   std::sort(sections.begin(), sections.end());
 
-  std::set_difference(active_lists_set.begin(),
-                      active_lists_set.end(),
+  std::set_difference(explicit_blocks.begin(),
+                      explicit_blocks.end(),
                       sections.begin(),
                       sections.end(),
                       std::inserter(difference, difference.end()));
 
   if (!difference.empty())
-  {
-    std::ostringstream oss;
-    oss << "One or more active lists in the input file are missing a referenced section:\n";
-    for (const auto & name : difference)
-      oss << name << "\n";
-    mooseError(oss.str());
-  }
+    mooseError("One or more active/inactive lists in the input file are missing a referenced "
+               "section:\n",
+               Moose::stringify(difference, "\n"));
 }
 
 void
@@ -391,7 +410,10 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars,
   std::sort(all_vars.begin(), all_vars.end());
 
   // Remove flags, they aren't "input" parameters
-  all_vars.erase(std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end());
+  all_vars.erase(std::remove_if(all_vars.begin(),
+                                all_vars.end(),
+                                [](const std::string & s) { return s.length() && s[0] == '-'; }),
+                 all_vars.end());
 
   std::set_difference(all_vars.begin(),
                       all_vars.end(),
@@ -472,7 +494,7 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
   if (cmd_line.get())
   {
     GetPot * get_pot = cmd_line->getPot();
-    mooseAssert(get_pot, "GetPot object is NULL");
+    mooseAssert(get_pot, "GetPot object is nullptr");
 
     std::vector<std::string> cli_variables = get_pot->get_variable_names();
     for (const auto & cli_var : cli_variables)
@@ -545,16 +567,13 @@ Parser::reorderHelper(std::vector<std::string> & section_names,
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
 {
-  if (_syntax_formatter)
-    delete _syntax_formatter;
-
   switch (type)
   {
     case INPUT_FILE:
-      _syntax_formatter = new InputFileFormatter(dump_mode);
+      _syntax_formatter = libmesh_make_unique<InputFileFormatter>(dump_mode);
       break;
     case YAML:
-      _syntax_formatter = new YAMLFormatter(dump_mode);
+      _syntax_formatter = libmesh_make_unique<YAMLFormatter>(dump_mode);
       break;
     default:
       mooseError("Unrecognized Syntax Formatter requested");
@@ -573,7 +592,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
   for (const auto & iter : _syntax.getAssociatedActions())
   {
     Syntax::ActionInfo act_info = iter.second;
-    // If the task is NULL that means we need to figure out which task
+    // If the task is nullptr that means we need to figure out which task
     // goes with this syntax for the purpose of building the Moose Object part of the tree.
     // We will figure this out by asking the ActionFactory for the registration info.
     if (act_info._task == "")
@@ -677,14 +696,12 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 void
 Parser::buildFullTree(const std::string & search_string)
 {
-  //  std::string prev_name = "";
-  //  std::vector<InputParameters *> params_ptrs(2);
   std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
 
   for (const auto & iter : _syntax.getAssociatedActions())
   {
     Syntax::ActionInfo act_info = iter.second;
-    // If the task is NULL that means we need to figure out which task
+    // If the task is nullptr that means we need to figure out which task
     // goes with this syntax for the purpose of building the Moose Object part of the tree.
     // We will figure this out by asking the ActionFactory for the registration info.
     if (act_info._task == "")
@@ -763,7 +780,7 @@ Parser::buildFullTree(const std::string & search_string)
 const GetPot *
 Parser::getPotHandle() const
 {
-  return _getpot_initialized ? &_getpot_file : NULL;
+  return _getpot_initialized ? &_getpot_file : nullptr;
 }
 
 /**************************************************************************************************************************
@@ -909,7 +926,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       _syntax.getSyntaxByAction("GlobalParamsAction", global_params_task);
 
   ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_task);
-  GlobalParamsAction * global_params_block = NULL;
+  GlobalParamsAction * global_params_block = nullptr;
 
   // We are grabbing only the first
   if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_task))
@@ -936,7 +953,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       found = true;
     }
     // Wait! Check the GlobalParams section
-    else if (global_params_block != NULL)
+    else if (global_params_block)
     {
       full_name = global_params_block_name + "/" + it.first;
       if (_getpot_file.have_variable(full_name.c_str()))
@@ -965,7 +982,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       if (scalar_p)
       {
         std::string input_file_name = getFileName();
-        mooseAssert(input_file_name != "", "Input Filename is NULL");
+        mooseAssert(input_file_name != "", "Input Filename is nullptr");
         size_t pos = input_file_name.find_last_of('.');
         mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
         scalar_p->set() = input_file_name.substr(0, pos) + "_out";
@@ -1279,7 +1296,7 @@ Parser::setScalarValueTypeParameter(const std::string & full_name,
 
   // If this is a range checked param, we need to make sure that the value falls within the
   // requested range
-  mooseAssert(_current_params, "Current params is NULL");
+  mooseAssert(_current_params, "Current params is nullptr");
 
   _current_params->rangeCheck<T, UP_T>(full_name, short_name, param, *_current_error_stream);
 }
