@@ -330,12 +330,12 @@
     density = 5.0
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     at_nodes = true
     porepressure = pp
   [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
   [./massfrac]

@@ -32,6 +32,8 @@ PorousFlow1PhaseP_VG::PorousFlow1PhaseP_VG(const InputParameters & parameters)
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m"))
 {
+  mooseDeprecated("PorousFlow1PhaseP_VG is deprecated. Please use PorousFlow1PhaseP and a "
+                  "PorousFlowCapillaryPressureVG UserObject instead");
 }
 
 Real

@@ -49,6 +49,9 @@ PorousFlow1PhaseP_BW::PorousFlow1PhaseP_BW(const InputParameters & parameters)
     _c(getParam<Real>("C")),
     _las(getParam<Real>("las"))
 {
+  mooseDeprecated("PorousFlow1PhaseP_BW is deprecated. Please use PorousFlow1PhaseP and a "
+                  "PorousFlowCapillaryPressureBW UserObject instead");
+
   if (_ss <= _sn)
     mooseError("In BW effective saturation Sn set to ",
                _sn,

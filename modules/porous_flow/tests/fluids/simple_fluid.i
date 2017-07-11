@@ -66,7 +66,7 @@
     temperature = T
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
   [./simple_fluid]

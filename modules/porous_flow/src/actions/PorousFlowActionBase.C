@@ -398,6 +398,19 @@ PorousFlowActionBase::addRelativePermeabilityFLAC(
 }
 
 void
+PorousFlowActionBase::addCapillaryPressureVG(Real m, Real alpha, std::string userobject_name)
+{
+  if (_current_task == "add_user_object")
+  {
+    std::string userobject_type = "PorousFlowCapillaryPressureVG";
+    InputParameters params = _factory.getValidParams(userobject_type);
+    params.set<Real>("m") = m;
+    params.set<Real>("alpha") = alpha;
+    _problem->addUserObject(userobject_type, userobject_name, params);
+  }
+}
+
+void
 PorousFlowActionBase::addJoiner(bool at_nodes,
                                 const std::string & material_property,
                                 const std::string & output_name)

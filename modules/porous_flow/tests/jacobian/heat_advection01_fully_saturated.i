@@ -81,7 +81,7 @@
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./PS]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
   [./simple_fluid]

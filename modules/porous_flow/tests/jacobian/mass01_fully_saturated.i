@@ -151,13 +151,12 @@
   [./vol_strain]
     type = PorousFlowVolumetricStrain
   [../]
-
   [./temperature]
     type = PorousFlowTemperature
     temperature = T
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
   [./massfrac]

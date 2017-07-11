@@ -236,17 +236,15 @@
     type = PorousFlowEffectiveFluidPressure
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     at_nodes = true
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
@@ -297,6 +295,11 @@
     porous_flow_vars = 'porepressure disp_x disp_y disp_z'
     number_fluid_phases = 1
     number_fluid_components = 1
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1
   [../]
 []
 

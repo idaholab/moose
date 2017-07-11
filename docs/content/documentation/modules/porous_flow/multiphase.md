@@ -10,11 +10,5 @@ each phase are the nonlinear variables, or where porepressure and saturation of
 one phase are solved. These `Materials` calculate the pressure and saturation of each
 fluid phases, as well as all derivatives with respect to the PorousFlow variables.
 
-## Porepressure formulations
-
-- Two-phase flow with van Genuchten capillary pressure [`PorousFlow2PhasePP_VG`](/porous_flow/PorousFlow2PhasePP_VG.md)
-- Two-phase flow with Rogers-Stallybrass-Clements capillary pressure [`PorousFlow2PhasePP_RSC`](/porous_flow/PorousFlow2PhasePP_RSC.md)
-
-## Porepressure-Saturation formulations
-
-- Two-phase flow with van Genuchten capillary pressure [`PorousFlow2PhasePS_VG`](/porous_flow/PorousFlow2PhasePS_VG.md)
+- Two-phase flow with porepressure formulation [`PorousFlow2PhasePP`](/porous_flow/PorousFlow2PhasePP.md)
+- Two-phase flow with porepressure - saturation formulation [`PorousFlow2PhasePS`](/porous_flow/PorousFlow2PhasePS.md)

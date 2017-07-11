@@ -6,15 +6,17 @@
 /****************************************************************/
 
 #include "PorousFlow1PhaseP.h"
+#include "PorousFlowCapillaryPressure.h"
 
 template <>
 InputParameters
 validParams<PorousFlow1PhaseP>()
 {
   InputParameters params = validParams<PorousFlowVariableBase>();
-
   params.addRequiredCoupledVar("porepressure",
                                "Variable that represents the porepressure of the single phase");
+  params.addParam<UserObjectName>("capillary_pressure",
+                                  "Name of the UserObject defining the capillary pressure");
   params.addClassDescription("This Material is used for the fully saturated single-phase situation "
                              "where porepressure is the primary variable");
   return params;
@@ -29,7 +31,10 @@ PorousFlow1PhaseP::PorousFlow1PhaseP(const InputParameters & parameters)
     _porepressure_varnum(coupled("porepressure")),
     _p_var_num(_dictator.isPorousFlowVariable(_porepressure_varnum)
                    ? _dictator.porousFlowVariableNum(_porepressure_varnum)
-                   : 0)
+                   : 0),
+    _pc_uo(parameters.isParamSetByUser("capillary_pressure")
+               ? &getUserObject<PorousFlowCapillaryPressure>("capillary_pressure")
+               : nullptr)
 {
   if (_num_phases != 1)
     mooseError("The Dictator proclaims that the number of phases is ",
@@ -83,8 +88,20 @@ PorousFlow1PhaseP::buildQpPPSS()
   _saturation[_qp][0] = effectiveSaturation(_porepressure_var[_qp]);
 }
 
-Real PorousFlow1PhaseP::effectiveSaturation(Real /* pressure */) const { return 1.0; }
+Real
+PorousFlow1PhaseP::effectiveSaturation(Real pc) const
+{
+  return _pc_uo->effectiveSaturation(pc);
+}
 
-Real PorousFlow1PhaseP::dEffectiveSaturation_dP(Real /* pressure */) const { return 0.0; }
+Real
+PorousFlow1PhaseP::dEffectiveSaturation_dP(Real pc) const
+{
+  return _pc_uo->dEffectiveSaturation(pc);
+}
 
-Real PorousFlow1PhaseP::d2EffectiveSaturation_dP2(Real /* pressure */) const { return 0.0; }
+Real
+PorousFlow1PhaseP::d2EffectiveSaturation_dP2(Real pc) const
+{
+  return _pc_uo->d2EffectiveSaturation(pc);
+}

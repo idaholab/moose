@@ -35,6 +35,8 @@ PorousFlow2PhasePP_RSC::PorousFlow2PhasePP_RSC(const InputParameters & parameter
     _shift(getParam<Real>("shift")),
     _scale(0.25 * _scale_ratio * _oil_viscosity)
 {
+  mooseDeprecated("PorousFlow2PhasePP_RSC is deprecated. Please use PorousFlow2PhasePP and a "
+                  "PorousFlowCapillaryPressureRSC UserObject instead");
 }
 
 Real
