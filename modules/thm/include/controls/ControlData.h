@@ -6,6 +6,7 @@
 
 // Forward declarations
 class ControlDataValue;
+class RELAP7Control;
 
 /**
  * Abstract definition of a ControlData value.
@@ -17,7 +18,7 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    */
-  ControlDataValue(std::string name) : _name(name), _declared(false) {}
+  ControlDataValue(std::string name) : _name(name), _declared(false), _control(nullptr) {}
 
   /**
    * Destructor.
@@ -36,6 +37,16 @@ public:
   const std::string & name() const { return _name; }
 
   /**
+   * Get the reference to the control object that declared this control data
+   */
+  RELAP7Control & getControl() const { return *_control; }
+
+  /**
+   * Set the reference to the control object that declared this control data
+   */
+  void setControl(RELAP7Control & ctrl) { _control = &ctrl; }
+
+  /**
    * Mark the data as declared
    */
   void setDeclared() { _declared = true; }
@@ -50,6 +61,8 @@ protected:
   const std::string _name;
   /// true if the data was declared by calling declareControlData. All data must be declared up front.
   bool _declared;
+  /// The control object that declared this control data
+  RELAP7Control * _control;
 };
 
 /**
