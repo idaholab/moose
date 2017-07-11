@@ -30,8 +30,9 @@ public:
   SubdomainConstantMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void subdomainSetup();
+  virtual void computeSubdomainProperties();
 
+  const MaterialPropertyName & _mat_prop_name;
   MaterialProperty<Real> & _mat_prop;
   std::map<SubdomainID, Real> _mapped_values;
 };

@@ -26,12 +26,16 @@ validParams<SubdomainConstantMaterial>()
   params.addParam<std::vector<Real>>(
       "values",
       "Values of the material property on the subdomains (must be paired up with blocks)");
+
+  params.set<MooseEnum>("constant_on") = "subdomain";
+  params.suppressParameter<MooseEnum>("constant_on");
   return params;
 }
 
 SubdomainConstantMaterial::SubdomainConstantMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _mat_prop(declareProperty<Real>(getParam<MaterialPropertyName>("mat_prop_name")))
+    _mat_prop_name(getParam<MaterialPropertyName>("mat_prop_name")),
+    _mat_prop(declareProperty<Real>(_mat_prop_name))
 {
   auto & blocks = getParam<std::vector<SubdomainName>>("block");
   auto & values = getParam<std::vector<Real>>("values");
@@ -44,14 +48,15 @@ SubdomainConstantMaterial::SubdomainConstantMaterial(const InputParameters & par
 }
 
 void
-SubdomainConstantMaterial::subdomainSetup()
+SubdomainConstantMaterial::computeSubdomainProperties()
 {
-  // side material should not have subdomainSetup.
-  if (_bnd)
-    return;
-
-  _mat_prop.resize(_fe_problem.getMaxQps());
-  Real current_value = _mapped_values.at(_current_elem->subdomain_id());
-  for (_qp = 0; _qp < _fe_problem.getMaxQps(); ++_qp)
-    _mat_prop[_qp] = current_value;
+  auto it = _mapped_values.find(_current_subdomain_id);
+  if (it != _mapped_values.end())
+    _mat_prop[_qp] = it->second;
+  else
+    mooseError("material property ",
+               _mat_prop_name,
+               " is used on block ",
+               _current_subdomain_id,
+               " where it is not defined");
 }
