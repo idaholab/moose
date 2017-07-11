@@ -193,7 +193,13 @@
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1
+  [../]
 []
+
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
@@ -211,12 +217,10 @@
   [./stress]
     type = ComputeLinearElasticStress
   [../]
-
   [./ppss]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = p
-    al = 1
-    m = 0.5
+    capillary_pressure = pc
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure

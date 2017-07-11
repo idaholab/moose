@@ -20,6 +20,11 @@
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.336
+    alpha = 1.43e-4
+  [../]
 []
 
 [Modules]
@@ -74,17 +79,15 @@
     material_property = PorousFlow_viscosity_nodal
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     at_nodes = true
     porepressure = pressure
-    m = 0.336
-    al = 1.43E-4
+    capillary_pressure = pc
   [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = pressure
-    m = 0.336
-    al = 1.43E-4
+    capillary_pressure = pc
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityVG

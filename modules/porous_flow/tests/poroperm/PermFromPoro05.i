@@ -136,6 +136,12 @@
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    # unimportant in this fully-saturated test
+    m = 0.8
+    alpha = 1e-4
+  [../]
 []
 
 [Modules]
@@ -165,20 +171,18 @@
 
   # Fluid pressure
   [./eff_fluid_pressure]
-    type = PorousFlowEffectiveFluidPressure # Calculate effective fluid pressure from fluid phase pressures and saturations
+    type = PorousFlowEffectiveFluidPressure
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
+    type = PorousFlow1PhaseP
     porepressure = pp
-    al = 1E-8 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
+    type = PorousFlow1PhaseP
     at_nodes = true
     porepressure = pp
-    al = 1E-8 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
 
   # Fluid properties

@@ -259,11 +259,11 @@
     at_nodes = true
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = ppwater
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     at_nodes = true
     porepressure = ppwater
   [../]

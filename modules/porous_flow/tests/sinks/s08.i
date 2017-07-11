@@ -24,6 +24,11 @@
     number_fluid_phases = 2
     number_fluid_components = 3
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1.1
+  [../]
 []
 
 [Variables]
@@ -92,12 +97,11 @@
     at_nodes = true
   [../]
   [./ppss]
-    type = PorousFlow2PhasePP_VG
+    type = PorousFlow2PhasePP
     at_nodes = true
     phase0_porepressure = pwater
     phase1_porepressure = pgas
-    al = 1.1
-    m = 0.5
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

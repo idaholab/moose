@@ -71,6 +71,11 @@
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.8
+    alpha = 1
+  [../]
 []
 
 [Variables]
@@ -212,17 +217,15 @@
     type = PorousFlowVolumetricStrain
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     at_nodes = true
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

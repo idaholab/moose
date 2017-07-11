@@ -1,6 +1,6 @@
 # Testing permeability from porosity
 # Trivial test, checking calculated permeability is correct
-# k = k_anisotropic * k0 * (1-phi0)^m/phi0^n * phi^n/(1-phi)^m
+# k = k_anisotropic * B * exp(A * phi)
 
 [Mesh]
   type = GeneratedMesh
@@ -135,6 +135,12 @@
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    # unimportant in this fully-saturated test
+    m = 0.8
+    alpha = 1e-4
+  [../]
 []
 
 [Modules]
@@ -152,13 +158,11 @@
 [Materials]
   # Permeability
   [./permeability]
-    type = PorousFlowPermeabilityKozenyCarman
+    type = PorousFlowPermeabilityExponential
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
-    poroperm_function = kozeny_carman_phi0
-    k0 = 1e-10
-    phi0 = 0.05
-    m = 2
-    n = 7
+    poroperm_function = exp_k
+    A = 10
+    B = 1e-8
   [../]
   [./temperature]
     type = PorousFlowTemperature
@@ -174,20 +178,18 @@
 
   # Fluid pressure
   [./eff_fluid_pressure]
-    type = PorousFlowEffectiveFluidPressure # Calculate effective fluid pressure from fluid phase pressures and saturations
+    type = PorousFlowEffectiveFluidPressure
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
+    type = PorousFlow1PhaseP
     porepressure = pp
-    al = 1E-8 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
+    type = PorousFlow1PhaseP
     at_nodes = true
     porepressure = pp
-    al = 1E-8 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
+    capillary_pressure = pc
   [../]
 
   # Fluid properties
@@ -257,8 +259,9 @@
   petsc_options_value = ' asm      2              lu            gmres     200'
 []
 
+
 [Outputs]
-  file_base = PermFromPoro02
+  file_base = PermFromPoro03
   csv = true
-  execute_on = 'initial timestep_end'
+  execute_on = 'timestep_end'
 []

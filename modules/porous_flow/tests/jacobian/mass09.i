@@ -73,6 +73,13 @@
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1
+    pc_max = -10
+    sat_lr = 0.1
+  [../]
 []
 
 [Modules]
@@ -98,14 +105,11 @@
     at_nodes = true
   [../]
   [./ppss_nodal]
-    type = PorousFlow2PhasePS_VG
+    type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     at_nodes = true
-    m = 0.5
-    p0 = 1
-    pc_max = -10
-    sat_lr = 0.1
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

@@ -97,6 +97,10 @@
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureConst
+    pc = 0
+  [../]
 []
 
 [Materials]
@@ -107,6 +111,7 @@
     type = PorousFlow2PhasePS
     phase0_porepressure = p0
     phase1_saturation = s1
+    capillary_pressure = pc
   [../]
   [./kr0]
     type = PorousFlowRelativePermeabilityConst

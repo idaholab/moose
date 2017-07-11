@@ -126,8 +126,8 @@ PorousFlowFullySaturated::act()
   // add Materials
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_qp") && _current_task == "add_material")
   {
-    // saturation is always unity, so is trivially calculated using Porousflow1PhaseP
-    std::string material_type = "PorousFlow1PhaseP";
+    // saturation is always unity, so is trivially calculated using PorousFlow1PhaseFullySaturated
+    std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowFullySaturated_1PhaseP_qp";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -136,7 +136,7 @@ PorousFlowFullySaturated::act()
   }
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_nodal") && _current_task == "add_material")
   {
-    std::string material_type = "PorousFlow1PhaseP";
+    std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
     std::string material_name = "PorousFlowFullySaturated_1PhaseP";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;

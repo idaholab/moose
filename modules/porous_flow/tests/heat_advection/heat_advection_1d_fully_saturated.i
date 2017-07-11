@@ -168,12 +168,12 @@
     at_nodes = true
   [../]
   [./PS]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     at_nodes = true
     porepressure = pp
   [../]
   [./PS_qp]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
 []

@@ -72,6 +72,13 @@
     number_fluid_phases = 1
     number_fluid_components = 3
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureBW
+    Sn = 0.05
+    Ss = 0.9
+    las = 2.2
+    C = 1.5
+  [../]
 []
 
 [Modules]
@@ -96,22 +103,16 @@
     at_nodes = true
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_BW
+    type = PorousFlow1PhaseP
     at_nodes = false
     porepressure = pp
-    Sn = 0.05
-    Ss = 0.9
-    las = 2.2
-    C = 1.5
+    capillary_pressure = pc
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP_BW
+    type = PorousFlow1PhaseP
     porepressure = pp
     at_nodes = true
-    Sn = 0.05
-    Ss = 0.9
-    las = 2.2
-    C = 1.5
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

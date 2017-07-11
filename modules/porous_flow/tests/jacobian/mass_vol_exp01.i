@@ -121,6 +121,11 @@
     yield_function_tolerance = 1.0E-9
     internal_constraint_tolerance = 1.0E-9
   [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1
+  [../]
 []
 
 [Modules]
@@ -156,11 +161,10 @@
     at_nodes = false
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = porepressure
     at_nodes = true
-    al = 1
-    m = 0.5
+    capillary_pressure = pc
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

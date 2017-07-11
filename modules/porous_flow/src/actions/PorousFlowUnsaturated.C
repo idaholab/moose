@@ -158,28 +158,30 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
+  // Add the capillary pressure UserObject
+  std::string capillary_pressure_name = "PorousFlowUnsaturated_CapillaryPressureVG";
+  addCapillaryPressureVG(_van_genuchten_m, _van_genuchten_alpha, capillary_pressure_name);
+
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_qp") && _current_task == "add_material")
   {
-    std::string material_type = "PorousFlow1PhaseP_VG";
+    std::string material_type = "PorousFlow1PhaseP";
     InputParameters params = _factory.getValidParams(material_type);
 
     std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_qp";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
-    params.set<Real>("al") = _van_genuchten_alpha;
-    params.set<Real>("m") = _van_genuchten_m;
+    params.set<UserObjectName>("capillary_pressure") = capillary_pressure_name;
     _problem->addMaterial(material_type, material_name, params);
   }
   if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_nodal") && _current_task == "add_material")
   {
-    std::string material_type = "PorousFlow1PhaseP_VG";
+    std::string material_type = "PorousFlow1PhaseP";
     InputParameters params = _factory.getValidParams(material_type);
 
     std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_nodal";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
-    params.set<Real>("al") = _van_genuchten_alpha;
-    params.set<Real>("m") = _van_genuchten_m;
+    params.set<UserObjectName>("capillary_pressure") = capillary_pressure_name;
     params.set<bool>("at_nodes") = true;
     _problem->addMaterial(material_type, material_name, params);
   }
