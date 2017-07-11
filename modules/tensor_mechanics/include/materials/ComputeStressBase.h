@@ -26,9 +26,6 @@ protected:
   virtual void computeQpProperties() override;
   virtual void computeQpStress() = 0;
 
-  /// check if all materials responsible for providing the elasticity tensor guarantee an isotropic tensor
-  bool isElasticityTensorGuaranteedIsotropic();
-
   const std::string _base_name;
   const std::string _elasticity_tensor_name;
 
@@ -49,17 +46,6 @@ protected:
 
   /// Parameter which decides whether to store old stress. This is required for HHT time integration and Rayleigh damping
   const bool _store_stress_old;
-
-private:
-  enum class OptionalBool
-  {
-    VALUE_UNDEFINED = -1,
-    VALUE_FALSE = 0,
-    VALUE_TRUE = 1
-  };
-
-  /// store
-  OptionalBool _elasticity_tensor_isotropic_guarantee;
 };
 
 #endif // COMPUTESTRESSBASE_H
