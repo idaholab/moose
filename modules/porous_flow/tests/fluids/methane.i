@@ -51,7 +51,7 @@
     temperature = 'temp'
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
   [./methane]

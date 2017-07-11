@@ -77,7 +77,7 @@
     type = PorousFlowTemperature
   [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
   [./massfrac]

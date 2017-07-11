@@ -260,11 +260,11 @@
     type = PorousFlowVolumetricStrain
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = porepressure
   [../]
   [./ppss_nodal]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     at_nodes = true
     porepressure = porepressure
   [../]

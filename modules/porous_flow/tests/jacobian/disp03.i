@@ -84,7 +84,7 @@
     at_nodes = false
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = pp
     at_nodes = false
   [../]

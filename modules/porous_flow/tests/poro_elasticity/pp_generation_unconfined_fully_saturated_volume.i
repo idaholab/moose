@@ -251,7 +251,7 @@
     consistent_with_displaced_mesh = false
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP
+    type = PorousFlow1PhaseFullySaturated
     porepressure = porepressure
   [../]
   [./simple_fluid_qp]
