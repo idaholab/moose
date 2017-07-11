@@ -19,21 +19,20 @@ class IsotropicPlasticity : public ReturnMappingModel
 public:
   IsotropicPlasticity(const InputParameters & parameters);
 
-  virtual void initStatefulProperties(unsigned n_points);
+  virtual void initQpStatefulProperties() override;
 
 protected:
-  virtual void computeYieldStress(unsigned qp);
-  virtual void computeStressInitialize(unsigned qp,
-                                       Real effectiveTrialStress,
-                                       const SymmElasticityTensor & elasticityTensor);
-  virtual void computeStressFinalize(unsigned qp, const SymmTensor & plasticStrainIncrement);
+  virtual void computeYieldStress();
+  virtual void computeStressInitialize(Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor) override;
+  virtual void computeStressFinalize(const SymmTensor & plasticStrainIncrement) override;
 
-  virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar);
-  virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar);
-  virtual void iterationFinalize(unsigned qp, Real scalar);
+  virtual Real computeResidual(const Real effectiveTrialStress, const Real scalar) override;
+  virtual Real computeDerivative(const Real effectiveTrialStress, const Real scalar) override;
+  virtual void iterationFinalize(Real scalar) override;
 
-  virtual Real computeHardeningValue(unsigned qp, Real scalar);
-  virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
+  virtual Real computeHardeningValue(Real scalar);
+  virtual Real computeHardeningDerivative(Real scalar);
 
   Function * _yield_stress_function;
   Real _yield_stress;

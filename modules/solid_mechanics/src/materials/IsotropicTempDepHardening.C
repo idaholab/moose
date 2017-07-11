@@ -75,8 +75,7 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
 }
 
 void
-IsotropicTempDepHardening::computeStressInitialize(unsigned qp,
-                                                   Real effectiveTrialStress,
+IsotropicTempDepHardening::computeStressInitialize(Real effectiveTrialStress,
                                                    const SymmElasticityTensor & elasticityTensor)
 {
   const SymmIsotropicElasticityTensor * eT =
@@ -85,17 +84,17 @@ IsotropicTempDepHardening::computeStressInitialize(unsigned qp,
     mooseError("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
 
   _shear_modulus = eT->shearModulus();
-  initializeHardeningFunctions(qp);
-  computeYieldStress(qp);
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[qp] - _yield_stress;
-  _hardening_variable[qp] = _hardening_variable_old[qp];
-  _plastic_strain[qp] = _plastic_strain_old[qp];
+  initializeHardeningFunctions();
+  computeYieldStress();
+  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 void
-IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
+IsotropicTempDepHardening::initializeHardeningFunctions()
 {
-  const Real temp = _temperature[qp];
+  const Real temp = _temperature[_qp];
   if (temp > _hf_temperatures[0] && temp < _hf_temperatures.back())
   {
     for (unsigned int i = 0; i < _hf_temperatures.size() - 1; ++i)
@@ -130,9 +129,9 @@ IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
 }
 
 Real
-IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
+IsotropicTempDepHardening::computeHardeningValue(Real scalar)
 {
-  const Real strain = _effective_inelastic_strain_old[qp] + scalar;
+  const Real strain = _effective_inelastic_strain_old[_qp] + scalar;
 
   const Real stress =
       (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point()) +
@@ -141,10 +140,9 @@ IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
   return stress - _yield_stress;
 }
 
-Real
-IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar*/)
+Real IsotropicTempDepHardening::computeHardeningDerivative(Real /*scalar*/)
 {
-  const Real strain_old = _effective_inelastic_strain_old[qp];
+  const Real strain_old = _effective_inelastic_strain_old[_qp];
 
   const Real derivative =
       (1.0 - _hf_fraction) *
@@ -155,9 +153,9 @@ IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar
 }
 
 void
-IsotropicTempDepHardening::computeYieldStress(unsigned qp)
+IsotropicTempDepHardening::computeYieldStress()
 {
-  _yield_stress = _interp_yield_stress->sample(_temperature[qp]);
+  _yield_stress = _interp_yield_stress->sample(_temperature[_qp]);
   if (_yield_stress <= 0.0)
     mooseError("The yield stress must be greater than zero, but during the simulation your yield "
                "stress became less than zero.");

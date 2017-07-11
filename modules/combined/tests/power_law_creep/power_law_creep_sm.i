@@ -162,9 +162,6 @@
     coefficient = 1.0e-15
     n_exponent = 4
     activation_energy = 3.0e5
-    relative_tolerance = 1e-25
-    absolute_tolerance = 1e-5
-    max_its = 100
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -177,7 +174,7 @@
     type = HeatConductionMaterial
     block = 0
     specific_heat = 1.0
-    thermal_conductivity = 100.
+    thermal_conductivity = 100.0
   [../]
   [./density]
     type = Density
@@ -188,11 +185,7 @@
 
 [Executioner]
   type = Transient
-#  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options = '-snes_ksp'
   petsc_options_iname = '-ksp_gmres_restart'

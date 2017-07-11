@@ -147,13 +147,12 @@
     coefficient = 3.0e-26
     n_exponent = 4
     activation_energy = 0.0
-    relative_tolerance = 1e-08
-    absolute_tolerance = 1e-20
-    max_its = 100
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     output_iteration_info = false
+    relative_tolerance = 1e-14
+    absolute_tolerance = 1e-14
     formulation = Nonlinear3D
   [../]
 []

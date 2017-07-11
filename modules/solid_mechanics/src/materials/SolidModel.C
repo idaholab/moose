@@ -568,7 +568,8 @@ SolidModel::modifyStrainIncrement()
     if (!cm)
       mooseError("ConstitutiveModel not available for block ", current_block);
 
-    modified |= cm->modifyStrainIncrement(*_current_elem, _qp, _strain_increment, _d_strain_dT);
+    cm->setQp(_qp);
+    modified |= cm->modifyStrainIncrement(*_current_elem, _strain_increment, _d_strain_dT);
   }
 
   if (!modified)
@@ -852,8 +853,9 @@ SolidModel::computeConstitutiveModelStress()
   if (!cm)
     mooseError("Logic error.  No ConstitutiveModel for current_block=", current_block, ".");
 
+  cm->setQp(_qp);
   cm->computeStress(
-      *_current_elem, _qp, *elasticityTensor(), _stress_old, _strain_increment, _stress[_qp]);
+      *_current_elem, *elasticityTensor(), _stress_old, _strain_increment, _stress[_qp]);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -898,7 +900,8 @@ SolidModel::updateElasticityTensor(SymmElasticityTensor & tensor)
     if (!cm)
       mooseError("ConstitutiveModel not available for block ", current_block);
 
-    changed |= cm->updateElasticityTensor(_qp, tensor);
+    cm->setQp(_qp);
+    changed |= cm->updateElasticityTensor(tensor);
   }
 
   if (!changed && (_youngs_modulus_function || _poissons_ratio_function))
@@ -1588,6 +1591,12 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
 
   Factory & factory = _app.getFactory();
   InputParameters params = factory.getValidParams(cm_name);
+  // These set_attributes calls are to make isParamSetByUser() work correctly on
+  // these parameters in the ConstitutiveModel class, and are needed only for the
+  // legacy_return_mapping option.
+  params.set_attributes("absolute_tolerance", false);
+  params.set_attributes("relative_tolerance", false);
+  params.set_attributes("max_its", false);
   params += parameters();
   MooseSharedPointer<ConstitutiveModel> cm =
       factory.create<ConstitutiveModel>(cm_name, name() + "Model", params, _tid);

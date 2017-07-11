@@ -23,14 +23,12 @@ public:
 
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress(const Elem & current_elem,
-                             unsigned qp,
                              const SymmElasticityTensor & elasticityTensor,
                              const SymmTensor & stress_old,
                              SymmTensor & strain_increment,
                              SymmTensor & stress_new);
 
   virtual bool modifyStrainIncrement(const Elem & current_elem,
-                                     unsigned qp,
                                      SymmTensor & strain_increment,
                                      SymmTensor & d_strain_dT);
 

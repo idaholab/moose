@@ -18,15 +18,14 @@ public:
   IsotropicTempDepHardening(const InputParameters & parameters);
 
 protected:
-  virtual void computeYieldStress(unsigned qp);
-  virtual void computeStressInitialize(unsigned qp,
-                                       Real effectiveTrialStress,
+  virtual void computeYieldStress();
+  virtual void computeStressInitialize(Real effectiveTrialStress,
                                        const SymmElasticityTensor & elasticityTensor);
 
-  virtual Real computeHardeningValue(unsigned qp, Real scalar);
-  virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
+  virtual Real computeHardeningValue(Real scalar);
+  virtual Real computeHardeningDerivative(Real scalar);
 
-  void initializeHardeningFunctions(unsigned qp);
+  void initializeHardeningFunctions();
 
   MooseSharedPointer<LinearInterpolation> _interp_yield_stress;
   const std::vector<FunctionName> _hardening_functions_names;

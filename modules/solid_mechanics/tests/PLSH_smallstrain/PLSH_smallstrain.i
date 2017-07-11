@@ -151,9 +151,6 @@
     block = 1
     yield_stress = 50.0
     hardening_function = hf
-    relative_tolerance = 1e-25
-    absolute_tolerance = 1e-5
-#    output_iteration_info = true
   [../]
 
 []
