@@ -170,7 +170,17 @@ public:
    */
   bool isBoundaryMaterial() const { return _bnd; }
 
+  /**
+   * Subdomain setup evaluating material properties when required
+   */
+  virtual void subdomainSetup() override;
+
 protected:
+  /**
+   * Evaluate material properties on subdomain
+   */
+  virtual void computeSubdomainProperties();
+
   /**
    * Users must override this method.
    */
@@ -218,6 +228,8 @@ protected:
 
   const Elem *& _current_elem;
 
+  const SubdomainID & _current_subdomain_id;
+
   /// current side of the current element
   unsigned int & _current_side;
 
@@ -244,10 +256,15 @@ protected:
   /// If False MOOSE does not compute this property
   const bool _compute;
 
-  /// False by default.  If true, MOOSE will only call
-  /// computeQpProperties() for the 0th qp and then copy
-  /// that value around to all the qps.
-  const bool _constant_on_elem;
+  enum ConstantTypeEnum
+  {
+    NONE,
+    ELEMENT,
+    SUBDOMAIN
+  };
+
+  /// Options of the constantness level of the material
+  const ConstantTypeEnum _constant_option;
 
   enum QP_Data_Type
   {

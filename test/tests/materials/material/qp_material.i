@@ -41,7 +41,7 @@
     type = QpMaterial
     block = 0
     outputs = all
-    constant_on_elem = true
+    constant_on = ELEMENT
     property_name = 'zero_prop'
   [../]
   # The second copy of QpMaterial is not constant_on_elem.
