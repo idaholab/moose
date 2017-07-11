@@ -30,6 +30,7 @@
     exodiff = 'csv_transient_out.e'
     cli_args = 'Outputs/csv=false Outputs/exodus=true'
     prereq = transient
+    max_parallel = 1
   [../]
   [./restart_part1]
     # First part of CSV restart test, CSV files should not append
