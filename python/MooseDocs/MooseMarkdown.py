@@ -39,6 +39,7 @@ class MooseMarkdown(markdown.Markdown):
                           supplied or default 'config'.
     """
     CODE_BLOCK_COUNT = 0 # counter for code block copy buttons
+    CACHE = dict() # Cache for find method
 
     @staticmethod
     def getDefaultExtensions():
@@ -161,6 +162,11 @@ class MooseMarkdown(markdown.Markdown):
         """
         Find method for filenames (mainly for testing).
         """
+        if desired in MooseMarkdown.CACHE:
+            return MooseMarkdown.CACHE[desired]
+
         types = (common.nodes.FileNodeBase)
         filter_ = lambda n: isinstance(n, types) and n.filename.endswith(desired)
-        return [n for n in anytree.iterators.PreOrderIter(node, filter_=filter_)]
+        nodes = [n for n in anytree.iterators.PreOrderIter(node, filter_=filter_)]
+        MooseMarkdown.CACHE[desired] = nodes
+        return nodes

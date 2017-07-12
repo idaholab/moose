@@ -39,6 +39,7 @@ class TestAppSyntax(MarkdownTestCase):
 
     def testParametersDisableObjects(self):
         md = '!syntax parameters /BCs/Pressure objects=False'
+        self.parser.inlinePatterns['moose_syntax_parameters'].clearCache()
         self.convert(md)
         self.assertInLogError('Failed to locate Action')
 
@@ -78,6 +79,7 @@ class TestAppSyntax(MarkdownTestCase):
 
     def testDescriptionDisableObjects(self):
         md = '!syntax description /BCs/Pressure objects=False'
+        self.parser.inlinePatterns['moose_syntax_description'].clearCache()
         self.convert(md)
         self.assertInLogError('Failed to locate Action')
 

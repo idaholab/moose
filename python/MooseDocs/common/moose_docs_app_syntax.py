@@ -77,6 +77,7 @@ def moose_docs_app_syntax(location, hide=None):
         location[str]: The folder to locate Moose executable.
         hide[dict]: Items to consider "hidden".
     """
+
     exe = mooseutils.find_moose_executable(location)
     raw = mooseutils.runExe(exe, '--json')
     raw = raw.split('**START JSON DATA**\n')[1]
