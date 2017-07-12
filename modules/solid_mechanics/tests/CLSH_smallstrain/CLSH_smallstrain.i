@@ -145,8 +145,6 @@
     hardening_constant = 100.
     c_alpha = 0.2418e-6
     c_beta = 0.1135
-    relative_tolerance = 1e-25
-    absolute_tolerance = 1e-5
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z

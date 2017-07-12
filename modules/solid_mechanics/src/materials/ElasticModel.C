@@ -26,7 +26,6 @@ ElasticModel::~ElasticModel() {}
 
 void
 ElasticModel::computeStress(const Elem & /*current_elem*/,
-                            unsigned /*qp*/,
                             const SymmElasticityTensor & elasticity_tensor,
                             const SymmTensor & stress_old,
                             SymmTensor & strain_increment,

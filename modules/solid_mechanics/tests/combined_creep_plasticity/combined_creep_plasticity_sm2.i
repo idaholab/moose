@@ -204,6 +204,7 @@
     relative_tolerance = 1e-5
     absolute_tolerance = 1e-20
     max_its = 30
+    legacy_return_mapping = true
   [../]
   [./plas]
     type = IsotropicPlasticity
@@ -213,6 +214,7 @@
     max_its = 30
     relative_tolerance = 1e-5
     absolute_tolerance = 1e-20
+    legacy_return_mapping = true
   [../]
 []
 

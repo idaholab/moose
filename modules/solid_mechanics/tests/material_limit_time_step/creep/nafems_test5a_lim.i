@@ -225,6 +225,7 @@
     max_its = 100
     output_iteration_info = false
     max_inelastic_increment = 0.01
+    legacy_return_mapping = true
   [../]
 []
 

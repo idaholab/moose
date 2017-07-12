@@ -14,14 +14,6 @@ validParams<ConstitutiveModel>()
 {
   InputParameters params = validParams<Material>();
 
-  // Sub-Newton Iteration control parameters
-  params.addParam<unsigned int>("max_its", 30, "Maximum number of sub-newton iterations");
-  params.addParam<bool>(
-      "output_iteration_info", false, "Set true to output sub-newton iteration information");
-  params.addParam<Real>(
-      "relative_tolerance", 1e-5, "Relative convergence tolerance for sub-newtion iteration");
-  params.addParam<Real>(
-      "absolute_tolerance", 1e-20, "Absolute convergence tolerance for sub-newtion iteration");
   params.addCoupledVar("temp", "Coupled Temperature");
 
   params.addParam<Real>("thermal_expansion", "The thermal expansion coefficient.");
@@ -91,8 +83,13 @@ ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters)
 }
 
 void
+ConstitutiveModel::setQp(unsigned int qp)
+{
+  _qp = qp;
+}
+
+void
 ConstitutiveModel::computeStress(const Elem & /*current_elem*/,
-                                 unsigned /*qp*/,
                                  const SymmElasticityTensor & elasticityTensor,
                                  const SymmTensor & stress_old,
                                  SymmTensor & strain_increment,
@@ -102,15 +99,8 @@ ConstitutiveModel::computeStress(const Elem & /*current_elem*/,
   stress_new += stress_old;
 }
 
-void
-ConstitutiveModel::initStatefulProperties(unsigned int /*n_points*/)
-{
-}
-
 bool
-ConstitutiveModel::applyThermalStrain(unsigned qp,
-                                      SymmTensor & strain_increment,
-                                      SymmTensor & d_strain_dT)
+ConstitutiveModel::applyThermalStrain(SymmTensor & strain_increment, SymmTensor & d_strain_dT)
 {
   if (_t_step >= 1)
     _step_zero_cm = false;
@@ -127,9 +117,9 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
     if (_step_one_cm && _has_stress_free_temp)
       old_temp = _stress_free_temp;
     else
-      old_temp = _temperature_old[qp];
+      old_temp = _temperature_old[_qp];
 
-    Real current_temp = _temperature[qp];
+    Real current_temp = _temperature[_qp];
 
     Real delta_t = current_temp - old_temp;
 

@@ -123,7 +123,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
       if (_output_iteration_info || _output_iteration_info_on_error)
       {
-        iteration_output =
+        iteration_output +=
             "In the element " + Moose::stringify(_current_elem->id()) + +" and the qp point " +
             Moose::stringify(_qp) + ": \n" + +" iteration = " + Moose::stringify(iteration) + "\n" +
             +" effective trial stress = " + Moose::stringify(effective_trial_stress) + "\n" +
@@ -133,6 +133,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
             +" relative tolerance = " + Moose::stringify(_relative_tolerance) + "\n" +
             +" absolute residual = " + Moose::stringify(norm_residual) + "\n" +
             +" absolute tolerance = " + Moose::stringify(_absolute_tolerance) + "\n";
+        iteration_output += "\n";
       }
 
       iterationFinalize(scalar_effective_inelastic_strain);
