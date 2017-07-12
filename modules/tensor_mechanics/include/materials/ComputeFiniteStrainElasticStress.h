@@ -8,12 +8,13 @@
 #define COMPUTEFINITESTRAINELASTICSTRESS_H
 
 #include "ComputeStressBase.h"
+#include "GuaranteeConsumer.h"
 
 /**
  * ComputeFiniteStrainElasticStress computes the stress following elasticity
  * theory for finite strains
  */
-class ComputeFiniteStrainElasticStress : public ComputeStressBase
+class ComputeFiniteStrainElasticStress : public ComputeStressBase, public GuaranteeConsumer
 {
 public:
   ComputeFiniteStrainElasticStress(const InputParameters & parameters);

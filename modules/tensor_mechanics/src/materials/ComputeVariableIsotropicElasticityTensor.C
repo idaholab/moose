@@ -37,6 +37,9 @@ ComputeVariableIsotropicElasticityTensor::ComputeVariableIsotropicElasticityTens
     _d2elasticity_tensor(_num_args),
     _isotropic_elastic_constants(2)
 {
+  // all tensors created by this class are always isotropic
+  issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
+
   // fetch prerequisite derivatives and build elasticity tensor derivatives and cross-derivatives
   for (unsigned int i = 0; i < _num_args; ++i)
   {

@@ -22,10 +22,11 @@ validParams<ComputeElasticityTensor>()
 ComputeElasticityTensor::ComputeElasticityTensor(const InputParameters & parameters)
   : ComputeRotatedElasticityTensorBase(parameters),
     _Cijkl(getParam<std::vector<Real>>("C_ijkl"),
-           (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
-    _is_isotropic(_Cijkl.isIsotropic())
+           (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
-  if (!_is_isotropic)
+  if (_Cijkl.isIsotropic())
+    issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
+  else
   {
     // Define a rotation according to Euler angle parameters
     RotationTensor R(_Euler_angles); // R type: RealTensorValue
@@ -40,10 +41,4 @@ ComputeElasticityTensor::computeQpElasticityTensor()
 {
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
-}
-
-bool
-ComputeElasticityTensor::isGuaranteedIsotropic() const
-{
-  return _is_isotropic;
 }

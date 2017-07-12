@@ -19,8 +19,6 @@ class ComputeVariableIsotropicElasticityTensor : public ComputeElasticityTensorB
 public:
   ComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
 
-  virtual bool isGuaranteedIsotropic() const override { return true; }
-
 protected:
   virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;
