@@ -37,6 +37,7 @@ class NodeCore(anytree.NodeMixin):
         self.parent = parent
         self.name = name
         self._root_directory = root_directory if root_directory else MooseDocs.ROOT_DIR
+        self.__cache = dict()
 
     @property
     def root_directory(self):
@@ -67,9 +68,17 @@ class NodeCore(anytree.NodeMixin):
                                argument is not set the default will return all nodes. The supplied
                                function should accept the node as an argument.
         """
+        if name and (filter_ is not None) and (name in self.__cache):
+            return self.__cache[name]
+
         if filter_ is None:
             filter_ = lambda n: n.full_name.endswith(name)
-        return [node for node in anytree.iterators.PreOrderIter(self.root, filter_=filter_)]
+        nodes = [node for node in anytree.iterators.PreOrderIter(self.root, filter_=filter_)]
+
+        if name and (filter_ is not None):
+            self.__cache[name] = nodes
+
+        return nodes
 
     def replace(self, node):
         """
