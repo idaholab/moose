@@ -16,7 +16,6 @@
 #define SIDESETSAROUNDSUBDOMAIN_H
 
 #include "AddSideSetsBase.h" // needed for _fe_face, if restricting using normals
-#include "BlockRestrictable.h"
 
 class SideSetsAroundSubdomain;
 
@@ -29,12 +28,10 @@ InputParameters validParams<SideSetsAroundSubdomain>();
  * Optionally, only adds faces that have a normal
  * equal to specified normal up to a tolerance
  */
-class SideSetsAroundSubdomain : public AddSideSetsBase, public BlockRestrictable
+class SideSetsAroundSubdomain : public AddSideSetsBase
 {
 public:
   SideSetsAroundSubdomain(const InputParameters & parameters);
-
-  virtual void initialize() override;
 
 protected:
   virtual void modify() override;
