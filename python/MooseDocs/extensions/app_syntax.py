@@ -145,6 +145,7 @@ class MooseSyntaxBase(MooseMarkdownCommon, Pattern):
         MooseMarkdownCommon.__init__(self, **kwargs)
         Pattern.__init__(self, regex, markdown_instance)
         self._syntax = syntax
+        self.__cache = dict()
 
     def initMatch(self, match):
         """
@@ -169,8 +170,12 @@ class MooseSyntaxBase(MooseMarkdownCommon, Pattern):
                                            "all be False.")
 
         # Locate the node
-        filter_ = lambda n: syntax == n.full_name and isinstance(n, tuple(types))
-        nodes = self._syntax.findall(filter_=filter_)
+        if syntax in self.__cache:
+            nodes = self.__cache[syntax]
+        else:
+            filter_ = lambda n: syntax == n.full_name and isinstance(n, tuple(types))
+            nodes = self._syntax.findall(filter_=filter_)
+            self.__cache[syntax] = nodes
         return nodes, settings
 
     def checkForErrors(self, nodes, match, settings, unique=True):
@@ -208,6 +213,12 @@ class MooseSyntaxBase(MooseMarkdownCommon, Pattern):
             return msg
 
         return None
+
+    def clearCache(self):
+        """
+        Clears the search cache, this is for testing only.
+        """
+        self.__cache = dict()
 
 class MooseParameters(MooseSyntaxBase):
     """
