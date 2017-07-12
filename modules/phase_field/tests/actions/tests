@@ -71,4 +71,16 @@
     input = 'conserved_forward_split_1var.i'
     exodiff = 'conserved_forward_split_1var_out.e'
   [../]
+  [./grain_growth]
+    # Test grain growth action
+    type = Exodiff
+    input = 'grain_growth.i'
+    exodiff = 'grain_growth_out.e'
+  [../]
+  [./grain_growth_with_c]
+    # Test grain growth action
+    type = Exodiff
+    input = 'grain_growth_with_c.i'
+    exodiff = 'grain_growth_with_c_out.e'
+  [../]
 []

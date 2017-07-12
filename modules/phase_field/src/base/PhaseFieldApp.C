@@ -245,6 +245,7 @@
 #include "ConservedAction.h"
 #include "DisplacementGradientsAction.h"
 #include "EulerAngle2RGBAction.h"
+#include "GrainGrowthAction.h"
 #include "HHPFCRFFSplitKernelAction.h"
 #include "HHPFCRFFSplitVariablesAction.h"
 #include "MaterialVectorAuxKernelAction.h"
@@ -528,6 +529,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("DisplacementGradientsAction", "Modules/PhaseField/DisplacementGradients");
   registerSyntax("EmptyAction", "ICs/PolycrystalICs"); // placeholder
   registerSyntax("EulerAngle2RGBAction", "Modules/PhaseField/EulerAngles2RGB");
+  registerSyntax("GrainGrowthAction", "Modules/PhaseField/GrainGrowth");
   registerSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
   registerSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
   registerSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");
@@ -559,6 +561,10 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(DisplacementGradientsAction, "add_variable");
   registerAction(EulerAngle2RGBAction, "add_aux_kernel");
   registerAction(EulerAngle2RGBAction, "add_aux_variable");
+  registerAction(GrainGrowthAction, "add_aux_variable");
+  registerAction(GrainGrowthAction, "add_aux_kernel");
+  registerAction(GrainGrowthAction, "add_variable");
+  registerAction(GrainGrowthAction, "add_kernel");
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
   registerAction(MaterialVectorAuxKernelAction, "add_aux_kernel");
