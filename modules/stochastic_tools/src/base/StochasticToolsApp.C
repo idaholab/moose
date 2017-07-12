@@ -20,6 +20,12 @@
 // MultiApps
 #include "SamplerMultiApp.h"
 
+// Transfers
+#include "SamplerTransfer.h"
+
+// Controls
+#include "SamplerReceiver.h"
+
 // for test purpose only
 #include "TestDistributionPostprocessor.h"
 #include "TestSampler.h"
@@ -80,6 +86,12 @@ StochasticToolsApp::registerObjects(Factory & factory)
 
   // MultiApps
   registerMultiApp(SamplerMultiApp);
+
+  // Transfers
+  registerTransfer(SamplerTransfer);
+
+  // Controls
+  registerControl(SamplerReceiver);
 
   // for test purpose only
   registerPostprocessor(TestDistributionPostprocessor);
