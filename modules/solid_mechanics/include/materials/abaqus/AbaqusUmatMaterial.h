@@ -93,9 +93,9 @@ protected:
   const VariableGradient & _grad_disp_y_old;
   const VariableGradient & _grad_disp_z_old;
   MaterialProperty<std::vector<Real>> & _state_var;
-  MaterialProperty<std::vector<Real>> & _state_var_old;
+  const MaterialProperty<std::vector<Real>> & _state_var_old;
   MaterialProperty<ColumnMajorMatrix> & _Fbar;
-  MaterialProperty<ColumnMajorMatrix> & _Fbar_old;
+  const MaterialProperty<ColumnMajorMatrix> & _Fbar_old;
   MaterialProperty<Real> & _elastic_strain_energy;
   MaterialProperty<Real> & _plastic_dissipation;
   MaterialProperty<Real> & _creep_dissipation;

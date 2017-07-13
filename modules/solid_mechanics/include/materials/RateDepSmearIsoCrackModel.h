@@ -41,7 +41,7 @@ protected:
   Real _upper_lim_damage;
 
   MaterialProperty<Real> & _energy;
-  MaterialProperty<Real> & _energy_old;
+  const MaterialProperty<Real> & _energy_old;
 
   Real _ddamage;
   Real _ddamagerate_drs;

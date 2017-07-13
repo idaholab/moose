@@ -45,7 +45,7 @@ protected:
   MaterialProperty<RealVectorValue> & _n;
 
   /// Old value of the normal
-  MaterialProperty<RealVectorValue> & _n_old;
+  const MaterialProperty<RealVectorValue> & _n_old;
 
   /// Rotation matrix that rotates _n to "z"
   RealTensorValue _rot_n_to_z;

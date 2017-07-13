@@ -64,13 +64,13 @@ PLC_LSH::PLC_LSH(const InputParameters & parameters)
     _absolute_stress_tolerance(parameters.get<Real>("absolute_stress_tolerance")),
 
     _creep_strain(declareProperty<SymmTensor>("creep_strain")),
-    _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<SymmTensor>("creep_strain")),
 
     _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<SymmTensor>("plastic_strain")),
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
-    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
+    _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
 
     _output(getParam<PostprocessorName>("output") != "" ? &getPostprocessorValue("output") : NULL)
 
@@ -84,7 +84,7 @@ PLC_LSH::PLC_LSH(const InputParameters & parameters)
 void
 PLC_LSH::initQpStatefulProperties()
 {
-  _hardening_variable[_qp] = _hardening_variable_old[_qp] = 0;
+  _hardening_variable[_qp] = 0;
   SolidModel::initQpStatefulProperties();
 }
 

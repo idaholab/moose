@@ -31,7 +31,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::
     _thermal_expansion_function(getFunction("thermal_expansion_function")),
     _thermal_strain(declareProperty<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
     _thermal_strain_old(
-        declarePropertyOld<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
+        getMaterialPropertyOld<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
     _step_one(declareRestartableData<bool>("step_one", true))
 {
 }

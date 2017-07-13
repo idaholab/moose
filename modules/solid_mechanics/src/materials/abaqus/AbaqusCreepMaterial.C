@@ -47,23 +47,23 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const InputParameters & parameters)
     _solve_definition(getParam<unsigned int>("solve_definition")),
     _routine_flag(getParam<unsigned int>("routine_flag")),
     _state_var(declareProperty<std::vector<Real>>("state_var")),
-    _state_var_old(declarePropertyOld<std::vector<Real>>("state_var")),
+    _state_var_old(getMaterialPropertyOld<std::vector<Real>>("state_var")),
     _trial_stress(declareProperty<SymmTensor>("trial_stress")),
-    _trial_stress_old(declarePropertyOld<SymmTensor>("trial_stress")),
+    _trial_stress_old(getMaterialPropertyOld<SymmTensor>("trial_stress")),
     _dev_trial_stress(declareProperty<SymmTensor>("dev_trial_stress")),
-    _dev_trial_stress_old(declarePropertyOld<SymmTensor>("dev_trial_stress")),
+    _dev_trial_stress_old(getMaterialPropertyOld<SymmTensor>("dev_trial_stress")),
     _ets(declareProperty<Real>("effective_trial_stress")),
-    _ets_old(declarePropertyOld<Real>("effective_trial_stress")),
+    _ets_old(getMaterialPropertyOld<Real>("effective_trial_stress")),
     _stress(declareProperty<SymmTensor>("stress")),
-    _stress_old(declarePropertyOld<SymmTensor>("stress")),
+    _stress_old(getMaterialPropertyOld<SymmTensor>("stress")),
     _creep_inc(declareProperty<Real>("creep_inc")),
-    _creep_inc_old(declarePropertyOld<Real>("creep_inc")),
+    _creep_inc_old(getMaterialPropertyOld<Real>("creep_inc")),
     _total_creep(declareProperty<Real>("total_creep")),
-    _total_creep_old(declarePropertyOld<Real>("total_creep")),
+    _total_creep_old(getMaterialPropertyOld<Real>("total_creep")),
     _swell_inc(declareProperty<Real>("swell_inc")),
-    _swell_inc_old(declarePropertyOld<Real>("swell_inc")),
+    _swell_inc_old(getMaterialPropertyOld<Real>("swell_inc")),
     _total_swell(declareProperty<Real>("total_swell")),
-    _total_swell_old(declarePropertyOld<Real>("total_swell"))
+    _total_swell_old(getMaterialPropertyOld<Real>("total_swell"))
 {
 #if defined(METHOD)
   _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
@@ -131,11 +131,9 @@ AbaqusCreepMaterial::initStatefulProperties(unsigned n_points)
   {
     // Initialize state variable vector
     _state_var[qp].resize(_num_state_vars);
-    _state_var_old[qp].resize(_num_state_vars);
     for (unsigned int i = 0; i < _num_state_vars; i++)
     {
       _state_var[qp][i] = 0.0;
-      _state_var_old[qp][i] = 0.0;
     }
   }
 }

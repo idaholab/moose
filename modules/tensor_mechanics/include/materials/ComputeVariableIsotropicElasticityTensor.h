@@ -24,9 +24,6 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpElasticityTensor() override;
 
-  /// Store the old elasticity tensor to compute the stress correctly for incremental formulations
-  MaterialProperty<RankFourTensor> & _elasticity_tensor_old;
-
   /// Material defininig the Young's Modulus
   const MaterialProperty<Real> & _youngs_modulus;
 

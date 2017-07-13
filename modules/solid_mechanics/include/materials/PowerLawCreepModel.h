@@ -37,7 +37,7 @@ protected:
   Real _expTime;
 
   MaterialProperty<SymmTensor> & _creep_strain;
-  MaterialProperty<SymmTensor> & _creep_strain_old;
+  const MaterialProperty<SymmTensor> & _creep_strain_old;
 
 private:
 };

@@ -53,7 +53,7 @@ RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & param
     _effective_inelastic_strain(
         declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
     _effective_inelastic_strain_old(
-        declarePropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
+        getMaterialPropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
     _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment"))
 {
 }

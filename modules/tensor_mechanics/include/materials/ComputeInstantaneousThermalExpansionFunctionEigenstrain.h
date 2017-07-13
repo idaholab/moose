@@ -35,7 +35,7 @@ protected:
   /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
   //@{
   MaterialProperty<Real> & _thermal_strain;
-  MaterialProperty<Real> & _thermal_strain_old;
+  const MaterialProperty<Real> & _thermal_strain_old;
   //@}
 
   /// Indicates whether we are on the first step, avoiding false positives when restarting

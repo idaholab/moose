@@ -48,7 +48,7 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
-    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
+    _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
     _temperature(coupledValue("temperature"))
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
@@ -72,7 +72,6 @@ IsotropicPlasticityStressUpdate::initQpStatefulProperties()
   // later on
   _yield_condition = -1.0;
   _hardening_variable[_qp] = 0.0;
-  _hardening_variable_old[_qp] = 0.0;
   _hardening_slope = 0.0;
   _plastic_strain[_qp].zero();
 }

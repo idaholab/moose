@@ -35,10 +35,10 @@ protected:
 
   std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
-  MaterialProperty<Real> & _eqv_plastic_strain_old;
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<Real> & _eqv_plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;

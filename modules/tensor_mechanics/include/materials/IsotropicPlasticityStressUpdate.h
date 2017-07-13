@@ -65,7 +65,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
-  MaterialProperty<Real> & _hardening_variable_old;
+  const MaterialProperty<Real> & _hardening_variable_old;
   const VariableValue & _temperature;
 };
 

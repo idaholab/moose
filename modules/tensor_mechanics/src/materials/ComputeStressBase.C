@@ -49,12 +49,6 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
   // Declares old stress and older stress if the parameter _store_stress_old is true. This parameter
   // can be set from the input file using any of the child classes of ComputeStressBase.
 
-  if (_store_stress_old)
-  {
-    declarePropertyOld<RankTwoTensor>(_base_name + "stress");
-    declarePropertyOlder<RankTwoTensor>(_base_name + "stress");
-  }
-
   const std::vector<FunctionName> & fcn_names(
       getParam<std::vector<FunctionName>>("initial_stress"));
   const unsigned num = fcn_names.size();

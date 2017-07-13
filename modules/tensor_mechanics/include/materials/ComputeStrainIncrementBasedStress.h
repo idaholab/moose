@@ -23,7 +23,7 @@ protected:
   virtual void computeQpStress();
   virtual void computeQpJacobian();
 
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   std::vector<const MaterialProperty<RankTwoTensor> *> _inelastic_strains;

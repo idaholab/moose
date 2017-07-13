@@ -25,7 +25,6 @@ validParams<ComputeVariableIsotropicElasticityTensor>()
 ComputeVariableIsotropicElasticityTensor::ComputeVariableIsotropicElasticityTensor(
     const InputParameters & parameters)
   : ComputeElasticityTensorBase(parameters),
-    _elasticity_tensor_old(declarePropertyOld<RankFourTensor>(_elasticity_tensor_name)),
     _youngs_modulus(getMaterialProperty<Real>("youngs_modulus")),
     _poissons_ratio(getMaterialProperty<Real>("poissons_ratio")),
     _num_args(coupledComponents("args")),

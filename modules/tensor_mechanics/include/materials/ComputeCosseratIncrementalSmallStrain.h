@@ -42,7 +42,7 @@ protected:
   std::vector<const VariableGradient *> _grad_wc_old;
 
   /// the Cosserat curvature strain: curvature_ij = nabla_j CosseratRotation_i
-  MaterialProperty<RankTwoTensor> & _curvature_old;
+  const MaterialProperty<RankTwoTensor> & _curvature_old;
 
   /// _curvature_increment = (curvature - _curvature_old)
   MaterialProperty<RankTwoTensor> & _curvature_increment;

@@ -28,7 +28,7 @@ RateDepSmearIsoCrackModel::RateDepSmearIsoCrackModel(const InputParameters & par
     _kfail(getParam<Real>("k_fail")),
     _upper_lim_damage(getParam<Real>("upper_limit_damage")),
     _energy(declareProperty<Real>("energy")),
-    _energy_old(declarePropertyOld<Real>("energy"))
+    _energy_old(getMaterialPropertyOld<Real>("energy"))
 {
 
   if (_nstate != 2)
@@ -40,10 +40,10 @@ RateDepSmearIsoCrackModel::initQpStatefulProperties()
 {
   RateDepSmearCrackModel::initQpStatefulProperties();
 
-  _intvar[_qp][1] = _intvar_old[_qp][1] = _crit_energy;
+  _intvar[_qp][1] = const_cast<MaterialProperty<std::vector<Real>> &>(_intvar_old)[_qp][1] =
+      _crit_energy;
 
   _energy[_qp] = 0.0;
-  _energy_old[_qp] = 0.0;
 }
 
 void

@@ -187,12 +187,12 @@ SolidModel::SolidModel(const InputParameters & parameters)
     _volumetric_models(),
     _dep_matl_props(),
     _stress(createProperty<SymmTensor>("stress")),
-    _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
+    _stress_old_prop(getPropertyOld<SymmTensor>("stress")),
     _stress_old(0),
     _total_strain(createProperty<SymmTensor>("total_strain")),
-    _total_strain_old(createPropertyOld<SymmTensor>("total_strain")),
+    _total_strain_old(getPropertyOld<SymmTensor>("total_strain")),
     _elastic_strain(createProperty<SymmTensor>("elastic_strain")),
-    _elastic_strain_old(createPropertyOld<SymmTensor>("elastic_strain")),
+    _elastic_strain_old(getPropertyOld<SymmTensor>("elastic_strain")),
     _crack_flags(NULL),
     _crack_flags_old(NULL),
     _crack_flags_local(),
@@ -206,7 +206,6 @@ SolidModel::SolidModel(const InputParameters & parameters)
     _crack_max_strain_old(NULL),
     _principal_strain(3, 1),
     _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
-    _elasticity_tensor_old(createPropertyOld<SymmElasticityTensor>("elasticity_tensor")),
     _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
     _d_strain_dT(),
     _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
@@ -227,9 +226,6 @@ SolidModel::SolidModel(const InputParameters & parameters)
     _element(NULL),
     _local_elasticity_tensor(NULL)
 {
-  if (_store_stress_older)
-    declarePropertyOlder<SymmTensor>("stress");
-
   bool same_coord_type = true;
 
   for (unsigned int i = 1; i < _block_id.size(); ++i)
@@ -259,18 +255,18 @@ SolidModel::SolidModel(const InputParameters & parameters)
   if (_cracking_stress > 0)
   {
     _crack_flags = &createProperty<RealVectorValue>("crack_flags");
-    _crack_flags_old = &createPropertyOld<RealVectorValue>("crack_flags");
+    _crack_flags_old = &getPropertyOld<RealVectorValue>("crack_flags");
     if (_cracking_release == CR_POWER)
     {
       _crack_count = &createProperty<RealVectorValue>("crack_count");
-      _crack_count_old = &createPropertyOld<RealVectorValue>("crack_count");
+      _crack_count_old = &getPropertyOld<RealVectorValue>("crack_count");
     }
     _crack_rotation = &createProperty<ColumnMajorMatrix>("crack_rotation");
-    _crack_rotation_old = &createPropertyOld<ColumnMajorMatrix>("crack_rotation");
+    _crack_rotation_old = &getPropertyOld<ColumnMajorMatrix>("crack_rotation");
     _crack_max_strain = &createProperty<RealVectorValue>("crack_max_strain");
-    _crack_max_strain_old = &createPropertyOld<RealVectorValue>("crack_max_strain");
+    _crack_max_strain_old = &getPropertyOld<RealVectorValue>("crack_max_strain");
     _crack_strain = &createProperty<RealVectorValue>("crack_strain");
-    _crack_strain_old = &createPropertyOld<RealVectorValue>("crack_strain");
+    _crack_strain_old = &getPropertyOld<RealVectorValue>("crack_strain");
 
     if (parameters.isParamValid("active_crack_planes"))
     {
@@ -345,7 +341,7 @@ SolidModel::SolidModel(const InputParameters & parameters)
   if (_compute_JIntegral)
   {
     _SED = &declareProperty<Real>("strain_energy_density");
-    _SED_old = &declarePropertyOld<Real>("strain_energy_density");
+    _SED_old = &getMaterialPropertyOld<Real>("strain_energy_density");
     _Eshelby_tensor = &declareProperty<ColumnMajorMatrix>("Eshelby_tensor");
     _J_thermal_term_vec = &declareProperty<RealVectorValue>("J_thermal_term_vec");
     _current_instantaneous_thermal_expansion_coef =
@@ -698,7 +694,6 @@ SolidModel::initQpStatefulProperties()
       mooseError("initial_stress must give six values");
     }
     _stress[_qp].fillFromInputVector(s);
-    _stress_old_prop[_qp].fillFromInputVector(s);
   }
 
   if (_cracking_stress_function != NULL)
@@ -707,20 +702,16 @@ SolidModel::initQpStatefulProperties()
   }
   if (_cracking_stress > 0)
   {
-    (*_crack_flags)[_qp](0) = (*_crack_flags)[_qp](1) = (*_crack_flags)[_qp](2) =
-        (*_crack_flags_old)[_qp](0) = (*_crack_flags_old)[_qp](1) = (*_crack_flags_old)[_qp](2) = 1;
+    (*_crack_flags)[_qp](0) = (*_crack_flags)[_qp](1) = (*_crack_flags)[_qp](2) = 1;
     if (_crack_count)
     {
-      (*_crack_count)[_qp](0) = (*_crack_count)[_qp](1) = (*_crack_count)[_qp](2) =
-          (*_crack_count_old)[_qp](0) = (*_crack_count_old)[_qp](1) = (*_crack_count_old)[_qp](2) =
-              0;
+      (*_crack_count)[_qp](0) = (*_crack_count)[_qp](1) = (*_crack_count)[_qp](2) = 0;
     }
 
     (*_crack_rotation)[_qp].identity();
-    (*_crack_rotation_old)[_qp].identity();
   }
   if (_SED)
-    (*_SED)[_qp] = (*_SED_old)[_qp] = 0;
+    (*_SED)[_qp] = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////

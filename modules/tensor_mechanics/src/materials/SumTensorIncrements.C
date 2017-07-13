@@ -23,7 +23,8 @@ SumTensorIncrements::SumTensorIncrements(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _property_names(getParam<std::vector<MaterialPropertyName>>("coupled_tensor_increment_names")),
     _tensor(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name"))),
-    _tensor_old(declarePropertyOld<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name"))),
+    _tensor_old(
+        getMaterialPropertyOld<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name"))),
     _tensor_increment(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name") +
                                                      "_increment"))
 {
