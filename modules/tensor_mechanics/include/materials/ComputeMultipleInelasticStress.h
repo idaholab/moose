@@ -141,6 +141,9 @@ protected:
    * inside of the yield surface in an iteration.
    */
   std::vector<StressUpdateBase *> _models;
+
+  /// is the elasticity tensor guaranteed to be isotropic?
+  bool _is_elasticity_tensor_guaranteed_isotropic;
 };
 
 #endif // COMPUTEMULTIPLEINELASTICSTRESS_H

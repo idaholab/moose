@@ -106,6 +106,8 @@ ComputeMultipleInelasticStress::initQpStatefulProperties()
 void
 ComputeMultipleInelasticStress::initialSetup()
 {
+  _is_elasticity_tensor_guaranteed_isotropic =
+      hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
   for (unsigned int i = 0; i < _num_models; ++i)
   {
@@ -113,7 +115,7 @@ ComputeMultipleInelasticStress::initialSetup()
     if (rrr)
     {
       _models.push_back(rrr);
-      if (rrr->requiresIsotropicTensor() && !isElasticityTensorGuaranteedIsotropic())
+      if (rrr->requiresIsotropicTensor() && !_is_elasticity_tensor_guaranteed_isotropic)
         mooseError("Model " + models[i] + " requires an isotropic elasticity tensor, but the one "
                                           "supplied is not guaranteed isotropic");
     }
@@ -155,7 +157,7 @@ ComputeMultipleInelasticStress::computeQpStress()
     _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
     _inelastic_strain[_qp] =
         _rotation_increment[_qp] * _inelastic_strain[_qp] * _rotation_increment[_qp].transpose();
-    if (!(isElasticityTensorGuaranteedIsotropic() &&
+    if (!(_is_elasticity_tensor_guaranteed_isotropic &&
           (_tangent_operator_type == TangentOperatorEnum::elastic || _num_models == 0)))
       _Jacobian_mult[_qp].rotate(_rotation_increment[_qp]);
   }

@@ -18,6 +18,7 @@ validParams<ComputeFiniteStrainElasticStress>()
 ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
     const InputParameters & parameters)
   : ComputeStressBase(parameters),
+    GuaranteeConsumer(this),
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
@@ -28,7 +29,7 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
 void
 ComputeFiniteStrainElasticStress::initialSetup()
 {
-  if (!isElasticityTensorGuaranteedIsotropic())
+  if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
                "that guarantee isotropic tensors.");
 }

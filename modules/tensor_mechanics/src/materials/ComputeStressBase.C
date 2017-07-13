@@ -44,8 +44,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _store_stress_old(getParam<bool>("store_stress_old")),
-    _elasticity_tensor_isotropic_guarantee(OptionalBool::VALUE_UNDEFINED)
+    _store_stress_old(getParam<bool>("store_stress_old"))
 {
   // Declares old stress and older stress if the parameter _store_stress_old is true. This parameter
   // can be set from the input file using any of the child classes of ComputeStressBase.
@@ -93,50 +92,4 @@ ComputeStressBase::computeQpProperties()
 
   // Add in extra stress
   _stress[_qp] += _extra_stress[_qp];
-}
-
-bool
-ComputeStressBase::isElasticityTensorGuaranteedIsotropic()
-{
-  // we need to determine this on demand in initialSetup
-  if (_elasticity_tensor_isotropic_guarantee == OptionalBool::VALUE_UNDEFINED)
-  {
-    if (!_fe_problem.startedInitialSetup())
-      mooseError("isElasticityTensorGuaranteedIsotropic() needs to be called in initialSetup()");
-
-    _elasticity_tensor_isotropic_guarantee = OptionalBool::VALUE_TRUE;
-
-    // Reference to MaterialWarehouse for testing and retrieving block ids
-    const auto & warehouse = _fe_problem.getMaterialWarehouse();
-
-    // Complete set of ids that this object is active
-    const auto & ids = blockRestricted() ? blockIDs() : meshBlockIDs();
-
-    // Loop over each id for this object
-    for (const auto & id : ids)
-    {
-      // If block materials exist, look if any declare the elasticity tensor
-      if (warehouse.hasActiveBlockObjects(id))
-      {
-        const std::vector<std::shared_ptr<Material>> & mats = warehouse.getActiveBlockObjects(id);
-        for (const auto & mat : mats)
-        {
-          const auto & mat_props = mat->getSuppliedItems();
-          if (mat_props.count(_elasticity_tensor_name))
-          {
-            auto elastic_mat = dynamic_cast<ComputeElasticityTensorBase *>(mat.get());
-            if (elastic_mat && !elastic_mat->isGuaranteedIsotropic())
-            {
-              // we found at least one material on the set of block we operate on
-              // that does _not_ guarantee an isotropic elasticity tensor
-              _elasticity_tensor_isotropic_guarantee = OptionalBool::VALUE_FALSE;
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return _elasticity_tensor_isotropic_guarantee == OptionalBool::VALUE_TRUE;
 }
