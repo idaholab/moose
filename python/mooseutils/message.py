@@ -79,14 +79,15 @@ def mooseMessage(*args, **kwargs):
         box.exec_()
 
     # Emit the message to any listeners
-    messageEmitter.write(message, color)
+    if MOOSE_USE_QT5:
+      messageEmitter.write(message, color)
 
     # Print the message to screen
     if color:
         message = colorText(message, color)
     print message
     # Show the traceback
-    if trace:
+    if trace and MOOSE_USE_QT5:
         traceback.print_stack()
         stack = ''.join(traceback.format_stack())
         messageEmitter.write(stack, color)
