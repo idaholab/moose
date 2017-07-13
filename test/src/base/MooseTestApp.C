@@ -282,16 +282,27 @@ InputParameters
 validParams<MooseTestApp>()
 {
   InputParameters params = validParams<MooseApp>();
+  /* MooseTestApp is special because it will have its own
+   * binary and we want the default to allow test objects.
+   */
+  params.addCommandLineParam<bool>(
+      "disallow_test_objects",
+      "--disallow-test-objects",
+      false,
+      "Don't register test objects and syntax. This overrides --allow-test-objects");
   return params;
 }
 
 MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
+  bool use_test_objs = !getParam<bool>("disallow_test_objects");
   Moose::registerObjects(_factory);
-  MooseTestApp::registerObjects(_factory);
+  if (use_test_objs)
+    MooseTestApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  MooseTestApp::associateSyntax(_syntax, _action_factory);
+  if (use_test_objs)
+    MooseTestApp::associateSyntax(_syntax, _action_factory);
 }
 
 MooseTestApp::~MooseTestApp() {}
