@@ -36,10 +36,11 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(
     _Cijkl(RankFourTensor()),
     _elastic_flexural_rigidity_tensor(
         declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
-    _compliance(declareProperty<RankFourTensor>(_base_name + "compliance_tensor")),
-    _elasticity_tensor_is_constant(
-        declareProperty<bool>(_base_name + "elasticity_tensor_is_constant"))
+    _compliance(declareProperty<RankFourTensor>(_base_name + "compliance_tensor"))
 {
+  // all tensors created by this class are always constant in time
+  issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
+
   const Real E = getParam<Real>("young");
   const Real nu = getParam<Real>("poisson");
   const Real b = getParam<Real>("layer_thickness");
@@ -102,9 +103,6 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(
 void
 ComputeLayeredCosseratElasticityTensor::computeQpElasticityTensor()
 {
-  // Let the Stress Calculator classes know that this class only has constant values
-  _elasticity_tensor_is_constant[_qp] = true;
-
   _elasticity_tensor[_qp] = _Eijkl;
   _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
   _compliance[_qp] = _Cijkl;

@@ -36,9 +36,6 @@ protected:
 
   /// Individual elasticity tensor
   RankFourTensor _Cijkl;
-
-  /// Flag for variable elasticity isotropic tensors
-  MaterialProperty<bool> & _elasticity_tensor_is_constant;
 };
 
 #endif // COMPUTEISOTROPICELASTICITYTENSOR_H
