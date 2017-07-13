@@ -102,7 +102,6 @@
 
   [./Adaptivity]
     steps = 3
-    print_changed_info = true
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
@@ -111,4 +110,5 @@
 
 [Outputs]
   exodus = true
+  print_mesh_changed_info = true
 []
