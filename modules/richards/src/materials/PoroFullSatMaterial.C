@@ -54,7 +54,6 @@ PoroFullSatMaterial::PoroFullSatMaterial(const InputParameters & parameters)
     _grad_disp(_ndisp),
 
     _vol_strain(declareProperty<Real>("volumetric_strain")),
-    _vol_strain_old(declarePropertyOld<Real>("volumetric_strain")),
 
     _biot_coefficient(declareProperty<Real>("biot_coefficient")),
 

@@ -33,8 +33,7 @@ Density::Density(const InputParameters & parameters)
     _disp_r(isCoupled("displacements") ? coupledValue("displacements", 0)
                                        : (isCoupled("disp_r") ? coupledValue("disp_r") : _zero)),
     _orig_density(getParam<Real>("density")),
-    _density(declareProperty<Real>("density")),
-    _density_old(declarePropertyOld<Real>("density"))
+    _density(declareProperty<Real>("density"))
 {
   // new parameter scheme
   if (isCoupled("displacements"))

@@ -22,7 +22,7 @@ validParams<TestControl>()
   InputParameters params = validParams<Control>();
 
   MooseEnum test_type(
-      "real variable point tid_warehouse_error disable_executioner connection alias");
+      "real variable point tid_warehouse_error disable_executioner connection alias mult");
   params.addRequiredParam<MooseEnum>(
       "test_type", test_type, "Indicates the type of test to perform");
   params.addParam<std::string>(
@@ -61,6 +61,9 @@ TestControl::TestControl(const InputParameters & parameters)
     _app.getInputParameterWarehouse().addControllableParameterConnection(_alias, slave);
   }
 
+  else if (_test_type == "mult")
+    getControllableValue<Real>("parameter");
+
   else if (_test_type != "point")
     mooseError("Unknown test type.");
 }
@@ -76,4 +79,10 @@ TestControl::execute()
 
   if (_test_type == "alias")
     setControllableValueByName<Real>(_alias, 0.42);
+
+  if (_test_type == "mult")
+  {
+    const Real & val = getControllableValue<Real>("parameter");
+    setControllableValue<Real>("parameter", val * 3);
+  }
 }

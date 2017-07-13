@@ -45,7 +45,7 @@ PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & par
     _has_temp(isCoupled("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _creep_strain(declareProperty<RankTwoTensor>(_creep_prepend + "creep_strain")),
-    _creep_strain_old(declarePropertyOld<RankTwoTensor>(_creep_prepend + "creep_strain"))
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_creep_prepend + "creep_strain"))
 {
 }
 

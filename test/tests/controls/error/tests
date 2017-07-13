@@ -38,4 +38,10 @@
     expect_err = "The desired parameter is not controllable: Executioner::\*/enable"
   [../]
 
+  [./non_existing_dependency]
+    # Test that non existing dependency errors out properly
+    type = RunException
+    input = 'non_existing_dependency.i'
+    expect_err = "The Control \"no-control\" was not created, did you make a spelling mistake or forget to include it in your input file\?"
+  [../]
 []

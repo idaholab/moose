@@ -172,7 +172,7 @@ protected:
   std::vector<MaterialProperty<std::vector<Real>> *> _mat_prop_state_vars;
 
   /// Old state variable material property
-  std::vector<MaterialProperty<std::vector<Real>> *> _mat_prop_state_vars_old;
+  std::vector<const MaterialProperty<std::vector<Real>> *> _mat_prop_state_vars_old;
 
   /// State variable evolution rate component material property
   std::vector<MaterialProperty<std::vector<Real>> *> _mat_prop_state_var_evol_rate_comps;
@@ -237,12 +237,12 @@ protected:
   MooseEnum _lsrch_method;
 
   MaterialProperty<RankTwoTensor> & _fp;
-  MaterialProperty<RankTwoTensor> & _fp_old;
+  const MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
-  MaterialProperty<RankTwoTensor> & _pk2_old;
+  const MaterialProperty<RankTwoTensor> & _pk2_old;
   MaterialProperty<RankTwoTensor> & _lag_e;
   MaterialProperty<RankTwoTensor> & _update_rot;
-  MaterialProperty<RankTwoTensor> & _update_rot_old;
+  const MaterialProperty<RankTwoTensor> & _update_rot_old;
 
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
   const MaterialProperty<RankTwoTensor> & _deformation_gradient_old;

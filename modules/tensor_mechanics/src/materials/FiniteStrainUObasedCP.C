@@ -80,15 +80,15 @@ FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
     _lsrch_max_iter(getParam<unsigned int>("line_search_maxiter")),
     _lsrch_method(getParam<MooseEnum>("line_search_method")),
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
-    _fp_old(declarePropertyOld<RankTwoTensor>(
+    _fp_old(getMaterialPropertyOld<RankTwoTensor>(
         "fp")), // Plastic deformation gradient of previous increment
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
-    _pk2_old(declarePropertyOld<RankTwoTensor>(
+    _pk2_old(getMaterialPropertyOld<RankTwoTensor>(
         "pk2")), // 2nd Piola Kirchoff Stress of previous increment
     _lag_e(declareProperty<RankTwoTensor>("lage")), // Lagrangian strain
     _update_rot(declareProperty<RankTwoTensor>(
         "update_rot")), // Rotation tensor considering material rotation and crystal orientation
-    _update_rot_old(declarePropertyOld<RankTwoTensor>("update_rot")),
+    _update_rot_old(getMaterialPropertyOld<RankTwoTensor>("update_rot")),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
     _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
     _crysrot(getMaterialProperty<RankTwoTensor>("crysrot"))
@@ -142,7 +142,7 @@ FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
         parameters.get<std::vector<UserObjectName>>("uo_state_vars")[i]);
     _mat_prop_state_vars[i] = &declareProperty<std::vector<Real>>(
         parameters.get<std::vector<UserObjectName>>("uo_state_vars")[i]);
-    _mat_prop_state_vars_old[i] = &declarePropertyOld<std::vector<Real>>(
+    _mat_prop_state_vars_old[i] = &getMaterialPropertyOld<std::vector<Real>>(
         parameters.get<std::vector<UserObjectName>>("uo_state_vars")[i]);
   }
 
@@ -170,7 +170,9 @@ FiniteStrainUObasedCP::initQpStatefulProperties()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
     (*_mat_prop_state_vars[i])[_qp].resize(_uo_state_vars[i]->variableSize());
-    (*_mat_prop_state_vars_old[i])[_qp].resize(_uo_state_vars[i]->variableSize());
+    // TODO: remove this nasty const_cast if you can figure out how
+    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp].resize(
+        _uo_state_vars[i]->variableSize());
     _state_vars_old[i].resize(_uo_state_vars[i]->variableSize());
     _state_vars_prev[i].resize(_uo_state_vars[i]->variableSize());
   }
@@ -195,7 +197,9 @@ FiniteStrainUObasedCP::initQpStatefulProperties()
   {
     // Initializes slip system related properties
     _uo_state_vars[i]->initSlipSysProps((*_mat_prop_state_vars[i])[_qp], _q_point[_qp]);
-    (*_mat_prop_state_vars_old[i])[_qp] = (*_mat_prop_state_vars[i])[_qp];
+    // TODO: remove this nasty const_cast if you can figure out how
+    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
+        (*_mat_prop_state_vars[i])[_qp];
   }
 }
 
@@ -263,8 +267,11 @@ FiniteStrainUObasedCP::computeQpStress()
 void
 FiniteStrainUObasedCP::preSolveQp()
 {
+  // TODO: remove this nasty const_cast if you can figure out how
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    (*_mat_prop_state_vars[i])[_qp] = (*_mat_prop_state_vars_old[i])[_qp] = _state_vars_old[i];
+    (*_mat_prop_state_vars[i])[_qp] =
+        const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
+            _state_vars_old[i];
 
   _pk2[_qp] = _pk2_old[_qp];
   _fp_old_inv = _fp_old[_qp].inverse();
@@ -283,9 +290,11 @@ FiniteStrainUObasedCP::solveQp()
 void
 FiniteStrainUObasedCP::postSolveQp()
 {
+  // TODO: remove this nasty const_cast if you can figure out how
   // Restores the the old stateful properties after a successful solve
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    (*_mat_prop_state_vars_old[i])[_qp] = _state_vars_old[i];
+    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
+        _state_vars_old[i];
 
   _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose() / _fe.det();
 
@@ -376,8 +385,10 @@ FiniteStrainUObasedCP::isStateVariablesConverged()
 void
 FiniteStrainUObasedCP::postSolveStatevar()
 {
+  // TODO: remove this nasty const_cast if you can figure out how
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    (*_mat_prop_state_vars_old[i])[_qp] = (*_mat_prop_state_vars[i])[_qp];
+    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
+        (*_mat_prop_state_vars[i])[_qp];
 
   _fp_old_inv = _fp_inv;
 }

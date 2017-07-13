@@ -56,7 +56,7 @@ protected:
   template <typename T>
   void initPropOld(const std::vector<UserObjectName> &,
                    unsigned int,
-                   std::vector<MaterialProperty<T> *> &);
+                   std::vector<const MaterialProperty<T> *> &);
 
   /// This function initializes user objects
   template <typename T>
@@ -191,7 +191,7 @@ protected:
   std::string _pk2_prop_name;
   MaterialProperty<RankTwoTensor> & _pk2;
   MaterialProperty<RankTwoTensor> & _fp;
-  MaterialProperty<RankTwoTensor> & _fp_old;
+  const MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _ce;
 
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
@@ -201,7 +201,7 @@ protected:
   std::vector<MaterialProperty<Real> *> _flow_rate_prop;
   std::vector<MaterialProperty<Real> *> _strength_prop;
   std::vector<MaterialProperty<Real> *> _int_var_stateful_prop;
-  std::vector<MaterialProperty<Real> *> _int_var_stateful_prop_old;
+  std::vector<const MaterialProperty<Real> *> _int_var_stateful_prop_old;
   std::vector<MaterialProperty<Real> *> _int_var_rate_prop;
   std::vector<Real> _int_var_old;
 

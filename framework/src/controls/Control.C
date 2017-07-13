@@ -26,6 +26,9 @@ validParams<Control>()
   params.registerBase("Control");
 
   params.set<MultiMooseEnum>("execute_on") = Control::getExecuteOptions();
+  params.addParam<std::vector<std::string>>(
+      "depends_on",
+      "The Controls that this control relies upon (i.e. must execute before this one)");
 
   return params;
 }
@@ -39,6 +42,7 @@ Control::Control(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
+    _depends_on(getParam<std::vector<std::string>>("depends_on")),
     _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {
 }

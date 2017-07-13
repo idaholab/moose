@@ -73,8 +73,8 @@ ComputeElasticSmearedCrackingStress::ComputeElasticSmearedCrackingStress(
     _strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getDefaultMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
     _cracking_release(getCrackingModel(getParam<std::string>("cracking_release"))),
     _cracking_residual_stress(getParam<Real>("cracking_residual_stress")),
     _cracking_stress_function(getFunction("cracking_stress")),
@@ -85,21 +85,21 @@ ComputeElasticSmearedCrackingStress::ComputeElasticSmearedCrackingStress(
     _cracking_beta(getParam<Real>("cracking_beta")),
     _shear_retention(getParam<bool>("shear_retention")),
     _crack_flags(declareProperty<RealVectorValue>(_base_name + "crack_flags")),
-    _crack_flags_old(declarePropertyOld<RealVectorValue>(_base_name + "crack_flags")),
+    _crack_flags_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_flags")),
     _crack_count(NULL),
     _crack_count_old(NULL),
     _crack_rotation(declareProperty<RankTwoTensor>(_base_name + "crack_rotation")),
-    _crack_rotation_old(declarePropertyOld<RankTwoTensor>(_base_name + "crack_rotation")),
+    _crack_rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "crack_rotation")),
     _crack_strain(declareProperty<RealVectorValue>(_base_name + "crack_strain")),
-    _crack_strain_old(declarePropertyOld<RealVectorValue>(_base_name + "crack_strain")),
+    _crack_strain_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_strain")),
     _crack_max_strain(declareProperty<RealVectorValue>(_base_name + "crack_max_strain")),
-    _crack_max_strain_old(declarePropertyOld<RealVectorValue>(_base_name + "crack_max_strain")),
+    _crack_max_strain_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_max_strain")),
     _principal_strain(3, 1)
 {
   if (_cracking_release == CR_POWER)
   {
     _crack_count = &declareProperty<RealVectorValue>(_base_name + "crack_count");
-    _crack_count_old = &declarePropertyOld<RealVectorValue>(_base_name + "crack_count");
+    _crack_count_old = &getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_count");
   }
 
   if (parameters.isParamValid("active_crack_planes"))

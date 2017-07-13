@@ -40,9 +40,9 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
     _grad_disp_y_old(coupledGradientOld("disp_y")),
     _grad_disp_z_old(coupledGradientOld("disp_z")),
     _state_var(declareProperty<std::vector<Real>>("state_var")),
-    _state_var_old(declarePropertyOld<std::vector<Real>>("state_var")),
+    _state_var_old(getMaterialPropertyOld<std::vector<Real>>("state_var")),
     _Fbar(declareProperty<ColumnMajorMatrix>("Fbar")),
-    _Fbar_old(declarePropertyOld<ColumnMajorMatrix>("Fbar")),
+    _Fbar_old(getMaterialPropertyOld<ColumnMajorMatrix>("Fbar")),
     _elastic_strain_energy(declareProperty<Real>("elastic_strain_energy")),
     _plastic_dissipation(declareProperty<Real>("plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>("creep_dissipation"))
@@ -170,12 +170,8 @@ AbaqusUmatMaterial::initQpStatefulProperties()
 {
   // Initialize state variable vector
   _state_var[_qp].resize(_num_state_vars);
-  _state_var_old[_qp].resize(_num_state_vars);
   for (unsigned int i = 0; i < _num_state_vars; ++i)
-  {
     _state_var[_qp][i] = 0.0;
-    _state_var_old[_qp][i] = 0.0;
-  }
 }
 
 void

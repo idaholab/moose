@@ -81,7 +81,7 @@ protected:
   Real _three_shear_modulus;
 
   MaterialProperty<Real> & _effective_inelastic_strain;
-  MaterialProperty<Real> & _effective_inelastic_strain_old;
+  const MaterialProperty<Real> & _effective_inelastic_strain_old;
   Real _max_inelastic_increment;
 };
 

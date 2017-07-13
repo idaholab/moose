@@ -26,7 +26,7 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
 };
 
 #endif // COMPUTEFINITESTRAINELASTICSTRESS_H

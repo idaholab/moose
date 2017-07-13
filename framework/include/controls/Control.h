@@ -70,9 +70,17 @@ public:
    */
   static MultiMooseEnum getExecuteOptions();
 
+  /**
+   * Return the Controls that must run before this Control
+   */
+  std::vector<std::string> & getDependencies() { return _depends_on; }
+
 protected:
   /// Reference to the FEProblemBase for this object
   FEProblemBase & _fe_problem;
+
+  /// A list of controls that are required to run before this control may run
+  std::vector<std::string> _depends_on;
 
   ///@{
   /**

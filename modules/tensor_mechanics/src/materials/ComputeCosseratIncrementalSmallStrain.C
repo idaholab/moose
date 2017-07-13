@@ -32,7 +32,7 @@ ComputeCosseratIncrementalSmallStrain::ComputeCosseratIncrementalSmallStrain(
     _wc_old(_nrots),
     _grad_wc(_nrots),
     _grad_wc_old(_nrots),
-    _curvature_old(declarePropertyOld<RankTwoTensor>("curvature")),
+    _curvature_old(getMaterialPropertyOld<RankTwoTensor>("curvature")),
     _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment"))
 {
   if (_nrots != 3)

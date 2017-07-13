@@ -139,6 +139,13 @@ public:
   TypeVector<Real> column(const unsigned int c) const;
 
   /**
+   * Returns a rotated version of the tensor data given a rank two tensor rotation tensor
+   * _vals[i][j] = R_ij * R_jl * _vals[k][l]
+   * @param R rotation matrix as a RealTensorValue
+   */
+  RankTwoTensor rotated(const RealTensorValue & R) const;
+
+  /**
    * rotates the tensor data given a rank two tensor rotation tensor
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RealTensorValue

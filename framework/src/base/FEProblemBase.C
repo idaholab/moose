@@ -2880,14 +2880,41 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 void
 FEProblemBase::executeControls(const ExecFlagType & exec_type)
 {
-  const auto & objects = _control_warehouse[exec_type].getActiveObjects();
+  DependencyResolver<std::shared_ptr<Control>> resolver;
 
-  if (!objects.empty())
+  auto controls_wh = _control_warehouse[exec_type];
+  // Add all of the dependencies into the resolver and sort them
+  for (const auto & it : controls_wh.getActiveObjects())
+  {
+    // Make sure an item with no dependencies comes out too!
+    resolver.addItem(it);
+
+    std::vector<std::string> & dependent_controls = it->getDependencies();
+    for (const auto & depend_name : dependent_controls)
+    {
+      if (controls_wh.hasActiveObject(depend_name))
+      {
+        auto dep_control = controls_wh.getActiveObject(depend_name);
+        resolver.insertDependency(it, dep_control);
+      }
+      else
+        mooseError("The Control \"",
+                   depend_name,
+                   "\" was not created, did you make a "
+                   "spelling mistake or forget to include it "
+                   "in your input file?");
+    }
+  }
+
+  const auto & ordered_controls = resolver.getSortedValues();
+
+  if (!ordered_controls.empty())
   {
     Moose::perf_log.push("computeControls()", "Execution");
 
     _control_warehouse.setup(exec_type);
-    for (const auto & control : objects)
+    // Run the controls in the proper order
+    for (const auto & control : ordered_controls)
       control->execute();
 
     Moose::perf_log.pop("computeControls()", "Execution");

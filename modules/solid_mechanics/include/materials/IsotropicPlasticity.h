@@ -44,10 +44,10 @@ protected:
   Real _hardening_slope;
 
   MaterialProperty<SymmTensor> & _plastic_strain;
-  MaterialProperty<SymmTensor> & _plastic_strain_old;
+  const MaterialProperty<SymmTensor> & _plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
-  MaterialProperty<Real> & _hardening_variable_old;
+  const MaterialProperty<Real> & _hardening_variable_old;
 };
 
 template <>

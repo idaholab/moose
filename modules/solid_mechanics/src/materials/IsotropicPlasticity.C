@@ -39,10 +39,10 @@ IsotropicPlasticity::IsotropicPlasticity(const InputParameters & parameters)
                             : NULL),
 
     _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<SymmTensor>("plastic_strain")),
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
-    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
+    _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable"))
 {
   if (isParamValid("yield_stress") && _yield_stress <= 0)
     mooseError("Yield stress must be greater than zero");

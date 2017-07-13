@@ -21,7 +21,7 @@ validParams<ComputeStrainIncrementBasedStress>()
 ComputeStrainIncrementBasedStress::ComputeStrainIncrementBasedStress(
     const InputParameters & parameters)
   : ComputeStressBase(parameters),
-    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain")),
     _mechanical_strain_old(
         getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "mechanical_strain")),

@@ -60,10 +60,10 @@ protected:
   }
 
   template <typename T>
-  MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
+  const MaterialProperty<T> & getPropertyOld(const std::string & prop_name)
   {
     std::string name(prop_name + _appended_property_name);
-    return declarePropertyOld<T>(name);
+    return getMaterialPropertyOld<T>(name);
   }
 };
 

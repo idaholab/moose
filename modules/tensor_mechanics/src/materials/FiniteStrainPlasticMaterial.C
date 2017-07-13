@@ -29,10 +29,10 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters &
   : ComputeStressBase(parameters),
     _yield_stress_vector(getParam<std::vector<Real>>("yield_stress")), // Read from input file
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
-    _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
-    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
+    _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
     _strain_increment(getMaterialProperty<RankTwoTensor>("strain_increment")),
     _rotation_increment(getMaterialProperty<RankTwoTensor>("rotation_increment")),
     _elasticity_tensor(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
@@ -48,11 +48,7 @@ void
 FiniteStrainPlasticMaterial::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
-  _stress_old[_qp] = _stress[_qp];
-
   _plastic_strain[_qp].zero();
-  _plastic_strain_old[_qp].zero();
-
   _eqv_plastic_strain[_qp] = 0.0;
 }
 

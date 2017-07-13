@@ -104,10 +104,10 @@ protected:
   Real _rndm_scale_var;       ///Variable value
 
   MaterialProperty<std::vector<Real>> & _intvar;
-  MaterialProperty<std::vector<Real>> & _intvar_old;
+  const MaterialProperty<std::vector<Real>> & _intvar_old;
 
   MaterialProperty<SymmTensor> & _stress_undamaged;
-  MaterialProperty<SymmTensor> & _stress_undamaged_old;
+  const MaterialProperty<SymmTensor> & _stress_undamaged_old;
 
   std::vector<Real> _intvar_incr;
   std::vector<Real> _intvar_tmp, _intvar_old_tmp;
@@ -118,7 +118,7 @@ protected:
   SymmElasticityTensor _elasticity;
   SymmTensor _stress_old, _dstrain, _stress_new;
   SymmTensor _stress0, _dstress0;
-  bool _nconv; ///Convergence flag
+  bool _nconv;   ///Convergence flag
   bool _err_tol; ///Flag to indicate that increment size has exceeded tolerance and needs cutback
 
 private:
