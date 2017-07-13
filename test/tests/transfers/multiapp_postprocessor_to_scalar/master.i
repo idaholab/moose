@@ -46,11 +46,8 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
+  num_steps = 5
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -61,10 +58,10 @@
 
 [MultiApps]
   [./pp_sub]
+    type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0.5 0.5 0 0.7 0.7 0'
     execute_on = timestep_end
-    type = TransientMultiApp
     input_files = sub.i
   [../]
 []
