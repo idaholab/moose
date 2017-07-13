@@ -35,6 +35,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
+    _block_restricted(false),
+    _boundary_restricted(false),
     _mi_block_ids(_empty_block_ids),
     _mi_boundary_ids(_empty_boundary_ids)
 {
@@ -50,6 +52,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
+    _block_restricted(block_ids.find(Moose::ANY_BLOCK_ID) == block_ids.end()),
+    _boundary_restricted(false),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(_empty_boundary_ids)
 {
@@ -65,6 +69,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
+    _block_restricted(false),
+    _boundary_restricted(boundary_ids.find(Moose::ANY_BOUNDARY_ID) == boundary_ids.end()),
     _mi_block_ids(_empty_block_ids),
     _mi_boundary_ids(boundary_ids)
 {
@@ -81,7 +87,11 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
-    _mi_block_ids(block_ids),
+    _block_restricted(block_ids.find(Moose::ANY_BLOCK_ID) == block_ids.end()),
+    _boundary_restricted(boundary_ids.find(Moose::ANY_BOUNDARY_ID) == boundary_ids.end()),
+    _mi_block_ids((!_mi_params.get<bool>("_dual_restrictable") && _boundary_restricted)
+                      ? _empty_block_ids
+                      : block_ids),
     _mi_boundary_ids(boundary_ids)
 {
   initializeMaterialPropertyInterface(_mi_params);
@@ -177,8 +187,11 @@ MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
 
   // If the material property is boundary restrictable, add to the list of materials to check
   if (!_mi_boundary_ids.empty())
+  {
+    // FIXME: we need also check the list of blocks connecting the boundary.
     for (const auto & bnd_id : _mi_boundary_ids)
       _mi_feproblem.storeDelayedCheckMatProp(_mi_name, bnd_id, name);
+  }
 }
 
 void
