@@ -14,4 +14,5 @@ pages, which can be done using the following command.
 
 The software quality documents for MOOSE are listed below:
 
-* [Software Requirement Specification (SRS)](/sqa/srs.md)
+* [System Requirement Specification (SRS)](/sqa/srs.md)
+* [System Design Description (SDD)](/sqa/sdd.md)
