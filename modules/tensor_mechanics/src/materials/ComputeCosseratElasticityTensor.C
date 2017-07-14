@@ -31,6 +31,8 @@ ComputeCosseratElasticityTensor::ComputeCosseratElasticityTensor(const InputPara
     _elastic_flexural_rigidity_tensor(
         declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor"))
 {
+  // all tensors created by this class are always constant in time
+  issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 }
 
 void

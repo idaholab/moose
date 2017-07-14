@@ -11,7 +11,7 @@ InputParameters
 validParams<ComputeIsotropicElasticityTensor>()
 {
   InputParameters params = validParams<ComputeElasticityTensorBase>();
-  params.addClassDescription("Compute an isotropic elasticity tensor.");
+  params.addClassDescription("Compute a constant isotropic elasticity tensor.");
   params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
   params.addParam<Real>("lambda", "Lame's first constant for the material.");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
@@ -36,12 +36,14 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
 {
   unsigned int num_elastic_constants = _bulk_modulus_set + _lambda_set + _poissons_ratio_set +
                                        _shear_modulus_set + _youngs_modulus_set;
+  if (num_elastic_constants != 2)
+    mooseError("Exactly two elastic constants must be defined for material '" + name() + "'.");
 
   // all tensors created by this class are always isotropic
   issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 
-  if (num_elastic_constants != 2)
-    mooseError("Exactly two elastic constants must be defined for material '" + name() + "'.");
+  // all tensors created by this class are always constant in time
+  issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 
   if (_bulk_modulus_set && _bulk_modulus <= 0.0)
     mooseError("Bulk modulus must be positive in material '" + name() + "'.");

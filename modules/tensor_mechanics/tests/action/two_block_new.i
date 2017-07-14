@@ -26,7 +26,7 @@
 
 [Modules/TensorMechanics/Master]
   # parameters that apply to all subblocks are specified at this level. They
-  # can be overwritten in teh subblocks.
+  # can be overwritten in the subblocks.
   add_variables = true
   strain = FINITE
   generate_output = 'stress_xx'

@@ -110,10 +110,10 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     block = 0
-    fill_method = symmetric_isotropic
-    C_ijkl = '0.1 1'
+    lambda = 0.1
+    shear_modulus = 1.0
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

@@ -293,7 +293,6 @@
   [../]
 
   [./stress]
-    type = ComputeVariableElasticConstantStress
   [../]
 
   [./heat]

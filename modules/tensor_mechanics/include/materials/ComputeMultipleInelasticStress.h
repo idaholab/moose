@@ -144,6 +144,9 @@ protected:
 
   /// is the elasticity tensor guaranteed to be isotropic?
   bool _is_elasticity_tensor_guaranteed_isotropic;
+
+  // /// flag for if the elasticity tensor does NOT change value over time
+  // bool _is_elasticity_tensor_guaranteed_constant_in_time;
 };
 
 #endif // COMPUTEMULTIPLEINELASTICSTRESS_H
