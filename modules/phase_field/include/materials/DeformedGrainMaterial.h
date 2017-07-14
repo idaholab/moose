@@ -56,7 +56,6 @@ protected:
   MaterialProperty<Real> & _gamma;
   MaterialProperty<Real> & _L;
   MaterialProperty<Real> & _mu;
-  MaterialProperty<Real> & _tgrad_corr_mult;
 
   /// the prefactor needed to calculate the deformation energy from dislocation density
   MaterialProperty<Real> & _beta;

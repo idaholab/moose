@@ -32,9 +32,6 @@ protected:
   std::vector<unsigned int> _vals_var;
 
   const MaterialProperty<Real> & _mu;
-  const MaterialProperty<Real> & _tgrad_corr_mult;
-
-  const VariableGradient * _grad_T;
 };
 
 #endif // ACGRGRBASE_H

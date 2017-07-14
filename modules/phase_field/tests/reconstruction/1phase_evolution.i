@@ -52,6 +52,8 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./bnds]
+  [../]
 []
 
 [AuxKernels]
@@ -61,6 +63,11 @@
     ebsd_reader = ebsd_reader
     grain_tracker = grain_tracker
     data_name = feature_id
+    execute_on = 'initial timestep_end'
+  [../]
+  [./bnds]
+    type = BndsCalcAux
+    variable = bnds
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -73,19 +80,20 @@
     GBmob0 = 2.5e-6 #Mobility prefactor for Cu from Schonfelder1997
     GBenergy = 0.708 # GB energy in J/m^2
     Q = 0.23 #Activation energy for grain growth from Schonfelder 1997
-    T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
-    wGB = 14 # nm    #Width of the diffuse GB
-    outputs = exodus
+    T = 500 # K   #Constant temperature of the simulation (for mobility calculation)
+    wGB = 1 # nm    #Width of the diffuse GB
+    #outputs = exodus
+    length_scale = 1e-06
+    time_scale = 1e-6
   [../]
 []
 
 [Executioner]
   type = Transient
   num_steps = 2
-  dt = 0.05
+  dt = 10
 []
 
 [Outputs]
   exodus = true
-  print_linear_residuals = false
 []

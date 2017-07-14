@@ -47,18 +47,12 @@ ACGrGrMulti::computeDFDOP(PFFunctionType type)
   {
     case Residual:
     {
-      const Real tgrad_correction =
-          _grad_T ? _tgrad_corr_mult[_qp] * _grad_u[_qp] * (*_grad_T)[_qp] : 0.0;
-      return _mu[_qp] * (_u[_qp] * _u[_qp] * _u[_qp] - _u[_qp] + 2.0 * _u[_qp] * SumGammaEtaj) +
-             tgrad_correction;
+      return _mu[_qp] * (_u[_qp] * _u[_qp] * _u[_qp] - _u[_qp] + 2.0 * _u[_qp] * SumGammaEtaj);
     }
 
     case Jacobian:
     {
-      const Real tgrad_correction =
-          _grad_T ? _tgrad_corr_mult[_qp] * _grad_phi[_j][_qp] * (*_grad_T)[_qp] : 0.0;
-      return _mu[_qp] * (_phi[_j][_qp] * (3.0 * _u[_qp] * _u[_qp] - 1.0 + 2.0 * SumGammaEtaj)) +
-             tgrad_correction;
+      return _mu[_qp] * (_phi[_j][_qp] * (3.0 * _u[_qp] * _u[_qp] - 1.0 + 2.0 * SumGammaEtaj));
     }
 
     default:

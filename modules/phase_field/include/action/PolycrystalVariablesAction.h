@@ -10,6 +10,9 @@
 #include "InputParameters.h"
 #include "Action.h"
 
+// Forward declaration
+class PolycrystalVariablesAction;
+
 /**
  * Automatically generates all variables to model a polycrystal with op_num orderparameters
  */
