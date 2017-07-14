@@ -285,11 +285,11 @@ validParams<MooseTestApp>()
   /* MooseTestApp is special because it will have its own
    * binary and we want the default to allow test objects.
    */
-  params.addCommandLineParam<bool>(
-      "disallow_test_objects",
-      "--disallow-test-objects",
-      false,
-      "Don't register test objects and syntax. This overrides --allow-test-objects");
+  params.suppressParameter<bool>("allow_test_objects");
+  params.addCommandLineParam<bool>("disallow_test_objects",
+                                   "--disallow-test-objects",
+                                   false,
+                                   "Don't register test objects and syntax");
   return params;
 }
 
