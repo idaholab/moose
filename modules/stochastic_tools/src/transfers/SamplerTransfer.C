@@ -69,7 +69,7 @@ SamplerTransfer::execute()
       continue;
 
     // Get the sub-app SamplerReceiver object and perform error checking
-    std::shared_ptr<SamplerReceiver> ptr = getReceiver(app_index, samples);
+    SamplerReceiver * ptr = getReceiver(app_index, samples);
 
     // Perform the transfer
     std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
@@ -82,7 +82,7 @@ SamplerTransfer::execute()
   }
 }
 
-std::shared_ptr<SamplerReceiver>
+SamplerReceiver *
 SamplerTransfer::getReceiver(unsigned int app_index, const std::vector<DenseMatrix<Real>> & samples)
 {
   // Test that the sub-application has the given Control object
@@ -95,8 +95,9 @@ SamplerTransfer::getReceiver(unsigned int app_index, const std::vector<DenseMatr
                _receiver_name,
                "'.");
 
-  std::shared_ptr<SamplerReceiver> ptr =
-      std::dynamic_pointer_cast<SamplerReceiver>(control_wh.getActiveObject(_receiver_name));
+  SamplerReceiver * ptr =
+      dynamic_cast<SamplerReceiver *>(control_wh.getActiveObject(_receiver_name).get());
+
   if (!ptr)
     mooseError(
         "The sub-application (",
