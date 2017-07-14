@@ -7,9 +7,6 @@
   zmin = 0
   zmax = 0
   elem_type = TRI3
-  # AssignElementSubdomainID only works with ReplicatedMesh and/or
-  # with element_ids set.
-  parallel_type = replicated
 []
 
 [MeshModifiers]
