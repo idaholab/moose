@@ -7,7 +7,7 @@
 #ifndef STRESSDIVERGENCERZTENSORS_H
 #define STRESSDIVERGENCERZTENSORS_H
 
-#include "StressDivergenceTensors.h"
+#include "StressDivergence2DTensors.h"
 
 // Forward Declarations
 class StressDivergenceRZTensors;
@@ -26,7 +26,7 @@ InputParameters validParams<StressDivergenceRZTensors>();
  * u_r, and '_disp_y' refers to displacement in the axial direction, u_z.
  * The COORD_TYPE in the Problem block must be set to RZ.
  */
-class StressDivergenceRZTensors : public StressDivergenceTensors
+class StressDivergenceRZTensors : public StressDivergence2DTensors
 {
 public:
   StressDivergenceRZTensors(const InputParameters & parameters);
@@ -34,14 +34,13 @@ public:
 protected:
   virtual void initialSetup() override;
 
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeAverageGradientZZTest() override;
+  virtual void computeAverageGradientZZPhi() override;
+  virtual Real getGradientZZTest() override;
+  virtual Real getGradientZZPhi() override;
 
-  virtual void computeAverageGradientTest() override;
-  virtual void computeAverageGradientPhi() override;
-
-  Real calculateJacobian(unsigned int ivar, unsigned int jvar);
+  /// Whether the mesh is made of first order elements
+  const bool _first_order;
 };
 
 #endif // STRESSDIVERGENCERZTENSORS_H

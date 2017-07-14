@@ -23,6 +23,9 @@ public:
 protected:
   virtual void computeProperties() override;
   virtual Real computeStrainZZ() = 0;
+
+  /// Whether to average the out of plane strain
+  bool _ave_strain_zz;
 };
 
 #endif // COMPUTE2DSMALLSTRAIN_H

@@ -21,6 +21,7 @@
 #include "StressDivergenceTensorsTruss.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "StressDivergenceRZTensors.h"
+#include "StressDivergence2DTensors.h"
 #include "StressDivergenceRSphericalTensors.h"
 #include "MomentBalancing.h"
 #include "PoroMechanicsCoupling.h"
@@ -228,6 +229,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceTensorsTruss);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(StressDivergenceRZTensors);
+  registerKernel(StressDivergence2DTensors);
   registerKernel(StressDivergenceRSphericalTensors);
   registerKernel(MomentBalancing);
   registerKernel(PoroMechanicsCoupling);

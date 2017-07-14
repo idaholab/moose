@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "Compute2DSmallStrain.h"
+#include "MooseMesh.h"
 
 #include "libmesh/quadrature.h"
 
@@ -19,14 +20,17 @@ validParams<Compute2DSmallStrain>()
 }
 
 Compute2DSmallStrain::Compute2DSmallStrain(const InputParameters & parameters)
-  : ComputeSmallStrain(parameters)
+  : ComputeSmallStrain(parameters), _ave_strain_zz(false)
 {
+  if (!_fe_problem.mesh().hasSecondOrderElements())
+    _ave_strain_zz = true;
 }
 
 void
 Compute2DSmallStrain::computeProperties()
 {
   Real volumetric_strain = 0.0;
+  Real out_of_plane_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     _total_strain[_qp](0, 0) = (*_grad_disp[0])[_qp](0);
@@ -36,21 +40,30 @@ Compute2DSmallStrain::computeProperties()
     _total_strain[_qp](2, 2) = computeStrainZZ();
 
     if (_volumetric_locking_correction)
-      volumetric_strain += _total_strain[_qp].trace() * _JxW[_qp] * _coord[_qp];
+      volumetric_strain +=
+          (_total_strain[_qp](0, 0) + _total_strain[_qp](1, 1)) * _JxW[_qp] * _coord[_qp];
+
+    if (_ave_strain_zz)
+      out_of_plane_strain += _total_strain[_qp](2, 2) * _JxW[_qp] * _coord[_qp];
   }
 
   if (_volumetric_locking_correction)
     volumetric_strain /= _current_elem_volume;
 
+  if (_ave_strain_zz)
+    out_of_plane_strain /= _current_elem_volume;
+
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     if (_volumetric_locking_correction)
     {
-      Real trace = _total_strain[_qp].trace();
-      _total_strain[_qp](0, 0) += (volumetric_strain - trace) / 3.0;
-      _total_strain[_qp](1, 1) += (volumetric_strain - trace) / 3.0;
-      _total_strain[_qp](2, 2) += (volumetric_strain - trace) / 3.0;
+      const Real trace_2D = _total_strain[_qp](0, 0) + _total_strain[_qp](1, 1);
+      _total_strain[_qp](0, 0) += (volumetric_strain - trace_2D) / 2.0;
+      _total_strain[_qp](1, 1) += (volumetric_strain - trace_2D) / 2.0;
     }
+
+    if (_ave_strain_zz)
+      _total_strain[_qp](2, 2) = out_of_plane_strain;
 
     _mechanical_strain[_qp] = _total_strain[_qp];
 

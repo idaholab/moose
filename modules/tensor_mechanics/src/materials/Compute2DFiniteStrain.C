@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "Compute2DFiniteStrain.h"
+#include "MooseMesh.h"
 
 #include "libmesh/quadrature.h"
 
@@ -20,8 +21,10 @@ validParams<Compute2DFiniteStrain>()
 }
 
 Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters)
-  : ComputeFiniteStrain(parameters)
+  : ComputeFiniteStrain(parameters), _ave_strain_zz(false)
 {
+  if (!_fe_problem.mesh().hasSecondOrderElements())
+    _ave_strain_zz = true;
 }
 
 void
@@ -29,6 +32,7 @@ Compute2DFiniteStrain::computeProperties()
 {
   RankTwoTensor ave_Fhat;
   Real ave_dfgrd_det = 0.0;
+  Real ave_dfgrd_22 = 0.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
@@ -61,27 +65,64 @@ Compute2DFiniteStrain::computeProperties()
     if (_volumetric_locking_correction)
     {
       // Calculate average _Fhat for volumetric locking correction
-      ave_Fhat += _Fhat[_qp] * _JxW[_qp] * _coord[_qp];
+      ave_Fhat(0, 0) += _Fhat[_qp](0, 0) * _JxW[_qp] * _coord[_qp];
+      ave_Fhat(0, 1) += _Fhat[_qp](0, 1) * _JxW[_qp] * _coord[_qp];
+      ave_Fhat(1, 0) += _Fhat[_qp](1, 0) * _JxW[_qp] * _coord[_qp];
+      ave_Fhat(1, 1) += _Fhat[_qp](1, 1) * _JxW[_qp] * _coord[_qp];
 
       // Average deformation gradient
-      ave_dfgrd_det += _deformation_gradient[_qp].det() * _JxW[_qp] * _coord[_qp];
+      ave_dfgrd_det += (_deformation_gradient[_qp](0, 0) * _deformation_gradient[_qp](1, 1) -
+                        _deformation_gradient[_qp](0, 1) * _deformation_gradient[_qp](1, 0)) *
+                       _JxW[_qp] * _coord[_qp];
+    }
+    if (_ave_strain_zz)
+    {
+      ave_Fhat(2, 2) += _Fhat[_qp](2, 2) * _JxW[_qp] * _coord[_qp];
+      ave_dfgrd_22 += _deformation_gradient[_qp](2, 2) * _JxW[_qp] * _coord[_qp];
     }
   }
   if (_volumetric_locking_correction)
   {
     // needed for volumetric locking correction
-    ave_Fhat /= _current_elem_volume;
+    ave_Fhat(0, 0) /= _current_elem_volume;
+    ave_Fhat(0, 1) /= _current_elem_volume;
+    ave_Fhat(1, 0) /= _current_elem_volume;
+    ave_Fhat(1, 1) /= _current_elem_volume;
     // average deformation gradient
     ave_dfgrd_det /= _current_elem_volume;
   }
+  if (_ave_strain_zz)
+  {
+    ave_Fhat(2, 2) /= _current_elem_volume;
+    ave_dfgrd_22 /= _current_elem_volume;
+  }
+
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     if (_volumetric_locking_correction)
     {
       // Finalize volumetric locking correction
-      _Fhat[_qp] *= std::cbrt(ave_Fhat.det() / _Fhat[_qp].det());
+      const Real factor =
+          std::sqrt((ave_Fhat(0, 0) * ave_Fhat(1, 1) - ave_Fhat(0, 1) * ave_Fhat(1, 0)) /
+                    (_Fhat[_qp](0, 0) * _Fhat[_qp](1, 1) - _Fhat[_qp](0, 1) * _Fhat[_qp](1, 0)));
+      _Fhat[_qp](0, 0) *= factor;
+      _Fhat[_qp](0, 1) *= factor;
+      _Fhat[_qp](1, 0) *= factor;
+      _Fhat[_qp](1, 1) *= factor;
+
       // Volumetric locking correction
-      _deformation_gradient[_qp] *= std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
+      const Real factor2 = std::sqrt(
+          ave_dfgrd_det / (_deformation_gradient[_qp](0, 0) * _deformation_gradient[_qp](1, 1) -
+                           _deformation_gradient[_qp](0, 1) * _deformation_gradient[_qp](1, 0)));
+      _deformation_gradient[_qp](0, 0) *= factor2;
+      _deformation_gradient[_qp](0, 1) *= factor2;
+      _deformation_gradient[_qp](1, 0) *= factor2;
+      _deformation_gradient[_qp](1, 1) *= factor2;
+    }
+    if (_ave_strain_zz)
+    {
+      _Fhat[_qp](2, 2) = ave_Fhat(2, 2);
+      _deformation_gradient[_qp](2, 2) = ave_dfgrd_22;
     }
 
     computeQpStrain();
