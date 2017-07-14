@@ -724,7 +724,6 @@ void
 NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
 {
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
-  jacobian.close();
   if (_constraints.hasActiveNodalConstraints())
   {
     const auto & ncs = _constraints.getActiveNodalConstraints();
@@ -1617,9 +1616,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
 #endif
 #endif
 
-        jacobian.close();
         jacobian.zero_rows(zero_rows, 0.0);
-        jacobian.close();
         _fe_problem.addCachedJacobian(jacobian, 0);
         jacobian.close();
       }
@@ -1648,9 +1645,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
 #endif
 #endif
 
-      jacobian.close();
       jacobian.zero_rows(zero_rows, 0.0);
-      jacobian.close();
       _fe_problem.addCachedJacobian(jacobian, 0);
       jacobian.close();
     }
