@@ -89,30 +89,47 @@ AddExtraNodeset::modify()
     for (unsigned int j = 0; j < dim; ++j)
       p(j) = coord[i * dim + j];
 
+    bool on_node = false;
+
     const Elem * elem = (*locator)(p);
-    if (!elem)
+
+    if (elem)
+    {
+      for (unsigned int j = 0; j < elem->n_nodes(); ++j)
+      {
+        const Node * node = elem->node_ptr(j);
+
+        Point q;
+        for (unsigned int k = 0; k < dim; ++k)
+          q(k) = (*node)(k);
+
+        if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance")))
+        {
+          for (const auto & boundary_id : boundary_ids)
+            boundary_info.add_node(node, boundary_id);
+
+          on_node = true;
+          break;
+        }
+      }
+    }
+
+    bool found_elem = elem;
+
+    // If we are on a distributed mesh, then any particular processor
+    // may be unable to find any particular node, but *some* processor
+    // should have found it.
+    if (!_mesh_ptr->getMesh().is_replicated())
+    {
+      this->comm().max(found_elem);
+      this->comm().max(on_node);
+    }
+
+    if (!found_elem)
       mooseError(
           "Unable to locate the following point within the domain, please check its coordinates:\n",
           p);
 
-    bool on_node = false;
-    for (unsigned int j = 0; j < elem->n_nodes(); ++j)
-    {
-      const Node * node = elem->node_ptr(j);
-
-      Point q;
-      for (unsigned int k = 0; k < dim; ++k)
-        q(k) = (*node)(k);
-
-      if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance")))
-      {
-        for (const auto & boundary_id : boundary_ids)
-          boundary_info.add_node(node, boundary_id);
-
-        on_node = true;
-        break;
-      }
-    }
     if (!on_node)
       mooseError("Point can not be located!");
   }
