@@ -109,6 +109,12 @@
 #include "ComputeAxisymmetric1DFiniteStrain.h"
 #include "ComputePlasticHeatEnergy.h"
 #include "ComputeInterfaceStress.h"
+#include "ComputeLinearViscoelasticStress.h"
+#include "ComputeLinearViscoelasticCreepStrain.h"
+#include "ViscoelasticityAdjustedEigenstrain.h"
+#include "GeneralizedKelvinVoigtModel.h"
+#include "GeneralizedMaxwellModel.h"
+#include "ViscoelasticityUpdate.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -150,6 +156,8 @@
 #include "NewmarkVelAux.h"
 #include "RadialDisplacementCylinderAux.h"
 #include "RadialDisplacementSphereAux.h"
+#include "VectorRankTwoAux.h"
+#include "VectorRankFourAux.h"
 
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
@@ -313,6 +321,11 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetric1DFiniteStrain);
   registerMaterial(ComputePlasticHeatEnergy);
   registerMaterial(ComputeInterfaceStress);
+  registerMaterial(ComputeLinearViscoelasticStress);
+  registerMaterial(ComputeLinearViscoelasticCreepStrain);
+  registerMaterial(ViscoelasticityAdjustedEigenstrain);
+  registerMaterial(GeneralizedKelvinVoigtModel);
+  registerMaterial(GeneralizedMaxwellModel);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
@@ -348,6 +361,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticityStateVariable);
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
   registerUserObject(GeneralizedPlaneStrainUserObject);
+  registerUserObject(ViscoelasticityUpdate);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);
@@ -360,6 +374,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(NewmarkVelAux);
   registerAux(RadialDisplacementCylinderAux);
   registerAux(RadialDisplacementSphereAux);
+  registerAux(VectorRankTwoAux);
+  registerAux(VectorRankFourAux);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
