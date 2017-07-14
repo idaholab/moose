@@ -374,9 +374,9 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    fill_method = symmetric_isotropic
-    C_ijkl = '6.4E9 6.4E9'  # young 16MPa, Poisson 0.25
+    type = ComputeIsotropicElasticityTensor
+    lambda = 6.4e9
+    shear_modulus = 6.4e9 # young 16MPa, Poisson 0.25
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

@@ -22,6 +22,10 @@ ComputeVariableElasticConstantStress::ComputeVariableElasticConstantStress(
   : ComputeFiniteStrainElasticStress(parameters),
     _elasticity_tensor_old(getMaterialPropertyOld<RankFourTensor>(_base_name + "elasticity_tensor"))
 {
+  mooseDeprecated("ComputeVariableElasticConstantStress is deprecated, and the functionality of "
+                  "this deprecated class is now available natively in the incremental form stress "
+                  "calculators.  Please use ComputeFiniteStrainElasticStress or "
+                  "ComputeMultipleInelasticStress.");
 }
 
 void

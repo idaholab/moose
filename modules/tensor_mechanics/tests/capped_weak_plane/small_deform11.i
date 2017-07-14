@@ -526,9 +526,9 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    fill_method = symmetric_isotropic
-    C_ijkl = '4 4'
+    type = ComputeIsotropicElasticityTensor
+    lambda = 4.0
+    shear_modulus = 4.0
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

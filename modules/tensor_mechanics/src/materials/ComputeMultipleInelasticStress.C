@@ -108,6 +108,15 @@ ComputeMultipleInelasticStress::initialSetup()
 {
   _is_elasticity_tensor_guaranteed_isotropic =
       hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
+
+  _is_elasticity_tensor_guaranteed_constant_in_time =
+      hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
+  if ((isParamValid("initial_stress")) && !_is_elasticity_tensor_guaranteed_constant_in_time)
+    mooseError("A finite stress material cannot both have an initial stress and an elasticity "
+               "tensor with varying values; please use a defined constant elasticity tensor, "
+               "such as ComputeIsotropicElasticityTensor, if your model defines an initial "
+               "stress, or apply an initial strain instead.");
+
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
   for (unsigned int i = 0; i < _num_models; ++i)
   {
@@ -116,8 +125,9 @@ ComputeMultipleInelasticStress::initialSetup()
     {
       _models.push_back(rrr);
       if (rrr->requiresIsotropicTensor() && !_is_elasticity_tensor_guaranteed_isotropic)
-        mooseError("Model " + models[i] + " requires an isotropic elasticity tensor, but the one "
-                                          "supplied is not guaranteed isotropic");
+        mooseError("Model " + models[i] +
+                   " requires an isotropic elasticity tensor, but the one supplied is not "
+                   "guaranteed isotropic");
     }
     else
       mooseError("Model " + models[i] + " is not compatible with ComputeMultipleInelasticStress");
@@ -133,7 +143,15 @@ ComputeMultipleInelasticStress::computeQpStress()
   if (_num_models == 0)
   {
     _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+
+    // If the elasticity tensor values have changed and the tensor is isotropic,
+    // use the old strain to calculate the old stress
+    if (!_is_elasticity_tensor_guaranteed_constant_in_time &&
+        _is_elasticity_tensor_guaranteed_isotropic)
+      _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+    else
+      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+
     if (_fe_problem.currentlyComputingJacobian())
       _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
   }
@@ -198,8 +216,13 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
         if (i_rmm != j_rmm)
           elastic_strain_increment -= inelastic_strain_increment[j_rmm];
 
-      // form the trial stress
-      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      // form the trial stress, with the check for changed elasticity constants
+      if (!_is_elasticity_tensor_guaranteed_constant_in_time &&
+          _is_elasticity_tensor_guaranteed_isotropic)
+        _stress[_qp] =
+            _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+      else
+        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
       // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
@@ -298,7 +321,13 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
 
   elastic_strain_increment = _strain_increment[_qp];
 
-  _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  // If the elasticity tensor values have changed and the tensor is isotropic,
+  // use the old strain to calculate the old stress
+  if (!_is_elasticity_tensor_guaranteed_constant_in_time &&
+      _is_elasticity_tensor_guaranteed_isotropic)
+    _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+  else
+    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
   computeAdmissibleState(model_number,
                          elastic_strain_increment,

@@ -22,7 +22,8 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress"))
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _elastic_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain"))
 {
 }
 
@@ -32,14 +33,34 @@ ComputeFiniteStrainElasticStress::initialSetup()
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
                "that guarantee isotropic tensors.");
+
+  _is_elasticity_tensor_guaranteed_constant_in_time =
+      hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
+  if ((isParamValid("initial_stress")) && !_is_elasticity_tensor_guaranteed_constant_in_time)
+    mooseError("A finite stress material cannot both have an initial stress and an elasticity "
+               "tensor with varying values; please use a defined constant elasticity tensor, "
+               "such as ComputeIsotropicElasticityTensor, if your model defines an initial "
+               "stress, or apply an initial strain instead.");
+}
+
+void
+ComputeFiniteStrainElasticStress::initQpStatefulProperties()
+{
+  ComputeStressBase::initQpStatefulProperties();
 }
 
 void
 ComputeFiniteStrainElasticStress::computeQpStress()
 {
   // Calculate the stress in the intermediate configuration
-  RankTwoTensor intermediate_stress =
-      _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+  RankTwoTensor intermediate_stress;
+
+  // Check if the elasticity tensor has changed values
+  if (!_is_elasticity_tensor_guaranteed_constant_in_time)
+    intermediate_stress =
+        _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+  else
+    intermediate_stress = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
 
   // Rotate the stress state to the current configuration
   _stress[_qp] =
