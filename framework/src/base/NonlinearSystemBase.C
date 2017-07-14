@@ -1422,9 +1422,16 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & 
 
   findImplicitGeometricCouplingEntries(geom_search_data, graph);
 
+  const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
+  const dof_id_type end_dof_on_proc = dofMap().end_dof(processor_id());
+
   for (const auto & it : graph)
   {
     dof_id_type dof = it.first;
+
+    if (dof < first_dof_on_proc || dof >= end_dof_on_proc)
+      continue;
+
     const std::vector<dof_id_type> & row = it.second;
 
     for (const auto & coupled_dof : row)
