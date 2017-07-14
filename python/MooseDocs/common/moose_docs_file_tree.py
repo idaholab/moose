@@ -74,6 +74,12 @@ def moose_docs_file_tree(config):
         config[dict]: Contains key value pairs, with each value containing another dict() with
                       key value pairs that are passed to moose_docs_import function.
     """
+
+    # Set the MOOSE_DIR if it does not exists so that the root_dir can always use it
+    if 'MOOSE_DIR' not in os.environ:
+        os.environ['MOOSE_DIR'] = MooseDocs.MOOSE_DIR
+
+    # Build the file tree
     node = DirectoryNode('')
     for value in config.itervalues():
         value.setdefault('include', [])
