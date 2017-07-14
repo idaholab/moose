@@ -17,7 +17,7 @@ validParams<SingleVariableReturnMappingSolution>()
   InputParameters params = emptyInputParameters();
 
   // Newton iteration control parameters
-  params.addParam<unsigned int>("max_its", 200, "Maximum number of Newton iterations");
+  params.addParam<unsigned int>("max_its", 300, "Maximum number of Newton iterations");
   params.addParam<bool>(
       "output_iteration_info", false, "Set true to output Newton iteration information");
   params.addDeprecatedParam<bool>(
