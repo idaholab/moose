@@ -148,11 +148,9 @@ Parser::parse(const std::string & input_filename)
 
   /**
    * Only allow the main application to "absorb" it's command line parameters into the input file
-   * object.
-   * This allows DBEs with substitutions on the CLI to work for the master application but not sub
-   * apps.
-   * If we did allow this, it would remove the ability to only set CLI overrides for the main app
-   * only.
+   * object. This allows DBEs with substitutions on the CLI to work for the master application but
+   * not sub apps. If we did allow this, it would remove the ability to only set CLI overrides for
+   * the main app only.
    */
   if (_app.name() == "main")
     _getpot_file.absorb(*_app.commandLine()->getPot());
@@ -163,8 +161,7 @@ Parser::parse(const std::string & input_filename)
 
   /**
    * We re-parse the exact same file for error checking purposes. We don't want all of the CLI
-   * variables
-   * involved in error checks.
+   * variables involved in error checks.
    */
   _getpot_file_error_checking.parse_input_file(input_filename);
 
@@ -189,8 +186,10 @@ Parser::parse(const std::string & input_filename)
       _app.commandLine()->setPrefix(_app.name(), "0");
   }
 
-  // Check for "unidentified nominuses".  These can indicate a vector
-  // input which the user failed to wrap in quotes e.g.: v = 1 2
+  /**
+   * Check for "unidentified nominuses".  These can indicate a vector input which the user failed to
+   * wrap in quotes e.g.: v = 1 2
+   */
   {
     std::set<std::string> knowns;
     std::vector<std::string> ufos = _getpot_file_error_checking.unidentified_nominuses();
@@ -208,8 +207,10 @@ Parser::parse(const std::string & input_filename)
   std::vector<std::string> section_names = _getpot_file.get_section_names();
   appendAndReorderSectionNames(section_names);
 
-  // Set the class variable to indicate that sections names have been read, this is used later by
-  // the checkOverriddenParams function
+  /**
+   * Set the class variable to indicate that sections names have been read, this is used later by
+   * the checkOverriddenParams function
+   */
   _sections_read = true;
 
   // A map containing all of the section names and active/inactive subblocks
@@ -219,13 +220,12 @@ Parser::parse(const std::string & input_filename)
     // Chop off the last character (the trailing slash)
     std::string curr_identifier = section_name.erase(section_name.size() - 1);
 
-    // Before we retrieve any actions or build any objects, make sure that the section they are in
-    // is active
     if (isSectionActive(curr_identifier, block_lists))
     {
-      // Extract the block parameters before constructing the action
-      // There may be more than one Action registered for a given section in which case we need to
-      // build them all
+      /**
+       * Extract the block parameters before constructing the action There may be more than one
+       * Action registered for a given section in which case we need to build them all.
+       */
       bool is_parent;
       std::string registered_identifier = _syntax.isAssociated(section_name, &is_parent);
 
@@ -379,7 +379,6 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars,
       // delete the current item by copying the last item to this position and decrementing the
       // vector end position
       all_vars[i] = all_vars[last--];
-
     else if (pcrecpp::RE("(.*?)" // Same as above without the MultiApp number
                          ":"
                          "(.*)")
@@ -395,7 +394,8 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars,
       all_vars[i] = all_vars[last--];
 
     else
-      // only increment if we didn't "delete", otherwise we'll need to revisit the current index due
+      // only increment if we didn't "delete", otherwise we'll need to revisit the current index
+      // due
       // to copy
       ++i;
   }
@@ -507,7 +507,8 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
       // a Multiapp parameter which we won't handle here.
       if (colon_pos == std::string::npos && last_slash_pos != std::string::npos)
       {
-        // If the user supplies a CLI argument whose section doesn't exist in the input file, we'll
+        // If the user supplies a CLI argument whose section doesn't exist in the input file,
+        // we'll
         // append it here
         std::string section = cli_var.substr(0, last_slash_pos + 1);
         if (std::find(section_names.begin(), section_names.end(), section) == section_names.end())
@@ -521,21 +522,17 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
    * order for the parser and application to function properly:
    *
    * SetupDebugAction: This action can contain an option for monitoring the parser progress. It must
-   * be parsed first
-   *                   to capture all of the parsing output.
+   * be parsed first to capture all of the parsing output.
    *
    * GlobalParamsAction: This action is checked during the parameter extraction routines of all
-   * subsequent blocks.
-   *                     It must be parsed early since it must exist during subsequent parameter
-   * extraction.
+   *                     subsequent blocks. It must be parsed early since it must exist during
+   *                     subsequent parameter extraction.
    *
    * DynamicObjectRegistration: This action must be built before any MooseObjectActions are built.
-   * This is because
-   *                            we retrieve valid parameters from the Factory during parse time.
-   * Objects must
-   *                            be registered before validParameters can be retrieved.
+   *                            This is because we retrieve valid parameters from the Factory during
+   *                            parse time. Objects must be registered before validParameters can be
+   *                            retrieved.
    */
-
   // Reverse order here since each call to reoderHelper moves the requested Action to the front
   reorderHelper(section_names, "DynamicObjectRegistrationAction", "dynamic_object_registration");
   reorderHelper(section_names, "GlobalParamsAction", "set_global_params");
@@ -549,8 +546,7 @@ Parser::reorderHelper(std::vector<std::string> & section_names,
 {
   /**
    * Note: I realize that doing inserts and deletes in a vector are "slow".  Swapping is not an
-   * option due to the
-   *       way that active_lists are constructed.  These are small vectors ;)
+   *       option due to the way that active_lists are constructed.  These are small vectors ;)
    */
   std::string syntax = _syntax.getSyntaxByAction(action, task);
   syntax += '/'; // section names *always* have trailing slashes
@@ -592,9 +588,11 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
   for (const auto & iter : _syntax.getAssociatedActions())
   {
     Syntax::ActionInfo act_info = iter.second;
-    // If the task is nullptr that means we need to figure out which task
-    // goes with this syntax for the purpose of building the Moose Object part of the tree.
-    // We will figure this out by asking the ActionFactory for the registration info.
+    /**
+     * If the task is nullptr that means we need to figure out which task goes with this syntax for
+     * the purpose of building the Moose Object part of the tree. We will figure this out by asking
+     * the ActionFactory for the registration info.
+     */
     if (act_info._task == "")
       act_info._task = _action_factory.getTaskName(act_info._action);
 
@@ -627,9 +625,11 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
       }
     }
 
-    // We need to see if this action is inherited from MooseObjectAction
-    // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
-    // if they have associated bases matching the current task.
+    /**
+     * We need to see if this action is inherited from MooseObjectAction. If it is, then we will
+     * loop over all the Objects in MOOSE's Factory object to print them out if they have associated
+     * bases matching the current task.
+     */
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
@@ -701,9 +701,11 @@ Parser::buildFullTree(const std::string & search_string)
   for (const auto & iter : _syntax.getAssociatedActions())
   {
     Syntax::ActionInfo act_info = iter.second;
-    // If the task is nullptr that means we need to figure out which task
-    // goes with this syntax for the purpose of building the Moose Object part of the tree.
-    // We will figure this out by asking the ActionFactory for the registration info.
+    /**
+     * If the task is nullptr that means we need to figure out which task goes with this syntax for
+     * the purpose of building the Moose Object part of the tree. We will figure this out by asking
+     * the ActionFactory for the registration info.
+     */
     if (act_info._task == "")
       act_info._task = _action_factory.getTaskName(act_info._action);
 
@@ -719,9 +721,11 @@ Parser::buildFullTree(const std::string & search_string)
     const std::string & task = act_names.second._task;
     std::string act_name = act_names.first;
 
-    // We need to see if this action is inherited from MooseObjectAction
-    // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
-    // if they have associated bases matching the current task.
+    /**
+     * We need to see if this action is inherited from MooseObjectAction. If it is, then we will
+     * loop over all the Objects in MOOSE's Factory object to print them out if they have associated
+     * bases matching the current task.
+     */
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
@@ -730,9 +734,10 @@ Parser::buildFullTree(const std::string & search_string)
            ++moose_obj)
       {
         InputParameters moose_obj_params = (moose_obj->second)();
-        // Now that we know that this is a MooseObjectAction we need to see if it has been
-        // restricted
-        // in any way by the user.
+        /**
+         * Now that we know that this is a MooseObjectAction we need to see if it has been
+         * restricted in any way by the user.
+         */
         const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
 
         // See if the current Moose Object syntax belongs under this Action's block
@@ -783,11 +788,11 @@ Parser::getPotHandle() const
   return _getpot_initialized ? &_getpot_file : nullptr;
 }
 
-/**************************************************************************************************************************
- **************************************************************************************************************************
- *                                            Parameter Extraction Routines *
- **************************************************************************************************************************
- **************************************************************************************************************************/
+/**************************************************************************************************
+ **************************************************************************************************
+ *                                   Parameter Extraction Routines                                *
+ **************************************************************************************************
+ **************************************************************************************************/
 using std::string;
 
 // Template Specializations for retrieving special types from the input file
@@ -932,7 +937,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
   if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_task))
     global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
 
-  // Set a pointer to the current InputParameters object being parsed so that it can be referred to
+  // Set a pointer to the current InputParameters object being parsed so that it can be referred
+  // to
   // in the extraction routines
   _current_params = &p;
   _current_error_stream = &error_stream;
@@ -975,7 +981,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
        */
 
       // In the case where we have OutFileName but it wasn't actually found in the input filename,
-      // we will populate it with the actual parsed filename which is available here in the parser.
+      // we will populate it with the actual parsed filename which is available here in the
+      // parser.
 
       InputParameters::Parameter<OutFileBase> * scalar_p =
           dynamic_cast<InputParameters::Parameter<OutFileBase> *>(it.second);
@@ -1194,7 +1201,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           SubdomainName, it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractDoubleIndex(
           BoundaryName, it.second, full_name, it.first, in_global, global_params_block);
-      // reading double indexed Variable name is problematic because Coupleable assumes they come as
+      // reading double indexed Variable name is problematic because Coupleable assumes they come
+      // as
       // vectors
       // therefore they not included in this list
       dynamicCastAndExtractDoubleIndex(
@@ -1231,7 +1239,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       p.getAutoBuildVectors();
   for (const auto & it : auto_build_vectors)
   {
-    // We'll autogenerate values iff the requested vector is not valid but both the base and number
+    // We'll autogenerate values iff the requested vector is not valid but both the base and
+    // number
     // are valid
     const std::string & base_name = it.second.first;
     const std::string & num_repeat = it.second.second;
@@ -1669,9 +1678,8 @@ Parser::setVectorParameter<MooseEnum>(const std::string & full_name,
     values[i] = static_cast<std::string>(enum_values[i]);
 
   /**
-   * With MOOSE Enums we need a default object so it should have been passed in the param
-   * pointer.  We are only going to use the first item in the vector (values[0]) and ignore the
-   * rest.
+   * With MOOSE Enums we need a default object so it should have been passed in the param pointer.
+   * We are only going to use the first item in the vector (values[0]) and ignore the rest.
    */
   int vec_size = gp->vector_variable_size(full_name.c_str());
   if (gp->have_variable(full_name.c_str()))
@@ -1689,8 +1697,10 @@ Parser::setVectorParameter<MooseEnum>(const std::string & full_name,
   }
 }
 
-// Specialization for coupling vectors. This routine handles default values and auto generated
-// VariableValue vectors
+/**
+ * Specialization for coupling vectors. This routine handles default values and auto generated
+ * VariableValue vectors.
+ */
 template <>
 void
 Parser::setVectorParameter<VariableName>(
@@ -1722,10 +1732,9 @@ Parser::setVectorParameter<VariableName>(
 
     // If we are able to convert this value into a Real, then set a default coupled value
     if (ss >> real_value && ss.eof())
-      // FIXME: the real_value is assigned to defaultCoupledValue overriding the value assigned
-      // before.
-      // Currently there is no functionality to separately assign the correct "real_value[i]" in
-      // InputParameters
+      /* FIXME: the real_value is assigned to defaultCoupledValue overriding the value assigned
+       * before. Currently there is no functionality to separately assign the correct
+       * "real_value[i]" in InputParameters.*/
       _current_params->defaultCoupledValue(short_name, real_value);
     else
     {
