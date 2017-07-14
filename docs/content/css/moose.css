@@ -460,7 +460,7 @@ footer.page-footer {
 
 
 /* Admonition */
-.admonition-title {
+.admonition-title{
     margin-top:0px;
     font-weight: bold;
     display: block;
@@ -484,6 +484,11 @@ footer.page-footer {
     margin: 0px;
     padding: 6px;
     text-align: left;
+}
+
+.admonition-message{
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
 .admonition.info {

@@ -31,6 +31,7 @@ commands add associated settings defined in the extension.
 | [refs](extensions/refs.md) | Implements latex style references to numbered floats (e.g., figures and tables) |
 | [templates](extensions/templates.md) | Allows for converted markdown to be applied to arbitrary templates. |
 | [app_syntax](extensions/app_syntax.md) | Adds markdown syntax for extracting content from MOOSE source code. |
+| [sqa](extensions/sqa.md) | Adds tools for creating software quality documentation using MOOSE templates. |
 
 ## Python-Markdown Extensions
 
@@ -47,7 +48,7 @@ likely be of use as you develop your own  website, reports, or presentations.
 | [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html) | The Admonition extension adds [rST-style](http://docutils.sourceforge.net/docs/ref/rst/directives.html#specific-admonitionss) admonitions to Markdown documents. |
 | [extra](https://pythonhosted.org/Markdown/extensions/extra.html) | A compilation of various Python-Markdown extensions that (mostly) imitates [PHP Markdown Extra](https://michelf.ca/projects/php-markdown/extra/). |
 | [meta](https://pythonhosted.org/Markdown/extensions/meta_data.html) | Adds a syntax for defining meta-data about a document, which is used by MooseDocs to specify template arguments in the [MooseDocs.extensions.template](extensions/templates.md) extension. |
-| [mdx_math](https://github.com/mitya57/python-markdown-math) | This extension adds math formulas support to Python-Markdown. |s
+| [mdx_math](https://github.com/mitya57/python-markdown-math) | This extension adds math formulas support to Python-Markdown. |
 
 A few of these packages listed above are worth demonstrating. Foremost the [mdx_math](https://github.com/mitya57/python-markdown-math) extension enables the use of [MathJax](http://www.mathjax.org) within markdown, refer to the package documentation for complete
 details: [python-markdown-math](https://github.com/mitya57/python-markdown-math).
