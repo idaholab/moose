@@ -134,6 +134,10 @@ validParams<FEProblemBase>()
                         false,
                         "Do not explicitly store zero values in "
                         "the Jacobian matrix if true");
+  params.addParam<bool>("update_jacobian_preallocation",
+                        false,
+                        "Update Jacobian preallocation during each nonlinear iteration"
+                        "if true");
   params.addParam<bool>("force_restart",
                         false,
                         "EXPERIMENTAL: If true, a sub_app may use a "
@@ -207,6 +211,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
+    _update_jacobian_preallocation(getParam<bool>("update_jacobian_preallocation")),
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
@@ -3611,7 +3616,8 @@ FEProblemBase::init()
   }
 
   _nl->dofMap()._dof_coupling = _cm.get();
-  _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl);
+  if (!_update_jacobian_preallocation)
+    _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl);
   _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl);
   _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux);
 

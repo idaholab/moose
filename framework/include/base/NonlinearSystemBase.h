@@ -339,6 +339,8 @@ public:
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) override;
 
+  void updateJacobianSparsity(SparseMatrix<Number> & jacobian);
+
   /**
    * Sets a preconditioner
    * @param pc The preconditioner to be set
