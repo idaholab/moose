@@ -35,6 +35,7 @@ validParams<INSMomentumBase>()
   // Optional parameters
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addParam<bool>("convective_term", true, "Toggles the convective term");
 
   return params;
 }
@@ -67,7 +68,10 @@ INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
 
     // Material properties
     _mu(getMaterialProperty<Real>("mu_name")),
-    _rho(getMaterialProperty<Real>("rho_name"))
+    _rho(getMaterialProperty<Real>("rho_name")),
+
+    // Convective term toggling
+    _convective(getParam<bool>("convective_term"))
 {
 }
 
@@ -76,10 +80,12 @@ INSMomentumBase::computeQpResidual()
 {
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
-  Real convective_part = _rho[_qp] *
-                         (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
-                          _w_vel[_qp] * _grad_u[_qp](2)) *
-                         _test[_i][_qp];
+  Real convective_part = _convective
+                             ? _rho[_qp] *
+                                   (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
+                                    _w_vel[_qp] * _grad_u[_qp](2)) *
+                                   _test[_i][_qp]
+                             : 0.0;
 
   // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
   Real pressure_part = 0.;
@@ -105,9 +111,11 @@ INSMomentumBase::computeQpJacobian()
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
-  Real convective_part = _rho[_qp] *
-                         ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
-                         _test[_i][_qp];
+  Real convective_part =
+      _convective
+          ? _rho[_qp] * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
+                _test[_i][_qp]
+          : 0.0;
 
   // Call derived class to compute the viscous contribution.
   Real viscous_part = computeQpJacobianViscousPart();
@@ -121,7 +129,8 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {
-    Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
+    Real convective_part =
+        _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp] : 0.0;
 
     // Call derived class to compute the viscous contribution.
     Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
@@ -131,7 +140,8 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _v_vel_var_number)
   {
-    Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
+    Real convective_part =
+        _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp] : 0.0;
 
     // Call derived class to compute the viscous contribution.
     Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
@@ -141,7 +151,8 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _w_vel_var_number)
   {
-    Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
+    Real convective_part =
+        _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp] : 0.0;
 
     // Call derived class to compute the viscous contribution.
     Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
