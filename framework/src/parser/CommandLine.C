@@ -261,6 +261,17 @@ CommandLine::resetPrefix()
 }
 
 void
+CommandLine::clearPrefix()
+{
+  // If this CommandLine instance doesn't have a prefix, do nothing
+  if (!_has_prefix)
+    return;
+
+  _has_prefix = false;
+  _get_pot->set_prefix("");
+}
+
+void
 CommandLine::print(const char * prefix, std::ostream & out_stream, unsigned int skip_count)
 {
   _get_pot->print(prefix, out_stream, skip_count);

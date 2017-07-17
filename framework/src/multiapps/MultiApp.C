@@ -26,6 +26,7 @@
 #include "RestartableDataIO.h"
 #include "SetupInterface.h"
 #include "UserObject.h"
+#include "CommandLine.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -535,6 +536,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
+  // prefix of command line could have been changed, so clear prefix for the current MultiApp
+  _app.commandLine()->clearPrefix();
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
