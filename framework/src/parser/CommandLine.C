@@ -38,7 +38,9 @@ CommandLine::addCommandLineOptionsFromParams(InputParameters & params)
     std::string orig_name = it.first;
 
     cli_opt.description = params.getDocString(orig_name);
-    syntax = params.getSyntax(orig_name);
+    if (!params.isPrivate(orig_name))
+      // If a param is private then it shouldn't have any command line syntax.
+      syntax = params.getSyntax(orig_name);
     cli_opt.cli_syntax = syntax;
     cli_opt.required = false;
     InputParameters::Parameter<bool> * bool_type =
@@ -136,7 +138,7 @@ CommandLine::search(const std::string & option_name)
     }
   }
   else
-    mooseError("Unrecognized option name");
+    mooseError("Unrecognized option name: ", option_name);
 
   return false;
 }

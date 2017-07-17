@@ -66,14 +66,7 @@ class TestJSON(unittest.TestCase):
         data = json.loads(output)
         return data
 
-    def testJson(self):
-        """
-        Some basic checks to see if some data
-        is there and is in the right location.
-        """
-        all_data = self.getJsonData()
-        self.assertIn("active", all_data["global"]["parameters"])
-        data = all_data["blocks"]
+    def check_basic_json(self, data):
         self.assertIn("Executioner", data)
         self.assertIn("BCs", data)
         bcs = data["BCs"]
@@ -110,6 +103,26 @@ class TestJSON(unittest.TestCase):
         i = a["subblocks"]["Indicators"]["star"]["subblock_types"]["AnalyticalIndicator"]
         self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
         self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
+
+    def testJson(self):
+        """
+        Some basic checks to see if some data
+        is there and is in the right location.
+        """
+        all_data = self.getJsonData()
+        self.assertIn("active", all_data["global"]["parameters"])
+        data = all_data["blocks"]
+        self.check_basic_json(data)
+        # Make sure the default dump has test objects
+        self.assertIn("ApplyInputParametersTest", data)
+
+    def testNoTestObjects(self):
+        # Make sure test objects are removed from the output
+        all_data = self.getJsonData(["--disallow-test-objects"])
+        self.assertIn("active", all_data["global"]["parameters"])
+        data = all_data["blocks"]
+        self.check_basic_json(data)
+        self.assertNotIn("ApplyInputParametersTest", data)
 
     def testJsonSearch(self):
         """
@@ -177,6 +190,9 @@ class TestJSON(unittest.TestCase):
         # the comments got split and there is a unmatched " on a line of the comment.
         # This breaks the parser and it doesn't read in all the parameters.
         # self.assertIn("petsc_options", split.params_list)
+
+        # Make sure the default dump has test objects
+        self.assertIn("ApplyInputParametersTest", root.children)
 
     def testInputFileFormatSearch(self):
         """
