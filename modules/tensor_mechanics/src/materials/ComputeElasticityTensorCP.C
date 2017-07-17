@@ -29,6 +29,9 @@ ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & par
     _crysrot(declareProperty<RankTwoTensor>("crysrot")),
     _R(_Euler_angles)
 {
+  // the base class guarantees constant in time, but in this derived class the
+  // tensor will rotate over time once plastic deformation sets in
+  revokeGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 }
 
 void
