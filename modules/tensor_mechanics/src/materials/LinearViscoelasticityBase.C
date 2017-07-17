@@ -1,0 +1,203 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#include "LinearViscoelasticityBase.h"
+#include "libmesh/quadrature.h"
+
+template <>
+InputParameters
+validParams<LinearViscoelasticityBase>()
+{
+  MooseEnum integration("backward-euler mid-point newmark zienkiewicz", "backward-euler");
+
+  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  params.addParam<MooseEnum>("integration_rule",
+                             integration,
+                             "describes how the viscoelastic behavior is integrated through time");
+  params.addRangeCheckedParam<Real>("theta",
+                                    1,
+                                    "theta > 0 & theta <= 1",
+                                    "coefficient for newmark integration rule (between 0 and 1)");
+  params.addParam<std::string>("driving_eigenstrain",
+                               "name of the eigenstrain that increases the creep strains");
+  params.addParam<bool>("force_recompute_properties",
+                        false,
+                        "forces the computation of the viscoelastic properties at each step of"
+                        "the solver (default: false)");
+  params.suppressParameter<FunctionName>("elasticity_tensor_prefactor");
+  return params;
+}
+
+LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & parameters)
+  : ComputeElasticityTensorBase(parameters),
+    _integration_rule(getParam<MooseEnum>("integration_rule").getEnum<IntegrationRule>()),
+    _theta(getParam<Real>("theta")),
+    _apparent_elasticity_tensor(
+        declareProperty<RankFourTensor>(_base_name + "apparent_elasticity_tensor")),
+    _apparent_elasticity_tensor_inv(
+        declareProperty<RankFourTensor>(_base_name + "apparent_elasticity_tensor_inv")),
+    _instantaneous_elasticity_tensor(
+        declareProperty<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor")),
+    _instantaneous_elasticity_tensor_inv(
+        declareProperty<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor_inv")),
+    _need_viscoelastic_properties_inverse(false),
+    _has_longterm_dashpot(false),
+    _components(0),
+    _first_elasticity_tensor(
+        declareProperty<RankFourTensor>(_base_name + "first_elasticity_tensor")),
+    _first_elasticity_tensor_inv(_need_viscoelastic_properties_inverse ?
+        &declareProperty<RankFourTensor>(_base_name + "first_elasticity_tensor_inv") :
+        nullptr),
+    _springs_elasticity_tensors(
+        declareProperty<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors")),
+    _springs_elasticity_tensors_inv(_need_viscoelastic_properties_inverse ?
+        &declareProperty<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv") :
+        nullptr),
+    _dashpot_viscosities(declareProperty<std::vector<Real>>(_base_name + "dashpot_viscosities")),
+    _viscous_strains(declareProperty<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
+    _viscous_strains_old(
+        declarePropertyOld<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
+    _apparent_creep_strain(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain")),
+    _apparent_creep_strain_old(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain_old")),
+    _has_driving_eigenstrain(isParamValid("driving_eigenstrain")),
+    _driving_eigenstrain_name(
+        _has_driving_eigenstrain ? getParam<std::string>("driving_eigenstrain") : ""),
+    _driving_eigenstrain(_has_driving_eigenstrain
+                             ? &getMaterialPropertyByName<RankTwoTensor>(_driving_eigenstrain_name)
+                             : nullptr),
+    _force_recompute_properties(getParam<bool>("force_recompute_properties")),
+    _step_zero(declareRestartableData<bool>("step_zero", true))
+{
+  if (_theta < 0.5)
+    mooseWarning("theta parameter for LinearViscoelasticityBase is below 0.5; time integration may "
+                 "not converge!");
+
+  // force material properties to be considered stateful
+  declarePropertyOld<RankFourTensor>(_base_name + "apparent_elasticity_tensor");
+  declarePropertyOld<RankFourTensor>(_base_name + "apparent_elasticity_tensor_inv");
+  declarePropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor");
+  declarePropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor_inv");
+  declarePropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor");
+  declarePropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors");
+  declarePropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities");
+
+  if (_need_viscoelastic_properties_inverse)
+  {
+    declarePropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor_inv");
+    declarePropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv");
+  }
+}
+
+void
+LinearViscoelasticityBase::initQpStatefulProperties()
+{
+  _apparent_elasticity_tensor[_qp].zero();
+  _apparent_elasticity_tensor_inv[_qp].zero();
+  _instantaneous_elasticity_tensor[_qp].zero();
+  _instantaneous_elasticity_tensor_inv[_qp].zero();
+  _first_elasticity_tensor[_qp].zero();
+  _apparent_creep_strain[_qp].zero();
+
+  _springs_elasticity_tensors[_qp].resize(_components, RankFourTensor());
+  _dashpot_viscosities[_qp].resize(_components, 0);
+  _viscous_strains[_qp].resize(_components, RankTwoTensor());
+
+  if (_need_viscoelastic_properties_inverse)
+  {
+    (*_first_elasticity_tensor_inv)[_qp].zero();
+    (*_springs_elasticity_tensors_inv)[_qp].resize(_components, RankFourTensor());
+  }
+}
+
+RankTwoTensor 
+LinearViscoelasticityBase::computeQpCreepStrain(unsigned int qp,
+                                                const RankTwoTensor & strain)
+{
+  return strain - 
+           (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
+           (strain - _apparent_creep_strain[qp]);
+}
+
+RankTwoTensor 
+LinearViscoelasticityBase::computeQpCreepStrainIncrement(unsigned int qp,
+                                                         const RankTwoTensor & strain_increment)
+{
+  return strain_increment - 
+          (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
+          (strain_increment - (_apparent_creep_strain[qp] - _apparent_creep_strain_old[qp]));
+}
+
+
+void 
+LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
+{
+  unsigned int qp_prev = _qp;
+  _qp = qp;
+  computeQpViscoelasticProperties();
+  if (_need_viscoelastic_properties_inverse)
+    computeQpViscoelasticPropertiesInv();
+  computeQpApparentElasticityTensors();
+  if (!_step_zero)
+    computeQpApparentCreepStrain();
+  _qp = qp_prev;
+}
+
+void
+LinearViscoelasticityBase::computeQpElasticityTensor()
+{
+  if (_t_step >= 1)
+    _step_zero = false;
+
+  if (_force_recompute_properties)
+    recomputeQpApparentProperties(_qp);
+
+  _elasticity_tensor[_qp] = _instantaneous_elasticity_tensor[_qp];
+}
+
+void
+LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
+{
+  (*_first_elasticity_tensor_inv)[_qp] = _first_elasticity_tensor[_qp].invSymm();
+  for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
+    (*_springs_elasticity_tensors_inv)[_qp][i] = _springs_elasticity_tensors[_qp][i].invSymm();
+}
+
+Real
+LinearViscoelasticityBase::computeTheta(Real dt, Real viscosity) const
+{
+  if (MooseUtils::absoluteFuzzyEqual(dt, 0.0))
+    mooseError("linear viscoelasticity cannot be integrated over a dt of ", dt);
+
+  switch (_integration_rule)
+  {
+    case IntegrationRule::BackwardEuler:
+      return 1.;
+    case IntegrationRule::MidPoint:
+      return 0.5;
+    case IntegrationRule::Newmark:
+      return _theta;
+    case IntegrationRule::Zienkiewicz:
+      return 1. / (1. - std::exp(-dt / viscosity)) - viscosity / dt;
+    default:
+      return 1.;
+  }
+  return 1.;
+}
+
+void
+LinearViscoelasticityBase::fillIsotropicElasticityTensor(RankFourTensor & tensor,
+                                                         Real young_modulus,
+                                                         Real poisson_ratio) const
+{
+  std::vector<Real> iso_const(2);
+  iso_const[0] =
+      young_modulus * poisson_ratio / ((1.0 + poisson_ratio) * (1.0 - 2.0 * poisson_ratio));
+  iso_const[1] = young_modulus / (2.0 * (1.0 + poisson_ratio));
+
+  tensor.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
+}
+
+
