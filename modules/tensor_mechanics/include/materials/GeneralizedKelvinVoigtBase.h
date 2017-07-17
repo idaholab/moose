@@ -11,7 +11,7 @@
 
 class GeneralizedKelvinVoigtBase;
 
-template<>
+template <>
 InputParameters validParams<GeneralizedKelvinVoigtBase>();
 
 /**
@@ -19,7 +19,7 @@ InputParameters validParams<GeneralizedKelvinVoigtBase>();
  * a generalized Kelvin-Voigt model (an arbitrary number of Kelvin-Voigt
  * units assembled in series with a single spring at the top).
  *
- * This class does not attribute the mechanical properties to each spring 
+ * This class does not attribute the mechanical properties to each spring
  * and dashpot. It must be inherited to do so (see GeneralizedKelvinVoigtModel
  * for an example).
  *
@@ -35,15 +35,13 @@ class GeneralizedKelvinVoigtBase : public LinearViscoelasticityBase
 public:
   GeneralizedKelvinVoigtBase(const InputParameters & parameters);
 
-  virtual void
-  updateQpApparentProperties(unsigned int qp,
-                             const RankTwoTensor & effective_strain,
-                             const RankTwoTensor & effective_stress) final;
+  virtual void updateQpApparentProperties(unsigned int qp,
+                                          const RankTwoTensor & effective_strain,
+                                          const RankTwoTensor & effective_stress) final;
 
 protected:
   virtual void computeQpApparentElasticityTensors() final;
   virtual void computeQpApparentCreepStrain() final;
-
 };
 
 #endif // GENERALIZEDKELVINVOIGTBASE_H

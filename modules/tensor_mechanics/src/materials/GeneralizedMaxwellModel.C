@@ -55,7 +55,8 @@ GeneralizedMaxwellModel::GeneralizedMaxwellModel(const InputParameters & paramet
 
   for (unsigned int i = 0; i < _Ci.size(); ++i)
   {
-    _Ci[i].fillFromInputVector({creep_modulus[i], creep_ratio[i]}, RankFourTensor::symmetric_isotropic_E_nu);
+    _Ci[i].fillFromInputVector({creep_modulus[i], creep_ratio[i]},
+                               RankFourTensor::symmetric_isotropic_E_nu);
     _Si[i] = _Ci[i].invSymm();
     _C0 -= _Ci[i];
   }

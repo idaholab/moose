@@ -11,20 +11,24 @@ InputParameters
 validParams<LinearViscoelasticStressUpdate>()
 {
   InputParameters params = validParams<StressUpdateBase>();
-  params.addRequiredParam<std::string>("viscoelastic_model","name of the LinearViscoelasticityBase object to manage");
-  params.addParam<std::string>("base_name","optional string prepended to the creep strain name");
+  params.addRequiredParam<std::string>("viscoelastic_model",
+                                       "name of the LinearViscoelasticityBase object to manage");
+  params.addParam<std::string>("base_name", "optional string prepended to the creep strain name");
   return params;
 }
 
-LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParameters & parameters) : 
-    StressUpdateBase(parameters),
+LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParameters & parameters)
+  : StressUpdateBase(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") : std::string()),
-    _creep_strain(declareProperty<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
-    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain(declareProperty<RankTwoTensor>(
+        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(
+        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
     _viscoelastic_model_name(getParam<std::string>("viscoelastic_model")),
     _viscoelastic_model(nullptr)
 {
-  std::shared_ptr<Material> test = _mi_feproblem.getMaterial( _viscoelastic_model_name, _material_data_type, _mi_tid, true );
+  std::shared_ptr<Material> test =
+      _mi_feproblem.getMaterial(_viscoelastic_model_name, _material_data_type, _mi_tid, true);
 
   if (!test)
     mooseError(_viscoelastic_model_name + " does not exist");
@@ -32,7 +36,7 @@ LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParame
   _viscoelastic_model = std::dynamic_pointer_cast<LinearViscoelasticityBase>(test);
 
   if (!_viscoelastic_model)
-      mooseError(_viscoelastic_model_name + " is not a LinearViscoelasticityBase object");
+    mooseError(_viscoelastic_model_name + " is not a LinearViscoelasticityBase object");
 }
 
 void
@@ -47,7 +51,7 @@ LinearViscoelasticStressUpdate::propagateQpStatefulProperties()
   _creep_strain[_qp] = _creep_strain_old[_qp];
 }
 
-void 
+void
 LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
                                             RankTwoTensor & inelastic_strain_increment,
                                             const RankTwoTensor & /*rotation_increment*/,
@@ -58,7 +62,8 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
                                             bool /*compute_full_tangent_operator*/,
                                             RankFourTensor & tangent_operator)
 {
-  RankTwoTensor current_mechanical_strain = elastic_strain_old + _creep_strain_old[_qp] + strain_increment;
+  RankTwoTensor current_mechanical_strain =
+      elastic_strain_old + _creep_strain_old[_qp] + strain_increment;
   _creep_strain[_qp] = _viscoelastic_model->computeQpCreepStrain(_qp, current_mechanical_strain);
   RankTwoTensor creep_strain_increment = _creep_strain[_qp] - _creep_strain_old[_qp];
 
@@ -68,5 +73,3 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   tangent_operator = elasticity_tensor;
 }
-
-

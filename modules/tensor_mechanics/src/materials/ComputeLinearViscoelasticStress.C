@@ -13,16 +13,17 @@ validParams<ComputeLinearViscoelasticStress>()
 {
   InputParameters params = validParams<ComputeLinearElasticStress>();
   params.addClassDescription("Divides total strain into elastic + creep + eigenstrains");
-  params.addParam<std::string>(
-      "viscoelastic_model",
-      "name of the viscoelastic model provinding the creep strain");
+  params.addParam<std::string>("viscoelastic_model",
+                               "name of the viscoelastic model provinding the creep strain");
   return params;
 }
 
 ComputeLinearViscoelasticStress::ComputeLinearViscoelasticStress(const InputParameters & parameters)
   : ComputeLinearElasticStress(parameters),
-    _creep_strain(declareProperty<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
-    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain(declareProperty<RankTwoTensor>(
+        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(
+        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
     _viscoelastic_model_name(getParam<std::string>("viscoelastic_model")),
     _viscoelastic_model(nullptr)
 {
@@ -37,7 +38,8 @@ ComputeLinearViscoelasticStress::initQpStatefulProperties()
 void
 ComputeLinearViscoelasticStress::initialSetup()
 {
-  std::shared_ptr<Material> test = _mi_feproblem.getMaterial( _viscoelastic_model_name, _material_data_type, _mi_tid, true );
+  std::shared_ptr<Material> test =
+      _mi_feproblem.getMaterial(_viscoelastic_model_name, _material_data_type, _mi_tid, true);
 
   if (!test)
     mooseError(_viscoelastic_model_name + " does not exist");
@@ -45,7 +47,7 @@ ComputeLinearViscoelasticStress::initialSetup()
   _viscoelastic_model = std::dynamic_pointer_cast<LinearViscoelasticityBase>(test);
 
   if (!_viscoelastic_model)
-      mooseError(_viscoelastic_model_name + " is not a LinearViscoelasticityBase object");
+    mooseError(_viscoelastic_model_name + " is not a LinearViscoelasticityBase object");
 }
 
 void

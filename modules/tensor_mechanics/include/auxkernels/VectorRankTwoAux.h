@@ -17,7 +17,7 @@ InputParameters validParams<VectorRankTwoAux>();
 
 /**
  * VectorRankTwoAux is designed to take the data in a std::vector<RankTwoTensor>
- * material property, such as provided by linear viscoelastic models, and output 
+ * material property, such as provided by linear viscoelastic models, and output
  * the value for the supplied indices.
  */
 class VectorRankTwoAux : public AuxKernel

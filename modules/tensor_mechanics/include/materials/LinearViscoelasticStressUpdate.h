@@ -22,7 +22,7 @@ InputParameters validParams<LinearViscoelasticStressUpdate>();
  * The stress is reduced accordingly.
  *
  * This material must be used in conjunction with ComputeMultipleInelasticStress, and uses
- * an incremental (small or finite) strain formulation. To use viscoelastic models with 
+ * an incremental (small or finite) strain formulation. To use viscoelastic models with
  * total small strain, use a ComputeLinearViscoelasticStress material instead.
  */
 class LinearViscoelasticStressUpdate : public StressUpdateBase
@@ -61,7 +61,6 @@ protected:
   /// Pointer to the viscoelastic model itself
   std::string _viscoelastic_model_name;
   std::shared_ptr<LinearViscoelasticityBase> _viscoelastic_model;
-
 };
 
 #endif // LINEARVISCOELASTICSTRESSUPDATE_H

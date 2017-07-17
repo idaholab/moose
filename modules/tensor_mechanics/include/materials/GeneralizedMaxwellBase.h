@@ -11,7 +11,7 @@
 
 class GeneralizedMaxwellBase;
 
-template<>
+template <>
 InputParameters validParams<GeneralizedMaxwellBase>();
 
 /**
@@ -19,7 +19,7 @@ InputParameters validParams<GeneralizedMaxwellBase>();
  * a generalized Maxwell model (an arbitrary number of Maxwell
  * units assembled in parallel with a single spring).
  *
- * This class does not attribute the mechanical properties to each spring 
+ * This class does not attribute the mechanical properties to each spring
  * and dashpot. It must be inherited to do so (see GeneralizedMaxwellModel
  * for an example).
  *
@@ -35,15 +35,13 @@ class GeneralizedMaxwellBase : public LinearViscoelasticityBase
 public:
   GeneralizedMaxwellBase(const InputParameters & parameters);
 
-  virtual void
-  updateQpApparentProperties(unsigned int qp,
-                             const RankTwoTensor & effective_strain,
-                             const RankTwoTensor & effective_stress) final;
+  virtual void updateQpApparentProperties(unsigned int qp,
+                                          const RankTwoTensor & effective_strain,
+                                          const RankTwoTensor & effective_stress) final;
 
 protected:
   virtual void computeQpApparentElasticityTensors() final;
   virtual void computeQpApparentCreepStrain() final;
-
 };
 
 #endif // GENERALIZEDMAXWELLBASE_H

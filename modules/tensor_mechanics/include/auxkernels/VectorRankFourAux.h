@@ -17,7 +17,7 @@ InputParameters validParams<VectorRankFourAux>();
 
 /**
  * VectorRankFourAux is designed to take the data in a std::vector<RankFourTensor>
- * material property, such as provided by linear viscoelastic models, and output 
+ * material property, such as provided by linear viscoelastic models, and output
  * the value for the supplied indices.
  */
 class VectorRankFourAux : public AuxKernel

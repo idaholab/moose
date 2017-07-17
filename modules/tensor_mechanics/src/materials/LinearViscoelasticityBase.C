@@ -27,10 +27,11 @@ validParams<LinearViscoelasticityBase>()
                         false,
                         "forces the computation of the viscoelastic properties at each step of"
                         "the solver (default: false)");
-  params.addParam<bool>("need_viscoelastic_properties_inverse",
-                        false,
-                        "checks whether the model requires the computation of the inverse viscoelastic"
-                        "properties (default: false)");
+  params.addParam<bool>(
+      "need_viscoelastic_properties_inverse",
+      false,
+      "checks whether the model requires the computation of the inverse viscoelastic"
+      "properties (default: false)");
   params.suppressParameter<FunctionName>("elasticity_tensor_prefactor");
   return params;
 }
@@ -52,20 +53,23 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
     _components(0),
     _first_elasticity_tensor(
         declareProperty<RankFourTensor>(_base_name + "first_elasticity_tensor")),
-    _first_elasticity_tensor_inv(_need_viscoelastic_properties_inverse ?
-        &declareProperty<RankFourTensor>(_base_name + "first_elasticity_tensor_inv") :
-        nullptr),
+    _first_elasticity_tensor_inv(
+        _need_viscoelastic_properties_inverse
+            ? &declareProperty<RankFourTensor>(_base_name + "first_elasticity_tensor_inv")
+            : nullptr),
     _springs_elasticity_tensors(
         declareProperty<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors")),
-    _springs_elasticity_tensors_inv(_need_viscoelastic_properties_inverse ?
-        &declareProperty<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv") :
-        nullptr),
+    _springs_elasticity_tensors_inv(_need_viscoelastic_properties_inverse
+                                        ? &declareProperty<std::vector<RankFourTensor>>(
+                                              _base_name + "springs_elasticity_tensors_inv")
+                                        : nullptr),
     _dashpot_viscosities(declareProperty<std::vector<Real>>(_base_name + "dashpot_viscosities")),
     _viscous_strains(declareProperty<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
     _viscous_strains_old(
         getMaterialPropertyOld<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
     _apparent_creep_strain(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain")),
-    _apparent_creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "apparent_creep_strain")),
+    _apparent_creep_strain_old(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "apparent_creep_strain")),
     _has_driving_eigenstrain(isParamValid("driving_eigenstrain")),
     _driving_eigenstrain_name(
         _has_driving_eigenstrain ? getParam<std::string>("driving_eigenstrain") : ""),
@@ -91,7 +95,8 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
   if (_need_viscoelastic_properties_inverse)
   {
     getMaterialPropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor_inv");
-    getMaterialPropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv");
+    getMaterialPropertyOld<std::vector<RankFourTensor>>(_base_name +
+                                                        "springs_elasticity_tensors_inv");
   }
 }
 
@@ -116,16 +121,16 @@ LinearViscoelasticityBase::initQpStatefulProperties()
   }
 }
 
-RankTwoTensor 
+RankTwoTensor
 LinearViscoelasticityBase::computeQpCreepStrain(unsigned int qp,
                                                 const RankTwoTensor & mechanical_strain)
 {
-  return mechanical_strain - 
-           (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
-           (mechanical_strain - _apparent_creep_strain[qp]);
+  return mechanical_strain -
+         (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
+             (mechanical_strain - _apparent_creep_strain[qp]);
 }
 
-void 
+void
 LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
 {
   unsigned int qp_prev = _qp;
@@ -181,6 +186,3 @@ LinearViscoelasticityBase::computeTheta(Real dt, Real viscosity) const
   }
   return 1.;
 }
-
-
-
