@@ -181,6 +181,9 @@ validParams<MooseApp>()
                                    "Disabled performance logging. Overrides -t or --timing "
                                    "if passed in conjunction with this flag");
 
+  params.addCommandLineParam<bool>(
+      "allow_test_objects", "--allow-test-objects", false, "Register test objects and syntax.");
+
   // Options ignored by MOOSE but picked up by libMesh, these are here so that they are displayed in
   // the application help
   params.addCommandLineParam<bool>(
