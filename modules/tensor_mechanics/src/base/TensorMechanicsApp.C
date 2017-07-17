@@ -116,6 +116,7 @@
 #include "GeneralizedMaxwellModel.h"
 #include "GeneralizedKelvinVoigtModel.h"
 #include "LinearViscoelasticStressUpdate.h"
+#include "ComputeLinearViscoelasticStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -342,6 +343,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(GeneralizedMaxwellModel);
   registerMaterial(GeneralizedKelvinVoigtModel);
   registerMaterial(LinearViscoelasticStressUpdate);
+  registerMaterial(ComputeLinearViscoelasticStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

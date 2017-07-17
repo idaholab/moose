@@ -37,7 +37,7 @@ GeneralizedMaxwellModel::GeneralizedMaxwellModel(const InputParameters & paramet
   Real young_modulus = getParam<Real>("young_modulus");
   Real poisson_ratio = getParam<Real>("poisson_ratio");
 
-  fillIsotropicElasticityTensor(_C0, young_modulus, poisson_ratio);
+  _C0.fillFromInputVector({young_modulus, poisson_ratio}, RankFourTensor::symmetric_isotropic_E_nu);
 
   std::vector<Real> creep_modulus = getParam<std::vector<Real>>("creep_modulus");
   std::vector<Real> creep_ratio;
@@ -55,7 +55,7 @@ GeneralizedMaxwellModel::GeneralizedMaxwellModel(const InputParameters & paramet
 
   for (unsigned int i = 0; i < _Ci.size(); ++i)
   {
-    fillIsotropicElasticityTensor(_Ci[i], creep_modulus[i], creep_ratio[i]);
+    _Ci[i].fillFromInputVector({creep_modulus[i], creep_ratio[i]}, RankFourTensor::symmetric_isotropic_E_nu);
     _Si[i] = _Ci[i].invSymm();
     _C0 -= _Ci[i];
   }

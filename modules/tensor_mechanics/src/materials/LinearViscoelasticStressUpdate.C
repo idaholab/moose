@@ -12,15 +12,15 @@ validParams<LinearViscoelasticStressUpdate>()
 {
   InputParameters params = validParams<StressUpdateBase>();
   params.addRequiredParam<std::string>("viscoelastic_model","name of the LinearViscoelasticityBase object to manage");
-  params.addParam<std::string>("base_name","string prepended to the creep strain name");
+  params.addParam<std::string>("base_name","optional string prepended to the creep strain name");
   return params;
 }
 
 LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParameters & parameters) : 
     StressUpdateBase(parameters),
-    _base_name(getParam<std::string>("base_name")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") : std::string()),
     _creep_strain(declareProperty<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
-    _creep_strain_old(declarePropertyOld<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
     _viscoelastic_model_name(getParam<std::string>("viscoelastic_model")),
     _viscoelastic_model(nullptr)
 {
@@ -54,13 +54,13 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
                                             RankTwoTensor & stress_new,
                                             const RankTwoTensor & /*stress_old*/,
                                             const RankFourTensor & elasticity_tensor,
-                                            const RankTwoTensor & /*elastic_strain_old*/,
+                                            const RankTwoTensor & elastic_strain_old,
                                             bool /*compute_full_tangent_operator*/,
                                             RankFourTensor & tangent_operator)
 {
-  RankTwoTensor creep_strain_increment = _viscoelastic_model->computeQpCreepStrainIncrement(_qp, strain_increment);
-
-  _creep_strain[_qp] = _creep_strain_old[_qp] + creep_strain_increment;
+  RankTwoTensor current_mechanical_strain = elastic_strain_old + _creep_strain_old[_qp] + strain_increment;
+  _creep_strain[_qp] = _viscoelastic_model->computeQpCreepStrain(_qp, current_mechanical_strain);
+  RankTwoTensor creep_strain_increment = _creep_strain[_qp] - _creep_strain_old[_qp];
 
   strain_increment -= creep_strain_increment;
   inelastic_strain_increment += creep_strain_increment;

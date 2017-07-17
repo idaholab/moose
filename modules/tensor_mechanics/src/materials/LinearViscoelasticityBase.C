@@ -27,6 +27,10 @@ validParams<LinearViscoelasticityBase>()
                         false,
                         "forces the computation of the viscoelastic properties at each step of"
                         "the solver (default: false)");
+  params.addParam<bool>("need_viscoelastic_properties_inverse",
+                        false,
+                        "checks whether the model requires the computation of the inverse viscoelastic"
+                        "properties (default: false)");
   params.suppressParameter<FunctionName>("elasticity_tensor_prefactor");
   return params;
 }
@@ -43,7 +47,7 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
         declareProperty<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor")),
     _instantaneous_elasticity_tensor_inv(
         declareProperty<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor_inv")),
-    _need_viscoelastic_properties_inverse(false),
+    _need_viscoelastic_properties_inverse(getParam<bool>("need_viscoelastic_properties_inverse")),
     _has_longterm_dashpot(false),
     _components(0),
     _first_elasticity_tensor(
@@ -59,9 +63,9 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
     _dashpot_viscosities(declareProperty<std::vector<Real>>(_base_name + "dashpot_viscosities")),
     _viscous_strains(declareProperty<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
     _viscous_strains_old(
-        declarePropertyOld<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
+        getMaterialPropertyOld<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
     _apparent_creep_strain(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain")),
-    _apparent_creep_strain_old(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain_old")),
+    _apparent_creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "apparent_creep_strain")),
     _has_driving_eigenstrain(isParamValid("driving_eigenstrain")),
     _driving_eigenstrain_name(
         _has_driving_eigenstrain ? getParam<std::string>("driving_eigenstrain") : ""),
@@ -76,18 +80,18 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
                  "not converge!");
 
   // force material properties to be considered stateful
-  declarePropertyOld<RankFourTensor>(_base_name + "apparent_elasticity_tensor");
-  declarePropertyOld<RankFourTensor>(_base_name + "apparent_elasticity_tensor_inv");
-  declarePropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor");
-  declarePropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor_inv");
-  declarePropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor");
-  declarePropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors");
-  declarePropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities");
+  getMaterialPropertyOld<RankFourTensor>(_base_name + "apparent_elasticity_tensor");
+  getMaterialPropertyOld<RankFourTensor>(_base_name + "apparent_elasticity_tensor_inv");
+  getMaterialPropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor");
+  getMaterialPropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor_inv");
+  getMaterialPropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor");
+  getMaterialPropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors");
+  getMaterialPropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities");
 
   if (_need_viscoelastic_properties_inverse)
   {
-    declarePropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor_inv");
-    declarePropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv");
+    getMaterialPropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor_inv");
+    getMaterialPropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv");
   }
 }
 
@@ -114,28 +118,22 @@ LinearViscoelasticityBase::initQpStatefulProperties()
 
 RankTwoTensor 
 LinearViscoelasticityBase::computeQpCreepStrain(unsigned int qp,
-                                                const RankTwoTensor & strain)
+                                                const RankTwoTensor & mechanical_strain)
 {
-  return strain - 
+  return mechanical_strain - 
            (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
-           (strain - _apparent_creep_strain[qp]);
+           (mechanical_strain - _apparent_creep_strain[qp]);
 }
-
-RankTwoTensor 
-LinearViscoelasticityBase::computeQpCreepStrainIncrement(unsigned int qp,
-                                                         const RankTwoTensor & strain_increment)
-{
-  return strain_increment - 
-          (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
-          (strain_increment - (_apparent_creep_strain[qp] - _apparent_creep_strain_old[qp]));
-}
-
 
 void 
 LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
 {
   unsigned int qp_prev = _qp;
   _qp = qp;
+
+  if (_t_step >= 1)
+    _step_zero = false;
+
   computeQpViscoelasticProperties();
   if (_need_viscoelastic_properties_inverse)
     computeQpViscoelasticPropertiesInv();
@@ -148,9 +146,6 @@ LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
 void
 LinearViscoelasticityBase::computeQpElasticityTensor()
 {
-  if (_t_step >= 1)
-    _step_zero = false;
-
   if (_force_recompute_properties)
     recomputeQpApparentProperties(_qp);
 
@@ -187,17 +182,5 @@ LinearViscoelasticityBase::computeTheta(Real dt, Real viscosity) const
   return 1.;
 }
 
-void
-LinearViscoelasticityBase::fillIsotropicElasticityTensor(RankFourTensor & tensor,
-                                                         Real young_modulus,
-                                                         Real poisson_ratio) const
-{
-  std::vector<Real> iso_const(2);
-  iso_const[0] =
-      young_modulus * poisson_ratio / ((1.0 + poisson_ratio) * (1.0 - 2.0 * poisson_ratio));
-  iso_const[1] = young_modulus / (2.0 * (1.0 + poisson_ratio));
-
-  tensor.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
-}
 
 

@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                        Grizzly                               */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2015 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 
 #include "GeneralizedMaxwellBase.h"
@@ -103,14 +96,14 @@ GeneralizedMaxwellBase::computeQpApparentCreepStrain()
   {
     Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp][i]);
     Real gamma = _dashpot_viscosities[_qp][i] / (_dt * theta_i);
-    _apparent_creep_strain[_qp] += (_springs_elasticity_tensors[_qp][i] * _viscous_strains[_qp][i]) * (gamma / (1. + gamma));
+    _apparent_creep_strain[_qp] += (_springs_elasticity_tensors[_qp][i] * _viscous_strains_old[_qp][i]) * (gamma / (1. + gamma));
   }
 
   if (_has_longterm_dashpot)
   {
     Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp].back());
     Real gamma = _dashpot_viscosities[_qp].back() / (_dt * theta_i);
-    _apparent_creep_strain[_qp] += (_first_elasticity_tensor[_qp] * _viscous_strains[_qp].back()) * gamma;
+    _apparent_creep_strain[_qp] += (_first_elasticity_tensor[_qp] * _viscous_strains_old[_qp].back()) * gamma;
   }
 
   _apparent_creep_strain[_qp] = _apparent_elasticity_tensor_inv[_qp] * _apparent_creep_strain[_qp];
