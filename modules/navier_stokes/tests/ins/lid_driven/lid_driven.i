@@ -56,7 +56,6 @@
     variable = p
     u = vel_x
     v = vel_y
-    p = p
   [../]
 
   # x-momentum, time
