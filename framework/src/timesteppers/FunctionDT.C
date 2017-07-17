@@ -41,12 +41,20 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
   : TimeStepper(parameters),
     _time_t(getParam<std::vector<Real>>("time_t")),
     _time_dt(getParam<std::vector<Real>>("time_dt")),
-    _time_ipol(_time_t, getParam<std::vector<Real>>("time_dt")),
     _growth_factor(getParam<Real>("growth_factor")),
     _cutback_occurred(false),
     _min_dt(getParam<Real>("min_dt")),
     _interpolate(getParam<bool>("interpolate"))
 {
+  try
+  {
+    _time_ipol = libmesh_make_unique<LinearInterpolation>(_time_t, _time_dt);
+  }
+  catch (std::domain_error & e)
+  {
+    mooseError("In FunctionDT ", _name, ": ", e.what());
+  }
+
   _time_knots = _time_t;
 }
 
@@ -82,7 +90,7 @@ FunctionDT::computeDT()
   Real local_dt = 0;
 
   if (_interpolate)
-    local_dt = _time_ipol.sample(_time);
+    local_dt = _time_ipol->sample(_time);
   else // Find where we are
   {
     unsigned int i = 0;

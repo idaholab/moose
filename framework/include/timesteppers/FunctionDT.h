@@ -45,7 +45,8 @@ protected:
   const std::vector<Real> & _time_dt;
 
   /// Piecewise linear definition of time stepping
-  LinearInterpolation _time_ipol;
+  std::unique_ptr<LinearInterpolation> _time_ipol;
+
   Real _growth_factor;
   /// True if cut back of the time step occurred
   bool _cutback_occurred;
