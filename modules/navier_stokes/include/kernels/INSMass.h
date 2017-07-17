@@ -41,7 +41,6 @@ protected:
   unsigned _u_vel_var_number;
   unsigned _v_vel_var_number;
   unsigned _w_vel_var_number;
-  unsigned _p_var_number;
 };
 
 #endif // INSMASS_H

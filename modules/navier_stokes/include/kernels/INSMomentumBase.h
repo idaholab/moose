@@ -71,6 +71,9 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
+
+  // Convective term toggling
+  const bool _convective;
 };
 
 #endif
