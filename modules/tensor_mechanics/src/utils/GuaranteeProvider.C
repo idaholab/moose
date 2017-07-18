@@ -27,3 +27,11 @@ GuaranteeProvider::issueGuarantee(const MaterialPropertyName & prop_name, Guaran
   // intentional insertion
   _guarantees[prop_name].insert(guarantee);
 }
+
+void
+GuaranteeProvider::revokeGuarantee(const MaterialPropertyName & prop_name, Guarantee guarantee)
+{
+  auto it = _guarantees.find(prop_name);
+  if (it != _guarantees.end())
+    it->second.erase(guarantee);
+}
