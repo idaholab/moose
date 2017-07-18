@@ -30,6 +30,7 @@ public:
 
 protected:
   void issueGuarantee(const MaterialPropertyName & prop_name, Guarantee guarantee);
+  void revokeGuarantee(const MaterialPropertyName & prop_name, Guarantee guarantee);
 
 private:
   std::map<MaterialPropertyName, std::set<Guarantee>> _guarantees;
