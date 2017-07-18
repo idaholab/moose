@@ -11,6 +11,9 @@ of limited use in real simulations, and is only used in the Porous
 Flow module for comparison with the analytical solutions offered by
 the authors for multi-phase infiltration and drainage problems.
 
+!!! note
+    Only effective saturation as a function of capillary pressure is available
+
 !syntax parameters /UserObjects/PorousFlowCapillaryPressureRSC
 
 !syntax inputs /UserObjects/PorousFlowCapillaryPressureRSC
