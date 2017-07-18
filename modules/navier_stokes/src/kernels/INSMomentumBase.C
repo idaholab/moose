@@ -80,22 +80,22 @@ INSMomentumBase::computeQpResidual()
 {
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
-  Real convective_part = _convective
-                             ? _rho[_qp] *
-                                   (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
-                                    _w_vel[_qp] * _grad_u[_qp](2)) *
-                                   _test[_i][_qp]
-                             : 0.0;
+  const Real convective_part =
+      _convective
+          ? _rho[_qp] * (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
+                         _w_vel[_qp] * _grad_u[_qp](2)) *
+                _test[_i][_qp]
+          : 0.0;
 
   // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
-  Real pressure_part = 0.;
+  Real pressure_part = 0.0;
   if (_integrate_p_by_parts)
     pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
   else
     pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
 
   // Call derived class to compute the viscous contribution.
-  Real viscous_part = computeQpResidualViscousPart();
+  const Real viscous_part = computeQpResidualViscousPart();
 
   // Body force term
   const Real body_force_part = -_rho[_qp] * _gravity(_component) * _test[_i][_qp];
@@ -109,14 +109,14 @@ INSMomentumBase::computeQpJacobian()
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
-  Real convective_part =
+  const Real convective_part =
       _convective
           ? _rho[_qp] * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
                 _test[_i][_qp]
           : 0.0;
 
   // Call derived class to compute the viscous contribution.
-  Real viscous_part = computeQpJacobianViscousPart();
+  const Real viscous_part = computeQpJacobianViscousPart();
 
   return convective_part + viscous_part;
 }
@@ -127,33 +127,33 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {
-    Real convective_part =
+    const Real convective_part =
         _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp] : 0.0;
 
     // Call derived class to compute the viscous contribution.
-    Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
+    const Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
 
     return convective_part + viscous_part;
   }
 
   else if (jvar == _v_vel_var_number)
   {
-    Real convective_part =
+    const Real convective_part =
         _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp] : 0.0;
 
     // Call derived class to compute the viscous contribution.
-    Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
+    const Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
 
     return convective_part + viscous_part;
   }
 
   else if (jvar == _w_vel_var_number)
   {
-    Real convective_part =
+    const Real convective_part =
         _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp] : 0.0;
 
     // Call derived class to compute the viscous contribution.
-    Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
+    const Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
 
     return convective_part + viscous_part;
   }
@@ -167,5 +167,5 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
   }
 
   else
-    return 0;
+    return 0.0;
 }
