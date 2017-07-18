@@ -10,9 +10,11 @@ except:
 class DAGValidationError(Exception):
     pass
 
+# Added by the MOOSE group
 class DAGEdgeDepError(Exception):
     pass
 
+# Added by the MOOSE group
 class DAGEdgeIndError(Exception):
     pass
 
@@ -62,6 +64,7 @@ class DAG(object):
         except KeyError:
             pass
 
+    # Modified by the MOOSE group
     def add_edge(self, ind_node, dep_node, graph=None):
         """ Add an edge (dependency) between the specified nodes. """
         if not graph:
@@ -131,6 +134,7 @@ class DAG(object):
             i += 1
         return filter(lambda node: node in nodes_seen, self.topological_sort(graph=graph))
 
+    # Added by the MOOSE group
     def delete_downstreams(self, node, graph=None):
         """ Delete and return all nodes this node has edges towards. """
         if graph is None:

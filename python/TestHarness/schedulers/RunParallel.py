@@ -28,10 +28,10 @@ class RunParallel(Scheduler):
     #
     # The run method should be blocking until the test has completed _and_ the results have been
     # processed (with tester.processResults()). When we return from this method, this test will
-    # be considered finished, the output file will be closed, and worker will immediately place
-    # this job on the status queue, to have its status printed to the screen.
-    def run(self, tester_data):
-        tester = tester_data.getTester()
+    # be considered finished, the output file will be closed, and a worker will immediately place
+    # this job in the status queue, to have its status printed to the screen.
+    def run(self, job_container):
+        tester = job_container.getTester()
 
         # Get the command needed to run this test
         command = tester.getCommand(self.options)
@@ -40,7 +40,7 @@ class RunParallel(Scheduler):
         tester.prepare(self.options)
 
         # Launch and wait for the command to finish
-        process = tester_data.runCommand(command)
+        process = job_container.runCommand(command)
 
         # Was this test already considered finished? (Timeouts, Dry Run)
         if tester.isFinished():
@@ -48,7 +48,7 @@ class RunParallel(Scheduler):
 
         if process.poll() is not None:
             # get the output for this test
-            output = tester_data.getOutput()
+            output = job_container.getOutput()
 
             # If we are doing recover tests
             if self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
@@ -56,22 +56,25 @@ class RunParallel(Scheduler):
                 return
             else:
                 # Process the results and beautify the output
-                self.testOutput(tester_data, output)
+                self.testOutput(job_container, output)
 
         # This test failed to launch properly
         else:
             tester.setStatus('ERROR LAUNCHING JOB', tester.bucket_fail)
 
     # Modify the output the way we want it. Run processResults
-    def testOutput(self, tester_data, output):
-        tester = tester_data.getTester()
+    def testOutput(self, job_container, output):
+        tester = job_container.getTester()
 
         # process and store new results from output
-        output = tester.processResults(tester.getMooseDir(), tester_data.getExitCode(), self.options, output)
+        output = tester.processResults(tester.getMooseDir(), job_container.getExitCode(), self.options, output)
 
-        # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
-        # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
-        # status yet in the postprocessing stage. We'll inspect didPass() after processing results
+        # See if there's already a fail status set on this test. If there is, we shouldn't attempt to
+        # read from the files
+
+        # Note: We cannot use the didPass() method on the tester here because the tester
+        # hasn't had a chance to set status yet in the postprocessing stage. We'll inspect didPass() after
+        # processing results
         if not tester.didFail():
             # Read the output either from the temporary file or redirected files
             if tester.hasRedirectedOutput(self.options):
@@ -87,4 +90,4 @@ class RunParallel(Scheduler):
             output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
         # Set testers output with modifications made above so it prints the way we want it
-        tester_data.setOutput(output)
+        job_container.setOutput(output)

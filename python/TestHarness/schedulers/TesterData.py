@@ -1,11 +1,13 @@
-import re, os
+import re, os, sys, platform
 from timeit import default_timer as clock
-
+from signal import SIGTERM
+from time import sleep
 import util
 
-# TODO: Figure out what to do with this entire class... The issue is, some of it belongs in the Tester, some
-#       of it in the Scheduler. But no one wants the entire thing.
-class TesterData:
+class TesterDataKeyboardInterrupt(Exception):
+    pass
+
+class TesterData(object):
     """
     The TesterData class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, the start and end time, etc
@@ -39,6 +41,8 @@ class TesterData:
 
     # Run a tester specific command (changes into test_dir before execution)
     def runCommand(self, command):
+        # os.setpgid(os.getpid(), self.group_id)
+
         if self.options.dry_run or not self.__tester.shouldExecute():
             self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
             return
@@ -46,7 +50,7 @@ class TesterData:
         # Run a command and get the process and tempfile
         (process, output_file) = util.launchCommand(self.__tester, command)
 
-        # Save this information before waiting, so
+        # Save this information before waiting
         self.__process = process
         self.__outfile = output_file
         self.__start_time = clock()
@@ -64,10 +68,18 @@ class TesterData:
         # Return the process
         return process
 
-    # Kill the process
+    # Kill the Popen process
     def killProcess(self):
-        if self.__process:
-            self.__process.kill()
+        # Attempt to kill a running Popen process
+        if self.__process is not None:
+            try:
+                if platform.system() == "Windows":
+                    self.__process.terminate()
+                else:
+                    pgid = os.getpgid(self.__process.pid)
+                    os.killpg(pgid, SIGTERM)
+            except OSError: # Process already terminated
+                pass
 
     # Return Exit code
     def getExitCode(self):
@@ -127,6 +139,8 @@ class TesterData:
         if self.getActiveTime():
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():
-            return self.getEndTime() - self.getStartTime()
+            # Max is here, because we might get asked for timing before the test is finished
+            # (RUNNING...)
+            return max(0.0, self.getEndTime() - self.getStartTime())
         else:
             return 0.0

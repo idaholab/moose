@@ -199,6 +199,9 @@ class TestHarness:
                 self.error_code = self.error_code | 0x80
 
         except KeyboardInterrupt:
+            # Attempt to kill jobs currently running
+            self.scheduler.killRemaining()
+
             if self.writeFailedTest != None:
                 self.writeFailedTest.close()
             print('\nExiting due to keyboard interrupt...')
