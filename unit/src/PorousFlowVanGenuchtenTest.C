@@ -66,34 +66,34 @@ TEST(PorousFlowVanGenuchten, d2sat)
 
 TEST(PorousFlowVanGenuchten, cap)
 {
-  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::capillaryPressure(1.1, 0.55, 1.0, -1.0E30), 1.0E-5);
-  EXPECT_NEAR(-4.06172392297447,
-              PorousFlowVanGenuchten::capillaryPressure(0.3, 0.55, 1.6, -1.0E30),
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::capillaryPressure(1.1, 1.0, 0.55, 1.0E30), 1.0E-5);
+  EXPECT_NEAR(4.06172392297447,
+              PorousFlowVanGenuchten::capillaryPressure(0.3, 0.625, 0.55, 1.0E30),
               1.0E-5);
-  EXPECT_NEAR(-2.9, PorousFlowVanGenuchten::capillaryPressure(0.001, 0.55, 1.6, -2.9), 1.0E-5);
-  EXPECT_NEAR(-1000.0, PorousFlowVanGenuchten::capillaryPressure(0.0, 0.55, 1.6, -1000.0), 1.0E-5);
+  EXPECT_NEAR(2.9, PorousFlowVanGenuchten::capillaryPressure(0.001, 0.625, 0.55, 2.9), 1.0E-5);
+  EXPECT_NEAR(1000.0, PorousFlowVanGenuchten::capillaryPressure(0.0, 0.625, 0.55, 1000.0), 1.0E-5);
 }
 
 TEST(PorousFlowVanGenuchten, dcap)
 {
   Real fd;
-  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dCapillaryPressure(0.0, 0.55, 1.0, -1.0E30), 1.0E-5);
-  fd = (PorousFlowVanGenuchten::capillaryPressure(0.3 + eps, 0.55, 1.6, -1.0E30) -
-        PorousFlowVanGenuchten::capillaryPressure(0.3, 0.55, 1.6, -1.0E30)) /
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dCapillaryPressure(0.0, 1.0, 0.55, 1.0E30), 1.0E-5);
+  fd = (PorousFlowVanGenuchten::capillaryPressure(0.3 + eps, 0.625, 0.55, 1.0E30) -
+        PorousFlowVanGenuchten::capillaryPressure(0.3, 0.625, 0.55, 1.0E30)) /
        eps;
-  EXPECT_NEAR(fd, PorousFlowVanGenuchten::dCapillaryPressure(0.3, 0.55, 1.6, -1.0E30), 1.0E-5);
-  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dCapillaryPressure(1.0, 0.55, 1.0, -1.0E30), 1.0E-5);
+  EXPECT_NEAR(fd, PorousFlowVanGenuchten::dCapillaryPressure(0.3, 0.625, 0.55, 1.0E30), 1.0E-5);
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dCapillaryPressure(1.0, 1.0, 0.55, 1.0E30), 1.0E-5);
 }
 
 TEST(PorousFlowVanGenuchten, d2cap)
 {
   Real fd;
-  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2CapillaryPressure(0.0, 0.55, 1.0, -1.0E30), 1.0E-5);
-  fd = (PorousFlowVanGenuchten::dCapillaryPressure(0.3 + eps, 0.55, 1.6, -1.0E30) -
-        PorousFlowVanGenuchten::dCapillaryPressure(0.3, 0.55, 1.6, -1.0E30)) /
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2CapillaryPressure(0.0, 1.0, 0.55, 1.0E30), 1.0E-5);
+  fd = (PorousFlowVanGenuchten::dCapillaryPressure(0.3 + eps, 0.625, 0.55, 1.0E30) -
+        PorousFlowVanGenuchten::dCapillaryPressure(0.3, 0.625, 0.55, 1.0E30)) /
        eps;
-  EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2CapillaryPressure(0.3, 0.55, 1.6, -1.0E30), 1.0E-5);
-  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2CapillaryPressure(1.0, 0.55, 1.6, -2.9), 1.0E-5);
+  EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2CapillaryPressure(0.3, 0.625, 0.55, 1.0E30), 1.0E-5);
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2CapillaryPressure(1.0, 0.625, 0.55, 1.0E30), 1.0E-5);
 }
 
 TEST(PorousFlowVanGenuchten, relperm)

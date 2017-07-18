@@ -36,6 +36,12 @@
     csvdiff = 'pressure_pulse_1d_2phasePSVG_pp_0011.csv'
     rel_err = 1.0E-5
   [../]
+  [./pressure_pulse_1d_2phasePSVG2]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_2phasePSVG2.i'
+    csvdiff = 'pressure_pulse_1d_2phasePSVG2_pp_0011.csv'
+    rel_err = 1.0E-5
+  [../]
   [./pressure_pulse_1d_MD]
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_MD.i'
