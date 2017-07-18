@@ -18,11 +18,6 @@ validParams<PorousFlow2PhasePS>()
   params.addRequiredCoupledVar("phase1_saturation",
                                "Variable that is the saturation of phase 1 (eg, the water phase)");
   params.addRangeCheckedParam<Real>(
-      "pc",
-      0.0,
-      "pc <= 0",
-      "Constant capillary pressure (Pa). Default is 0. Note: capillary pressure must be negative");
-  params.addRangeCheckedParam<Real>(
       "sat_lr",
       0.0,
       "sat_lr >= 0 & sat_lr <= 1",
@@ -88,7 +83,7 @@ PorousFlow2PhasePS::computeQpProperties()
     (*_grads_qp)[_qp][0] = -_phase1_grads_qp[_qp];
     (*_grads_qp)[_qp][1] = _phase1_grads_qp[_qp];
     (*_gradp_qp)[_qp][0] = _phase0_gradp_qp[_qp];
-    (*_gradp_qp)[_qp][1] = _phase0_gradp_qp[_qp] + dpc * (*_grads_qp)[_qp][1];
+    (*_gradp_qp)[_qp][1] = _phase0_gradp_qp[_qp] - dpc * (*_grads_qp)[_qp][1];
   }
 
   // _porepressure depends on _phase0_porepressure, and its derivative is 1
@@ -110,15 +105,15 @@ PorousFlow2PhasePS::computeQpProperties()
     // _phase1_porepressure depends on saturation through the capillary pressure function
     _dsaturation_dvar[_qp][0][_svar] = -1.0;
     _dsaturation_dvar[_qp][1][_svar] = 1.0;
-    _dporepressure_dvar[_qp][1][_svar] = dpc;
+    _dporepressure_dvar[_qp][1][_svar] = -dpc;
 
     if (!_nodal_material)
     {
       (*_dgrads_qp_dgradv)[_qp][0][_svar] = -1.0;
       (*_dgrads_qp_dgradv)[_qp][1][_svar] = 1.0;
       const Real d2pc_qp = d2CapillaryPressure_dS2(_phase1_saturation[_qp]);
-      (*_dgradp_qp_dv)[_qp][1][_svar] = d2pc_qp * (*_grads_qp)[_qp][1];
-      (*_dgradp_qp_dgradv)[_qp][1][_svar] = dpc;
+      (*_dgradp_qp_dv)[_qp][1][_svar] = -d2pc_qp * (*_grads_qp)[_qp][1];
+      (*_dgradp_qp_dgradv)[_qp][1][_svar] = -dpc;
     }
   }
 }
@@ -130,7 +125,7 @@ PorousFlow2PhasePS::buildQpPPSS()
   _saturation[_qp][1] = _phase1_saturation[_qp];
   const Real pc = capillaryPressure(_phase1_saturation[_qp]);
   _porepressure[_qp][0] = _phase0_porepressure[_qp];
-  _porepressure[_qp][1] = _phase0_porepressure[_qp] + pc;
+  _porepressure[_qp][1] = _phase0_porepressure[_qp] - pc;
 }
 
 Real

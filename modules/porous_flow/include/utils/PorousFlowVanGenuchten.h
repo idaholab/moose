@@ -57,38 +57,36 @@ Real d2EffectiveSaturation(Real p, Real alpha, Real m);
 
 /**
  * Capillary pressure as a function of effective saturation
- * Note: the parameter p0 is the inverse of the alpha parameter
- * in effectiveSaturation
  *
  * @param seff effective saturation
+ * @param alpha van Genuchten parameter
  * @param m van Genuchten exponent
- * @param p0 capillary pressure strength factor (Pa)
  * @param pc_max maximum capillary pressure (Pa)
  * @return capillary pressure (Pa)
  */
-Real capillaryPressure(Real seff, Real m, Real p0, Real pc_max);
+Real capillaryPressure(Real seff, Real alpha, Real m, Real pc_max);
 
 /**
  * Derivative of capillary pressure wrt effective saturation
  *
  * @param seff effective saturation
+ * @param alpha van Genuchten parameter
  * @param m van Genuchten exponent
- * @param p0 capillary pressure strength factor (Pa)
  * @param pc_max maximum capillary pressure (Pa)
  * @return derivative of capillary pressure wrt effective saturation
  */
-Real dCapillaryPressure(Real seff, Real m, Real p0, Real pc_max);
+Real dCapillaryPressure(Real seff, Real alpha, Real m, Real pc_max);
 
 /**
  * Second derivative of capillary pressure wrt effective saturation
  *
  * @param seff effective saturation
+ * @param alpha van Genuchten parameter
  * @param m van Genuchten exponent
- * @param p0 capillary pressure strength factor (Pa)
  * @param pc_max maximum capillary pressure (Pa)
  * @return second derivative of capillary pressure wrt effective saturation
  */
-Real d2CapillaryPressure(Real seff, Real m, Real p0, Real pc_max);
+Real d2CapillaryPressure(Real seff, Real alpha, Real m, Real pc_max);
 
 /**
  * Relative permeability as a function of effective saturation

@@ -26,16 +26,12 @@ class PorousFlowCapillaryPressureVG : public PorousFlowCapillaryPressure
 public:
   PorousFlowCapillaryPressureVG(const InputParameters & parameters);
 
-  virtual Real capillaryPressure(Real saturation) const override;
-
-  virtual Real dCapillaryPressure(Real saturation) const override;
-
-  virtual Real d2CapillaryPressure(Real saturation) const override;
+  virtual Real capillaryPressureCurve(Real saturation) const override;
+  virtual Real dCapillaryPressureCurve(Real saturation) const override;
+  virtual Real d2CapillaryPressureCurve(Real saturation) const override;
 
   virtual Real effectiveSaturation(Real pc) const override;
-
   virtual Real dEffectiveSaturation(Real pc) const override;
-
   virtual Real d2EffectiveSaturation(Real pc) const override;
 
 protected:
@@ -43,10 +39,6 @@ protected:
   const Real _m;
   /// van Genuchten capillary coefficient alpha
   const Real _alpha;
-  /// P0 - inverse of alpha
-  const Real _p0;
-  /// Maximum capillary pressure (Pa). Note: must be <= 0
-  const Real _pc_max;
 };
 
 #endif // POROUSFLOWCAPILLARYPRESSUREVG_H

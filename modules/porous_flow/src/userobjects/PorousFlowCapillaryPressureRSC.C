@@ -36,21 +36,23 @@ PorousFlowCapillaryPressureRSC::PorousFlowCapillaryPressureRSC(const InputParame
     _shift(getParam<Real>("shift")),
     _scale(0.25 * _scale_ratio * _oil_viscosity)
 {
+  // Set _log_ext to false as no capillary pressure curves are implmented in this class
+  _log_ext = false;
 }
 
-Real PorousFlowCapillaryPressureRSC::capillaryPressure(Real /*seff*/) const
+Real PorousFlowCapillaryPressureRSC::capillaryPressureCurve(Real /*saturation*/) const
 {
   mooseError("PorousFlowCapillaryPressureRSC::capillaryPressure not implemented");
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureRSC::dCapillaryPressure(Real /*seff*/) const
+Real PorousFlowCapillaryPressureRSC::dCapillaryPressureCurve(Real /*saturation*/) const
 {
   mooseError("PorousFlowCapillaryPressureRSC::dCapillaryPressure not implemented");
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureRSC::d2CapillaryPressure(Real /*seff*/) const
+Real PorousFlowCapillaryPressureRSC::d2CapillaryPressureCurve(Real /*saturation*/) const
 {
   mooseError("PorousFlowCapillaryPressureRSC::d2CapillaryPressure not implemented");
   return 0.0;

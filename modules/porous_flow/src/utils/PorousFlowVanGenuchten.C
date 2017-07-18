@@ -58,9 +58,8 @@ d2EffectiveSaturation(Real p, Real alpha, Real m)
 }
 
 Real
-capillaryPressure(Real seff, Real m, Real p0, Real pc_max)
+capillaryPressure(Real seff, Real alpha, Real m, Real pc_max)
 {
-  Real pc = 0.0;
   if (seff >= 1.0)
     return 0.0;
   else if (seff <= 0.0)
@@ -68,56 +67,45 @@ capillaryPressure(Real seff, Real m, Real p0, Real pc_max)
   else
   {
     Real a = std::pow(seff, -1.0 / m) - 1.0;
-    if (a > 0.0)
-      pc = -p0 * std::pow(a, 1.0 - m);
+    return std::min(std::pow(a, 1.0 - m) / alpha, pc_max);
   }
-  return std::max(pc, pc_max);
 }
 
 Real
-dCapillaryPressure(Real seff, Real m, Real p0, Real pc_max)
+dCapillaryPressure(Real seff, Real alpha, Real m, Real pc_max)
 {
-  Real dpc = 0.0;
-  Real pc = 0.0;
-
   if (seff <= 0.0 || seff >= 1.0)
     return 0.0;
   else
   {
     Real a = std::pow(seff, -1.0 / m) - 1.0;
-    if (a > 0.0)
-    {
-      pc = -p0 * std::pow(a, 1.0 - m);
-      if (pc > pc_max)
-        dpc = p0 * (1.0 - m) * std::pow(a, -m) * std::pow(seff, -1.0 - 1.0 / m) / m;
-    }
+    // Return 0 if pc > pc_max
+    if (std::pow(a, 1.0 - m) / alpha > pc_max)
+      return 0.0;
+    else
+      return (m - 1.0) * std::pow(a, -m) * std::pow(seff, -1.0 - 1.0 / m) / m / alpha;
   }
-  return dpc;
 }
 
 Real
-d2CapillaryPressure(Real seff, Real m, Real p0, Real pc_max)
+d2CapillaryPressure(Real seff, Real alpha, Real m, Real pc_max)
 {
-  Real pc = 0.0;
-  Real d2pc = 0.0;
-
   if (seff <= 0.0 || seff >= 1.0)
     return 0.0;
   else
   {
     Real a = std::pow(seff, -1.0 / m) - 1.0;
-    if (a > 0.0)
+    // Return 0 if pc > pc_max
+    if (std::pow(a, 1.0 - m) / alpha > pc_max)
+      return 0.0;
+    else
     {
-      pc = -p0 * std::pow(a, 1.0 - m);
-      if (pc > pc_max)
-      {
-        d2pc = std::pow(a, -1.0 - m) * std::pow(seff, -2.0 - 2.0 / m) -
-               ((1.0 + m) / m) * std::pow(a, -m) * std::pow(seff, -1.0 / m - 2.0);
-        d2pc *= p0 * (1.0 - m) / m;
-      }
+      Real d2pc = -std::pow(a, -1.0 - m) * std::pow(seff, -2.0 - 2.0 / m) +
+                  ((1.0 + m) / m) * std::pow(a, -m) * std::pow(seff, -1.0 / m - 2.0);
+      d2pc *= (1.0 - m) / m / alpha;
+      return d2pc;
     }
   }
-  return d2pc;
 }
 
 Real

@@ -223,7 +223,7 @@ PorousFlowFluidStateWaterNCG::thermophysicalProperties()
 
   // Calculate the saturations and pressures for each phase
   liquid_saturation = 1.0 - gas_saturation;
-  Real liquid_porepressure = _gas_porepressure[_qp] + _pc_uo.capillaryPressure(liquid_saturation);
+  Real liquid_porepressure = _gas_porepressure[_qp] - _pc_uo.capillaryPressure(liquid_saturation);
 
   // Calculate liquid density and viscosity if in the two phase or single phase
   // liquid region, assuming they are not affected by the presence of dissolved
