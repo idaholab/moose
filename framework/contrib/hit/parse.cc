@@ -527,8 +527,26 @@ std::string
 Field::strVal()
 {
   std::string s = _val;
-  if (_val[0] == '\'' || _val[0] == '"')
+
+  std::string quote = "";
+  if (_val[0] == '\'')
+    quote = "'";
+  else if (_val[0] == '"')
+    quote = "\"";
+
+  if (quote != "")
+  {
     s = _val.substr(1, _val.size() - 2);
+
+    size_t pos = s.find("\\" + quote, 0);
+    while (pos != std::string::npos)
+    {
+      s.replace(pos, 2, quote);
+      pos += 1; // handles case where replaced text is a substring of find text
+      pos = s.find("\\" + quote, pos);
+    }
+  }
+
   return s;
 }
 

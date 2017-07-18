@@ -21,10 +21,10 @@
 #include "InputParameters.h"
 #include "Syntax.h"
 
-// libMesh include
-#include "libmesh/getpot.h"
+#include "hit.h"
 
-#include "parse.h" // new getpot
+#include <vector>
+#include <string>
 
 // Forward declarations
 class ActionWarehouse;
@@ -35,12 +35,88 @@ class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
 
+inline std::string
+errormsg(std::string /*fname*/, hit::Node * /*n*/)
+{
+  return "";
+}
+
+template <typename T, typename... Args>
+std::string
+errormsg(std::string fname, hit::Node * n, T arg, Args... args)
+{
+  std::stringstream ss;
+  if (n && fname.size() > 0)
+    ss << fname << ":" << n->line() << ": ";
+  else if (fname.size() > 0)
+    ss << fname << ":0: ";
+  ss << arg;
+  ss << errormsg("", nullptr, args...);
+  return ss.str();
+}
+
+// Expands ${...} substitution expressions with variable values from the tree.
+class ExpandWalker : public hit::Walker
+{
+public:
+  ExpandWalker(std::string fname) : _fname(fname) {}
+  virtual void
+  walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    auto f = dynamic_cast<hit::Field *>(n);
+    auto s = f->val();
+
+    auto start = s.find("${");
+    while (start < s.size())
+    {
+      auto end = s.find("}", start);
+      if (end != std::string::npos)
+      {
+        auto var = s.substr(start + 2, end - (start + 2));
+        auto curr = n;
+        while ((curr = curr->parent()))
+        {
+          if (curr->find(var) && curr->find(var) != n)
+          {
+            used.push_back(hit::pathJoin({curr->fullpath(), var}));
+            s = s.substr(0, start) + curr->param<std::string>(var) +
+                s.substr(end + 1, s.size() - (end + 1));
+
+            if (end + 1 - start == f->val().size())
+              f->setVal(s, dynamic_cast<hit::Field *>(curr->find(var))->kind());
+            else
+              f->setVal(s);
+
+            // move end back to the position of the end of the replacement text - not the replaced
+            // text since the former is the one relevant to the string for remaining replacements.
+            end = start + curr->param<std::string>(var).size();
+            break;
+          }
+        }
+
+        if (curr == nullptr)
+          errors.push_back(
+              errormsg(_fname, n, "no variable '", var, "' found for substitution expression"));
+      }
+      else
+        errors.push_back(errormsg(_fname, n, "missing substitution expression terminator '}'"));
+      start = s.find("${", end);
+    }
+  }
+
+  std::vector<std::string> used;
+  std::vector<std::string> errors;
+
+private:
+  std::string _fname;
+};
+
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
  * parsing files. It is not currently designed for extensibility. If you wish to build your own
  * parser, please contact the MOOSE team for guidance.
  */
-class Parser : public ConsoleStreamInterface
+class Parser : public ConsoleStreamInterface, public hit::Walker
 {
 public:
   enum SyntaxFormatterType
@@ -65,15 +141,10 @@ public:
   std::string getFileName(bool stripLeadingPath = true) const;
 
   /**
-   * Parse an input file consisting of getpot syntax and setup objects
+   * Parse an input file consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
   void parse(const std::string & input_filename);
-
-  /**
-   * Return a reference to the getpot object to extract options from the input file
-   */
-  const GetPot * getPotHandle() const;
 
   /**
    * This function attempts to extract values from the input file based on the contents of
@@ -97,76 +168,24 @@ public:
    */
   void buildJsonSyntaxTree(JsonSyntaxTree & tree) const;
 
-  /**
-   * This function checks to see if there are unidentified variables in the input file (i.e. unused)
-   * If the warn_is_error is set, then the program will abort if unidentified parameters are found
-   */
-  void checkUnidentifiedParams(std::vector<std::string> & all_vars,
-                               bool error_on_warn,
-                               bool in_input_file,
-                               std::shared_ptr<FEProblemBase> fe_problem) const;
+  void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n);
 
-  /**
-   * This function checks to see if there were any overridden parameters in the input file.
-   * (i.e. supplied more than once)
-   * @param error_on_warn a Boolean that will trigger an error if this case is detected
-   */
-  void checkOverriddenParams(bool error_on_warn) const;
+  void errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused);
 
 protected:
-  /// Helper struct to hold the active and inactive lists for each parsed block
-  struct BlockLists
-  {
-    BlockLists(std::vector<std::string> && active_list, std::vector<std::string> && inactive_list)
-      : active(std::move(active_list)), inactive(std::move(inactive_list))
-    {
-    }
-
-    const std::vector<std::string> active;
-    const std::vector<std::string> inactive;
-  };
-
-  /**
-   * Determines whether a particular block is marked as active
-   * in the input file
-   */
-  bool isSectionActive(const std::string & section_name,
-                       const std::map<std::string, BlockLists> & block_lists) const;
-
-  /**
-   * This function checks to make sure that the active lists (active=*) are used up in the supplied
-   * input file.
-   */
-  void checkExplicitBlocksUsed(std::vector<std::string> & sections,
-                               const std::map<std::string, BlockLists> & block_lists) const;
-
-  /**
-   * Appends sections from the CLI Reorders section names so that Debugging options can be enabled
-   * before parsing begins.
-   */
-  void appendAndReorderSectionNames(std::vector<std::string> & section_names);
-
-  /**
-   * Reorders specified tasks in the section names list (helper method called from
-   * appednAndReorderSectionNames).
-   */
-  void reorderHelper(std::vector<std::string> & section_names,
-                     const std::string & action,
-                     const std::string & task) const;
-
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are called only from this Object
    */
   /// Template method for setting any scalar type parameter read from the input file or command line
-  template <typename T>
+  template <typename T, typename Base>
   void setScalarParameter(const std::string & full_name,
                           const std::string & short_name,
                           InputParameters::Parameter<T> * param,
                           bool in_global,
                           GlobalParamsAction * global_block);
 
-  template <typename T, typename UP_T>
+  template <typename T, typename UP_T, typename Base>
   void setScalarValueTypeParameter(const std::string & full_name,
                                    const std::string & short_name,
                                    InputParameters::Parameter<T> * param,
@@ -174,7 +193,7 @@ protected:
                                    GlobalParamsAction * global_block);
 
   /// Template method for setting any vector type parameter read from the input file or command line
-  template <typename T>
+  template <typename T, typename Base>
   void setVectorParameter(const std::string & full_name,
                           const std::string & short_name,
                           InputParameters::Parameter<std::vector<T>> * param,
@@ -214,6 +233,10 @@ protected:
                                    bool in_global,
                                    GlobalParamsAction * global_block);
 
+  std::unique_ptr<hit::Node> _cli_root = nullptr;
+  std::unique_ptr<hit::Node> _root = nullptr;
+  std::vector<std::string> _secs_need_first;
+
   /// The MooseApp this Parser is part of
   MooseApp & _app;
   /// The Factory associated with that MooseApp
@@ -227,21 +250,6 @@ protected:
 
   /// Object for holding the syntax parse tree
   std::unique_ptr<SyntaxTree> _syntax_formatter;
-
-  /**
-   * Contains all of the sections that are not active during the parse phase so that blocks nested
-   * more than one level deep can detect that the grandparent is not active.
-   */
-  std::set<std::string> _inactive_strings;
-
-  /// Boolean indicating whether the getpot parser has been initialized
-  bool _getpot_initialized;
-
-  /// The getpot object used for extracting parameters
-  GetPot _getpot_file;
-
-  /// The getpot object used for testing
-  GetPot _getpot_file_error_checking;
 
   /// The input file name that is used for parameter extraction
   std::string _input_filename;
@@ -257,6 +265,12 @@ protected:
 
   /// The current stream object used for capturing errors during extraction
   std::ostringstream * _current_error_stream;
+
+private:
+  std::string _errmsg;
+  std::string _warnmsg;
+  std::string hitCLIFilter(std::string appname, int argc, char * argv[]);
+  void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };
 
 #endif // PARSER_H
