@@ -40,49 +40,64 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-  p->computeJacobian(
-      *eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
+  if (!p->isNonlinearEigenvalueSolver())
+  {
+    p->computeJacobian(
+        *eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
+  }
+  else
+  {
+    Mat petsc_mat_A = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_A).mat();
 
-  Mat petsc_mat_A = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_A).mat();
+    PetscObjectComposeFunction((PetscObject)petsc_mat_A,
+                               "formJacobian",
+                               Moose::SlepcSupport::mooseSlepcEigenFormJacobianA);
+    PetscObjectComposeFunction((PetscObject)petsc_mat_A,
+                               "formFunction",
+                               Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
 
-  PetscObjectComposeFunction(
-      (PetscObject)petsc_mat_A, "formJacobian", Moose::SlepcSupport::mooseSlepcEigenFormJacobianA);
-  PetscObjectComposeFunction(
-      (PetscObject)petsc_mat_A, "formFunction", Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
-
-  PetscContainer container;
-  PetscContainerCreate(eigen_system.comm().get(), &container);
-  PetscContainerSetPointer(container, p);
-  PetscObjectCompose((PetscObject)petsc_mat_A, "formJacobianCtx", nullptr);
-  PetscObjectCompose((PetscObject)petsc_mat_A, "formJacobianCtx", (PetscObject)container);
-  PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", nullptr);
-  PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", (PetscObject)container);
-
+    PetscContainer container;
+    PetscContainerCreate(eigen_system.comm().get(), &container);
+    PetscContainerSetPointer(container, p);
+    PetscObjectCompose((PetscObject)petsc_mat_A, "formJacobianCtx", nullptr);
+    PetscObjectCompose((PetscObject)petsc_mat_A, "formJacobianCtx", (PetscObject)container);
+    PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", nullptr);
+    PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", (PetscObject)container);
+    PetscContainerDestroy(&container);
+  }
   if (eigen_system.generalized())
   {
     if (eigen_system.matrix_B)
     {
-      p->computeJacobian(
-          *eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
+      if (!p->isNonlinearEigenvalueSolver())
+      {
+        p->computeJacobian(
+            *eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
+      }
+      else
+      {
+        Mat petsc_mat_B = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_B).mat();
 
-      Mat petsc_mat_B = static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_B).mat();
+        PetscObjectComposeFunction((PetscObject)petsc_mat_B,
+                                   "formJacobian",
+                                   Moose::SlepcSupport::mooseSlepcEigenFormJacobianB);
+        PetscObjectComposeFunction((PetscObject)petsc_mat_B,
+                                   "formFunction",
+                                   Moose::SlepcSupport::mooseSlepcEigenFormFunctionB);
 
-      PetscObjectComposeFunction((PetscObject)petsc_mat_B,
-                                 "formJacobian",
-                                 Moose::SlepcSupport::mooseSlepcEigenFormJacobianB);
-      PetscObjectComposeFunction((PetscObject)petsc_mat_B,
-                                 "formFunction",
-                                 Moose::SlepcSupport::mooseSlepcEigenFormFunctionB);
-
-      PetscObjectCompose((PetscObject)petsc_mat_B, "formFunctionCtx", nullptr);
-      PetscObjectCompose((PetscObject)petsc_mat_B, "formFunctionCtx", (PetscObject)container);
-      PetscObjectCompose((PetscObject)petsc_mat_B, "formJacobianCtx", nullptr);
-      PetscObjectCompose((PetscObject)petsc_mat_B, "formJacobianCtx", (PetscObject)container);
+        PetscContainer container;
+        PetscContainerCreate(eigen_system.comm().get(), &container);
+        PetscContainerSetPointer(container, p);
+        PetscObjectCompose((PetscObject)petsc_mat_B, "formFunctionCtx", nullptr);
+        PetscObjectCompose((PetscObject)petsc_mat_B, "formFunctionCtx", (PetscObject)container);
+        PetscObjectCompose((PetscObject)petsc_mat_B, "formJacobianCtx", nullptr);
+        PetscObjectCompose((PetscObject)petsc_mat_B, "formJacobianCtx", (PetscObject)container);
+        PetscContainerDestroy(&container);
+      }
     }
     else
       mooseError("It is a generalized eigenvalue problem but matrix B is empty\n");
   }
-  PetscContainerDestroy(&container);
 }
 }
 
