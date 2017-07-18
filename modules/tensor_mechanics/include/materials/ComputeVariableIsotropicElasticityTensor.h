@@ -30,9 +30,6 @@ protected:
   /// Material defininig the Poisson's Ratio
   const MaterialProperty<Real> & _poissons_ratio;
 
-  /// Flag for variable elasticity isotropic tensors
-  MaterialProperty<bool> & _elasticity_tensor_is_constant;
-
   /// number of variables the moduli depend on
   const unsigned int _num_args;
 
