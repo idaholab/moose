@@ -24,6 +24,8 @@
 // libMesh include
 #include "libmesh/getpot.h"
 
+#include "parse.h" // new getpot
+
 // Forward declarations
 class ActionWarehouse;
 class SyntaxTree;
