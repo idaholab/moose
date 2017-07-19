@@ -32,7 +32,8 @@ InputParameters
 validParams<MultiAppInterpolationTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-
+  params.addClassDescription(
+      "Transfers the value to the target domain from the nearest node in the source domain.");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");

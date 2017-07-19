@@ -12,11 +12,10 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.01
   [../]
-  [./td]
+  [./time]
     type = TimeDerivative
     variable = u
   [../]
@@ -37,41 +36,15 @@
   [../]
 []
 
-[Postprocessors]
-  [./average]
-    type = ElementAverageValue
-    variable = u
-  [../]
-[]
-
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
   num_steps = 5
+  dt = 0.01
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
-[]
-
-[MultiApps]
-  [./pp_sub]
-    type = TransientMultiApp
-    app_type = MooseTestApp
-    positions = '0.5 0.5 0 0.7 0.7 0'
-    execute_on = timestep_end
-    input_files = sub.i
-  [../]
-[]
-
-[Transfers]
-  [./pp_transfer]
-    type = MultiAppPostprocessorToAuxScalarTransfer
-    direction = to_multiapp
-    multi_app = pp_sub
-    from_postprocessor = average
-    to_aux_scalar = from_master_app
-  [../]
 []

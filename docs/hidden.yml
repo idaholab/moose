@@ -50,7 +50,16 @@ framework:
     - /Preconditioning
     - /Problem
     - /ScalarKernels
-    - /Transfers
+    - /Transfers/MultiAppMeshFunctionTransfer
+    - /Transfers/MultiAppPostprocessorInterpolationTransfer
+    - /Transfers/MultiAppPostprocessorTransfer
+    - /Transfers/MultiAppProjectionTransfer
+    - /Transfers/MultiAppUserObjectTransfer
+    - /Transfers/MultiAppVariableValueSamplePostprocessorTransfer
+    - /Transfers/MultiAppNearestNodeTransfer
+    - /Transfers/MultiAppPostprocessorToAuxScalarTransfer
+    - /Transfers/MultiAppVariableValueSampleTransfer
+    - /Transfers/MultiAppScalarToAuxScalarTransfer
     - /Variables
     - /VectorPostprocessors
     - /UserObjects

@@ -1,8 +1,7 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 1
   nx = 10
-  ny = 10
 []
 
 [Variables]
@@ -10,20 +9,12 @@
   [../]
 []
 
-[AuxVariables]
-  [./from_master_app]
-    order = FIRST
-    family = SCALAR
-  [../]
-[]
-
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.01
   [../]
-  [./td]
+  [./time]
     type = TimeDerivative
     variable = u
   [../]
@@ -40,27 +31,38 @@
     type = DirichletBC
     variable = u
     boundary = right
-    value = 2
-  [../]
-[]
-
-[Postprocessors]
-  [./from_master]
-    type = ScalarVariable
-    variable = from_master_app
+    value = 1
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
-  num_steps = 1
-  dt = 1
+  num_steps = 5
+  dt = 0.01
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
+[Controls]
+  [./stochastic]
+    type = SamplerReceiver
+  [../]
+[]
+
+[Postprocessors]
+  [./left_bc]
+    type = NodalVariableValue
+    nodeid = 0
+    variable = u
+  [../]
+  [./right_bc]
+    type = NodalVariableValue
+    nodeid = 10
+    variable = u
+  [../]
+[]
+
 [Outputs]
-  exodus = true
-  hide = from_master_app
+  csv = true
 []
