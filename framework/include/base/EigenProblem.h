@@ -42,6 +42,7 @@ public:
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
+  virtual bool isNonlinearEigenvalueSolver();
 
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
