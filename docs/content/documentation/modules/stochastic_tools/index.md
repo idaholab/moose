@@ -3,6 +3,9 @@ The stochastic tools module is a toolbox designed for performing stochastic anal
 applications. The following sections detail the various aspects of this module that can be
 used independently or in combination to meet the needs of the application developer.
 
+## Examples
+* [Example 1: Monte Carlo](/examples/monte_carlo.md)
+
 ## Distributions
 Distribution objects in [MOOSE] are [function](Functions/index.md)-like in that they have methods
 that are called on-demand by other objects and do not maintain any state. A custom Distribution
@@ -41,7 +44,7 @@ various methods on the object as discussed previously.
 ## Distribution Objects
 The following lists the available Distribution objects within the Stochastic Tools module.
 
-!subobjects /Distributions title=None
+!syntax objects /Distributions title=None
 
 ## Samplers
 Sampler objects in [MOOSE] are designed to generate an arbitrary set of data sampled from
@@ -57,4 +60,4 @@ complete set of samples that could be passed to sub-applications via the [Sample
 ## Sampler Objects
 The following lists the available Sampler objects within the Stochastic Tools module.
 
-!subobjects /Samplers title=None
+!syntax objects /Samplers title=None
