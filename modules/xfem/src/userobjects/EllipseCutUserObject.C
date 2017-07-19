@@ -12,7 +12,6 @@
 
 // XFEM includes
 #include "XFEMFuncs.h"
-//#include "EFAFuncs.h"
 
 template <>
 InputParameters
@@ -33,8 +32,11 @@ validParams<EllipseCutUserObject>()
 EllipseCutUserObject::EllipseCutUserObject(const InputParameters & parameters)
   : GeometricCut3DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
 {
+  // Set up constant parameters
+  const int cut_data_len = 9;
+
   // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() != 9)
+  if (_cut_data.size() != cut_data_len)
     mooseError("Length of EllipseCutUserObject cut_data must be 9");
 
   // Assign cut_data to vars used to construct cuts
@@ -42,41 +44,38 @@ EllipseCutUserObject::EllipseCutUserObject(const InputParameters & parameters)
   _vertices.push_back(Point(_cut_data[3], _cut_data[4], _cut_data[5]));
   _vertices.push_back(Point(_cut_data[6], _cut_data[7], _cut_data[8]));
 
-  Point ray1 = _vertices[0] - _center;
-  Point ray2 = _vertices[1] - _center;
+  std::pair<Point, Point> rays = std::make_pair(_vertices[0] - _center, _vertices[1] - _center);
 
-  if (std::abs(ray1 * ray2) > 1e-6)
+  if (std::abs(rays.first * rays.second) > 1e-6)
     mooseError(
         "EllipseCutUserObject only works on an elliptic cut. Users should provide two points at "
         "the long and short axis.");
 
-  _normal = ray1.cross(ray2);
+  _normal = rays.first.cross(rays.second);
   Xfem::normalizePoint(_normal);
 
-  Real R1 = std::sqrt(ray1.norm_sq());
-  Real R2 = std::sqrt(ray2.norm_sq());
+  std::pair<Real, Real> ray_radii =
+      std::make_pair(std::sqrt(rays.first.norm_sq()), std::sqrt(rays.second.norm_sq()));
 
   // Determine which the long and short axes
-  if (R1 > R2)
+  if (ray_radii.first > ray_radii.second)
   {
-    _unit_vec1 = ray1;
-    _unit_vec2 = ray2;
-    _long_axis = R1;
-    _short_axis = R2;
+    _unit_vec1 = rays.first;
+    _unit_vec2 = rays.second;
+    _long_axis = ray_radii.first;
+    _short_axis = ray_radii.second;
   }
   else
   {
-    _unit_vec1 = ray2;
-    _unit_vec2 = ray1;
-    _long_axis = R2;
-    _short_axis = R1;
+    _unit_vec1 = rays.second;
+    _unit_vec2 = rays.first;
+    _long_axis = ray_radii.second;
+    _short_axis = ray_radii.first;
   }
 
   Xfem::normalizePoint(_unit_vec1);
   Xfem::normalizePoint(_unit_vec2);
 }
-
-EllipseCutUserObject::~EllipseCutUserObject() {}
 
 bool
 EllipseCutUserObject::isInsideCutPlane(Point p) const
@@ -84,11 +83,10 @@ EllipseCutUserObject::isInsideCutPlane(Point p) const
   Point ray = p - _center;
   if (std::abs(ray * _normal) < 1e-6)
   {
-    double xloc = ray * _unit_vec1;
-    double yloc = ray * _unit_vec2;
+    std::pair<Real, Real> xy_loc = std::make_pair(ray * _unit_vec1, ray * _unit_vec2);
 
-    if (std::sqrt(xloc * xloc / (_long_axis * _long_axis) +
-                  yloc * yloc / (_short_axis * _short_axis)) < 1)
+    if (std::sqrt(xy_loc.first * xy_loc.first / (_long_axis * _long_axis) +
+                  xy_loc.second * xy_loc.second / (_short_axis * _short_axis)) < 1)
       return true;
   }
   return false;

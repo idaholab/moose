@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef RECTANGLE_CUT_USEROBJECT_H
-#define RECTANGLE_CUT_USEROBJECT_H
+#ifndef RECTANGLECUTUSEROBJECT_H
+#define RECTANGLECUTUSEROBJECT_H
 
 #include "GeometricCut3DUserObject.h"
 
@@ -20,11 +20,10 @@ class RectangleCutUserObject : public GeometricCut3DUserObject
 {
 public:
   RectangleCutUserObject(const InputParameters & parameters);
-  ~RectangleCutUserObject();
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
 protected:
   std::vector<Real> _cut_data;
@@ -32,7 +31,7 @@ protected:
 private:
   std::vector<Point> _vertices;
 
-  bool isInsideCutPlane(Point p) const;
+  bool isInsideCutPlane(Point p) const override;
 };
 
-#endif // RECTANGLE_CUT_USEROBJECT_H
+#endif // RECTANGLECUTUSEROBJECT_H

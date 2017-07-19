@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef LINE_SEGMENT_CUT_SET_USER_OBJECT_H
-#define LINE_SEGMENT_CUT_SET_USER_OBJECT_H
+#ifndef LINESEGMENTCUTSETUSEROBJECT_H
+#define LINESEGMENTCUTSETUSEROBJECT_H
 
 #include "GeometricCut2DUserObject.h"
 
@@ -20,14 +20,13 @@ class LineSegmentCutSetUserObject : public GeometricCut2DUserObject
 {
 public:
   LineSegmentCutSetUserObject(const InputParameters & parameters);
-  ~LineSegmentCutSetUserObject();
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
 protected:
   std::vector<Real> _cut_data;
 };
 
-#endif // LINE_SEGMENT_CUT_SET_USER_OBJECT_H
+#endif // LINESEGMENTCUTSETUSEROBJECT_H

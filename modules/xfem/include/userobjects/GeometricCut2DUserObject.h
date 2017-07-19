@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef GEOMETRIC_CUT_2D_USEROBJECT_H
-#define GEOMETRIC_CUT_2D_USEROBJECT_H
+#ifndef GEOMETRICCUT2DUSEROBJECT_H
+#define GEOMETRICCUT2DUSEROBJECT_H
 
 #include "GeometricCutUserObject.h"
 
@@ -20,37 +20,37 @@ class GeometricCut2DUserObject : public GeometricCutUserObject
 {
 public:
   GeometricCut2DUserObject(const InputParameters & parameters);
-  ~GeometricCut2DUserObject();
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
-  virtual bool active(Real time) const;
+  virtual bool active(Real time) const override;
 
-  virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time) const;
-  virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) const;
+  virtual bool cutElementByGeometry(const Elem * elem,
+                                    std::vector<CutEdge> & cut_edges,
+                                    Real time) const override;
+  virtual bool cutElementByGeometry(const Elem * elem,
+                                    std::vector<CutFace> & cut_faces,
+                                    Real time) const override;
 
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
                                      std::vector<CutEdge> & cut_edges,
-                                     Real time) const;
+                                     Real time) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
                                      std::vector<CutFace> & cut_faces,
-                                     Real time) const;
+                                     Real time) const override;
 
 protected:
-  std::vector<Point> _cut_line_start_points;
-  std::vector<Point> _cut_line_end_points;
+  std::vector<std::pair<Point, Point>> _cut_line_endpoints;
 
   bool IntersectSegmentWithCutLine(const Point & segment_point1,
                                    const Point & segment_point2,
-                                   const Point & cutting_line_point1,
-                                   const Point & cutting_line_point2,
+                                   const std::pair<Point, Point> & cutting_line_points,
                                    const Real & cutting_line_fraction,
                                    Real & segment_intersection_fraction) const;
-  Real crossProduct2D(Real ax, Real ay, Real bx, Real by) const;
+
+  Real crossProduct2D(const Point & point_a, const Point & point_b) const;
 };
 
-#endif // GEOMETRIC_CUT_2D_USEROBJECT_H
+#endif // GEOMETRICCUT2DUSEROBJECT_H

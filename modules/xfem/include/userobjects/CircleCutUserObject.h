@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef CIRCLE_CUT_USEROBJECT_H
-#define CIRCLE_CUT_USEROBJECT_H
+#ifndef CIRCLECUTUSEROBJECT_H
+#define CIRCLECUTUSEROBJECT_H
 
 #include "GeometricCut3DUserObject.h"
 
@@ -20,11 +20,10 @@ class CircleCutUserObject : public GeometricCut3DUserObject
 {
 public:
   CircleCutUserObject(const InputParameters & parameters);
-  ~CircleCutUserObject();
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
 protected:
   std::vector<Real> _cut_data;
@@ -34,7 +33,7 @@ private:
   Real _radius;
   Real _angle;
 
-  virtual bool isInsideCutPlane(Point p) const;
+  virtual bool isInsideCutPlane(Point p) const override;
 };
 
-#endif // CIRCLE_CUT_USEROBJECT_H
+#endif // CIRCLECUTUSEROBJECT_H

@@ -12,7 +12,6 @@
 
 // XFEM includes
 #include "XFEMFuncs.h"
-//#include "EFAFuncs.h"
 
 template <>
 InputParameters
@@ -33,8 +32,12 @@ validParams<RectangleCutUserObject>()
 RectangleCutUserObject::RectangleCutUserObject(const InputParameters & parameters)
   : GeometricCut3DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
 {
+  // Set up constant parameters
+  const int cut_data_len = 12;
+  const int num_vertices = 4;
+
   // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() != 12)
+  if (_cut_data.size() != cut_data_len)
     mooseError("Length of RectangleCutUserObject cut_data must be 12");
 
   // Assign cut_data to vars used to construct cuts
@@ -43,29 +46,29 @@ RectangleCutUserObject::RectangleCutUserObject(const InputParameters & parameter
   _vertices.push_back(Point(_cut_data[6], _cut_data[7], _cut_data[8]));
   _vertices.push_back(Point(_cut_data[9], _cut_data[10], _cut_data[11]));
 
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < num_vertices; ++i)
     _center += _vertices[i];
   _center *= 0.25;
 
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < num_vertices; ++i)
   {
     unsigned int iplus1(i < 3 ? i + 1 : 0);
-    Point ray1 = _vertices[i] - _center;
-    Point ray2 = _vertices[iplus1] - _center;
-    _normal += ray1.cross(ray2);
+    std::pair<Point, Point> rays =
+        std::make_pair(_vertices[i] - _center, _vertices[iplus1] - _center);
+    _normal += rays.first.cross(rays.second);
   }
   _normal *= 0.25;
   Xfem::normalizePoint(_normal);
 }
 
-RectangleCutUserObject::~RectangleCutUserObject() {}
-
 bool
 RectangleCutUserObject::isInsideCutPlane(Point p) const
 {
+  const int num_vertices = 4;
+
   bool inside = false;
   unsigned int counter = 0;
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < num_vertices; ++i)
   {
     unsigned int iplus1 = (i < 3 ? i + 1 : 0);
     Point middle2p = p - 0.5 * (_vertices[i] + _vertices[iplus1]);
@@ -76,7 +79,7 @@ RectangleCutUserObject::isInsideCutPlane(Point p) const
     if (middle2p * side_norm <= 0.0)
       counter += 1;
   }
-  if (counter == 4)
+  if (counter == num_vertices)
     inside = true;
   return inside;
 }

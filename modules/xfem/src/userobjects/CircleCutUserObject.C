@@ -12,7 +12,6 @@
 
 // XFEM includes
 #include "XFEMFuncs.h"
-//#include "EFAFuncs.h"
 
 template <>
 InputParameters
@@ -33,8 +32,11 @@ validParams<CircleCutUserObject>()
 CircleCutUserObject::CircleCutUserObject(const InputParameters & parameters)
   : GeometricCut3DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
 {
+  // Set up constant parameters
+  const int cut_data_len = 9;
+
   // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() != 9)
+  if (_cut_data.size() != cut_data_len)
     mooseError("Length of CircleCutUserObject cut_data must be 9");
 
   // Assign cut_data to vars used to construct cuts
@@ -42,22 +44,20 @@ CircleCutUserObject::CircleCutUserObject(const InputParameters & parameters)
   _vertices.push_back(Point(_cut_data[3], _cut_data[4], _cut_data[5]));
   _vertices.push_back(Point(_cut_data[6], _cut_data[7], _cut_data[8]));
 
-  Point ray1 = _vertices[0] - _center;
-  Point ray2 = _vertices[1] - _center;
+  std::pair<Point, Point> rays = std::make_pair(_vertices[0] - _center, _vertices[1] - _center);
 
-  _normal = ray1.cross(ray2);
+  _normal = rays.first.cross(rays.second);
   Xfem::normalizePoint(_normal);
 
-  Real R1 = std::sqrt(ray1.norm_sq());
-  Real R2 = std::sqrt(ray2.norm_sq());
-  if (std::abs(R1 - R2) > 1e-10)
+  std::pair<Real, Real> ray_radii =
+      std::make_pair(std::sqrt(rays.first.norm_sq()), std::sqrt(rays.second.norm_sq()));
+
+  if (std::abs(ray_radii.first - ray_radii.second) > 1e-10)
     mooseError("CircleCutUserObject only works for a circular cut");
 
-  _radius = 0.5 * (R1 + R2);
-  _angle = std::acos((ray1 * ray2) / (R1 * R2));
+  _radius = 0.5 * (ray_radii.first + ray_radii.second);
+  _angle = std::acos((rays.first * rays.second) / (ray_radii.first * ray_radii.second));
 }
-
-CircleCutUserObject::~CircleCutUserObject() {}
 
 bool
 CircleCutUserObject::isInsideCutPlane(Point p) const

@@ -1460,30 +1460,6 @@ XFEM::getFragmentFaces(const Elem * elem,
   }
 }
 
-/*std::vector<Real> &
-XFEM::getXFEMCutData()
-{
-  return _XFEM_cut_data;
-}
-
-void
-XFEM::setXFEMCutData(std::vector<Real> & cut_data)
-{
-  _XFEM_cut_data = cut_data;
-}
-
-std::string &
-XFEM::getXFEMCutType()
-{
-  return _XFEM_cut_type;
-}
-
-void
-XFEM::setXFEMCutType(std::string & cut_type)
-{
-  _XFEM_cut_type = cut_type;
-}*/
-
 Xfem::XFEM_QRULE &
 XFEM::getXFEMQRule()
 {

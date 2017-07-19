@@ -13,22 +13,21 @@
 
 XFEMCrackGrowthIncrement2DCut::XFEMCrackGrowthIncrement2DCut(
     Real x0, Real y0, Real x1, Real y1, Real t0, Real t1)
-  : _t_start(t0), _t_end(t1), _cut_line_start(x0, y0, 0.0), _cut_line_end(x1, y1, 0.0)
+  : _time_range(std::make_pair(t0, t1)),
+    _cut_line_endpoints(std::make_pair(Point(x0, y0, 0.0), Point(x1, y1, 0.0)))
 {
 }
-
-XFEMCrackGrowthIncrement2DCut::~XFEMCrackGrowthIncrement2DCut() {}
 
 Real
 XFEMCrackGrowthIncrement2DCut::cutCompletionFraction(Real time)
 {
   Real fraction = 0.0;
-  if (time >= _t_start)
+  if (time >= _time_range.first)
   {
-    if (time >= _t_end)
+    if (time >= _time_range.second)
       fraction = 1.0;
     else
-      fraction = (time - _t_start) / (_t_end - _t_start);
+      fraction = (time - _time_range.first) / (_time_range.second - _time_range.first);
   }
   return fraction;
 }
@@ -60,8 +59,7 @@ XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
       const Node * node2 = curr_side->get_node(1);
       Real seg_int_frac = 0.0;
 
-      if (IntersectSegmentWithCutLine(
-              *node1, *node2, _cut_line_start, _cut_line_end, fraction, seg_int_frac))
+      if (IntersectSegmentWithCutLine(*node1, *node2, _cut_line_endpoints, fraction, seg_int_frac))
       {
         cut_elem = true;
         CutEdgeForCrackGrowthIncr mycut;
@@ -77,12 +75,12 @@ XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
 }
 
 bool
-XFEMCrackGrowthIncrement2DCut::IntersectSegmentWithCutLine(const Point & segment_point1,
-                                                           const Point & segment_point2,
-                                                           const Point & cutting_line_point1,
-                                                           const Point & cutting_line_point2,
-                                                           const Real & cutting_line_fraction,
-                                                           Real & segment_intersection_fraction)
+XFEMCrackGrowthIncrement2DCut::IntersectSegmentWithCutLine(
+    const Point & segment_point1,
+    const Point & segment_point2,
+    const std::pair<Point, Point> & cutting_line_points,
+    const Real & cutting_line_fraction,
+    Real & segment_intersection_fraction)
 {
   // Use the algorithm described here to determine whether a line segment is intersected
   // by a cutting line, and to compute the fraction along that line where the intersection
@@ -91,26 +89,20 @@ XFEMCrackGrowthIncrement2DCut::IntersectSegmentWithCutLine(const Point & segment
 
   bool cut_segment = false;
   Point seg_dir = segment_point2 - segment_point1;
-  Point cut_dir = cutting_line_point2 - cutting_line_point1;
-  Point cut_start_to_seg_start = segment_point1 - cutting_line_point1;
+  Point cut_dir = cutting_line_points.second - cutting_line_points.first;
+  Point cut_start_to_seg_start = segment_point1 - cutting_line_points.first;
 
-  Real cut_dir_cross_seg_dir = crossProduct2D(cut_dir(0), cut_dir(1), seg_dir(0), seg_dir(1));
+  Real cut_dir_cross_seg_dir = crossProduct2D(cut_dir, seg_dir);
 
   if (std::abs(cut_dir_cross_seg_dir) > Xfem::tol)
   {
     // Fraction of the distance along the cutting segment where it intersects the edge segment
-    Real cut_int_frac =
-        crossProduct2D(
-            cut_start_to_seg_start(0), cut_start_to_seg_start(1), seg_dir(0), seg_dir(1)) /
-        cut_dir_cross_seg_dir;
+    Real cut_int_frac = crossProduct2D(cut_start_to_seg_start, seg_dir) / cut_dir_cross_seg_dir;
 
     if (cut_int_frac >= 0.0 && cut_int_frac <= cutting_line_fraction)
     { // Cutting segment intersects the line of the edge segment, but the intersection point may be
       // outside the segment
-      Real int_frac =
-          crossProduct2D(
-              cut_start_to_seg_start(0), cut_start_to_seg_start(1), cut_dir(0), cut_dir(1)) /
-          cut_dir_cross_seg_dir;
+      Real int_frac = crossProduct2D(cut_start_to_seg_start, cut_dir) / cut_dir_cross_seg_dir;
       if (int_frac >= 0.0 &&
           int_frac <= 1.0) // TODO: revisit end cases for intersections with corners
       {
@@ -123,7 +115,7 @@ XFEMCrackGrowthIncrement2DCut::IntersectSegmentWithCutLine(const Point & segment
 }
 
 Real
-XFEMCrackGrowthIncrement2DCut::crossProduct2D(Real ax, Real ay, Real bx, Real by)
+XFEMCrackGrowthIncrement2DCut::crossProduct2D(const Point & point_a, const Point & point_b)
 {
-  return (ax * by - bx * ay);
+  return (point_a(0) * point_b(1) - point_b(0) * point_a(1));
 }

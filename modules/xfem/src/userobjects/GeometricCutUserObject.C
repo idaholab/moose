@@ -27,25 +27,26 @@ validParams<GeometricCutUserObject>()
 }
 
 GeometricCutUserObject::GeometricCutUserObject(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _start_times(), _end_times()
+    //: GeneralUserObject(parameters), _start_times(), _end_times()
+    : GeneralUserObject(parameters),
+      _cut_time_ranges()
 {
-  _start_times.push_back(getParam<Real>("time_start_cut"));
-  _end_times.push_back(getParam<Real>("time_end_cut"));
+  _cut_time_ranges.push_back(
+      std::make_pair(getParam<Real>("time_start_cut"), getParam<Real>("time_end_cut")));
 }
-
-GeometricCutUserObject::~GeometricCutUserObject() {}
 
 Real
 GeometricCutUserObject::cutFraction(unsigned int cut_num, Real time) const
 {
   Real fraction = 0.0;
 
-  if (time >= _start_times[cut_num])
+  if (time >= _cut_time_ranges[cut_num].first)
   {
-    if (time >= _end_times[cut_num])
+    if (time >= _cut_time_ranges[cut_num].second)
       fraction = 1.0;
     else
-      fraction = (time - _start_times[cut_num]) / (_end_times[cut_num] - _start_times[cut_num]);
+      fraction = (time - _cut_time_ranges[cut_num].first) /
+                 (_cut_time_ranges[cut_num].second - _cut_time_ranges[cut_num].first);
   }
   return fraction;
 }

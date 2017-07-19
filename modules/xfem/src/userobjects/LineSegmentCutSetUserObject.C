@@ -32,51 +32,51 @@ validParams<LineSegmentCutSetUserObject>()
 LineSegmentCutSetUserObject::LineSegmentCutSetUserObject(const InputParameters & parameters)
   : GeometricCut2DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
 {
+  // Set up constant parameters
+  const int line_cut_data_len = 6;
+
   // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() % 6 != 0)
+  if (_cut_data.size() % line_cut_data_len != 0)
     mooseError("Length of LineSegmentCutSetUserObject cut_data must be a multiple of 6.");
 
-  unsigned int num_cuts = _cut_data.size() / 6;
+  unsigned int num_cuts = _cut_data.size() / line_cut_data_len;
 
-  std::vector<Real> scale;
+  // Assign scale and translate parameters
+  std::pair<Real, Real> scale;
   if (isParamValid("cut_scale"))
   {
-    scale = getParam<std::vector<Real>>("cut_scale");
+    auto vec_scale = getParam<std::vector<Real>>("cut_scale");
+    scale = std::make_pair(vec_scale[0], vec_scale[1]);
   }
   else
   {
-    scale.push_back(1.0);
-    scale.push_back(1.0);
+    scale = std::make_pair(1.0, 1.0);
   }
 
-  std::vector<Real> trans;
+  std::pair<Real, Real> trans;
   if (isParamValid("cut_translate"))
   {
-    trans = getParam<std::vector<Real>>("cut_translate");
+    auto vec_trans = getParam<std::vector<Real>>("cut_translate");
+    trans = std::make_pair(vec_trans[0], vec_trans[1]);
   }
   else
   {
-    trans.push_back(0.0);
-    trans.push_back(0.0);
+    trans = std::make_pair(0.0, 0.0);
   }
 
   // Clear _start_times & _end_times vectors initialized from
   // time_start_cut & time_end_cut values
-  _start_times.clear();
-  _end_times.clear();
+  _cut_time_ranges.clear();
 
   for (unsigned int i = 0; i < num_cuts; ++i)
   {
-    Real x0 = (_cut_data[i * 6 + 0] + trans[0]) * scale[0];
-    Real y0 = (_cut_data[i * 6 + 1] + trans[1]) * scale[1];
-    Real x1 = (_cut_data[i * 6 + 2] + trans[0]) * scale[0];
-    Real y1 = (_cut_data[i * 6 + 3] + trans[1]) * scale[1];
-    _cut_line_start_points.push_back(Point(x0, y0, 0.0));
-    _cut_line_end_points.push_back(Point(x1, y1, 0.0));
+    Real x0 = (_cut_data[i * line_cut_data_len + 0] + trans.first) * scale.first;
+    Real y0 = (_cut_data[i * line_cut_data_len + 1] + trans.second) * scale.second;
+    Real x1 = (_cut_data[i * line_cut_data_len + 2] + trans.first) * scale.first;
+    Real y1 = (_cut_data[i * line_cut_data_len + 3] + trans.second) * scale.second;
+    _cut_line_endpoints.push_back(std::make_pair(Point(x0, y0, 0.0), Point(x1, y1, 0.0)));
 
-    _start_times.push_back(_cut_data[i * 6 + 4]);
-    _end_times.push_back(_cut_data[i * 6 + 5]);
+    _cut_time_ranges.push_back(
+        std::make_pair(_cut_data[i * line_cut_data_len + 4], _cut_data[i * line_cut_data_len + 5]));
   }
 }
-
-LineSegmentCutSetUserObject::~LineSegmentCutSetUserObject() {}

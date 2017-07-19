@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef GEOMETRIC_CUT_3D_USEROBJECT_H
-#define GEOMETRIC_CUT_3D_USEROBJECT_H
+#ifndef GEOMETRICCUT3DUSEROBJECT_H
+#define GEOMETRICCUT3DUSEROBJECT_H
 
 #include "GeometricCutUserObject.h"
 
@@ -16,25 +16,26 @@ class GeometricCut3DUserObject : public GeometricCutUserObject
 {
 public:
   GeometricCut3DUserObject(const InputParameters & parameters);
-  virtual ~GeometricCut3DUserObject();
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
-  virtual bool active(Real time) const;
+  virtual bool active(Real time) const override;
 
-  virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time) const;
-  virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) const;
+  virtual bool cutElementByGeometry(const Elem * elem,
+                                    std::vector<CutEdge> & cut_edges,
+                                    Real time) const override;
+  virtual bool cutElementByGeometry(const Elem * elem,
+                                    std::vector<CutFace> & cut_faces,
+                                    Real time) const override;
 
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
                                      std::vector<CutEdge> & cut_edges,
-                                     Real time) const;
+                                     Real time) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
                                      std::vector<CutFace> & cut_faces,
-                                     Real time) const;
+                                     Real time) const override;
 
 protected:
   Point _center;
@@ -49,4 +50,4 @@ protected:
   Real getRelativePosition(const Point & p1, const Point & p2, const Point & p) const;
 };
 
-#endif // GEOMETRIC_CUT_3D_USEROBJECT_H
+#endif // GEOMETRICCUT3DUSEROBJECT_H

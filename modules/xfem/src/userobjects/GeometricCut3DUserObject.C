@@ -32,11 +32,8 @@ validParams<GeometricCut3DUserObject>()
 GeometricCut3DUserObject::GeometricCut3DUserObject(const InputParameters & parameters)
   : GeometricCutUserObject(parameters), _center(), _normal()
 {
-  _start_times.push_back(0.0);
-  _end_times.push_back(0.0);
+  _cut_time_ranges.push_back(std::make_pair(0.0, 0.0));
 }
-
-GeometricCut3DUserObject::~GeometricCut3DUserObject() {}
 
 bool GeometricCut3DUserObject::active(Real /*time*/) const { return true; }
 

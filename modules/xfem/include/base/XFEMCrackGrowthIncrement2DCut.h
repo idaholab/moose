@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEM_CRACK_GROWTH_INCREMENT_2D_CUT_H
-#define XFEM_CRACK_GROWTH_INCREMENT_2D_CUT_H
+#ifndef XFEMCRACKGROWTHINCREMENT2DCUT_H
+#define XFEMCRACKGROWTHINCREMENT2DCUT_H
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
@@ -26,7 +26,6 @@ class XFEMCrackGrowthIncrement2DCut
 {
 public:
   XFEMCrackGrowthIncrement2DCut(Real x0, Real y0, Real x1, Real y1, Real t0, Real t1);
-  ~XFEMCrackGrowthIncrement2DCut();
 
   virtual bool cutElementByCrackGrowthIncrement(const Elem * elem,
                                                 std::vector<CutEdgeForCrackGrowthIncr> & cut_edges,
@@ -37,19 +36,16 @@ public:
 protected:
   bool IntersectSegmentWithCutLine(const Point & segment_point1,
                                    const Point & segment_point2,
-                                   const Point & cutting_line_point1,
-                                   const Point & cutting_line_point2,
+                                   const std::pair<Point, Point> & cutting_line_points,
                                    const Real & cutting_line_fraction,
                                    Real & segment_intersection_fraction);
 
-  Real crossProduct2D(Real ax, Real ay, Real bx, Real by);
+  Real crossProduct2D(const Point & point_a, const Point & point_b);
 
-  Real _t_start;
-  Real _t_end;
+  const std::pair<Real, Real> _time_range;
 
 private:
-  const Point _cut_line_start;
-  const Point _cut_line_end;
+  const std::pair<Point, Point> _cut_line_endpoints;
 };
 
-#endif // XFEM_CRACK_GROWTH_INCREMENT_2D_CUT_H
+#endif // XFEMCRACKGROWTHINCREMENT2DCUT_H

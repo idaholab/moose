@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef GEOMETRIC_CUT_USEROBJECT_H
-#define GEOMETRIC_CUT_USEROBJECT_H
+#ifndef GEOMETRICCUTUSEROBJECT_H
+#define GEOMETRICCUTUSEROBJECT_H
 
 // MOOSE includes
 #include "GeneralUserObject.h"
@@ -47,7 +47,6 @@ public:
    * constructor.
    */
   GeometricCutUserObject(const InputParameters & parameters);
-  virtual ~GeometricCutUserObject();
 
   virtual void initialize(){};
   virtual void execute(){};
@@ -70,8 +69,7 @@ public:
   Real cutFraction(unsigned int cut_num, Real time) const;
 
 protected:
-  std::vector<Real> _start_times;
-  std::vector<Real> _end_times;
+  std::vector<std::pair<Real, Real>> _cut_time_ranges;
 };
 
-#endif // GEOMETRIC_CUT_USEROBJECT_H
+#endif // GEOMETRICCUTUSEROBJECT_H

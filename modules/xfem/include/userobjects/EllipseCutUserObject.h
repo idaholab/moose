@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef ELLIPSE_CUT_USEROBJECT_H
-#define ELLIPSE_CUT_USEROBJECT_H
+#ifndef ELLIPSECUTUSEROBJECT_H
+#define ELLIPSECUTUSEROBJECT_H
 
 #include "GeometricCut3DUserObject.h"
 
@@ -20,11 +20,10 @@ class EllipseCutUserObject : public GeometricCut3DUserObject
 {
 public:
   EllipseCutUserObject(const InputParameters & parameters);
-  ~EllipseCutUserObject();
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override{};
+  virtual void execute() override{};
+  virtual void finalize() override{};
 
 protected:
   std::vector<Real> _cut_data;
@@ -36,7 +35,7 @@ private:
   Real _long_axis;
   Real _short_axis;
 
-  virtual bool isInsideCutPlane(Point p) const;
+  virtual bool isInsideCutPlane(Point p) const override;
 };
 
-#endif // ELLIPSE_CUT_USEROBJECT_H
+#endif // ELLIPSECUTUSEROBJECT_H
