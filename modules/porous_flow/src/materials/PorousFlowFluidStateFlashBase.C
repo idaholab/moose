@@ -200,15 +200,15 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
 
     if (!_nodal_material)
       (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_zvar[0]] =
-          dpc * _fsp[_aqueous_phase_number].dsaturation_dp +
+          -dpc * _fsp[_aqueous_phase_number].dsaturation_dp -
           dpc * _fsp[_aqueous_phase_number].dsaturation_dz;
 
     // The aqueous phase porepressure is also a function of liquid saturation,
     // which depends on both gas porepressure and z
     _dporepressure_dvar[_qp][_aqueous_phase_number][_pvar] +=
-        dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar];
+        -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar];
     _dporepressure_dvar[_qp][_aqueous_phase_number][_zvar[0]] =
-        dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_zvar[0]];
+        -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_zvar[0]];
   }
 
   // Calculate derivatives of material properties wrt primary variables
@@ -264,10 +264,10 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
 
     (*_gradp_qp)[_qp][_gas_phase_number] = _gas_gradp_qp[_qp];
     (*_gradp_qp)[_qp][_aqueous_phase_number] =
-        _gas_gradp_qp[_qp] + dpc * (*_grads_qp)[_qp][_aqueous_phase_number];
+        _gas_gradp_qp[_qp] - dpc * (*_grads_qp)[_qp][_aqueous_phase_number];
 
     (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_zvar[0]] =
-        d2pc * (*_grads_qp)[_qp][_aqueous_phase_number];
+        -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number];
 
     (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] =
         _fsp[_aqueous_phase_number].dmass_fraction_dp[_aqueous_fluid_component] *

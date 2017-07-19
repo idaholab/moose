@@ -51,21 +51,24 @@ PorousFlowCapillaryPressureBW::PorousFlowCapillaryPressureBW(const InputParamete
                " and Ss set to ",
                _ss,
                " but these must obey Ss > Sn");
+
+  // Set _log_ext to false as no capillary pressure curves are implmented in this class
+  _log_ext = false;
 }
 
-Real PorousFlowCapillaryPressureBW::capillaryPressure(Real /*seff*/) const
+Real PorousFlowCapillaryPressureBW::capillaryPressureCurve(Real /*saturation*/) const
 {
   mooseError("PorousFlowCapillaryPressureBW::capillaryPressure not implemented");
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureBW::dCapillaryPressure(Real /*seff*/) const
+Real PorousFlowCapillaryPressureBW::dCapillaryPressureCurve(Real /*saturation*/) const
 {
   mooseError("PorousFlowCapillaryPressureBW::dCapillaryPressure not implemented");
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureBW::d2CapillaryPressure(Real /*seff*/) const
+Real PorousFlowCapillaryPressureBW::d2CapillaryPressureCurve(Real /*saturation*/) const
 {
   mooseError("PorousFlowCapillaryPressureBW::d2CapillaryPressure not implemented");
   return 0.0;

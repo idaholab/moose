@@ -71,7 +71,7 @@
   [../]
   [./pc]
     type = PorousFlowCapillaryPressureConst
-    pc = -1e5
+    pc = 1e5
   [../]
 []
 

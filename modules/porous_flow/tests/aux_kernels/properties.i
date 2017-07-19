@@ -237,7 +237,7 @@
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1e-5
-    pc_max = -1e7
+    pc_max = 1e7
     sat_lr = 0.1
   [../]
 []

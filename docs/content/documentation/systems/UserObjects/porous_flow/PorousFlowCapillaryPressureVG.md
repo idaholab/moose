@@ -31,6 +31,8 @@ parameter $m$ must satisfy
 0 < m < 1 \ .
 \end{equation}
 
+By default, a logarithmic extension for low liquid phase saturations is implemented.
+This can be disabled by setting `log_extension = false`.
 
 !syntax parameters /UserObjects/PorousFlowCapillaryPressureVG
 

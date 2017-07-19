@@ -69,7 +69,7 @@
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1e1
-    pc_max = -1e4
+    pc_max = 1e4
   [../]
 []
 
