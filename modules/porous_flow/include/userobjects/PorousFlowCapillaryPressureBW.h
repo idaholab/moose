@@ -23,46 +23,12 @@ class PorousFlowCapillaryPressureBW : public PorousFlowCapillaryPressure
 public:
   PorousFlowCapillaryPressureBW(const InputParameters & parameters);
 
-  /**
-   * Capillary pressure is calculated as a function of effective saturation
-   * @param seff effecitve saturation
-   * @return capillary pressure (Pa)
-   */
-  virtual Real capillaryPressure(Real seff) const override;
+  virtual Real capillaryPressureCurve(Real saturation) const override;
+  virtual Real dCapillaryPressureCurve(Real saturation) const override;
+  virtual Real d2CapillaryPressureCurve(Real saturation) const override;
 
-  /**
-   * Derivative of capillary pressure wrt effective saturation
-   * @param seff effecitve saturation
-   * @return derivative of capillary pressure with respect to liquid saturation
-   */
-  virtual Real dCapillaryPressure(Real seff) const override;
-
-  /**
-   * Second derivative of capillary pressure wrt effective saturation
-   * @param seff effecitve saturation
-   * @return second derivative of capillary pressure with respect to liquid saturation
-   */
-  virtual Real d2CapillaryPressure(Real seff) const override;
-
-  /**
-   * Effective saturation as a function of capillary pressure
-   * @param pc capillary pressure (Pa)
-   * @return effective saturation
-   */
   virtual Real effectiveSaturation(Real pc) const override;
-
-  /**
-   * Derivative of effective saturation wrt capillary pressure
-   * @param pc capillary pressure (Pa)
-   * @return derivative of effective saturation wrt capillary pressure
-   */
   virtual Real dEffectiveSaturation(Real pc) const override;
-
-  /**
-   * Second derivative of effective saturation wrt capillary pressure
-   * @param pc capillary pressure
-   * @return second derivative of effective saturation wrt capillary pressure
-   */
   virtual Real d2EffectiveSaturation(Real pc) const override;
 
 protected:

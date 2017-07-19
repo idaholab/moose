@@ -175,7 +175,7 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
 
     liquid_density =
         1.0 / (X0 / co2_partial_density +
-               X1 / _brine_fp.rho(pressure + _pc_uo.capillaryPressure(liqsat), Tk, xnacl));
+               X1 / _brine_fp.rho(pressure - _pc_uo.capillaryPressure(liqsat), Tk, xnacl));
 
     // The gas saturation in the two phase case
     gas_saturation = vapor_mass_fraction * liquid_density /
@@ -184,7 +184,7 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
 
   // Calculate the saturations and pressures for each phase
   liquid_saturation = 1.0 - gas_saturation;
-  Real liquid_porepressure = pressure + _pc_uo.capillaryPressure(liquid_saturation);
+  Real liquid_porepressure = pressure - _pc_uo.capillaryPressure(liquid_saturation);
 
   // Calculate liquid density and viscosity if in the two phase or single phase
   // liquid region, including a density correction due to the presence of dissolved

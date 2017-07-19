@@ -36,6 +36,8 @@ protected:
   const Real _pc_max;
   /// van Genuchten capillary pressure coefficient (inverse of alpha)
   const Real _p0;
+  /// van Genuchten alpha = 1/p0
+  const Real _alpha;
 };
 
 #endif // POROUSFLOW2PHASEPS_VG_H

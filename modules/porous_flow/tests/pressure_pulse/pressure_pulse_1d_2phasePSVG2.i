@@ -1,22 +1,21 @@
-# Checking that gravity head is established in the transient situation when 0<=saturation<=1 (note the less-than-or-equal-to).
-# 2phase (PS), 2components, constant capillary pressure, constant fluid bulk-moduli for each phase, constant viscosity,
-# constant permeability, Corey relative permeabilities with no residual saturation
+# Pressure pulse in 1D with 2 phases, 2components - transient
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  ny = 10
-  ymax = 100
+  dim = 1
+  nx = 10
+  xmin = 0
+  xmax = 100
 []
 
 [GlobalParams]
   PorousFlowDictator = dictator
-  gravity = '0 -10 0'
+  gravity = '0 0 0'
 []
 
 [Variables]
   [./ppwater]
-    initial_condition = 1.5e6
+    initial_condition = 2e6
   [../]
   [./sgas]
     initial_condition = 0.3
@@ -34,18 +33,6 @@
     family = MONOMIAL
     order = FIRST
   [../]
-  [./swater]
-    family = MONOMIAL
-    order = FIRST
-  [../]
-  [./relpermwater]
-    family = MONOMIAL
-    order = FIRST
-  [../]
-  [./relpermgas]
-    family = MONOMIAL
-    order = FIRST
-  [../]
 []
 
 [Kernels]
@@ -56,8 +43,8 @@
   [../]
   [./flux0]
     type = PorousFlowAdvectiveFlux
-    fluid_component = 0
     variable = ppwater
+    fluid_component = 0
   [../]
   [./mass1]
     type = PorousFlowMassTimeDerivative
@@ -66,8 +53,8 @@
   [../]
   [./flux1]
     type = PorousFlowAdvectiveFlux
-    fluid_component = 1
     variable = sgas
+    fluid_component = 1
   [../]
 []
 
@@ -77,24 +64,6 @@
     property = pressure
     phase = 1
     variable = ppgas
-  [../]
-  [./swater]
-    type = PorousFlowPropertyAux
-    property = saturation
-    phase = 0
-    variable = swater
-  [../]
-  [./relpermwater]
-    type = PorousFlowPropertyAux
-    property = relperm
-    phase = 0
-    variable = relpermwater
-  [../]
-  [./relpermgas]
-    type = PorousFlowPropertyAux
-    property = relperm
-    phase = 1
-    variable = relpermgas
   [../]
 []
 
@@ -106,8 +75,12 @@
     number_fluid_components = 2
   [../]
   [./pc]
-    type = PorousFlowCapillaryPressureConst
-    pc = 1e5
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1e-4
+    sat_lr = 0.3
+    pc_max = 1e9
+    log_extension = true
   [../]
 []
 
@@ -117,15 +90,15 @@
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
-      viscosity = 1e-3
       thermal_expansion = 0
+      viscosity = 1e-3
     [../]
     [./simple_fluid1]
       type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 10
-      viscosity = 1e-5
+      bulk_modulus = 2e7
+      density0 = 1
       thermal_expansion = 0
+      viscosity = 1e-5
     [../]
   [../]
 []
@@ -133,20 +106,20 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
   [../]
-  [./temperature_qp]
+  [./temperature_nodal]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
-    type = PorousFlow2PhasePS
     at_nodes = true
+  [../]
+  [./ppss_qp]
+    type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     capillary_pressure = pc
   [../]
-  [./ppss_qp]
+  [./ppss]
     type = PorousFlow2PhasePS
+    at_nodes = true
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     capillary_pressure = pc
@@ -184,7 +157,7 @@
     include_old = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
-  [./dens_qp_all]
+  [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
     at_nodes = false
@@ -201,18 +174,18 @@
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    permeability = '1e-11 0 0 0 1e-11 0  0 0 1e-11'
+    permeability = '1e-15 0 0 0 1e-15 0 0 0 1e-15'
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     at_nodes = true
-    n = 2
+    n = 1
     phase = 0
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     at_nodes = true
-    n = 2
+    n = 1
     phase = 1
   [../]
   [./relperm_all]
@@ -220,32 +193,20 @@
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
   [../]
-  [./relperm_water_qp]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 2
-    phase = 0
-  [../]
-  [./relperm_gas_qp]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 2
-    phase = 1
-  [../]
-  [./relperm_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
-  [../]
 []
 
-[Postprocessors]
-  [./mass_ph0]
-    type = PorousFlowFluidMass
-    fluid_component = 0
-    execute_on = 'initial timestep_end'
+[BCs]
+  [./leftwater]
+    type = DirichletBC
+    boundary = left
+    value = 3e6
+    variable = ppwater
   [../]
-  [./mass_ph1]
-    type = PorousFlowFluidMass
-    fluid_component = 1
-    execute_on = 'initial timestep_end'
+  [./rightwater]
+    type = DirichletBC
+    boundary = right
+    value = 2e6
+    variable = ppwater
   [../]
 []
 
@@ -253,25 +214,33 @@
   [./smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol'
-    petsc_options_value = 'bcgs bjacobi 1E-12 1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-15 1E-20 10000'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
-  end_time = 1e5
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1e4
+  dt = 1e3
+  end_time = 1e4
+[]
+
+[VectorPostprocessors]
+  [./pp]
+    type = LineValueSampler
+    execute_on = timestep_end
+    sort_by = x
+    variable = 'ppwater ppgas'
+    start_point = '0 0 0'
+    end_point = '100 0 0'
+    num_points = 11
   [../]
 []
 
 [Outputs]
-  execute_on = 'initial timestep_end'
-  file_base = grav02e
-  exodus = true
-  print_perf_log = true
-  csv = false
+  file_base = pressure_pulse_1d_2phasePSVG2
+  print_linear_residuals = false
+  csv = true
+  execute_on = final
 []
