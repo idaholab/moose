@@ -45,11 +45,15 @@
     type = 'Exodiff'
     input = 'elem_part1.i'
     exodiff = 'elem_part1_out.e'
+    use_old_floor = true
+    abs_zero = 1e-09
   [../]
   [./elem_var_2]
     type = 'Exodiff'
     input = 'elem_part2.i'
     exodiff = 'elem_part2_out.e'
+    use_old_floor = true
+    abs_zero = 1e-09
     max_parallel = 1
     prereq = 'elem_var_1'
   [../]
