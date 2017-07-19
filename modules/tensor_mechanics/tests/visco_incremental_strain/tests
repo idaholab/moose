@@ -3,29 +3,26 @@
     type = 'Exodiff'
     input = 'burgers_creep.i'
     exodiff = 'burgers_creep_out.e'
-    exodiff_opts = '-F 1e-8'
   [../]
   [./generalized_kelvin_voigt]
     type = 'Exodiff'
     input = 'gen_kv_creep.i'
     exodiff = 'gen_kv_creep_out.e'
-    exodiff_opts = '-F 1e-8'
   [../]
   [./generalized_maxwell]
     type = 'Exodiff'
     input = 'gen_maxwell_relax.i'
     exodiff = 'gen_maxwell_relax_out.e'
-    exodiff_opts = '-F 1e-8'
   [../]
   [./generalized_kelvin_voigt_w_driving]
     type = 'Exodiff'
     input = 'gen_kv_driving.i'
     exodiff = 'gen_kv_driving_out.e'
-    exodiff_opts = '-F 1e-8'
+    custom_cmp = 'visco_driving.cmd'
   [./generalized_maxwell_w_driving]
     type = 'Exodiff'
     input = 'gen_maxwell_driving.i'
     exodiff = 'gen_maxwell_driving_out.e'
-    exodiff_opts = '-F 1e-8'
+    custom_cmp = 'visco_driving.cmd'
   [../]
 []
