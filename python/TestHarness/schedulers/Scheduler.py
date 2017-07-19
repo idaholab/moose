@@ -8,6 +8,10 @@ from contrib import dag
 
 import util
 from multiprocessing.pool import ThreadPool
+
+# Prototype parallel non-shared work
+from multiprocessing import Process
+
 import threading # for thread locking
 import multiprocessing # for timeouts
 
@@ -68,8 +72,11 @@ class Scheduler(MooseObject):
         # Initialize status pool to only use 1 process (to prevent status messages from getting clobbered)
         self.status_pool = ThreadPool(processes=1)
 
-        # Thread Locking
-        self.thread_lock = threading.Lock()
+        # Slot Lock when processing resource allocations
+        self.slot_lock = threading.Lock()
+
+        # DAG Lock when processing the DAG
+        self.dag_lock = threading.Lock()
 
         # Workers in use
         self.slots_in_use = 0
@@ -94,10 +101,6 @@ class Scheduler(MooseObject):
     def run(self, job_container):
         return
 
-    ## process test results
-    def returnToTestHarness(self, tester, thread_lock):
-        return
-
     # return bool if we want to ignore prereq requirements
     def skipPrereqs(self):
         if self.options.ignored_caveats:
@@ -117,7 +120,8 @@ class Scheduler(MooseObject):
 
     # Delete and return downstream nodes based on tester status and TestHarness options
     def processDownstreamTests(self, job_container):
-        with self.thread_lock:
+        #with self.dag_lock:
+        if True:
             failed_job_containers = set([])
             tester = job_container.getTester()
             job_dag = job_container.getDAG()
@@ -258,7 +262,7 @@ class Scheduler(MooseObject):
     # pools
     def schedule(self, testers):
         # Increment our simple queue count with the number of testers the scheduler received
-        with self.thread_lock:
+        with self.slot_lock:
             self.job_queue_count += len(testers)
 
         # Create the job DAG object we will share between this group of testers
@@ -401,7 +405,7 @@ class Scheduler(MooseObject):
         # Make sure we are complying with the requested load average
         self.satisfyLoad()
 
-        with self.thread_lock:
+        with self.slot_lock:
             can_run = False
             # See if we can fit this job into our busy schedule
             if self.slots_in_use + tester.getProcs(self.options) <= self.available_slots:
@@ -428,7 +432,7 @@ class Scheduler(MooseObject):
 
     # Remove incoming job and get next available set of jobs
     def getNextJobGroup(self, job_container):
-        with self.thread_lock:
+        with self.dag_lock:
             tester = job_container.getTester()
             job_dag = job_container.getDAG()
             next_job_list = []
@@ -469,7 +473,7 @@ class Scheduler(MooseObject):
 
         # Decrement the job queue count now that this test has finished
         if tester.isFinished():
-            with self.thread_lock:
+            with self.slot_lock:
                 self.job_queue_count -= 1
 
     # Test execution processing
@@ -506,7 +510,7 @@ class Scheduler(MooseObject):
             next_job_group = self.getNextJobGroup(job_container)
 
             # Recover worker count before attempting to queue more jobs
-            with self.thread_lock:
+            with self.slot_lock:
                 self.slots_in_use = max(0, self.slots_in_use - tester.getProcs(self.options))
 
             # Queue this new batch of runnable jobs
@@ -523,4 +527,4 @@ class Scheduler(MooseObject):
             else:
                 # There are no available slots, currently. Place back in queue, and sleep for a bit
                 self.queueJobs(tester_job_containers=[job_container])
-                sleep(0.5)
+                sleep(0.3)
