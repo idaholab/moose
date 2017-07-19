@@ -35,9 +35,8 @@ class JsonSyntaxTree;
 
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
- * parsing files. It is not
- * currently designed for extensibility. If you wish to build your own parser, please contact the
- * MOOSE team for guidance.
+ * parsing files. It is not currently designed for extensibility. If you wish to build your own
+ * parser, please contact the MOOSE team for guidance.
  */
 class Parser : public ConsoleStreamInterface
 {
@@ -59,13 +58,6 @@ public:
   }
 
   /**
-   * Determines whether a particular block is marked as active
-   * in the input file
-   */
-  bool isSectionActive(const std::string & section_name,
-                       const std::map<std::string, std::vector<std::string>> & active_lists);
-
-  /**
    * Return the filename that was parsed
    */
   std::string getFileName(bool stripLeadingPath = true) const;
@@ -75,13 +67,6 @@ public:
    * in the MOOSE derived application
    */
   void parse(const std::string & input_filename);
-
-  /**
-   * This function checks to make sure that the active lists (active=*) are used up in the supplied
-   * input file.
-   */
-  void checkActiveUsed(std::vector<std::string> & sections,
-                       const std::map<std::string, std::vector<std::string>> & active_lists);
 
   /**
    * Return a reference to the getpot object to extract options from the input file
@@ -127,10 +112,42 @@ public:
   void checkOverriddenParams(bool error_on_warn) const;
 
 protected:
-  /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins
+  /// Helper struct to hold the active and inactive lists for each parsed block
+  struct BlockLists
+  {
+    BlockLists(std::vector<std::string> && active_list, std::vector<std::string> && inactive_list)
+      : active(std::move(active_list)), inactive(std::move(inactive_list))
+    {
+    }
+
+    const std::vector<std::string> active;
+    const std::vector<std::string> inactive;
+  };
+
+  /**
+   * Determines whether a particular block is marked as active
+   * in the input file
+   */
+  bool isSectionActive(const std::string & section_name,
+                       const std::map<std::string, BlockLists> & block_lists) const;
+
+  /**
+   * This function checks to make sure that the active lists (active=*) are used up in the supplied
+   * input file.
+   */
+  void checkExplicitBlocksUsed(std::vector<std::string> & sections,
+                               const std::map<std::string, BlockLists> & block_lists) const;
+
+  /**
+   * Appends sections from the CLI Reorders section names so that Debugging options can be enabled
+   * before parsing begins.
+   */
   void appendAndReorderSectionNames(std::vector<std::string> & section_names);
 
-  /// Reorders specified tasks in the section names list (helper method called from appednAndReorderSectionNames
+  /**
+   * Reorders specified tasks in the section names list (helper method called from
+   * appednAndReorderSectionNames).
+   */
   void reorderHelper(std::vector<std::string> & section_names,
                      const std::string & action,
                      const std::string & task) const;
@@ -162,7 +179,10 @@ protected:
                           bool in_global,
                           GlobalParamsAction * global_block);
 
-  /// Template method for setting any double indexed type parameter read from the input file or command line
+  /**
+   * Template method for setting any double indexed type parameter read from the input file or
+   * command line.
+   */
   template <typename T>
   void setDoubleIndexParameter(const std::string & full_name,
                                const std::string & short_name,
@@ -170,7 +190,10 @@ protected:
                                bool in_global,
                                GlobalParamsAction * global_block);
 
-  /// Template method for setting any multivalue "scalar" type parameter read from the input file or command line.  Examples include "Point" and "RealVectorValue"
+  /**
+   * Template method for setting any multivalue "scalar" type parameter read from the input file or
+   * command line.  Examples include "Point" and "RealVectorValue".
+   */
   template <typename T>
   void setScalarComponentParameter(const std::string & full_name,
                                    const std::string & short_name,
@@ -178,7 +201,10 @@ protected:
                                    bool in_global,
                                    GlobalParamsAction * global_block);
 
-  /// Template method for setting several multivalue "scalar" type parameter read from the input file or command line.  Examples include "Point" and "RealVectorValue"
+  /**
+   * Template method for setting several multivalue "scalar" type parameter read from the input
+   * file or command line.  Examples include "Point" and "RealVectorValue".
+   */
   template <typename T>
   void setVectorComponentParameter(const std::string & full_name,
                                    const std::string & short_name,
@@ -198,10 +224,12 @@ protected:
   Syntax & _syntax;
 
   /// Object for holding the syntax parse tree
-  SyntaxTree * _syntax_formatter;
+  std::unique_ptr<SyntaxTree> _syntax_formatter;
 
-  /// Contains all of the sections that are not active during the parse phase so that blocks
-  /// nested more than one level deep can detect that the grandparent is not active
+  /**
+   * Contains all of the sections that are not active during the parse phase so that blocks nested
+   * more than one level deep can detect that the grandparent is not active.
+   */
   std::set<std::string> _inactive_strings;
 
   /// Boolean indicating whether the getpot parser has been initialized

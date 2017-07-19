@@ -270,7 +270,7 @@
   [./missing_active_section_test]
     type = 'RunException'
     input = 'missing_active_section.i'
-    expect_err = "One or more active lists in the input file are missing a referenced section"
+    expect_err = "One or more active/inactive lists in the input file are missing a referenced section"
   [../]
 
   [./missing_coupled_mat_prop_test]
