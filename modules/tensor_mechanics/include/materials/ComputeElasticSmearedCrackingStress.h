@@ -9,13 +9,14 @@
 
 #include "ColumnMajorMatrix.h"
 #include "ComputeStressBase.h"
+#include "GuaranteeConsumer.h"
 #include "Function.h"
 
 /**
  * ComputeElasticSmearedCrackingStress computes the stress for a finite strain elastic
  * model with smeared cracking
  */
-class ComputeElasticSmearedCrackingStress : public ComputeStressBase
+class ComputeElasticSmearedCrackingStress : public ComputeStressBase, public GuaranteeConsumer
 {
 public:
   ComputeElasticSmearedCrackingStress(const InputParameters & parameters);
@@ -38,11 +39,15 @@ protected:
   void updateElasticityTensor();
 
   virtual void crackingStressRotation();
-  virtual Real
-  computeCrackFactor(int i, Real & sigma, Real & flag_value, const Real & cracking_stress);
+  virtual Real computeCrackFactor(int i,
+                                  Real & sigma,
+                                  Real & flag_value,
+                                  const Real cracking_stress,
+                                  const Real cracking_alpha,
+                                  const Real youngs_modulus);
 
   virtual unsigned int getNumKnownCrackDirs() const;
-  void computeCrackStrainAndOrientation(ColumnMajorMatrix & principal_strain);
+  void computeCrackStrainAndOrientation(RealVectorValue & principal_strain);
 
   void applyCracksToTensor(RankTwoTensor & tensor, const RealVectorValue & sigma);
 
@@ -62,7 +67,6 @@ protected:
   const Real _cracking_residual_stress;
   Function & _cracking_stress_function;
 
-  Real _cracking_alpha;
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
   const Real _cracking_neg_fraction;
@@ -85,10 +89,7 @@ protected:
   ///@}
 
   //@{ Variables used by multiple methods within the calculation for a single material point
-  RealVectorValue _crack_flags_local;
-  ColumnMajorMatrix _principal_strain;
   RankFourTensor _local_elasticity_tensor;
-  Real _youngs_modulus;
   ///@}
 };
 
