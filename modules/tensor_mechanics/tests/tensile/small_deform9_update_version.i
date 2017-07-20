@@ -1,8 +1,8 @@
 # A single unit element is stretched in a complicated way
 # that the trial stress is
 #
-#      1.16226      -0.0116587       0.0587872 
-#     -0.0116587         1.12695       0.0779428 
+#      1.16226      -0.0116587       0.0587872
+#     -0.0116587         1.12695       0.0779428
 #      0.0587872       0.0779428        0.710169
 #
 # This has eigenvalues
