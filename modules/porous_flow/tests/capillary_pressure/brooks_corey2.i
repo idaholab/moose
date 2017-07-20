@@ -1,12 +1,10 @@
-# Test van Genuchten relative permeability curve by varying saturation over the mesh
-# van Genuchten exponent m = 0.5 for both phases
-# Phase 0 residual saturation s0r = 0.2
-# Phase 1 residual saturation s1r = 0.3
+# Test Brooks-Corey capillary pressure curve by varying saturation over the mesh
+# lambda = 2, sat_lr = 0.1, log_extension = true
 
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 100
+  nx = 500
 []
 
 [GlobalParams]
@@ -30,11 +28,11 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./kr0aux]
+  [./p0aux]
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./kr1aux]
+  [./p1aux]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -53,17 +51,17 @@
     phase = 1
     variable = s1aux
   [../]
-  [./kr0]
+  [./p0]
     type = PorousFlowPropertyAux
-    property = relperm
+    property = pressure
     phase = 0
-    variable = kr0aux
+    variable = p0aux
   [../]
-  [./kr1]
+  [./p1]
     type = PorousFlowPropertyAux
-    property = relperm
+    property = pressure
     phase = 1
-    variable = kr1aux
+    variable = p1aux
   [../]
 []
 
@@ -101,8 +99,11 @@
     number_fluid_components = 2
   [../]
   [./pc]
-    type = PorousFlowCapillaryPressureConst
-    pc = 0
+    type = PorousFlowCapillaryPressureBC
+    lambda = 2
+    log_extension = true
+    pe = 1e5
+    sat_lr = 0.1
   [../]
 []
 
@@ -120,15 +121,11 @@
     type = PorousFlowRelativePermeabilityVG
     phase = 0
     m = 0.5
-    s_res = 0.2
-    sum_s_res = 0.5
   [../]
   [./kr1]
-    type = PorousFlowRelativePermeabilityVG
+    type = PorousFlowRelativePermeabilityCorey
     phase = 1
-    m = 0.5
-    s_res = 0.3
-    sum_s_res = 0.5
+    n = 2
   [../]
   [./kr_all]
     type = PorousFlowJoiner
@@ -139,10 +136,10 @@
 [VectorPostprocessors]
   [./vpp]
     type = LineValueSampler
-    variable = 's0aux s1aux kr0aux kr1aux'
+    variable = 's0aux s1aux p0aux p1aux'
     start_point = '0 0 0'
     end_point = '1 0 0'
-    num_points = 20
+    num_points = 500
     sort_by = id
   [../]
 []
