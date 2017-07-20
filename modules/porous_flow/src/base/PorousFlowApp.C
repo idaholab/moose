@@ -18,6 +18,7 @@
 #include "PorousFlowCapillaryPressureVG.h"
 #include "PorousFlowCapillaryPressureRSC.h"
 #include "PorousFlowCapillaryPressureBW.h"
+#include "PorousFlowCapillaryPressureBC.h"
 
 // DiracKernels
 #include "PorousFlowSquarePulsePointSource.h"
@@ -54,6 +55,7 @@
 #include "PorousFlowPorosityHMBiotModulus.h"
 #include "PorousFlowPorosityTM.h"
 #include "PorousFlowPorosityTHM.h"
+#include "PorousFlowRelativePermeabilityBC.h"
 #include "PorousFlowRelativePermeabilityCorey.h"
 #include "PorousFlowRelativePermeabilityConst.h"
 #include "PorousFlowRelativePermeabilityVG.h"
@@ -163,6 +165,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerUserObject(PorousFlowCapillaryPressureVG);
   registerUserObject(PorousFlowCapillaryPressureRSC);
   registerUserObject(PorousFlowCapillaryPressureBW);
+  registerUserObject(PorousFlowCapillaryPressureBC);
 
   // DiracKernels
   registerDiracKernel(PorousFlowSquarePulsePointSource);
@@ -199,6 +202,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowPorosityHMBiotModulus);
   registerMaterial(PorousFlowPorosityTM);
   registerMaterial(PorousFlowPorosityTHM);
+  registerMaterial(PorousFlowRelativePermeabilityBC);
   registerMaterial(PorousFlowRelativePermeabilityCorey);
   registerMaterial(PorousFlowRelativePermeabilityConst);
   registerMaterial(PorousFlowRelativePermeabilityVG);
