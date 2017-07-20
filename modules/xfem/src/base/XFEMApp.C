@@ -21,6 +21,13 @@
 #include "XFEMSingleVariableConstraint.h"
 #include "XFEMPressure.h"
 
+#include "GeometricCutUserObject.h"
+#include "LineSegmentCutUserObject.h"
+#include "LineSegmentCutSetUserObject.h"
+#include "CircleCutUserObject.h"
+#include "EllipseCutUserObject.h"
+#include "RectangleCutUserObject.h"
+
 template <>
 InputParameters
 validParams<XFEMApp>()
@@ -77,6 +84,13 @@ XFEMApp::registerObjects(Factory & factory)
   // UserObjects
   registerUserObject(XFEMMarkerUserObject);
   registerUserObject(XFEMMaterialTensorMarkerUserObject);
+
+  // Geometric Cut User Objects
+  registerUserObject(LineSegmentCutUserObject);
+  registerUserObject(LineSegmentCutSetUserObject);
+  registerUserObject(CircleCutUserObject);
+  registerUserObject(EllipseCutUserObject);
+  registerUserObject(RectangleCutUserObject);
 
   // DiracKernels
   registerDiracKernel(XFEMPressure);

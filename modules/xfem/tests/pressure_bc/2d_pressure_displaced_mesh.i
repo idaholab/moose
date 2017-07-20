@@ -5,7 +5,7 @@
 []
 
 [XFEM]
-  cut_data = '0.0 0.5 1.0 0.5 0 0'
+  geometric_cut_userobjects = 'line_seg_cut_uo'
   qrule = volfrac
   output_cut_plane = true
 []
@@ -21,6 +21,13 @@
   ymax = 1.0
   elem_type = QUAD4
   displacements = 'disp_x disp_y'
+[]
+
+[UserObjects]
+  [./line_seg_cut_uo]
+    type = LineSegmentCutUserObject
+    cut_data = '0.0 0.5 1.0 0.5'
+  [../]
 []
 
 [Variables]
