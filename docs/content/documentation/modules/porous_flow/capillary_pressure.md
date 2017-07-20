@@ -3,20 +3,20 @@
 The capillary pressure is the pressure difference between two fluid phases in a porous
 medium that arises due to the interfacial tension between the fluid phases and the surface
 tension between fluids and the porous medium. Capillary pressure, $P_c$, is commonly
-defined as \citep{Bear1972}
+defined as \citep{bear1972}
 \begin{equation}
 P_c = P_{nw} - P_w,
 \end{equation}
 where $P_{nw}$ is the pressure of the non-wetting phase (typically the gas phase), and  
 $P_w$ is the pressure of the wetting phase (typically the liquid phase).
 
-The capillary pressure is given by the Young-Laplace equation \citep{Bear1972}
+The capillary pressure is given by the Young-Laplace equation \citep{bear1972}
 \begin{equation}
 P_c = \frac{2 \gamma \cos(\theta)}{r_c},
 \end{equation}
 where $\gamma$ is the interfacial tension, $\theta$ is the contact angle of the
 wetting phase on the surface of the porous medium, and $r_c$ is the radius of curvature
-at the interface, see \citet{Bear1972}.
+at the interface, see \citet{bear1972}.
 
 Due to the difficulty in measuring $\gamma$ and $\theta$ in real porous rocks, empirical and
 semi-impirical formulations for capillary pressure have been proposed that relate capillary
@@ -106,6 +106,21 @@ problems rarely explore the $S_{\mathrm{eff}}\sim 0$ region.
 
 !media media/porous_flow/van_genuchten_pc.png width=80% margin-left=10px caption=Three values of $m$ are shown: 0.5, 0.7 and 0.9 id=van_genuchten_pc
 
+##Brooks-Corey
+[`PorousFlowCapillaryPressureBC`](/porous_flow/PorousFlowCapillaryPressureBC.md)
+
+The Brooks-Corey capillary-pressure relationship is \citep{brookscorey1966}
+
+\begin{equation}
+S_{\mathrm{eff}} = \left( \frac{P_c}{P_e} \right)^{-\lambda},
+\end{equation}
+or
+\begin{equation}
+P_c = P_e S_{\mathrm{eff}}^{-1/\lambda},
+\end{equation}
+where $P_e$ is the threshold entry pressure, and $\lambda$ is a user-defined exponent. Brooks and Corey originally related the exponent $\lambda$ to the statistical distribution of pore sizes in the porous medium. A value of $\lambda$ less than 2 was suggested for narrow
+distributions of pore sizes, while a value of greater than 2 was suggested for broad distributions of pore sizes.
+
 ##Broadbridge-White
 [`PorousFlowCapillaryPressureBW`](/porous_flow/PorousFlowCapillaryPressureBW.md)
 
@@ -163,9 +178,11 @@ curve
 P_c = P_{c,max} 10^{m(S - S^*)}
 \end{equation}
 is used for saturations less than a value $S^*$. The value of $s^*$ is calculated so that the capillary pressure curve is continuous and smooth up to the maximum capillary pressure $P_{c,max}$, see \ref{pc_vg_logext} for an example for the van Genuchten capillary
-pressure.
+pressure, and \ref{pc_bc_logext} for the Brooks-Corey capillary pressure.
 
 !media media/porous_flow/pc_vg_logext.png width=80% margin-left=10px caption=Logarithmic extension to van Genuchten capillary pressure curve below residual saturation id=pc_vg_logext
+
+!media media/porous_flow/pc_bc_logext.png width=80% margin-left=10px caption=Logarithmic extension to Brooks-Corey capillary pressure curve below residual saturation id=pc_bc_logext
 
 ##References
 \bibliographystyle{unsrt}

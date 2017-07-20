@@ -31,7 +31,10 @@ The relative permeability of the phase is given by \citet{corey1954}
 \begin{equation}
 k_{\mathrm{r}} = S_{\mathrm{eff}}^{n},
 \end{equation}
-where $n$ is a user-defined quantity.
+where $n$ is a user-defined quantity. Originally, \citet{corey1954} used $n = 4$ for the wetting phase, but the PorousFlow module allows an arbitrary exponent to be used.
+
+!media media/porous_flow/relperm_corey.png width=80% margin-left=10px caption=Corey relative permeability id=relperm_corey
+
 
 ## van Genuchten
 [`PorousFlowRelativePermeabilityVG`](/porous_flow/PorousFlowRelativePermeabilityVG.md)
@@ -60,6 +63,24 @@ Here the cubic is chosen so that its value and derivative match the
 van Genuchten expression at $S=S_{c}$, and so that it is unity at
 $S_{\mathrm{eff}}=1$.
 
+!media media/porous_flow/relperm_vg.png width=80% margin-left=10px caption=van Genuchten relative permeability id=relperm_vg
+
+## Brooks-Corey
+[`PorousFlowRelativePermeabilityBC`](/porous_flow/PorousFlowRelativePermeabilityBC.md)
+
+The \citet{brookscorey1966} relative permeability model is an extension of the previous  \citet{corey1954} formulation where the relative permeability of the wetting phase is given by
+\begin{equation}
+k_{\mathrm{r, w}} = \left(S_{\mathrm{eff}}\right)^{(2 + 3 \lambda)/\lambda},
+\end{equation}
+and the relative permeability of the non-wetting phase is
+\begin{equation}
+k_{\mathrm{r, nw}} = (1 - S_{\mathrm{eff}})^2 \left[1 - \left(S_{\mathrm{eff}}\right)^{(2 + \lambda)/\lambda}\right],
+\end{equation}
+where $\lambda$ is a user-defined exponent. When $\lambda = 2$, this formulation reduces
+to the original \citet{corey1954} form.
+
+!media media/porous_flow/relperm_bc.png width=80% margin-left=10px caption=Brooks-Corey relative permeability id=relperm_bc
+
 ## Broadbridge-White
 [`PorousFlowRelativePermeabilityBW`](/porous_flow/PorousFlowRelativePermeabilityBW.md)
 
@@ -72,7 +93,7 @@ k_{\mathrm{r}} = K_{n} + \frac{K_{s} - K_{n}}{(c - 1)(c -
 ## FLAC
 [`PorousFlowRelativePermeabilityFLAC`](/porous_flow/PorousFlowRelativePermeabilityFLAC.md)
 
-A form of relative permeability used in FLAC
+A form of relative permeability used in FLAC, where
 \begin{equation}
 k_{\mathrm{r}} = (m + 1)S_{\mathrm{eff}}^{m} - m S_{\mathrm{eff}}^{m + 1}.
 \end{equation}
