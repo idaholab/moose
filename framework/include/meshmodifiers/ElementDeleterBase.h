@@ -42,6 +42,12 @@ protected:
    * element should be removed from the mesh.
    */
   virtual bool shouldDelete(const Elem * elem) = 0;
+
+  ///  Assign a boundary name to the cut surface?
+  const bool _assign_boundary;
+
+  /// Name of the boundary name to assign to the cut surface
+  const BoundaryName _boundary_name;
 };
 
 #endif /* ELEMENTDELETERBASE_H */

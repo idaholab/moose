@@ -54,4 +54,9 @@
     input = 'BlockDeleterTest11.i'
     exodiff = 'BlockDeleterTest11_out.e'
   [../]
+  [./BlockDeleterTest12]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest12.i'
+    exodiff = 'BlockDeleterTest12_out.e'
+  [../]
 []
