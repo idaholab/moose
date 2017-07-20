@@ -5,9 +5,13 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEM_GEOMETRIC_CUT_H
-#define XFEM_GEOMETRIC_CUT_H
+#ifndef GEOMETRICCUTUSEROBJECT_H
+#define GEOMETRICCUTUSEROBJECT_H
 
+// MOOSE includes
+#include "GeneralUserObject.h"
+
+// libMesh includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"
@@ -29,32 +33,43 @@ struct CutFace
   std::vector<Real> position;
 };
 
-class XFEMGeometricCut
+// Forward declarations
+class GeometricCutUserObject;
+
+template <>
+InputParameters validParams<GeometricCutUserObject>();
+
+class GeometricCutUserObject : public GeneralUserObject
 {
 public:
-  XFEMGeometricCut(Real t0, Real t1);
-  virtual ~XFEMGeometricCut();
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
+   */
+  GeometricCutUserObject(const InputParameters & parameters);
 
-  virtual bool active(Real time) = 0;
+  virtual void initialize(){};
+  virtual void execute(){};
+  virtual void finalize(){};
+
+  virtual bool active(Real time) const = 0;
 
   virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time) = 0;
+  cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time) const = 0;
   virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) = 0;
+  cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) const = 0;
 
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
                                      std::vector<CutEdge> & cut_edges,
-                                     Real time) = 0;
+                                     Real time) const = 0;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
                                      std::vector<CutFace> & cut_faces,
-                                     Real time) = 0;
+                                     Real time) const = 0;
 
-  Real cutFraction(Real time);
+  Real cutFraction(unsigned int cut_num, Real time) const;
 
 protected:
-  Real _t_start;
-  Real _t_end;
-  Real crossProduct2D(Real ax, Real ay, Real bx, Real by);
+  std::vector<std::pair<Real, Real>> _cut_time_ranges;
 };
 
-#endif
+#endif // GEOMETRICCUTUSEROBJECT_H

@@ -4,10 +4,7 @@
 []
 
 [XFEM]
-  cut_type = 'circle_cut_3d' # penny shape cut plane
-  cut_data = '-0.5 -0.5 0
-              0.0 -0.5 0
-              -0.5 0 0'
+  geometric_cut_userobjects = 'circle_cut_uo'
   qrule = volfrac
   output_cut_plane = true
 []
@@ -17,6 +14,15 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
+[UserObjects]
+  [./circle_cut_uo]
+    type = CircleCutUserObject
+    cut_data = '-0.5 -0.5 0
+                0.0 -0.5 0
+                -0.5 0 0'
+  [../]
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -24,7 +30,7 @@
   [../]
   [./disp_z]
   [../]
-  []
+[]
 
 [AuxVariables]
   [./stress_xx]

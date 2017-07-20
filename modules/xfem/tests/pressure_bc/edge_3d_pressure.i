@@ -5,11 +5,7 @@
 []
 
 [XFEM]
-  cut_type = 'square_cut_3d' # rectangular cut plane
-  cut_data = '-0.2  0.0 -0.5
-              -0.2  0.0  0.0
-               0.2  0.0  0.0
-               0.2  0.0 -0.5'
+  geometric_cut_userobjects = 'square_planar_cut_uo'
   qrule = volfrac
   output_cut_plane = true
 []
@@ -28,6 +24,16 @@
   zmax = 0.5
   elem_type = HEX8
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[UserObjects]
+  [./square_planar_cut_uo]
+    type = RectangleCutUserObject
+    cut_data = '-0.2  0.0 -0.5
+                -0.2  0.0  0.0
+                 0.2  0.0  0.0
+                 0.2  0.0 -0.5'
+  [../]
 []
 
 [Variables]

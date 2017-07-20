@@ -9,6 +9,7 @@
 #define XFEMACTION_H
 
 #include "Action.h"
+#include "UserObjectInterface.h"
 
 class XFEMAction;
 
@@ -23,10 +24,7 @@ public:
   virtual void act();
 
 protected:
-  std::string _xfem_cut_type;
-  std::vector<Real> _xfem_cut_data;
-  std::vector<Real> _xfem_cut_scale;
-  std::vector<Real> _xfem_cut_translate;
+  std::vector<UserObjectName> _geom_cut_userobjects;
   std::string _xfem_qrule;
   std::string _order;
   std::string _family;

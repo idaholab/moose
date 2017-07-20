@@ -19,13 +19,19 @@
 []
 
 [XFEM]
-  cut_type = 'square_cut_3d' # rectangular cut plane
-  cut_data = ' 0.5 -0.001 -0.001
-               0.5  1.001 -0.001
-               0.5  1.001  1.001
-               0.5 -0.001  1.001'
+  geometric_cut_userobjects = 'square_planar_cut_uo'
   qrule = volfrac
   output_cut_plane = true
+[]
+
+[UserObjects]
+  [./square_planar_cut_uo]
+    type = RectangleCutUserObject
+    cut_data = ' 0.5 -0.001 -0.001
+                 0.5  1.001 -0.001
+                 0.5  1.001  1.001
+                 0.5 -0.001  1.001'
+  [../]
 []
 
 [Variables]

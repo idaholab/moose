@@ -14,8 +14,7 @@
 []
 
 [XFEM]
-  cut_data ='0.0000e+000  0.0000e+000  5.5000e+000  0.0000e+000  0.0000e+000  0.0000e+000
-             5.5000e+000  0.0000e+000  2.5500e+001  0.0000e+000  0.0500e+000  1.0500e+000'
+  geometric_cut_userobjects = 'line_seg_cut_set_uo'
   output_cut_plane = true
 []
 
@@ -30,6 +29,14 @@
   ymax = 12.5
   elem_type = QUAD4
   displacements = 'disp_x disp_y'
+[]
+
+[UserObjects]
+  [./line_seg_cut_set_uo]
+    type = LineSegmentCutSetUserObject
+    cut_data ='0.0000e+000  0.0000e+000  5.5000e+000  0.0000e+000  0.0   0.0
+               5.5000e+000  0.0000e+000  2.5500e+001  0.0000e+000  0.05  1.05'
+  [../]
 []
 
 [Variables]

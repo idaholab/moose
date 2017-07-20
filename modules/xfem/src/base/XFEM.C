@@ -8,8 +8,6 @@
 #include "XFEM.h"
 
 // XFEM includes
-#include "XFEMGeometricCut.h"
-#include "XFEMGeometricCut2D.h"
 #include "XFEMCutElem2D.h"
 #include "XFEMCutElem3D.h"
 #include "XFEMFuncs.h"
@@ -40,9 +38,6 @@ XFEM::XFEM(const InputParameters & params) : XFEMInterface(params), _efa_mesh(Mo
 
 XFEM::~XFEM()
 {
-  for (std::size_t i = 0; i < _geometric_cuts.size(); ++i)
-    delete _geometric_cuts[i];
-
   for (std::map<unique_id_type, XFEMCutElem *>::iterator cemit = _cut_elem_map.begin();
        cemit != _cut_elem_map.end();
        ++cemit)
@@ -50,7 +45,7 @@ XFEM::~XFEM()
 }
 
 void
-XFEM::addGeometricCut(XFEMGeometricCut * geometric_cut)
+XFEM::addGeometricCut(const GeometricCutUserObject * geometric_cut)
 {
   _geometric_cuts.push_back(geometric_cut);
 }
@@ -332,10 +327,12 @@ XFEM::markCutEdgesByGeometry(Real time)
 {
   bool marked_edges = false;
 
-  std::vector<XFEMGeometricCut *> active_geometric_cuts;
+  std::vector<const GeometricCutUserObject *> active_geometric_cuts;
   for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
     if (_geometric_cuts[i]->active(time))
+    {
       active_geometric_cuts.push_back(_geometric_cuts[i]);
+    }
 
   if (active_geometric_cuts.size() > 0)
   {
@@ -753,12 +750,12 @@ XFEM::markCutEdgesByState(Real time)
         Real x1 = x0 + _crack_growth_increment * growth_direction(0);
         Real y1 = y0 + _crack_growth_increment * growth_direction(1);
 
-        XFEMGeometricCut2D geometric_cut(x0, y0, x1, y1, time * 0.9, time * 0.9);
+        XFEMCrackGrowthIncrement2DCut geometric_cut(x0, y0, x1, y1, time * 0.9, time * 0.9);
 
         for (; elem_it != elem_end; ++elem_it)
         {
           const Elem * elem = *elem_it;
-          std::vector<CutEdge> elem_cut_edges;
+          std::vector<CutEdgeForCrackGrowthIncr> elem_cut_edges;
           EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
           EFAElement2D * CEMElem = dynamic_cast<EFAElement2D *>(EFAelem);
 
@@ -770,7 +767,7 @@ XFEM::markCutEdgesByState(Real time)
             continue;
 
           // mark cut edges for the element and its fragment
-          geometric_cut.cutElementByGeometry(elem, elem_cut_edges, time);
+          geometric_cut.cutElementByCrackGrowthIncrement(elem, elem_cut_edges, time);
 
           for (unsigned int i = 0; i < elem_cut_edges.size(); ++i) // mark element edges
           {
@@ -823,7 +820,7 @@ XFEM::markCutFacesByGeometry(Real time)
   MeshBase::element_iterator elem_it = _mesh->elements_begin();
   const MeshBase::element_iterator elem_end = _mesh->elements_end();
 
-  std::vector<XFEMGeometricCut *> active_geometric_cuts;
+  std::vector<const GeometricCutUserObject *> active_geometric_cuts;
   for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
     if (_geometric_cuts[i]->active(time))
       active_geometric_cuts.push_back(_geometric_cuts[i]);
@@ -1461,30 +1458,6 @@ XFEM::getFragmentFaces(const Elem * elem,
       frag_faces.push_back(p_line);
     }
   }
-}
-
-std::vector<Real> &
-XFEM::getXFEMCutData()
-{
-  return _XFEM_cut_data;
-}
-
-void
-XFEM::setXFEMCutData(std::vector<Real> & cut_data)
-{
-  _XFEM_cut_data = cut_data;
-}
-
-std::string &
-XFEM::getXFEMCutType()
-{
-  return _XFEM_cut_type;
-}
-
-void
-XFEM::setXFEMCutType(std::string & cut_type)
-{
-  _XFEM_cut_type = cut_type;
 }
 
 Xfem::XFEM_QRULE &

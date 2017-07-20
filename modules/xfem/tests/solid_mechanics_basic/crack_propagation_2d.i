@@ -4,8 +4,7 @@
 []
 
 [XFEM]
-  #             x0   y0   x1   y1   t0    t1
-  cut_data = ' 1.0  0.5  0.7  0.5  0.0   0.0'
+  geometric_cut_userobjects = 'line_seg_cut_uo'
   qrule = volfrac
   output_cut_plane = true
   use_crack_growth_increment = true
@@ -26,6 +25,12 @@
 []
 
 [UserObjects]
+  [./line_seg_cut_uo]
+    type = LineSegmentCutUserObject
+    cut_data = '1.0  0.5  0.7  0.5'
+    time_start_cut = 0.0
+    time_end_cut = 0.0
+  [../]
   [./xfem_marker_uo]
     type = XFEMMaterialTensorMarkerUserObject
     execute_on = timestep_end

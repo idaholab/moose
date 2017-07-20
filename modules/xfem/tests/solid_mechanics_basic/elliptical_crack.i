@@ -4,10 +4,7 @@
 []
 
 [XFEM]
-  cut_type = 'ellipse_cut_3d' # elliptical cut plane
-  cut_data = '-0.5 -0.5 0
-              -0.5 -0.1 0
-               0.1 -0.5 0'
+  geometric_cut_userobjects = 'ellip_cut_uo'
   qrule = volfrac
   output_cut_plane = true
 []
@@ -15,6 +12,15 @@
 [Mesh]
   file = quarter_sym.e
   displacements = 'disp_x disp_y disp_z'
+[]
+
+[UserObjects]
+  [./ellip_cut_uo]
+    type = EllipseCutUserObject
+  cut_data = '-0.5 -0.5 0
+              -0.5 -0.1 0
+               0.1 -0.5 0'
+  [../]
 []
 
 [Variables]
