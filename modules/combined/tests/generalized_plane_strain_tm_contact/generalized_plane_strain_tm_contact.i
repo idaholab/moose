@@ -266,7 +266,7 @@
 
 # controls for nonlinear iterations
   nl_max_its = 20
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-9
   nl_abs_tol = 1e-10
 
 # time control
@@ -274,7 +274,6 @@
   dt = 0.2
   dtmin = 0.2
   end_time = 2.0
-  num_steps = 5000
 []
 
 [Outputs]
