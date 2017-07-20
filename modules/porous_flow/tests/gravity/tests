@@ -57,6 +57,11 @@
     input = 'grav02f.i'
     exodiff = 'grav02f.e'
   [../]
+  [./grav02g]
+    type = 'Exodiff'
+    input = 'grav02g.i'
+    exodiff = 'grav02g.e'
+  [../]
 
   [./fully_saturated_grav01a]
     type = 'CSVDiff'
