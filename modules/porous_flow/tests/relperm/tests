@@ -34,4 +34,14 @@
     input = 'vangenuchten2.i'
     csvdiff = 'vangenuchten2_out_vpp_0001.csv'
   [../]
+  [./brookscorey1]
+    type = 'CSVDiff'
+    input = 'brooks_corey1.i'
+    csvdiff = 'brooks_corey1_out_vpp_0001.csv'
+  [../]
+  [./brookscorey2]
+    type = 'CSVDiff'
+    input = 'brooks_corey2.i'
+    csvdiff = 'brooks_corey2_out_vpp_0001.csv'
+  [../]
 []
