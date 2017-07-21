@@ -105,10 +105,10 @@ MooseVariableScalar::reinit()
         // If we can't catch errors at run-time, we can at least
         // propagate NaN values rather than invalid values, so that
         // users won't trust the result.
-        _u[i]       = std::numeric_limits<Real>::quiet_NaN();
-        _u_old[i]   = std::numeric_limits<Real>::quiet_NaN();
+        _u[i] = std::numeric_limits<Real>::quiet_NaN();
+        _u_old[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
-        _u_dot[i]   = std::numeric_limits<Real>::quiet_NaN();
+        _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
 #endif
       }
     }
