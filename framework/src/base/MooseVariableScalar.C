@@ -91,17 +91,26 @@ MooseVariableScalar::reinit()
         solution_older.get(one_dof_index, &_u_older[i]);
         u_dot.get(one_dof_index, &_u_dot[i]);
       }
-#ifdef DEBUG
       else
       {
+#ifdef _GLIBCXX_DEBUG
         // Let's make it possible to catch invalid accesses to these
-        // variables, at least with libstdc++ in dbg mode.
+        // variables immediately via a thrown exception, if our
+        // libstdc++ compiler flags allow for that.
         _u.resize(i);
         _u_old.resize(i);
         _u_older.resize(i);
         _u_dot.resize(i);
-      }
+#else
+        // If we can't catch errors at run-time, we can at least
+        // propagate NaN values rather than invalid values, so that
+        // users won't trust the result.
+        _u[i]       = std::numeric_limits<Real>::quiet_NaN();
+        _u_old[i]   = std::numeric_limits<Real>::quiet_NaN();
+        _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
+        _u_dot[i]   = std::numeric_limits<Real>::quiet_NaN();
 #endif
+      }
     }
   }
 }
