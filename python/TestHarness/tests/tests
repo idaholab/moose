@@ -59,4 +59,8 @@
     type = PythonUnitTest
     input = test_Syntax.py
   [../]
+  [./required_objects]
+    type = PythonUnitTest
+    input = test_RequiredObjects.py
+  [../]
 []
