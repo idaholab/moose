@@ -5,9 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-// MOOSE includes
+// StochasticTools includes
 #include "SamplerMultiApp.h"
-#include "Sampler.h"
 
 template <>
 InputParameters
@@ -27,11 +26,9 @@ validParams<SamplerMultiApp>()
 }
 
 SamplerMultiApp::SamplerMultiApp(const InputParameters & parameters)
-  : TransientMultiApp(parameters), SamplerInterface(this), _sampler(getSampler("sampler"))
+  : TransientMultiApp(parameters),
+    SamplerInterface(this),
+    _sampler(SamplerInterface::getSampler("sampler"))
 {
-  std::vector<DenseMatrix<Real>> out = _sampler.getSamples();
-  unsigned int num = 0;
-  for (const DenseMatrix<Real> & mat : out)
-    num += mat.m();
-  init(num);
+  init(_sampler.getTotalNumberOfRows());
 }

@@ -49,6 +49,24 @@ public:
   Sampler(const InputParameters & parameters);
 
   /**
+   * Simple object for storing the sampler location (see SamplerMultiApp).
+   */
+  struct Location
+  {
+    Location(const unsigned int & sample, const unsigned int & row)
+    {
+      this->sample = sample;
+      this->row = row;
+    }
+
+    /// Sample number (i.e., the index in the matrix)
+    unsigned int sample;
+
+    /// Row number for the given sample matrix
+    unsigned int row;
+  };
+
+  /**
    * Return the list of distribution names.
    */
   const std::vector<DistributionName> & getDistributionNames() const { return _distribution_names; }
@@ -67,10 +85,32 @@ public:
   std::vector<DenseMatrix<Real>> getSamples();
 
   /**
+   * Return the sample names, by default 'sample_0, sample_1, etc.' is used.
+   *
+   * If custom names are required then utilize the setSampleNames method.
+   */
+  const std::vector<std::string> & getSampleNames() const { return _sample_names; }
+
+  /**
+   * Set the sample names.
+   */
+  void setSampleNames(std::vector<std::string> names);
+
+  /**
    * Store the state of the MooseRandom generator so that new calls to getSamples will create
    * new numbers.
    */
   void execute();
+
+  /**
+   * Return the Sample::Location for the given multi app index.
+   */
+  Sampler::Location getLocation(unsigned int global_index);
+
+  /**
+   * Return the number of samples.
+   */
+  unsigned int getTotalNumberOfRows();
 
 protected:
   /**
@@ -94,11 +134,19 @@ protected:
    */
   void setNumberOfRequiedRandomSeeds(const std::size_t & number);
 
+  /**
+   * Reinitialize the offsets and row counts.
+   */
+  void reinit(const std::vector<DenseMatrix<Real>> & data);
+
   /// Map used to store the perturbed parameters and their corresponding distributions
   std::vector<Distribution *> _distributions;
 
   /// Distribution names
   const std::vector<DistributionName> & _distribution_names;
+
+  /// Sample names
+  std::vector<std::string> _sample_names;
 
 private:
   /// Random number generator, don't give users access we want to control it via the interface
@@ -110,6 +158,12 @@ private:
 
   /// Initial random number seed
   const unsigned int & _seed;
+
+  /// Data offsets for computing location based on global index
+  std::vector<unsigned int> _offsets;
+
+  /// Total number of rows
+  unsigned int _total_rows = 0;
 };
 
 #endif /* SAMPLER_H */

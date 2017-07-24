@@ -50,8 +50,24 @@ Sampler::execute()
 {
   // Get the samples then save the state so that subsequent calls to getSamples returns the same
   // random numbers until this execute command is called again.
-  getSamples();
+  std::vector<DenseMatrix<Real>> data = getSamples();
   _generator.saveState();
+  reinit(data);
+}
+
+void
+Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
+{
+  // Update offsets and total number of rows
+  _total_rows = 0;
+  _offsets.clear();
+  _offsets.reserve(data.size() + 1);
+  _offsets.push_back(_total_rows);
+  for (const DenseMatrix<Real> & mat : data)
+  {
+    _total_rows += mat.m();
+    _offsets.push_back(_total_rows);
+  }
 }
 
 std::vector<DenseMatrix<Real>>
@@ -61,6 +77,16 @@ Sampler::getSamples()
   sampleSetUp();
   std::vector<DenseMatrix<Real>> output = sample();
   sampleTearDown();
+
+  if (_sample_names.empty())
+  {
+    _sample_names.resize(output.size());
+    for (auto i = beginIndex(output); i < output.size(); ++i)
+      _sample_names[i] = "sample_" + std::to_string(i);
+  }
+  mooseAssert(output.size() == _sample_names.size(),
+              "The number of sample names must match the number of samples returned.");
+
   return output;
 }
 
@@ -85,4 +111,31 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
     _generator.seed(i, _seed_generator.randl(0));
 
   _generator.saveState();
+}
+
+void
+Sampler::setSampleNames(std::vector<std::string> names)
+{
+  _sample_names = names;
+  mooseAssert(getSamples().size() == _sample_names.size(),
+              "The number of sample names must match the number of samples returned.");
+}
+
+Sampler::Location
+Sampler::getLocation(unsigned int global_index)
+{
+  if (_offsets.empty())
+    reinit(getSamples());
+
+  std::vector<unsigned int>::const_iterator iter;
+  iter = std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
+  return Sampler::Location(iter - _offsets.begin(), global_index - *iter);
+}
+
+unsigned int
+Sampler::getTotalNumberOfRows()
+{
+  if (_total_rows == 0)
+    reinit(getSamples());
+  return _total_rows;
 }
