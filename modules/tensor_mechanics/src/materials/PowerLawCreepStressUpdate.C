@@ -55,6 +55,14 @@ PowerLawCreepStressUpdate::initQpStatefulProperties()
 }
 
 void
+PowerLawCreepStressUpdate::propagateQpStatefulProperties()
+{
+  _creep_strain[_qp] = _creep_strain_old[_qp];
+
+  propagateQpStatefulPropertiesRadialReturn();
+}
+
+void
 PowerLawCreepStressUpdate::computeStressInitialize(const Real /*effective_trial_stress*/,
                                                    const RankFourTensor & /*elasticity_tensor*/)
 {

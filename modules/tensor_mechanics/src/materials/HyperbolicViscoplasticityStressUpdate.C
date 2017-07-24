@@ -42,6 +42,7 @@ HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
     _hardening_constant(parameters.get<Real>("hardening_constant")),
     _c_alpha(parameters.get<Real>("c_alpha")),
     _c_beta(parameters.get<Real>("c_beta")),
+    _yield_condition(-1.0), // set to a non-physical value to catch uninitalized yield condition
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
 
@@ -53,11 +54,17 @@ HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
 void
 HyperbolicViscoplasticityStressUpdate::initQpStatefulProperties()
 {
-  // set a default non-physical value to catch uninitalized yield condition--could cause problems
-  // later on
-  _yield_condition = -1.0;
   _hardening_variable[_qp] = 0.0;
   _plastic_strain[_qp].zero();
+}
+
+void
+HyperbolicViscoplasticityStressUpdate::propagateQpStatefulProperties()
+{
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+
+  propagateQpStatefulPropertiesRadialReturn();
 }
 
 void

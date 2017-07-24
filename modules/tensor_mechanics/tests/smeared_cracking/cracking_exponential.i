@@ -37,7 +37,7 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = SMALL
+    strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
   [../]
@@ -90,14 +90,13 @@
     type = ComputeElasticSmearedCrackingStress
     cracking_release = exponential
     cracking_stress = 119.3e6
+    inelastic_models = ''
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
   petsc_options_iname = '-ksp_gmres_restart -pc_type'
   petsc_options_value = '101                lu'
 
@@ -106,16 +105,13 @@
   l_tol = 1e-6
 
   nl_max_its = 10
-  nl_rel_tol = 1e-12
-
-  # Some timesteps in this example start from very small initial
-  # residuals, so it is legitimate to use a (very small) nl_abs_tol.
-  nl_abs_tol = 1.e-20
+  nl_rel_tol = 1e-9
+  nl_abs_tol = 1.e-4
 
   start_time = 0.0
-  dt = 0.005
-  dtmin = 0.005
-  num_steps = 1200
+  dt = 0.02
+  dtmin = 0.02
+  num_steps = 300
 []
 
 [Outputs]
