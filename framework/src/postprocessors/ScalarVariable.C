@@ -59,7 +59,7 @@ ScalarVariable::getValue()
   if (dof >= dof_map.first_dof() && dof < dof_map.end_dof())
     returnval = _var.sln()[_idx];
 
-  this->comm().min(returnval);
+  gatherMin(returnval);
 
   return returnval;
 }
