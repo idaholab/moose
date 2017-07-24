@@ -108,9 +108,11 @@ public:
   /**
    * The DofMap associated with the system this variable is in.
    */
-  const DofMap & dofMap() { return _dof_map; }
+  const DofMap & dofMap() const { return _dof_map; }
 
   std::vector<dof_id_type> & dofIndices() { return _dof_indices; }
+
+  const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
 
   unsigned int numberOfDofs() { return _dof_indices.size(); }
 

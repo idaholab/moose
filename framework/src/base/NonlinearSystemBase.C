@@ -1134,12 +1134,26 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
           mooseError("Unrecognized KernelType in computeResidualInternal().");
       }
 
+      bool have_scalar_contributions = false;
       for (const auto & scalar_kernel : *scalars)
       {
         scalar_kernel->reinit();
-        scalar_kernel->computeResidual();
+        const std::vector<dof_id_type> & dof_indices = scalar_kernel->variable().dofIndices();
+        const DofMap & dof_map = scalar_kernel->variable().dofMap();
+        const dof_id_type first_dof = dof_map.first_dof();
+        const dof_id_type end_dof = dof_map.end_dof();
+        for (dof_id_type dof : dof_indices)
+        {
+          if (dof >= first_dof && dof < end_dof)
+          {
+            scalar_kernel->computeResidual();
+            have_scalar_contributions = true;
+            break;
+          }
+        }
       }
-      _fe_problem.addResidualScalar();
+      if (have_scalar_contributions)
+        _fe_problem.addResidualScalar();
 
       Moose::perf_log.pop("computScalarKernels()", "Execution");
     }
@@ -1760,13 +1774,29 @@ NonlinearSystemBase::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobi
     const auto & scalars = _scalar_kernels.getActiveObjects();
 
     _fe_problem.reinitScalars(/*tid=*/0);
+
+    bool have_scalar_contributions = false;
     for (const auto & kernel : scalars)
     {
       kernel->reinit();
-      kernel->computeJacobian();
-      _fe_problem.addJacobianOffDiagScalar(jacobian, kernel->variable().number());
+      const std::vector<dof_id_type> & dof_indices = kernel->variable().dofIndices();
+      const DofMap & dof_map = kernel->variable().dofMap();
+      const dof_id_type first_dof = dof_map.first_dof();
+      const dof_id_type end_dof = dof_map.end_dof();
+      for (dof_id_type dof : dof_indices)
+      {
+        if (dof >= first_dof && dof < end_dof)
+        {
+          kernel->computeJacobian();
+          _fe_problem.addJacobianOffDiagScalar(jacobian, kernel->variable().number());
+          have_scalar_contributions = true;
+          break;
+        }
+      }
     }
-    _fe_problem.addJacobianScalar(jacobian);
+
+    if (have_scalar_contributions)
+      _fe_problem.addJacobianScalar(jacobian);
   }
 }
 

@@ -18,6 +18,8 @@
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 
+#include "libmesh/dof_map.h"
+
 template <>
 InputParameters
 validParams<ScalarVariable>()
@@ -49,5 +51,14 @@ Real
 ScalarVariable::getValue()
 {
   _var.reinit();
-  return _var.sln()[_idx];
+
+  Real returnval = std::numeric_limits<Real>::max();
+  const DofMap & dof_map = _var.dofMap();
+  const dof_id_type dof = _var.dofIndices()[_idx];
+  if (dof >= dof_map.first_dof() && dof < dof_map.end_dof())
+    returnval = _var.sln()[_idx];
+
+  gatherMin(returnval);
+
+  return returnval;
 }
