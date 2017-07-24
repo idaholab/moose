@@ -4,7 +4,6 @@ from mooseutils import colorText
 from collections import namedtuple
 import json
 from tempfile import TemporaryFile
-from timeit import default_timer as clock
 
 TERM_COLS = 110
 
@@ -120,21 +119,22 @@ def runCommand(cmd, cwd=None):
         output = 'ERROR: ' + output
     return output
 
-# Execute a command and return the process, temporary output_file and time the process was launched
-def launchCommand(tester, command):
-    # It seems that using PIPE doesn't work very well when launching multiple jobs.
-    # It deadlocks rather easy.  Instead we will use temporary files
-    # to hold the output as it is produced
+def launchTesterCommand(tester, command):
+    """
+    Method to enter the tester directory, execute a command, and return the process
+    and temporary output file objects.
+    """
+
     try:
         f = TemporaryFile()
         # On Windows, there is an issue with path translation when the command is passed in
         # as a list.
         if platform.system() == "Windows":
-            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=CREATE_NEW_PROCESS_GROUP, cwd=tester.getTestDir())
+            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=tester.getTestDir())
         else:
             process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=tester.getTestDir())
     except:
-        print "Error in launching a new task", command
+        print("Error in launching a new task", command)
         raise
 
     return (process, f)
@@ -145,7 +145,9 @@ def launchCommand(tester, command):
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def formatResult(tester, result, timing, options, color=True):
+def formatResult(tester_data, result, options, color=True):
+    tester = tester_data.getTester()
+    timing = tester_data.getTiming()
     f_result = ''
     caveats = ''
     first_directory = tester.specs['first_directory']
@@ -176,7 +178,7 @@ def formatResult(tester, result, timing, options, color=True):
     if options.timing:
         f_result += ' [' + '%0.3f' % float(timing) + 's]'
     if options.debug_harness:
-        f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % tester.getEndTime()
+        f_result += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
     return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
@@ -224,7 +226,7 @@ def runExecutable(libmesh_dir, location, bin, args):
         libmesh_exe = libmesh_uninstalled2
 
     else:
-        print "Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"
+        print("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!")
         exit(1)
 
     return runCommand(libmesh_exe + " " + args).rstrip()
@@ -397,7 +399,7 @@ def getSharedOption(libmesh_dir):
         shared_option.add('STATIC')
     else:
         # Neither no nor yes?  Not possible!
-        print "Error! Could not determine whether shared libraries were built."
+        print("Error! Could not determine whether shared libraries were built.")
         exit(1)
 
     return shared_option
@@ -486,7 +488,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
             try:
                 os.remove(full_path)
             except:
-                print "Unable to remove file: " + full_path
+                print("Unable to remove file: " + full_path)
 
     # Now try to delete directories that might have been created
     if delete_folders:
@@ -547,102 +549,6 @@ def readOutput(f, options, max_size=100000):
 
     output += f.read()              # Now read the rest
     return output
-
-# See http://code.activestate.com/recipes/576570-dependency-resolver/
-class DependencyResolver:
-    """
-    Class for returning dependency sets. That is, all of the vertices from a directed
-    graph that a given vertex depends on (or can reach)
-    """
-    def __init__(self):
-        self.dependency_dict = {}
-
-    def insertDependency(self, key, values):
-        """
-        Insert all of the immediate dependencies for a given vertex. "values" should be a set
-        """
-        self.dependency_dict[key] = values
-
-    def getSortedValuesSets(self):
-        """
-        Method to return the "execution order" for a directed graph (i.e. the order in which
-        nodes must be visited to satistfy dependencies
-        """
-        d = dict((k, set(self.dependency_dict[k])) for k in self.dependency_dict)
-        r = []
-        while d:
-            # values not in keys (items without dep)
-            t = set(i for v in d.values() for i in v) - set(d.keys())
-            # and keys without value (items without dep)
-            t.update(k for k, v in d.items() if not v)
-
-            if len(t) == 0 and len(d) > 0:
-              raise Exception("Cyclic or Invalid Dependency Detected!")
-
-            # can be done right away
-            r.append(t)
-            # and cleaned up
-            d = dict(((k, v-t) for k, v in d.items() if v))
-        return r
-
-class ReverseReachability:
-    """
-    Calculates the Reverse Reachability of a graph. This class does this by
-    computing the reachability of a graph (reversing the direction of edges)
-    """
-    def __init__(self):
-        """
-        Creats the dictionary to hold all of the reverse dependencies. (i.e. the key -> value
-        pair is inserted in the dictionary such that the value -> key)
-        """
-        self.dependency_dict = {}
-
-    def insertDependency(self, key, values):
-        """
-        Inserts all of the dependencies for a given key. "values" can either be
-        a single value or a set of values.
-
-        """
-        for value in values:
-            self.dependency_dict.setdefault(value, set()).add(key)
-
-        # Also make sure the original key is in there with an empty set
-        self.dependency_dict.setdefault(key, set())
-
-    def getReverseReachabilitySets(self):
-        """
-        Method to retrieve all of the vertices that can reach a given vertex in a complete dictionary.
-        """
-        reachable = {}
-        for key in self.dependency_dict:
-            reachable[key] = self.getReverseReachableSet(key)
-
-        return reachable
-
-    def getReverseReachableSet(self, key):
-        """
-        Method to retrieve all of the verices for the passed in vertex (key)
-        """
-        return self._reverseReachability(key)
-
-    def _reverseReachability(self, key, seen = None):
-        """
-        Helper method to discover all of the vertices that can reach this vertex. It uses recursion
-        to populate the data structures.
-        """
-        seen = seen or []
-        seen.append(key)
-        reached = set()
-        adjacent = self.dependency_dict.get(key)
-
-        if adjacent:
-            reached.update(adjacent)
-            for subkey in adjacent:
-                if subkey in adjacent and subkey not in seen:
-                    reached.update(self._reverseReachability(subkey, seen))
-
-        return reached
-
 
 class TestStatus(object):
     """

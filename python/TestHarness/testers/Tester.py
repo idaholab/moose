@@ -1,11 +1,11 @@
 import re, os
 import util
-from InputParameters import InputParameters
 from MooseObject import MooseObject
-from timeit import default_timer as clock
 
 class Tester(MooseObject):
-
+    """
+    Base class from which all tester objects are instanced.
+    """
     @staticmethod
     def validParams():
         params = MooseObject.validParams()
@@ -94,62 +94,66 @@ class Tester(MooseObject):
         self.check_input = self.specs['check_input']
 
     def getTestName(self):
+        """ return test name """
         return self.specs['test_name']
 
     def getPrereqs(self):
+        """ return list of prerequisite tests this test depends on """
         return self.specs['prereq']
 
     def getMooseDir(self):
+        """ return moose directory """
         return self.specs['moose_dir']
 
     def getTestDir(self):
+        """ return directory this tester is located """
         return self.specs['test_dir']
 
-    def getPerfTime(self):
-        return self.__perf_time
-
-    def setPerfTime(self, perf_time):
-        self.perf_time = perf_time
-        return self.__perf_time
-
     def getMinReportTime(self):
+        """ return minimum time elapse before reporting a 'long running' status """
         return self.specs['min_reported_time']
 
     def getMaxTime(self):
+        """ return maximum time elapse before reporting a 'timeout' status """
         return self.specs['max_time']
 
-    # A cached method to return if the test can run
     def getRunnable(self, options):
+        """ return bool and cache results, if this test can run """
         if self._runnable is None:
             self._runnable = self.checkRunnableBase(options)
         return self._runnable
 
-    # Method to return text color based on current test status
     def getColor(self):
+        """ return print color assigned to this tester """
         return self.status.getColor()
 
-    # Method to return the input file if applicable to this Tester
     def getInputFile(self):
+        """ return the input file if applicable to this Tester """
         return None
 
-    # Method to return the output files if applicable to this Tester
     def getOutputFiles(self):
+        """ return the output files if applicable to this Tester """
         return []
 
-    # Method to return the successful message printed to stdout
     def getSuccessMessage(self):
+        """ return the success message assigned to this tester """
         return self.success_message
 
-    # Method to return status text (exodiff, crash, skipped because x, y and z etc)
     def getStatusMessage(self):
+        """ return the status message assigned to this tester """
         return self.status.getStatusMessage()
 
-    # Method to return status bucket tuple
     def getStatus(self):
+        """ return current enumerated tester status bucket """
         return self.status.getStatus()
 
-    # Method to set the bucket status
     def setStatus(self, reason, bucket):
+        """
+        Method to set a testers status.
+
+        Syntax:
+          .setStatus('str message', <enumerated tester status bucket>)
+        """
         self.status.setStatus(reason, bucket)
         return self.getStatus()
 
@@ -159,6 +163,10 @@ class Tester(MooseObject):
     #       didPass. This will happen if the tester is in-progress for instance.
     # See didPass()
     def didFail(self):
+        """
+        return bool for tester failure
+        see util.TestStatus for more information
+        """
         return self.status.didFail()
 
     # Method to check for successfull test
@@ -170,94 +178,131 @@ class Tester(MooseObject):
     #       output has been tested).
     # See didFail()
     def didPass(self):
+        """
+        return boolean for tester successfulness
+        see util.TestStatus for more information
+        """
         return self.status.didPass()
 
-    # Method to check if this test has diff'd
     def didDiff(self):
+        """
+        return boolean for a differential tester failure
+        see util.TestStatus for more information
+        """
         return self.status.didDiff()
 
-    # Method to check if this test is Initialized
     def isInitialized(self):
+        """
+        return boolean for tester in an initialization status
+        see util.TestStatus for more information
+        """
         return self.status.isInitialized()
 
-    # Method to check if this test is pending
     def isPending(self):
+        """
+        return boolean for tester in a pending status
+        see util.TestStatus for more information
+        """
         return self.status.isPending()
 
-    # Method to check if this test is finished
     def isFinished(self):
+        """
+        return boolean for tester no longer pending
+        see util.TestStatus for more information
+        """
         return self.status.isFinished()
 
-    # Method to check if this test is skipped
     def isSkipped(self):
+        """
+        return boolean for tester being reported as skipped
+        see util.TestStatus for more information
+        """
         return self.status.isSkipped()
 
-    # Method to check if this test is silent
     def isSilent(self):
+        """
+        return boolean for tester being skipped and not reported
+        see util.TestStatus for more information
+        """
         return self.status.isSilent()
 
-    # Method to check if this test is deleted
     def isDeleted(self):
+        """
+        return boolean for tester being skipped and not reported due to
+        internal deletion status
+        see util.TestStatus for more information
+        """
         return self.status.isDeleted()
 
     def getCheckInput(self):
         return self.check_input
 
     def setValgrindMode(self, mode):
-        # Increase the alloted time for tests when running with the valgrind option
+        """ Increase the alloted time for tests when running with the valgrind option """
         if mode == 'NORMAL':
             self.specs['max_time'] = self.specs['max_time'] * 2
         elif mode == 'HEAVY':
             self.specs['max_time'] = self.specs['max_time'] * 6
 
-
-    # Override this method to tell the harness whether or not this test should run.
-    # This function should return a tuple (Boolean, reason)
-    # If a reason is provided it'll be printed and counted as skipped.  If the reason
-    # is left blank, the test will not be printed at all nor counted in the test totals.
     def checkRunnable(self, options):
+        """
+        Derived method to return tuple if this tester should be executed or not.
+
+        The tuple should be structured as (boolean, 'reason'). If false, and the
+        reason is left blank, this tester will be treated as silent (no status
+        will be printed and will not be counted among the skipped tests).
+        """
         return (True, '')
 
-    # Whether or not the executeable should be run
-    # Don't override this
     def shouldExecute(self):
+        """
+        return boolean for tester allowed to execute its command
+        see .getCommand for more information
+        """
         return self.should_execute
 
-    # This method is called prior to running the test.  It can be used to cleanup files
-    # or do other preparations before the tester is run
     def prepare(self, options):
+        """
+        Method which is called prior to running the test. It can be used to cleanup files
+        or do other preparations before the tester is run.
+        """
         return
 
     def getThreads(self, options):
+        """ return number of threads to use for this tester """
         return 1
 
     def getProcs(self, options):
+        """ return number of processors to use for this tester """
         return 1
 
-    # This method should return the executable command that will be executed by the tester
     def getCommand(self, options):
+        """ return the executable command that will be executed by the tester """
         return
 
-    # This method is called to return the commands (list) used for processing results
     def processResultsCommand(self, moose_dir, options):
+        """ method to return the commands (list) used for processing results """
         return []
 
-    # This method will be called to process the results of running the test.  Any post-test
-    # processing should happen in this method
     def processResults(self, moose_dir, retcode, options, output):
+        """ method to process the results of a finished tester """
         return
 
-    # Return boolean on test having redirected output
     def hasRedirectedOutput(self, options):
+        """ return bool on tester having redirected output """
         return (self.specs.isValid('redirect_output') and self.specs['redirect_output'] == True and self.getProcs(options) > 1)
 
-    # Return a list of redirected output
     def getRedirectedOutputFiles(self, options):
+        """ return a list of redirected output """
         return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
 
-    # This is the base level runnable check common to all Testers.  DO NOT override
-    # this method in any of your derived classes.  Instead see "checkRunnable"
     def checkRunnableBase(self, options):
+        """
+        Method to check for caveats that would prevent this tester from
+        executing correctly (or not at all).
+
+        DO NOT override this method. Instead, see .checkRunnable()
+        """
         reasons = {}
         checks = options._checks
 

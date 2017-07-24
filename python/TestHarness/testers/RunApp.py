@@ -1,7 +1,6 @@
-import re, os, sys, time
+import re, os, time
 from Tester import Tester
 import util
-from Scheduler import Scheduler # For TIMEOUT value
 
 class RunApp(Tester):
 
@@ -177,8 +176,8 @@ class RunApp(Tester):
 
         return command
 
-    # Set a failure status for expressions found in output
     def testFileOutput(self, moose_dir, retcode, options, output):
+        """ Set a failure status for expressions found in output """
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
@@ -214,6 +213,15 @@ class RunApp(Tester):
         return reason
 
     def processResults(self, moose_dir, retcode, options, output):
+        """
+        Wrapper method for testFileOutput.
+
+        testFileOutput does not set a success status, while processResults does.
+        For testers that are RunApp types, they would call this method. While
+        all other tester types (like exodiff) will call testFileOutput. This is
+        to prevent derived testers from having a successful status set, before
+        actually running their derived processResults method.
+        """
         reason = self.testFileOutput(moose_dir, retcode, options, output)
 
         # Populate the bucket

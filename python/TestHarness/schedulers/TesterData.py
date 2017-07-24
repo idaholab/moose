@@ -1,16 +1,12 @@
-import re, os, sys, platform
+import re, os, platform
 from timeit import default_timer as clock
 from signal import SIGTERM
-from time import sleep
 import util
-
-class TesterDataKeyboardInterrupt(Exception):
-    pass
 
 class TesterData(object):
     """
     The TesterData class is a simple container for the tester and its associated output file object, the DAG,
-    the process object, the exit codes, the start and end time, etc
+    the process object, the exit codes, and the start and end times.
     """
     def __init__(self, tester, tester_dag, options):
         self.options = options
@@ -23,54 +19,49 @@ class TesterData(object):
         self.__end_time = clock()
         self.__std_out = ''
 
-    # Return the tester object
     def getTester(self):
+        """ Return the tester object """
         return self.__tester
 
-    # Return the DAG object
     def getDAG(self):
+        """ Return the DAG object """
         return self.__dag
 
-    # Return the tester name
     def getTestName(self):
+        """ Wrapper method to return the testers test name """
         return self.__tester.getTestName()
 
-    # # Return list of tester prereqs
-    # def getPrereqs(self):
-    #     return self.__tester.getPrereqs()
-
-    # Run a tester specific command (changes into test_dir before execution)
-    def runCommand(self, command):
-        # os.setpgid(os.getpid(), self.group_id)
+    def processCommand(self, command):
+        """
+        A blocking method to handle the exit status of the process object while keeping track of the
+        time the process was active. When the process exits, read the output and close the file.
+        """
 
         if self.options.dry_run or not self.__tester.shouldExecute():
             self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
             return
 
-        # Run a command and get the process and tempfile
-        (process, output_file) = util.launchCommand(self.__tester, command)
+        # Run the command and get the process and tempfile
+        (process, output_file) = util.launchTesterCommand(self.__tester, command)
 
-        # Save this information before waiting
         self.__process = process
         self.__outfile = output_file
         self.__start_time = clock()
 
-        # Wait for the process to finish
         process.wait()
 
-        # Record some information about this finished command
         self.__end_time = clock()
         self.__exit_code = process.poll()
 
-        # This saves the trimmed output to std_out, and closes the file
-        self.__std_out = self.getOutput()
+        # store the contents of output, and close the file
+        self.__std_out = util.readOutput(self.__outfile, self.options)
+        self.__outfile.close()
 
-        # Return the process
         return process
 
-    # Kill the Popen process
     def killProcess(self):
-        # Attempt to kill a running Popen process
+        """ Kill remaining process that may be running """
+
         if self.__process is not None:
             try:
                 if platform.system() == "Windows":
@@ -81,61 +72,42 @@ class TesterData(object):
             except OSError: # Process already terminated
                 pass
 
-    # Return Exit code
     def getExitCode(self):
+        """ Return exit code """
         return self.__exit_code
 
-    # Return start time
     def getStartTime(self):
+        """ Return the time the process started """
         return self.__start_time
 
-    # Return end time
     def getEndTime(self):
+        """ Return the time the process exited """
         return self.__end_time
 
-    # Return the output file handler object
-    def getOutFile(self):
-        return self.__outfile
+    def getOutput(self):
+        """ Return the contents of output """
+        return self.__std_out
 
-    # Close the OutFile object
-    def closeFile(self):
-        if not self.__outfile.closed:
-            self.__outfile.close()
-
-    ######
-    # Set or override the output
-    # NOTE: This does nothing if there is a valid file handler and its opened (a running non-skipped
-    #       test). This is to protect the output that the running process is busy creating.
-    #
-    #       Proper usage would be to; wait for procsess to finish, getOutput(), modify it, and then
-    #       setOutput(<modified output>). Concurrent getOutput()'s would then return your modified
-    #       output.
     def setOutput(self, output):
+        """ Method to allow testers to overwrite the output if certain conditions are met """
         if self.__outfile is not None and not self.__outfile.closed:
             return
         self.__std_out = output
 
-    # Read and return the output, then close the file
-    def getOutput(self):
-        if self.__outfile is not None and not self.__outfile.closed:
-            self.__std_out = util.readOutput(self.__outfile, self.options)
-            self.__outfile.close()
-        return self.__std_out
-
-    # Return active time
     def getActiveTime(self):
+        """ Return active time """
         m = re.search(r"Active time=(\S+)", self.__std_out)
         if m != None:
             return m.group(1)
 
-    # Return solve time
     def getSolveTime(self):
+        """ Return solve time """
         m = re.search(r"solve().*", self.__std_out)
         if m != None:
             return m.group().split()[5]
 
-    # Return active time if available, if not return a comparison of start and end time
     def getTiming(self):
+        """ Return active time if available, if not return a comparison of start and end time """
         if self.getActiveTime():
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():

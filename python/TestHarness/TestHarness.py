@@ -334,7 +334,6 @@ class TestHarness:
 
     def checkExpectError(self, output, expect_error):
         if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
-            #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
             return False
         else:
             return True
@@ -376,6 +375,7 @@ class TestHarness:
 
     # Print and return formatted current tester status output
     def printResult(self, tester_data):
+        """ Method to print a testers status to the screen """
         tester = tester_data.getTester()
 
         # The test has no status to print
@@ -399,12 +399,11 @@ class TestHarness:
                     print(output)
 
             caveat_formatted_results = self.formatCaveats(tester)
-            print util.formatResult(tester, caveat_formatted_results, tester_data.getTiming(), self.options)
+            print(util.formatResult(tester_data, caveat_formatted_results, self.options))
         return caveat_formatted_results
 
-    # handleTestStatus calls the tester's ability to print its current status to the screen, and handles
-    # the finalized status for tallying up the totals based on those statuses (failed, success, etc)
     def handleTestStatus(self, tester_data):
+        """ Method to handle a testers status """
         tester = tester_data.getTester()
 
         # print and store those results
@@ -415,7 +414,7 @@ class TestHarness:
             timing = tester_data.getTiming()
 
             # Store these results to a table we will use when we print final results
-            self.test_table.append( (tester, result, timing) )
+            self.test_table.append( (tester_data, result, timing) )
 
             # Tally the results of this test to be used in our Final Test Results footer
             if tester.isSkipped():
@@ -431,14 +430,12 @@ class TestHarness:
                     self.writeFailedTest.write(tester.getTestName() + '\n')
 
                 if self.options.file:
-                    self.file.write(util.formatResult( tester, result, timing, self.options, color=False) + '\n')
-                    self.file.write(output)
+                    self.file.write(util.formatResult( tester_data, result, self.options, color=False) + '\n')
 
                 if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
                     fname = os.path.join(tester.getTestDir(), tester.getTestName().split('/')[-1] + '.' + result[:6] + '.txt')
                     f = open(fname, 'w')
-                    f.write(util.formatResult( tester, result, timing, self.options, color=False) + '\n')
-                    f.write(output)
+                    f.write(util.formatResult( tester_data, result, self.options, color=False) + '\n')
                     f.close()
 
     # Print final results, close open files, and exit with the correct error code
@@ -446,9 +443,9 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print '\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS-1))
-            for (test, result, timing) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
-                print util.formatResult(test, result, timing, self.options)
+            print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS-1)))
+            for (tester_data, result, timing) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
+                print(util.formatResult(tester_data, result, self.options))
 
         time = clock() - self.start_time
 
@@ -484,8 +481,8 @@ class TestHarness:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print util.colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code )
+            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code ))
 
         if self.file:
             self.file.close()
@@ -614,7 +611,6 @@ class TestHarness:
 
         # If attempting to test only failed_tests, open the .failed_tests file and create a list object
         # otherwise, open the failed_tests file object for writing (clobber).
-        test_list = []
         failed_tests_file = os.path.join(os.getcwd(), '.failed_tests')
         if self.options.failed_tests:
             with open(failed_tests_file, 'r') as tmp_failed_tests:
