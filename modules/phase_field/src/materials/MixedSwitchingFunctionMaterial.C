@@ -16,7 +16,7 @@ validParams<MixedSwitchingFunctionMaterial>()
   MooseEnum h_order("MIX234=0 MIX246", "MIX234");
   params.addParam<MooseEnum>(
       "h_order", h_order, "Polynomial order of the switching function h(eta)");
-  params.set<std::string>("function_n ame") = std::string("h");
+  params.set<std::string>("function_name") = std::string("h");
 
   params.addRangeCheckedParam<Real>(
       "weight", 1.0, "weight <= 1 & weight >= 0", "Weight parameter for MIX type h(eta)");
