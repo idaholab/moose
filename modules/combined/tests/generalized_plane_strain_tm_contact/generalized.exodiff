@@ -14,7 +14,7 @@ NODAL VARIABLES relative 1.e-5 floor 1e-10
 	temp              # min:               0 @ t1,n1	max:               2 @ t11,n10
 
 ELEMENT VARIABLES relative 1.e-5 floor 1e-10
-	stress_xx      # min:               0 @ t1,b1,e1	max:       12948.737 @ t11,b1,e2
+	stress_xx  relative 1.e-4    # min:               0 @ t1,b1,e1	max:       12948.737 @ t11,b1,e2
 	stress_xy      # min:               0 @ t1,b1,e1	max:       2009.6183 @ t11,b2,e5
 	stress_yy      # min:               0 @ t1,b1,e1	max:       2975.5513 @ t11,b2,e8
 	stress_zz      # min:               0 @ t1,b1,e1	max:       17721.946 @ t11,b1,e4
