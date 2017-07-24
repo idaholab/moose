@@ -18,7 +18,6 @@
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 
 template <>

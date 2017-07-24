@@ -23,7 +23,6 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 
-// C++
 #include <limits>
 
 MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
