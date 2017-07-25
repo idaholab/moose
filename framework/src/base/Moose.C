@@ -129,6 +129,7 @@
 
 // dirac kernels
 #include "ConstantPointSource.h"
+#include "FunctionDiracSource.h"
 
 // DG
 #include "DGDiffusion.h"
@@ -549,6 +550,7 @@ registerObjects(Factory & factory)
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
+  registerDiracKernel(FunctionDiracSource);
 
   // aux kernels
   registerAux(ConstantAux);
