@@ -82,6 +82,9 @@ protected:
   /// manner.
   bool _legacy_return_mapping;
 
+  /// Whether to check to see whether iterative solution is within admissible range, and set within that range if outside
+  bool _check_range;
+
 private:
   /// Maximum number of return mapping iterations
   unsigned int _max_its;
@@ -101,9 +104,6 @@ private:
   /// Whether to save upper and lower bounds of root for scalar, and set solution to the midpoint between
   /// those bounds if outside them
   bool _bracket_solution;
-
-  /// Whether to check to see whether iterative solution is within admissible range, and set within that range if outside
-  bool _check_range;
 
   /**
    * Method called from within this class to perform the actual return mappping iterations.

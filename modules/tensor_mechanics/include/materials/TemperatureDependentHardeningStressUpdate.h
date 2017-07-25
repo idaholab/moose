@@ -24,7 +24,7 @@ public:
   TemperatureDependentHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(Real effectiveTrialStress,
+  virtual void computeStressInitialize(const Real effectiveTrialStress,
                                        const RankFourTensor & elasticity_tensor) override;
 
   virtual void computeYieldStress(const RankFourTensor & elasticity_tensor) override;

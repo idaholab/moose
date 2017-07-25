@@ -61,7 +61,7 @@ public:
 protected:
   /**
    * Perform any necessary initialization before return mapping iterations
-   * @param effectiveTrialStress Effective trail stress
+   * @param effectiveTrialStress Effective trial stress
    * @param elasticityTensor     Elasticity tensor
    */
   virtual void computeStressInitialize(Real /*effectiveTrialStress*/,
