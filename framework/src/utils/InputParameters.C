@@ -991,7 +991,7 @@ InputParameters::reservedValues(const std::string & name) const
 void
 InputParameters::checkParamName(const std::string & name) const
 {
-  const static pcrecpp::RE valid("\\w+");
+  const static pcrecpp::RE valid("[\\w:/]+");
   if (!valid.FullMatch(name))
     mooseError("Invalid parameter name: '", name, "'");
 }

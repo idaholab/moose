@@ -145,7 +145,7 @@ testBadParamName(const std::string & name)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Invalid parameter name") != std::string::npos)
+    EXPECT_TRUE(msg.find("Invalid parameter name") != std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
