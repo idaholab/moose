@@ -20,6 +20,8 @@
 #include "MooseUtils.h"
 #include "MultiMooseEnum.h"
 
+#include "pcrecpp.h"
+
 #include <cmath>
 
 InputParameters
@@ -984,4 +986,12 @@ InputParameters::reservedValues(const std::string & name) const
     return std::set<std::string>();
   else
     return it->second;
+}
+
+void
+InputParameters::checkParamName(const std::string & name) const
+{
+  const static pcrecpp::RE valid("\\w+");
+  if (!valid.FullMatch(name))
+    mooseError("Invalid parameter name: '", name, "'");
 }
