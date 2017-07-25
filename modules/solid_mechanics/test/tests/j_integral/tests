@@ -58,18 +58,21 @@
  [../]
  [./j_3d_as_2d_topo_q_outq]
    type = 'Exodiff'
-   input = 'j_integral_3d_as_2d_topo_q_func.i cli_args = "DomainIntegral/output_q=false" "Outputs/file_base=j_integral_3d_as_2d_topo_q_func_outputQ_out"'
+   input = 'j_integral_3d_as_2d_topo_q_func.i'
    exodiff = 'j_integral_3d_as_2d_topo_q_func_outputQ_out.e'
+   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=j_integral_3d_as_2d_topo_q_func_outputQ_out'
    rel_err = 5e-5
  [../]
  [./j_3d_mouth_dir_outq]
    type = 'Exodiff'
-   input = 'j_integral_3d_mouth_dir.i cli_args = "DomainIntegral/output_q=false" "Outputs/file_base=j_integral_3d_mouth_dir_outputQ_out"'
+   input = 'j_integral_3d_mouth_dir.i'
+   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=j_integral_3d_mouth_dir_outputQ_out'
    exodiff = 'j_integral_3d_mouth_dir_outputQ_out.e'
  [../]
  [./j_2d_outq]
    type = 'Exodiff'
-   input = 'j_integral_2d.i cli_args = "DomainIntegral/output_q=false" "Outputs/file_base=j_integral_2d_outputQ_out"'
+   input = 'j_integral_2d.i'
+   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=j_integral_2d_outputQ_out'
    exodiff = 'j_integral_2d_outputQ_out.e'
  [../]
 []

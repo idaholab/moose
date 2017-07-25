@@ -273,6 +273,7 @@
     type = FunctionDT
     time_dt = '1E-2 1E-1 1E0 1E1 1E3 1E4 1E5 1E6 1E7'
     time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
+  [../]
 []
 
 [Outputs]

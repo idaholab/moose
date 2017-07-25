@@ -142,7 +142,7 @@
     hprops = '1.0 541.5 60.8 109.8 2.5'
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     tan_mod_type = exact
-    gen_random_stress_flag = false;
+    gen_random_stress_flag = false
     maximum_substep_iteration = 2
   [../]
   [./elasticity_tensor]
