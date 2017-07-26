@@ -4,6 +4,8 @@
     input = 'ie.i'
     exodiff = 'ie_out.e'
     group = 'requirements'
+    use_old_floor = true
+    abs_zero = 1e-9
   [../]
 
   [./adapt]
