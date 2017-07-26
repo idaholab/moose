@@ -81,7 +81,7 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser)
     return 0.0;
 
   // evaluate expression
-  Real result = parser->Eval(&_func_params[0]);
+  Real result = parser->Eval(_func_params.data());
 
   // fetch fparser evaluation error
   int error_code = parser->EvalError();
