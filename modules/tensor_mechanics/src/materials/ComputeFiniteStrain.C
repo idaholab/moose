@@ -79,50 +79,54 @@ ComputeFiniteStrain::computeProperties()
   {
     // needed for volumetric locking correction
     ave_Fhat /= _current_elem_volume;
+    const Real ave_Fhat_det = ave_Fhat.det();
     // average deformation gradient
     ave_dfgrd_det /= _current_elem_volume;
-  }
 
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    if (_volumetric_locking_correction)
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
       // Finalize volumetric locking correction
-      _Fhat[_qp] *= std::cbrt(ave_Fhat.det() / _Fhat[_qp].det());
+      _Fhat[_qp] *= std::cbrt(ave_Fhat_det / _Fhat[_qp].det());
       _deformation_gradient[_qp] *= std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
     }
-
-    computeQpStrain();
   }
+
+  computeStrain();
 }
 
 void
-ComputeFiniteStrain::computeQpStrain()
+ComputeFiniteStrain::computeStrain()
 {
   RankTwoTensor total_strain_increment;
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
 
-  // two ways to calculate these increments: TaylorExpansion(default) or EigenSolution
-  computeQpIncrements(total_strain_increment, _rotation_increment[_qp]);
+    // two ways to calculate these increments: TaylorExpansion(default) or EigenSolution
+    computeQpIncrements(total_strain_increment, _rotation_increment[_qp]);
 
-  _strain_increment[_qp] = total_strain_increment;
+    _strain_increment[_qp] = total_strain_increment;
+    _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
+    _total_strain[_qp] =
+        _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+  }
 
   // Remove the eigenstrain increment
-  subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+  subtractModifiedEigenstrainIncrementFromStrain(_strain_increment);
 
-  if (_dt > 0)
-    _strain_rate[_qp] = _strain_increment[_qp] / _dt;
-  else
-    _strain_rate[_qp].zero();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    if (_dt > 0)
+      _strain_rate[_qp] = _strain_increment[_qp] / _dt;
+    else
+      _strain_rate[_qp].zero();
 
-  // Update strain in intermediate configuration
-  _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
-  _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
+    // Update strain in intermediate configuration
+    _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
 
-  // Rotate strain to current configuration
-  _mechanical_strain[_qp] =
-      _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
-  _total_strain[_qp] =
-      _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+    // Rotate strain to current configuration
+    _mechanical_strain[_qp] =
+        _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
+  }
 }
 
 void
@@ -143,7 +147,8 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       // Cinv - I = A A^T - A - A^T;
       RankTwoTensor Cinv_I = A * A.transpose() - A - A.transpose();
 
-      // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
+      // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 +
+      // ...
       total_strain_increment = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
 
       const Real a[3] = {invFhat(1, 2) - invFhat(2, 1),
@@ -175,7 +180,8 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
           0.5 * std::sqrt((p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) /
                           Utility::pow<3>(p + q)); // sin theta_a/(2 sqrt(q))
 
-      // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
+      // Calculate incremental rotation. Note that this value is the transpose of that from
+      // Rashid,
       // 93, so we transpose it before storing
       RankTwoTensor R_incr;
       R_incr.addIa(C1);

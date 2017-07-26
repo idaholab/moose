@@ -51,10 +51,13 @@ ComputeIncrementalSmallStrain::computeProperties()
     }
 
     _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+  }
 
-    // Remove the Eigen strain increment
-    subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+  // Remove the Eigen strain increment
+  subtractModifiedEigenstrainIncrementFromStrain(_strain_increment);
 
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
     // strain rate
     if (_dt > 0)
       _strain_rate[_qp] = _strain_increment[_qp] / _dt;

@@ -65,3 +65,10 @@ ComputeIncrementalStrainBase::subtractEigenstrainIncrementFromStrain(RankTwoTens
     strain += (*_eigenstrains_old[i])[_qp];
   }
 }
+
+void
+ComputeIncrementalStrainBase::subtractModifiedEigenstrainIncrementFromStrain(
+    MaterialProperty<RankTwoTensor> & strain)
+{
+  applyIncrementalEigenstrain(_eigenstrains, _eigenstrains_old, strain);
+}

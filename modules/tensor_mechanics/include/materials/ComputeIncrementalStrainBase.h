@@ -22,6 +22,7 @@ protected:
   virtual void initQpStatefulProperties() override;
 
   void subtractEigenstrainIncrementFromStrain(RankTwoTensor & strain);
+  void subtractModifiedEigenstrainIncrementFromStrain(MaterialProperty<RankTwoTensor> & strain);
 
   std::vector<const VariableGradient *> _grad_disp_old;
 
