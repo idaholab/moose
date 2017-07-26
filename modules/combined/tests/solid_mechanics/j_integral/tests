@@ -56,4 +56,20 @@
    input = 'j_integral_3d_topo_q_func.i'
    exodiff = 'j_integral_3d_topo_q_func_out.e'
  [../]
+ [./j_3d_as_2d_topo_q_outq]
+   type = 'Exodiff'
+   input = 'j_integral_3d_as_2d_topo_q_func_outputQ.i'
+   exodiff = 'j_integral_3d_as_2d_topo_q_func_outputQ_out.e'
+   rel_err = 5e-5
+ [../]
+ [./j_3d_mouth_dir_outq]
+   type = 'Exodiff'
+   input = 'j_integral_3d_mouth_dir_outputQ.i'
+   exodiff = 'j_integral_3d_mouth_dir_outputQ_out.e'
+ [../]
+ [./j_2d_outq]
+   type = 'Exodiff'
+   input = 'j_integral_2d_outputQ.i'
+   exodiff = 'j_integral_2d_outputQ_out.e'
+ [../]
 []
