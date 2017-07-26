@@ -396,8 +396,10 @@ Material::getZeroMaterialProperty(const std::string & prop_name)
     _fe_problem.storeZeroMatProp(*it, prop_name);
 
   // set values for all qpoints to zero
+  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
   unsigned int nqp = _mi_feproblem.getMaxQps();
-  preload_with_zero.resize(nqp);
+  if (nqp > preload_with_zero.size())
+    preload_with_zero.resize(nqp);
   for (unsigned int qp = 0; qp < nqp; ++qp)
     mooseSetToZero<T>(preload_with_zero[qp]);
 

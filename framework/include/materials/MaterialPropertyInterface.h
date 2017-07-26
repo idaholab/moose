@@ -468,8 +468,10 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
   static MaterialProperty<T> zero;
 
   // resize to accomodate maximum number of qpoints
+  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
   unsigned int nqp = _mi_feproblem.getMaxQps();
-  zero.resize(nqp);
+  if (nqp > zero.size())
+    zero.resize(nqp);
 
   // set values for all qpoints to zero
   for (unsigned int qp = 0; qp < nqp; ++qp)
