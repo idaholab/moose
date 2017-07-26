@@ -7,6 +7,7 @@
     rel_err = 5e-05
     recover = false
     allow_warnings = true
+    use_old_floor = true
   [../]
   [./test_nonlinear_eigen]
     type = 'Exodiff'
