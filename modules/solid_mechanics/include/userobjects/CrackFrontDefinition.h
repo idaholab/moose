@@ -15,6 +15,12 @@
 class CrackFrontDefinition;
 class AuxiliarySystem;
 
+// libMesh forward declarations
+namespace libMesh
+{
+class QBase;
+}
+
 template <>
 InputParameters validParams<CrackFrontDefinition>();
 void addCrackFrontDefinitionParams(InputParameters & params);
@@ -61,6 +67,13 @@ public:
   bool isNodeInRing(const unsigned int ring_index,
                     const dof_id_type connected_node_id,
                     const unsigned int node_index) const;
+
+  Real DomainIntegralQFunction(unsigned int crack_front_point_index,
+                               unsigned int ring_index,
+                               const Node * const current_node) const;
+  Real DomainIntegralTopologicalQFunction(unsigned int crack_front_point_index,
+                                          unsigned int ring_index,
+                                          const Node * const current_node) const;
 
 protected:
   enum DIRECTION_METHOD
@@ -126,8 +139,15 @@ protected:
   bool _t_stress;
   bool _q_function_rings;
   unsigned int _last_ring;
+  unsigned int _first_ring;
   std::map<std::pair<dof_id_type, unsigned int>, std::set<dof_id_type>>
       _crack_front_node_to_node_map;
+  MooseEnum _q_function_type;
+  unsigned int _nrings;
+  unsigned int _num_crack_front_points;
+  std::vector<bool> _is_point_on_intersecting_boundary;
+  std::vector<Real> _j_integral_radius_inner;
+  std::vector<Real> _j_integral_radius_outer;
 
   void getCrackFrontNodes(std::set<dof_id_type> & nodes);
   void orderCrackFrontNodes(std::set<dof_id_type> & nodes);
@@ -151,6 +171,10 @@ protected:
                                const std::set<dof_id_type> & nodes_neighbor1,
                                const std::set<dof_id_type> & nodes_neighbor2,
                                std::vector<std::vector<const Elem *>> & nodes_to_elem_map);
+  void projectToFrontAtPoint(Real & dist_to_front,
+                             Real & dist_along_tangent,
+                             unsigned int crack_front_point_index,
+                             const Node * const current_node) const;
 };
 
 #endif /* CRACKFRONTDEFINITION_H */
