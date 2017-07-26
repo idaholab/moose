@@ -221,18 +221,13 @@
     coefficient = 3.125e-14
     n_exponent = 5
     activation_energy = 0
-    relative_tolerance = 1.e-12
-    max_its = 100
-    output_iteration_info = false
     max_inelastic_increment = 0.01
-    legacy_return_mapping = true
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
@@ -357,4 +352,3 @@
     max_rows = 25
   [../]
 []
-

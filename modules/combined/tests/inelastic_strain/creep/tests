@@ -10,5 +10,6 @@
     type = 'Exodiff'
     input = 'creep_nl1_sm.i'
     exodiff = 'creep_nl1_out.e'
+    abs_zero = 7e-5
   [../]
 []

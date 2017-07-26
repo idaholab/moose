@@ -16,16 +16,16 @@
   displacements = 'disp_x disp_y'
 []
 
-[Mesh]#Comment
+[Mesh]
   file = one_elem2.e
-[] # Mesh
+[]
 
 [Variables]
   [./disp_x]
   [../]
   [./disp_y]
   [../]
-[] # Variables
+[]
 
 [AuxVariables]
   [./stress_xx]
@@ -92,13 +92,13 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-[] # AuxVariables
+[]
 
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
   [../]
-[] # Kernels
+[]
 
 [AuxKernels]
   [./stress_xx]
@@ -224,7 +224,7 @@
     property = effective_plastic_strain
     variable = eff_plastic_strain
   [../]
-[] # AuxKernels
+[]
 
 [Functions]
   [./appl_dispy]
@@ -265,7 +265,7 @@
     boundary = 1
     function = appl_dispy
   [../]
-[] # BCs
+[]
 
 [Materials]
   [./elasticity_tensor]
@@ -289,13 +289,11 @@
     hardening_constant = 0.0
     relative_tolerance = 1e-20
     absolute_tolerance = 1e-8
-    max_iterations = 50
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_rel_tol = 1e-10
@@ -308,7 +306,7 @@
   start_time = 0.0
   num_steps = 100
   end_time = 12.0
-[] # Executioner
+[]
 
 [Postprocessors]
   [./stress_xx]
@@ -408,4 +406,4 @@
     perf_log = true
     output_linear = true
   [../]
-[] # Outputs
+[]

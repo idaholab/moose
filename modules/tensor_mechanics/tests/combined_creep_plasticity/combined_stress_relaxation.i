@@ -90,7 +90,6 @@
     activation_energy = 0.0
     relative_tolerance = 1e-14
     absolute_tolerance = 1e-14
-    max_iterations = 100
   [../]
 []
 
@@ -104,7 +103,6 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp'

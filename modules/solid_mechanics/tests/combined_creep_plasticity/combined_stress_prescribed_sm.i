@@ -48,6 +48,10 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
+[GlobalParams]
+  volumetric_locking_correction = true
+[]
+
 [Variables]
   [./disp_x]
     order = FIRST
@@ -139,42 +143,35 @@
     type = PLC_LSH
     block = 0
     youngs_modulus = 2.8e7
-    poissons_ratio = .3
+    poissons_ratio = 0.3
     coefficient = 3.0e-24
     n_exponent = 4
     m_exponent = 0
     activation_energy = 0
-    relative_tolerance = 1.e-5
-    max_its = 100
+    formulation = Nonlinear3D
     hardening_constant = 1
     yield_stress = 1e30
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    output_iteration_info = false
   [../]
 []
 
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
-  petsc_options_value = '101           asm      lu'
-
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = ' lu       superlu_dist'
 
   line_search = 'none'
 
-
   l_max_its = 100
   nl_max_its = 100
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
-  l_tol = 1e-5
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-8
+  l_tol = 1e-8
   start_time = 0.0
   end_time = 32400
   dt = 1e-2

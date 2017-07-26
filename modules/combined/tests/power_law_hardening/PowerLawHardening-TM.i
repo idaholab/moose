@@ -23,12 +23,10 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
@@ -37,12 +35,10 @@
 
 
 [AuxVariables]
-
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -65,7 +61,6 @@
 
 
 [AuxKernels]
-
   [./stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -73,7 +68,6 @@
     index_i = 1
     index_j = 1
   [../]
-
   [./total_strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
@@ -85,28 +79,24 @@
 
 
 [BCs]
-
   [./y_pull_function]
     type = FunctionPresetBC
     variable = disp_y
     boundary = top
     function = top_pull
   [../]
-
   [./x_bot]
     type = PresetBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
-
   [./y_bot]
     type = PresetBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-
   [./z_bot]
     type = PresetBC
     variable = disp_z
@@ -121,20 +111,14 @@
     youngs_modulus = 1.0
     poissons_ratio = 0.3
   [../]
-
   [./strain]
     type = ComputeIncrementalSmallStrain
   [../]
-
   [./power_law_hardening]
     type = IsotropicPowerLawHardeningStressUpdate
     strength_coefficient = 0.5 #K
     strain_hardening_exponent = 0.5 #n
     output_iteration_info_on_error = true
-    relative_tolerance = 1e-10
-    absolute_tolerance = 1e-12
-    max_iterations = 50
-#    output_iteration_info = true
   [../]
 
   [./radial_return_stress]
