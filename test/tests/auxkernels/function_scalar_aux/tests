@@ -3,5 +3,7 @@
     type = 'Exodiff'
     input = 'function_scalar_aux.i'
     exodiff = 'function_scalar_aux_out.e'
+    use_old_floor = true
+    abs_zero = 1e-9
   [../]
 []
