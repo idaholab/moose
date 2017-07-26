@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'grad_component.i'
     exodiff = 'grad_component_out.e'
+    use_old_floor = true
   [../]
 []
