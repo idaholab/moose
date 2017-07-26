@@ -9,6 +9,7 @@
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_residual_transient_out.e'
+    use_old_floor = true
   [../]
 
   [./parallel_exception_residual_transient_non_zero_rank]
@@ -29,6 +30,7 @@
     input = 'parallel_exception_jacobian_transient.i'
     petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
+    use_old_floor = true
   [../]
 
   [./parallel_exception_jacobian_transient_non_zero_rank]
