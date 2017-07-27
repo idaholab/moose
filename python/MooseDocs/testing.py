@@ -18,7 +18,6 @@ import inspect
 import unittest
 import difflib
 import StringIO
-
 import bs4
 
 import MooseDocs
@@ -60,7 +59,6 @@ class LogTestCase(unittest.TestCase):
         """
         Test that an error was logged.
         """
-        print self._formatter.messages('ERROR')
         self.assertIn(msg, self._formatter.messages('ERROR')[index])
 
     def assertInLogWarning(self, msg, index=-1):
@@ -84,6 +82,10 @@ class MarkdownTestCase(LogTestCase):
         Create the markdown parser using the configuration file.
         """
         super(MarkdownTestCase, cls).setUpClass()
+
+        # Setup logging
+        cls._stream = StringIO.StringIO()
+        cls._formatter = init_logging(stream=cls._stream)
 
         # Define the local directory
         cls._path = os.path.abspath(os.path.dirname(inspect.getfile(cls)))
@@ -204,8 +206,6 @@ class MarkdownTestCase(LogTestCase):
 
         # Compare against gold
         self.assertTextFile(name)
-
-
 
 class TestLatexBase(MarkdownTestCase):
     """
