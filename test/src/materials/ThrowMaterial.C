@@ -34,6 +34,12 @@ ThrowMaterial::ThrowMaterial(const InputParameters & parameters)
 }
 
 void
+ThrowMaterial::residualSetup()
+{
+  this->comm().max(_has_thrown);
+}
+
+void
 ThrowMaterial::computeQpProperties()
 {
   // 1 + current value squared

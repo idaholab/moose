@@ -33,6 +33,9 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
+  /// Keeps _has_thrown synchronized between processors
+  virtual void residualSetup() override;
+
   /// The MaterialProperty value we are responsible for computing
   MaterialProperty<Real> & _prop_value;
 
