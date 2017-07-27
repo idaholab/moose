@@ -4,7 +4,7 @@ Page header including the "sidebar" navigation.
 
 {% for nav in navigation %}
   {% for nav_key, nav_value in nav.iteritems() %}
-    {% if nav_value is not string %}
+    {% if nav_value is iterable and nav_value is not string %}
       <ul id="dropdown-{{nav_key.replace(' ', '_').lower()}}" class="dropdown-content">
       {% for item in nav_value %}
         <li><a href="{{item.values()[0]}}">{{item.keys()[0]}}</a></li>

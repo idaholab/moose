@@ -5,6 +5,7 @@ framework:
     - 'docs/content/documentation/systems/Adaptivity/Markers/framework/BoxMarker.md'
     - 'docs/content/js/*'
     - 'docs/content/css/*'
+    - 'docs/content/media/*'
   exclude:
     - 'docs/content/documentation/systems/Functions/framework/ParsedFunction.md'
 test:

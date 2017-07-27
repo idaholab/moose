@@ -11,6 +11,10 @@ code {
   background: #f5f2f0;
 }
 
+.admonition-message pre{
+  background: #f5f2f0;
+}
+
 html, body {
   height: 100%;
 }
@@ -183,7 +187,8 @@ ul {
 }
 
 a.moose-bad-link,
-a.moose-unknown-reference{
+a.moose-unknown-reference,
+span.moose-sqa-error{
     color:red;
 }
 

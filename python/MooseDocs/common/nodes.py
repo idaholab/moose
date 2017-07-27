@@ -127,7 +127,7 @@ class FileTreeNodeBase(NodeCore):
     Base node type for the markdown file tree.
     """
     COLOR = 'YELLOW'
-    def __init__(self, name, base=None, **kwargs):
+    def __init__(self, name, base=None, display=None, **kwargs):
         super(FileTreeNodeBase, self).__init__(name, **kwargs)
         if base is None:
             if self.parent:
@@ -135,6 +135,17 @@ class FileTreeNodeBase(NodeCore):
             else:
                 base = ''
         self._base = base
+
+        self._display = display
+        if self._display is None:
+            self._display = name
+
+    @property
+    def display(self):
+        """
+        Return the display name.
+        """
+        return self._display
 
     @property
     def base(self):
@@ -222,6 +233,13 @@ class MarkdownFileIndexNode(MarkdownFileNodeBase):
     @property
     def filename(self):
         return os.path.join(self.basename, 'index.md')
+
+    @property
+    def display(self):
+        if self.name == '':
+            return 'home'
+        else:
+            return self._display
 
 class MarkdownFilePageNode(MarkdownFileNodeBase):
     """

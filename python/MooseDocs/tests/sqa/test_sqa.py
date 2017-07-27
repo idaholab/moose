@@ -60,13 +60,22 @@ class TestSQA(unittest.TestCase):
         proc = subprocess.Popen(c, cwd=os.path.join(MooseDocs.MOOSE_DIR, 'test', 'docs'),
                                 stdout=subprocess.PIPE)
         out = proc.stdout.read()
-        self.assertIn(out, 'WARNINGS: 0  ERRORS: 2\n')
+        self.assertIn(out, 'WARNINGS: 0  ERRORS: 3\n')
 
-        with open(os.path.join(self.SITE_DIR, 'sqa', 'srs', 'index.html'), 'r') as fid:
+        with open(os.path.join(self.SITE_DIR, 'sqa', 'test_srs', 'index.html'), 'r') as fid:
             html = fid.read()
         self.assertIn('Testing testing testing', html)
         self.assertIn('Missing Template Item: project_description', html)
         self.assertIn('Missing Template Item: system_scope', html)
+        self.assertIn('<div class="moose-collection-name col l4">F1.50</div>', html)
+        self.assertIn('<div class="collapsible-header moose-group-header">Transient Analysis</div>', html)
+        self.assertIn('<li id="requirement-F1.10">', html)
+
+        with open(os.path.join(self.SITE_DIR, 'sqa', 'test_rtm', 'index.html'), 'r') as fid:
+            html = fid.read()
+        self.assertIn('<div class="collapsible-header moose-group-header">Transient Analysis</div>', html)
+        self.assertIn('<a href="../test_srs/index.html">F1.10</a>', html)
+        self.assertIn('<span class="moose-sqa-error">F9.99</span>', html)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

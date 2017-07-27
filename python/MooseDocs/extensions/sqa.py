@@ -16,16 +16,21 @@
 import re
 import os
 import collections
+import logging
 
 import jinja2
 from markdown.util import etree
+from markdown.inlinepatterns import Pattern
 from markdown.preprocessors import Preprocessor
+from markdown.blockprocessors import BlockProcessor
 
 import mooseutils
 
 import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
+
+LOG = logging.getLogger(__name__)
 
 class SQAExtension(MooseMarkdownExtension):
     """
@@ -38,6 +43,8 @@ class SQAExtension(MooseMarkdownExtension):
         """
         config = MooseMarkdownExtension.defaultConfig()
         config['PROJECT'] = ['UNKNOWN PROJECT', "Project name to use throughout the template."]
+        config['repo'] = ['', "The remote repository to create hyperlinks."]
+        config['branch'] = ['master', "The branch name to consider in repository links."]
         return config
 
     def extendMarkdown(self, md, md_globals):
@@ -46,8 +53,20 @@ class SQAExtension(MooseMarkdownExtension):
         """
         md.registerExtension(self)
         config = self.getConfigs()
+
+        repo = os.path.join(config['repo'], 'blob', config['branch'])
+        database = SQAInputTagDatabase(repo)
+
         md.preprocessors.add('moose_sqa',
                              SQAPreprocessor(markdown_instance=md, **config), '_begin')
+
+        md.parser.blockprocessors.add('moose_sqa_input_tags',
+                                      SQAInputTags(markdown_instance=md, **config),
+                                      '_begin')
+
+        md.inlinePatterns.add('moose_sqa_matrix',
+                              SQAInputTagMatrix(markdown_instance=md, database=database, **config),
+                              '_begin')
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """
@@ -60,8 +79,9 @@ class SQAPreprocessor(MooseMarkdownCommon, Preprocessor):
     Preprocessor to read the template and create the complete markdown content.
     """
 
-    SQA_LOAD_RE = r'(?<!`)!SQA\s+(?P<filename>.*\.md)(?:$|\s+)(?P<settings>.*)'
-    SQA_TEMPLATE_RE = r'!SQA\s+template\s+(?P<name>\w+)(?P<settings>.*?)\n(?P<markdown>.*?)!END'
+    SQA_LOAD_RE = r'(?<!`)!SQA-load\s+(?P<filename>.*\.md)(?:$|\s+)(?P<settings>.*)'
+    SQA_TEMPLATE_RE = r'!SQA-template\s+(?P<name>\w+)(?P<settings>.*?)' \
+                      r'\n(?P<markdown>.*?)!END-template'
 
     @staticmethod
     def defaultSettings():
@@ -153,8 +173,9 @@ class SQAPreprocessor(MooseMarkdownCommon, Preprocessor):
             pre = etree.SubElement(help_div, 'pre')
             code = etree.SubElement(pre, 'code')
             code.set('class', 'language-text')
-            code.text = '!SQA item {}\nThe content placed here should be valid markdown that ' \
-                        'will replace the template description.\n!END'.format(name)
+            code.text = '!SQA-template-item {}\nThe content placed here should be valid markdown ' \
+                        'that will replace the template description.\n!END-template-item' \
+                        .format(name)
 
             title = 'Missing Template Item: {}'.format(name)
             div = MooseMarkdownCommon.createErrorElement(title=title,
@@ -192,13 +213,13 @@ class SQAPreprocessor(MooseMarkdownCommon, Preprocessor):
 
         return div, a
 
-
 class SQADatabase(object):
     """
     Helper object for creating a database of items.
     """
 
-    SQA_ITEM_RE = r'!SQA\s+item\s+(?P<name>\w+)(?P<settings>.*?)\n(?P<markdown>.*?)!END'
+    SQA_ITEM_RE = r'!SQA-template-item\s+(?P<name>\w+)(?P<settings>.*?)' \
+                  r'\n(?P<markdown>.*?)!END-template-item'
     ITEMINFO = collections.namedtuple('ItemInfo', 'name settings markdown')
 
     def __init__(self, content):
@@ -234,3 +255,167 @@ class SQADatabase(object):
         "in" operator testing for content
         """
         return name in self.__items
+
+class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
+    """
+    Adds command for defining groups of requirements, validation, etc. lists that are linked to
+    input files.
+    """
+    RE = re.compile(r'(?<!`)!SQA-(?P<key>r\w+)-list(?:$|\s+)(?P<title>.*?)' \
+                    r'\n(?P<items>.*?)(?:\Z|\n{2,})',
+                    flags=re.DOTALL)
+
+    @staticmethod
+    def defaultSettings():
+        """Settings for SQARequirement"""
+        settings = MooseMarkdownCommon.defaultSettings()
+        return settings
+
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        BlockProcessor.__init__(self, markdown_instance.parser)
+
+    def test(self, parent, block):
+        """
+        Check that block contains the defined RE.
+        """
+        return self.RE.search(block)
+
+    def run(self, parent, blocks):
+        """
+        Create the collapsible region with the listed requirements.
+        """
+        block = blocks.pop(0)
+        match = self.RE.search(block)
+        key = match.group('key')
+
+        ul = MooseDocs.common.MooseCollapsible()
+        ul.addHeader(match.group('title'))
+
+        for item in match.group('items').split('\n'):
+            tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
+            ul.addItem(tag_id, text, text, id_='{}-{}'.format(key, tag_id))
+
+        parent.append(ul.element())
+
+class SQAInputTagMatrix(MooseMarkdownCommon, Pattern):
+    """
+    Adds input tag matrix creation (e.g., Requirements Traceability Matrix)
+    """
+    RE = r'(?<!`)!SQA-(?P<key>\w+)-matrix\s+(?P<filename>.*\.md)(?:\n|\s*(?P<settings>.*))'
+
+    @staticmethod
+    def defaultSettings():
+        settings = MooseMarkdownCommon.defaultSettings()
+        return settings
+
+    def __init__(self, markdown_instance=None, database=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
+        self._database = database
+
+    def handleMatch(self, match):
+        """
+        Build the matrix.
+        """
+        #settings = self.getSettings(match.group('settings'))
+        # Determine the items to include in the matrix
+        key = match.group('key')
+
+        # Report error if the key is not located
+        if key not in self._database:
+            return self.createErrorElement("The desired key ({0}) does not exist in any input " \
+                                           "file using the expected '@{0} <tag>' syntax." \
+                                           .format(key))
+
+        # Load the desired items
+        filename = match.group('filename')
+        full_file, _ = self.markdown.getFilename(filename, check_local=True)
+        if os.path.exists(full_file):
+            items = self.getItems(full_file, key)
+        else:
+            return self.createErrorElement("Unable to locate markdown file {}.".format(filename))
+
+        # Create the table
+        ul = MooseDocs.common.MooseCollapsible()
+        for title in sorted(items.keys()):
+            ul.addHeader(title)
+            for tag_id, text in items[title]:
+                tag, desc, body = self.buildText(key, filename, tag_id, text)
+                ul.addItem(tag, desc, body)
+
+        # Return the element
+        return ul.element()
+
+    @staticmethod
+    def getItems(filename, key):
+        """
+        Extract the matrix items from a markdown file.
+        """
+        out = collections.defaultdict(list)
+        with open(filename) as fid:
+            for match in SQAInputTags.RE.finditer(fid.read()):
+                if key == match.group('key'):
+                    title = match.group('title')
+                    for item in match.group('items').split('\n'):
+                        tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
+                        out[title].append((tag_id, text))
+        return out
+
+    def buildText(self, key, filename, tag_id, text):
+        """
+        Create the content for the collapsible body
+        """
+        if tag_id not in self._database[key]:
+            LOG.error('Unknown tag: %s', tag_id)
+            tag = '<span class="moose-sqa-error">{}</span>'.format(tag_id)
+            desc = '<span class="moose-sqa-error">{}</span>'.format(text)
+            body = desc
+        else:
+            desc = '<div class="moose-sqa-list-description">{}</div>'.format(text)
+            body = desc
+            tag = '<a href="{}">{}</a>'.format(filename, tag_id)
+            for item in self._database[key][tag_id]:
+                body += '<div class="moose-sqa-list-link"><a href="{}">{}</a></div>'.format(*item)
+        return tag, desc, body
+
+class SQAInputTagDatabase(object):
+    """
+    Storage container for SQA tagged groups (e.g., requirements).
+
+    This storage is used for recall by the traceability matrix.
+    """
+    RE = re.compile(r'@(?P<key>\w+)\s+(?P<tag>.*?)(?:$|\s+)', flags=re.IGNORECASE)
+
+    def __init__(self, repo):
+        self.__repo = repo
+        self.__database = collections.defaultdict(lambda: collections.defaultdict(list))
+        for base, _, files in os.walk(MooseDocs.ROOT_DIR):
+            for filename in files:
+                full_name = os.path.join(base, filename)
+                if filename.endswith('.i'):
+                    self.search(full_name)
+
+    def __getitem__(self, value):
+        """
+        Operator[] access to the top-level of the storage dict.
+        """
+        return self.__database[value]
+
+    def __contains__(self, key):
+        """
+        Keyword "in" access to the top-level of the storage dict.
+        """
+        return key in self.__database
+
+    def search(self, filename):
+        """
+        Locates @<keyword> tags within input file.
+        """
+        with open(filename) as fid:
+            for match in self.RE.finditer(fid.read()):
+                key = match.group('key').lower()
+                tag = match.group('tag')
+                local = filename.replace(MooseDocs.ROOT_DIR, '').lstrip('/')
+                remote = '{}/{}'.format(self.__repo.rstrip('/'), local)
+                self.__database[key][tag].append((remote, local))

@@ -42,14 +42,14 @@ class MooseCollapsible(object):
         div.set('class', 'collapsible-header moose-group-header')
         div.text = header
 
-
-    def addItem(self, name, body=None):
+    def addItem(self, name, desc=None, body=None, id_='moose-collection-li'):
         """
         Add a collapsible item to the list.
         """
         self.__count += 1
 
         li = etree.SubElement(self._ul, 'li')
+        li.set('id', id_)
 
         header = etree.SubElement(li, 'div')
         header.set('class', 'collapsible-header')
@@ -64,14 +64,14 @@ class MooseCollapsible(object):
         else:
             name_el.append(name)
 
-        desc_el = etree.SubElement(row, 'div')
-        desc_el.set('class', 'moose-collection-description hide-on-med-and-down col l8')
+        if desc:
+            desc_el = etree.SubElement(row, 'div')
+            desc_el.set('class', 'moose-collection-description hide-on-med-and-down col l8')
+            desc_el.text = desc
 
         if body:
             body_el = etree.SubElement(li, 'div')
             body_el.set('class', 'collapsible-body')
-
-            desc_el.text = body
             body_el.text = body
 
     def element(self):

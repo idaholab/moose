@@ -2,14 +2,14 @@
 
 ## Introduction
 ### System Purpose
-!SQA template system_purpose default=True
+!SQA-template system_purpose default=True
 The purpose of the System Design Description (SDD) is:
 
 * Provide an as-built description of the system (software, servers, and network)
 * Ensure technical staff has a common understanding of how the system was designed; including both the base software and the configured software
 * Provide a tool for tracing requirements through system design, development, and verification.
 
-!END
+!END-template
 
 ## References
 
