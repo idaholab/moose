@@ -4,5 +4,6 @@
     input = 'grad_component.i'
     exodiff = 'grad_component_out.e'
     use_old_floor = true
+    abs_zero = 1e-09
   [../]
 []
