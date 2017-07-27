@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// STL includes
+#include <iterator>
+
 // MOOSE includes
 #include "Sampler.h"
 #include "MooseRandom.h"
@@ -38,7 +41,8 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
-    _seed(getParam<unsigned int>("seed"))
+    _seed(getParam<unsigned int>("seed")),
+    _total_rows(0)
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
@@ -87,6 +91,9 @@ Sampler::getSamples()
   mooseAssert(output.size() == _sample_names.size(),
               "The number of sample names must match the number of samples returned.");
 
+  mooseAssert(output.size() > 0,
+              "It is not acceptable to return an empty vector of sample matrices.");
+
   return output;
 }
 
@@ -114,9 +121,12 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
 }
 
 void
-Sampler::setSampleNames(std::vector<std::string> names)
+Sampler::setSampleNames(const std::vector<std::string> & names)
 {
   _sample_names = names;
+
+  // Use assert because to check the size a getSamples call is required, which you don't
+  // want to do if you don't need it.
   mooseAssert(getSamples().size() == _sample_names.size(),
               "The number of sample names must match the number of samples returned.");
 }
@@ -127,9 +137,18 @@ Sampler::getLocation(unsigned int global_index)
   if (_offsets.empty())
     reinit(getSamples());
 
-  std::vector<unsigned int>::const_iterator iter;
-  iter = std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
-  return Sampler::Location(iter - _offsets.begin(), global_index - *iter);
+  mooseAssert(_offsets.size() > 1,
+              "The getSamples method returned an empty vector, if you are seeing this you have "
+              "done something to bypass another assert in the 'getSamples' method that should "
+              "prevent this message.");
+
+  // The lower_bound method returns the first value "which does not compare less than" the value and
+  // upper_bound performs "which compares greater than." The upper_bound -1 method is used here
+  // because of the equal case; lower_bound will provide the wrong index, but the method here will
+  // provide the correct index.
+  std::vector<unsigned int>::iterator iter =
+      std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
+  return Sampler::Location(std::distance(_offsets.begin(), iter), global_index - *iter);
 }
 
 unsigned int

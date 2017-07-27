@@ -28,22 +28,27 @@ public:
   void virtual finalize() override {}
   void virtual execute() override {}
 
-protected:
-  /// Initialize storage based on this
+  /**
+   * Initialize storage based on the Sampler returned by the SamplerMultiApp.
+   * @param sampler The Sampler associated with the MultiApp that this VPP is working with.
+   *
+   * This method is called by the SamplerPostprocessorTransfer.
+   */
   void init(Sampler & _sampler);
 
-  /// Return the VectorPostprocessorValue for a given Sampler group index
+  /**
+   * Return the VectorPostprocessorValue for a given Sampler group index.
+   * @param group Index related to the index of the DenseMatrix returned by Sampler::getSamples()
+   * @return A reference to the storage location for the PP data from the sub-applications.
+   */
   VectorPostprocessorValue & getVectorPostprocessorValueByGroup(unsigned int group);
 
+protected:
   /// Storage for declared vectors
   std::vector<VectorPostprocessorValue *> _sample_vectors;
 
   /// The sampler to extract data
   Sampler * _sampler = nullptr;
-
-  /// This object is designed to work with the SamplerPostprocessorTransfer, the init and
-  /// get methods should only be called by this class.
-  friend class SamplerPostprocessorTransfer;
 };
 
 #endif

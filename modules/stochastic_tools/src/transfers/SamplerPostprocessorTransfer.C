@@ -42,8 +42,8 @@ void
 SamplerPostprocessorTransfer::initialSetup()
 {
   const ExecuteMooseObjectWarehouse<UserObject> & user_objects = _fe_problem.getUserObjects();
-  std::shared_ptr<UserObject> uo = user_objects.getActiveObject(_results_name);
-  _results = std::dynamic_pointer_cast<StochasticResults>(uo).get();
+  UserObject * uo = user_objects.getActiveObject(_results_name).get();
+  _results = dynamic_cast<StochasticResults *>(uo);
 
   if (!_results)
     mooseError("The 'results' object must be a 'StochasticResults' object.");
@@ -54,7 +54,7 @@ SamplerPostprocessorTransfer::initialSetup()
 void
 SamplerPostprocessorTransfer::execute()
 {
-  // Number of values
+  // Number of PP is equal to the number of MultiApps
   const unsigned int n = _multi_app->numGlobalApps();
 
   // Collect the PP values for this processor
@@ -78,7 +78,7 @@ SamplerPostprocessorTransfer::execute()
   for (unsigned int i = 0; i < n; i++)
   {
     Sampler::Location loc = _sampler.getLocation(i);
-    VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample);
-    vpp[loc.row] = values[i];
+    VectorPostprocessorValue & vpp = _results->getVectorPostprocessorValueByGroup(loc.sample());
+    vpp[loc.row()] = values[i];
   }
 }
