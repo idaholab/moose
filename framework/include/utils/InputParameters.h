@@ -676,6 +676,9 @@ private:
    */
   void allowCopy(bool status) { _allow_copy = status; }
 
+  /// Make sure the parameter name doesn't have any invalid characters.
+  void checkParamName(const std::string & name) const;
+
   /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
   template <typename T, typename S>
   void setParamHelper(const std::string & name, T & l_value, const S & r_value);
@@ -763,6 +766,7 @@ template <typename T>
 T &
 InputParameters::set(const std::string & name, bool quiet_mode)
 {
+  checkParamName(name);
   checkConsistentType<T>(name);
 
   if (!this->have_parameter<T>(name))
@@ -948,6 +952,7 @@ template <typename T>
 void
 InputParameters::addRequiredParam(const std::string & name, const std::string & doc_string)
 {
+  checkParamName(name);
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
@@ -969,6 +974,7 @@ template <typename T, typename S>
 void
 InputParameters::addParam(const std::string & name, const S & value, const std::string & doc_string)
 {
+  checkParamName(name);
   checkConsistentType<T>(name);
 
   T & l_value = InputParameters::set<T>(name);
@@ -987,6 +993,7 @@ template <typename T>
 void
 InputParameters::addParam(const std::string & name, const std::string & doc_string)
 {
+  checkParamName(name);
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
@@ -1066,6 +1073,7 @@ template <typename T>
 void
 InputParameters::addPrivateParam(const std::string & name)
 {
+  checkParamName(name);
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
@@ -1076,6 +1084,7 @@ template <typename T>
 void
 InputParameters::addPrivateParam(const std::string & name, const T & value)
 {
+  checkParamName(name);
   checkConsistentType<T>(name);
 
   InputParameters::set<T>(name) = value;

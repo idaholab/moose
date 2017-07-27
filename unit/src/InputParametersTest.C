@@ -132,3 +132,28 @@ TEST(InputParameters, checkSetDocStringError)
         << "failed with unexpected error: " << msg;
   }
 }
+
+void
+testBadParamName(const std::string & name)
+{
+  try
+  {
+    InputParameters params = emptyInputParameters();
+    params.addParam<bool>(name, "Doc");
+    FAIL() << "failed to error on attempt to set invalid parameter name";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_TRUE(msg.find("Invalid parameter name") != std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
+
+/// Just make sure we don't allow invalid parameter names
+TEST(InputParameters, checkParamName)
+{
+  testBadParamName("p 0");
+  testBadParamName("p-0");
+  testBadParamName("p!0");
+}
