@@ -32,6 +32,7 @@ commands add associated settings defined in the extension.
 | [templates](extensions/templates.md) | Allows for converted markdown to be applied to arbitrary templates. |
 | [app_syntax](extensions/app_syntax.md) | Adds markdown syntax for extracting content from MOOSE source code. |
 | [sqa](extensions/sqa.md) | Adds tools for creating software quality documentation using MOOSE templates. |
+| [gchart](extensions/gchart.md) | Adds [Google chart](https://developers.google.com/chart/) capability to MOOSE markdown. |
 
 ## Python-Markdown Extensions
 

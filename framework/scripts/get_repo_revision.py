@@ -7,15 +7,19 @@ import subprocess, os, sys, re
 
 
 def shellCommand( command, cwd=None ):
-    # The following line works with Python 2.7+
-    # return subprocess.check_output( command, shell=True, stderr=subprocess.STDOUT, cwd=cwd )
-    p = subprocess.Popen( command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd )
-    p.wait()
-    retcode = p.returncode
-    if retcode != 0:
-        raise Exception()
+    """
+    Run a command in the shell.
+    We can ignore anything on stderr as that can potentially mess up the output
+    of an otherwise successful command.
+    """
+    with open(os.devnull, 'w') as devnull:
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=devnull, cwd=cwd)
+        p.wait()
+        retcode = p.returncode
+        if retcode != 0:
+            raise Exception()
 
-    return p.communicate()[0]
+        return p.communicate()[0]
 
 
 def gitSHA1( cwd=None ):

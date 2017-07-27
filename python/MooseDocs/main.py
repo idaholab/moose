@@ -31,7 +31,6 @@ LOG = logging.getLogger(__name__)
 class MooseDocsFormatter(logging.Formatter):
     """
     A formatter that is aware of the class hierarchy of the MooseDocs library.
-
     Call the init_logging function to initialize the use of this custom formatter.
     """
     COLOR = {'DEBUG':'CYAN',
@@ -96,6 +95,7 @@ def init_logging(verbose=False, stream=None):
     log.setLevel(level)
     log.addHandler(logging.NullHandler())
     return formatter
+
 
 def purge(exts):
     """
