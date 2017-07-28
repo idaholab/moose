@@ -13,7 +13,7 @@ TIME STEPS
 GLOBAL VARIABLES 
 	creep_strain_xx  
 	strain_xx        
-	stress_xx floor 1e-5
+	stress_xx floor 5e-5
 
 NODAL VARIABLES 
 	disp_x  
@@ -21,7 +21,7 @@ NODAL VARIABLES
 	disp_z  
 
 ELEMENT VARIABLES 
-	stress_xx floor 1e-5
+	stress_xx floor 5e-5
 	strain_xx 
 	creep_strain_xx 
 

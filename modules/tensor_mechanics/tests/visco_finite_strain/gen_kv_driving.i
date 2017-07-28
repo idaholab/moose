@@ -98,7 +98,7 @@
   [./eigen]
     type = ComputeEigenstrain
     eigenstrain_name = eigen_true
-    eigen_base = '1e-3 1e-3 1e-3 0 0 0'
+    eigen_base = '1e-4 1e-4 1e-4 0 0 0'
   [../]
   [./kelvin_voigt]
     type = GeneralizedKelvinVoigtModel
@@ -162,12 +162,12 @@
   solve_type = 'PJFNK'
 
   l_max_its  = 50
-  l_tol      = 1e-8
+  l_tol      = 1e-6
   nl_max_its = 20
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-6
 
-  dtmin = 0.01
+  dtmin = 0.0001
   end_time = 100
   [./TimeStepper]
     type = LogConstantDT

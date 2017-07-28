@@ -163,7 +163,7 @@
   l_max_its  = 50
   l_tol      = 1e-8
   nl_max_its = 20
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
 
   dtmin = 0.01
