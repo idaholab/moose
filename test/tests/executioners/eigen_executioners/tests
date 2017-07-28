@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'ipm.i'
     exodiff = 'ipm.e'
-    abs_zero = 2e-09
+    abs_zero = 5e-09
     rel_err = 5e-05
     recover = false
     allow_warnings = true
