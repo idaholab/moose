@@ -47,14 +47,6 @@ validParams<GapConductance>()
                         "then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
 
-  // Deprecated parameter
-  MooseEnum coord_types("default XYZ");
-  params.addDeprecatedParam<MooseEnum>(
-      "coord_type",
-      coord_types,
-      "Gap calculation type (default or XYZ).",
-      "The functionality of this parameter is replaced by 'gap_geometry_type'.");
-
   params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
 
   params.addParam<bool>("use_displaced_mesh",
@@ -169,6 +161,12 @@ GapConductance::GapConductance(const InputParameters & parameters)
 }
 
 void
+GapConductance::initialSetup()
+{
+  setGapGeometryParameters(_pars, _coord_sys, _gap_geometry_type, _p1, _p2);
+}
+
+void
 GapConductance::setGapGeometryParameters(const InputParameters & params,
                                          const Moose::CoordinateSystemType coord_sys,
                                          GAP_GEOMETRY & gap_geometry_type,
@@ -179,23 +177,6 @@ GapConductance::setGapGeometryParameters(const InputParameters & params,
   {
     gap_geometry_type =
         GapConductance::GAP_GEOMETRY(int(params.get<MooseEnum>("gap_geometry_type")));
-    if (params.isParamSetByUser("coord_type"))
-      ::mooseError("Deprecated parameter 'coord_type' cannot be used together with "
-                   "'gap_geometry_type' in GapConductance");
-  }
-  else if (params.isParamSetByUser("coord_type"))
-  {
-    if (params.get<MooseEnum>("coord_type") == "XYZ")
-      gap_geometry_type = GapConductance::PLATE;
-    else
-    {
-      if (coord_sys == Moose::COORD_XYZ)
-        gap_geometry_type = GapConductance::PLATE;
-      else if (coord_sys == Moose::COORD_RZ)
-        gap_geometry_type = GapConductance::CYLINDER;
-      else if (coord_sys == Moose::COORD_RSPHERICAL)
-        gap_geometry_type = GapConductance::SPHERE;
-    }
   }
   else
   {
@@ -255,18 +236,6 @@ GapConductance::setGapGeometryParameters(const InputParameters & params,
       p1 = Point(0, 0, 0);
     }
   }
-}
-
-void
-GapConductance::computeProperties()
-{
-  if (!_gap_geometry_params_set)
-  {
-    _gap_geometry_params_set = true;
-    setGapGeometryParameters(_pars, _coord_sys, _gap_geometry_type, _p1, _p2);
-  }
-
-  Material::computeProperties();
 }
 
 void
