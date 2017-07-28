@@ -24,7 +24,7 @@ class GapHeatTransfer : public IntegratedBC
 public:
   GapHeatTransfer(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
+  virtual void initialSetup() override;
 
 protected:
   virtual Real computeQpResidual() override;
