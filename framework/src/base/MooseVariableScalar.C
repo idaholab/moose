@@ -154,6 +154,15 @@ MooseVariableScalar::setValues(Number value)
 void
 MooseVariableScalar::insert(NumericVector<Number> & soln)
 {
-  if (_dof_indices.size() > 0)
+  // We may have redundantly computed this value on many different
+  // processors, but only the processor which actually owns it should
+  // be saving it to the solution vector, to avoid O(N_scalar_vars)
+  // unnecessary communication.
+
+  const dof_id_type first_dof = _dof_map.first_dof();
+  const dof_id_type end_dof = _dof_map.end_dof();
+  if (_dof_indices.size() > 0 &&
+      first_dof <= _dof_indices[0] &&
+      _dof_indices[0] < end_dof)
     soln.insert(&_u[0], _dof_indices);
 }
