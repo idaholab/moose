@@ -9,6 +9,7 @@
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_residual_transient_out.e'
+    use_old_floor = true
   [../]
 
   [./parallel_exception_residual_transient_non_zero_rank]
@@ -17,6 +18,7 @@
     petsc_version = '>=3.6.0'
     cli_args = 'Kernels/exception/rank=1'
     exodiff = 'parallel_exception_residual_transient_out.e'
+    use_old_floor = true
     prereq = 'parallel_exception_residual_transient'
     min_parallel = 2
   [../]
@@ -29,6 +31,7 @@
     input = 'parallel_exception_jacobian_transient.i'
     petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
+    use_old_floor = true
   [../]
 
   [./parallel_exception_jacobian_transient_non_zero_rank]
@@ -37,6 +40,7 @@
     petsc_version = '>=3.6.0'
     cli_args = 'Kernels/exception/rank=1'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
+    use_old_floor = true
     prereq = 'parallel_exception_jacobian_transient'
     min_parallel = 2
   [../]
