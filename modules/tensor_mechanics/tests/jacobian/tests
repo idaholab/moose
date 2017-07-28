@@ -411,4 +411,53 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
   [../]
+
+  [./mc_update1]
+    type = 'PetscJacobianTester'
+    input = 'mc_update1.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update2]
+    type = 'PetscJacobianTester'
+    input = 'mc_update2.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update3]
+    type = 'PetscJacobianTester'
+    input = 'mc_update3.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+  [./mc_update4]
+    type = 'PetscJacobianTester'
+    input = 'mc_update4.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+  [./mc_update5]
+    type = 'PetscJacobianTester'
+    input = 'mc_update5.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update6]
+    type = 'PetscJacobianTester'
+    input = 'mc_update5.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update7]
+    type = 'PetscJacobianTester'
+    input = 'mc_update7.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update8]
+    type = 'PetscJacobianTester'
+    input = 'mc_update8.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
 []
