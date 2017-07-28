@@ -10,8 +10,8 @@
     type = ImageDiff
     command = line_sample.py
     imagediff = 'line_sample.png'
-    expect_out = '0.048\d*\s0.400' # Test the the sampled values are present
-    allowed_darwin = 0.92
+    expect_out = '0.049\d*\s0.400' # Test the the sampled values are present
+    allowed_linux = 0.92
   [../]
 
   [./line_sample_elem]
