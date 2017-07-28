@@ -476,7 +476,7 @@ protected:
 
   /**
    * Sets the derivatives of internal parameters, based on the trial values of
-   * stress_params, their current values, and the old values of the
+   * stress_params, their current values, and the current values of the
    * internal parameters.
    * Derived classes must override this.
    * @param trial_stress_params[in] The trial stress parameters
