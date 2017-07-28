@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "Conversion.h"
 #include "AddVariableAction.h"
+#include "GapConductance.h"
 
 template <>
 InputParameters
@@ -45,6 +46,7 @@ validParams<ThermalContactBCsAction>()
       "save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
   params.addParam<bool>(
       "quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
+  params += GapConductance::actionParameters();
 
   return params;
 }

@@ -140,16 +140,10 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
 }
 
 void
-GapHeatTransfer::computeResidual()
+GapHeatTransfer::initialSetup()
 {
-  if (!_gap_geometry_params_set)
-  {
-    _gap_geometry_params_set = true;
-    GapConductance::setGapGeometryParameters(
-        _pars, _assembly.coordSystem(), _gap_geometry_type, _p1, _p2);
-  }
-
-  IntegratedBC::computeResidual();
+  GapConductance::setGapGeometryParameters(
+      _pars, _assembly.coordSystem(), _gap_geometry_type, _p1, _p2);
 }
 
 Real

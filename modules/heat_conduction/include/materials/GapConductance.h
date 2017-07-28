@@ -49,7 +49,7 @@ public:
                               Real & r2,
                               Real & radius);
 
-  virtual void computeProperties() override;
+  virtual void initialSetup() override;
 
 protected:
   virtual void computeQpProperties() override;
