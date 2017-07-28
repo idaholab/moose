@@ -43,6 +43,7 @@
     type = 'Exodiff'
     input = 'orthogonal_pbc_on_square.i'
     exodiff = 'orthogonal_pbc_on_square_out.e'
+    use_old_floor = true
     group = 'periodic'
   [../]
 
