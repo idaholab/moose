@@ -16,10 +16,10 @@
   block = 1
 []
 
-[Mesh]#Comment
+[Mesh]
   file = one_elem2.e
   displacements = 'disp_x disp_y'
-[] # Mesh
+[]
 
 [Variables]
   [./disp_x]
@@ -29,7 +29,7 @@
   [./temp]
     initial_condition = 600.0
   [../]
-[] # Variables
+[]
 
 [AuxVariables]
   [./stress_xx]
@@ -96,7 +96,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -212,7 +212,7 @@
     property = effective_creep_strain
     variable = eff_creep_strain
   [../]
-[] # AuxKernels
+[]
 
 [Functions]
   [./appl_dispy]
@@ -259,7 +259,7 @@
     boundary = '1 2'
     value = 600.0
   [../]
-[] # BCs
+[]
 
 [Materials]
   [./stiff]
@@ -278,8 +278,6 @@
     n_exponent = 5.0
     m_exponent = 0.0
     activation_energy = 0.0
-    max_its = 100
-    legacy_return_mapping = true
   [../]
 
   [./thermal]
@@ -294,11 +292,10 @@
     block = 1
     density = 1.0
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_rel_tol = 1e-10
@@ -311,7 +308,7 @@
   start_time = 0.0
   num_steps = 100
   end_time = 2.0
-[] # Executioner
+[]
 
 [Postprocessors]
   [./stress_xx]
@@ -405,11 +402,10 @@
 
 [Outputs]
   exodus = true
-  csv = true
   file_base=creep_nl1_out
   [./console]
     type = Console
     perf_log = true
     output_linear = true
   [../]
-[] # Outputs
+[]

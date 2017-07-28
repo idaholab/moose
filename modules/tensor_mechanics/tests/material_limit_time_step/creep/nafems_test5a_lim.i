@@ -233,8 +233,6 @@
     n_exponent = 5.0
     m_exponent = 0.0
     activation_energy = 0.0
-    max_iterations = 100
-    relative_tolerance = 1e-12
     max_inelastic_increment = 0.01
   [../]
 []
@@ -242,11 +240,10 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu     superlu_dist'
+  petsc_options_value = ' lu       superlu_dist'
 
   line_search = 'none'
 
@@ -269,7 +266,6 @@
     cutback_factor = 0.5
     postprocessor_dtlim = matl_ts_min
   [../]
-
 []
 
 [Postprocessors]
@@ -367,4 +363,3 @@
     max_rows = 25
   [../]
 []
-

@@ -1,5 +1,5 @@
 #RadialReturnStressUpdate
-!syntax description /Materials/RadialReturnStressUpdate
+Base class which calculates the effective inelastic strain increment required to return the isotropic stress state to a J2 yield surface.  This class is intended to be a parent class for classes with specific constitutive models.
 
 
 ###Algorithm References
@@ -59,9 +59,6 @@ Additionally, new radial return methods must also overwrite a single method from
   - **resetQpProperties**: Set the material property used in the iteration, usually $ \Delta p $, to zero at the start the iteration.  This method is necessary to avoid incorrect material property values.
 
 More details on how to write the equivalent yield surface equation for a creep model are given in Dunne and Petrinic.
-
-
-!syntax children /Materials/RadialReturnStressUpdate
 
 ## References
 \bibliographystyle{unsrt}

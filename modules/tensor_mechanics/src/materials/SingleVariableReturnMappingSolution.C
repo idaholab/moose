@@ -18,6 +18,10 @@ validParams<SingleVariableReturnMappingSolution>()
 
   // Newton iteration control parameters
   params.addParam<unsigned int>("max_its", 300, "Maximum number of Newton iterations");
+  params.addParam<unsigned int>(
+      "maximum_iterations",
+      300,
+      "Maximum number of Newton iterations with old tensor mechanics parameter");
   params.addParam<bool>(
       "output_iteration_info", false, "Set true to output Newton iteration information");
   params.addDeprecatedParam<bool>(
@@ -42,13 +46,15 @@ validParams<SingleVariableReturnMappingSolution>()
 SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     const InputParameters & parameters)
   : _legacy_return_mapping(false),
-    _max_its(parameters.get<unsigned int>("max_its")),
+    _check_range(false),
+    _max_its(parameters.isParamSetByUser("max_iterations")
+                 ? parameters.get<unsigned int>("max_iterations")
+                 : parameters.get<unsigned int>("max_its")),
     _output_iteration_info(parameters.get<bool>("output_iteration_info")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _line_search(true),
-    _bracket_solution(true),
-    _check_range(false)
+    _bracket_solution(true)
 {
   if (parameters.get<bool>("legacy_return_mapping") == true)
   {
@@ -346,8 +352,9 @@ SingleVariableReturnMappingSolution::outputIterInfo(std::stringstream * iter_out
 {
   if (iter_output)
   {
-    *iter_output << " it=" << it << " trl_strs=" << effective_trial_stress << " scalar=" << scalar
-                 << " residual=" << residual << " ref_res=" << reference_residual
+    *iter_output << " iteration=" << it << " trial_stress=" << effective_trial_stress
+                 << " scalar=" << scalar << " residual=" << residual
+                 << " ref_res=" << reference_residual
                  << " rel_res=" << std::abs(residual) / reference_residual
                  << " rel_tol=" << _relative_tolerance << " abs_res=" << std::abs(residual)
                  << " abs_tol=" << _absolute_tolerance << std::endl;

@@ -63,14 +63,12 @@
     boundary = 'left right'
     value = 0.0
   [../]
-
   [./y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-
   [./z_sides]
     type = DirichletBC
     variable = disp_z
@@ -88,10 +86,7 @@
   [./isotropic_plasticity]
     type = IsotropicPlasticityStressUpdate
     yield_stress = 25.
-    hardening_constant = 1000.
-    relative_tolerance = 1e-10
-    absolute_tolerance = 1e-12
-    max_iterations = 50
+    hardening_constant = 1000.0
   [../]
   [./radial_return_stress]
     type = ComputeMultipleInelasticStress

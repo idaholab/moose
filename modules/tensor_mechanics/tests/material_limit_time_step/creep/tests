@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'nafems_test5a_lim.i'
     exodiff = 'nafems_test5a_lim_out.e'
+    rel_err = 1e-5
     abs_zero = 1e-8
     superlu = true
   [../]
