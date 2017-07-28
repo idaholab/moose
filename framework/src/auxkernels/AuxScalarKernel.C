@@ -82,8 +82,7 @@ AuxScalarKernel::compute()
   // However, in rare cases not all processors will have access to a
   // particular scalar variable, in which case we skip computation
   // there.
-  if (_var.dofIndices().empty() ||
-      !_var.dofMap().all_semilocal_indices(_var.dofIndices()))
+  if (_var.dofIndices().empty() || !_var.dofMap().all_semilocal_indices(_var.dofIndices()))
     return;
 
   for (_i = 0; _i < _var.order(); ++_i)

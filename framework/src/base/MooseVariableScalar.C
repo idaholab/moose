@@ -161,8 +161,6 @@ MooseVariableScalar::insert(NumericVector<Number> & soln)
 
   const dof_id_type first_dof = _dof_map.first_dof();
   const dof_id_type end_dof = _dof_map.end_dof();
-  if (_dof_indices.size() > 0 &&
-      first_dof <= _dof_indices[0] &&
-      _dof_indices[0] < end_dof)
+  if (_dof_indices.size() > 0 && first_dof <= _dof_indices[0] && _dof_indices[0] < end_dof)
     soln.insert(&_u[0], _dof_indices);
 }
