@@ -18,6 +18,13 @@
 
 using namespace libMesh;
 
+struct CutPoint
+{
+  int id;
+  std::vector<unsigned int> neighbor;
+  Real coord[3];
+};
+
 struct CutEdge
 {
   unsigned int id1;
