@@ -3,6 +3,9 @@
     type = 'Exodiff'
     input = '1d_dg_block_restrict.i'
     exodiff = '1d_dg_block_restrict_out.e'
+    # The linear systems from this test foil many PETSc
+    # preconditioners if they're partitioned too finely
+    max_parallel = 12
   [../]
   [./2D_test]
     type = 'Exodiff'
