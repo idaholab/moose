@@ -13,6 +13,8 @@
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/quadrature.h"
 
 template <>
 InputParameters
@@ -66,9 +68,19 @@ addCrackFrontDefinitionParams(InputParameters & params)
   params.addParam<bool>("t_stress", false, "Calculate T-stress");
   params.addParam<bool>("q_function_rings", false, "Generate rings of nodes for q-function");
   params.addParam<unsigned int>("last_ring", "The number of rings of nodes to generate");
+  params.addParam<unsigned int>("first_ring", "The number of rings of nodes to generate");
   params.addParam<VariableName>("disp_x", "Variable containing the x displacement");
   params.addParam<VariableName>("disp_y", "Variable containing the y displacement");
   params.addParam<VariableName>("disp_z", "Variable containing the z displacement");
+  params.addParam<std::vector<Real>>("j_integral_radius_inner",
+                                     "Radius for J-Integral calculation");
+  params.addParam<std::vector<Real>>("j_integral_radius_outer",
+                                     "Radius for J-Integral calculation");
+  MooseEnum q_function_type("Geometry Topology", "Geometry");
+  params.addParam<MooseEnum>("q_function_type",
+                             q_function_type,
+                             "The method used to define the integration domain. Options are: " +
+                                 q_function_type.getRawNames());
 }
 
 const Real CrackFrontDefinition::_tol = 1e-10;
@@ -85,7 +97,8 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane")
                                         : std::numeric_limits<unsigned int>::max()),
     _t_stress(getParam<bool>("t_stress")),
-    _q_function_rings(getParam<bool>("q_function_rings"))
+    _q_function_rings(getParam<bool>("q_function_rings")),
+    _q_function_type(getParam<MooseEnum>("q_function_type"))
 {
   if (isParamValid("crack_front_points"))
   {
@@ -175,6 +188,12 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
       mooseError("The max number of rings of nodes to generate must be provided if "
                  "q_function_rings = true");
     _last_ring = getParam<unsigned int>("last_ring");
+    _first_ring = getParam<unsigned int>("first_ring");
+  }
+  else
+  {
+    _j_integral_radius_inner = getParam<std::vector<Real>>("j_integral_radius_inner");
+    _j_integral_radius_outer = getParam<std::vector<Real>>("j_integral_radius_outer");
   }
 }
 
@@ -215,6 +234,19 @@ CrackFrontDefinition::initialSetup()
     unsigned int num_crack_front_nodes = _ordered_crack_front_nodes.size();
     for (unsigned int i = 0; i < num_crack_front_nodes; ++i)
       _strain_along_front.push_back(-std::numeric_limits<Real>::max());
+  }
+
+  unsigned int num_crack_front_points = getNumCrackFrontPoints();
+  if (_q_function_type == "GEOMETRY")
+  {
+    if (!_treat_as_2d)
+      if (num_crack_front_points < 1)
+        mooseError("num_crack_front_points is not > 0");
+    for (unsigned int i = 0; i < num_crack_front_points; ++i)
+    {
+      bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
+      _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
+    }
   }
 }
 
@@ -1613,4 +1645,89 @@ CrackFrontDefinition::isNodeInRing(const unsigned int ring_index,
     is_node_in_ring = true;
 
   return is_node_in_ring;
+}
+
+Real
+CrackFrontDefinition::DomainIntegralQFunction(unsigned int crack_front_point_index,
+                                              unsigned int ring_index,
+                                              const Node * const current_node) const
+{
+  Real dist_to_crack_front;
+  Real dist_along_tangent;
+  projectToFrontAtPoint(
+      dist_to_crack_front, dist_along_tangent, crack_front_point_index, current_node);
+
+  Real q = 1.0;
+  if (dist_to_crack_front > _j_integral_radius_inner[ring_index] &&
+      dist_to_crack_front < _j_integral_radius_outer[ring_index])
+    q = (_j_integral_radius_outer[ring_index] - dist_to_crack_front) /
+        (_j_integral_radius_outer[ring_index] - _j_integral_radius_inner[ring_index]);
+  else if (dist_to_crack_front >= _j_integral_radius_outer[ring_index])
+    q = 0.0;
+
+  if (q > 0.0)
+  {
+    Real tangent_multiplier = 1.0;
+    if (!_treat_as_2d)
+    {
+      const Real forward_segment_length =
+          getCrackFrontForwardSegmentLength(crack_front_point_index);
+      const Real backward_segment_length =
+          getCrackFrontBackwardSegmentLength(crack_front_point_index);
+
+      if (dist_along_tangent >= 0.0)
+      {
+        if (forward_segment_length > 0.0)
+          tangent_multiplier = 1.0 - dist_along_tangent / forward_segment_length;
+      }
+      else
+      {
+        if (backward_segment_length > 0.0)
+          tangent_multiplier = 1.0 + dist_along_tangent / backward_segment_length;
+      }
+    }
+
+    tangent_multiplier = std::max(tangent_multiplier, 0.0);
+    tangent_multiplier = std::min(tangent_multiplier, 1.0);
+
+    // Set to zero if a node is on a designated free surface and its crack front node is not.
+    if (isNodeOnIntersectingBoundary(current_node) &&
+        !_is_point_on_intersecting_boundary[crack_front_point_index])
+      tangent_multiplier = 0.0;
+
+    q *= tangent_multiplier;
+  }
+
+  return q;
+}
+
+Real
+CrackFrontDefinition::DomainIntegralTopologicalQFunction(unsigned int crack_front_point_index,
+                                                         unsigned int ring_index,
+                                                         const Node * const current_node) const
+{
+  Real q = 0;
+  bool is_node_in_ring = isNodeInRing(ring_index, current_node->id(), crack_front_point_index);
+  if (is_node_in_ring)
+    q = 1;
+
+  return q;
+}
+
+void
+CrackFrontDefinition::projectToFrontAtPoint(Real & dist_to_front,
+                                            Real & dist_along_tangent,
+                                            unsigned int crack_front_point_index,
+                                            const Node * const current_node) const
+{
+  const Point * crack_front_point = getCrackFrontPoint(crack_front_point_index);
+
+  Point p = *current_node;
+  const RealVectorValue & crack_front_tangent = getCrackFrontTangent(crack_front_point_index);
+
+  RealVectorValue crack_node_to_current_node = p - *crack_front_point;
+  dist_along_tangent = crack_node_to_current_node * crack_front_tangent;
+  RealVectorValue projection_point = *crack_front_point + dist_along_tangent * crack_front_tangent;
+  RealVectorValue axis_to_current_node = p - projection_point;
+  dist_to_front = axis_to_current_node.norm();
 }
