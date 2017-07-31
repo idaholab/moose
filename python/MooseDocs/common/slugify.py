@@ -13,15 +13,34 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
-from MooseCollapsible import MooseCollapsible
-from MarkdownTable import MarkdownTable
-from MooseLinkDatabase import MooseLinkDatabase
-from MooseClassDatabase import MooseClassDatabase
-from Builder import Builder
-from moose_docs_file_tree import moose_docs_file_tree
-from moose_docs_import import moose_docs_import
-from moose_docs_app_syntax import moose_docs_app_syntax
-from slugify import slugify
+import re
+import logging
+LOG = logging.getLogger(__name__)
 
-EXTENSIONS = ('.md', '.png', '.bmp', '.jpeg', '.svg', '.gif', '.webm', '.ogg', '.mp4', '.js',
-              '.css', '.bib')
+def slugify(text, *args):
+    """
+    A utility for converting text into acceptable filename.
+
+    Spaces are converted to underscore.
+    :/\.,[]{}()!"'*?<>| produce an error, unless a conversion pair is supplied.
+
+    Returns the a tuple of the replace string and a flag, if True the returned string is valid and
+    does not contain invalid characters.
+    """
+
+    # Build replacement map
+    conv = {' ':'_'}
+    for key, value in args:
+        conv[key] = value
+
+    # Loop through all matches and replace
+    valid = True
+    regex = re.compile(r'(?P<char>[\s:\/\\\.\,\[\]\{\}\(\)\!\"\'\*\?\<\>\|])')
+    for match in regex.finditer(text):
+        char = match.group('char')
+        if char in conv:
+            text = text.replace(char, conv[char])
+        else:
+            valid = False
+
+    return text, valid
