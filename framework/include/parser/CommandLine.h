@@ -119,6 +119,11 @@ public:
    */
   void resetPrefix();
 
+  /**
+   * Clears the prefix for the CommandLine object.
+   */
+  void clearPrefix();
+
   // Dump the contents of the GetPot object
   void print(const char * prefix, std::ostream & out_stream, unsigned int skip_count);
 
