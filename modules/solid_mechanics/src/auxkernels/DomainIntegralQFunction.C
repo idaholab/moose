@@ -63,7 +63,6 @@ DomainIntegralQFunction::initialSetup()
 Real
 DomainIntegralQFunction::computeValue()
 {
-
   Real dist_to_crack_front;
   Real dist_along_tangent;
   projectToFrontAtPoint(dist_to_crack_front, dist_along_tangent);

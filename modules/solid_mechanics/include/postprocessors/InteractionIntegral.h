@@ -31,9 +31,7 @@ public:
 protected:
   virtual void initialSetup();
   virtual Real computeQpIntegral();
-  const VariableValue & _scalar_q;
-  /// The gradient of the scalar q field
-  const VariableGradient & _grad_of_scalar_q;
+  virtual Real computeIntegral();
   const CrackFrontDefinition * const _crack_front_definition;
   bool _has_crack_front_point_index;
   const unsigned int _crack_front_point_index;
@@ -54,6 +52,12 @@ protected:
   bool _has_symmetry_plane;
   bool _t_stress;
   Real _poissons_ratio;
+  unsigned int _ring_index;
+  unsigned int _ring_first;
+  MooseEnum _q_function_type;
+  std::vector<Real> _q_curr_elem;
+  const std::vector<std::vector<Real>> * _phi_curr_elem;
+  const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
 };
 
 #endif // INTERACTIONINTEGRAL_H

@@ -8,13 +8,14 @@
 //
 #include "InteractionIntegral.h"
 #include "MooseMesh.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/quadrature.h"
 
 template <>
 InputParameters
 validParams<InteractionIntegral>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addCoupledVar("q", "The q function, aux variable");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -35,13 +36,18 @@ validParams<InteractionIntegral>()
   params.addParam<bool>("t_stress", false, "Calculate T-stress");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.set<bool>("use_displaced_mesh") = false;
+  params.addParam<unsigned int>("ring_index", "Ring ID");
+  params.addParam<unsigned int>("ring_first", "First Ring ID");
+  MooseEnum q_function_type("Geometry Topology", "Geometry");
+  params.addParam<MooseEnum>("q_function_type",
+                             q_function_type,
+                             "The method used to define the integration domain. Options are: " +
+                                 q_function_type.getRawNames());
   return params;
 }
 
 InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
-    _scalar_q(coupledValue("q")),
-    _grad_of_scalar_q(coupledGradient("q")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _has_crack_front_point_index(isParamValid("crack_front_point_index")),
     _crack_front_point_index(
@@ -65,30 +71,22 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _t_stress(getParam<bool>("t_stress")),
-    _poissons_ratio(getParam<Real>("poissons_ratio"))
+    _poissons_ratio(getParam<Real>("poissons_ratio")),
+    _ring_index(getParam<unsigned int>("ring_index")),
+    _q_function_type(getParam<MooseEnum>("q_function_type"))
 {
   if (_has_temp && !_current_instantaneous_thermal_expansion_coef)
     mooseError("To include thermal strain term in interaction integral, must both couple "
                "temperature in DomainIntegral block and compute thermal expansion property in "
                "material model using compute_InteractionIntegral = true.");
+  if (_q_function_type == "TOPOLOGY")
+    _ring_first = getParam<unsigned int>("ring_first");
 }
 
 void
 InteractionIntegral::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
-
-  if (_treat_as_2d)
-  {
-    if (_has_crack_front_point_index)
-      mooseWarning(
-          "crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
-  }
-  else
-  {
-    if (!_has_crack_front_point_index)
-      mooseError("crack_front_point_index must be specified in qFunctionJIntegral3D");
-  }
 }
 
 Real
@@ -107,8 +105,19 @@ InteractionIntegral::getValue()
 Real
 InteractionIntegral::computeQpIntegral()
 {
+  Real scalar_q = 0.0;
+  RealVectorValue grad_q(0.0, 0.0, 0.0);
 
-  RealVectorValue grad_q = _grad_of_scalar_q[_qp];
+  const std::vector<std::vector<Real>> & phi_curr_elem = *_phi_curr_elem;
+  const std::vector<std::vector<RealGradient>> & dphi_curr_elem = *_dphi_curr_elem;
+
+  for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+  {
+    scalar_q += phi_curr_elem[i][_qp] * _q_curr_elem[i];
+
+    for (unsigned int j = 0; j < _current_elem->dim(); ++j)
+      grad_q(j) += dphi_curr_elem[i][_qp](j) * _q_curr_elem[i];
+  }
 
   // In the crack front coordinate system, the crack direction is (1,0,0)
   RealVectorValue crack_direction(0.0);
@@ -190,8 +199,8 @@ InteractionIntegral::computeQpIntegral()
   {
     Real aux_stress_trace =
         _aux_stress[_qp](0, 0) + _aux_stress[_qp](1, 1) + _aux_stress[_qp](2, 2);
-    term4 = _scalar_q[_qp] * aux_stress_trace *
-            (*_current_instantaneous_thermal_expansion_coef)[_qp] * grad_temp_cf(0);
+    term4 = scalar_q * aux_stress_trace * (*_current_instantaneous_thermal_expansion_coef)[_qp] *
+            grad_temp_cf(0);
   }
 
   Real q_avg_seg = 1.0;
@@ -209,4 +218,43 @@ InteractionIntegral::computeQpIntegral()
     eq *= 2.0;
 
   return eq / q_avg_seg;
+}
+
+Real
+InteractionIntegral::computeIntegral()
+{
+  Real sum = 0;
+
+  // calculate phi and dphi for this element
+  FEType fe_type(Utility::string_to_enum<Order>("first"),
+                 Utility::string_to_enum<FEFamily>("lagrange"));
+  const unsigned int dim = _current_elem->dim();
+  UniquePtr<FEBase> fe(FEBase::build(dim, fe_type));
+  fe->attach_quadrature_rule(_qrule);
+  _phi_curr_elem = &fe->get_phi();
+  _dphi_curr_elem = &fe->get_dphi();
+  fe->reinit(_current_elem);
+
+  // calculate q for all nodes in this element
+  _q_curr_elem.clear();
+  unsigned int ring_base = (_q_function_type == "TOPOLOGY") ? 0 : 1;
+
+  for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+  {
+    Node * this_node = _current_elem->get_node(i);
+    Real q_this_node;
+
+    if (_q_function_type == "GEOMETRY")
+      q_this_node = _crack_front_definition->DomainIntegralQFunction(
+          _crack_front_point_index, _ring_index - ring_base, this_node);
+    else if (_q_function_type == "TOPOLOGY")
+      q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
+          _crack_front_point_index, _ring_index - ring_base, this_node);
+
+    _q_curr_elem.push_back(q_this_node);
+  }
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
+  return sum;
 }
