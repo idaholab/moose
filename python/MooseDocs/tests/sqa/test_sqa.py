@@ -60,7 +60,7 @@ class TestSQA(unittest.TestCase):
         proc = subprocess.Popen(c, cwd=os.path.join(MooseDocs.MOOSE_DIR, 'test', 'docs'),
                                 stdout=subprocess.PIPE)
         out = proc.stdout.read()
-        self.assertIn(out, 'WARNINGS: 0  ERRORS: 3\n')
+        self.assertIn(out, 'WARNINGS: 0  ERRORS: 5\n')
 
         with open(os.path.join(self.SITE_DIR, 'sqa', 'test_srs', 'index.html'), 'r') as fid:
             html = fid.read()
@@ -76,6 +76,12 @@ class TestSQA(unittest.TestCase):
         self.assertIn('<div class="collapsible-header moose-group-header">Transient Analysis</div>', html)
         self.assertIn('<a href="../test_srs/index.html">F1.10</a>', html)
         self.assertIn('<span class="moose-sqa-error">F9.99</span>', html)
+
+        with open(os.path.join(self.SITE_DIR, 'sqa', 'test_v_and_v', 'index.html'), 'r') as fid:
+            html = fid.read()
+        self.assertIn('<a href="validation/V1-01/index.html">V1.01</a>', html)
+        link = os.path.join(MooseDocs.ROOT_DIR, 'test/docs/content/sqa/test_v_and_v/validation/V1-02.md')
+        self.assertIn('<a class="moose-bad-link" href="{}">V1.02</a>'.format(link), html)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

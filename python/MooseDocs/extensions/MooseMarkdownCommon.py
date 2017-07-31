@@ -56,11 +56,16 @@ class MooseMarkdownCommon(object):
         Returns:
             dict of values that were parsed
         """
+        return self.getSettingsHelper(copy.copy(self.__settings), settings_line, legacy_style)
 
+    @staticmethod
+    def getSettingsHelper(options, settings_line, legacy_style=True):
+        """
+        see getSettings
+        """
         # Crazy RE capable of many things like understanding key=value pairs with spaces in them!
-        matches = re.findall(self.SETTINGS_RE, settings_line.strip())
+        matches = re.findall(MooseMarkdownCommon.SETTINGS_RE, settings_line.strip())
 
-        options = copy.copy(self.__settings)
         if len(matches) == 0:
             return options
         for entry in matches:
@@ -213,8 +218,6 @@ class MooseMarkdownCommon(object):
             content.append(help_button)
 
             MooseMarkdownCommon.HELP_CONTENT_HELP += 1
-
-
 
         if error:
             LOG.error('%s: %s', str(title), str(message))

@@ -261,19 +261,27 @@ class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
     Adds command for defining groups of requirements, validation, etc. lists that are linked to
     input files.
     """
-    RE = re.compile(r'(?<!`)!SQA-(?P<key>r\w+)-list(?:$|\s+)(?P<title>.*?)' \
-                    r'\n(?P<items>.*?)(?:\Z|\n{2,})',
+    RE = re.compile(r'(?<!`)!SQA-(?P<key>\w+)-list' \
+                    r'(?:$|(?P<settings>.*?))\n' \
+                    r'(?P<items>.*?)(?:\Z|\n{2,})',
                     flags=re.DOTALL)
 
     @staticmethod
     def defaultSettings():
         """Settings for SQARequirement"""
         settings = MooseMarkdownCommon.defaultSettings()
+        settings['title'] = ('', "Title to assign to the list of items.")
+        settings['require-markdown'] = (False, "")
+        settings['markdown-folder'] = ('', "When supplied the value provided should be a " \
+                                           "directory relative to the repository root directory " \
+                                           "where the required files are located " \
+                                           "(require-markdown must be enabled).")
         return settings
 
     def __init__(self, markdown_instance=None, **kwargs):
         MooseMarkdownCommon.__init__(self, **kwargs)
         BlockProcessor.__init__(self, markdown_instance.parser)
+        self.markdown = markdown_instance
 
     def test(self, parent, block):
         """
@@ -287,13 +295,30 @@ class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
         """
         block = blocks.pop(0)
         match = self.RE.search(block)
+        settings = self.getSettings(match.group('settings'))
         key = match.group('key')
 
+        # Set the default directory
+        require_md = settings['require-markdown']
+        if require_md:
+            folder = settings['markdown-folder']
+            if not folder:
+                folder = os.path.join(os.path.dirname(self.markdown.current.filename), key)
+            else:
+                folder = os.path.join(MooseDocs.ROOT_DIR, folder)
+
         ul = MooseDocs.common.MooseCollapsible()
-        ul.addHeader(match.group('title'))
+        if settings['title']:
+            ul.addHeader(settings['title'])
 
         for item in match.group('items').split('\n'):
             tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
+            if require_md:
+                slug, _ = MooseDocs.common.slugify(tag_id, ('.', '-'))
+                full_name = os.path.join(folder, slug + '.md')
+                if not os.path.exists(full_name):
+                    LOG.error("The required markdown file (%s) does not exist.", full_name)
+                tag_id = '<a href="{}">{}</a>'.format(full_name, tag_id)
             ul.addItem(tag_id, text, text, id_='{}-{}'.format(key, tag_id))
 
         parent.append(ul.element())
@@ -356,7 +381,11 @@ class SQAInputTagMatrix(MooseMarkdownCommon, Pattern):
         with open(filename) as fid:
             for match in SQAInputTags.RE.finditer(fid.read()):
                 if key == match.group('key'):
-                    title = match.group('title')
+                    options = dict(title='')
+                    settings = MooseMarkdownCommon.getSettingsHelper(options,
+                                                                     match.group('settings'),
+                                                                     legacy_style=False)
+                    title = settings['title']
                     for item in match.group('items').split('\n'):
                         tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
                         out[title].append((tag_id, text))
