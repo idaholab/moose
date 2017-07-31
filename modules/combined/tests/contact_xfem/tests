@@ -1,0 +1,16 @@
+[Tests]
+  [./mechanical_contact_xfem]
+    type = 'Exodiff'
+    input = 'mechanical_contact_xfem.i'
+    exodiff = 'mechanical_contact_xfem_out.e'
+    abs_zero = 1e-10
+    superlu = true
+  [../]
+  [./thermal_contact_xfem]
+    type = 'Exodiff'
+    input = 'thermal_contact_xfem.i'
+    exodiff = 'thermal_contact_xfem_out.e'
+    abs_zero = 1e-10
+    superlu = true
+  [../]
+[]

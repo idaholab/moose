@@ -716,7 +716,7 @@ DisplacedProblem::meshChanged()
 
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i]->invalidateCache();
-  _geometric_search_data.update();
+  _geometric_search_data.reinit();
 }
 
 void
