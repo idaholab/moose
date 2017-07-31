@@ -42,7 +42,6 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
     _hardening_constant(getParam<Real>("hardening_constant")),
     _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function")
                                                            : NULL),
-    _shear_modulus(0.0),
 
     _plastic_strain(declareProperty<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
@@ -77,44 +76,44 @@ IsotropicPlasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
-IsotropicPlasticityStressUpdate::computeStressInitialize(Real effectiveTrialStress,
+IsotropicPlasticityStressUpdate::computeStressInitialize(const Real effective_trial_stress,
                                                          const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
   computeYieldStress(elasticity_tensor);
 
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 Real
-IsotropicPlasticityStressUpdate::computeResidual(Real effectiveTrialStress, Real scalar)
+IsotropicPlasticityStressUpdate::computeResidual(const Real effective_trial_stress,
+                                                 const Real scalar)
 {
-  Real residual = 0.;
+  Real residual = 0.0;
 
-  mooseAssert(_yield_condition != -1.,
+  mooseAssert(_yield_condition != -1.0,
               "the yield stress was not updated by computeStressInitialize");
 
-  if (_yield_condition > 0.)
+  if (_yield_condition > 0.0)
   {
     _hardening_slope = computeHardeningDerivative(scalar);
     _hardening_variable[_qp] = computeHardeningValue(scalar);
 
-    // The order here is important: the final term can be small, and we don't want it lost to
-    // roundoff.
-    residual = effectiveTrialStress - _yield_stress - _hardening_variable[_qp];
-    residual -= 3.0 * _shear_modulus * scalar;
+    residual =
+        (effective_trial_stress - _hardening_variable[_qp] - _yield_stress) / _three_shear_modulus -
+        scalar;
   }
   return residual;
 }
 
-Real IsotropicPlasticityStressUpdate::computeDerivative(Real /*effectiveTrialStress*/,
-                                                        Real /*scalar*/)
+Real
+IsotropicPlasticityStressUpdate::computeDerivative(const Real /*effective_trial_stress*/,
+                                                   const Real /*scalar*/)
 {
   Real derivative = 1.0;
   if (_yield_condition > 0.0)
-    derivative = -3.0 * _shear_modulus - _hardening_slope;
+    derivative = -1.0 - _hardening_slope / _three_shear_modulus;
 
   return derivative;
 }

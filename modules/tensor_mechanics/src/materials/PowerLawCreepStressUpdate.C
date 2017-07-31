@@ -41,7 +41,6 @@ PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & par
     _activation_energy(parameters.get<Real>("activation_energy")),
     _gas_constant(parameters.get<Real>("gas_constant")),
     _start_time(getParam<Real>("start_time")),
-    _shear_modulus(0.0),
     _has_temp(isCoupled("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _creep_strain(declareProperty<RankTwoTensor>(_creep_prepend + "creep_strain")),
@@ -56,11 +55,9 @@ PowerLawCreepStressUpdate::initQpStatefulProperties()
 }
 
 void
-PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/,
-                                                   const RankFourTensor & elasticity_tensor)
+PowerLawCreepStressUpdate::computeStressInitialize(const Real /*effective_trial_stress*/,
+                                                   const RankFourTensor & /*elasticity_tensor*/)
 {
-  _shear_modulus = ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
-
   if (_has_temp)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
   else
@@ -72,20 +69,22 @@ PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/
 }
 
 Real
-PowerLawCreepStressUpdate::computeResidual(Real effectiveTrialStress, Real scalar)
+PowerLawCreepStressUpdate::computeResidual(const Real effective_trial_stress, const Real scalar)
 {
-  return _coefficient * std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent) *
-             _exponential * _exp_time -
-         scalar / _dt;
+  const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const Real creep_rate =
+      _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _exp_time;
+  return creep_rate * _dt - scalar;
 }
 
 Real
-PowerLawCreepStressUpdate::computeDerivative(Real effectiveTrialStress, Real scalar)
+PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, const Real scalar)
 {
-  return -3 * _coefficient * _shear_modulus * _n_exponent *
-             std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent - 1) *
-             _exponential * _exp_time -
-         1 / _dt;
+  const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *
+                                     std::pow(stress_delta, _n_exponent - 1.0) * _exponential *
+                                     _exp_time;
+  return creep_rate_derivative * _dt - 1.0;
 }
 
 void

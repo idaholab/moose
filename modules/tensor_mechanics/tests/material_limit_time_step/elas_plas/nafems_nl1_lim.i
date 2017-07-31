@@ -168,7 +168,7 @@
     boundary = 2
     function = appl_dispx
   [../]
-[] # BCs
+[]
 
 [Materials]
   [./elasticity_tensor]
@@ -192,14 +192,12 @@
     hardening_constant = 0.0
     relative_tolerance = 1e-20
     absolute_tolerance = 1e-8
-    max_iterations = 50
     max_inelastic_increment = 0.000001
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_rel_tol = 1e-10

@@ -4,10 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef RECOMPUTERADIALRETURN_H
-#define RECOMPUTERADIALRETURN_H
+#ifndef RADIALRETURNSTRESSUPDATE_H
+#define RADIALRETURNSTRESSUPDATE_H
 
 #include "StressUpdateBase.h"
+#include "SingleVariableReturnMappingSolution.h"
 
 // Forward declaration
 class RadialReturnStressUpdate;
@@ -28,14 +29,25 @@ InputParameters validParams<RadialReturnStressUpdate>();
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
  */
 
-class RadialReturnStressUpdate : public StressUpdateBase
+class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableReturnMappingSolution
 {
 public:
   RadialReturnStressUpdate(const InputParameters & parameters,
                            const std::string inelastic_strain_name = "");
 
-  /// A radial return (J2) mapping method is defined in this material by overwritting
-  /// the computeInelasticStrainIncrement method.
+  /**
+   * A radial return (J2) mapping method is performed with return mapping
+   * iterations.
+   * @param strain_increment              Sum of elastic and inelastic strain increments
+   * @param inelastic_strain_increment    Inelastic strain increment calculated by this class
+   * @param rotation increment            Not used by this class
+   * @param stress_new                    New trial stress from pure elastic calculation
+   * @param stress_old                    Old state of stress
+   * @param elasticity_tensor             Rank 4 C_{ijkl}, must be isotropic
+   * @param elastic_strain_old            Old state of total elastic strain
+   * @param compute_full_tangent_operator Flag currently unused by this class
+   * @param tangent_operator              Currently a copy of the elasticity tensor in this class
+   */
   virtual void updateState(RankTwoTensor & strain_increment,
                            RankTwoTensor & inelastic_strain_increment,
                            const RankTwoTensor & rotation_increment,
@@ -45,6 +57,16 @@ public:
                            const RankTwoTensor & elastic_strain_old,
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) override;
+
+  virtual Real computeReferenceResidual(const Real effective_trial_stress,
+                                        const Real scalar_effective_inelastic_strain) override;
+
+  virtual Real maximumPermissibleValue(const Real effective_trial_stress) const override;
+
+  /**
+   * Compute the limiting value of the time step for this material
+   * @return Limiting time step
+   */
   virtual Real computeTimeStepLimit() override;
 
   /**
@@ -54,25 +76,29 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeStressInitialize(Real /*effectiveTrialStress*/,
+
+  /**
+   * Perform any necessary initialization before return mapping iterations
+   * @param effective_trial_stress Effective trial stress
+   * @param elasticityTensor     Elasticity tensor
+   */
+  virtual void computeStressInitialize(const Real /*effective_trial_stress*/,
                                        const RankFourTensor & /*elasticity_tensor*/)
   {
   }
-  virtual void iterationInitialize(Real /*scalar*/) {}
-  virtual Real computeResidual(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
-  virtual Real computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
-  virtual void iterationFinalize(Real /*scalar*/) {}
+
+  /**
+   * Perform any necessary steps to finalize state after return mapping iterations
+   * @param inelasticStrainIncrement Inelastic strain increment
+   */
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
 
-  const unsigned int _max_its;
-  const bool _output_iteration_info;
-  const bool _output_iteration_info_on_error;
-  const Real _relative_tolerance;
-  const Real _absolute_tolerance;
+  /// 3 * shear modulus
+  Real _three_shear_modulus;
 
   MaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
   Real _max_inelastic_increment;
 };
 
-#endif // RECOMPUTERADIALRETURN_H
+#endif // RADIALRETURNSTRESSUPDATE_H

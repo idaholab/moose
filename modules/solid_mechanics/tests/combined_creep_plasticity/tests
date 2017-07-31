@@ -19,7 +19,9 @@
     type = 'Exodiff'
     input = 'combined_stress_prescribed_sm.i'
     exodiff = 'combined_stress_prescribed_out.e'
+    rel_err = 1e-5
     abs_zero = 1e-09
+    super_lu = true
   [../]
 
   [./stress_relaxation_sm]

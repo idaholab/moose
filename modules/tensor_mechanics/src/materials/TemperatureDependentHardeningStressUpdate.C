@@ -74,9 +74,8 @@ TemperatureDependentHardeningStressUpdate::TemperatureDependentHardeningStressUp
 
 void
 TemperatureDependentHardeningStressUpdate::computeStressInitialize(
-    Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
+    const Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
 {
-  _shear_modulus = ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
   initializeHardeningFunctions();
   computeYieldStress(elasticity_tensor);
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;

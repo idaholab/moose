@@ -123,29 +123,24 @@
              if(t<=1, stressAtYield,
              (a+b*sqrt(exp(expFac*t))+c*exp(expFac*t))/(1.0+d*exp(expFac*t))))' # tends to -a
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -176,7 +171,7 @@
     family = MONOMIAL
   [../]
 
-[] # AuxVariables
+[]
 
 [Kernels]
   [./TensorMechanics]
@@ -184,7 +179,6 @@
 []
 
 [AuxKernels]
-
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -241,11 +235,9 @@
     index_j = 2
     execute_on = 'timestep_end'
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./fixed_x]
     type = DirichletBC
     variable = disp_x
@@ -283,11 +275,9 @@
     boundary = front
     function = disp_z
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 210666666666.666667
@@ -302,23 +292,18 @@
     type = IsotropicPlasticityStressUpdate
     yield_stress = 285788383.2488647 # = sqrt(3)*165e6 = sqrt(3) * yield in shear
     hardening_constant = 0.0
-    relative_tolerance = 1e-14 #1e-10
-    absolute_tolerance = 1e-30 #1e-12
-    max_iterations = 50
   [../]
   [./radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'isotropic_plasticity'
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
 
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type'
@@ -331,7 +316,6 @@
   start_time = 0.0
   dt = 0.01 # use 0.0001 for a nearly exact match
   end_time = 2.0
-
 []
 
 [Postprocessors]
@@ -379,7 +363,6 @@
     variable = stress_zz
     function = stress_zz
   [../]
-
 []
 
 [Outputs]

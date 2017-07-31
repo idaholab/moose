@@ -62,42 +62,43 @@ HyperbolicViscoplasticityStressUpdate::initQpStatefulProperties()
 
 void
 HyperbolicViscoplasticityStressUpdate::computeStressInitialize(
-    Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
+    const Real effective_trial_stress, const RankFourTensor & /*elasticity_tensor*/)
 {
-  _shear_modulus = ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
-
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
 
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 Real
-HyperbolicViscoplasticityStressUpdate::computeResidual(Real effectiveTrialStress, Real scalar)
+HyperbolicViscoplasticityStressUpdate::computeResidual(const Real effective_trial_stress,
+                                                       const Real scalar)
 {
   Real residual = 0.0;
 
-  mooseAssert(_yield_condition != -1.,
+  mooseAssert(_yield_condition != -1.0,
               "the yield stress was not updated by computeStressInitialize");
 
   if (_yield_condition > 0.0)
   {
-    Real xflow = _c_beta * (effectiveTrialStress - (3.0 * _shear_modulus * scalar) -
-                            _hardening_variable[_qp] - _yield_stress);
-    Real xphi = _c_alpha * std::sinh(xflow);
-    _xphidp = -3.0 * _shear_modulus * _c_alpha * _c_beta * std::cosh(xflow);
+    const Real xflow = _c_beta * (effective_trial_stress - (_three_shear_modulus * scalar) -
+                                  _hardening_variable[_qp] - _yield_stress);
+    const Real xphi = _c_alpha * std::sinh(xflow);
+
+    _xphidp = -_three_shear_modulus * _c_alpha * _c_beta * std::cosh(xflow);
     _xphir = -_c_alpha * _c_beta * std::cosh(xflow);
-    residual = xphi - scalar / _dt;
+    residual = xphi * _dt - scalar;
   }
   return residual;
 }
 
-Real HyperbolicViscoplasticityStressUpdate::computeDerivative(Real /*effectiveTrialStress*/,
-                                                              Real /*scalar*/)
+Real
+HyperbolicViscoplasticityStressUpdate::computeDerivative(const Real /*effective_trial_stress*/,
+                                                         const Real /*scalar*/)
 {
   Real derivative = 1.0;
   if (_yield_condition > 0.0)
-    derivative = _xphidp + _hardening_constant * _xphir - 1 / _dt;
+    derivative = _xphidp * _dt + _hardening_constant * _xphir * _dt - 1.0;
 
   return derivative;
 }
