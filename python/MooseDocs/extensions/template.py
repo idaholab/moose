@@ -121,6 +121,7 @@ class TemplatePostprocessorBase(Postprocessor):
         """
         template_args.setdefault('content', text)
         template_args.setdefault('navigation', [])
+        template_args['page_status'] = self._pageStatus()
 
     def run(self, text):
         """
@@ -209,6 +210,12 @@ class TemplatePostprocessorBase(Postprocessor):
                     url += '#' + parts[1]
                 LOG.debug('Converting link: %s --> %s', href, url)
                 link['href'] = url
+
+    def _pageStatus(self):
+        """
+        Report the page status for insert into meta data
+        """
+        return self.markdown.current.status
 
     @staticmethod
     def _relpath(path, start):

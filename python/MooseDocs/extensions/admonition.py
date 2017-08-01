@@ -54,7 +54,7 @@ class AdmonitionBlock(MooseMarkdownCommon, BlockProcessor):
     RE = re.compile(r'!admonition\s+'
                     r'(?P<command>info|note|important|warning|danger|error)\s*' # commands
                     r'(?P<title>[^\n]*?)'               # optional title (any non newline)
-                    r'(?P<settings>\w+=.*?)?'          # optional settings
+                    r'(?P<settings>\w+=.*?)?'           # optional settings
                     r'\n(?P<message>.*?)(?:\Z|\n{2,})', # message
                     flags=re.DOTALL|re.MULTILINE)
 
@@ -81,9 +81,7 @@ class AdmonitionBlock(MooseMarkdownCommon, BlockProcessor):
         """
         block = blocks.pop(0)
         match = self.RE.search(block)
-        #settings = self.getSettings(match.group('settings'))
         command = match.group('command')
         title = match.group('title').strip()
         message = match.group('message').strip()
         self.createAdmonition(command, message, title=title, parent=parent)
-        #print etree.tostring(el)

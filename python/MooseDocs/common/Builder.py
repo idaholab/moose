@@ -107,6 +107,7 @@ class Builder(object):
         """
         if isinstance(page, nodes.MarkdownFileNodeBase):
             LOG.debug('Building page: %s', page.filename)
+            page.reset()
             html = self.convert(page)
             self.write(page, html)
 

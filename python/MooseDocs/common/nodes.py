@@ -15,6 +15,7 @@
 #pylint: enable=missing-docstring
 import os
 import re
+import collections
 import logging
 import anytree
 import mooseutils
@@ -36,6 +37,7 @@ class NodeCore(anytree.NodeMixin):
         super(NodeCore, self).__init__()
         self.parent = parent
         self.name = name
+        self.status = collections.defaultdict(int)
         self._root_directory = root_directory if root_directory else MooseDocs.ROOT_DIR
         self.__cache = dict()
 
@@ -92,6 +94,12 @@ class NodeCore(anytree.NodeMixin):
             child.parent = node
         self.parent = None
         return node
+
+    def reset(self):
+        """
+        Called before a page is re-created.
+        """
+        self.status.clear()
 
     def __repr__(self):
         """

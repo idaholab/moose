@@ -25,32 +25,31 @@ class TestAdmonition(MarkdownTestCase):
         md = '!admonition error\nThis a message.'
         html = self.convert(md)
         self.assertIn('<div class="admonition error">', html)
-        self.assertNotIn('<p class="admonition-title">', html)
+        self.assertIn('<p class="admonition-title">Error</p>', html)
 
     def testTitle(self):
         md = '!admonition error The Title\nThis a message.'
         html = self.convert(md)
         self.assertIn('<div class="admonition error">', html)
-        self.assertIn('<p class="admonition-title">The Title</p>', html)
+        self.assertIn('<p class="admonition-title">Error: The Title</p>', html)
 
     def testTitleAndSettings(self):
         md = '!admonition error The Title foo=bar\nThis a message.'
         html = self.convert(md)
         self.assertIn('<div class="admonition error">', html)
-        self.assertIn('<p class="admonition-title">The Title</p>', html)
+        self.assertIn('<p class="admonition-title">Error: The Title</p>', html)
 
     def testBasicWithSettings(self):
         md = '!admonition error foo=bar\nThis a message.'
         html = self.convert(md)
         self.assertIn('<div class="admonition error">', html)
-        self.assertNotIn('<p class="admonition-title">', html)
+        self.assertIn('<p class="admonition-title">Error</p>', html)
 
     def testCommands(self):
         for cmd in ['info', 'note', 'important', 'warning', 'danger', 'error']:
             md = '!admonition {}\nThis a message.'.format(cmd)
             html = self.convert(md)
             self.assertIn('<div class="admonition {}">'.format(cmd), html)
-
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

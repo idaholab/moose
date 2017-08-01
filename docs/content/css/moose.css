@@ -547,6 +547,49 @@ footer.page-footer {
     border: 0px solid transparent;
 }
 
+span.badge.new{
+  float:none;
+  padding: 4px 8px 4px 8px;
+}
+
+.moose-collection-description span.moose-page-status{
+  float:right;
+}
+
+span.badge.new.info{
+  background-color: #528452;
+}
+
+span.badge.new.note{
+  background-color: #3a7296;
+}
+
+span.badge.new.important{
+  background-color: #b100b0;
+}
+
+span.badge.new.warning{
+  background-color: #968b2b;
+}
+
+span.badge.new.danger{
+  background-color: #b14d00;
+}
+
+span.badge.new.error{
+  background-color: #940000;
+}
+
+span.badge.new.pass{
+  background-color: #148a00;
+}
+
+.moose-status-container{
+  margin-top: 0;
+  margin-bottom: 0;
+  float: right;
+}
+
 /* MOOSE Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;

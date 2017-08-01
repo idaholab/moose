@@ -154,8 +154,7 @@ class MooseMarkdownCommon(object):
 
         return div
 
-    @staticmethod
-    def createErrorElement(message, title='Markdown Parsing Error', parent=None, error=True,
+    def createErrorElement(self, message, title='Markdown Parsing Error', parent=None, error=True,
                            help_button=None, markdown=False):
         """
         Returns a tree element containing error message.
@@ -176,31 +175,33 @@ class MooseMarkdownCommon(object):
             help_button[etree.Element]: The html button to use for creating a help pop-up
             markdown[bool]: When true this will enable markdown parsing within html
         """
-        el = MooseMarkdownCommon.createAdmonition('error', message, title=title, parent=parent,
-                                                  help_button=help_button, markdown=markdown)
+        el = self.createAdmonition('error', message, title=title, parent=parent,
+                                   help_button=help_button, markdown=markdown)
         if error:
             LOG.error('%s: %s', str(title), str(message))
         return el
 
-    @staticmethod
-    def createAdmonition(command, message, title=None, parent=None, help_button=None,
+    def createAdmonition(self, command, message, title=None, parent=None, help_button=None,
                          markdown=False):
         """
         Generates Element object for MOOSE admonitions
         """
 
-        # Create the basic admonition HTML
         if parent is not None:
             el = etree.SubElement(parent, 'div')
         else:
             el = etree.Element('div')
         el.set('class', "admonition {}".format(command))
 
+        self.markdown.current.status[command] += 1 #pylint: disable=no-member
+
+        title_div = etree.SubElement(el, 'div')
+        title_el = etree.SubElement(title_div, 'p')
+        title_el.set('class', "admonition-title")
         if title:
-            title_div = etree.SubElement(el, 'div')
-            title_el = etree.SubElement(title_div, 'p')
-            title_el.set('class', "admonition-title")
-            title_el.text = title
+            title_el.text = '{}: {}'.format(command.title(), title)
+        else:
+            title_el.text = command.title()
 
         msg_div = etree.SubElement(el, 'div')
         msg_div.set('class', 'admonition-message')

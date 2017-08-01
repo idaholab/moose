@@ -25,7 +25,7 @@ def slugify(text, *args):
     Spaces are converted to underscore.
     :/\.,[]{}()!"'*?<>| produce an error, unless a conversion pair is supplied.
 
-    Returns the a tuple of the replace string and a flag, if True the returned string is valid and
+    Returns a tuple of the replace string and a flag, if True the returned string is valid and
     does not contain invalid characters.
     """
 

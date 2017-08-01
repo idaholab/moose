@@ -82,6 +82,13 @@ class TestSQA(unittest.TestCase):
         self.assertIn('<a href="validation/V1-01/index.html">V1.01</a>', html)
         link = os.path.join(MooseDocs.ROOT_DIR, 'test/docs/content/sqa/test_v_and_v/validation/V1-02.md')
         self.assertIn('<a class="moose-bad-link" href="{}">V1.02</a>'.format(link), html)
+        self.assertIn('<span class="new badge danger" data-badge-caption="danger">1', html)
+        self.assertIn('<span class="new badge error" data-badge-caption="error">1', html)
+
+        with open(os.path.join(self.SITE_DIR, 'sqa', 'index.html'), 'r') as fid:
+            html = fid.read()
+        self.assertIn('<span class="moose-page-status" data-filename="test_srs/index.html">', html)
+        self.assertIn('<span class="new badge pass" data-badge-caption="pass">', html)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

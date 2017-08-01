@@ -68,6 +68,15 @@ class SQAExtension(MooseMarkdownExtension):
                               SQAInputTagMatrix(markdown_instance=md, database=database, **config),
                               '_begin')
 
+        md.inlinePatterns.add('moose-sqa-page-status',
+                              SQAPageStatus(markdown_instance=md, **config),
+                              '_begin')
+
+        md.inlinePatterns.add('moose-sqa-link',
+                              SQALink(markdown_instance=md, **config),
+                              '_begin')
+
+
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """
     Create SQAExtension
@@ -178,10 +187,8 @@ class SQAPreprocessor(MooseMarkdownCommon, Preprocessor):
                         .format(name)
 
             title = 'Missing Template Item: {}'.format(name)
-            div = MooseMarkdownCommon.createErrorElement(title=title,
-                                                         message=markdown,
-                                                         markdown=True,
-                                                         help_button=help_div)
+            div = self.createErrorElement(title=title, message=markdown, markdown=True,
+                                          help_button=help_div)
 
         return etree.tostring(div)
 
@@ -272,6 +279,8 @@ class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
         settings = MooseMarkdownCommon.defaultSettings()
         settings['title'] = ('', "Title to assign to the list of items.")
         settings['require-markdown'] = (False, "")
+        settings['status'] = (False, "When enabled with 'require-markdown' the status of the " \
+                                     "page is added to the list.")
         settings['markdown-folder'] = ('', "When supplied the value provided should be a " \
                                            "directory relative to the repository root directory " \
                                            "where the required files are located " \
@@ -300,6 +309,7 @@ class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
 
         # Set the default directory
         require_md = settings['require-markdown']
+        status = settings['status']
         if require_md:
             folder = settings['markdown-folder']
             if not folder:
@@ -313,13 +323,21 @@ class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
 
         for item in match.group('items').split('\n'):
             tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
+            desc = text
             if require_md:
                 slug, _ = MooseDocs.common.slugify(tag_id, ('.', '-'))
-                full_name = os.path.join(folder, slug + '.md')
+                slug += '.md'
+                full_name = os.path.join(folder, slug)
                 if not os.path.exists(full_name):
                     LOG.error("The required markdown file (%s) does not exist.", full_name)
                 tag_id = '<a href="{}">{}</a>'.format(full_name, tag_id)
-            ul.addItem(tag_id, text, text, id_='{}-{}'.format(key, tag_id))
+                if status:
+                    _, found = self.getFilename(slug)
+                    if found:
+                        status_el = SQAPageStatus.createStatusElement(found, self.markdown.current)
+                        desc += etree.tostring(status_el)
+
+            ul.addItem(tag_id, desc, text, id_='{}-{}'.format(key, tag_id))
 
         parent.append(ul.element())
 
@@ -343,7 +361,6 @@ class SQAInputTagMatrix(MooseMarkdownCommon, Pattern):
         """
         Build the matrix.
         """
-        #settings = self.getSettings(match.group('settings'))
         # Determine the items to include in the matrix
         key = match.group('key')
 
@@ -448,3 +465,82 @@ class SQAInputTagDatabase(object):
                 local = filename.replace(MooseDocs.ROOT_DIR, '').lstrip('/')
                 remote = '{}/{}'.format(self.__repo.rstrip('/'), local)
                 self.__database[key][tag].append((remote, local))
+
+class SQAPageStatus(MooseMarkdownCommon, Pattern):
+    """
+    Creates tag that displays the pages status, which is updated from a script in init.js
+    """
+    RE = r'(?<!`)!SQA-status\s*(?P<filename>.*?)!'
+
+    @staticmethod
+    def defaultSettings():
+        settings = MooseMarkdownCommon.defaultSettings()
+        return settings
+
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
+
+    def handleMatch(self, match):
+        """
+        Return a div that will be replaced.
+        """
+        _, found = self.markdown.getFilename(match.group('filename').strip())
+        if not found:
+            return self.createErrorElement("Unable to locate filename {} in !status command." \
+                                           .format(match.group('filename')))
+        return self.createStatusElement(found, self.markdown.current)
+
+    @staticmethod
+    def createStatusElement(found, current):
+        """
+        Helper for creating status span tag.
+        """
+        el = etree.Element('span')
+        el.set('class', 'moose-page-status')
+        local = os.path.relpath(found.destination, os.path.dirname(current.destination))
+        el.set('data-filename', local)
+        return el
+
+class SQALink(MooseMarkdownCommon, Pattern):
+    """
+    Creates markdown link syntax that accept key, value pairs.
+    """
+    RE = r'(?<!`)\[(?P<text>.*?)\]\((?P<filename>.*?)(?:\s+(?P<settings>.*?))?\)'
+
+    @staticmethod
+    def defaultSettings():
+        settings = MooseMarkdownCommon.defaultSettings()
+        settings['status'] = (False, "When True status badge(s) are created that display the "
+                                     "status of the linked page.")
+        return settings
+
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
+
+    def handleMatch(self, match):
+        """
+        Return a div that will be replaced.
+        """
+        # Do nothing if settings not given
+        if not match.group('settings'):
+            return None
+
+        # Extract data
+        settings = self.getSettings(match.group('settings'))
+        filename = match.group('filename')
+        text = match.group('text')
+
+        # Create a element
+        el = etree.Element('a')
+        el.set('href', match.group('filename'))
+        if settings['status']:
+            span = etree.SubElement(el, 'span')
+            span.text = text
+            _, found = self.markdown.getFilename(filename)
+            if found:
+                el.append(SQAPageStatus.createStatusElement(found, self.markdown.current))
+        else:
+            el.text = text
+        return el

@@ -10,14 +10,14 @@ solves.
 !END-template-item
 
 !SQA-template-item system_context
-{{PROJECT}} is utilizes an object-oriented design to allow users to customize existing
+{{PROJECT}} utilizes an object-oriented design to allow users to customize existing
 code and build up a simulation in a modular fashion.
 !END-template-item
 
 !SQA-template-item system_requirements
 
-!SQA-requirement-list Transient Analysis
-    F1.10 The system shall perform time dependent analysis.
-    F1.50 The system shall include the ability to create custom input syntax.
+!SQA-requirement-list title=Transient Analysis
+   F1.10 The system shall perform time dependent analysis.
+   F1.50 The system shall include the ability to create custom input syntax.
 
 !END-template-item

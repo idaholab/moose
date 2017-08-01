@@ -14,6 +14,6 @@ pages, which can be done using the following command.
 
 The software quality documents for MOOSE are listed below:
 
-* [System Requirement Specification (SRS)](/sqa/moose_srs.md)
-* [System Design Description (SDD)](/sqa/moose_sdd.md)
-* [Requirements Traceability Matrix (RTM)](/sqa/moose_rtm.md)
+* [System Requirement Specification (SRS)](/sqa/moose_srs.md) !SQA-status /sqa/moose_srs.md!
+* [System Design Description (SDD)](/sqa/moose_sdd.md) !SQA-status /sqa/moose_sdd.md!
+* [Requirements Traceability Matrix (RTM)](/sqa/moose_rtm.md) !SQA-status /sqa/moose_rtm.md!
