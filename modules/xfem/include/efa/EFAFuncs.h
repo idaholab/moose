@@ -18,13 +18,14 @@ namespace Efa
 
 template <typename T>
 bool
-deleteFromMap(std::map<unsigned int, T *> & theMap, T * elemToDelete)
+deleteFromMap(std::map<unsigned int, T *> & theMap, T * elemToDelete, bool delete_elem = true)
 {
   bool didIt = false;
   typename std::map<unsigned int, T *>::iterator i = theMap.find(elemToDelete->id());
   if (i != theMap.end())
   {
-    delete i->second;
+    if (delete_elem)
+      delete i->second;
     theMap.erase(i);
     didIt = true;
   }

@@ -69,7 +69,8 @@ EFAElement::createLocalNodeFromGlobalNode(const EFANode * global_node) const
 {
   // Given a global node, create a new local node
   if (global_node->category() != EFANode::N_CATEGORY_PERMANENT &&
-      global_node->category() != EFANode::N_CATEGORY_TEMP)
+      global_node->category() != EFANode::N_CATEGORY_TEMP &&
+      global_node->category() != EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
     EFAError("In createLocalNodeFromGlobalNode node is not global");
 
   EFANode * new_local_node = NULL;

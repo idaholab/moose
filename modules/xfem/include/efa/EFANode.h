@@ -18,6 +18,7 @@ public:
     N_CATEGORY_PERMANENT,
     N_CATEGORY_TEMP,
     N_CATEGORY_EMBEDDED,
+    N_CATEGORY_EMBEDDED_PERMANENT,
     N_CATEGORY_LOCAL_INDEX
   };
 
@@ -32,6 +33,7 @@ public:
   std::string idCatString();
   unsigned int id() const;
   N_CATEGORY category() const;
+  void setCategory(EFANode::N_CATEGORY category);
   EFANode * parent() const;
   void removeParent();
 };

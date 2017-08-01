@@ -26,6 +26,12 @@ struct CutEdge
   unsigned int host_side_id;
 };
 
+struct CutNode
+{
+  unsigned int id;
+  unsigned int host_id;
+};
+
 struct CutFace
 {
   unsigned int face_id;
@@ -54,8 +60,10 @@ public:
 
   virtual bool active(Real time) const = 0;
 
-  virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time) const = 0;
+  virtual bool cutElementByGeometry(const Elem * elem,
+                                    std::vector<CutEdge> & cut_edges,
+                                    std::vector<CutNode> & cut_nodes,
+                                    Real time) const = 0;
   virtual bool
   cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) const = 0;
 
