@@ -1,4 +1,4 @@
-# The purpose of this test is to verify that the procedures for initializing
+#The purpose of this test is to verify that the procedures for initializing
 # the solution on nodes/elements affected by XFEM works correctly in both
 # serial and parallel.
 
@@ -137,8 +137,7 @@
 []
 
 [Executioner]
-  type = Transient
-
+    type = NestedTransient
   solve_type = 'PJFNK'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      8'
