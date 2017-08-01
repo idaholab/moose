@@ -229,7 +229,7 @@
     friction_angle = mc_phi
     dilation_angle = mc_psi
     smoothing_tol = 5.0
-    yield_function_tol = 1.0E-12
+    yield_function_tol = 1.0E-7
   [../]
   [./stress]
     type = ComputeMultipleInelasticStress

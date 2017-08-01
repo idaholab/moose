@@ -51,6 +51,13 @@ protected:
   /// Poisson's ratio
   Real _poissons_ratio;
 
+  /**
+   * When equal-eigenvalues are predicted from the stress initialization routine, shift them by this
+   * amount.
+   * This avoids equal-eigenvalue problems, but also accounts for the smoothing of the yield surface
+   */
+  const Real _shifter;
+
   /// Eigenvectors of the trial stress as a RankTwoTensor, in order to rotate the returned stress back to stress space
   RankTwoTensor _eigvecs;
 

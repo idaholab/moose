@@ -13,12 +13,12 @@
   type = GeneratedMesh
   dim = 3
   nx = 100
-  ny = 1234
+  ny = 12
   nz = 1
   xmin = 0
   xmax = 100
   ymin = 0
-  ymax = 1234
+  ymax = 12
   zmin = 0
   zmax = 1
 []
@@ -512,25 +512,25 @@
 [UserObjects]
   [./ts]
     type = TensorMechanicsHardeningCubic
-    value_0 = 1E5
-    value_residual = 2E5
+    value_0 = 1E6
+    value_residual = 2E6
     internal_limit = 1
   [../]
   [./cs]
     type = TensorMechanicsHardeningCubic
-    value_0 = 1E6
-    value_residual = 0.5E6
+    value_0 = 1E7
+    value_residual = 0.5E7
     internal_limit = 1
   [../]
   [./coh]
     type = TensorMechanicsHardeningCubic
-    value_0 = 1E6
-    value_residual = 0
+    value_0 = 2E6
+    value_residual = 1E6
     internal_limit = 1
   [../]
   [./phi]
     type = TensorMechanicsHardeningCubic
-    value_0 = 0.9
+    value_0 = 0.6
     value_residual = 0.2
     internal_limit = 1
   [../]
@@ -560,7 +560,7 @@
     friction_angle = phi
     dilation_angle = psi
     smoothing_tol = 1E5
-    max_NR_iterations = 100
+    max_NR_iterations = 1000
     yield_function_tol = 1.0E-1
   [../]
   [./stress]
@@ -574,6 +574,7 @@
 [Executioner]
   end_time = 1
   dt = 1
+  dtmin = 1
   type = Transient
 []
 
