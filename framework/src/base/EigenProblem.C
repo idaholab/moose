@@ -21,6 +21,9 @@
 #include "DisplacedProblem.h"
 #include "NonlinearEigenSystem.h"
 #include "SlepcSupport.h"
+#include "RandomData.h"
+#include "OutputWarehouse.h"
+#include "Function.h"
 
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
@@ -42,7 +45,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   : FEProblemBase(parameters),
     _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
     _generalized_eigenvalue_problem(false),
-    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
+    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0")),
+    _is_residual_initialed(false)
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -170,4 +174,16 @@ EigenProblem::isNonlinearEigenvalueSolver()
          solverParams()._eigen_solve_type == Moose::EST_MF_NONLINEAR_POWER ||
          solverParams()._eigen_solve_type == Moose::EST_MONOLITH_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
+}
+
+void
+EigenProblem::computeResidualTypeBx(const NumericVector<Number> & soln,
+                                    NumericVector<Number> & residual,
+                                    Moose::KernelType type)
+{
+  _nl->setSolution(soln);
+
+  _nl->zeroVariablesForResidual();
+
+  _nl->computeResidual(residual, type);
 }

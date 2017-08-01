@@ -356,9 +356,17 @@ moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, Moose::Kerne
   X_global.localize(*sys.current_local_solution.get());
 
   R.zero();
-
-  eigen_problem->computeResidualType(*sys.current_local_solution.get(), R, type);
-
+  if (type == Moose::KT_EIGEN && eigen_problem->residualInitialed())
+  {
+    eigen_problem->computeResidualTypeBx(*sys.current_local_solution.get(), R, type);
+    eigen_problem->setResidualInitialed(false);
+  }
+  else
+  {
+    eigen_problem->computeResidualType(*sys.current_local_solution.get(), R, type);
+    if (type == Moose::KT_NONEIGEN)
+      eigen_problem->setResidualInitialed(true);
+  }
   R.close();
 }
 
