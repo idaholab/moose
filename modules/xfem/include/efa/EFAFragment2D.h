@@ -35,6 +35,7 @@ public:
   virtual void switchNode(EFANode * new_node, EFANode * old_node);
   virtual bool containsNode(EFANode * node) const;
   virtual unsigned int getNumCuts() const;
+  virtual unsigned int getNumCutNodes() const;
   virtual std::set<EFANode *> getAllNodes() const;
   virtual bool isConnected(EFAFragment * other_fragment) const;
   virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes);

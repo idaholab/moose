@@ -1,0 +1,37 @@
+[Tests]
+  [./corner_node_cut_twice]
+    type = Exodiff
+    input = corner_node_cut_twice.i
+    exodiff = 'corner_node_cut_twice_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./corner_edge_cut]
+    type = Exodiff
+    input = corner_edge_cut.i
+    exodiff = 'corner_edge_cut_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./edge_cut]
+    type = Exodiff
+    input = edge_cut.i
+    exodiff = 'edge_cut_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./corner_node_cut]
+    type = Exodiff
+    input = corner_node_cut.i
+    exodiff = 'corner_node_cut_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./notch]
+    type = Exodiff
+    input = notch.i
+    exodiff = 'notch_out.e'
+    map = false
+    unique_id = true
+  [../]
+[]

@@ -85,6 +85,12 @@ EFAFragment3D::getNumCuts() const
   return num_cut_faces;
 }
 
+unsigned int
+EFAFragment3D::getNumCutNodes() const
+{
+  mooseError("Not implemented yet for 3D.");
+}
+
 std::set<EFANode *>
 EFAFragment3D::getAllNodes() const
 {

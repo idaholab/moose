@@ -40,6 +40,7 @@ bool GeometricCut3DUserObject::active(Real /*time*/) const { return true; }
 bool
 GeometricCut3DUserObject::cutElementByGeometry(const Elem * /*elem*/,
                                                std::vector<CutEdge> & /*cut_edges*/,
+                                               std::vector<CutNode> & /*cut_nodes*/,
                                                Real /*time*/) const
 {
   mooseError("Invalid method: must use vector of element faces for 3D mesh cutting");

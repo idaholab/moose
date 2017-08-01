@@ -326,6 +326,7 @@ bool
 XFEM::markCutEdgesByGeometry(Real time)
 {
   bool marked_edges = false;
+  bool marked_nodes = false;
 
   std::vector<const GeometricCutUserObject *> active_geometric_cuts;
   for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
@@ -342,6 +343,7 @@ XFEM::markCutEdgesByGeometry(Real time)
     {
       const Elem * elem = *elem_it;
       std::vector<CutEdge> elem_cut_edges;
+      std::vector<CutNode> elem_cut_nodes;
       std::vector<CutEdge> frag_cut_edges;
       std::vector<std::vector<Point>> frag_edges;
       EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
@@ -360,7 +362,7 @@ XFEM::markCutEdgesByGeometry(Real time)
       // mark cut edges for the element and its fragment
       for (unsigned int i = 0; i < active_geometric_cuts.size(); ++i)
       {
-        active_geometric_cuts[i]->cutElementByGeometry(elem, elem_cut_edges, time);
+        active_geometric_cuts[i]->cutElementByGeometry(elem, elem_cut_edges, elem_cut_nodes, time);
         if (CEMElem->numFragments() > 0)
           active_geometric_cuts[i]->cutFragmentByGeometry(frag_edges, frag_cut_edges, time);
       }
@@ -373,6 +375,12 @@ XFEM::markCutEdgesByGeometry(Real time)
               elem->id(), elem_cut_edges[i].host_side_id, elem_cut_edges[i].distance);
           marked_edges = true;
         }
+      }
+
+      for (unsigned int i = 0; i < elem_cut_nodes.size(); ++i) // mark element edges
+      {
+        _efa_mesh.addElemNodeIntersection(elem->id(), elem_cut_nodes[i].host_id);
+        marked_nodes = true;
       }
 
       for (unsigned int i = 0; i < frag_cut_edges.size();
@@ -393,7 +401,7 @@ XFEM::markCutEdgesByGeometry(Real time)
     }
   }
 
-  return marked_edges;
+  return marked_edges || marked_nodes;
 }
 
 void
@@ -1238,8 +1246,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
        ++it)
   {
     std::vector<const Elem *> & sibling_elem_vec = it->second;
-    if (sibling_elem_vec.size() != 2)
-      mooseError("Must have exactly 2 sibling elements");
+    // TODO: for cut-node case, how to find the sibling elements?
+    // if (sibling_elem_vec.size() != 2)
+    // mooseError("Must have exactly 2 sibling elements");
     _sibling_elems.push_back(std::make_pair(sibling_elem_vec[0], sibling_elem_vec[1]));
   }
 

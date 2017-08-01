@@ -44,7 +44,8 @@ EFAElement2D::EFAElement2D(const EFAElement2D * from_elem, bool convert_to_local
     for (unsigned int i = 0; i < _num_nodes; ++i)
     {
       if (from_elem->_nodes[i]->category() == EFANode::N_CATEGORY_PERMANENT ||
-          from_elem->_nodes[i]->category() == EFANode::N_CATEGORY_TEMP)
+          from_elem->_nodes[i]->category() == EFANode::N_CATEGORY_TEMP ||
+          from_elem->_nodes[i]->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
       {
         _nodes[i] = from_elem->createLocalNodeFromGlobalNode(from_elem->_nodes[i]);
         _local_nodes.push_back(_nodes[i]); // convenient to delete local nodes
@@ -831,11 +832,12 @@ EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
 
   // count fragment's cut edges
   unsigned int num_cut_frag_edges = _fragments[0]->getNumCuts();
+  unsigned int num_cut_nodes = _fragments[0]->getNumCutNodes();
   unsigned int num_frag_edges = _fragments[0]->numEdges();
   if (num_cut_frag_edges > 3)
     EFAError("In element ", _id, " there are more than 2 cut fragment edges");
 
-  if (num_cut_frag_edges == 0)
+  if (num_cut_frag_edges == 0 && num_cut_nodes == 0)
   {
     if (!isPartial()) // delete the temp frag for an uncut elem
     {
@@ -872,12 +874,15 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
   // count permanent and embedded nodes for new fragments
   std::vector<unsigned int> num_emb;
   std::vector<unsigned int> num_perm;
+  std::vector<unsigned int> num_emb_perm;
   for (unsigned int i = 0; i < _fragments.size(); ++i)
   {
     num_emb.push_back(0);
     num_perm.push_back(0);
+    num_emb_perm.push_back(0);
     std::set<EFANode *> perm_nodes;
     std::set<EFANode *> emb_nodes;
+    std::set<EFANode *> emb_perm_nodes;
     for (unsigned int j = 0; j < _fragments[i]->numEdges(); ++j)
     {
       for (unsigned int k = 0; k < 2; ++k)
@@ -887,13 +892,21 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
           perm_nodes.insert(temp_node);
         else if (temp_node->category() == EFANode::N_CATEGORY_EMBEDDED)
           emb_nodes.insert(temp_node);
+        else if (temp_node->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+          emb_perm_nodes.insert(temp_node);
         else
           EFAError("Invalid node category");
       }
     }
     num_perm[i] = perm_nodes.size();
     num_emb[i] = emb_nodes.size();
+    num_emb_perm[i] = emb_perm_nodes.size();
   }
+
+  // TODO: For cut-node case, how to check fragment sanity
+  for (unsigned int i = 0; i < _fragments.size(); ++i)
+    if (num_emb_perm[i] != 0)
+      return;
 
   unsigned int n_interior_nodes = numInteriorNodes();
   if (n_interior_nodes > 0 && n_interior_nodes != 1)
@@ -978,7 +991,15 @@ EFAElement2D::createChild(const std::set<EFAElement *> & CrackTipElements,
   if (_children.size() != 0)
     EFAError("Element cannot have existing children in createChildElements");
 
-  if (_fragments.size() > 1 || shouldDuplicateForCrackTip(CrackTipElements))
+  bool shouldDuplicateForCutNodeElement = false;
+  for (unsigned int j = 0; j < _num_nodes; ++j)
+  {
+    if (_nodes[j]->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+      shouldDuplicateForCutNodeElement = true;
+  }
+
+  if (_fragments.size() > 1 || shouldDuplicateForCrackTip(CrackTipElements) ||
+      shouldDuplicateForCutNodeElement)
   {
     if (_fragments.size() > 3)
       EFAError("More than 3 fragments not yet supported");
@@ -1055,11 +1076,41 @@ EFAElement2D::createChild(const std::set<EFAElement *> & CrackTipElements,
         EFAPoint origin_to_point = p - origin;
         EFAPoint origin2_to_point = p - origin2;
 
-        if (_fragments.size() == 1 && !shouldDuplicateForCrackTip(CrackTipElements))
+        if (_fragments.size() == 1 &&
+            _nodes[j]->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT) // create temp node for
+                                                                             // embedded permanent
+                                                                             // node
+        {
+          unsigned int new_node_id = Efa::getNewID(TempNodes);
+          EFANode * newNode = new EFANode(new_node_id, EFANode::N_CATEGORY_TEMP, _nodes[j]);
+          TempNodes.insert(std::make_pair(new_node_id, newNode));
+          childElem->setNode(j, newNode); // be a temp node
+        }
+        else if (_fragments.size() == 1 && !shouldDuplicateForCrackTip(CrackTipElements))
+        {
           childElem->setNode(j, _nodes[j]); // inherit parent's node
-        else if (origin_to_point * normal < Xfem::tol && origin2_to_point * normal2 < Xfem::tol)
+        }
+        else if (std::abs(origin_to_point * normal) < Xfem::tol &&
+                 _fragments.size() > 1) // cut through node case
+        {
+          unsigned int new_node_id = Efa::getNewID(TempNodes);
+          EFANode * newNode = new EFANode(new_node_id, EFANode::N_CATEGORY_TEMP, _nodes[j]);
+          TempNodes.insert(std::make_pair(new_node_id, newNode));
+          childElem->setNode(j, newNode); // be a temp node
+        }
+        else if (origin_to_point * normal < Xfem::tol && origin2_to_point * normal2 < Xfem::tol &&
+                 (_fragments.size() > 1 || shouldDuplicateForCrackTip(CrackTipElements)))
+        {
           childElem->setNode(j, _nodes[j]); // inherit parent's node
-        else                                // parent element's node is not in fragment
+        }
+        else if (normal.norm() < Xfem::tol && normal2.norm() < Xfem::tol &&
+                 _fragments.size() == 1) // cut along edge case
+        {
+          childElem->setNode(j, _nodes[j]); // inherit parent's node
+        }
+        else if ((_fragments.size() > 1 ||
+                  shouldDuplicateForCrackTip(
+                      CrackTipElements))) // parent element's node is not in fragment
         {
           unsigned int new_node_id = Efa::getNewID(TempNodes);
           EFANode * newNode = new EFANode(new_node_id, EFANode::N_CATEGORY_TEMP, _nodes[j]);
@@ -1091,10 +1142,8 @@ EFAElement2D::createChild(const std::set<EFAElement *> & CrackTipElements,
     }
   }
   else // num_links == 1 || num_links == 0
-  {
     // child is itself - but don't insert into the list of ChildElements!!!
     _children.push_back(this);
-  }
 }
 
 void
@@ -1188,14 +1237,11 @@ EFAElement2D::connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNode
               EFAError("dynamic cast childOfNeighborElem fails");
 
             EFAEdge * neighborChildEdge = childOfNeighborElem->getEdge(neighbor_edge_id);
-            if (!neighborChildEdge
-                     ->hasIntersection()) // neighbor edge must NOT have intersection either
+            if (!neighborChildEdge->hasIntersection()) // neighbor edge must NOT have
+                                                       // intersection either
             {
               // Check to see if the nodes are already merged.  There's nothing else to do in that
               // case.
-              if (_edges[j]->equivalent(*neighborChildEdge))
-                continue;
-
               unsigned int num_edge_nodes = 2;
               for (unsigned int i = 0; i < num_edge_nodes; ++i)
               {
@@ -1247,6 +1293,17 @@ EFAElement2D::connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNode
         EFAError(
             "Attempted to delete node: ", childNode->id(), " from TempNodes, but couldn't find it");
     }
+  }
+}
+
+void
+EFAElement2D::updateFragmentNode()
+{
+  for (unsigned int j = 0; j < _num_nodes; ++j)
+  {
+    if (_nodes[j]->parent() != NULL &&
+        _nodes[j]->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+      switchNode(_nodes[j], _nodes[j]->parent(), false);
   }
 }
 
@@ -1660,7 +1717,8 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
   if (embedded_node) // use the existing embedded node if it was passed in
     local_embedded = embedded_node;
 
-  if (_edges[edge_id]->hasIntersectionAtPosition(position, edge_node1))
+  if (_edges[edge_id]->hasIntersectionAtPosition(position, edge_node1) &&
+      position > Xfem::tol & position < 1.0 - Xfem::tol)
   {
     unsigned int emb_id = _edges[edge_id]->getEmbeddedNodeIndex(position, edge_node1);
     EFANode * old_emb = _edges[edge_id]->getEmbeddedNode(emb_id);
@@ -1751,6 +1809,29 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
   } // If add_to_neighbor required
 }
 
+void
+EFAElement2D::addNodeCut(unsigned int node_id,
+                         EFANode * embedded_permanent_node,
+                         std::map<unsigned int, EFANode *> & PermanentNodes,
+                         std::map<unsigned int, EFANode *> & EmbeddedPermanentNodes)
+{
+  EFANode * local_embedded_permanent = NULL;
+  EFANode * node = _nodes[node_id];
+  if (embedded_permanent_node) // use the existing embedded node if it was passed in
+    local_embedded_permanent = embedded_permanent_node;
+
+  if (node->category() == EFANode::N_CATEGORY_PERMANENT)
+  {
+    node->setCategory(EFANode::N_CATEGORY_EMBEDDED_PERMANENT);
+    local_embedded_permanent = node;
+    EmbeddedPermanentNodes.insert(std::make_pair(node->id(), local_embedded_permanent));
+    if (!Efa::deleteFromMap(PermanentNodes, local_embedded_permanent, false))
+      EFAError("Attempted to delete node: ",
+               local_embedded_permanent->id(),
+               " from PermanentNodes, but couldn't find it");
+  }
+}
+
 bool
 EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
                                  double position,
@@ -1768,6 +1849,10 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
   if ((std::abs(position) < Xfem::tol && edge_node1->category() == EFANode::N_CATEGORY_EMBEDDED) ||
       (std::abs(1.0 - position) < Xfem::tol &&
        edge_node2->category() == EFANode::N_CATEGORY_EMBEDDED))
+    isValidIntersection = false;
+
+  // TODO: do not allow to cut fragment's node
+  if (std::abs(position) < Xfem::tol || std::abs(1.0 - position) < Xfem::tol)
     isValidIntersection = false;
 
   // add valid intersection point to an edge

@@ -358,6 +358,12 @@ EFAElement3D::switchEmbeddedNode(EFANode * new_emb_node, EFANode * old_emb_node)
 }
 
 void
+EFAElement3D::updateFragmentNode()
+{
+  // In EFAElement3D, updateFragmentNode needs to be implemented
+}
+
+void
 EFAElement3D::getMasterInfo(EFANode * node,
                             std::vector<EFANode *> & master_nodes,
                             std::vector<double> & master_weights) const

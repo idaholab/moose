@@ -49,6 +49,7 @@ GeometricCut2DUserObject::active(Real time) const
 bool
 GeometricCut2DUserObject::cutElementByGeometry(const Elem * elem,
                                                std::vector<CutEdge> & cut_edges,
+                                               std::vector<CutNode> & cut_nodes,
                                                Real time) const
 {
   bool cut_elem = false;
@@ -79,13 +80,24 @@ GeometricCut2DUserObject::cutElementByGeometry(const Elem * elem,
         if (IntersectSegmentWithCutLine(
                 *node1, *node2, _cut_line_endpoints[cut], fraction, seg_int_frac))
         {
-          cut_elem = true;
-          CutEdge mycut;
-          mycut.id1 = node1->id();
-          mycut.id2 = node2->id();
-          mycut.distance = seg_int_frac;
-          mycut.host_side_id = i;
-          cut_edges.push_back(mycut);
+          if (seg_int_frac > Xfem::tol && seg_int_frac < 1.0 - Xfem::tol)
+          {
+            cut_elem = true;
+            CutEdge mycut;
+            mycut.id1 = node1->id();
+            mycut.id2 = node2->id();
+            mycut.distance = seg_int_frac;
+            mycut.host_side_id = i;
+            cut_edges.push_back(mycut);
+          }
+          else if (seg_int_frac < Xfem::tol)
+          {
+            cut_elem = true;
+            CutNode mycut;
+            mycut.id = node1->id();
+            mycut.host_id = i;
+            cut_nodes.push_back(mycut);
+          }
         }
       }
     }
@@ -176,7 +188,8 @@ GeometricCut2DUserObject::IntersectSegmentWithCutLine(
     Real cut_int_frac = crossProduct2D(cut_start_to_seg_start, seg_dir) / cut_dir_cross_seg_dir;
 
     if (cut_int_frac >= 0.0 && cut_int_frac <= cutting_line_fraction)
-    { // Cutting segment intersects the line of the edge segment, but the intersection point may be
+    { // Cutting segment intersects the line of the edge segment, but the intersection point may
+      // be
       // outside the segment
       Real int_frac = crossProduct2D(cut_start_to_seg_start, cut_dir) / cut_dir_cross_seg_dir;
       if (int_frac >= 0.0 &&
