@@ -78,6 +78,7 @@ class MooseMarkdown(markdown.Markdown):
         ext['MooseDocs.extensions.app_syntax'] = dict()
         ext['MooseDocs.extensions.template'] = dict()
         ext['MooseDocs.extensions.gchart'] = dict()
+        ext['MooseDocs.extensions.admonition'] = dict()
         return ext
 
     def __init__(self, config=None, default=True):

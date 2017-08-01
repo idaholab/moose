@@ -26,7 +26,7 @@ class MooseMarkdownCommon(object):
     """
     SETTINGS_RE = r'([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))'
     COPY_BUTTON_COUNT = 0
-    HELP_CONTENT_HELP = 0
+    HELP_CONTENT_COUNT = 0
 
     @staticmethod
     def defaultSettings():
@@ -176,18 +176,31 @@ class MooseMarkdownCommon(object):
             help_button[etree.Element]: The html button to use for creating a help pop-up
             markdown[bool]: When true this will enable markdown parsing within html
         """
+        el = MooseMarkdownCommon.createAdmonition('error', message, title=title, parent=parent,
+                                                  help_button=help_button, markdown=markdown)
+        if error:
+            LOG.error('%s: %s', str(title), str(message))
+        return el
+
+    @staticmethod
+    def createAdmonition(command, message, title=None, parent=None, help_button=None,
+                         markdown=False):
+        """
+        Generates Element object for MOOSE admonitions
+        """
 
         # Create the basic admonition HTML
-        if parent:
+        if parent is not None:
             el = etree.SubElement(parent, 'div')
         else:
             el = etree.Element('div')
-        el.set('class', "admonition error")
+        el.set('class', "admonition {}".format(command))
 
-        title_div = etree.SubElement(el, 'div')
-        title_el = etree.SubElement(title_div, 'p')
-        title_el.set('class', "admonition-title")
-        title_el.text = title
+        if title:
+            title_div = etree.SubElement(el, 'div')
+            title_el = etree.SubElement(title_div, 'p')
+            title_el.set('class', "admonition-title")
+            title_el.text = title
 
         msg_div = etree.SubElement(el, 'div')
         msg_div.set('class', 'admonition-message')
@@ -199,7 +212,7 @@ class MooseMarkdownCommon(object):
 
         # Add the help button
         if help_button is not None:
-            id_ = 'moose-modal-help-data-{}'.format(MooseMarkdownCommon.HELP_CONTENT_HELP)
+            id_ = 'moose-modal-help-data-{}'.format(MooseMarkdownCommon.HELP_CONTENT_COUNT)
 
             a = etree.SubElement(title_el, 'a')
             a.set('class', 'waves-effect waves-light btn-floating red')
@@ -217,10 +230,7 @@ class MooseMarkdownCommon(object):
             content.set('class', 'modal-content')
             content.append(help_button)
 
-            MooseMarkdownCommon.HELP_CONTENT_HELP += 1
-
-        if error:
-            LOG.error('%s: %s', str(title), str(message))
+            MooseMarkdownCommon.HELP_CONTENT_COUNT += 1
 
         return el
 

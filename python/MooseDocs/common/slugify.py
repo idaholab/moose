@@ -13,12 +13,13 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
+
 import re
 import logging
 LOG = logging.getLogger(__name__)
 
 def slugify(text, *args):
-    """
+    r"""
     A utility for converting text into acceptable filename.
 
     Spaces are converted to underscore.
