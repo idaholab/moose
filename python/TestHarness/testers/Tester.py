@@ -54,6 +54,7 @@ class Tester(MooseObject):
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
         params.addParam('should_execute', True, 'Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
         params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
+        params.addParam('required_objects', [], "A list of required objects that are in the executable.")
         params.addParam('check_input',    False, "Check for correct input file syntax")
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOT is detected ('ALL', 'TRUE', 'FALSE')")
@@ -331,6 +332,16 @@ class Tester(MooseObject):
         for file in self.specs['depend_files']:
             if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
                 reasons['depend_files'] = 'DEPEND FILES'
+
+        # We calculate the exe_objects only if we need them
+        if self.specs["required_objects"] and checks["exe_objects"] is None:
+            checks["exe_objects"] = util.getExeObjects(self.specs["executable"])
+
+        # Check to see if we have the required object names
+        for var in self.specs['required_objects']:
+            if var not in checks["exe_objects"]:
+                reasons['required_objects'] = '%s not found in executable' % var
+                break
 
         # Check to make sure required submodules are initialized
         for var in self.specs['required_submodule']:
