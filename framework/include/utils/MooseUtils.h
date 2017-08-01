@@ -388,10 +388,9 @@ tokenizeAndConvert(const std::string & str,
 
 /**
  * Convert supplied string to upper case.
- * @params name The string to convert upper case, this is pass by value because the conversion
- *              to upper case must modify the string.
+ * @params name The string to convert upper case.
  */
-std::string toUpper(std::string name);
+std::string toUpper(const std::string & name);
 }
 
 #endif // MOOSEUTILS_H

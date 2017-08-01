@@ -128,16 +128,15 @@ MooseEnum::operator!=(unsigned short value) const
 bool
 MooseEnum::compareCurrent(const MooseEnum & other, CompareMode mode) const
 {
-
-  if (mode == COMPARE_BOTH)
-    return (_current.id() == other._current.id()) && (_current.name() == other._current.name());
-
-  else if (mode == COMPARE_NAME)
-    return _current.name() == other._current.name();
-
-  else if (mode == COMPARE_ID)
-    return _current.id() == other._current.id();
-
+  switch (mode)
+  {
+    case CompareMode::COMPARE_BOTH:
+      return (_current.id() == other._current.id()) && (_current.name() == other._current.name());
+    case CompareMode::COMPARE_NAME:
+      return _current.name() == other._current.name();
+    case CompareMode::COMPARE_ID:
+      return _current.id() == other._current.id();
+  }
   return false;
 }
 

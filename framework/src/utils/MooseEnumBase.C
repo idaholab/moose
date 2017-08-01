@@ -15,6 +15,7 @@
 #include "MooseEnumBase.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <algorithm>
@@ -121,15 +122,13 @@ MooseEnumBase::getNames() const
 std::string
 MooseEnumBase::getRawNames() const
 {
-  std::ostringstream oss;
-  std::copy(_items.begin(), _items.end(), infix_ostream_iterator<std::string>(oss, " "));
-  return oss.str();
+  return Moose::stringify(_items, " ");
 }
 
 std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const std::string & name) const
 {
-  return std::find_if(_items.begin(), _items.end(), [name](MooseEnumItem const & item) {
+  return std::find_if(_items.begin(), _items.end(), [&name](MooseEnumItem const & item) {
     return item.name() == name;
   });
 }
@@ -138,12 +137,12 @@ std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(int id) const
 {
   return std::find_if(
-      _items.begin(), _items.end(), [id](MooseEnumItem const & item) { return item.id() == id; });
+      _items.begin(), _items.end(), [&id](MooseEnumItem const & item) { return item.id() == id; });
 }
 
 std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const MooseEnumItem & other) const
 {
   return std::find_if(
-      _items.begin(), _items.end(), [other](MooseEnumItem const & item) { return item == other; });
+      _items.begin(), _items.end(), [&other](MooseEnumItem const & item) { return item == other; });
 }

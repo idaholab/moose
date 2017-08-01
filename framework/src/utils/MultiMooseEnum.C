@@ -71,7 +71,7 @@ bool
 MultiMooseEnum::contains(const std::string & value) const
 {
   std::string upper(MooseUtils::toUpper(value));
-  return std::find_if(_current.begin(), _current.end(), [upper](const MooseEnumItem & item) {
+  return std::find_if(_current.begin(), _current.end(), [&upper](const MooseEnumItem & item) {
            return item.name() == upper;
          }) != _current.end();
 }
@@ -79,7 +79,7 @@ MultiMooseEnum::contains(const std::string & value) const
 bool
 MultiMooseEnum::contains(int value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [value](const MooseEnumItem & item) {
+  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
            return item.id() == value;
          }) != _current.end();
 }
@@ -87,7 +87,7 @@ MultiMooseEnum::contains(int value) const
 bool
 MultiMooseEnum::contains(unsigned short value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [value](const MooseEnumItem & item) {
+  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
            return item.id() == value;
          }) != _current.end();
 }
@@ -104,7 +104,7 @@ MultiMooseEnum::contains(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const MooseEnumItem & value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [value](const MooseEnumItem & item) {
+  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
            return item.id() == value.id();
          }) != _current.end();
 }
@@ -232,7 +232,7 @@ MultiMooseEnum::remove(InputIterator first, InputIterator last)
     // Values stored as upper case
     std::string upper(MooseUtils::toUpper(*it));
     std::vector<MooseEnumItem>::iterator iter =
-        std::find_if(_current.begin(), _current.end(), [upper](const MooseEnumItem & item) {
+        std::find_if(_current.begin(), _current.end(), [&upper](const MooseEnumItem & item) {
           return item.name() == upper;
         });
     if (iter != _current.end())
@@ -262,11 +262,6 @@ MultiMooseEnum::checkDeprecated() const
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  if (obj._current.size() > 0)
-  {
-    out << obj._current[0].rawName();
-    for (std::size_t i = 1; i < obj._current.size(); ++i)
-      out << " " << obj._current[i].rawName();
-  }
+  out << obj.getRawNames();
   return out;
 }

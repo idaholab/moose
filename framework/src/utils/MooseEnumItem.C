@@ -74,3 +74,10 @@ MooseEnumItem::operator!=(const MooseEnumItem &) const
 {
   mooseError("Direct comparison between MooseEnumItems is not supported.");
 }
+
+std::ostream &
+operator<<(std::ostream & out, const MooseEnumItem & item)
+{
+  out << item.rawName();
+  return out;
+}

@@ -40,7 +40,7 @@ public:
   /**
    * Enum item for controlling comparison in the compareCurrent method.
    */
-  enum CompareMode
+  enum class CompareMode
   {
     COMPARE_NAME,
     COMPARE_ID,
@@ -101,7 +101,7 @@ public:
   /**
    * Method for comparing currently set values between MooseEnum.
    */
-  bool compareCurrent(const MooseEnum & other, CompareMode mode = COMPARE_NAME) const;
+  bool compareCurrent(const MooseEnum & other, CompareMode mode = CompareMode::COMPARE_NAME) const;
 
   /**
    * Assignment operators

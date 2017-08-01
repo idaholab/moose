@@ -281,25 +281,25 @@ TEST(MooseEnum, compareCurrent)
   MooseEnum c("a=2 b=1", "a");
 
   EXPECT_TRUE(a.compareCurrent(b));
-  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::COMPARE_ID));
-  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::COMPARE_BOTH));
+  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_BOTH));
 
   b = "b";
   EXPECT_FALSE(a.compareCurrent(b));
-  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_ID));
-  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_BOTH));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_BOTH));
 
   b = "c";
   EXPECT_FALSE(a.compareCurrent(b));
-  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_ID));
-  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::COMPARE_BOTH));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_BOTH));
 
   EXPECT_TRUE(a.compareCurrent(c));
-  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::COMPARE_ID));
-  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::COMPARE_BOTH));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_BOTH));
 
   c = "b";
   EXPECT_FALSE(a.compareCurrent(c));
-  EXPECT_TRUE(a.compareCurrent(c, MooseEnum::COMPARE_ID));
-  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::COMPARE_BOTH));
+  EXPECT_TRUE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_BOTH));
 }
