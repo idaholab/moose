@@ -81,19 +81,19 @@ INSTemperature::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
   {
-    Real convective_part = _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
+    Real convective_part = _rho[_qp] * _cp[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
     return convective_part;
   }
 
   else if (jvar == _v_vel_var_number)
   {
-    Real convective_part = _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
+    Real convective_part = _rho[_qp] * _cp[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
     return convective_part;
   }
 
   else if (jvar == _w_vel_var_number)
   {
-    Real convective_part = _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
+    Real convective_part = _rho[_qp] * _cp[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
     return convective_part;
   }
   else
