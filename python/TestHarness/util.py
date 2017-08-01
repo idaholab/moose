@@ -2,6 +2,7 @@ import platform, os, re
 import subprocess
 from mooseutils import colorText
 from collections import namedtuple
+import json
 
 TERM_COLS = 110
 
@@ -395,6 +396,43 @@ def getInitializedSubmodules(root_dir):
         return []
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
     return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
+
+def addObjectsFromBlock(objs, node, block_name):
+    """
+    Utility function that iterates over a dictionary and adds keys
+    to the executable object name set.
+    """
+    data = node.get(block_name, {})
+    if data: # could be None so we can't just iterate over items
+        for name, block in data.iteritems():
+            objs.add(name)
+            addObjectNames(objs, block)
+
+def addObjectNames(objs, node):
+    """
+    Add object names that reside in this node.
+    """
+    if not node:
+        return
+
+    addObjectsFromBlock(objs, node, "subblocks")
+    addObjectsFromBlock(objs, node, "subblock_types")
+
+    star = node.get("star")
+    if star:
+        addObjectNames(objs, star)
+
+def getExeObjects(exe):
+    """
+    Gets a set of object names that are in the executable JSON dump.
+    """
+    output = runCommand("%s --json" % exe)
+    output = output.split('**START JSON DATA**\n')[1]
+    output = output.split('**END JSON DATA**\n')[0]
+    obj_names = set()
+    data = json.loads(output)
+    addObjectsFromBlock(obj_names, data, "blocks")
+    return obj_names
 
 def checkOutputForPattern(output, re_pattern):
     """
