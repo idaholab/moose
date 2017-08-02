@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 ####################################################################################################
 #                                    DO NOT MODIFY THIS HEADER                                     #
@@ -13,15 +14,31 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
-from MooseCollapsible import MooseCollapsible
-from MarkdownTable import MarkdownTable
-from MooseLinkDatabase import MooseLinkDatabase
-from MooseClassDatabase import MooseClassDatabase
-from Builder import Builder
-from moose_docs_file_tree import moose_docs_file_tree
-from moose_docs_import import moose_docs_import
-from moose_docs_app_syntax import moose_docs_app_syntax
-from slugify import slugify
+import unittest
+from MooseDocs.common import slugify
 
-EXTENSIONS = ('.md', '.png', '.bmp', '.jpeg', '.svg', '.gif', '.webm', '.ogg', '.mp4', '.js',
-              '.css', '.bib')
+class TestSlugify(unittest.TestCase):
+
+    INVALID = [':', '\\', '.', '[', ']', '(', ')', '!', '"', "'", '*', '?', '<', '>', '|']
+
+    def testBasic(self):
+        """
+        Test basic conversion and invalid characters.
+        """
+        self.assertEqual(('Foo_Bar', True), slugify('Foo Bar'))
+        for x in self.INVALID:
+            string = 'Foo{}Bar'.format(x)
+            self.assertEqual((string, False), slugify(string))
+
+    def testReplace(self):
+        """
+        Test replacement.
+        """
+        for x in self.INVALID:
+            string = 'Foo{}Bar'.format(x)
+            replaced = 'FooXBar'.format(x)
+            self.assertEqual((replaced, True), slugify(string, (x, 'X')))
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

@@ -13,4 +13,4 @@
     repo: https://github.com/idaholab/moose
     template_args:
         title: 'MOOSE Test'
-        logo: docs/media/moose_logo_small.png
+        logo: media/moose_logo_small.png

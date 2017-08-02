@@ -3,5 +3,6 @@ default:
     include:
         - 'docs/content/js/*'
         - 'docs/content/css/*'
+        - 'docs/content/media/*'
         - 'docs/content/index.md'
         - 'docs/content/documentation/sqa/*'

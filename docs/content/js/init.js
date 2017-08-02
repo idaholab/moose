@@ -46,3 +46,12 @@ MathJax.Hub.Queue(function(){
     }
   });
 });
+
+$(document).ready(function(){
+  var elems = document.getElementsByClassName("moose-page-status")
+  for (var i = 0; i < elems.length; i++)
+  {
+    var url = $(elems[i]).data("filename")
+    $(elems[i]).load(url + " #moose-status")
+  }
+});
