@@ -60,7 +60,7 @@ class TestSQA(unittest.TestCase):
         proc = subprocess.Popen(c, cwd=os.path.join(MooseDocs.MOOSE_DIR, 'test', 'docs'),
                                 stdout=subprocess.PIPE)
         out = proc.stdout.read()
-        self.assertIn(out, 'WARNINGS: 0  ERRORS: 5\n')
+        self.assertIn(out, 'WARNINGS: 0  ERRORS: 4\n')
 
         with open(os.path.join(self.SITE_DIR, 'sqa', 'test_srs', 'index.html'), 'r') as fid:
             html = fid.read()
