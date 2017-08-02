@@ -129,6 +129,7 @@ FaceFaceConstraint::reinitSide(Moose::ConstraintType res_type)
   switch (res_type)
   {
     case Moose::Master:
+      _assembly.setCurrentSubdomainID(_elem_master->subdomain_id());
       _assembly.reinit(_elem_master);
       _master_var.prepare();
       _assembly.prepare();
@@ -136,6 +137,7 @@ FaceFaceConstraint::reinitSide(Moose::ConstraintType res_type)
       break;
 
     case Moose::Slave:
+      _assembly.setCurrentSubdomainID(_elem_slave->subdomain_id());
       _assembly.reinit(_elem_slave);
       _slave_var.prepare();
       _assembly.prepare();

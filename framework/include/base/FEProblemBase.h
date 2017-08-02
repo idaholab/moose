@@ -348,6 +348,9 @@ public:
                        const std::vector<dof_id_type> & dof_indices,
                        THREAD_ID tid) override;
 
+  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) override;
+  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) override;
+  virtual void setNeighborSubdomainID(const Elem * elem, THREAD_ID tid);
   virtual void prepareAssembly(THREAD_ID tid) override;
 
   virtual void addGhostedElem(dof_id_type elem_id) override;

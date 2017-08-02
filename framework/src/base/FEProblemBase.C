@@ -957,6 +957,33 @@ FEProblemBase::prepare(const Elem * elem,
 }
 
 void
+FEProblemBase::setCurrentSubdomainID(const Elem * elem, THREAD_ID tid)
+{
+  SubdomainID did = elem->subdomain_id();
+  _assembly[tid]->setCurrentSubdomainID(did);
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->assembly(tid).setCurrentSubdomainID(did);
+}
+
+void
+FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  SubdomainID did = elem->neighbor_ptr(side)->subdomain_id();
+  _assembly[tid]->setCurrentNeighborSubdomainID(did);
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->assembly(tid).setCurrentNeighborSubdomainID(did);
+}
+
+void
+FEProblemBase::setNeighborSubdomainID(const Elem * elem, THREAD_ID tid)
+{
+  SubdomainID did = elem->subdomain_id();
+  _assembly[tid]->setCurrentNeighborSubdomainID(did);
+  if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+    _displaced_problem->assembly(tid).setCurrentNeighborSubdomainID(did);
+}
+
+void
 FEProblemBase::prepareAssembly(THREAD_ID tid)
 {
   _assembly[tid]->prepare();

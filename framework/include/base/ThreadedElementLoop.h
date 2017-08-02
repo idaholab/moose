@@ -91,17 +91,14 @@ template <typename RangeType>
 void
 ThreadedElementLoop<RangeType>::preElement(const Elem * el)
 {
-  _fe_problem.assembly(ThreadedElementLoopBase<RangeType>::_tid)
-      .setCurrentSubdomainID(el->subdomain_id());
+  _fe_problem.setCurrentSubdomainID(el, ThreadedElementLoopBase<RangeType>::_tid);
 }
 
 template <typename RangeType>
 void
 ThreadedElementLoop<RangeType>::preInternalSide(const Elem * el, unsigned int side)
 {
-  const Elem * neighbor = el->neighbor_ptr(side);
-  _fe_problem.assembly(ThreadedElementLoopBase<RangeType>::_tid)
-      .setCurrentNeighborSubdomainID(neighbor->subdomain_id());
+  _fe_problem.setNeighborSubdomainID(el, side, ThreadedElementLoopBase<RangeType>::_tid);
 }
 
 template <typename RangeType>
