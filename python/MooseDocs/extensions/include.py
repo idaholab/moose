@@ -58,7 +58,8 @@ class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
         settings = MooseMarkdownCommon.defaultSettings()
         l_settings = ListingPattern.defaultSettings()
         settings['re'] = (None, "Python regular expression to use for removing text, with flags " \
-                                "set to MULTILINE|DOTALL.")
+                                "set to MULTILINE|DOTALL. If a 'markdown' group is set, only the" \
+                                "text in that group will be included.")
         settings['start'] = l_settings['start']
         settings['end'] = l_settings['end']
         settings['include-end'] = l_settings['include-end']
@@ -94,7 +95,10 @@ class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
                 msg = "Failed to located regex in following command.\n{}"
                 el = self.createErrorElement(msg.format(settings['re']), title="Failed Regex")
                 return etree.tostring(el)
-            content = match.group(0)
+            if 'markdown' in match.groupdict():
+                content = match.group('markdown')
+            else:
+                content = match.group(0)
 
         self._found = True
         return content

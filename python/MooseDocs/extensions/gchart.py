@@ -84,6 +84,19 @@ class GoogleChartBase(MooseMarkdownCommon, Pattern):
         Pattern.__init__(self, regex, markdown_instance)
         self._csv = dict() # CSV DataFrame cache
         self._count = 0
+        self._status = None
+
+    def setStatus(self, message, *args):
+        """
+        Set the error status message, this should be used in the arguments() and globals() methods.
+        """
+        self._status = message.format(*args)
+
+    def clearStatus(self):
+        """
+        Remove any existing error status messages.
+        """
+        self._status = None
 
     def arguments(self, settings):
         """
@@ -97,9 +110,10 @@ class GoogleChartBase(MooseMarkdownCommon, Pattern):
 
         if settings['csv'] is None:
             if isinstance(self.markdown.current, nodes.FileNodeBase):
-                LOG.error("The 'csv' setting is required in %s.", self.markdown.current.filename)
+                self.setStatus("The 'csv' setting is required in {}.",
+                               self.markdown.current.filename)
             else:
-                LOG.error("The 'csv' setting is required.")
+                self.setStatus("The 'csv' setting is required.")
             settings['data_frame'] = pandas.DataFrame()
         else:
             settings['data_frame'] = self._readCSV(os.path.join(MooseDocs.ROOT_DIR,
@@ -135,10 +149,14 @@ class GoogleChartBase(MooseMarkdownCommon, Pattern):
                  os.path.join(os.getcwd(), 'templates', 'gchart')]
 
         # Apply the arguments to the template
+        self.clearStatus()
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(paths))
         self.globals(env)
         template = env.get_template(template)
         complete = template.render(**self.arguments(settings))
+
+        if self._status is not None:
+            return self.createErrorElement(self._status, title="Google Chart Creation Error")
 
         # Create the <script> tag
         script = etree.SubElement(div, 'script')
@@ -161,10 +179,10 @@ class GoogleChartBase(MooseMarkdownCommon, Pattern):
 
             except IOError:
                 if isinstance(self.markdown.current, nodes.FileNodeBase):
-                    LOG.error("Failed to read CSV file '%s' in chart command of %s.", \
-                              filename, self.markdown.current.filename)
+                    self.setStatus("Failed to read CSV file '{}' in chart command of {}.",
+                                   filename, self.markdown.current.filename)
                 else:
-                    LOG.error("Failed to read CSV file '%s' in chart command", filename)
+                    self.setStatus("Failed to read CSV file '{}' in chart command.", filename)
                 return pandas.DataFrame()
 
         return self._csv[filename]
@@ -254,5 +272,8 @@ class ScatterDiffChart(ScatterChart):
 
         settings['gold_data_frame'] = self._readCSV(os.path.join(MooseDocs.ROOT_DIR,
                                                                  settings['gold']))
+        if settings['gold_data_frame'].empty:
+            self.setStatus("The gold file ({}) does not exist or does not contain data.",
+                           settings['gold'])
 
         return settings

@@ -15,6 +15,7 @@
 #pylint: enable=missing-docstring
 import os
 import re
+import collections
 import logging
 import anytree
 import mooseutils
@@ -36,6 +37,7 @@ class NodeCore(anytree.NodeMixin):
         super(NodeCore, self).__init__()
         self.parent = parent
         self.name = name
+        self.status = collections.defaultdict(int)
         self._root_directory = root_directory if root_directory else MooseDocs.ROOT_DIR
         self.__cache = dict()
 
@@ -93,6 +95,12 @@ class NodeCore(anytree.NodeMixin):
         self.parent = None
         return node
 
+    def reset(self):
+        """
+        Called before a page is re-created.
+        """
+        self.status.clear()
+
     def __repr__(self):
         """
         Print the node name.
@@ -127,7 +135,7 @@ class FileTreeNodeBase(NodeCore):
     Base node type for the markdown file tree.
     """
     COLOR = 'YELLOW'
-    def __init__(self, name, base=None, **kwargs):
+    def __init__(self, name, base=None, display=None, **kwargs):
         super(FileTreeNodeBase, self).__init__(name, **kwargs)
         if base is None:
             if self.parent:
@@ -135,6 +143,17 @@ class FileTreeNodeBase(NodeCore):
             else:
                 base = ''
         self._base = base
+
+        self._display = display
+        if self._display is None:
+            self._display = name
+
+    @property
+    def display(self):
+        """
+        Return the display name.
+        """
+        return self._display
 
     @property
     def base(self):
@@ -222,6 +241,13 @@ class MarkdownFileIndexNode(MarkdownFileNodeBase):
     @property
     def filename(self):
         return os.path.join(self.basename, 'index.md')
+
+    @property
+    def display(self):
+        if self.name == '':
+            return 'home'
+        else:
+            return self._display
 
 class MarkdownFilePageNode(MarkdownFileNodeBase):
     """
