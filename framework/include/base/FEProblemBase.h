@@ -382,6 +382,7 @@ public:
   virtual void clearDiracInfo() override;
 
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
+  virtual void neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
   virtual void newAssemblyArray(NonlinearSystemBase & nl);
   virtual void deleteAssemblyArray();

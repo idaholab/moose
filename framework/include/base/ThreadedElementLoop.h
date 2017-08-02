@@ -51,6 +51,10 @@ public:
 
   virtual void preElement(const Elem * elem) override;
 
+  virtual void preInternalSide(const Elem * elem, unsigned int side) override;
+
+  virtual void neighborSubdomainChanged() override;
+
 protected:
   FEProblemBase & _fe_problem;
 };
@@ -89,6 +93,23 @@ ThreadedElementLoop<RangeType>::preElement(const Elem * el)
 {
   _fe_problem.assembly(ThreadedElementLoopBase<RangeType>::_tid)
       .setCurrentSubdomainID(el->subdomain_id());
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::preInternalSide(const Elem * el, unsigned int side)
+{
+  const Elem * neighbor = el->neighbor_ptr(side);
+  _fe_problem.assembly(ThreadedElementLoopBase<RangeType>::_tid)
+      .setCurrentNeighborSubdomainID(neighbor->subdomain_id());
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::neighborSubdomainChanged()
+{
+  _fe_problem.neighborSubdomainSetup(ThreadedElementLoopBase<RangeType>::_neighbor_subdomain,
+                                     ThreadedElementLoopBase<RangeType>::_tid);
 }
 
 #endif // THREADEDELEMENTLOOP_H
