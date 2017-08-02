@@ -27,7 +27,6 @@ InputParameters validParams();
 template <>
 InputParameters validParams<EigenExecutioner>();
 
-
 class EigenExecutioner : public Steady
 {
 public:

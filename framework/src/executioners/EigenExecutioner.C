@@ -29,6 +29,6 @@ validParams<EigenExecutioner>()
 EigenExecutioner::EigenExecutioner(const InputParameters & parameters)
   : Steady(parameters),
     _eigen_problem(*parameters.getCheckedPointerParam<EigenProblem *>(
-      "_eigen_problem", "This might happen if you don't have a mesh"))
+        "_eigen_problem", "This might happen if you don't have a mesh"))
 {
 }

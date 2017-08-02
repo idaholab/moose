@@ -100,7 +100,7 @@
 
 
 [Executioner]
-  type = Steady
+  type = EigenExecutioner
   eigen_solve_type = MF_MONOLITH_NEWTON
 []
 

@@ -150,6 +150,7 @@
 #include "Transient.h"
 #include "InversePowerMethod.h"
 #include "NonlinearEigen.h"
+#include "EigenExecutioner.h"
 
 // functions
 #include "Axisymmetric2D3DSolutionFunction.h"
@@ -599,6 +600,7 @@ registerObjects(Factory & factory)
   registerExecutioner(Transient);
   registerExecutioner(InversePowerMethod);
   registerExecutioner(NonlinearEigen);
+  registerExecutioner(EigenExecutioner);
 
   // functions
   registerFunction(Axisymmetric2D3DSolutionFunction);

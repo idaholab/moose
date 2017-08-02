@@ -93,7 +93,7 @@
 []
 
 [Executioner]
-  type = Steady
+  type = EigenExecutioner
   eigen_solve_type = jacobi_davidson
   petsc_options = '-eps_view'
 []

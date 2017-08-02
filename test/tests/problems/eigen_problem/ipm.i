@@ -85,7 +85,7 @@
 []
 
 [Executioner]
-  type = Steady
+  type = EigenExecutioner
   eigen_solve_type = krylovschur
   petsc_options = '-eps_view'
 []
