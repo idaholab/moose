@@ -1,4 +1,4 @@
-# This input file tests Dirichlet pressure in/outflow boundary conditions for the incompressible NS equations.
+# This input file tests the jacobians of many of the INS kernels
 [GlobalParams]
   gravity = '0 0 0'
 []
@@ -9,7 +9,7 @@
   xmin = 0
   xmax = 3.0
   ymin = 0
-  ymax = 1.0
+  ymax = 1.5
   nx = 1
   ny = 1
   elem_type = QUAD9
@@ -26,6 +26,10 @@
   [../]
   [./p]
     order = FIRST
+    family = LAGRANGE
+  [../]
+  [./temp]
+    order = SECOND
     family = LAGRANGE
   [../]
 []
@@ -55,14 +59,32 @@
     component = 1
     integrate_p_by_parts = false
   [../]
+  [./x_mom_time]
+    type = INSMomentumTimeDerivative
+    variable = vel_x
+  [../]
+  [./y_mom_time]
+    type = INSMomentumTimeDerivative
+    variable = vel_y
+  [../]
+  [./temp]
+    type = INSTemperature
+    variable = temp
+    u = vel_x
+    v = vel_y
+  [../]
+  [./temp_time_deriv]
+    type = INSTemperatureTimeDerivative
+    variable = temp
+  [../]
 []
 
 [Materials]
   [./const]
     type = GenericConstantMaterial
     block = 0
-    prop_names = 'rho mu'
-    prop_values = '0.5 1.5'
+    prop_names = 'rho mu k cp'
+    prop_values = '0.5 1.5 0.7 1.3'
   [../]
 []
 
@@ -75,7 +97,8 @@
 
 [Executioner]
   solve_type = NEWTON
-  type = Steady
+  type = Transient
+  num_steps = 1
 []
 
 [ICs]
@@ -94,6 +117,12 @@
   [./vel_y]
     type = RandomIC
     variable = vel_y
+    min = 0.5
+    max = 1.5
+  [../]
+  [./temp]
+    type = RandomIC
+    variable = temp
     min = 0.5
     max = 1.5
   [../]

@@ -1,7 +1,7 @@
 [Tests]
-  [./laplace_kernels]
+  [./jacobian_test]
     type = AnalyzeJacobian
-    input = laplace_kernels.i
+    input = jacobian_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     mesh_mode = REPLICATED
