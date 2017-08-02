@@ -413,7 +413,6 @@ class SQAInputTagMatrix(MooseMarkdownCommon, Pattern):
         Create the content for the collapsible body
         """
         if tag_id not in self._database[key]:
-            LOG.error('Unknown tag: %s', tag_id)
             tag = '<span class="moose-sqa-error">{}</span>'.format(tag_id)
             desc = '<span class="moose-sqa-error">{}</span>'.format(text)
             body = desc
