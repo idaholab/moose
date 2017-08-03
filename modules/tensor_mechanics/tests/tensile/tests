@@ -247,4 +247,52 @@
     heavy = true
   [../]
 
+  [./small_deform1_update]
+    type = 'CSVDiff'
+    input = 'small_deform1_update_version.i'
+    csvdiff = 'small_deform1_update_version.csv'
+  [../]
+  [./small_deform2_update]
+    type = 'CSVDiff'
+    input = 'small_deform2_update_version.i'
+    csvdiff = 'small_deform2_update_version.csv'
+  [../]
+  [./small_deform3_update]
+    type = 'CSVDiff'
+    input = 'small_deform3_update_version.i'
+    csvdiff = 'small_deform3_update_version.csv'
+  [../]
+  [./small_deform5_update]
+    type = 'CSVDiff'
+    input = 'small_deform5_update_version.i'
+    csvdiff = 'small_deform5_update_version.csv'
+  [../]
+  [./small_deform6_update]
+    type = 'CSVDiff'
+    input = 'small_deform6_update_version.i'
+    csvdiff = 'small_deform6_update_version.csv'
+  [../]
+  [./small_deform_hard3_update]
+    type = 'CSVDiff'
+    input = 'small_deform_hard3_update_version.i'
+    csvdiff = 'small_deform_hard3_update_version.csv'
+  [../]
+  [./small_deform8_update]
+    type = 'CSVDiff'
+    input = 'small_deform8_update_version.i'
+    csvdiff = 'small_deform8_update_version.csv'
+  [../]
+  [./small_deform9_update]
+    type = 'CSVDiff'
+    input = 'small_deform9_update_version.i'
+    csvdiff = 'small_deform9_update_version.csv'
+  [../]
+  [./random_update_heavy]
+    type = CSVDiff
+    input = 'random_update.i'
+    csvdiff = 'random_update.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=40 Mesh/xmax=40 Mesh/ymax=40'
+    heavy = true
+  [../]
+
 []

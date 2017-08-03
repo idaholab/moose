@@ -361,7 +361,7 @@ CappedDruckerPragerStressUpdate::setIntnlValues(Real p_trial,
 {
   intnl[0] = intnl_old[0] + (q_trial - q) / _Eqq;
   Real tanpsi;
-  _dp.onlyB(intnl_old[0], _dp.dilation, tanpsi);
+  _dp.onlyB(intnl[0], _dp.dilation, tanpsi);
   intnl[1] = intnl_old[1] + (p_trial - p) / _Epp - (q_trial - q) * tanpsi / _Eqq;
 }
 

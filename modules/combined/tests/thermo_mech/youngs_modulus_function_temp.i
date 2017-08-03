@@ -160,6 +160,7 @@
     block = 0
   [../]
   [./stress]
+    type=ComputeFiniteStrainElasticStress
     block = 0
   [../]
   [./heat1]

@@ -158,7 +158,7 @@ public:
    * Allow adaptivity to be toggled programatically.
    * @param state The adaptivity state (on/off).
    */
-  void setAdpaptivityOn(bool state) { _mesh_refinement_on = state; }
+  void setAdaptivityOn(bool state) { _mesh_refinement_on = state; }
 
   /**
    * Is adaptivity on?

@@ -52,7 +52,7 @@ LevelSetMeshRefinementTransfer::initialSetup()
       adapt.init(0, 0);
       adapt.setUseNewSystem();
       adapt.setMaxHLevel(from_problem.adaptivity().getMaxHLevel());
-      adapt.setAdpaptivityOn(false);
+      adapt.setAdaptivityOn(false);
     }
 }
 
@@ -66,8 +66,8 @@ LevelSetMeshRefinementTransfer::execute()
     {
       FEProblemBase & to_problem = _multi_app->appProblemBase(i);
       Adaptivity & adapt = to_problem.adaptivity();
-      adapt.setAdpaptivityOn(true);
+      adapt.setAdaptivityOn(true);
       to_problem.adaptMesh();
-      adapt.setAdpaptivityOn(false);
+      adapt.setAdaptivityOn(false);
     }
 }

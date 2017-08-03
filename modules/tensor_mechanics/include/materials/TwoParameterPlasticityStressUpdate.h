@@ -60,7 +60,6 @@ protected:
   /// derivative of Variable with respect to trial variable (used in consistent-tangent-operator calculation)
   Real _dq_dqt;
 
-
   /**
    * Computes the values of the yield functions, given p, q and intnl parameters.
    * Derived classes must override this, to provide the values of the yield functions
@@ -241,7 +240,7 @@ protected:
                                     const std::vector<Real> & intnl,
                                     const yieldAndFlow & smoothed_q,
                                     const RankFourTensor & Eijkl,
-                                    RankTwoTensor & stress) const;
+                                    RankTwoTensor & stress) const = 0;
   void setStressAfterReturnV(const RankTwoTensor & stress_trial,
                              const std::vector<Real> & stress_params,
                              Real gaE,

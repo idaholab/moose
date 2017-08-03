@@ -2,21 +2,12 @@
   [./test]
     type = 'Exodiff'
     input = 'thermal_elastic.i'
-    cli_args = 'Materials/stress/type=ComputeFiniteStrainElasticStress'
     exodiff = 'thermal_elastic_out.e'
-  [../]
-  [./test-deprecated-variableStress]
-    type = 'Exodiff'
-    input = 'thermal_elastic.i'
-    cli_args = 'Materials/stress/type=ComputeVariableElasticConstantStress'
-    exodiff = 'thermal_elastic_out.e'
-    prereq = test
-    allow_deprecated_until = '8/3/2017'
   [../]
   [./test_sm]
     type = 'Exodiff'
     input = 'thermal_elastic_sm.i'
     exodiff = 'thermal_elastic_out.e'
-    prereq = test-deprecated-variableStress
+    prereq = test
   [../]
 []
