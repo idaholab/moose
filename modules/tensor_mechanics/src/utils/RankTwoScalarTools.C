@@ -48,13 +48,13 @@ getQuantity(const RankTwoTensor & tensor,
       val = L2norm(tensor);
       break;
     case 4:
-      val = maxPrinciple(tensor);
+      val = maxPrincipal(tensor, direction);
       break;
     case 5:
-      val = midPrinciple(tensor);
+      val = midPrincipal(tensor, direction);
       break;
     case 6:
-      val = minPrinciple(tensor);
+      val = minPrincipal(tensor, direction);
       break;
     case 7:
       val = volumetricStrain(tensor);
@@ -186,48 +186,32 @@ thirdInvariant(const RankTwoTensor & r2tensor)
 }
 
 Real
-maxPrincipal(const RankTwoTensor & r2tensor)
+maxPrincipal(const RankTwoTensor & r2tensor, Point & direction)
 {
-  return calcEigenValues(r2tensor, (LIBMESH_DIM - 1));
+  return calcEigenValuesEigenVectors(r2tensor, (LIBMESH_DIM - 1), direction);
 }
 
 Real
-midPrincipal(const RankTwoTensor & r2tensor)
+midPrincipal(const RankTwoTensor & r2tensor, Point & direction)
 {
-  return calcEigenValues(r2tensor, 1);
+  return calcEigenValuesEigenVectors(r2tensor, 1, direction);
 }
 
 Real
-minPrincipal(const RankTwoTensor & r2tensor)
+minPrincipal(const RankTwoTensor & r2tensor, Point & direction)
 {
-  return calcEigenValues(r2tensor, 0);
+  return calcEigenValuesEigenVectors(r2tensor, 0, direction);
 }
 
 Real
-maxPrinciple(const RankTwoTensor & r2tensor)
-{
-  return calcEigenValues(r2tensor, (LIBMESH_DIM - 1));
-}
-
-Real
-midPrinciple(const RankTwoTensor & r2tensor)
-{
-  return calcEigenValues(r2tensor, 1);
-}
-
-Real
-minPrinciple(const RankTwoTensor & r2tensor)
-{
-  return calcEigenValues(r2tensor, 0);
-}
-
-Real
-calcEigenValues(const RankTwoTensor & r2tensor, unsigned int index)
+calcEigenValuesEigenVectors(const RankTwoTensor & r2tensor, unsigned int index, Point & eigenvec)
 {
   std::vector<Real> eigenval(LIBMESH_DIM);
-  r2tensor.symmetricEigenvalues(eigenval);
+  RankTwoTensor eigvecs;
+  r2tensor.symmetricEigenvaluesEigenvectors(eigenval, eigvecs);
 
   Real val = eigenval[index];
+  eigenvec = eigvecs.column(index);
 
   return val;
 }
