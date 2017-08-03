@@ -2,16 +2,7 @@
   [./youngs_modulus_func_temp]
     type = Exodiff
     input = 'youngs_modulus_function_temp.i'
-    cli_args = 'Materials/stress/type=ComputeFiniteStrainElasticStress'
     exodiff = 'youngs_modulus_function_temp_out.e'
-  [../]
-  [./youngs_modulus_func_temp-deprecated-variableStress]
-    type = Exodiff
-    input = 'youngs_modulus_function_temp.i'
-    cli_args = 'Materials/stress/type=ComputeVariableElasticConstantStress'
-    exodiff = 'youngs_modulus_function_temp_out.e'
-    prereq = youngs_modulus_func_temp
-    allow_deprecated_until = '8/3/2017'
   [../]
 
   [./thermomechanics]

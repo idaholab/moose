@@ -293,6 +293,7 @@
   [../]
 
   [./stress]
+    type=ComputeFiniteStrainElasticStress
   [../]
 
   [./heat]

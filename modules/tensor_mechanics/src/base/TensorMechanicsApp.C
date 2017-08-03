@@ -74,7 +74,6 @@
 #include "ComputeLinearElasticStress.h"
 #include "ComputeLinearElasticPFFractureStress.h"
 #include "ComputeFiniteStrainElasticStress.h"
-#include "ComputeVariableElasticConstantStress.h"
 #include "ComputeEigenstrain.h"
 #include "ComputeExtraStressConstant.h"
 #include "ComputeVariableBaseEigenStrain.h"
@@ -279,7 +278,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeLinearElasticStress);
   registerMaterial(ComputeLinearElasticPFFractureStress);
   registerMaterial(ComputeFiniteStrainElasticStress);
-  registerMaterial(ComputeVariableElasticConstantStress);
   registerMaterial(ComputeEigenstrain);
   registerMaterial(ComputeExtraStressConstant);
   registerMaterial(ComputeVariableBaseEigenStrain);
