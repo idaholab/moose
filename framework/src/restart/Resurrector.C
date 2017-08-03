@@ -26,7 +26,7 @@ const std::string Resurrector::MAT_PROP_EXT(".msmp");
 const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
 
 Resurrector::Resurrector(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem), _restartable(_fe_problem)
+  : _fe_problem(fe_problem), _restart_file_suffix("xdr"), _restartable(_fe_problem)
 {
 }
 
@@ -37,10 +37,16 @@ Resurrector::setRestartFile(const std::string & file_base)
 }
 
 void
+Resurrector::setRestartSuffix(const std::string & file_ext)
+{
+  _restart_file_suffix = file_ext;
+}
+
+void
 Resurrector::restartFromFile()
 {
   Moose::perf_log.push("restartFromFile()", "Setup");
-  std::string file_name(_restart_file_base + ".xdr");
+  std::string file_name(_restart_file_base + '.' + _restart_file_suffix);
   MooseUtils::checkFileReadable(file_name);
   _restartable.readRestartableDataHeader(_restart_file_base + RESTARTABLE_DATA_EXT);
   unsigned int read_flags = EquationSystems::READ_DATA;
