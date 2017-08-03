@@ -39,6 +39,7 @@
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainCPSlipRateRes.h"
 #include "FiniteStrainUObasedCP.h"
+#include "CappedMohrCoulombStressUpdate.h"
 #include "CappedWeakPlaneStressUpdate.h"
 #include "CappedWeakInclinedPlaneStressUpdate.h"
 #include "CappedWeakPlaneCosseratStressUpdate.h"
@@ -108,6 +109,7 @@
 #include "ComputeAxisymmetric1DFiniteStrain.h"
 #include "ComputePlasticHeatEnergy.h"
 #include "ComputeInterfaceStress.h"
+#include "TensileStressUpdate.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -242,6 +244,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainCPSlipRateRes);
   registerMaterial(FiniteStrainUObasedCP);
+  registerMaterial(CappedMohrCoulombStressUpdate);
   registerMaterial(CappedWeakPlaneStressUpdate);
   registerMaterial(CappedWeakInclinedPlaneStressUpdate);
   registerMaterial(CappedWeakPlaneCosseratStressUpdate);
@@ -311,6 +314,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetric1DFiniteStrain);
   registerMaterial(ComputePlasticHeatEnergy);
   registerMaterial(ComputeInterfaceStress);
+  registerMaterial(TensileStressUpdate);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

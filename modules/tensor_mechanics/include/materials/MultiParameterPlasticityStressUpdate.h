@@ -76,6 +76,10 @@ InputParameters validParams<MultiParameterPlasticityStressUpdate>();
  * for the _num_sp stress_params S, and the single scalar ga
  * (actually I solve for gaE = ga * _En, where _En is a normalising
  * factor so that gaE is of similar magnitude to the S variables).
+ * In general E[a, b] = dS[a]/dstress(i, j) E(i, j, k, l) dS[b]/dstress(k, l),
+ * and in the code below it is assumed that the E[a, b] are independent
+ * of the stress_params, but adding a dependence would only require
+ * some Jacobian terms to be modified.
  * There are N+1 rhs equations to solve.  Here f is
  * the smoothed yield function, so the last equation is the admissibility
  * condition (the returned stress lies on the yield surface) and g
@@ -213,7 +217,7 @@ protected:
     {
     }
 
-    // this is involved in the smoothing of a group of yield functions
+    // this may be involved in the smoothing of a group of yield functions
     bool operator<(const yieldAndFlow & fd) const { return f < fd.f; }
   };
 
@@ -221,13 +225,28 @@ protected:
    * Computes the smoothed yield function
    * @param stress_params The stress parameters (eg stress_params[0] = stress_zz and
    * stress_params[1] = sqrt(stress_zx^2 + stress_zy^2))
-   * @param intnl The internal parameters (intnl[0] is shear, intnl[1] is tensile)
+   * @param intnl The internal parameters (eg intnl[0] is shear, intnl[1] is tensile)
    * @return The smoothed yield function value
    */
   Real yieldF(const std::vector<Real> & stress_params, const std::vector<Real> & intnl) const;
 
   /**
-   * Smooths yield functions
+   * Computes the smoothed yield function
+   * @param yfs The values of the individual yield functions
+   * @return The smoothed yield function value
+   */
+  Real yieldF(const std::vector<Real> & yfs) const;
+
+  /**
+   * Smooths yield functions.  The returned value must be zero if abs(f_diff) >= _smoothing_tol
+   * and otherwise must satisfy, over -_smoothing_tol <= f_diff <= _smoothing_tol:
+   * (1) C2
+   * (2) zero at f_diff = +/- _smoothing_tol
+   * (3) derivative is +/-0.5 at f_diff = +/- _smoothing_tol
+   * (4) derivative must be in [-0.5, 0.5]
+   * (5) second derivative is zero at f_diff = +/- _smoothing_tol
+   * (6) second derivative must be non-negative
+   * in order to ensure C2 differentiability and convexity of the smoothed yield surface.
    */
   Real ismoother(Real f_diff) const;
 
@@ -457,7 +476,7 @@ protected:
 
   /**
    * Sets the derivatives of internal parameters, based on the trial values of
-   * stress_params, their current values, and the old values of the
+   * stress_params, their current values, and the current values of the
    * internal parameters.
    * Derived classes must override this.
    * @param trial_stress_params[in] The trial stress parameters
@@ -501,7 +520,7 @@ protected:
    * This is called after the return-map process has completed
    * successfully in stress_param space, just after finalizeReturnProcess
    * has been called.
-   * Derived classes may override this function
+   * Derived classes must override this function
    * @param stress_trial[in] The trial value of stress
    * @param stress_params[in] The value of the stress_params after the return-map process has
    * completed successfully
@@ -519,7 +538,7 @@ protected:
                                      const std::vector<Real> & intnl,
                                      const yieldAndFlow & smoothed_q,
                                      const RankFourTensor & Eijkl,
-                                     RankTwoTensor & stress) const;
+                                     RankTwoTensor & stress) const = 0;
 
   /**
    * Sets inelastic strain increment from the returned configuration
@@ -596,7 +615,11 @@ protected:
 
   /**
    * Calculates derivatives of the stress_params and gaE with repect to the
-   * trial values of the stress_params for the (sub)strain increment
+   * trial values of the stress_params for the (sub)strain increment.
+   * After the strain increment has been fully applied, dvar_dtrial will
+   * contain the result appropriate to the full strain increment.  Before
+   * that time (if applying in sub-strain increments) it will contain the
+   * result appropriate to the amount of strain increment applied successfully.
    * @param elastic_only[in] whether this was an elastic step: if so then the updates to dvar_dtrial
    * are fairly trivial
    * @param trial_stress_params[in] Trial values of stress_params for this (sub)strain increment
@@ -609,7 +632,7 @@ protected:
    * @param compute_full_tangent_operator[in] true if the full consistent tangent operator is
    * needed,
    * otherwise false
-   * @param dvar_dtrial[out] dvar_dtrial[i][j] = d({stress_param[i],gaE})/d(stress_param[j])
+   * @param dvar_dtrial[out] dvar_dtrial[i][j] = d({stress_param[i],gaE})/d(trial_stress_param[j])
    */
   void dVardTrial(bool elastic_only,
                   const std::vector<Real> & trial_stress_params,

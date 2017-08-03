@@ -273,20 +273,6 @@ TwoParameterPlasticityStressUpdate::setStressAfterReturnV(const RankTwoTensor & 
   const Real q_ok = stress_params[1];
   setStressAfterReturn(stress_trial, p_ok, q_ok, gaE, intnl, smoothed_q, Eijkl, stress);
 }
-void
-TwoParameterPlasticityStressUpdate::setStressAfterReturn(const RankTwoTensor & stress_trial,
-                                                         Real /*p_ok*/,
-                                                         Real /*q_ok*/,
-                                                         Real gaE,
-                                                         const std::vector<Real> & /*intnl*/,
-                                                         const yieldAndFlow & smoothed_q,
-                                                         const RankFourTensor & elasticity_tensor,
-                                                         RankTwoTensor & stress) const
-{
-  const RankTwoTensor correction = elasticity_tensor * (smoothed_q.dg[0] * dpdstress(stress) +
-                                                        smoothed_q.dg[1] * dqdstress(stress));
-  stress = stress_trial - gaE / _Epp * correction;
-}
 
 void
 TwoParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
