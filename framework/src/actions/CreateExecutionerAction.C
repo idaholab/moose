@@ -17,6 +17,7 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "Executioner.h"
+#include "EigenExecutioner.h"
 #include "FEProblem.h"
 #include "EigenProblem.h"
 
@@ -43,6 +44,10 @@ CreateExecutionerAction::act()
       (std::dynamic_pointer_cast<EigenProblem>(_problem)).get();
   std::shared_ptr<Executioner> executioner =
       _factory.create<Executioner>(_type, "Executioner", _moose_object_pars);
+
+  if (std::dynamic_pointer_cast<EigenProblem>(_problem).get() &&
+      !(std::dynamic_pointer_cast<EigenExecutioner>(executioner).get()))
+    mooseError("EigenProblem requires an EigenExecutioner or its derived subclass");
 
   _app.executioner() = executioner;
 }

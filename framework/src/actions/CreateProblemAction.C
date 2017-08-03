@@ -15,6 +15,7 @@
 #include "CreateProblemAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
+#include "EigenProblem.h"
 #include "MooseApp.h"
 
 template <>
@@ -68,6 +69,24 @@ CreateProblemAction::act()
   {
     // build the problem only if we have mesh
     {
+      // if users try to use Eigen Executioner and do not specify a problem type,
+      // we should create EigenProblem
+      if (_app.useEigenExecutioner() && _type == "FEProblem")
+      {
+        _type = "EigenProblem";
+        parameters().set<std::string>("type") = "EigenProblem";
+        _moose_object_pars =
+            (!parameters().have_parameter<bool>("skip_param_construction") ||
+                     (parameters().have_parameter<bool>("skip_param_construction") &&
+                      !parameters().get<bool>("skip_param_construction"))
+                 ? _factory.getValidParams(_type)
+                 : validParams<MooseObject>());
+        _app.parser().extractParams(parameters().get<std::string>("parser_syntax"),
+                                    _moose_object_pars);
+        _moose_object_pars.set<std::vector<std::string>>("control_tags")
+            .push_back(MooseUtils::baseName(parameters().get<std::string>("parser_syntax")));
+      }
+
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
 
@@ -81,6 +100,13 @@ CreateProblemAction::act()
           _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())
         mooseError("Problem has to be of a FEProblemBase type");
+
+      // if users provide a problem type, the type has to be an EigenProblem or its derived subclass
+      // when uing an eigen executioner
+      if (_app.useEigenExecutioner() && _type != "EigenProblem" &&
+          !(std::dynamic_pointer_cast<EigenProblem>(_problem).get()))
+        mooseError("Problem has to be of a EigenProblem (or derived subclass) type when using "
+                   "eigen executioner");
     }
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);

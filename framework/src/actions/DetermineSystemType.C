@@ -37,4 +37,8 @@ DetermineSystemType::act()
    */
   if (_moose_object_pars.isParamValid("_eigen") && _moose_object_pars.get<bool>("_eigen"))
     _app.useNonlinear() = false;
+
+  if (_moose_object_pars.isParamValid("_use_eigen_executioner") &&
+      _moose_object_pars.get<bool>("_use_eigen_executioner"))
+    _app.useEigenExecutioner() = true;
 }

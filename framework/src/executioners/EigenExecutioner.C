@@ -23,7 +23,11 @@ template <>
 InputParameters
 validParams<EigenExecutioner>()
 {
-  return validParams<Steady>();
+  InputParameters params = validParams<Steady>();
+
+  params.addPrivateParam<bool>("_use_eigen_executioner", true);
+
+  return params;
 }
 
 EigenExecutioner::EigenExecutioner(const InputParameters & parameters)

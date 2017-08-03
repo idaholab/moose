@@ -220,6 +220,11 @@ public:
   bool & useNonlinear() { return _use_nonlinear; }
 
   /**
+   * Set a Boolean indicating whether this app will use an eigenvalue executioner.
+   */
+  bool & useEigenExecutioner() { return _use_eigen_executioner; }
+
+  /**
    * Retrieve the Factory associated with this App.
    */
   Factory & getFactory() { return _factory; }
@@ -580,6 +585,9 @@ protected:
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;
+
+  /// Boolean to indicate whether to use an eigenvalue executioner
+  bool _use_eigen_executioner;
 
   /// System Information
   std::shared_ptr<SystemInfo> _sys_info;
