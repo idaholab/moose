@@ -156,7 +156,8 @@ class GoogleChartBase(MooseMarkdownCommon, Pattern):
         complete = template.render(**self.arguments(settings))
 
         if self._status is not None:
-            return self.createErrorElement(self._status, title="Google Chart Creation Error")
+            return self.createErrorElement(self._status, title="Google Chart Creation Error",
+                                           error=False)
 
         # Create the <script> tag
         script = etree.SubElement(div, 'script')
