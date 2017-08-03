@@ -3,10 +3,12 @@
     type = RunApp
     input = threads.i
     min_threads = 2
+    cli_args = --allow-test-objects
   [../]
   [./mpi]
     type = RunApp
     input = mpi.i
     min_parallel = 2
+    cli_args = --allow-test-objects
   [../]
 []
