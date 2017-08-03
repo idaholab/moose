@@ -16,7 +16,7 @@ where $a$ and $b$ are the lower bound and upper bound for the uniform distributi
 
 ## Example Input Syntax
 
-!listing modules/stochastic_tools/tests/distributions/uniform.i block=Distributions
+!listing modules/stochastic_tools/test/tests/distributions/uniform.i block=Distributions
 
 !syntax parameters /Distributions/UniformDistribution
 

@@ -5,8 +5,6 @@
 # list of application-wide excluded source files
 excluded_srcfiles :=
 
-print-%  : ; @echo $* = $($*)
-
 #
 # Save off parameters for possible app.mk recursion
 #

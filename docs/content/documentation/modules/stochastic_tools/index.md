@@ -25,13 +25,13 @@ methods.
 To utilize a Distribution object within an input file, first the object must be created and secondly an object must be defined to use the distribution. Distribution objects may be
 created in the input file within the `[Distributions]` block, as shown below.
 
-!listing modules/stochastic_tools/tests/distributions/uniform.i block=Distributions
+!listing modules/stochastic_tools/test/tests/distributions/uniform.i block=Distributions
 
 To use a distribution an object must inherit from the DistributionInterface, which provides
 to methods:
 
 * **getDistribution**<br>
-This method accepts the name of an input parameter added via a call with the  
+This method accepts the name of an input parameter added via a call with the
 `addParam<DistributionName>` method. In general, application developers will use this method.
 
 * **getDistributionByName**<br>

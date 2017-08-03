@@ -86,7 +86,7 @@ def moose_docs_app_syntax(location, hide=None):
         sys.exit(1)
 
     try:
-        raw = mooseutils.runExe(exe, '--json')
+        raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
         tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
