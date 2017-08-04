@@ -37,6 +37,7 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),
+    _initialized(false),
     _initial_steps(0),
     _steps(0),
     _print_mesh_changed(false),
@@ -94,6 +95,9 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
     // TODO: This is currently an empty function on the DisplacedProblem... could it be removed?
     _displaced_problem->initAdaptivity();
   }
+
+  // indicate the Adaptivity system has been initialized
+  _initialized = true;
 }
 
 void
@@ -231,6 +235,16 @@ Adaptivity::uniformRefineWithProjection()
       displaced_mesh_refinement.uniformly_refine(1);
     _subproblem.meshChanged();
   }
+}
+
+void
+Adaptivity::setAdaptivityOn(bool state)
+{
+  // check if Adaptivity has been initialized before turning on
+  if (state == true && !_initialized)
+    mooseError("Mesh adaptivity system not available");
+
+  _mesh_refinement_on = state;
 }
 
 void
