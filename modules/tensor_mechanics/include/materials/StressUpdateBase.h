@@ -40,8 +40,9 @@ public:
    * Given a strain increment that results in a trial stress, perform some
    * procedure (such as an iterative return-mapping process) to produce
    * an admissible stress, an elastic strain increment and an inelastic
-   * strain increment, as well as d(stress)/d(strain) (or some approximation
-   * to it).
+   * strain increment.
+   * If _fe_problem.currentlyComputingJacobian() = true, then updateState also computes
+   * d(stress)/d(strain) (or some approximation to it).
    *
    * This method is called by ComputeMultipleInelasticStress.
    * This method is pure virutal: all inheriting classes must overwrite this method.
@@ -55,10 +56,11 @@ public:
    * @param stress_old The old value of stress
    * @param elasticity_tensor The elasticity tensor
    * @param compute_full_tangent_operator The calling routine would like the full consistent tangent
-   * operator to be placed in tangent_operator, if possible.
+   * operator to be placed in tangent_operator, if possible.  This is irrelevant if
+   * _fe_problem.currentlyComputingJacobian() = false
    * @param tangent_operator d(stress)/d(strain), or some approximation to it  If
    * compute_full_tangent_operator=false, then tangent_operator=elasticity_tensor is an appropriate
-   * choice
+   * choice.  tangent_operator is only computed if _fe_problem.currentlyComputingJacobian() = true
    */
   virtual void updateState(RankTwoTensor & strain_increment,
                            RankTwoTensor & inelastic_strain_increment,

@@ -81,7 +81,7 @@ TwoParameterPlasticityStressUpdate::preReturnMap(Real /*p_trial*/,
 }
 
 void
-TwoParameterPlasticityStressUpdate::initialiseVars(Real p_trial,
+TwoParameterPlasticityStressUpdate::initializeVars(Real p_trial,
                                                    Real q_trial,
                                                    const std::vector<Real> & intnl_old,
                                                    Real & p,
@@ -106,7 +106,7 @@ TwoParameterPlasticityStressUpdate::computeAllQV(const std::vector<Real> & stres
 }
 
 void
-TwoParameterPlasticityStressUpdate::initialiseVarsV(const std::vector<Real> & trial_stress_params,
+TwoParameterPlasticityStressUpdate::initializeVarsV(const std::vector<Real> & trial_stress_params,
                                                     const std::vector<Real> & intnl_old,
                                                     std::vector<Real> & stress_params,
                                                     Real & gaE,
@@ -116,7 +116,7 @@ TwoParameterPlasticityStressUpdate::initialiseVarsV(const std::vector<Real> & tr
   const Real q_trial = trial_stress_params[1];
   Real p;
   Real q;
-  initialiseVars(p_trial, q_trial, intnl_old, p, q, gaE, intnl);
+  initializeVars(p_trial, q_trial, intnl_old, p, q, gaE, intnl);
   stress_params[0] = p;
   stress_params[1] = q;
 }
@@ -209,9 +209,6 @@ TwoParameterPlasticityStressUpdate::consistentTangentOperator(
     bool compute_full_tangent_operator,
     RankFourTensor & cto) const
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = elasticity_tensor;
   if (!compute_full_tangent_operator)
     return;

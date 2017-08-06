@@ -59,7 +59,7 @@ protected:
   /// Elasticity tensor rotated to the frame where _n points along "z"
   RankFourTensor _rotated_Eijkl;
 
-  virtual void initialiseReturnProcess() override;
+  virtual void initializeReturnProcess() override;
   virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
   virtual void preReturnMap(Real p_trial,

@@ -692,7 +692,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old,
 
   iter = 0;
 
-  // Initialise the set of active constraints
+  // Initialize the set of active constraints
   // At this stage, the active constraints are
   // those that exceed their _f_tol
   // active constraints.

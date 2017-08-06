@@ -92,7 +92,7 @@ protected:
                     const std::vector<Real> & intnl,
                     std::vector<yieldAndFlow> & all_q) const override;
 
-  void initialiseVarsV(const std::vector<Real> & trial_stress_params,
+  void initializeVarsV(const std::vector<Real> & trial_stress_params,
                        const std::vector<Real> & intnl_old,
                        std::vector<Real> & stress_params,
                        Real & gaE,

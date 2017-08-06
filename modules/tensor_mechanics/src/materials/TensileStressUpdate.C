@@ -162,7 +162,7 @@ TensileStressUpdate::setEffectiveElasticity(const RankFourTensor & Eijkl)
 }
 
 void
-TensileStressUpdate::initialiseVarsV(const std::vector<Real> & trial_stress_params,
+TensileStressUpdate::initializeVarsV(const std::vector<Real> & trial_stress_params,
                                      const std::vector<Real> & intnl_old,
                                      std::vector<Real> & stress_params,
                                      Real & gaE,
@@ -229,9 +229,6 @@ TensileStressUpdate::consistentTangentOperatorV(const RankTwoTensor & stress_tri
                                                 const std::vector<std::vector<Real>> & dvar_dtrial,
                                                 RankFourTensor & cto)
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = elasticity_tensor;
   if (!compute_full_tangent_operator)
     return;

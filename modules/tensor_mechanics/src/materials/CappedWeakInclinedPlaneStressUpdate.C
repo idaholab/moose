@@ -59,9 +59,9 @@ CappedWeakInclinedPlaneStressUpdate::finalizeReturnProcess(const RankTwoTensor &
 }
 
 void
-CappedWeakInclinedPlaneStressUpdate::initialiseReturnProcess()
+CappedWeakInclinedPlaneStressUpdate::initializeReturnProcess()
 {
-  CappedWeakPlaneStressUpdate::initialiseReturnProcess();
+  CappedWeakPlaneStressUpdate::initializeReturnProcess();
   if (_perform_finite_strain_rotations)
   {
     _rot_n_to_z = RotationMatrix::rotVecToZ(_n[_qp]);

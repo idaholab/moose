@@ -64,7 +64,7 @@ validParams<MultiParameterPlasticityStressUpdate>()
   params.addParam<std::vector<Real>>("admissible_stress",
                                      "A single admissible value of the value of the stress "
                                      "parameters for internal parameters = 0.  This is used "
-                                     "to initialise the return-mapping algorithm during the first "
+                                     "to initialize the return-mapping algorithm during the first "
                                      "nonlinear iteration.  If not given then it is assumed that "
                                      "stress parameters = 0 is admissible.");
   return params;
@@ -151,7 +151,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                                                   bool compute_full_tangent_operator,
                                                   RankFourTensor & tangent_operator)
 {
-  initialiseReturnProcess();
+  initializeReturnProcess();
 
   if (_t_step >= 2)
     _step_one = false;
@@ -167,11 +167,9 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
   if (yieldF(_yf[_qp]) <= _f_tol)
   {
     _plastic_strain[_qp] = _plastic_strain_old[_qp];
+    inelastic_strain_increment.zero();
     if (_fe_problem.currentlyComputingJacobian())
-    {
-      inelastic_strain_increment.zero();
       tangent_operator = elasticity_tensor;
-    }
     return;
   }
 
@@ -236,7 +234,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
     for (unsigned i = 0; i < _num_sp; ++i)
       _trial_sp[i] = _ok_sp[i] + step_size * _del_stress_params[i];
 
-    // initialise variables that are to be found via Newton-Raphson
+    // initialize variables that are to be found via Newton-Raphson
     _current_sp = _trial_sp;
     Real gaE = 0.0;
 
@@ -259,8 +257,8 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
     {
       // this is a plastic step
 
-      // initialise current_sp, gaE and current_intnl based on the non-smoothed situation
-      initialiseVarsV(_trial_sp, _ok_intnl, _current_sp, gaE, _current_intnl);
+      // initialize current_sp, gaE and current_intnl based on the non-smoothed situation
+      initializeVarsV(_trial_sp, _ok_intnl, _current_sp, gaE, _current_intnl);
       // and find the smoothed yield function, flow potential and derivatives
       smoothed_q = smoothAllQuantities(_current_sp, _current_intnl);
       smoothed_q_calculated = true;
@@ -357,16 +355,18 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
   strain_increment = strain_increment - inelastic_strain_increment;
   _plastic_strain[_qp] = _plastic_strain_old[_qp] + inelastic_strain_increment;
 
-  consistentTangentOperatorV(_stress_trial,
-                             _trial_sp,
-                             stress_new,
-                             _ok_sp,
-                             gaE_total,
-                             smoothed_q,
-                             elasticity_tensor,
-                             compute_full_tangent_operator,
-                             _dvar_dtrial,
-                             tangent_operator);
+  if (_fe_problem.currentlyComputingJacobian())
+    // for efficiency, do not compute the tangent operator if not currently computing Jacobian
+    consistentTangentOperatorV(_stress_trial,
+                               _trial_sp,
+                               stress_new,
+                               _ok_sp,
+                               gaE_total,
+                               smoothed_q,
+                               elasticity_tensor,
+                               compute_full_tangent_operator,
+                               _dvar_dtrial,
+                               tangent_operator);
 }
 
 MultiParameterPlasticityStressUpdate::yieldAndFlow
@@ -592,7 +592,7 @@ MultiParameterPlasticityStressUpdate::errorHandler(const std::string & message) 
 }
 
 void
-MultiParameterPlasticityStressUpdate::initialiseReturnProcess()
+MultiParameterPlasticityStressUpdate::initializeReturnProcess()
 {
 }
 
@@ -638,7 +638,7 @@ MultiParameterPlasticityStressUpdate::yieldF(const std::vector<Real> & yfs) cons
 }
 
 void
-MultiParameterPlasticityStressUpdate::initialiseVarsV(const std::vector<Real> & trial_stress_params,
+MultiParameterPlasticityStressUpdate::initializeVarsV(const std::vector<Real> & trial_stress_params,
                                                       const std::vector<Real> & intnl_old,
                                                       std::vector<Real> & stress_params,
                                                       Real & gaE,
@@ -662,9 +662,6 @@ MultiParameterPlasticityStressUpdate::consistentTangentOperatorV(
     const std::vector<std::vector<Real>> & dvar_dtrial,
     RankFourTensor & cto)
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = elasticity_tensor;
   if (!compute_full_tangent_operator)
     return;

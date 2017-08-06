@@ -138,4 +138,12 @@ getIsotropicYoungsModulus(const RankFourTensor & elasticity_tensor)
       shear_modulus * (3.0 * lambda + 2.0 * shear_modulus) / (lambda + shear_modulus);
   return youngs_modulus;
 }
+
+Real
+getIsotropicPoissonsRatio(const RankFourTensor & elasticity_tensor)
+{
+  const Real poissons_ratio = elasticity_tensor(1, 1, 0, 0) /
+                              (elasticity_tensor(1, 1, 1, 1) + elasticity_tensor(1, 1, 0, 0));
+  return poissons_ratio;
+}
 }
