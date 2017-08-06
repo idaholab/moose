@@ -258,6 +258,7 @@
 #include "VolumeHistogram.h"
 
 // user objects
+#include "GeometrySphere.h"
 #include "LayeredIntegral.h"
 #include "LayeredAverage.h"
 #include "LayeredSideIntegral.h"
@@ -706,6 +707,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(VolumeHistogram);
 
   // user objects
+  registerUserObject(GeometrySphere);
   registerUserObject(LayeredIntegral);
   registerUserObject(LayeredAverage);
   registerUserObject(LayeredSideIntegral);
