@@ -1,0 +1,7 @@
+[Tests]
+  [./geometrysphere]
+    type = 'Exodiff'
+    input = 'geometrysphere.i'
+    exodiff = 'geometrysphere_out.e-s004'
+  [../]
+[]
