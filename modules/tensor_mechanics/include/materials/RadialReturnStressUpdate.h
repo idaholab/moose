@@ -78,6 +78,16 @@ protected:
   virtual void initQpStatefulProperties() override;
 
   /**
+   * Propagate the properties pertaining to this intermediate class.  This
+   * is intended to be called from propagateQpStatefulProperties() in
+   * classes that inherit from this one.
+   * This is intentionally named uniquely because almost all models that derive
+   * from this class have their own stateful properties, and this forces them
+   * to define their own implementations of propagateQpStatefulProperties().
+   */
+  void propagateQpStatefulPropertiesRadialReturn();
+
+  /**
    * Perform any necessary initialization before return mapping iterations
    * @param effective_trial_stress Effective trial stress
    * @param elasticityTensor     Elasticity tensor

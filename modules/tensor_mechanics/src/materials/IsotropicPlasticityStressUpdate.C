@@ -42,10 +42,10 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
     _hardening_constant(getParam<Real>("hardening_constant")),
     _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function")
                                                            : NULL),
-
+    _yield_condition(-1.0), // set to a non-physical value to catch uninitalized yield condition
+    _hardening_slope(0.0),
     _plastic_strain(declareProperty<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
-
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
     _temperature(coupledValue("temperature"))
@@ -67,12 +67,17 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
 void
 IsotropicPlasticityStressUpdate::initQpStatefulProperties()
 {
-  // set a default non-physical value to catch uninitalized yield condition--could cause problems
-  // later on
-  _yield_condition = -1.0;
   _hardening_variable[_qp] = 0.0;
-  _hardening_slope = 0.0;
   _plastic_strain[_qp].zero();
+}
+
+void
+IsotropicPlasticityStressUpdate::propagateQpStatefulProperties()
+{
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+
+  propagateQpStatefulPropertiesRadialReturn();
 }
 
 void
