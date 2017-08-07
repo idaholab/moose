@@ -61,13 +61,6 @@ public:
    */
   MultiMooseEnum(const MultiMooseEnum & other_enum);
 
-  /**
-   * Named constructor to build an empty MultiMooseEnum with only the
-   * valid names and the allow_out_of_range flag taken from another enumeration
-   * @param other_enum - The other enumeration to copy the validity checking data from
-   */
-  static MultiMooseEnum withNamesFrom(const MooseEnumBase & other_enum);
-
   ///@{
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums

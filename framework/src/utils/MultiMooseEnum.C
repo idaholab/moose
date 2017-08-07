@@ -37,12 +37,6 @@ MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
 {
 }
 
-MultiMooseEnum
-MultiMooseEnum::withNamesFrom(const MooseEnumBase & other_enum)
-{
-  return MultiMooseEnum(other_enum);
-}
-
 /**
  * Private constuctor for use by libmesh::Parameters
  */

@@ -53,8 +53,7 @@ public:
    * @param names - a list of names for this enumeration
    * @param default_name - the default value for this enumeration instance
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   * it's range of
-   *                       defined values.
+   * it's range of defined values.
    */
   MooseEnum(std::string names, std::string default_name = "", bool allow_out_of_range = false);
 
@@ -63,13 +62,6 @@ public:
    * @param other_enum - The other enumeration to copy state from
    */
   MooseEnum(const MooseEnum & other_enum);
-
-  /**
-   * Named constructor to build an empty MooseEnum with only the valid names
-   * and the allow_out_of_range flag taken from another enumeration
-   * @param other_enum - The other enumeration to copy the validity checking data from
-   */
-  static MooseEnum withNamesFrom(const MooseEnumBase & other_enum);
 
   virtual ~MooseEnum() = default;
 
@@ -141,12 +133,6 @@ private:
    * Private constructor for use by libmesh::Parameters
    */
   MooseEnum();
-
-  /**
-   * Private constructor that can accept a MooseEnumBase for ::withOptionsFrom()
-   * @param other_enum - MooseEnumBase type to copy names and out-of-range data from
-   */
-  MooseEnum(const MooseEnumBase & other_enum);
 
   /// The current id
   MooseEnumItem _current;
