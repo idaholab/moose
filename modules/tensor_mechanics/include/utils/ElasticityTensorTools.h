@@ -68,6 +68,12 @@ Real getIsotropicBulkModulus(const RankFourTensor & elasticity_tensor);
  * param elasticity_tensor the tensor (must be isotropic, but not checked for efficiency)
  */
 Real getIsotropicYoungsModulus(const RankFourTensor & elasticity_tensor);
+
+/**
+ * Get the Poisson's modulus for an isotropic elasticity tensor
+ * param elasticity_tensor the tensor (must be isotropic, but not checked for efficiency)
+ */
+Real getIsotropicPoissonsRatio(const RankFourTensor & elasticity_tensor);
 }
 
 #endif // ELASTICITYTENSORTOOLS_H

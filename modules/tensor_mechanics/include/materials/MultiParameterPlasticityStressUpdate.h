@@ -453,7 +453,7 @@ protected:
    * @param gaE[out] The "good guess" value of gaE
    * @param intnl[out] The "good guess" value of the internal parameters
    */
-  virtual void initialiseVarsV(const std::vector<Real> & trial_stress_params,
+  virtual void initializeVarsV(const std::vector<Real> & trial_stress_params,
                                const std::vector<Real> & intnl_old,
                                std::vector<Real> & stress_params,
                                Real & gaE,
@@ -500,12 +500,12 @@ protected:
 
   /**
    * Derived classes may use this to perform calculations before
-   * any return-map process is performed, for instance, to initialise
+   * any return-map process is performed, for instance, to initialize
    * variables.
    * This is called at the very start of updateState, even before
    * any checking for admissible stresses, etc, is performed
    */
-  virtual void initialiseReturnProcess();
+  virtual void initializeReturnProcess();
 
   /**
    * Derived classes may use this to perform calculations after the
@@ -657,7 +657,7 @@ protected:
 
 private:
   /**
-   * "Trial" value of stress_params that initialises the return-map process
+   * "Trial" value of stress_params that initializes the return-map process
    * This is derived from stress = stress_old + Eijkl * strain_increment.
    * However, since the return-map process can fail and be restarted by
    * applying strain_increment in multiple substeps, _trial_sp can vary

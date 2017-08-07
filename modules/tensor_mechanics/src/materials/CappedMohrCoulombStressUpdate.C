@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "CappedMohrCoulombStressUpdate.h"
 #include "libmesh/utility.h"
+#include "ElasticityTensorTools.h"
 
 template <>
 InputParameters
@@ -94,7 +95,7 @@ CappedMohrCoulombStressUpdate::preReturnMapV(const std::vector<Real> & /*trial_s
 {
   std::vector<Real> eigvals;
   stress_trial.symmetricEigenvaluesEigenvectors(eigvals, _eigvecs);
-  _poissons_ratio = Eijkl(2, 2, 0, 0) / (Eijkl(2, 2, 2, 2) + Eijkl(2, 2, 0, 0));
+  _poissons_ratio = ElasticityTensorTools::getIsotropicPoissonsRatio(Eijkl);
 }
 
 void
@@ -257,7 +258,7 @@ CappedMohrCoulombStressUpdate::setEffectiveElasticity(const RankFourTensor & Eij
 }
 
 void
-CappedMohrCoulombStressUpdate::initialiseVarsV(const std::vector<Real> & trial_stress_params,
+CappedMohrCoulombStressUpdate::initializeVarsV(const std::vector<Real> & trial_stress_params,
                                                const std::vector<Real> & intnl_old,
                                                std::vector<Real> & stress_params,
                                                Real & gaE,
@@ -712,7 +713,7 @@ CappedMohrCoulombStressUpdate::initialiseVarsV(const std::vector<Real> & trial_s
       for (unsigned i = 0; i < _num_sp; ++i)
         stress_params[i] = trial_stress_params[i];
       gaE = 0.0;
-      mooseWarning("CappedMohrCoulombStressUpdate cannot initialise from max = ",
+      mooseWarning("CappedMohrCoulombStressUpdate cannot initialize from max = ",
                    stress_params[2],
                    " mid = ",
                    stress_params[1],
@@ -795,9 +796,6 @@ CappedMohrCoulombStressUpdate::consistentTangentOperatorV(
     const std::vector<std::vector<Real>> & dvar_dtrial,
     RankFourTensor & cto)
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = elasticity_tensor;
   if (!compute_full_tangent_operator)
     return;

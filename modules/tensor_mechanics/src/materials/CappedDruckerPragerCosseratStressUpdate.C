@@ -82,9 +82,6 @@ CappedDruckerPragerCosseratStressUpdate::consistentTangentOperator(
     bool compute_full_tangent_operator,
     RankFourTensor & cto) const
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   if (!compute_full_tangent_operator)
   {
     cto = Eijkl;

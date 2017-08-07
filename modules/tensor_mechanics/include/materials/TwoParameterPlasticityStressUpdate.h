@@ -137,14 +137,14 @@ protected:
    * @param gaE[out] The "good guess" value of gaE.  Default = 0
    * @param intnl[out] The "good guess" value of the internal parameters
    */
-  virtual void initialiseVars(Real p_trial,
+  virtual void initializeVars(Real p_trial,
                               Real q_trial,
                               const std::vector<Real> & intnl_old,
                               Real & p,
                               Real & q,
                               Real & gaE,
                               std::vector<Real> & intnl) const;
-  void initialiseVarsV(const std::vector<Real> & trial_stress_params,
+  void initializeVarsV(const std::vector<Real> & trial_stress_params,
                        const std::vector<Real> & intnl_old,
                        std::vector<Real> & stress_params,
                        Real & gaE,
