@@ -19,18 +19,14 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    incremental = true
   [../]
 []
 
@@ -105,10 +101,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
-  [../]
-  [./strain]
-    type = ComputeIncrementalSmallStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

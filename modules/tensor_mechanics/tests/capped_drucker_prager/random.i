@@ -16,23 +16,17 @@
   zmin = 0
   zmax = 1
 []
-
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = finite
   [../]
 []
-
 
 [ICs]
   [./x]
@@ -216,11 +210,6 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.7E7 1E7'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

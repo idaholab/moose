@@ -12,23 +12,16 @@
   zmin = -0.5
   zmax = 0.5
 []
-
-
-[Variables]
-  [./x_disp]
-  [../]
-  [./y_disp]
-  [../]
-  [./z_disp]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'x_disp y_disp z_disp'
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    incremental = true
   [../]
 []
-
 
 [UserObjects]
   [./coh]
@@ -58,10 +51,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'x_disp y_disp z_disp'
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

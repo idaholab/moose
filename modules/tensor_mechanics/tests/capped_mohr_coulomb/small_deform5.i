@@ -18,21 +18,18 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
+    generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
   [../]
 []
-
 
 [BCs]
   [./x]
@@ -56,18 +53,6 @@
 []
 
 [AuxVariables]
-  [./stress_I]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_II]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_III]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -99,24 +84,6 @@
 []
 
 [AuxKernels]
-  [./stress_I]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    variable = stress_I
-    scalar_type = MaxPrincipal
-  [../]
-  [./stress_II]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = MidPrincipal
-    variable = stress_II
-  [../]
-  [./stress_III]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = MinPrincipal
-    variable = stress_III
-  [../]
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -171,17 +138,17 @@
   [./s_I]
     type = PointValue
     point = '0 0 0'
-    variable = stress_I
+    variable = max_principal_stress
   [../]
   [./s_II]
     type = PointValue
     point = '0 0 0'
-    variable = stress_II
+    variable = mid_principal_stress
   [../]
   [./s_III]
     type = PointValue
     point = '0 0 0'
-    variable = stress_III
+    variable = min_principal_stress
   [../]
   [./f]
     type = PointValue
@@ -214,10 +181,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 2.0'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./tensile]
     type = CappedMohrCoulombStressUpdate

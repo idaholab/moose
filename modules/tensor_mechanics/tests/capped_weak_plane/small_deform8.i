@@ -25,19 +25,15 @@
   zmax = 0.5
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    incremental = true
+    generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz plastic_strain_xx plastic_strain_xy plastic_strain_xz plastic_strain_yy plastic_strain_yz plastic_strain_zz strain_xx strain_xy strain_xz strain_yy strain_yz strain_zz'
   [../]
 []
 
@@ -82,78 +78,6 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strainp_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strainp_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strainp_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strainp_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strainp_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strainp_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./straint_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./straint_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./straint_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./straint_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./straint_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./straint_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./f_shear]
     order = CONSTANT
     family = MONOMIAL
@@ -185,132 +109,6 @@
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
-  [./strainp_xx]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = strainp_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./strainp_xy]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = strainp_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./strainp_xz]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = strainp_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./strainp_yy]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = strainp_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./strainp_yz]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = strainp_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./strainp_zz]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = strainp_zz
-    index_i = 2
-    index_j = 2
-  [../]
-  [./straint_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = straint_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./straint_xy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = straint_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./straint_xz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = straint_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./straint_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = straint_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./straint_yz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = straint_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./straint_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = straint_zz
-    index_i = 2
-    index_j = 2
-  [../]
   [./f_shear]
     type = MaterialStdVectorAux
     property = plastic_yield_function
@@ -387,62 +185,62 @@
   [./strainp_xx]
     type = PointValue
     point = '0 0 0'
-    variable = strainp_xx
+    variable = plastic_strain_xx
   [../]
   [./strainp_xy]
     type = PointValue
     point = '0 0 0'
-    variable = strainp_xy
+    variable = plastic_strain_xy
   [../]
   [./strainp_xz]
     type = PointValue
     point = '0 0 0'
-    variable = strainp_xz
+    variable = plastic_strain_xz
   [../]
   [./strainp_yy]
     type = PointValue
     point = '0 0 0'
-    variable = strainp_yy
+    variable = plastic_strain_yy
   [../]
   [./strainp_yz]
     type = PointValue
     point = '0 0 0'
-    variable = strainp_yz
+    variable = plastic_strain_yz
   [../]
   [./strainp_zz]
     type = PointValue
     point = '0 0 0'
-    variable = strainp_zz
+    variable = plastic_strain_zz
   [../]
   [./straint_xx]
     type = PointValue
     point = '0 0 0'
-    variable = straint_xx
+    variable = strain_xx
   [../]
   [./straint_xy]
     type = PointValue
     point = '0 0 0'
-    variable = straint_xy
+    variable = strain_xy
   [../]
   [./straint_xz]
     type = PointValue
     point = '0 0 0'
-    variable = straint_xz
+    variable = strain_xz
   [../]
   [./straint_yy]
     type = PointValue
     point = '0 0 0'
-    variable = straint_yy
+    variable = strain_yy
   [../]
   [./straint_yz]
     type = PointValue
     point = '0 0 0'
-    variable = straint_yz
+    variable = strain_yz
   [../]
   [./straint_zz]
     type = PointValue
     point = '0 0 0'
-    variable = straint_zz
+    variable = strain_zz
   [../]
   [./f_shear]
     type = PointValue
@@ -512,10 +310,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
-  [../]
-  [./strain]
-    type = ComputeIncrementalSmallStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
