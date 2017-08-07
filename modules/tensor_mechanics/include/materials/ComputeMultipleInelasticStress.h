@@ -39,6 +39,20 @@ protected:
   virtual void computeQpStress() override;
 
   /**
+    Compute the stress for the current QP, but do not rotate tensors from the
+    intermediate configuration to the new configuration
+   */
+  virtual void computeQpStressIntermediateConfiguration();
+
+  /**
+    Rotate _elastic_strain, _stress, _inelastic_strain, and _Jacobian_mult to the
+    new configuration.
+    @param force_elasticity_rotation Force the elasticity tensor to be rotated, even if
+    it is not deemed necessary.
+   */
+  virtual void finiteStrainRotation(const bool force_elasticity_rotation = false);
+
+  /**
    * Given the _strain_increment[_qp], iterate over all of the user-specified
    * recompute materials in order to find an admissible stress (which is placed
    * into _stress[_qp]) and set of inelastic strains, as well as the tangent operator

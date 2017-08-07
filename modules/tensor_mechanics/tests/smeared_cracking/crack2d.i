@@ -23,7 +23,7 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = SMALL
+    strain = FINITE
     add_variables = true
     save_in = 'resid_x resid_y'
     generate_output = 'stress_xx stress_yy stress_zz'
@@ -62,6 +62,7 @@
     cracking_release = exponential
     cracking_stress = 1.0
     cracking_residual_stress = 0.1
+    inelastic_models = ''
   [../]
 []
 

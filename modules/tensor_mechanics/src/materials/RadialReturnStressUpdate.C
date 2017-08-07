@@ -44,6 +44,12 @@ RadialReturnStressUpdate::initQpStatefulProperties()
 }
 
 void
+RadialReturnStressUpdate::propagateQpStatefulPropertiesRadialReturn()
+{
+  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+}
+
+void
 RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
                                       RankTwoTensor & inelastic_strain_increment,
                                       const RankTwoTensor & /*rotation_increment*/,

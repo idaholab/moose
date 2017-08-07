@@ -8,15 +8,14 @@
 #define COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
 
 #include "ColumnMajorMatrix.h"
-#include "ComputeStressBase.h"
-#include "GuaranteeConsumer.h"
+#include "ComputeMultipleInelasticStress.h"
 #include "Function.h"
 
 /**
  * ComputeElasticSmearedCrackingStress computes the stress for a finite strain elastic
  * model with smeared cracking
  */
-class ComputeElasticSmearedCrackingStress : public ComputeStressBase, public GuaranteeConsumer
+class ComputeElasticSmearedCrackingStress : public ComputeMultipleInelasticStress
 {
 public:
   ComputeElasticSmearedCrackingStress(const InputParameters & parameters);
@@ -33,7 +32,6 @@ public:
 
 protected:
   virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
   virtual void computeQpStress();
 
   void updateElasticityTensor();
@@ -51,16 +49,9 @@ protected:
 
   void applyCracksToTensor(RankTwoTensor & tensor, const RealVectorValue & sigma);
 
-  const MaterialProperty<RankTwoTensor> & _mechanical_strain;
+  bool previouslyCracked();
 
   bool _is_finite_strain;
-
-  ///@{ Material properties related to stress and strain
-  const MaterialProperty<RankTwoTensor> & _strain_increment;
-  const MaterialProperty<RankTwoTensor> & _rotation_increment;
-  const MaterialProperty<RankTwoTensor> & _stress_old;
-  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  ///@}
 
   ///@{ Input parameters for smeared crack models
   const CRACKING_RELEASE _cracking_release;
@@ -72,7 +63,8 @@ protected:
   const Real _cracking_neg_fraction;
 
   const Real _cracking_beta;
-  const bool _shear_retention;
+  const Real _shear_retention_factor;
+  const Real _max_stress_correction;
   ///@}
 
   //@{ Stateful material properties related to smeared cracking model
