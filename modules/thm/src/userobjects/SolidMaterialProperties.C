@@ -1,5 +1,4 @@
 #include "SolidMaterialProperties.h"
-#include "R7Conversion.h"
 
 template <>
 InputParameters

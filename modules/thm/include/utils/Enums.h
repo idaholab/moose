@@ -1,8 +1,14 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
+#include <string>
+#include "MooseEnum.h"
+
 namespace RELAP7
 {
+
+template <typename T>
+T stringToEnum(const std::string & s);
 
 /// Type of the heat transfer geometry
 enum EConvHeatTransGeom
@@ -11,12 +17,25 @@ enum EConvHeatTransGeom
   CHTG_ROD_BUNDLE
 };
 
-///< Type of the end
+template <>
+EConvHeatTransGeom stringToEnum<EConvHeatTransGeom>(const std::string & s);
+
+/// Enum with convective heat transfer geometry
+MooseEnum getConvHeatTransGeometry(const std::string & name);
+
+// ----------------------------------------------------------------------------
+
+/// Type of the end
 enum EEndType
 {
   IN, ///< inlet
   OUT ///< outlet
 };
+
+template <>
+EEndType stringToEnum<EEndType>(const std::string & s);
+
+// ----------------------------------------------------------------------------
 
 enum EValveStatusType
 {
@@ -26,6 +45,14 @@ enum EValveStatusType
   VALVE_OPENING = 2   ///< valve is being opened
 };
 
+template <>
+EValveStatusType stringToEnum<EValveStatusType>(const std::string & s);
+
+/// Enum with valve status
+MooseEnum getValveStatusType(const std::string & name = "");
+
+// ----------------------------------------------------------------------------
+
 enum EValveActionType
 {
   VALVE_NO_ACTION = 0,   ///< maintaining current status
@@ -33,12 +60,37 @@ enum EValveActionType
   VALVE_TURNING_OFF = -1 ///< turning off the valve
 };
 
+template <>
+EValveActionType stringToEnum<EValveActionType>(const std::string & s);
+
+/// Enum with valve action
+MooseEnum getValveActionType(const std::string & name = "");
+
+// ----------------------------------------------------------------------------
+
+/// Check valve type
+enum ECheckValveType
+{
+  CHECK_VALVE_FLOW = 0,   ///< the type of check valve which closes by flow reversal
+  CHECK_VALVE_STATIC = 1, ///< the type of check valve which closes by static differential pressure
+  CHECK_VALVE_DYNAMIC = 2 ///< the type of check valve which closes by dynamic differential pressure
+};
+
+MooseEnum getCheckValveType(const std::string & str = "FLOW");
+
+template <>
+ECheckValveType stringToEnum<ECheckValveType>(const std::string & s);
+
+// ----------------------------------------------------------------------------
+
 enum ETHCouplingType
 {
   MOD_DENSITY, ///< moderator density
   MOD_TEMP,    ///< moderator temperature
   FUEL_TEMP    ///< fuel temperature
 };
+
+// ----------------------------------------------------------------------------
 
 /// The type of an equation
 enum EFlowEquationType
@@ -50,6 +102,14 @@ enum EFlowEquationType
   INVALID = 4
 };
 
+template <>
+EFlowEquationType stringToEnum<EFlowEquationType>(const std::string & s);
+
+// get MooseEnum with equation type
+MooseEnum getFlowEquationType(const std::string & eqn_name = "INVALID");
+
+// ----------------------------------------------------------------------------
+
 /// Type of heat structure
 enum EHeatStructureType
 {
@@ -58,12 +118,25 @@ enum EHeatStructureType
   HS_TYPE_CYLINDER
 };
 
-/// Global closures type
+template <>
+EHeatStructureType stringToEnum<EHeatStructureType>(const std::string & s);
+
+/// Enum with the heat structure type
+MooseEnum getHeatStructureType(const std::string & name = "PLATE");
+
+// ----------------------------------------------------------------------------
+
+/// Closures type
 enum EClosuresType
 {
   CLOSURES_SIMPLE = 0,
   CLOSURES_TRACE = 1
 };
+
+template <>
+EClosuresType stringToEnum<EClosuresType>(const std::string & s);
+
+// ----------------------------------------------------------------------------
 
 enum EFlowRegimeNamesType
 {
@@ -76,6 +149,8 @@ enum EFlowRegimeNamesType
   FR_DISPERSED        ///< Weight of Dispersed Flow Correlations PostCHF
 };
 
+// ----------------------------------------------------------------------------
+
 enum EWallDragFlowRegimeNamesType
 {
   WDFR_BUBBLYSLUG,      ///< Weight of Bubbly/Slug Correlations PreCHF
@@ -84,6 +159,8 @@ enum EWallDragFlowRegimeNamesType
   WDFR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
   WDFR_DISPERSED        ///< Weight of Dispersed Flow Correlations PostCHF
 };
+
+// ----------------------------------------------------------------------------
 
 enum EWallHeatTransferRegimeNamesType
 {
@@ -95,16 +172,6 @@ enum EWallHeatTransferRegimeNamesType
   WHT_TRANSITION,         ///< Weight of Transition Boiling PreCHF
   WHT_INVERTEDANNULAR,    ///< Weight of Inverted Annular Flow Correlations PostCHF
   WHT_DISPERSED           ///< Weight of Dispersed Flow Correlations PostCHF
-};
-
-/**
- * Check valve type
- */
-enum ECheckValveType
-{
-  CHECK_VALVE_FLOW = 0,   ///< the type of check valve which closes by flow reversal
-  CHECK_VALVE_STATIC = 1, ///< the type of check valve which closes by static differential pressure
-  CHECK_VALVE_DYNAMIC = 2 ///< the type of check valve which closes by dynamic differential pressure
 };
 }
 
