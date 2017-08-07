@@ -103,6 +103,10 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
       mooseError("libMesh does not support EPT_POS_GEN_NON_HERMITIAN currently \n");
       break;
 
+    case Moose::EPT_SLEPC_DEFAULT:
+      _generalized_eigenvalue_problem = false;
+      break;
+
     default:
       mooseError("Unknown eigen solver type \n");
   }
@@ -130,9 +134,6 @@ void
 EigenProblem::solve()
 {
   Moose::perf_log.push("Eigen_solve()", "Execution");
-#if LIBMESH_HAVE_SLEPC
-  Moose::SlepcSupport::slepcSetOptions(*this); // Make sure the SLEPc options are setup for this app
-#endif
   if (_solve)
   {
     _nl->solve();

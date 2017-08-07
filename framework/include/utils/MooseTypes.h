@@ -270,12 +270,13 @@ enum EigenSolveType
  */
 enum EigenProblemType
 {
-  EPT_HERMITIAN,            ///< Hermitian
-  EPT_NON_HERMITIAN,        ///< Non-Hermitian
-  EPT_GEN_HERMITIAN,        ///< Generalized Hermitian
-  EPT_GEN_INDEFINITE,       ///< Generalized Hermitian indefinite
-  EPT_GEN_NON_HERMITIAN,    ///< Generalized Non-Hermitian
-  EPT_POS_GEN_NON_HERMITIAN ///< Generalized Non-Hermitian with positive (semi-)definite B
+  EPT_HERMITIAN,             ///< Hermitian
+  EPT_NON_HERMITIAN,         ///< Non-Hermitian
+  EPT_GEN_HERMITIAN,         ///< Generalized Hermitian
+  EPT_GEN_INDEFINITE,        ///< Generalized Hermitian indefinite
+  EPT_GEN_NON_HERMITIAN,     ///< Generalized Non-Hermitian
+  EPT_POS_GEN_NON_HERMITIAN, ///< Generalized Non-Hermitian with positive (semi-)definite B
+  EPT_SLEPC_DEFAULT          ///< use whatever SLPEC has by default
 };
 
 /**
@@ -292,7 +293,8 @@ enum WhichEigenPairs
   WEP_TARGET_MAGNITUDE,   ///< target magnitude
   WEP_TARGET_REAL,        ///< target real
   WEP_TARGET_IMAGINARY,   ///< target imaginary
-  WEP_ALL_EIGENVALUES     ///< all eigenvalues
+  WEP_ALL_EIGENVALUES,    ///< all eigenvalues
+  WEP_SLEPC_DEFAULT       ///< use whatever we have in SLEPC
 };
 
 /**

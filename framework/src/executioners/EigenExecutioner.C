@@ -28,7 +28,10 @@ validParams<EigenExecutioner>()
 
   params.addPrivateParam<bool>("_use_eigen_executioner", true);
 
-#if LIBMESH_HAVE_SLEPC
+// Add slepc options and eigen problems
+#ifdef LIBMESH_HAVE_SLEPC
+  params += Moose::SlepcSupport::getSlepcValidParams();
+
   params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
 #endif
   return params;
@@ -39,9 +42,21 @@ EigenExecutioner::EigenExecutioner(const InputParameters & parameters)
     _eigen_problem(*parameters.getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh"))
 {
+// Extract and store SLEPc options
 #if LIBMESH_HAVE_SLEPC
-  Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
-#endif
+  Moose::SlepcSupport::storeSlepcOptions(_fe_problem, _pars);
 
- _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
+  Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
+  _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
+#endif
+}
+
+void
+EigenExecutioner::execute()
+{
+#if LIBMESH_HAVE_SLEPC
+  // Make sure the SLEPc options are setup for this app
+  Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+#endif
+  Steady::execute();
 }

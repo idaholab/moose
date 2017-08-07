@@ -105,6 +105,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   : NonlinearSystemBase(
         eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
+    _eigen_problem(eigen_problem),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
@@ -131,6 +132,8 @@ NonlinearEigenSystem::solve()
 
   // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+
+  _n_eigen_pairs_required = _eigen_problem.getNEigenPairsRequired();
 
   if (_n_eigen_pairs_required < n_converged_eigenvalues)
     n_converged_eigenvalues = _n_eigen_pairs_required;

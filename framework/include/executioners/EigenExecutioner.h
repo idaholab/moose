@@ -38,6 +38,8 @@ public:
    */
   EigenExecutioner(const InputParameters & parameters);
 
+  virtual void execute() override;
+
 protected:
   EigenProblem & _eigen_problem;
 };
