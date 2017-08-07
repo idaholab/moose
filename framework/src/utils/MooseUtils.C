@@ -464,7 +464,7 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
   for (const auto & cp_file : checkpoint_files)
   {
     // Only look at the main checkpoint file, not the mesh, or restartable data files
-    if (hasExtension(cp_file, "xdr"))
+    if (hasExtension(cp_file, "xdr") || hasExtension(cp_file, "xda"))
     {
       struct stat stats;
       stat(cp_file.c_str(), &stats);
