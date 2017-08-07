@@ -30,8 +30,9 @@ class TestMooseAppSyntax(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         exe = os.path.join(MooseDocs.ROOT_DIR, 'modules', 'combined')
-        hide = {'framework': ['/Functions'],
-                'all': ['/Modules/PhaseField']}
+        hide = {'framework': ['/Functions', '/Functions/ParsedFunction',
+                              '/Functions/AddFunctionAction'],
+                'all': ['/Modules/PhaseField', '/Modules/PhaseField/EulerAngles2RGB']}
         cls._syntax = moose_docs_app_syntax(exe, hide)
 
     def testFindall(self):
@@ -198,7 +199,8 @@ class TestMooseAppSyntax(unittest.TestCase):
         Test that Postprocessors don't show up as UserObjects.
         """
         nodes = self._syntax.findall('UserObjects/NumVars')
-        self.assertEqual(nodes, [])
+        self.assertNotEqual(nodes, [])
+        self.assertTrue(nodes[0].hidden)
 
     def testActionGroups(self):
         """
