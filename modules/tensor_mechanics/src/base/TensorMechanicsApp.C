@@ -109,6 +109,7 @@
 #include "ComputePlasticHeatEnergy.h"
 #include "ComputeInterfaceStress.h"
 #include "TensileStressUpdate.h"
+#include "ComputeFiniteStrainElasticStressBirchMurnaghan.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -313,6 +314,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputePlasticHeatEnergy);
   registerMaterial(ComputeInterfaceStress);
   registerMaterial(TensileStressUpdate);
+  registerMaterial(ComputeFiniteStrainElasticStressBirchMurnaghan);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
