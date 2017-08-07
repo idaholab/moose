@@ -159,8 +159,8 @@
 #include "NewmarkVelAux.h"
 #include "RadialDisplacementCylinderAux.h"
 #include "RadialDisplacementSphereAux.h"
-#include "VectorRankTwoAux.h"
 #include "VectorRankFourAux.h"
+#include "VectorRankTwoAux.h"
 
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
