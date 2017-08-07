@@ -58,6 +58,10 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./g]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [AuxKernels]
@@ -95,6 +99,11 @@
     type = MaterialRealAux
      variable = k
      property = k
+  [../]
+  [./g]
+    type = MaterialRealAux
+     variable = g
+     property = g
   [../]
 []
 

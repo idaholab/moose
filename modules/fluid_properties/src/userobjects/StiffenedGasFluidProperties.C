@@ -235,6 +235,23 @@ StiffenedGasFluidProperties::dpdh_from_h_s(Real h, Real s) const
          std::exp((_q_prime - s) / ((_gamma - 1.0) * _cv));
 }
 
+Real
+StiffenedGasFluidProperties::g(Real v, Real e) const
+{
+  // g(p,T) for SGEOS is given by Equation (37) in the following reference:
+  //
+  // Ray A. Berry, Richard Saurel, Olivier LeMetayer
+  // The discrete equation method (DEM) for fully compressible, two-phase flows in
+  //   ducts of spatially varying cross-section
+  // Nuclear Engineering and Design 240 (2010) p. 3797-3818
+  //
+  const Real p = pressure(v, e);
+  const Real T = temperature(v, e);
+
+  return (_gamma * _cv - _q_prime) * T -
+         _cv * T * std::log(std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0)) + _q;
+}
+
 Real StiffenedGasFluidProperties::gamma(Real, Real) const { return _gamma; }
 
 Real

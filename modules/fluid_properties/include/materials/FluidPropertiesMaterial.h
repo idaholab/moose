@@ -46,6 +46,8 @@ protected:
   MaterialProperty<Real> & _mu;
   /// Thermal conductivity
   MaterialProperty<Real> & _k;
+  /// Gibbs free enthalpy
+  MaterialProperty<Real> & _g;
 
   /// Fluid properties
   const SinglePhaseFluidProperties & _fp;

@@ -66,6 +66,8 @@ public:
   virtual Real p_from_h_s(Real h, Real s) const override;
   virtual Real dpdh_from_h_s(Real h, Real s) const override;
 
+  virtual Real g(Real v, Real e) const override;
+
 protected:
   Real _gamma;
   Real _R;
