@@ -184,3 +184,19 @@ Real IdealGasFluidProperties::dpdh_from_h_s(Real /*h*/, Real /*s*/) const
   mooseError(name(), ": dpdh_from_h_s() not implemented.");
   return 0.0;
 }
+
+Real
+IdealGasFluidProperties::g(Real v, Real e) const
+{
+  // g(p,T) for SGEOS is given by Equation (37) in the following reference:
+  //
+  // Ray A. Berry, Richard Saurel, Olivier LeMetayer
+  // The discrete equation method (DEM) for fully compressible, two-phase flows in
+  //   ducts of spatially varying cross-section
+  // Nuclear Engineering and Design 240 (2010) p. 3797-3818
+  //
+  const Real p = pressure(v, e);
+  const Real T = temperature(v, e);
+
+  return _gamma * _cv * T - _cv * T * std::log(std::pow(T, _gamma) / std::pow(p, _gamma - 1.0));
+}
