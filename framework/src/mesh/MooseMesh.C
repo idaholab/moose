@@ -1960,13 +1960,16 @@ MooseMesh::init()
     // Some partitioners are not idempotent.  Some recovery data
     // files require partitioning to match mesh partitioning.  This
     // means that, when recovering, we can't safely repartition.
-    bool skip_partitioning_later = getMesh().skip_partitioning();
+    const bool skip_partitioning_later = getMesh().skip_partitioning();
     getMesh().skip_partitioning(true);
+    const bool allow_renumbering_later = getMesh().allow_renumbering();
+    getMesh().allow_renumbering(false);
 
     // For now, only read the recovery mesh on the Ultimate Master..
     // sub-apps need to just build their mesh like normal
     getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
 
+    getMesh().allow_renumbering(allow_renumbering_later);
     getMesh().skip_partitioning(skip_partitioning_later);
   }
   else // Normally just build the mesh
