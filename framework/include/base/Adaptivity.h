@@ -158,14 +158,22 @@ public:
    * Allow adaptivity to be toggled programatically.
    * @param state The adaptivity state (on/off).
    */
-  void setAdaptivityOn(bool state) { _mesh_refinement_on = state; }
+  void setAdaptivityOn(bool state);
 
   /**
    * Is adaptivity on?
    *
-   * @return true if we do mesh adaptivity, otherwise false
+   * @return true if mesh adaptivity is on, otherwise false
    */
   bool isOn() { return _mesh_refinement_on; }
+
+  /**
+   * Returns whether or not Adaptivity::init() has ran. Can
+   * be used to indicate if mesh adaptivity is available.
+   *
+   * @return true if the Adaptivity system is ready to be used, otherwise false
+   */
+  bool isInitialized() { return _initialized; }
 
   /**
    * Sets the time when the adaptivity is active
@@ -240,6 +248,8 @@ protected:
 
   /// on/off flag reporting if the adaptivity is being used
   bool _mesh_refinement_on;
+  /// on/off flag reporting if the adaptivity system has been initialized
+  bool _initialized;
   /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
   std::unique_ptr<MeshRefinement> _mesh_refinement;
   /// Error estimator to be used by the apps.
