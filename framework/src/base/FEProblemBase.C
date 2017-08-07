@@ -434,7 +434,11 @@ FEProblemBase::initialSetup()
   _app.getOutputWarehouse().mooseConsole();
 
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
+  {
     _resurrector->setRestartFile(_app.getRecoverFileBase());
+    if (_app.getRecoverFileSuffix() == "cpa")
+      _resurrector->setRestartSuffix("xda");
+  }
 
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
     _resurrector->restartFromFile();

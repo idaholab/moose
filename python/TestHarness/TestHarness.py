@@ -379,14 +379,19 @@ class TestHarness:
                 # Part 1:
                 part1_params = part1.parameters()
                 part1_params['test_name'] += '_part1'
-                part1_params['cli_args'].append('--half-transient Outputs/checkpoint=true')
+                part1_params['cli_args'].append('--half-transient')
+                if self.options.recoversuffix == 'cpr':
+                    part1_params['cli_args'].append('Outputs/checkpoint=true')
+                if self.options.recoversuffix == 'cpa':
+                    part1_params['cli_args'].append('Outputs/out/type=Checkpoint')
+                    part1_params['cli_args'].append('Outputs/out/binary=false')
                 part1_params['skip_checks'] = True
 
                 # Part 2:
                 part2_params = part2.parameters()
                 part2_params['prereq'].append(part1.parameters()['test_name'])
                 part2_params['delete_output_before_running'] = False
-                part2_params['cli_args'].append('--recover')
+                part2_params['cli_args'].append('--recover --recoversuffix ' + self.options.recoversuffix)
                 part2_params.addParam('caveats', ['recover'], "")
 
                 new_tests.append(part2)
@@ -825,6 +830,7 @@ class TestHarness:
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
         parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
+        parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
         parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')

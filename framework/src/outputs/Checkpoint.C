@@ -116,9 +116,8 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   // Write the checkpoint file
   io.write(current_file_struct.checkpoint);
 
-  // Write the xdr
+  // Write the system data, using ENCODE vs WRITE based on xdr vs xda
   _es_ptr->write(current_file_struct.system,
-                 ENCODE,
                  EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
                      EquationSystems::WRITE_PARALLEL_FILES,
                  renumber);
