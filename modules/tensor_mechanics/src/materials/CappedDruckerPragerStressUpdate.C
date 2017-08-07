@@ -66,7 +66,7 @@ CappedDruckerPragerStressUpdate::CappedDruckerPragerStressUpdate(const InputPara
 }
 
 void
-CappedDruckerPragerStressUpdate::initialiseReturnProcess()
+CappedDruckerPragerStressUpdate::initializeReturnProcess()
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
@@ -256,7 +256,7 @@ CappedDruckerPragerStressUpdate::computeAllQ(Real p,
 }
 
 void
-CappedDruckerPragerStressUpdate::initialiseVars(Real p_trial,
+CappedDruckerPragerStressUpdate::initializeVars(Real p_trial,
                                                 Real q_trial,
                                                 const std::vector<Real> & intnl_old,
                                                 Real & p,
@@ -430,9 +430,6 @@ CappedDruckerPragerStressUpdate::consistentTangentOperator(const RankTwoTensor &
                                                            bool compute_full_tangent_operator,
                                                            RankFourTensor & cto) const
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = Eijkl;
   if (!compute_full_tangent_operator)
     return;

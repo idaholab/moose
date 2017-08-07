@@ -25,21 +25,17 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    add_variables = true
+    incremental = true
+    generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
   [../]
 []
-
 
 [BCs]
   [./x]
@@ -63,30 +59,6 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./yield_fcn_dp]
     order = CONSTANT
     family = MONOMIAL
@@ -98,48 +70,6 @@
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
   [./yield_fcn_dp_auxk]
     type = MaterialStdVectorAux
     index = 1    # this is the tensile yield function - it should be zero
@@ -254,11 +184,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.2
     youngs_modulus = 1E7
-  [../]
-  [./strain]
-    type = ComputeIncrementalSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

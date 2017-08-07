@@ -80,7 +80,7 @@ CappedWeakPlaneStressUpdate::CappedWeakPlaneStressUpdate(const InputParameters &
 }
 
 void
-CappedWeakPlaneStressUpdate::initialiseReturnProcess()
+CappedWeakPlaneStressUpdate::initializeReturnProcess()
 {
   _stress_return_type = StressReturnType::nothing_special;
 }
@@ -180,9 +180,6 @@ CappedWeakPlaneStressUpdate::consistentTangentOperator(const RankTwoTensor & /*s
                                                        bool compute_full_tangent_operator,
                                                        RankFourTensor & cto) const
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = Eijkl;
   if (!compute_full_tangent_operator)
     return;
@@ -372,7 +369,7 @@ CappedWeakPlaneStressUpdate::computeAllQ(Real p,
 }
 
 void
-CappedWeakPlaneStressUpdate::initialiseVars(Real p_trial,
+CappedWeakPlaneStressUpdate::initializeVars(Real p_trial,
                                             Real q_trial,
                                             const std::vector<Real> & intnl_old,
                                             Real & p,

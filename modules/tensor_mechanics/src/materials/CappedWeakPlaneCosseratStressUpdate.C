@@ -62,9 +62,6 @@ CappedWeakPlaneCosseratStressUpdate::consistentTangentOperator(
     bool compute_full_tangent_operator,
     RankFourTensor & cto) const
 {
-  if (!_fe_problem.currentlyComputingJacobian())
-    return;
-
   cto = Eijkl;
   if (!compute_full_tangent_operator)
     return;

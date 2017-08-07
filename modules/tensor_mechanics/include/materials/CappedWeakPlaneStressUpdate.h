@@ -55,7 +55,7 @@ protected:
   /// The cone vertex is smoothed by this amount
   const Real _small_smoother2;
 
-  /// Initialise the NR proceedure from a guess coming from perfect plasticity
+  /// Initialize the NR proceedure from a guess coming from perfect plasticity
   const bool _perfect_guess;
 
   /**
@@ -125,7 +125,7 @@ protected:
                             const std::vector<Real> & yf,
                             const RankFourTensor & Eijkl) override;
 
-  virtual void initialiseVars(Real p_trial,
+  virtual void initializeVars(Real p_trial,
                               Real q_trial,
                               const std::vector<Real> & intnl_old,
                               Real & p,
@@ -149,7 +149,7 @@ protected:
 
   virtual void computePQ(const RankTwoTensor & stress, Real & p, Real & q) const override;
 
-  virtual void initialiseReturnProcess() override;
+  virtual void initializeReturnProcess() override;
 
   virtual void finalizeReturnProcess(const RankTwoTensor & rotation_increment) override;
 
