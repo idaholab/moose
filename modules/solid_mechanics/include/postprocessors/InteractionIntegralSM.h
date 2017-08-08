@@ -4,27 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INTERACTIONINTEGRAL_H
-#define INTERACTIONINTEGRAL_H
+#ifndef INTERACTIONINTEGRALSM_H
+#define INTERACTIONINTEGRALSM_H
 
 #include "ElementIntegralPostprocessor.h"
 #include "CrackFrontDefinition.h"
 #include "SymmTensor.h"
 
 // Forward Declarations
-class InteractionIntegral;
+class InteractionIntegralSM;
 
 template <>
-InputParameters validParams<InteractionIntegral>();
+InputParameters validParams<InteractionIntegralSM>();
 
 /**
  * This postprocessor computes the Interaction Integral
  *
  */
-class InteractionIntegral : public ElementIntegralPostprocessor
+class InteractionIntegralSM : public ElementIntegralPostprocessor
 {
 public:
-  InteractionIntegral(const InputParameters & parameters);
+  InteractionIntegralSM(const InputParameters & parameters);
 
   virtual Real getValue();
 
@@ -60,4 +60,4 @@ protected:
   const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
 };
 
-#endif // INTERACTIONINTEGRAL_H
+#endif // INTERACTIONINTEGRALSM_H

@@ -426,7 +426,7 @@ DomainIntegralAction::act()
                    "mode-III interaction integral");
 
       const std::string pp_base_name("II");
-      const std::string pp_type_name("InteractionIntegral");
+      const std::string pp_type_name("InteractionIntegralSM");
       InputParameters params = _factory.getValidParams(pp_type_name);
       params.set<MultiMooseEnum>("execute_on") = "timestep_end";
       params.set<UserObjectName>("crack_front_definition") = uo_name;

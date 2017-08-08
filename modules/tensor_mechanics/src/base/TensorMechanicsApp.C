@@ -184,6 +184,17 @@
 
 #include "ElementJacobianDamper.h"
 
+#include "JIntegral.h"
+#include "CrackDataSampler.h"
+#include "CrackFrontData.h"
+#include "CrackFrontDefinition.h"
+#include "DomainIntegralAction.h"
+#include "DomainIntegralQFunction.h"
+#include "DomainIntegralTopologicalQFunction.h"
+#include "InteractionIntegralAuxFields.h"
+#include "InteractionIntegralBenchmarkBC.h"
+#include "MixedModeEquivalentK.h"
+
 template <>
 InputParameters
 validParams<TensorMechanicsApp>()
@@ -319,6 +330,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeInterfaceStress);
   registerMaterial(TensileStressUpdate);
   registerMaterial(ComputeFiniteStrainElasticStressBirchMurnaghan);
+  registerMaterial(InteractionIntegralAuxFields);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
@@ -354,6 +366,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticityStateVariable);
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
   registerUserObject(GeneralizedPlaneStrainUserObject);
+  registerUserObject(CrackFrontDefinition);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);
@@ -366,6 +379,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(NewmarkVelAux);
   registerAux(RadialDisplacementCylinderAux);
   registerAux(RadialDisplacementSphereAux);
+  registerAux(DomainIntegralQFunction);
+  registerAux(DomainIntegralTopologicalQFunction);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
@@ -373,15 +388,20 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(DisplacementAboutAxis);
   registerBoundaryCondition(PresetDisplacement);
   registerBoundaryCondition(PresetAcceleration);
+  registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(Mass);
   registerPostprocessor(TorqueReaction);
   registerPostprocessor(MaterialTensorIntegral);
   registerPostprocessor(MaterialTimeStepPostprocessor);
+  registerPostprocessor(JIntegral);
+  registerPostprocessor(CrackFrontData);
+  registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(LineMaterialRankTwoSampler);
   registerVectorPostprocessor(LineMaterialRankTwoScalarSampler);
+  registerVectorPostprocessor(CrackDataSampler);
 
   registerDamper(ElementJacobianDamper);
 }
@@ -411,6 +431,13 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
                  "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
   registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
   registerSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
+
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_user_object");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_kernel");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_postprocessor");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_vector_postprocessor");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_material");
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem");
@@ -447,4 +474,10 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_user_object");
+
+  registerAction(DomainIntegralAction, "add_user_object");
+  registerAction(DomainIntegralAction, "add_aux_variable");
+  registerAction(DomainIntegralAction, "add_aux_kernel");
+  registerAction(DomainIntegralAction, "add_postprocessor");
+  registerAction(DomainIntegralAction, "add_material");
 }

@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "ColumnMajorMatrix.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/string_to_enum.h"
@@ -1101,28 +1102,6 @@ CrackFrontDefinition::rotateToCrackFrontCoords(const RealVectorValue vector,
   vec(1) = vec3x1(1, 0);
   vec(2) = vec3x1(2, 0);
   return vec;
-}
-
-ColumnMajorMatrix
-CrackFrontDefinition::rotateToCrackFrontCoords(const SymmTensor tensor,
-                                               const unsigned int point_index) const
-{
-  ColumnMajorMatrix tensor_CMM;
-  tensor_CMM(0, 0) = tensor.xx();
-  tensor_CMM(0, 1) = tensor.xy();
-  tensor_CMM(0, 2) = tensor.xz();
-  tensor_CMM(1, 0) = tensor.xy();
-  tensor_CMM(1, 1) = tensor.yy();
-  tensor_CMM(1, 2) = tensor.yz();
-  tensor_CMM(2, 0) = tensor.xz();
-  tensor_CMM(2, 1) = tensor.yz();
-  tensor_CMM(2, 2) = tensor.zz();
-
-  ColumnMajorMatrix tmp = _rot_matrix[point_index] * tensor_CMM;
-  ColumnMajorMatrix rotT = _rot_matrix[point_index].transpose();
-  ColumnMajorMatrix rotated_tensor = tmp * rotT;
-
-  return rotated_tensor;
 }
 
 ColumnMajorMatrix

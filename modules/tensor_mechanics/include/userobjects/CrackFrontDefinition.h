@@ -10,10 +10,10 @@
 #include "GeneralUserObject.h"
 #include "BoundaryRestrictable.h"
 #include <set>
-#include "SymmTensor.h"
 
 class CrackFrontDefinition;
 class AuxiliarySystem;
+class ColumnMajorMatrix;
 
 // libMesh forward declarations
 namespace libMesh
@@ -52,8 +52,6 @@ public:
   bool treatAs2D() const { return _treat_as_2d; }
   RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector,
                                            const unsigned int point_index) const;
-  ColumnMajorMatrix rotateToCrackFrontCoords(const SymmTensor tensor,
-                                             const unsigned int point_index) const;
   ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor,
                                              const unsigned int point_index) const;
   void calculateRThetaToCrackFront(const Point qp,

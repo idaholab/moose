@@ -10,7 +10,6 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 #include "CrackFrontDefinition.h"
-#include "SymmTensor.h"
 #include "LineSegment.h"
 
 // Forward Declarations

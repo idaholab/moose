@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "InteractionIntegralAuxFields.h"
+#include "ColumnMajorMatrix.h"
 
 template <>
 InputParameters

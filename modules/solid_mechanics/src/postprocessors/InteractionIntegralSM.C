@@ -6,14 +6,14 @@
 /****************************************************************/
 //  This post processor returns the Interaction Integral
 //
-#include "InteractionIntegral.h"
+#include "InteractionIntegralSM.h"
 #include "MooseMesh.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
 
 template <>
 InputParameters
-validParams<InteractionIntegral>()
+validParams<InteractionIntegralSM>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addCoupledVar("disp_x", "The x displacement");
@@ -46,7 +46,7 @@ validParams<InteractionIntegral>()
   return params;
 }
 
-InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
+InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _has_crack_front_point_index(isParamValid("crack_front_point_index")),
@@ -84,13 +84,13 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
 }
 
 void
-InteractionIntegral::initialSetup()
+InteractionIntegralSM::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
 }
 
 Real
-InteractionIntegral::getValue()
+InteractionIntegralSM::getValue()
 {
   gatherSum(_integral_value);
 
@@ -103,7 +103,7 @@ InteractionIntegral::getValue()
 }
 
 Real
-InteractionIntegral::computeQpIntegral()
+InteractionIntegralSM::computeQpIntegral()
 {
   Real scalar_q = 0.0;
   RealVectorValue grad_q(0.0, 0.0, 0.0);
@@ -221,7 +221,7 @@ InteractionIntegral::computeQpIntegral()
 }
 
 Real
-InteractionIntegral::computeIntegral()
+InteractionIntegralSM::computeIntegral()
 {
   Real sum = 0;
 
