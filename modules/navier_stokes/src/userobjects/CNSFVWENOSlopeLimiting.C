@@ -34,6 +34,7 @@ std::vector<RealGradient>
 CNSFVWENOSlopeLimiting::limitElementSlope() const
 {
   const Elem * elem = _current_elem;
+  const Elem * neighbor;
 
   /// current element id
   dof_id_type _elementID = elem->id();
@@ -78,10 +79,11 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    neighbor = elem->neighbor_ptr(is);
 
-    if (elem->neighbor(is) != NULL)
+    if (neighbor != NULL && this->hasBlocks(neighbor->subdomain_id()))
     {
-      dof_id_type _neighborID = elem->neighbor(is)->id();
+      dof_id_type _neighborID = neighbor->id();
       rugrad = _rslope.getElementSlope(_neighborID);
 
       for (unsigned int iv = 0; iv < nvars; iv++)
@@ -103,8 +105,9 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    neighbor = elem->neighbor_ptr(is);
 
-    if (elem->neighbor(is) != NULL)
+    if (neighbor != NULL && this->hasBlocks(neighbor->subdomain_id()))
       for (unsigned int iv = 0; iv < nvars; iv++)
         weig[in][iv] = weig[in][iv] / summ[iv];
   }
@@ -119,10 +122,11 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    neighbor = elem->neighbor_ptr(is);
 
-    if (elem->neighbor(is) != NULL)
+    if (neighbor != NULL && this->hasBlocks(neighbor->subdomain_id()))
     {
-      dof_id_type _neighborID = elem->neighbor(is)->id();
+      dof_id_type _neighborID = neighbor->id();
       rugrad = _rslope.getElementSlope(_neighborID);
 
       for (unsigned int iv = 0; iv < nvars; iv++)
