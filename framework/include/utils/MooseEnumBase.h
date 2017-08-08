@@ -17,8 +17,12 @@
 
 // C++ includes
 #include <string>
+#include <set>
 #include <vector>
 #include <map>
+
+// MOOSE includes
+#include "MooseEnumItem.h"
 
 /**
  * The base class for both the MooseEnum and MultiMooseEnum classes.
@@ -58,14 +62,13 @@ public:
    * Method for returning a vector of all valid enumeration names for this instance
    * @return a vector of names
    */
-  /// TODO: This should probably be turn into a set to avoid duplicate entries
-  const std::vector<std::string> & getNames() const { return _names; }
+  std::vector<std::string> getNames() const;
 
   /**
    * Method for returning the raw name strings for this instance
    * @return a space separated list of names
    */
-  const std::string & getRawNames() const { return _raw_names; }
+  std::string getRawNames() const;
 
   /**
    * IsValid
@@ -91,14 +94,17 @@ protected:
    */
   void checkDeprecatedBase(const std::string & name_upper) const;
 
-  /// The vector of enumeration names
-  std::vector<std::string> _names;
+  ///@{
+  /**
+   * Locate an item.
+   */
+  std::set<MooseEnumItem>::const_iterator find(const MooseEnumItem & other) const;
+  std::set<MooseEnumItem>::const_iterator find(const std::string & name) const;
+  std::set<MooseEnumItem>::const_iterator find(int id) const;
+  ///@}
 
-  /// The raw string of names separated by spaces
-  std::string _raw_names;
-
-  /// The map of names to enumeration constants
-  std::map<std::string, int> _name_to_id;
+  /// Storage for the assigned items
+  std::set<MooseEnumItem> _items;
 
   /// The map of deprecated names and optional replacements
   std::map<std::string, std::string> _deprecated_names;

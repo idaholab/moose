@@ -17,12 +17,14 @@
 // MOOSE includes
 #include "HashMap.h"
 #include "MaterialProperty.h" // MaterialProperties
+#include "InfixIterator.h"
 
 // C++ includes
 #include <string>
 #include <vector>
 #include <map>
 #include <list>
+#include <iterator>
 
 // Forward Declarations
 namespace libMesh
@@ -383,6 +385,12 @@ tokenizeAndConvert(const std::string & str,
   }
   return true;
 }
+
+/**
+ * Convert supplied string to upper case.
+ * @params name The string to convert upper case.
+ */
+std::string toUpper(const std::string & name);
 }
 
 #endif // MOOSEUTILS_H
