@@ -18,6 +18,7 @@
 #include "Factory.h"
 #include "MooseApp.h"
 #include "NonlinearEigenSystem.h"
+#include "SlepcSupport.h"
 
 template <>
 InputParameters
@@ -27,6 +28,9 @@ validParams<EigenExecutioner>()
 
   params.addPrivateParam<bool>("_use_eigen_executioner", true);
 
+#if LIBMESH_HAVE_SLEPC
+  params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
+#endif
   return params;
 }
 
@@ -35,4 +39,9 @@ EigenExecutioner::EigenExecutioner(const InputParameters & parameters)
     _eigen_problem(*parameters.getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh"))
 {
+#if LIBMESH_HAVE_SLEPC
+  Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
+#endif
+
+ _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
 }

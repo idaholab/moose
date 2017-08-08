@@ -33,17 +33,12 @@ InputParameters
 validParams<EigenProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
-  params.addParam<unsigned int>("n_eigen_pairs", 1, "The number of eigen pairs");
-  params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of eigen subspaces");
-#if LIBMESH_HAVE_SLEPC
-  params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
-#endif
   return params;
 }
 
 EigenProblem::EigenProblem(const InputParameters & parameters)
   : FEProblemBase(parameters),
-    _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
+    _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0")),
     _is_residual_initialed(false)
@@ -52,22 +47,12 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   _nl = _nl_eigen;
   _aux = new AuxiliarySystem(*this, "aux0");
 
-  // Set necessary parametrs used in EigenSystem::solve(),
-  // i.e. the number of requested eigenpairs nev and the number
-  // of basis vectors ncv used in the solution algorithm. Note that
-  // ncv >= nev must hold and ncv >= 2*nev is recommended.
-  es().parameters.set<unsigned int>("eigenpairs") = _n_eigen_pairs_required;
-  es().parameters.set<unsigned int>("basis vectors") = getParam<unsigned int>("n_basis_vectors");
-
   newAssemblyArray(*_nl_eigen);
 
   FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
 
   _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
 
-  Moose::SlepcSupport::storeSlepcEigenProblemOptions(*this, _pars);
-
-  setEigenproblemType(solverParams()._eigen_problem_type);
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */

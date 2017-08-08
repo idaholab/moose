@@ -77,15 +77,11 @@
   [../]
 []
 
-[Problem]
-  type = EigenProblem
+[Executioner]
+  type = EigenExecutioner
   which_eigen_pairs = largest_magnitude
   n_eigen_pairs = 5
   n_basis_vectors = 15
-[]
-
-[Executioner]
-  type = EigenExecutioner
   eigen_solve_type = krylovschur
   petsc_options = '-eps_view'
 []
