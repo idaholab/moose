@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "InteractionIntegralAuxFields.h"
-#include "ColumnMajorMatrix.h"
+#include "RankTwoTensor.h"
 
 template <>
 InputParameters
@@ -49,24 +49,24 @@ InteractionIntegralAuxFields::getSIFModesEnum()
 InteractionIntegralAuxFields::InteractionIntegralAuxFields(const InputParameters & parameters)
   : Material(parameters),
     _appended_index_name(getParam<std::string>("appended_index_name")),
-    _aux_stress_I(declareProperty<ColumnMajorMatrix>("aux_stress_I_" + _appended_index_name)),
-    _aux_disp_I(declareProperty<ColumnMajorMatrix>("aux_disp_I_" + _appended_index_name)),
-    _aux_grad_disp_I(declareProperty<ColumnMajorMatrix>("aux_grad_disp_I_" + _appended_index_name)),
-    _aux_strain_I(declareProperty<ColumnMajorMatrix>("aux_strain_I_" + _appended_index_name)),
-    _aux_stress_II(declareProperty<ColumnMajorMatrix>("aux_stress_II_" + _appended_index_name)),
-    _aux_disp_II(declareProperty<ColumnMajorMatrix>("aux_disp_II_" + _appended_index_name)),
+    _aux_stress_I(declareProperty<RankTwoTensor>("aux_stress_I_" + _appended_index_name)),
+    _aux_disp_I(declareProperty<RankTwoTensor>("aux_disp_I_" + _appended_index_name)),
+    _aux_grad_disp_I(declareProperty<RankTwoTensor>("aux_grad_disp_I_" + _appended_index_name)),
+    _aux_strain_I(declareProperty<RankTwoTensor>("aux_strain_I_" + _appended_index_name)),
+    _aux_stress_II(declareProperty<RankTwoTensor>("aux_stress_II_" + _appended_index_name)),
+    _aux_disp_II(declareProperty<RankTwoTensor>("aux_disp_II_" + _appended_index_name)),
     _aux_grad_disp_II(
-        declareProperty<ColumnMajorMatrix>("aux_grad_disp_II_" + _appended_index_name)),
-    _aux_strain_II(declareProperty<ColumnMajorMatrix>("aux_strain_II_" + _appended_index_name)),
-    _aux_stress_III(declareProperty<ColumnMajorMatrix>("aux_stress_III_" + _appended_index_name)),
-    _aux_disp_III(declareProperty<ColumnMajorMatrix>("aux_disp_III_" + _appended_index_name)),
+        declareProperty<RankTwoTensor>("aux_grad_disp_II_" + _appended_index_name)),
+    _aux_strain_II(declareProperty<RankTwoTensor>("aux_strain_II_" + _appended_index_name)),
+    _aux_stress_III(declareProperty<RankTwoTensor>("aux_stress_III_" + _appended_index_name)),
+    _aux_disp_III(declareProperty<RankTwoTensor>("aux_disp_III_" + _appended_index_name)),
     _aux_grad_disp_III(
-        declareProperty<ColumnMajorMatrix>("aux_grad_disp_III_" + _appended_index_name)),
-    _aux_strain_III(declareProperty<ColumnMajorMatrix>("aux_strain_III_" + _appended_index_name)),
-    _aux_stress_T(declareProperty<ColumnMajorMatrix>("aux_stress_T_" + _appended_index_name)),
-    _aux_disp_T(declareProperty<ColumnMajorMatrix>("aux_disp_T_" + _appended_index_name)),
-    _aux_grad_disp_T(declareProperty<ColumnMajorMatrix>("aux_grad_disp_T_" + _appended_index_name)),
-    _aux_strain_T(declareProperty<ColumnMajorMatrix>("aux_strain_T_" + _appended_index_name)),
+        declareProperty<RankTwoTensor>("aux_grad_disp_III_" + _appended_index_name)),
+    _aux_strain_III(declareProperty<RankTwoTensor>("aux_strain_III_" + _appended_index_name)),
+    _aux_stress_T(declareProperty<RankTwoTensor>("aux_stress_T_" + _appended_index_name)),
+    _aux_disp_T(declareProperty<RankTwoTensor>("aux_disp_T_" + _appended_index_name)),
+    _aux_grad_disp_T(declareProperty<RankTwoTensor>("aux_grad_disp_T_" + _appended_index_name)),
+    _aux_strain_T(declareProperty<RankTwoTensor>("aux_strain_T_" + _appended_index_name)),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
@@ -115,10 +115,10 @@ InteractionIntegralAuxFields::computeQpProperties()
 
 void
 InteractionIntegralAuxFields::computeAuxFields(const SIF_MODE sif_mode,
-                                               ColumnMajorMatrix & stress,
-                                               ColumnMajorMatrix & disp,
-                                               ColumnMajorMatrix & grad_disp,
-                                               ColumnMajorMatrix & strain)
+                                               RankTwoTensor & stress,
+                                               RankTwoTensor & disp,
+                                               RankTwoTensor & grad_disp,
+                                               RankTwoTensor & strain)
 {
 
   RealVectorValue k(0);
@@ -296,8 +296,8 @@ InteractionIntegralAuxFields::computeAuxFields(const SIF_MODE sif_mode,
 }
 
 void
-InteractionIntegralAuxFields::computeTFields(ColumnMajorMatrix & stress,
-                                             ColumnMajorMatrix & grad_disp)
+InteractionIntegralAuxFields::computeTFields(RankTwoTensor & stress,
+                                             RankTwoTensor & grad_disp)
 {
 
   Real t = _theta;

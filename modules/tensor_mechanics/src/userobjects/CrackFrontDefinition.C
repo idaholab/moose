@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
-#include "ColumnMajorMatrix.h"
+#include "RankTwoTensor.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/string_to_enum.h"
@@ -685,16 +685,9 @@ CrackFrontDefinition::updateCrackFrontGeometry()
         calculateCrackFrontDirection(*crack_front_point, tangent_direction, MIDDLE_NODE);
     _crack_directions.push_back(crack_direction);
     _crack_plane_normal = tangent_direction.cross(crack_direction);
-    ColumnMajorMatrix rot_mat;
-    rot_mat(0, 0) = crack_direction(0);
-    rot_mat(0, 1) = crack_direction(1);
-    rot_mat(0, 2) = crack_direction(2);
-    rot_mat(1, 0) = _crack_plane_normal(0);
-    rot_mat(1, 1) = _crack_plane_normal(1);
-    rot_mat(1, 2) = _crack_plane_normal(2);
-    rot_mat(2, 0) = 0.0;
-    rot_mat(2, 1) = 0.0;
-    rot_mat(2, 2) = 0.0;
+    RankTwoTensor rot_mat;
+    rot_mat.fillRow(0, crack_direction);
+    rot_mat.fillRow(1, _crack_plane_normal);
     rot_mat(2, _axis_2d) = 1.0;
     _rot_matrix.push_back(rot_mat);
 
@@ -830,16 +823,10 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     // Create rotation matrix
     for (unsigned int i = 0; i < num_crack_front_points; ++i)
     {
-      ColumnMajorMatrix rot_mat;
-      rot_mat(0, 0) = _crack_directions[i](0);
-      rot_mat(0, 1) = _crack_directions[i](1);
-      rot_mat(0, 2) = _crack_directions[i](2);
-      rot_mat(1, 0) = _crack_plane_normal(0);
-      rot_mat(1, 1) = _crack_plane_normal(1);
-      rot_mat(1, 2) = _crack_plane_normal(2);
-      rot_mat(2, 0) = _tangent_directions[i](0);
-      rot_mat(2, 1) = _tangent_directions[i](1);
-      rot_mat(2, 2) = _tangent_directions[i](2);
+      RankTwoTensor rot_mat;
+      rot_mat.fillRow(0, _crack_directions[i]);
+      rot_mat.fillRow(1, _crack_plane_normal);
+      rot_mat.fillRow(2, _tangent_directions[i]);
       _rot_matrix.push_back(rot_mat);
     }
 
@@ -1095,24 +1082,16 @@ RealVectorValue
 CrackFrontDefinition::rotateToCrackFrontCoords(const RealVectorValue vector,
                                                const unsigned int point_index) const
 {
-  ColumnMajorMatrix vec3x1;
-  vec3x1 = _rot_matrix[point_index] * vector;
-  RealVectorValue vec;
-  vec(0) = vec3x1(0, 0);
-  vec(1) = vec3x1(1, 0);
-  vec(2) = vec3x1(2, 0);
-  return vec;
+  return _rot_matrix[point_index] * vector;
 }
 
-ColumnMajorMatrix
-CrackFrontDefinition::rotateToCrackFrontCoords(const ColumnMajorMatrix tensor,
+RankTwoTensor
+CrackFrontDefinition::rotateToCrackFrontCoords(const RankTwoTensor tensor,
                                                const unsigned int point_index) const
 {
-  ColumnMajorMatrix tmp = _rot_matrix[point_index] * tensor;
-  ColumnMajorMatrix rotT = _rot_matrix[point_index].transpose();
-  ColumnMajorMatrix rotated_tensor = tmp * rotT;
-
-  return rotated_tensor;
+  RankTwoTensor tmp_tensor(tensor);
+  tmp_tensor.rotate(_rot_matrix[point_index]);
+  return tmp_tensor;
 }
 
 void

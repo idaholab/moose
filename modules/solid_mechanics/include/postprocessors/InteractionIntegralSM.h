@@ -13,6 +13,7 @@
 
 // Forward Declarations
 class InteractionIntegralSM;
+class RankTwoTensor;
 
 template <>
 InputParameters validParams<InteractionIntegralSM>();
@@ -44,9 +45,9 @@ protected:
   const bool _has_temp;
   const VariableGradient & _grad_temp;
   std::string _aux_stress_name;
-  const MaterialProperty<ColumnMajorMatrix> & _aux_stress;
+  const MaterialProperty<RankTwoTensor> & _aux_stress;
   std::string _aux_grad_disp_name;
-  const MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp;
+  const MaterialProperty<RankTwoTensor> & _aux_grad_disp;
   const MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
   Real _K_factor;
   bool _has_symmetry_plane;

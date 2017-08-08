@@ -7,7 +7,7 @@
 //  This post processor calculates the J-Integral
 //
 #include "JIntegral.h"
-#include "ColumnMajorMatrix.h"
+#include "RankTwoTensor.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
 
@@ -47,7 +47,7 @@ JIntegral::JIntegral(const InputParameters & parameters)
     _crack_front_point_index(
         _has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
     _treat_as_2d(false),
-    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
+    _Eshelby_tensor(getMaterialProperty<RankTwoTensor>("Eshelby_tensor")),
     _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             ? &getMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             : NULL),
@@ -88,7 +88,7 @@ JIntegral::computeQpIntegral()
       grad_of_scalar_q(j) += dphi_curr_elem[i][_qp](j) * _q_curr_elem[i];
   }
 
-  ColumnMajorMatrix grad_of_vector_q;
+  RankTwoTensor grad_of_vector_q;
   const RealVectorValue & crack_direction =
       _crack_front_definition->getCrackDirection(_crack_front_point_index);
   grad_of_vector_q(0, 0) = crack_direction(0) * grad_of_scalar_q(0);

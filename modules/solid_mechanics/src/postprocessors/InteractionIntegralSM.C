@@ -8,6 +8,7 @@
 //
 #include "InteractionIntegralSM.h"
 #include "MooseMesh.h"
+#include "RankTwoTensor.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
 
@@ -62,8 +63,8 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
                      : _grad_zero),
     _has_temp(isCoupled("temp")),
     _grad_temp(_has_temp ? coupledGradient("temp") : _grad_zero),
-    _aux_stress(getMaterialProperty<ColumnMajorMatrix>("aux_stress")),
-    _aux_grad_disp(getMaterialProperty<ColumnMajorMatrix>("aux_grad_disp")),
+    _aux_stress(getMaterialProperty<RankTwoTensor>("aux_stress")),
+    _aux_grad_disp(getMaterialProperty<RankTwoTensor>("aux_grad_disp")),
     _current_instantaneous_thermal_expansion_coef(
         hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef")
             ? &getMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef")
@@ -123,12 +124,7 @@ InteractionIntegralSM::computeQpIntegral()
   RealVectorValue crack_direction(0.0);
   crack_direction(0) = 1.0;
 
-  ColumnMajorMatrix aux_du;
-  aux_du(0, 0) = _aux_grad_disp[_qp](0, 0);
-  aux_du(0, 1) = _aux_grad_disp[_qp](0, 1);
-  aux_du(0, 2) = _aux_grad_disp[_qp](0, 2);
-
-  ColumnMajorMatrix stress;
+  RankTwoTensor stress;
   stress(0, 0) = _stress[_qp].xx();
   stress(0, 1) = _stress[_qp].xy();
   stress(0, 2) = _stress[_qp].xz();
@@ -139,7 +135,7 @@ InteractionIntegralSM::computeQpIntegral()
   stress(2, 1) = _stress[_qp].yz();
   stress(2, 2) = _stress[_qp].zz();
 
-  ColumnMajorMatrix strain;
+  RankTwoTensor strain;
   strain(0, 0) = _strain[_qp].xx();
   strain(0, 1) = _strain[_qp].xy();
   strain(0, 2) = _strain[_qp].xz();
@@ -150,7 +146,7 @@ InteractionIntegralSM::computeQpIntegral()
   strain(2, 1) = _strain[_qp].yz();
   strain(2, 2) = _strain[_qp].zz();
 
-  ColumnMajorMatrix grad_disp;
+  RankTwoTensor grad_disp;
   grad_disp(0, 0) = _grad_disp_x[_qp](0);
   grad_disp(0, 1) = _grad_disp_x[_qp](1);
   grad_disp(0, 2) = _grad_disp_x[_qp](2);
@@ -164,16 +160,16 @@ InteractionIntegralSM::computeQpIntegral()
   // Rotate stress, strain, displacement and temperature to crack front coordinate system
   RealVectorValue grad_q_cf =
       _crack_front_definition->rotateToCrackFrontCoords(grad_q, _crack_front_point_index);
-  ColumnMajorMatrix grad_disp_cf =
+  RankTwoTensor grad_disp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(grad_disp, _crack_front_point_index);
-  ColumnMajorMatrix stress_cf =
+  RankTwoTensor stress_cf =
       _crack_front_definition->rotateToCrackFrontCoords(stress, _crack_front_point_index);
-  ColumnMajorMatrix strain_cf =
+  RankTwoTensor strain_cf =
       _crack_front_definition->rotateToCrackFrontCoords(strain, _crack_front_point_index);
   RealVectorValue grad_temp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], _crack_front_point_index);
 
-  ColumnMajorMatrix dq;
+  RankTwoTensor dq;
   dq(0, 0) = crack_direction(0) * grad_q_cf(0);
   dq(0, 1) = crack_direction(0) * grad_q_cf(1);
   dq(0, 2) = crack_direction(0) * grad_q_cf(2);
@@ -181,11 +177,11 @@ InteractionIntegralSM::computeQpIntegral()
   // Calculate interaction integral terms
 
   // Term1 = stress * x1-derivative of aux disp * dq
-  ColumnMajorMatrix tmp1 = dq * stress_cf;
-  Real term1 = aux_du.doubleContraction(tmp1);
+  RankTwoTensor tmp1 = dq * stress_cf;
+  Real term1 = _aux_grad_disp[_qp].doubleContraction(tmp1);
 
   // Term2 = aux stress * x1-derivative of disp * dq
-  ColumnMajorMatrix tmp2 = dq * _aux_stress[_qp];
+  RankTwoTensor tmp2 = dq * _aux_stress[_qp];
   Real term2 = grad_disp_cf(0, 0) * tmp2(0, 0) + grad_disp_cf(1, 0) * tmp2(0, 1) +
                grad_disp_cf(2, 0) * tmp2(0, 2);
 

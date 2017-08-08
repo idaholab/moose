@@ -13,7 +13,7 @@
 
 class CrackFrontDefinition;
 class AuxiliarySystem;
-class ColumnMajorMatrix;
+class RankTwoTensor;
 
 // libMesh forward declarations
 namespace libMesh
@@ -52,8 +52,8 @@ public:
   bool treatAs2D() const { return _treat_as_2d; }
   RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector,
                                            const unsigned int point_index) const;
-  ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor,
-                                             const unsigned int point_index) const;
+  RankTwoTensor rotateToCrackFrontCoords(const RankTwoTensor tensor,
+                                         const unsigned int point_index) const;
   void calculateRThetaToCrackFront(const Point qp,
                                    const unsigned int point_index,
                                    Real & r,
@@ -113,7 +113,7 @@ protected:
   std::vector<Real> _distances_along_front;
   std::vector<Real> _angles_along_front;
   std::vector<Real> _strain_along_front;
-  std::vector<ColumnMajorMatrix> _rot_matrix;
+  std::vector<RankTwoTensor> _rot_matrix;
   Real _overall_length;
   DIRECTION_METHOD _direction_method;
   END_DIRECTION_METHOD _end_direction_method;

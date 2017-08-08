@@ -14,6 +14,7 @@
 
 // Forward Declarations
 class InteractionIntegralAuxFields;
+class RankTwoTensor;
 
 template <>
 InputParameters validParams<InteractionIntegralAuxFields>();
@@ -36,22 +37,22 @@ protected:
   virtual void computeQpProperties();
 
   std::string _appended_index_name;
-  MaterialProperty<ColumnMajorMatrix> & _aux_stress_I;
-  MaterialProperty<ColumnMajorMatrix> & _aux_disp_I;
-  MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_I;
-  MaterialProperty<ColumnMajorMatrix> & _aux_strain_I;
-  MaterialProperty<ColumnMajorMatrix> & _aux_stress_II;
-  MaterialProperty<ColumnMajorMatrix> & _aux_disp_II;
-  MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_II;
-  MaterialProperty<ColumnMajorMatrix> & _aux_strain_II;
-  MaterialProperty<ColumnMajorMatrix> & _aux_stress_III;
-  MaterialProperty<ColumnMajorMatrix> & _aux_disp_III;
-  MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_III;
-  MaterialProperty<ColumnMajorMatrix> & _aux_strain_III;
-  MaterialProperty<ColumnMajorMatrix> & _aux_stress_T;
-  MaterialProperty<ColumnMajorMatrix> & _aux_disp_T;
-  MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_T;
-  MaterialProperty<ColumnMajorMatrix> & _aux_strain_T;
+  MaterialProperty<RankTwoTensor> & _aux_stress_I;
+  MaterialProperty<RankTwoTensor> & _aux_disp_I;
+  MaterialProperty<RankTwoTensor> & _aux_grad_disp_I;
+  MaterialProperty<RankTwoTensor> & _aux_strain_I;
+  MaterialProperty<RankTwoTensor> & _aux_stress_II;
+  MaterialProperty<RankTwoTensor> & _aux_disp_II;
+  MaterialProperty<RankTwoTensor> & _aux_grad_disp_II;
+  MaterialProperty<RankTwoTensor> & _aux_strain_II;
+  MaterialProperty<RankTwoTensor> & _aux_stress_III;
+  MaterialProperty<RankTwoTensor> & _aux_disp_III;
+  MaterialProperty<RankTwoTensor> & _aux_grad_disp_III;
+  MaterialProperty<RankTwoTensor> & _aux_strain_III;
+  MaterialProperty<RankTwoTensor> & _aux_stress_T;
+  MaterialProperty<RankTwoTensor> & _aux_disp_T;
+  MaterialProperty<RankTwoTensor> & _aux_grad_disp_T;
+  MaterialProperty<RankTwoTensor> & _aux_strain_T;
 
   enum SIF_MODE
   {
@@ -62,11 +63,11 @@ protected:
   };
 
   void computeAuxFields(const SIF_MODE sif_mode,
-                        ColumnMajorMatrix & stress,
-                        ColumnMajorMatrix & disp,
-                        ColumnMajorMatrix & grad_disp,
-                        ColumnMajorMatrix & strain);
-  void computeTFields(ColumnMajorMatrix & stress, ColumnMajorMatrix & grad_disp);
+                        RankTwoTensor & stress,
+                        RankTwoTensor & disp,
+                        RankTwoTensor & grad_disp,
+                        RankTwoTensor & strain);
+  void computeTFields(RankTwoTensor & stress, RankTwoTensor & grad_disp);
 
 private:
   const CrackFrontDefinition * _crack_front_definition;
