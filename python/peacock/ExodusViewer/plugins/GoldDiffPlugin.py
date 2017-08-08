@@ -121,7 +121,7 @@ class GoldDiffPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         Sets the Qt enabled status for this widget.
         """
-        value = bool(mooseutils.gold(self._filename) != None)
+        value = mooseutils.gold(self._filename) is not None
         self.setEnabled(value)
         if value:
             self._callbackGoldToggle(self.GoldToggle.isChecked())
@@ -143,7 +143,7 @@ class GoldDiffPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         Change default enable/disable behavior this is handled by onFileChanged.
         """
         super(GoldDiffPlugin, self).onWindowCreated(*args)
-        self.setEnabled(False)
+        self.setActive()
 
     def onWindowUpdated(self):
         """

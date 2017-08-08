@@ -153,6 +153,9 @@ def gold(filename):
     """
     Get the gold filename corresponding to a filename.
     """
+    if not filename:
+        return None
+
     if not os.path.exists(filename):
         return None
 
