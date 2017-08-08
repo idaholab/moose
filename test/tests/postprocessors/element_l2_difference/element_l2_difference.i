@@ -23,7 +23,7 @@
   [./force_u]
     type = UserForcingFunction
     variable = u
-    function = 'x*x*x + y*y*y'
+    function = 'x*x*x+y*y*y'
   [../]
   [./diff_v]
     type = Diffusion
@@ -32,7 +32,7 @@
   [./force_v]
     type = UserForcingFunction
     variable = v
-    function = 'x*x*x + y*y*y'
+    function = 'x*x*x+y*y*y'
   [../]
 []
 
