@@ -89,7 +89,6 @@ TEST(MooseEnum, multiTestOne)
 
   // Size
   EXPECT_EQ(mme.size(), 4);
-  EXPECT_EQ(mme.unique_items_size(), 3);
 
   // All but "two" should be in the Enum
   std::set<std::string> compare_set, return_set, difference;
@@ -115,86 +114,6 @@ TEST(MooseEnum, multiTestOne)
   EXPECT_EQ(mme[0], "one");
   EXPECT_EQ(mme[1], "two");
   EXPECT_EQ(mme[2], "four");
-}
-
-TEST(MooseEnum, withNamesFromTest)
-{
-  //
-  // Construct MultiMooseEnum from MooseEnum
-  //
-  MooseEnum me1("one two three four");
-  MultiMooseEnum mme1 = MultiMooseEnum::withNamesFrom(me1);
-
-  // set in-range values
-  mme1 = "one two";
-  EXPECT_EQ(mme1.contains("one"), true);
-  EXPECT_EQ(mme1.contains("two"), true);
-  EXPECT_EQ(mme1.contains("three"), false);
-  EXPECT_EQ(mme1.contains("four"), false);
-
-  // compare against out-of-range value
-  try
-  {
-    bool foo = me1 == "five";
-    foo = foo;
-    // TODO: this test fails if you uncomment the following line. It was written incorrectly before
-    // FAIL() << "missing expected error";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-
-    ASSERT_NE(msg.find("Invalid string comparison"), std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
-
-  // set out-of-range values
-  try
-  {
-    mme1 = "five";
-    FAIL() << "missing expected error";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_NE(msg.find("Invalid option"), std::string::npos) << "failed with unexpected error: "
-                                                             << msg;
-  }
-
-  // construct mme with out-of-range-allowed
-  MooseEnum me2("one two three four", "", true);
-  MultiMooseEnum mme2 = MultiMooseEnum::withNamesFrom(me2);
-  mme2 = "six";
-  EXPECT_EQ(mme2.contains("six"), true);
-
-  //
-  // Construct MooseEnum from MultiMooseEnum
-  //
-  MultiMooseEnum mme3("one two three four");
-  MooseEnum me3 = MooseEnum::withNamesFrom(mme3);
-
-  // set in-range values
-  me3 = "one";
-  EXPECT_EQ(me3, "one");
-
-  // set out-of-range values
-  try
-  {
-    me3 = "five";
-    FAIL() << "missing expected error";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_NE(msg.find("Invalid option"), std::string::npos) << "failed with unexpected error: "
-                                                             << msg;
-  }
-
-  // construct mme with out-of-range-allowed
-  MultiMooseEnum mme4("one two three four", "", true);
-  MooseEnum me4 = MooseEnum::withNamesFrom(mme4);
-  me4 = "six";
-  EXPECT_EQ(me4, "six");
 }
 
 TEST(MooseEnum, testDeprecate)
@@ -273,4 +192,34 @@ TEST(MooseEnum, testErrors)
     ASSERT_NE(msg.find("You cannot place whitespace around the '=' character"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
+}
+
+TEST(MooseEnum, compareCurrent)
+{
+  MooseEnum a("a=1 b=2", "a");
+  MooseEnum b("a=1 b=2 c=3", "a");
+  MooseEnum c("a=2 b=1", "a");
+
+  EXPECT_TRUE(a.compareCurrent(b));
+  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_TRUE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_BOTH));
+
+  b = "b";
+  EXPECT_FALSE(a.compareCurrent(b));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_BOTH));
+
+  b = "c";
+  EXPECT_FALSE(a.compareCurrent(b));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(b, MooseEnum::CompareMode::COMPARE_BOTH));
+
+  EXPECT_TRUE(a.compareCurrent(c));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_BOTH));
+
+  c = "b";
+  EXPECT_FALSE(a.compareCurrent(c));
+  EXPECT_TRUE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_ID));
+  EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_BOTH));
 }

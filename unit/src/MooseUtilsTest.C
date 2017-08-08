@@ -36,3 +36,9 @@ TEST(MooseUtils, underscoreToCamelCase)
   EXPECT_EQ(MooseUtils::underscoreToCamelCase("_foo_bar", true), "FooBar");
   EXPECT_EQ(MooseUtils::underscoreToCamelCase("_foo_bar_", true), "FooBar");
 }
+
+TEST(MooseUtils, toUpper)
+{
+  std::string specs("RotaryGirder");
+  EXPECT_EQ(MooseUtils::toUpper(specs), "ROTARYGIRDER");
+}
