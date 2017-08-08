@@ -14,6 +14,7 @@
 ####################################################################################################
 #pylint: enable=missing-docstring
 import collections
+
 import logging
 import json
 
@@ -24,15 +25,15 @@ LOG = logging.getLogger(__name__)
 
 def add_moose_object_helper(name, item, parent):
     """
-    Helper to handle the Postprocessor/UserObject special case.
-
-    This probably needs to be more generic, but this will do the job for now.
+    Helper to handle the Postprocessor/UserObject and Bounds/AuxKernel special case.
     """
-    if ('moose_base' in item) and (item['moose_base'] == 'Postprocessor') and \
-       (item['parent_syntax'] == 'UserObjects/*'):
-        return
-    MooseObjectNode(name, item, parent=parent)
+    node = MooseObjectNode(name, item, parent=parent)
 
+    pairs = [('Postprocessor', 'UserObjects/*'), ('AuxKernel', 'Bounds/*')]
+    for base, parent_syntax in pairs:
+        if ('moose_base' in item) and (item['moose_base'] == base) and \
+           (item['parent_syntax'] == parent_syntax):
+            node.hidden = True
 
 def syntax_tree_helper(item, parent):
     """
@@ -90,11 +91,10 @@ def moose_docs_app_syntax(location, hide=None):
         syntax_tree_helper(value, node)
 
     if hide is not None:
-        for group, hidden in hide.iteritems():
-            for h in hidden:
-                filter_ = lambda n, hide=h, grp=group: (n.full_name.startswith(hide)) and \
-                                    (grp == 'all' or grp in n.groups.keys())
-                for node in root.findall(filter_=filter_):
+        for node in root.findall():
+            if ('all' in hide) and (node.full_name in hide['all']):
+                node.hidden = True
+            for group in node.groups:
+                if (group in hide) and (node.full_name in hide[group]):
                     node.hidden = True
-
     return root
