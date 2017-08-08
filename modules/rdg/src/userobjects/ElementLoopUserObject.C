@@ -185,10 +185,31 @@ ElementLoopUserObject::onInternalSide(const Elem * elem, unsigned int side)
 }
 
 void
-ElementLoopUserObject::onInterface(const Elem * /*elem*/,
-                                   unsigned int /*side*/,
-                                   BoundaryID /*bnd_id*/)
+ElementLoopUserObject::onInterface(const Elem * elem, unsigned int side, BoundaryID /*bnd_id*/)
 {
+  _current_elem = elem;
+  // Pointer to the neighbor we are currently working on.
+  _current_neighbor = elem->neighbor(side);
+
+  // Get the global id of the element and the neighbor
+  const dof_id_type elem_id = elem->id();
+  const dof_id_type neighbor_id = _current_neighbor->id();
+
+  // TODO: add if-statement to check if this needs to be executed
+  if ((_current_neighbor->active() && (_current_neighbor->level() == elem->level()) &&
+       (elem_id < neighbor_id)) ||
+      (_current_neighbor->level() < elem->level()))
+  {
+    computeInterface();
+  }
+
+  if (!_have_interface_elems &&
+      (_current_elem->processor_id() != _current_neighbor->processor_id()))
+  {
+    // if my current neighbor is on another processor store the current element
+    // ID for later communication
+    _interface_elem_ids.insert(_current_elem->id());
+  }
 }
 
 void
@@ -213,6 +234,11 @@ ElementLoopUserObject::computeBoundary()
 
 void
 ElementLoopUserObject::computeInternalSide()
+{
+}
+
+void
+ElementLoopUserObject::computeInterface()
 {
 }
 

@@ -113,6 +113,7 @@ protected:
   virtual void computeElement();
   virtual void computeBoundary();
   virtual void computeInternalSide();
+  virtual void computeInterface();
 };
 
 #endif
