@@ -267,6 +267,7 @@ class SyntaxNodeBase(NodeCore):
     def __init__(self, name, **kwargs):
         super(SyntaxNodeBase, self).__init__(name, **kwargs)
         self.__hidden = False
+        self.__check_status = None
 
     @property
     def hidden(self):
@@ -282,8 +283,6 @@ class SyntaxNodeBase(NodeCore):
         """
         if isinstance(value, bool):
             self.__hidden = value
-            for node in self.children:
-                node.hidden = value
         else:
             raise TypeError("The supplied value must be a boolean.")
 
@@ -335,7 +334,13 @@ class SyntaxNodeBase(NodeCore):
     def check(self, install, generate=False, groups=None, update=None):
         """
         Check that the expected documentation exists.
+
+        Return:
+            True, False, or None, where True indicates that the page exists, False indicates the
+            page does not exist or doesn't contain content, and None indicates that the page is
+            hidden.
         """
+        out = None # not checked because it was hidden
         if self.hidden:
             LOG.debug("Skipping documentation check for %s, it is hidden.", self.full_name)
 
@@ -346,6 +351,7 @@ class SyntaxNodeBase(NodeCore):
         else:
             filename = self.markdown(install)
             if not os.path.isfile(filename):
+                out = False
                 LOG.error("No documentation for %s, documentation for this object should be "
                           "created in: %s", self.full_name, filename)
                 if generate:
@@ -361,6 +367,7 @@ class SyntaxNodeBase(NodeCore):
                 with open(filename, 'r') as fid:
                     lines = fid.readlines()
                 if lines and self.STUB_HEADER in lines[0]:
+                    out = False
                     LOG.error("A MOOSE generated stub page for %s exists, but no content was "
                               "added. Add documentation content to %s.", self.name, filename)
                     if update:
@@ -370,6 +377,7 @@ class SyntaxNodeBase(NodeCore):
                             if not isinstance(content, str):
                                 raise TypeError("The _defaultContent method must return a str.")
                             fid.write(content)
+        return out
 
     def _defaultContent(self):
         """
