@@ -1010,6 +1010,7 @@ tensor_mechanics:
     - /Materials/TensileStressUpdate
     - /Materials/TwoPhaseStressMaterial
     - /Materials/VolumeDeformGradCorrectedStress
+    - /Materials/ComputeFiniteStrainElasticStressBirchMurnaghan
     - /Modules/TensorMechanics
     - /Modules/TensorMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction
     - /Modules/TensorMechanics/Master/CommonTensorMechanicsAction
