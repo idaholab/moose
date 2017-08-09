@@ -17,10 +17,9 @@ class TestHarnessTestCase(unittest.TestCase):
         Make sure the TestHarness status line reports the correct counts.
         """
         # We need to be sure to match any of the terminal codes in the line
-        status_re = r'(?P<passed>\d+) passed.*, .*(?P<skipped>\d+) skipped.*, .*(?P<pending>\d+) pending.*, .*(?P<failed>\d+) failed'
+        status_re = r'(?P<passed>\d+) passed.*, .*(?P<skipped>\d+) skipped.*, .*(?P<failed>\d+) failed'
         match = re.search(status_re, output)
         self.assertNotEqual(match, None)
         self.assertEqual(match.group("passed"), str(passed))
         self.assertEqual(match.group("failed"), str(failed))
         self.assertEqual(match.group("skipped"), str(skipped))
-        self.assertEqual(match.group("pending"), str(pending))
