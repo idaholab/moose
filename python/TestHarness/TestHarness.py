@@ -193,7 +193,7 @@ class TestHarness:
                                 # Schedule the testers for immediate execution
                                 self.scheduler.schedule(testers)
 
-                            # record this launched test to prevent this test from launching again
+                            # record these launched test to prevent this test from launching again
                             # due to os.walk following symbolic links
                             launched_tests.append(os.path.join(dirpath, file))
 
