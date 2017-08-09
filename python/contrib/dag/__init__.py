@@ -226,3 +226,11 @@ class DAG(object):
     def size(self):
         return len(self.graph)
 
+    # Added by the MOOSE group
+    def clone(self):
+        """ create a hard copy of the current graph with pointers
+        to the original graph's contents.
+        """
+        new_graph = DAG()
+        new_graph.graph = copy(self.graph)
+        return new_graph

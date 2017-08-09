@@ -136,39 +136,18 @@ class Scheduler(MooseObject):
 
         return failed_job_containers
 
-    def createDependencies(self, job_container_dict):
-        """
-        Create dependencies using supplied dictionary of TesterData objects.
-        """
-        for tester_name, job_container in job_container_dict.iteritems():
-            tester = job_container.getTester()
-            job_dag = job_container.getDAG()
-
-            job_dag.add_node_if_not_exists(job_container)
-
-            for prereq in tester.getPrereqs():
-
-                if prereq in job_container_dict.keys():
-
-                    job_dag.add_node_if_not_exists(job_container_dict[prereq])
-
-                    # Attempt to create an edge node dependency
-                    try:
-                        job_dag.add_edge(job_container_dict[prereq], job_container)
-
-                    # We do not care about cyclic errors, they have been handled already
-                    except dag.DAGValidationError:
-                        pass
-
-        return job_container_dict
-
     def checkGroupFailures(self, job_container_dict):
         """
-        Method to detect failures on a macroscopic level. Returns a set of tests
-        that were discovered as causing failures.
+        Method to detect failures on a macroscopic level. Returns a set of testers
+        that are discovered to cause failures.
         """
-        temp_dag = dag.DAG()
+
         failed_or_skipped_testers = set([])
+
+        # Arbitrarily obtain a dag object from one of the job containers as they
+        # are shared between each job_container
+        arbitrary_job = job_container_dict.iteritems().next()[1]
+        job_dag = arbitrary_job.getDAG()
 
         # Create DAG independent nodes
         for tester_name, job_container in job_container_dict.iteritems():
@@ -177,7 +156,7 @@ class Scheduler(MooseObject):
             # If this tester is not runnable, continue to the next tester
             if tester.getRunnable(self.options):
 
-                temp_dag.add_node_if_not_exists(job_container)
+                job_dag.add_node_if_not_exists(job_container)
 
             else:
                 failed_or_skipped_testers.add(tester)
@@ -196,7 +175,7 @@ class Scheduler(MooseObject):
 
                     # Try to produce either a cyclic or skipped dependency error using the DAG's
                     # built-in exception methods
-                    temp_dag.add_edge(job_container_dict[prereq], job_container)
+                    job_dag.add_edge(job_container_dict[prereq], job_container)
 
                 # Skipped Dependencies
                 except dag.DAGEdgeIndError:
@@ -206,8 +185,8 @@ class Scheduler(MooseObject):
 
                     # Add the parent node / dependency edge to create a functional DAG now that we have caught
                     # the skipped dependency (needed for discovering race conditions later on)
-                    temp_dag.add_node_if_not_exists(job_container_dict[prereq])
-                    temp_dag.add_edge(job_container_dict[prereq], job_container)
+                    job_dag.add_node_if_not_exists(job_container_dict[prereq])
+                    job_dag.add_edge(job_container_dict[prereq], job_container)
 
                 # Cyclic Failure
                 except dag.DAGValidationError:
@@ -226,11 +205,25 @@ class Scheduler(MooseObject):
 
         # With a working DAG created above (even a partial one), discover race conditions with remaining runnable
         # testers.
-        while temp_dag.size():
+        failed_or_skipped_testers.update(self.checkRaceConditions(job_dag))
+
+        return failed_or_skipped_testers
+
+    def checkRaceConditions(self, dag_object):
+        """
+        Return a set of failing testers exhibiting race conditions with their
+        output file.
+        """
+        failed_or_skipped_testers = set([])
+
+        # clone the dag so we can operate destructively on the cloned dag
+        dag_clone = dag_object.clone()
+
+        while dag_clone.size():
             output_files_in_dir = set()
 
             # Get a list of concurrent tester containers
-            concurrent_jobs = temp_dag.ind_nodes()
+            concurrent_jobs = dag_clone.ind_nodes()
 
             for job_container in concurrent_jobs:
                 tester = job_container.getTester()
@@ -252,7 +245,7 @@ class Scheduler(MooseObject):
 
             # Delete this group of job containers and allow the loop to continue
             for job_container in concurrent_jobs:
-                temp_dag.delete_node(job_container)
+                dag_clone.delete_node(job_container)
 
         return failed_or_skipped_testers
 
@@ -279,22 +272,21 @@ class Scheduler(MooseObject):
             name_to_job_container[tester.getTestName()] = TesterData(tester, job_dag, self.options)
             self.tester_datas.add(name_to_job_container[tester.getTestName()])
 
+        # Discover any testers causing macroscopic level failures. This method also inherently creates
+        # a usable job_dag we use throughout the scheduler.
         skipped_or_failed_testers = self.checkGroupFailures(name_to_job_container)
 
         # Create a set of failing job containers
         for failed_tester in skipped_or_failed_testers:
             non_runnable_jobs.add(name_to_job_container[failed_tester.getTestName()])
 
-        # Create dependencies in the DAG shared between this group of testers
-        self.createDependencies(name_to_job_container)
-
         # Iterate over the items in our non_runnable_jobs and handle any skipped dependencies
         for job in non_runnable_jobs.copy():
-            additionally_skipped = self.processDownstreamTests(name_to_job_container[job.getTestName()])
+            additionally_skipped = self.processDownstreamTests(job)
             non_runnable_jobs.update(additionally_skipped)
-            job_dag.delete_node_if_exists(name_to_job_container[job.getTestName()])
+            job_dag.delete_node_if_exists(job)
 
-        # Get a count of all the items still in the DAG. This will be the jobs that ultimately get queued
+        # Get a count of all the items still in the DAG. This will be the jobs that ultimately are queued
         runnable_jobs = job_dag.size()
 
         # Make sure we didn't drop a tester somehow
@@ -394,7 +386,8 @@ class Scheduler(MooseObject):
         tester = job_container.getTester()
 
         # comply with load average
-        self.satisfyLoad()
+        if self.options.load:
+            self.satisfyLoad()
 
         with self.slot_lock:
             can_run = False
@@ -502,13 +495,13 @@ class Scheduler(MooseObject):
                 if tester.isPending():
                     raise SchedulerError('Derived Scheduler can not return a pending status!')
 
-                # Get possible skipped dependency jobs if this job failed
+                # Obtain possible skipped dependency jobs
                 possibly_skipped_job_containers = self.processDownstreamTests(job_container)
 
-                # Include _this_ job in the possible skipped set
+                # Include _this_ job in the possibly empty skipped set so we only call status methods once
                 possibly_skipped_job_containers.add(job_container)
 
-                # Submit this set of jobs to the status queue
+                # Submit this job set to the status queue for status printing
                 self.queueJobs(status_job_containers=possibly_skipped_job_containers)
 
                 # Get next job list
