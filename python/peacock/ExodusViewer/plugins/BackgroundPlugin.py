@@ -146,13 +146,19 @@ class BackgroundPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         """
         if self.GradientToggle.isChecked():
             title = 'Select top gradient color'
+            default_color = self._top
         else:
             title = 'Select solid color'
+            default_color = self._solid
 
         dialog = QtWidgets.QColorDialog()
-        c = dialog.getColor(initial=self._top, title=title)
+        c = dialog.getColor(initial=default_color, title=title)
+
         if c.isValid():
-            self._top = c
+            if self.GradientToggle.isChecked():
+                self._top = c
+            else:
+                self._solid = c
             self.color()
 
     def _setupBottomButton(self, qobject):
