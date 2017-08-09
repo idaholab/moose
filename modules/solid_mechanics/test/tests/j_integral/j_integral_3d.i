@@ -50,7 +50,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vonmises]
+  [./vonmises_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -110,7 +110,7 @@
   [./vonmises]
     type = MaterialTensorAux
     tensor = stress
-    variable = vonmises
+    variable = vonmises_stress
     quantity = vonmises
     execute_on = timestep_end
   [../]

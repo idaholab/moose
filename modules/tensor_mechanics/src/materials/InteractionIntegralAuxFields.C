@@ -55,13 +55,11 @@ InteractionIntegralAuxFields::InteractionIntegralAuxFields(const InputParameters
     _aux_strain_I(declareProperty<RankTwoTensor>("aux_strain_I_" + _appended_index_name)),
     _aux_stress_II(declareProperty<RankTwoTensor>("aux_stress_II_" + _appended_index_name)),
     _aux_disp_II(declareProperty<RankTwoTensor>("aux_disp_II_" + _appended_index_name)),
-    _aux_grad_disp_II(
-        declareProperty<RankTwoTensor>("aux_grad_disp_II_" + _appended_index_name)),
+    _aux_grad_disp_II(declareProperty<RankTwoTensor>("aux_grad_disp_II_" + _appended_index_name)),
     _aux_strain_II(declareProperty<RankTwoTensor>("aux_strain_II_" + _appended_index_name)),
     _aux_stress_III(declareProperty<RankTwoTensor>("aux_stress_III_" + _appended_index_name)),
     _aux_disp_III(declareProperty<RankTwoTensor>("aux_disp_III_" + _appended_index_name)),
-    _aux_grad_disp_III(
-        declareProperty<RankTwoTensor>("aux_grad_disp_III_" + _appended_index_name)),
+    _aux_grad_disp_III(declareProperty<RankTwoTensor>("aux_grad_disp_III_" + _appended_index_name)),
     _aux_strain_III(declareProperty<RankTwoTensor>("aux_strain_III_" + _appended_index_name)),
     _aux_stress_T(declareProperty<RankTwoTensor>("aux_stress_T_" + _appended_index_name)),
     _aux_disp_T(declareProperty<RankTwoTensor>("aux_disp_T_" + _appended_index_name)),
@@ -296,8 +294,7 @@ InteractionIntegralAuxFields::computeAuxFields(const SIF_MODE sif_mode,
 }
 
 void
-InteractionIntegralAuxFields::computeTFields(RankTwoTensor & stress,
-                                             RankTwoTensor & grad_disp)
+InteractionIntegralAuxFields::computeTFields(RankTwoTensor & stress, RankTwoTensor & grad_disp)
 {
 
   Real t = _theta;

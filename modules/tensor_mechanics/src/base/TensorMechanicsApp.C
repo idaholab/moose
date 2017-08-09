@@ -194,6 +194,7 @@
 #include "InteractionIntegralAuxFields.h"
 #include "InteractionIntegralBenchmarkBC.h"
 #include "MixedModeEquivalentK.h"
+#include "EshelbyTensor.h"
 
 template <>
 InputParameters
@@ -331,6 +332,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(TensileStressUpdate);
   registerMaterial(ComputeFiniteStrainElasticStressBirchMurnaghan);
   registerMaterial(InteractionIntegralAuxFields);
+  registerMaterial(EshelbyTensor);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

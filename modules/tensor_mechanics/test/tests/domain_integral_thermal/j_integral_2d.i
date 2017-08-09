@@ -1,42 +1,15 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
-  disp_x = disp_x
-  disp_y = disp_y
+  displacements = 'disp_x disp_y'
+  volumetric_locking_correction = true
 []
 
 [Mesh]
   file = crack2d.e
-  displacements = 'disp_x disp_y'
-#  uniform_refine = 3
 []
-
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
 
 [AuxVariables]
-  [./stress_xx]      # stress aux variables are defined for output; this is a way to get integration point variables to the output file
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vonmises_stress]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./SED]
     order = CONSTANT
     family = MONOMIAL
@@ -46,7 +19,6 @@
     family = LAGRANGE
   [../]
 []
-
 
 [Functions]
   [./tempfunc]
@@ -66,40 +38,18 @@
   radius_outer = '80.0 100.0 120.0 140.0'
 []
 
-[SolidMechanics]
-  [./solid]
+[Modules/TensorMechanics/Master]
+  [./master]
+    strain = FINITE
+    add_variables = true
+    incremental = true
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
+    planar_formulation = PLANE_STRAIN
+    eigenstrain_names = thermal_expansion
   [../]
 []
 
 [AuxKernels]
-  [./stress_xx]               # computes stress components for output
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-    execute_on = timestep_end     # for efficiency, only compute at the end of a timestep
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-    execute_on = timestep_end
-  [../]
-  [./vonmises]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = vonmises_stress
-    quantity = vonmises
-    execute_on = timestep_end
-  [../]
   [./SED]
     type = MaterialRealAux
     variable = SED
@@ -115,7 +65,6 @@
 []
 
 [BCs]
-
   [./crack_y]
     type = PresetBC
     variable = disp_y
@@ -136,31 +85,32 @@
     boundary = 900
     value = 0.0
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-  [./stiffStuff]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-    thermal_expansion = 1.35e-5
-    formulation = NonlinearPlaneStrain
-    compute_JIntegral = true
-    temp = temp
+  [../]
+  [./elastic_stress]
+    type = ComputeFiniteStrainElasticStress
+  [../]
+  [./eshelby]
+    type = EshelbyTensor
+    temperature = temp
+    eigenstrain_names = thermal_expansion
+  [../]
+  [./thermal_expansion_strain]
+    type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 0.0
-
+    thermal_expansion_coeff = 1.35e-5
+    temperature = temp
+    eigenstrain_name = thermal_expansion
   [../]
 []
 
-
 [Executioner]
-
   type = Transient
 
   solve_type = 'PJFNK'
@@ -171,19 +121,17 @@
 
   line_search = 'none'
 
-   l_max_its = 50
-   nl_max_its = 40
+  l_max_its = 50
+  nl_max_its = 40
 
-   nl_rel_step_tol= 1e-10
-   nl_rel_tol = 1e-10
+  nl_rel_step_tol= 1e-10
+  nl_rel_tol = 1e-10
 
+  start_time = 0.0
+  dt = 1
 
-   start_time = 0.0
-   dt = 1
-
-   end_time = 1
-   num_steps = 1
-
+  end_time = 1
+  num_steps = 1
 []
 
 [Outputs]
@@ -192,7 +140,6 @@
 []
 
 [Preconditioning]
-  active = 'smp'
   [./smp]
     type = SMP
     pc_side = left

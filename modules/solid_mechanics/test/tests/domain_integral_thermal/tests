@@ -9,7 +9,7 @@
     type = 'Exodiff'
     input = 'j_integral_2d_ctefunc.i'
     exodiff = 'j_integral_2d_ctefunc_out.e'
-    custom_cmp = 'j_integral_2d.cmp'
+    custom_cmp = 'j_integral_2d_ctefunc.cmp'
   [../]
   [./test_jthermal_mean_ctefunc]
     type = 'CSVDiff'
