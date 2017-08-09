@@ -138,11 +138,6 @@ public:
   FEProblemBase & problemBase() { return _fe_problem; }
 
   /**
-   * Get the FEProblem this MultiApp is part of.
-   */
-  FEProblem & problem();
-
-  /**
    * Get the FEProblemBase for the global app is part of.
    * @param app The global app number
    */
