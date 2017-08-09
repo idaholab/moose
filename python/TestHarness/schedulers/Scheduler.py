@@ -136,18 +136,12 @@ class Scheduler(MooseObject):
 
         return failed_job_containers
 
-    def checkGroupFailures(self, job_container_dict):
+    def buildDAG(self, job_container_dict, job_dag):
         """
-        Method to detect failures on a macroscopic level. Returns a set of testers
-        that are discovered to cause failures.
+        Build the DAG and catch any failures.
         """
 
         failed_or_skipped_testers = set([])
-
-        # Arbitrarily obtain a dag object from one of the job containers as they
-        # are shared between each job_container
-        arbitrary_job = job_container_dict.iteritems().next()[1]
-        job_dag = arbitrary_job.getDAG()
 
         # Create DAG independent nodes
         for tester_name, job_container in job_container_dict.iteritems():
@@ -258,7 +252,9 @@ class Scheduler(MooseObject):
         if self.tester_pool._state:
             return
 
+        # Instance the DAG class so we can share it amongst all the TesterData containers
         job_dag = dag.DAG()
+
         non_runnable_jobs = set([])
         name_to_job_container = {}
 
@@ -272,15 +268,16 @@ class Scheduler(MooseObject):
             name_to_job_container[tester.getTestName()] = TesterData(tester, job_dag, self.options)
             self.tester_datas.add(name_to_job_container[tester.getTestName()])
 
-        # Discover any testers causing macroscopic level failures. This method also inherently creates
-        # a usable job_dag we use throughout the scheduler.
-        skipped_or_failed_testers = self.checkGroupFailures(name_to_job_container)
+        # Populate job_dag with testers. This method will also return any testers which caused failures
+        # while building the DAG.
+        skipped_or_failed_testers = self.buildDAG(name_to_job_container, job_dag)
 
         # Create a set of failing job containers
         for failed_tester in skipped_or_failed_testers:
             non_runnable_jobs.add(name_to_job_container[failed_tester.getTestName()])
 
-        # Iterate over the items in our non_runnable_jobs and handle any skipped dependencies
+        # Iterate over the jobs in our non_runnable_jobs and handle any downstream jobs affected by
+        # 'job'. These will be our 'skipped dependency' test.
         for job in non_runnable_jobs.copy():
             additionally_skipped = self.processDownstreamTests(job)
             non_runnable_jobs.update(additionally_skipped)
