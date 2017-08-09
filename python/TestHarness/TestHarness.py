@@ -180,8 +180,18 @@ class TestHarness:
                             # Get the testers for this test
                             testers = self.createTesters(dirpath, file, find_only)
 
-                            # Schedule the testers for immediate execution
-                            self.scheduler.schedule(testers)
+                            # Some 'test' files generate empty tests. Such as an entirely commented out
+                            # test block:
+                            #
+                            # [Tests]
+                            #   # [./test]
+                            #   # [../]
+                            # []
+                            #
+                            # We do not want to send an empty list of testers to the scheduler.
+                            if len(testers):
+                                # Schedule the testers for immediate execution
+                                self.scheduler.schedule(testers)
 
                             # record this launched test to prevent this test from launching again
                             # due to os.walk following symbolic links
