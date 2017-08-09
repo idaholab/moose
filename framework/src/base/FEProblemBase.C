@@ -4414,6 +4414,9 @@ FEProblemBase::adaptMesh()
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
   _cycles_completed = 0;
+
+  Moose::perf_log.push("adaptMesh()", "Execution");
+
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
     _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
@@ -4428,12 +4431,14 @@ FEProblemBase::adaptMesh()
     else
     {
       _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
-      return;
+      break;
     }
 
     // Show adaptivity progress
     _console << std::flush;
   }
+
+  Moose::perf_log.pop("adaptMesh()", "Execution");
 }
 #endif // LIBMESH_ENABLE_AMR
 
