@@ -60,6 +60,10 @@ class MultiApp : public MooseObject, public SetupInterface, public Restartable
 public:
   MultiApp(const InputParameters & parameters);
 
+  virtual void preExecute() {}
+
+  virtual void postExecute();
+
   virtual void initialSetup() override;
 
   /**

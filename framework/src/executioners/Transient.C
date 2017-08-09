@@ -305,6 +305,11 @@ Transient::execute()
 
   if (!_app.halfTransient())
     _problem.outputStep(EXEC_FINAL);
+
+  // This method is to finalize anything else we want to do on the problem side.
+  _problem.postExecute();
+
+  // This method can be overridden for user defined activities in the Executioner.
   postExecute();
 }
 
