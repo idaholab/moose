@@ -21,7 +21,7 @@ validParams<CappedMohrCoulombCosseratStressUpdate>()
                                             "host_youngs_modulus>0",
                                             "Young's modulus for the isotropic host medium");
   params.addRequiredRangeCheckedParam<Real>("host_poissons_ratio",
-                                            "host_poissons_ratio>=0",
+                                            "host_poissons_ratio>=0 & host_poissons_ratio<0.5",
                                             "Poisson's ratio for the isotropic host medium");
   return params;
 }
@@ -37,11 +37,12 @@ CappedMohrCoulombCosseratStressUpdate::CappedMohrCoulombCosseratStressUpdate(
 }
 
 void
-CappedMohrCoulombCosseratStressUpdate::preReturnMapV(const std::vector<Real> & /*trial_stress_params*/,
-                                             const RankTwoTensor & stress_trial,
-                                             const std::vector<Real> & /*intnl_old*/,
-                                             const std::vector<Real> & /*yf*/,
-                                             const RankFourTensor & /*Eijkl*/)
+CappedMohrCoulombCosseratStressUpdate::preReturnMapV(
+    const std::vector<Real> & /*trial_stress_params*/,
+    const RankTwoTensor & stress_trial,
+    const std::vector<Real> & /*intnl_old*/,
+    const std::vector<Real> & /*yf*/,
+    const RankFourTensor & /*Eijkl*/)
 {
   std::vector<Real> eigvals;
   stress_trial.symmetricEigenvaluesEigenvectors(eigvals, _eigvecs);
@@ -64,13 +65,14 @@ CappedMohrCoulombCosseratStressUpdate::setEffectiveElasticity(const RankFourTens
 }
 
 void
-CappedMohrCoulombCosseratStressUpdate::setStressAfterReturnV(const RankTwoTensor & stress_trial,
-                                                     const std::vector<Real> & stress_params,
-                                                     Real /*gaE*/,
-                                                     const std::vector<Real> & /*intnl*/,
-                                                     const yieldAndFlow & /*smoothed_q*/,
-                                                     const RankFourTensor & /*Eijkl*/,
-                                                     RankTwoTensor & stress) const
+CappedMohrCoulombCosseratStressUpdate::setStressAfterReturnV(
+    const RankTwoTensor & stress_trial,
+    const std::vector<Real> & stress_params,
+    Real /*gaE*/,
+    const std::vector<Real> & /*intnl*/,
+    const yieldAndFlow & /*smoothed_q*/,
+    const RankFourTensor & /*Eijkl*/,
+    RankTwoTensor & stress) const
 {
   // form the diagonal stress
   stress = RankTwoTensor(stress_params[0], stress_params[1], stress_params[2], 0.0, 0.0, 0.0);
@@ -93,11 +95,36 @@ CappedMohrCoulombCosseratStressUpdate::consistentTangentOperatorV(
     const std::vector<std::vector<Real>> & dvar_dtrial,
     RankFourTensor & cto)
 {
-  CappedMohrCoulombStressUpdate::consistentTangentOperatorV(stress_trial, trial_stress_params, stress, stress_params, gaE, smoothed_q, elasticity_tensor, compute_full_tangent_operator, dvar_dtrial, cto);
+  CappedMohrCoulombStressUpdate::consistentTangentOperatorV(stress_trial,
+                                                            trial_stress_params,
+                                                            stress,
+                                                            stress_params,
+                                                            gaE,
+                                                            smoothed_q,
+                                                            elasticity_tensor,
+                                                            compute_full_tangent_operator,
+                                                            dvar_dtrial,
+                                                            cto);
 
   if (!compute_full_tangent_operator)
     return;
 
+  /**
+   * Add the correction for the antisymmetric part of the elasticity
+   * tensor.
+   * CappedMohrCoulombStressUpdate computes
+   * cto(i, j, k, l) = dstress(i, j)/dstrain(k, l)
+   * and during the computations it explicitly performs certain
+   * contractions that result in symmetry between i and j, and k and l,
+   * viz, cto(i, j, k, l) = cto(j, i, k, l) = cto(i, j, l, k)
+   * That is correct because that plasticity model is only valid for
+   * symmetric stresses and strains.
+   * CappedMohrCoulombCosseratStressUpdate does not include contributions from the
+   * antisymmetric parts of stress (or strain), so the antisymmetric
+   * parts of cto are just the antisymmetric parts of the elasticity
+   * tensor, which must now get added to the cto computed by
+   * CappedMohrCoulombStressUpdate
+   */
   RankFourTensor anti;
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
     for (unsigned j = 0; j < _tensor_dimensionality; ++j)

@@ -16,15 +16,24 @@ InputParameters validParams<CappedMohrCoulombCosseratStressUpdate>();
 
 /**
  * CappedMohrCoulombCosseratStressUpdate implements rate-independent nonassociative
- * Mohr-CoulombC plus tensile plus compressive plasticity with hardening/softening
- * in the Cosserat setting.  The Mohr-Coulomb plasticity is based on the symmetric
- * part of the stress tensor only, and uses an isotropic elasticity tensor.
+ * Mohr-Coulomb plus tensile plus compressive plasticity with hardening/softening
+ * in the Cosserat setting.  The Mohr-Coulomb plasticity considers the symmetric
+ * part of the stress tensor only, and uses an isotropic elasticity tensor that
+ * is input by the user (the anti-symmetric parts of the stress tensor and the
+ * moment-stress tensor are not included in this plastic model, and any non-isometric
+ * parts of the elasticity tensor are ignored in the flow rule).
  */
 class CappedMohrCoulombCosseratStressUpdate : public CappedMohrCoulombStressUpdate
 {
 public:
   CappedMohrCoulombCosseratStressUpdate(const InputParameters & parameters);
 
+  /**
+   * The full elasticity tensor may be anisotropic, and usually is in the case
+   * of layered Cosserat.  However, this class only uses the isotropic parts of
+   * it (corresponding to the "host" material) that are encoded in _host_young
+   * and _host_poisson
+   */
   bool requiresIsotropicTensor() override { return false; }
 
 protected:
