@@ -16,17 +16,15 @@ template <>
 InputParameters validParams<INSMomentumSUPG>();
 
 /**
- * This class computes the spatial part of the momentum equation
- * residual and Jacobian for the incompressible Navier-Stokes momentum
- * equation, calling a virtual function to get the viscous
- * contribution.  You do not use this class directly, instead use one of:
- * .) INSMomentumLaplaceForm
- * .) INSMomentumTractionForm
- * depending on the application.  For "open" flow boundary conditions,
- * the INSMomentumLaplaceForm seems to give better results.  If you
- * have traction BCs, i.e. BCs where the normal traction is specified
- * on part of the boundary, you should use the INSMomentumTractionForm
- * instead.
+ * This class adds streamline upwind modifications to the test function,
+ * important in advection dominated problems, e.g. when the grid Peclet
+ * number is greater than 1. The alpha parameter is chosen in an optimal
+ * way such that at least for a single-component, one dimensional advection-
+ * diffusion equation, exact solutions at the nodes are achieved for the
+ * entire range of grid Peclet numbers (0 - infinity). For references on
+ * the subject, please see Zienkiewicz, et. al., FEM for Fluid Dynamics, 7th
+ * ed., Chapter 2, as well as Computer Methods in Applied Mechanics and Engineering
+ * 32 (1982) 199-259 by Hughes et. al.
  */
 class INSMomentumSUPG : public Kernel
 {
@@ -44,19 +42,24 @@ protected:
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
+  const VariableValue & _p;
 
   // Gradients
   const VariableGradient & _grad_u_vel;
   const VariableGradient & _grad_v_vel;
   const VariableGradient & _grad_w_vel;
+  const VariableGradient & _grad_p;
 
   // Variable numberings
   unsigned _u_vel_var_number;
   unsigned _v_vel_var_number;
   unsigned _w_vel_var_number;
+  unsigned _p_var_number;
 
   // Parameters
+  RealVectorValue _gravity;
   unsigned _component;
+  bool _integrate_p_by_parts;
 
   // Material properties
   const MaterialProperty<Real> & _mu;

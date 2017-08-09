@@ -87,6 +87,8 @@
 #include "INSChorinCorrector.h"
 #include "INSChorinPressurePoisson.h"
 #include "INSCompressibilityPenalty.h"
+#include "INSMomentumSUPG.h"
+#include "INSMomentumTimeDerivativeSUPG.h"
 #include "INSScalarSUPG.h"
 
 // BCs
@@ -268,6 +270,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSChorinPressurePoisson);
   registerKernel(INSCompressibilityPenalty);
   registerKernel(INSMomentumSUPG);
+  registerKernel(INSMomentumTimeDerivativeSUPG);
 
   // BCs
   registerBoundaryCondition(INSMomentumNoBCBCTractionForm);

@@ -17,13 +17,18 @@ validParams<INSMomentumSUPG>()
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
+  params.addRequiredCoupledVar("p", "pressure");
 
   // Required parameters
+  params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addRequiredParam<unsigned>(
       "component",
       "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
 
   // Optional parameters
+  params.addParam<bool>("integrate_p_by_parts",
+                        true,
+                        "Allows simulations to be run with pressure BC if set to false");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
@@ -37,19 +42,24 @@ INSMomentumSUPG::INSMomentumSUPG(const InputParameters & parameters)
     _u_vel(coupledValue("u")),
     _v_vel(coupledValue("v")),
     _w_vel(coupledValue("w")),
+    _p(coupledValue("p")),
 
     // Gradients
     _grad_u_vel(coupledGradient("u")),
     _grad_v_vel(coupledGradient("v")),
     _grad_w_vel(coupledGradient("w")),
+    _grad_p(coupledGradient("p")),
 
     // Variable numberings
     _u_vel_var_number(coupled("u")),
     _v_vel_var_number(coupled("v")),
     _w_vel_var_number(coupled("w")),
+    _p_var_number(coupled("p")),
 
-    // Required parameters
+    // parameters
+    _gravity(getParam<RealVectorValue>("gravity")),
     _component(getParam<unsigned>("component")),
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
 
     // Material properties
     _mu(getMaterialProperty<Real>("mu_name")),
@@ -60,32 +70,62 @@ INSMomentumSUPG::INSMomentumSUPG(const InputParameters & parameters)
 Real
 INSMomentumSUPG::computeQpResidual()
 {
-  // The convection part, rho * (u.grad) * u_component * v.
-  // Note: _grad_u is the gradient of the _component entry of the velocity vector.
-
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  Real Pe = _rho[_qp] * _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-  Real delta = 1. / std::tanh(Pe) - 1. / Pe;
-  Real alpha0 = delta * U.norm() * _current_elem->hmax() / 2.;
-  Real PG_test = alpha0 / (U.norm() * U.norm()) * U * _grad_test[_i][_qp];
-  Real convective_part = _rho[_qp] *
-                         (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
-                          _w_vel[_qp] * _grad_u[_qp](2)) *
-                         PG_test;
+  Real alpha;
+  if (_mu[_qp] < std::numeric_limits<double>::epsilon())
+    alpha = 1;
+  else if (U.norm() < std::numeric_limits<double>::epsilon())
+  {
+    alpha = 0;
+    return 0;
+  }
+  else
+  {
+    Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
+    alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
+  }
+  Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
-  return convective_part;
+  Real convective_part = _rho[_qp] * U * _grad_u[_qp] * PG_test;
+
+  // Note that integrating pressure by parts would imply applying a second
+  // derivative to the test function, which we are not equipped to do (?)
+  Real pressure_part = 0;
+  if (!_integrate_p_by_parts)
+    pressure_part = _grad_p[_qp](_component) * PG_test;
+
+  // From Computer Mechanics in Applied Mechanics and Engineering 32 (1982) pg. 212:
+  // For reasonable (linear) element shapes the contribution of PG_test * viscous
+  // term is small and can be neglected. This is not generally the case for higher
+  // order elements (and note that we commonly use quadratic shape functions for
+  // velocity). However, including this term would again imply applying a second
+  // derivative either to the test function or to the variable u
+  // Real viscous_part = computeQpResidualViscousPart();
+
+  Real body_force_part = -_rho[_qp] * _gravity(_component) * PG_test;
+
+  return convective_part + pressure_part + /*viscous_part +*/ body_force_part;
 }
 
 Real
 INSMomentumSUPG::computeQpJacobian()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  Real Pe = _rho[_qp] * _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-  Real delta = 1. / std::tanh(Pe) - 1. / Pe;
-  Real alpha0 = delta * U.norm() * _current_elem->hmax() / 2.;
-  Real PG_test = alpha0 / (U.norm() * U.norm()) * U * _grad_test[_i][_qp];
+  Real alpha;
+  if (_mu[_qp] < std::numeric_limits<double>::epsilon())
+    alpha = 1;
+  else if (U.norm() < std::numeric_limits<double>::epsilon())
+  {
+    alpha = 0;
+    return 0;
+  }
+  else
+  {
+    Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
+    alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
+  }
+  Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
-  // Convective part
   Real convective_part =
       _rho[_qp] * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) * PG_test;
 
@@ -95,14 +135,23 @@ INSMomentumSUPG::computeQpJacobian()
 Real
 INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
 {
-  // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    Real Pe = _rho[_qp] * _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-    Real delta = 1. / std::tanh(Pe) - 1. / Pe;
-    Real alpha0 = delta * U.norm() * _current_elem->hmax() / 2.;
-    Real PG_test = alpha0 / (U.norm() * U.norm()) * U * _grad_test[_i][_qp];
+    Real alpha;
+    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
+      alpha = 1;
+    else if (U.norm() < std::numeric_limits<double>::epsilon())
+    {
+      alpha = 0;
+      return 0;
+    }
+    else
+    {
+      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
+      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
+    }
+    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
     Real convective_part = _phi[_j][_qp] * _grad_u[_qp](0) * PG_test;
 
@@ -112,10 +161,20 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _v_vel_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    Real Pe = _rho[_qp] * _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-    Real delta = 1. / std::tanh(Pe) - 1. / Pe;
-    Real alpha0 = delta * U.norm() * _current_elem->hmax() / 2.;
-    Real PG_test = alpha0 / (U.norm() * U.norm()) * U * _grad_test[_i][_qp];
+    Real alpha;
+    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
+      alpha = 1;
+    else if (U.norm() < std::numeric_limits<double>::epsilon())
+    {
+      alpha = 0;
+      return 0;
+    }
+    else
+    {
+      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
+      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
+    }
+    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
     Real convective_part = _phi[_j][_qp] * _grad_u[_qp](1) * PG_test;
 
@@ -125,14 +184,46 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _w_vel_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    Real Pe = _rho[_qp] * _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-    Real delta = 1. / std::tanh(Pe) - 1. / Pe;
-    Real alpha0 = delta * U.norm() * _current_elem->hmax() / 2.;
-    Real PG_test = alpha0 / (U.norm() * U.norm()) * U * _grad_test[_i][_qp];
+    Real alpha;
+    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
+      alpha = 1;
+    else if (U.norm() < std::numeric_limits<double>::epsilon())
+    {
+      alpha = 0;
+      return 0;
+    }
+    else
+    {
+      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
+      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
+    }
+    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
     Real convective_part = _phi[_j][_qp] * _grad_u[_qp](2) * PG_test;
 
     return convective_part;
+  }
+
+  else if (jvar == _p_var_number && !_integrate_p_by_parts)
+  {
+    RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    Real alpha;
+    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
+      alpha = 1;
+    else if (U.norm() < std::numeric_limits<double>::epsilon())
+    {
+      alpha = 0;
+      return 0;
+    }
+    else
+    {
+      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
+      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
+    }
+    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
+
+    Real pressure_part = _grad_phi[_j][_qp](_component) * PG_test;
+    return pressure_part;
   }
 
   else
