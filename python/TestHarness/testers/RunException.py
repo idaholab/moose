@@ -51,7 +51,7 @@ class RunException(RunApp):
                     reason = 'NO EXPECTED ASSERT'
 
         if reason == '':
-            output = RunApp.testFileOutput(self, moose_dir, retcode, options, output)
+            RunApp.testFileOutput(self, moose_dir, retcode, options, output)
 
         if reason != '':
             self.setStatus(reason, self.bucket_fail)

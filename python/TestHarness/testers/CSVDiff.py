@@ -17,7 +17,7 @@ class CSVDiff(FileTester):
         return self.specs['csvdiff']
 
     def processResults(self, moose_dir, retcode, options, output):
-        output = FileTester.processResults(self, moose_dir, retcode, options, output)
+        FileTester.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
 

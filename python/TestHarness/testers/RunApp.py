@@ -96,50 +96,50 @@ class RunApp(Tester):
         if specs.isValid('command'):
             return os.path.join(specs['test_dir'], specs['command']) + ' ' + ' '.join(specs['cli_args'])
 
-        # Create the command line string to run
-        command = ''
+        # Create the additional command line arguments list
+        cli_args = list(specs['cli_args'])
 
         # Check for built application
         if not options.dry_run and not os.path.exists(specs['executable']):
             self.setStatus('Application not found', self.bucket_fail)
             return ''
 
-        if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
+        if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option
-            specs['cli_args'].append('--distributed-mesh')
+            cli_args.append('--distributed-mesh')
 
-        if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
+        if options.error and '--error' not in cli_args and not specs["allow_warnings"]:
             # The user has passed the error option to the test harness
             # and it is NOT supplied already in the cli-args option\
-            specs['cli_args'].append('--error')
+            cli_args.append('--error')
 
-        if options.error_unused and '--error-unused' not in specs['cli_args'] and '--warn-unused' not in specs['cli_args'] and not specs["allow_warnings"]:
+        if options.error_unused and '--error-unused' not in cli_args and '--warn-unused' not in cli_args and not specs["allow_warnings"]:
             # The user has passed the error-unused option to the test harness
             # and it is NOT supplied already in the cli-args option
             # also, neither is the conflicting option "warn-unused"
-            specs['cli_args'].append('--error-unused')
+            cli_args.append('--error-unused')
 
         if self.getCheckInput():
-            specs['cli_args'].append('--check-input')
+            cli_args.append('--check-input')
 
         timing_string = ' '
         if options.timing:
-            specs['cli_args'].append('--timing')
-            specs['cli_args'].append('Outputs/print_perf_log=true')
+            cli_args.append('--timing')
+            cli_args.append('Outputs/print_perf_log=true')
 
         if options.colored == False:
-            specs['cli_args'].append('--color off')
+            cli_args.append('--color off')
 
         if options.cli_args:
-            specs['cli_args'].insert(0, options.cli_args)
+            cli_args.insert(0, options.cli_args)
 
         if options.scaling and specs['scale_refine'] > 0:
-            specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
+            cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
         # The test harness should never use GDB backtraces: they don't
         # work well when dozens of expect_err jobs run at the same time.
-        specs['cli_args'].append('--no-gdb-backtrace')
+        cli_args.append('--no-gdb-backtrace')
 
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
@@ -151,7 +151,7 @@ class RunApp(Tester):
             default_ncpus = options.parallel
 
         if specs['redirect_output'] and ncpus > 1:
-            specs['cli_args'].append('--keep-cout --redirect-output ' + self.name())
+            cli_args.append('--keep-cout --redirect-output ' + self.name())
 
         caveats = []
         if nthreads > options.nthreads:
@@ -168,11 +168,11 @@ class RunApp(Tester):
             self.specs['caveats'] = caveats
 
         if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
+            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(cli_args)
         elif options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
-            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
+            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
         else:
-            command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
+            command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
 
         return command
 
