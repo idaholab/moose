@@ -40,42 +40,25 @@ ComputeInterfaceStress::ComputeInterfaceStress(const InputParameters & parameter
 void
 ComputeInterfaceStress::computeQpProperties()
 {
-  const Real _grad_norm_sq = _grad_v[_qp].norm_sq();
-  _planar_stress[_qp].zero();
+  auto & S = _planar_stress[_qp];
 
   // no interface, return zero stress
+  const Real _grad_norm_sq = _grad_v[_qp].norm_sq();
   if (_grad_norm_sq < libMesh::TOLERANCE)
+  {
+    S.zero();
     return;
+  }
 
-  const Real _grad_norm = std::sqrt(_grad_norm_sq);
-  RealGradient _col[3];
-  _col[0] = _grad_v[_qp] / _grad_norm;
+  const Real nx = _grad_v[_qp](0);
+  const Real ny = _grad_v[_qp](1);
+  const Real nz = _grad_v[_qp](2);
+  const Real s = _stress / std::sqrt(_grad_norm_sq);
 
-  // get two linearly independent vectors
-  unsigned int max_component = 0;
-  for (unsigned int i = 1; i < 3; ++i)
-    if (std::abs(_col[0](i)) > std::abs(_col[0](max_component)))
-      max_component = i;
-
-  _col[1]((max_component + 1) % 3) = 1.0;
-  _col[2]((max_component + 2) % 3) = 1.0;
-
-  // make the two vectors perpendicular to _grad_v (modified Gram-Schmidt)
-  _col[1] -= (_col[1] * _col[0]) / _col[0].norm_sq() * _col[0];
-  _col[2] -= (_col[2] * _col[0]) / _col[0].norm_sq() * _col[0];
-  _col[2] -= (_col[2] * _col[1]) / _col[1].norm_sq() * _col[1];
-
-  // normalize new basis vectors
-  _col[1] /= _col[1].norm();
-  _col[2] /= _col[2].norm();
-
-  // build Eigenvalue matrix M (only set in-plane stress)
-  _planar_stress[_qp](1, 1) = _stress;
-  _planar_stress[_qp](2, 2) = _stress;
-
-  // build S matrix for coordinate transformation
-  RankTwoTensor S = RankTwoTensor::initializeFromColumns(_col[0], _col[1], _col[2]);
-
-  // basis change into cartesian coordinates (and scale with gradient norm)
-  _planar_stress[_qp] = (S * _planar_stress[_qp] * S.transpose()) * _grad_norm;
+  S(0, 0) = (ny * ny + nz * nz) * s;
+  S(1, 0) = S(0, 1) = -nx * ny * s;
+  S(1, 1) = (nx * nx + nz * nz) * s;
+  S(2, 0) = S(0, 2) = -nx * nz * s;
+  S(2, 1) = S(1, 2) = -ny * nz * s;
+  S(2, 2) = (nx * nx + ny * ny) * s;
 }
