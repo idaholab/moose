@@ -37,8 +37,8 @@ CNSFVGreenGaussSlopeReconstruction::CNSFVGreenGaussSlopeReconstruction(
   : SlopeReconstructionMultiD(parameters),
     _rho(getVar("rho", 0)),
     _rhou(getVar("rhou", 0)),
-    _rhov(isCoupled("rhov") ? getVar("rhov", 0) : NULL),
-    _rhow(isCoupled("rhow") ? getVar("rhow", 0) : NULL),
+    _rhov(isCoupled("rhov") ? getVar("rhov", 0) : nullptr),
+    _rhow(isCoupled("rhow") ? getVar("rhow", 0) : nullptr),
     _rhoe(getVar("rhoe", 0)),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
@@ -85,9 +85,9 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
   Real rhovc = 0.;
   Real rhowc = 0.;
   Real rhoec = _rhoe->getElementalValue(elem);
-  if (_rhov != NULL)
+  if (_rhov != nullptr)
     rhovc = _rhov->getElementalValue(elem);
-  if (_rhow != NULL)
+  if (_rhow != nullptr)
     rhowc = _rhow->getElementalValue(elem);
 
   ucell[0][1] = rhouc * rhomc;
@@ -114,12 +114,12 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    const Elem * neig = elem->neighbor_ptr(is);
 
     /// for internal side
 
-    if (elem->neighbor(is) != NULL)
+    if (neig != nullptr && this->hasBlocks(neig->subdomain_id()))
     {
-      const Elem * neig = elem->neighbor(is);
       dof_id_type neigID = neig->id();
 
       if (_side_geoinfo_cached)
@@ -147,9 +147,9 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
       Real v = 1. / _rho->getElementalValue(neig);
 
       ucell[in][1] = _rhou->getElementalValue(neig) * v;
-      if (_rhov != NULL)
+      if (_rhov != nullptr)
         ucell[in][2] = _rhov->getElementalValue(neig) * v;
-      if (_rhow != NULL)
+      if (_rhow != nullptr)
         ucell[in][3] = _rhow->getElementalValue(neig) * v;
 
       Real e = _rhoe->getElementalValue(neig) * v -
