@@ -38,14 +38,15 @@ validParams<EigenProblem>()
 
 EigenProblem::EigenProblem(const InputParameters & parameters)
   : FEProblemBase(parameters),
+    // By default, we want to compute an eigenvalue only (smallest or largest)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
-    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0")),
+    _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
     _is_residual_initialed(false)
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
-  _aux = new AuxiliarySystem(*this, "aux0");
+  _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(*_nl_eigen);
 
@@ -63,9 +64,6 @@ EigenProblem::~EigenProblem()
 #if LIBMESH_HAVE_SLEPC
   FEProblemBase::deleteAssemblyArray();
 #endif /* LIBMESH_HAVE_SLEPC */
-  delete _nl;
-
-  delete _aux;
 }
 
 #if LIBMESH_HAVE_SLEPC
@@ -172,4 +170,23 @@ EigenProblem::computeResidualTypeBx(const NumericVector<Number> & soln,
   _nl->zeroVariablesForResidual();
 
   _nl->computeResidual(residual, type);
+}
+
+void
+EigenProblem::computeResidualType(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  Moose::KernelType type)
+{
+  // if Ax is just compputed, we do not do extra computation such as Transfer
+  if (type == Moose::KT_EIGEN && _is_residual_initialed)
+  {
+    computeResidualTypeBx(soln, residual, type);
+    _is_residual_initialed = false;
+  }
+  else
+  {
+    FEProblemBase::computeResidualType(soln, residual, type);
+    if (type == Moose::KT_NONEIGEN)
+      _is_residual_initialed = true;
+  }
 }
