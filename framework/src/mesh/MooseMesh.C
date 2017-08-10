@@ -1233,9 +1233,12 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     }
   }
 
+  this->comm().max(max);
+  this->comm().min(min);
+
   _extreme_nodes.resize(8); // 2^LIBMESH_DIM
   // Now make sure that there are actual nodes at all of the extremes
-  unsigned int extreme_matches = 0;
+  std::vector<bool> extreme_matches(8, false);
   std::vector<unsigned int> comp_map(3);
   for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
   {
@@ -1260,12 +1263,13 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     if (coord_match == dim) // Found a coordinate at one of the extremes
     {
       _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = &node;
-      ++extreme_matches;
+      extreme_matches[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = true;
     }
   }
 
   // See if we matched all of the extremes for the mesh dimension
-  if (extreme_matches != std::pow(2.0, (int)dim))
+  this->comm().max(extreme_matches);
+  if (std::count(extreme_matches.begin(), extreme_matches.end(), true) != std::pow(2.0, (int)dim))
     return false; // This is not a regular orthogonal mesh
 
   // This is a regular orthogonal mesh, so set the bounds
