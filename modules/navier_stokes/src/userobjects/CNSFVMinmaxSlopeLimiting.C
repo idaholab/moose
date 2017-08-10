@@ -73,9 +73,11 @@ CNSFVMinmaxSlopeLimiting::limitElementSlope() const
 
   for (unsigned int is = 0; is < nside; is++)
   {
-    if (elem->neighbor(is) != NULL)
+    const Elem * neighbor = elem->neighbor_ptr(is);
+
+    if (neighbor != nullptr && this->hasBlocks(neighbor->subdomain_id()))
     {
-      dof_id_type _neighborID = elem->neighbor(is)->id();
+      dof_id_type _neighborID = neighbor->id();
       uelem = _rslope.getElementAverageValue(_neighborID);
       scent[is] = _rslope.getSideCentroid(_elementID, _neighborID);
     }

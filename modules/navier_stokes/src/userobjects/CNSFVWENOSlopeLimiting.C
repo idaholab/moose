@@ -78,10 +78,11 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    const Elem * neighbor = elem->neighbor_ptr(is);
 
-    if (elem->neighbor(is) != NULL)
+    if (neighbor != nullptr && this->hasBlocks(neighbor->subdomain_id()))
     {
-      dof_id_type _neighborID = elem->neighbor(is)->id();
+      dof_id_type _neighborID = neighbor->id();
       rugrad = _rslope.getElementSlope(_neighborID);
 
       for (unsigned int iv = 0; iv < nvars; iv++)
@@ -103,8 +104,9 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    const Elem * neighbor = elem->neighbor_ptr(is);
 
-    if (elem->neighbor(is) != NULL)
+    if (neighbor != nullptr && this->hasBlocks(neighbor->subdomain_id()))
       for (unsigned int iv = 0; iv < nvars; iv++)
         weig[in][iv] = weig[in][iv] / summ[iv];
   }
@@ -119,10 +121,11 @@ CNSFVWENOSlopeLimiting::limitElementSlope() const
   for (unsigned int is = 0; is < nside; is++)
   {
     unsigned int in = is + 1;
+    const Elem * neighbor = elem->neighbor_ptr(is);
 
-    if (elem->neighbor(is) != NULL)
+    if (neighbor != nullptr && this->hasBlocks(neighbor->subdomain_id()))
     {
-      dof_id_type _neighborID = elem->neighbor(is)->id();
+      dof_id_type _neighborID = neighbor->id();
       rugrad = _rslope.getElementSlope(_neighborID);
 
       for (unsigned int iv = 0; iv < nvars; iv++)
