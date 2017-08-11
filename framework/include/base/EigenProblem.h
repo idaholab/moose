@@ -49,10 +49,6 @@ public:
   virtual bool isNonlinearEigenvalueSolver();
 
   bool residualInitialed() { return _is_residual_initialed; }
-  void setResidualInitialed(bool is_residual_initialed)
-  {
-    _is_residual_initialed = is_residual_initialed;
-  }
 
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
@@ -64,6 +60,10 @@ public:
   void computeResidualTypeBx(const NumericVector<Number> & soln,
                              NumericVector<Number> & residual,
                              Moose::KernelType type);
+
+  void computeResidualType(const NumericVector<Number> & soln,
+                           NumericVector<Number> & residual,
+                           Moose::KernelType type) override;
 
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC
