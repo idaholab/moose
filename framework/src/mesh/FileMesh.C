@@ -102,18 +102,18 @@ FileMesh::buildMesh()
       const bool allow_renumbering_later = restarting && getMesh().allow_renumbering();
 
       if (restarting)
-        {
-          getMesh().skip_partitioning(true);
-          getMesh().allow_renumbering(false);
-        }
+      {
+        getMesh().skip_partitioning(true);
+        getMesh().allow_renumbering(false);
+      }
 
       getMesh().read(_file_name);
 
       if (restarting)
-        {
-          getMesh().allow_renumbering(allow_renumbering_later);
-          getMesh().skip_partitioning(skip_partitioning_later);
-        }
+      {
+        getMesh().allow_renumbering(allow_renumbering_later);
+        getMesh().skip_partitioning(skip_partitioning_later);
+      }
     }
   }
 
