@@ -26,6 +26,8 @@ validParams<EigenExecutioner>()
 {
   InputParameters params = validParams<Steady>();
 
+  params.addClassDescription("EigenExecutioner solves a standard/generalized eigenvaue problem");
+
   params.addPrivateParam<bool>("_use_eigen_executioner", true);
 
 // Add slepc options and eigen problems

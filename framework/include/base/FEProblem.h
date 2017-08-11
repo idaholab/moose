@@ -43,7 +43,7 @@ public:
 
 protected:
   bool _use_nonlinear;
-  NonlinearSystem * _nl_sys;
+  std::shared_ptr<NonlinearSystem> _nl_sys;
 };
 
 #endif /* FEPROBLEM_H */

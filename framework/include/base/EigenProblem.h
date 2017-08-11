@@ -72,7 +72,7 @@ public:
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
-  NonlinearEigenSystem * _nl_eigen;
+  std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
   bool _is_residual_initialed;
 };
 

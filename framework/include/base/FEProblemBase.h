@@ -1312,8 +1312,8 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  NonlinearSystemBase * _nl;
-  AuxiliarySystem * _aux;
+  std::shared_ptr<NonlinearSystemBase> _nl;
+  std::shared_ptr<AuxiliarySystem> _aux;
 
   Moose::CouplingType _coupling;       ///< Type of variable coupling
   std::unique_ptr<CouplingMatrix> _cm; ///< Coupling matrix for variables.
