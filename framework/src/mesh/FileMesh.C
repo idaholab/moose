@@ -97,7 +97,8 @@ FileMesh::buildMesh()
       // a solution file that relies on that mesh partitioning and/or
       // numbering.  In that case, we need to turn off repartitioning
       // and renumbering, at least at first.
-      const bool restarting = _app.isRestarting();
+      const bool restarting = _file_name.rfind(".cpa") < _file_name.size() ||
+                              _file_name.rfind(".cpr") < _file_name.size();
       const bool skip_partitioning_later = restarting && getMesh().skip_partitioning();
       const bool allow_renumbering_later = restarting && getMesh().allow_renumbering();
 
