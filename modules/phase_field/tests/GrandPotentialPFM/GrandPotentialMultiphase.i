@@ -246,8 +246,8 @@
   [../]
   [./const]
     type = GenericConstantMaterial
-    prop_names =  'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu  tgrad_corr_mult'
-    prop_values = '0        1       1.0 1.0  1.0  1.0  10.0  0.1  10.0  0.9   4.5 1.5 1.0 0.0'
+    prop_names =  'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu'
+    prop_values = '0        1       1.0 1.0  1.0  1.0  10.0  0.1  10.0  0.9   4.5 1.5 1.0'
   [../]
   [./Mobility]
     type = DerivativeParsedMaterial

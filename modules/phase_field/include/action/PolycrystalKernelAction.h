@@ -26,9 +26,6 @@ protected:
 
   /// base name for the order parameter variables
   const std::string _var_name_base;
-
-  /// kernels are implicit?
-  const bool _implicit;
 };
 
 template <>

@@ -34,26 +34,28 @@ validParams<GrainGrowthAction>()
   params.addParam<MooseEnum>("family",
                              families,
                              "Specifies the family of FE "
-                             "shape functions to use for this variable");
+                             "shape function to use for the order parameters");
   params.addParam<MooseEnum>("order",
                              orders,
                              "Specifies the order of the FE "
-                             "shape function to use for this variable");
+                             "shape function to use for the order parameters");
   params.addParam<MaterialPropertyName>(
-      "mobility", "L", "The isotropic mobility used with the kernel");
-  params.addParam<MaterialPropertyName>("kappa", "kappa_op", "The kappa used with the kernel");
-  params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
+      "mobility", "L", "The isotropic mobility used with the kernels");
+  params.addParam<MaterialPropertyName>("kappa", "kappa_op", "The kappa used with the kernels");
+  params.addParam<Real>(
+      "scaling", 1.0, "Specifies a scaling factor to apply to the order parameters");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<bool>(
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
-  params.addParam<unsigned int>("ndef", 0, "specifies the number of deformed grains to create");
+  params.addParam<unsigned int>("ndef", 0, "Specifies the number of deformed grains to create");
   params.addParam<bool>("variable_mobility",
                         true,
                         "The mobility is a function of any MOOSE variable (if "
                         "this is set to false, L must be constant over the "
                         "entire domain!)");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments that L depends on");
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addParamNamesToGroup("c en_ratio ndef", "Multiphysics");
 

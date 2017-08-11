@@ -6,11 +6,10 @@
     group = 'adpative'
   [../]
 
-  [./GrGrTemp_test]
+  [./GrGr_wTgrad]
     type = 'Exodiff'
-    input = 'GrGr_wTGrad_test.i'
-    exodiff = 'wT.e-s003'
-    group = 'adaptive'
+    input = 'GrGr_wTGrad.i'
+    exodiff = 'GrGr_wTGrad_out.e'
   [../]
 
   [./GrGrThumb_test]

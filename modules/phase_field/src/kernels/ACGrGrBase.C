@@ -13,7 +13,6 @@ validParams<ACGrGrBase>()
   InputParameters params = ACBulk<Real>::validParams();
   params.addRequiredCoupledVar("v",
                                "Array of coupled order paramter names for other order parameters");
-  params.addCoupledVar("T", "temperature");
   return params;
 }
 
@@ -22,9 +21,7 @@ ACGrGrBase::ACGrGrBase(const InputParameters & parameters)
     _op_num(coupledComponents("v")),
     _vals(_op_num),
     _vals_var(_op_num),
-    _mu(getMaterialProperty<Real>("mu")),
-    _tgrad_corr_mult(getMaterialProperty<Real>("tgrad_corr_mult")),
-    _grad_T(isCoupled("T") ? &coupledGradient("T") : NULL)
+    _mu(getMaterialProperty<Real>("mu"))
 {
   // Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _op_num; ++i)
