@@ -89,7 +89,6 @@
 #include "INSCompressibilityPenalty.h"
 #include "INSMomentumSUPG.h"
 #include "INSMomentumTimeDerivativeSUPG.h"
-#include "INSScalarSUPG.h"
 
 // BCs
 #include "INSMomentumNoBCBCTractionForm.h"

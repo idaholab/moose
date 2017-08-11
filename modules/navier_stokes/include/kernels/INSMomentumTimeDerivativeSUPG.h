@@ -17,9 +17,11 @@ InputParameters validParams<INSMomentumTimeDerivativeSUPG>();
 
 /**
  * This class computes the time derivative for the incompressible
- * Navier-Stokes momentum equation with an additional perturbation to the test
+ * Navier-Stokes momentum equation with a perturbation to the test
  * function as described in Computer Methods in Applied Mechanics and Engineering
- * 32 (1982) 199-259 by Hughes et. al.
+ * 32 (1982) 199-259 by Hughes et. al. This kernel must be used in conjunction
+ * with INSTimeDerivative to get the contribution from the standard Galerkin
+ * test function
  */
 class INSMomentumTimeDerivativeSUPG : public INSMomentumTimeDerivative
 {

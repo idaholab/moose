@@ -56,7 +56,7 @@ INSMomentumTimeDerivativeSUPG::computeQpResidual()
   }
   Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
-  return INSMomentumTimeDerivative::computeQpResidual() + _rho[_qp] * _u_dot[_qp] * PG_test;
+  return _rho[_qp] * _u_dot[_qp] * PG_test;
 }
 
 Real
@@ -78,6 +78,5 @@ INSMomentumTimeDerivativeSUPG::computeQpJacobian()
   }
   Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
 
-  return INSMomentumTimeDerivative::computeQpJacobian() +
-         _rho[_qp] * _du_dot_du[_qp] * _phi[_j][_qp] * PG_test;
+  return _rho[_qp] * _du_dot_du[_qp] * _phi[_j][_qp] * PG_test;
 }
