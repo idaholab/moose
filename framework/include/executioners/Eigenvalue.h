@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EIGENEXECUTIONER_H
-#define EIGENEXECUTIONER_H
+#ifndef EIGENVALUE_H
+#define EIGENVALUE_H
 
 #include "Steady.h"
 
 class InputParameters;
-class EigenExecutioner;
+class Eigenvalue;
 class EigenProblem;
 
 template <typename T>
 InputParameters validParams();
 
 template <>
-InputParameters validParams<EigenExecutioner>();
+InputParameters validParams<Eigenvalue>();
 
-class EigenExecutioner : public Steady
+class Eigenvalue : public Steady
 {
 public:
   /**
@@ -36,7 +36,7 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    * @return Whether or not the solve was successful.
    */
-  EigenExecutioner(const InputParameters & parameters);
+  Eigenvalue(const InputParameters & parameters);
 
   virtual void execute() override;
 
@@ -44,4 +44,4 @@ protected:
   EigenProblem & _eigen_problem;
 };
 
-#endif // EIGENEXECUTIONER_H
+#endif // EIGENVALUE_H

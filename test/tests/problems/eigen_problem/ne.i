@@ -43,7 +43,7 @@
 []
 
 [Executioner]
-  type = EigenExecutioner
+  type = Eigenvalue
   eigen_solve_type = MF_MONOLITH_NEWTON
   eigen_problem_type = GEN_NON_HERMITIAN
 []

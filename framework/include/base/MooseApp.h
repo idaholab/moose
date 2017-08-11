@@ -222,7 +222,7 @@ public:
   /**
    * Set a Boolean indicating whether this app will use an eigenvalue executioner.
    */
-  bool & useEigenExecutioner() { return _use_eigen_executioner; }
+  bool & useEigenvalue() { return _use_eigen_value; }
 
   /**
    * Retrieve the Factory associated with this App.
@@ -587,7 +587,7 @@ protected:
   bool _use_nonlinear;
 
   /// Boolean to indicate whether to use an eigenvalue executioner
-  bool _use_eigen_executioner;
+  bool _use_eigen_value;
 
   /// System Information
   std::shared_ptr<SystemInfo> _sys_info;

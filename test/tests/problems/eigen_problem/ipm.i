@@ -78,7 +78,7 @@
 []
 
 [Executioner]
-  type = EigenExecutioner
+  type = Eigenvalue
   which_eigen_pairs = largest_magnitude
   eigen_problem_type = NON_HERMITIAN
   n_eigen_pairs = 5

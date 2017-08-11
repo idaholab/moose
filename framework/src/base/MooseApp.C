@@ -227,7 +227,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
     _use_nonlinear(true),
-    _use_eigen_executioner(false),
+    _use_eigen_value(false),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),

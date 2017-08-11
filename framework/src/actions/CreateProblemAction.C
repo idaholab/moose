@@ -85,7 +85,7 @@ CreateProblemAction::act()
 
       // if users provide a problem type, the type has to be an EigenProblem or its derived subclass
       // when uing an eigen executioner
-      if (_app.useEigenExecutioner() && _type != "EigenProblem" &&
+      if (_app.useEigenvalue() && _type != "EigenProblem" &&
           !(std::dynamic_pointer_cast<EigenProblem>(_problem)))
         mooseError("Problem has to be of a EigenProblem (or derived subclass) type when using "
                    "eigen executioner");

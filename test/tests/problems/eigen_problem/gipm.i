@@ -86,7 +86,7 @@
 []
 
 [Executioner]
-  type = EigenExecutioner
+  type = Eigenvalue
   eigen_problem_type = gen_non_hermitian
   which_eigen_pairs = SMALLEST_MAGNITUDE
   n_eigen_pairs = 1

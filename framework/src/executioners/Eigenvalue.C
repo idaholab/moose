@@ -13,7 +13,7 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "EigenExecutioner.h"
+#include "Eigenvalue.h"
 #include "EigenProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
@@ -22,13 +22,13 @@
 
 template <>
 InputParameters
-validParams<EigenExecutioner>()
+validParams<Eigenvalue>()
 {
   InputParameters params = validParams<Steady>();
 
-  params.addClassDescription("EigenExecutioner solves a standard/generalized eigenvaue problem");
+  params.addClassDescription("Eigenvalue solves a standard/generalized eigenvaue problem");
 
-  params.addPrivateParam<bool>("_use_eigen_executioner", true);
+  params.addPrivateParam<bool>("_use_eigen_value", true);
 
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
@@ -39,7 +39,7 @@ validParams<EigenExecutioner>()
   return params;
 }
 
-EigenExecutioner::EigenExecutioner(const InputParameters & parameters)
+Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Steady(parameters),
     _eigen_problem(*parameters.getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh"))
@@ -54,7 +54,7 @@ EigenExecutioner::EigenExecutioner(const InputParameters & parameters)
 }
 
 void
-EigenExecutioner::execute()
+Eigenvalue::execute()
 {
 #if LIBMESH_HAVE_SLEPC
   // Make sure the SLEPc options are setup for this app
