@@ -24,6 +24,7 @@
 #include "ACSEDGPoly.h"
 #include "ACSwitching.h"
 #include "AllenCahn.h"
+#include "ACTwoPhaseGrGrPoly.h"
 #include "CahnHilliard.h"
 #include "CahnHilliardAniso.h"
 #include "CHBulkPFCTrad.h"
@@ -261,6 +262,7 @@
 #include "PolycrystalKernelAction.h"
 #include "PolycrystalRandomICAction.h"
 #include "PolycrystalStoredEnergyAction.h"
+#include "PolycrystalTwoPhaseKernelAction.h"
 #include "PolycrystalVariablesAction.h"
 #include "PolycrystalVoronoiVoidICAction.h"
 #include "RigidBodyMultiKernelAction.h"
@@ -328,6 +330,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACSEDGPoly);
   registerKernel(ACSwitching);
   registerKernel(AllenCahn);
+  registerKernel(ACTwoPhaseGrGrPoly);
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
   registerKernel(CHBulkPFCTrad);
@@ -545,6 +548,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
   registerSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
   registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
+  registerSyntax("PolycrystalTwoPhaseKernelAction", "Kernels/PolycrystalTwoPhaseKernel");
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
   registerSyntax("PolycrystalVoronoiVoidICAction", "ICs/PolycrystalICs/PolycrystalVoronoiVoidIC");
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
@@ -583,6 +587,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalRandomICAction, "add_ic");
   registerAction(PolycrystalStoredEnergyAction, "add_kernel");
+  registerAction(PolycrystalTwoPhaseKernelAction, "add_kernel");
   registerAction(PolycrystalVariablesAction, "add_variable");
   registerAction(PolycrystalVoronoiVoidICAction, "add_ic");
   registerAction(RigidBodyMultiKernelAction, "add_kernel");

@@ -17,7 +17,7 @@ validParams<PolycrystalKernelAction>()
   params.addClassDescription(
       "Set up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly kernels");
   params.addRequiredParam<unsigned int>(
-      "op_num", "specifies the total number of grains (deformed + recrystallized) to create");
+      "op_num", "specifies the total number of grains/variants (in all phases) to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
@@ -32,44 +32,43 @@ validParams<PolycrystalKernelAction>()
 PolycrystalKernelAction::PolycrystalKernelAction(const InputParameters & params)
   : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
-    _var_name_base(getParam<std::string>("var_name_base")),
-    _implicit(getParam<bool>("implicit"))
+    _var_name_base(getParam<std::string>("var_name_base"))
 {
 }
 
 void
 PolycrystalKernelAction::act()
 {
-  for (unsigned int op = 0; op < _op_num; ++op)
+  for (_op = 0; _op < _op_num; ++_op)
   {
     //
     // Create variable names
     //
 
-    std::string var_name = _var_name_base + Moose::stringify(op);
+    std::string var_name = _var_name_base + Moose::stringify(_op);
     std::vector<VariableName> v;
     v.resize(_op_num - 1);
 
     unsigned int ind = 0;
     for (unsigned int j = 0; j < _op_num; ++j)
-      if (j != op)
+      if (j != _op)
         v[ind++] = _var_name_base + Moose::stringify(j);
 
     //
-    // Set up ACGrGrPoly kernels
+    // Set up ACGrGrPoly (for single phase) or ACTwoPhaseGrGrPoly (for two-phase) kernels
     //
 
     {
-      InputParameters params = _factory.getValidParams("ACGrGrPoly");
+      InputParameters params = _factory.getValidParams(getACBulkName());
+      // params.applyParameters(parameters());
+
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<std::vector<VariableName>>("v") = v;
-      params.set<bool>("implicit") = _implicit;
-      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
       if (isParamValid("T"))
         params.set<std::vector<VariableName>>("T") = {getParam<VariableName>("T")};
+      params.applyParameters(parameters());
 
-      std::string kernel_name = "ACBulk_" + var_name;
-      _problem->addKernel("ACGrGrPoly", kernel_name, params);
+      setupACBulkKernel(params, var_name);
     }
 
     //
@@ -78,12 +77,11 @@ PolycrystalKernelAction::act()
 
     {
       InputParameters params = _factory.getValidParams("ACInterface");
-      params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<bool>("implicit") = getParam<bool>("implicit");
-      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
-      std::string kernel_name = "ACInt_" + var_name;
-      _problem->addKernel("ACInterface", kernel_name, params);
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.applyParameters(parameters());
+
+      _problem->addKernel("ACInterface", "ACInt_" + var_name, params);
     }
 
     //
@@ -93,11 +91,10 @@ PolycrystalKernelAction::act()
     {
       InputParameters params = _factory.getValidParams("TimeDerivative");
       params.set<NonlinearVariableName>("variable") = var_name;
+      params.applyParameters(parameters());
       params.set<bool>("implicit") = true;
-      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
-      std::string kernel_name = "IE_" + var_name;
-      _problem->addKernel("TimeDerivative", kernel_name, params);
+      _problem->addKernel("TimeDerivative", "IE_" + var_name, params);
     }
 
     //
@@ -109,12 +106,15 @@ PolycrystalKernelAction::act()
       InputParameters params = _factory.getValidParams("ACGBPoly");
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<std::vector<VariableName>>("c") = {getParam<VariableName>("c")};
-      params.set<Real>("en_ratio") = getParam<Real>("en_ratio");
-      params.set<bool>("implicit") = getParam<bool>("implicit");
-      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+      params.applyParameters(parameters());
 
-      std::string kernel_name = "ACBubInteraction_" + var_name;
-      _problem->addKernel("ACGBPoly", kernel_name, params);
+      _problem->addKernel("ACGBPoly", "ACBubInteraction_" + var_name, params);
     }
   }
+}
+
+void
+PolycrystalKernelAction::setupACBulkKernel(InputParameters params, std::string var_name)
+{
+  _problem->addKernel(getACBulkName(), "ACBulk_" + var_name, params);
 }

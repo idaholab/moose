@@ -78,4 +78,9 @@
     exodiff = 'particle.e-s005'
     abs_zero = 1e-8
   [../]
+  [./GBEvolutionTwoPhase_test]
+    type = 'Exodiff'
+    input = 'GBEvolutionTwoPhase_test.i'
+    exodiff = 'GBEvolutionTwoPhase.e'
+  [../]
 []
