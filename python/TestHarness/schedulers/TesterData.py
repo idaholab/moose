@@ -16,7 +16,7 @@ class TesterData(object):
         self.__process = None
         self.__exit_code = 0
         self.__start_time = clock()
-        self.__end_time = clock()
+        self.__end_time = None
         self.__std_out = ''
 
     def getTester(self):
@@ -111,8 +111,9 @@ class TesterData(object):
         if self.getActiveTime():
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():
-            # Max is here, because we might get asked for timing before the test is finished
-            # (RUNNING...)
-            return max(0.0, self.getEndTime() - self.getStartTime())
+            return self.getEndTime() - self.getStartTime()
+        elif self.getStartTime():
+            # If the test is still running, return current run time instead
+            return max(0.0, clock() - self.getStartTime())
         else:
             return 0.0

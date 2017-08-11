@@ -3,6 +3,7 @@ from MooseObject import MooseObject
 from TesterData import TesterData
 import os, sys
 from contrib import dag
+from timeit import default_timer as clock
 
 from multiprocessing.pool import ThreadPool
 import threading # for thread locking
@@ -74,6 +75,9 @@ class Scheduler(MooseObject):
         # Jobs waiting to finish
         self.job_queue_count = 0
 
+        # The time the status queue reported something to the user
+        self.last_reported = clock()
+
         # Set containing our Tester Data containers. We use this in the event of a KeyboardInterrupt to
         # iterate over and kill any subprocesses
         self.tester_datas = set([])
@@ -103,18 +107,6 @@ class Scheduler(MooseObject):
             if 'all' in self.options.ignored_caveats or 'prereq' in self.options.ignored_caveats:
                 return True
         return False
-
-    def skippedTests(self, testers):
-        """
-        Method to return a list of skipped tests based on their current status and
-        their caveat check (getRunnable).
-        """
-        skipped_failed = set([])
-        for tester in testers:
-            if (tester.isFinished() and not tester.didPass()) \
-               or not tester.getRunnable(self.options):
-                skipped_failed.add(tester)
-        return skipped_failed
 
     def processDownstreamTests(self, job_container):
         """
@@ -350,9 +342,10 @@ class Scheduler(MooseObject):
     def handleLongRunningJobs(self, job_container):
         """ Inform the user of a long running test """
         tester = job_container.getTester()
-        tester.specs.addParam('caveats', ['FINISHED'], "")
         tester.setStatus('RUNNING...', tester.bucket_pending)
         self.queueJobs(status_job_containers=[job_container])
+        # Restart the timer. Looks like thread timers are one-shot only.
+        self.handleTimers(start_timers=job_container)
 
     def handleTimeoutJobs(self, job_container):
         """ Handle tests that have timed out """
@@ -460,13 +453,34 @@ class Scheduler(MooseObject):
         try:
             tester = job_container.getTester()
 
-            # Return to the TestHarness
-            self.harness.handleTestStatus(job_container)
+            # If the test is still running for a long period of time
+            if tester.isPending():
+                if clock() - self.last_reported >= float(tester.getMinReportTime()):
+                    # Print 'running...'
+                    self.harness.handleTestStatus(job_container)
+
+                    # ...And then set the finished caveat now that the running status has printed
+                    tester.specs.addParam('caveats', ['FINISHED'], "")
+
+                # Job is 'Pending', but is under the threshold to be reported (return now so
+                # last_reported time does not get updated). This will ensure that if nothing
+                # has happened between 'now' and another occurrence of our thread timer event
+                # we do report it.
+                else:
+                    return
+
+            else:
+                # All other statuses are sent unmolested
+                self.harness.handleTestStatus(job_container)
 
             # Decrement the job queue count now that this test has finished
             if tester.isFinished():
                 with self.slot_lock:
                     self.job_queue_count -= 1
+
+            # Record current reported time only if it is an activity the user will see
+            if not tester.isSilent() or not tester.isDeleted():
+                self.last_reported = clock()
 
         except Exception as e:
             print 'statusWorker Exception: %s' % (e)
