@@ -202,6 +202,7 @@
 #include "GhostUserObject.h"
 #include "GetTransferUserObject.h"
 #include "TestCSVReader.h"
+#include "ToggleMeshAdaptivity.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -539,6 +540,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(GhostUserObject);
   registerUserObject(GetTransferUserObject);
   registerUserObject(TestCSVReader);
+  registerUserObject(ToggleMeshAdaptivity);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
