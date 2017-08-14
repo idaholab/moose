@@ -315,37 +315,11 @@ class Scheduler(MooseObject):
         self.status_pool.close()
         self.status_pool.join()
 
-    def handleTimers(self, start_timers=None, stop_timers=None):
-        """ Method containing several thread pool timers  """
-        if start_timers:
-            tester = start_timers.getTester()
-
-            # Long running timer (RUNNING...)
-            long_running_timer = threading.Timer(float(tester.getMinReportTime()),
-                                                 self.handleLongRunningJobs,
-                                                 (start_timers,))
-            long_running_timer.start()
-
-            # Failed TIMEOUT timer
-            timeout_timer = threading.Timer(float(tester.getMaxTime()),
-                                          self.handleTimeoutJobs,
-                                          (start_timers,))
-            timeout_timer.start()
-
-            return (long_running_timer, timeout_timer)
-
-        # Stop any timers we started
-        elif stop_timers:
-            for timer in stop_timers:
-                timer.cancel()
-
     def handleLongRunningJobs(self, job_container):
         """ Inform the user of a long running test """
         tester = job_container.getTester()
         tester.setStatus('RUNNING...', tester.bucket_pending)
         self.queueJobs(status_job_containers=[job_container])
-        # Restart the timer. Looks like thread timers are one-shot only.
-        self.handleTimers(start_timers=job_container)
 
     def handleTimeoutJobs(self, job_container):
         """ Handle tests that have timed out """
@@ -494,13 +468,23 @@ class Scheduler(MooseObject):
             # Check if there are enough resources to run this job
             if self.reserveSlots(job_container):
 
-                # Start thread timers pertaining to this job
-                my_timers = self.handleTimers(start_timers=job_container)
+                # Start reporting timer
+                reporting_timer = threading.Timer(float(tester.getMinReportTime()),
+                                                     self.handleLongRunningJobs,
+                                                     (job_container,))
+                reporting_timer.start()
+
+                # Start timeout timer
+                timeout_timer = threading.Timer(float(tester.getMaxTime()),
+                                          self.handleTimeoutJobs,
+                                          (job_container,))
+                timeout_timer.start()
 
                 self.run(job_container)
 
-                # Stop thread timers pertaining to this job
-                self.handleTimers(stop_timers=my_timers)
+                # Stop thread timers now that the job has finished
+                reporting_timer.cancel()
+                timeout_timer.cancel()
 
                 # Derived run needs to set a non-pending status of some sort.
                 if tester.isPending():
