@@ -1,14 +1,14 @@
 #ifndef XFEMTESTAPP_H
 #define XFEMTESTAPP_H
 
-#include "XFEMApp.h"
+#include "MooseApp.h"
 
 class XFEMTestApp;
 
 template <>
 InputParameters validParams<XFEMTestApp>();
 
-class XFEMTestApp : public XFEMApp
+class XFEMTestApp : public MooseApp
 {
 public:
   XFEMTestApp(InputParameters parameters);

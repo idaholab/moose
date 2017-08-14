@@ -1,14 +1,14 @@
 #ifndef SOLIDMECHANICSTESTAPP_H
 #define SOLIDMECHANICSTESTAPP_H
 
-#include "SolidMechanicsApp.h"
+#include "MooseApp.h"
 
 class SolidMechanicsTestApp;
 
 template <>
 InputParameters validParams<SolidMechanicsTestApp>();
 
-class SolidMechanicsTestApp : public SolidMechanicsApp
+class SolidMechanicsTestApp : public MooseApp
 {
 public:
   SolidMechanicsTestApp(InputParameters parameters);

@@ -1,14 +1,14 @@
 #ifndef MISCTESTAPP_H
 #define MISCTESTAPP_H
 
-#include "MiscApp.h"
+#include "MooseApp.h"
 
 class MiscTestApp;
 
 template <>
 InputParameters validParams<MiscTestApp>();
 
-class MiscTestApp : public MiscApp
+class MiscTestApp : public MooseApp
 {
 public:
   MiscTestApp(InputParameters parameters);

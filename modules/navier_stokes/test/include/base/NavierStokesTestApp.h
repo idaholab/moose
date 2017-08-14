@@ -1,14 +1,14 @@
 #ifndef NAVIERSTOKESTESTAPP_H
 #define NAVIERSTOKESTESTAPP_H
 
-#include "NavierStokesApp.h"
+#include "MooseApp.h"
 
 class NavierStokesTestApp;
 
 template <>
 InputParameters validParams<NavierStokesTestApp>();
 
-class NavierStokesTestApp : public NavierStokesApp
+class NavierStokesTestApp : public MooseApp
 {
 public:
   NavierStokesTestApp(InputParameters parameters);

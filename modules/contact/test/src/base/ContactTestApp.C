@@ -1,4 +1,5 @@
 #include "ContactTestApp.h"
+#include "ContactApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<ContactTestApp>()
   return params;
 }
 
-ContactTestApp::ContactTestApp(InputParameters parameters) : ContactApp(parameters)
+ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  ContactApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  ContactApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

@@ -1,4 +1,5 @@
 #include "MiscTestApp.h"
+#include "MiscApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<MiscTestApp>()
   return params;
 }
 
-MiscTestApp::MiscTestApp(InputParameters parameters) : MiscApp(parameters)
+MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  MiscApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  MiscApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

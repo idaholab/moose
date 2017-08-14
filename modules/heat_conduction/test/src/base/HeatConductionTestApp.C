@@ -1,4 +1,5 @@
 #include "HeatConductionTestApp.h"
+#include "HeatConductionApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<HeatConductionTestApp>()
   return params;
 }
 
-HeatConductionTestApp::HeatConductionTestApp(InputParameters parameters) : HeatConductionApp(parameters)
+HeatConductionTestApp::HeatConductionTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  HeatConductionApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  HeatConductionApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

@@ -1,4 +1,5 @@
 #include "ChemicalReactionsTestApp.h"
+#include "ChemicalReactionsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,15 @@ validParams<ChemicalReactionsTestApp>()
   return params;
 }
 
-ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters) : ChemicalReactionsApp(parameters)
+ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters)
+  : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  ChemicalReactionsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

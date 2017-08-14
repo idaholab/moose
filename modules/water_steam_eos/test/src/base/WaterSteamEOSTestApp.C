@@ -1,4 +1,5 @@
 #include "WaterSteamEOSTestApp.h"
+#include "WaterSteamEOSApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<WaterSteamEOSTestApp>()
   return params;
 }
 
-WaterSteamEOSTestApp::WaterSteamEOSTestApp(InputParameters parameters) : WaterSteamEOSApp(parameters)
+WaterSteamEOSTestApp::WaterSteamEOSTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  WaterSteamEOSApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  WaterSteamEOSApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

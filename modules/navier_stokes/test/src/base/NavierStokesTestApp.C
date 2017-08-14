@@ -1,4 +1,5 @@
 #include "NavierStokesTestApp.h"
+#include "NavierStokesApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,16 @@ validParams<NavierStokesTestApp>()
   return params;
 }
 
-NavierStokesTestApp::NavierStokesTestApp(InputParameters parameters) : NavierStokesApp(parameters)
+NavierStokesTestApp::NavierStokesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  NavierStokesApp::registerObjectDepends(_factory);
+  NavierStokesApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  NavierStokesApp::associateSyntaxDepends(_syntax, _action_factory);
+  NavierStokesApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

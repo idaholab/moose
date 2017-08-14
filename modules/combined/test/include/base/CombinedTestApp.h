@@ -1,14 +1,14 @@
 #ifndef COMBINEDTESTAPP_H
 #define COMBINEDTESTAPP_H
 
-#include "CombinedApp.h"
+#include "MooseApp.h"
 
 class CombinedTestApp;
 
 template <>
 InputParameters validParams<CombinedTestApp>();
 
-class CombinedTestApp : public CombinedApp
+class CombinedTestApp : public MooseApp
 {
 public:
   CombinedTestApp(const InputParameters & parameters);

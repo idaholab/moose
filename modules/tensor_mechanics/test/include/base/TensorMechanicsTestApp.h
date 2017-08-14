@@ -1,14 +1,14 @@
 #ifndef TENSORMECHANICSTESTAPP_H
 #define TENSORMECHANICSTESTAPP_H
 
-#include "TensorMechanicsApp.h"
+#include "MooseApp.h"
 
 class TensorMechanicsTestApp;
 
 template <>
 InputParameters validParams<TensorMechanicsTestApp>();
 
-class TensorMechanicsTestApp : public TensorMechanicsApp
+class TensorMechanicsTestApp : public MooseApp
 {
 public:
   TensorMechanicsTestApp(InputParameters parameters);

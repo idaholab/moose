@@ -1,4 +1,5 @@
 #include "SolidMechanicsTestApp.h"
+#include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,16 @@ validParams<SolidMechanicsTestApp>()
   return params;
 }
 
-SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : SolidMechanicsApp(parameters)
+SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  SolidMechanicsApp::registerObjectDepends(_factory);
+  SolidMechanicsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  SolidMechanicsApp::associateSyntaxDepends(_syntax, _action_factory);
+  SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

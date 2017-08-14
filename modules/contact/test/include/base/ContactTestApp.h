@@ -1,14 +1,14 @@
 #ifndef CONTACTTESTAPP_H
 #define CONTACTTESTAPP_H
 
-#include "ContactApp.h"
+#include "MooseApp.h"
 
 class ContactTestApp;
 
 template <>
 InputParameters validParams<ContactTestApp>();
 
-class ContactTestApp : public ContactApp
+class ContactTestApp : public MooseApp
 {
 public:
   ContactTestApp(InputParameters parameters);

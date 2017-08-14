@@ -1,14 +1,14 @@
 #ifndef RDGTESTAPP_H
 #define RDGTESTAPP_H
 
-#include "RdgApp.h"
+#include "MooseApp.h"
 
 class RdgTestApp;
 
 template <>
 InputParameters validParams<RdgTestApp>();
 
-class RdgTestApp : public RdgApp
+class RdgTestApp : public MooseApp
 {
 public:
   RdgTestApp(InputParameters parameters);

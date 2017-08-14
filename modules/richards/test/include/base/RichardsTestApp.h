@@ -1,14 +1,14 @@
 #ifndef RICHARDSTESTAPP_H
 #define RICHARDSTESTAPP_H
 
-#include "RichardsApp.h"
+#include "MooseApp.h"
 
 class RichardsTestApp;
 
 template <>
 InputParameters validParams<RichardsTestApp>();
 
-class RichardsTestApp : public RichardsApp
+class RichardsTestApp : public MooseApp
 {
 public:
   RichardsTestApp(InputParameters parameters);

@@ -1,4 +1,5 @@
 #include "PorousFlowTestApp.h"
+#include "PorousFlowApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,16 @@ validParams<PorousFlowTestApp>()
   return params;
 }
 
-PorousFlowTestApp::PorousFlowTestApp(InputParameters parameters) : PorousFlowApp(parameters)
+PorousFlowTestApp::PorousFlowTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  PorousFlowApp::registerObjectDepends(_factory);
+  PorousFlowApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  PorousFlowApp::associateSyntaxDepends(_syntax, _action_factory);
+  PorousFlowApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

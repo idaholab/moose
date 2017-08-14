@@ -1,14 +1,14 @@
 #ifndef WATERSTEAMEOSTESTAPP_H
 #define WATERSTEAMEOSTESTAPP_H
 
-#include "WaterSteamEOSApp.h"
+#include "MooseApp.h"
 
 class WaterSteamEOSTestApp;
 
 template <>
 InputParameters validParams<WaterSteamEOSTestApp>();
 
-class WaterSteamEOSTestApp : public WaterSteamEOSApp
+class WaterSteamEOSTestApp : public MooseApp
 {
 public:
   WaterSteamEOSTestApp(InputParameters parameters);

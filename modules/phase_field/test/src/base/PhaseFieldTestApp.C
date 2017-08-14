@@ -1,4 +1,5 @@
 #include "PhaseFieldTestApp.h"
+#include "PhaseFieldApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<PhaseFieldTestApp>()
   return params;
 }
 
-PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : PhaseFieldApp(parameters)
+PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  PhaseFieldApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  PhaseFieldApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

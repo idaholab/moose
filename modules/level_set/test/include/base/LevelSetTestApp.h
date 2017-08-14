@@ -1,14 +1,14 @@
 #ifndef LEVELSETTESTAPP_H
 #define LEVELSETTESTAPP_H
 
-#include "LevelSetApp.h"
+#include "MooseApp.h"
 
 class LevelSetTestApp;
 
 template <>
 InputParameters validParams<LevelSetTestApp>();
 
-class LevelSetTestApp : public LevelSetApp
+class LevelSetTestApp : public MooseApp
 {
 public:
   LevelSetTestApp(InputParameters parameters);

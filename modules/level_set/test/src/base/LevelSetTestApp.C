@@ -1,4 +1,5 @@
 #include "LevelSetTestApp.h"
+#include "LevelSetApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,16 @@ validParams<LevelSetTestApp>()
   return params;
 }
 
-LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : LevelSetApp(parameters)
+LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  srand(processor_id());
+
+  Moose::registerObjects(_factory);
+  LevelSetApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  LevelSetApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

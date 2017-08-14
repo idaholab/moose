@@ -1,4 +1,5 @@
 #include "XFEMTestApp.h"
+#include "XFEMApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,16 @@ validParams<XFEMTestApp>()
   return params;
 }
 
-XFEMTestApp::XFEMTestApp(InputParameters parameters) : XFEMApp(parameters)
+XFEMTestApp::XFEMTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  XFEMApp::registerObjectDepends(_factory);
+  XFEMApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  XFEMApp::associateSyntaxDepends(_syntax, _action_factory);
+  XFEMApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

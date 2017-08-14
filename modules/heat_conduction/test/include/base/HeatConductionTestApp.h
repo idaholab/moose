@@ -1,14 +1,14 @@
 #ifndef HEATCONDUCTIONTESTAPP_H
 #define HEATCONDUCTIONTESTAPP_H
 
-#include "HeatConductionApp.h"
+#include "MooseApp.h"
 
 class HeatConductionTestApp;
 
 template <>
 InputParameters validParams<HeatConductionTestApp>();
 
-class HeatConductionTestApp : public HeatConductionApp
+class HeatConductionTestApp : public MooseApp
 {
 public:
   HeatConductionTestApp(InputParameters parameters);

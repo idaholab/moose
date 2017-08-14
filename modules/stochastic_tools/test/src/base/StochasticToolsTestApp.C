@@ -1,4 +1,5 @@
 #include "StochasticToolsTestApp.h"
+#include "StochasticToolsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -13,8 +14,14 @@ validParams<StochasticToolsTestApp>()
   return params;
 }
 
-StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : StochasticToolsApp(parameters)
+StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  StochasticToolsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  StochasticToolsApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

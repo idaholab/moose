@@ -1,4 +1,5 @@
 #include "FluidPropertiesTestApp.h"
+#include "FluidPropertiesApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<FluidPropertiesTestApp>()
   return params;
 }
 
-FluidPropertiesTestApp::FluidPropertiesTestApp(InputParameters parameters) : FluidPropertiesApp(parameters)
+FluidPropertiesTestApp::FluidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  FluidPropertiesApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

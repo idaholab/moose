@@ -1,14 +1,14 @@
 #ifndef PHASEFIELDTESTAPP_H
 #define PHASEFIELDTESTAPP_H
 
-#include "PhaseFieldApp.h"
+#include "MooseApp.h"
 
 class PhaseFieldTestApp;
 
 template <>
 InputParameters validParams<PhaseFieldTestApp>();
 
-class PhaseFieldTestApp : public PhaseFieldApp
+class PhaseFieldTestApp : public MooseApp
 {
 public:
   PhaseFieldTestApp(InputParameters parameters);

@@ -1,4 +1,5 @@
 #include "TensorMechanicsTestApp.h"
+#include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<TensorMechanicsTestApp>()
   return params;
 }
 
-TensorMechanicsTestApp::TensorMechanicsTestApp(InputParameters parameters) : TensorMechanicsApp(parameters)
+TensorMechanicsTestApp::TensorMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  TensorMechanicsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

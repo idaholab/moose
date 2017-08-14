@@ -1,4 +1,5 @@
 #include "RdgTestApp.h"
+#include "RdgApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,8 +12,14 @@ validParams<RdgTestApp>()
   return params;
 }
 
-RdgTestApp::RdgTestApp(InputParameters parameters) : RdgApp(parameters)
+RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  RdgApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  RdgApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "CombinedTestApp.h"
+#include "CombinedApp.h"
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "AppFactory.h"
@@ -36,8 +37,14 @@ validParams<CombinedTestApp>()
   return params;
 }
 
-CombinedTestApp::CombinedTestApp(const InputParameters & parameters) : CombinedApp(parameters)
+CombinedTestApp::CombinedTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  CombinedApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  CombinedApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {

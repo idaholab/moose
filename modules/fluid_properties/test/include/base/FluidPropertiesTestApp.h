@@ -1,14 +1,14 @@
 #ifndef FLUIDPROPERTIESTESTAPP_H
 #define FLUIDPROPERTIESTESTAPP_H
 
-#include "FluidPropertiesApp.h"
+#include "MooseApp.h"
 
 class FluidPropertiesTestApp;
 
 template <>
 InputParameters validParams<FluidPropertiesTestApp>();
 
-class FluidPropertiesTestApp : public FluidPropertiesApp
+class FluidPropertiesTestApp : public MooseApp
 {
 public:
   FluidPropertiesTestApp(InputParameters parameters);

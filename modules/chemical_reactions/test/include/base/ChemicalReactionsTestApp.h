@@ -1,14 +1,14 @@
 #ifndef CHEMICALREACTIONSTESTAPP_H
 #define CHEMICALREACTIONSTESTAPP_H
 
-#include "ChemicalReactionsApp.h"
+#include "MooseApp.h"
 
 class ChemicalReactionsTestApp;
 
 template <>
 InputParameters validParams<ChemicalReactionsTestApp>();
 
-class ChemicalReactionsTestApp : public ChemicalReactionsApp
+class ChemicalReactionsTestApp : public MooseApp
 {
 public:
   ChemicalReactionsTestApp(InputParameters parameters);

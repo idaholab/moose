@@ -1,14 +1,14 @@
 #ifndef STOCHASTICTOOLSTESTAPP_H
 #define STOCHASTICTOOLSTESTAPP_H
 
-#include "StochasticToolsApp.h"
+#include "MooseApp.h"
 
 class StochasticToolsTestApp;
 
 template <>
 InputParameters validParams<StochasticToolsTestApp>();
 
-class StochasticToolsTestApp : public StochasticToolsApp
+class StochasticToolsTestApp : public MooseApp
 {
 public:
   StochasticToolsTestApp(InputParameters parameters);

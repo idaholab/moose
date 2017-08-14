@@ -1,14 +1,14 @@
 #ifndef POROUSFLOWTESTAPP_H
 #define POROUSFLOWTESTAPP_H
 
-#include "PorousFlowApp.h"
+#include "MooseApp.h"
 
 class PorousFlowTestApp;
 
 template <>
 InputParameters validParams<PorousFlowTestApp>();
 
-class PorousFlowTestApp : public PorousFlowApp
+class PorousFlowTestApp : public MooseApp
 {
 public:
   PorousFlowTestApp(InputParameters parameters);

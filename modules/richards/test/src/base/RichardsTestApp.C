@@ -1,4 +1,5 @@
 #include "RichardsTestApp.h"
+#include "RichardsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -11,14 +12,23 @@ validParams<RichardsTestApp>()
   return params;
 }
 
-RichardsTestApp::RichardsTestApp(InputParameters parameters) : RichardsApp(parameters)
+RichardsTestApp::RichardsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
+  Moose::registerObjects(_factory);
+  RichardsApp::registerObjects(_factory);
+
+  Moose::associateSyntax(_syntax, _action_factory);
+  RichardsApp::associateSyntax(_syntax, _action_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
     RichardsTestApp::registerObjects(_factory);
     RichardsTestApp::associateSyntax(_syntax, _action_factory);
   }
+
+  mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
+                  "not included in PorousFlow, please contact the moose-users google group");
 }
 
 RichardsTestApp::~RichardsTestApp() {}
