@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef ACInterface_H
-#define ACInterface_H
+#ifndef ACINTERFACE_H
+#define ACINTERFACE_H
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
@@ -69,4 +69,4 @@ protected:
   std::vector<const VariableGradient *> _gradarg;
 };
 
-#endif // ACInterface_H
+#endif // ACINTERFACE_H

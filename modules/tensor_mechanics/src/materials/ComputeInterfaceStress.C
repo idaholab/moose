@@ -43,8 +43,8 @@ ComputeInterfaceStress::computeQpProperties()
   auto & S = _planar_stress[_qp];
 
   // no interface, return zero stress
-  const Real _grad_norm_sq = _grad_v[_qp].norm_sq();
-  if (_grad_norm_sq < libMesh::TOLERANCE)
+  const Real grad_norm_sq = _grad_v[_qp].norm_sq();
+  if (grad_norm_sq < libMesh::TOLERANCE)
   {
     S.zero();
     return;
@@ -53,7 +53,7 @@ ComputeInterfaceStress::computeQpProperties()
   const Real nx = _grad_v[_qp](0);
   const Real ny = _grad_v[_qp](1);
   const Real nz = _grad_v[_qp](2);
-  const Real s = _stress / std::sqrt(_grad_norm_sq);
+  const Real s = _stress / std::sqrt(grad_norm_sq);
 
   S(0, 0) = (ny * ny + nz * nz) * s;
   S(1, 0) = S(0, 1) = -nx * ny * s;
