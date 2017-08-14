@@ -39,7 +39,6 @@ DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
     _gamma(declareProperty<Real>("gamma_asymm")),
     _L(declareProperty<Real>("L")),
     _mu(declareProperty<Real>("mu")),
-    _tgrad_corr_mult(declareProperty<Real>("tgrad_corr_mult")),
     _beta(declareProperty<Real>("beta")),
     _Disloc_Den_i(declareProperty<Real>("Disloc_Den_i")),
     _rho_eff(declareProperty<Real>("rho_eff")),
@@ -111,5 +110,4 @@ DeformedGrainMaterial::computeQpProperties()
   _kappa[_qp] = 3.0 / 4.0 * sigma * _int_width;
   _gamma[_qp] = 1.5;
   _mu[_qp] = 6.0 * sigma / _int_width;
-  _tgrad_corr_mult[_qp] = _mu[_qp] * 9.0 / 8.0;
 }

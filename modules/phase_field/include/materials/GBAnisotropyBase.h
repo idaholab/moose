@@ -56,7 +56,6 @@ protected:
   MaterialProperty<Real> & _molar_volume;
   MaterialProperty<Real> & _entropy_diff;
   MaterialProperty<Real> & _act_wGB;
-  MaterialProperty<Real> & _tgrad_corr_mult;
 
   const Real _kb;
   const Real _JtoeV;

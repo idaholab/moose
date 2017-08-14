@@ -51,7 +51,6 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters)
     _molar_volume(declareProperty<Real>("molar_volume")),
     _entropy_diff(declareProperty<Real>("entropy_diff")),
     _act_wGB(declareProperty<Real>("act_wGB")),
-    _tgrad_corr_mult(declareProperty<Real>("tgrad_corr_mult")),
     _kb(8.617343e-5),      // Boltzmann constant in eV/K
     _JtoeV(6.24150974e18), // Joule to eV conversion
     _mu_qp(0.0),
@@ -176,5 +175,4 @@ GBAnisotropyBase::computeQpProperties()
       _M_V / (_length_scale * _length_scale * _length_scale); // m^3/mol converted to ls^3/mol
   _entropy_diff[_qp] = 9.5 * _JtoeV;                          // J/(K mol) converted to eV(K mol)
   _act_wGB[_qp] = 0.5e-9 / _length_scale;                     // 0.5 nm
-  _tgrad_corr_mult[_qp] = _mu[_qp] * 9.0 / 8.0;
 }
