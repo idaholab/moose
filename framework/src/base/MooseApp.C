@@ -35,6 +35,7 @@
 #include "ConsoleUtils.h"
 #include "JsonSyntaxTree.h"
 #include "JsonInputFileFormatter.h"
+#include "SONDefinitionFormatter.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -86,6 +87,8 @@ validParams<MooseApp>()
       false,
       "Ignore input file and build a minimal application with Transient executioner.");
 
+  params.addCommandLineParam<std::string>(
+      "definition", "--definition", "Shows a SON style input definition dump for input validation");
   params.addCommandLineParam<std::string>(
       "dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
   params.addCommandLineParam<std::string>(
@@ -387,6 +390,15 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(param_search);
     _parser.buildJsonSyntaxTree(tree);
     JsonInputFileFormatter formatter;
+    Moose::out << formatter.toString(tree.getRoot()) << "\n";
+    _ready_to_exit = true;
+  }
+  else if (isParamValid("definition"))
+  {
+    Moose::perf_log.disable_logging();
+    JsonSyntaxTree tree("");
+    _parser.buildJsonSyntaxTree(tree);
+    SONDefinitionFormatter formatter;
     Moose::out << formatter.toString(tree.getRoot()) << "\n";
     _ready_to_exit = true;
   }
