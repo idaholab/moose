@@ -458,13 +458,14 @@ MooseApp::setupOptions()
       // a dash then we are going to eventually find the newest recovery file to use
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
         _recover_base = recover_following_arg;
+    }
 
-      // Optionally get command line argument following
-      // --recoversuffix on command line
-      if (isParamValid("recoversuffix"))
-      {
-        _recover_suffix = getParam<std::string>("recoversuffix");
-      }
+    // Optionally get command line argument following --recoversuffix
+    // on command line.  Currently this argument applies to both
+    // recovery and restart files.
+    if (isParamValid("recoversuffix"))
+    {
+      _recover_suffix = getParam<std::string>("recoversuffix");
     }
 
     _parser.parse(_input_filename);

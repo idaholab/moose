@@ -1,0 +1,27 @@
+[Tests]
+  [./s1_testmodel]
+    type = RunApp
+    input = 's1_testmodel.i'
+    check_input = True
+  [../]
+  [./s2_fasttest]
+    type = RunApp
+    input = 's2_fasttest.i'
+    check_input = True
+  [../]
+  [./s3_decomp]
+    type = RunApp
+    input = 's3_decomp.i'
+    check_input = True
+  [../]
+  [./s4_mobility]
+    type = RunApp
+    input = 's4_mobility.i'
+    check_input = True
+  [../]
+  [./s5_energycurve]
+    type = RunApp
+    input = 's5_energycurve.i'
+    check_input = True
+  [../]
+[]
