@@ -13,6 +13,7 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 #pylint: enable=missing-docstring
+import sys
 import collections
 
 import logging
@@ -80,10 +81,18 @@ def moose_docs_app_syntax(location, hide=None):
     """
 
     exe = mooseutils.find_moose_executable(location)
-    raw = mooseutils.runExe(exe, '--json')
-    raw = raw.split('**START JSON DATA**\n')[1]
-    raw = raw.split('**END JSON DATA**')[0]
-    tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
+    if isinstance(exe, int):
+        LOG.error("Unable to locate an executable in the supplied location: %s", location)
+        sys.exit(1)
+
+    try:
+        raw = mooseutils.runExe(exe, '--json')
+        raw = raw.split('**START JSON DATA**\n')[1]
+        raw = raw.split('**END JSON DATA**')[0]
+        tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
+    except Exception: #pylint: disable=broad-except
+        LOG.error("Failed to execute the MOOSE executable: %s", exe)
+        sys.exit(1)
 
     root = SyntaxNode('')
     for key, value in tree['blocks'].iteritems():
