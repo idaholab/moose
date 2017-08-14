@@ -112,8 +112,8 @@
     type = NumResidualEvaluations
   [../]
   [./active_time]           # Time computer spent on simulation
-    type = RunTime
-    time_type = active
+    type = PerformanceData
+    event =  ACTIVE
   [../]
 []
 

@@ -135,11 +135,11 @@
     derivative_order = 2
   [../]
   [./precipitate_indicator]  # Returns 1/625 if precipitate
-      type = ParsedMaterial
-      f_name = prec_indic
-      args = c
-      function = if(c>0.6,0.0016,0)
-    [../]
+    type = ParsedMaterial
+    f_name = prec_indic
+    args = c
+    function = if(c>0.6,0.0016,0)
+  [../]
 []
 
 [Postprocessors]
@@ -170,8 +170,8 @@
     mat_prop = prec_indic
   [../]
   [./active_time]           # Time computer spent on simulation
-    type = RunTime
-    time_type = active
+    type = PerformanceData
+    event =  ACTIVE
   [../]
 []
 
