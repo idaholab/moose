@@ -58,7 +58,7 @@
     fill_method = symmetric_isotropic
   [../]
   [./elastic_stress]
-    type = ComputeElasticSmearedCrackingStress
+    type = ComputeSmearedCrackingStress
     cracking_release = exponential
     cracking_stress = 1.0
     cracking_residual_stress = 0.1

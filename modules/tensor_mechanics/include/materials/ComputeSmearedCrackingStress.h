@@ -4,21 +4,21 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
-#define COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
+#ifndef COMPUTESMEAREDCRACKINGSTRESS_H
+#define COMPUTESMEAREDCRACKINGSTRESS_H
 
 #include "ColumnMajorMatrix.h"
 #include "ComputeMultipleInelasticStress.h"
 #include "Function.h"
 
 /**
- * ComputeElasticSmearedCrackingStress computes the stress for a finite strain elastic
- * model with smeared cracking
+ * ComputeSmearedCrackingStress computes the stress for a finite strain
+ * material with smeared cracking
  */
-class ComputeElasticSmearedCrackingStress : public ComputeMultipleInelasticStress
+class ComputeSmearedCrackingStress : public ComputeMultipleInelasticStress
 {
 public:
-  ComputeElasticSmearedCrackingStress(const InputParameters & parameters);
+  ComputeSmearedCrackingStress(const InputParameters & parameters);
 
   enum CRACKING_RELEASE
   {
@@ -56,7 +56,7 @@ protected:
   ///@{ Input parameters for smeared crack models
   const CRACKING_RELEASE _cracking_release;
   const Real _cracking_residual_stress;
-  Function & _cracking_stress_function;
+  const VariableValue & _cracking_stress;
 
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
@@ -85,4 +85,4 @@ protected:
   ///@}
 };
 
-#endif // COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
+#endif // COMPUTESMEAREDCRACKINGSTRESS_H
