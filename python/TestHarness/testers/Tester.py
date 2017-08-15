@@ -13,6 +13,7 @@ class Tester(MooseObject):
         # Common Options
         params.addRequiredParam('type', "The type of test of Tester to create for this test.")
         params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
+        params.addParam('min_reported_time', 10, "The minimum time elapsed before a test is reported as taking to long to run.")
         params.addParam('skip',     "Provide a reason this test will be skipped.")
         params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
 
@@ -107,6 +108,10 @@ class Tester(MooseObject):
     def getTestDir(self):
         """ return directory this tester is located """
         return self.specs['test_dir']
+
+    def getMinReportTime(self):
+        """ return minimum time elapse before reporting a 'long running' status """
+        return self.specs['min_reported_time']
 
     def getMaxTime(self):
         """ return maximum time elapse before reporting a 'timeout' status """
