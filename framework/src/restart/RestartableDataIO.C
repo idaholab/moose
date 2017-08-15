@@ -23,6 +23,7 @@
 #include "RestartableData.h"
 
 #include <stdio.h>
+#include <fstream>
 
 RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem) : _fe_problem(fe_problem)
 {

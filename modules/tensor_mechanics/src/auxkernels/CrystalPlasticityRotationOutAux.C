@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "CrystalPlasticityRotationOutAux.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<CrystalPlasticityRotationOutAux>()

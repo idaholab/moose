@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "CrystalPlasticityStateVariable.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<CrystalPlasticityStateVariable>()

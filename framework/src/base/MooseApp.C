@@ -51,6 +51,7 @@
 
 // C++ includes
 #include <numeric> // std::accumulate
+#include <fstream>
 
 #define QUOTE(macro) stringifyName(macro)
 
