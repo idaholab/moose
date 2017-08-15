@@ -12,7 +12,7 @@ equal to the re-initialized solution $U_h$, and the entire process
 is repeated at time $t+\Delta t$.
 
 ## Example Syntax
-!listing modules/level_set/tests/reinitialization/reinit.i block=UserObjects
+!listing modules/level_set/test/tests/reinitialization/reinit.i block=UserObjects
 
 !syntax parameters /UserObjects/LevelSetOlssonTerminator
 

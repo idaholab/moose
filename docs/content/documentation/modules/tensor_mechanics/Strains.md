@@ -31,7 +31,7 @@ As the class name suggests, `ComputeIncrementalSmallStrain` is an incremental fo
 
 The input file syntax for incremental small strain is
 
-!listing modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i start=small_strain end=small_stress
+!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i start=small_strain end=small_stress
 
 
 ##Finite Large Strains
@@ -61,4 +61,4 @@ where $\mathrm{av}_{el}()$ is the average value for the entire element. The stra
 
 The input file syntax for a finite incremental strain material is
 
-!listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress

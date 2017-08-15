@@ -9,7 +9,7 @@ this transfer is performed by the [LevelSetMeshRefinementTransfer](#).
 
 ## Example Syntax
 
-!listing modules/level_set/tests/transfers/markers/multi_level/master.i block=Transfers
+!listing modules/level_set/test/tests/transfers/markers/multi_level/master.i block=Transfers
 
 !syntax parameters /Transfers/LevelSetMeshRefinementTransfer
 

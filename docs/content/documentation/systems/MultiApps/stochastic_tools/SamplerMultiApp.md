@@ -3,7 +3,7 @@ The [SamplerMultiApp](#) simply creates a sub application (see [MultiApps]) for 
 each matrix returned from the [Sampler](stochastic_tools/index.md#samplers) object.
 
 ## Example Syntax
-!listing modules/stochastic_tools/tests/multiapps/sampler_multiapp/master.i block=MultiApps label=False
+!listing modules/stochastic_tools/test/tests/multiapps/sampler_multiapp/master.i block=MultiApps label=False
 
 !syntax parameters /MultiApps/SamplerMultiApp
 

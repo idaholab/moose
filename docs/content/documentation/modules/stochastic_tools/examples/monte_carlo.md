@@ -19,7 +19,7 @@ complete input file for the problem is provided in \ref{monte-carlo-sub}. The on
 to enable the stochastic analysis is the [Controls] block, which contains a [SamplerReceiver](stochastic_tools/SamplerReceiver.md) object, the use of which will be explained
 in the following section.
 
-!listing modules/stochastic_tools/tests/transfers/sub.i id=monte-carlo-sub caption=Complete input file for executing the transient diffusion problem.
+!listing modules/stochastic_tools/test/tests/transfers/sub.i id=monte-carlo-sub caption=Complete input file for executing the transient diffusion problem.
 
 ## Master Input
 The master application, with respect to the [MultiApps] system, is the driver of the stochastic
@@ -28,12 +28,12 @@ application is shown in \ref{monte-carlo-master}, but the import sections will b
 individually.
 
 First, [Distributions] for each of the two stochastic boundary conditions are defined.
-!listing modules/stochastic_tools/tests/transfers/monte_carlo.i block=Distributions
+!listing modules/stochastic_tools/test/tests/transfers/monte_carlo.i block=Distributions
 
 Second, a [MonteCarloSampler](stochastic_tools/MonteCarloSampler.md) is defined that utilizes the
 two distributions and creates the Monte Carlo samples.
 
-!listing modules/stochastic_tools/tests/transfers/monte_carlo.i block=Samplers
+!listing modules/stochastic_tools/test/tests/transfers/monte_carlo.i block=Samplers
 
 Notice, that this sampler only executes on "initial", which means that the random numbers are
 created once during the initial setup of the problem and not changed again during the simulation.
@@ -41,12 +41,12 @@ created once during the initial setup of the problem and not changed again durin
 Next, a [SamplerMultiApp](stochastic_tools/SamplerMultiApp.md) object is created. This object
 creates and runs a sub-application for each sample provided by the sampler object.
 
-!listing modules/stochastic_tools/tests/transfers/monte_carlo.i block=MultiApps
+!listing modules/stochastic_tools/test/tests/transfers/monte_carlo.i block=MultiApps
 
 Finally, the [SamplerTransfer](stochastic_tools/SamplerTransfer.md) is utilized to communicate the
 sampler data to the sub-application. The 'parameters' input lists the parameters on the
 sub-applications to perturb and the 'to_control' specifies the [SamplerReceiver](stochastic_tools/SamplerReceiver.md) object in the sub-application.
 
-!listing modules/stochastic_tools/tests/transfers/monte_carlo.i block=Transfers
+!listing modules/stochastic_tools/test/tests/transfers/monte_carlo.i block=Transfers
 
-!listing modules/stochastic_tools/tests/transfers/monte_carlo.i id=monte-carlo-master caption=Complete input file for master application for executing Monte Carlo stochastic simulations.
+!listing modules/stochastic_tools/test/tests/transfers/monte_carlo.i id=monte-carlo-master caption=Complete input file for master application for executing Monte Carlo stochastic simulations.
