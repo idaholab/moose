@@ -3,20 +3,20 @@
     type = CSVDiff
     input = uniform.i
     csvdiff = 'uniform_out.csv'
-    cli_args = --allow-test-objects
+    allow_test_objects = true
   [../]
   [./weibull]
     type = CSVDiff
     input = weibull.i
     csvdiff = 'weibull_out.csv'
     boost = true
-    cli_args = --allow-test-objects
+    allow_test_objects = true
   [../]
   [./weibull_no_boost]
     type = RunException
     input = weibull.i
     expect_err = "The WeibullDistribution distribution named 'weibull' requires that libMesh"
     boost = false
-    cli_args = --allow-test-objects
+    allow_test_objects = true
   [../]
 []

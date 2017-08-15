@@ -24,6 +24,7 @@ class Tester(MooseObject):
         params.addParam('success_message', 'OK', "The successful message")
 
         params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
+        params.addParam('allow_test_objects', False, "Allow the use of test objects by adding --allow-test-objects to the command line.")
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
@@ -90,6 +91,9 @@ class Tester(MooseObject):
         # Set up common paramaters
         self.should_execute = self.specs['should_execute']
         self.check_input = self.specs['check_input']
+
+        if self.specs["allow_test_objects"]:
+            self.specs["cli_args"].append("--allow-test-objects")
 
     def getTestName(self):
         return self.specs['test_name']
