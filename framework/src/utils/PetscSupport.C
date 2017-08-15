@@ -690,9 +690,9 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     pc_description += "strong_threshold: 0.7 (auto)";
   }
 
-#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0) && PETSC_VERSION_LESS_THAN(3, 7, 6)
   // In PETSc-3.7.{0--4}, there is a bug when using superlu_dist, and we have to use
-  // SamePattern_SameRowPerm
+  // SamePattern_SameRowPerm, otherwise we use whatever we have in PETSc
   if (superlu_dist_found && !fact_pattern_found)
   {
     po.inames.push_back("-mat_superlu_dist_fact");

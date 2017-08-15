@@ -244,9 +244,6 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu     superlu_dist'
-
   line_search = 'none'
 
   nl_abs_tol = 1e-10
