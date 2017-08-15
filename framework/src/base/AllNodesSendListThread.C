@@ -13,43 +13,62 @@
 /****************************************************************/
 
 #include "AllNodesSendListThread.h"
-#include "DisplacedProblem.h"
 #include "MooseMesh.h"
-#include "SubProblem.h"
+
+#include "libmesh/dof_map.h"
 
 AllNodesSendListThread::AllNodesSendListThread(FEProblemBase & fe_problem,
-                                               MooseMesh & mesh,
+                                               const MooseMesh & mesh,
                                                const std::vector<unsigned int> & var_nums,
-                                               unsigned int system_number)
-  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
+                                               const System & system)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _ref_mesh(mesh),
     _var_nums(var_nums),
-    _system_number(system_number),
+    _system(system),
+    _system_number(_system.number()),
+    _first_dof(_system.get_dof_map().first_dof()),
+    _end_dof(_system.get_dof_map().end_dof()),
     _send_list()
 {
+  // We may use the same _var_num multiple times, but it's inefficient
+  // to examine it multiple times.
+  std::sort(this->_var_nums.begin(),
+            this->_var_nums.end());
+
+  std::vector<dof_id_type>::iterator new_end =
+    std::unique (this->_var_nums.begin(),
+                 this->_var_nums.end());
+
+  std::vector<dof_id_type>
+    (this->_var_nums.begin(), new_end).swap (this->_var_nums);
 }
 
 AllNodesSendListThread::AllNodesSendListThread(AllNodesSendListThread & x,
                                                Threads::split split)
-  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _ref_mesh(x._ref_mesh),
     _var_nums(x._var_nums),
-    _system_number(x._system_number),
+    _system(x._system),
+    _system_number(_system.number()),
+    _first_dof(_system.get_dof_map().first_dof()),
+    _end_dof(_system.get_dof_map().end_dof()),
     _send_list()
 {
 }
 
 void
-AllNodesSendListThread::onNode(NodeRange::const_iterator & nd)
+AllNodesSendListThread::onNode(ConstNodeRange::const_iterator & nd)
 {
-  Node & displaced_node = *(*nd);
-
-  Node & reference_node = _ref_mesh.nodeRef(displaced_node.id());
+  const Node & node = *(*nd);
 
   for (unsigned int i = 0; i < _var_nums.size(); i++)
   {
-    if (reference_node.n_dofs(_system_number, _var_nums[i]) > 0)
-      this->_send_list.push_back(reference_node.dof_number(_system_number, _var_nums[i], 0));
+    if (node.n_dofs(_system_number, _var_nums[i]) > 0)
+    {
+      const dof_id_type id = node.dof_number(_system_number, _var_nums[i], 0);
+      if (id < _first_dof || id >= _end_dof)
+        this->_send_list.push_back(id);
+    }
   }
 }
 
@@ -70,8 +89,9 @@ AllNodesSendListThread::unique()
   std::sort(this->_send_list.begin(),
             this->_send_list.end());
 
-  // Now use std::unique to remove any duplicate entries?  There actually
-  // shouldn't be any, since we're hitting each node exactly once.
+  // Now use std::unique to remove any duplicate entries.  There
+  // actually shouldn't be any, since we're hitting each node exactly
+  // once and we pre-uniqued _var_nums.
   // std::vector<dof_id_type>::iterator new_end =
   //   std::unique (this->_send_list.begin(),
   //                this->_send_list.end());
@@ -80,7 +100,7 @@ AllNodesSendListThread::unique()
   // remove the end of the send_list, using the "swap trick" from Effective
   // STL.
   // std::vector<dof_id_type>
-  //  (this->send_list.begin(), new_end).swap (this->send_list);
+  //  (this->_send_list.begin(), new_end).swap (this->_send_list);
 }
 
 const std::vector<dof_id_type> &

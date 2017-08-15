@@ -12,16 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef UPDATEDISPLACEDMESHTHREAD_H
-#define UPDATEDISPLACEDMESHTHREAD_H
+#ifndef ALLNODESSENDLISTTHREAD_H
+#define ALLNODESSENDLISTTHREAD_H
 
 // MOOSE includes
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
-
-// Forward declarations
-class DisplacedProblem;
-class AllNodesSendListThread;
 
 // libMesh forward declarations
 namespace libMesh
@@ -31,16 +27,16 @@ class NumericVector;
 }
 
 class AllNodesSendListThread
-    : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
+    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  AllNodesSendListThread(FEProblemBase & fe_problem, MooseMesh & mesh,
+  AllNodesSendListThread(FEProblemBase & fe_problem, const MooseMesh & mesh,
                          const std::vector<unsigned int> & var_nums,
-                         unsigned int system_number);
+                         const System &system);
 
   AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split);
 
-  virtual void onNode(NodeRange::const_iterator & nd) override;
+  virtual void onNode(ConstNodeRange::const_iterator & nd) override;
 
   void join(const AllNodesSendListThread & y);
 
@@ -51,14 +47,18 @@ public:
   const std::vector<dof_id_type> & send_list() const;
 
 protected:
-  MooseMesh & _ref_mesh;
+  const MooseMesh & _ref_mesh;
 
 private:
-  const std::vector<unsigned int> & _var_nums;
+  std::vector<unsigned int> _var_nums;
+
+  const System & _system;
 
   const unsigned int _system_number;
+
+  const dof_id_type _first_dof, _end_dof;
 
   std::vector<dof_id_type> _send_list;
 };
 
-#endif /* UPDATEDISPLACEDMESHTHREAD_H */
+#endif /* ALLNODESSENDLISTTHREAD_H */
