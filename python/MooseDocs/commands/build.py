@@ -15,7 +15,9 @@
 #pylint: enable=missing-docstring
 import os
 import multiprocessing
+import re
 import shutil
+import subprocess
 import logging
 
 import livereload
@@ -38,6 +40,9 @@ def build_options(parser):
                         help="The YAML file containing the locations containing the markdown "
                              "files (Default: %(default)s). If the file doesn't exists the default "
                              "is {'default':{'base':'docs/content', 'include':'docs/content/*'}}")
+    if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
+        parser.add_argument('--init', action='store_true', help="Initialize and/or update the "
+                                                                "large media submodule if needed.")
     parser.add_argument('--dump', action='store_true',
                         help="Display the website file tree that will be created without "
                              "performing a build.")
@@ -59,6 +64,17 @@ def build_options(parser):
                              "ignored for this case.")
     parser.add_argument('--no-livereload', action='store_true',
                         help="When --serve is used this flag disables the live reloading.")
+
+def submodule_status():
+    """
+    Return the status of each of the git submodule.
+    """
+    out = dict()
+    result = subprocess.check_output(['git', 'submodule', 'status'], cwd=MooseDocs.MOOSE_DIR)
+    regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s')
+    for match in regex.finditer(result):
+        out[match.group('name')] = match.group('status')
+    return out
 
 class WebsiteBuilder(common.Builder):
     """
@@ -126,7 +142,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         return self.filepath, None
 
 def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False, content=None,
-          dump=False, clean=False, serve=False, host=None, port=None, template=None,
+          dump=False, clean=False, serve=False, host=None, port=None, template=None, init=False,
           **template_args):
     """
     The main build command.
@@ -145,11 +161,27 @@ def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False
     if not os.path.exists(site_dir):
         os.makedirs(site_dir)
 
+    # Check submodule for large_media
+    if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
+        status = submodule_status()
+        if status['docs/content/media/large_media'] == '-':
+            if init:
+                subprocess.call(['git', 'submodule', 'update', '--init',
+                                 'docs/content/media/large_media'], cwd=MooseDocs.MOOSE_DIR)
+            else:
+                LOG.warning("The 'large_media' submodule for storing images above 1MB is not "
+                            "initialized, thus some images will not be visible within the "
+                            "generated website. Run the build command with the --init flag to "
+                            "initialize the submodule.")
+
     # Check media files size
     if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
         media = os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', 'media')
-        large = mooseutils.check_file_size(base=media,
-                                           ignore=os.path.join(media, 'large_media', '*'))
+        ignore = set()
+        for base, _, files in os.walk(os.path.join(media, 'large_media')):
+            for name in files:
+                ignore.add(os.path.join(base, name))
+        large = mooseutils.check_file_size(base=media, ignore=ignore)
         if large:
             msg = "Media files above the limit of 1 MB detected, these files should be stored in " \
                   "large media repository (docs/content/media/large_media):"

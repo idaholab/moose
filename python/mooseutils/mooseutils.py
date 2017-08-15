@@ -2,7 +2,6 @@ from __future__ import print_function
 import os
 import re
 import collections
-import glob
 import math
 import errno
 import multiprocessing
@@ -202,9 +201,7 @@ def check_file_size(base=os.getcwd(), size=1, ignore=None):
     size = size * 1024.**2
 
     # Define ignore sets
-    if ignore:
-        ignore = set(glob.glob(ignore))
-    else:
+    if ignore is None:
         ignore = set()
 
     # Search for files that are too large
