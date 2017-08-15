@@ -198,7 +198,13 @@ DisplacedProblem::updateMesh()
 
   UpdateDisplacedMeshThread udmt(_mproblem, *this);
 
-  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
+  // We displace all nodes, not just semilocal nodes, because
+  // parallel-inconsistent mesh geometry makes libMesh cry.
+  NodeRange node_range(_mesh.getMesh().nodes_begin(),
+                       _mesh.getMesh().nodes_end(),
+                       /*grainsize=*/1);
+
+  Threads::parallel_reduce(node_range, udmt);
 
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();
@@ -227,7 +233,13 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
 
   UpdateDisplacedMeshThread udmt(_mproblem, *this);
 
-  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
+  // We displace all nodes, not just semilocal nodes, because
+  // parallel-inconsistent mesh geometry makes libMesh cry.
+  NodeRange node_range(_mesh.getMesh().nodes_begin(),
+                       _mesh.getMesh().nodes_end(),
+                       /*grainsize=*/1);
+
+  Threads::parallel_reduce(node_range, udmt);
 
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();
