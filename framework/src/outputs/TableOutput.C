@@ -176,7 +176,7 @@ TableOutput::outputScalarVariables()
     // code path shouldn't be hit often enough for that to matter.
 
     const DofMap & dof_map = scalar_var.sys().dofMap();
-    for (unsigned int i=0; i != n; ++i)
+    for (unsigned int i = 0; i != n; ++i)
     {
       const processor_id_type pid = dof_map.dof_owner(dof_indices[i]);
       this->comm().broadcast(value[i], pid);
