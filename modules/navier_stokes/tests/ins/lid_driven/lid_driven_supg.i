@@ -51,6 +51,7 @@
     variable = vel_x
     u = vel_x
     v = vel_y
+    component = 0
   [../]
 
   # x-momentum, space
@@ -81,6 +82,7 @@
     variable = vel_y
     u = vel_x
     v = vel_y
+    component = 1
   [../]
 
   # y-momentum, space

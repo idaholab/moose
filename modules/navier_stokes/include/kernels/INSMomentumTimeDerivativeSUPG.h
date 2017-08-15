@@ -33,14 +33,20 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Coupled vars
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
+  unsigned _u_vel_var_number;
+  unsigned _v_vel_var_number;
+  unsigned _w_vel_var_number;
 
   // Mat props
   const MaterialProperty<Real> & _mu;
+
+  unsigned _component;
 };
 
 #endif // INSMOMENTUMTIMEDERIVATIVESUPG_H
