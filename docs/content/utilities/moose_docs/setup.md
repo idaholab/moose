@@ -5,16 +5,8 @@ using [markdown](https://en.wikipedia.org/wiki/Markdown) syntax, including a cus
 process: [Moose Flavored Markdown](moose_markdown/index.md).
 
 ## Dependencies
-If you are using a current [MOOSE package](getting_started/installation/index.md) then a majority of the setup is complete, you will
-only need to load the git-lfs module (See "Install Git LFS in Manual Setup below for more detail).
-
-If you are working on documentation in MOOSE or an application that has existing documentation then
-you will need to run the following command from within the repository to download any existing
-images.
-
-```bash
-git lfs pull
-```
+If you are using a current [MOOSE package](getting_started/installation/index.md) then the setup is
+complete.
 
 ## Configuration
 If you are adding documentation to an existing project then you will need to add a few files to
@@ -54,42 +46,9 @@ of documentation that MooseDocs is capable of producing:
 
 
 ## Manual Setup
-If you are not using a MOOSE package, then the following steps may be performed to install the
-necessary dependencies for using the documentation system.
-
-(1) Install Git LFS
-Install the latest Git Large File Storage package for your system. If you are using the MOOSE redistributable, you should already
-have git-lfs on your system. You simply need to load the following module (put it in your .bash_profile or .bashrc_local file):
-```bash
-module load git-lfs
-```
-Otherwise, follow the getting started instruction from [git-lfs.github.com](https://git-lfs.github.com/). If you are working on
-documentation in MOOSE or an application that has existing documentation then
-you will need to run the following command from within the repository to download any existing images.
+If you are not using a MOOSE package, then the following packages must be installed, this can
+be done using [pip](https://pip.pypa.io/en/stable/).
 
 ```bash
-git lfs pull
-```
-
-(2) Create a new python environment.
-
-This will create a special python environment suitable for using the documentation system, this is done so that an existing
-python configuration you have will not be damaged.
-
-```bash
-conda create --name docs --clone root
-```
-
-(3) Activate the new environment.
-
-This command will need to be executed within any terminal that you plan to perform documentation related tasks.
-
-```bash
-source activate docs
-```
-
-(4) Install the additional python packages.
-
-```bash
-pip install python-markdown-math bs4 pybtex jinja2 livereload lxml pylatexenc anytree pandas
+pip install --user markdown python-markdown-math bs4 pybtex jinja2 livereload lxml pylatexenc anytree pandas
 ```
