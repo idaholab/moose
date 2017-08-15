@@ -22,8 +22,10 @@
 #include "MooseVariableScalar.h"
 #include "PetscSupport.h"
 #include "Postprocessor.h"
+#include "SystemBase.h"
 
 // libMesh includes
+#include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 
 template <>
@@ -150,9 +152,35 @@ TableOutput::outputScalarVariables()
     // Make sure the value of the variable is in sync with the solution vector
     scalar_var.reinit();
 
-    VariableValue & value = scalar_var.sln();
+    // Next we need to make sure all processors agree on the value of
+    // the variable - not all processors may be able to see all
+    // scalars!
 
-    unsigned int n = value.size();
+    // Make a copy rather than taking a reference to the MooseArray,
+    // because if a processor can't see that scalar variable's values
+    // then we'll need to do our own communication of them.
+    VariableValue value = scalar_var.sln();
+
+    // libMesh *does* currently guarantee that all processors can
+    // calculate all scalar DoF indices, so this is a const reference
+    const std::vector<dof_id_type> & dof_indices = scalar_var.dofIndices();
+    const unsigned int n = dof_indices.size();
+
+    // In dbg mode, if we don't see a scalar we might not even have
+    // its array allocated to full length yet.
+    value.resize(n);
+
+    // Finally, let's just let the owners broadcast their values.
+    // There's probably lots of room to optimize this communication
+    // via merging broadcasts and making them asynchronous, but this
+    // code path shouldn't be hit often enough for that to matter.
+
+    const DofMap & dof_map = scalar_var.sys().dofMap();
+    for (unsigned int i=0; i != n; ++i)
+    {
+      const processor_id_type pid = dof_map.dof_owner(dof_indices[i]);
+      this->comm().broadcast(value[i], pid);
+    }
 
     // If the variable has a single component, simply output the value with the name
     if (n == 1)
