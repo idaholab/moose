@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'simple_diffusion.i'
-    exodiff = 'simple_diffusion_out.e'
-  [../]
-[]
+../../../../step08_postprocessors/tests/kernels/simple_diffusion/tests

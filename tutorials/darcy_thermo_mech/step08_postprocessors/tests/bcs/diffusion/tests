@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'diffusion.i'
-    exodiff = 'diffusion_out.e'
-  [../]
-[]
+../../../../step07_adaptivity/tests/bcs/diffusion/tests
