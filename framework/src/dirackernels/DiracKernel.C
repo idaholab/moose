@@ -435,6 +435,13 @@ DiracKernel::clearPoints()
   _local_dirac_kernel_info.clearPoints();
 }
 
+void
+DiracKernel::meshChanged()
+{
+  _point_cache.clear();
+  _reverse_point_cache.clear();
+}
+
 MooseVariable &
 DiracKernel::variable()
 {

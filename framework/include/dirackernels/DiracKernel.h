@@ -115,6 +115,13 @@ public:
    */
   void clearPoints();
 
+  /**
+   * Clear point cache when the mesh changes, so that element
+   * coarsening, element deletion, and distributed mesh repartitioning
+   * don't leave this with an invalid cache.
+   */
+  virtual void meshChanged() override;
+
 protected:
   /**
    * This is the virtual that derived classes should override for computing the residual.
