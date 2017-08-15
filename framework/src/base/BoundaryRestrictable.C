@@ -137,7 +137,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
     {
       std::ostringstream msg;
       msg << "The object '" << name
-          << "' contains the following boundary ids that do no exist on the mesh:";
+          << "' contains the following boundary ids that do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
       mooseError(msg.str());

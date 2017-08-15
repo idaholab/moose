@@ -168,7 +168,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
     {
       std::ostringstream msg;
       msg << "The object '" << name
-          << "' contains the following block ids that do no exist on the mesh:";
+          << "' contains the following block ids that do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
       mooseError(msg.str());
