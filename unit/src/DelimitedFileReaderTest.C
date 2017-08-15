@@ -157,4 +157,27 @@ TEST(DelimitedFileReader, BadRowValue)
   }
 }
 
+TEST(DelimitedFileReader, EmptyLine)
+{
+  // Read file with empty lines
+  MooseUtils::DelimitedFileReader reader("data/csv/example_empty_lines.csv");
+  reader.read();
+
+  // Disable empty lines
+  try
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example_empty_lines.csv");
+    reader.setIgnoreEmptyLines(false);
+    reader.read();
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    std::string gold =
+        "Failed to read line 4 in file data/csv/example_empty_lines.csv. The line is empty.";
+    std::size_t pos = std::string(err.what()).find(gold);
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
+
 #endif

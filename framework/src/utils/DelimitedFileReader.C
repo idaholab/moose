@@ -28,7 +28,11 @@ DelimitedFileReader::DelimitedFileReader(const std::string & filename,
                                          const bool header,
                                          const std::string delimiter,
                                          const libMesh::Parallel::Communicator * comm)
-  : _filename(filename), _header(header), _delimiter(delimiter), _communicator(comm)
+  : _filename(filename),
+    _header(header),
+    _delimiter(delimiter),
+    _ignore_empty_lines(true),
+    _communicator(comm)
 {
 }
 
@@ -169,6 +173,15 @@ DelimitedFileReader::readData(std::ifstream & stream_data, std::vector<double> &
     // Increment row counter and clear any tokenized data
     count++;
     row.clear();
+
+    // Ignore empty lines
+    if (line.empty())
+    {
+      if (_ignore_empty_lines)
+        continue;
+      else
+        mooseError("Failed to read line ", count, " in file ", _filename, ". The line is empty.");
+    }
 
     // Separate the row and error if it fails
     bool status = MooseUtils::tokenizeAndConvert<double>(line, row, _delimiter);
