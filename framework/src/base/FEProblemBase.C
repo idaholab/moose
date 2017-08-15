@@ -3236,6 +3236,15 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 }
 
 void
+FEProblemBase::postExecute()
+{
+  const auto & multi_apps = _multi_apps.getActiveObjects();
+
+  for (const auto & multi_app : multi_apps)
+    multi_app->postExecute();
+}
+
+void
 FEProblemBase::advanceMultiApps(ExecFlagType type)
 {
   const auto & multi_apps = _multi_apps[type].getActiveObjects();

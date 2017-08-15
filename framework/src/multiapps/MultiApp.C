@@ -27,6 +27,7 @@
 #include "SetupInterface.h"
 #include "UserObject.h"
 #include "CommandLine.h"
+#include "Conversion.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
@@ -332,6 +333,13 @@ MultiApp::getExecutioner(unsigned int app)
 }
 
 void
+MultiApp::postExecute()
+{
+  for (const auto & app_ptr : _apps)
+    app_ptr->getExecutioner()->postExecute();
+}
+
+void
 MultiApp::backup()
 {
   for (unsigned int i = 0; i < _my_num_apps; i++)
@@ -412,13 +420,6 @@ MultiApp::appProblemBase(unsigned int app)
 }
 
 FEProblem &
-MultiApp::problem()
-{
-  mooseDeprecated("MultiApp::problem() is deprecated, call MultiApp::problemBase() instead.\n");
-  return dynamic_cast<FEProblem &>(_fe_problem);
-}
-
-FEProblem &
 MultiApp::appProblem(unsigned int app)
 {
   mooseDeprecated(
@@ -468,6 +469,7 @@ MultiApp::hasLocalApp(unsigned int global_app)
 MooseApp *
 MultiApp::localApp(unsigned int local_app)
 {
+  mooseAssert(local_app < _apps.size(), "Index out of range: " + Moose::stringify(local_app));
   return _apps[local_app].get();
 }
 
