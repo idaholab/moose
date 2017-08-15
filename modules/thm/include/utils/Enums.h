@@ -149,6 +149,15 @@ enum EFlowRegimeNamesType
   FR_DISPERSED        ///< Weight of Dispersed Flow Correlations PostCHF
 };
 
+const std::map<unsigned int, std::string> flow_regime_type_to_string{
+    {FR_DISPERSEDBUBBLE, "dispersed_bubble"},
+    {FR_CAPSLUG, "capslug"},
+    {FR_ANNULARMIST, "annular_mist"},
+    {FR_STRATIFIED, "stratified"},
+    {FR_INVERTEDANNULAR, "inverted_annular"},
+    {FR_INVERTEDSLUG, "inverted_slug"},
+    {FR_DISPERSED, "dispersed"}};
+
 // ----------------------------------------------------------------------------
 
 enum EWallDragFlowRegimeNamesType
@@ -159,6 +168,13 @@ enum EWallDragFlowRegimeNamesType
   WDFR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
   WDFR_DISPERSED        ///< Weight of Dispersed Flow Correlations PostCHF
 };
+
+const std::map<unsigned int, std::string> wall_drag_flow_regime_type_to_string{
+    {WDFR_BUBBLYSLUG, "bubbly_slug"},
+    {WDFR_ANNULARMIST, "annular_mist"},
+    {WDFR_STRATIFIED, "stratified"},
+    {WDFR_INVERTEDANNULAR, "inverted_annular"},
+    {WDFR_DISPERSED, "dispersed"}};
 
 // ----------------------------------------------------------------------------
 
@@ -173,6 +189,16 @@ enum EWallHeatTransferRegimeNamesType
   WHT_INVERTEDANNULAR,    ///< Weight of Inverted Annular Flow Correlations PostCHF
   WHT_DISPERSED           ///< Weight of Dispersed Flow Correlations PostCHF
 };
+
+const std::map<unsigned int, std::string> wall_heat_transfer_flow_regime_type_to_string{
+    {WHT_SINGLECONVECTION, "single_phase_forced_convection"},
+    {WHT_TWOPHASECONVECTION, "two_phase_forced_convection"},
+    {WHT_FILMCONDENSATION, "film_condensation"},
+    {WHT_SUBCOOLED, "subcooled_nucleate_boiling"},
+    {WHT_NUCLEATE, "stable_nucleate_boiling"},
+    {WHT_TRANSITION, "transition_boiling"},
+    {WHT_INVERTEDANNULAR, "inverted_annular_postCHF"},
+    {WHT_DISPERSED, "dispersed_postCHF"}};
 }
 
 #endif // ENUMS_H
