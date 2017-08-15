@@ -18,6 +18,7 @@ class TesterData(object):
         self.__start_time = clock()
         self.__end_time = None
         self.__std_out = ''
+        self.report_timer = None
 
     def getTester(self):
         """ Return the tester object """

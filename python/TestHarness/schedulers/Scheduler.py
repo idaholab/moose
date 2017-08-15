@@ -6,7 +6,7 @@ from contrib import dag
 from timeit import default_timer as clock
 
 from multiprocessing.pool import ThreadPool
-import threading # for thread locking
+import threading # for thread locking and thread timers
 
 class SchedulerError(Exception):
     pass
@@ -32,6 +32,7 @@ class Scheduler(MooseObject):
         params = MooseObject.validParams()
         params.addRequiredParam('average_load',  64.0, "Average load to allow")
         params.addRequiredParam('max_processes', None, "Hard limit of maxium processes to use")
+        params.addRequiredParam('report_time',   10.0, "Time elapsed before reporting no activity (RUNNING...)")
 
         return params
 
@@ -57,6 +58,15 @@ class Scheduler(MooseObject):
         # Requested average load level to stay below
         self.average_load = params['average_load']
 
+        # Time to elapse before reporting no activity to the TestHarness
+        self.report_time = float(params['report_time'])
+
+        # The time the status queue reported no activity to the TestHarness
+        self.last_reported = clock()
+
+        # A set containing jobs that have been reported
+        self.jobs_reported = set([])
+
         # Initialize tester pool based on available slots
         self.tester_pool = ThreadPool(processes=self.available_slots)
 
@@ -74,9 +84,6 @@ class Scheduler(MooseObject):
 
         # Jobs waiting to finish
         self.job_queue_count = 0
-
-        # The time the status queue reported something to the user
-        self.last_reported = clock()
 
         # Set containing our Tester Data containers. We use this in the event of a KeyboardInterrupt to
         # iterate over and kill any subprocesses
@@ -317,9 +324,17 @@ class Scheduler(MooseObject):
 
     def handleLongRunningJobs(self, job_container):
         """ Inform the user of a long running test """
-        tester = job_container.getTester()
-        tester.setStatus('RUNNING...', tester.bucket_pending)
-        self.queueJobs(status_job_containers=[job_container])
+        if job_container not in self.jobs_reported:
+            tester = job_container.getTester()
+            tester.setStatus('RUNNING...', tester.bucket_pending)
+            self.queueJobs(status_job_containers=[job_container])
+
+            # Restart the reporting timer for this job
+            job_container.report_timer = threading.Timer(self.report_time,
+                                                         self.handleLongRunningJobs,
+                                                         (job_container,))
+
+            job_container.report_timer.start()
 
     def handleTimeoutJobs(self, job_container):
         """ Handle tests that have timed out """
@@ -340,7 +355,6 @@ class Scheduler(MooseObject):
         """ Method for controlling load average """
         while self.slots_in_use > 1 and self.getLoad() >= self.average_load:
             sleep(1.0)
-
 
     def reserveSlots(self, job_container):
         """
@@ -427,14 +441,18 @@ class Scheduler(MooseObject):
         try:
             tester = job_container.getTester()
 
-            # If the test is still running for a long period of time
+            # If the job is still running for a long period of time and we have not reported
+            # this same job alread, report it now.
             if tester.isPending():
-                if clock() - self.last_reported >= float(tester.getMinReportTime()):
-                    # Print 'running...'
+                if clock() - self.last_reported >= self.report_time and job_container not in self.jobs_reported:
+                    # Inform the TestHarness of a long running test (RUNNING...)
                     self.harness.handleTestStatus(job_container)
 
                     # ...And then set the finished caveat now that the running status has printed
                     tester.specs.addParam('caveats', ['FINISHED'], "")
+
+                    # Add this job to the reported container so it does not happen again
+                    self.jobs_reported.add(job_container)
 
                 # Job is 'Pending', but is under the threshold to be reported (return now so
                 # last_reported time does not get updated). This will ensure that if nothing
@@ -468,11 +486,11 @@ class Scheduler(MooseObject):
             # Check if there are enough resources to run this job
             if self.reserveSlots(job_container):
 
-                # Start reporting timer
-                reporting_timer = threading.Timer(float(tester.getMinReportTime()),
-                                                     self.handleLongRunningJobs,
-                                                     (job_container,))
-                reporting_timer.start()
+                # Start long running timer
+                job_container.report_timer = threading.Timer(self.report_time,
+                                                             self.handleLongRunningJobs,
+                                                             (job_container,))
+                job_container.report_timer.start()
 
                 # Start timeout timer
                 timeout_timer = threading.Timer(float(tester.getMaxTime()),
@@ -482,8 +500,8 @@ class Scheduler(MooseObject):
 
                 self.run(job_container)
 
-                # Stop thread timers now that the job has finished
-                reporting_timer.cancel()
+                # Stop timers now that the job has finished on its own
+                job_container.report_timer.cancel()
                 timeout_timer.cancel()
 
                 # Derived run needs to set a non-pending status of some sort.
