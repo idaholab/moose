@@ -112,5 +112,5 @@
 
 [Problem]
   register_objects_from = 'PhaseFieldApp'
-  library_path = '../../../../phase_field/lib'
+  library_path = '../../../../../phase_field/lib'
 []

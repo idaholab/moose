@@ -1,1 +1,1 @@
-../../../../tensor_mechanics/tests/combined_creep_plasticity/gold/combined_creep_plasticity_out.e
+../../../../../tensor_mechanics/test/tests/combined_creep_plasticity/gold/combined_creep_plasticity_out.e

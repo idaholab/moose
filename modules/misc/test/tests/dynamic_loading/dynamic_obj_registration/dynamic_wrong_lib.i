@@ -85,5 +85,5 @@
 # Here we'll load the wrong library and check for the correct error condition
 [Problem]
   register_objects_from = 'TensorMechanicsApp'
-  library_path = '../../../../tensor_mechanics/lib'
+  library_path = '../../../../../tensor_mechanics/lib'
 []

@@ -62,6 +62,6 @@
     app_type = PhaseFieldApp
 
     # Here we set an input file specific relative library path instead of using MOOSE_LIBRARY_PATH
-    library_path = '../../../../phase_field/lib'
+    library_path = '../../../../../phase_field/lib'
   [../]
 []
