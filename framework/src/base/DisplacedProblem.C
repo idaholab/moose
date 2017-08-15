@@ -188,12 +188,10 @@ DisplacedProblem::updateMesh()
   // the reference mesh to be also.  For that matter, did anyone
   // somehow serialize the whole mesh?  Hopefully not but let's avoid
   // causing errors if so.
-  if (_mesh.getMesh().is_serial() &&
-      !this->refMesh().getMesh().is_serial())
+  if (_mesh.getMesh().is_serial() && !this->refMesh().getMesh().is_serial())
     this->refMesh().getMesh().allgather();
 
-  if (_mesh.getMesh().is_serial_on_zero() &&
-      !this->refMesh().getMesh().is_serial_on_zero())
+  if (_mesh.getMesh().is_serial_on_zero() && !this->refMesh().getMesh().is_serial_on_zero())
     this->refMesh().getMesh().gather_to_zero();
 
   UpdateDisplacedMeshThread udmt(_mproblem, *this);

@@ -30,9 +30,10 @@ class AllNodesSendListThread
     : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  AllNodesSendListThread(FEProblemBase & fe_problem, const MooseMesh & mesh,
+  AllNodesSendListThread(FEProblemBase & fe_problem,
+                         const MooseMesh & mesh,
                          const std::vector<unsigned int> & var_nums,
-                         const System &system);
+                         const System & system);
 
   AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split);
 

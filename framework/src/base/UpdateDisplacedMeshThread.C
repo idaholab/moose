@@ -96,23 +96,25 @@ UpdateDisplacedMeshThread::init()
   _num_var_nums = _var_nums.size();
   _num_aux_var_nums = _aux_var_nums.size();
 
-  ConstNodeRange node_range (_ref_mesh.getMesh().nodes_begin(), _ref_mesh.getMesh().nodes_end());
+  ConstNodeRange node_range(_ref_mesh.getMesh().nodes_begin(), _ref_mesh.getMesh().nodes_end());
 
   {
-    AllNodesSendListThread nl_send_list(this->_fe_problem, _ref_mesh, _var_nums, _displaced_problem._displaced_nl.sys());
+    AllNodesSendListThread nl_send_list(
+        this->_fe_problem, _ref_mesh, _var_nums, _displaced_problem._displaced_nl.sys());
     Threads::parallel_reduce(node_range, nl_send_list);
     nl_send_list.unique();
-    _nl_ghosted_soln->init (_nl_soln.size(), _nl_soln.local_size(),
-                            nl_send_list.send_list(), GHOSTED);
+    _nl_ghosted_soln->init(
+        _nl_soln.size(), _nl_soln.local_size(), nl_send_list.send_list(), GHOSTED);
     _nl_soln.localize(*_nl_ghosted_soln, nl_send_list.send_list());
   }
 
   {
-    AllNodesSendListThread aux_send_list(this->_fe_problem, _ref_mesh, _aux_var_nums, _displaced_problem._displaced_aux.sys());
+    AllNodesSendListThread aux_send_list(
+        this->_fe_problem, _ref_mesh, _aux_var_nums, _displaced_problem._displaced_aux.sys());
     Threads::parallel_reduce(node_range, aux_send_list);
     aux_send_list.unique();
-    _aux_ghosted_soln->init (_aux_soln.size(), _aux_soln.local_size(),
-                            aux_send_list.send_list(), GHOSTED);
+    _aux_ghosted_soln->init(
+        _aux_soln.size(), _aux_soln.local_size(), aux_send_list.send_list(), GHOSTED);
     _aux_soln.localize(*_aux_ghosted_soln, aux_send_list.send_list());
   }
 }

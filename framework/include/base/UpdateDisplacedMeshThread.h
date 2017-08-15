@@ -30,8 +30,7 @@ template <typename T>
 class NumericVector;
 }
 
-class UpdateDisplacedMeshThread
-    : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
+class UpdateDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {
 public:
   UpdateDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);
@@ -43,7 +42,6 @@ public:
   void join(const UpdateDisplacedMeshThread & /*y*/);
 
 protected:
-
   void init();
 
   DisplacedProblem & _displaced_problem;
@@ -54,8 +52,8 @@ protected:
   // Solution vectors with expanded ghosting, for ReplicatedMesh or
   // for DistributedMesh cases where the standard algebraic ghosting
   // doesn't reach as far as the geometric ghosting
-  std::shared_ptr<NumericVector<Number> > _nl_ghosted_soln;
-  std::shared_ptr<NumericVector<Number> > _aux_ghosted_soln;
+  std::shared_ptr<NumericVector<Number>> _nl_ghosted_soln;
+  std::shared_ptr<NumericVector<Number>> _aux_ghosted_soln;
 
 private:
   std::vector<unsigned int> _var_nums;

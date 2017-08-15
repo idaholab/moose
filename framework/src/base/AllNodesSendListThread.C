@@ -32,19 +32,15 @@ AllNodesSendListThread::AllNodesSendListThread(FEProblemBase & fe_problem,
 {
   // We may use the same _var_num multiple times, but it's inefficient
   // to examine it multiple times.
-  std::sort(this->_var_nums.begin(),
-            this->_var_nums.end());
+  std::sort(this->_var_nums.begin(), this->_var_nums.end());
 
   std::vector<dof_id_type>::iterator new_end =
-    std::unique (this->_var_nums.begin(),
-                 this->_var_nums.end());
+      std::unique(this->_var_nums.begin(), this->_var_nums.end());
 
-  std::vector<dof_id_type>
-    (this->_var_nums.begin(), new_end).swap (this->_var_nums);
+  std::vector<dof_id_type>(this->_var_nums.begin(), new_end).swap(this->_var_nums);
 }
 
-AllNodesSendListThread::AllNodesSendListThread(AllNodesSendListThread & x,
-                                               Threads::split split)
+AllNodesSendListThread::AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _ref_mesh(x._ref_mesh),
     _var_nums(x._var_nums),
@@ -76,9 +72,7 @@ void
 AllNodesSendListThread::join(const AllNodesSendListThread & y)
 {
   // Joining simply requires I add the dof indices from the other object
-  this->_send_list.insert(this->_send_list.end(),
-                          y._send_list.begin(),
-                          y._send_list.end());
+  this->_send_list.insert(this->_send_list.end(), y._send_list.begin(), y._send_list.end());
 }
 
 void
@@ -86,8 +80,7 @@ AllNodesSendListThread::unique()
 {
   // Sort the send list.  After this duplicated
   // elements will be adjacent in the vector
-  std::sort(this->_send_list.begin(),
-            this->_send_list.end());
+  std::sort(this->_send_list.begin(), this->_send_list.end());
 
   // Now use std::unique to remove any duplicate entries.  There
   // actually shouldn't be any, since we're hitting each node exactly
