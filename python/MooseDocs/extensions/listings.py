@@ -345,6 +345,8 @@ class ListingInputPattern(ListingPattern):
     def defaultSettings():
         settings = ListingPattern.defaultSettings()
         settings['block'] = (None, "The input file syntax block to include.")
+        settings['main_comment'] = (False, "When True the main comment block (all text prior to "
+                                           "first block) is included for display.")
         return settings
 
     def __init__(self, **kwargs):
@@ -354,6 +356,12 @@ class ListingInputPattern(ListingPattern):
         """
         Extract input file content with GetPot parser if 'block' is available. (override)
         """
+        if settings['main_comment']:
+            with open(filename) as fid:
+                content = fid.read()
+            match = re.search(r'(?P<comment>.*?)\[.*?\]', content, flags=re.MULTILINE|re.DOTALL)
+            return match.group('comment')
+
         if not settings['block']:
             return super(ListingInputPattern, self).extractContent(filename, settings)
 

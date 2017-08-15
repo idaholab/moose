@@ -139,5 +139,9 @@ class TestListings(MarkdownTestCase):
         md = 'This should (`!listing`) be a paragraph.'
         self.assertConvert('testListingTick.html', md)
 
+    def testListingMainComment(self):
+        md = '!listing modules/phase_field/tests/KKS_system/kks_example.i main_comment=True'
+        self.assertConvert('testListingMainComment.html', md)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
