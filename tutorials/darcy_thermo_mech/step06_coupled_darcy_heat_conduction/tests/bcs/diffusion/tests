@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'diffusion.i'
-    exodiff = 'diffusion_out.e'
-  [../]
-[]
+../../../../step05_heat_conduction/tests/bcs/diffusion/tests

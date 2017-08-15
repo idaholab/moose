@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'darcy_convection.i'
-    exodiff = 'darcy_convection_out.e'
-  [../]
-[]
+../../../../step06_coupled_darcy_heat_conduction/tests/kernels/darcy_convection/tests
