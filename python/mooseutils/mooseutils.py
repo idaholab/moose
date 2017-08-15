@@ -1,6 +1,8 @@
 from __future__ import print_function
 import os
 import re
+import collections
+import glob
 import math
 import errno
 import multiprocessing
@@ -185,3 +187,35 @@ def make_chunks(local, num=multiprocessing.cpu_count()):
     num = int(math.ceil(len(local)/float(num)))
     for i in range(0, len(local), num):
         yield local[i:i + num]
+
+def check_file_size(base=os.getcwd(), size=1, ignore=None):
+    """
+    Check the supplied directory for files greater then a prescribed size.
+
+    Input:
+        base[str]: The root directory to recursively search
+        size[int]: The size in MiB to check against
+        ignore[pattern]: A glob pattern to ignore
+    """
+
+    # Define the size in bytes
+    size = size * 1024.**2
+
+    # Define ignore sets
+    if ignore:
+        ignore = set(glob.glob(ignore))
+    else:
+        ignore = set()
+
+    # Search for files that are too large
+    FileInfo = collections.namedtuple('FileInfo', 'name size')
+    output = []
+    for root, _, files in os.walk(base, topdown=False):
+        for name in files:
+            filename = os.path.join(root, name)
+            if filename in ignore:
+                continue
+            result = os.stat(filename)
+            if result.st_size > size:
+                output.append(FileInfo(name=filename, size=result.st_size/(1024.**2)))
+    return output
