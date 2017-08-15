@@ -127,5 +127,5 @@ KKSCHBulk::computeQpOffDiagJacobian(unsigned int jvar)
     res += (*_third_derivatives[i][cvar])[_qp] * (*_grad_args[i])[_qp] * _phi[_j][_qp];
 
   // keeping this term seems to improve the solution.
-  return res * _grad_test[_j][_qp];
+  return res * _grad_test[_i][_qp];
 }
