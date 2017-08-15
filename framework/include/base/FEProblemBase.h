@@ -483,6 +483,11 @@ public:
    */
   virtual void outputStep(ExecFlagType type);
 
+  /**
+   * Method called at the end of the simulation.
+   */
+  virtual void postExecute();
+
   ///@{
   /**
    * Ability to enable/disable all output calls

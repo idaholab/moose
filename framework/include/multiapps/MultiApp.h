@@ -60,6 +60,10 @@ class MultiApp : public MooseObject, public SetupInterface, public Restartable
 public:
   MultiApp(const InputParameters & parameters);
 
+  virtual void preExecute() {}
+
+  virtual void postExecute();
+
   virtual void initialSetup() override;
 
   /**
@@ -132,11 +136,6 @@ public:
    * Get the FEProblemBase this MultiApp is part of.
    */
   FEProblemBase & problemBase() { return _fe_problem; }
-
-  /**
-   * Get the FEProblem this MultiApp is part of.
-   */
-  FEProblem & problem();
 
   /**
    * Get the FEProblemBase for the global app is part of.
