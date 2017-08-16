@@ -34,6 +34,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
+  virtual void computeDPGTest(Real & PG_test, Real & d_PG_test_d_vel_comp, unsigned comp);
 
   // Coupled vars
   const VariableValue & _u_vel;

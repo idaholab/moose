@@ -11,7 +11,7 @@
   nx = 1
   ny = 1
   nz = 1
-  elem_type = HEX8
+  elem_type = HEX27
 []
 
 [Variables]

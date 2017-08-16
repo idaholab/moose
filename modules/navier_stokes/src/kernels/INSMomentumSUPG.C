@@ -72,7 +72,6 @@ INSMomentumSUPG::computeQpResidual()
     alpha = 1;
   else if (U.norm() < std::numeric_limits<double>::epsilon())
   {
-    alpha = 0;
     return 0;
   }
   else
@@ -101,8 +100,8 @@ INSMomentumSUPG::computeQpResidual()
   return convective_part + pressure_part + /*viscous_part +*/ body_force_part;
 }
 
-Real
-INSMomentumSUPG::computeQpJacobian()
+void
+INSMomentumSUPG::computeDPGTest(Real & PG_test, Real & d_PG_test_d_vel_comp, unsigned comp)
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real alpha;
@@ -117,27 +116,35 @@ INSMomentumSUPG::computeQpJacobian()
   // Pure diffusion
   else if (U.norm() < std::numeric_limits<double>::epsilon())
   {
-    alpha = 0;
-    return 0;
+    PG_test = 0;
+    d_PG_test_d_vel_comp = 0;
+    return;
   }
   else
   {
     Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
     Real d_grid_Pe_d_vel_component =
-        _current_elem->hmax() * _u[_qp] * _phi[_j][_qp] / (2. * _mu[_qp] * U.norm());
+        _current_elem->hmax() * U(comp) * _phi[_j][_qp] / (2. * _mu[_qp] * U.norm());
     alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
     d_alpha_d_vel_component =
         ((1. - 1. / (std::tanh(grid_Pe) * std::tanh(grid_Pe))) + 1. / (grid_Pe * grid_Pe)) *
         d_grid_Pe_d_vel_component;
   }
-  Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
+  PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
   RealVectorValue d_U_d_vel_component(0, 0, 0);
-  d_U_d_vel_component(_component) = _phi[_j][_qp];
-  Real d_PG_test_d_vel_component =
-      _current_elem->hmax() / 2. * _grad_test[_i][_qp] *
-      (d_alpha_d_vel_component * U / U.norm() +
-       alpha * (d_U_d_vel_component / U.norm() -
-                U / (U.norm() * U.norm() * U.norm()) * _u[_qp] * _phi[_j][_qp]));
+  d_U_d_vel_component(comp) = _phi[_j][_qp];
+  d_PG_test_d_vel_comp = _current_elem->hmax() / 2. * _grad_test[_i][_qp] *
+                         (d_alpha_d_vel_component * U / U.norm() +
+                          alpha * (d_U_d_vel_component / U.norm() -
+                                   U / (U.norm() * U.norm() * U.norm()) * U(comp) * _phi[_j][_qp]));
+}
+
+Real
+INSMomentumSUPG::computeQpJacobian()
+{
+  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  Real PG_test, d_PG_test_d_vel_component;
+  computeDPGTest(PG_test, d_PG_test_d_vel_component, _component);
 
   Real convective_part =
       _rho[_qp] * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) * PG_test;
@@ -156,36 +163,8 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
   if (jvar == _u_vel_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    Real alpha;
-    Real d_alpha_d_vel_component;
-    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
-    {
-      alpha = 1;
-      d_alpha_d_vel_component = 0;
-    }
-    else if (U.norm() < std::numeric_limits<double>::epsilon())
-    {
-      alpha = 0;
-      return 0;
-    }
-    else
-    {
-      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-      Real d_grid_Pe_d_vel_component =
-          _current_elem->hmax() * _u_vel[_qp] * _phi[_j][_qp] / (2. * _mu[_qp] * U.norm());
-      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
-      d_alpha_d_vel_component =
-          ((1. - 1. / (std::tanh(grid_Pe) * std::tanh(grid_Pe))) + 1. / (grid_Pe * grid_Pe)) *
-          d_grid_Pe_d_vel_component;
-    }
-    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
-    RealVectorValue d_U_d_vel_component(0, 0, 0);
-    d_U_d_vel_component(0) = _phi[_j][_qp];
-    Real d_PG_test_d_vel_component =
-        _current_elem->hmax() / 2. * _grad_test[_i][_qp] *
-        (d_alpha_d_vel_component * U / U.norm() +
-         alpha * (d_U_d_vel_component / U.norm() -
-                  U / (U.norm() * U.norm() * U.norm()) * _u_vel[_qp] * _phi[_j][_qp]));
+    Real PG_test, d_PG_test_d_vel_component;
+    computeDPGTest(PG_test, d_PG_test_d_vel_component, 0);
 
     Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * PG_test;
     convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
@@ -200,36 +179,8 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _v_vel_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    Real alpha;
-    Real d_alpha_d_vel_component;
-    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
-    {
-      alpha = 1;
-      d_alpha_d_vel_component = 0;
-    }
-    else if (U.norm() < std::numeric_limits<double>::epsilon())
-    {
-      alpha = 0;
-      return 0;
-    }
-    else
-    {
-      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-      Real d_grid_Pe_d_vel_component =
-          _current_elem->hmax() * _v_vel[_qp] * _phi[_j][_qp] / (2. * _mu[_qp] * U.norm());
-      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
-      d_alpha_d_vel_component =
-          ((1. - 1. / (std::tanh(grid_Pe) * std::tanh(grid_Pe))) + 1. / (grid_Pe * grid_Pe)) *
-          d_grid_Pe_d_vel_component;
-    }
-    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
-    RealVectorValue d_U_d_vel_component(0, 0, 0);
-    d_U_d_vel_component(1) = _phi[_j][_qp];
-    Real d_PG_test_d_vel_component =
-        _current_elem->hmax() / 2. * _grad_test[_i][_qp] *
-        (d_alpha_d_vel_component * U / U.norm() +
-         alpha * (d_U_d_vel_component / U.norm() -
-                  U / (U.norm() * U.norm() * U.norm()) * _v_vel[_qp] * _phi[_j][_qp]));
+    Real PG_test, d_PG_test_d_vel_component;
+    computeDPGTest(PG_test, d_PG_test_d_vel_component, 1);
 
     Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * PG_test;
     convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
@@ -244,36 +195,8 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _w_vel_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-    Real alpha;
-    Real d_alpha_d_vel_component;
-    if (_mu[_qp] < std::numeric_limits<double>::epsilon())
-    {
-      alpha = 1;
-      d_alpha_d_vel_component = 0;
-    }
-    else if (U.norm() < std::numeric_limits<double>::epsilon())
-    {
-      alpha = 0;
-      return 0;
-    }
-    else
-    {
-      Real grid_Pe = _current_elem->hmax() * U.norm() / (2. * _mu[_qp]);
-      Real d_grid_Pe_d_vel_component =
-          _current_elem->hmax() * _w_vel[_qp] * _phi[_j][_qp] / (2. * _mu[_qp] * U.norm());
-      alpha = 1. / std::tanh(grid_Pe) - 1. / grid_Pe;
-      d_alpha_d_vel_component =
-          ((1. - 1. / (std::tanh(grid_Pe) * std::tanh(grid_Pe))) + 1. / (grid_Pe * grid_Pe)) *
-          d_grid_Pe_d_vel_component;
-    }
-    Real PG_test = alpha * _current_elem->hmax() / 2. * U / U.norm() * _grad_test[_i][_qp];
-    RealVectorValue d_U_d_vel_component(0, 0, 0);
-    d_U_d_vel_component(2) = _phi[_j][_qp];
-    Real d_PG_test_d_vel_component =
-        _current_elem->hmax() / 2. * _grad_test[_i][_qp] *
-        (d_alpha_d_vel_component * U / U.norm() +
-         alpha * (d_U_d_vel_component / U.norm() -
-                  U / (U.norm() * U.norm() * U.norm()) * _w_vel[_qp] * _phi[_j][_qp]));
+    Real PG_test, d_PG_test_d_vel_component;
+    computeDPGTest(PG_test, d_PG_test_d_vel_component, 2);
 
     Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * PG_test;
     convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
@@ -293,7 +216,6 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
       alpha = 1;
     else if (U.norm() < std::numeric_limits<double>::epsilon())
     {
-      alpha = 0;
       return 0;
     }
     else
