@@ -47,10 +47,6 @@
     type = PythonUnitTest
     input = test_Timeout.py
   [../]
-  [./utils]
-    type = PythonUnitTest
-    input = test_utils.py
-  [../]
   [./unknown_prereq]
     type = PythonUnitTest
     input = test_UnknownPrereq.py

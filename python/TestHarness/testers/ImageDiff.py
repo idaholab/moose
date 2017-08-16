@@ -30,7 +30,7 @@ class ImageDiff(FileTester):
         """
 
         # Call base class processResults
-        output = FileTester.processResults(self, moose_dir, retcode, options, output)
+        FileTester.processResults(self, moose_dir, retcode, options, output)
         if self.getStatus() == self.bucket_fail:
             return output
 

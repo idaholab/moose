@@ -1,6 +1,5 @@
 import re, os, sys, time
 from Tester import Tester
-from RunParallel import RunParallel # For TIMEOUT value
 
 class RunCommand(Tester):
 

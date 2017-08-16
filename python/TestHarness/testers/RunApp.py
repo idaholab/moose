@@ -1,7 +1,6 @@
-import re, os, sys, time
+import re, os, time
 from Tester import Tester
 import util
-from RunParallel import RunParallel # For TIMEOUT value
 
 class RunApp(Tester):
 
@@ -23,10 +22,6 @@ class RunApp(Tester):
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
         # it'll be used in lieu of building up the command automatically
         params.addParam('command',            "The command line to execute for this test.")
-
-        params.addParam('walltime',           "The max time as pbs understands it")
-        params.addParam('job_name',           "The test name as pbs understands it")
-        params.addParam('no_copy',            "The tests file as pbs understands it")
 
         # Parallel/Thread testing
         params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
@@ -101,51 +96,50 @@ class RunApp(Tester):
         if specs.isValid('command'):
             return os.path.join(specs['test_dir'], specs['command']) + ' ' + ' '.join(specs['cli_args'])
 
-        # Create the command line string to run
-        command = ''
+        # Create the additional command line arguments list
+        cli_args = list(specs['cli_args'])
 
         # Check for built application
         if not options.dry_run and not os.path.exists(specs['executable']):
-            print os.getcwd()
-            print 'Application not found: ' + str(specs['executable'])
-            sys.exit(1)
+            self.setStatus('Application not found', self.bucket_fail)
+            return ''
 
-        if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
+        if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option
-            specs['cli_args'].append('--distributed-mesh')
+            cli_args.append('--distributed-mesh')
 
-        if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
+        if options.error and '--error' not in cli_args and not specs["allow_warnings"]:
             # The user has passed the error option to the test harness
             # and it is NOT supplied already in the cli-args option\
-            specs['cli_args'].append('--error')
+            cli_args.append('--error')
 
-        if options.error_unused and '--error-unused' not in specs['cli_args'] and '--warn-unused' not in specs['cli_args'] and not specs["allow_warnings"]:
+        if options.error_unused and '--error-unused' not in cli_args and '--warn-unused' not in cli_args and not specs["allow_warnings"]:
             # The user has passed the error-unused option to the test harness
             # and it is NOT supplied already in the cli-args option
             # also, neither is the conflicting option "warn-unused"
-            specs['cli_args'].append('--error-unused')
+            cli_args.append('--error-unused')
 
         if self.getCheckInput():
-            specs['cli_args'].append('--check-input')
+            cli_args.append('--check-input')
 
         timing_string = ' '
         if options.timing:
-            specs['cli_args'].append('--timing')
-            specs['cli_args'].append('Outputs/print_perf_log=true')
+            cli_args.append('--timing')
+            cli_args.append('Outputs/print_perf_log=true')
 
         if options.colored == False:
-            specs['cli_args'].append('--color off')
+            cli_args.append('--color off')
 
         if options.cli_args:
-            specs['cli_args'].insert(0, options.cli_args)
+            cli_args.insert(0, options.cli_args)
 
         if options.scaling and specs['scale_refine'] > 0:
-            specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
+            cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
         # The test harness should never use GDB backtraces: they don't
         # work well when dozens of expect_err jobs run at the same time.
-        specs['cli_args'].append('--no-gdb-backtrace')
+        cli_args.append('--no-gdb-backtrace')
 
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
@@ -157,7 +151,7 @@ class RunApp(Tester):
             default_ncpus = options.parallel
 
         if specs['redirect_output'] and ncpus > 1:
-            specs['cli_args'].append('--keep-cout --redirect-output ' + self.name())
+            cli_args.append('--keep-cout --redirect-output ' + self.name())
 
         caveats = []
         if nthreads > options.nthreads:
@@ -174,98 +168,16 @@ class RunApp(Tester):
             self.specs['caveats'] = caveats
 
         if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
+            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(cli_args)
         elif options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
-            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
+            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
         else:
-            command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
-
-        if options.pbs:
-            return self.getPBSCommand(options)
+            command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
 
         return command
 
-    def getPBSCommand(self, options):
-        if options.parallel == None:
-            default_ncpus = 1
-        else:
-            default_ncpus = options.parallel
-
-        # Raise the floor
-        ncpus = max(default_ncpus, int(self.specs['min_parallel']))
-        # Lower the ceiling
-        ncpus = min(ncpus, int(self.specs['max_parallel']))
-
-        # Set number of threads to be used lower bound
-        nthreads = max(options.nthreads, int(self.specs['min_threads']))
-        # Set number of threads to be used upper bound
-        nthreads = min(nthreads, int(self.specs['max_threads']))
-
-        extra_args = ''
-        if options.parallel or ncpus > 1 or nthreads > 1:
-            extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(self.specs['cli_args'])
-
-        timing_string = ' '
-        if options.timing:
-            self.specs['cli_args'].append('--timing')
-            self.specs['cli_args'].append('Outputs/print_perf_log=true')
-
-        # Append any extra args to the cluster_launcher
-        if extra_args != '':
-            self.specs['cli_args'] = extra_args
-        else:
-            self.specs['cli_args'] = ' '.join(self.specs['cli_args'])
-        self.specs['cli_args'] = "'" + self.specs['cli_args'].strip() + "'"
-
-        # Open our template. This should probably be done at the same time as cluster_handle.
-        template_script = open(os.path.join(self.specs['moose_dir'], 'python', 'TestHarness', 'pbs_template.i'), 'r')
-        content = template_script.read()
-        template_script.close()
-
-        # Convert MAX_TIME to hours:minutes for walltime use
-        hours = int(int(self.specs['max_time']) / 3600)
-        minutes = int(int(self.specs['max_time']) / 60) % 60
-        self.specs['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
-
-        # Truncate JOB_NAME. PBS can only accept 13 character (6 characters from test name + _## (test serial number) + _### (serialized number generated by cluster_launcher) = the 13 character limit)
-        self.specs['job_name'] = self.specs['input'][:6] + '_' + str(options.test_serial_number).zfill(2)
-        self.specs['job_name'] = self.specs['job_name'].replace('.', '')
-        self.specs['job_name'] = self.specs['job_name'].replace('-', '')
-
-        # Convert TEST_NAME to input tests file name (normally just 'tests')
-        self.specs['no_copy'] = options.input_file_name
-
-        # Are we using the PBS Emulator? Make this param valid if so.
-        # Add the substitution string here so it is not visable to the user
-        self.specs.addStringSubParam('pbs_stdout', 'PBS_STDOUT', "Save stdout to this location")
-        self.specs.addStringSubParam('pbs_stderr', 'PBS_STDERR', "Save stderr to this location")
-        if options.PBSEmulator:
-            self.specs['pbs_stdout'] = 'pbs_stdout = PBS_EMULATOR'
-            self.specs['pbs_stderr'] = 'pbs_stderr = PBS_EMULATOR'
-        else:
-            # The PBS Emulator fails when using the PROJECT argument (#PBS -P <project name>)
-            self.specs.addStringSubParam('pbs_project', 'PBS_PROJECT', "Identify this job submission with this project")
-            self.specs['pbs_project'] = 'pbs_project = %s' % (options.pbs_project)
-
-
-        # Do all of the replacements for the valid parameters
-        for spec in self.specs.valid_keys():
-            if spec in self.specs.substitute:
-                self.specs[spec] = self.specs.substitute[spec].replace(spec.upper(), self.specs[spec])
-            content = content.replace('<' + spec.upper() + '>', str(self.specs[spec]))
-
-        # Make sure we strip out any string substitution parameters that were not supplied
-        for spec in self.specs.substitute_keys():
-            if not self.specs.isValid(spec):
-                content = content.replace('<' + spec.upper() + '>', '')
-
-        # Write the cluster_launcher input file
-        options.cluster_handle.write(content + '\n')
-
-        return os.path.join(self.specs['moose_dir'], 'scripts', 'cluster_launcher.py') + ' ' + options.pbs + '.cluster'
-
-
-    def processResults(self, moose_dir, retcode, options, output):
+    def testFileOutput(self, moose_dir, retcode, options, output):
+        """ Set a failure status for expressions found in output """
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
@@ -287,8 +199,6 @@ class RunApp(Tester):
             # in the derived class.
             if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
                 reason = 'ERRMSG'
-            elif retcode == RunParallel.TIMEOUT:
-                reason = 'TIMEOUT'
             elif retcode == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
             elif retcode != 0 and specs['should_crash'] == False:
@@ -296,9 +206,23 @@ class RunApp(Tester):
             # Valgrind runs
             elif retcode == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
                 reason = 'MEMORY ERROR'
-            # PBS runs
-            elif retcode == 0 and options.pbs and 'command not found' in output:
-                reason = 'QSUB NOT FOUND'
+
+        if reason != '':
+            self.setStatus(reason, self.bucket_fail)
+
+        return reason
+
+    def processResults(self, moose_dir, retcode, options, output):
+        """
+        Wrapper method for testFileOutput.
+
+        testFileOutput does not set a success status, while processResults does.
+        For testers that are RunApp types, they would call this method. While
+        all other tester types (like exodiff) will call testFileOutput. This is
+        to prevent derived testers from having a successful status set, before
+        actually running their derived processResults method.
+        """
+        reason = self.testFileOutput(moose_dir, retcode, options, output)
 
         # Populate the bucket
         if reason != '':

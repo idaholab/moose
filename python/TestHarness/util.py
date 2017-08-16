@@ -3,6 +3,7 @@ import subprocess
 from mooseutils import colorText
 from collections import namedtuple
 import json
+from tempfile import TemporaryFile
 
 TERM_COLS = 110
 
@@ -118,17 +119,39 @@ def runCommand(cmd, cwd=None):
         output = 'ERROR: ' + output
     return output
 
+def launchTesterCommand(tester, command):
+    """
+    Method to enter the tester directory, execute a command, and return the process
+    and temporary output file objects.
+    """
+
+    try:
+        f = TemporaryFile()
+        # On Windows, there is an issue with path translation when the command is passed in
+        # as a list.
+        if platform.system() == "Windows":
+            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=tester.getTestDir())
+        else:
+            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=tester.getTestDir())
+    except:
+        print("Error in launching a new task", command)
+        raise
+
+    return (process, f)
+
 ## print an optionally colorified test result
 #
 # The test will not be colored if
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def printResult(tester, result, timing, start, end, options, color=True):
+def formatResult(tester_data, result, options, color=True):
+    tester = tester_data.getTester()
+    timing = tester_data.getTiming()
     f_result = ''
     caveats = ''
     first_directory = tester.specs['first_directory']
-    test_name = tester.specs['test_name']
+    test_name = tester.getTestName()
     status = tester.getStatus()
 
     cnt = (TERM_COLS-2) - len(test_name + result)
@@ -152,16 +175,15 @@ def printResult(tester, result, timing, start, end, options, color=True):
         f_result = test_name + '.'*cnt + ' ' + result
 
     # Tack on the timing if it exists
-    if timing:
+    if options.timing:
         f_result += ' [' + '%0.3f' % float(timing) + 's]'
     if options.debug_harness:
-        f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % end
+        f_result += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
     return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
 # supports weirded html for more advanced coloring schemes. \verbatim<r>,<g>,<y>,<b>\endverbatim All colors are bolded.
-
 
 def getPlatforms():
     # We'll use uname to figure this out.  platform.uname() is available on all platforms
@@ -204,7 +226,7 @@ def runExecutable(libmesh_dir, location, bin, args):
         libmesh_exe = libmesh_uninstalled2
 
     else:
-        print "Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"
+        print("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!")
         exit(1)
 
     return runCommand(libmesh_exe + " " + args).rstrip()
@@ -377,7 +399,7 @@ def getSharedOption(libmesh_dir):
         shared_option.add('STATIC')
     else:
         # Neither no nor yes?  Not possible!
-        print "Error! Could not determine whether shared libraries were built."
+        print("Error! Could not determine whether shared libraries were built.")
         exit(1)
 
     return shared_option
@@ -466,7 +488,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
             try:
                 os.remove(full_path)
             except:
-                print "Unable to remove file: " + full_path
+                print("Unable to remove file: " + full_path)
 
     # Now try to delete directories that might have been created
     if delete_folders:
@@ -488,101 +510,45 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     # TL;DR; Just pass...
                     pass
 
-# See http://code.activestate.com/recipes/576570-dependency-resolver/
-class DependencyResolver:
-    """
-    Class for returning dependency sets. That is, all of the vertices from a directed
-    graph that a given vertex depends on (or can reach)
-    """
-    def __init__(self):
-        self.dependency_dict = {}
+# Check if test has any redirected output, and if its ready to be read
+def checkOutputReady(tester, options):
+    for redirected_file in tester.getRedirectedOutputFiles(options):
+        file_path = os.path.join(tester.getTestDir(), redirected_file)
+        if not os.access(file_path, os.R_OK):
+            return False
 
-    def insertDependency(self, key, values):
-        """
-        Insert all of the immediate dependencies for a given vertex. "values" should be a set
-        """
-        self.dependency_dict[key] = values
+    return True
 
-    def getSortedValuesSets(self):
-        """
-        Method to return the "execution order" for a directed graph (i.e. the order in which
-        nodes must be visited to satistfy dependencies
-        """
-        d = dict((k, set(self.dependency_dict[k])) for k in self.dependency_dict)
-        r = []
-        while d:
-            # values not in keys (items without dep)
-            t = set(i for v in d.values() for i in v) - set(d.keys())
-            # and keys without value (items without dep)
-            t.update(k for k, v in d.items() if not v)
+# return concatenated output from tests with redirected output
+def getOutputFromFiles(tester, options):
+    file_output = ''
+    if checkOutputReady(tester, options):
+        for iteration, redirected_file in enumerate(tester.getRedirectedOutputFiles(options)):
+            file_path = os.path.join(tester.getTestDir(), redirected_file)
+            with open(file_path, 'r') as f:
+                file_output += "#"*80 + "\nOutput from processor " + str(iteration) + "\n" + "#"*80 + "\n" + readOutput(f, options)
+    return file_output
 
-            if len(t) == 0 and len(d) > 0:
-              raise Exception("Cyclic or Invalid Dependency Detected!")
+# This function reads output from the file (i.e. the test output)
+# but trims it down to the specified size.  It'll save the first two thirds
+# of the requested size and the last third trimming from the middle
+def readOutput(f, options, max_size=100000):
+    first_part = int(max_size*(2.0/3.0))
+    second_part = int(max_size*(1.0/3.0))
+    output = ''
 
-            # can be done right away
-            r.append(t)
-            # and cleaned up
-            d = dict(((k, v-t) for k, v in d.items() if v))
-        return r
+    f.seek(0)
+    if options.sep_files != True:
+        output = f.read(first_part)     # Limit the output to 1MB
+        if len(output) == first_part:   # This means we didn't read the whole file yet
+            output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
+            f.seek(-second_part, 2)       # Skip the middle part of the file
 
-class ReverseReachability:
-    """
-    Calculates the Reverse Reachability of a graph. This class does this by
-    computing the reachability of a graph (reversing the direction of edges)
-    """
-    def __init__(self):
-        """
-        Creats the dictionary to hold all of the reverse dependencies. (i.e. the key -> value
-        pair is inserted in the dictionary such that the value -> key)
-        """
-        self.dependency_dict = {}
+            if (f.tell() <= first_part):  # Don't re-read some of what you've already read
+                f.seek(first_part+1, 0)
 
-    def insertDependency(self, key, values):
-        """
-        Inserts all of the dependencies for a given key. "values" can either be
-        a single value or a set of values.
-
-        """
-        for value in values:
-            self.dependency_dict.setdefault(value, set()).add(key)
-
-        # Also make sure the original key is in there with an empty set
-        self.dependency_dict.setdefault(key, set())
-
-    def getReverseReachabilitySets(self):
-        """
-        Method to retrieve all of the vertices that can reach a given vertex in a complete dictionary.
-        """
-        reachable = {}
-        for key in self.dependency_dict:
-            reachable[key] = self.getReverseReachableSet(key)
-
-        return reachable
-
-    def getReverseReachableSet(self, key):
-        """
-        Method to retrieve all of the verices for the passed in vertex (key)
-        """
-        return self._reverseReachability(key)
-
-    def _reverseReachability(self, key, seen = None):
-        """
-        Helper method to discover all of the vertices that can reach this vertex. It uses recursion
-        to populate the data structures.
-        """
-        seen = seen or []
-        seen.append(key)
-        reached = set()
-        adjacent = self.dependency_dict.get(key)
-
-        if adjacent:
-            reached.update(adjacent)
-            for subkey in adjacent:
-                if subkey in adjacent and subkey not in seen:
-                    reached.update(self._reverseReachability(subkey, seen))
-
-        return reached
-
+    output += f.read()              # Now read the rest
+    return output
 
 class TestStatus(object):
     """
@@ -592,34 +558,36 @@ class TestStatus(object):
     ###### bucket status discriptions
     ## The following is a list of statuses possible in the TestHarness
     ##
-    ## PASS    =  Passing tests 'OK'
-    ## FAIL    =  Failing tests
-    ## DIFF    =  Failing tests due to Exodiff, CSVDiff
-    ## PBS     =  Any statuses belonging to messages generated by PBS
-    ## PENDING =  A pending status applied by the TestHarness (RUNNING...)
-    ## DELETED =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
-    ##            is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
-    ##            printed to stdout) when the user has specifically asked for more information while
-    ##            running tests (-e)
-    ## SKIP    =  Any test reported as skipped
-    ## SILENT  =  Any test reported as skipped and should not alert the user (deleted, tests not
-    ##            matching '--re=' options, etc)
+    ## INITIALIZED   =  The default tester status when it is instanced
+    ## PASS          =  Passing tests
+    ## FAIL          =  Failing tests
+    ## DIFF          =  Failing tests due to Exodiff, CSVDiff
+    ## PENDING       =  A pending status applied by the TestHarness (RUNNING...)
+    ## FINISHED      =  A status that can mean it finished in any status (like a pending queued status type)
+    ## DELETED       =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
+    ##                  is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
+    ##                  printed to stdout) when the user has specifically asked for more information while
+    ##                  running tests (-e)
+    ## SKIP          =  Any test reported as skipped
+    ## SILENT        =  Any test reported as skipped and should not alert the user (deleted, tests not
+    ##                  matching '--re=' options, etc)
     ######
 
-    test_status    = namedtuple('test_status', 'status color')
-    bucket_success = test_status(status='PASS', color='GREEN')
-    bucket_fail    = test_status(status='FAIL', color='RED')
-    bucket_deleted = test_status(status='DELETED', color='RED')
-    bucket_diff    = test_status(status='DIFF', color='YELLOW')
-    bucket_pbs     = test_status(status='PBS', color='CYAN')
-    bucket_pending = test_status(status='PENDING', color='CYAN')
-    bucket_skip    = test_status(status='SKIP', color='RESET')
-    bucket_silent  = test_status(status='SILENT', color='RESET')
+    test_status         = namedtuple('test_status', 'status color')
+    bucket_initialized  = test_status(status='INITIALIZED', color='CYAN')
+    bucket_success      = test_status(status='PASS', color='GREEN')
+    bucket_fail         = test_status(status='FAIL', color='RED')
+    bucket_deleted      = test_status(status='DELETED', color='RED')
+    bucket_diff         = test_status(status='DIFF', color='YELLOW')
+    bucket_pending      = test_status(status='PENDING', color='CYAN')
+    bucket_finished     = test_status(status='FINISHED', color='CYAN')
+    bucket_skip         = test_status(status='SKIP', color='RESET')
+    bucket_silent       = test_status(status='SILENT', color='RESET')
 
     # Initialize the class with a pending status
     # TODO: don't do this? Initialize instead with None type? If we do
     # and forget to set a status, getStatus will fail with None type errors
-    def __init__(self, status_message='initialized', status=bucket_pending):
+    def __init__(self, status_message='initialized', status=bucket_initialized):
         self.__status_message = status_message
         self.__status = status
 
@@ -662,9 +630,51 @@ class TestStatus(object):
         status = self.getStatus()
         return status == self.bucket_fail or status == self.bucket_diff
 
-    def getRunnable(self):
+    def didDiff(self):
         """
-        Return boolean whether the test should be allowed to run or not
+        Return boolean diff status (True if diff'd)
         """
         status = self.getStatus()
-        return not (status == self.bucket_deleted or status == self.bucket_skip or status == self.bucket_silent)
+        return status == self.bucket_diff
+
+    def isInitialized(self):
+        """
+        Return boolean initialized status
+        """
+        status = self.getStatus()
+        return status == self.bucket_initialized
+
+    def isPending(self):
+        """
+        Return boolean pending status
+        """
+        status = self.getStatus()
+        return status == self.bucket_pending
+
+    def isSkipped(self):
+        """
+        Return boolean skipped status
+        """
+        status = self.getStatus()
+        return status == self.bucket_skip
+
+    def isSilent(self):
+        """
+        Return boolean silent status
+        """
+        status = self.getStatus()
+        return status == self.bucket_silent
+
+    def isDeleted(self):
+        """
+        Return boolean deleted status
+        """
+        status = self.getStatus()
+        return status == self.bucket_deleted
+
+    def isFinished(self):
+        """
+        Return boolean finished status
+        """
+        status = self.getStatus()
+        return (status == self.bucket_finished or status != self.bucket_pending and status != self.bucket_initialized)

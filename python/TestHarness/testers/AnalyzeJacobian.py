@@ -1,7 +1,6 @@
 import re, os, sys
 import util
 from Tester import Tester
-from RunParallel import RunParallel # For TIMEOUT value
 
 class AnalyzeJacobian(Tester):
 
@@ -65,9 +64,7 @@ class AnalyzeJacobian(Tester):
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         if reason == '':
-            if retcode == RunParallel.TIMEOUT:
-                reason = 'TIMEOUT'
-            elif retcode != 0 :
+            if retcode != 0 :
                 reason = 'CRASH'
 
         # populate status bucket

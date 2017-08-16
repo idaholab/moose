@@ -1,10 +1,11 @@
 import re, os
 import util
-from InputParameters import InputParameters
 from MooseObject import MooseObject
 
 class Tester(MooseObject):
-
+    """
+    Base class from which all tester objects are instanced.
+    """
     @staticmethod
     def validParams():
         params = MooseObject.validParams()
@@ -12,7 +13,7 @@ class Tester(MooseObject):
         # Common Options
         params.addRequiredParam('type', "The type of test of Tester to create for this test.")
         params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
-        params.addParam('min_reported_time', "The minimum time elapsed before a test is reported as taking to long to run.")
+        params.addParam('min_reported_time', 10, "The minimum time elapsed before a test is reported as taking to long to run.")
         params.addParam('skip',     "Provide a reason this test will be skipped.")
         params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
 
@@ -66,21 +67,22 @@ class Tester(MooseObject):
         MooseObject.__init__(self, name, params)
         self.specs = params
 
+        # Bool if test can run
+        self._runnable = None
+
         # Initialize the status bucket class
         self.status = util.TestStatus()
 
         # Enumerate the buckets here so ther are easier to work with in the tester class
-        self.bucket_success = self.status.bucket_success
-        self.bucket_fail    = self.status.bucket_fail
-        self.bucket_diff    = self.status.bucket_diff
-        self.bucket_pbs     = self.status.bucket_pbs
-        self.bucket_pending = self.status.bucket_pending
-        self.bucket_deleted = self.status.bucket_deleted
-        self.bucket_skip    = self.status.bucket_skip
-        self.bucket_silent  = self.status.bucket_silent
-
-        # Initialize the tester with a pending status
-        self.setStatus('launched', self.bucket_pending)
+        self.bucket_initialized  = self.status.bucket_initialized
+        self.bucket_success      = self.status.bucket_success
+        self.bucket_fail         = self.status.bucket_fail
+        self.bucket_diff         = self.status.bucket_diff
+        self.bucket_pending      = self.status.bucket_pending
+        self.bucket_finished     = self.status.bucket_finished
+        self.bucket_deleted      = self.status.bucket_deleted
+        self.bucket_skip         = self.status.bucket_skip
+        self.bucket_silent       = self.status.bucket_silent
 
         # Set the status message
         if self.specs['check_input']:
@@ -96,41 +98,66 @@ class Tester(MooseObject):
             self.specs["cli_args"].append("--allow-test-objects")
 
     def getTestName(self):
+        """ return test name """
         return self.specs['test_name']
 
     def getPrereqs(self):
+        """ return list of prerequisite tests this test depends on """
         return self.specs['prereq']
 
-    # Method to return if the test can run
-    def getRunnable(self):
-        return self.status.getRunnable()
+    def getMooseDir(self):
+        """ return moose directory """
+        return self.specs['moose_dir']
 
-    # Method to return text color based on current test status
+    def getTestDir(self):
+        """ return directory this tester is located """
+        return self.specs['test_dir']
+
+    def getMinReportTime(self):
+        """ return minimum time elapse before reporting a 'long running' status """
+        return self.specs['min_reported_time']
+
+    def getMaxTime(self):
+        """ return maximum time elapse before reporting a 'timeout' status """
+        return self.specs['max_time']
+
+    def getRunnable(self, options):
+        """ return bool and cache results, if this test can run """
+        if self._runnable is None:
+            self._runnable = self.checkRunnableBase(options)
+        return self._runnable
+
     def getColor(self):
+        """ return print color assigned to this tester """
         return self.status.getColor()
 
-    # Method to return the input file if applicable to this Tester
     def getInputFile(self):
+        """ return the input file if applicable to this Tester """
         return None
 
-    # Method to return the output files if applicable to this Tester
     def getOutputFiles(self):
+        """ return the output files if applicable to this Tester """
         return []
 
-    # Method to return the successful message printed to stdout
     def getSuccessMessage(self):
+        """ return the success message assigned to this tester """
         return self.success_message
 
-    # Method to return status text (exodiff, crash, skipped because x, y and z etc)
     def getStatusMessage(self):
+        """ return the status message assigned to this tester """
         return self.status.getStatusMessage()
 
-    # Method to return status bucket tuple
     def getStatus(self):
+        """ return current enumerated tester status bucket """
         return self.status.getStatus()
 
-    # Method to set the bucket status
     def setStatus(self, reason, bucket):
+        """
+        Method to set a testers status.
+
+        Syntax:
+          .setStatus('str message', <enumerated tester status bucket>)
+        """
         self.status.setStatus(reason, bucket)
         return self.getStatus()
 
@@ -140,6 +167,10 @@ class Tester(MooseObject):
     #       didPass. This will happen if the tester is in-progress for instance.
     # See didPass()
     def didFail(self):
+        """
+        return bool for tester failure
+        see util.TestStatus for more information
+        """
         return self.status.didFail()
 
     # Method to check for successfull test
@@ -151,60 +182,137 @@ class Tester(MooseObject):
     #       output has been tested).
     # See didFail()
     def didPass(self):
+        """
+        return boolean for tester successfulness
+        see util.TestStatus for more information
+        """
         return self.status.didPass()
+
+    def didDiff(self):
+        """
+        return boolean for a differential tester failure
+        see util.TestStatus for more information
+        """
+        return self.status.didDiff()
+
+    def isInitialized(self):
+        """
+        return boolean for tester in an initialization status
+        see util.TestStatus for more information
+        """
+        return self.status.isInitialized()
+
+    def isPending(self):
+        """
+        return boolean for tester in a pending status
+        see util.TestStatus for more information
+        """
+        return self.status.isPending()
+
+    def isFinished(self):
+        """
+        return boolean for tester no longer pending
+        see util.TestStatus for more information
+        """
+        return self.status.isFinished()
+
+    def isSkipped(self):
+        """
+        return boolean for tester being reported as skipped
+        see util.TestStatus for more information
+        """
+        return self.status.isSkipped()
+
+    def isSilent(self):
+        """
+        return boolean for tester being skipped and not reported
+        see util.TestStatus for more information
+        """
+        return self.status.isSilent()
+
+    def isDeleted(self):
+        """
+        return boolean for tester being skipped and not reported due to
+        internal deletion status
+        see util.TestStatus for more information
+        """
+        return self.status.isDeleted()
 
     def getCheckInput(self):
         return self.check_input
 
     def setValgrindMode(self, mode):
-        # Increase the alloted time for tests when running with the valgrind option
+        """ Increase the alloted time for tests when running with the valgrind option """
         if mode == 'NORMAL':
             self.specs['max_time'] = self.specs['max_time'] * 2
         elif mode == 'HEAVY':
             self.specs['max_time'] = self.specs['max_time'] * 6
 
-
-    # Override this method to tell the harness whether or not this test should run.
-    # This function should return a tuple (Boolean, reason)
-    # If a reason is provided it'll be printed and counted as skipped.  If the reason
-    # is left blank, the test will not be printed at all nor counted in the test totals.
     def checkRunnable(self, options):
+        """
+        Derived method to return tuple if this tester should be executed or not.
+
+        The tuple should be structured as (boolean, 'reason'). If false, and the
+        reason is left blank, this tester will be treated as silent (no status
+        will be printed and will not be counted among the skipped tests).
+        """
         return (True, '')
 
-
-    # Whether or not the executeable should be run
-    # Don't override this
     def shouldExecute(self):
+        """
+        return boolean for tester allowed to execute its command
+        see .getCommand for more information
+        """
         return self.should_execute
 
-    # This method is called prior to running the test.  It can be used to cleanup files
-    # or do other preparations before the tester is run
     def prepare(self, options):
+        """
+        Method which is called prior to running the test. It can be used to cleanup files
+        or do other preparations before the tester is run.
+        """
         return
 
     def getThreads(self, options):
+        """ return number of threads to use for this tester """
         return 1
 
     def getProcs(self, options):
+        """ return number of processors to use for this tester """
         return 1
 
-    # This method should return the executable command that will be executed by the tester
     def getCommand(self, options):
+        """ return the executable command that will be executed by the tester """
         return
 
-    # This method is called to return the commands (list) used for processing results
     def processResultsCommand(self, moose_dir, options):
+        """ method to return the commands (list) used for processing results """
         return []
 
-    # This method will be called to process the results of running the test.  Any post-test
-    # processing should happen in this method
     def processResults(self, moose_dir, retcode, options, output):
+        """ method to process the results of a finished tester """
         return
 
-    # This is the base level runnable check common to all Testers.  DO NOT override
-    # this method in any of your derived classes.  Instead see "checkRunnable"
-    def checkRunnableBase(self, options, checks, test_list=None):
+    def hasRedirectedOutput(self, options):
+        """ return bool on tester having redirected output """
+        return (self.specs.isValid('redirect_output') and self.specs['redirect_output'] == True and self.getProcs(options) > 1)
+
+    def getRedirectedOutputFiles(self, options):
+        """ return a list of redirected output """
+        return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
+
+    def checkRunnableBase(self, options):
+        """
+        Method to check for caveats that would prevent this tester from
+        executing correctly (or not at all).
+
+        DO NOT override this method. Instead, see .checkRunnable()
+        """
         reasons = {}
+        checks = options._checks
+
+        # If the something has already deemed this test a failure, return now
+        if self.didFail():
+            return False
 
         # If --dry-run set the test status to pass and DO NOT return.
         # This will allow additional checks to perform and report tests
@@ -215,7 +323,7 @@ class Tester(MooseObject):
 
         # Check if we only want to run failed tests
         if options.failed_tests:
-            if self.specs['test_name'] not in test_list:
+            if self.specs['test_name'] not in options._test_list:
                 self.setStatus('not failed', self.bucket_silent)
                 return False
 
@@ -387,4 +495,5 @@ class Tester(MooseObject):
             return False
 
         # Check the return values of the derived classes
-        return self.checkRunnable(options)
+        self._runnable = self.checkRunnable(options)
+        return self._runnable
