@@ -2,3 +2,6 @@
         path = libmesh
         url = https://github.com/libMesh/libmesh.git
         ignore = dirty
+[submodule "docs/content/media/large_media"]
+	path = docs/content/media/large_media
+	url = git@github.com:idaholab/large_media.git

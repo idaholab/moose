@@ -14,11 +14,9 @@
 ####################################################################################################
 #pylint: enable=missing-docstring
 import os
-import sys
 import argparse
 import logging
 import multiprocessing
-import subprocess
 import collections
 
 import mooseutils
@@ -175,14 +173,6 @@ def run():
     # Remove moose.svg files (these get generated via dot)
     LOG.debug('Removing *.moose.svg files from %s', os.getcwd())
     purge(['svg'])
-
-    # Pull LFS image files
-    try:
-        subprocess.check_output(['git', 'lfs', 'pull'], cwd=MooseDocs.ROOT_DIR)
-    except subprocess.CalledProcessError:
-        LOG.error("Unable to run 'git lfs', it is likely not installed but required for "
-                  "the MOOSE documentation system.")
-        sys.exit(1)
 
     # Execute command
     cmd = options.pop('command')
