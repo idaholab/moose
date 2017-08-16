@@ -127,7 +127,13 @@ PenetrationLocator::detectPenetration()
 void
 PenetrationLocator::reinit()
 {
+  // Delete the PenetrationInfo objects we own before clearing the
+  // map, or we have a memory leak.
+  for (auto & it : _penetration_info)
+    delete it.second;
+
   _penetration_info.clear();
+
   _has_penetrated.clear();
 
   detectPenetration();
