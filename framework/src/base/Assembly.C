@@ -835,7 +835,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
   delete _current_neighbor_side_elem;
-  _current_neighbor_side_elem = neighbor->build_side(neighbor_side).release();
+  _current_neighbor_side_elem = neighbor->build_side_ptr(neighbor_side).release();
 
   std::vector<Point> reference_points;
 

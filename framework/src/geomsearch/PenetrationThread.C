@@ -1237,7 +1237,7 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   //   original projected position of slave node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  std::unique_ptr<Elem> side = info._starting_elem->build_side(info._starting_side_num, false);
+  std::unique_ptr<const Elem> side = info._starting_elem->build_side_ptr(info._starting_side_num, false);
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
@@ -1677,7 +1677,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     if (already_have_info_this_side)
       break;
 
-    Elem * side = (elem->build_side(sides[i], false)).release();
+    const Elem * side = (elem->build_side_ptr(sides[i], false)).release();
 
     // Only continue with creating info for this side if the side contains
     // all of the nodes in nodes_that_must_be_on_side
