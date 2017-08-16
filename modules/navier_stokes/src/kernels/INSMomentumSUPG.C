@@ -26,9 +26,6 @@ validParams<INSMomentumSUPG>()
       "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
 
   // Optional parameters
-  params.addParam<bool>("integrate_p_by_parts",
-                        true,
-                        "Allows simulations to be run with pressure BC if set to false");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
@@ -59,7 +56,6 @@ INSMomentumSUPG::INSMomentumSUPG(const InputParameters & parameters)
     // parameters
     _gravity(getParam<RealVectorValue>("gravity")),
     _component(getParam<unsigned>("component")),
-    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
 
     // Material properties
     _mu(getMaterialProperty<Real>("mu_name")),
@@ -90,9 +86,7 @@ INSMomentumSUPG::computeQpResidual()
 
   // Note that integrating pressure by parts would imply applying a second
   // derivative to the test function, which we are not equipped to do (?)
-  Real pressure_part = 0;
-  if (!_integrate_p_by_parts)
-    pressure_part = _grad_p[_qp](_component) * PG_test;
+  Real pressure_part = _grad_p[_qp](_component) * PG_test;
 
   // From Computer Mechanics in Applied Mechanics and Engineering 32 (1982) pg. 212:
   // For reasonable (linear) element shapes the contribution of PG_test * viscous
@@ -149,9 +143,7 @@ INSMomentumSUPG::computeQpJacobian()
       _rho[_qp] * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) * PG_test;
   convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
 
-  Real pressure_part = 0;
-  if (!_integrate_p_by_parts)
-    pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
+  Real pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
 
   Real body_force_part = -_rho[_qp] * _gravity(_component) * d_PG_test_d_vel_component;
 
@@ -198,9 +190,7 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
     Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * PG_test;
     convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
 
-    Real pressure_part = 0;
-    if (!_integrate_p_by_parts)
-      pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
+    Real pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
 
     Real body_force_part = -_rho[_qp] * _gravity(_component) * d_PG_test_d_vel_component;
 
@@ -244,9 +234,7 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
     Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * PG_test;
     convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
 
-    Real pressure_part = 0;
-    if (!_integrate_p_by_parts)
-      pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
+    Real pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
 
     Real body_force_part = -_rho[_qp] * _gravity(_component) * d_PG_test_d_vel_component;
 
@@ -290,16 +278,14 @@ INSMomentumSUPG::computeQpOffDiagJacobian(unsigned jvar)
     Real convective_part = _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * PG_test;
     convective_part += _rho[_qp] * U * _grad_u[_qp] * d_PG_test_d_vel_component;
 
-    Real pressure_part = 0;
-    if (!_integrate_p_by_parts)
-      pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
+    Real pressure_part = _grad_p[_qp](_component) * d_PG_test_d_vel_component;
 
     Real body_force_part = -_rho[_qp] * _gravity(_component) * d_PG_test_d_vel_component;
 
     return convective_part + pressure_part + body_force_part;
   }
 
-  else if (jvar == _p_var_number && !_integrate_p_by_parts)
+  else if (jvar == _p_var_number)
   {
     RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
     Real alpha;

@@ -59,7 +59,6 @@ protected:
   // Parameters
   RealVectorValue _gravity;
   unsigned _component;
-  bool _integrate_p_by_parts;
 
   // Material properties
   const MaterialProperty<Real> & _mu;
