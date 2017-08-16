@@ -171,7 +171,7 @@
   dt = .5
   num_steps = 1
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu	  NONZERO'
+  petsc_options_value = 'lu  NONZERO'
   line_search = none
   nl_rel_tol = 1e-8
   nl_max_its = 20
