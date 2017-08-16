@@ -87,7 +87,7 @@
     poissons_ratio = .316
   [../]
   [./elastic_stress]
-    type = ComputeElasticSmearedCrackingStress
+    type = ComputeSmearedCrackingStress
     cracking_release = exponential
     cracking_stress = 119.3e6
     inelastic_models = ''
