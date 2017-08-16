@@ -21,8 +21,11 @@ validParams<CircleCutUserObject>()
   InputParameters params = validParams<GeometricCut3DUserObject>();
 
   // Add required parameters
-  params.addRequiredParam<std::vector<Real>>("cut_data",
-                                             "Vector of Real values providing cut information");
+  params.addRequiredParam<Point>("centroid", "Coordinates of the center point of the circle");
+  params.addRequiredParam<Point>("edge_point1",
+                                 "Coordinates of one point on the edge of the circle");
+  params.addRequiredParam<Point>("edge_point2",
+                                 "Coordinates of a second point on the edge of the circle");
   // Class description
   params.addClassDescription("Creates a UserObject for circular cuts on 3D meshes for XFEM");
   // Return the parameters
@@ -30,21 +33,15 @@ validParams<CircleCutUserObject>()
 }
 
 CircleCutUserObject::CircleCutUserObject(const InputParameters & parameters)
-  : GeometricCut3DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
+  : GeometricCut3DUserObject(parameters),
+    _centroid(getParam<Point>("centroid")),
+    _edge_point1(getParam<Point>("edge_point1")),
+    _edge_point2(getParam<Point>("edge_point2"))
 {
-  // Set up constant parameters
-  const int cut_data_len = 9;
+  // Assign input data to vars used to construct cuts
+  _center = _centroid;
 
-  // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() != cut_data_len)
-    mooseError("Length of CircleCutUserObject cut_data must be 9");
-
-  // Assign cut_data to vars used to construct cuts
-  _center = Point(_cut_data[0], _cut_data[1], _cut_data[2]);
-  _vertices.push_back(Point(_cut_data[3], _cut_data[4], _cut_data[5]));
-  _vertices.push_back(Point(_cut_data[6], _cut_data[7], _cut_data[8]));
-
-  std::pair<Point, Point> rays = std::make_pair(_vertices[0] - _center, _vertices[1] - _center);
+  std::pair<Point, Point> rays = std::make_pair(_edge_point1 - _center, _edge_point2 - _center);
 
   _normal = rays.first.cross(rays.second);
   Xfem::normalizePoint(_normal);

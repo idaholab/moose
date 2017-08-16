@@ -27,10 +27,10 @@
 [UserObjects]
   [./square_planar_cut_uo]
     type = RectangleCutUserObject
-    cut_data = '  0.35 1.01 -0.001
-                  0.35 0.49 -0.001
-                  0.35 0.49  0.201
-                  0.35 1.01  0.201'
+    vertex_point1 = '0.35 1.01 -0.001'
+    vertex_point2 = '0.35 0.49 -0.001'
+    vertex_point3 = '0.35 0.49  0.201'
+    vertex_point4 = '0.35 1.01  0.201'
   [../]
 []
 

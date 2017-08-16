@@ -27,7 +27,6 @@ validParams<GeometricCutUserObject>()
 }
 
 GeometricCutUserObject::GeometricCutUserObject(const InputParameters & parameters)
-    //: GeneralUserObject(parameters), _start_times(), _end_times()
     : GeneralUserObject(parameters),
       _cut_time_ranges()
 {

@@ -17,9 +17,9 @@
 [UserObjects]
   [./ellip_cut_uo]
     type = EllipseCutUserObject
-  cut_data = '-0.5 -0.5 0
-              -0.5 -0.1 0
-               0.1 -0.5 0'
+    centroid = '-0.5 -0.5 0'
+    short_axis_point = '-0.5 -0.1 0'
+    long_axis_point = '0.1 -0.5 0'
   [../]
 []
 

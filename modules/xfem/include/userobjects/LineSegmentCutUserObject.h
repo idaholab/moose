@@ -26,7 +26,8 @@ public:
   virtual void finalize() override{};
 
 protected:
-  std::vector<Real> _cut_data;
+  std::vector<Real> _start_point;
+  std::vector<Real> _end_point;
 };
 
 #endif // LINESEGMENTCUTUSEROBJECT_H

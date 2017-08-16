@@ -26,12 +26,14 @@ public:
   virtual void finalize() override{};
 
 protected:
-  std::vector<Real> _cut_data;
+  Point _centroid;
+  Point _long_axis_point;
+  Point _short_axis_point;
 
 private:
   std::vector<Point> _vertices;
-  Point _unit_vec1;
-  Point _unit_vec2;
+  Point _long_axis_unit_vector;
+  Point _short_axis_unit_vector;
   Real _long_axis;
   Real _short_axis;
 

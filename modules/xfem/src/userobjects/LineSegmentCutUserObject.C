@@ -15,8 +15,12 @@ validParams<LineSegmentCutUserObject>()
   InputParameters params = validParams<GeometricCut2DUserObject>();
 
   // Add required parameters
-  params.addRequiredParam<std::vector<Real>>("cut_data",
-                                             "Vector of Real values providing cut information");
+  params.addRequiredParam<std::vector<Real>>(
+      "start_point",
+      "Vector of Real values for X and Y coordinates of the starting point of the line segment");
+  params.addRequiredParam<std::vector<Real>>(
+      "end_point",
+      "Vector of Real values for X and Y coordinates of the ending point of the line segment");
   // Add optional parameters
   params.addParam<std::vector<Real>>("cut_scale", "X,Y scale factors for geometric cuts");
   params.addParam<std::vector<Real>>("cut_translate", "X,Y translations for geometric cuts");
@@ -27,14 +31,18 @@ validParams<LineSegmentCutUserObject>()
 }
 
 LineSegmentCutUserObject::LineSegmentCutUserObject(const InputParameters & parameters)
-  : GeometricCut2DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
+  : GeometricCut2DUserObject(parameters),
+    _start_point(getParam<std::vector<Real>>("start_point")),
+    _end_point(getParam<std::vector<Real>>("end_point"))
 {
   // Set up constant parameters
-  const int cut_data_len = 4;
+  const int point_data_len = 2;
 
-  // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() != cut_data_len)
-    mooseError("Length of LineSegmentCutUserObject cut_data must be 4");
+  // Throw error if length of endpoints is incorrect
+  if (_start_point.size() != point_data_len)
+    mooseError("Length of LineSegmentCutUserObject start_point must be 2!");
+  if (_end_point.size() != point_data_len)
+    mooseError("Length of LineSegmentCutUserObject end_point must be 2!");
 
   // Assign scale and translate parameters
   std::pair<Real, Real> scale;
@@ -59,11 +67,11 @@ LineSegmentCutUserObject::LineSegmentCutUserObject(const InputParameters & param
     trans = std::make_pair(0.0, 0.0);
   }
 
-  // Assign translated and scaled cut_data to vars used to construct cuts
-  Real x0 = (_cut_data[0] + trans.first) * scale.first;
-  Real y0 = (_cut_data[1] + trans.second) * scale.second;
-  Real x1 = (_cut_data[2] + trans.first) * scale.first;
-  Real y1 = (_cut_data[3] + trans.second) * scale.second;
+  // Assign translated and scaled cut data to vars used to construct cuts
+  Real x0 = (_start_point[0] + trans.first) * scale.first;
+  Real y0 = (_start_point[1] + trans.second) * scale.second;
+  Real x1 = (_end_point[0] + trans.first) * scale.first;
+  Real y1 = (_end_point[1] + trans.second) * scale.second;
 
   _cut_line_endpoints.push_back(std::make_pair(Point(x0, y0, 0.0), Point(x1, y1, 0.0)));
 }
