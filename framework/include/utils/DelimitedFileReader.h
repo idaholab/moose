@@ -58,6 +58,11 @@ public:
   const std::vector<std::string> & getColumnNames() const;
 
   /**
+   * Toggle for handling empty lines.
+   */
+  void setIgnoreEmptyLines(bool value) { _ignore_empty_lines = value; }
+
+  /**
    * Return the columns of data.
    *
    * The outer vector is column and the inner the rows.
@@ -78,6 +83,9 @@ protected:
 
   /// The delimiter separating the supplied data entires.
   const std::string _delimiter;
+
+  /// Flag for ignoring empty lines
+  bool _ignore_empty_lines;
 
   /// Storage for the read or generated column names.
   std::vector<std::string> _column_names;

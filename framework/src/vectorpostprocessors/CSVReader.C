@@ -41,6 +41,8 @@ validParams<CSVReader>()
                                ",",
                                "The column delimiter. Despite the name this can read files "
                                "separated by delimiter other than a comma.");
+  params.addParam<bool>(
+      "ignore_empty_lines", true, "When true new empty lines in the file are ignored.");
   params.set<MultiMooseEnum>("execute_on") = "initial";
   return params;
 }
@@ -52,6 +54,7 @@ CSVReader::CSVReader(const InputParameters & params)
                 getParam<std::string>("delimiter"),
                 &_communicator)
 {
+  _csv_reader.setIgnoreEmptyLines(getParam<bool>("ignore_empty_lines"));
 }
 
 void
