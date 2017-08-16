@@ -74,6 +74,10 @@ BoundingBoxNodeSet::modify()
     }
   }
 
+  // Unless at least one processor found a node in the bounding box,
+  // the user probably specified it incorrectly.
+  this->comm().max(found_node);
+
   if (!found_node)
     mooseError("No nodes found within the bounding box");
 
