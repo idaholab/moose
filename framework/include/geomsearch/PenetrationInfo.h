@@ -53,8 +53,8 @@ public:
                   const std::vector<RealGradient> & dxyzdeta,
                   const std::vector<RealGradient> & d2xyzdxideta);
 
-// Not currently supported due to double-delete memory corruption bug
-//  PenetrationInfo(const PenetrationInfo & p);
+  // Not currently supported due to double-delete memory corruption bug
+  //  PenetrationInfo(const PenetrationInfo & p);
 
   PenetrationInfo();
 
