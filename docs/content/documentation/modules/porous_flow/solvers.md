@@ -11,4 +11,4 @@ various types of PorousFlow simulations.
 
 These options can be set in the `Preconditioning` block in the input file
 
-!listing modules/porous_flow/tests/newton_cooling/nc04.i block=Preconditioning caption=Example of using solver options
+!listing modules/porous_flow/test/tests/newton_cooling/nc04.i block=Preconditioning caption=Example of using solver options

@@ -6,7 +6,7 @@ distribution name.
 This object is primarily designed to test the Sampler output.
 
 ## Example Syntax
-!listing modules/stochastic_tools/tests/samplers/monte_carlo/monte_carlo_uniform.i block=VectorPostprocessors
+!listing modules/stochastic_tools/test/tests/samplers/monte_carlo/monte_carlo_uniform.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/SamplerData
 

@@ -1,1 +1,0 @@
-../../../../../tensor_mechanics/tests/material_limit_time_step/elas_plas/gold/nafems_nl1_lim_out.e

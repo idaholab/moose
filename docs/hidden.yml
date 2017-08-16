@@ -902,8 +902,9 @@ solid_mechanics:
     - /VectorPostprocessors/LineMaterialSymmTensorSampler
 stochastic_tools:
     - /Postprocessors/StateSimTester
-    - /Postprocessors/TestDistributionPostprocessor
     - /UserObjects/StateSimRunner
+stochastic_tools_test:
+    - /Postprocessors/TestDistributionPostprocessor
     - /UserObjects/TestSampler
 tensor_mechanics:
     - /AuxKernels/AccumulateAux

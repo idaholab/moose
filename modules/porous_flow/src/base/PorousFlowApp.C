@@ -123,15 +123,11 @@ validParams<PorousFlowApp>()
 PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
-  TensorMechanicsApp::registerObjects(_factory);
-  FluidPropertiesApp::registerObjects(_factory);
-  ChemicalReactionsApp::registerObjects(_factory);
+  PorousFlowApp::registerObjectDepends(_factory);
   PorousFlowApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
-  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
-  ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
+  PorousFlowApp::associateSyntaxDepends(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -147,6 +143,14 @@ void
 PorousFlowApp::registerApps()
 {
   registerApp(PorousFlowApp);
+}
+
+void
+PorousFlowApp::registerObjectDepends(Factory & factory)
+{
+  TensorMechanicsApp::registerObjects(factory);
+  FluidPropertiesApp::registerObjects(factory);
+  ChemicalReactionsApp::registerObjects(factory);
 }
 
 // External entry point for dynamic object registration
@@ -258,6 +262,14 @@ PorousFlowApp::registerObjects(Factory & factory)
 
   // Functions
   registerFunction(MovingPlanarFront);
+}
+
+void
+PorousFlowApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
+{
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+  FluidPropertiesApp::associateSyntax(syntax, action_factory);
+  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
 }
 
 // External entry point for dynamic syntax association

@@ -18,6 +18,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 ################################## MODULES ####################################
 ALL_MODULES       := yes
 INCLUDE_COMBINED  := no
+USE_TEST_LIBS     := yes
 include modules.mk
 ###############################################################################
 

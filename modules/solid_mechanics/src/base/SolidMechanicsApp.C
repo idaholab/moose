@@ -66,11 +66,11 @@ validParams<SolidMechanicsApp>()
 SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
-  TensorMechanicsApp::registerObjects(_factory);
+  SolidMechanicsApp::registerObjectDepends(_factory);
   SolidMechanicsApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+  SolidMechanicsApp::associateSyntaxDepends(_syntax, _action_factory);
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -88,11 +88,17 @@ SolidMechanicsApp::registerApps()
   registerApp(SolidMechanicsApp);
 }
 
+void
+SolidMechanicsApp::registerObjectDepends(Factory & factory)
+{
+  TensorMechanicsApp::registerObjects(factory);
+}
+
 // External entry point for dynamic object registration
 extern "C" void
 SolidMechanicsApp__registerObjects(Factory & factory)
 {
-  SolidMechanicsApp::registerObjects(factory);
+  TensorMechanicsApp::registerObjects(factory);
 }
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
@@ -145,6 +151,12 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
   registerUserObject(CrackFrontDefinition);
+}
+
+void
+SolidMechanicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
+{
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
 // External entry point for dynamic syntax association

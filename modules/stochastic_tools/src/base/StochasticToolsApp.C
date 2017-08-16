@@ -26,10 +26,6 @@
 // Controls
 #include "SamplerReceiver.h"
 
-// for test purpose only
-#include "TestDistributionPostprocessor.h"
-#include "TestSampler.h"
-
 template <>
 InputParameters
 validParams<StochasticToolsApp>()
@@ -93,9 +89,6 @@ StochasticToolsApp::registerObjects(Factory & factory)
   // Controls
   registerControl(SamplerReceiver);
 
-  // for test purpose only
-  registerPostprocessor(TestDistributionPostprocessor);
-  registerUserObject(TestSampler);
 }
 
 // External entry point for dynamic syntax association

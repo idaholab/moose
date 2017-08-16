@@ -37,6 +37,7 @@ endif
 ##############################################################################
 #
 # source files
+TEST_SRC_DIRS    := $(APPLICATION_DIR)/test/src
 SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
@@ -56,7 +57,23 @@ endif
 cobjects    := $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
+
 app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(ADDITIONAL_APP_OBJECTS)
+
+test_srcfiles    := $(shell find $(TEST_SRC_DIRS) -name "*.C" $(find_excludes) 2>/dev/null)
+test_csrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.c" 2>/dev/null)
+test_fsrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.f" 2>/dev/null)
+test_f90srcfiles := $(shell find $(TEST_SRC_DIRS) -name "*.f90" 2>/dev/null)
+ifeq ($(LIBRARY_SUFFIX),yes)
+  test_objects:= $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(test_srcfiles))
+else
+  test_objects:= $(patsubst %.C, %.$(obj-suffix), $(test_srcfiles))
+endif
+
+test_cobjects:= $(patsubst %.c, %.$(obj-suffix), $(test_csrcfiles))
+test_fobjects:= $(patsubst %.f, %.$(obj-suffix), $(test_fsrcfiles))
+test_f90objects:= $(patsubst %.f90, %.$(obj-suffix), $(test_f90srcfiles))
+app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects)
 
 # plugin files
 plugfiles   := $(shell find $(PLUGIN_DIR) -name "*.C" 2>/dev/null)
@@ -81,8 +98,13 @@ app_deps     := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(objects)) \
                 $(patsubst %.C, %.$(obj-suffix).d, $(main_src)) \
                 $(ADDITIONAL_APP_DEPS)
 
+app_test_deps     := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(test_objects)) \
+                $(patsubst %.c, %.$(obj-suffix).d, $(test_csrcfiles))
 depend_dirs := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/include)
 depend_dirs += $(APPLICATION_DIR)/include
+ifneq ($(wildcard $(APPLICATION_DIR)/test/include/*),)
+  depend_dirs += $(APPLICATION_DIR)/test/include
+endif
 
 # header files
 include_dirs	:= $(shell find $(depend_dirs) -type d | grep -v "\.svn")
@@ -98,6 +120,12 @@ else
   app_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)-$(METHOD).la
 endif
 
+ifeq ($(LIBRARY_SUFFIX),yes)
+  app_test_LIB     := $(APPLICATION_DIR)/test/lib/lib$(APPLICATION_NAME)_with$(app_LIB_SUFFIX)_test-$(METHOD).la
+else
+  app_test_LIB     := $(APPLICATION_DIR)/test/lib/lib$(APPLICATION_NAME)_test-$(METHOD).la
+endif
+
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
 
@@ -107,6 +135,12 @@ app_BASE_DIR    ?= base/
 app_HEADER      ?= $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
 # depend modules
 depend_libs  := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/lib/lib$(i)-$(METHOD).la)
+
+ifeq ($(USE_TEST_LIBS),yes)
+  depend_test_libs := $(depend_test_libs) $(app_test_LIB)
+  depend_test_libs_flags := $(foreach i, $(depend_test_libs), -L$(dir $(i)) -l$(shell echo $(notdir $(i)) | perl -pe 's/^lib(.*?)\.la/$$1/'))
+endif
+
 
 ##################################################################################################
 # If we are NOT building a module, then make sure the dependency libs are updated to reflect
@@ -138,6 +172,7 @@ ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME)
 
 # dependencies
 -include $(app_deps)
+-include $(app_test_deps)
 
 # Rest the certain variables in case this file is sourced again
 DEPEND_MODULES :=
@@ -180,10 +215,21 @@ $(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects)
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object)
+# Target-specific Variable Values (See GNU-make manual)
+$(app_test_LIB): curr_objs := $(app_test_objects)
+$(app_test_LIB): curr_dir  := $(APPLICATION_DIR)/test
+$(app_test_LIB): curr_deps := $(depend_libs)
+$(app_test_LIB): curr_libs := $(depend_libs_flags)
+$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects)
+	@echo "Linking Library "$@"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
+
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(app_LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(app_LIBS) $(app_test_LIB) $(depend_test_libs) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(depend_test_libs_flags) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS)
 
 # Clang static analyzer
 sa:: $(app_analyzer)

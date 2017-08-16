@@ -140,7 +140,7 @@ class TestListings(MarkdownTestCase):
         self.assertConvert('testListingTick.html', md)
 
     def testListingMainComment(self):
-        md = '!listing modules/phase_field/tests/KKS_system/kks_example.i main_comment=True'
+        md = '!listing modules/phase_field/test/tests/KKS_system/kks_example.i main_comment=True'
         self.assertConvert('testListingMainComment.html', md)
 
 if __name__ == '__main__':

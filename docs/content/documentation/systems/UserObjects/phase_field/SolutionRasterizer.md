@@ -33,7 +33,7 @@ The following input can be executed with the MOOSE Phase Field module executable
 * accept all atoms at the coordinates where the value of the non-linear variable `c` is above a value of `0.5`
 * write out the atomic coordinate file `out.xyz`
 
-!listing modules/phase_field/tests/solution_rasterizer/raster.i
+!listing modules/phase_field/test/tests/solution_rasterizer/raster.i
 
 !syntax parameters /UserObjects/SolutionRasterizer
 
