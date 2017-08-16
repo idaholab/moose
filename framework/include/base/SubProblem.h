@@ -86,6 +86,16 @@ public:
    */
   TagID addTag(TagName tag_name);
 
+  /**
+   * Retrieve the name associated with a TagID
+   */
+  TagName tagName(TagID tag);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  bool tagExists(TagID tag) { return tag < _tag_name_to_tag_id.size(); }
+
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
 
@@ -426,6 +436,9 @@ public:
 protected:
   /// The currently declared tags
   std::map<TagName, TagID> _tag_name_to_tag_id;
+
+  /// Reverse map
+  std::map<TagID, TagName> _tag_id_to_tag_name;
 
   /// The Factory for building objects
   Factory & _factory;
