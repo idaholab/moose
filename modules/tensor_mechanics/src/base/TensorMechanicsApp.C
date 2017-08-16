@@ -101,7 +101,7 @@
 #include "GBRelaxationStrainIncrement.h"
 #include "SumTensorIncrements.h"
 #include "ComputeStrainIncrementBasedStress.h"
-#include "ComputeElasticSmearedCrackingStress.h"
+#include "ComputeSmearedCrackingStress.h"
 #include "InclusionProperties.h"
 #include "ComputeAxisymmetric1DSmallStrain.h"
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
@@ -306,7 +306,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(GBRelaxationStrainIncrement);
   registerMaterial(SumTensorIncrements);
   registerMaterial(ComputeStrainIncrementBasedStress);
-  registerMaterial(ComputeElasticSmearedCrackingStress);
+  registerMaterial(ComputeSmearedCrackingStress);
   registerMaterial(InclusionProperties);
   registerMaterial(ComputeAxisymmetric1DSmallStrain);
   registerMaterial(ComputeAxisymmetric1DIncrementalStrain);

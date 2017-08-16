@@ -2,11 +2,11 @@
   [./block]
     type = 'RunException'
     input = 'undefined_block_kernel.i'
-    expect_err = "The object 'kernel_with_undefined_block' contains the following block ids that do no exist on the mesh: 10"
+    expect_err = "The object 'kernel_with_undefined_block' contains the following block ids that do not exist on the mesh: 10"
   [../]
   [./boundary]
     type = 'RunException'
     input = 'undefined_boundary_bc.i'
-    expect_err = "The object 'bc_with_undefined_boundary' contains the following boundary ids that do no exist on the mesh: 10"
+    expect_err = "The object 'bc_with_undefined_boundary' contains the following boundary ids that do not exist on the mesh: 10"
   [../]
 []
