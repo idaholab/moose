@@ -113,7 +113,7 @@ class TesterData(object):
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():
             return self.getEndTime() - self.getStartTime()
-        elif self.getStartTime():
+        elif self.getStartTime() and self.__tester.isPending():
             # If the test is still running, return current run time instead
             return max(0.0, clock() - self.getStartTime())
         else:
