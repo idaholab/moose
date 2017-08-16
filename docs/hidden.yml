@@ -65,7 +65,6 @@ framework:
     - /BCs/FunctionPenaltyDirichletBC
     - /BCs/FunctionPresetBC
     - /BCs/MatchedValueBC
-    - /BCs/NeumannBC
     - /BCs/OneDEqualValueConstraintBC
     - /BCs/PenaltyDirichletBC
     - /BCs/PostprocessorDirichletBC
