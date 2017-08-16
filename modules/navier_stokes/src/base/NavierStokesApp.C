@@ -157,11 +157,11 @@ validParams<NavierStokesApp>()
 NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
-  FluidPropertiesApp::registerObjects(_factory);
+  NavierStokesApp::registerObjectDepends(_factory);
   NavierStokesApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
+  NavierStokesApp::associateSyntaxDepends(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -177,6 +177,12 @@ void
 NavierStokesApp::registerApps()
 {
   registerApp(NavierStokesApp);
+}
+
+void
+NavierStokesApp::registerObjectDepends(Factory & factory)
+{
+  FluidPropertiesApp::registerObjects(factory);
 }
 
 // External entry point for dynamic object registration
@@ -320,13 +326,18 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerPostprocessor(CNSFVTimeStepLimit);
 }
 
+void
+NavierStokesApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
+{
+  FluidPropertiesApp::associateSyntax(syntax, action_factory);
+}
+
 // External entry point for dynamic syntax association
 extern "C" void
 NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   NavierStokesApp::associateSyntax(syntax, action_factory);
 }
-
 void
 NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

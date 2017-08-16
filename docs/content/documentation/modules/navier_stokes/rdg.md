@@ -89,7 +89,7 @@ the conserved variables are not recommended for reconstruction in the case of mu
 The second-order FV method described above will produce non-physical oscillations and nonlinear instability for flows with strong discontinuities. A common solution to this problem is to use a slope limiter. However, one drawback of the slope limiters is that they frequently identify regions near smooth extrema as requiring limiting and this typically results in a reduction of the optimal second-order convergence rate. In CFD applications, active limiters close to smooth extrema, such as a sharp corner or a tip of a geometric configuration, will contaminate the solution in the flow field and ultimately destroy the desired second-order accuracy of the solution. Alternatively, the ENO/WENO methods can be used as a nonlinear limiter for the FVMs as they are more robust than the slope limiters, and can achieve uniform high-order accuracy
 and sharp, essentially non-oscillatory shock transition. This can be accomplished by replacing the piecewise linearly reconstructed solution polynomials with the WENO reconstructed polynomials, which maintain the original cell averages of conservative flow variables, and have 1) second-order accuracy in the regions where the solution is smooth, and 2) oscillation-free behavior in the vicinity of discontinuities.
 
-This work is based on a WENO reconstruction scheme originally introduced by \cite{dumbser2007arbitrary,dumbser2007quadrature}. In this scheme, a linear polynomial on cell $\Omega_i$ is obtained using a nonlinear WENO reconstruction as a convex combination of the piecewise linearly reconstructed gradients at the cell itself ($k=0$) and its face-neighboring cells $(k=1, …, N_i)$,
+This work is based on a WENO reconstruction scheme originally introduced by \cite{dumbser2007arbitrary,dumbser2007quadrature}. In this scheme, a linear polynomial on cell $\Omega_i$ is obtained using a nonlinear WENO reconstruction as a convex combination of the piecewise linearly reconstructed gradients at the cell itself ($k=0$) and its face-neighboring cells $(k=1, â¦, N_i)$,
 $$
 \begin{equation}
 \label{eq:weno}
@@ -190,7 +190,7 @@ The content of some input file blocks is described in detail for clarity.
 
 ####GlobalParams
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=GlobalParams
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=GlobalParams
 
 Notes:
 
@@ -200,7 +200,7 @@ Notes:
 
 ####Mesh
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=Mesh
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=Mesh
 
 Notes:
 
@@ -208,7 +208,7 @@ Notes:
 
 ####Functions
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=Functions
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=Functions
 
 Notes:
 
@@ -216,7 +216,7 @@ Notes:
 
 ####UserObjects
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=UserObjects
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=UserObjects
 
 Notes:
 
@@ -228,7 +228,7 @@ Notes:
 
 ####Variables
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=Variables
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=Variables
 
 Notes:
 
@@ -236,7 +236,7 @@ Notes:
 
 ####Kernels
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=Kernels
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=Kernels
 
 Notes:
 
@@ -246,7 +246,7 @@ Notes:
 
 ####DGKernels
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=DGKernels
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=DGKernels
 
 Notes:
 
@@ -254,7 +254,7 @@ Notes:
 
 ####BCs
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=BCs
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=BCs
 
 Notes:
 
@@ -262,7 +262,7 @@ Notes:
 
 ####Materials
 
-!listing modules/navier_stokes/tests/cnsfv/1d_lax_shock_tube.i block=Materials
+!listing modules/navier_stokes/test/tests/cnsfv/1d_lax_shock_tube.i block=Materials
 
 Notes:
 
@@ -333,7 +333,7 @@ The content of some input file blocks is described in detail for clarity.
 
 ####GlobalParams
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=GlobalParams
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=GlobalParams
 
 Notes:
 
@@ -343,7 +343,7 @@ Notes:
 
 ####Mesh
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Mesh
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Mesh
 
 Notes:
 
@@ -351,7 +351,7 @@ Notes:
 
 ####UserObjects
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=UserObjects
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=UserObjects
 
 Notes:
 
@@ -368,7 +368,7 @@ Notes:
 
 ####Variables
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Variables
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Variables
 
 Notes:
 
@@ -376,7 +376,7 @@ Notes:
 
 ####Kernels
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Kernels
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Kernels
 
 Notes:
 
@@ -386,7 +386,7 @@ Notes:
 
 ####DGKernels
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=DGKernels
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=DGKernels
 
 Notes:
 
@@ -394,7 +394,7 @@ Notes:
 
 ####BCs
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=BCs
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=BCs
 
 Notes:
 
@@ -402,7 +402,7 @@ Notes:
 
 ####Materials
 
-!listing modules/navier_stokes/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Materials
+!listing modules/navier_stokes/test/tests/cnsfv/2d_obliqueshock_expl_weno.i block=Materials
 
 Notes:
 

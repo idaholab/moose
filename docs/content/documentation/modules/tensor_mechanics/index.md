@@ -65,7 +65,7 @@ For all strain this class defines the property `total_strain`.  For incremental 
 
 For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\boldsymbol{\epsilon} = (\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated. The input file syntax for a finite incremental strain material is
 
-!listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress
 
 
 ###Elasticity Tensor
@@ -85,14 +85,14 @@ The input file syntax for the isotropic elasticity tensor is
 
 and for an orthotropic material, such as a metal crystal, is
 
-!listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=elasticity_tensor end=strain
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=elasticity_tensor end=strain
 
 ###Stress
 The base class for constitutive equations to compute a stress ($\boldsymbol{\sigma}$) is `ComputeStressBase`. The `ComputeStressBase` class defines the properties `stress` and `elastic_strain`. It is a pure virtual class, requiring all children to override the method `computeQpStress()`.
 
 Two elastic constitutive models have been developed, one that assumes small strains [ComputeLinearElasticStress](/ComputeLinearElasticStress.md), and a second which assumes finite strains and rotations increments [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) The input file syntax for these materials is
 
-!listing modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=stress
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=stress
 
 There are a number of other constitutive models that have been implemented to calculate more complex elasticity problems, plasticity, and creep.  An overview of these different materials is available on the [Stresses](tensor_mechanics/Stresses.md) page.
 
@@ -114,13 +114,13 @@ Thermal strains are a volumetric change resulting from a change in temperature o
 
 The thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md) computes the thermal strains for both small total strains and for incremental strains as a linear function of temperature.  The input file syntax is
 
-!listing modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i block=thermal_expansion_strain
+!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i block=thermal_expansion_strain
 
 Other eigenstrains could be caused by defects such as over-sized or under-sized second phase particles. Another stress-free strain material that has been implemented is [ComputeVariableEigenstrain](/ComputeVariableEigenstrain.md). This class computes a lattice mismatch due to a secondary phase, where the form of the tensor is defined by an input vector, and the scalar dependence on a phase variable is defined in another material. The input file syntax is
 
-!listing modules/combined/tests/eigenstrain/inclusion.i block=var_dependence
+!listing modules/combined/test/tests/eigenstrain/inclusion.i block=var_dependence
 
-!listing modules/combined/tests/eigenstrain/inclusion.i block=eigenstrain
+!listing modules/combined/test/tests/eigenstrain/inclusion.i block=eigenstrain
 
 Note the `DerivativeParsedMaterial`,  which evaluates an expression given in the input file, and its automatically generated derivatives, at each quadrature point.
 

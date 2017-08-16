@@ -121,7 +121,7 @@ The Fluid Properties UserObjects are implemented in an input file in the `Module
 For example, to use the ideal gas formulation for specific volume and energy, the input
 file syntax would be:
 
-!listing modules/fluid_properties/tests/ideal_gas/test.i block=Modules label=False
+!listing modules/fluid_properties/test/tests/ideal_gas/test.i block=Modules label=False
 
 In this example, the user has specified a value for `gamma` (the ratio of isobaric
 to isochoric specific heat capacites), and `R`, the universal gas constant.
@@ -129,13 +129,13 @@ to isochoric specific heat capacites), and `R`, the universal gas constant.
 The fluid properties can then be accessed by other MOOSE objects through the name
 given in the input file.
 
-!listing modules/fluid_properties/tests/ideal_gas/test.i block=Materials label=False
+!listing modules/fluid_properties/test/tests/ideal_gas/test.i block=Materials label=False
 
 Due to the consistent interface for fluid properties, a different fluid can be substituted
 in the input file be changing the type of the UserObject. For example, to use a stiffened
 gas instead of an ideal gas, the only modification required in the input file is
 
-!listing modules/fluid_properties/tests/stiffened_gas/test.i block=Modules label=False
+!listing modules/fluid_properties/test/tests/stiffened_gas/test.i block=Modules label=False
 
 ## Creating additional fluids
 New fluids can be added to the Fluid Properties module by inheriting from the

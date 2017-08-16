@@ -174,7 +174,7 @@ b & \text{ if } |b| < |a| \text{ and } ab>0,\\
 $$
 If $a$ and $b$ have the same sign, then this selects the one that is smaller in modulus, else it returns zero.
 
-Rather than defining the slope on the $i$-th cell by always using the downwind difference (which would give the Lax–Wendroff method), or by always using the upwind difference (which would give the Beam–Warming method), the minmod method compares the two slopes and chooses the one that is smaller in magnitude. If the two slopes have different sign, then the value $\psi_i$ must be a local maximum or minimum, and it is easy to check in this case that
+Rather than defining the slope on the $i$-th cell by always using the downwind difference (which would give the LaxâWendroff method), or by always using the upwind difference (which would give the BeamâWarming method), the minmod method compares the two slopes and chooses the one that is smaller in magnitude. If the two slopes have different sign, then the value $\psi_i$ must be a local maximum or minimum, and it is easy to check in this case that
 we must set $\phi_i = 0$ in order to satisfy the TVD condition. The minmod method does a fairly good job of maintaining good accuracy in the smooth hump and also sharp discontinuities in the square wave, with no oscillations. Sharper resolution of discontinuities can be achieved with other limiters that do not reduce the slope as severely as minmod near a discontinuity.
 
 ###Superbee Slope Limiter
@@ -251,7 +251,7 @@ The content of some input file blocks is described in detail for clarity.
 
 ####GlobalParams
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=GlobalParams
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=GlobalParams
 
 Notes:
 
@@ -261,7 +261,7 @@ Notes:
 
 ####Mesh
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Mesh
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Mesh
 
 Notes:
 
@@ -269,7 +269,7 @@ Notes:
 
 ####Functions
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Functions
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Functions
 
 Notes:
 
@@ -277,7 +277,7 @@ Notes:
 
 ####UserObjects
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=UserObjects
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=UserObjects
 
 Notes:
 
@@ -289,7 +289,7 @@ Notes:
 
 ####Variables
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Variables
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Variables
 
 Notes:
 
@@ -297,7 +297,7 @@ Notes:
 
 ####Kernels
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Kernels
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Kernels
 
 Notes:
 
@@ -307,7 +307,7 @@ Notes:
 
 ####DGKernels
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=DGKernels
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=DGKernels
 
 Notes:
 
@@ -315,7 +315,7 @@ Notes:
 
 ####BCs
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=BCs
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=BCs
 
 Notes:
 
@@ -323,7 +323,7 @@ Notes:
 
 ####Materials
 
-!listing modules/rdg/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Materials
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Materials
 
 Notes:
 

@@ -154,8 +154,8 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps)
 # .) Calling 'make clean' in an app should not remove MOOSE object
 #    files, libraries, etc.
 clean::
-	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB)
-	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER)
+	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
+	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects)
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could

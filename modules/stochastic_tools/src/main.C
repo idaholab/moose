@@ -1,4 +1,4 @@
-#include "StochasticToolsApp.h"
+#include "StochasticToolsTestApp.h"
 #include "MooseInit.h"
 #include "Moose.h"
 #include "MooseApp.h"
@@ -15,10 +15,10 @@ main(int argc, char * argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  StochasticToolsApp::registerApps();
+  StochasticToolsTestApp::registerApps();
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("StochasticToolsApp", argc, argv);
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("StochasticToolsTestApp", argc, argv);
 
   // Execute the application
   app->run();

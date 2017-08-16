@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "RdgApp.h"
+#include "RdgTestApp.h"
 #include "MooseInit.h"
 #include "Moose.h"
 #include "MooseApp.h"
@@ -22,10 +22,10 @@ main(int argc, char * argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  RdgApp::registerApps();
+  RdgTestApp::registerApps();
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("RdgApp", argc, argv);
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("RdgTestApp", argc, argv);
 
   // Execute the application
   app->run();

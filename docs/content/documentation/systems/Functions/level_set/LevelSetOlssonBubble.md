@@ -7,7 +7,7 @@ Typically, the interface of the level set function is defined by the 0.5 contour
 
 For example, the following code creates a "bubble" in the lower left corner in a domain ranging from 0 to 1 in the x- and y-direction, as shown in the figure.
 
-!listing modules/level_set/tests/functions/olsson_bubble/olsson_bubble.i block=Functions
+!listing modules/level_set/test/tests/functions/olsson_bubble/olsson_bubble.i block=Functions
 
 !syntax parameters /Functions/LevelSetOlssonBubble
 

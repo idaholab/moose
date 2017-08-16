@@ -1,5 +1,5 @@
 # LevelSetCFLCondition
-Computes the minimum timestep based on the Courant–Friedrichs–Lewy (CFL) condition. The CFL condition, is defined as
+Computes the minimum timestep based on the CourantâFriedrichsâLewy (CFL) condition. The CFL condition, is defined as
 
 \begin{equation}
 C = \Delta t \sum_{i=1}^{n}\frac{u_{x_i}}{\Delta x_i} \leq C_{max},
@@ -26,13 +26,13 @@ as:
 The [LevelSetCFLCondition](#) is added to the input file in the [`[Postprocessors]`](/Postprocessors/index.md) block
 as follows.
 
-!listing modules/level_set/tests/reinitialization/master.i block=cfl label=False prefix=[Postprocessors] suffix=[] indent=2
+!listing modules/level_set/test/tests/reinitialization/master.i block=cfl label=False prefix=[Postprocessors] suffix=[] indent=2
 
 and it is designed to work to set the timestep within the ['[TimeStepper]'](/TimeStepper/index.md) block. Also, notice
 that at this point is possible to apply a "scaling" factor to the computed timestep to allow the simulation to operate
 at some level below the timestep limitation.
 
-!listing modules/level_set/tests/reinitialization/master.i block=Executioner label=False
+!listing modules/level_set/test/tests/reinitialization/master.i block=Executioner label=False
 
 !syntax parameters /Postprocessors/LevelSetCFLCondition
 

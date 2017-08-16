@@ -46,19 +46,19 @@ A grain structure is created from the EBSD data by assigning initial condition
 values for order parameters. Many more grains can be represented than the number
 of order parameters. The required blocks are
 
-!listing modules/phase_field/tests/reconstruction/1phase_reconstruction.i start=Mesh end=ENDDOC
+!listing modules/phase_field/test/tests/reconstruction/1phase_reconstruction.i start=Mesh end=ENDDOC
 
 ### Case 2: Initialize a variable from a specific phase number in the EBSD data, ignoring the grain numbers
 Here, the value for a single variable is initialized from the EBSD data corresponding
 to a single phase number. The required blocks are
 
-!listing modules/phase_field/tests/reconstruction/2phase_reconstruction.i start=Mesh end=ENDDOC
+!listing modules/phase_field/test/tests/reconstruction/2phase_reconstruction.i start=Mesh end=ENDDOC
 
 ###Case 3: Create an initial grain structure from the EBSD data only corresponding to one phase number
 Here, the grain and phase numbers are used. The order parameters are initialized
 from the EBSD data, but only using those grains with a given phase number.
 
-!listing modules/phase_field/tests/reconstruction/2phase_reconstruction2.i start=Mesh end=ENDDOC
+!listing modules/phase_field/test/tests/reconstruction/2phase_reconstruction2.i start=Mesh end=ENDDOC
 
 ## Using EBSD Crystal Info
 
@@ -133,6 +133,6 @@ input file that is available. The syntax is
 []
 ```
 
-We recommend you plot the colors using Paraview. The EulerAngle2RGB action will create three auxvariables with default names `RGB_x`, `RGB_y`, and `RGB_z`. Paraview will automatically create a vector variable of name `RGB_`. To correctly represent the colors,  
-1.  Select `RGB_` as the visualization variable.  
-2.  In the properties section with the advanced properties toggled on, uncheck `Map Scalars` under `Scalar Coloring`.    
+We recommend you plot the colors using Paraview. The EulerAngle2RGB action will create three auxvariables with default names `RGB_x`, `RGB_y`, and `RGB_z`. Paraview will automatically create a vector variable of name `RGB_`. To correctly represent the colors,
+1.  Select `RGB_` as the visualization variable.
+2.  In the properties section with the advanced properties toggled on, uncheck `Map Scalars` under `Scalar Coloring`.

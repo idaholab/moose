@@ -142,7 +142,10 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         rel_filename = match.group('filename').lstrip('/')
         filename = os.path.join(self.markdown.current.root_directory, rel_filename)
         if not os.path.exists(filename):
-            return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
+            msg = "Unable to locate file: {}".format(rel_filename)
+            if hasattr(self.markdown.current, filename):
+                msg += " in {}".format(self.markdwon.current.filename) #pylint: disable=no-member
+            return self.createErrorElement(msg)
 
         # Figure out file extensions
         if settings['language'] is None:
