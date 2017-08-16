@@ -61,7 +61,6 @@ framework:
     - /BCs/ConvectiveFluxBC
     - /BCs/DGFunctionDiffusionDirichletBC
     - /BCs/DiffusionFluxBC
-    - /BCs/DirichletBC
     - /BCs/FunctionDirichletBC
     - /BCs/FunctionNeumannBC
     - /BCs/FunctionPenaltyDirichletBC

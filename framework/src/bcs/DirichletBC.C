@@ -21,6 +21,8 @@ validParams<DirichletBC>()
   InputParameters p = validParams<NodalBC>();
   p.addRequiredParam<Real>("value", "Value of the BC");
   p.declareControllable("value");
+  p.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
+                        "is a constant, controllable value.");
   return p;
 }
 
