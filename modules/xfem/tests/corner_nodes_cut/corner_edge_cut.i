@@ -91,7 +91,7 @@
 []
 
 [Executioner]
-  type = Transient
+  type = NestedTransient
 
   solve_type = 'PJFNK'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
