@@ -5,11 +5,19 @@
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
   [../]
+  [./2block-3D-preallocation]
+    type = 'Exodiff'
+    input = '2blocks3d.i'
+    cli_args = 'Problem/update_jacobian_preallocation=true'
+    exodiff = '2blocks3d_out.e'
+    max_parallel = 4
+    prereq = '2block-3D'
+  [../]
   [./2block-3D-sm]
     type = 'Exodiff'
     input = '2blocks3d_sm.i'
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
-    prereq = '2block-3D'
+    prereq = '2block-3D-preallocation'
   [../]
 []

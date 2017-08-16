@@ -724,7 +724,6 @@ void
 NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
 {
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
-  jacobian.close();
   if (_constraints.hasActiveNodalConstraints())
   {
     const auto & ncs = _constraints.getActiveNodalConstraints();
@@ -1437,9 +1436,16 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & 
 
   findImplicitGeometricCouplingEntries(geom_search_data, graph);
 
+  const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
+  const dof_id_type end_dof_on_proc = dofMap().end_dof(processor_id());
+
   for (const auto & it : graph)
   {
     dof_id_type dof = it.first;
+
+    if (dof < first_dof_on_proc || dof >= end_dof_on_proc)
+      continue;
+
     const std::vector<dof_id_type> & row = it.second;
 
     for (const auto & coupled_dof : row)
@@ -1631,9 +1637,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
 #endif
 #endif
 
-        jacobian.close();
         jacobian.zero_rows(zero_rows, 0.0);
-        jacobian.close();
         _fe_problem.addCachedJacobian(jacobian, 0);
         jacobian.close();
       }
@@ -1662,9 +1666,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
 #endif
 #endif
 
-      jacobian.close();
       jacobian.zero_rows(zero_rows, 0.0);
-      jacobian.close();
       _fe_problem.addCachedJacobian(jacobian, 0);
       jacobian.close();
     }
@@ -1828,6 +1830,9 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
 
 #endif
 
+  if (_fe_problem.updateJacobianPreallocation() &&
+      _add_implicit_geometric_coupling_entries_to_jacobian)
+    updateJacobianSparsity(jacobian);
   // jacobianSetup /////
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1939,7 +1944,8 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     static bool first = true;
 
     // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
-    if (first && (_add_implicit_geometric_coupling_entries_to_jacobian))
+    if ((first || _fe_problem.updateJacobianPreallocation()) &&
+        (_add_implicit_geometric_coupling_entries_to_jacobian))
     {
       first = false;
       addImplicitGeometricCouplingEntries(jacobian, _fe_problem.geomSearchData());
@@ -2335,6 +2341,69 @@ NonlinearSystemBase::residualGhosted()
   if (!_residual_ghosted)
     _residual_ghosted = &addVector("residual_ghosted", false, GHOSTED);
   return *_residual_ghosted;
+}
+
+void
+NonlinearSystemBase::updateJacobianSparsity(SparseMatrix<Number> & jacobian)
+{
+  // This is computed in libMesh according to the mesh
+  const std::vector<dof_id_type> & basic_n_nz = dofMap().get_n_nz();
+  const std::vector<dof_id_type> & basic_n_oz = dofMap().get_n_oz();
+
+  std::vector<dof_id_type> n_nz(basic_n_nz.begin(), basic_n_nz.end());
+  std::vector<dof_id_type> n_oz(basic_n_oz.begin(), basic_n_oz.end());
+
+  _fe_problem.updateGeomSearch();
+
+  std::map<dof_id_type, std::vector<dof_id_type>> graph;
+
+  findImplicitGeometricCouplingEntries(_fe_problem.geomSearchData(), graph);
+
+  if (_fe_problem.getDisplacedProblem())
+    findImplicitGeometricCouplingEntries(_fe_problem.getDisplacedProblem()->geomSearchData(),
+                                         graph);
+
+  const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
+  const dof_id_type end_dof_on_proc = dofMap().end_dof(processor_id());
+
+  // The total number of dofs on and off processor
+  const dof_id_type n_dofs_on_proc = dofMap().n_local_dofs();
+  const dof_id_type n_dofs_not_on_proc = dofMap().n_dofs() - dofMap().n_local_dofs();
+
+  for (const auto & git : graph)
+  {
+    dof_id_type dof = git.first;
+    dof_id_type local_dof = dof - first_dof_on_proc;
+
+    if (dof < first_dof_on_proc || dof >= end_dof_on_proc)
+      continue;
+
+    const std::vector<dof_id_type> & row = git.second;
+
+    for (const auto & coupled_dof : row)
+    {
+      if (coupled_dof < first_dof_on_proc || coupled_dof >= end_dof_on_proc)
+      {
+        if (n_oz[local_dof] < n_dofs_not_on_proc)
+          n_oz[local_dof]++;
+      }
+      else
+      {
+        if (n_nz[local_dof] < n_dofs_on_proc)
+          n_nz[local_dof]++;
+      }
+    }
+  }
+#ifdef LIBMESH_HAVE_PETSC
+#if !PETSC_VERSION_LESS_THAN(3, 7, 2)
+  MatXAIJSetPreallocation(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                          dofMap().block_size(),
+                          numeric_petsc_cast(n_nz.empty() ? nullptr : &n_nz[0]),
+                          numeric_petsc_cast(n_oz.empty() ? nullptr : &n_oz[0]),
+                          nullptr,
+                          nullptr);
+#endif
+#endif
 }
 
 void
