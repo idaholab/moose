@@ -38,7 +38,7 @@ class PenetrationInfo
 public:
   PenetrationInfo(const Node * node,
                   const Elem * elem,
-                  Elem * side,
+                  const Elem * side,
                   unsigned int side_num,
                   RealVectorValue norm,
                   Real norm_distance,
@@ -78,7 +78,7 @@ public:
 
   const Node * _node;
   const Elem * _elem;
-  Elem * _side;
+  const Elem * _side;
   unsigned int _side_num;
   RealVectorValue _normal;
   Real _distance; // Positive distance means the node has penetrated

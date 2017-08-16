@@ -25,7 +25,7 @@
 
 PenetrationInfo::PenetrationInfo(const Node * node,
                                  const Elem * elem,
-                                 Elem * side,
+                                 const Elem * side,
                                  unsigned int side_num,
                                  RealVectorValue norm,
                                  Real norm_distance,
