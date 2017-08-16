@@ -32,7 +32,7 @@ validParams<Eigenvalue>()
 
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
-  params += Moose::SlepcSupport::getSlepcValidParams();
+  Moose::SlepcSupport::getSlepcValidParams(params);
 
   params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
 #endif

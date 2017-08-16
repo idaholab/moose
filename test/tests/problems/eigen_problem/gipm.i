@@ -91,7 +91,7 @@
   which_eigen_pairs = SMALLEST_MAGNITUDE
   n_eigen_pairs = 1
   n_basis_vectors = 18
-  eigen_solve_type = jacobi_davidson
+  solve_type = jacobi_davidson
   petsc_options = '-eps_view'
 []
 

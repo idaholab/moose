@@ -34,7 +34,7 @@ namespace SlepcSupport
  * The output of this function should be added to the the parameters object of the overarching class
  * @see EigenProblem
  */
-InputParameters getSlepcValidParams();
+InputParameters getSlepcValidParams(InputParameters & params);
 InputParameters getSlepcEigenProblemValidParams();
 void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params);
 void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params);
