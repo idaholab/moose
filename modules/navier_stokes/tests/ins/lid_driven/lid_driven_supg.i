@@ -10,9 +10,17 @@
   xmax = .1
   ymin = 0
   ymax = .1
-  nx = 20
-  ny = 20
+  nx = 40
+  ny = 40
   elem_type = QUAD9
+[]
+
+[MeshModifiers]
+  [./corner_node]
+    type = AddExtraNodeset
+    new_boundary = 'pinned_node'
+    nodes = '0'
+  [../]
 []
 
 [Variables]
@@ -125,6 +133,13 @@
     boundary = 'bottom right top left'
     value = 0.0
   [../]
+
+  [./pressure_pin]
+    type = DirichletBC
+    variable = p
+    boundary = 'pinned_node'
+    value = 0
+  [../]
 []
 
 [Materials]
@@ -154,12 +169,11 @@
 [Executioner]
   type = Transient
   dt = .5
-  num_steps = 2
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'asm'
+  num_steps = 1
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu	  NONZERO'
   line_search = none
-  nl_abs_tol = 1e-12
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-8
   nl_max_its = 20
   l_max_its = 30
 []

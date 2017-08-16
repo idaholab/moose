@@ -1,6 +1,5 @@
 [GlobalParams]
   gravity = '0 0 0'
-  integrate_p_by_parts = false
 []
 
 [Mesh]
@@ -17,12 +16,18 @@
 
 [Variables]
   [./vel_x]
+    family = LAGRANGE
+    order = SECOND
   [../]
 
   [./vel_y]
+    family = LAGRANGE
+    order = SECOND
   [../]
 
   [./vel_z]
+    family = LAGRANGE
+    order = SECOND
   [../]
 
   [./p]
