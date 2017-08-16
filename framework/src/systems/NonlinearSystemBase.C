@@ -109,9 +109,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _solution_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
-    _u_dot(&addVector("u_dot", true, GHOSTED)),
     _Re_time(NULL),
-    _Re_non_time(&addVector("Re_non_time", false, GHOSTED)),
     _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
@@ -140,6 +138,11 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _has_nodalbc_save_in(false),
     _has_nodalbc_diag_save_in(false)
 {
+  _u_dot_tag = _fe_problem.addTag("u_dot");
+  _u_dot = &addVector(_u_dot_tag, true, GHOSTED);
+
+  _Re_non_time_tag = _fe_problem.addTag("Re_non_time");
+  _Re_non_time = &addVector(_Re_non_time_tag, false, GHOSTED);
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()

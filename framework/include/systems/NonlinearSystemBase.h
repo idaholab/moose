@@ -595,12 +595,22 @@ protected:
 
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
+
+  /// Tag for u_dot
+  TagID _u_dot_tag;
+
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
+
+  /// Tag for time contribution residual
+  TagID _Re_time_tag;
   /// residual vector for time contributions
   NumericVector<Number> * _Re_time;
+
+  /// Tag for non-time contribution residual
+  TagID _Re_non_time_tag;
   /// residual vector for non-time contributions
   NumericVector<Number> * _Re_non_time;
 

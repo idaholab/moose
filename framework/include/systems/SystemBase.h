@@ -166,9 +166,19 @@ public:
   virtual bool hasVector(const std::string & name) const;
 
   /**
+   * Check if the tagged vector exists in the system.
+   */
+  virtual bool hasVector(TagID tag);
+
+  /**
    * Get a raw NumericVector
    */
   virtual NumericVector<Number> & getVector(const std::string & name);
+
+  /**
+   * Get a raw NumericVector
+   */
+  virtual NumericVector<Number> & getVector(TagID tag);
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
@@ -465,6 +475,21 @@ public:
   virtual NumericVector<Number> &
   addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
+  /**
+   * Adds a solution length vector to the system with the specified TagID
+   *
+   * @param tag_name The name of the tag
+   * @param project Whether or not to project this vector when doing mesh refinement.
+   *                If the vector is just going to be recomputed then there is no need to project
+   * it.
+   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
+   *                                            GHOSTED is needed if you are going to be accessing
+   * off-processor entries.
+   *                                            The ghosting pattern is the same as the solution
+   * vector.
+   */
+  virtual NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
+
   virtual const std::string & name() const { return system().name(); }
 
   /**
@@ -508,6 +533,8 @@ protected:
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   Real _du_dot_du;
+
+  std::vector<NumericVector<Number> *> _tagged_vectors;
 
   NumericVector<Number> * _dummy_vec; // to satisfy the interface
 

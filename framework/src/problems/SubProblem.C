@@ -56,9 +56,18 @@ TagID
 SubProblem::addTag(TagName tag_name)
 {
   if (_tag_name_to_tag_id.find(tag_name) == _tag_name_to_tag_id.end())
-    _tag_name_to_tag_id[tag_name] = _tag_name_to_tag_id.size();
+  {
+    auto tag_id = _tag_name_to_tag_id[tag_name] = _tag_name_to_tag_id.size();
+    _tag_id_to_tag_name[tag_id] = tag_name;
+  }
 
   return _tag_name_to_tag_id.at(tag_name);
+}
+
+TagName
+SubProblem::tagName(TagID tag)
+{
+  return _tag_id_to_tag_name[tag];
 }
 
 void
