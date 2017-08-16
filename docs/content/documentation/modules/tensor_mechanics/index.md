@@ -112,7 +112,7 @@ The mechanical strain is passed to the `Compute*Stress` methods to calculate the
 
 Thermal strains are a volumetric change resulting from a change in temperature of the material.  The change in strains can be either a simple linear function of thermal change, e.g. ($\boldsymbol{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.   Besides thermal expansion, some models employ other stress-free strains ($\boldsymbol{\epsilon}_0$) to provide inherit strains in the material.
 
-The thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenStrain.md) computes the thermal strains for both small total strains and for incremental strains as a linear function of temperature.  The input file syntax is
+The thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md) computes the thermal strains for both small total strains and for incremental strains as a linear function of temperature.  The input file syntax is
 
 !listing modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i block=thermal_expansion_strain
 
