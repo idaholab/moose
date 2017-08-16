@@ -2,9 +2,10 @@
 {% if mathjax_url %}
   {% set mathjax_js = mathjax_url %}
 {% endif %}
-<script type="text/javascript" src="{{jquery_js|default('https://code.jquery.com/jquery-2.1.1.min.js')}}"></script>
-<script type="text/javascript" src="{{materialize_js|default('https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js')}}"></script>
-<script type="text/javascript" src="{{prism_js|default('https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js')}}"></script>
+<script type="text/javascript" src="{{jquery_js|default(relpath('js/jquery-3.2.1.min.js', current.destination))}}"></script>
+<script type="text/javascript" src="{{materialize_js|default(relpath('js/materialize.min.js', current.destination))}}"></script>
+<script type="text/javascript" src="{{prism_js|default(relpath('js/prisim.min.js', current.destination))}}"></script>
 <script type="text/javascript" src="{{mathjax_js|default('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js')}}"></script>
-<script type="text/javascript" src="{{clipboard_js|default('https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js')}}"></script>
+<script type="text/javascript" src="{{clipboard_js|default(relpath('js/clipboard.min.js', current.destination))}}"></script>
+<script type="text/javascript" src="{{google_chart_loader_js|default('https://www.gstatic.com/charts/loader.js')}}"></script>
 <script type="text/javascript" src="{{relpath('js/init.js', current.destination)}}"></script>
