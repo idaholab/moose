@@ -76,6 +76,16 @@ public:
 
   virtual bool isTransient() const = 0;
 
+  /**
+   * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
+   * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
+   *
+   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   *
+   * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   */
+  TagID addTag(TagName tag_name);
+
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
 
@@ -414,6 +424,9 @@ public:
   const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
 
 protected:
+  /// The currently declared tags
+  std::map<TagName, TagID> _tag_name_to_tag_id;
+
   /// The Factory for building objects
   Factory & _factory;
 
