@@ -93,8 +93,7 @@
 [Contact]
   [./leftright]
     slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
+    displacements = 'disp_x disp_y'
     master = 2
     model = frictionless
     penalty = 1e+6
