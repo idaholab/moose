@@ -495,6 +495,30 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
   return *vec;
 }
 
+NumericVector<Number> &
+SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
+{
+  if (!_subproblem.tagExists(tag))
+    mooseError("Cannot add a tagged vector with tag, ",
+               tag,
+               ", that tag does not exist in System ",
+               name());
+
+  if (hasVector(tag))
+    return getVector(tag);
+
+  auto vector_name = _subproblem.tagName(tag);
+
+  NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
+
+  if (tag + 1 >= _tagged_vectors.size())
+    _tagged_vectors.resize(tag + 1);
+
+  _tagged_vectors[tag] = vec;
+
+  return *vec;
+}
+
 void
 SystemBase::addVariable(const std::string & var_name,
                         const FEType & type,
@@ -585,6 +609,12 @@ SystemBase::hasVector(const std::string & name)
   return system().have_vector(name);
 }
 
+bool
+SystemBase::hasVector(TagID tag)
+{
+  return tag < _tagged_vectors.size() && _tagged_vectors[tag];
+}
+
 /**
  * Get a raw NumericVector with the given name.
  */
@@ -592,6 +622,14 @@ NumericVector<Number> &
 SystemBase::getVector(const std::string & name)
 {
   return system().get_vector(name);
+}
+
+NumericVector<Number> &
+SystemBase::getVector(TagID tag)
+{
+  mooseAssert(hasVector(tag), "Cannot retrieve vector with tag: " << tag);
+
+  return *_tagged_vectors[tag];
 }
 
 unsigned int
