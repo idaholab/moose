@@ -46,6 +46,15 @@ SubProblem::SubProblem(const InputParameters & parameters)
 
 SubProblem::~SubProblem() {}
 
+TagID
+SubProblem::addTag(TagName tag_name)
+{
+  if (_tag_name_to_tag_id.find(tag_name) == _tag_name_to_tag_id.end())
+    _tag_name_to_tag_id[tag_name] = _tag_name_to_tag_id.size();
+
+  return _tag_name_to_tag_id.at(tag_name);
+}
+
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
                                              THREAD_ID tid)
