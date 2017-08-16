@@ -75,6 +75,7 @@ PenetrationInfo::PenetrationInfo(const Node * node,
 {
 }
 
+/*
 PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
   : _node(p._node),
     _elem(p._elem),
@@ -112,6 +113,7 @@ PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
     _slip_tol(p._slip_tol)
 {
 }
+*/
 
 PenetrationInfo::PenetrationInfo()
   : _node(NULL),
