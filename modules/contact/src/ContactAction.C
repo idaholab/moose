@@ -37,6 +37,10 @@ validParams<ContactAction>()
       "penalty",
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("penalty_slip",
+                        1e8,
+                        "The penalty to apply on sliping direction.  This can "
+                        "vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,
@@ -68,6 +72,11 @@ validParams<ContactAction>()
   params.addParam<bool>("master_slave_jacobian",
                         true,
                         "Whether to include jacobian entries coupling master and slave nodes.");
+
+  params.addParam<Real>("penetration_tolerance", 1e-9, "The tolerance of the distance function");
+  params.addParam<Real>("stickking_tolerance", 1e-9, "The tolerance of the sticking");
+
+  params.addParam<Real>("frictionalforce_tolerance", 1e-9, "The tolerance of the frictionalforce");
 
   return params;
 }

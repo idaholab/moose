@@ -66,6 +66,12 @@ public:
 
   virtual bool addCouplingEntriesToJacobian() { return true; }
 
+  virtual bool contactConverged() { return false; }
+
+  virtual void updateLagMul(bool) { return; }
+
+  virtual bool haveAugLM() { return false; }
+
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;

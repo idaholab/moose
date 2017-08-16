@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "FEProblemBase.h"
-
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
@@ -4487,6 +4486,38 @@ FEProblemBase::updateMeshXFEM()
   return updated;
 }
 
+bool
+FEProblemBase::updateLagMul()
+{
+
+  if (_displaced_problem != NULL)
+    return _nl->updateLagMul(true);
+
+  return _nl->updateLagMul(false);
+}
+
+void
+FEProblemBase::initLagMul()
+{
+  if (_displaced_problem != NULL)
+  {
+    _nl->initLagMul(true);
+    return;
+  }
+  else
+    _nl->initLagMul(false);
+  return;
+}
+
+bool
+FEProblemBase::haveAugLM()
+{
+  if (_displaced_problem != NULL)
+    return _nl->haveAugLM(true);
+
+  return _nl->haveAugLM(false);
+}
+
 void
 FEProblemBase::meshChanged()
 {
@@ -4501,6 +4532,7 @@ FEProblemBase::meshChanged()
 
   // mesh changed
   _eq.reinit();
+
   _mesh.meshChanged();
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
