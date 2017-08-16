@@ -544,6 +544,10 @@ public:
   unsigned int _current_nl_its;
   bool _compute_initial_residual_before_preset_bcs;
 
+  bool updateLagMul(bool displaced);
+  void initLagMul(bool displaced);
+  bool haveAugLM(bool displaced);
+
 protected:
   /**
    * Compute the residual

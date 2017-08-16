@@ -752,6 +752,134 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jaco
   }
 }
 
+bool
+NonlinearSystemBase::updateLagMul(bool displaced)
+{
+
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
+      NULL;
+
+  if (!displaced)
+  {
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
+    penetration_locators = &geom_search_data._penetration_locators;
+  }
+  else
+  {
+    GeometricSearchData & displaced_geom_search_data =
+        _fe_problem.getDisplacedProblem()->geomSearchData();
+    penetration_locators = &displaced_geom_search_data._penetration_locators;
+  }
+
+  for (const auto & it : *penetration_locators)
+  {
+    PenetrationLocator & pen_loc = *(it.second);
+
+    BoundaryID slave_boundary = pen_loc._slave_boundary;
+
+    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    {
+      const auto & ncs = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+
+      for (const auto & nc : ncs)
+      {
+        if (nc->haveAugLM())
+        {
+          if (!nc->contactConverged())
+          {
+            nc->updateLagMul(false);
+            // restoreSolutions();
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+void
+NonlinearSystemBase::initLagMul(bool displaced)
+{
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
+      NULL;
+
+  if (!displaced)
+  {
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
+    penetration_locators = &geom_search_data._penetration_locators;
+  }
+  else
+  {
+    GeometricSearchData & displaced_geom_search_data =
+        _fe_problem.getDisplacedProblem()->geomSearchData();
+    penetration_locators = &displaced_geom_search_data._penetration_locators;
+  }
+
+  for (const auto & it : *penetration_locators)
+  {
+    PenetrationLocator & pen_loc = *(it.second);
+
+    BoundaryID slave_boundary = pen_loc._slave_boundary;
+
+    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    {
+      const auto & ncs = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+
+      for (const auto & nc : ncs)
+      {
+        if (nc->haveAugLM())
+        {
+          _console << "Initialize the Lagrangin Multiplier\n";
+          nc->updateLagMul(true);
+          return;
+        }
+      }
+    }
+  }
+}
+
+bool
+NonlinearSystemBase::haveAugLM(bool displaced)
+{
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
+      NULL;
+  if (!displaced)
+  {
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
+    penetration_locators = &geom_search_data._penetration_locators;
+  }
+  else
+  {
+    GeometricSearchData & displaced_geom_search_data =
+        _fe_problem.getDisplacedProblem()->geomSearchData();
+    penetration_locators = &displaced_geom_search_data._penetration_locators;
+  }
+
+  bool haveAugLagMul = false;
+
+  for (const auto & it : *penetration_locators)
+  {
+    PenetrationLocator & pen_loc = *(it.second);
+
+    BoundaryID slave_boundary = pen_loc._slave_boundary;
+
+    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    {
+      const auto & ncs = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+      for (const auto & nc : ncs)
+      {
+        if (nc->haveAugLM())
+        {
+          _console << "The contact is enforced using augmented Lagrangin Multiplier\n";
+          return true;
+        }
+      }
+    }
+  }
+  return haveAugLagMul;
+}
+
 void
 NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
 {

@@ -477,7 +477,10 @@ PenetrationThread::switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNe
     infoNew->_starting_elem = info->_starting_elem;
     infoNew->_starting_side_num = info->_starting_side_num;
     infoNew->_starting_closest_point_ref = info->_starting_closest_point_ref;
+    infoNew->_normal_old = info->_normal_old;
     infoNew->_incremental_slip = info->_incremental_slip;
+    infoNew->_total_slip = info->_total_slip;
+    infoNew->_total_slip_old = info->_total_slip_old;
     infoNew->_accumulated_slip = info->_accumulated_slip;
     infoNew->_accumulated_slip_old = info->_accumulated_slip_old;
     infoNew->_frictional_energy = info->_frictional_energy;
@@ -485,6 +488,7 @@ PenetrationThread::switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNe
     infoNew->_contact_force = info->_contact_force;
     infoNew->_contact_force_old = info->_contact_force_old;
     infoNew->_lagrange_multiplier = info->_lagrange_multiplier;
+    infoNew->_lagrange_multiplier_slip = info->_lagrange_multiplier_slip;
     infoNew->_locked_this_step = info->_locked_this_step;
     infoNew->_stick_locked_this_step = info->_stick_locked_this_step;
     infoNew->_mech_status = info->_mech_status;
@@ -1246,6 +1250,7 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
     info._frictional_energy =
         info._frictional_energy_old + info._contact_force * info._incremental_slip;
     info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.norm();
+    info._total_slip = info._total_slip_old + info._incremental_slip;
   }
 }
 
