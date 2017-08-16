@@ -1,10 +1,6 @@
-{# Deprecated template variable #}
-{% if mathjax_url %}
-  {% set mathjax_js = mathjax_url %}
-{% endif %}
 <script type="text/javascript" src="{{jquery_js|default(relpath('js/jquery-3.2.1.min.js', current.destination))}}"></script>
 <script type="text/javascript" src="{{materialize_js|default(relpath('js/materialize.min.js', current.destination))}}"></script>
-<script type="text/javascript" src="{{prism_js|default(relpath('js/prisim.min.js', current.destination))}}"></script>
+<script type="text/javascript" src="{{prism_js|default(relpath('js/prism.min.js', current.destination))}}"></script>
 <script type="text/javascript" src="{{mathjax_js|default('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js')}}"></script>
 <script type="text/javascript" src="{{clipboard_js|default(relpath('js/clipboard.min.js', current.destination))}}"></script>
 <script type="text/javascript" src="{{google_chart_loader_js|default('https://www.gstatic.com/charts/loader.js')}}"></script>

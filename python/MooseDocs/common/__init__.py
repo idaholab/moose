@@ -24,4 +24,4 @@ from moose_docs_app_syntax import moose_docs_app_syntax
 from slugify import slugify
 
 EXTENSIONS = ('.md', '.png', '.bmp', '.jpeg', '.svg', '.gif', '.webm', '.ogg', '.mp4', '.js',
-              '.css', '.bib')
+              '.css', '.bib', '.woff', '.woff2')
