@@ -925,9 +925,11 @@ MooseMesh::addQuadratureNode(const Elem * elem,
     _quadrature_nodes[new_id] = qnode;
     _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp] = qnode;
 
-    _node_to_elem_map[new_id].push_back(elem->id());
     if (elem->active())
+    {
+      _node_to_elem_map[new_id].push_back(elem->id());
       _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
+    }
   }
   else
     qnode = _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];
