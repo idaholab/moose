@@ -38,8 +38,12 @@ class IncludeExtension(MooseMarkdownExtension):
         """
         md.registerExtension(self)
         config = self.getConfigs()
+        if 'fenced_code_block' in md.preprocessors:
+            loc = '>fenced_code_block'
+        else:
+            loc = '_begin'
         md.preprocessors.add('moose-markdown-include',
-                             MarkdownPreprocessor(markdown_instance=md, **config), '_begin')
+                             MarkdownPreprocessor(markdown_instance=md, **config), loc)
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """Create IncludeExtension"""
