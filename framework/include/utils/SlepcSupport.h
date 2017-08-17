@@ -40,6 +40,7 @@ void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & param
 void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params);
 void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params);
 void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
+void setSlepcOutputOptions(EigenProblem & eigen_problem);
 
 PetscErrorCode mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
 PetscErrorCode mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
