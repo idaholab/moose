@@ -34,10 +34,10 @@ AllNodesSendListThread::AllNodesSendListThread(FEProblemBase & fe_problem,
   // to examine it multiple times.
   std::sort(this->_var_nums.begin(), this->_var_nums.end());
 
-  std::vector<dof_id_type>::iterator new_end =
+  std::vector<unsigned int>::iterator new_end =
       std::unique(this->_var_nums.begin(), this->_var_nums.end());
 
-  std::vector<dof_id_type>(this->_var_nums.begin(), new_end).swap(this->_var_nums);
+  std::vector<unsigned int>(this->_var_nums.begin(), new_end).swap(this->_var_nums);
 }
 
 AllNodesSendListThread::AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split)
