@@ -183,9 +183,26 @@ DisplacedProblem::updateMesh()
   _nl_solution = _mproblem.getNonlinearSystemBase().currentSolution();
   _aux_solution = _mproblem.getAuxiliarySystem().currentSolution();
 
+  // If the displaced mesh has been serialized to one processor (as
+  // may have occurred if it was used for Exodus output), then we need
+  // the reference mesh to be also.  For that matter, did anyone
+  // somehow serialize the whole mesh?  Hopefully not but let's avoid
+  // causing errors if so.
+  if (_mesh.getMesh().is_serial() && !this->refMesh().getMesh().is_serial())
+    this->refMesh().getMesh().allgather();
+
+  if (_mesh.getMesh().is_serial_on_zero() && !this->refMesh().getMesh().is_serial_on_zero())
+    this->refMesh().getMesh().gather_to_zero();
+
   UpdateDisplacedMeshThread udmt(_mproblem, *this);
 
-  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
+  // We displace all nodes, not just semilocal nodes, because
+  // parallel-inconsistent mesh geometry makes libMesh cry.
+  NodeRange node_range(_mesh.getMesh().nodes_begin(),
+                       _mesh.getMesh().nodes_end(),
+                       /*grainsize=*/1);
+
+  Threads::parallel_reduce(node_range, udmt);
 
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();
@@ -214,7 +231,13 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
 
   UpdateDisplacedMeshThread udmt(_mproblem, *this);
 
-  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
+  // We displace all nodes, not just semilocal nodes, because
+  // parallel-inconsistent mesh geometry makes libMesh cry.
+  NodeRange node_range(_mesh.getMesh().nodes_begin(),
+                       _mesh.getMesh().nodes_end(),
+                       /*grainsize=*/1);
+
+  Threads::parallel_reduce(node_range, udmt);
 
   // Update the geometric searches that depend on the displaced mesh
   _geometric_search_data.update();
