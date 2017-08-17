@@ -14,13 +14,20 @@ validParams<StorkApp>()
 StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  StorkApp::registerObjectDepends(_factory);
   StorkApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  StorkApp::associateSyntaxDepends(_syntax, _action_factory);
   StorkApp::associateSyntax(_syntax, _action_factory);
 }
 
 StorkApp::~StorkApp() {}
+
+void
+StorkApp::registerObjectDepends(Factory & /*factory*/)
+{
+}
 
 // External entry point for dynamic application loading
 extern "C" void
@@ -42,6 +49,11 @@ StorkApp__registerObjects(Factory & factory)
 }
 void
 StorkApp::registerObjects(Factory & /*factory*/)
+{
+}
+
+void
+StorkApp::associateSyntaxDepends(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
 
