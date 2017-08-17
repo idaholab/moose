@@ -596,9 +596,6 @@ protected:
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
 
-  /// Tag for u_dot
-  TagID _u_dot_tag;
-
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
   /// \f$ {du^dot}\over{du} \f$

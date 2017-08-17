@@ -76,17 +76,22 @@ public:
    *
    * @param tag_name The name of the tag to create, the TagID will get automatically generated
    */
-  TagID addTag(TagName tag_name);
+  virtual TagID addTag(TagName tag_name);
 
   /**
    * Retrieve the name associated with a TagID
    */
-  TagName tagName(TagID tag);
+  virtual TagName tagName(TagID tag);
 
   /**
    * Check to see if a particular Tag exists
    */
-  bool tagExists(TagID tag) { return tag < _tag_name_to_tag_id.size(); }
+  virtual bool tagExists(TagID tag) { return tag < _tag_name_to_tag_id.size(); }
+
+  /**
+   * The total number of tags
+   */
+  virtual unsigned int numTags() { return _tag_name_to_tag_id.size(); }
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const = 0;

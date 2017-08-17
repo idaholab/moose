@@ -1020,9 +1020,10 @@ Assembly::init(const CouplingMatrix * cm)
   if (max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
-  // two vectors: one for time residual contributions and one for non-time residual contributions
-  _sub_Re.resize(2);
-  _sub_Rn.resize(2);
+  std::cout << "numTags: " << _sys.subproblem().numTags() << std::endl;
+
+  _sub_Re.resize(_sys.subproblem().numTags());
+  _sub_Rn.resize(_sys.subproblem().numTags());
   for (unsigned int i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);

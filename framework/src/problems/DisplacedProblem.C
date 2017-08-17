@@ -218,6 +218,30 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
   Moose::perf_log.pop("updateDisplacedMesh()", "Execution");
 }
 
+TagID
+DisplacedProblem::addTag(TagName tag_name)
+{
+  return _mproblem.addTag(tag_name);
+}
+
+TagName
+DisplacedProblem::tagName(TagID tag)
+{
+  return _mproblem.tagName(tag);
+}
+
+bool
+DisplacedProblem::tagExists(TagID tag)
+{
+  return _mproblem.tagExists(tag);
+}
+
+unsigned int
+DisplacedProblem::numTags()
+{
+  return _mproblem.numTags();
+}
+
 bool
 DisplacedProblem::hasVariable(const std::string & var_name) const
 {
