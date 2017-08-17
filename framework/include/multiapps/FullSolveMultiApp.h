@@ -39,6 +39,8 @@ public:
 
   virtual void advanceStep() override {}
 
+  virtual bool isSolved() const override { return _solved; }
+
 private:
   std::vector<Executioner *> _executioners;
 

@@ -3241,7 +3241,9 @@ FEProblemBase::postExecute()
   const auto & multi_apps = _multi_apps.getActiveObjects();
 
   for (const auto & multi_app : multi_apps)
-    multi_app->postExecute();
+    // If the app has been solved, then postExecute() will have been called already too
+    if (!multi_app->isSolved())
+      multi_app->postExecute();
 }
 
 void
