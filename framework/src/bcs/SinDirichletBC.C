@@ -22,7 +22,10 @@ validParams<SinDirichletBC>()
   params.set<Real>("initial") = 0.0;
   params.set<Real>("final") = 0.0;
   params.set<Real>("duration") = 0.0;
-
+  params.addClassDescription(
+      "Imposes a time-varying essential boundary condition $u=g(t)$, where $g(t)$ "
+      "varies from an given initial value at time $t=0$ to a given final value over a specified "
+      "duration.");
   return params;
 }
 

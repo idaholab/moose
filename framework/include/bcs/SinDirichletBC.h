@@ -23,6 +23,17 @@ class SinDirichletBC;
 template <>
 InputParameters validParams<SinDirichletBC>();
 
+/**
+ * A spatially-constant, time-varying NodalBC whose imposed value g(t)
+ * varies sinusoidally with time according to the formula:
+ *
+ * g(t) = { g0 + (gT - g0) * sin ((pi*t) / (2*T)), 0 < t < T
+ *        { gT                                   , t > T
+ * where:
+ * g0 = value at time 0
+ * gT = value at time T
+ *  T = duration over which the value is changing.
+ */
 class SinDirichletBC : public NodalBC
 {
 public:
