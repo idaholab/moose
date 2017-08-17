@@ -1400,7 +1400,7 @@ protected:
   ExecuteMooseObjectWarehouse<Transfer> _from_multi_app_transfers;
 
   /// A map of objects that consume random numbers
-  std::map<std::string, RandomData *> _random_data_objects;
+  std::map<std::string, std::unique_ptr<RandomData>> _random_data_objects;
 
   /// Cache for calculating materials on side
   std::vector<std::unordered_map<SubdomainID, bool>> _block_mat_side_cache;
@@ -1464,7 +1464,7 @@ protected:
   bool _has_initialized_stateful;
 
   /// Object responsible for restart (read/write)
-  Resurrector * _resurrector;
+  std::unique_ptr<Resurrector> _resurrector;
 
   /// true if the Jacobian is constant
   bool _const_jacobian;

@@ -59,7 +59,7 @@ public:
   /**
    * Class destructor
    */
-  virtual ~OrientedBoxInterface();
+  virtual ~OrientedBoxInterface() = default;
 
 protected:
   /**
@@ -74,10 +74,10 @@ private:
   Point _center;
 
   /// Rotation matrix for transforming the bounding box
-  RealTensorValue * _rot_matrix;
+  std::unique_ptr<RealTensorValue> _rot_matrix;
 
   /// The bounding box used to test if the point is contained within
-  MeshTools::BoundingBox * _bounding_box;
+  std::unique_ptr<MeshTools::BoundingBox> _bounding_box;
 };
 
 #endif // ORIENTEDBOXINTERFACE_H
