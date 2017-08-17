@@ -1,6 +1,6 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y'
-  volumetric_locking_correction = true
+  order = FIRST
+  family = LAGRANGE
 []
 
 [XFEM]
@@ -21,6 +21,7 @@
   ymin = 0.0
   ymax = 1.0
   elem_type = QUAD4
+  displacements = 'disp_x disp_y'
 []
 
 [UserObjects]
@@ -31,20 +32,26 @@
     time_end_cut = 0.0
   [../]
   [./xfem_marker_uo]
-    type = XFEMRankTwoTensorMarkerUserObject
+    type = XFEMMaterialTensorMarkerUserObject
     execute_on = timestep_end
     tensor = stress
-    scalar_type = MaxPrincipal
+    quantity = MaxPrincipal
     threshold = 5e+1
     average = true
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = FINITE
-    planar_formulation = plane_strain
-    add_variables = true
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
+[]
+
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
 []
 
@@ -84,16 +91,14 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e6
+  [./linelast]
+    type = Elastic
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
     poissons_ratio = 0.3
-    block = 0
-  [../]
-
-  [./_elastic_strain]
-    type = ComputeFiniteStrainElasticStress
-    block = 0
+    youngs_modulus = 1e6
+    formulation = NonlinearPlaneStrain
   [../]
 []
 

@@ -118,30 +118,38 @@ Real thirdInvariant(const RankTwoTensor & r2tensor);
 /*
  * The max Principal method returns the largest principal value for a symmetric
  * tensor, using the calcEigenValues method.
+ * param r2tensor RankTwoTensor from which to extract the principal value
+ * param direction Direction corresponding to the principal value
  */
-Real maxPrincipal(const RankTwoTensor & r2tensor);
-Real maxPrinciple(const RankTwoTensor & r2tensor);
+Real maxPrincipal(const RankTwoTensor & r2tensor, Point & direction);
 
 /*
  * The mid Principal method calculates the second largest principal value for a
  * tensor.  This method is valid only for 3D problems and will return an error
  * if called in 2D problems.
+ * param r2tensor RankTwoTensor from which to extract the principal value
+ * param direction Direction corresponding to the principal value
  */
-Real midPrincipal(const RankTwoTensor & r2tensor);
-Real midPrinciple(const RankTwoTensor & r2tensor);
+Real midPrincipal(const RankTwoTensor & r2tensor, Point & direction);
 
 /*
  * The min Principal stress returns the smallest principal value from a symmetric
  * tensor.
+ * param r2tensor RankTwoTensor from which to extract the principal value
+ * param direction Direction corresponding to the principal value
  */
-Real minPrincipal(const RankTwoTensor & r2tensor);
-Real minPrinciple(const RankTwoTensor & r2tensor);
+Real minPrincipal(const RankTwoTensor & r2tensor, Point & direction);
 
 /*
  * This method is called by the *Principal methods to calculate the eigenvalues
- * of a symmetric tensor and return the desired value based on vector position.
+ * and eigenvectors of a symmetric tensor and return the desired value based on
+ * vector position.
+ * param r2tensor The RankTwoTensor from which to extract eigenvalues/vectors
+ * param index The index of the principal value
+ * param direction The eigenvector corresponding to the computed eigenvalue
  */
-Real calcEigenValues(const RankTwoTensor & r2tensor, unsigned int index);
+Real
+calcEigenValuesEigenVectors(const RankTwoTensor & r2tensor, unsigned int index, Point & eigenvec);
 
 /*
  * The axial stress is the scalar component of the stress tensor in an user-defined
