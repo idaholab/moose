@@ -290,7 +290,7 @@ GapHeatTransfer::computeGapValues()
       _gap_distance = pinfo->_distance;
       _has_info = true;
 
-      Elem * slave_side = pinfo->_side;
+      const Elem * slave_side = pinfo->_side;
       std::vector<std::vector<Real>> & slave_side_phi = pinfo->_side_phi;
       _gap_temp = _variable->getValue(slave_side, slave_side_phi);
 

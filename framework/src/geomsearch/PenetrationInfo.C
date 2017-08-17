@@ -25,7 +25,7 @@
 
 PenetrationInfo::PenetrationInfo(const Node * node,
                                  const Elem * elem,
-                                 Elem * side,
+                                 const Elem * side,
                                  unsigned int side_num,
                                  RealVectorValue norm,
                                  Real norm_distance,
@@ -75,6 +75,7 @@ PenetrationInfo::PenetrationInfo(const Node * node,
 {
 }
 
+/*
 PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
   : _node(p._node),
     _elem(p._elem),
@@ -112,6 +113,7 @@ PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
     _slip_tol(p._slip_tol)
 {
 }
+*/
 
 PenetrationInfo::PenetrationInfo()
   : _node(NULL),
@@ -222,7 +224,7 @@ dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context)
     loadHelper(stream, pinfo->_elem, context);
     loadHelper(stream, pinfo->_side_num, context);
     // Rebuild the side element.
-    pinfo->_side = pinfo->_elem->build_side(pinfo->_side_num, false).release();
+    pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num, false).release();
 
     loadHelper(stream, pinfo->_normal, context);
     loadHelper(stream, pinfo->_distance, context);
