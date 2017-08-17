@@ -6,4 +6,11 @@
     recover = false
     mesh_mode = REPLICATED
   [../]
+  [./jacobian_supg_test]
+    type = AnalyzeJacobian
+    input = jacobian_supg_test.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
 []

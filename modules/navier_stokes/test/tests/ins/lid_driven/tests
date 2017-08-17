@@ -5,4 +5,11 @@
     exodiff = 'lid_driven_out.e'
     custom_cmp = 'lid_driven.cmp'
   [../]
+  [./supg]
+    type = 'Exodiff'
+    input = 'lid_driven_supg.i'
+    exodiff = 'lid_driven_supg_out.e'
+    custom_cmp = 'lid_driven_supg.cmp'
+    heavy = true
+  [../]
 []
