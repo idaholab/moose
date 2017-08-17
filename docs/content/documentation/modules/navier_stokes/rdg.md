@@ -7,14 +7,12 @@
 
 The Euler equations governing unsteady compressible inviscid flows can be expressed in the conservative form as
 
-$$
 \begin{equation}
 \label{eq:euler_equations}
 \frac{\partial{\bf W}({\bf x},t)}{\partial t}
 + \frac{\partial{\bf F}_j({\bf W}({\bf x},t))}{\partial x_j}
 = 0,
 \end{equation}
-$$
 
 where the conservative state vector, $\bf W$, is defined as ${\bf W} = \left[ \rho, \rho u_i, \rho E \right]^{\tt T}$, and the conservative flux vectors, $\bf F$, are defined as ${\bf F} = \left[ \rho u_j, \rho u_i u_j, u_j (\rho E + p) \right]^{\tt T}$, where the summation convention is used. $\rho$, $p$, and $E$ denote the density, pressure, and specific total energy of the fluid, respectively; and $u_i$ is the velocity of the flow in the coordinate direction $x_i$. This set of equations is completed by the addition of the equation of state, $p = (\gamma -1)\rho(E - \frac{1}{2} u_j u_i)$, which is valid for ideal gas. $\gamma$ is the ratio of the specific heats.
 
@@ -22,20 +20,17 @@ where the conservative state vector, $\bf W$, is defined as ${\bf W} = \left[ \r
 
 The above equation has been discretized in space using a cell-centered FV method. In a FV method, the computational domain $\Omega$ is divided by a set of non-overlapping control volumes $\Omega_i$, which can be one or a combination of the most common element types, e.g.,
 line segment in 1D, triangles and quadrilaterals in 2D, and tetrahedra, prisms, pyramids, and hexahedra in 3D. On each control volume, the integral form of the governing equations is required to be satisfied,
-$$
 \begin{equation}
 \label{eq:fvm_integral}
   \int_{\Omega_i}\frac{\partial{\bf W}}{\partial t}~{\rm d}V
 + \int_{\Omega_i}\nabla\cdot{\bf F}~{\rm d}V
 = 0.
 \end{equation}
-$$
 The cell-averaged conserved variable vectors, ${\bf W}_i$,
 are taken to be the unknowns and defined by
 ${\bf W}_i(t) = \frac{1}{V_i}\int_{\Omega_i}{\bf W}({\bf x}, t)~{\rm d}V$,
 where $V_i$ is the volume of the control volume $\Omega_i$.
 The following equations can then be derived using the divergence theorem,
-$$
 \begin{equation}
   V_i\frac{{\rm d}{\bf W}_i}{{\rm d}t}
 + \sum_{j \in N_i}\int_{\Gamma_{ij}}{\bf F}_{ij}\cdot{\bf n}_{ij}~{\rm d}S
@@ -43,11 +38,9 @@ $$
 = 0,
 \label{eq:fvm_divergence_theorem_bc}
 \end{equation}
-$$
 where $\Gamma_{ij}=\partial\Omega_i\cap\partial\Omega_j$ denotes an interior common face between cell $\Omega_i$ and $\Omega_j$, $\Gamma_{ib}=\partial\Omega_i\cap\partial\Omega$ denotes a face on the boundary of domain $\Omega$; and ${\bf n}_{ij}$ and ${\bf n}_{ib}$ are the unit vectors normal to face $\Gamma_{ij}$ and $\Gamma_{ib}$, respectively. For each cell $\Omega_i$, $N_i$ represents a set of neighboring cells, $\Omega_j$, sharing a common face, $\Gamma_{ij}$. Because the numerical solution is discontinuous between cell interfaces, the interface fluxes are not uniquely defined. The flux function, ${\bf F}_{ij}\cdot{\bf n}_{ij}$, is replaced by a numerical Riemann flux function $\mathcal{H}({\bf W}_{ij}, {\bf W}_{ji}, {\bf n}_{ij})$, where ${\bf W}_{ij}$ and ${\bf W}_{ji}$ are the conservative state vector at the left and right side of the cell interface ($i < j$). In the case of first-order FVMs, the solution in each cell is assumed to be constant in space. Then on any interior face, $\Gamma_{ij}$, the two states are simply ${\bf W}_{ij} = {\bf W}_i$ and ${\bf W}_{ji} = {\bf W}_j$. In order to guarantee consistency and conservation, $\mathcal{H}({\bf W}_{ij}, {\bf W}_{ji}, {\bf n}_{ij})$ is required to satisfy $\mathcal{H}({\bf W}_{ij}, {\bf W}_{ji}, {\bf n}_{ij}) = {\bf F}_{i}\cdot{\bf n}_{ij}$, and $\mathcal{H}({\bf W}_{ij}, {\bf W}_{ji}, {\bf n}_{ij}) = -\mathcal{H}({\bf W}_{ji}, {\bf W}_{ij}, {\bf n}_{ij})$. Similarly, the flux function on the domain boundary, ${\bf F}_{ib}\cdot{\bf n}_{ib}$, should be determined by $\mathcal{H}({\bf W}_{ib}, {\bf W}_b, {\bf n}_{ib})$ with the use of appropriate boundary conditions (BCs) satisfying the characteristic theory.
 
 Finally, the boundary integration is approximated using one point quadrature at the midpoint of the face, and the semi-discrete form of the equations may be written as
-$$
 \begin{equation}
 \label{eq:fvm_semi_discrete}
   V_i\frac{{\rm d}{\bf W}_i}{{\rm d}t}
@@ -55,7 +48,6 @@ $$
 + \sum_{\Gamma_{ib} \in \partial\Omega}\mathcal{H}_b({\bf W}_{ib}, {\bf W}_b, {\bf n}_{ib})S_{ib}
 = 0,
 \end{equation}
-$$
 where $S_{ij}$ is the length of cell edge in 2D, and area of cell face in 3D.
 In this work, the Riemann flux function is approximated
 using the HLLC (Harten-Lax-van Leer-Contact) approximate Riemann solver \cite{batten1997average}.
@@ -69,11 +61,9 @@ is easier and the computational cost is lower compared with other available Riem
 By assembling all the elemental contributions,
 a system of ordinary differential equations
 governing the evolution of the discrete solution in time can be written as
-$$
 \begin{equation}
 {\bf M}\frac{{\rm d}{\bf W}}{{\rm d}t} = -{\bf R}({\bf W}),
 \end{equation}
-$$
 where $\bf M$ denotes the mass matrix,
 $\bf W$ is the global vector of the degrees of freedom,
 and ${\bf R}({\bf W})$ is the residual vector.
@@ -89,21 +79,17 @@ the conserved variables are not recommended for reconstruction in the case of mu
 The second-order FV method described above will produce non-physical oscillations and nonlinear instability for flows with strong discontinuities. A common solution to this problem is to use a slope limiter. However, one drawback of the slope limiters is that they frequently identify regions near smooth extrema as requiring limiting and this typically results in a reduction of the optimal second-order convergence rate. In CFD applications, active limiters close to smooth extrema, such as a sharp corner or a tip of a geometric configuration, will contaminate the solution in the flow field and ultimately destroy the desired second-order accuracy of the solution. Alternatively, the ENO/WENO methods can be used as a nonlinear limiter for the FVMs as they are more robust than the slope limiters, and can achieve uniform high-order accuracy
 and sharp, essentially non-oscillatory shock transition. This can be accomplished by replacing the piecewise linearly reconstructed solution polynomials with the WENO reconstructed polynomials, which maintain the original cell averages of conservative flow variables, and have 1) second-order accuracy in the regions where the solution is smooth, and 2) oscillation-free behavior in the vicinity of discontinuities.
 
-This work is based on a WENO reconstruction scheme originally introduced by \cite{dumbser2007arbitrary,dumbser2007quadrature}. In this scheme, a linear polynomial on cell $\Omega_i$ is obtained using a nonlinear WENO reconstruction as a convex combination of the piecewise linearly reconstructed gradients at the cell itself ($k=0$) and its face-neighboring cells $(k=1, â¦, N_i)$,
-$$
+This work is based on a WENO reconstruction scheme originally introduced by \cite{dumbser2007arbitrary,dumbser2007quadrature}. In this scheme, a linear polynomial on cell $\Omega_i$ is obtained using a nonlinear WENO reconstruction as a convex combination of the piecewise linearly reconstructed gradients at the cell itself ($k=0$) and its face-neighboring cells $(k=1, \hat{a}|, N_i)$,
 \begin{equation}
 \label{eq:weno}
 \nabla q^{\rm WENO}_i = \sum_{k=0}^{N_i}w_k \nabla q_k,
 \end{equation}
-$$
 where $q_i$ is a component of the primitive variable vector, ${\bf Q}_i$, in cell $\Omega_i$, $\nabla q^{\rm WENO}_i$ is the WENO reconstructed gradient of $q_i$ in cell $\Omega_i$, $\nabla q_k$ is the piecewise linearly reconstructed gradient of $q_k$ in cell $\Omega_k$, and $w_k$ are the normalized nonlinear weights in cell $\Omega_k$. The stencils in the reconstruction are chosen only in a von Neumann neighborhood, i.e. adjacent face-neighboring cells, in order to be compact and consistent with the underlying FV method. The following figure shows a cell $\Omega_e$ of an arbitrary shape in 2D, where the following five stencils ($\Omega_e\Omega_e$, $\Omega_e\Omega_a$, $\Omega_e\Omega_b$, $\Omega_e\Omega_c$,$\Omega_e\Omega_d$) are chosen to construct a Hermite polynomial such that,
-$$
 \begin{equation}
 \frac{1}{V_e}\int_{\Omega_e}q~{\tt d}\Omega = {\bar q_e},
-\hspace{2em}
-\frac{1}{V_k}\int_{\Omega_k}\nabla q^{\rm WENO}~{\rm d}\Omega = \nabla q^{\rm WENO}|_k \hspace{1em} (k = e, a, b, c, d)
+\quad
+\frac{1}{V_k}\int_{\Omega_k}\nabla q^{\rm WENO}~{\rm d}\Omega = \nabla q^{\rm WENO}|_k \quad (k = e, a, b, c, d)
 \end{equation}
-$$
 Although the total number of stencils for each cell depends on the shape of the cell, the presented choice is unique and compact, as only the von Neumann neighbors are involved. This idea has also been extended to higher-order discontinuous Galerkin (DG) methods, where the curvatures of polynomial solutions are reconstructed in a similar fashion \cite{luo2012hermite,luo2013reconstructed}.
 
 !media media/navier_stokes/rdg/weno_stencil.png width=50% padding-right=20px caption=Neighborhood defined by von Neumann neighbors of cell $\Omega_e$ used for HWENO reconstruction on unstructured cells.
@@ -111,20 +97,16 @@ Although the total number of stencils for each cell depends on the shape of the 
 The calculation of $\nabla q^{\rm WENO}_i$ consists of the following steps:
 
   1. Calculation of the so-called oscillation indicator,
-     $$
      \begin{equation}
      o_k = \left[\nabla q_k \cdot \nabla q_k\right]^{\frac{1}{2}},
      \end{equation}
-     $$
      which is used to assess the smoothness of the piecewise linearly reconstructed solution polynomial.
 
   2. And finally, calculation of the non-normalized nonlinear weights,
-     $$
      \begin{equation}
      \tilde{w}_k = \frac{\lambda_k}{(\varepsilon+o_i)^\gamma}.
      \label{eq:non-normalized-nonlinear-weights}
      \end{equation}
-     $$
      where $\varepsilon$ is a small positive number used to avoid division by zero.
      $\tilde{w}_k$ are functions of the linear weights, $\lambda_k$, and oscillation indicator, $o_k$.
      $\lambda_k$ can be chosen to balance the accuracy and the non-oscillatory property of the FV method.
@@ -134,11 +116,9 @@ The calculation of $\nabla q^{\rm WENO}_i$ consists of the following steps:
      and non-oscillatory resolution of strong discontinuities in non-smooth flow problems.
 
   3. Calculation of the normalized nonlinear weights, $w_k$:
-     $$
      \begin{equation}
      w_k = \frac{\tilde{w}_k}{\sum_{k=0}^{N_i}\tilde{w}_k}
      \end{equation}
-     $$
 
 To summarize, the resulting HWENO gradient reconstruction scheme uses the piecewise linearly reconstructed gradients on the cell itself as the central stencil, as well as the piecewise linearly reconstructed gradients on its face-neighboring cells as biased stencils. However, this scheme is not compact in a strict sense, as neighbors` neighbors are used in solution update. Similarly, the well-known minmax slope limiter by \cite{barth1989design} is not compact in this sense either. But like the minmax limiter, the stencil used in the HWENO reconstruction is compact as it involves only the von Neumann neighbors. Therefore this HWENO scheme can be implemented in a compact manner, meaning that no additional data structure is required from the underlying FV method. Notice that it is an attractive feature favored also by other unstructured mesh based frameworks \cite{christon2016hybrid,liu2016comparative}.
 

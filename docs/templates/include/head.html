@@ -6,7 +6,11 @@
 <title>{{title}}</title>
 
 <!-- CSS  -->
-<link href="{{material_icons|default(relpath('css/material-icons.css', current.destination))}}" rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="{{materialize_css|default(relpath('css/materialize.min.css', current.destination))}}"/>
-<link type="text/css" rel="stylesheet" href="{{prism_css|default(relpath('css/prism.min.css', current.destination))}}"/>
-<link type="text/css" rel="stylesheet" href="{{relpath('css/moose.css', current.destination)}}"/>
+<link href="{{load(material_icons|default('css/material-icons.css'))}}" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="{{load(materialize_css|default('css/materialize.min.css'))}}"/>
+<link type="text/css" rel="stylesheet" href="{{load(prism_css|default('css/prism.min.css'))}}"/>
+<link type="text/css" rel="stylesheet" href="{{load(katex_css|default('css/katex.min.css'))}}"/>
+<link type="text/css" rel="stylesheet" href="{{load('css/moose.css')}}"/>
+
+<!-- JS -->
+<script type="text/javascript" src="{{load(katex_js|default('js/katex.min.js'))}}"></script>

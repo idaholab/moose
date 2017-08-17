@@ -549,7 +549,7 @@ class MooseCompleteSyntax(MooseMarkdownCommon, Pattern):
                         a.set('data-moose-disable-link-error', '1')
 
                     if hasattr(obj, 'description'):
-                        el.addItem(a, obj.description)
+                        el.addItem(a, desc=obj.description, body=obj.description)
                     else:
                         el.addItem(a)
 

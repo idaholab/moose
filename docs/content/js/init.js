@@ -21,23 +21,15 @@
   }); // end of document ready
 })(jQuery); // end of jQuery name space
 
-// Setup MathJax
-MathJax.Hub.Config({
-  config: ["MMLorHTML.js"],
-  jax: ["input/TeX", "output/HTML-CSS", "output/NativeMML"],
-  extensions: ["MathMenu.js", "MathZoom.js"],
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-
 // Copy code button
 var clipboard = new Clipboard('.moose-copy-button');
 
 // Function for latex equation references
-MathJax.Hub.Queue(function(){
+$(document).ready(function(){
   $('.moose-equation-reference').each(function(i, e) {
     var elem = $($(e).attr('href'));
     if (elem.length) {
-      var txt = $('.mtext', elem).text()
+      var txt = elem.data('moose-katex-equation-number')
       $(e).text(txt);
       console.log('Located reference to Equation ' + txt);
     } else {

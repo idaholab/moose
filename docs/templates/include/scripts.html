@@ -1,7 +1,5 @@
-<script type="text/javascript" src="{{jquery_js|default(relpath('js/jquery-3.2.1.min.js', current.destination))}}"></script>
-<script type="text/javascript" src="{{materialize_js|default(relpath('js/materialize.min.js', current.destination))}}"></script>
-<script type="text/javascript" src="{{prism_js|default(relpath('js/prism.min.js', current.destination))}}"></script>
-<script type="text/javascript" src="{{mathjax_js|default('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js')}}"></script>
-<script type="text/javascript" src="{{clipboard_js|default(relpath('js/clipboard.min.js', current.destination))}}"></script>
-<script type="text/javascript" src="{{google_chart_loader_js|default('https://www.gstatic.com/charts/loader.js')}}"></script>
-<script type="text/javascript" src="{{relpath('js/init.js', current.destination)}}"></script>
+<script type="text/javascript" src="{{load(jquery_js|default('js/jquery-3.2.1.min.js'))}}"></script>
+<script type="text/javascript" src="{{load(materialize_js|default('js/materialize.min.js'))}}"></script>
+<script type="text/javascript" src="{{load(clipboard_js|default('js/clipboard.min.js'))}}"></script>
+<script type="text/javascript" src="{{load(prism_js|default('js/prism.min.js'))}}"></script>
+©<script type="text/javascript" src="{{load('js/init.js')}}"></script>

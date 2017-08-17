@@ -463,6 +463,25 @@ footer.page-footer {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
 
+/* Equations */
+.moose-katex-block{
+  display: flex;
+}
+
+.moose-katex-equation{
+  flex-grow: 1;
+}
+
+.moose-katex-equation-number{
+  width: 5%;
+  text-align: right;
+  margin-bottom: : auto;
+  margin-top: auto;
+}
+
+.katex-display{
+  margin: 0;
+}
 
 /* Admonition */
 .admonition-title{
@@ -545,6 +564,10 @@ footer.page-footer {
     background: #ffb4b4;
     color: #000;
     border: 0px solid transparent;
+}
+
+.moose-katex-error{
+    color: red;
 }
 
 span.badge.new{

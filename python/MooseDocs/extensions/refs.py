@@ -30,7 +30,7 @@ class RefExtension(MooseMarkdownExtension):
     """
     Adds ref and eqref support.
 
-    eqref: works with MathJax equation reference support.
+    eqref: works with the katex.py extension.
     ref: works with captions create with MooseDocs (see tables.py, media.py, and listings.py).
     """
 
@@ -83,12 +83,7 @@ class FloatReferencePattern(Pattern):
 
 class EquationPattern(MooseMarkdownCommon, Pattern):
     """
-    Defines syntax for referencing MathJax equations with label defined.
-
-    This should be handled automatically by MathJax, but I can't seem to get the eqref stuff
-    working via MathJax. I am guessing that the python-markdown-math package is doing something to
-    break compatibility. I also can't get latex math to work without the package, so until I have
-    more time to dig I am just building the references manually.
+    Defines syntax for referencing equations with label defined.
     """
 
     RE = r'(?<!`)\\eqref{(.*?)}'
@@ -101,10 +96,10 @@ class EquationPattern(MooseMarkdownCommon, Pattern):
         """
         Creates the <a> object with the reference that is updated with FloatLinker.
         """
-        mjx_id = 'mjx-eqn-{}'.format(match.group(2).replace(':', ''))
+        eqn_id = 'moose-katex-equation-{}'.format(match.group(2)).replace(':', '-')
         el = etree.Element('a')
         el.set('class', 'moose-equation-reference')
-        el.set('href', '#' + mjx_id)
+        el.set('href', '#' + eqn_id)
         el.text = '(??)'
         return el
 

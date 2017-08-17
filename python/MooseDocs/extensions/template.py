@@ -110,6 +110,7 @@ class TemplatePostprocessorBase(Postprocessor):
         env.globals['insert_files'] = self._insertFiles
         env.globals['relpath'] = self._relpath
         env.globals['breadcrumbs'] = self._breadcrumbs
+        env.globals['load'] = self._load
 
     def arguments(self, template_args, text): #pylint: disable=no-self-use
         """
@@ -236,6 +237,12 @@ class TemplatePostprocessorBase(Postprocessor):
                 breadcrumb_helper(node.parent)
         breadcrumb_helper(current)
         return crumbs
+
+    def _load(self, location):
+        """
+        Loads css/js from given url and sets the correct relative path.
+        """
+        return self._relpath(location, self.markdown.current.destination)
 
 class TemplatePostprocessor(TemplatePostprocessorBase):
     """

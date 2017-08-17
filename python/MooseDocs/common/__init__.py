@@ -21,7 +21,7 @@ from Builder import Builder
 from moose_docs_file_tree import moose_docs_file_tree
 from moose_docs_import import moose_docs_import
 from moose_docs_app_syntax import moose_docs_app_syntax
+from submodule_status import submodule_status
 from slugify import slugify
 
-EXTENSIONS = ('.md', '.png', '.bmp', '.jpeg', '.svg', '.gif', '.webm', '.ogg', '.mp4', '.js',
-              '.css', '.bib', '.woff', '.woff2')
+EXTENSIONS = ('.md', '.png', '.bmp', '.jpeg', '.svg', '.gif', '.webm', '.ogg', '.mp4', '.bib')

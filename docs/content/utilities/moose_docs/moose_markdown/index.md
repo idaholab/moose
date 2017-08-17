@@ -33,6 +33,8 @@ commands add associated settings defined in the extension.
 | [app_syntax](extensions/app_syntax.md) | Adds markdown syntax for extracting content from MOOSE source code. |
 | [sqa](extensions/sqa.md) | Adds tools for creating software quality documentation using MOOSE templates. |
 | [gchart](extensions/gchart.md) | Adds [Google chart](https://developers.google.com/chart/) capability to MOOSE markdown. |
+| [katex](extensions/katex.md) | Adds math support via [KaTeX](https://khan.github.io/KaTeX/). |
+
 
 ## Python-Markdown Extensions
 
@@ -50,19 +52,6 @@ likely be of use as you develop your own  website, reports, or presentations.
 | [extra](https://pythonhosted.org/Markdown/extensions/extra.html) | A compilation of various Python-Markdown extensions that (mostly) imitates [PHP Markdown Extra](https://michelf.ca/projects/php-markdown/extra/). |
 | [meta](https://pythonhosted.org/Markdown/extensions/meta_data.html) | Adds a syntax for defining meta-data about a document, which is used by MooseDocs to specify template arguments in the [MooseDocs.extensions.template](extensions/templates.md) extension. |
 | [mdx_math](https://github.com/mitya57/python-markdown-math) | This extension adds math formulas support to Python-Markdown. |
-
-A few of these packages listed above are worth demonstrating. Foremost the [mdx_math](https://github.com/mitya57/python-markdown-math) extension enables the use of [MathJax](http://www.mathjax.org) within markdown, refer to the package documentation for complete
-details: [python-markdown-math](https://github.com/mitya57/python-markdown-math).
-
-Inline math may be specified by enclosing the latex in single `$`: $y=a\cdot x + b$. Additionally, stand-alone math may
-be enclosed in `$$` or preferably using the `\begin{equation}` and `\end{equation}` commands.
-
-\begin{equation}
-\label{eqn:test}
-x=\frac{1+y}{1+2z^2}.
-\end{equation}
-
-When [mdx_math](https://github.com/mitya57/python-markdown-math) is utilized and the `\label{eqn:test}` was placed within the latex then it is possible to link to the equation using traditional latex syntax (`\eqref{eqn:test}`): Equation \eqref{eqn:test}.
 
 The [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html) package enables for important and critical
 items to be highlighted, using the syntax detailed below and the package documentation: [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html).
