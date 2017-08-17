@@ -240,7 +240,7 @@ class TestHarness:
         # Note: The warehouse will accumulate all testers in this mode
         if find_only:
             self.warehouse.markAllObjectsInactive()
-            return
+            return []
 
         # Clear out the testers, we won't need them to stick around in the warehouse
         self.warehouse.clear()
