@@ -454,7 +454,7 @@ class TestHarness:
         # tests as they were running
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS-1)))
-            for (tester_data, result, timing) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
+            for (tester_data, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
                 print(util.formatResult(tester_data, result, self.options))
 
         time = clock() - self.start_time
