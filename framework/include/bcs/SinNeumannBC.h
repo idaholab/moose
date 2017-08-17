@@ -24,16 +24,20 @@ template <>
 InputParameters validParams<SinNeumannBC>();
 
 /**
- * Implements a simple constant SinNeumann BC where grad(u)=value on the boundary.
- * Uses the term produced from integrating the diffusion operator by parts.
+ * Implements a spatially-constant, time-varying flux boundary
+ * condition grad(u).n = g(t), where
+ *
+ * g(t) = { g0 + (gT - g0) * sin ((pi*t) / (2*T)), 0 < t < T
+ *        { gT                                   , t > T
+ *
+ * and where:
+ * g0 = value at time 0
+ * gT = value at time T
+ *  T = duration over which the value is changing.
  */
 class SinNeumannBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   SinNeumannBC(const InputParameters & parameters);
 
 protected:

@@ -69,7 +69,6 @@ framework:
     - /BCs/PostprocessorDirichletBC
     - /BCs/PostprocessorNeumannBC
     - /BCs/PresetBC
-    - /BCs/SinNeumannBC
     - /BCs/VacuumBC
     - /BCs/VectorNeumannBC
     - /BCs/WeakGradientBC
