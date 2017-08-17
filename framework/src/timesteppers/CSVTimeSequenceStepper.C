@@ -20,16 +20,17 @@ InputParameters
 validParams<CSVTimeSequenceStepper>()
 {
   InputParameters params = validParams<TimeSequenceStepperBase>();
-  params.addRequiredParam<std::string>("file_name", "name of the file in which the time sequence is read");
-  params.addParam<bool>("header", 
-                        true,
-                        "indicates whether the file contains a header with the column names");
+  params.addRequiredParam<std::string>("file_name",
+                                       "name of the file in which the time sequence is read");
+  params.addParam<bool>(
+      "header", true, "indicates whether the file contains a header with the column names");
   params.addParam<std::string>("delimiter", ",", "delimiter used to parse the file");
-  params.addParam<std::string>("column_name", "time", "name of the column which contains the time sequence");
-  params.addRangeCheckedParam<int>("column_index",
-                                   "column_index >= 0",
-                                   "index of the column which contains the time sequence");
-  params.addClassDescription("Solves the Transient problem at a sequence of given time points read in a file.");
+  params.addParam<std::string>(
+      "column_name", "time", "name of the column which contains the time sequence");
+  params.addRangeCheckedParam<int>(
+      "column_index", "column_index >= 0", "index of the column which contains the time sequence");
+  params.addClassDescription(
+      "Solves the Transient problem at a sequence of given time points read in a file.");
   return params;
 }
 

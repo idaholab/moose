@@ -23,8 +23,8 @@ template <>
 InputParameters validParams<CSVTimeSequenceStepper>();
 
 /**
- * Solves the PDEs at a sequence of time points given as a column in a 
- * text table file (such as a *.csv file). This class uses a 
+ * Solves the PDEs at a sequence of time points given as a column in a
+ * text table file (such as a *.csv file). This class uses a
  * DelimitedFileReader to read the input file.
  *
  * The column can either be identified by name (if the input file contains
@@ -44,7 +44,7 @@ protected:
   bool _header;
   /// string used as a delimiter
   const std::string _delimiter;
-  
+
   /// name of the column containing the time data
   const std::string _column_name;
 
