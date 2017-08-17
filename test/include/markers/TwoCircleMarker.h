@@ -11,41 +11,37 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef FULLSOLVEMULTIAPP_H
-#define FULLSOLVEMULTIAPP_H
 
-#include "MultiApp.h"
+#ifndef TWOCIRCLEMARKER_H
+#define TWOCIRCLEMARKER_H
 
-// Forward declarations
-class FullSolveMultiApp;
-class Executioner;
+#include "Marker.h"
+
+// libmesh includes
+#include "libmesh/mesh_tools.h"
+
+class TwoCircleMarker;
 
 template <>
-InputParameters validParams<FullSolveMultiApp>();
+InputParameters validParams<TwoCircleMarker>();
 
-/**
- * This type of MultiApp will completely solve itself the first time it is asked to take a step.
- *
- * Each "step" after that it will do nothing.
- */
-class FullSolveMultiApp : public MultiApp
+class TwoCircleMarker : public Marker
 {
 public:
-  FullSolveMultiApp(const InputParameters & parameters);
+  TwoCircleMarker(const InputParameters & parameters);
+  virtual ~TwoCircleMarker(){};
 
-  virtual void initialSetup() override;
+protected:
+  virtual MarkerValue computeElementMarker();
 
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
+  const MarkerValue _inside;
+  const MarkerValue _outside;
 
-  virtual void advanceStep() override {}
-
-  virtual bool isSolved() const override { return _solved; }
-
-private:
-  std::vector<Executioner *> _executioners;
-
-  /// Whether or not this MultiApp has already been solved.
-  bool _solved;
+  const Point _p1;
+  const Real _r1;
+  const Point _p2;
+  const Real _r2;
+  const Real _shut_off_time;
 };
 
-#endif // FULLSOLVEMULTIAPP_H
+#endif /* TWOCIRCLEMARKER_H */

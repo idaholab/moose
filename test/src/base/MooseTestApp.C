@@ -202,6 +202,7 @@
 #include "GhostUserObject.h"
 #include "GetTransferUserObject.h"
 #include "TestCSVReader.h"
+#include "ToggleMeshAdaptivity.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -241,6 +242,7 @@
 #include "RandomHitMarker.h"
 #include "QPointMarker.h"
 #include "CircleMarker.h"
+#include "TwoCircleMarker.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -539,6 +541,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(GhostUserObject);
   registerUserObject(GetTransferUserObject);
   registerUserObject(TestCSVReader);
+  registerUserObject(ToggleMeshAdaptivity);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
@@ -561,6 +564,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);
   registerMarker(CircleMarker);
+  registerMarker(TwoCircleMarker);
 
   registerExecutioner(TestSteady);
   registerExecutioner(AdaptAndModify);

@@ -53,8 +53,16 @@ Resurrector::restartFromFile()
   if (!_fe_problem.skipAdditionalRestartData())
     read_flags |= EquationSystems::READ_ADDITIONAL_DATA;
 
-  // DECODE or READ based on suffix
-  _fe_problem.es().read(file_name, read_flags, _fe_problem.adaptivity().isOn());
+  // Set libHilbert renumbering flag to false.  We don't support
+  // N-to-M restarts regardless, and if we're *never* going to do
+  // N-to-M restarts then libHilbert is just unnecessary computation
+  // and communication.
+  const bool renumber = false;
+
+  // DECODE or READ based on suffix.
+  // MOOSE doesn't currently use partition-agnostic renumbering, since
+  // it can break restarts when multiple nodes are at the same point
+  _fe_problem.es().read(file_name, read_flags, renumber);
 
   _fe_problem.getNonlinearSystemBase().update();
   Moose::perf_log.pop("restartFromFile()", "Setup");

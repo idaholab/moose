@@ -19,8 +19,10 @@
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "MooseVariableScalar.h"
+#include "SystemBase.h"
 
 // libMesh includes
+#include "libmesh/dof_map.h"
 #include "libmesh/nemesis_io.h"
 
 template <>
@@ -102,14 +104,30 @@ Nemesis::outputScalarVariables()
   // Append the scalar to the global output lists
   for (const auto & out_name : out)
   {
-    VariableValue & variable = _problem_ptr->getScalarVariable(0, out_name).sln();
-    unsigned int n = variable.size();
+    // Make sure scalar values are in sync with the solution vector
+    // and are visible on this processor.  See TableOutput.C for
+    // TableOutput::outputScalarVariables() explanatory comments
+
+    MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, out_name);
+    scalar_var.reinit();
+    VariableValue value = scalar_var.sln();
+
+    const std::vector<dof_id_type> & dof_indices = scalar_var.dofIndices();
+    const unsigned int n = dof_indices.size();
+    value.resize(n);
+
+    const DofMap & dof_map = scalar_var.sys().dofMap();
+    for (unsigned int i = 0; i != n; ++i)
+    {
+      const processor_id_type pid = dof_map.dof_owner(dof_indices[i]);
+      this->comm().broadcast(value[i], pid);
+    }
 
     // If the scalar has a single component, output the name directly
     if (n == 1)
     {
       _global_names.push_back(out_name);
-      _global_values.push_back(variable[0]);
+      _global_values.push_back(value[0]);
     }
 
     // If the scalar as many components add indices to the end of the name
@@ -120,7 +138,7 @@ Nemesis::outputScalarVariables()
         std::ostringstream os;
         os << out_name << "_" << i;
         _global_names.push_back(os.str());
-        _global_values.push_back(variable[i]);
+        _global_values.push_back(value[i]);
       }
     }
   }

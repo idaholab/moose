@@ -11,41 +11,32 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef FULLSOLVEMULTIAPP_H
-#define FULLSOLVEMULTIAPP_H
 
-#include "MultiApp.h"
+#ifndef TOGGLEMESHADAPTIVITY_H
+#define TOGGLEMESHADAPTIVITY_H
 
-// Forward declarations
-class FullSolveMultiApp;
-class Executioner;
+#include "GeneralUserObject.h"
+
+class ToggleMeshAdaptivity;
 
 template <>
-InputParameters validParams<FullSolveMultiApp>();
+InputParameters validParams<ToggleMeshAdaptivity>();
 
-/**
- * This type of MultiApp will completely solve itself the first time it is asked to take a step.
- *
- * Each "step" after that it will do nothing.
- */
-class FullSolveMultiApp : public MultiApp
+class ToggleMeshAdaptivity : public GeneralUserObject
 {
 public:
-  FullSolveMultiApp(const InputParameters & parameters);
+  ToggleMeshAdaptivity(const InputParameters & params);
 
-  virtual void initialSetup() override;
+  virtual void initialSetup();
 
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
+  virtual void initialize(){};
+  virtual void execute();
+  virtual void finalize(){};
 
-  virtual void advanceStep() override {}
+protected:
+  void checkState();
 
-  virtual bool isSolved() const override { return _solved; }
-
-private:
-  std::vector<Executioner *> _executioners;
-
-  /// Whether or not this MultiApp has already been solved.
-  bool _solved;
+  MooseEnum _state;
 };
 
-#endif // FULLSOLVEMULTIAPP_H
+#endif /* TOGGLEMESHADAPTIVITY_H */

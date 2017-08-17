@@ -1,6 +1,5 @@
 from FileTester import FileTester
 from CSVDiffer import CSVDiffer
-import util
 
 class CSVDiff(FileTester):
 
