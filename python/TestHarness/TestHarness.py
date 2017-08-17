@@ -426,6 +426,7 @@ class TestHarness:
             # Store these results to a table we will use when we print final results
             self.test_table.append( (tester_data, result, timing) )
 
+            self.postRun(tester.specs, timing)
             # Tally the results of this test to be used in our Final Test Results footer
             if tester.isSkipped():
                 self.num_skipped += 1
@@ -747,7 +748,6 @@ class TestTimer(TestHarness):
         data = []
         sum_time = 0
         num = 0
-        parse_failed = False
         # Were only interested in storing scaled data
         if timing != None and test['scale_refine'] != 0:
             sum_time += float(timing)
