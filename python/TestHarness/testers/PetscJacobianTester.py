@@ -1,5 +1,5 @@
 from RunApp import RunApp
-import os, re
+import re
 
 class PetscJacobianTester(RunApp):
 

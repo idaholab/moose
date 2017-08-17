@@ -1,6 +1,5 @@
 from FileTester import FileTester
 import os
-import util
 import sys
 from mooseutils.ImageDiffer import ImageDiffer
 

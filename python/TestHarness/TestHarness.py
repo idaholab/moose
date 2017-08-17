@@ -3,7 +3,7 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
-import os, re, inspect, errno, subprocess, shutil, time, copy
+import os, re, inspect, errno, time, copy
 
 import path_tool
 path_tool.activate_module('FactorySystem')
@@ -16,7 +16,6 @@ from Parser import Parser
 from Warehouse import Warehouse
 import util
 
-from multiprocessing import Process
 import argparse
 from timeit import default_timer as clock
 
@@ -617,7 +616,6 @@ class TestHarness:
         # Convert all list based options of length one to scalars
         for key, value in vars(self.options).items():
             if type(value) == list and len(value) == 1:
-                tmp_str = getattr(self.options, key)
                 setattr(self.options, key, value[0])
 
         # If attempting to test only failed_tests, open the .failed_tests file and create a list object
@@ -705,6 +703,7 @@ class TestTimer(TestHarness):
         TestHarness.__init__(self, argv, app_name, moose_dir)
         try:
             from sqlite3 import dbapi2 as sqlite
+            assert sqlite # silence pyflakes warning
         except:
             print('Error: --store-timing requires the sqlite3 python module.')
             sys.exit(1)

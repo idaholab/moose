@@ -1,4 +1,4 @@
-import os, sys, traceback
+import os, traceback
 import xml.etree.ElementTree as xml
 
 ##
@@ -129,7 +129,6 @@ class XMLDiffer(object):
 
         # Define local variables
         root = [self._root1, self._root2]
-        name = ['file 1', 'file 2']
 
         # Do nothing if the objects do not exist
         if root[0] == None or root[1] == None:
