@@ -1,4 +1,4 @@
-import re, os, sys
+import os, sys
 import util
 from Tester import Tester
 
@@ -25,8 +25,9 @@ class AnalyzeJacobian(Tester):
     def checkRunnable(self, options):
         try:
             import numpy
+            assert numpy # silence pyflakes warning
             return (True, '')
-        except Exception as e:
+        except Exception:
             return (False, 'skipped (no numpy)')
 
 

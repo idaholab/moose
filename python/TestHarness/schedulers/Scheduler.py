@@ -1,7 +1,7 @@
 from time import sleep
 from MooseObject import MooseObject
 from TesterData import TesterData
-import os, sys
+import os
 from contrib import dag
 from timeit import default_timer as clock
 

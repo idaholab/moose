@@ -1,4 +1,3 @@
-import re, os, sys, time
 from Tester import Tester
 
 class RunCommand(Tester):
