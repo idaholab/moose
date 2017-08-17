@@ -21,13 +21,13 @@ validParams<ToggleMeshAdaptivity>()
   MooseEnum state("on off");
 
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<MooseEnum>("mesh_adaptivity", state, "Control mesh adaptivity, choices are 'on' or 'off'.");
+  params.addRequiredParam<MooseEnum>(
+      "mesh_adaptivity", state, "Control mesh adaptivity, choices are 'on' or 'off'.");
   return params;
 }
 
 ToggleMeshAdaptivity::ToggleMeshAdaptivity(const InputParameters & params)
-  : GeneralUserObject(params),
-    _state(getParam<MooseEnum>("mesh_adaptivity"))
+  : GeneralUserObject(params), _state(getParam<MooseEnum>("mesh_adaptivity"))
 {
 }
 
