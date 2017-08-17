@@ -4,4 +4,4 @@
         ignore = dirty
 [submodule "docs/content/media/large_media"]
 	path = docs/content/media/large_media
-	url = git@github.com:idaholab/large_media.git
+	url = https://github.com/idaholab/large_media.git

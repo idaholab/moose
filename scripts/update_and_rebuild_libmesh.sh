@@ -50,8 +50,8 @@ cd $SCRIPT_DIR/..
 # Test for git repository when not using fast
 git_dir=`git rev-parse --show-cdup 2>/dev/null`
 if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
-  git submodule init
-  git submodule update
+  git submodule init libmesh
+  git submodule update libmesh
   if [[ $? != 0 ]]; then
     echo "git submodule command failed, are your proxy settings correct?"
     # TODO: is this a git bug?
