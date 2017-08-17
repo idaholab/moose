@@ -31,8 +31,13 @@ protected:
   virtual Real computeQpJacobian() = 0;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) = 0;
   virtual RealVectorValue computeStrongConvectiveTerm();
+  virtual RealVectorValue dConvecDUComp(unsigned comp);
   virtual RealVectorValue computeStrongViscousTerm();
+  virtual RealVectorValue dViscDUComp(unsigned comp);
+  virtual RealVectorValue weakViscousTerm(unsigned comp);
+  virtual RealVectorValue dWeakViscDUComp();
   virtual RealVectorValue computeStrongPressureTerm();
+  virtual RealVectorValue dPressureDPressure();
   virtual RealVectorValue computeStrongGravityTerm();
 
   /// second derivatives of the shape function

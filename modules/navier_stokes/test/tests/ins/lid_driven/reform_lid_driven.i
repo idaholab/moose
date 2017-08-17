@@ -12,7 +12,6 @@
   nx = 16
   ny = 16
   elem_type = QUAD9
-  # elem_type = QUAD4
 []
 
 [MeshModifiers]
@@ -25,15 +24,14 @@
 
 [Variables]
   [./vel_x]
-    # order = SECOND
-    # family = LAGRANGE
+    order = SECOND
+    family = LAGRANGE
   [../]
 
   [./vel_y]
-    # order = SECOND
-    # family = LAGRANGE
+    order = SECOND
+    family = LAGRANGE
   [../]
-
 
   [./p]
     order = FIRST
@@ -49,13 +47,6 @@
     u = vel_x
     v = vel_y
   [../]
-  [./mass_pspg]
-    type = INSMassPSPG
-    variable = p
-    u = vel_x
-    v = vel_y
-    p = p
-  [../]
 
   # # x-momentum, time
   # [./x_momentum_time]
@@ -65,7 +56,7 @@
 
   # x-momentum, space
   [./x_momentum_space]
-    type = INSMomentumLaplaceForm
+    type = INSMomentumChild
     variable = vel_x
     u = vel_x
     v = vel_y
@@ -81,14 +72,13 @@
 
   # y-momentum, space
   [./y_momentum_space]
-    type = INSMomentumLaplaceForm
+    type = INSMomentumChild
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
   [../]
-
 []
 
 [BCs]
@@ -145,7 +135,6 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-    # solve_type = 'PJFNK'
   [../]
 []
 
@@ -155,11 +144,8 @@
   # num_steps = 5
   # dt = .5
   # dtmin = .5
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  # petsc_options_iname = '-pc_type' # -pc_factor_levels'
-  # petsc_options_value = 'ilu' # 2'
   # petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
   # petsc_options_value = 'asm      2               ilu          4'
   line_search = 'none'
@@ -171,7 +157,6 @@
 []
 
 [Outputs]
-  print_linear_residuals = false
-  file_base = lid_driven_out_pspg
+  file_base = lid_driven_out
   exodus = true
 []

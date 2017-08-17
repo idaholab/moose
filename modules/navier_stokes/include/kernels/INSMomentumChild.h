@@ -4,35 +4,35 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INSMASSPSPG_H
-#define INSMASSPSPG_H
+#ifndef INSMOMENTUMCHILD_H
+#define INSMOMENTUMCHILD_H
 
 #include "INSBase.h"
 
 // Forward Declarations
-class INSMassPSPG;
+class INSMomentumChild;
 
 template <>
-InputParameters validParams<INSMassPSPG>();
+InputParameters validParams<INSMomentumChild>();
 
 /**
  * This class computes the mass equation residual and Jacobian
  * contributions for the incompressible Navier-Stokes momentum
  * equation.
  */
-class INSMassPSPG : public INSBase
+class INSMomentumChild : public INSBase
 {
 public:
-  INSMassPSPG(const InputParameters & parameters);
+  INSMomentumChild(const InputParameters & parameters);
 
-  virtual ~INSMassPSPG() {}
+  virtual ~INSMomentumChild() {}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  const Real & _alpha;
+  unsigned _component;
 };
 
-#endif // INSMASSPSPG_H
+#endif // INSMOMENTUMCHILD_H

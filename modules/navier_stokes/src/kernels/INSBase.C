@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "INSBase.h"
+#include "Assembly.h"
 
 template <>
 InputParameters
@@ -91,12 +92,9 @@ INSBase::dConvecDUComp(unsigned comp)
   convective_term(1) = _rho[_qp] * d_U_d_comp * _grad_v_vel[_qp];
   convective_term(2) = _rho[_qp] * d_U_d_comp * _grad_w_vel[_qp];
 
-  // Put the gradients of velocity into a tensor and then call only the component row of the tensor
-  // in order to add to convective_term
-  for (unsigned i = 0; i < 3; i++)
-    if
+  convective_term(comp) += _rho[_qp] * U * _grad_phi[_j][_qp];
 
-      return convective_term;
+  return convective_term;
 }
 
 RealVectorValue
@@ -114,9 +112,50 @@ INSBase::computeStrongViscousTerm()
 }
 
 RealVectorValue
+INSBase::dViscDUComp(unsigned comp)
+{
+  RealVectorValue viscous_term(0, 0, 0);
+  viscous_term(comp) = -_mu[_qp] * (_second_phi[_j][_qp](0, 0) + _second_phi[_j][_qp](1, 1) +
+                                    _second_phi[_j][_qp](2, 2));
+
+  return viscous_term;
+}
+
+RealVectorValue
+INSBase::weakViscousTerm(unsigned comp)
+{
+  switch (comp)
+  {
+    case 0:
+      return _mu[_qp] * _grad_u_vel[_qp];
+
+    case 1:
+      return _mu[_qp] * _grad_v_vel[_qp];
+
+    case 2:
+      return _mu[_qp] * _grad_w_vel[_qp];
+
+    default:
+      return _zero[_qp];
+  }
+}
+
+RealVectorValue
+INSBase::dWeakViscDUComp()
+{
+  return _mu[_qp] * _grad_phi[_j][_qp];
+}
+
+RealVectorValue
 INSBase::computeStrongPressureTerm()
 {
   return _grad_p[_qp];
+}
+
+RealVectorValue
+INSBase::dPressureDPressure()
+{
+  return _grad_phi[_j][_qp];
 }
 
 RealVectorValue

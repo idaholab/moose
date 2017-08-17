@@ -14,18 +14,20 @@ validParams<INSMassPSPG>()
 
   params.addClassDescription(
       "This class computes the PSPG stabilization components for the incompressibility equation.");
+  params.addParam<Real>("alpha", 1., "The alpha stabilization parameter.");
   return params;
 }
 
-INSMassPSPG::INSMassPSPG(const InputParameters & parameters) : INSBase(parameters) {}
+INSMassPSPG::INSMassPSPG(const InputParameters & parameters)
+  : INSBase(parameters), _alpha(getParam<Real>("alpha"))
+
+{
+}
 
 Real
 INSMassPSPG::computeQpResidual()
 {
-  // To do: Pick this in a more intelligent way
-  Real alpha = 1;
-
-  Real tau = alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+  Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
   return tau * _grad_test[_i][_qp] * (computeStrongConvectiveTerm() + computeStrongViscousTerm() +
                                       computeStrongPressureTerm() + computeStrongGravityTerm());
 }
@@ -33,13 +35,28 @@ INSMassPSPG::computeQpResidual()
 Real
 INSMassPSPG::computeQpJacobian()
 {
-  // To do
-  return 0.0;
+  Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+  return tau * _grad_test[_i][_qp] * dPressureDPressure();
 }
 
 Real
 INSMassPSPG::computeQpOffDiagJacobian(unsigned jvar)
 {
-  // To do
-  return 0.0;
+  if (jvar == _u_vel_var_number)
+  {
+    Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+    return tau * _grad_test[_i][_qp] * (dConvecDUComp(0) + dViscDUComp(0));
+  }
+  else if (jvar == _v_vel_var_number)
+  {
+    Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+    return tau * _grad_test[_i][_qp] * (dConvecDUComp(1) + dViscDUComp(1));
+  }
+  else if (jvar == _w_vel_var_number)
+  {
+    Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+    return tau * _grad_test[_i][_qp] * (dConvecDUComp(2) + dViscDUComp(2));
+  }
+  else
+    return 0;
 }
