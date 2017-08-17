@@ -20,8 +20,8 @@ InputParameters
 validParams<CSVTimeSequenceStepper>()
 {
   InputParameters params = validParams<TimeSequenceStepperBase>();
-  params.addRequiredParam<std::string>("file_name",
-                                       "name of the file in which the time sequence is read");
+  params.addRequiredParam<FileName>("file_name",
+                                    "name of the file in which the time sequence is read");
   params.addParam<bool>(
       "header", true, "indicates whether the file contains a header with the column names");
   params.addParam<std::string>("delimiter", ",", "delimiter used to parse the file");
@@ -36,7 +36,7 @@ validParams<CSVTimeSequenceStepper>()
 
 CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameters)
   : TimeSequenceStepperBase(parameters),
-    _file_name(getParam<std::string>("file_name")),
+    _file_name(getParam<FileName>("file_name")),
     _header(getParam<bool>("header")),
     _delimiter(getParam<std::string>("delimiter")),
     _column_name(getParam<std::string>("column_name")),
