@@ -63,7 +63,7 @@ class Tests(Testing.PeacockTester):
         """
         image_name = os.path.abspath(self.pressure_filename)
         with Testing.remember_cwd():
-            pressure_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "tensor_mechanics", "tests", "pressure")
+            pressure_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "tensor_mechanics", "test", "tests", "pressure")
             exe = Testing.find_moose_test_exe("modules/combined", "combined")
             self.checkInputFile("pressure_test.i", image_name, exe_path=exe, cwd=pressure_dir)
 
@@ -75,7 +75,7 @@ class Tests(Testing.PeacockTester):
         """
         image_name = os.path.abspath(self.globals_filename)
         with Testing.remember_cwd():
-            reconstruct_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "phase_field", "tests", "reconstruction")
+            reconstruct_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "phase_field", "test", "tests", "reconstruction")
             exe = Testing.find_moose_test_exe("modules/combined", "combined")
             self.checkInputFile("2phase_reconstruction2.i", image_name, exe_path=exe, cwd=reconstruct_dir)
 

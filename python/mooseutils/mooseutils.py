@@ -69,8 +69,12 @@ def find_moose_executable(loc, **kwargs):
         name[str]: (Default: opt.path.basename(loc)) The name of the executable to locate.
     """
 
-    # Set the methods and name local varaiables
-    methods = kwargs.pop('methods', ['opt', 'oprof', 'dbg', 'devel'])
+    # Set the methods and name local variables
+    if 'METHOD' in os.environ:
+        methods = [os.environ['METHOD']]
+    else:
+        methods = ['opt', 'oprof', 'dbg', 'devel']
+    methods = kwargs.pop('methods', methods)
     name = kwargs.pop('name', os.path.basename(loc))
 
     # Handle 'combined' and 'tests'
