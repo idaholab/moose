@@ -60,7 +60,6 @@ framework:
     - /BCs/AddBCAction
     - /BCs/ConvectiveFluxBC
     - /BCs/DGFunctionDiffusionDirichletBC
-    - /BCs/DiffusionFluxBC
     - /BCs/FunctionPenaltyDirichletBC
     - /BCs/FunctionPresetBC
     - /BCs/MatchedValueBC

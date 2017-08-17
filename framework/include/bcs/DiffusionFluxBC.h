@@ -23,7 +23,16 @@ template <>
 InputParameters validParams<DiffusionFluxBC>();
 
 /**
+ * A FluxBC which is consistent with the boundary terms arising from
+ * the Diffusion Kernel. The flux vector in this case is simply
+ * grad(u) and the residual contribution is:
+ *
  * \f$ F(u) = - \int_{\Gamma} \nabla u * \hat n * \phi d\Gamma \f$
+ *
+ * In contrast to e.g. VectorNeumannBC, the user does not provide a
+ * specified value of the flux when using this class, instead the
+ * residual contribution corresponding to the current value of grad(u)
+ * is computed and accumulated into the residual vector.
  */
 class DiffusionFluxBC : public FluxBC
 {
