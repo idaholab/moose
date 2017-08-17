@@ -23,9 +23,10 @@ class CheckFiles(FileTester):
         return self.specs['check_files'] + self.specs['check_not_exists']
 
     def processResults(self, moose_dir, retcode, options, output):
-        output = FileTester.processResults(self, moose_dir, retcode, options, output)
+        FileTester.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
+
         if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output
         else:

@@ -24,10 +24,11 @@ class VTKDiff(RunApp):
             util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
     def processResults(self, moose_dir, retcode, options, output):
-        output = RunApp.processResults(self, moose_dir, retcode, options, output)
+        RunApp.testFileOutput(self, moose_dir, retcode, options, output)
 
         # Skip
         specs = self.specs
+
         if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output
 
