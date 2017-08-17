@@ -27,16 +27,13 @@ template <>
 InputParameters validParams<VectorNeumannBC>();
 
 /**
- * Implements a simple constant VectorNeumann BC where grad(u)=value on the boundary.
- * Uses the term produced from integrating the diffusion operator by parts.
+ * Implements a flux boundary condition grad(u).n = V.n, where the
+ * vector V is specifed by the user. This differs from NeumannBC,
+ * where the user instead specifies the _scalar_ value g = grad(u).n.
  */
 class VectorNeumannBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   VectorNeumannBC(const InputParameters & parameters);
 
 protected:
@@ -46,4 +43,4 @@ protected:
   const RealVectorValue & _value;
 };
 
-#endif // NEUMANNBC_H
+#endif

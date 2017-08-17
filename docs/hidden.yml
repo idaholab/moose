@@ -70,7 +70,6 @@ framework:
     - /BCs/PostprocessorNeumannBC
     - /BCs/PresetBC
     - /BCs/VacuumBC
-    - /BCs/VectorNeumannBC
     - /BCs/WeakGradientBC
     - /BCs/Periodic
     - /BCs/Periodic/AddPeriodicBCAction
