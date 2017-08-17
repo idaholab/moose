@@ -94,10 +94,11 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   MeshBase & mesh = _es_ptr->get_mesh();
   CheckpointIO io(mesh, _binary);
 
-  // Set renumbering flag (renumber if adaptivity is on)
-  bool renumber = false;
-  if (_problem_ptr->adaptivity().isOn())
-    renumber = true;
+  // Set libHilbert renumbering flag to false.  We don't support
+  // N-to-M restarts regardless, and if we're *never* going to do
+  // N-to-M restarts then libHilbert is just unnecessary computation
+  // and communication.
+  const bool renumber = false;
 
   // Create checkpoint file structure
   CheckpointFileNames current_file_struct;
