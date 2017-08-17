@@ -397,7 +397,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number> & vec_solu
               // std::vector<Point>points(1);
               // points[0] = info._starting_closest_point_ref;
               // Elem *side =
-              // (info._starting_elem->build_side(info._starting_side_num,false)).release();
+              // (info._starting_elem->build_side_ptr(info._starting_side_num,false)).release();
               // FEBase &fe = *(pen_loc._fe[0]);
               // fe.reinit(side, &points);
               // RealVectorValue correction = starting_point[0] - current_coords;

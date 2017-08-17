@@ -695,16 +695,16 @@ PenetrationThread::findRidgeContactPoint(Point & contact_point,
   mooseAssert(sidedim == pi2->_side->dim(), "Incompatible dimensionalities");
 
   // Nodes on faces for the two interactions
-  std::vector<Node *> side1_nodes;
+  std::vector<const Node *> side1_nodes;
   getSideCornerNodes(pi1->_side, side1_nodes);
-  std::vector<Node *> side2_nodes;
+  std::vector<const Node *> side2_nodes;
   getSideCornerNodes(pi2->_side, side2_nodes);
 
   std::sort(side1_nodes.begin(), side1_nodes.end());
   std::sort(side2_nodes.begin(), side2_nodes.end());
 
   // Find nodes shared by the two faces
-  std::vector<Node *> common_nodes;
+  std::vector<const Node *> common_nodes;
   std::set_intersection(side1_nodes.begin(),
                         side1_nodes.end(),
                         side2_nodes.begin(),
@@ -778,7 +778,7 @@ PenetrationThread::findRidgeContactPoint(Point & contact_point,
 }
 
 void
-PenetrationThread::getSideCornerNodes(Elem * side, std::vector<Node *> & corner_nodes)
+PenetrationThread::getSideCornerNodes(const Elem * side, std::vector<const Node *> & corner_nodes)
 {
   const ElemType t(side->type());
   corner_nodes.clear();
@@ -822,7 +822,7 @@ bool
 PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point & p,
                                                       const Node *& closest_node,
                                                       const Elem * side,
-                                                      const std::vector<Node *> & edge_nodes)
+                                                      const std::vector<const Node *> & edge_nodes)
 {
   const ElemType t = side->type();
   Real & xi = p(0);
@@ -1237,7 +1237,8 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   //   original projected position of slave node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  std::unique_ptr<Elem> side = info._starting_elem->build_side(info._starting_side_num, false);
+  std::unique_ptr<const Elem> side =
+      info._starting_elem->build_side_ptr(info._starting_side_num, false);
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
@@ -1677,7 +1678,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     if (already_have_info_this_side)
       break;
 
-    Elem * side = (elem->build_side(sides[i], false)).release();
+    const Elem * side = (elem->build_side_ptr(sides[i], false)).release();
 
     // Only continue with creating info for this side if the side contains
     // all of the nodes in nodes_that_must_be_on_side

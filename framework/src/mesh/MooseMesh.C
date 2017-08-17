@@ -1148,8 +1148,8 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
           unsigned int s_neigh =
               boundary_info.side_with_boundary_id(neigh, periodic->pairedboundary);
 
-          std::unique_ptr<Elem> elem_side = elem->build_side(s);
-          std::unique_ptr<Elem> neigh_side = neigh->build_side(s_neigh);
+          std::unique_ptr<const Elem> elem_side = elem->build_side_ptr(s);
+          std::unique_ptr<const Elem> neigh_side = neigh->build_side_ptr(s_neigh);
 
           // At this point we have matching sides - lets find matching nodes
           for (unsigned int i = 0; i < elem_side->n_nodes(); ++i)
@@ -1158,7 +1158,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
             Point master_point = periodic->get_corresponding_pos(*master_node);
             for (unsigned int j = 0; j < neigh_side->n_nodes(); ++j)
             {
-              Node * slave_node = neigh_side->node_ptr(j);
+              const Node * slave_node = neigh_side->node_ptr(j);
               if (master_point.absolute_fuzzy_equals(*slave_node))
               {
                 // Avoid inserting any duplicates
@@ -1347,7 +1347,7 @@ MooseMesh::detectPairedSidesets()
       // If side is on the boundary
       if (elem->neighbor_ptr(s) == nullptr)
       {
-        std::unique_ptr<Elem> side = elem->build_side(s);
+        std::unique_ptr<Elem> side = elem->build_side_ptr(s);
 
         fe_faces[side_dim]->reinit(elem, s);
 

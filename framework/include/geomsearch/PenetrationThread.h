@@ -115,12 +115,12 @@ protected:
                              const unsigned int index1,
                              const unsigned int index2);
 
-  void getSideCornerNodes(Elem * side, std::vector<Node *> & corner_nodes);
+  void getSideCornerNodes(const Elem * side, std::vector<const Node *> & corner_nodes);
 
   bool restrictPointToSpecifiedEdgeOfFace(Point & p,
                                           const Node *& closest_node,
                                           const Elem * side,
-                                          const std::vector<Node *> & edge_nodes);
+                                          const std::vector<const Node *> & edge_nodes);
   bool restrictPointToFace(Point & p, const Node *& closest_node, const Elem * side);
 
   bool isFaceReasonableCandidate(const Elem * master_elem,
