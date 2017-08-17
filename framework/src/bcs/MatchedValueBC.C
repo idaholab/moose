@@ -20,6 +20,8 @@ validParams<MatchedValueBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
+  params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
+                             "on a specified boundary.");
   return params;
 }
 

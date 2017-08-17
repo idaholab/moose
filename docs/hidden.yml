@@ -62,7 +62,6 @@ framework:
     - /BCs/DGFunctionDiffusionDirichletBC
     - /BCs/FunctionPenaltyDirichletBC
     - /BCs/FunctionPresetBC
-    - /BCs/MatchedValueBC
     - /BCs/OneDEqualValueConstraintBC
     - /BCs/PostprocessorDirichletBC
     - /BCs/PostprocessorNeumannBC
