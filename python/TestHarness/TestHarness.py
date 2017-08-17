@@ -445,7 +445,7 @@ class TestHarness:
                 if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
                     fname = os.path.join(tester.getTestDir(), tester.getTestName().split('/')[-1] + '.' + result[:6] + '.txt')
                     f = open(fname, 'w')
-                    f.write(util.formatResult( tester_data, result, self.options, color=False) + '\n')
+                    f.write(util.formatResult( tester_data, tester_data.getOutput(), self.options, color=False) + '\n')
                     f.close()
 
     # Print final results, close open files, and exit with the correct error code
