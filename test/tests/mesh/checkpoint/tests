@@ -1,0 +1,14 @@
+[Tests]
+  [./test_2]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_2.e'
+    cli_args = 'Outputs/file_base=test_2  Mesh/file=checkpoint_split_in.2.cpr'
+  [../]
+  [./test_2a]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_2a.e'
+    cli_args = 'Outputs/file_base=test_2a Mesh/file=checkpoint_split_in.2.cpa'
+  [../]
+[]
