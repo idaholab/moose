@@ -6,6 +6,7 @@
   file = 2blocks.e
   displacements = 'disp_x disp_y'
   patch_size = 80
+  parallel_type = replicated
 []
 
 [Variables]
