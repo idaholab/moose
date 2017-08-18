@@ -143,7 +143,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _has_nodalbc_save_in(false),
     _has_nodalbc_diag_save_in(false)
 {
-  _Re_non_time_tag = _fe_problem.addTag("Re_non_time");
+  _Re_non_time_tag = _fe_problem.addTag("NONTIME");
   _Re_non_time = &addVector(_Re_non_time_tag, false, GHOSTED);
 
   _u_dot = &addVector("u_dot", true, GHOSTED);
@@ -668,7 +668,7 @@ NonlinearSystemBase::residualVector(Moose::KernelType type)
       {
         print_trace();
 
-        _Re_time_tag = _fe_problem.addTag("Re_time");
+        _Re_time_tag = _fe_problem.addTag("TIME");
         _Re_time = &addVector(_Re_time_tag, false, GHOSTED);
       }
       return *_Re_time;
