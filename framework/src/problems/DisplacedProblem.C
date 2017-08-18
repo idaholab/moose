@@ -224,6 +224,12 @@ DisplacedProblem::addTag(TagName tag_name)
   return _mproblem.addTag(tag_name);
 }
 
+TagID
+DisplacedProblem::getTag(TagName tag_name)
+{
+  return _mproblem.getTag(tag_name);
+}
+
 TagName
 DisplacedProblem::tagName(TagID tag)
 {

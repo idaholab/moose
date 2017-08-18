@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'RunException'
+    input = 'no_tags.i'
+    expect_err = 'MUST provide at least one tag for Kernel'
+  [../]
+[]

@@ -79,6 +79,11 @@ public:
   virtual TagID addTag(TagName tag_name);
 
   /**
+   * Get a TagID from a TagName.
+   */
+  virtual TagID getTag(TagName tag_name);
+
+  /**
    * Retrieve the name associated with a TagID
    */
   virtual TagName tagName(TagID tag);

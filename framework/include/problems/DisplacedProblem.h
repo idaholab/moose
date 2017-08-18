@@ -92,6 +92,7 @@ public:
                           const NumericVector<Number> & aux_soln);
 
   virtual TagID addTag(TagName tag_name) override;
+  virtual TagID getTag(TagName tag_name) override;
   virtual TagName tagName(TagID tag) override;
   virtual bool tagExists(TagID tag) override;
   virtual unsigned int numTags() override;

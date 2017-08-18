@@ -581,6 +581,12 @@ public:
   {
     return _sub_Re[static_cast<unsigned int>(type)][var_num];
   }
+
+  DenseVector<Number> & residualBlock(unsigned int var_num, TagID type)
+  {
+    return _sub_Re[static_cast<unsigned int>(type)][var_num];
+  }
+
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num,
                                               Moose::KernelType type = Moose::KT_NONTIME)
   {

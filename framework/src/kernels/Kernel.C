@@ -84,13 +84,36 @@ Kernel::Kernel(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
+
+  auto & tag_names = getParam<MultiMooseEnum>("tags");
+
+  if (!tag_names.isValid())
+    mooseError("MUST provide at least one tag for Kernel: ", name());
+
+  for (auto & tag_name : tag_names)
+  {
+    if (!_fe_problem.tagExists(tag_name))
+      mooseError("Kernel, ",
+                 name(),
+                 ", was assigned an invalid tag: '",
+                 tag_name,
+                 "'.  If this is a TimeKernel then this may have happened because you didn't "
+                 "specify a Transient Executioner.");
+
+    _tags.push_back(_fe_problem.getTag(tag_name));
+    std::cout << name() << " Kernel using tag: " << _tags.back() << std::endl;
+  }
+
+  _re_blocks.resize(_tags.size());
 }
 
 void
 Kernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
+  for (auto i = beginIndex(_re_blocks); i < _re_blocks.size(); i++)
+    _re_blocks[i] = &_assembly.residualBlock(_var.number(), (TagID)i);
+
+  _local_re.resize(_re_blocks[0]->size());
   _local_re.zero();
 
   precalculateResidual();
@@ -98,7 +121,8 @@ Kernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  for (auto & re : _re_blocks)
+    *re += _local_re;
 
   if (_has_save_in)
   {

@@ -21,6 +21,9 @@ InputParameters
 validParams<TimeKernel>()
 {
   InputParameters params = validParams<Kernel>();
+
+  params.set<MultiMooseEnum>("tags") = "time";
+
   return params;
 }
 

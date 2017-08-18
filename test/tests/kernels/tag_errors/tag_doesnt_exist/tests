@@ -1,0 +1,13 @@
+[Tests]
+  [./bad_transient]
+    type = 'RunException'
+    input = 'bad_transient.i'
+    expect_err = 'was assigned an invalid tag'
+  [../]
+
+  [./bad_tag]
+    type = 'RunException'
+    input = 'bad_tag.i'
+    expect_err = 'was assigned an invalid tag'
+  [../]
+[]
