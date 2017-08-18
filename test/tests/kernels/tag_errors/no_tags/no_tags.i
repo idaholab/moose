@@ -12,15 +12,10 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.1
+    tags = ''
   [../]
-#  The TimeDerivative existing in a Steady calculation will trigger an error itself!
-#  [./time]
-#    type = TimeDerivative
-#    variable = u
-#  [../]
 []
 
 [BCs]
@@ -40,27 +35,11 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Dampers]
-  [./const_damp]
-    type = ConstantDamper
-    damping = 0.9
-  [../]
-[]
-
 [Outputs]
   exodus = true
-[]
-
-[Controls]
-  [./damping_control]
-    type = TimePeriod
-    disable_objects = 'const_damp'
-    start_time = 0.25
-    execute_on = 'initial timestep_begin'
-  [../]
 []

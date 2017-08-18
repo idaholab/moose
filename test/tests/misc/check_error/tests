@@ -261,11 +261,13 @@
     expect_err = "You cannot couple an elemental variable to a nodal variable"
   [../]
 
-  [./invalid_steady_exec_test]
-    type = 'RunException'
-    input = 'invalid_steady_exec_test.i'
-    expect_err = "You have specified time kernels in your steady state simulation"
-  [../]
+#  This will now be caught by a Tag error
+#  [./invalid_steady_exec_test]
+#    type = 'RunException'
+#    input = 'invalid_steady_exec_test.i'
+#    expect_err = "You have specified time kernels in your steady state simulation"
+#    deleted = true
+#  [../]
 
   [./missing_active_section_test]
     type = 'RunException'
