@@ -144,6 +144,7 @@
   # num_steps = 5
   # dt = .5
   # dtmin = .5
+  # petsc_options = '-snes_test_display'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   # petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
@@ -160,3 +161,24 @@
   file_base = lid_driven_out
   exodus = true
 []
+
+# [ICs]
+#   [./vel_x]
+#     type = RandomIC
+#     variable = vel_x
+#     min = .1
+#     max = .9
+#   [../]
+#   [./vel_y]
+#     type = RandomIC
+#     variable = vel_y
+#     min = .1
+#     max = .9
+#   [../]
+#   [./p]
+#     type = RandomIC
+#     variable = p
+#     min = .1
+#     max = .9
+#   [../]
+# []

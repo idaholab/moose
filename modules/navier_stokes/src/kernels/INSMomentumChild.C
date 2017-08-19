@@ -45,15 +45,15 @@ Real
 INSMomentumChild::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
-    return _test[_i][_qp] * dConvecDUComp(0)(_component) + _grad_test[_i][_qp] * dWeakViscDUComp();
+    return _test[_i][_qp] * dConvecDUComp(0)(_component);
   // return _test[_i][_qp] * (dConvecDUComp(0) + dViscDUComp(0))(_component);
 
   else if (jvar == _v_vel_var_number)
-    return _test[_i][_qp] * dConvecDUComp(1)(_component) + _grad_test[_i][_qp] * dWeakViscDUComp();
+    return _test[_i][_qp] * dConvecDUComp(1)(_component);
   // return _test[_i][_qp] * (dConvecDUComp(1) + dViscDUComp(1))(_component);
 
   else if (jvar == _w_vel_var_number)
-    return _test[_i][_qp] * dConvecDUComp(2)(_component) + _grad_test[_i][_qp] * dWeakViscDUComp();
+    return _test[_i][_qp] * dConvecDUComp(2)(_component);
   // return _test[_i][_qp] * (dConvecDUComp(2) + dViscDUComp(2))(_component);
 
   else if (jvar == _p_var_number)
