@@ -28,8 +28,9 @@ Real
 INSMassPSPG::computeQpResidual()
 {
   Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-  return tau * _grad_test[_i][_qp] * (computeStrongConvectiveTerm() + computeStrongViscousTerm() +
-                                      computeStrongPressureTerm() + computeStrongGravityTerm());
+  return -tau * _grad_test[_i][_qp] *
+         (/*computeStrongConvectiveTerm() + computeStrongViscousTerm() +*/
+          computeStrongPressureTerm() + computeStrongGravityTerm());
 }
 
 Real
@@ -45,17 +46,17 @@ INSMassPSPG::computeQpOffDiagJacobian(unsigned jvar)
   if (jvar == _u_vel_var_number)
   {
     Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-    return tau * _grad_test[_i][_qp] * (dConvecDUComp(0) + dViscDUComp(0));
+    return tau * _grad_test[_i][_qp] * (/*dConvecDUComp(0) +*/ dViscDUComp(0));
   }
   else if (jvar == _v_vel_var_number)
   {
     Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-    return tau * _grad_test[_i][_qp] * (dConvecDUComp(1) + dViscDUComp(1));
+    return tau * _grad_test[_i][_qp] * (/*dConvecDUComp(1) +*/ dViscDUComp(1));
   }
   else if (jvar == _w_vel_var_number)
   {
     Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-    return tau * _grad_test[_i][_qp] * (dConvecDUComp(2) + dViscDUComp(2));
+    return tau * _grad_test[_i][_qp] * (/*dConvecDUComp(2) +*/ dViscDUComp(2));
   }
   else
     return 0;

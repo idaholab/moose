@@ -33,6 +33,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   unsigned _component;
+  bool _stokes_only;
 };
 
 #endif // INSMOMENTUMCHILD_H
