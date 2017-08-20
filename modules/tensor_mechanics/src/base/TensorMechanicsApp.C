@@ -32,6 +32,7 @@
 #include "GeneralizedPlaneStrainOffDiag.h"
 #include "WeakPlaneStress.h"
 #include "PlasticHeatEnergy.h"
+#include "CrackPropagationHeatEnergy.h"
 #include "PhaseFieldFractureMechanicsOffDiag.h"
 
 #include "LinearElasticTruss.h"
@@ -108,6 +109,7 @@
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
 #include "ComputeAxisymmetric1DFiniteStrain.h"
 #include "ComputePlasticHeatEnergy.h"
+#include "ComputeCrackPropagationHeatEnergy.h"
 #include "ComputeInterfaceStress.h"
 #include "TensileStressUpdate.h"
 #include "ComputeFiniteStrainElasticStressBirchMurnaghan.h"
@@ -238,6 +240,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(GeneralizedPlaneStrainOffDiag);
   registerKernel(WeakPlaneStress);
   registerKernel(PlasticHeatEnergy);
+  registerKernel(CrackPropagationHeatEnergy);
   registerKernel(PhaseFieldFractureMechanicsOffDiag);
 
   registerMaterial(LinearElasticTruss);
@@ -314,6 +317,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetric1DIncrementalStrain);
   registerMaterial(ComputeAxisymmetric1DFiniteStrain);
   registerMaterial(ComputePlasticHeatEnergy);
+  registerMaterial(ComputeCrackPropagationHeatEnergy);
   registerMaterial(ComputeInterfaceStress);
   registerMaterial(TensileStressUpdate);
   registerMaterial(ComputeFiniteStrainElasticStressBirchMurnaghan);
