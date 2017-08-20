@@ -2,8 +2,9 @@
   gravity = '0 0 0'
   alpha = 1
   stokes_only = true
-  consistent = false
-  integrate_p_by_parts = false
+  consistent = true
+  integrate_p_by_parts = true
+  laplace = false
 []
 
 [Mesh]
@@ -28,17 +29,17 @@
 
 [Variables]
   [./vel_x]
-    order = FIRST
+    # order = SECOND
     family = LAGRANGE
   [../]
 
   [./vel_y]
-    order = FIRST
+    # order = SECOND
     family = LAGRANGE
   [../]
 
   [./p]
-    order = FIRST
+    # order = SECOND
     family = LAGRANGE
   [../]
 []

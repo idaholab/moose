@@ -75,6 +75,7 @@ protected:
   const MaterialProperty<Real> & _rho;
 
   bool _stokes_only;
+  bool _laplace;
 };
 
 #endif

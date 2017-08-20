@@ -31,6 +31,10 @@ validParams<INSBase>()
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
   params.addParam<bool>(
       "stokes_only", false, "Whether to ignore the convective acceleration term.");
+  params.addParam<bool>(
+      "laplace",
+      true,
+      "Whether to simplify the viscous term using the incompressibility condition.");
 
   return params;
 }
@@ -69,7 +73,8 @@ INSBase::INSBase(const InputParameters & parameters)
     _mu(getMaterialProperty<Real>("mu_name")),
     _rho(getMaterialProperty<Real>("rho_name")),
 
-    _stokes_only(getParam<bool>("stokes_only"))
+    _stokes_only(getParam<bool>("stokes_only")),
+    _laplace(getParam<bool>("laplace"))
 {
 }
 
@@ -108,9 +113,20 @@ INSBase::computeStrongViscousTerm()
   Real lap_u = _second_u_vel[_qp](0, 0) + _second_u_vel[_qp](1, 1) + _second_u_vel[_qp](2, 2);
   Real lap_v = _second_v_vel[_qp](0, 0) + _second_v_vel[_qp](1, 1) + _second_v_vel[_qp](2, 2);
   Real lap_w = _second_w_vel[_qp](0, 0) + _second_w_vel[_qp](1, 1) + _second_w_vel[_qp](2, 2);
+
   viscous_term(0) = -_mu[_qp] * lap_u;
   viscous_term(1) = -_mu[_qp] * lap_v;
   viscous_term(2) = -_mu[_qp] * lap_w;
+
+  if (!_laplace)
+  {
+    viscous_term(0) += -_mu[_qp] * (_second_u_vel[_qp](0, 0) + _second_v_vel[_qp](0, 1) +
+                                    _second_w_vel[_qp](0, 2));
+    viscous_term(1) += -_mu[_qp] * (_second_u_vel[_qp](1, 0) + _second_v_vel[_qp](1, 1) +
+                                    _second_w_vel[_qp](1, 2));
+    viscous_term(2) += -_mu[_qp] * (_second_u_vel[_qp](2, 0) + _second_v_vel[_qp](2, 1) +
+                                    _second_w_vel[_qp](2, 2));
+  }
 
   return viscous_term;
 }
@@ -128,19 +144,48 @@ INSBase::dViscDUComp(unsigned comp)
 RealVectorValue
 INSBase::weakViscousTerm(unsigned comp)
 {
-  switch (comp)
+  if (_laplace)
   {
-    case 0:
-      return _mu[_qp] * _grad_u_vel[_qp];
+    switch (comp)
+    {
+      case 0:
+        return _mu[_qp] * _grad_u_vel[_qp];
 
-    case 1:
-      return _mu[_qp] * _grad_v_vel[_qp];
+      case 1:
+        return _mu[_qp] * _grad_v_vel[_qp];
 
-    case 2:
-      return _mu[_qp] * _grad_w_vel[_qp];
+      case 2:
+        return _mu[_qp] * _grad_w_vel[_qp];
 
-    default:
-      return _zero[_qp];
+      default:
+        return _zero[_qp];
+    }
+  }
+  else
+  {
+    switch (comp)
+    {
+      case 0:
+      {
+        RealVectorValue transpose(_grad_u_vel[_qp](0), _grad_v_vel[_qp](0), _grad_w_vel[_qp](0));
+        return _mu[_qp] * _grad_u_vel[_qp] + _mu[_qp] * transpose;
+      }
+
+      case 1:
+      {
+        RealVectorValue transpose(_grad_u_vel[_qp](1), _grad_v_vel[_qp](1), _grad_w_vel[_qp](1));
+        return _mu[_qp] * _grad_v_vel[_qp] + _mu[_qp] * transpose;
+      }
+
+      case 2:
+      {
+        RealVectorValue transpose(_grad_u_vel[_qp](2), _grad_v_vel[_qp](2), _grad_w_vel[_qp](2));
+        return _mu[_qp] * _grad_w_vel[_qp] + _mu[_qp] * transpose;
+      }
+
+      default:
+        return _zero[_qp];
+    }
   }
 }
 
