@@ -33,6 +33,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   const Real & _alpha;
+  bool _consistent;
 };
 
 #endif // INSMASSPSPG_H

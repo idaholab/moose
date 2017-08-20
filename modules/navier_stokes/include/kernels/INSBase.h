@@ -37,6 +37,7 @@ protected:
   virtual RealVectorValue weakViscousTerm(unsigned comp);
   virtual RealVectorValue dWeakViscDUComp();
   virtual RealVectorValue computeStrongPressureTerm();
+  virtual Real computeWeakPressureTerm();
   virtual RealVectorValue dPressureDPressure();
   virtual RealVectorValue computeStrongGravityTerm();
 
@@ -72,6 +73,8 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
+
+  bool _stokes_only;
 };
 
 #endif

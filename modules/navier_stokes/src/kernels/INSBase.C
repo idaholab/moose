@@ -29,6 +29,8 @@ validParams<INSBase>()
   // Optional parameters
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addParam<bool>(
+      "stokes_only", false, "Whether to ignore the convective acceleration term.");
 
   return params;
 }
@@ -65,7 +67,9 @@ INSBase::INSBase(const InputParameters & parameters)
 
     // Material properties
     _mu(getMaterialProperty<Real>("mu_name")),
-    _rho(getMaterialProperty<Real>("rho_name"))
+    _rho(getMaterialProperty<Real>("rho_name")),
+
+    _stokes_only(getParam<bool>("stokes_only"))
 {
 }
 
@@ -150,6 +154,12 @@ RealVectorValue
 INSBase::computeStrongPressureTerm()
 {
   return _grad_p[_qp];
+}
+
+Real
+INSBase::computeWeakPressureTerm()
+{
+  return -_p[_qp];
 }
 
 RealVectorValue

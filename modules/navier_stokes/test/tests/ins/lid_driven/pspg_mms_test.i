@@ -1,6 +1,9 @@
 [GlobalParams]
   gravity = '0 0 0'
   alpha = 1
+  stokes_only = true
+  consistent = false
+  integrate_p_by_parts = false
 []
 
 [Mesh]
@@ -12,7 +15,7 @@
   ymax = 1.0
   nx = 32
   ny = 32
-  elem_type = QUAD4
+  elem_type = QUAD9
 []
 
 [MeshModifiers]
@@ -25,13 +28,13 @@
 
 [Variables]
   [./vel_x]
-    # order = SECOND
-    # family = LAGRANGE
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./vel_y]
-    # order = SECOND
-    # family = LAGRANGE
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./p]
@@ -88,35 +91,71 @@
     p = p
     component = 1
   [../]
+
+  [./vel_x_source]
+    type = UserForcingFunction
+    function = vel_x_source_func
+    variable = vel_x
+  [../]
+
+  [./vel_y_source]
+    type = UserForcingFunction
+    function = vel_y_source_func
+    variable = vel_y
+  [../]
+
+  [./p_source]
+    type = UserForcingFunction
+    function = p_source_func
+    variable = p
+  [../]
 []
 
 [BCs]
-  [./x_no_slip]
-    type = DirichletBC
-    variable = vel_x
-    boundary = 'bottom right left'
-    value = 0.0
-  [../]
-
-  [./lid]
+  [./vel_x]
     type = FunctionDirichletBC
+    boundary = 'left right top bottom'
+    function = vel_x_func
     variable = vel_x
-    boundary = 'top'
-    function = 'lid_function'
   [../]
-
-  [./y_no_slip]
-    type = DirichletBC
+  [./vel_y]
+    type = FunctionDirichletBC
+    boundary = 'left right top bottom'
+    function = vel_y_func
     variable = vel_y
-    boundary = 'bottom right top left'
-    value = 0.0
   [../]
-
-  [./pressure_pin]
-    type = DirichletBC
+  [./p]
+    type = FunctionDirichletBC
+    boundary = 'left right top bottom'
+    function = p_func
     variable = p
-    boundary = 'pinned_node'
-    value = 0
+  [../]
+[]
+
+[Functions]
+  [./vel_x_source_func]
+    type = ParsedFunction
+    value = ''
+  [../]
+  [./vel_y_source_func]
+    type = ParsedFunction
+    value = ''
+  [../]
+  [./p_source_func]
+    type = ParsedFunction
+    value = ''
+  [../]
+  [./vel_x_func]
+    type = ParsedFunction
+    value = ''
+  [../]
+  [./vel_y_func]
+    type = ParsedFunction
+    value = ''
+  [../]
+  [./p_func]
+    type = ParsedFunction
+    value = ''
   [../]
 []
 
@@ -125,7 +164,7 @@
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
-    prop_values = '1  1'
+    prop_values = '${rho}  ${mu}'
   [../]
 []
 
@@ -154,10 +193,10 @@
   # dt = .5
   # dtmin = .5
   # petsc_options = '-snes_test_display'
-  # petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  # petsc_options_value = 'lu NONZERO'
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
-  petsc_options_value = 'asm      2               ilu          4'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
+  # petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
+  # petsc_options_value = 'asm      2               ilu          4'
   line_search = 'none'
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-13
@@ -167,7 +206,14 @@
 []
 
 [Outputs]
-  exodus = true
+  [./exodus]
+    type = Exodus
+    file_base = 'forward_test'
+  [../]
+  [./csv]
+    type = CSV
+    file_base = 'forward_test'
+  [../]
 []
 
 # [ICs]
@@ -190,3 +236,42 @@
 #     max = .9
 #   [../]
 # []
+
+[Postprocessors]
+  [./L2vel_x]
+    type = ElementL2Error
+    variable = vel_x
+    function = vel_x_func
+    outputs = 'console csv'
+  [../]
+  [./L2vel_y]
+    variable = vel_y
+    function = vel_y_func
+    type = ElementL2Error
+    outputs = 'console csv'
+  [../]
+  [./L2p]
+    variable = p
+    function = p_func
+    type = ElementL2Error
+    outputs = 'console csv'
+  [../]
+  # [./L2nvel_x]
+  #   type = NodalL2Error
+  #   variable = vel_x
+  #   function = vel_x_func
+  #   outputs = 'console csv'
+  # [../]
+  # [./L2nvel_y]
+  #   variable = vel_y
+  #   function = vel_y_func
+  #   type = NodalL2Error
+  #   outputs = 'console csv'
+  # [../]
+  # [./L2np]
+  #   variable = p
+  #   function = p_func
+  #   type = NodalL2Error
+  #   outputs = 'console csv'
+  # [../]
+[]

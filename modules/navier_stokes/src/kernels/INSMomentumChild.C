@@ -16,14 +16,14 @@ validParams<INSMomentumChild>()
       "This class computes the PSPG stabilization components for the incompressibility equation.");
   params.addRequiredParam<unsigned>("component", "The velocity component that this is applied to.");
   params.addParam<bool>(
-      "stokes_only", false, "Whether to ignore the convective acceleration term.");
+      "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts.");
   return params;
 }
 
 INSMomentumChild::INSMomentumChild(const InputParameters & parameters)
   : INSBase(parameters),
     _component(getParam<unsigned>("component")),
-    _stokes_only(getParam<bool>("stokes_only"))
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
 {
 }
 
@@ -34,7 +34,10 @@ INSMomentumChild::computeQpResidual()
   // viscous term
   r += _grad_test[_i][_qp] * weakViscousTerm(_component);
   // pressure term
-  r += _test[_i][_qp] * computeStrongPressureTerm()(_component);
+  if (_integrate_p_by_parts)
+    r += _grad_test[_i][_qp](_component) * computeWeakPressureTerm();
+  else
+    r += _test[_i][_qp] * computeStrongPressureTerm()(_component);
   // body force term
   r += _test[_i][_qp] * computeStrongGravityTerm()(_component);
   // convective term

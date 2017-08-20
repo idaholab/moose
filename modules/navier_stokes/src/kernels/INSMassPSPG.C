@@ -15,11 +15,15 @@ validParams<INSMassPSPG>()
   params.addClassDescription(
       "This class computes the PSPG stabilization components for the incompressibility equation.");
   params.addParam<Real>("alpha", 1., "The alpha stabilization parameter.");
+  params.addParam<bool>(
+      "consistent",
+      false,
+      "Whether to consistently include the viscous term in the PSPG formulation.");
   return params;
 }
 
 INSMassPSPG::INSMassPSPG(const InputParameters & parameters)
-  : INSBase(parameters), _alpha(getParam<Real>("alpha"))
+  : INSBase(parameters), _alpha(getParam<Real>("alpha")), _consistent(getParam<bool>("consistent"))
 
 {
 }
@@ -28,9 +32,13 @@ Real
 INSMassPSPG::computeQpResidual()
 {
   Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-  return -tau * _grad_test[_i][_qp] *
-         (/*computeStrongConvectiveTerm() + computeStrongViscousTerm() +*/
-          computeStrongPressureTerm() + computeStrongGravityTerm());
+  Real r = -tau * _grad_test[_i][_qp] * (computeStrongPressureTerm() + computeStrongGravityTerm());
+  if (_consistent)
+    r += -tau * _grad_test[_i][_qp] * computeStrongViscousTerm();
+  if (!_stokes_only)
+    r += -tau * _grad_test[_i][_qp] * computeStrongConvectiveTerm();
+
+  return r;
 }
 
 Real
