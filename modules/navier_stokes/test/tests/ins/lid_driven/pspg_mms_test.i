@@ -29,17 +29,17 @@
 
 [Variables]
   [./vel_x]
-    # order = SECOND
+    order = SECOND
     family = LAGRANGE
   [../]
 
   [./vel_y]
-    # order = SECOND
+    order = SECOND
     family = LAGRANGE
   [../]
 
   [./p]
-    # order = SECOND
+    order = SECOND
     family = LAGRANGE
   [../]
 []
@@ -158,6 +158,10 @@
     type = ParsedFunction
     value = ''
   [../]
+  [./vxx_func]
+    type = ParsedFunction
+    value = ''
+  [../]
 []
 
 [Materials]
@@ -257,6 +261,12 @@
     type = ElementL2Error
     outputs = 'console csv'
   [../]
+  [./L2vxx]
+    variable = vxx
+    function = vxx_func
+    type = ElementL2Error
+    outputs = 'console csv'
+  [../]
   # [./L2nvel_x]
   #   type = NodalL2Error
   #   variable = vel_x
@@ -275,4 +285,20 @@
   #   type = NodalL2Error
   #   outputs = 'console csv'
   # [../]
+[]
+
+[AuxVariables]
+  [./vxx]
+    family = MONOMIAL
+    order = FIRST
+  [../]
+[]
+
+[AuxKernels]
+  [./vxx]
+    type = VariableGradientComponent
+    component = x
+    variable = vxx
+    gradient_variable = vel_x
+  [../]
 []
