@@ -1,6 +1,7 @@
 [Mesh]
   type = FileMesh
   file = checkpoint_split_in.2.cpr
+  parallel_type = distributed # workaround until libMesh/libmesh#1409
 []
 
 [Variables]
