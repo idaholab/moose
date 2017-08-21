@@ -4507,6 +4507,11 @@ FEProblemBase::meshChanged()
   _mesh.meshChanged();
   _eq.reinit();
 
+  // But that breaks other adaptivity code, unless we then *again*
+  // update the MooseMesh caches.  E.g. the definition of "active" and
+  // "local" may be *changed* by EquationSystems::reinit().
+  _mesh.meshChanged();
+
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
 
