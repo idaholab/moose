@@ -9,7 +9,7 @@ class JsonData(object):
     Class that holds the json produced by an executable.
     """
 
-    def __init__(self, app_path="", **kwds):
+    def __init__(self, app_path="", extra_args=[], **kwds):
         """
         Constructor.
         Input:
@@ -19,6 +19,7 @@ class JsonData(object):
 
         self.json_data = None
         self.app_path = None
+        self.extra_args = extra_args
         if app_path:
             self.appChanged(app_path)
 
@@ -55,7 +56,7 @@ class JsonData(object):
         """
         #  "-options_left 0" is used to stop the debug version of PETSc from printing
         # out WARNING messages that sometime confuse the json parser
-        data = ExeLauncher.runExe(app_path, ["-options_left", "0", "--json"] )
+        data = ExeLauncher.runExe(app_path, ["-options_left", "0", "--json"] + self.extra_args)
         data = data.split('**START JSON DATA**\n')[1]
         data = data.split('**END JSON DATA**')[0]
         return data

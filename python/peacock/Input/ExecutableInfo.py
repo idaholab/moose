@@ -11,6 +11,7 @@ class ExecutableInfo(object):
     Holds the Json of an executable.
     """
     SETTINGS_KEY = "ExecutableInfo"
+    SETTINGS_KEY_TEST_OBJS = "ExecutableWithTestObjectsInfo"
     CACHE_VERSION = 4
     def __init__(self, **kwds):
         super(ExecutableInfo, self).__init__(**kwds)
@@ -19,7 +20,7 @@ class ExecutableInfo(object):
         self.path_map = {}
         self.type_to_block_map = {}
 
-    def setPath(self, new_path):
+    def setPath(self, new_path, use_test_objects=False):
         """
         Executable path set property.
         Will try to generate the json data of the executable.
@@ -27,7 +28,13 @@ class ExecutableInfo(object):
         if not new_path:
             return
 
-        fc = FileCache(self.SETTINGS_KEY, new_path, self.CACHE_VERSION)
+        setting_key = self.SETTINGS_KEY
+        extra_args = []
+        if use_test_objects:
+            setting_key = self.SETTINGS_KEY_TEST_OBJS
+            extra_args = ["--allow-test-objects"]
+
+        fc = FileCache(setting_key, new_path, self.CACHE_VERSION)
         if fc.path == self.path:
             # If we are setting the path again, we need to make sure the executable itself hasn't changed
             if not fc.dirty:
@@ -44,7 +51,7 @@ class ExecutableInfo(object):
                 self.path = fc.path
                 return
 
-        json_data = JsonData(fc.path)
+        json_data = JsonData(fc.path, extra_args)
         if json_data.app_path:
             self.json_data = json_data
             self.path = fc.path
@@ -63,6 +70,7 @@ class ExecutableInfo(object):
     @staticmethod
     def clearCache():
         FileCache.clearAll(ExecutableInfo.SETTINGS_KEY)
+        FileCache.clearAll(ExecutableInfo.SETTINGS_KEY_TEST_OBJS)
 
     def toPickle(self):
         return {"json_data": self.json_data.toPickle(),
