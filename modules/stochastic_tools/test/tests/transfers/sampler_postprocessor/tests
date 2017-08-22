@@ -1,0 +1,7 @@
+[Tests]
+  [./sobol_from_multiapp]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_storage_0001.csv master_out_storage_0002.csv master_out_storage_0003.csv master_out_storage_0004.csv master_out_storage_0005.csv'
+  [../]
+[]

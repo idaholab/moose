@@ -10,7 +10,6 @@
     input = weibull.i
     csvdiff = 'weibull_out.csv'
     boost = true
-    allow_test_objects = true
   [../]
   [./weibull_no_boost]
     type = RunException
