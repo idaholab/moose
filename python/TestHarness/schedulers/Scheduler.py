@@ -1,5 +1,5 @@
 from time import sleep
-from MooseObject import MooseObject
+from FactorySystem.MooseObject import MooseObject
 from TesterData import TesterData
 import os
 from contrib import dag
@@ -35,6 +35,9 @@ class Scheduler(MooseObject):
         params.addRequiredParam('max_processes', None, "Hard limit of maxium processes to use")
 
         return params
+
+    # This is what will be checked for when we look for valid schedulers
+    IS_SCHEDULER = True
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)

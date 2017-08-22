@@ -1,5 +1,5 @@
 from FileTester import FileTester
-from CSVDiffer import CSVDiffer
+from TestHarness.CSVDiffer import CSVDiffer
 
 class CSVDiff(FileTester):
 

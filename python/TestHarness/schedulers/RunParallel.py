@@ -1,5 +1,5 @@
-from Scheduler import Scheduler
-import util
+from TestHarness.schedulers.Scheduler import Scheduler
+from TestHarness import util
 
 class RunParallel(Scheduler):
     """
