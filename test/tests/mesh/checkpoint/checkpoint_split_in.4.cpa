@@ -1,0 +1,5 @@
+checkpoint-1.1	 # version
+2	 # dimensions
+1	 # parallel
+4	 # n_procs
+0	 # subdomain id to name map
