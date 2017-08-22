@@ -22,6 +22,10 @@ validParams<SinNeumannBC>()
   params.addParam<Real>("initial", 0.0, "The initial value of the gradient on the boundary");
   params.addParam<Real>("final", 0.0, "The final value of the gradient on the boundary");
   params.addParam<Real>("duration", 0.0, "The duration of the ramp");
+  params.addClassDescription("Imposes a time-varying flux boundary condition $\\frac{\\partial "
+                             "u}{\\partial n}=g(t)$, where $g(t)$ "
+                             "varies from an given initial value at time $t=0$ to a given final "
+                             "value over a specified duration.");
   return params;
 }
 

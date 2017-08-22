@@ -21,6 +21,9 @@ validParams<FunctionNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<FunctionName>("function", "The function.");
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "$\\frac{\\partial u}{\\partial n}=h(t,\\vec{x})$, "
+                             "where $h$ is a (possibly) time and space-dependent MOOSE Function.");
   return params;
 }
 
