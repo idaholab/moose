@@ -22,6 +22,9 @@ validParams<PenaltyDirichletBC>()
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addParam<Real>("value", 0.0, "Boundary value of the variable");
   params.declareControllable("value");
+  params.addClassDescription("Enforces a Dirichlet boundary condition "
+                             "in a weak sense by penalizing differences between the current "
+                             "solution and the Dirichlet data.");
   return params;
 }
 

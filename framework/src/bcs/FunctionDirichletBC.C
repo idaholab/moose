@@ -21,6 +21,9 @@ validParams<FunctionDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
+  params.addClassDescription(
+      "Imposes the essential boundary condition $u=g(t,\\vec{x})$, where $g$ "
+      "is a (possibly) time and space-dependent MOOSE Function.");
   return params;
 }
 

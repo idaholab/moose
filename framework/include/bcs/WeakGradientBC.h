@@ -24,16 +24,20 @@ template <>
 InputParameters validParams<WeakGradientBC>();
 
 /**
- * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
- * Uses the term produced from integrating the diffusion operator by parts.
+ * A FluxBC which is consistent with the boundary terms arising from
+ * the Diffusion Kernel. The residual contribution is:
+ *
+ * \f$ F(u) = - \int_{\Gamma} \nabla u * \hat n * \phi d\Gamma \f$
+ *
+ * This class is essentially identical to the DiffusionFluxBC, but it
+ * is not a part of the FluxBC hierarchy. It does not actually impose
+ * any boundary condition, instead it computes the residual
+ * contribution due to the boundary term arising from integration by
+ * parts of the Diffusion Kernel.
  */
 class WeakGradientBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   WeakGradientBC(const InputParameters & parameters);
 
 protected:

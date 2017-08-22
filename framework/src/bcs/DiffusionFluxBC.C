@@ -19,7 +19,11 @@ InputParameters
 validParams<DiffusionFluxBC>()
 {
   InputParameters params = validParams<FluxBC>();
-
+  params.addClassDescription(
+      "Computes a boundary residual contribution consistent with the Diffusion Kernel. "
+      "Does not impose a boundary condition; instead computes the boundary "
+      "contribution corresponding to the current value of grad(u) and accumulates "
+      "it in the residual vector.");
   return params;
 }
 

@@ -21,6 +21,9 @@ validParams<VectorNeumannBC>()
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<RealVectorValue>(
       "vector_value", RealVectorValue(), "vector this BC should act in");
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "$\\frac{\\partial u}{\\partial n}=\\vec{V}\\cdot\\hat{n}$, "
+                             "where $\\vec{V}$ is a user-defined, constant vector.");
   return params;
 }
 
