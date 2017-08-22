@@ -519,7 +519,6 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-
   virtual NumericVector<Number> * solutionPreviousNewton() override
   {
     return _solution_previous_nl;
