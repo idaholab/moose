@@ -43,9 +43,7 @@
 #include "PorousFlow1PhaseP_BW.h"
 #include "PorousFlow2PhasePS.h"
 #include "PorousFlowBrine.h"
-#include "PorousFlowDensityConstBulk.h"
 #include "PorousFlowEffectiveFluidPressure.h"
-#include "PorousFlowIdealGas.h"
 #include "PorousFlowPermeabilityConst.h"
 #include "PorousFlowPermeabilityConstFromVar.h"
 #include "PorousFlowPermeabilityKozenyCarman.h"
@@ -62,15 +60,12 @@
 #include "PorousFlowRelativePermeabilityBW.h"
 #include "PorousFlowRelativePermeabilityFLAC.h"
 #include "PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity.h"
-#include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
 #include "PorousFlowTemperature.h"
 #include "PorousFlowThermalConductivityIdeal.h"
 #include "PorousFlowThermalConductivityFromPorosity.h"
 #include "PorousFlowMatrixInternalEnergy.h"
-#include "PorousFlowInternalEnergyIdeal.h"
-#include "PorousFlowEnthalpy.h"
 #include "PorousFlowDiffusivityConst.h"
 #include "PorousFlowDiffusivityMillingtonQuirk.h"
 #include "PorousFlowSingleComponentFluid.h"
@@ -194,9 +189,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow1PhaseP_BW);
   registerMaterial(PorousFlow2PhasePS);
   registerMaterial(PorousFlowBrine);
-  registerMaterial(PorousFlowDensityConstBulk);
   registerMaterial(PorousFlowEffectiveFluidPressure);
-  registerMaterial(PorousFlowIdealGas);
   registerMaterial(PorousFlowPermeabilityConst);
   registerMaterial(PorousFlowPermeabilityConstFromVar);
   registerMaterial(PorousFlowPermeabilityKozenyCarman);
@@ -213,15 +206,12 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowRelativePermeabilityBW);
   registerMaterial(PorousFlowRelativePermeabilityFLAC);
   registerMaterial(PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
-  registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);
   registerMaterial(PorousFlowTemperature);
   registerMaterial(PorousFlowThermalConductivityIdeal);
   registerMaterial(PorousFlowThermalConductivityFromPorosity);
   registerMaterial(PorousFlowMatrixInternalEnergy);
-  registerMaterial(PorousFlowInternalEnergyIdeal);
-  registerMaterial(PorousFlowEnthalpy);
   registerMaterial(PorousFlowDiffusivityConst);
   registerMaterial(PorousFlowDiffusivityMillingtonQuirk);
   registerMaterial(PorousFlowSingleComponentFluid);
