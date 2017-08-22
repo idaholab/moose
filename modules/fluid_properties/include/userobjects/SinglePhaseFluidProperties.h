@@ -81,7 +81,7 @@ public:
   /// Derivative of pressure wrt specific enthalpy
   virtual Real dpdh_from_h_s(Real h, Real s) const = 0;
 
-  /// Gibbs free enthalpy
+  /// Gibbs free energy
   virtual Real g(Real v, Real e) const = 0;
 
   /// Thermal expansion coefficient
