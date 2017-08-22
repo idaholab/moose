@@ -47,4 +47,4 @@ When volumetric locking correction is turned on, using a SMP preconditioner with
 
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic/elastic_rotation_test.i start=Preconditioning end=Executioner
 
-\bibliography{docs/bib/tensor_mechanics.bib}
+\bibliography{tensor_mechanics.bib}

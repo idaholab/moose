@@ -45,4 +45,4 @@ where $S_{\mathrm{s}}$ is the solid-phase saturation.
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

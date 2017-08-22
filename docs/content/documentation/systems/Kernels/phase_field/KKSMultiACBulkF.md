@@ -55,4 +55,4 @@ For the off-diagonal Jacobians we also need to multiply by $L$, the Allen-Cahn m
 
 !syntax children /Kernels/KKSMultiACBulkF
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

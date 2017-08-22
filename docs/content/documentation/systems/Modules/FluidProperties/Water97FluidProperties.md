@@ -45,4 +45,4 @@ The Water97FluidProperties UserObject is valid for:
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/fluid_properties.bib}
+\bibliography{fluid_properties.bib}

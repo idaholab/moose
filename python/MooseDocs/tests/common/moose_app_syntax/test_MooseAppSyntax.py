@@ -142,7 +142,7 @@ class TestMooseAppSyntax(unittest.TestCase):
         self.assertEqual(node.groups, {'level_set':'Level Set'})
 
         node = self._syntax.findall('/Outputs/CommonOutputAction')[0]
-        self.assertEqual(node.groups, {u'framework':u'Framework'})
+        self.assertEqual(node.groups, {'moose':'Moose', 'framework':'Framework'})
 
         node = self._syntax.findall('/Kernels/AddKernelAction')[0]
         self.assertEqual(node.groups, {u'framework':u'Framework'})
@@ -153,7 +153,7 @@ class TestMooseAppSyntax(unittest.TestCase):
         """
         node = self._syntax.findall('/Functions')[0]
         self.assertIsInstance(node, SyntaxNode)
-        self.assertEqual(node.groups, {'framework':'Framework'})
+        self.assertEqual(node.groups, {'moose':'Moose', 'framework':'Framework'})
 
         node = self._syntax.findall('/Functions/LevelSetOlssonBubble')[0]
         self.assertIsInstance(node, MooseObjectNode)

@@ -29,50 +29,50 @@ class TestBibtexExtension(MarkdownTestCase):
         changing the configuration file.
         """
         configs['MooseDocs.extensions.bibtex']['macro_files'] =\
-            ['docs/bib/macro_test_abbrev.bib']
+               ['docs/content/bib/macro_test_abbrev.bib']
 
     def testCite(self):
-        md = r'\cite{testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\cite{testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_cite.html', md)
 
     def testCiteTwo(self):
-        md = r'\cite{testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\cite{testkey, testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citeTwo.html', md)
 
     def testCiteThree(self):
-        md = r'\cite{testkey, testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\cite{testkey, testkey, testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citeThree.html', md)
 
     def testCitet(self):
-        md = r'\citet{testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\citet{testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citet.html', md)
 
     def testCitetTwo(self):
-        md = r'\citet{testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\citet{testkey, testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citetTwo.html', md)
 
     def testCitetThree(self):
-        md = r'\citet{testkey, testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\citet{testkey, testkey, testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citetThree.html', md)
 
     def testCitep(self):
-        md = r'\citep{testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\citep{testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citep.html', md)
 
     def testCitepTwo(self):
-        md = r'\citep{testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\citep{testkey, testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citepTwo.html', md)
 
     def testCitepThree(self):
-        md = r'\citep{testkey, testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
+        md = r'\citep{testkey, testkey, testkey}\n\bibliography{docs/content/bib/moose.bib}'
         self.assertConvert('test_citepThree.html', md)
 
     def testBibtexMacro(self):
-        md = r'\cite{macroTestKey}\n\bibliography{docs/bib/test.bib}'
+        md = r'\cite{macroTestKey}\n\bibliography{docs/content/bib/test.bib}'
         self.assertConvert('test_bibtex_macro.html', md)
 
     def testNoAuthor(self):
-        md = r'\cite{noAuthorTestKey}\n\bibliography{docs/bib/test.bib}'
+        md = r'\cite{noAuthorTestKey}\n\bibliography{docs/content/bib/test.bib}'
         self.assertConvert('test_no_author.html', md)
 
 if __name__ == '__main__':

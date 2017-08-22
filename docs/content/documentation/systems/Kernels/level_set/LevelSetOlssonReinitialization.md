@@ -34,4 +34,4 @@ The LevelSetOlssonReinitialization kernel is typically employed in a reinitializ
 ## References
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/level_set.bib}
+\bibliography{level_set.bib}

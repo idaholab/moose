@@ -65,7 +65,6 @@ def tree_builder(files, root, base, node, directory):
                 n = DirectoryNode(item, base=base, parent=node)
             tree_builder(files, root, base, n, path)
 
-
 def moose_docs_file_tree(config):
     """
     Creates a unified markdown file tree from multiple locations.

@@ -19,4 +19,4 @@ is typically used to represent water that is under very high pressure.
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/fluid_properties.bib}
+\bibliography{fluid_properties.bib}

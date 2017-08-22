@@ -220,4 +220,4 @@ as written in Eq. \eqref{eq:phi_dog}.
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

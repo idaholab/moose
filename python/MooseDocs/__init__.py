@@ -74,16 +74,16 @@ class Loader(yaml.Loader):
         else:
             raise IOError("Unknown included file: {}".format(filename))
 
-    def importer(self, node):
+    def importer(self, node, function):
         """
         Method for importing top-level entry from another file
         """
         filename, key = self.construct_scalar(node).split(' ')
-        filename = os.path.join(ROOT_DIR, filename)
+        filename = os.path.join(ROOT_DIR, filename.replace('$MOOSE_DIR', MOOSE_DIR))
         if not os.path.exists(filename):
             raise IOError("Unknown import file: {}".format(filename))
 
-        data = load_config(filename)
+        data = function(filename)
         if not isinstance(data, dict):
             raise IOError("The imported YAML data must contain a dict() at the top level.")
         if key not in data:
@@ -101,7 +101,8 @@ def yaml_load(filename):
 
     # Attach the include constructor to our custom loader.
     Loader.add_constructor('!include', Loader.include)
-    Loader.add_constructor('!import', Loader.importer)
+    Loader.add_constructor('!import', lambda x, y: Loader.importer(x, y, yaml_load))
+    Loader.add_constructor('!import-config', lambda x, y: Loader.importer(x, y, load_config))
 
     if not os.path.exists(filename):
         raise IOError("The supplied configuration file was not found: {}".format(filename))

@@ -16,4 +16,4 @@ For example, the following code creates a "bubble" in the lower left corner in a
 !syntax children /Functions/LevelSetOlssonBubble
 References
 
-\bibliographystyle{unsrt} \bibliography{docs/bib/level_set.bib}
+\bibliographystyle{unsrt} \bibliography{level_set.bib}

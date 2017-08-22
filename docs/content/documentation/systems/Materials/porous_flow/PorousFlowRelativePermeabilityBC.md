@@ -24,4 +24,4 @@ and $\lambda$ is a user-defined exponent.
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

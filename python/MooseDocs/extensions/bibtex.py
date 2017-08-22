@@ -85,7 +85,6 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
         above the original bib file.  This temporary combined file can then be
         parsed by pybtex.
         """
-
         if self._macro_files:
             t_bib_path = os.path.join(MooseDocs.ROOT_DIR, "tBib.bib")
             with open(t_bib_path, "wb") as t_bib:
@@ -121,10 +120,12 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
                     filename, _ = self.getFilename(bfile.strip())
                     bibfiles.append(filename)
                     data = self.parseBibtexFile(bibfiles[-1])
+                    self._bibtex.add_entries(data.entries.iteritems())
                 except UndefinedMacro:
                     LOG.error('Undefined macro in bibtex file: %s, specify macro_files arguments ' \
                               'in configuration file (e.g. website.yml)', bfile.strip())
-                self._bibtex.add_entries(data.entries.iteritems())
+                except TypeError:
+                    LOG.error('Unable to locate bibtex file in %s', self.markdown.current.filename)
         else:
             return lines
 

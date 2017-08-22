@@ -177,4 +177,4 @@ to Peaceman's 0.28).
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

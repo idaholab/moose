@@ -25,4 +25,4 @@ Flow module for comparison with the analytical solutions of \citet{broadbridge19
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}
