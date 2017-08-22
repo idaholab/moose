@@ -409,7 +409,7 @@ public:
  * Unary operators
  */
 #define UNARY_OP_IMPLEMENT(op, OP)                                                                 \
-  EBTerm operator op()                                                                             \
+  EBTerm operator op() const                                                                       \
   {                                                                                                \
     mooseAssert(_root != NULL, "Empty term provided for unary operator " #op);                     \
     return EBTerm(new EBUnaryOpTermNode(cloneRoot(), EBUnaryOpTermNode::OP));                      \
@@ -435,7 +435,7 @@ public:
  * Binary operators (including number,term operations)
  */
 #define BINARY_OP_IMPLEMENT(op, OP)                                                                \
-  EBTerm operator op(const EBTerm & term)                                                          \
+  EBTerm operator op(const EBTerm & term) const                                                    \
   {                                                                                                \
     mooseAssert(_root != NULL, "Empty term provided on left side of operator " #op);               \
     mooseAssert(term._root != NULL, "Empty term provided on right side of operator " #op);         \
