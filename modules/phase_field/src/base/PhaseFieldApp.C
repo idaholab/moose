@@ -170,6 +170,7 @@
 #include "SwitchingFunctionMultiPhaseMaterial.h"
 #include "ThirdPhaseSuppressionMaterial.h"
 #include "TimeStepMaterial.h"
+#include "VanDerWaalsFreeEnergy.h"
 #include "VariableGradientMaterial.h"
 
 /*
@@ -459,6 +460,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(SwitchingFunctionMultiPhaseMaterial);
   registerMaterial(ThirdPhaseSuppressionMaterial);
   registerMaterial(TimeStepMaterial);
+  registerMaterial(VanDerWaalsFreeEnergy);
   registerMaterial(VariableGradientMaterial);
 
   registerPostprocessor(AverageGrainVolume);
