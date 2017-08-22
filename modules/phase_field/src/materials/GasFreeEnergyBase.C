@@ -12,8 +12,8 @@ validParams<GasFreeEnergyBase>()
 {
   InputParameters params = validParams<DerivativeParsedMaterialHelper>();
   params.addRequiredCoupledVar("T", "Temperature");
-  MooseEnum molecule("MONOATOMIC DIATOMIC", "MONOATOMIC");
-  params.addParam<MooseEnum>("molecule", molecule, "Gas molecule size");
+  // MooseEnum molecule("MONOATOMIC DIATOMIC", "MONOATOMIC");
+  // params.addParam<MooseEnum>("molecule", molecule, "Gas molecule size");
   params.addRequiredCoupledVar("c", "Concentration variable");
   params.addRequiredParam<Real>(
       "omega", "Lattice site volume (default mass_unit_conversion requires this to be in [Ang^3])");
@@ -35,13 +35,6 @@ validParams<GasFreeEnergyBase>()
 
 GasFreeEnergyBase::GasFreeEnergyBase(const InputParameters & parameters)
   : DerivativeParsedMaterialHelper(parameters),
-    _molecule(getParam<MooseEnum>("molecule").getEnum<MoleculeSize>()),
-    // clang-format off
-    _cv(  _molecule == MoleculeSize::MONOATOMIC ? 3.0 / 2.0
-        : _molecule == MoleculeSize::DIATOMIC   ? 5.0 / 2.0
-        : (mooseError("Invalid molecule size"), 0.0)),
-    // clang-format on
-    _cp(_cv + 1.0),
     _T("T"),
     _c("c"),
     _omega(getParam<Real>("omega")),

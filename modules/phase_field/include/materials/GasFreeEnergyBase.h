@@ -26,18 +26,6 @@ public:
   GasFreeEnergyBase(const InputParameters & parameters);
 
 protected:
-  enum class MoleculeSize
-  {
-    MONOATOMIC,
-    DIATOMIC
-  } _molecule;
-
-  /// Molecular DOF exponent (heat capacity at constant volume)
-  const Real _cv;
-
-  /// heat capacity at constant pressure
-  const Real _cp;
-
   /// Coupled variable value for the Temperature
   const EBTerm _T;
 
