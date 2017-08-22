@@ -46,7 +46,7 @@ protected:
   MaterialProperty<Real> & _mu;
   /// Thermal conductivity
   MaterialProperty<Real> & _k;
-  /// Gibbs free enthalpy
+  /// Gibbs free energy
   MaterialProperty<Real> & _g;
 
   /// Fluid properties
