@@ -60,7 +60,8 @@ def moose_docs_import(root_dir=None, include=None, exclude=None, base=None,
     # Loop through the base directory and create a set of matching filenames
     matches = set()
     for root, _, files in os.walk(os.path.join(root_dir, base)):
-        filenames = [os.path.join(root, fname) for fname in files if fname.endswith(extensions) and not fname.startswith('.')]
+        filenames = [os.path.join(root, fname) for fname in files if fname.endswith(extensions)
+                     and not fname.startswith('.')]
         for pattern in include:
             for filename in fnmatch.filter(filenames, os.path.join(root_dir, pattern)):
                 matches.add(filename)
