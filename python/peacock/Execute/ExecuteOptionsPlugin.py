@@ -44,6 +44,11 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
                 50,
                 "Set the maximum number of recent command line arguments that have been used.",
                 )
+        self._preferences.addBool("execute/allowTestObjects",
+                "Allow using test objects",
+                False,
+                "Allow using test objects by default",
+                )
         self._preferences.addBool("execute/mpiEnabled",
                 "Enable MPI by default",
                 False,
@@ -88,36 +93,42 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self.args_line = WidgetUtils.addLineEdit(None, self, None)
         self.all_exe_layout.addWidget(self.args_line, 2, 2)
 
+        self.test_label = WidgetUtils.addLabel(None, self, "Allow test objects")
+        self.all_exe_layout.addWidget(self.test_label, 3, 0)
+        self.test_checkbox = WidgetUtils.addCheckbox(None, self, "", self._allowTestObjects)
+        self.test_checkbox.setChecked(self._preferences.value("execute/allowTestObjects"))
+        self.all_exe_layout.addWidget(self.test_checkbox, 3, 1, alignment=Qt.AlignHCenter)
+
         self.mpi_label = WidgetUtils.addLabel(None, self, "Use MPI")
-        self.all_exe_layout.addWidget(self.mpi_label, 3, 0)
+        self.all_exe_layout.addWidget(self.mpi_label, 4, 0)
         self.mpi_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
         self.mpi_checkbox.setChecked(self._preferences.value("execute/mpiEnabled"))
-        self.all_exe_layout.addWidget(self.mpi_checkbox, 3, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(self.mpi_checkbox, 4, 1, alignment=Qt.AlignHCenter)
         self.mpi_line = WidgetUtils.addLineEdit(None, self, None)
         self.mpi_line.setText(self._preferences.value("execute/mpiArgs"))
         self.mpi_line.cursorPositionChanged.connect(self._mpiLineCursorChanged)
-        self.all_exe_layout.addWidget(self.mpi_line, 3, 2)
+        self.all_exe_layout.addWidget(self.mpi_line, 4, 2)
 
         self.threads_label = WidgetUtils.addLabel(None, self, "Use Threads")
-        self.all_exe_layout.addWidget(self.threads_label, 4, 0)
+        self.all_exe_layout.addWidget(self.threads_label, 5, 0)
         self.threads_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
         self.threads_checkbox.setChecked(self._preferences.value("execute/threadsEnabled"))
-        self.all_exe_layout.addWidget(self.threads_checkbox, 4, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(self.threads_checkbox, 5, 1, alignment=Qt.AlignHCenter)
         self.threads_line = WidgetUtils.addLineEdit(None, self, None)
         self.threads_line.setText(self._preferences.value("execute/threadsArgs"))
         self.threads_line.cursorPositionChanged.connect(self._threadsLineCursorChanged)
-        self.all_exe_layout.addWidget(self.threads_line, 4, 2)
+        self.all_exe_layout.addWidget(self.threads_line, 5, 2)
 
         self.csv_label = WidgetUtils.addLabel(None, self, "Postprocessor CSV Output")
-        self.all_exe_layout.addWidget(self.csv_label, 5, 0)
+        self.all_exe_layout.addWidget(self.csv_label, 6, 0)
         self.csv_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
-        self.all_exe_layout.addWidget(self.csv_checkbox, 5, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(self.csv_checkbox, 6, 1, alignment=Qt.AlignHCenter)
         self.csv_checkbox.setCheckState(Qt.Checked)
 
         self.recover_label = WidgetUtils.addLabel(None, self, "Recover")
-        self.all_exe_layout.addWidget(self.recover_label, 6, 0)
+        self.all_exe_layout.addWidget(self.recover_label, 7, 0)
         self.recover_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
-        self.all_exe_layout.addWidget(self.recover_checkbox, 6, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(self.recover_checkbox, 7, 1, alignment=Qt.AlignHCenter)
 
         self._recent_exe_menu = None
         self._recent_working_menu = None
@@ -149,7 +160,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         QApplication.processEvents()
 
         app_info = ExecutableInfo()
-        app_info.setPath(app_path)
+        app_info.setPath(app_path, self.test_checkbox.isChecked())
 
         QApplication.processEvents()
 
@@ -175,6 +186,12 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         # So just use the static method.
         exe_name, other = QFileDialog.getOpenFileName(self, "Chooose executable")
         self.setExecutablePath(exe_name)
+
+    def _allowTestObjects(self):
+        """
+        Reload the ExecutableInfo based on whether we are allowing test objects or not.
+        """
+        self.setExecutablePath(self.exe_line.text())
 
     def _workingDirChanged(self):
         """
