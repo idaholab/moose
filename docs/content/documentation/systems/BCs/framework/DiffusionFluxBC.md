@@ -4,18 +4,19 @@
 
 ## Description
 `DiffusionFluxBC` is a `FluxBC` which is appropriate for use with the
-boundary terms arising from the `Diffusion` `Kernel`. `DiffusionFluxBC`
+boundary terms arising from the [`Diffusion`](/framework/Diffusion.md) [`Kernel`](/Kernels/index.md). `DiffusionFluxBC`
 does not "enforce" a boundary condition per-se (see,
-e.g. `DirichletBC`, `NeumannBC`, and related classes for that).
+e.g. [`DirichletBC`](/framework/DirichletBC.md), [`NeumannBC`](/framework/NeumannBC.md), and related classes for that).
 Instead, this class is responsible for computing the residual (and
 Jacobian) contributions due to the boundary contribution arising from
-integration by parts on the `Diffusion` `Kernel`.
+integration by parts on the [`Diffusion`](/framework/Diffusion.md) [`Kernel`](/Kernels/index.md).
 
-Note: the standard theory of elliptic operators requires the specification of boundary
-conditions on all parts of the boundary, so "implicitly" computing a residual contribution
-in this manner (instead of replacing it with the correct "data") falls outside of this
-theory. That said, there are instances where such an approach gives reasonable results
-in practice, see, for example, the paper by \cite{griffiths1997noboundary}.
+!!!note
+    The standard theory of elliptic operators requires the specification of boundary
+    conditions on all parts of the boundary, so "implicitly" computing a residual contribution
+    in this manner (instead of replacing it with the correct "data") falls outside of this
+    theory. That said, there are instances where such an approach gives reasonable results
+    in practice, see, for example, the paper by \cite{griffiths1997noboundary}.
 
 As an example, consider the Poisson problem with mixed
 boundary conditions:
@@ -33,7 +34,7 @@ boundary conditions and such that
   \label{weakform}
   \int_{\Omega} \left( \nabla u \cdot \nabla v - fv \right) \,\text{d}x
   -\int_{\partial \Omega_N} hv \,\text{d}s
-  -\int_{\partial \Omega_F} \frac{\partial u}{\partial n} v \,\text{d}s = 0
+  -\underbrace{\int_{\partial \Omega_F} \frac{\partial u}{\partial n} v \,\text{d}s}_{\texttt{DiffusionFluxBC}} = 0
 \end{equation}
 holds for every
 $v \in \mathcal{V} = \{v : v \in H^1(\Omega), v=0 \text{ on } \partial \Omega_D \}$,

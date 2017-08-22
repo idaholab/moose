@@ -13,10 +13,14 @@ appropriate to use in systems of partial differential equations (PDEs) of the fo
   u &= g && \quad \in \partial \Omega_D \\
   \frac{\partial u}{\partial n} &= \vec{V} \cdot \hat{n} && \quad \in \partial \Omega_N
 \end{alignat}
-Note that there is not a 1:1 correspondence between the choice of
-$\vec{V}$ and the resulting solution, since the component of $\vec{V}$
-which is orthogonal to the outward normal vector will not have any
-effect on the result. This class exists mainly for convenience: if the true
+
+!!!note
+    There is not a 1:1 correspondence between the choice of
+    $\vec{V}$ and the resulting solution, since the component of $\vec{V}$
+    which is orthogonal to the outward normal vector will not have any
+    effect on the result.
+
+This class exists mainly for convenience: if the true
 solution has a constant flux, then it is easier to specify Neumann boundary
 conditions on parts of the boundary with different outward normal vectors
 by simply specifying the true constant flux vector, and allowing MOOSE to

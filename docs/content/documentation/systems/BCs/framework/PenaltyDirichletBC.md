@@ -4,7 +4,7 @@
 
 ## Description
 `PenaltyDirichletBC` is a `NodalBC` used for enforcing Dirichlet boundary conditions
-which differs from the `DirichletBC` class in the way in which it handles the enforcement.
+which differs from the [`DirichletBC`](/framework/DirichletBC.md) class in the way in which it handles the enforcement.
 It is appropriate for partial differential equations (PDEs) in the form
 
 \begin{alignat}{2}
