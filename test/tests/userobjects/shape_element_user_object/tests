@@ -4,7 +4,6 @@
     input = 'shape_element_user_object.i'
     recover = false
     allow_warnings = true
-    mesh_mode = REPLICATED
   [../]
 
   [./simple_shape_element_uo]
@@ -15,7 +14,6 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
-    mesh_mode = REPLICATED
   [../]
 
   [./jacobian_test1]
@@ -26,7 +24,6 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
-    mesh_mode = REPLICATED
   [../]
 
   [./jacobian_test2]
@@ -37,7 +34,6 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
-    mesh_mode = REPLICATED
   [../]
 
   [./shape_side_uo_jac_test]
@@ -47,7 +43,6 @@
     ratio_tol = 3e-8
     recover = false
     allow_warnings = true
-    mesh_mode = REPLICATED
     # This tests sometimes reports an incorrect jacobian when run
     # with multiple threads.
     max_threads = 1
@@ -57,7 +52,6 @@
     input = 'shape_side_uo_physics_test.i'
     exodiff = 'shape_side_uo_physics_test_out.e'
     allow_warnings = true
-    mesh_mode = REPLICATED
     recover = false
   [../]
 []
