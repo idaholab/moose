@@ -18,6 +18,7 @@
 #include "GeneralizedPlaneStrainAction.h"
 
 #include "StressDivergenceTensors.h"
+#include "StressDivergenceExpTensors.h"
 #include "StressDivergenceTensorsTruss.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "StressDivergenceRZTensors.h"
@@ -25,6 +26,7 @@
 #include "MomentBalancing.h"
 #include "PoroMechanicsCoupling.h"
 #include "InertialForce.h"
+#include "InertialForceExp.h"
 #include "Gravity.h"
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
@@ -149,6 +151,8 @@
 #include "RankTwoScalarAux.h"
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
+#include "ExpAccelAux.h"
+#include "ExpVelAux.h"
 #include "RadialDisplacementCylinderAux.h"
 #include "RadialDisplacementSphereAux.h"
 
@@ -181,6 +185,8 @@
 #include "GeneralizedPlaneStrainUserObject.h"
 
 #include "ElementJacobianDamper.h"
+
+#include "ExplicitCriticalDT.h"
 
 template <>
 InputParameters
@@ -223,6 +229,7 @@ void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {
   registerKernel(StressDivergenceTensors);
+  registerKernel(StressDivergenceExpTensors);
   registerKernel(StressDivergenceTensorsTruss);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(StressDivergenceRZTensors);
@@ -230,6 +237,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(MomentBalancing);
   registerKernel(PoroMechanicsCoupling);
   registerKernel(InertialForce);
+  registerKernel(InertialForceExp);
   registerKernel(Gravity);
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);
@@ -360,6 +368,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(RankTwoScalarAux);
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
+  registerAux(ExpAccelAux);
+  registerAux(ExpVelAux);
   registerAux(RadialDisplacementCylinderAux);
   registerAux(RadialDisplacementSphereAux);
 
@@ -380,6 +390,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerVectorPostprocessor(LineMaterialRankTwoScalarSampler);
 
   registerDamper(ElementJacobianDamper);
+
+  registerTimeStepper(ExplicitCriticalDT);
 }
 
 // External entry point for dynamic syntax association
