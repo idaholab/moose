@@ -904,6 +904,8 @@ tensor_mechanics:
     - /AuxKernels/RankFourAux
     - /AuxKernels/RankTwoAux
     - /AuxKernels/RankTwoScalarAux
+    - /AuxKernels/VectorRankFourAux
+    - /AuxKernels/VectorRankTwoAux
     - /BCs
     - /BCs/DashpotBC
     - /BCs/DisplacementAboutAxis
@@ -964,6 +966,7 @@ tensor_mechanics:
     - /Materials/ComputeLayeredCosseratElasticityTensor
     - /Materials/ComputeLinearElasticPFFractureStress
     - /Materials/ComputeLinearElasticStress
+    - /Materials/ComputeLinearViscoelasticStress
     - /Materials/ComputeMultiPlasticityStress
     - /Materials/ComputeMultipleInelasticCosseratStress
     - /Materials/ComputeMultipleInelasticStress
@@ -990,6 +993,7 @@ tensor_mechanics:
     - /Materials/HyperElasticPhaseFieldIsoDamage
     - /Materials/InclusionProperties
     - /Materials/LinearElasticTruss
+    - /Materials/LinearViscoelasticStressUpdate
     - /Materials/MultiPhaseStressMaterial
     - /Materials/PowerLawCreepStressUpdate
     - /Materials/StressBasedChemicalPotential
@@ -1021,6 +1025,7 @@ tensor_mechanics:
     - /UserObjects/HEVPEqvPlasticStrainRate
     - /UserObjects/HEVPFlowRatePowerLawJ2
     - /UserObjects/HEVPLinearHardening
+    - /UserObjects/LinearViscoelasticityManager
     - /UserObjects/HEVPRambergOsgoodHardening
     - /UserObjects/TensorMechanicsHardeningConstant
     - /UserObjects/TensorMechanicsHardeningCubic
