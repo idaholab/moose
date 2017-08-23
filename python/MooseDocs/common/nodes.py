@@ -124,6 +124,13 @@ class MarkdownNode(NodeCore):
         self._content = content
 
     @property
+    def filename(self):
+        """
+        Provide a 'filename' for when MooseMarkdown object is used with a raw string.
+        """
+        return 'supplied string.'
+
+    @property
     def content(self):
         """
         Return the supplied markdown content.
@@ -503,7 +510,7 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
         """
         if 'file_info' in item:
             for info in item['file_info'].iterkeys():
-                match = re.search(r'/(?P<group>\w+)App\.C', info)
+                match = re.search(r'/(?P<group>\w+)(?:App|Syntax)\.C', info)
                 if match:
                     heading = re.sub(r'(?<=[a-z])([A-Z])', r' \1', match.group('group'))
                     folder = heading.replace(' ', '_').lower()

@@ -32,4 +32,4 @@ with SUPG stabilization.
 ## References
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/level_set.bib}
+\bibliography{level_set.bib}

@@ -48,6 +48,7 @@ class AppSyntaxExtension(MooseMarkdownExtension):
                                    "links to objects."]
         config['install'] = ['', "The location to install system and object documentation."]
         config['hide'] = [dict(), "Suppress warnings for syntax listed in this dictionary."]
+        config['pairs'] = [list(), "Testing."]
         return config
 
     def __init__(self, **kwargs):

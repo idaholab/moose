@@ -102,4 +102,4 @@ derivative is continuous at $S_{\mathrm{eff}}=1$.
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

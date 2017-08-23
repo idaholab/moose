@@ -13,9 +13,9 @@ The [BibTeX] extension makes it possible to include citations using LaTeX comman
 The bibliography style may be set within a page using the latex command
 `\bibliographystyle{unsrt}`. Three styles are currently available: 'unsrt', 'plain', 'alpha', and 'unsrtalpha'.
 
-The references are displayed by using the latex `\bibliography{docs/bib/moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
+The references are displayed by using the latex `\bibliography{moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/moose.bib}
+\bibliography{moose.bib}
 
 !extension BibtexExtension

@@ -43,4 +43,4 @@ $$
 * [Comparison with the analytical solution for an equilibrium interface](Multi Phase/KKS Analytical.md) for a simple 2-component example of the KKS model.
 * [KKS phase-field model with 3 or more components](Multi Phase/KKS Multi Component Example.md)
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

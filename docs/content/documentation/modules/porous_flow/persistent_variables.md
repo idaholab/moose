@@ -40,4 +40,4 @@ z^{\kappa} = \frac{\sum_{\alpha} S_{\alpha} \rho_{\alpha} x_{\alpha}^{\kappa}}{\
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

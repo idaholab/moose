@@ -426,4 +426,4 @@ $$
 J= \phi_j \frac{\partial R}{\partial \eta} = \phi_j \frac{dh}{d\eta}(c_b-c_a)
 $$
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

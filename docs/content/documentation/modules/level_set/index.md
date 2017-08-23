@@ -26,4 +26,4 @@ set module more useful and robust for real-world applications:
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/level_set.bib}
+\bibliography{level_set.bib}

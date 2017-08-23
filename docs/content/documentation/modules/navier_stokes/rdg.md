@@ -412,4 +412,4 @@ Notes:
 ##Reference
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/rdg.bib}
+\bibliography{rdg.bib}

@@ -45,4 +45,4 @@ x_i = \frac{z_i}{(K_i - 1) V + 1}, \quad y_i = \frac{z_i K_i}{(K_i - 1) V + 1}.
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}
