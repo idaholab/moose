@@ -17,6 +17,7 @@
 
 #include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
+#include "Assembly.h"
 #include "ThreadedElementLoopBase.h"
 
 // Forward declarations
@@ -47,6 +48,13 @@ public:
   virtual void caughtMooseException(MooseException & e) override;
 
   virtual bool keepGoing() override { return !_fe_problem.hasException(); }
+
+  virtual void preElement(const Elem * elem) override;
+
+  virtual void preInternalSide(const Elem * elem, unsigned int side) override;
+
+  virtual void neighborSubdomainChanged() override;
+
 protected:
   FEProblemBase & _fe_problem;
 };
@@ -77,6 +85,28 @@ ThreadedElementLoop<RangeType>::caughtMooseException(MooseException & e)
 
   std::string what(e.what());
   _fe_problem.setException(what);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::preElement(const Elem * el)
+{
+  _fe_problem.setCurrentSubdomainID(el, ThreadedElementLoopBase<RangeType>::_tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::preInternalSide(const Elem * el, unsigned int side)
+{
+  _fe_problem.setNeighborSubdomainID(el, side, ThreadedElementLoopBase<RangeType>::_tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::neighborSubdomainChanged()
+{
+  _fe_problem.neighborSubdomainSetup(ThreadedElementLoopBase<RangeType>::_neighbor_subdomain,
+                                     ThreadedElementLoopBase<RangeType>::_tid);
 }
 
 #endif // THREADEDELEMENTLOOP_H

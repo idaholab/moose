@@ -337,6 +337,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
+        _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
 
@@ -409,6 +410,7 @@ GeometricSearchData::generateMortarNodes(unsigned int master_id,
   const MooseArray<Point> & qpoints = _subproblem.assembly(0).qPoints();
   for (const auto & elem : iface->_elems)
   {
+    _subproblem.setCurrentSubdomainID(elem, 0);
     _subproblem.assembly(0).reinit(elem);
 
     for (unsigned int qp = 0; qp < qpoints.size(); qp++)
@@ -432,6 +434,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
+        _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
 
@@ -459,6 +462,7 @@ GeometricSearchData::updateMortarNodes()
   for (const auto & iface : ifaces)
     for (const auto & elem : iface->_elems)
     {
+      _subproblem.setCurrentSubdomainID(elem, 0);
       _subproblem.assembly(0).reinit(elem);
 
       for (unsigned int qp = 0; qp < qpoints.size(); qp++)

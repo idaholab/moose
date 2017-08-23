@@ -98,6 +98,7 @@ PointSamplerBase::execute()
         // We have to pass a vector of points into reinitElemPhys
         point_vec[0] = p;
 
+        _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
 
         for (auto j = beginIndex(_coupled_moose_vars); j < _coupled_moose_vars.size(); ++j)

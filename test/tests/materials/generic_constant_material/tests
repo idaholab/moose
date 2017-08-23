@@ -12,6 +12,6 @@
     input = 'generic_constant_material_test.i'
     exodiff = 'out.e'
     prereq = test
-    cli_args = 'Materials/dm1/constant_on_elem=true'
+    cli_args = 'Materials/dm1/constant_on=ELEMENT'
   [../]
 []

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'mat_prop_block.i'
+    exodiff = 'mat_prop_block_out.e'
+  [../]
+[]

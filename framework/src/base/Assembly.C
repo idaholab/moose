@@ -596,6 +596,8 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
   _current_neighbor_elem = neighbor;
+  mooseAssert(_current_neighbor_subdomain_id == _current_neighbor_elem->subdomain_id(),
+              "current neighbor subdomain has been set incorrectly");
 
   // Calculate the volume of the neighbor
   if (_need_neighbor_elem_volume)
@@ -610,7 +612,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     // set the coord transformation
     _coord_neighbor.resize(qrule->n_points());
     Moose::CoordinateSystemType coord_type =
-        _sys.subproblem().getCoordSystem(_current_neighbor_elem->subdomain_id());
+        _sys.subproblem().getCoordSystem(_current_neighbor_subdomain_id);
     unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
     const std::vector<Real> & JxW = fe->get_JxW();
     const std::vector<Point> & q_points = fe->get_xyz();
@@ -647,7 +649,8 @@ void
 Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
-  _current_neighbor_elem = NULL;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
   unsigned int elem_dimension = elem->dim();
@@ -729,7 +732,8 @@ void
 Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points)
 {
   _current_elem = elem;
-  _current_neighbor_elem = NULL;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
   FEInterface::inverse_map(elem->dim(),
@@ -750,7 +754,8 @@ void
 Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
   _current_elem = elem;
-  _current_neighbor_elem = NULL;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
   unsigned int elem_dimension = _current_elem->dim();
@@ -774,8 +779,9 @@ void
 Assembly::reinit(const Elem * elem, unsigned int side)
 {
   _current_elem = elem;
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
   _current_side = side;
-  _current_neighbor_elem = NULL;
   _current_elem_volume_computed = false;
   _current_side_volume_computed = false;
 

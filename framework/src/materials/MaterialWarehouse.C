@@ -63,16 +63,26 @@ void
 MaterialWarehouse::subdomainSetup(THREAD_ID tid /*=0*/) const
 {
   MooseObjectWarehouse<Material>::subdomainSetup(tid);
-  _neighbor_materials.subdomainSetup(tid);
   _face_materials.subdomainSetup(tid);
+}
+
+void
+MaterialWarehouse::neighborSubdomainSetup(THREAD_ID tid /*=0*/) const
+{
+  _neighbor_materials.subdomainSetup(tid);
 }
 
 void
 MaterialWarehouse::subdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) const
 {
   MooseObjectWarehouse<Material>::subdomainSetup(id, tid);
-  _neighbor_materials.subdomainSetup(id, tid);
   _face_materials.subdomainSetup(id, tid);
+}
+
+void
+MaterialWarehouse::neighborSubdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) const
+{
+  _neighbor_materials.subdomainSetup(id, tid);
 }
 
 void

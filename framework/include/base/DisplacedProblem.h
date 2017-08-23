@@ -141,6 +141,8 @@ public:
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices,
                        THREAD_ID tid) override;
+  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) override;
+  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) override;
   virtual void prepareBlockNonlocal(unsigned int ivar,
                                     unsigned int jvar,
                                     const std::vector<dof_id_type> & idof_indices,

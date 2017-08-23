@@ -43,6 +43,8 @@ public:
   virtual void timestepSetup(THREAD_ID tid = 0) const;
   virtual void subdomainSetup(THREAD_ID tid = 0) const;
   virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
+  virtual void neighborSubdomainSetup(THREAD_ID tid = 0) const;
+  virtual void neighborSubdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
   virtual void jacobianSetup(THREAD_ID tid = 0) const;
   virtual void residualSetup(THREAD_ID tid = 0) const;
   virtual void updateActive(THREAD_ID tid = 0);
