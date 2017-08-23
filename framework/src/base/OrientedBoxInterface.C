@@ -51,7 +51,7 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
   Point bottom_left(-xmax, -ymax, -zmax);
   Point top_right(xmax, ymax, zmax);
 
-  _bounding_box = new MeshTools::BoundingBox(bottom_left, top_right);
+  _bounding_box = libmesh_make_unique<MeshTools::BoundingBox>(bottom_left, top_right);
 
   /*
    * now create the rotation matrix that rotates the oriented
@@ -79,13 +79,7 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
     mooseError("width_direction and length_direction are not perpendicular in ", name);
 
   // The rotation matrix!
-  _rot_matrix = new RealTensorValue(w, l, w.cross(l));
-}
-
-OrientedBoxInterface::~OrientedBoxInterface()
-{
-  delete _bounding_box;
-  delete _rot_matrix;
+  _rot_matrix = libmesh_make_unique<RealTensorValue>(w, l, w.cross(l));
 }
 
 bool

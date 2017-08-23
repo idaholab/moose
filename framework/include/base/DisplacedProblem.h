@@ -45,7 +45,6 @@ class DisplacedProblem : public SubProblem
 {
 public:
   DisplacedProblem(const InputParameters & parameters);
-  virtual ~DisplacedProblem();
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
@@ -275,7 +274,7 @@ protected:
   const NumericVector<Number> * _nl_solution;
   const NumericVector<Number> * _aux_solution;
 
-  std::vector<Assembly *> _assembly;
+  std::vector<std::unique_ptr<Assembly>> _assembly;
 
   GeometricSearchData _geometric_search_data;
 

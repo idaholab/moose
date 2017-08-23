@@ -190,7 +190,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_dampers(false),
     _has_constraints(false),
     _has_initialized_stateful(false),
-    _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
     _needs_old_newton_iter(false),
@@ -244,7 +243,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
 
-  _resurrector = new Resurrector(*this);
+  _resurrector = libmesh_make_unique<Resurrector>(*this);
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 }
@@ -321,12 +320,6 @@ FEProblemBase::~FEProblemBase()
     _second_zero[i].release();
     _second_phi_zero[i].release();
   }
-
-  delete _resurrector;
-
-  // Random data objects
-  for (auto & it : _random_data_objects)
-    delete it.second;
 }
 
 Moose::CoordinateSystemType
@@ -5047,16 +5040,13 @@ FEProblemBase::solverParams()
 void
 FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
 {
-  RandomData * random_data;
-  if (_random_data_objects.find(name) == _random_data_objects.end())
-  {
-    random_data = new RandomData(*this, random_interface);
-    random_interface.setRandomDataPointer(random_data);
+  auto rand_pair_it = _random_data_objects.lower_bound(name);
+  if (rand_pair_it == _random_data_objects.end() || rand_pair_it->first != name)
+    rand_pair_it = _random_data_objects.emplace_hint(
+        rand_pair_it, name, libmesh_make_unique<RandomData>(*this, random_interface));
 
-    _random_data_objects[name] = random_data;
-  }
-  else
-    random_interface.setRandomDataPointer(_random_data_objects[name]);
+  auto random_data_ptr = rand_pair_it->second.get();
+  random_interface.setRandomDataPointer(random_data_ptr);
 }
 
 bool

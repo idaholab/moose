@@ -60,15 +60,9 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
   unsigned int n_threads = libMesh::n_threads();
 
-  _assembly.resize(n_threads);
+  _assembly.reserve(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-    _assembly[i] = new Assembly(_displaced_nl, i);
-}
-
-DisplacedProblem::~DisplacedProblem()
-{
-  for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
-    delete _assembly[i];
+    _assembly.emplace_back(libmesh_make_unique<Assembly>(_displaced_nl, i));
 }
 
 bool
