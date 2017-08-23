@@ -153,6 +153,7 @@ framework:
     - /Executioner/TimeStepper/LogConstantDT
     - /Executioner/TimeStepper/PostprocessorDT
     - /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+    - /Executioner/TimeStepper/CSVTimeSequenceStepper
     - /Executioner/TimeStepper/TimeSequenceStepper
     - /Functions
     - /Functions/AddFunctionAction
