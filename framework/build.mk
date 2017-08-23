@@ -57,7 +57,13 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
 
-all::
+.PHONY: pre-build main-build
+.SECONDARY: main-build
+
+all:: pre-build main-build
+	@echo ALL
+
+pre-build::
 
 #
 # C++ rules

@@ -189,7 +189,7 @@ LIBRARY_SUFFIX :=
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
 ifeq ($(BUILD_EXEC),yes)
-  all:: $(app_EXEC)
+  main-build:: $(app_EXEC)
 endif
 
 BUILD_EXEC :=
