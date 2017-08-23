@@ -59,7 +59,7 @@ moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 app_INCLUDES := $(moose_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: libmesh_submodule_status moose_revision moose
+main-build:: libmesh_submodule_status moose_revision moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
@@ -121,7 +121,7 @@ exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR) $(libmesh_INCLUDE)
 # dependency files
 exodiff_deps := $(patsubst %.C, %.$(obj-suffix).d, $(exodiff_srcfiles))
 
-all:: exodiff
+main-build:: exodiff
 
 # Target-specific Variable Values (See GNU-make manual)
 exodiff: app_INCLUDES := $(exodiff_includes)
