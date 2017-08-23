@@ -78,6 +78,7 @@
     input = 'bh27.i'
     exodiff = 'bh27.e'
     rel_err = 1E-5
+    abs_zero = 1E-5
     heavy = true
   [../]
 
