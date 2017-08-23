@@ -11,4 +11,4 @@ variance-based sensitivity analysis, refer to \citet{saltelli2002making} for com
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/stochastic_tools.bib}
+\bibliography{stochastic_tools.bib}

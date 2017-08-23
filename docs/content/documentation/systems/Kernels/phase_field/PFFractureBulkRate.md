@@ -29,4 +29,4 @@ which works with linear shape functions (e.g. first order Lagrange).
 
 !syntax children /Kernels/PFFractureBulkRate
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

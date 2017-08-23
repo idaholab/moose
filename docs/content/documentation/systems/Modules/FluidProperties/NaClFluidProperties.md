@@ -34,4 +34,4 @@ The NaClFluidProperties UserObject is valid for the solid phase region only
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/fluid_properties.bib}
+\bibliography{fluid_properties.bib}

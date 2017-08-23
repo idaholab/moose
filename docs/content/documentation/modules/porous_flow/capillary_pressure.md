@@ -186,4 +186,4 @@ pressure, and \ref{pc_bc_logext} for the Brooks-Corey capillary pressure.
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

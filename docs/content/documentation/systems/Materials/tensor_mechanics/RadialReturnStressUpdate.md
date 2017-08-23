@@ -62,4 +62,4 @@ More details on how to write the equivalent yield surface equation for a creep m
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/tensor_mechanics.bib}
+\bibliography{tensor_mechanics.bib}

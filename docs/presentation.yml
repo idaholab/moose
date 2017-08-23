@@ -5,7 +5,7 @@
 - MooseDocs.extensions.listings:
     repo: https://github.com/idaholab/moose
     make_dir: modules/combined
-- MooseDocs.extensions.app_syntax: !import docs/website.yml MooseDocs.extensions.app_syntax
+- MooseDocs.extensions.app_syntax: !import-config docs/website.yml MooseDocs.extensions.app_syntax
 - MooseDocs.extensions.template:
     template: presentation.html
     template_args:

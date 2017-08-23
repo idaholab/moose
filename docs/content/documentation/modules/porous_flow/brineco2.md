@@ -15,4 +15,4 @@ as all mass fractions of all fluid components in all fluid phases in a single ma
 
 ##References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/porous_flow.bib}
+\bibliography{porous_flow.bib}

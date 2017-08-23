@@ -169,4 +169,4 @@ which is the familiar form implemented by [ACInterface](/ACInterface.md).
 
 !syntax children /Kernels/ACMultiInterface
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

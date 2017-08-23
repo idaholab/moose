@@ -73,4 +73,4 @@ in good agreement with the expected value of 2.
 
 !listing modules/phase_field/examples/kim-kim-suzuki/kks_example_dirichlet.i
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

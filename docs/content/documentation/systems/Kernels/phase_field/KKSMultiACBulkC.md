@@ -74,4 +74,4 @@ $$
 
 !syntax children /Kernels/KKSMultiACBulkC
 
-\bibliography{docs/bib/phase_field.bib}
+\bibliography{phase_field.bib}

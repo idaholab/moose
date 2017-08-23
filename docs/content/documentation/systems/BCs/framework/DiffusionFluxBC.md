@@ -44,7 +44,7 @@ class would then be used to compute the last term in \eqref{weakform}.
 ## References
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/moose.bib}
+\bibliography{moose.bib}
 
 ## Example Input Syntax
 !listing test/tests/mortar/2d/equalgradient.i start=[./all] end=[../] include-end=true
