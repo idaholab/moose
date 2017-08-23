@@ -37,6 +37,11 @@ StorkApp::registerApps()
   registerApp(StorkApp);
 }
 
+void
+StorkApp::registerObjectDepends(Factory & /*factory*/)
+{
+}
+
 // External entry point for dynamic object registration
 extern "C" void
 StorkApp__registerObjects(Factory & factory)
@@ -44,7 +49,12 @@ StorkApp__registerObjects(Factory & factory)
   StorkApp::registerObjects(factory);
 }
 void
-StorkApp::registerObjects(Factory & factory)
+StorkApp::registerObjects(Factory & /*factory*/)
+{
+}
+
+void
+StorkApp::associateSyntaxDepends(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
 
