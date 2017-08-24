@@ -649,6 +649,7 @@ void
 Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
+  _current_neighbor_elem = nullptr;
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
@@ -732,6 +733,7 @@ void
 Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physical_points)
 {
   _current_elem = elem;
+  _current_neighbor_elem = nullptr;
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
@@ -754,6 +756,7 @@ void
 Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
   _current_elem = elem;
+  _current_neighbor_elem = nullptr;
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
@@ -779,6 +782,7 @@ void
 Assembly::reinit(const Elem * elem, unsigned int side)
 {
   _current_elem = elem;
+  _current_neighbor_elem = nullptr;
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_side = side;
