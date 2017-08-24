@@ -4,7 +4,7 @@
 This material defines the Helmholtz free energy density $f$ of an ideal Boltzmann gas.
 
 $$
-F = U - TS = -Nk_BT\left(1+\ln\frac {n_Q}n\right)
+f = \frac FV = \frac 1V(U - TS) = -nk_BT\left(1+\ln\frac {n_Q}n\right)
 $$
 
 where

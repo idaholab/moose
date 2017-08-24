@@ -9,7 +9,7 @@ units $u$ (this can be customized using the `mass_unit_conversion`). $T$ (`T`) i
 the coupled temperature, $n$ is defined as
 
 $$
-n=\frac c\Omega,
+n= \frac NV = \frac c\Omega,
 $$
 
 where $c$ (`c`) is the coupled concentration and $\Omega$ (`omega`) is the lattice

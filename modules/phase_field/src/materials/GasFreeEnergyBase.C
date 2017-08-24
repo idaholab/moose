@@ -19,11 +19,10 @@ validParams<GasFreeEnergyBase>()
       "omega", "Lattice site volume (default mass_unit_conversion requires this to be in [Ang^3])");
   params.addRequiredParam<Real>(
       "m", "Gas atom mass (the default mass_unit_conversion requires this to be in [u])");
-  params.addParam<Real>(
-      "mass_unit_conversion",
-      1.0364271410595204e-28,
-      "Conversion factor to get the mass gas atom mass in [eV*s^2/Ang^2] (defaults "
-      "to [eV*s^2/(Ang^2*u)])");
+  params.addParam<Real>("mass_unit_conversion",
+                        1.0364271410595204e-28,
+                        "Conversion factor to get the gas atom mass in [eV*s^2/Ang^2] (defaults "
+                        "to [eV*s^2/(Ang^2*u)])");
   params.addParam<Real>("h",
                         4.135667662e-15,
                         "Planck constant - units need to be consistent with "
