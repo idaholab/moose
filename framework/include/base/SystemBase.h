@@ -182,6 +182,16 @@ public:
   virtual NumericVector<Number> & getVector(TagID tag);
 
   /**
+   * Check if the tagged matrix exists in the system.
+   */
+  virtual bool hasMatrix(TagID tag);
+
+  /**
+   * Get a raw SparseMatrix
+   */
+  virtual SparseMatrix<Number> & getMatrix(TagID tag);
+
+  /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
    */
   virtual NumericVector<Number> & serializedSolution() = 0;
@@ -475,6 +485,16 @@ public:
    */
   virtual NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
+  /**
+   * Adds a jacobian sized vector
+   *
+   * @param tag_name The name of the tag
+   */
+  virtual SparseMatrix<Number> & addMatrix(TagID /* tag */)
+  {
+    mooseError("Adding a matrix is not supported for this type of system!");
+  }
+
   virtual const std::string & name() { return system().name(); }
 
   /**
@@ -520,6 +540,7 @@ protected:
   Real _du_dot_du;
 
   std::vector<NumericVector<Number> *> _tagged_vectors;
+  std::vector<SparseMatrix<Number> *> _tagged_matrices;
 
   NumericVector<Number> * _dummy_vec; // to satisfy the interface
 

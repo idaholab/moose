@@ -499,8 +499,8 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
 NumericVector<Number> &
 SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
 {
-  if (!_subproblem.tagExists(tag))
-    mooseError("Cannot add a tagged vector with tag, ",
+  if (!_subproblem.vectorTagExists(tag))
+    mooseError("Cannot add a tagged vector with vector_tag, ",
                tag,
                ", that tag does not exist in System ",
                name());
@@ -508,7 +508,7 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
   if (hasVector(tag))
     return getVector(tag);
 
-  auto vector_name = _subproblem.tagName(tag);
+  auto vector_name = _subproblem.vectorTagName(tag);
 
   NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
 
@@ -633,9 +633,23 @@ SystemBase::getVector(const std::string & name)
 NumericVector<Number> &
 SystemBase::getVector(TagID tag)
 {
-  mooseAssert(hasVector(tag), "Cannot retrieve vector with tag: " << tag);
+  mooseAssert(hasVector(tag), "Cannot retrieve vector with residual_tag: " << tag);
 
   return *_tagged_vectors[tag];
+}
+
+bool
+SystemBase::hasMatrix(TagID tag)
+{
+  return tag < _tagged_matrices.size() && _tagged_matrices[tag];
+}
+
+SparseMatrix<Number> &
+SystemBase::getMatrix(TagID tag)
+{
+  mooseAssert(hasVector(tag), "Cannot retrieve matrix with matrix_tag: " << tag);
+
+  return *_tagged_matrices[tag];
 }
 
 unsigned int

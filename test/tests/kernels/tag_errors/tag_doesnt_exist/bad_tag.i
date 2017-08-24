@@ -14,7 +14,6 @@
   [./diff]
     type = Diffusion
     variable = u
-    tags = 'nope'
   [../]
 []
 
