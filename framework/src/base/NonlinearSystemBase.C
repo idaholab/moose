@@ -801,6 +801,7 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
+            _fe_problem.setNeighborSubdomainID(master_elem, 0);
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
             for (const auto & nfc : constraints)
@@ -896,6 +897,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
+            _fe_problem.setNeighborSubdomainID(master_elem, 0);
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
             for (const auto & nfc : constraints)
@@ -978,6 +980,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
       for (const auto & elem : elems)
       {
         // for each element process constraints on the
+        _fe_problem.setCurrentSubdomainID(elem, tid);
         _fe_problem.prepare(elem, tid);
         _fe_problem.reinitElem(elem, tid);
 
@@ -1044,7 +1047,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         // for each element process constraints on the
         for (const auto & ec : _element_constraints)
         {
+          _fe_problem.setCurrentSubdomainID(elem1, tid);
           _fe_problem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
+          _fe_problem.setNeighborSubdomainID(elem2, tid);
           _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
           ec->subProblem().prepareShapes(ec->variable().number(), tid);
@@ -1523,6 +1528,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
             points.push_back(info._closest_point);
 
             // reinit variables on the master element's face at the contact point
+            _fe_problem.setNeighborSubdomainID(master_elem, 0);
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
             for (const auto & nfc : constraints)
             {
@@ -1687,6 +1693,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
         // for each element process constraints on the
         for (const auto & ffc : face_constraints)
         {
+          _fe_problem.setCurrentSubdomainID(elem, tid);
           _fe_problem.prepare(elem, tid);
           _fe_problem.reinitElem(elem, tid);
           ffc->reinit();
@@ -1748,7 +1755,9 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
         // for each element process constraints on the
         for (const auto & ec : _element_constraints)
         {
+          _fe_problem.setCurrentSubdomainID(elem1, tid);
           _fe_problem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
+          _fe_problem.setNeighborSubdomainID(elem2, tid);
           _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
           ec->subProblem().prepareShapes(ec->variable().number(), tid);

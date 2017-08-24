@@ -359,6 +359,20 @@ DisplacedProblem::prepare(const Elem * elem,
 }
 
 void
+DisplacedProblem::setCurrentSubdomainID(const Elem * elem, THREAD_ID tid)
+{
+  SubdomainID did = elem->subdomain_id();
+  _assembly[tid]->setCurrentSubdomainID(did);
+}
+
+void
+DisplacedProblem::setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  SubdomainID did = elem->neighbor_ptr(side)->subdomain_id();
+  _assembly[tid]->setCurrentNeighborSubdomainID(did);
+}
+
+void
 DisplacedProblem::prepareBlockNonlocal(unsigned int ivar,
                                        unsigned int jvar,
                                        const std::vector<dof_id_type> & idof_indices,

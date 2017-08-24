@@ -47,10 +47,15 @@ validParams<Material>()
                         "The user must call computeProperties() after retrieving the Material "
                         "via MaterialPropertyInterface::getMaterial(). "
                         "Non-computed Materials are not sorted for dependencies.");
-  params.addParam<bool>("constant_on_elem",
-                        false,
-                        "When true, MOOSE will only call computeQpProperties() for the 0th "
-                        "quadrature point, and then copy that value to the other qps.");
+  MooseEnum const_option("NONE=0 ELEMENT=1 SUBDOMAIN=2", "none");
+  params.addParam<MooseEnum>(
+      "constant_on",
+      const_option,
+      "When ELEMENT, MOOSE will only call computeQpProperties() for the 0th "
+      "quadrature point, and then copy that value to the other qps."
+      "When SUBDOMAIN, MOOSE will only call computeSubdomainProperties() for the 0th "
+      "quadrature point, and then copy that value to the other qps. Evaluations on element qps "
+      "will be skipped");
 
   // Outputs
   params += validParams<OutputInterface>();
@@ -61,7 +66,7 @@ validParams<Material>()
       "must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
-  params.addParamNamesToGroup("use_displaced_mesh constant_on_elem", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh constant_on", "Advanced");
   params.registerBase("Material");
 
   return params;
@@ -107,11 +112,13 @@ Material::Material(const InputParameters & parameters)
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
     _normals(_assembly.normals()),
     _current_elem(_neighbor ? _assembly.neighbor() : _assembly.elem()),
+    _current_subdomain_id(_neighbor ? _assembly.currentNeighborSubdomainID()
+                                    : _assembly.currentSubdomainID()),
     _current_side(_neighbor ? _assembly.neighborSide() : _assembly.side()),
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
-    _constant_on_elem(getParam<bool>("constant_on_elem")),
+    _constant_option(getParam<MooseEnum>("constant_on").getEnum<ConstantTypeEnum>()),
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
@@ -182,12 +189,43 @@ Material::getOutputs()
 }
 
 void
+Material::subdomainSetup()
+{
+  if (_constant_option == ConstantTypeEnum::SUBDOMAIN)
+  {
+    unsigned int nqp = _fe_problem.getMaxQps();
+
+    MaterialProperties & props = _material_data->props();
+    for (const auto & prop_id : _supplied_prop_ids)
+      props[prop_id]->resize(nqp);
+
+    _qp = 0;
+    computeSubdomainProperties();
+
+    for (const auto & prop_id : _supplied_prop_ids)
+    {
+      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
+        props[prop_id]->qpCopy(qp, props[prop_id], 0);
+    }
+  }
+}
+
+void
+Material::computeSubdomainProperties()
+{
+  mooseError("computeSubdomainQpProperties in Material '", name(), "' needs to be implemented");
+}
+
+void
 Material::computeProperties()
 {
+  if (_constant_option == ConstantTypeEnum::SUBDOMAIN)
+    return;
+
   // If this Material has the _constant_on_elem flag set, we take the
   // value computed for _qp==0 and use it at all the quadrature points
   // in the Elem.
-  if (_constant_on_elem)
+  if (_constant_option == ConstantTypeEnum::ELEMENT)
   {
     // Compute MaterialProperty values at the first qp.
     _qp = 0;

@@ -65,6 +65,10 @@ public:
   MooseVariable & variable() { return _var; }
 
   virtual bool addCouplingEntriesToJacobian() { return true; }
+  virtual void subdomainSetup() override final
+  {
+    mooseError("subdomain setup for constraints is not implemented");
+  }
 
 protected:
   SubProblem & _subproblem;

@@ -189,6 +189,16 @@ public:
   const Elem *& elem() { return _current_elem; }
 
   /**
+   * Return the current subdomain ID
+   */
+  const SubdomainID & currentSubdomainID() const { return _current_subdomain_id; }
+
+  /**
+   * set the current subdomain ID
+   */
+  void setCurrentSubdomainID(SubdomainID i) { _current_subdomain_id = i; }
+
+  /**
    * Returns the reference to the current element volume
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -223,6 +233,16 @@ public:
    * @return A _reference_.  Make sure to store this as a reference!
    */
   const Elem *& neighbor() { return _current_neighbor_elem; }
+
+  /**
+   * Return the current subdomain ID
+   */
+  const SubdomainID & currentNeighborSubdomainID() const { return _current_neighbor_subdomain_id; }
+
+  /**
+   * set the current subdomain ID
+   */
+  void setCurrentNeighborSubdomainID(SubdomainID i) { _current_neighbor_subdomain_id = i; }
 
   /**
    * Returns the reference to the current neighbor volume
@@ -758,6 +778,8 @@ protected:
 
   /// The current "element" we are currently on.
   const Elem * _current_elem;
+  /// The current subdomain ID
+  SubdomainID _current_subdomain_id;
   /// Volume of the current element
   Real _current_elem_volume;
   /// The current side of the selected element (valid only when working with sides)
@@ -768,6 +790,8 @@ protected:
   Real _current_side_volume;
   /// The current neighbor "element"
   const Elem * _current_neighbor_elem;
+  /// The current neighbor subdomain ID
+  SubdomainID _current_neighbor_subdomain_id;
   /// The current side of the selected neighboring element (valid only when working with sides)
   unsigned int _current_neighbor_side;
   /// The current side element of the ncurrent neighbor element

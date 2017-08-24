@@ -16,6 +16,8 @@
 #include "ComputeElemAuxBcsThread.h"
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
+#include "Assembly.h"
 #include "AuxKernel.h"
 
 // libmesh includes
@@ -70,6 +72,7 @@ ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
 
       if (iter != boundary_kernels.end() && !(iter->second.empty()))
       {
+        _problem.setCurrentSubdomainID(elem, _tid);
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
 

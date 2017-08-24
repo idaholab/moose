@@ -201,6 +201,8 @@ public:
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices,
                        THREAD_ID tid) = 0;
+  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
   virtual void prepareAssembly(THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
@@ -357,6 +359,11 @@ public:
   virtual std::vector<SubdomainName> getMaterialPropertyBlockNames(const std::string & prop_name);
 
   /**
+   * Check if a material property is defined on a block.
+   */
+  virtual bool hasBlockMaterialProperty(SubdomainID block_id, const std::string & prop_name);
+
+  /**
    * Get a vector containing the block ids the material property is defined on.
    */
   virtual std::set<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & prop_name);
@@ -365,6 +372,11 @@ public:
    * Get a vector of block id equivalences that the material property is defined on.
    */
   virtual std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & prop_name);
+
+  /**
+   * Check if a material property is defined on a block.
+   */
+  virtual bool hasBoundaryMaterialProperty(BoundaryID boundary_id, const std::string & prop_name);
 
   /**
    * Returns true if the problem is in the process of computing it's initial residual.
