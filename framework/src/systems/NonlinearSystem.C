@@ -112,6 +112,30 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
 
 NonlinearSystem::~NonlinearSystem() {}
 
+SparseMatrix<Number> &
+NonlinearSystem::addMatrix(TagID tag)
+{
+  if (!_subproblem.matrixTagExists(tag))
+    mooseError("Cannot add a tagged matrix with matrix_tag, ",
+               tag,
+               ", that tag does not exist in System ",
+               name());
+
+  if (hasMatrix(tag))
+    return getMatrix(tag);
+
+  auto matrix_name = _subproblem.matrixTagName(tag);
+
+  SparseMatrix<Number> * vec = &_transient_sys.add_matrix(matrix_name);
+
+  if (tag + 1 >= _tagged_matrices.size())
+    _tagged_matrices.resize(tag + 1);
+
+  _tagged_matrices[tag] = vec;
+
+  return *vec;
+}
+
 void
 NonlinearSystem::solve()
 {

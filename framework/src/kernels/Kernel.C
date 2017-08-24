@@ -85,33 +85,53 @@ Kernel::Kernel(const InputParameters & parameters)
 
   _has_diag_save_in = _diag_save_in.size() > 0;
 
-  auto & tag_names = getParam<MultiMooseEnum>("tags");
+  auto & vector_tag_names = getParam<MultiMooseEnum>("vector_tags");
 
-  if (!tag_names.isValid())
-    mooseError("MUST provide at least one tag for Kernel: ", name());
+  if (!vector_tag_names.isValid())
+    mooseError("MUST provide at least one vector_tag for Kernel: ", name());
 
-  for (auto & tag_name : tag_names)
+  for (auto & vector_tag_name : vector_tag_names)
   {
-    if (!_fe_problem.tagExists(tag_name))
+    if (!_fe_problem.vectorTagExists(vector_tag_name))
       mooseError("Kernel, ",
                  name(),
-                 ", was assigned an invalid tag: '",
-                 tag_name,
+                 ", was assigned an invalid vector_tag: '",
+                 vector_tag_name,
                  "'.  If this is a TimeKernel then this may have happened because you didn't "
                  "specify a Transient Executioner.");
 
-    _tags.push_back(_fe_problem.getTag(tag_name));
-    std::cout << name() << " Kernel using tag: " << _tags.back() << std::endl;
+    _vector_tags.push_back(_fe_problem.getVectorTag(vector_tag_name));
+    std::cout << name() << " Kernel using vector tag: " << _vector_tags.back() << std::endl;
   }
 
-  _re_blocks.resize(_tags.size());
+  auto & matrix_tag_names = getParam<MultiMooseEnum>("matrix_tags");
+
+  if (!matrix_tag_names.isValid())
+    mooseError("MUST provide at least one matrix_tag for Kernel: ", name());
+
+  for (auto & matrix_tag_name : matrix_tag_names)
+  {
+    if (!_fe_problem.matrixTagExists(matrix_tag_name))
+      mooseError("Kernel, ",
+                 name(),
+                 ", was assigned an invalid matrix_tag: '",
+                 matrix_tag_name,
+                 "'.  If this is a TimeKernel then this may have happened because you didn't "
+                 "specify a Transient Executioner.");
+
+    _matrix_tags.push_back(_fe_problem.getMatrixTag(matrix_tag_name));
+    std::cout << name() << " Kernel using matrix tag: " << _matrix_tags.back() << std::endl;
+  }
+
+  _re_blocks.resize(_vector_tags.size());
+  _ke_blocks.resize(_matrix_tags.size());
 }
 
 void
 Kernel::computeResidual()
 {
-  for (auto i = beginIndex(_re_blocks); i < _re_blocks.size(); i++)
-    _re_blocks[i] = &_assembly.residualBlock(_var.number(), (TagID)i);
+  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++)
+    _re_blocks[i] = &_assembly.residualBlock(_var.number(), _vector_tags[i]);
 
   _local_re.resize(_re_blocks[0]->size());
   _local_re.zero();
@@ -135,8 +155,10 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
+  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++)
+    _ke_blocks[i] = &_assembly.jacobianBlock(_var.number(), _var.number(), _matrix_tags[i]);
+
+  _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
   _local_ke.zero();
 
   precalculateJacobian();
@@ -145,11 +167,12 @@ Kernel::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  ke += _local_ke;
+  for (auto & ke : _ke_blocks)
+    *ke += _local_ke;
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);

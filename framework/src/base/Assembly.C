@@ -934,7 +934,14 @@ DenseMatrix<Number> &
 Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
 {
   _jacobian_block_used[ivar][jvar] = 1;
-  return _sub_Kee[ivar][_block_diagonal_matrix ? 0 : jvar];
+  return _sub_Kee[0][ivar][_block_diagonal_matrix ? 0 : jvar];
+}
+
+DenseMatrix<Number> &
+Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag)
+{
+  _jacobian_block_used[ivar][jvar] = 1;
+  return _sub_Kee[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
 }
 
 DenseMatrix<Number> &
@@ -954,7 +961,7 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, u
     {
       default:
       case Moose::ElementElement:
-        return _sub_Kee[ivar][0];
+        return _sub_Kee[0][ivar][0];
       case Moose::ElementNeighbor:
         return _sub_Ken[ivar][0];
       case Moose::NeighborElement:
@@ -969,7 +976,7 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, u
     {
       default:
       case Moose::ElementElement:
-        return _sub_Kee[ivar][jvar];
+        return _sub_Kee[0][ivar][jvar];
       case Moose::ElementNeighbor:
         return _sub_Ken[ivar][jvar];
       case Moose::NeighborElement:
@@ -1020,17 +1027,24 @@ Assembly::init(const CouplingMatrix * cm)
   if (max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
-  std::cout << "numTags: " << _sys.subproblem().numTags() << std::endl;
+  std::cout << "numVectorTags: " << _sys.subproblem().numVectorTags() << std::endl;
+  std::cout << "numMatrixTags: " << _sys.subproblem().numMatrixTags() << std::endl;
 
-  _sub_Re.resize(_sys.subproblem().numTags());
-  _sub_Rn.resize(_sys.subproblem().numTags());
-  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  auto num_vector_tags = _sys.subproblem().numVectorTags();
+  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+
+  _sub_Re.resize(num_vector_tags);
+  _sub_Rn.resize(num_vector_tags);
+  for (auto i = beginIndex(_sub_Re); i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
   }
 
-  _sub_Kee.resize(n_vars);
+  _sub_Kee.resize(num_matrix_tags);
+  for (auto i = beginIndex(_sub_Kee); i < _sub_Kee.size(); i++)
+    _sub_Kee[i].resize(n_vars);
+
   _sub_Keg.resize(n_vars);
   _sub_Ken.resize(n_vars);
   _sub_Kne.resize(n_vars);
@@ -1043,7 +1057,9 @@ Assembly::init(const CouplingMatrix * cm)
   {
     if (!_block_diagonal_matrix)
     {
-      _sub_Kee[i].resize(n_vars);
+      for (auto t = beginIndex(_sub_Kee); t < _sub_Kee.size(); t++)
+        _sub_Kee[t][i].resize(n_vars);
+
       _sub_Keg[i].resize(n_vars);
       _sub_Ken[i].resize(n_vars);
       _sub_Kne[i].resize(n_vars);
@@ -1051,7 +1067,8 @@ Assembly::init(const CouplingMatrix * cm)
     }
     else
     {
-      _sub_Kee[i].resize(1);
+      for (auto t = beginIndex(_sub_Kee); t < _sub_Kee.size(); t++)
+        _sub_Kee[t][i].resize(1);
       _sub_Keg[i].resize(1);
       _sub_Ken[i].resize(1);
       _sub_Kne[i].resize(1);

@@ -14,7 +14,7 @@
   [./diff]
     type = Diffusion
     variable = u
-    tags = ''
+    vector_tags = ''
   [../]
 []
 

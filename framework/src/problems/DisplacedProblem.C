@@ -219,33 +219,63 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
 }
 
 TagID
-DisplacedProblem::addTag(TagName tag_name)
+DisplacedProblem::addVectorTag(TagName tag_name)
 {
-  return _mproblem.addTag(tag_name);
+  return _mproblem.addVectorTag(tag_name);
 }
 
 TagID
-DisplacedProblem::getTag(TagName tag_name)
+DisplacedProblem::getVectorTag(TagName tag_name)
 {
-  return _mproblem.getTag(tag_name);
+  return _mproblem.getVectorTag(tag_name);
 }
 
 TagName
-DisplacedProblem::tagName(TagID tag)
+DisplacedProblem::vectorTagName(TagID tag)
 {
-  return _mproblem.tagName(tag);
+  return _mproblem.vectorTagName(tag);
 }
 
 bool
-DisplacedProblem::tagExists(TagID tag)
+DisplacedProblem::vectorTagExists(TagID tag)
 {
-  return _mproblem.tagExists(tag);
+  return _mproblem.vectorTagExists(tag);
 }
 
 unsigned int
-DisplacedProblem::numTags()
+DisplacedProblem::numVectorTags()
 {
-  return _mproblem.numTags();
+  return _mproblem.numVectorTags();
+}
+
+TagID
+DisplacedProblem::addMatrixTag(TagName tag_name)
+{
+  return _mproblem.addMatrixTag(tag_name);
+}
+
+TagID
+DisplacedProblem::getMatrixTag(TagName tag_name)
+{
+  return _mproblem.getMatrixTag(tag_name);
+}
+
+TagName
+DisplacedProblem::matrixTagName(TagID tag)
+{
+  return _mproblem.matrixTagName(tag);
+}
+
+bool
+DisplacedProblem::matrixTagExists(TagID tag)
+{
+  return _mproblem.matrixTagExists(tag);
+}
+
+unsigned int
+DisplacedProblem::numMatrixTags()
+{
+  return _mproblem.numMatrixTags();
 }
 
 bool

@@ -22,7 +22,8 @@ validParams<TimeKernel>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.set<MultiMooseEnum>("tags") = "time";
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "nontime";
 
   return params;
 }

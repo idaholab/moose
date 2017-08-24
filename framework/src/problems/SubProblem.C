@@ -53,31 +53,59 @@ SubProblem::SubProblem(const InputParameters & parameters)
 SubProblem::~SubProblem() {}
 
 TagID
-SubProblem::addTag(TagName tag_name)
+SubProblem::addVectorTag(TagName tag_name)
 {
   std::cout << "Adding tag: " << tag_name << std::endl;
 
-  if (_tag_name_to_tag_id.find(tag_name) == _tag_name_to_tag_id.end())
+  if (_vector_tag_name_to_tag_id.find(tag_name) == _vector_tag_name_to_tag_id.end())
   {
-    auto tag_id = _tag_name_to_tag_id[tag_name] = _tag_name_to_tag_id.size();
-    _tag_id_to_tag_name[tag_id] = tag_name;
+    auto tag_id = _vector_tag_name_to_tag_id[tag_name] = _vector_tag_name_to_tag_id.size();
+    _vector_tag_id_to_tag_name[tag_id] = tag_name;
   }
 
-  return _tag_name_to_tag_id.at(tag_name);
+  return _vector_tag_name_to_tag_id.at(tag_name);
 }
 
 TagID
-SubProblem::getTag(TagName tag_name)
+SubProblem::getVectorTag(TagName tag_name)
 {
   std::cout << "getting tag: " << tag_name << std::endl;
 
-  return _tag_name_to_tag_id.at(tag_name);
+  return _vector_tag_name_to_tag_id.at(tag_name);
 }
 
 TagName
-SubProblem::tagName(TagID tag)
+SubProblem::vectorTagName(TagID tag)
 {
-  return _tag_id_to_tag_name[tag];
+  return _vector_tag_id_to_tag_name[tag];
+}
+
+TagID
+SubProblem::addMatrixTag(TagName tag_name)
+{
+  std::cout << "Adding Matrix tag: " << tag_name << std::endl;
+
+  if (_matrix_tag_name_to_tag_id.find(tag_name) == _matrix_tag_name_to_tag_id.end())
+  {
+    auto tag_id = _matrix_tag_name_to_tag_id[tag_name] = _matrix_tag_name_to_tag_id.size();
+    _matrix_tag_id_to_tag_name[tag_id] = tag_name;
+  }
+
+  return _matrix_tag_name_to_tag_id.at(tag_name);
+}
+
+TagID
+SubProblem::getMatrixTag(TagName tag_name)
+{
+  std::cout << "getting Matrix tag: " << tag_name << std::endl;
+
+  return _matrix_tag_name_to_tag_id.at(tag_name);
+}
+
+TagName
+SubProblem::matrixTagName(TagID tag)
+{
+  return _matrix_tag_id_to_tag_name[tag];
 }
 
 void

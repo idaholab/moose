@@ -76,27 +76,57 @@ public:
    *
    * @param tag_name The name of the tag to create, the TagID will get automatically generated
    */
-  virtual TagID addTag(TagName tag_name);
+  virtual TagID addVectorTag(TagName tag_name);
 
   /**
    * Get a TagID from a TagName.
    */
-  virtual TagID getTag(TagName tag_name);
+  virtual TagID getVectorTag(TagName tag_name);
 
   /**
    * Retrieve the name associated with a TagID
    */
-  virtual TagName tagName(TagID tag);
+  virtual TagName vectorTagName(TagID tag);
 
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool tagExists(TagID tag) { return tag < _tag_name_to_tag_id.size(); }
+  virtual bool vectorTagExists(TagID tag) { return tag < _vector_tag_name_to_tag_id.size(); }
 
   /**
    * The total number of tags
    */
-  virtual unsigned int numTags() { return _tag_name_to_tag_id.size(); }
+  virtual unsigned int numVectorTags() { return _vector_tag_name_to_tag_id.size(); }
+
+  /**
+   * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
+   * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
+   *
+   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   *
+   * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   */
+  virtual TagID addMatrixTag(TagName tag_name);
+
+  /**
+   * Get a TagID from a TagName.
+   */
+  virtual TagID getMatrixTag(TagName tag_name);
+
+  /**
+   * Retrieve the name associated with a TagID
+   */
+  virtual TagName matrixTagName(TagID tag);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool matrixTagExists(TagID tag) { return tag < _matrix_tag_name_to_tag_id.size(); }
+
+  /**
+   * The total number of tags
+   */
+  virtual unsigned int numMatrixTags() { return _matrix_tag_name_to_tag_id.size(); }
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const = 0;
@@ -441,10 +471,16 @@ public:
 
 protected:
   /// The currently declared tags
-  std::map<TagName, TagID> _tag_name_to_tag_id;
+  std::map<TagName, TagID> _vector_tag_name_to_tag_id;
 
   /// Reverse map
-  std::map<TagID, TagName> _tag_id_to_tag_name;
+  std::map<TagID, TagName> _vector_tag_id_to_tag_name;
+
+  /// The currently declared tags
+  std::map<TagName, TagID> _matrix_tag_name_to_tag_id;
+
+  /// Reverse map
+  std::map<TagID, TagName> _matrix_tag_id_to_tag_name;
 
   /// The Factory for building objects
   Factory & _factory;
