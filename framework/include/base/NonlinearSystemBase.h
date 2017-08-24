@@ -595,6 +595,9 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> * _Re_non_time;
 
+  /// Tag for non-time contribution Jacobian
+  TagID _Ke_non_time_tag;
+
   ///@{
   /// Kernel Storage
   KernelWarehouse _kernels;
