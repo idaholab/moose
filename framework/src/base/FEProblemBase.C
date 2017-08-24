@@ -4525,8 +4525,15 @@ FEProblemBase::meshChanged()
 
   ghostGhostedBoundaries();
 
-  // mesh changed
+  // The mesh changed.  We notify the MooseMesh first, because
+  // callbacks (e.g. for sparsity calculations) triggered by the
+  // EquationSystems reinit may require up-to-date MooseMesh caches.
+  _mesh.meshChanged();
   _eq.reinit();
+
+  // But that breaks other adaptivity code, unless we then *again*
+  // update the MooseMesh caches.  E.g. the definition of "active" and
+  // "local" may be *changed* by EquationSystems::reinit().
   _mesh.meshChanged();
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
