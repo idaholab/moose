@@ -16,11 +16,12 @@ validParams<ACInterfaceStress>()
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredParam<Real>("stress", "Planar stress");
-  params.addParam<Real>("op_range",
-                        1.0,
-                        "Range over which order parameters change across an "
-                        "interface. By default order parameters are assumed to "
-                        "vary from 0 to 1");
+  params.addRangeCheckedParam<Real>("op_range",
+                                    1.0,
+                                    "op_range > 0.0",
+                                    "Range over which order parameters change across an "
+                                    "interface. By default order parameters are assumed to "
+                                    "vary from 0 to 1");
   return params;
 }
 

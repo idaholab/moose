@@ -18,11 +18,12 @@ validParams<ComputeInterfaceStress>()
                        "Order parameter that defines the interface. The interface is the region "
                        "where the gradient of this order parameter is non-zero.");
   params.addRequiredParam<Real>("stress", "Planar stress");
-  params.addParam<Real>("op_range",
-                        1.0,
-                        "Range over which order parameters change across an "
-                        "interface. By default order parameters are assumed to "
-                        "vary from 0 to 1");
+  params.addRangeCheckedParam<Real>("op_range",
+                                    1.0,
+                                    "op_range > 0.0",
+                                    "Range over which order parameters change across an "
+                                    "interface. By default order parameters are assumed to "
+                                    "vary from 0 to 1");
   params.addParam<MaterialPropertyName>(
       "planar_stress_name", "extra_stress", "Material property name for the planar stress");
   return params;
