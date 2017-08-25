@@ -1536,6 +1536,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     Elem * elem = can_it.second;
 
     // Need to do this just once to get the right qrules put in place
+    assembly->setCurrentSubdomainID(elem->subdomain_id());
     assembly->reinit(elem);
     assembly->reinit(elem, 0);
     QBase * qrule = assembly->qRule();
