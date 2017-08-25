@@ -366,6 +366,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
@@ -377,6 +378,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Matrix-free nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
@@ -392,6 +394,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption(
           "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
@@ -409,6 +412,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption(
           "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #else
       mooseError("Matrix-free Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
