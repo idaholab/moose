@@ -1,8 +1,8 @@
 [Tests]
   [./test]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'point_value.i'
-    exodiff = 'point_value_out.e'
+    csvdiff = 'point_value_out.csv'
   [../]
 
   [./error]
