@@ -9,7 +9,12 @@ swapping the name of the Fluid Properties UserObject in a plug-and-play manner.
     execute() and finalize() methods, so do nothing during a simulation. Their purpose is
     to provide convenient access to fluid properties through the UserObject interface.
 
-Two formulations are provided: a formulation base on internal energy and specific volume as the primary variables, and one based on pressure and temperature.
+This module provides fluid properties for different liquids and gases.
+
+Provided formulations are available in terms of:
+
+* (p, T) - pressure and temperature
+* (v, e) - specific volume and specific internal energy
 
 ##Energy-volume formulation
 For the energy-specific volume formulation, the following properties (with
