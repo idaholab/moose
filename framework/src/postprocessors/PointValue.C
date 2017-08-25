@@ -86,6 +86,7 @@ PointValue::finalize()
     var_list.insert(&_var);
 
     _fe_problem.setActiveElementalMooseVariables(var_list, _tid);
+    _subproblem.setCurrentSubdomainID(elem, 0);
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
     mooseAssert(_u.size() == 1, "No values in u!");
     _value = _u[0];
