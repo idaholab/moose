@@ -27,6 +27,7 @@ validParams<HeatConductionMaterial>()
   params.addParam<Real>("specific_heat", "The specific heat value");
   params.addParam<FunctionName>(
       "specific_heat_temperature_function", "", "Specific heat as a function of temperature.");
+  params.addClassDescription("General-purpose material model for heat conduction");
 
   return params;
 }

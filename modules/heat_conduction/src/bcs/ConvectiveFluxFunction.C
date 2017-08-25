@@ -16,6 +16,8 @@ validParams<ConvectiveFluxFunction>()
   params.addRequiredParam<FunctionName>("T_infinity", "Function describing far-field temperature");
   params.addRequiredParam<Real>("coefficient", "Heat transfer coefficient");
   params.addParam<FunctionName>("coefficient_function", "Heat transfer coefficient function");
+  params.addClassDescription(
+      "Determines boundary value by fluid heat transfer coefficient and far-field temperature");
 
   return params;
 }

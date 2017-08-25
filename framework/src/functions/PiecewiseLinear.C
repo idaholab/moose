@@ -19,6 +19,7 @@ InputParameters
 validParams<PiecewiseLinear>()
 {
   InputParameters params = validParams<Piecewise>();
+  params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }
 

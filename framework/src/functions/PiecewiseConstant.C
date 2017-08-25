@@ -22,6 +22,7 @@ validParams<PiecewiseConstant>()
   MooseEnum direction("left right", "left");
   params.addParam<MooseEnum>(
       "direction", direction, "Direction to look to find value: " + direction.getRawNames());
+  params.addClassDescription("Defines data using a set of x-y data pairs");
   return params;
 }
 

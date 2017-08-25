@@ -21,6 +21,8 @@ validParams<FunctionPresetBC>()
 {
   InputParameters params = validParams<PresetNodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
+  params.addClassDescription(
+      "The same as FunctionDirichletBC except the value is applied before the solve begins");
   return params;
 }
 

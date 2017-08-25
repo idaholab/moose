@@ -16,6 +16,8 @@ validParams<MaterialTensorAux>()
   params += validParams<MaterialTensorCalculator>();
   params.addRequiredParam<MaterialPropertyName>("tensor", "The material tensor name.");
   params.addParam<unsigned int>("qp_select", "The quad point you want evaluated");
+  params.addClassDescription(
+      "Outputs quantities related to second-order tensors used as material properties");
   return params;
 }
 
