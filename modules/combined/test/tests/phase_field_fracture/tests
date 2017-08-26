@@ -43,5 +43,7 @@
     type = 'Exodiff'
     input = 'crack_propagation_heat.i'
     exodiff = 'crack_propagation_heat_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
   [../]
 [../]

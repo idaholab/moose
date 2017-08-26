@@ -56,7 +56,6 @@
   nx = 1
   ny = 1
   nz = 1
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -75,6 +74,12 @@
 []
 
 [AuxVariables]
+  [./resid_x]
+  [../]
+  [./resid_y]
+  [../]
+  [./resid_z]
+  [../]
   [./strain_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -109,6 +114,7 @@
   [../]
   [./DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
+    save_in = 'resid_x resid_y resid_z'
   [../]
   [./solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
