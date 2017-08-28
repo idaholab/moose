@@ -26,6 +26,7 @@ validParams<ElementalVariableValue>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
   params.addRequiredParam<unsigned int>("elementid", "The ID of the element where we monitor");
+  params.addClassDescription("Outputs an elemental variable value at a particular location");
   return params;
 }
 

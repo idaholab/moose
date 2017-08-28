@@ -20,6 +20,7 @@ InputParameters
 validParams<TimestepSize>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addClassDescription("Reports the timestep size");
   return params;
 }
 

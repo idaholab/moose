@@ -26,6 +26,7 @@ validParams<NumNonlinearIterations>()
       "accumulate_over_step",
       false,
       "When set to true, accumulates to count the total over all Picard iterations for each step");
+  params.addClassDescription("Outputs the number of nonlinear iterations");
   return params;
 }
 

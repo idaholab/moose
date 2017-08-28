@@ -23,6 +23,8 @@ validParams<ConvectiveFluxBC>()
   params.set<Real>("initial") = 500;
   params.set<Real>("final") = 500;
   params.set<Real>("duration") = 0.0;
+  params.addClassDescription(
+      "Determines boundary values via the initial and final values, flux, and exposure duration");
   return params;
 }
 
