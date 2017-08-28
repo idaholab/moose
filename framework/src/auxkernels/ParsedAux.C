@@ -22,7 +22,8 @@ validParams<ParsedAux>()
   params += validParams<FunctionParserUtils>();
   params.addClassDescription("Parsed function AuxKernel.");
 
-  params.addRequiredParam<std::string>("function", "function expression");
+  params.addRequiredCustomTypeParam<std::string>(
+      "function", "FunctionExpression", "function expression");
   params.addCoupledVar("args", "coupled variables");
   params.addParam<std::vector<std::string>>(
       "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
