@@ -23,11 +23,13 @@ validParams<ToggleMeshAdaptivity>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<MooseEnum>(
       "mesh_adaptivity", state, "Control mesh adaptivity, choices are 'on' or 'off'.");
+  params.addParam<unsigned int>("apply_after_timestep", 0, "Number of time steps to wait before applying the adaptivity state.");
   return params;
 }
 
 ToggleMeshAdaptivity::ToggleMeshAdaptivity(const InputParameters & params)
-  : GeneralUserObject(params), _state(getParam<MooseEnum>("mesh_adaptivity"))
+  : GeneralUserObject(params), _state(getParam<MooseEnum>("mesh_adaptivity")),
+    _steps_to_wait(getParam<unsigned int>("apply_after_timestep"))
 {
 }
 
@@ -52,5 +54,6 @@ ToggleMeshAdaptivity::initialSetup()
 void
 ToggleMeshAdaptivity::execute()
 {
-  checkState();
+  if (_t_step > _steps_to_wait)
+    checkState();
 }
