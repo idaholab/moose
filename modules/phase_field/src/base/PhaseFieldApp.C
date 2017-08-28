@@ -20,6 +20,7 @@
 #include "ACMultiInterface.h"
 #include "ACInterfaceKobayashi1.h"
 #include "ACInterfaceKobayashi2.h"
+#include "ACInterfaceStress.h"
 #include "AllenCahnPFFracture.h"
 #include "ACSEDGPoly.h"
 #include "ACSwitching.h"
@@ -324,6 +325,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACMultiInterface);
   registerKernel(ACInterfaceKobayashi1);
   registerKernel(ACInterfaceKobayashi2);
+  registerKernel(ACInterfaceStress);
   registerKernel(AllenCahnPFFracture);
   registerKernel(ACSEDGPoly);
   registerKernel(ACSwitching);
