@@ -1,4 +1,16 @@
 [Tests]
+  [./IdealGasFreeEnergy]
+    type = 'Exodiff'
+    input = 'IdealGasFreeEnergy.i'
+    exodiff = 'IdealGasFreeEnergy_out.e'
+  [../]
+
+  [./VanDerWaalsFreeEnergy]
+    type = 'Exodiff'
+    input = 'VanDerWaalsFreeEnergy.i'
+    exodiff = 'VanDerWaalsFreeEnergy_out.e'
+  [../]
+
   [./MathFreeEnergy]
     type = 'Exodiff'
     input = 'MathFreeEnergy.i'
