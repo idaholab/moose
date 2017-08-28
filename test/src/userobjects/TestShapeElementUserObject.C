@@ -14,6 +14,8 @@
 
 #include "TestShapeElementUserObject.h"
 
+#include "NonlinearSystemBase.h"
+
 template <>
 InputParameters
 validParams<TestShapeElementUserObject>()
@@ -74,12 +76,19 @@ TestShapeElementUserObject::executeJacobian(unsigned int jvar)
 void
 TestShapeElementUserObject::finalize()
 {
-  // check in all MPI processes if executeJacobian was called for each variable
+  // Using this semi-encapsulated member feels like cheating but hey,
+  // it's a test object.
+  const FEProblemBase & prob = _ti_feproblem;
+
+  const dof_id_type n_local_dfs = prob.getNonlinearSystemBase().system().n_local_dofs();
+
+  // check if executeJacobian was called for each variable on each MPI
+  // process that owns any degrees of freedom.
   if (_fe_problem.currentlyComputingJacobian())
   {
-    if ((_execute_mask & 1) == 0)
+    if ((_execute_mask & 1) == 0 && n_local_dfs)
       mooseError("Never called executeJacobian for variable u.");
-    if ((_execute_mask & 2) == 0)
+    if ((_execute_mask & 2) == 0 && n_local_dfs)
       mooseError("Never called executeJacobian for variable v.");
   }
 }

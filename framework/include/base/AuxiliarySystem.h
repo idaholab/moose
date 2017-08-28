@@ -157,6 +157,7 @@ public:
   virtual TransientExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
+  virtual const System & system() const override { return _sys; }
 
   virtual NumericVector<Number> * solutionPreviousNewton() override
   {

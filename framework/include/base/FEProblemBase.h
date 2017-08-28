@@ -546,6 +546,8 @@ public:
 
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
+  const NonlinearSystemBase & getNonlinearSystemBase() const { return *_nl; }
+
   virtual NonlinearSystem & getNonlinearSystem();
 
   void addVariable(const std::string & var_name,

@@ -4,6 +4,7 @@
   nx = 2
   ny = 2
   nz = 2
+  parallel_type = replicated
 []
 
 [Variables]
