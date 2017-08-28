@@ -353,3 +353,15 @@ RankTwoTensor operator*(const RealVectorValue & p, const RankThreeTensor & b)
 
   return result;
 }
+
+RealVectorValue
+RankThreeTensor::doubleContraction(const RankTwoTensor & b) const
+{
+  RealVectorValue result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N2; ++j)
+      result(i) += _vals[i * N2 + j] * b._vals[j];
+
+  return result;
+}

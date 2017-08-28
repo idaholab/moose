@@ -66,13 +66,13 @@ public:
   /// Gets the value for the index specified.  Takes index = 0,1,2
   inline Real & operator()(unsigned int i, unsigned int j, unsigned int k)
   {
-    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)];
+    return _vals[((i * N + j) * N + k)];
   }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2. Used for const
   inline Real operator()(unsigned int i, unsigned int j, unsigned int k) const
   {
-    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)];
+    return _vals[((i * N + j) * N + k)];
   }
 
   /// Zeros out the tensor.
@@ -167,6 +167,11 @@ public:
    * @param a RankTwoTensor A in the equation above
    */
   RankFourTensor mixedProductRankFour(const RankTwoTensor & a) const;
+
+  /**
+   * Creates a vector from the double contraction of a rank three and rank two tensor.
+   */
+  RealVectorValue doubleContraction(const RankTwoTensor & b) const;
 
 protected:
   /// Dimensionality of rank-three tensor

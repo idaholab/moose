@@ -70,6 +70,21 @@
   [./SimpleCHInterface]
     type = 'Exodiff'
     input = 'SimpleCHInterface.i'
-    exodiff = 'SimpleCHInterface_out.e'            
+    exodiff = 'SimpleCHInterface_out.e'
+  [../]
+
+  [./ACInterfaceStress]
+    type = 'Exodiff'
+    input = 'ACInterfaceStress.i'
+    exodiff = 'ACInterfaceStress_out.e'
+    cli_args = 'Executioner/dt=0.001'
+  [../]
+
+  [./analyzejacobian_ACInterfaceStress]
+    type = 'AnalyzeJacobian'
+    input = 'ACInterfaceStress_jacobian.i'
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    heavy = true
   [../]
 []
