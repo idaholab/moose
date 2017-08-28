@@ -111,6 +111,7 @@ public:
    * Get the reference to the libMesh system
    */
   virtual System & system() = 0;
+  virtual const System & system() const = 0;
 
   /**
    * Initialize the system

@@ -6,6 +6,7 @@
   type = GeneratedMesh
   dim = 1
   nx = 2
+  parallel_type = replicated
 []
 
 [Variables]
