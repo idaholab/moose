@@ -27,8 +27,8 @@ validParams<CSVTimeSequenceStepper>()
   params.addParam<std::string>("delimiter", ",", "delimiter used to parse the file");
   params.addParam<std::string>(
       "column_name", "time", "name of the column which contains the time sequence");
-  params.addRangeCheckedParam<int>(
-      "column_index", "column_index >= 0", "index of the column which contains the time sequence");
+  params.addParam<unsigned int>(
+      "column_index", "index of the column which contains the time sequence");
   params.addClassDescription(
       "Solves the Transient problem at a sequence of given time points read in a file.");
   return params;
@@ -40,7 +40,8 @@ CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameter
     _header(getParam<bool>("header")),
     _delimiter(getParam<std::string>("delimiter")),
     _column_name(getParam<std::string>("column_name")),
-    _column_index(isParamValid("column_index") ? getParam<int>("column_index") : -1)
+    _search_by_index(isParamValid("column_index")),
+    _column_index(_search_by_index ? getParam<unsigned int>("column_index") : 0)
 {
 }
 
@@ -52,7 +53,7 @@ CSVTimeSequenceStepper::init()
 
   std::vector<Real> instants;
 
-  if (_column_index >= 0)
+  if (_search_by_index)
   {
     std::vector<std::vector<double>> data = file.getColumnData();
     if (_column_index >= data.size())

@@ -41,15 +41,19 @@ protected:
   /// name of the file where the data is read
   const std::string _file_name;
   /// whether the file contains a header with the column names
-  bool _header;
+  const bool _header;
   /// string used as a delimiter
   const std::string _delimiter;
 
   /// name of the column containing the time data
   const std::string _column_name;
 
+  /// indicates whether to access a column using its index or its name
+  const bool _search_by_index;
+
   /// index of the column containing the time data
-  const int _column_index;
+  const unsigned int _column_index;
+
 };
 
 #endif // CSVTIMESEQUENCESTEPPER_H
