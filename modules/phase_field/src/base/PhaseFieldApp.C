@@ -149,6 +149,7 @@
 #include "GBEvolution.h"
 #include "GBWidthAnisotropy.h"
 #include "GrainAdvectionVelocity.h"
+#include "IdealGasFreeEnergy.h"
 #include "InterfaceOrientationMaterial.h"
 #include "KKSXeVacSolidMaterial.h"
 #include "MathEBFreeEnergy.h"
@@ -170,6 +171,7 @@
 #include "SwitchingFunctionMultiPhaseMaterial.h"
 #include "ThirdPhaseSuppressionMaterial.h"
 #include "TimeStepMaterial.h"
+#include "VanDerWaalsFreeEnergy.h"
 #include "VariableGradientMaterial.h"
 
 /*
@@ -439,6 +441,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBDependentDiffusivity);
   registerMaterial(GBWidthAnisotropy);
   registerMaterial(GrainAdvectionVelocity);
+  registerMaterial(IdealGasFreeEnergy);
   registerMaterial(InterfaceOrientationMaterial);
   registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(MathEBFreeEnergy);
@@ -459,6 +462,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(SwitchingFunctionMultiPhaseMaterial);
   registerMaterial(ThirdPhaseSuppressionMaterial);
   registerMaterial(TimeStepMaterial);
+  registerMaterial(VanDerWaalsFreeEnergy);
   registerMaterial(VariableGradientMaterial);
 
   registerPostprocessor(AverageGrainVolume);
