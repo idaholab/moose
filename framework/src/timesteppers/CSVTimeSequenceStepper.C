@@ -27,8 +27,8 @@ validParams<CSVTimeSequenceStepper>()
   params.addParam<std::string>("delimiter", ",", "delimiter used to parse the file");
   params.addParam<std::string>(
       "column_name", "time", "name of the column which contains the time sequence");
-  params.addParam<unsigned int>(
-      "column_index", "index of the column which contains the time sequence");
+  params.addParam<unsigned int>("column_index",
+                                "index of the column which contains the time sequence");
   params.addClassDescription(
       "Solves the Transient problem at a sequence of given time points read in a file.");
   return params;
