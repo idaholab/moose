@@ -21,6 +21,8 @@ validParams<PresetBC>()
   InputParameters p = validParams<NodalBC>();
   p.addRequiredParam<Real>("value", "Value of the BC");
   p.declareControllable("value");
+  p.addClassDescription(
+      "Similar to DirichletBC except the value is applied before the solve begins");
   return p;
 }
 

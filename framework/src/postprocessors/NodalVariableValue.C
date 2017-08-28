@@ -30,6 +30,7 @@ validParams<NodalVariableValue>()
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
   params.addRequiredParam<unsigned int>("nodeid", "The ID of the node where we monitor");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the variable");
+  params.addClassDescription("Outputs values of a nodal variable at a particular location");
   return params;
 }
 

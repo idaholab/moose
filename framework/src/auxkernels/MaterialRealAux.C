@@ -19,6 +19,7 @@ InputParameters
 validParams<MaterialRealAux>()
 {
   InputParameters params = validParams<MaterialAuxBase<Real>>();
+  params.addClassDescription("Outputs element volume-averaged material properties");
   return params;
 }
 

@@ -11,6 +11,7 @@ InputParameters
 validParams<Elastic>()
 {
   InputParameters params = validParams<SolidModel>();
+  params.addClassDescription("A simple hypo-elastic model");
   return params;
 }
 

@@ -104,7 +104,10 @@ JsonSyntaxTree::setParams(InputParameters * params,
     else if (params->hasDefaultCoupledValue(iter.first))
       param_json["default"] = params->defaultCoupledValue(iter.first);
 
-    param_json["options"] = buildOptions(iter);
+    bool out_of_range_allowed = false;
+    param_json["options"] = buildOptions(iter, out_of_range_allowed);
+    if (!param_json["options"].asString().empty())
+      param_json["out_of_range_allowed"] = out_of_range_allowed;
     auto reserved_values = params->reservedValues(iter.first);
     for (const auto & reserved : reserved_values)
       param_json["reserved_values"].append(reserved);
@@ -188,26 +191,36 @@ JsonSyntaxTree::addParameters(const std::string & parent,
 }
 
 std::string
-JsonSyntaxTree::buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p)
+JsonSyntaxTree::buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
+                             bool & out_of_range_allowed)
 {
   std::string options;
   {
     InputParameters::Parameter<MooseEnum> * enum_type =
         dynamic_cast<InputParameters::Parameter<MooseEnum> *>(p.second);
     if (enum_type)
+    {
+      out_of_range_allowed = enum_type->get().isOutOfRangeAllowed();
       options = enum_type->get().getRawNames();
+    }
   }
   {
     InputParameters::Parameter<MultiMooseEnum> * enum_type =
         dynamic_cast<InputParameters::Parameter<MultiMooseEnum> *>(p.second);
     if (enum_type)
+    {
+      out_of_range_allowed = enum_type->get().isOutOfRangeAllowed();
       options = enum_type->get().getRawNames();
+    }
   }
   {
     InputParameters::Parameter<std::vector<MooseEnum>> * enum_type =
         dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(p.second);
     if (enum_type)
+    {
+      out_of_range_allowed = (enum_type->get())[0].isOutOfRangeAllowed();
       options = (enum_type->get())[0].getRawNames();
+    }
   }
   return options;
 }
@@ -254,6 +267,11 @@ JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string type)
   {
     auto & j = getJson(path);
     j["associated_types"].append(type);
+  }
+  // If they are doing a search they probably don't want to see this
+  if (_search.empty())
+  {
+    _root["global"]["associated_types"][type].append(path);
   }
 }
 

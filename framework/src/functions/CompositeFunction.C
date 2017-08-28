@@ -22,6 +22,7 @@ validParams<CompositeFunction>()
   params.addParam<std::vector<FunctionName>>("functions",
                                              "The functions to be multiplied together.");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.addClassDescription("Multiplies an arbitrary set of functions together");
   return params;
 }
 

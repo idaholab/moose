@@ -76,6 +76,12 @@ public:
    */
   virtual bool isValid() const = 0;
 
+  /**
+   * isOutOfRangeAllowed
+   * @return - a Boolean indicating whether enum names out of range are allowed
+   */
+  bool isOutOfRangeAllowed() const { return _out_of_range_index; }
+
 protected:
   MooseEnumBase();
 

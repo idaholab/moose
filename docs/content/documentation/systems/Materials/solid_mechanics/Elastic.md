@@ -1,7 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # Elastic
 !syntax description /Materials/Elastic
+
+## Description
+The `Elastic` model is a simple hypo-elastic model.
 
 !syntax parameters /Materials/Elastic
 

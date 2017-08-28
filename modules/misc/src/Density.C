@@ -23,6 +23,7 @@ validParams<Density>()
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addRequiredParam<Real>("density", "Density");
+  params.addClassDescription("Creates density material property");
 
   return params;
 }

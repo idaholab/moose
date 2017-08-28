@@ -25,6 +25,7 @@ validParams<CombinedCreepPlasticity>()
       "relative_tolerance", 1e-5, "Relative convergence tolerance for combined submodel iteration");
   params.addParam<Real>(
       "absolute_tolerance", 1e-5, "Absolute convergence tolerance for combined submodel iteration");
+  params.addClassDescription("Models creep and instantaneous plasticity deformation");
 
   return params;
 }

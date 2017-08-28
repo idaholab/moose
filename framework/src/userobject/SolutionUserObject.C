@@ -96,6 +96,7 @@ validParams<SolutionUserObject>()
       "if transformation_order = 'rotation0 scale_multiplier translation scale rotation1' then "
       "form p = R1*(R0*x*m - t)/s.  Then the values provided by the SolutionUserObject at point x "
       "in the simulation are the variable values at point p in the mesh.");
+  params.addClassDescription("Reads a variable from a mesh in one simulation to another");
   // Return the parameters
   return params;
 }

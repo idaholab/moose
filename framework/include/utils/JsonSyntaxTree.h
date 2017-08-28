@@ -80,7 +80,8 @@ public:
   void addGlobal();
 
 protected:
-  std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p);
+  std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
+                           bool & out_of_range_allowed);
 
   std::string prettyCppType(const std::string & cpp_type);
   std::string basicCppType(const std::string & cpp_type);
