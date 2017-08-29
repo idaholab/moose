@@ -67,17 +67,11 @@
   [../]
 []
 
-[Problem]
-  type = EigenProblem
-  eigen_problem_type = gen_non_hermitian
-  which_eigen_pairs = TARGET_MAGNITUDE
-[]
-
 [Executioner]
-  type = Steady
-  eigen_solve_type = MF_MONOLITH_NEWTON
+  type = Eigenvalue
+  solve_type = MF_MONOLITH_NEWTON
+  eigen_problem_type = GEN_NON_HERMITIAN
 []
-
 
 [VectorPostprocessors]
   [./eigenvalues]

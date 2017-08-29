@@ -77,16 +77,13 @@
   [../]
 []
 
-[Problem]
-  type = EigenProblem
+[Executioner]
+  type = Eigenvalue
   which_eigen_pairs = largest_magnitude
+  eigen_problem_type = NON_HERMITIAN
   n_eigen_pairs = 5
   n_basis_vectors = 15
-[]
-
-[Executioner]
-  type = Steady
-  eigen_solve_type = krylovschur
+  solve_type = krylovschur
   petsc_options = '-eps_view'
 []
 

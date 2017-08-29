@@ -574,7 +574,7 @@ void
 storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
-  if (params.isParamValid("solve_type"))
+  if (params.isParamValid("solve_type") && !params.isParamValid("_use_eigen_value"))
   {
     // Extract the solve type
     const std::string & solve_type = params.get<MooseEnum>("solve_type");

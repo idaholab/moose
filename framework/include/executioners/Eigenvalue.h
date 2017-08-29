@@ -12,38 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FEPROBLEM_H
-#define FEPROBLEM_H
+#ifndef EIGENVALUE_H
+#define EIGENVALUE_H
 
-#include "FEProblemBase.h"
+#include "Steady.h"
 
-class FEProblem;
-class NonlinearSystem;
+class InputParameters;
+class Eigenvalue;
+class EigenProblem;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
-InputParameters validParams<FEProblem>();
+InputParameters validParams<Eigenvalue>();
 
-/**
- * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
- *
- */
-class FEProblem : public FEProblemBase
+class Eigenvalue : public Steady
 {
 public:
-  FEProblem(const InputParameters & parameters);
+  /**
+   * Constructor
+   *
+   * @param parameters The parameters object holding data for the class to use.
+   * @return Whether or not the solve was successful.
+   */
+  Eigenvalue(const InputParameters & parameters);
 
-  virtual ~FEProblem();
-
-  virtual bool getUseNonlinear() const { return _use_nonlinear; }
-  virtual void setUseNonlinear(bool use_nonlinear) { _use_nonlinear = use_nonlinear; }
-
-  virtual void setInputParametersFEProblem(InputParameters & parameters) override;
-
-  NonlinearSystem & getNonlinearSystem() override { return *_nl_sys; }
+  virtual void execute() override;
 
 protected:
-  bool _use_nonlinear;
-  std::shared_ptr<NonlinearSystem> _nl_sys;
+  EigenProblem & _eigen_problem;
 };
 
-#endif /* FEPROBLEM_H */
+#endif // EIGENVALUE_H

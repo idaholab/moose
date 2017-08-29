@@ -115,6 +115,7 @@ initEigenProlemType()
     eigen_problem_type_to_enum["GEN_NON_HERMITIAN"] = EPT_GEN_NON_HERMITIAN;
     eigen_problem_type_to_enum["GEN_INDEFINITE"] = EPT_GEN_INDEFINITE;
     eigen_problem_type_to_enum["POS_GEN_NON_HERMITIAN"] = EPT_POS_GEN_NON_HERMITIAN;
+    eigen_problem_type_to_enum["SLEPC_DEFAULT"] = EPT_SLEPC_DEFAULT;
   }
 }
 
@@ -133,6 +134,7 @@ initWhichEigenPairs()
     which_eigen_pairs_to_enum["TARGET_REAL"] = WEP_TARGET_REAL;
     which_eigen_pairs_to_enum["TARGET_IMAGINARY"] = WEP_TARGET_IMAGINARY;
     which_eigen_pairs_to_enum["ALL_EIGENVALUES"] = WEP_ALL_EIGENVALUES;
+    which_eigen_pairs_to_enum["SLEPC_DEFAULT"] = WEP_SLEPC_DEFAULT;
   }
 }
 
