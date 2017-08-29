@@ -74,9 +74,8 @@ bool
 MooseEnum::operator==(const char * name) const
 {
   std::string upper(MooseUtils::toUpper(name));
-  std::set<MooseEnumItem>::const_iterator iter = find(upper);
 
-  mooseAssert(_out_of_range_index != 0 || iter != _items.end(),
+  mooseAssert(_out_of_range_index != 0 || find(upper) != _items.end(),
               std::string("Invalid string comparison \"") + upper +
                   "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                   "\".");

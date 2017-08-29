@@ -21,6 +21,9 @@
 #include "DisplacedProblem.h"
 #include "NonlinearEigenSystem.h"
 #include "SlepcSupport.h"
+#include "RandomData.h"
+#include "OutputWarehouse.h"
+#include "Function.h"
 
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
@@ -30,30 +33,20 @@ InputParameters
 validParams<EigenProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
-  params.addParam<unsigned int>("n_eigen_pairs", 1, "The number of eigen pairs");
-  params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of eigen subspaces");
-#if LIBMESH_HAVE_SLEPC
-  params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
-#endif
   return params;
 }
 
 EigenProblem::EigenProblem(const InputParameters & parameters)
   : FEProblemBase(parameters),
-    _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
+    // By default, we want to compute an eigenvalue only (smallest or largest)
+    _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
-    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
+    _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
+    _is_residual_initialed(false)
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
-  _aux = new AuxiliarySystem(*this, "aux0");
-
-  // Set necessary parametrs used in EigenSystem::solve(),
-  // i.e. the number of requested eigenpairs nev and the number
-  // of basis vectors ncv used in the solution algorithm. Note that
-  // ncv >= nev must hold and ncv >= 2*nev is recommended.
-  es().parameters.set<unsigned int>("eigenpairs") = _n_eigen_pairs_required;
-  es().parameters.set<unsigned int>("basis vectors") = getParam<unsigned int>("n_basis_vectors");
+  _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(*_nl_eigen);
 
@@ -61,9 +54,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 
   _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
 
-  Moose::SlepcSupport::storeSlepcEigenProblemOptions(*this, _pars);
-
-  setEigenproblemType(solverParams()._eigen_problem_type);
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
@@ -74,9 +64,6 @@ EigenProblem::~EigenProblem()
 #if LIBMESH_HAVE_SLEPC
   FEProblemBase::deleteAssemblyArray();
 #endif /* LIBMESH_HAVE_SLEPC */
-  delete _nl;
-
-  delete _aux;
 }
 
 #if LIBMESH_HAVE_SLEPC
@@ -114,6 +101,10 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
       mooseError("libMesh does not support EPT_POS_GEN_NON_HERMITIAN currently \n");
       break;
 
+    case Moose::EPT_SLEPC_DEFAULT:
+      _generalized_eigenvalue_problem = false;
+      break;
+
     default:
       mooseError("Unknown eigen solver type \n");
   }
@@ -141,9 +132,6 @@ void
 EigenProblem::solve()
 {
   Moose::perf_log.push("Eigen_solve()", "Execution");
-#if LIBMESH_HAVE_SLEPC
-  Moose::SlepcSupport::slepcSetOptions(*this); // Make sure the SLEPc options are setup for this app
-#endif
   if (_solve)
   {
     _nl->solve();
@@ -170,4 +158,35 @@ EigenProblem::isNonlinearEigenvalueSolver()
          solverParams()._eigen_solve_type == Moose::EST_MF_NONLINEAR_POWER ||
          solverParams()._eigen_solve_type == Moose::EST_MONOLITH_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
+}
+
+void
+EigenProblem::computeResidualTypeBx(const NumericVector<Number> & soln,
+                                    NumericVector<Number> & residual,
+                                    Moose::KernelType type)
+{
+  _nl->setSolution(soln);
+
+  _nl->zeroVariablesForResidual();
+
+  _nl->computeResidual(residual, type);
+}
+
+void
+EigenProblem::computeResidualType(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  Moose::KernelType type)
+{
+  // if Ax is just compputed, we do not do extra computation such as Transfer
+  if (type == Moose::KT_EIGEN && _is_residual_initialed)
+  {
+    computeResidualTypeBx(soln, residual, type);
+    _is_residual_initialed = false;
+  }
+  else
+  {
+    FEProblemBase::computeResidualType(soln, residual, type);
+    if (type == Moose::KT_NONEIGEN)
+      _is_residual_initialed = true;
+  }
 }

@@ -150,6 +150,7 @@
 #include "Transient.h"
 #include "InversePowerMethod.h"
 #include "NonlinearEigen.h"
+#include "Eigenvalue.h"
 
 // functions
 #include "Axisymmetric2D3DSolutionFunction.h"
@@ -599,6 +600,7 @@ registerObjects(Factory & factory)
   registerExecutioner(Transient);
   registerExecutioner(InversePowerMethod);
   registerExecutioner(NonlinearEigen);
+  registerExecutioner(Eigenvalue);
 
   // functions
   registerFunction(Axisymmetric2D3DSolutionFunction);
@@ -885,7 +887,7 @@ addActionTypes(Syntax & syntax)
   /**************************/
   /**** Register Actions ****/
   /**************************/
-  registerMooseObjectTask("create_problem",               Problem,                 true);
+  registerMooseObjectTask("create_problem",               Problem,                 false);
   registerMooseObjectTask("setup_executioner",            Executioner,             true);
 
   // This task does not construct an object, but it needs all of the parameters that

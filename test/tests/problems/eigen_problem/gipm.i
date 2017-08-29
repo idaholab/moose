@@ -85,16 +85,13 @@
   [../]
 []
 
-[Problem]
-  type = EigenProblem
+[Executioner]
+  type = Eigenvalue
   eigen_problem_type = gen_non_hermitian
+  which_eigen_pairs = SMALLEST_MAGNITUDE
   n_eigen_pairs = 1
   n_basis_vectors = 18
-[]
-
-[Executioner]
-  type = Steady
-  eigen_solve_type = jacobi_davidson
+  solve_type = jacobi_davidson
   petsc_options = '-eps_view'
 []
 

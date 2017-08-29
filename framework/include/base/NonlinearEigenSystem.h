@@ -115,7 +115,7 @@ public:
 
 protected:
   TransientEigenSystem & _transient_sys;
-
+  EigenProblem & _eigen_problem;
   std::vector<std::pair<Real, Real>> _eigen_values;
   unsigned int _n_eigen_pairs_required;
 };

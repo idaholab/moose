@@ -1614,7 +1614,13 @@ FEProblemBase::getNonlinearSystem()
 {
   mooseDeprecated("FEProblemBase::getNonlinearSystem() is deprecated, please use "
                   "FEProblemBase::getNonlinearSystemBase() \n");
-  return *(dynamic_cast<NonlinearSystem *>(_nl));
+
+  auto nl_sys = std::dynamic_pointer_cast<NonlinearSystem>(_nl);
+
+  if (!nl_sys)
+    mooseError("This is not a NonlinearSystem");
+
+  return *nl_sys;
 }
 
 void
@@ -1662,13 +1668,13 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                       const FEType & type,
                                       bool is_aux)
 {
-  SystemBase * curr_sys_ptr = _nl;
-  SystemBase * other_sys_ptr = _aux;
+  SystemBase * curr_sys_ptr = _nl.get();
+  SystemBase * other_sys_ptr = _aux.get();
   std::string error_prefix = "";
   if (is_aux)
   {
-    curr_sys_ptr = _aux;
-    other_sys_ptr = _nl;
+    curr_sys_ptr = _aux.get();
+    other_sys_ptr = _nl.get();
     error_prefix = "Aux";
   }
 
@@ -1749,7 +1755,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
 
   _nl->addKernel(kernel_name, name, parameters);
@@ -1780,7 +1786,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addNodalKernel(kernel_name, name, parameters);
 }
@@ -1809,7 +1815,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addScalarKernel(kernel_name, name, parameters);
 }
@@ -1839,7 +1845,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addBoundaryCondition(bc_name, name, parameters);
 }
@@ -1865,7 +1871,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addConstraint(c_name, name, parameters);
 }
@@ -1930,8 +1936,8 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux;
-    parameters.set<SystemBase *>("_nl_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.set<SystemBase *>("_nl_sys") = _nl.get();
   }
   _aux->addKernel(kernel_name, name, parameters);
 }
@@ -1960,7 +1966,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
   }
   _aux->addScalarKernel(kernel_name, name, parameters);
 }
@@ -1990,7 +1996,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addDiracKernel(kernel_name, name, parameters);
 }
@@ -2022,7 +2028,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addDGKernel(dg_kernel_name, name, parameters);
 }
@@ -2054,7 +2060,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addInterfaceKernel(interface_kernel_name, name, parameters);
 }
@@ -3031,7 +3037,7 @@ FEProblemBase::addDamper(std::string damper_name,
 {
   setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<SystemBase *>("_sys") = _nl;
+  parameters.set<SystemBase *>("_sys") = _nl.get();
 
   _has_dampers = true;
   _nl->addDamper(damper_name, name, parameters);
@@ -3068,7 +3074,7 @@ FEProblemBase::addIndicator(std::string indicator_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -3110,7 +3116,7 @@ FEProblemBase::addMarker(std::string marker_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -3148,7 +3154,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
@@ -3381,7 +3387,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
   // Create the Transfer objects
@@ -3677,9 +3683,9 @@ FEProblemBase::init()
   }
 
   _nl->dofMap()._dof_coupling = _cm.get();
-  _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl);
-  _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl);
-  _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux);
+  _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl.get());
+  _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl.get());
+  _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
 
   if (_solve && n_vars == 0)
     mooseError("No variables specified in the FEProblemBase '", name(), "'.");

@@ -41,8 +41,14 @@ public:
   virtual bool converged() override;
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
+  virtual void setNEigenPairsRequired(unsigned int n_eigen_pairs)
+  {
+    _n_eigen_pairs_required = n_eigen_pairs;
+  }
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
   virtual bool isNonlinearEigenvalueSolver();
+
+  bool residualInitialed() { return _is_residual_initialed; }
 
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
@@ -50,6 +56,15 @@ public:
   virtual void computeJacobian(const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian,
                                Moose::KernelType kernel_type) override;
+
+  void computeResidualTypeBx(const NumericVector<Number> & soln,
+                             NumericVector<Number> & residual,
+                             Moose::KernelType type);
+
+  void computeResidualType(const NumericVector<Number> & soln,
+                           NumericVector<Number> & residual,
+                           Moose::KernelType type) override;
+
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
@@ -57,7 +72,8 @@ public:
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
-  NonlinearEigenSystem * _nl_eigen;
+  std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
+  bool _is_residual_initialed;
 };
 
 #endif /* EIGENPROBLEM_H */
