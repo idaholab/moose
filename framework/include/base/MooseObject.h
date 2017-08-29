@@ -18,6 +18,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
+#include "Parser.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -75,6 +76,20 @@ public:
    * Return the enabled status of the object.
    */
   virtual bool enabled() { return _enabled; }
+
+  /**
+   * Emits an error prefixed with the file and line number of the given param (from the input
+   * file) with the given args as the message.
+   */
+  template <typename... Args>
+  [[noreturn]] void paramError(std::string param, Args... args)
+  {
+    auto prefix = param + ": ";
+    if (_pars.have_parameter<std::string>(paramLocName(param)))
+      prefix = _pars.get<std::string>(paramLocName(param)) + ": (" +
+               _pars.get<std::string>(paramPathName(param)) + ") ";
+    mooseError(prefix, args...);
+  }
 
   template <typename... Args>
   [[noreturn]] void mooseError(Args &&... args) const

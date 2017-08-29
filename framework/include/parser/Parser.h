@@ -35,6 +35,9 @@ class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
 
+std::string paramLocName(std::string param);
+std::string paramPathName(std::string param);
+
 inline std::string
 errormsg(std::string /*fname*/, hit::Node * /*n*/)
 {
