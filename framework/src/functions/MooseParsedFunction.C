@@ -25,7 +25,8 @@ validParams<MooseParsedFunction>()
 {
   InputParameters params = validParams<Function>();
   params += validParams<MooseParsedFunctionBase>();
-  params.addRequiredParam<std::string>("value", "The user defined function.");
+  params.addRequiredCustomTypeParam<std::string>(
+      "value", "FunctionExpression", "The user defined function.");
   return params;
 }
 
