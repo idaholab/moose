@@ -9,6 +9,11 @@
 
 #include "ComputeExtraStressBase.h"
 
+class ComputeGasPressureBase;
+
+template <>
+InputParameters validParams<ComputeGasPressureBase>();
+
 /**
  * Sets up an isotropic extra Stress with a trace that equals the pressure of
  * an ideal gas with the given density.
