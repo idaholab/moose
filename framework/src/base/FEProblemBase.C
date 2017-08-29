@@ -4444,11 +4444,13 @@ FEProblemBase::initialAdaptMesh()
 void
 FEProblemBase::adaptMesh()
 {
+  // reset cycle counter
+  _cycles_completed = 0;
+
   if (!_adaptivity.isAdaptivityDue())
     return;
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
-  _cycles_completed = 0;
 
   Moose::perf_log.push("adaptMesh()", "Execution");
 
