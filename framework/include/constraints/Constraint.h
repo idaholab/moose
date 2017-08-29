@@ -70,12 +70,6 @@ public:
     mooseError("subdomain setup for constraints is not implemented");
   }
 
-  virtual bool contactConverged() { return false; }
-
-  virtual void updateLagMul(bool) { return; }
-
-  virtual bool haveAugLM() { return false; }
-
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;

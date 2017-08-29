@@ -72,12 +72,13 @@ validParams<ContactAction>()
   params.addParam<bool>("master_slave_jacobian",
                         true,
                         "Whether to include jacobian entries coupling master and slave nodes.");
+  params.addParam<Real>("al_penetration_tolerance",
+                        "The tolerance of the penetration for augmented Lagrangian method.");
+  params.addParam<Real>("al_incremental_slip_tolerance",
+                        "The tolerance of the incremental slip for augmented Lagrangian method.");
 
-  params.addParam<Real>("penetration_tolerance", 1e-9, "The tolerance of the distance function");
-  params.addParam<Real>("stickking_tolerance", 1e-9, "The tolerance of the sticking");
-
-  params.addParam<Real>("frictionalforce_tolerance", 1e-9, "The tolerance of the frictionalforce");
-
+  params.addParam<Real>("al_frictional_force_tolerance",
+                        "The tolerance of the frictional force for augmented Lagrangian method.");
   return params;
 }
 

@@ -42,4 +42,25 @@
     abs_zero = 1e-7
     max_time = 800
   [../]
+
+  [./frictionless_aug]
+    type = 'Exodiff'
+    input = 'frictionless_aug.i'
+    exodiff = 'frictionless_aug_out.e'
+    heavy = true
+    min_parallel = 4
+    abs_zero = 1e-7
+    max_time = 800
+  [../]
+
+  [./frictional_mu02_aug]
+    type = 'Exodiff'
+    input = 'frictional_02_aug.i'
+    exodiff = 'frictional_02_aug_out.e'
+    heavy = true
+    min_parallel = 4
+    abs_zero = 1e-7
+    max_time = 800
+  [../]
+
 []

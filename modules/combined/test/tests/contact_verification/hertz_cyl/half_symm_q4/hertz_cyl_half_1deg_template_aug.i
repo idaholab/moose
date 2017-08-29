@@ -1,25 +1,21 @@
+[GlobalParams]
+  volumetric_locking_correction = true
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = hertz_cyl_half_1deg.e
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y'
-[]
-
 [Problem]
-  type = ContactAugLagMulProblem
-  master = '2'
-  slave = '3'
-  penalty = 1e+8
-  normalize_penalty = true
-  disp_x = disp_x
-  disp_y = disp_y
-  contact_lagmul_tolerance_factor = 1.0
+  type = AugmentedLagrangianContactProblem
   solution_variables = 'disp_x disp_y'
   reference_residual_variables = 'saved_x saved_y'
-  contact_reference_residual_variables = 'saved_x saved_y'
+  maximum_lagrangian_update_iterations = 100
+  penetration_tolerance = 1e-4
+  tangential_increment_stick_tolerance = 1e-2
+  tangential_friction_force_tolerance =  1e-2
 []
-
 
 [Variables]
   [./disp_x]
@@ -29,8 +25,6 @@
 []
 
 [AuxVariables]
-  [./contact_traction]
-  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -78,35 +72,37 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    save_in_disp_y = saved_y
-    save_in_disp_x = saved_x
-    diag_save_in_disp_y = diag_saved_y
-    diag_save_in_disp_x = diag_saved_x
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
+    save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./inc_slip_x]
     type = PenetrationAux
@@ -228,68 +224,103 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff1_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e10
     poissons_ratio = 0.0
-    formulation = NonlinearPlaneStrain
   [../]
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff1_strain]
+    type = ComputeFiniteStrain
+    block = '1'
+  [../]
+  [./stuff1_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+  [./stuff2_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    formulation = NonlinearPlaneStrain
   [../]
-  [./stiffStuff3]
-    type = Elastic
-    block = 3
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff2_strain]
+    type = ComputeFiniteStrain
+    block = '2'
+  [../]
+  [./stuff2_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
+  [../]
+  [./stuff3_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '3'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    formulation = NonlinearPlaneStrain
   [../]
-  [./stiffStuff4]
-    type = Elastic
-    block = 4
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff3_strain]
+    type = ComputeFiniteStrain
+    block = '3'
+  [../]
+  [./stuff3_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '3'
+  [../]
+  [./stuff4_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '4'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    formulation = NonlinearPlaneStrain
   [../]
-  [./stiffStuff5]
-    type = Elastic
-    block = 5
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff4_strain]
+    type = ComputeFiniteStrain
+    block = '4'
+  [../]
+  [./stuff4_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '4'
+  [../]
+  [./stuff5_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '5'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    formulation = NonlinearPlaneStrain
   [../]
-  [./stiffStuff6]
-    type = Elastic
-    block = 6
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff5_strain]
+    type = ComputeFiniteStrain
+    block = '5'
+  [../]
+  [./stuff5_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '5'
+  [../]
+  [./stuff6_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '6'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    formulation = NonlinearPlaneStrain
   [../]
-  [./stiffStuff7]
-    type = Elastic
-    block = 7
-    disp_x = disp_x
-    disp_y = disp_y
+  [./stuff6_strain]
+    type = ComputeFiniteStrain
+    block = '6'
+  [../]
+  [./stuff6_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '6'
+  [../]
+  [./stuff7_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '7'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-    formulation = NonlinearPlaneStrain
+  [../]
+  [./stuff7_strain]
+    type = ComputeFiniteStrain
+    block = '7'
+  [../]
+  [./stuff7_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '7'
   [../]
 []
 
@@ -300,28 +331,28 @@
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu     mumps'
+  petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'none'
 
   nl_abs_tol = 1e-5
   nl_rel_tol = 1e-4
-  l_max_its = 100
+  l_max_its = 20
   nl_max_its = 200
 
   start_time = 0.0
-  end_time = 2.0
+  end_time = 6.0
   l_tol = 1e-6
-  dt = 0.1
-  dtmin = 0.1
+  dt = 0.2
+  dtmin = 0.01
 []
 
 [Preconditioning]
   [./SMP]
     type = SMP
     full = true
-#    petsc_options_iname = 'pc_type'
-#    petsc_options_value = 'lu'
+    petsc_options_iname = 'pc_type'
+    petsc_options_value = 'lu'
   [../]
 []
 
@@ -380,17 +411,12 @@
   [./interface]
     master = 2
     slave = 3
-    model = coulomb
-   formulation = augmented_lagrange
-   friction_coefficient = 0.20
-  #  formulation  = kinematic
+    formulation = augmented_lagrange
     system = constraint
     normalize_penalty = true
-  #  tangential_tolerance = 1e-3
-    penetration_tolerance = 1e-8
-    stickking_tolerance = 1e-3
-    frictionalforce_tolerance = 1e-3
-    penalty = 1e+8
-    penalty_slip = 1e+8
+    penalty = 1e8
+    model = coulomb
+    friction_coefficient = 0.0
+    tangential_tolerance = 1e-3
   [../]
 []

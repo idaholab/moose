@@ -361,9 +361,6 @@ Transient::incrementStepOrReject()
       _problem.adaptMesh();
 #endif
 
-      if (_problem.haveAugLM())
-        _problem.initLagMul();
-
       _time_old = _time; // = _time_old + _dt;
       _t_step++;
 

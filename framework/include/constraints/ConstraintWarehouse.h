@@ -50,7 +50,7 @@ public:
   const std::vector<std::shared_ptr<ElemElemConstraint>> &
   getActiveElemElemConstraints(InterfaceID interface_id) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
-  getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
+  getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   ///@}
 
   ///@{

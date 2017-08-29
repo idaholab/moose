@@ -31,11 +31,9 @@ public:
   virtual void timestepSetup() override;
   virtual void jacobianSetup() override;
 
-  virtual bool haveAugLM() override;
+  virtual bool AugmentedLagrangianContactConverged();
 
-  virtual bool contactConverged() override;
-
-  virtual void updateLagMul(bool beginning_of_step = false) override;
+  virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step = false);
 
   virtual void updateContactSet(bool beginning_of_step = false);
 
@@ -80,7 +78,7 @@ public:
    */
   bool getCoupledVarComponent(unsigned int var_num, unsigned int & component);
 
-  virtual bool addCouplingEntriesToJacobian() { return _master_slave_jacobian; }
+  virtual bool addCouplingEntriesToJacobian() override { return _master_slave_jacobian; }
 
   bool shouldApply() override;
   void computeContactForce(PenetrationInfo * pinfo);
@@ -88,7 +86,8 @@ public:
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real nodalArea(PenetrationInfo & pinfo);
-  Real getPenalty(PenetrationInfo & pinfo, Real penalty_param);
+  Real getPenalty(PenetrationInfo & pinfo);
+  Real getSlipPenalty(PenetrationInfo & pinfo);
 
   const unsigned int _component;
   ContactModel _model;
@@ -100,9 +99,6 @@ protected:
   const Real _friction_coefficient;
   const Real _tension_release;
   const Real _capture_tolerance;
-  const Real _penetration_tolerance;
-  const Real _stickking_tolerance;
-  const Real _frictionalforce_tolerance;
   const unsigned int _stick_lock_iterations;
   const Real _stick_unlock_factor;
   bool _update_contact_set;
@@ -124,6 +120,13 @@ protected:
   const bool _connected_slave_nodes_jacobian;
   /// Whether to include coupling terms with non-displacement variables in the Jacobian
   const bool _non_displacement_vars_jacobian;
+
+  /// The tolerance of the penetration for augmented Lagrangian method
+  Real _al_penetration_tolerance;
+  /// The tolerance of the incremental slip for augmented Lagrangian method
+  Real _al_incremental_slip_tolerance;
+  /// The tolerance of the frictional force for augmented Lagrangian method
+  Real _al_frictional_force_tolerance;
 
   typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator
       pl_iterator;

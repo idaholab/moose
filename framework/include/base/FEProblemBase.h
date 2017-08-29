@@ -1101,12 +1101,6 @@ public:
 
   virtual void meshChanged() override;
 
-  virtual bool haveAugLM();
-
-  virtual bool updateLagMul();
-
-  virtual void initLagMul();
-
   /**
    * Register an object that derives from MeshChangedInterface
    * to be notified when the mesh changes.

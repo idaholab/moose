@@ -45,9 +45,9 @@
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
-    input = 'brick1_template1.i'
+    input = 'brick1_aug.i'
     csvdiff = 'brick1_frictionless_aug_check.csv brick1_frictionless_aug_check_cont_press_0001.csv brick1_frictionless_aug_check_x_disp_0001.csv brick1_frictionless_aug_check_y_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=brick1_frictionless_aug_out Outputs/chkfile/file_base=brick1_frictionless_aug_check'
+    cli_args = 'Outputs/file_base=brick1_frictionless_aug_out Outputs/chkfile/file_base=brick1_frictionless_aug_check'
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
@@ -96,9 +96,9 @@
   [../]
   [./frictionless_aug_sm]
     type = 'CSVDiff'
-    input = 'brick1_template1_sm.i'
+    input = 'brick1_aug_sm.i'
     csvdiff = 'brick1_frictionless_aug_check.csv brick1_frictionless_aug_check_cont_press_0001.csv brick1_frictionless_aug_check_x_disp_0001.csv brick1_frictionless_aug_check_y_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=brick1_frictionless_aug_out Outputs/chkfile/file_base=brick1_frictionless_aug_check'
+    cli_args = 'Outputs/file_base=brick1_frictionless_aug_out Outputs/chkfile/file_base=brick1_frictionless_aug_check'
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1

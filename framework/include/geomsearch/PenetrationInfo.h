@@ -81,7 +81,6 @@ public:
   const Elem * _side;
   unsigned int _side_num;
   RealVectorValue _normal;
-  RealVectorValue _normal_old;
   Real _distance; // Positive distance means the node has penetrated
   Real _tangential_distance;
   Point _closest_point;
@@ -97,16 +96,12 @@ public:
   unsigned int _starting_side_num;
   Point _starting_closest_point_ref;
   Point _incremental_slip;
-  Point _total_slip;
-  Point _total_slip_old;
   Real _accumulated_slip;
   Real _accumulated_slip_old;
   Real _frictional_energy;
   Real _frictional_energy_old;
   RealVectorValue _contact_force;
   RealVectorValue _contact_force_old;
-  RealVectorValue _contact_force_normal;
-  RealVectorValue _contact_force_tangential;
 
   Real _lagrange_multiplier;
   RealVectorValue _lagrange_multiplier_slip;

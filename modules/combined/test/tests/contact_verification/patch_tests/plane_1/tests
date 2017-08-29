@@ -93,6 +93,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_aug_sm'
+    skip = 'waiting for alm merge'
   [../]
   [./frictionless_aug_sm]
     type = 'CSVDiff'
@@ -103,5 +104,6 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    skip = 'waiting for alm merge'
   [../]
 []

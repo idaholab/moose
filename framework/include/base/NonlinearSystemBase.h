@@ -507,6 +507,7 @@ public:
     return _element_dampers;
   }
   const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
+  const ConstraintWarehouse & getConstraintWarehouse() { return _constraints; };
   //@}
 
   /**
@@ -543,10 +544,6 @@ public:
   std::vector<unsigned int> _current_l_its;
   unsigned int _current_nl_its;
   bool _compute_initial_residual_before_preset_bcs;
-
-  bool updateLagMul(bool displaced);
-  void initLagMul(bool displaced);
-  bool haveAugLM(bool displaced);
 
 protected:
   /**

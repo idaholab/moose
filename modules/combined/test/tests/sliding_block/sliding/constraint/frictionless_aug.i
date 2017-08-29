@@ -1,9 +1,9 @@
-#  This is a benchmark test that checks constraint based frictional
-#  contact using the penalty method.  In this test a constant
+#  This is a benchmark test that checks constraint based frictionless
+#  contact using the augmented lagrangian method.  In this test a constant
 #  displacement is applied in the horizontal direction to simulate
 #  a small block come sliding down a larger block.
 #
-#  A friction coefficient of 0.2 is used.  The gold file is run on one processor
+#  The gold file is run on one processor
 #  and the benchmark case is run on a minimum of 4 processors to ensure no
 #  parallel variability in the contact pressure and penetration results.
 #
@@ -25,6 +25,10 @@
 []
 
 [AuxVariables]
+  [./saved_x]
+  [../]
+  [./saved_y]
+  [../]
   [./contact_traction]
   [../]
   [./penetration]
@@ -36,18 +40,6 @@
   [./accum_slip_x]
   [../]
   [./accum_slip_y]
-  [../]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./diag_saved_x]
-  [../]
-  [./diag_saved_y]
-  [../]
-  [./tang_force_x]
-  [../]
-  [./tang_force_y]
   [../]
 []
 
@@ -62,6 +54,8 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
+    save_in_disp_x = saved_x
+    save_in_disp_y = saved_y
   [../]
 []
 
@@ -167,18 +161,18 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu     mumps'
+  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
+  petsc_options_value = 'asm     lu    20    101'
 
   line_search = 'none'
 
   l_max_its = 100
-  nl_max_its = 1000
+  nl_max_its = 100
   dt = 0.1
   end_time = 15
-  num_steps = 1000
+  num_steps = 200
   l_tol = 1e-6
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-7
   nl_abs_tol = 1e-6
   dtmin = 0.01
 
@@ -189,9 +183,8 @@
 []
 
 [Outputs]
-  file_base = frictional_02_alm_out
-  print_linear_residuals = false
-  interval = 1
+  file_base = frictionless_aug_out
+  interval = 10
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
@@ -203,34 +196,32 @@
 []
 
 [Problem]
-  type = ContactAugLagMulProblem
-  master = '2'
-  slave = '3'
-  penalty = 1e+8
-  normalize_penalty = true
-  disp_x = disp_x
-  disp_y = disp_y
-  contact_lagmul_tolerance_factor = 1.0
+  type = AugmentedLagrangianContactProblem
   solution_variables = 'disp_x disp_y'
   reference_residual_variables = 'saved_x saved_y'
-  contact_reference_residual_variables = 'saved_x saved_y'
+  maximum_lagrangian_update_iterations = 25
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+    petsc_options_iname = 'pc_type'
+    petsc_options_value = 'lu'
+  [../]
 []
 
 [Contact]
   [./leftright]
     slave = 3
     master = 2
-    model = coulomb
-    penalty = 1e+8
-#    penalty_slip = 1e+8
-    friction_coefficient = 0.2
-#    formulation = penalty
-    formulation = augmented_lagrange
-    system = constraint
+    model = frictionless
+    penalty = 1e+7
     normalize_penalty = true
+    formulation = augmented_lagrange
+    tangential_tolerance = 1e-3
+    system = constraint
     normal_smoothing_distance = 0.1
-    penetration_tolerance = 1e-9
-    stickking_tolerance = 1e-3
-    frictionalforce_tolerance = 1e-3
+    al_penetration_tolerance = 1e-9
   [../]
 []

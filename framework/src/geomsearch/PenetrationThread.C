@@ -477,10 +477,7 @@ PenetrationThread::switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNe
     infoNew->_starting_elem = info->_starting_elem;
     infoNew->_starting_side_num = info->_starting_side_num;
     infoNew->_starting_closest_point_ref = info->_starting_closest_point_ref;
-    infoNew->_normal_old = info->_normal_old;
     infoNew->_incremental_slip = info->_incremental_slip;
-    infoNew->_total_slip = info->_total_slip;
-    infoNew->_total_slip_old = info->_total_slip_old;
     infoNew->_accumulated_slip = info->_accumulated_slip;
     infoNew->_accumulated_slip_old = info->_accumulated_slip_old;
     infoNew->_frictional_energy = info->_frictional_energy;
@@ -1250,7 +1247,6 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
     info._frictional_energy =
         info._frictional_energy_old + info._contact_force * info._incremental_slip;
     info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.norm();
-    info._total_slip = info._total_slip_old + info._incremental_slip;
   }
 }
 
