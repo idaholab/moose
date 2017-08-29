@@ -1,7 +1,17 @@
 [Tests]
-  [./test]
+  [./num_adaptivity_cycles]
     type = 'CSVDiff'
     input = 'num_adaptivity_cycles.i'
     csvdiff = 'num_adaptivity_cycles_out.csv'
+  [../]
+  [./num_adaptivity_cycles_toggle_adaptivity]
+    type = 'CSVDiff'
+    input = 'num_adaptivity_cycles_toggle_adaptivity.i'
+    csvdiff = 'num_adaptivity_cycles_toggle_adaptivity_out.csv'
+  [../]
+  [./num_adaptivity_cycles_toggle_adaptivity_wait]
+    type = 'CSVDiff'
+    input = 'num_adaptivity_cycles_toggle_adaptivity_wait.i'
+    csvdiff = 'num_adaptivity_cycles_toggle_adaptivity_wait_out.csv'
   [../]
 []
