@@ -9,6 +9,6 @@
     type = RunException
     input = master.i
     cli_args = 'sub0:Mesh/elem_type=QUAD8 sub0:Variables/u/order=SECOND'
-    expect_err = 'The variables must be the same type \(order and family\)'
+    expect_err = 'must be the same type \(order and family\)'
   [../]
 []
