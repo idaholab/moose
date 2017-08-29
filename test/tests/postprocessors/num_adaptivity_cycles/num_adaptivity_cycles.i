@@ -51,7 +51,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 2
+  num_steps = 4
   dt = 1
 
   # Preconditioned JFNK (default)
@@ -60,7 +60,7 @@
 []
 
 [Adaptivity]
-  cycles_per_step = 3
+  cycles_per_step = 1
   marker = box
   max_h_level = 2
   initial_steps = 4
