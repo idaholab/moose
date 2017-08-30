@@ -24,6 +24,7 @@
 #include "BrineFluidProperties.h"
 #include "SimpleFluidProperties.h"
 #include "TabulatedFluidProperties.h"
+#include "SodiumProperties.h"
 
 #include "SpecificEnthalpyAux.h"
 #include "StagnationPressureAux.h"
@@ -87,7 +88,7 @@ FluidPropertiesApp::registerObjects(Factory & factory)
   registerUserObject(BrineFluidProperties);
   registerUserObject(SimpleFluidProperties);
   registerUserObject(TabulatedFluidProperties);
-
+  registerUserObject(SodiumProperties);
   registerAuxKernel(SpecificEnthalpyAux);
   registerAuxKernel(StagnationPressureAux);
   registerAuxKernel(StagnationTemperatureAux);
