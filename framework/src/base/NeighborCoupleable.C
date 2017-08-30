@@ -117,3 +117,37 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
   MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->secondSlnNeighbor() : var->secondSlnOldNeighbor();
 }
+
+const DenseVector<Number> &
+NeighborCoupleable::coupledNeighborSolutionDoFs(const std::string & var_name, unsigned int comp)
+{
+  if (_neighbor_nodal)
+    mooseError("nodal objects should not call coupledSolutionDoFs");
+
+  MooseVariable * var = getVar(var_name, comp);
+  return (_c_is_implicit) ? var->solutionDoFsNeighbor() : var->solutionDoFsOldNeighbor();
+}
+
+const DenseVector<Number> &
+NeighborCoupleable::coupledNeighborSolutionDoFsOld(const std::string & var_name, unsigned int comp)
+{
+  if (_neighbor_nodal)
+    mooseError("nodal objects should not call coupledSolutionDoFsOld");
+
+  MooseVariable * var = getVar(var_name, comp);
+  return (_c_is_implicit) ? var->solutionDoFsOldNeighbor() : var->solutionDoFsOlderNeighbor();
+}
+
+const DenseVector<Number> &
+NeighborCoupleable::coupledNeighborSolutionDoFsOlder(const std::string & var_name,
+                                                     unsigned int comp)
+{
+  if (_neighbor_nodal)
+    mooseError("nodal objects should not call coupledSolutionDoFsOlder");
+
+  MooseVariable * var = getVar(var_name, comp);
+  if (_c_is_implicit)
+    return var->solutionDoFsOlderNeighbor();
+  else
+    mooseError("Older values not available for explicit schemes");
+}
