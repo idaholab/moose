@@ -331,8 +331,7 @@ Transient::incrementStepOrReject()
     else
     {
 #ifdef LIBMESH_ENABLE_AMR
-      if (_problem.adaptivity().isOn())
-        _problem.adaptMesh();
+      _problem.adaptMesh();
 #endif
 
       _time_old = _time; // = _time_old + _dt;

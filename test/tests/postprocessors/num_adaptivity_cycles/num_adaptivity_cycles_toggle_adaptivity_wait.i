@@ -83,6 +83,14 @@
   [../]
 []
 
+[UserObjects]
+  [./toggle_adaptivity]
+    type = ToggleMeshAdaptivity
+    mesh_adaptivity = 'off'
+    apply_after_timestep = 1
+  [../]
+[]
+
 [Postprocessors]
   [./adaptivity_cycles]
     type = NumAdaptivityCycles

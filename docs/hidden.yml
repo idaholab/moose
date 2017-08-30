@@ -941,6 +941,7 @@ tensor_mechanics:
     - /Kernels/TensorMechanics/LegacyTensorMechanicsAction
     - /Materials/CappedDruckerPragerCosseratStressUpdate
     - /Materials/CappedDruckerPragerStressUpdate
+    - /Materials/CappedMohrCoulombCosseratStressUpdate
     - /Materials/CappedMohrCoulombStressUpdate
     - /Materials/CappedWeakInclinedPlaneStressUpdate
     - /Materials/CappedWeakPlaneCosseratStressUpdate
