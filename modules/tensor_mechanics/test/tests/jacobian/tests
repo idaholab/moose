@@ -544,4 +544,59 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
   [../]
+
+  [./mc_update1_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update1_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update8_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update8_cosserat.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+  [./mc_update18_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update18_cosserat.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+  [./mc_update21_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update21_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update22_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update22_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update23_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update23_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update24_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update24_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update33_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update33_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./mc_update34_cosserat]
+    type = 'PetscJacobianTester'
+    input = 'mc_update34_cosserat.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
 []

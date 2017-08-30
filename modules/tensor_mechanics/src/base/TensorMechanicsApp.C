@@ -40,6 +40,7 @@
 #include "FiniteStrainCPSlipRateRes.h"
 #include "FiniteStrainUObasedCP.h"
 #include "CappedMohrCoulombStressUpdate.h"
+#include "CappedMohrCoulombCosseratStressUpdate.h"
 #include "CappedWeakPlaneStressUpdate.h"
 #include "CappedWeakInclinedPlaneStressUpdate.h"
 #include "CappedWeakPlaneCosseratStressUpdate.h"
@@ -245,6 +246,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainCPSlipRateRes);
   registerMaterial(FiniteStrainUObasedCP);
   registerMaterial(CappedMohrCoulombStressUpdate);
+  registerMaterial(CappedMohrCoulombCosseratStressUpdate);
   registerMaterial(CappedWeakPlaneStressUpdate);
   registerMaterial(CappedWeakInclinedPlaneStressUpdate);
   registerMaterial(CappedWeakPlaneCosseratStressUpdate);
