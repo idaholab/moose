@@ -17,8 +17,6 @@ if "MOOSE_DIR" in os.environ:
   MOOSE_DIR = os.environ['MOOSE_DIR']
 
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
-import path_tool
-path_tool.activate_module('TestHarness')
 
 from TestHarness import TestHarness
 # Run the tests!

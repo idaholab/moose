@@ -1,4 +1,4 @@
-import util
+from TestHarness import util
 from RunApp import RunApp
 
 class RunException(RunApp):
