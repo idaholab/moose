@@ -173,6 +173,13 @@ NonlinearSystemBase::init()
 }
 
 void
+NonlinearSystemBase::turnOffJacobian()
+{
+  system().set_basic_system_only();
+  nonlinearSolver()->jacobian = NULL;
+}
+
+void
 NonlinearSystemBase::addExtraVectors()
 {
   if (_fe_problem.needsPreviousNewtonIteration())
