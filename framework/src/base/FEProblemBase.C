@@ -88,6 +88,7 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
+#include "libmesh/nonlinear_solver.h"
 
 // Anonymous namespace for helper function
 namespace
@@ -3691,6 +3692,10 @@ FEProblemBase::init()
     mooseError("No variables specified in the FEProblemBase '", name(), "'.");
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
+
+  // do not assemble system matrix for JFNK solve
+  if (solverParams()._type == Moose::ST_JFNK)
+    _nl->turnOffJacobian();
 
   Moose::perf_log.push("eq.init()", "Setup");
   _eq.init();
