@@ -7,6 +7,8 @@
 
 #include "SolutionRasterizer.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<SolutionRasterizer>()

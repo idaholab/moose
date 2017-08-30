@@ -9,6 +9,8 @@
 #include "MooseRandom.h"
 #include "MooseMesh.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<ElementPropertyReadFile>()

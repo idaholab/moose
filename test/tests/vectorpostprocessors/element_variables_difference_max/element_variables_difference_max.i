@@ -53,14 +53,14 @@
 [BCs]
   [./bottom]
     type = DirichletBC
-    variable = 'u v'
+    variable = 'u'
     boundary = 'bottom'
     value = 1
   [../]
 
   [./top]
     type = DirichletBC
-    variable = 'u v'
+    variable = 'u'
     boundary = 'top'
     value = 0
   [../]

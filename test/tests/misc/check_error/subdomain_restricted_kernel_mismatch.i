@@ -54,7 +54,6 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  preconditioner = 'ILU'
 #  petsc_options = '-snes_mf_operator'
 #  petsc_options_iname = '-pc_type -pc_hypre_type'
 #  petsc_options_value = 'hypre boomeramg'

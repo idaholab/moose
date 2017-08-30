@@ -41,6 +41,7 @@
     [./InitialCondition]
       type = FunctionIC
       function = sphere
+    [../]
   [../]
 []
 

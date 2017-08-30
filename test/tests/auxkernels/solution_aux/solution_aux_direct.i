@@ -24,6 +24,7 @@
     type = Diffusion
     variable = u
   [../]
+[]
 
 [AuxKernels]
   [./initial_cond_aux]

@@ -12,7 +12,6 @@
     exodiff = 'planestrain_out.e'
     abs_zero = 5e-6
     compiler = 'CLANG GCC'
-    cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'plane_strain'
   [../]
   [./finite_planestrain]

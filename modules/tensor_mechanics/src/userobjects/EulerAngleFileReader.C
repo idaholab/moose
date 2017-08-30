@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "EulerAngleFileReader.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<EulerAngleFileReader>()

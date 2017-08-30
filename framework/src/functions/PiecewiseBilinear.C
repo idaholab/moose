@@ -16,6 +16,8 @@
 #include "ColumnMajorMatrix.h"
 #include "BilinearInterpolation.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<PiecewiseBilinear>()

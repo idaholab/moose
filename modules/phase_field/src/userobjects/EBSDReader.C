@@ -11,6 +11,8 @@
 #include "Conversion.h"
 #include "NonlinearSystem.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<EBSDReader>()

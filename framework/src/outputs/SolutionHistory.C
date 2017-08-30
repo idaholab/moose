@@ -17,6 +17,8 @@
 #include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<SolutionHistory>()
