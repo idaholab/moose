@@ -38,6 +38,9 @@
   nx = 3
   ny = 1
   xmax = 3
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Variables]

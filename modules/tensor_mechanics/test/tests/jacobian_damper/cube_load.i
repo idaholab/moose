@@ -5,6 +5,9 @@
   ny = 1
   nz = 1
   displacements = 'disp_x disp_y disp_z'
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Variables]

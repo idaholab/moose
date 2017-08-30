@@ -36,9 +36,11 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
 {
-  // This class only works with ReplicatedMesh, since it relies on a
-  // specific element numbering that we can't guarantee with DistributedMesh
-  _mesh.errorIfDistributedMesh("ElementalVariableValue");
+  // This class may be too dangerous to use if renumbering is enabled,
+  // as the nodeid parameter obviously depends on a particular
+  // numbering.
+  if (_mesh.getMesh().allow_renumbering())
+    mooseError("ElementalVariableValue should only be used when node renumbering is disabled.");
 }
 
 Real
