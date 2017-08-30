@@ -80,4 +80,10 @@
     max_parallel = 1
   [../]
 
+  [./csvtimesequence]
+    type = 'Exodiff'
+    prereq = timesequence_no_start_time
+    input = 'csvtimesequence.i'
+    exodiff = 'csvtimesequence_out.e'
+  [../]
 []

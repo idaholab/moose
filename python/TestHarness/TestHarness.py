@@ -5,15 +5,10 @@ if sys.version_info[0:2] != (2, 7):
 
 import os, re, inspect, errno, time, copy
 
-import path_tool
-path_tool.activate_module('FactorySystem')
-
 from socket import gethostname
-from Scheduler import Scheduler
-from Tester import Tester
-from Factory import Factory
-from Parser import Parser
-from Warehouse import Warehouse
+from FactorySystem.Factory import Factory
+from FactorySystem.Parser import Parser
+from FactorySystem.Warehouse import Warehouse
 import util
 
 import argparse
@@ -50,7 +45,7 @@ class TestHarness:
         dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
 
         # Finally load the plugins!
-        self.factory.loadPlugins(dirs, 'testers', Tester)
+        self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
         self.test_table = []
         self.num_passed = 0
@@ -503,7 +498,7 @@ class TestHarness:
 
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
-        self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', Scheduler)
+        self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', "IS_SCHEDULER")
 
         # Add our scheduler plugins
         # Note: for now, we only have one: 'RunParallel'. In the future this will be an options.argument

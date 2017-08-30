@@ -1,5 +1,5 @@
 from FileTester import FileTester
-import util
+from TestHarness import util
 import os
 
 class CheckFiles(FileTester):

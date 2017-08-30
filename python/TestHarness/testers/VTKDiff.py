@@ -1,7 +1,7 @@
 from RunApp import RunApp
-import util
+from TestHarness import util
 import os
-from XMLDiffer import XMLDiffer
+from TestHarness.XMLDiffer import XMLDiffer
 
 class VTKDiff(RunApp):
 

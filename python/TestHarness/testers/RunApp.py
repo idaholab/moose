@@ -1,6 +1,6 @@
 import re, os, time
 from Tester import Tester
-import util
+from TestHarness import util
 
 class RunApp(Tester):
 

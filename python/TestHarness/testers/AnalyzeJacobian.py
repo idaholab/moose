@@ -1,5 +1,5 @@
 import os, sys
-import util
+from TestHarness import util
 from Tester import Tester
 
 class AnalyzeJacobian(Tester):
