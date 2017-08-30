@@ -1,0 +1,31 @@
+# USE_OLD_FLOOR does not appear to be supported, so that behavior
+# needs to come in via the command line option
+
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 0.0
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES
+	accel_x relative 1.e-8 floor 1.e-8
+	accel_y relative 1.e-8 floor 1.e-8
+	accel_z relative 1.e-8 floor 1.e-8
+	disp_x relative 1.e-8 floor 1.e-8
+	disp_y relative 1.e-8 floor 1.e-8
+	disp_z relative 1.e-8 floor 1.e-8
+	vel_x relative 1.e-8
+	vel_y relative 1.e-8
+	vel_z relative 1.e-8
+
+ELEMENT VARIABLES
+	stress_xx relative 1.e-8 floor 1.e-3
+	stress_yy relative 1.e-8 floor 1.e-3
+	stress_zz relative 1.e-8 floor 1.e-3
+	strain_xx relative 1.e-8
+	strain_yy relative 1.e-8
+	strain_zz relative 1.e-8
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

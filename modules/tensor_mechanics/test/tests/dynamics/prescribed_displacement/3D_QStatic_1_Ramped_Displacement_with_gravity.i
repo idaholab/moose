@@ -33,6 +33,7 @@
   ymax = 1
   zmin = 0.0
   zmax = 1
+  allow_renumbering = false # So NodalVariableValue can index by id
 []
 
 [Variables] # variables that are solved
