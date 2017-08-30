@@ -16,6 +16,7 @@
 #include "MooseUtils.h"
 #include "MooseError.h"
 #include "InfixIterator.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <algorithm>
@@ -256,6 +257,6 @@ MultiMooseEnum::checkDeprecated() const
 std::ostream &
 operator<<(std::ostream & out, const MultiMooseEnum & obj)
 {
-  out << obj.getRawNames();
+  out << Moose::stringify(obj._current, " ");
   return out;
 }

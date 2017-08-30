@@ -72,7 +72,7 @@ protected:
   std::string backtrack()
   {
     std::string backtrack_path;
-    for (size_t i = 0; i < _level; ++i)
+    for (int i = 0; i < _level; ++i)
       backtrack_path += "../";
     return backtrack_path;
   }
