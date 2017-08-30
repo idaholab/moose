@@ -36,6 +36,9 @@ XFEMMaterialManager::XFEMMaterialManager(const InputParameters & parameters)
     auto prop_list = material.getSuppliedItems();
     for (auto & prop : prop_list)
     {
+      // register managed property
+      _managed_properties.insert(std::make_pair(prop, _props.size()));
+
       // get the property ID
       unsigned int prop_id = _material_data->getPropertyId(prop);
 
@@ -162,4 +165,14 @@ XFEMMaterialManager::execute()
 void
 XFEMMaterialManager::finalize()
 {
+}
+
+unsigned int
+XFEMMaterialManager::materialPropertyIndex(const std::string & name)
+{
+  auto it = _managed_properties.find(name);
+  if (it == _managed_properties.end())
+    mooseError("Property '", name, "' is not managed by this object");
+
+  return it->second;
 }
