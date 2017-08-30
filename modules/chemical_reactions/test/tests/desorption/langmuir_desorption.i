@@ -128,4 +128,3 @@
   exodus = true
   csv = 10
 [] # Outputs
-[]

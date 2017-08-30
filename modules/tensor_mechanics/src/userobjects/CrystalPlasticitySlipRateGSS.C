@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "CrystalPlasticitySlipRateGSS.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<CrystalPlasticitySlipRateGSS>()

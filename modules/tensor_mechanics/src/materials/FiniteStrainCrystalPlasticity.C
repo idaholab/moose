@@ -8,6 +8,8 @@
 #include "petscblaslapack.h"
 #include "libmesh/utility.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<FiniteStrainCrystalPlasticity>()

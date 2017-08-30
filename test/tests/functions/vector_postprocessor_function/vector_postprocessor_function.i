@@ -64,6 +64,7 @@
   variable = v
   function = function_v
 [../]
+[]
 
 [BCs]
   [./top_u]
@@ -79,7 +80,7 @@
     value = 0
   [../]
 []
-[]
+
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'

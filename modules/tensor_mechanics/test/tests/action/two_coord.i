@@ -25,6 +25,7 @@
 [Problem]
   coord_type = 'XYZ RZ'
   block      = '1   2'
+[]
 
 [GlobalParams]
   displacements = 'disp_x disp_y'

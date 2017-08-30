@@ -15,7 +15,6 @@
 #include "GeneratedMesh.h"
 
 // libMesh includes
-#include "libmesh/getpot.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/periodic_boundaries.h"

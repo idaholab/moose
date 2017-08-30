@@ -13,7 +13,7 @@
   [./cli_args]
     type = RunApp
     input = controllable.i
-    cli_args = "Outputs/controls=false --show-controls"
+    cli_args = "--show-controls"
     expect_out = "Controls:.*Active Controls:"
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
   [../]

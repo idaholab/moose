@@ -8,7 +8,7 @@
     type = Exodiff
     input = 'pressure_test.i'
     exodiff = 'pressure_test_out.e'
-    cli_args = 'GlobalParams/volumetric_locking_correction = true'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = '3D'
   [../]
 []

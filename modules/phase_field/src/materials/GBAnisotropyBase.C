@@ -8,6 +8,8 @@
 #include "GBAnisotropyBase.h"
 #include "MooseMesh.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<GBAnisotropyBase>()

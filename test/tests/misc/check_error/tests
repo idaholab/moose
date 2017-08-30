@@ -14,7 +14,7 @@
   [./checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "quotes around a vector"
+    expect_err = "after parameter name"
   [../]
 
   [./add_aux_variable_multiple_test]
@@ -270,7 +270,7 @@
   [./missing_active_section_test]
     type = 'RunException'
     input = 'missing_active_section.i'
-    expect_err = "One or more active/inactive lists in the input file are missing a referenced section"
+    expect_err = "variables listed as active"
   [../]
 
   [./missing_coupled_mat_prop_test]
@@ -397,9 +397,9 @@
   [../]
 
   [./override_name_variable_test]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'override_name_variable_test.i'
-    expect_out = "The following variables were overridden or supplied multiple times:"
+    expect_err = 'supplied multiple times'
     max_parallel = 1
     allow_warnings = true
   [../]
@@ -430,7 +430,7 @@
 
   [./unused_param_test]
     type = 'RunApp'
-    expect_out = "The following parameters were unused in your input file"
+    expect_out = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
     allow_warnings = true
@@ -439,7 +439,7 @@
 
   [./unused_param_test_cli]
     type = 'RunApp'
-    expect_out = "The following parameters were unused on the command line"
+    expect_out = "unused parameter 'Executioner/unused_param'"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused Executioner/unused_param=true'
     allow_warnings = true

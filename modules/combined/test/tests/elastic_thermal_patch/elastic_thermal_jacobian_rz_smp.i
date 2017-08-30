@@ -44,13 +44,20 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
-  displacements = 'disp_x disp_y'
-  add_variables = true
-  strain = SMALL
-  incremental = true
-  eigenstrain_names = eigenstrain
-  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+[Modules]
+    [TensorMechanics]
+        [Master]
+            displacements = 'disp_x disp_y'
+            [All]
+                displacements = 'disp_x disp_y'
+                add_variables = true
+                strain = SMALL
+                incremental = true
+                eigenstrain_names = eigenstrain
+                generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+            [../]
+        [../]
+    [../]
 []
 
 [Kernels]

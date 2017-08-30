@@ -14,6 +14,8 @@
 
 #include "Piecewise.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<Piecewise>()

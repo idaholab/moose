@@ -89,6 +89,7 @@
     component = 'concentration'
     flux = free_outflow_bc
   [../]
+[]
 ############################################################
 [Materials]
   [./aefv]

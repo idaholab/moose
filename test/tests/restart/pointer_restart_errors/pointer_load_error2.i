@@ -41,6 +41,7 @@
 [Problem]
   type = FEProblem
   solve = false
+  restart_file_base = pointer_load_error_out_cp/0001
 []
 
 [Executioner]
@@ -59,6 +60,3 @@
   [../]
 []
 
-[Problem]
-  restart_file_base = pointer_load_error_out_cp/0001
-[]

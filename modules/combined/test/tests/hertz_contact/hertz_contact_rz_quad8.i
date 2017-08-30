@@ -44,6 +44,7 @@
     type = PiecewiseLinear
     x = '0.  1.    2.'
     y = '0. -0.01 -0.01'
+  [../]
 [] # Functions
 
 [Variables]
