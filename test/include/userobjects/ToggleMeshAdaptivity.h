@@ -37,6 +37,8 @@ protected:
   void checkState();
 
   MooseEnum _state;
+
+  unsigned int _steps_to_wait;
 };
 
 #endif /* TOGGLEMESHADAPTIVITY_H */
