@@ -5,6 +5,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Variables]

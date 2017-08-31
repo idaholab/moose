@@ -16,6 +16,9 @@
   nx = 1
   ny = 1
   nz = 1
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [GlobalParams]

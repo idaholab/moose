@@ -5,6 +5,9 @@
 [Mesh]
    file = plate.e
    displacements = 'disp_x disp_y'
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Variables]
