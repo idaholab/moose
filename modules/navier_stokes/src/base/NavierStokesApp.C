@@ -90,6 +90,7 @@
 #include "INSMomentumSUPG.h"
 #include "INSMomentumTimeDerivativeSUPG.h"
 #include "INSMassPSPG.h"
+#include "INSMomentumPSPG.h"
 #include "INSMomentumChild.h"
 
 // BCs
@@ -273,6 +274,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSMomentumSUPG);
   registerKernel(INSMomentumTimeDerivativeSUPG);
   registerKernel(INSMassPSPG);
+  registerKernel(INSMomentumPSPG);
   registerKernel(INSMomentumChild);
 
   // BCs

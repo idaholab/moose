@@ -4,11 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "INSMassPSPG.h"
+#include "INSMomentumPSPG.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters
-validParams<INSMassPSPG>()
+validParams<INSMomentumPSPG>()
 {
   InputParameters params = validParams<INSBase>();
 
@@ -19,37 +20,45 @@ validParams<INSMassPSPG>()
       "consistent",
       true,
       "Whether to consistently include the viscous term in the PSPG formulation.");
+  params.addParam<unsigned>("component", 0, "The velocity component");
   return params;
 }
 
-INSMassPSPG::INSMassPSPG(const InputParameters & parameters)
-  : INSBase(parameters), _alpha(getParam<Real>("alpha")), _consistent(getParam<bool>("consistent"))
-
+INSMomentumPSPG::INSMomentumPSPG(const InputParameters & parameters)
+  : INSBase(parameters),
+    _alpha(getParam<Real>("alpha")),
+    _consistent(getParam<bool>("consistent")),
+    _second_test(_var.secondPhi()),
+    _component(getParam<unsigned>("component"))
 {
 }
 
 Real
-INSMassPSPG::computeQpResidual()
+INSMomentumPSPG::computeQpResidual()
 {
   Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-  Real r = -tau * _grad_test[_i][_qp] * (computeStrongPressureTerm() + computeStrongGravityTerm());
+  Real lap_test =
+      _second_test[_i][_qp](0, 0) + _second_test[_i][_qp](1, 1) + _second_test[_i][_qp](2, 2);
+
+  Real r = -_mu[_qp] * lap_test * tau *
+           (computeStrongPressureTerm()(_component) + computeStrongGravityTerm()(_component));
   if (_consistent)
-    r += -tau * _grad_test[_i][_qp] * computeStrongViscousTerm();
-  if (!_stokes_only)
-    r += -tau * _grad_test[_i][_qp] * computeStrongConvectiveTerm();
+    r += -_mu[_qp] * lap_test * tau * computeStrongViscousTerm()(_component);
+  // if (!_stokes_only)
+  //   r += -_mu[_qp] * lap_test-tau * _grad_test[_i][_qp] * computeStrongConvectiveTerm();
 
   return r;
 }
 
 Real
-INSMassPSPG::computeQpJacobian()
+INSMomentumPSPG::computeQpJacobian()
 {
   Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
   return tau * _grad_test[_i][_qp] * dPressureDPressure();
 }
 
 Real
-INSMassPSPG::computeQpOffDiagJacobian(unsigned jvar)
+INSMomentumPSPG::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
   {

@@ -1,10 +1,10 @@
 [GlobalParams]
   gravity = '0 0 0'
-  alpha = 1
+  alpha = 0
   stokes_only = true
   consistent = true
   integrate_p_by_parts = true
-  laplace = false
+  laplace = true
 []
 
 [Mesh]
@@ -29,17 +29,17 @@
 
 [Variables]
   [./vel_x]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
   [./vel_y]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 
   [./p]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
   [../]
 []
@@ -61,12 +61,6 @@
     p = p
   [../]
 
-  # # x-momentum, time
-  # [./x_momentum_time]
-  #   type = INSMomentumTimeDerivative
-  #   variable = vel_x
-  # [../]
-
   # x-momentum, space
   [./x_momentum_space]
     type = INSMomentumChild
@@ -77,15 +71,29 @@
     component = 0
   [../]
 
-  # # y-momentum, time
-  # [./y_momentum_time]
-  #   type = INSMomentumTimeDerivative
-  #   variable = vel_y
-  # [../]
-
   # y-momentum, space
   [./y_momentum_space]
     type = INSMomentumChild
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    p = p
+    component = 1
+  [../]
+
+  # x-momentum, space
+  [./x_momentum_space_pspg]
+    type = INSMomentumPSPG
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    p = p
+    component = 0
+  [../]
+
+  # y-momentum, space
+  [./y_momentum_space_pspg]
+    type = INSMomentumPSPG
     variable = vel_y
     u = vel_x
     v = vel_y
