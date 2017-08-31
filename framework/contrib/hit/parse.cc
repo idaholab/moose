@@ -142,14 +142,15 @@ pathNorm(const std::string & path)
 std::string
 pathJoin(const std::vector<std::string> & paths)
 {
-  std::string fullpath;
+  static std::string fullpath;
+  fullpath.clear();
   for (auto & p : paths)
   {
     if (p == "")
       continue;
     fullpath += "/" + p;
   }
-  return fullpath.substr(1, fullpath.size() - 1);
+  return fullpath.substr(1);
 }
 
 Node::Node(NodeType t) : _type(t) {}
@@ -299,7 +300,7 @@ Node::find(const std::string & path)
 {
   if (path == "" && fullpath() == "")
     return this;
-  return findInner(path, "");
+  return findInner(pathNorm(path), "");
 }
 
 std::vector<Token> &
@@ -317,8 +318,8 @@ Node::findInner(const std::string & path, const std::string & prefix)
     if (t != NodeType::Section && t != NodeType::Field)
       continue;
 
-    auto fullpath = pathNorm(pathJoin({prefix, child->path()}));
-    if (pathNorm(fullpath) == pathNorm(path))
+    auto fullpath = pathJoin({prefix, child->path()});
+    if (fullpath == path)
       return child;
 
     if (child->type() == NodeType::Section)
@@ -391,14 +392,14 @@ Section::clone()
 }
 
 Field::Field(const std::string & field, Kind k, const std::string & val)
-  : Node(NodeType::Field), _kind(k), _field(field), _val(val)
+  : Node(NodeType::Field), _kind(k), _path(pathNorm(field)), _field(field), _val(val)
 {
 }
 
 std::string
 Field::path()
 {
-  return pathNorm(_field);
+  return _path;
 }
 
 std::string
