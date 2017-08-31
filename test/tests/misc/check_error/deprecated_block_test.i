@@ -26,8 +26,6 @@
 []
 
 [DeprecatedBlock]
-  type = ElementAverageValue
-  variable = u
 []
 
 [Executioner]

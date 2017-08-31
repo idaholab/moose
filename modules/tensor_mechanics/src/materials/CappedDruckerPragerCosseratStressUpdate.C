@@ -20,7 +20,7 @@ validParams<CappedDruckerPragerCosseratStressUpdate>()
                                             "host_youngs_modulus>0",
                                             "Young's modulus for the isotropic host medium");
   params.addRequiredRangeCheckedParam<Real>("host_poissons_ratio",
-                                            "host_poissons_ratio>=0",
+                                            "host_poissons_ratio>=0 & host_poissons_ratio<0.5",
                                             "Poisson's ratio for the isotropic host medium");
   return params;
 }

@@ -22,27 +22,14 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-// System includes
-#include <queue>
-
-class ComparePair
-{
-public:
-  bool operator()(std::pair<unsigned int, Real> & p1, std::pair<unsigned int, Real> & p2)
-  {
-    if (p1.second > p2.second)
-      return true;
-
-    return false;
-  }
-};
-
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(
     const MooseMesh & mesh,
     const std::vector<dof_id_type> & trial_master_nodes,
     const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-    const unsigned int patch_size)
-  : _mesh(mesh),
+    const unsigned int patch_size,
+    KDTree & kd_tree)
+  : _kd_tree(kd_tree),
+    _mesh(mesh),
     _trial_master_nodes(trial_master_nodes),
     _node_to_elem_map(node_to_elem_map),
     _patch_size(patch_size)
@@ -52,7 +39,8 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(
 // Splitting Constructor
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x,
                                                  Threads::split /*split*/)
-  : _mesh(x._mesh),
+  : _kd_tree(x._kd_tree),
+    _mesh(x._mesh),
     _trial_master_nodes(x._trial_master_nodes),
     _node_to_elem_map(x._node_to_elem_map),
     _patch_size(x._patch_size)
@@ -70,40 +58,33 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 {
   processor_id_type processor_id = _mesh.processor_id();
 
+  unsigned int patch_size =
+      std::min(_patch_size, static_cast<unsigned int>(_trial_master_nodes.size()));
+
+  std::vector<std::size_t> return_index(patch_size);
+
   for (const auto & node_id : range)
   {
-    const Node & node = *_mesh.nodePtr(node_id);
+    const Node & node = _mesh.nodeRef(node_id);
+    Point query_pt;
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      query_pt(i) = node(i);
 
-    std::priority_queue<std::pair<unsigned int, Real>,
-                        std::vector<std::pair<unsigned int, Real>>,
-                        ComparePair>
-        neighbors;
+    /**
+     * neighborSearch function takes the slave coordinates and patch_size as
+     * input and
+     * finds the k (=patch_size) nearest neighbors to the slave node from the
+     * trial
+     *  master node set. The indices of the nearest neighbors are stored in the
+     * array
+     * return_index.
+     */
 
-    unsigned int n_master_nodes = _trial_master_nodes.size();
+    _kd_tree.neighborSearch(query_pt, patch_size, return_index);
 
-    // Get a list, in descending order of distance, of master nodes in relation to this node
-    for (unsigned int k = 0; k < n_master_nodes; k++)
-    {
-      dof_id_type master_id = _trial_master_nodes[k];
-      const Node * cur_node = _mesh.nodePtr(master_id);
-      Real distance = ((*cur_node) - node).norm();
-
-      neighbors.push(std::make_pair(master_id, distance));
-    }
-
-    std::vector<dof_id_type> neighbor_nodes;
-
-    unsigned int patch_size = std::min(_patch_size, static_cast<unsigned int>(neighbors.size()));
-    neighbor_nodes.resize(patch_size);
-
-    // Grab the closest "patch_size" worth of nodes to save off
-    for (unsigned int t = 0; t < patch_size; t++)
-    {
-      std::pair<unsigned int, Real> neighbor_info = neighbors.top();
-      neighbors.pop();
-
-      neighbor_nodes[t] = neighbor_info.first;
-    }
+    std::vector<dof_id_type> neighbor_nodes(patch_size);
+    for (unsigned int i = 0; i < patch_size; ++i)
+      neighbor_nodes[i] = _trial_master_nodes[return_index[i]];
 
     /**
      * Now see if _this_ processor needs to keep track of this slave and it's neighbors

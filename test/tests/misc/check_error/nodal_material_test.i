@@ -83,6 +83,5 @@ active = 'mat'
 
 [Outputs]
   file_base = out
-  elemental_as_nodal = true
   exodus = true
 []

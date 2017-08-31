@@ -9,6 +9,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<PolycrystalCircles>()

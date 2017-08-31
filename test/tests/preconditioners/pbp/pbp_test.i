@@ -89,8 +89,7 @@
   l_max_its = 1
   nl_max_its = 1
 
-  # This is setup automatically in MOOSE (SetupPBPAction.C)
-  # petsc_options = '-snes_mf'
+  solve_type = JFNK
 []
 
 [Outputs]

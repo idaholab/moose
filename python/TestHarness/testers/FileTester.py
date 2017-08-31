@@ -1,5 +1,5 @@
 from RunApp import RunApp
-import util
+from TestHarness import util
 
 # Classes that derive from this class are expected to write
 # output files. The Tester::getOutputFiles() method should

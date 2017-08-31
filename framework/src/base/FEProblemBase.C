@@ -88,6 +88,7 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
+#include "libmesh/nonlinear_solver.h"
 
 // Anonymous namespace for helper function
 namespace
@@ -3692,6 +3693,10 @@ FEProblemBase::init()
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
+  // do not assemble system matrix for JFNK solve
+  if (solverParams()._type == Moose::ST_JFNK)
+    _nl->turnOffJacobian();
+
   Moose::perf_log.push("eq.init()", "Setup");
   _eq.init();
   Moose::perf_log.pop("eq.init()", "Setup");
@@ -4450,11 +4455,13 @@ FEProblemBase::initialAdaptMesh()
 void
 FEProblemBase::adaptMesh()
 {
+  // reset cycle counter
+  _cycles_completed = 0;
+
   if (!_adaptivity.isAdaptivityDue())
     return;
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
-  _cycles_completed = 0;
 
   Moose::perf_log.push("adaptMesh()", "Execution");
 

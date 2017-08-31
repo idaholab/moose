@@ -7,6 +7,8 @@
 #include "EBSDMesh.h"
 #include "MooseApp.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<EBSDMesh>()

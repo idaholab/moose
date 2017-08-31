@@ -14,6 +14,8 @@
 
 #include "MTUserObject.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<MTUserObject>()

@@ -27,6 +27,7 @@
 
 // compiler includes (for type demangling)
 #include <cxxabi.h>
+#include <fstream>
 
 template <>
 InputParameters

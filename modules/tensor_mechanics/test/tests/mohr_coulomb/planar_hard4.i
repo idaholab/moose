@@ -82,6 +82,7 @@
     value = 'if(abs(a-b)<1E-6,0,1E6*abs(a-b))'
     vars = 'a b'
     vals = 'Coh_analytic Coh_moose'
+  [../]
 []
 
 [AuxVariables]

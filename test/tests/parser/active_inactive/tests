@@ -6,24 +6,24 @@
     cli_args = 'Outputs/exodus=true'
   [../]
 
-  [./inactive_section_missing]
-    type = RunException
-    input = 'active_inactive.i'
-    cli_args = 'AuxKernels/active=aux5'
-    expect_err = 'One or more active/inactive lists in the input file are missing a referenced section'
-  [../]
-
   [./active_section_missing]
     type = RunException
     input = 'active_inactive.i'
+    cli_args = 'AuxKernels/active=aux5'
+    expect_err = "variables listed as active"
+  [../]
+
+  [./inactive_section_missing]
+    type = RunException
+    input = 'active_inactive.i'
     cli_args = 'Kernels/inactive=convection BCs/inactive=top'
-    expect_err = 'One or more active/inactive lists in the input file are missing a referenced section:\nBCs/top\nKernels/convection'
+    expect_err = "variables listed as inactive"
   [../]
 
   [./inactive_active_combo]
     type = RunException
     input = 'active_inactive.i'
-    cli_args = 'AuxVariables/active=aux2'
-    expect_err = 'The params \S+ and \S+ are both provided on block'
+    cli_args = 'AuxKernels/inactive=aux2'
+    expect_err = "'active' and 'inactive' parameters both provided in section"
   [../]
 []

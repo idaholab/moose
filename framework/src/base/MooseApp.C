@@ -51,6 +51,7 @@
 
 // C++ includes
 #include <numeric> // std::accumulate
+#include <fstream>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -537,29 +538,6 @@ MooseApp::runInputFile()
     _ready_to_exit = true;
     return;
   }
-
-  bool error_unused = getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED;
-  bool warn_unused = getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED;
-
-  if (error_unused || warn_unused)
-  {
-    std::shared_ptr<FEProblemBase> fe_problem = _action_warehouse.problemBase();
-    if (fe_problem.get() && name() == "main" && !getParam<bool>("minimal"))
-    {
-      // Check the CLI parameters
-      std::vector<std::string> all_vars = _command_line->getPot()->get_variable_names();
-      _parser.checkUnidentifiedParams(all_vars, error_unused, false, fe_problem);
-
-      // Check the input file parameters
-      all_vars = _parser.getPotHandle()->get_variable_names();
-      _parser.checkUnidentifiedParams(all_vars, error_unused, true, fe_problem);
-    }
-  }
-
-  if (getParam<bool>("error_override") || _error_overridden)
-    _parser.checkOverriddenParams(true);
-  else
-    _parser.checkOverriddenParams(false);
 }
 
 void
@@ -576,6 +554,11 @@ MooseApp::executeExecutioner()
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
 #endif
     _executioner->init();
+
+    bool warn = _enable_unused_check == WARN_UNUSED || getParam<bool>("warn_unused");
+    bool err = _enable_unused_check == ERROR_UNUSED || getParam<bool>("error_unused");
+    _parser.errorCheck(*_comm, warn, err);
+
     _executioner->execute();
   }
   else
@@ -711,8 +694,15 @@ MooseApp::run()
   Moose::perf_log.push("Full Runtime", "Application");
 
   Moose::perf_log.push("Application Setup", "Setup");
-  setupOptions();
-  runInputFile();
+  try
+  {
+    setupOptions();
+    runInputFile();
+  }
+  catch (std::exception & err)
+  {
+    mooseError(err.what());
+  }
   Moose::perf_log.pop("Application Setup", "Setup");
 
   if (!_check_input)

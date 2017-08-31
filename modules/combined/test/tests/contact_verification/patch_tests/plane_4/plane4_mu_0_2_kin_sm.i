@@ -79,6 +79,8 @@
   [../]
   [./tang_force_y]
   [../]
+[]
+
 [SolidMechanics]
   [./solid]
     disp_x = disp_x

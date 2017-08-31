@@ -8,6 +8,8 @@
 #include "PeacemanBorehole.h"
 #include "RotationMatrix.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<PeacemanBorehole>()

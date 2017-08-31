@@ -31,9 +31,6 @@
     type = ConstantAux
     variable = distance
   [../]
-[]
-
-[AuxKernels]
   [./distance]
     type = NearestNodeDistanceAux
     variable = distance

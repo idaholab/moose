@@ -181,4 +181,15 @@
     heavy = true
     abs_zero = 1.0E-6
   [../]
+
+  [./small1_cosserat]
+    type = 'CSVDiff'
+    input = 'small_deform1_cosserat.i'
+    csvdiff = 'small_deform1_cosserat.csv'
+  [../]
+  [./small9_cosserat]
+    type = 'CSVDiff'
+    input = 'small_deform9_cosserat.i'
+    csvdiff = 'small_deform9_cosserat.csv'
+  [../]
 []

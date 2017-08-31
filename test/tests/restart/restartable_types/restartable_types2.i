@@ -53,6 +53,7 @@
 [Problem]
   type = FEProblem
   solve = false
+  restart_file_base = restartable_types_out_cp/LATEST
 []
 
 [Executioner]
@@ -67,6 +68,3 @@
   exodus = true
 []
 
-[Problem]
-  restart_file_base = restartable_types_out_cp/LATEST
-[]

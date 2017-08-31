@@ -1,7 +1,7 @@
 import re, os, platform
 from timeit import default_timer as clock
 from signal import SIGTERM
-import util
+from TestHarness import util
 
 class TesterData(object):
     """

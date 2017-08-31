@@ -7,6 +7,8 @@
 
 #include "RichardsPolyLineSink.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<RichardsPolyLineSink>()

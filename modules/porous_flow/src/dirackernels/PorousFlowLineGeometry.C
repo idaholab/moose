@@ -8,6 +8,8 @@
 #include "PorousFlowLineGeometry.h"
 #include "libmesh/utility.h"
 
+#include <fstream>
+
 template <>
 InputParameters
 validParams<PorousFlowLineGeometry>()

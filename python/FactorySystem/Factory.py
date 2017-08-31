@@ -1,4 +1,5 @@
-import os, sys, types
+import os, sys
+import inspect
 
 class Factory:
     def __init__(self):
@@ -24,7 +25,7 @@ class Factory:
         return classes
 
 
-    def loadPlugins(self, base_dirs, plugin_path, module):
+    def loadPlugins(self, base_dirs, plugin_path, attribute):
         for dir in base_dirs:
             dir = os.path.join(dir, plugin_path)
             if not os.path.exists(dir):
@@ -36,12 +37,15 @@ class Factory:
                     module_name = file[:-3]
                     try:
                         __import__(module_name)
-                    except:
-                        print '\nERROR: Your Plugin Tester "' + module_name + '" failed to import. (skipping)\n\n'
-
-        classes = self.getClassHierarchy(module.__subclasses__())
-        for aclass in classes:
-            self.register(aclass, aclass.__name__)
+                        # Search through the module and look for classes that
+                        # have the passed in attribute, which should be a bool and be True
+                        for name, obj in inspect.getmembers(sys.modules[module_name]):
+                            if inspect.isclass(obj) and hasattr(obj, attribute):
+                                at = getattr(obj, attribute)
+                                if isinstance(at, bool) and at:
+                                    self.register(obj, name)
+                    except Exception as e:
+                        print '\nERROR: Your Plugin Tester "' + module_name + '" failed to import. (skipping)\n\n' + str(e)
 
 
     def printDump(self, root_node_name):
@@ -53,9 +57,6 @@ class Factory:
             params = self.validParams(name)
 
             for key in params.desc:
-                required = 'No'
-                if params.isRequired(key):
-                    required = 'Yes'
                 default = ''
                 if params.isValid(key):
                     the_param = params[key]

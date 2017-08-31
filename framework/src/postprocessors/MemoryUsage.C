@@ -16,6 +16,7 @@
 
 #include <array>
 #include <unistd.h>
+#include <fstream>
 
 #ifdef __APPLE__
 #include <mach/task.h>

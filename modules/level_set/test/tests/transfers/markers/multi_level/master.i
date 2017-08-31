@@ -22,7 +22,7 @@
       coarsen = 0.4
       refine = 0.5
       indicator = error
-    [./]
+    [../]
   [../]
 []
 

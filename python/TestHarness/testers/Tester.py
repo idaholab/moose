@@ -1,6 +1,6 @@
 import re, os
-import util
-from MooseObject import MooseObject
+from TestHarness import util
+from FactorySystem.MooseObject import MooseObject
 
 class Tester(MooseObject):
     """
@@ -62,6 +62,9 @@ class Tester(MooseObject):
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOT is detected ('ALL', 'TRUE', 'FALSE')")
 
         return params
+
+    # This is what will be checked for when we look for valid testers
+    IS_TESTER = True
 
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
