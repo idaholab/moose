@@ -175,12 +175,18 @@ def plot(revisions, benchmarks, subdir='.'):
     labels = []
     for rev, bench in zip(revisions, benchmarks):
         data.append(bench.realruns)
-        labels.append(rev[:6])
+        labels.append(rev[:7])
 
     plt.boxplot(data, labels=labels)
     plt.xticks(rotation=90)
 
     fig = plt.gcf()
+
+    ax = fig.axes[0]
+    labels = ax.get_xticklabels()
+    for label in labels:
+        label.set_url("https://github.com/idaholab/moose/commit/" + label.get_text())
+
     fig.subplots_adjust(bottom=.15)
     fig.savefig(os.path.join(subdir, benchmarks[0].name + '.svg'))
     plt.clf()
@@ -370,7 +376,7 @@ class BenchmarkDB:
 
     def revisions(self):
         c = self.conn.cursor()
-        c.execute('SELECT DISTINCT revision,date FROM benchmarks ORDER BY date ASC')
+        c.execute('SELECT revision,date FROM benchmarks GROUP BY revision ORDER BY date ASC')
         rows = c.fetchall()
         revs = []
         times = []
@@ -407,7 +413,7 @@ class BenchmarkDB:
     def store(self, benchmark, rev=None):
         """stores a (run/executed) Benchmark in the database. if rev is None, git revision is retrieved from git"""
         ex = benchmark.test.executable
-        (ex_name, ex.method) = os.path.basename(ex).rsplit('-', 1)
+        (ex_name, ex_method) = os.path.basename(ex).rsplit('-', 1)
         infile = benchmark.test.infile
         timestamp = time.time()
         date = timestamp

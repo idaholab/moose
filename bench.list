@@ -9,15 +9,10 @@
         infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=4'
     [../]
-    [./simple_diffusion_ref5]
+    [./simple_diffusion_refine5]
         binary = test/moose_test-opt
         infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=5'
     [../]
-    #[./simple_diffusion_ref5]
-    #    binary = modules/tensor_mechanics/tensor_mechanics-opt
-    #    infile = modules/tensor_mechanics/tests/mean_cap/random.i
-    #    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
-    #[../]
 []
 
