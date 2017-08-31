@@ -66,28 +66,11 @@ protected:
    */
   void addParameters(const JsonVal & params);
 
-  /**
-   * return backtrack relative path from the current level to the document root
-   */
-  std::string backtrack()
-  {
-    std::string backtrack_path;
-    for (int i = 0; i < _level; ++i)
-      backtrack_path += "../";
-    return backtrack_path;
-  }
-
-  JsonVal _globalparams;
   const int _spaces;
   int _level;
   std::ostringstream _stream;
   std::map<std::string, std::vector<std::string>> _assoc_types_map;
-  std::map<std::string, std::string> _json_path_regex_replacement_map = {
-      {"/star/subblock_types/([A-Za-z0-9_]*)/", "/\\1_type/"},
-      {"[A-Za-z0-9_]*/types/([A-Za-z0-9_]*)/", "\\1_type/"},
-      {"/actions/[A-Za-z0-9_]*/parameters/", "/"},
-      {"/parameters/", "/"},
-      {"/subblocks/", "/"}};
+  JsonVal _global_params;
 };
 
 #endif /* SONDEFINITIONFORMATTER_H */

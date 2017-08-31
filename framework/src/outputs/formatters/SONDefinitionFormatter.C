@@ -27,16 +27,24 @@ SONDefinitionFormatter::SONDefinitionFormatter() : _spaces(2), _level(0) {}
 std::string
 SONDefinitionFormatter::toString(const JsonVal & root)
 {
+
+  const std::map<std::string, std::string> json_path_regex_replacement_map = {
+      {"/star/subblock_types/([A-Za-z0-9_]*)/", "/\\1_type/"},
+      {"[A-Za-z0-9_]*/types/([A-Za-z0-9_]*)/", "\\1_type/"},
+      {"/actions/[A-Za-z0-9_]*/parameters/", "/"},
+      {"/parameters/", "/"},
+      {"/subblocks/", "/"}};
+
   for (const auto & type : root["global"]["associated_types"].getMemberNames())
     for (const auto & path_iter : root["global"]["associated_types"][type])
     {
       std::string path = path_iter.asString();
-      for (auto map_iter : _json_path_regex_replacement_map)
+      for (const auto & map_iter : json_path_regex_replacement_map)
         pcrecpp::RE(map_iter.first).GlobalReplace(map_iter.second, &path);
       _assoc_types_map[type].push_back(path);
     }
 
-  _globalparams = root["global"]["parameters"];
+  _global_params = root["global"]["parameters"];
   _stream.clear();
   _stream.str("");
   for (const auto & name : root["blocks"].getMemberNames())
@@ -136,7 +144,7 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // second : add or overwrite with any parameter inheritance
   // third  : add or overwrite with any local RegularParameters
   // fourth : add or overwrite with any local ActionParameters
-  JsonVal parameters = _globalparams;
+  JsonVal parameters = _global_params;
   for (const auto & name : parameters_in.getMemberNames())
     parameters[name] = parameters_in[name];
   for (const auto & name : block["parameters"].getMemberNames())
@@ -225,37 +233,53 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
 void
 SONDefinitionFormatter::addParameters(const JsonVal & params)
 {
-  for (const auto & param_name : params.getMemberNames())
+
+  for (const auto & name : params.getMemberNames())
   {
 
-    JsonVal param = params[param_name];
+    JsonVal param = params[name];
+
+    // lambda to calculate relative path from the current level to the document root
+    auto backtrack = [](int level) {
+      std::string backtrack_path;
+      for (int i = 0; i < level; ++i)
+        backtrack_path += "../";
+      return backtrack_path;
+    };
+
+    // capture the cpp_type and basic_type and strip off any unnecessary information
+    std::string cpp_type = param["cpp_type"].asString();
+    std::string basic_type = param["basic_type"].asString();
+    bool is_array = false;
+    if (cpp_type == "FunctionExpression" || basic_type.compare(0, 6, "Array:") == 0)
+      is_array = true;
+    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &cpp_type);
+    pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
 
     // *** ChildAtLeastOne of parameter
     // if parameter is required and no default exists then outside its level specify
-    //   ChildAtLeastOne = [ GlobalParams/param_name/value /param_name/value ]
+    //   ChildAtLeastOne = [ "backtrack/GlobalParams/name/value" "name/value" ]
     bool required = param["required"].asBool();
     std::string def = MooseUtils::trim(param["default"].asString());
     if (required && def.empty())
-      addLine("ChildAtLeastOne=[  \"" + backtrack() + "GlobalParams/" + param_name +
-              "/value\"  \"" + param_name + "/value\"" + "  ]");
+      addLine("ChildAtLeastOne=[ \"" + backtrack(_level) + "GlobalParams/" + name +
+              "/value\"   \"" + name + "/value\"" + " ]");
 
     // *** open parameter
-    addLine("'" + param_name + "'" + "{");
+    addLine("'" + name + "'" + "{");
     _level++;
 
     // *** InputTmpl of parameter
     addLine("InputTmpl=MooseParam");
 
     // *** InputType of parameter
-    std::string basic_type = param["basic_type"].asString();
-    bool is_array = (basic_type.find("Array") == std::string::npos ? false : true);
     if (is_array)
       addLine("InputType=key_array");
     else
       addLine("InputType=key_value");
 
     // *** InputName of parameter
-    addLine("InputName=\"" + param_name + "\"");
+    addLine("InputName=\"" + name + "\"");
 
     // *** Description of parameter
     std::string description = param["description"].asString();
@@ -277,9 +301,9 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     addLine(is_array ? "MaxOccurs=NoLimit" : "MaxOccurs=1");
 
     // *** ValType of parameter's value
-    if (basic_type.find("Integer") != std::string::npos)
+    if (basic_type == "Integer")
       addLine("ValType=Int");
-    else if (basic_type.find("Real") != std::string::npos)
+    else if (basic_type == "Real")
       addLine("ValType=Real");
     else
       addLine("ValType=String");
@@ -301,25 +325,22 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     }
 
     // *** ExistsIn of parameter's value
-    // add any reserved_values and get the cpp_type and if this parameter's cpp_type
-    // is FunctionName then add a NumericalConstants flag and check if there are any
+    // add any reserved_values and if this parameter's above transformed cpp_type is
+    // "FunctionName" then add an ExpressionsAreOkay flag and check if there are any
     // paths associated with the cpp_type in the map that was built before traversal
     // then add those paths relative to this node here as well
     std::string paths;
     for (const auto & reserved : param["reserved_values"])
       paths += "EXTRA:\"" + reserved.asString() + "\" ";
-    std::string cpp_type = param["cpp_type"].asString();
-    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &cpp_type);
     if (cpp_type == "FunctionName")
-      paths += "EXTRA:\"NumericalConstants\" ";
-    for (auto path : _assoc_types_map[cpp_type])
-      paths += "\"" + backtrack() + path + "/decl\" ";
+      paths += "EXTRA:\"ExpressionsAreOkay\" ";
+    for (const auto & path : _assoc_types_map[cpp_type])
+      paths += "\"" + backtrack(_level) + path + "/decl\" ";
     if (!paths.empty())
       addLine("ExistsIn=[ " + paths + "]");
 
     // *** MinValInc of parameter's value
-    if (basic_type.find("Integer") != std::string::npos &&
-        cpp_type.find("unsigned") != std::string::npos)
+    if (cpp_type.compare(0, 8, "unsigned") == 0 && basic_type == "Integer")
       addLine("MinValInc=0");
 
     // *** InputDefault of parameter's value
@@ -332,6 +353,6 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
 
     // *** close parameter
     _level--;
-    addLine("} % end parameter " + param_name);
+    addLine("} % end parameter " + name);
   }
 }
