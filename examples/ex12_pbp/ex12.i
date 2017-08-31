@@ -78,6 +78,7 @@
 
 [Executioner]
   type = Steady
+  solve_type = JFNK
 []
 
 [Outputs]
