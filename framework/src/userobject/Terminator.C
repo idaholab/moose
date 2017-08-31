@@ -20,8 +20,9 @@ InputParameters
 validParams<Terminator>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<std::string>(
+  params.addRequiredCustomTypeParam<std::string>(
       "expression",
+      "FunctionExpression",
       "FParser expression to process Postprocessor values into a boolean value. "
       "Termination of the simulation occurs when this returns true.");
   return params;

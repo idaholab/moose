@@ -167,4 +167,11 @@
     expect_out = '\'cycles_per_step\'{.*'value'{.*MinValInc=0.*InputDefault="1".*} % end parameter cycles_per_step'
     cli_args = '--definition'
   [../]
+
+  [./definition_expressions_are_okay_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'function\'{.*\'value\'{.*ExistsIn=\[\s*EXTRA:"ExpressionsAreOkay"\s*"../../../../../Functions/["*"]/decl"\s*\].*}.*} % end parameter function'
+    cli_args = '--definition'
+  [../]
 []
