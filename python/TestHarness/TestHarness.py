@@ -80,7 +80,7 @@ class TestHarness:
         if self.options.skip_config_checks:
             checks['compiler'] = set(['ALL'])
             checks['petsc_version'] = 'N/A'
-            checks['petsc_version_release'] = 'N/A'
+            checks['petsc_version_release'] = set(['ALL'])
             checks['slepc_version'] = 'N/A'
             checks['library_mode'] = set(['ALL'])
             checks['mesh_mode'] = set(['ALL'])
