@@ -42,6 +42,9 @@
 
 [Mesh]
   file = meshes/rz_displaced.e
+  # This test uses ElementalVariableValue postprocessors on specific
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Functions]
