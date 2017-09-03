@@ -79,7 +79,7 @@ INSBase::INSBase(const InputParameters & parameters)
 }
 
 RealVectorValue
-INSBase::computeStrongConvectiveTerm()
+INSBase::convectiveTerm()
 {
   RealVectorValue convective_term(0, 0, 0);
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -107,7 +107,7 @@ INSBase::dConvecDUComp(unsigned comp)
 }
 
 RealVectorValue
-INSBase::computeStrongViscousTerm()
+INSBase::strongViscousTermLaplace()
 {
   RealVectorValue viscous_term(0, 0, 0);
   Real lap_u = _second_u_vel[_qp](0, 0) + _second_u_vel[_qp](1, 1) + _second_u_vel[_qp](2, 2);
@@ -118,21 +118,37 @@ INSBase::computeStrongViscousTerm()
   viscous_term(1) = -_mu[_qp] * lap_v;
   viscous_term(2) = -_mu[_qp] * lap_w;
 
-  if (!_laplace)
-  {
-    viscous_term(0) += -_mu[_qp] * (_second_u_vel[_qp](0, 0) + _second_v_vel[_qp](0, 1) +
-                                    _second_w_vel[_qp](0, 2));
-    viscous_term(1) += -_mu[_qp] * (_second_u_vel[_qp](1, 0) + _second_v_vel[_qp](1, 1) +
-                                    _second_w_vel[_qp](1, 2));
-    viscous_term(2) += -_mu[_qp] * (_second_u_vel[_qp](2, 0) + _second_v_vel[_qp](2, 1) +
-                                    _second_w_vel[_qp](2, 2));
-  }
+  return viscous_term;
+}
+
+RealVectorValue
+INSBase::strongViscousTermTraction()
+{
+  RealVectorValue viscous_term = strongLaplaceViscousTerm();
+
+  viscous_term(0) +=
+      -_mu[_qp] * (_second_u_vel[_qp](0, 0) + _second_v_vel[_qp](0, 1) + _second_w_vel[_qp](0, 2));
+  viscous_term(1) +=
+      -_mu[_qp] * (_second_u_vel[_qp](1, 0) + _second_v_vel[_qp](1, 1) + _second_w_vel[_qp](1, 2));
+  viscous_term(2) +=
+      -_mu[_qp] * (_second_u_vel[_qp](2, 0) + _second_v_vel[_qp](2, 1) + _second_w_vel[_qp](2, 2));
 
   return viscous_term;
 }
 
 RealVectorValue
-INSBase::dViscDUComp(unsigned comp)
+INSBase::dStrongViscDUCompLaplace(unsigned comp)
+{
+  RealVectorValue viscous_term(0, 0, 0);
+  viscous_term(comp) = -_mu[_qp] * (_second_phi[_j][_qp](0, 0) + _second_phi[_j][_qp](1, 1) +
+                                    _second_phi[_j][_qp](2, 2));
+
+  return viscous_term;
+}
+
+// Fix me
+RealVectorValue
+INSBase::dStrongViscDUCompTraction(unsigned comp)
 {
   RealVectorValue viscous_term(0, 0, 0);
   viscous_term(comp) = -_mu[_qp] * (_second_phi[_j][_qp](0, 0) + _second_phi[_j][_qp](1, 1) +
@@ -142,79 +158,92 @@ INSBase::dViscDUComp(unsigned comp)
 }
 
 RealVectorValue
-INSBase::weakViscousTerm(unsigned comp)
+INSBase::weakViscousTermLaplace(unsigned comp)
 {
-  if (_laplace)
+  switch (comp)
   {
-    switch (comp)
-    {
-      case 0:
-        return _mu[_qp] * _grad_u_vel[_qp];
+    case 0:
+      return _mu[_qp] * _grad_u_vel[_qp];
 
-      case 1:
-        return _mu[_qp] * _grad_v_vel[_qp];
+    case 1:
+      return _mu[_qp] * _grad_v_vel[_qp];
 
-      case 2:
-        return _mu[_qp] * _grad_w_vel[_qp];
+    case 2:
+      return _mu[_qp] * _grad_w_vel[_qp];
 
-      default:
-        return _zero[_qp];
-    }
+    default:
+      return _zero[_qp];
   }
-  else
+}
+}
+
+RealVectorValue
+INSBase::weakViscousTermTraction(unsigned comp)
+{
+  switch (comp)
   {
-    switch (comp)
+    case 0:
     {
-      case 0:
-      {
-        RealVectorValue transpose(_grad_u_vel[_qp](0), _grad_v_vel[_qp](0), _grad_w_vel[_qp](0));
-        return _mu[_qp] * _grad_u_vel[_qp] + _mu[_qp] * transpose;
-      }
-
-      case 1:
-      {
-        RealVectorValue transpose(_grad_u_vel[_qp](1), _grad_v_vel[_qp](1), _grad_w_vel[_qp](1));
-        return _mu[_qp] * _grad_v_vel[_qp] + _mu[_qp] * transpose;
-      }
-
-      case 2:
-      {
-        RealVectorValue transpose(_grad_u_vel[_qp](2), _grad_v_vel[_qp](2), _grad_w_vel[_qp](2));
-        return _mu[_qp] * _grad_w_vel[_qp] + _mu[_qp] * transpose;
-      }
-
-      default:
-        return _zero[_qp];
+      RealVectorValue transpose(_grad_u_vel[_qp](0), _grad_v_vel[_qp](0), _grad_w_vel[_qp](0));
+      return _mu[_qp] * _grad_u_vel[_qp] + _mu[_qp] * transpose;
     }
+
+    case 1:
+    {
+      RealVectorValue transpose(_grad_u_vel[_qp](1), _grad_v_vel[_qp](1), _grad_w_vel[_qp](1));
+      return _mu[_qp] * _grad_v_vel[_qp] + _mu[_qp] * transpose;
+    }
+
+    case 2:
+    {
+      RealVectorValue transpose(_grad_u_vel[_qp](2), _grad_v_vel[_qp](2), _grad_w_vel[_qp](2));
+      return _mu[_qp] * _grad_w_vel[_qp] + _mu[_qp] * transpose;
+    }
+
+    default:
+      return _zero[_qp];
   }
 }
 
 RealVectorValue
-INSBase::dWeakViscDUComp()
+INSBase::dWeakViscDUCompLaplace()
+{
+  return _mu[_qp] * _grad_phi[_j][_qp];
+}
+
+// Fix me
+RealVectorValue
+INSBase::dWeakViscDUCompTraction()
 {
   return _mu[_qp] * _grad_phi[_j][_qp];
 }
 
 RealVectorValue
-INSBase::computeStrongPressureTerm()
+INSBase::strongPressureTerm()
 {
   return _grad_p[_qp];
 }
 
 Real
-INSBase::computeWeakPressureTerm()
+INSBase::weakPressureTerm()
 {
   return -_p[_qp];
 }
 
 RealVectorValue
-INSBase::dPressureDPressure()
+INSBase::dStrongPressureDPressure()
 {
   return _grad_phi[_j][_qp];
 }
 
 RealVectorValue
-INSBase::computeStrongGravityTerm()
+INSBase::bodyForcesTerm()
+{
+  return gravity();
+}
+
+RealVectorValue
+INSBase::gravity()
 {
   return -_rho[_qp] * _gravity;
 }

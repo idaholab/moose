@@ -30,16 +30,26 @@ protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian() = 0;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) = 0;
-  virtual RealVectorValue computeStrongConvectiveTerm();
+
+  virtual RealVectorValue convectiveTerm();
   virtual RealVectorValue dConvecDUComp(unsigned comp);
-  virtual RealVectorValue computeStrongViscousTerm();
-  virtual RealVectorValue dViscDUComp(unsigned comp);
-  virtual RealVectorValue weakViscousTerm(unsigned comp);
-  virtual RealVectorValue dWeakViscDUComp();
-  virtual RealVectorValue computeStrongPressureTerm();
-  virtual Real computeWeakPressureTerm();
-  virtual RealVectorValue dPressureDPressure();
-  virtual RealVectorValue computeStrongGravityTerm();
+
+  virtual RealVectorValue strongViscousTermLaplace();
+  virtual RealVectorValue strongViscousTermTraction();
+  virtual RealVectorValue dStrongViscDUCompLaplace(unsigned comp);
+  virtual RealVectorValue dStrongViscDUCompTraction(unsigned comp);
+
+  virtual RealVectorValue weakViscousTermLaplace(unsigned comp);
+  virtual RealVectorValue weakViscousTermTraction(unsigned comp);
+  virtual RealVectorValue dWeakViscDUCompLaplace();
+  virtual RealVectorValue dWeakViscDUCompTraction();
+
+  virtual RealVectorValue strongPressureTerm();
+  virtual Real weakPressureTerm();
+  virtual RealVectorValue dStrongPressureDPressure();
+
+  virtual RealVectorValue bodyForcesTerm();
+  virtual RealVectorValue gravity();
 
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;
