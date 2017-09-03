@@ -89,9 +89,7 @@
 #include "INSCompressibilityPenalty.h"
 #include "INSMomentumSUPG.h"
 #include "INSMomentumTimeDerivativeSUPG.h"
-#include "INSMassPSPG.h"
 #include "INSMomentumPSPG.h"
-#include "INSMomentumChild.h"
 
 // BCs
 #include "INSMomentumNoBCBCTractionForm.h"
@@ -273,9 +271,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSCompressibilityPenalty);
   registerKernel(INSMomentumSUPG);
   registerKernel(INSMomentumTimeDerivativeSUPG);
-  registerKernel(INSMassPSPG);
   registerKernel(INSMomentumPSPG);
-  registerKernel(INSMomentumChild);
 
   // BCs
   registerBoundaryCondition(INSMomentumNoBCBCTractionForm);

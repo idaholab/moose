@@ -10,33 +10,15 @@ template <>
 InputParameters
 validParams<INSMass>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<INSBase>();
 
   params.addClassDescription("This class computes the mass equation residual and Jacobian "
                              "contributions for the incompressible Navier-Stokes momentum "
                              "equation.");
-  // Coupled variables
-  params.addRequiredCoupledVar("u", "x-velocity");
-  params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
-  params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
-
   return params;
 }
 
-INSMass::INSMass(const InputParameters & parameters)
-  : Kernel(parameters),
-
-    // Gradients
-    _grad_u_vel(coupledGradient("u")),
-    _grad_v_vel(coupledGradient("v")),
-    _grad_w_vel(coupledGradient("w")),
-
-    // Variable numberings
-    _u_vel_var_number(coupled("u")),
-    _v_vel_var_number(coupled("v")),
-    _w_vel_var_number(coupled("w"))
-{
-}
+INSMass::INSMass(const InputParameters & parameters) : INSBase(parameters) {}
 
 Real
 INSMass::computeQpResidual()
@@ -44,28 +26,87 @@ INSMass::computeQpResidual()
   // (div u) * q
   // Note: we (arbitrarily) multiply this term by -1 so that it matches the -p(div v)
   // term in the momentum equation.  Not sure if that is really important?
-  return -(_grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2)) * _test[_i][_qp];
+  Real r = -(_grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2)) * _test[_i][_qp];
+
+  if (_stabilize)
+    r += computeQpPGResidual();
+
+  return r;
+}
+
+Real
+INSMass::computeQpPGResidual()
+{
+  Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+  Real r =
+      -tau * _grad_test[_i][_qp] * (strongPressureTerm() + bodyForcesTerm() + strongViscousTerm());
+  if (_convective_term)
+    r += -tau * _grad_test[_i][_qp] * strongConvectiveTerm();
+
+  return r;
 }
 
 Real
 INSMass::computeQpJacobian()
 {
   // Derivative wrt to p is zero
-  return 0.0;
+  Real r = 0;
+
+  // Unless we are doing GLS stabilization
+  if (_stabilize)
+    r += computeQpPGJacobian();
+
+  return r;
+}
+
+Real
+INSMass::computeQpPGJacobian()
+{
+  Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
+  return -tau * _grad_test[_i][_qp] * dStrongPressureDPressure();
 }
 
 Real
 INSMass::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
-    return -_grad_phi[_j][_qp](0) * _test[_i][_qp];
+  {
+    Real jac = -_grad_phi[_j][_qp](0) * _test[_i][_qp];
+    if (_stabilize)
+      jac += computeQpPGOffDiagJacobian(0);
+    return jac;
+  }
 
   else if (jvar == _v_vel_var_number)
-    return -_grad_phi[_j][_qp](1) * _test[_i][_qp];
+  {
+    Real jac = -_grad_phi[_j][_qp](1) * _test[_i][_qp];
+    if (_stabilize)
+      jac += computeQpPGOffDiagJacobian(1);
+    return jac;
+  }
 
   else if (jvar == _w_vel_var_number)
-    return -_grad_phi[_j][_qp](2) * _test[_i][_qp];
+  {
+    Real jac = -_grad_phi[_j][_qp](2) * _test[_i][_qp];
+    if (_stabilize)
+      jac += computeQpPGOffDiagJacobian(2);
+    return jac;
+  }
 
   else
     return 0.0;
+}
+
+Real
+INSMass::computeQpPGOffDiagJacobian(unsigned comp)
+{
+  Real jac;
+  if (_laplace)
+    jac = -tau * _grad_test[_i][_qp] * dStrongViscDUCompLaplace(comp);
+  else
+    jac = -tau * _grad_test[_i][_qp] * dStrongViscDUCompTraction(comp);
+  if (_convective_term)
+    jac += dConvecDUComp(comp);
+
+  return jac;
 }

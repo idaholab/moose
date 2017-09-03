@@ -23,18 +23,16 @@ validParams<INSBase>()
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
   params.addRequiredCoupledVar("p", "pressure");
 
-  // Required parameters
-  params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+  params.addParam<RealVectorValue>("gravity", (0, 0, 0), "Direction of the gravity vector");
 
-  // Optional parameters
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+
+  params.addParam<bool>("stabilize", false, "Whether to use GLS (encompasses SUPG) stabilization.");
+  params.addParam<Real>("alpha", 1., "The alpha stabilization parameter.");
   params.addParam<bool>(
-      "stokes_only", false, "Whether to ignore the convective acceleration term.");
-  params.addParam<bool>(
-      "laplace",
-      true,
-      "Whether to simplify the viscous term using the incompressibility condition.");
+      "laplace", true, "Whether the viscous term of the momentum equations is in laplace form.");
+  params.addParam<bool>("convective_term", true, "Whether to include the convective term.");
 
   return params;
 }
@@ -66,15 +64,16 @@ INSBase::INSBase(const InputParameters & parameters)
     _w_vel_var_number(coupled("w")),
     _p_var_number(coupled("p")),
 
-    // Required parameters
     _gravity(getParam<RealVectorValue>("gravity")),
 
     // Material properties
     _mu(getMaterialProperty<Real>("mu_name")),
     _rho(getMaterialProperty<Real>("rho_name")),
 
-    _stokes_only(getParam<bool>("stokes_only")),
-    _laplace(getParam<bool>("laplace"))
+    _stabilize(getParam<bool>("stabilize")),
+    _alpha(getParam<Real>("alpha")),
+    _laplace(getParam<bool>("laplace")),
+    _convective_term(getParam<bool>("convective_term"))
 {
 }
 
@@ -175,7 +174,6 @@ INSBase::weakViscousTermLaplace(unsigned comp)
       return _zero[_qp];
   }
 }
-}
 
 RealVectorValue
 INSBase::weakViscousTermTraction(unsigned comp)
@@ -234,6 +232,12 @@ RealVectorValue
 INSBase::dStrongPressureDPressure()
 {
   return _grad_phi[_j][_qp];
+}
+
+Real
+INSBase::dWeakPressureDPressure()
+{
+  return -_phi[_j][_qp];
 }
 
 RealVectorValue

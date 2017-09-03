@@ -47,6 +47,7 @@ protected:
   virtual RealVectorValue strongPressureTerm();
   virtual Real weakPressureTerm();
   virtual RealVectorValue dStrongPressureDPressure();
+  virtual Real dWeakPressureDPressure();
 
   virtual RealVectorValue bodyForcesTerm();
   virtual RealVectorValue gravity();
@@ -77,15 +78,16 @@ protected:
   unsigned _w_vel_var_number;
   unsigned _p_var_number;
 
-  // Parameters
   RealVectorValue _gravity;
 
   // Material properties
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
 
-  bool _stokes_only;
+  bool _stabilize;
+  const Real & _alpha;
   bool _laplace;
+  bool _convective_term;
 };
 
 #endif
