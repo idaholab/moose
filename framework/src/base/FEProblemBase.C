@@ -2708,7 +2708,7 @@ FEProblemBase::computeIndicators()
   // Initialize indicator aux variable fields
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    Moose::perf_log.push("computeIndicators()", "Execution");
+    Moose::perf_log.push("computeIndicators()", "Mesh Adaptivity");
 
     std::vector<std::string> fields;
 
@@ -2735,7 +2735,7 @@ FEProblemBase::computeIndicators()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("computeIndicators()", "Execution");
+    Moose::perf_log.pop("computeIndicators()", "Mesh Adaptivity");
   }
 }
 
@@ -2744,7 +2744,7 @@ FEProblemBase::computeMarkers()
 {
   if (_markers.hasActiveObjects())
   {
-    Moose::perf_log.push("computeMarkers()", "Execution");
+    Moose::perf_log.push("computeMarkers()", "Mesh Adaptivity");
 
     std::vector<std::string> fields;
 
@@ -2770,7 +2770,7 @@ FEProblemBase::computeMarkers()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("computeMarkers()", "Execution");
+    Moose::perf_log.pop("computeMarkers()", "Mesh Adaptivity");
   }
 }
 
@@ -4463,7 +4463,7 @@ FEProblemBase::adaptMesh()
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
 
-  Moose::perf_log.push("adaptMesh()", "Execution");
+  Moose::perf_log.push("adaptMesh()", "Mesh Adaptivity");
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
@@ -4486,7 +4486,7 @@ FEProblemBase::adaptMesh()
     _console << std::flush;
   }
 
-  Moose::perf_log.pop("adaptMesh()", "Execution");
+  Moose::perf_log.pop("adaptMesh()", "Mesh Adaptivity");
 }
 #endif // LIBMESH_ENABLE_AMR
 
