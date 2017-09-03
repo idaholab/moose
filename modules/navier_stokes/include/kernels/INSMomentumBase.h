@@ -35,6 +35,9 @@ protected:
   virtual Real computeQpJacobianViscousPart() = 0;
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) = 0;
 
+  virtual Real computeQpPGResidual();
+  virtual Real computeQpPGJacobian();
+
   unsigned _component;
   bool _integrate_p_by_parts;
 };

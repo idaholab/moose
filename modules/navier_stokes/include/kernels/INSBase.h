@@ -52,6 +52,8 @@ protected:
   virtual RealVectorValue bodyForcesTerm();
   virtual RealVectorValue gravity();
 
+  virtual Real tau();
+
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;
 

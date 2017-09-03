@@ -37,11 +37,11 @@ INSMass::computeQpResidual()
 Real
 INSMass::computeQpPGResidual()
 {
-  Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-  Real r =
-      -tau * _grad_test[_i][_qp] * (strongPressureTerm() + bodyForcesTerm() + strongViscousTerm());
+  RealVectorValue viscous_term =
+      _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
+  Real r = -tau() * _grad_test[_i][_qp] * (strongPressureTerm() + bodyForcesTerm() + viscous_term);
   if (_convective_term)
-    r += -tau * _grad_test[_i][_qp] * strongConvectiveTerm();
+    r += -tau() * _grad_test[_i][_qp] * convectiveTerm();
 
   return r;
 }
@@ -62,8 +62,7 @@ INSMass::computeQpJacobian()
 Real
 INSMass::computeQpPGJacobian()
 {
-  Real tau = _alpha * _current_elem->hmax() * _current_elem->hmax() / (2. * _mu[_qp]);
-  return -tau * _grad_test[_i][_qp] * dStrongPressureDPressure();
+  return -tau() * _grad_test[_i][_qp] * dStrongPressureDPressure();
 }
 
 Real
@@ -102,11 +101,11 @@ INSMass::computeQpPGOffDiagJacobian(unsigned comp)
 {
   Real jac;
   if (_laplace)
-    jac = -tau * _grad_test[_i][_qp] * dStrongViscDUCompLaplace(comp);
+    jac = -tau() * _grad_test[_i][_qp] * dStrongViscDUCompLaplace(comp);
   else
-    jac = -tau * _grad_test[_i][_qp] * dStrongViscDUCompTraction(comp);
+    jac = -tau() * _grad_test[_i][_qp] * dStrongViscDUCompTraction(comp);
   if (_convective_term)
-    jac += dConvecDUComp(comp);
+    jac += -tau() * _grad_test[_i][_qp] * dConvecDUComp(comp);
 
   return jac;
 }

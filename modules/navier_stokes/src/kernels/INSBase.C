@@ -23,13 +23,14 @@ validParams<INSBase>()
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
   params.addRequiredCoupledVar("p", "pressure");
 
-  params.addParam<RealVectorValue>("gravity", (0, 0, 0), "Direction of the gravity vector");
+  params.addParam<RealVectorValue>(
+      "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
 
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
   params.addParam<bool>("stabilize", false, "Whether to use GLS (encompasses SUPG) stabilization.");
-  params.addParam<Real>("alpha", 1., "The alpha stabilization parameter.");
+  params.addParam<Real>("alpha", 1., "Multiplicative factor on the stabilization parameter tau.");
   params.addParam<bool>(
       "laplace", true, "Whether the viscous term of the momentum equations is in laplace form.");
   params.addParam<bool>("convective_term", true, "Whether to include the convective term.");
@@ -123,7 +124,7 @@ INSBase::strongViscousTermLaplace()
 RealVectorValue
 INSBase::strongViscousTermTraction()
 {
-  RealVectorValue viscous_term = strongLaplaceViscousTerm();
+  RealVectorValue viscous_term = strongViscousTermLaplace();
 
   viscous_term(0) +=
       -_mu[_qp] * (_second_u_vel[_qp](0, 0) + _second_v_vel[_qp](0, 1) + _second_w_vel[_qp](0, 2));
@@ -250,4 +251,14 @@ RealVectorValue
 INSBase::gravity()
 {
   return -_rho[_qp] * _gravity;
+}
+
+Real
+INSBase::tau()
+{
+  Real nu = _mu[_qp] / _rho[_qp];
+  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  Real h = _current_elem->hmax();
+  return _alpha / std::sqrt((2. * U.norm() / h) * (2. * U.norm() / h) +
+                            9. * (4. * nu / (h * h)) * (4. * nu / (h * h)));
 }
