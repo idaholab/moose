@@ -53,6 +53,7 @@ protected:
   virtual RealVectorValue gravity();
 
   virtual Real tau();
+  virtual Real dTauDUComp(unsigned comp);
 
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;

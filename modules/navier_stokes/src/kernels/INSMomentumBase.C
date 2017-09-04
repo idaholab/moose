@@ -87,22 +87,32 @@ INSMomentumBase::computeQpJacobian()
     jac += _test[_i][_qp] * dConvecDUComp(_component)(_component);
 
   if (_stabilize)
-    jac += computeQpPGJacobian();
+    jac += computeQpPGJacobian(_component);
 
   return jac;
 }
 
-// Fix me
 Real
-INSMomentumBase::computeQpPGJacobian()
+INSMomentumBase::computeQpPGJacobian(unsigned comp)
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  RealVectorValue d_U_d_U_comp(0, 0, 0);
+  d_U_d_U_comp(comp) = _phi[_j][_qp];
 
-  RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
-  RealVectorValue viscous_term =
-      _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
-  return tau() * U * _grad_test[_i][_qp] *
-         (convective_term + viscous_term + strongPressureTerm() + bodyForcesTerm())(_component);
+  Real convective_term = _convective_term ? convectiveTerm()(_component) : 0;
+  Real d_convective_term_d_u_comp = _convective_term ? dConvecDUComp(comp)(_component) : 0;
+  Real viscous_term =
+      _laplace ? strongViscousTermLaplace()(_component) : strongViscousTermTraction()(_component);
+  Real d_viscous_term_d_u_comp = _laplace ? dStrongViscDUCompLaplace(comp)(_component)
+                                          : dStrongViscDUCompTraction(comp)(_component);
+
+  return dTauDUComp(comp) * U * _grad_test[_i][_qp] *
+             (convective_term + viscous_term + strongPressureTerm()(_component) +
+              bodyForcesTerm()(_component)) +
+         tau() * d_U_d_U_comp * _grad_test[_i][_qp] *
+             (convective_term + viscous_term + strongPressureTerm()(_component) +
+              bodyForcesTerm()(_component)) +
+         tau() * U * _grad_test[_i][_qp] * (d_convective_term_d_u_comp + d_viscous_term_d_u_comp);
 }
 
 // Fix me
@@ -115,21 +125,36 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
     Real convective_term = _convective_term ? _test[_i][_qp] * dConvecDUComp(0)(_component) : 0.;
     Real viscous_term = computeQpOffDiagJacobianViscousPart(jvar);
 
-    return convective_term + viscous_term;
+    jac += convective_term + viscous_term;
+
+    if (_stabilize)
+      jac += computeQpPGJacobian(0);
+
+    return jac;
   }
   else if (jvar == _v_vel_var_number)
   {
     Real convective_term = _convective_term ? _test[_i][_qp] * dConvecDUComp(1)(_component) : 0.;
     Real viscous_term = computeQpOffDiagJacobianViscousPart(jvar);
 
-    return convective_term + viscous_term;
+    jac += convective_term + viscous_term;
+
+    if (_stabilize)
+      jac += computeQpPGJacobian(1);
+
+    return jac;
   }
   else if (jvar == _w_vel_var_number)
   {
     Real convective_term = _convective_term ? _test[_i][_qp] * dConvecDUComp(2)(_component) : 0.;
     Real viscous_term = computeQpOffDiagJacobianViscousPart(jvar);
 
-    return convective_term + viscous_term;
+    jac += convective_term + viscous_term;
+
+    if (_stabilize)
+      jac += computeQpPGJacobian(2);
+
+    return jac;
   }
 
   else if (jvar == _p_var_number)
@@ -138,6 +163,12 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
       jac += _grad_test[_i][_qp](_component) * dWeakPressureDPressure();
     else
       jac += _test[_i][_qp] * dStrongPressureDPressure()(_component);
+
+    if (_stabilize)
+    {
+      RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+      jac += tau() * U * _grad_test[_i][_qp] * dStrongPressureDPressure()(_component);
+    }
 
     return jac;
   }

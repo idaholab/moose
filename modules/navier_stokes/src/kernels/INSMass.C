@@ -99,13 +99,15 @@ INSMass::computeQpOffDiagJacobian(unsigned jvar)
 Real
 INSMass::computeQpPGOffDiagJacobian(unsigned comp)
 {
-  Real jac;
-  if (_laplace)
-    jac = -tau() * _grad_test[_i][_qp] * dStrongViscDUCompLaplace(comp);
-  else
-    jac = -tau() * _grad_test[_i][_qp] * dStrongViscDUCompTraction(comp);
-  if (_convective_term)
-    jac += -tau() * _grad_test[_i][_qp] * dConvecDUComp(comp);
+  RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
+  RealVectorValue d_convective_term_d_u_comp =
+      _convective_term ? dConvecDUComp(comp) : RealVectorValue(0, 0, 0);
+  RealVectorValue viscous_term =
+      _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
+  RealVectorValue d_viscous_term_d_u_comp =
+      _laplace ? dStrongViscDUCompLaplace(comp) : dStrongViscDUCompTraction(comp);
 
-  return jac;
+  return -tau() * _grad_test[_i][_qp] * (d_convective_term_d_u_comp + d_viscous_term_d_u_comp) -
+         dTauDUComp(comp) * _grad_test[_i][_qp] *
+             (convective_term + viscous_term + strongPressureTerm() + bodyForcesTerm());
 }

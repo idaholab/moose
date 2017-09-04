@@ -8,6 +8,7 @@
   integrate_p_by_parts = true
   laplace = true
   stabilize = true
+  alpha = 1.1
 []
 
 [Mesh]
