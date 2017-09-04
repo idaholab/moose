@@ -5,6 +5,7 @@
 # .) Natural boundary condition at the outlet.
 [GlobalParams]
   integrate_p_by_parts = false
+  laplace = false
   gravity = '0 0 0'
 []
 
