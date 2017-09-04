@@ -1,18 +1,25 @@
 [GlobalParams]
   gravity = '0 0 0'
+  stabilize = true
+  convective_term = false
   integrate_p_by_parts = true
+  laplace = true
+  u = vel_x
+  v = vel_y
+  p = p
 []
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
   xmin = 0
-  xmax = .1
+  xmax = 1.0
   ymin = 0
-  ymax = .1
-  nx = 40
-  ny = 40
+  ymax = 1.0
+  nx = 16
+  ny = 16
   elem_type = QUAD9
+  # elem_type = QUAD4
 []
 
 [MeshModifiers]
@@ -25,14 +32,15 @@
 
 [Variables]
   [./vel_x]
-    order = SECOND
-    family = LAGRANGE
+    # order = SECOND
+    # family = LAGRANGE
   [../]
 
   [./vel_y]
-    order = SECOND
-    family = LAGRANGE
+    # order = SECOND
+    # family = LAGRANGE
   [../]
+
 
   [./p]
     order = FIRST
@@ -47,68 +55,31 @@
     variable = p
     u = vel_x
     v = vel_y
-    p = p
   [../]
 
-  # x-momentum, time
-  [./x_momentum_time]
-    type = INSMomentumTimeDerivative
-    variable = vel_x
-  [../]
-  [./x_momentum_time_supg]
-    type = INSMomentumTimeDerivativeSUPG
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    component = 0
-  [../]
+# # x-momentum, time
+  # [./x_momentum_time]
+  #   type = INSMomentumTimeDerivative
+  #   variable = vel_x
+  # [../]
 
   # x-momentum, space
   [./x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 0
-  [../]
-  [./x_supg]
-    type = INSMomentumSUPG
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    p = p
     component = 0
   [../]
 
-  # y-momentum, time
-  [./y_momentum_time]
-    type = INSMomentumTimeDerivative
-    variable = vel_y
-  [../]
-  [./y_momentum_time_supg]
-    type = INSMomentumTimeDerivativeSUPG
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    component = 1
-  [../]
+  # # y-momentum, time
+  # [./y_momentum_time]
+  #   type = INSMomentumTimeDerivative
+  #   variable = vel_y
+  # [../]
 
   # y-momentum, space
   [./y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 1
-  [../]
-  [./y_supg]
-    type = INSMomentumSUPG
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    p = p
     component = 1
   [../]
 []
@@ -148,14 +119,17 @@
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
-    prop_values = '1  1e-4'
+    prop_values = '1  1'
   [../]
 []
 
 [Functions]
   [./lid_function]
+    # We pick a function that is exactly represented in the velocity
+    # space so that the Dirichlet conditions are the same regardless
+    # of the mesh spacing.
     type = ParsedFunction
-    value = '400*x*(.1-x)'
+    value = '4*x*(1-x)'
   [../]
 []
 
@@ -164,22 +138,33 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
+    # solve_type = 'PJFNK'
   [../]
 []
 
 [Executioner]
-  type = Transient
-  dt = .5
-  num_steps = 1
+  type = Steady
+  # Run for 100+ timesteps to reach steady state.
+  # num_steps = 5
+  # dt = .5
+  # dtmin = .5
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu  NONZERO'
-  line_search = none
-  nl_rel_tol = 1e-8
-  nl_max_its = 20
-  l_max_its = 30
+  petsc_options_value = 'lu NONZERO'
+  # petsc_options_iname = '-pc_type' # -pc_factor_levels'
+  # petsc_options_value = 'ilu' # 2'
+  # petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
+  # petsc_options_value = 'asm      2               ilu          4'
+  line_search = 'none'
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-13
+  nl_max_its = 6
+  l_tol = 1e-6
+  l_max_its = 500
 []
 
 [Outputs]
+  print_linear_residuals = false
+  file_base = lid_driven_out_pspg
   exodus = true
-  execute_on = timestep_end
 []
