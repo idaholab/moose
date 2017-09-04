@@ -19,6 +19,7 @@
 #include "AnisoHeatConduction.h"
 #include "HeatConductionTimeDerivative.h"
 #include "HeatCapacityConductionTimeDerivative.h"
+#include "CrackPropagationHeatSource.h"
 #include "ConsistentHeatCapacityTimeDerivative.h"
 #include "SpecificHeatConductionTimeDerivative.h"
 #include "ConsistentSpecificHeatTimeDerivative.h"
@@ -85,6 +86,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(HeatSource);
   registerKernel(HomogenizedHeatConduction);
   registerKernel(HeatCapacityConductionTimeDerivative);
+  registerKernel(CrackPropagationHeatSource);
   registerKernel(ConsistentHeatCapacityTimeDerivative);
   registerKernel(JouleHeatingSource);
   registerKernel(SpecificHeatConductionTimeDerivative);

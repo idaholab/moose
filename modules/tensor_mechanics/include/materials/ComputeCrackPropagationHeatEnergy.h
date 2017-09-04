@@ -43,6 +43,12 @@ protected:
   /// old value of phase field damage variable
   const VariableValue & _c_old;
 
+  /// MOOSE variable number for the phase field damage variable
+  const unsigned int _c_var;
+
+  /// name of phase field damage variable
+  VariableName _c_name;
+
   /// Contribution of umdamaged strain energy to damage evolution
   const MaterialProperty<Real> & _G0_pos;
 

@@ -4,17 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef CRACKPROPAGATIONHEATENERGY_H
-#define CRACKPROPAGATIONHEATENERGY_H
+#ifndef CRACKPROPAGATIONHEATSOURCE_H
+#define CRACKPROPAGATIONHEATSOURCE_H
 
+#include "DerivativeMaterialInterface.h"
 #include "Kernel.h"
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class CrackPropagationHeatEnergy;
+class CrackPropagationHeatSource;
 
 template <>
-InputParameters validParams<CrackPropagationHeatEnergy>();
+InputParameters validParams<CrackPropagationHeatSource>();
 
 /**
  * Provides a heat source from crack propagation:
@@ -31,10 +32,10 @@ InputParameters validParams<CrackPropagationHeatEnergy>();
  * inter-granular fracture in UO2 using a phase-field based method
  * Idaho National Laboratory technical report
  */
-class CrackPropagationHeatEnergy : public Kernel
+class CrackPropagationHeatSource : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  CrackPropagationHeatEnergy(const InputParameters & parameters);
+  CrackPropagationHeatSource(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -53,8 +54,14 @@ protected:
   /// d(crack_propagation_heat)/d(c)
   const MaterialProperty<Real> & _dcrack_propagation_heat_dc;
 
+  /// Phase field damage variable
+  const VariableValue & _c;
+
   /// MOOSE variable number for the phase field damage variable
   const unsigned int _c_var;
+
+  /// name of phase field damage variable
+  VariableName _c_name;
 
   /// Number of coupled displacement variables
   unsigned int _ndisp;
@@ -63,4 +70,4 @@ protected:
   std::vector<unsigned int> _disp_var;
 };
 
-#endif // CRACKPROPAGATIONHEATENERGY_H
+#endif // CRACKPROPAGATIONHEATSOURCE_H

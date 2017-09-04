@@ -5,23 +5,18 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "CrackPropagationHeatEnergy.h"
+#include "CrackPropagationHeatSource.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
 template <>
 InputParameters
-validParams<CrackPropagationHeatEnergy>()
+validParams<CrackPropagationHeatSource>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Crack propagation heat energy density = - (dPsi/dc) * (dc/dt) "
                              "is the energy dissipated due to damage increase "
-                             "Psi is the free energy of the phase-field fracture model "
-                             "defined as Psi = (1 - c)^2 * G0_pos + G0_neg "
-                             "c is the order parameter for damage, continuous between 0 and 1 "
-                             "0 represents no damage, 1 represents fully cracked "
-                             "G0_pos and G0_neg are the positive and negative components "
-                             "of the specific strain energies");
+                             "Psi is the free energy of the phase-field fracture model");
   params.addRequiredCoupledVar("c", "Phase field damage variable");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
@@ -29,15 +24,17 @@ validParams<CrackPropagationHeatEnergy>()
   return params;
 }
 
-CrackPropagationHeatEnergy::CrackPropagationHeatEnergy(const InputParameters & parameters)
-  : Kernel(parameters),
+CrackPropagationHeatSource::CrackPropagationHeatSource(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _crack_propagation_heat(getMaterialProperty<Real>(_base_name + "crack_propagation_heat")),
     _dcrack_propagation_heat_dstrain(
         getMaterialProperty<RankTwoTensor>(_base_name + "dcrack_propagation_heat_dstrain")),
     _dcrack_propagation_heat_dc(
-        getMaterialProperty<Real>(_base_name + "dcrack_propagation_heat_dc")),
+        getMaterialPropertyDerivative<Real>(_base_name + "dcrack_propagation_heat_dc", _c_name)),
+    _c(coupledValue("c")),
     _c_var(coupled("c")),
+    _c_name(getVar("c", 0)->name()),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp)
 {
@@ -47,24 +44,24 @@ CrackPropagationHeatEnergy::CrackPropagationHeatEnergy(const InputParameters & p
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
     mooseError(
-        "CrackPropagationHeatEnergy: The number of displacement variables supplied must match the "
+        "CrackPropagationHeatSource: The number of displacement variables supplied must match the "
         "mesh dimension.");
 }
 
 Real
-CrackPropagationHeatEnergy::computeQpResidual()
+CrackPropagationHeatSource::computeQpResidual()
 {
   return -_test[_i][_qp] * _crack_propagation_heat[_qp];
 }
 
 Real
-CrackPropagationHeatEnergy::computeQpJacobian()
+CrackPropagationHeatSource::computeQpJacobian()
 {
   return computeQpOffDiagJacobian(_var.number());
 }
 
 Real
-CrackPropagationHeatEnergy::computeQpOffDiagJacobian(unsigned int jvar)
+CrackPropagationHeatSource::computeQpOffDiagJacobian(unsigned int jvar)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     if (jvar == _disp_var[i])

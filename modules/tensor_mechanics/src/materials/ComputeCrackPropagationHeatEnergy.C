@@ -18,12 +18,7 @@ validParams<ComputeCrackPropagationHeatEnergy>()
                                "block, i.e. for multiple phases");
   params.addClassDescription("Crack propagation heat energy density = - (dPsi/dc) * (dc/dt) "
                              "is the energy dissipated due to damage increase "
-                             "Psi is the free energy of the phase-field fracture model "
-                             "defined as Psi = (1 - c)^2 * G0_pos + G0_neg "
-                             "c is the order parameter for damage, continuous between 0 and 1 "
-                             "0 represents no damage, 1 represents fully cracked "
-                             "G0_pos and G0_neg are the positive and negative components "
-                             "of the specific strain energies");
+                             "Psi is the free energy of the phase-field fracture model");
   params.addRequiredCoupledVar("c", "Phase field damage variable");
   params.addCoupledVar(
       "displacements",
@@ -37,12 +32,15 @@ ComputeCrackPropagationHeatEnergy::ComputeCrackPropagationHeatEnergy(
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _c(coupledValue("c")),
     _c_old(coupledValueOld("c")),
+    _c_var(coupled("c")),
+    _c_name(getVar("c", 0)->name()),
     _G0_pos(getMaterialPropertyByName<Real>(_base_name + "G0_pos")),
     _dG0_pos_dstrain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "dG0_pos_dstrain")),
     _crack_propagation_heat(declareProperty<Real>(_base_name + "crack_propagation_heat")),
     _dcrack_propagation_heat_dstrain(
         declareProperty<RankTwoTensor>(_base_name + "dcrack_propagation_heat_dstrain")),
-    _dcrack_propagation_heat_dc(declareProperty<Real>(_base_name + "dcrack_propagation_heat_dc"))
+    _dcrack_propagation_heat_dc(
+        declarePropertyDerivative<Real>(_base_name + "dcrack_propagation_heat_dc", _c_name))
 {
 }
 

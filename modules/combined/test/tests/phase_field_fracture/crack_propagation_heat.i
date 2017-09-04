@@ -154,7 +154,7 @@
     density_name = density
   [../]
   [./crack_heat]
-    type = CrackPropagationHeatEnergy
+    type = CrackPropagationHeatSource
     variable = temperature
     c = c
     displacements = 'disp_x disp_y disp_z'
