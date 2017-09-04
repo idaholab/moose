@@ -153,6 +153,8 @@ INSBase::dStrongViscDUCompTraction(unsigned comp)
   RealVectorValue viscous_term(0, 0, 0);
   viscous_term(comp) = -_mu[_qp] * (_second_phi[_j][_qp](0, 0) + _second_phi[_j][_qp](1, 1) +
                                     _second_phi[_j][_qp](2, 2));
+  for (unsigned i = 0; i < 3; i++)
+    viscous_term(i) += -_mu[_qp] * _second_phi[_j][_qp](i, comp);
 
   return viscous_term;
 }
@@ -272,5 +274,6 @@ INSBase::dTauDUComp(unsigned comp)
   return -_alpha / 2. * std::pow((2. * U.norm() / h) * (2. * U.norm() / h) +
                                      9. * (4. * nu / (h * h)) * (4. * nu / (h * h)),
                                  -1.5) *
-         2. * (2. * U.norm() / h) * 2. / h * U(comp) * _phi[_j][_qp] / U.norm();
+         2. * (2. * U.norm() / h) * 2. / h * U(comp) * _phi[_j][_qp] /
+         (U.norm() + std::numeric_limits<double>::epsilon());
 }

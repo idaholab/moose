@@ -20,4 +20,11 @@
     recover = false
     mesh_mode = REPLICATED
   [../]
+  [./jacobian_traction_stabilized_test]
+    type = AnalyzeJacobian
+    input = jacobian_traction_stabilized.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
 []
