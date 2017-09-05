@@ -36,6 +36,7 @@
 #include "ThermalConductivity.h"
 #include "CoupledConvectiveFlux.h"
 #include "ElectricalConductivity.h"
+#include "SemiconductorLinearConductivity.h"
 #include "JouleHeatingSource.h"
 
 template <>
@@ -96,6 +97,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CoupledConvectiveFlux);
 
   registerMaterial(ElectricalConductivity);
+  registerMaterial(SemiconductorLinearConductivity);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerMaterial(AnisoHeatConductionMaterial);
