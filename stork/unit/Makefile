@@ -63,7 +63,7 @@ DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_N
 include $(FRAMEWORK_DIR)/app.mk
 
 # Find all the Stork unit test source files and include their dependencies.
-stork_unit_srcfiles := $(shell find $(MOOSE_DIR)/unit/src -name "*.C")
+stork_unit_srcfiles := $(shell find $(CURRENT_DIR)/src -name "*.C")
 stork_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(stork_unit_srcfiles))
 -include $(stork_unit_deps)
 
