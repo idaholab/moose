@@ -34,6 +34,9 @@ validParams<INSBase>()
   params.addParam<bool>(
       "laplace", true, "Whether the viscous term of the momentum equations is in laplace form.");
   params.addParam<bool>("convective_term", true, "Whether to include the convective term.");
+  params.addParam<bool>("transient_term",
+                        false,
+                        "Whether there should be a transient term in the momentum residuals.");
 
   return params;
 }
@@ -59,6 +62,16 @@ INSBase::INSBase(const InputParameters & parameters)
     _second_v_vel(coupledSecond("v")),
     _second_w_vel(coupledSecond("w")),
 
+    // time derivatives
+    _u_vel_dot(coupledDot("u")),
+    _v_vel_dot(coupledDot("v")),
+    _w_vel_dot(coupledDot("w")),
+
+    // derivatives of time derivatives
+    _d_u_vel_dot_du(coupledDotDu("u")),
+    _d_v_vel_dot_dv(coupledDotDu("v")),
+    _d_w_vel_dot_dw(coupledDotDu("w")),
+
     // Variable numberings
     _u_vel_var_number(coupled("u")),
     _v_vel_var_number(coupled("v")),
@@ -74,7 +87,8 @@ INSBase::INSBase(const InputParameters & parameters)
     _stabilize(getParam<bool>("stabilize")),
     _alpha(getParam<Real>("alpha")),
     _laplace(getParam<bool>("laplace")),
-    _convective_term(getParam<bool>("convective_term"))
+    _convective_term(getParam<bool>("convective_term")),
+    _transient_term(getParam<bool>("transient_term"))
 {
 }
 
@@ -253,6 +267,37 @@ RealVectorValue
 INSBase::gravity()
 {
   return -_rho[_qp] * _gravity;
+}
+
+RealVectorValue
+INSBase::timeDerivativeTerm()
+{
+  RealVectorValue time_term(0, 0, 0);
+  time_term(0) = _rho[_qp] * _u_vel_dot[_qp];
+  time_term(1) = _rho[_qp] * _v_vel_dot[_qp];
+  time_term(2) = _rho[_qp] * _w_vel_dot[_qp];
+
+  return time_term;
+}
+
+RealVectorValue
+INSBase::dTimeDerivativeDUComp(unsigned comp)
+{
+  Real base = _rho[_qp] * _phi[_j][_qp];
+  switch (comp)
+  {
+    case 0:
+      return RealVectorValue(base * _d_u_vel_dot_du[_qp], 0, 0);
+
+    case 1:
+      return RealVectorValue(0, base * _d_v_vel_dot_dv[_qp], 0);
+
+    case 2:
+      return RealVectorValue(0, 0, base * _d_w_vel_dot_dw[_qp]);
+
+    default:
+      mooseError("comp must be 0, 1, or 2");
+  }
 }
 
 Real

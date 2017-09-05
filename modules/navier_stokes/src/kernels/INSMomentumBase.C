@@ -23,6 +23,8 @@ INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
     _component(getParam<unsigned>("component")),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
 {
+  if (_stabilize && !_convective_term)
+    mooseError("It doesn't make sense to conduct SUPG stabilization without a convective term.");
 }
 
 Real
@@ -60,8 +62,11 @@ INSMomentumBase::computeQpPGResidual()
   RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
   RealVectorValue viscous_term =
       _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
-  return tau() * U * _grad_test[_i][_qp] *
-         (convective_term + viscous_term + strongPressureTerm() + bodyForcesTerm())(_component);
+  RealVectorValue transient_term =
+      _transient_term ? timeDerivativeTerm() : RealVectorValue(0, 0, 0);
+
+  return tau() * U * _grad_test[_i][_qp] * (convective_term + viscous_term + transient_term +
+                                            strongPressureTerm() + bodyForcesTerm())(_component);
 
   // For GLS as opposed to SUPG stabilization, one would need to modify the test function functional
   // space to include second derivatives of the Galerkin test functions corresponding to the viscous
@@ -105,14 +110,17 @@ INSMomentumBase::computeQpPGJacobian(unsigned comp)
       _laplace ? strongViscousTermLaplace()(_component) : strongViscousTermTraction()(_component);
   Real d_viscous_term_d_u_comp = _laplace ? dStrongViscDUCompLaplace(comp)(_component)
                                           : dStrongViscDUCompTraction(comp)(_component);
+  Real transient_term = _transient_term ? timeDerivativeTerm()(_component) : 0;
+  Real d_transient_term_d_u_comp = _transient_term ? dTimeDerivativeDUComp(comp)(_component) : 0;
 
   return dTauDUComp(comp) * U * _grad_test[_i][_qp] *
              (convective_term + viscous_term + strongPressureTerm()(_component) +
-              bodyForcesTerm()(_component)) +
+              bodyForcesTerm()(_component) + transient_term) +
          tau() * d_U_d_U_comp * _grad_test[_i][_qp] *
              (convective_term + viscous_term + strongPressureTerm()(_component) +
-              bodyForcesTerm()(_component)) +
-         tau() * U * _grad_test[_i][_qp] * (d_convective_term_d_u_comp + d_viscous_term_d_u_comp);
+              bodyForcesTerm()(_component) + transient_term) +
+         tau() * U * _grad_test[_i][_qp] *
+             (d_convective_term_d_u_comp + d_viscous_term_d_u_comp + d_transient_term_d_u_comp);
 }
 
 // Fix me

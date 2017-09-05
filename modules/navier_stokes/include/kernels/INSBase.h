@@ -52,6 +52,9 @@ protected:
   virtual RealVectorValue bodyForcesTerm();
   virtual RealVectorValue gravity();
 
+  virtual RealVectorValue timeDerivativeTerm();
+  virtual RealVectorValue dTimeDerivativeDUComp(unsigned comp);
+
   virtual Real tau();
   virtual Real dTauDUComp(unsigned comp);
 
@@ -75,6 +78,16 @@ protected:
   const VariableSecond & _second_v_vel;
   const VariableSecond & _second_w_vel;
 
+  // Time derivatives
+  const VariableValue & _u_vel_dot;
+  const VariableValue & _v_vel_dot;
+  const VariableValue & _w_vel_dot;
+
+  // Derivatives of time derivatives
+  const VariableValue & _d_u_vel_dot_du;
+  const VariableValue & _d_v_vel_dot_dv;
+  const VariableValue & _d_w_vel_dot_dw;
+
   // Variable numberings
   unsigned _u_vel_var_number;
   unsigned _v_vel_var_number;
@@ -91,6 +104,7 @@ protected:
   const Real & _alpha;
   bool _laplace;
   bool _convective_term;
+  bool _transient_term;
 };
 
 #endif
