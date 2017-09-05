@@ -126,6 +126,9 @@
 #include "TestLapBC.h"
 #include "ExampleShapeSideIntegratedBC.h"
 
+// dg kernels
+#include "DGCoupledDiffusion.h"
+
 // ICs
 #include "TEIC.h"
 #include "MTICSum.h"
@@ -448,6 +451,9 @@ MooseTestApp::registerObjects(Factory & factory)
   registerBoundaryCondition(MatDivergenceBC);
   registerBoundaryCondition(CoupledDirichletBC);
   registerBoundaryCondition(TestLapBC);
+
+  // dg kernels
+  registerDGKernel(DGCoupledDiffusion);
 
   // Initial conditions
   registerInitialCondition(TEIC);
