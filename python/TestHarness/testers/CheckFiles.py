@@ -22,8 +22,8 @@ class CheckFiles(FileTester):
     def getOutputFiles(self):
         return self.specs['check_files'] + self.specs['check_not_exists']
 
-    def processResults(self, moose_dir, retcode, options, output):
-        FileTester.processResults(self, moose_dir, retcode, options, output)
+    def processResults(self, moose_dir, options, output):
+        FileTester.processResults(self, moose_dir, options, output)
 
         specs = self.specs
 

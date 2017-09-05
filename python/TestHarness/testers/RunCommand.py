@@ -17,9 +17,9 @@ class RunCommand(Tester):
         # Create the command line string to run
         return self.command
 
-    def processResults(self, moose_dir, retcode, options, output):
-        if retcode != 0 :
-            self.setStatus('CODE %d' % retcode, self.bucket_fail)
+    def processResults(self, moose_dir, options, output):
+        if self.exit_code != 0 :
+            self.setStatus('CODE %d' % self.exit_code, self.bucket_fail)
         else:
-            self.setStatus(retcode, self.bucket_success)
+            self.setStatus(self.exit_code, self.bucket_success)
         return output

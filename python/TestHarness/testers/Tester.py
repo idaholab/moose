@@ -1,6 +1,9 @@
-import re, os
+import platform, re, os
 from TestHarness import util
 from FactorySystem.MooseObject import MooseObject
+from tempfile import TemporaryFile
+import subprocess
+from signal import SIGTERM
 
 class Tester(MooseObject):
     """
@@ -69,6 +72,9 @@ class Tester(MooseObject):
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
         self.specs = params
+        self.outfile = None
+        self.std_out = ''
+        self.exit_code = 0
 
         # Bool if test can run
         self._runnable = None
@@ -287,11 +293,59 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return
 
+    def runCommand(self, timer, options):
+        """
+        Method to enter the tester directory, execute a command, and return the process
+        and temporary output file objects.
+        """
+
+        cmd = self.getCommand(options)
+        cwd = self.getTestDir()
+
+        try:
+            f = TemporaryFile()
+            # On Windows, there is an issue with path translation when the command is passed in
+            # as a list.
+            if platform.system() == "Windows":
+                process = subprocess.Popen(cmd,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+            else:
+                process = subprocess.Popen(cmd,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=cwd)
+        except:
+            print("Error in launching a new task", cmd)
+            raise
+
+        self.process = process
+        self.outfile = f
+
+        timer.start()
+        process.wait()
+        timer.stop()
+
+        self.exit_code = process.poll()
+
+        # store the contents of output, and close the file
+        self.std_out = util.readOutput(self.outfile, options)
+        self.outfile.close()
+
+    def killCommand(self):
+        if self.process is not None:
+            try:
+                if platform.system() == "Windows":
+                    self.process.terminate()
+                else:
+                    pgid = os.getpgid(self.process.pid)
+                    os.killpg(pgid, SIGTERM)
+            except OSError: # Process already terminated
+                pass
+
+    def run(self, timer, options):
+        self.runCommand(timer, options)
+
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """
         return []
 
-    def processResults(self, moose_dir, retcode, options, output):
+    def processResults(self, moose_dir, options, output):
         """ method to process the results of a finished tester """
         return
 

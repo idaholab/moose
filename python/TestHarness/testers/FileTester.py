@@ -20,5 +20,5 @@ class FileTester(RunApp):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.specs['test_dir'], self.getOutputFiles(), self.specs['delete_output_folders'])
 
-    def processResults(self, moose_dir, retcode, options, output):
-        return RunApp.testFileOutput(self, moose_dir, retcode, options, output)
+    def processResults(self, moose_dir, options, output):
+        return RunApp.testFileOutput(self, moose_dir, options, output)

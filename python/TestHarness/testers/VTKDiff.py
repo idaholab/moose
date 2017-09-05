@@ -23,8 +23,8 @@ class VTKDiff(RunApp):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
-    def processResults(self, moose_dir, retcode, options, output):
-        RunApp.testFileOutput(self, moose_dir, retcode, options, output)
+    def processResults(self, moose_dir, options, output):
+        RunApp.testFileOutput(self, moose_dir, options, output)
 
         # Skip
         specs = self.specs
