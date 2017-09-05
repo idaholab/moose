@@ -23,6 +23,7 @@ validParams<CoupledBEEquilibriumSub>()
   params.addRequiredParam<std::vector<Real>>(
       "sto_v", "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");
+  params.addClassDescription("Derivative of equilibrium species concentration wrt time");
   return params;
 }
 

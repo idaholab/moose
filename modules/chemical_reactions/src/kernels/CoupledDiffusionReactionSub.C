@@ -24,6 +24,7 @@ validParams<CoupledDiffusionReactionSub>()
   params.addRequiredParam<std::vector<Real>>(
       "sto_v", "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "List of coupled primary species in this equilibrium species");
+  params.addClassDescription("Diffusion of equilibrium species");
   return params;
 }
 

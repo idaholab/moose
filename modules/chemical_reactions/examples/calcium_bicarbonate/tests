@@ -1,0 +1,7 @@
+[Tests]
+  [./calcium_bicarbonite]
+    type = RunApp
+    input = 'calcium_bicarbonate.i'
+    check_input = true
+  [../]
+[]

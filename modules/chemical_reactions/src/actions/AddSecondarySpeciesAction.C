@@ -30,6 +30,7 @@ validParams<AddSecondarySpeciesAction>()
   params.addParam<std::vector<AuxVariableName>>("secondary_species",
                                                 "The list of secondary species to add");
   params.addParam<std::vector<std::string>>("kin_reactions", "The list of solid kinetic reactions");
+  params.addClassDescription("Adds AuxVariables for all secondary species");
   return params;
 }
 

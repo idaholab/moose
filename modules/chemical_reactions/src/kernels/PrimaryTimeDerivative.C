@@ -11,6 +11,7 @@ InputParameters
 validParams<PrimaryTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addClassDescription("Derivative of primary species concentration wrt time");
   return params;
 }
 

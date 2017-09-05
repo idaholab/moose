@@ -15,13 +15,14 @@ validParams<CoupledConvectionReactionSub>()
   params.addParam<Real>("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
   params.addParam<Real>("sto_u",
                         1.0,
-                        "Stoichiometric coef of the primary spceices the kernel "
+                        "Stoichiometric coef of the primary species the kernel "
                         "operates on in the equilibrium reaction");
   params.addRequiredParam<std::vector<Real>>(
       "sto_v",
       "The stoichiometric coefficients of coupled primary species in equilibrium reaction");
   params.addRequiredCoupledVar("p", "Pressure");
   params.addCoupledVar("v", "List of coupled primary species");
+  params.addClassDescription("Convection of equilibrium species");
   return params;
 }
 

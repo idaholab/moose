@@ -21,6 +21,7 @@ validParams<KineticDisPreConcAux>()
   params.addParam<Real>("ref_temp", 298.15, "Reference temperature, K");
   params.addParam<Real>("sys_temp", 298.15, "System temperature, K");
   params.addCoupledVar("v", "The list of reactant species");
+  params.addClassDescription("Concentration of secondary kinetic species");
   return params;
 }
 
