@@ -41,7 +41,7 @@ class TestHarness:
 
         # Use the find_dep_apps script to get the dependant applications for an app
         import find_dep_apps
-        depend_app_dirs = find_dep_apps.findDepApps(app_name)
+        depend_app_dirs = find_dep_apps.findDepApps(app_name, use_current_only=True)
         dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
 
         # Finally load the plugins!
