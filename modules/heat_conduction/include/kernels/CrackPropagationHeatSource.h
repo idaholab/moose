@@ -45,15 +45,6 @@ protected:
   /// optional parameter that allows multiple mechanics models to be defined
   std::string _base_name;
 
-  /// - (dPsi/dc) * (dc/dt) = 2 * (1 - c) * G0_pos * (dc/dt)
-  const MaterialProperty<Real> & _crack_propagation_heat;
-
-  /// d(crack_propagation_heat)/d(total strain)
-  const MaterialProperty<RankTwoTensor> & _dcrack_propagation_heat_dstrain;
-
-  /// d(crack_propagation_heat)/d(c)
-  const MaterialProperty<Real> & _dcrack_propagation_heat_dc;
-
   /// Phase field damage variable
   const VariableValue & _c;
 
@@ -62,6 +53,15 @@ protected:
 
   /// name of phase field damage variable
   VariableName _c_name;
+
+  /// - (dPsi/dc) * (dc/dt) = 2 * (1 - c) * G0_pos * (dc/dt)
+  const MaterialProperty<Real> & _crack_propagation_heat;
+
+  /// d(crack_propagation_heat)/d(total strain)
+  const MaterialProperty<RankTwoTensor> & _dcrack_propagation_heat_dstrain;
+
+  /// d(crack_propagation_heat)/d(c)
+  const MaterialProperty<Real> & _dcrack_propagation_heat_dc;
 
   /// Number of coupled displacement variables
   unsigned int _ndisp;

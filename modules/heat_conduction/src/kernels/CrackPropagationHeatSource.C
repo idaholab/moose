@@ -27,14 +27,14 @@ validParams<CrackPropagationHeatSource>()
 CrackPropagationHeatSource::CrackPropagationHeatSource(const InputParameters & parameters)
   : DerivativeMaterialInterface<Kernel>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _c(coupledValue("c")),
+    _c_var(coupled("c")),
+    _c_name(getVar("c", 0)->name()),
     _crack_propagation_heat(getMaterialProperty<Real>(_base_name + "crack_propagation_heat")),
     _dcrack_propagation_heat_dstrain(
         getMaterialProperty<RankTwoTensor>(_base_name + "dcrack_propagation_heat_dstrain")),
     _dcrack_propagation_heat_dc(
         getMaterialPropertyDerivative<Real>(_base_name + "dcrack_propagation_heat_dc", _c_name)),
-    _c(coupledValue("c")),
-    _c_var(coupled("c")),
-    _c_name(getVar("c", 0)->name()),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp)
 {
