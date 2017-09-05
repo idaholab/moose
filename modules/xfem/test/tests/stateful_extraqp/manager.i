@@ -1,6 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
+  nx = 2
+  ny = 2
 []
 
 [UserObjects]
@@ -37,9 +39,7 @@
     compute = false
   [../]
   [./material2]
-    type = GenericConstantMaterial
-    prop_names  = 'prop3 prop4'
-    prop_values = '3     4'
+    type = StatefulTestMaterial
     compute = false
   [../]
 []
@@ -53,4 +53,6 @@
 
 [Executioner]
   type = Transient
+  dt = 0.1
+  num_steps = 3
 []

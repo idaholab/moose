@@ -31,6 +31,13 @@ XFEMMaterialManager::XFEMMaterialManager(const InputParameters & parameters)
     _mesh(_fe_problem.mesh().getMesh()),
     _extra_qp_map(getUserObject<ExtraQPProvider>("extra_qps").getExtraQPMap())
 {
+}
+
+void
+XFEMMaterialManager::initialSetup()
+{
+  std::cout << "XFEMMaterialManager::initialSetup()\n";
+
   // get MaterialData entries for all listed material properties
   for (auto name : getParam<std::vector<std::string>>("material_names"))
   {
@@ -62,15 +69,26 @@ XFEMMaterialManager::XFEMMaterialManager(const InputParameters & parameters)
   _map_older = std::unique_ptr<HistoryStorage>(new HistoryStorage);
 }
 
+void
+XFEMMaterialManager::timestepSetup()
+{
+  // roll the history forward
+  if (_fe_problem.converged())
+  {
+    _map.swap(_map_old);
+    _map.swap(_map_older);
+  }
+}
+
 XFEMMaterialManager::~XFEMMaterialManager()
 {
   // destroy extra QP stateful property storage
-  for (auto & item : *_map)
-    item.second.destroy();
-  for (auto & item : *_map_old)
-    item.second.destroy();
-  for (auto & item : *_map_older)
-    item.second.destroy();
+  // for (auto & item : *_map)
+  //   item.second.destroy();
+  // for (auto & item : *_map_old)
+  //   item.second.destroy();
+  // for (auto & item : *_map_older)
+  //   item.second.destroy();
 }
 
 void
@@ -120,7 +138,7 @@ XFEMMaterialManager::execute()
     while (item_old.size() < _props_old.size())
       item_old.push_back(_props_old[item_old.size()]->init(n_extra_qps));
     while (item_older.size() < _props_older.size())
-      item_older.push_back(_props_old[item_older.size()]->init(n_extra_qps));
+      item_older.push_back(_props_older[item_older.size()]->init(n_extra_qps));
 
     // make sure it has the number of quadrature points
     item.resizeItems(n_extra_qps);
@@ -171,8 +189,52 @@ XFEMMaterialManager::finalize()
 {
 }
 
+void
+XFEMMaterialManager::swapInProperties(dof_id_type elem_id)
+{
+  auto & item = (*_map)[elem_id];
+  auto & item_old = (*_map_old)[elem_id];
+  auto & item_older = (*_map_older)[elem_id];
+
+  // swap the history in for all properties
+  for (auto i = beginIndex(_props); i < _props.size(); ++i)
+    _props[i]->swap(item[i]);
+  for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+    _props_old[i]->swap(item_old[i]);
+  for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
+    _props_older[i]->swap(item_older[i]);
+}
+
+void
+XFEMMaterialManager::swapOutProperties(dof_id_type elem_id)
+{
+  auto & item = (*_map)[elem_id];
+  auto & item_old = (*_map_old)[elem_id];
+  auto & item_older = (*_map_older)[elem_id];
+
+  // swap the history in for all properties
+  for (auto i = beginIndex(_props); i < _props.size(); ++i)
+    _props[i]->swap(item[i]);
+  for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+    _props_old[i]->swap(item_old[i]);
+  for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
+    _props_older[i]->swap(item_older[i]);
+}
+
+void
+XFEMMaterialManager::swapInProperties(dof_id_type elem_id) const
+{
+  const_cast<XFEMMaterialManager *>(this)->swapInProperties(elem_id);
+}
+
+void
+XFEMMaterialManager::swapOutProperties(dof_id_type elem_id) const
+{
+  const_cast<XFEMMaterialManager *>(this)->swapOutProperties(elem_id);
+}
+
 unsigned int
-XFEMMaterialManager::materialPropertyIndex(const std::string & name)
+XFEMMaterialManager::materialPropertyIndex(const std::string & name) const
 {
   auto it = _managed_properties.find(name);
   if (it == _managed_properties.end())
