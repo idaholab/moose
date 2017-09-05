@@ -16,6 +16,7 @@ validParams<AqueousEquilibriumRxnAux>()
                                              "The stoichiometric coefficient of reactants");
   params.addCoupledVar("v",
                        "The list of primary species participating in this equilibrium species");
+  params.addClassDescription("Concentration of secondary equilibrium species");
   return params;
 }
 

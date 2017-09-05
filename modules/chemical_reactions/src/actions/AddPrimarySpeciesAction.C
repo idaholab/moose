@@ -28,6 +28,7 @@ validParams<AddPrimarySpeciesAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "primary_species", "The list of primary variables to add");
+  params.addClassDescription("Adds Variables for all primary species");
   return params;
 }
 

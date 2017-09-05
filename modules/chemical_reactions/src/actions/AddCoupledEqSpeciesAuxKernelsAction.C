@@ -32,6 +32,7 @@ validParams<AddCoupledEqSpeciesAuxKernelsAction>()
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
   params.addParam<std::vector<std::string>>(
       "secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
+  params.addClassDescription("Adds AuxKernels for secondary equilibrium species");
   return params;
 }
 

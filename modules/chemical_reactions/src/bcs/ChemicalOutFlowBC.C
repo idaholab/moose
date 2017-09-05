@@ -11,6 +11,7 @@ InputParameters
 validParams<ChemicalOutFlowBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
+  params.addClassDescription("Chemical flux boundary condition");
   return params;
 }
 

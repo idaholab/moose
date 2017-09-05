@@ -14,6 +14,7 @@ validParams<CoupledBEKinetic>()
   params.addRequiredParam<std::vector<Real>>("weight",
                                              "The weight of kinetic species concentration");
   params.addCoupledVar("v", "List of kinetic species being coupled by concentration");
+  params.addClassDescription("Derivative of kinetic species concentration wrt time");
   return params;
 }
 
