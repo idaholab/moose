@@ -10,7 +10,7 @@
 class MyWalker : public hit::Walker
 {
 public:
-  void walk(std::string fullpath, std::string nodepath, hit::Node * f)
+  void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * f)
   {
     std::cout << "    path=" << fullpath << "/" << nodepath << "\n";
   }
@@ -19,7 +19,7 @@ public:
 class DupSectionWalker : public hit::Walker
 {
 public:
-  void walk(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * n)
+  void walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n)
   {
     if (have.count(n->fullpath()) > 0)
     {
