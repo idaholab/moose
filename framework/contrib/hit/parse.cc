@@ -142,8 +142,7 @@ pathNorm(const std::string & path)
 std::string
 pathJoin(const std::vector<std::string> & paths)
 {
-  static std::string fullpath;
-  fullpath.clear();
+  std::string fullpath;
   for (auto & p : paths)
   {
     if (p == "")
