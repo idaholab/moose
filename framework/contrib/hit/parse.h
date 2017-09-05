@@ -372,6 +372,7 @@ public:
 
 private:
   Kind _kind;
+  std::string _path;
   std::string _field;
   std::string _val;
 };
