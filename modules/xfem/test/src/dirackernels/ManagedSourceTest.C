@@ -8,30 +8,34 @@
 #include "ManagedSourceTest.h"
 
 #include "XFEMMaterialManager.h"
+#include "MooseMesh.h"
 
 template <>
 InputParameters
 validParams<ManagedSourceTest>()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = validParams<XFEMMaterialManagerDiracKernel>();
   params.addClassDescription("Tests the XFEMMaterialManager");
-  params.addRequiredParam<UserObjectName>("manager", "XFEMMaterialManager object");
   return params;
 }
 
 ManagedSourceTest::ManagedSourceTest(const InputParameters & parameters)
-  : DiracKernel(parameters), _manager(getUserObject<XFEMMaterialManager>("manager"))
+  : XFEMMaterialManagerDiracKernel(parameters)
 {
 }
 
 void
-ManagedSourceTest::addPoints()
+ManagedSourceTest::initialSetup()
 {
+  _prop1 = getMaterialProperty<Real>("prop1");
+  _prop3 = getMaterialProperty<Real>("prop3");
 }
 
 Real
 ManagedSourceTest::computeQpResidual()
 {
+  std::cout << "elem " << _current_elem << " point " << _qp << ':' << _q_point[_qp]
+            << " prop1=" << (*_prop1)[_qp] << " prop3=" << (*_prop3)[_qp] << '\n';
   return 0.0;
 }
 

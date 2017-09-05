@@ -8,7 +8,7 @@
 #ifndef MANAGEDSOURCETEST_H
 #define MANAGEDSOURCETEST_H
 
-#include "DiracKernel.h"
+#include "XFEMMaterialManagerDiracKernel.h"
 
 class ManagedSourceTest;
 class XFEMMaterialManager;
@@ -19,17 +19,19 @@ InputParameters validParams<ManagedSourceTest>();
 /**
  * Stateful point source test kernel for the XFEMMaterialManager
  */
-class ManagedSourceTest : public DiracKernel
+class ManagedSourceTest : public XFEMMaterialManagerDiracKernel
 {
 public:
   ManagedSourceTest(const InputParameters & parameters);
 
-  virtual void addPoints() override;
+  virtual void initialSetup() override;
+
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
 protected:
-  const XFEMMaterialManager & _manager;
+  const MaterialProperty<Real> * _prop1;
+  const MaterialProperty<Real> * _prop3;
 };
 
 #endif // MANAGEDSOURCETEST_H
