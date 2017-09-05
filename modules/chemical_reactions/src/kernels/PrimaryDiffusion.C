@@ -11,6 +11,7 @@ InputParameters
 validParams<PrimaryDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
+  params.addClassDescription("Diffusion of primary species");
   return params;
 }
 

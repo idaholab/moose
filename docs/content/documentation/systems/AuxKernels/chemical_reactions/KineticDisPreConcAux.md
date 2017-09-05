@@ -1,7 +1,11 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # KineticDisPreConcAux
 !syntax description /AuxKernels/KineticDisPreConcAux
+
+Calculates the concentration of mineral using the kinetic reaction rate $I_m$
+(calculated using [`KineticDisPreRateAux`](/chemical_reactions/KineticDisPreRateAux.md)),
+\begin{equation}
+\frac{d C_m}{d t} = I_m.
+\end{equation}
 
 !syntax parameters /AuxKernels/KineticDisPreConcAux
 

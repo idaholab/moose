@@ -42,6 +42,7 @@ validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>()
       "reference_temperature", "The list of reference temperatures for all reactions, (K)");
   params.addRequiredParam<std::vector<Real>>(
       "system_temperature", "The list of system temperatures for all reactions, (K)");
+  params.addClassDescription("Adds AuxKernels for solid kinetic secondary species");
   return params;
 }
 

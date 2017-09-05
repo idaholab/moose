@@ -30,6 +30,7 @@ validParams<AddCoupledSolidKinSpeciesKernelsAction>()
                                                               "The list of primary species to add");
   params.addRequiredParam<std::vector<std::string>>("kin_reactions",
                                                     "The list of solid kinetic reactions");
+  params.addClassDescription("Adds Kernels for primary kinetic species");
   return params;
 }
 

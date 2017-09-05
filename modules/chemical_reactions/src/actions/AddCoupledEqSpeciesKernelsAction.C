@@ -33,6 +33,7 @@ validParams<AddCoupledEqSpeciesKernelsAction>()
       "primary_species", "The list of primary variables to add");
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
   params.addParam<std::string>("pressure", "Checks if pressure is a primary variable");
+  params.addClassDescription("Adds Kernels for primary species");
   return params;
 }
 

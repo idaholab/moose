@@ -12,6 +12,7 @@ validParams<PrimaryConvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("p", "Pressure");
+  params.addClassDescription("Convection of primary species");
   return params;
 }
 

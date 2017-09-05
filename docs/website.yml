@@ -11,17 +11,19 @@
     links:
         Tests:
             - test/tests
-            - modules/phase_field/tests
-            - modules/tensor_mechanics/tests
-            - modules/heat_conduction/tests
-            - modules/level_set/tests
-            - modules/fluid_properties/tests
-            - modules/porous_flow/tests
+            - modules/phase_field/test/tests
+            - modules/tensor_mechanics/test/tests
+            - modules/heat_conduction/test/tests
+            - modules/level_set/test/tests
+            - modules/fluid_properties/test/tests
+            - modules/porous_flow/test/tests
+            - modules/chemical_reactions/test/tests
         Examples:
             - examples
             - modules/phase_field/examples
             - modules/combined/examples
             - modules/level_set/examples
+            - modules/chemical_reactions/examples
         Tutorials:
             - tutorials
             - modules/tensor_mechanics/tutorials
