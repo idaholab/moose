@@ -20,6 +20,8 @@ validParams<CoupledForce>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("Implements a source term proportional to the value of a coupled "
+                             "variable. Weak form: $(\\psi_i, -\\sigma v)$.");
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addParam<Real>("coef", 1.0, "Coefficent to multiply the coupled force term by");
 
