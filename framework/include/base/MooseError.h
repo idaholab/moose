@@ -19,7 +19,6 @@
 #include "MooseException.h"
 #include "libmesh/threads.h"
 
-// libMesh includes
 #include "libmesh/print_trace.h"
 #include "libmesh/libmesh_common.h"
 

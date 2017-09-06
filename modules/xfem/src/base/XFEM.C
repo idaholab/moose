@@ -24,7 +24,6 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
-// libMesh includes
 #include "libmesh/mesh_communication.h"
 
 XFEM::XFEM(const InputParameters & params) : XFEMInterface(params), _efa_mesh(Moose::out)

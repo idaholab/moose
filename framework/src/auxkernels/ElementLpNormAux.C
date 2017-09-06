@@ -15,7 +15,6 @@
 // MOOSE includes
 #include "ElementLpNormAux.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

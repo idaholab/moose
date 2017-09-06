@@ -21,7 +21,6 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/nemesis_io.h"
 

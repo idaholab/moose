@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
-// libMesh includes for qrule
 #include "libmesh/quadrature.h"
 
 template <>

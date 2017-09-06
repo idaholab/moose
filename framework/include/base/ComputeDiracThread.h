@@ -18,7 +18,6 @@
 // Moose Includes
 #include "ThreadedElementLoop.h"
 
-// libMesh includes
 #include "libmesh/stored_range.h"
 
 // Forward declarations

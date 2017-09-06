@@ -13,7 +13,6 @@
 #include "XFEMInterface.h"
 #include "XFEMCrackGrowthIncrement2DCut.h"
 
-// libMesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/quadrature.h"
 

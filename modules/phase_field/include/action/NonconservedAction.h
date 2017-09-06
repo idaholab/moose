@@ -11,7 +11,6 @@
 #include "Action.h"
 #include "AddVariableAction.h"
 
-// libMesh includes
 #include "libmesh/fe_type.h"
 
 // Forward declaration

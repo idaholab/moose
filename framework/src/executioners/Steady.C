@@ -19,7 +19,6 @@
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 
 template <>

@@ -15,7 +15,6 @@
 #include "MaxQpsThread.h"
 #include "FEProblem.h"
 
-// libmesh includes
 #include "libmesh/fe_base.h"
 #include "libmesh/threads.h"
 #include LIBMESH_INCLUDE_UNORDERED_SET

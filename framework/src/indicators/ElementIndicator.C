@@ -18,7 +18,6 @@
 #include "MooseVariable.h"
 #include "SystemBase.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 template <>

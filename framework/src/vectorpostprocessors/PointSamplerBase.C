@@ -18,7 +18,6 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 template <>

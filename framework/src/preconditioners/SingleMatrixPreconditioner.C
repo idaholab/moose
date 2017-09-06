@@ -20,7 +20,6 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/coupling_matrix.h"
 
 template <>

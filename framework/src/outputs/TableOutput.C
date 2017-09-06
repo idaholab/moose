@@ -24,7 +24,6 @@
 #include "Postprocessor.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 

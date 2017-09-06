@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

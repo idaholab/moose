@@ -17,7 +17,6 @@
 
 #include "MeshModifier.h"
 
-// libMesh includes
 #include "libmesh/fe_base.h"
 
 // Forward declarations

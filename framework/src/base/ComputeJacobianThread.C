@@ -26,7 +26,6 @@
 #include "SwapBackSentinel.h"
 #include "TimeDerivative.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,

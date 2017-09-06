@@ -10,7 +10,6 @@
 
 #include <deque>
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

@@ -7,7 +7,6 @@
 
 #include "Compute2DSmallStrain.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

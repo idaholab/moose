@@ -16,7 +16,6 @@
 #include "MooseError.h"
 #include "InfixIterator.h"
 
-// libMesh includes
 #include "libmesh/exodusII_io.h"
 
 #include <iomanip>

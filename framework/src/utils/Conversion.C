@@ -17,7 +17,6 @@
 #include "MooseError.h"
 #include "MultiMooseEnum.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 // system includes

@@ -20,7 +20,6 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

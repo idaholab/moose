@@ -17,7 +17,6 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/fparser_ad.hh"
 
 template <>

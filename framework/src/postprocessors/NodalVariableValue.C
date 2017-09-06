@@ -19,7 +19,6 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 
-// libMesh includes
 #include "libmesh/node.h"
 
 template <>

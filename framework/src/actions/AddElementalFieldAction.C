@@ -17,7 +17,6 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/fe.h"
 
 template <>

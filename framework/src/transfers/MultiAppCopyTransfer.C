@@ -23,7 +23,6 @@
 #include "MultiApp.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/system.h"
 #include "libmesh/id_types.h"
 

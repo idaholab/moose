@@ -17,7 +17,6 @@
 
 #include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/elem_range.h"
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"

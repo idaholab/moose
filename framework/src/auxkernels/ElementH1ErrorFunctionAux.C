@@ -16,7 +16,6 @@
 #include "ElementH1ErrorFunctionAux.h"
 #include "Function.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

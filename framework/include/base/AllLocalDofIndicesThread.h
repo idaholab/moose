@@ -18,7 +18,6 @@
 #include "Moose.h"
 #include "MooseTypes.h"
 
-// libmesh includes
 #include "libmesh/elem_range.h"
 
 // Forward declare classes in libMesh

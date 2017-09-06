@@ -15,7 +15,6 @@
 #include "MaterialProperty.h"
 #include "PermutationTensor.h"
 
-// libMesh includes
 #include "libmesh/utility.h"
 
 // C++ includes

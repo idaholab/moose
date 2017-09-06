@@ -19,7 +19,6 @@
 #include "SystemInfo.h"
 #include "CommandLine.h"
 
-// libMesh includes
 #include "libmesh/exodusII.h"
 
 // C++

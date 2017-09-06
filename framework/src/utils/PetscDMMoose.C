@@ -38,7 +38,6 @@
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_vector.h"

@@ -17,7 +17,6 @@
 
 #include "MooseTypes.h"
 
-// libmesh includes
 
 #include <map>
 

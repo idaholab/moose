@@ -20,7 +20,6 @@
 #include "Problem.h"
 #include "PiecewiseLinear.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

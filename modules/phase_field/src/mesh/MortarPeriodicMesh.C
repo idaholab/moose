@@ -7,7 +7,6 @@
 
 #include "MortarPeriodicMesh.h"
 
-// libMesh includes
 #include "libmesh/mesh_modification.h"
 
 template <>

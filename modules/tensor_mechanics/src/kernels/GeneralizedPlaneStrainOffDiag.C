@@ -15,7 +15,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

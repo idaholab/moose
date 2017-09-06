@@ -16,7 +16,6 @@
 #include "EqualValueBoundaryConstraint.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_elem.h"

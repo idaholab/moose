@@ -12,7 +12,6 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 
-// libMesh includes
 #include "libmesh/boundary_info.h"
 
 template <>

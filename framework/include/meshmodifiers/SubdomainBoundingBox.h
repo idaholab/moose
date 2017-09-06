@@ -19,7 +19,6 @@
 #include "MooseEnum.h"
 #include "MeshModifier.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 
 // Forward declerations

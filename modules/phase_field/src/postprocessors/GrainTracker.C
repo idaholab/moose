@@ -14,7 +14,6 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/periodic_boundary_base.h"
 
 // C++ includes

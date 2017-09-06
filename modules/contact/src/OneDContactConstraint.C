@@ -12,7 +12,6 @@
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 

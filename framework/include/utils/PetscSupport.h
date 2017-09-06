@@ -22,7 +22,6 @@
 // MOOSE includes
 #include "MultiMooseEnum.h"
 
-// libMesh includes
 #include "libmesh/petsc_macro.h"
 
 // Forward declarations

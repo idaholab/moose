@@ -25,7 +25,6 @@
 #include "OutputWarehouse.h"
 #include "SystemInfo.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 namespace ConsoleUtils

@@ -17,7 +17,6 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/remote_elem.h"
 
 template <>

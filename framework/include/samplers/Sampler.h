@@ -15,7 +15,6 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
-// libMesh includes
 #include "libmesh/dense_matrix.h"
 
 // MOOSE includes

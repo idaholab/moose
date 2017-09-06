@@ -20,7 +20,6 @@
 #include "GeometricSearchData.h"
 #include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/coupling_matrix.h"
 
 class MooseMesh;

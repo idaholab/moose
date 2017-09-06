@@ -19,7 +19,6 @@
 #include "Restartable.h"
 #include "PenetrationInfo.h"
 
-// libmesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
 #include "libmesh/fe_base.h"

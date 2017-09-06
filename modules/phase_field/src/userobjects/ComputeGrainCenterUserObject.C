@@ -7,7 +7,6 @@
 
 #include "ComputeGrainCenterUserObject.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

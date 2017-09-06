@@ -21,7 +21,6 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-// libmesh includes
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"

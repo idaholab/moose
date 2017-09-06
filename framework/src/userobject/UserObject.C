@@ -16,7 +16,6 @@
 #include "SubProblem.h"
 #include "Assembly.h"
 
-// libMesh includes
 #include "libmesh/sparse_matrix.h"
 
 template <>

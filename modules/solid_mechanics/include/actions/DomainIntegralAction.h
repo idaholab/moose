@@ -12,7 +12,6 @@
 #include "MooseEnum.h"
 #include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/vector_value.h"
 
 class DomainIntegralAction;

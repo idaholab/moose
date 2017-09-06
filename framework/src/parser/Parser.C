@@ -38,7 +38,6 @@
 #include "JsonSyntaxTree.h"
 #include "SystemInfo.h"
 
-// libMesh includes
 #include "libmesh/parallel.h"
 
 // Regular expression includes
