@@ -37,6 +37,14 @@ KineticDisPreRateAux::KineticDisPreRateAux(const InputParameters & parameters)
     _sto_v(getParam<std::vector<Real>>("sto_v"))
 {
   const unsigned int n = coupledComponents("v");
+
+  // Check that the number of stoichiometric coefficients is equal to the number
+  // of reactant species
+  if (_sto_v.size() != n)
+    mooseError("The number of stoichiometric coefficients is not equal to the number of reactant "
+               "species in ",
+               _name);
+
   _vals.resize(n);
   for (unsigned int i = 0; i < n; ++i)
     _vals[i] = &coupledValue("v", i);
@@ -46,10 +54,10 @@ Real
 KineticDisPreRateAux::computeValue()
 {
   const Real kconst =
-      _ref_kconst * std::exp(-_e_act * (1.0 / _ref_temp - 1.0 / _sys_temp) / _gas_const);
+      _ref_kconst * std::exp(_e_act * (1.0 / _ref_temp - 1.0 / _sys_temp) / _gas_const);
   Real omega = 1.0;
 
-  if (_vals.size())
+  if (_vals.size() > 0)
   {
     for (unsigned int i = 0; i < _vals.size(); ++i)
     {
