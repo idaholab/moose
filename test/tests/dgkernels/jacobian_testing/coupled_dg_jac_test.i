@@ -27,17 +27,12 @@
     type = DGCoupledDiffusion
     variable = u
     v = v
-    epsilon = -1
-    sigma = 6
   [../]
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-snes_type'
-  petsc_options_value = 'test'
-  petsc_options = '-snes_test_display'
 []
 
 [Preconditioning]

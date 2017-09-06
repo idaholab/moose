@@ -30,13 +30,9 @@ public:
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
-  virtual Real computeQpJacobian(Moose::DGJacobianType /*type*/) override;
+  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar) override;
 
-  Real _epsilon;
-  Real _sigma;
-  const MaterialProperty<Real> & _diff;
-  const MaterialProperty<Real> & _diff_neighbor;
   MooseVariable & _v_var;
   const VariableValue & _v;
   const VariableValue & _v_neighbor;
