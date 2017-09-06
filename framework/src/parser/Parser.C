@@ -267,13 +267,11 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
 
   if (iters.first == iters.second)
   {
-    mooseError(
-        errormsg(getFileName(),
-                 n,
-                 "section '",
-                 curr_identifier,
-                 "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" "
-                 "in one of your nested blocks?"));
+    mooseError(errormsg(getFileName(),
+                        n,
+                        "section '",
+                        curr_identifier,
+                        "' does not have an associated \"Action\".\nDid you misspell it?"));
   }
 
   for (auto it = iters.first; it != iters.second; ++it)
