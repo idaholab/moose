@@ -20,9 +20,9 @@ class Timer(object):
         self.starts = []
         self.ends = []
 
-class TesterData(object):
+class Job(object):
     """
-    The TesterData class is a simple container for the tester and its associated output file object, the DAG,
+    The Job class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, and the start and end times.
     """
     def __init__(self, tester, tester_dag, options):
