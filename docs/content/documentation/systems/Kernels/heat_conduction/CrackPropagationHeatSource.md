@@ -17,6 +17,9 @@ $$
 $$
 \cite{miehe2015phasefield}
 \cite{chakraborty2016intergranularfracture}
+This is a Kernel that applies this heat source as a term in the heat equation.
+This is intended to be used in conjunction with the [ComputeCrackPropagationHeatEnergy](/Materials/tensor_mechanics/ComputeCrackPropagationHeatEnergy.md) Material,
+which computes the value of that source.
 
 !syntax description /Kernels/CrackPropagationHeatSource
 

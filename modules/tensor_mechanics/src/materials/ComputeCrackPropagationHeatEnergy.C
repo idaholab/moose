@@ -16,9 +16,9 @@ validParams<ComputeCrackPropagationHeatEnergy>()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.addClassDescription("Crack propagation heat energy density = - (dPsi/dc) * (dc/dt) "
-                             "is the energy dissipated due to damage increase "
-                             "Psi is the free energy of the phase-field fracture model");
+  params.addClassDescription("Computes crack propagation heat energy density "
+                             "dissipated due to damage increase "
+                             "in the phase-field fracture model");
   params.addRequiredCoupledVar("c", "Phase field damage variable");
   params.addCoupledVar(
       "displacements",
@@ -40,7 +40,7 @@ ComputeCrackPropagationHeatEnergy::ComputeCrackPropagationHeatEnergy(
     _dcrack_propagation_heat_dstrain(
         declareProperty<RankTwoTensor>(_base_name + "dcrack_propagation_heat_dstrain")),
     _dcrack_propagation_heat_dc(
-        declarePropertyDerivative<Real>(_base_name + "dcrack_propagation_heat_dc", _c_name))
+        declarePropertyDerivative<Real>(_base_name + "crack_propagation_heat", _c_name))
 {
 }
 

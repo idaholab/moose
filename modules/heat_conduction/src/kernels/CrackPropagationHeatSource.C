@@ -14,9 +14,10 @@ InputParameters
 validParams<CrackPropagationHeatSource>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Crack propagation heat energy density = - (dPsi/dc) * (dc/dt) "
-                             "is the energy dissipated due to damage increase "
-                             "Psi is the free energy of the phase-field fracture model");
+  params.addClassDescription("Applies volumetric heating from material "
+                             "property that computes heat energy "
+                             "density dissipated due to damage increase "
+                             "in the phase-field fracture model");
   params.addRequiredCoupledVar("c", "Phase field damage variable");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
@@ -34,7 +35,7 @@ CrackPropagationHeatSource::CrackPropagationHeatSource(const InputParameters & p
     _dcrack_propagation_heat_dstrain(
         getMaterialProperty<RankTwoTensor>(_base_name + "dcrack_propagation_heat_dstrain")),
     _dcrack_propagation_heat_dc(
-        getMaterialPropertyDerivative<Real>(_base_name + "dcrack_propagation_heat_dc", _c_name)),
+        getMaterialPropertyDerivative<Real>(_base_name + "crack_propagation_heat", _c_name)),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp)
 {
