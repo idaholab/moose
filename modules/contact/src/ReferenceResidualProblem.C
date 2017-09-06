@@ -29,6 +29,7 @@ validParams<ReferenceResidualProblem>()
   params.addParam<int>("acceptable_iterations",
                        0,
                        "Iterations after which convergence to acceptable limits is accepted");
+  params.addClassDescription("Alternative way to signify convergence of a timestep");
   return params;
 }
 

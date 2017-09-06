@@ -1,7 +1,9 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # SideFluxIntegral
 !syntax description /Postprocessors/SideFluxIntegral
+
+## Example Input Syntax
+
+!listing tutorials/darcy_thermo_mech/step08_postprocessors/problems/step8.i block=Postprocessors
 
 !syntax parameters /Postprocessors/SideFluxIntegral
 
