@@ -38,7 +38,7 @@ protected:
 
   MooseEnum _state;
 
-  unsigned int _steps_to_wait;
+  int _steps_to_wait;
 };
 
 #endif /* TOGGLEMESHADAPTIVITY_H */
