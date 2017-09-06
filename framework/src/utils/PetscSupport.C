@@ -117,10 +117,12 @@ setSolverOptions(SolverParams & solver_params)
   {
     case Moose::ST_PJFNK:
       setSinglePetscOption("-snes_mf_operator");
+      setSinglePetscOption("-mat_mffd_type", "ds");
       break;
 
     case Moose::ST_JFNK:
       setSinglePetscOption("-snes_mf");
+      setSinglePetscOption("-mat_mffd_type", "ds");
       break;
 
     case Moose::ST_NEWTON:
