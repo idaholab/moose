@@ -7,7 +7,8 @@
   p = p
   integrate_p_by_parts = false
   laplace = false
-  stabilize = true
+  supg = true
+  pspg = true
   alpha = 1.1
 []
 

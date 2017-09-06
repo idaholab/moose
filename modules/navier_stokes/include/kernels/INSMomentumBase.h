@@ -40,6 +40,7 @@ protected:
 
   unsigned _component;
   bool _integrate_p_by_parts;
+  bool _supg;
 };
 
 #endif // INSMOMENTUMBASE_H

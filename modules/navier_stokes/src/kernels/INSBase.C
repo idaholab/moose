@@ -29,7 +29,6 @@ validParams<INSBase>()
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
-  params.addParam<bool>("stabilize", false, "Whether to use GLS (encompasses SUPG) stabilization.");
   params.addParam<Real>("alpha", 1., "Multiplicative factor on the stabilization parameter tau.");
   params.addParam<bool>(
       "laplace", true, "Whether the viscous term of the momentum equations is in laplace form.");
@@ -84,7 +83,6 @@ INSBase::INSBase(const InputParameters & parameters)
     _mu(getMaterialProperty<Real>("mu_name")),
     _rho(getMaterialProperty<Real>("rho_name")),
 
-    _stabilize(getParam<bool>("stabilize")),
     _alpha(getParam<Real>("alpha")),
     _laplace(getParam<bool>("laplace")),
     _convective_term(getParam<bool>("convective_term")),

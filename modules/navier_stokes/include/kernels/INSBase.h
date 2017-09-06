@@ -100,7 +100,6 @@ protected:
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
 
-  bool _stabilize;
   const Real & _alpha;
   bool _laplace;
   bool _convective_term;

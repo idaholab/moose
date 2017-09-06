@@ -15,15 +15,18 @@ validParams<INSMomentumBase>()
   params.addRequiredParam<unsigned>("component", "The velocity component that this is applied to.");
   params.addParam<bool>(
       "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts.");
+  params.addParam<bool>(
+      "supg", false, "Whether to perform SUPG stabilization of the momentum residuals");
   return params;
 }
 
 INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
   : INSBase(parameters),
     _component(getParam<unsigned>("component")),
-    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
+    _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
+    _supg(getParam<bool>("supg"))
 {
-  if (_stabilize && !_convective_term)
+  if (_supg && !_convective_term)
     mooseError("It doesn't make sense to conduct SUPG stabilization without a convective term.");
 }
 
@@ -48,7 +51,7 @@ INSMomentumBase::computeQpResidual()
   if (_convective_term)
     r += _test[_i][_qp] * convectiveTerm()(_component);
 
-  if (_stabilize)
+  if (_supg)
     r += computeQpPGResidual();
 
   return r;
@@ -91,7 +94,7 @@ INSMomentumBase::computeQpJacobian()
   if (_convective_term)
     jac += _test[_i][_qp] * dConvecDUComp(_component)(_component);
 
-  if (_stabilize)
+  if (_supg)
     jac += computeQpPGJacobian(_component);
 
   return jac;
@@ -135,7 +138,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
     jac += convective_term + viscous_term;
 
-    if (_stabilize)
+    if (_supg)
       jac += computeQpPGJacobian(0);
 
     return jac;
@@ -147,7 +150,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
     jac += convective_term + viscous_term;
 
-    if (_stabilize)
+    if (_supg)
       jac += computeQpPGJacobian(1);
 
     return jac;
@@ -159,7 +162,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
     jac += convective_term + viscous_term;
 
-    if (_stabilize)
+    if (_supg)
       jac += computeQpPGJacobian(2);
 
     return jac;
@@ -172,7 +175,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
     else
       jac += _test[_i][_qp] * dStrongPressureDPressure()(_component);
 
-    if (_stabilize)
+    if (_supg)
     {
       RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
       jac += tau() * U * _grad_test[_i][_qp] * dStrongPressureDPressure()(_component);

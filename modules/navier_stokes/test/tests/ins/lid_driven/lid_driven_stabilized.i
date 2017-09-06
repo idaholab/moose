@@ -1,10 +1,25 @@
 [GlobalParams]
   gravity = '0 0 0'
-  stabilize = true
   laplace = true
   integrate_p_by_parts = true
   family = LAGRANGE
   order = FIRST
+
+  # There are multiple types of stabilization possible in incompressible
+  # Navier Stokes. The user can specify supg = true to apply streamline
+  # upwind petrov-galerkin stabilization to the momentum equations. This
+  # is most useful for high Reynolds numbers, e.g. when inertial effects
+  # dominate over viscous effects. The user can also specify pspg = true
+  # to apply pressure stabilized petrov-galerkin stabilization to the mass
+  # equation. PSPG is a form of Galerkin Least Squares. This stabilization
+  # allows equal order interpolations to be used for pressure and velocity.
+  # Finally, the alpha parameter controls the amount of stabilization.
+  # For PSPG, decreasing alpha leads to increased accuracy but may induce
+  # spurious oscillations in the pressure field. Some numerical experiments
+  # suggest that alpha between .1 and 1 may be optimal for accuracy and
+  # robustness.
+  supg = true
+  pspg = true
   alpha = 1e-1
 []
 

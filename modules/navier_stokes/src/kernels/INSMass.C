@@ -15,10 +15,15 @@ validParams<INSMass>()
   params.addClassDescription("This class computes the mass equation residual and Jacobian "
                              "contributions for the incompressible Navier-Stokes momentum "
                              "equation.");
+  params.addParam<bool>(
+      "pspg", false, "Whether to perform PSPG stabilization of the mass equation");
   return params;
 }
 
-INSMass::INSMass(const InputParameters & parameters) : INSBase(parameters) {}
+INSMass::INSMass(const InputParameters & parameters)
+  : INSBase(parameters), _pspg(getParam<bool>("pspg"))
+{
+}
 
 Real
 INSMass::computeQpResidual()
@@ -28,7 +33,7 @@ INSMass::computeQpResidual()
   // term in the momentum equation.  Not sure if that is really important?
   Real r = -(_grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2)) * _test[_i][_qp];
 
-  if (_stabilize)
+  if (_pspg)
     r += computeQpPGResidual();
 
   return r;
@@ -55,7 +60,7 @@ INSMass::computeQpJacobian()
   Real r = 0;
 
   // Unless we are doing GLS stabilization
-  if (_stabilize)
+  if (_pspg)
     r += computeQpPGJacobian();
 
   return r;
@@ -73,7 +78,7 @@ INSMass::computeQpOffDiagJacobian(unsigned jvar)
   if (jvar == _u_vel_var_number)
   {
     Real jac = -_grad_phi[_j][_qp](0) * _test[_i][_qp];
-    if (_stabilize)
+    if (_pspg)
       jac += computeQpPGOffDiagJacobian(0);
     return jac;
   }
@@ -81,7 +86,7 @@ INSMass::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _v_vel_var_number)
   {
     Real jac = -_grad_phi[_j][_qp](1) * _test[_i][_qp];
-    if (_stabilize)
+    if (_pspg)
       jac += computeQpPGOffDiagJacobian(1);
     return jac;
   }
@@ -89,7 +94,7 @@ INSMass::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _w_vel_var_number)
   {
     Real jac = -_grad_phi[_j][_qp](2) * _test[_i][_qp];
-    if (_stabilize)
+    if (_pspg)
       jac += computeQpPGOffDiagJacobian(2);
     return jac;
   }
