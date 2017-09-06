@@ -1,20 +1,29 @@
 import re
 from timeit import default_timer as clock
 
+
 class Timer(object):
+    """
+    A helper class for testers to track the time it takes to run.
+
+    Every call to the start method must be followed by a call to stop.
+    """
     def __init__(self):
         self.starts = []
         self.ends = []
     def start(self):
+        """ starts the timer clock """
         self.starts.append(clock())
     def stop(self):
+        """ stop/pauses the timer clock """
         self.ends.append(clock())
-    def cumdur(self):
+    def cumulativeDur(self):
+        """ returns the total/cumulative time taken by the timer """
         diffs = [end - start for start, end in zip(self.starts, self.ends)]
         return sum(diffs)
-    def avgdur(self):
-        return self.cumdur() / len(self.starts)
-    def nruns(self):
+    def avgerageDur(self):
+        return self.cumulativeDur() / len(self.starts)
+    def nRuns(self):
         return len(self.starts)
     def reset(self):
         self.starts = []
@@ -105,7 +114,7 @@ class Job(object):
         if self.getActiveTime():
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():
-            return self.timer.cumdur()
+            return self.timer.cumulativeDur()
         elif self.getStartTime() and self.__tester.isPending():
             # If the test is still running, return current run time instead
             return max(0.0, clock() - self.getStartTime())
