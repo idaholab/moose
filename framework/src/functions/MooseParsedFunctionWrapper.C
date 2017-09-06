@@ -148,7 +148,7 @@ MooseParsedFunctionWrapper::initialize()
     {
       // Use istringstream to convert, if it fails produce an error, otherwise add the variable to
       // the _vals variable
-      if (!(ss >> tmp))
+      if (!(ss >> tmp) || !ss.eof())
         mooseError(
             "The input value '",
             _vals_input[i],
