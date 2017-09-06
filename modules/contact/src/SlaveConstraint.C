@@ -12,7 +12,6 @@
 #include "SystemBase.h"
 #include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/plane.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"

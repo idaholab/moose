@@ -20,7 +20,6 @@
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
 
-// libMesh includes
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 

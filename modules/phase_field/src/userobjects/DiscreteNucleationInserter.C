@@ -8,7 +8,6 @@
 #include "DiscreteNucleationInserter.h"
 #include "libmesh/parallel_algebra.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

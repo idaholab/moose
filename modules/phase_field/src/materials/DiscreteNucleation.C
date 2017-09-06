@@ -8,7 +8,6 @@
 #include "DiscreteNucleation.h"
 #include "DiscreteNucleationMap.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

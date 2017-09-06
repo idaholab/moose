@@ -21,7 +21,6 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

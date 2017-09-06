@@ -20,7 +20,6 @@
 #include "Executioner.h"
 #include "Transient.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

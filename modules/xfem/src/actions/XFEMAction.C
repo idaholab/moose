@@ -18,7 +18,6 @@
 
 #include "GeometricCutUserObject.h"
 
-// libMesh includes
 #include "libmesh/transient_system.h"
 #include "libmesh/string_to_enum.h"
 

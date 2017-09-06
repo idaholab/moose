@@ -17,7 +17,6 @@
 #include "FEProblem.h"
 #include "ParallelUniqueId.h"
 
-// libmesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/threads.h"
 #include "libmesh/system.h"

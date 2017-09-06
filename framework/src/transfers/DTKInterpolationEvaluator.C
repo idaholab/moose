@@ -19,7 +19,6 @@
 #include "DTKInterpolationEvaluator.h"
 #include "DTKInterpolationHelper.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/fe_compute_data.h"

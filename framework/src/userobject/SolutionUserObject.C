@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "RotationMatrix.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/numeric_vector.h"

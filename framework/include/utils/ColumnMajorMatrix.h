@@ -19,7 +19,6 @@
 #include "Moose.h"      // using namespace libMesh
 #include "MooseError.h" // mooseAssert
 
-// libMesh includes
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"

@@ -17,7 +17,6 @@
 #include "InputParameters.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
 #include "libmesh/string_to_enum.h"

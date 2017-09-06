@@ -21,7 +21,6 @@
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

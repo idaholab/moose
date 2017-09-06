@@ -17,7 +17,6 @@
 
 #include "Moose.h"
 
-// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"

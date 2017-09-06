@@ -10,7 +10,6 @@
 #include "Problem.h"
 #include "SymmIsotropicElasticityTensor.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 namespace SolidMechanics

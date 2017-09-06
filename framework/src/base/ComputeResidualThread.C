@@ -25,7 +25,6 @@
 #include "KernelWarehouse.h"
 #include "SwapBackSentinel.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type)

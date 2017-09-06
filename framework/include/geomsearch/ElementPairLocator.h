@@ -22,7 +22,6 @@
 #include "DataIO.h"
 #include "ElementPairInfo.h"
 
-// libmesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
 

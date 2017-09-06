@@ -15,7 +15,6 @@
 #ifndef MOOSE_H
 #define MOOSE_H
 
-// libMesh includes
 #include "libmesh/perf_log.h"
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"

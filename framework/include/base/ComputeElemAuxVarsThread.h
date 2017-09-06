@@ -15,7 +15,6 @@
 #ifndef COMPUTEELEMAUXVARSTHREAD_H
 #define COMPUTEELEMAUXVARSTHREAD_H
 
-// libMesh includes
 #include "libmesh/elem_range.h"
 
 // MOOSE includes

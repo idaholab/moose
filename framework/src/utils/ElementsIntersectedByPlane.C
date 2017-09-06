@@ -15,7 +15,6 @@
 // Moose includes
 #include "ElementsIntersectedByPlane.h"
 
-// libMesh includes
 #include "libmesh/plane.h"
 #include "libmesh/point.h"
 #include "libmesh/mesh.h"

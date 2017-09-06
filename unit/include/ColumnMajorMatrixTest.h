@@ -21,7 +21,6 @@
 // Moose includes
 #include "ColumnMajorMatrix.h"
 
-// libMesh include
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 

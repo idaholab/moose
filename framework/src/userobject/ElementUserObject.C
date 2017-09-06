@@ -17,7 +17,6 @@
 #include "SubProblem.h"
 #include "Assembly.h"
 
-// libMesh includes
 #include "libmesh/elem.h"
 
 template <>

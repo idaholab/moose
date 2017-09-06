@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "DataIO.h"
 
-// libMesh includes
 #include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"

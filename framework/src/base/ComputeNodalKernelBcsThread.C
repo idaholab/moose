@@ -20,7 +20,6 @@
 #include "MooseVariable.h"
 #include "NodalKernel.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(

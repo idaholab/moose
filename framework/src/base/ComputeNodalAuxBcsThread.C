@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 // MOOSE includes

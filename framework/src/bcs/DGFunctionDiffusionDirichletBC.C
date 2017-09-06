@@ -18,7 +18,6 @@
 #include "Function.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/numeric_vector.h"
 #include "libmesh/utility.h"
 

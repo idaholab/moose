@@ -11,7 +11,6 @@
 #include "MooseEnum.h"
 #include "MooseUtils.h"
 
-// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/utility.h"

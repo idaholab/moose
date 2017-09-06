@@ -20,7 +20,6 @@
 #include "Assembly.h"
 #include "AuxKernel.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblemBase & problem,

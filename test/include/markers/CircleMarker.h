@@ -17,7 +17,6 @@
 
 #include "Marker.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 
 class CircleMarker;

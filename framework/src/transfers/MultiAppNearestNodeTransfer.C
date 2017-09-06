@@ -21,7 +21,6 @@
 #include "MooseTypes.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/system.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/id_types.h"

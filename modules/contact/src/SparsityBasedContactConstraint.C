@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/petsc_macro.h"
 #include "libmesh/petsc_matrix.h"
 

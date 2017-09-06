@@ -21,7 +21,6 @@
 #include "MaterialData.h"
 #include "ParallelUniqueId.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/numeric_vector.h"

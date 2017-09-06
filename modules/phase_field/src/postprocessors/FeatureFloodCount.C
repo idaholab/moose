@@ -16,7 +16,6 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/periodic_boundaries.h"

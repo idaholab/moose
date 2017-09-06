@@ -20,7 +20,6 @@
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 
-// libMesh includes
 #include "libmesh/parameters.h"
 #include "libmesh/parsed_function.h"
 

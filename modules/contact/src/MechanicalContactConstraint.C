@@ -15,7 +15,6 @@
 #include "Executioner.h"
 #include "AddVariableAction.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 

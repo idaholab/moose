@@ -20,7 +20,6 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(

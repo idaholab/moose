@@ -18,7 +18,6 @@
 #include "Problem.h"
 #include "NodalDamper.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem)

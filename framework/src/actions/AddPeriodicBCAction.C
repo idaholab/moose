@@ -24,7 +24,6 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
-// LibMesh includes
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
 
 template <>

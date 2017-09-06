@@ -17,7 +17,6 @@
 
 #include "SystemBase.h"
 
-// libMesh include
 #include "libmesh/transient_system.h"
 #include "libmesh/explicit_system.h"
 

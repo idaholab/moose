@@ -14,7 +14,6 @@
 
 #include "NumElemQPs.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

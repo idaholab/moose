@@ -8,7 +8,6 @@
 #include "AEFVMaterial.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

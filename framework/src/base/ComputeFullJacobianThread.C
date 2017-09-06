@@ -23,7 +23,6 @@
 #include "MooseVariableScalar.h"
 #include "NonlocalKernel.h"
 #include "NonlocalIntegratedBC.h"
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,

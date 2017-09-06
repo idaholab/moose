@@ -19,7 +19,6 @@
 #include <cstdlib> // std::system, mkstemp
 #include <fstream>
 
-// libMesh includes
 #include "libmesh/mesh_generation.h"
 
 template <>

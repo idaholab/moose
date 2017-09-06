@@ -20,7 +20,6 @@
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblemBase & problem,

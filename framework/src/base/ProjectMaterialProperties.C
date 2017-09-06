@@ -22,7 +22,6 @@
 #include "Assembly.h"
 #include "AuxKernel.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 #include "libmesh/elem.h"
 

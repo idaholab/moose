@@ -17,7 +17,6 @@
 #include "MooseError.h"
 #include "MaterialProperty.h"
 
-// libMesh includes
 #include "libmesh/elem.h"
 
 // External includes

@@ -19,7 +19,6 @@
 #include "FileRangeBuilder.h"
 #include "ConsoleStream.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 
 // VTK includes

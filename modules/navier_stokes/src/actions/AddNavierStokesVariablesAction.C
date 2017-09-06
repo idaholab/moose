@@ -11,7 +11,6 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
 

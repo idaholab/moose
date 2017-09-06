@@ -11,7 +11,6 @@
 
 #include <cmath> // std::sinh and std::cosh
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

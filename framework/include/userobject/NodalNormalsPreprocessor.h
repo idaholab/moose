@@ -19,7 +19,6 @@
 #include "ElementUserObject.h"
 #include "BoundaryRestrictable.h"
 
-// libMesh includes
 #include "libmesh/fe_type.h"
 
 // Forward declarations

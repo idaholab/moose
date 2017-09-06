@@ -19,7 +19,6 @@
 #include "MooseError.h"
 #include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/parsed_function.h"
 
 // C++ includes

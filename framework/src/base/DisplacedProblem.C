@@ -26,7 +26,6 @@
 #include "SubProblem.h"
 #include "UpdateDisplacedMeshThread.h"
 
-// libMesh includes
 #include "libmesh/numeric_vector.h"
 
 template <>

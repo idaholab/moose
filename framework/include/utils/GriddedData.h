@@ -15,7 +15,6 @@
 #ifndef GRIDDEDDATA_H
 #define GRIDDEDDATA_H
 
-// libMesh includes
 #include "libmesh/libmesh_common.h" // Real
 
 using namespace libMesh;

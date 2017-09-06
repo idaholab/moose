@@ -22,7 +22,6 @@
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/fe.h"
 
 // compiler includes (for type demangling)

@@ -11,7 +11,6 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"

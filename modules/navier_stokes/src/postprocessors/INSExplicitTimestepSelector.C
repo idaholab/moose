@@ -7,7 +7,6 @@
 
 #include "INSExplicitTimestepSelector.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

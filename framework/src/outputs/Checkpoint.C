@@ -23,7 +23,6 @@
 #include "RestartableData.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/enum_xdr_mode.h"
 

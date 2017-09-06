@@ -21,7 +21,6 @@
 #include "AuxiliarySystem.h"
 #include "TimeIntegrator.h"
 
-// libMesh includes
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/numeric_vector.h"
 

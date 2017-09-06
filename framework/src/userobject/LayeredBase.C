@@ -20,7 +20,6 @@
 #include "SubProblem.h"
 #include "UserObject.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/point.h"
 

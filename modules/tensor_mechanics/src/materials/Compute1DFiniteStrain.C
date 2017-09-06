@@ -7,7 +7,6 @@
 
 #include "Compute1DFiniteStrain.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>
