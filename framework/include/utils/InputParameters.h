@@ -849,7 +849,7 @@ InputParameters::rangeCheck(const std::string & full_name,
         iss.seekg(short_name.size() + 1);
 
         size_t index;
-        if (iss >> index)
+        if (iss >> index && iss.eof())
         {
           if (index >= value.size())
           {

@@ -1022,7 +1022,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name,
     BoundaryID id;
     std::istringstream ss(boundary_name[i]);
 
-    if (!(ss >> id))
+    if (!(ss >> id) || !ss.eof())
     {
       /**
        * If the conversion from a name to a number fails, that means that this must be a named
@@ -1052,7 +1052,7 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
   SubdomainID id = Moose::INVALID_BLOCK_ID;
   std::istringstream ss(subdomain_name);
 
-  if (!(ss >> id))
+  if (!(ss >> id) || !ss.eof())
     id = getMesh().get_id_by_name(subdomain_name);
 
   return id;
@@ -1077,7 +1077,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
     SubdomainID id = Moose::INVALID_BLOCK_ID;
     std::istringstream ss(subdomain_name[i]);
 
-    if (!(ss >> id))
+    if (!(ss >> id) || !ss.eof())
       id = getMesh().get_id_by_name(subdomain_name[i]);
 
     ids[i] = id;
