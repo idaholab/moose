@@ -14,7 +14,6 @@
 
 #include "LineSegmentTest.h"
 
-// libMesh includes
 #include "libmesh/plane.h"
 
 TEST_F(LineSegmentTest, closestPointTest)

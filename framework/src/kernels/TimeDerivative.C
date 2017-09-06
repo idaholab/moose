@@ -18,7 +18,6 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

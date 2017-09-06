@@ -11,7 +11,6 @@
 #include "MooseVariable.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 

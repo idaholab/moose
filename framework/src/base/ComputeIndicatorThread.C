@@ -22,7 +22,6 @@
 #include "Problem.h"
 #include "SwapBackSentinel.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblemBase & fe_problem, bool finalize)

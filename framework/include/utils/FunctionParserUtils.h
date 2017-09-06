@@ -17,7 +17,6 @@
 
 #include "Moose.h"
 
-// libMesh includes
 #include "libmesh/fparser_ad.hh"
 
 // C++ includes

@@ -17,7 +17,6 @@
 #include "LineSegment.h"
 #include "MooseError.h"
 
-// libMesh includes
 #include "libmesh/plane.h"
 #include "libmesh/point.h"
 #include "libmesh/mesh.h"

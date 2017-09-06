@@ -17,7 +17,6 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/utility.h"
 
 template <>

@@ -12,7 +12,6 @@
 #include "ElementPairInfo.h"
 #include "FEProblem.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

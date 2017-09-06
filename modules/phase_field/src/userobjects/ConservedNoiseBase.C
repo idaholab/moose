@@ -7,7 +7,6 @@
 
 #include "ConservedNoiseBase.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

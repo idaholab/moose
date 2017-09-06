@@ -14,7 +14,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

@@ -8,7 +8,6 @@
 #include "ComputeFiniteStrain.h"
 #include "Assembly.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 

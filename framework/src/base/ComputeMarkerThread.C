@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "SwapBackSentinel.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeMarkerThread::ComputeMarkerThread(FEProblemBase & fe_problem)

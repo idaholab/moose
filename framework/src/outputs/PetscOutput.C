@@ -17,7 +17,6 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 

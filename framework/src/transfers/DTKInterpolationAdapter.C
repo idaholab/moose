@@ -22,7 +22,6 @@
 #include "DTKInterpolationAdapter.h"
 #include "Transfer.h"
 
-// libMesh includes
 #include "libmesh/mesh.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem.h"

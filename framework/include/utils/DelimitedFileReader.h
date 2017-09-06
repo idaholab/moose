@@ -20,7 +20,6 @@
 #include <string>
 #include <fstream>
 
-// libMesh includes
 #include "libmesh/parallel.h"
 
 namespace MooseUtils

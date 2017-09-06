@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/mesh_base.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/vector_value.h"

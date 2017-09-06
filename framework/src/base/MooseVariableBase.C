@@ -18,7 +18,6 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"
 

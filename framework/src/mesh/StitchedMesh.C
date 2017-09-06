@@ -16,7 +16,6 @@
 #include "Parser.h"
 #include "InputParameters.h"
 
-// libMesh includes
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"

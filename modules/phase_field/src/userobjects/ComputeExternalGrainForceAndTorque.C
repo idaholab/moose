@@ -7,7 +7,6 @@
 #include "ComputeExternalGrainForceAndTorque.h"
 #include "GrainTrackerInterface.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "MooseError.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 // XFEM includes

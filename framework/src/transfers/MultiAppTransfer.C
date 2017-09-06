@@ -21,7 +21,6 @@
 #include "MultiApp.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
 

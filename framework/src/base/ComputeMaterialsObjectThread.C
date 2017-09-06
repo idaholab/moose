@@ -23,7 +23,6 @@
 #include "AuxKernel.h"
 #include "Material.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 

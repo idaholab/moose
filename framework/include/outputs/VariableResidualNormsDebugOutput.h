@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "PetscOutput.h"
 
-// libMesh includes
 #include "libmesh/system.h"
 
 // Forward declerations

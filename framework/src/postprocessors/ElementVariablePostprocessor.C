@@ -17,7 +17,6 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

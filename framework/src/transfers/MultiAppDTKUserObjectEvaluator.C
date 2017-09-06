@@ -25,7 +25,6 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 MultiAppDTKUserObjectEvaluator::MultiAppDTKUserObjectEvaluator(MultiApp & multi_app,

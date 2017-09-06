@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "Action.h"
 
-// libMesh includes
 #include "libmesh/fe_type.h"
 
 // Forward declaration

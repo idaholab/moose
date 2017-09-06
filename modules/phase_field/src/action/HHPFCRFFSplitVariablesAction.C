@@ -4,7 +4,6 @@
 #include "Conversion.h"
 #include "AddVariableAction.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 template <>

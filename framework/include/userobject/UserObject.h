@@ -25,7 +25,6 @@
 #include "ScalarCoupleable.h"
 #include "SetupInterface.h"
 
-// libMesh includes
 #include "libmesh/parallel.h"
 
 // Forward declarations

@@ -19,7 +19,6 @@
 #include "MooseError.h"
 #include "DTKInterpolationHelper.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 
 // Ignore warnings coming from Trilinos/DTK headers.

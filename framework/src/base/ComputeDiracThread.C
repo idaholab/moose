@@ -23,7 +23,6 @@
 #include "DiracKernel.h"
 #include "Assembly.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem, SparseMatrix<Number> * jacobian)

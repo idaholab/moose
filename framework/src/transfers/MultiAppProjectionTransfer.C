@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/linear_implicit_system.h"
 #include "libmesh/mesh_function.h"

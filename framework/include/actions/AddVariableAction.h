@@ -19,7 +19,6 @@
 #include "Action.h"
 #include "OutputInterface.h"
 
-// libMesh includes
 #include "libmesh/fe_type.h"
 
 // Forward declerations

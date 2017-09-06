@@ -21,7 +21,6 @@
 #include "MooseError.h"
 #include "Backup.h"
 
-// libMesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/parallel.h"

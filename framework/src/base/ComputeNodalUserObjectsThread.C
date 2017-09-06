@@ -19,7 +19,6 @@
 #include "MooseMesh.h"
 #include "NodalUserObject.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(

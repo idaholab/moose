@@ -19,7 +19,6 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 

@@ -15,7 +15,6 @@
 #include "MeshSideSet.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/mesh_modification.h"
 
 template <>

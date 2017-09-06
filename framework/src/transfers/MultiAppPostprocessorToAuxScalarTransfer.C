@@ -21,7 +21,6 @@
 #include "MultiApp.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 

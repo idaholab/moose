@@ -33,7 +33,6 @@
 #include "Executioner.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 #include "libmesh/linear_implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"

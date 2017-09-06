@@ -18,7 +18,6 @@
 // Moose Includes
 #include "MooseError.h"
 
-// libMesh includes
 #include "libmesh/parallel.h"
 
 // C++ includes

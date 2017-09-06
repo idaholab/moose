@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 /**

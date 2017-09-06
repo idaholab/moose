@@ -24,7 +24,6 @@
 #include "MooseVariableInterface.h"
 #include "MultiAppDTKUserObjectEvaluator.h"
 
-// libMesh includes
 #include "libmesh/dtk_adapter.h"
 
 // Ignore warnings coming from DTK/Trilinos headers

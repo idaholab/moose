@@ -20,7 +20,6 @@
 #include "MooseTypes.h"
 #include "MultiApp.h"
 
-// libMesh includes
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"

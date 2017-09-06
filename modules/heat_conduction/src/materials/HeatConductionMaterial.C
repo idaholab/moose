@@ -8,7 +8,6 @@
 #include "HeatConductionMaterial.h"
 #include "Function.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

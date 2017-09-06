@@ -14,7 +14,6 @@
 
 #include "ErrorFractionMarker.h"
 
-// libMesh includes
 #include "libmesh/error_vector.h"
 
 template <>

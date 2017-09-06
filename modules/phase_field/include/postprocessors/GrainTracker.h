@@ -11,7 +11,6 @@
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
 
-// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 class GrainTracker;

@@ -19,7 +19,6 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 
-// libMesh includes
 #include "libmesh/parallel_object.h"
 
 class MooseApp;

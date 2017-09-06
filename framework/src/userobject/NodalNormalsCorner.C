@@ -19,7 +19,6 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/numeric_vector.h"
 
 Threads::spin_mutex nodal_normals_corner_mutex;

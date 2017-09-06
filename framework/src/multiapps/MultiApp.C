@@ -29,7 +29,6 @@
 #include "CommandLine.h"
 #include "Conversion.h"
 
-// libMesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
 

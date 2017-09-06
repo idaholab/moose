@@ -19,7 +19,6 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 
-// libMesh includes
 #include "libmesh/partitioner.h"
 
 // Forward declarations

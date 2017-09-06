@@ -20,7 +20,6 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 template <>
