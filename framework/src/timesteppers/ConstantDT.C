@@ -26,6 +26,7 @@ validParams<ConstantDT>()
       "growth_factor>=1",
       "Maximum ratio of new to previous timestep sizes following a step that required the time"
       " step to be cut due to a failed solve.");
+  params.addClassDescription("Timestepper that takes a constant time step size");
   return params;
 }
 

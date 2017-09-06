@@ -23,6 +23,7 @@ validParams<IsotropicPlasticity>()
   params.addParam<Real>("hardening_constant", "Hardening slope");
   params.addParam<FunctionName>("hardening_function",
                                 "True stress as a function of plastic strain");
+  params.addClassDescription("Models the instantaneous plasticity of Zry cladding");
 
   return params;
 }

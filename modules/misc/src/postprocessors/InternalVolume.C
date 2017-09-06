@@ -20,6 +20,7 @@ validParams<InternalVolume>()
   params.addParam<Real>(
       "addition", 0, "An additional volume to be included in the internal volume calculation");
   params.set<bool>("use_displaced_mesh") = true;
+  params.addClassDescription("Computes the volume of an enclosed space");
   return params;
 }
 
