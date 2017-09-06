@@ -242,7 +242,7 @@ camelCaseToUnderscore(const std::string & camel_case_name)
 {
   string replaced = camel_case_name;
   // Put underscores in front of each contiguous set of capital letters
-  pcrecpp::RE("(?!^)([A-Z]+)").GlobalReplace("_\\1", &replaced);
+  pcrecpp::RE("(?!^)(?<![A-Z])([A-Z]+)").GlobalReplace("_\\1", &replaced);
 
   // Convert all capital letters to lower case
   std::transform(replaced.begin(), replaced.end(), replaced.begin(), ::tolower);
