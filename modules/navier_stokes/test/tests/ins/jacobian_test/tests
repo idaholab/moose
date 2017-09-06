@@ -6,9 +6,16 @@
     recover = false
     mesh_mode = REPLICATED
   [../]
-  [./jacobian_supg_test]
+  [./jacobian_stabilized_test]
     type = AnalyzeJacobian
-    input = jacobian_supg_test.i
+    input = jacobian_stabilized_test.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
+  [./jacobian_traction_stabilized_test]
+    type = AnalyzeJacobian
+    input = jacobian_traction_stabilized.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     mesh_mode = REPLICATED

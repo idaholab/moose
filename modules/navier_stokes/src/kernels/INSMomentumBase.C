@@ -4,168 +4,186 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #include "INSMomentumBase.h"
 
 template <>
 InputParameters
 validParams<INSMomentumBase>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<INSBase>();
 
-  params.addClassDescription("This class computes the spatial part of the momentum equation "
-                             "residual and Jacobian for the incompressible Navier-Stokes momentum "
-                             "equation, calling a virtual function to get the viscous "
-                             "contribution.");
-  // Coupled variables
-  params.addRequiredCoupledVar("u", "x-velocity");
-  params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
-  params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
-  params.addRequiredCoupledVar("p", "pressure");
-
-  // Required parameters
-  params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  params.addRequiredParam<unsigned>(
-      "component",
-      "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
-  params.addParam<bool>("integrate_p_by_parts",
-                        true,
-                        "Allows simulations to be run with pressure BC if set to false");
-
-  // Optional parameters
-  params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
-  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
-  params.addParam<bool>("convective_term", true, "Toggles the convective term");
-
+  params.addRequiredParam<unsigned>("component", "The velocity component that this is applied to.");
+  params.addParam<bool>(
+      "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts.");
+  params.addParam<bool>(
+      "supg", false, "Whether to perform SUPG stabilization of the momentum residuals");
   return params;
 }
 
 INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
-  : Kernel(parameters),
-
-    // Coupled variables
-    _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
-    _w_vel(coupledValue("w")),
-    _p(coupledValue("p")),
-
-    // Gradients
-    _grad_u_vel(coupledGradient("u")),
-    _grad_v_vel(coupledGradient("v")),
-    _grad_w_vel(coupledGradient("w")),
-    _grad_p(coupledGradient("p")),
-
-    // Variable numberings
-    _u_vel_var_number(coupled("u")),
-    _v_vel_var_number(coupled("v")),
-    _w_vel_var_number(coupled("w")),
-    _p_var_number(coupled("p")),
-
-    // Required parameters
-    _gravity(getParam<RealVectorValue>("gravity")),
+  : INSBase(parameters),
     _component(getParam<unsigned>("component")),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
-
-    // Material properties
-    _mu(getMaterialProperty<Real>("mu_name")),
-    _rho(getMaterialProperty<Real>("rho_name")),
-
-    // Convective term toggling
-    _convective(getParam<bool>("convective_term"))
+    _supg(getParam<bool>("supg"))
 {
+  if (_supg && !_convective_term)
+    mooseError("It doesn't make sense to conduct SUPG stabilization without a convective term.");
 }
 
 Real
 INSMomentumBase::computeQpResidual()
 {
-  // The convection part, rho * (u.grad) * u_component * v.
-  // Note: _grad_u is the gradient of the _component entry of the velocity vector.
-  const Real convective_part =
-      _convective
-          ? _rho[_qp] * (_u_vel[_qp] * _grad_u[_qp](0) + _v_vel[_qp] * _grad_u[_qp](1) +
-                         _w_vel[_qp] * _grad_u[_qp](2)) *
-                _test[_i][_qp]
-          : 0.0;
+  Real r = 0;
 
-  // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
-  Real pressure_part = 0.0;
+  // viscous term
+  r += computeQpResidualViscousPart();
+
+  // pressure term
   if (_integrate_p_by_parts)
-    pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
+    r += _grad_test[_i][_qp](_component) * weakPressureTerm();
   else
-    pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
+    r += _test[_i][_qp] * strongPressureTerm()(_component);
 
-  // Call derived class to compute the viscous contribution.
-  const Real viscous_part = computeQpResidualViscousPart();
+  // body force term
+  r += _test[_i][_qp] * bodyForcesTerm()(_component);
 
-  // Body force term
-  const Real body_force_part = -_rho[_qp] * _gravity(_component) * _test[_i][_qp];
+  // convective term
+  if (_convective_term)
+    r += _test[_i][_qp] * convectiveTerm()(_component);
 
-  return convective_part + pressure_part + viscous_part + body_force_part;
+  if (_supg)
+    r += computeQpPGResidual();
+
+  return r;
+}
+
+Real
+INSMomentumBase::computeQpPGResidual()
+{
+  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+
+  RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
+  RealVectorValue viscous_term =
+      _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
+  RealVectorValue transient_term =
+      _transient_term ? timeDerivativeTerm() : RealVectorValue(0, 0, 0);
+
+  return tau() * U * _grad_test[_i][_qp] * (convective_term + viscous_term + transient_term +
+                                            strongPressureTerm() + bodyForcesTerm())(_component);
+
+  // For GLS as opposed to SUPG stabilization, one would need to modify the test function functional
+  // space to include second derivatives of the Galerkin test functions corresponding to the viscous
+  // term. This would look like:
+  // Real lap_test =
+  //     _second_test[_i][_qp](0, 0) + _second_test[_i][_qp](1, 1) + _second_test[_i][_qp](2, 2);
+
+  // Real pg_viscous_r = -_mu[_qp] * lap_test * tau() *
+  //                     (convective_term + viscous_term + strongPressureTerm()(_component) +
+  //                      bodyForcesTerm())(_component);
 }
 
 Real
 INSMomentumBase::computeQpJacobian()
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  Real jac = 0;
 
-  // Convective part
-  const Real convective_part =
-      _convective
-          ? _rho[_qp] * ((U * _grad_phi[_j][_qp]) + _phi[_j][_qp] * _grad_u[_qp](_component)) *
-                _test[_i][_qp]
-          : 0.0;
+  // viscous term
+  jac += computeQpJacobianViscousPart();
 
-  // Call derived class to compute the viscous contribution.
-  const Real viscous_part = computeQpJacobianViscousPart();
+  // convective term
+  if (_convective_term)
+    jac += _test[_i][_qp] * dConvecDUComp(_component)(_component);
 
-  return convective_part + viscous_part;
+  if (_supg)
+    jac += computeQpPGJacobian(_component);
+
+  return jac;
 }
 
 Real
+INSMomentumBase::computeQpPGJacobian(unsigned comp)
+{
+  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  RealVectorValue d_U_d_U_comp(0, 0, 0);
+  d_U_d_U_comp(comp) = _phi[_j][_qp];
+
+  Real convective_term = _convective_term ? convectiveTerm()(_component) : 0;
+  Real d_convective_term_d_u_comp = _convective_term ? dConvecDUComp(comp)(_component) : 0;
+  Real viscous_term =
+      _laplace ? strongViscousTermLaplace()(_component) : strongViscousTermTraction()(_component);
+  Real d_viscous_term_d_u_comp = _laplace ? dStrongViscDUCompLaplace(comp)(_component)
+                                          : dStrongViscDUCompTraction(comp)(_component);
+  Real transient_term = _transient_term ? timeDerivativeTerm()(_component) : 0;
+  Real d_transient_term_d_u_comp = _transient_term ? dTimeDerivativeDUComp(comp)(_component) : 0;
+
+  return dTauDUComp(comp) * U * _grad_test[_i][_qp] *
+             (convective_term + viscous_term + strongPressureTerm()(_component) +
+              bodyForcesTerm()(_component) + transient_term) +
+         tau() * d_U_d_U_comp * _grad_test[_i][_qp] *
+             (convective_term + viscous_term + strongPressureTerm()(_component) +
+              bodyForcesTerm()(_component) + transient_term) +
+         tau() * U * _grad_test[_i][_qp] *
+             (d_convective_term_d_u_comp + d_viscous_term_d_u_comp + d_transient_term_d_u_comp);
+}
+
+// Fix me
+Real
 INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 {
-  // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
+  Real jac = 0;
   if (jvar == _u_vel_var_number)
   {
-    const Real convective_part =
-        _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp] : 0.0;
+    Real convective_term = _convective_term ? _test[_i][_qp] * dConvecDUComp(0)(_component) : 0.;
+    Real viscous_term = computeQpOffDiagJacobianViscousPart(jvar);
 
-    // Call derived class to compute the viscous contribution.
-    const Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
+    jac += convective_term + viscous_term;
 
-    return convective_part + viscous_part;
+    if (_supg)
+      jac += computeQpPGJacobian(0);
+
+    return jac;
   }
-
   else if (jvar == _v_vel_var_number)
   {
-    const Real convective_part =
-        _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp] : 0.0;
+    Real convective_term = _convective_term ? _test[_i][_qp] * dConvecDUComp(1)(_component) : 0.;
+    Real viscous_term = computeQpOffDiagJacobianViscousPart(jvar);
 
-    // Call derived class to compute the viscous contribution.
-    const Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
+    jac += convective_term + viscous_term;
 
-    return convective_part + viscous_part;
+    if (_supg)
+      jac += computeQpPGJacobian(1);
+
+    return jac;
   }
-
   else if (jvar == _w_vel_var_number)
   {
-    const Real convective_part =
-        _convective ? _rho[_qp] * _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp] : 0.0;
+    Real convective_term = _convective_term ? _test[_i][_qp] * dConvecDUComp(2)(_component) : 0.;
+    Real viscous_term = computeQpOffDiagJacobianViscousPart(jvar);
 
-    // Call derived class to compute the viscous contribution.
-    const Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
+    jac += convective_term + viscous_term;
 
-    return convective_part + viscous_part;
+    if (_supg)
+      jac += computeQpPGJacobian(2);
+
+    return jac;
   }
 
   else if (jvar == _p_var_number)
   {
     if (_integrate_p_by_parts)
-      return -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
+      jac += _grad_test[_i][_qp](_component) * dWeakPressureDPressure();
     else
-      return _grad_phi[_j][_qp](_component) * _test[_i][_qp];
+      jac += _test[_i][_qp] * dStrongPressureDPressure()(_component);
+
+    if (_supg)
+    {
+      RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+      jac += tau() * U * _grad_test[_i][_qp] * dStrongPressureDPressure()(_component);
+    }
+
+    return jac;
   }
 
   else
-    return 0.0;
+    return 0;
 }
