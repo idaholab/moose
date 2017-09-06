@@ -38,9 +38,6 @@ BreakBoundaryOnSubdomain::BreakBoundaryOnSubdomain(const InputParameters & param
 void
 BreakBoundaryOnSubdomain::modify()
 {
-  // this modifier is not designed for working with distributed mesh
-  _mesh_ptr->errorIfDistributedMesh("BreakBoundaryOnSubdomain");
-
   // get the mesh and boundary info
   auto & mesh = _mesh_ptr->getMesh();
   auto & boundary_info = mesh.get_boundary_info();
@@ -54,12 +51,18 @@ BreakBoundaryOnSubdomain::modify()
       breaking_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_name));
   }
   else
+  {
     breaking_boundary_ids = boundary_info.get_boundary_ids();
+
+    // We might be on a distributed mesh with remote boundary ids
+    if (!mesh.is_replicated())
+      this->comm().set_union(breaking_boundary_ids);
+  }
 
   auto end_el = mesh.active_elements_end();
 
   // create a list of new boundary names
-  std::set<BoundaryName> new_boundary_name_set;
+  std::set<std::string> new_boundary_name_set;
   for (auto el = mesh.active_elements_begin(); el != end_el; ++el)
   {
     auto elem = *el;
@@ -76,6 +79,11 @@ BreakBoundaryOnSubdomain::modify()
                                         subdomain_name);
     }
   }
+
+  // We might be on a distributed mesh with remote elements that had
+  // new boundary ids added
+  if (!mesh.is_replicated())
+    this->comm().set_union(new_boundary_name_set);
 
   // assign boundary IDs to the boundaries to be added
   std::vector<BoundaryName> new_boundary_names(new_boundary_name_set.begin(),
