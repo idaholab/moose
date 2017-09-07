@@ -23,13 +23,13 @@ class ImageDiff(FileTester):
     def getOutputFiles(self):
         return self.specs['imagediff']
 
-    def processResults(self, moose_dir, retcode, options, output):
+    def processResults(self, moose_dir, options, output):
         """
         Perform image diff
         """
 
         # Call base class processResults
-        FileTester.processResults(self, moose_dir, retcode, options, output)
+        FileTester.processResults(self, moose_dir, options, output)
         if self.getStatus() == self.bucket_fail:
             return output
 

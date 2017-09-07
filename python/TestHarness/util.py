@@ -3,7 +3,6 @@ import subprocess
 from mooseutils import colorText
 from collections import namedtuple
 import json
-from tempfile import TemporaryFile
 
 TERM_COLS = 110
 
@@ -118,26 +117,6 @@ def runCommand(cmd, cwd=None):
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
-
-def launchTesterCommand(tester, command):
-    """
-    Method to enter the tester directory, execute a command, and return the process
-    and temporary output file objects.
-    """
-
-    try:
-        f = TemporaryFile()
-        # On Windows, there is an issue with path translation when the command is passed in
-        # as a list.
-        if platform.system() == "Windows":
-            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=tester.getTestDir())
-        else:
-            process = subprocess.Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=tester.getTestDir())
-    except:
-        print("Error in launching a new task", command)
-        raise
-
-    return (process, f)
 
 ## print an optionally colorified test result
 #

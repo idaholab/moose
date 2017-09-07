@@ -176,7 +176,7 @@ class RunApp(Tester):
 
         return command
 
-    def testFileOutput(self, moose_dir, retcode, options, output):
+    def testFileOutput(self, moose_dir, options, output):
         """ Set a failure status for expressions found in output """
         reason = ''
         specs = self.specs
@@ -199,12 +199,12 @@ class RunApp(Tester):
             # in the derived class.
             if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
                 reason = 'ERRMSG'
-            elif retcode == 0 and specs['should_crash'] == True:
+            elif self.exit_code == 0 and specs['should_crash'] == True:
                 reason = 'NO CRASH'
-            elif retcode != 0 and specs['should_crash'] == False:
+            elif self.exit_code != 0 and specs['should_crash'] == False:
                 reason = 'CRASH'
             # Valgrind runs
-            elif retcode == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+            elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
                 reason = 'MEMORY ERROR'
 
         if reason != '':
@@ -212,7 +212,7 @@ class RunApp(Tester):
 
         return reason
 
-    def processResults(self, moose_dir, retcode, options, output):
+    def processResults(self, moose_dir, options, output):
         """
         Wrapper method for testFileOutput.
 
@@ -222,7 +222,7 @@ class RunApp(Tester):
         to prevent derived testers from having a successful status set, before
         actually running their derived processResults method.
         """
-        reason = self.testFileOutput(moose_dir, retcode, options, output)
+        reason = self.testFileOutput(moose_dir, options, output)
 
         # Populate the bucket
         if reason != '':

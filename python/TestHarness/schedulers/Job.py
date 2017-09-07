@@ -1,20 +1,45 @@
-import re, os, platform
+import re
 from timeit import default_timer as clock
-from signal import SIGTERM
-from TestHarness import util
 
-class TesterData(object):
+
+class Timer(object):
     """
-    The TesterData class is a simple container for the tester and its associated output file object, the DAG,
+    A helper class for testers to track the time it takes to run.
+
+    Every call to the start method must be followed by a call to stop.
+    """
+    def __init__(self):
+        self.starts = []
+        self.ends = []
+    def start(self):
+        """ starts the timer clock """
+        self.starts.append(clock())
+    def stop(self):
+        """ stop/pauses the timer clock """
+        self.ends.append(clock())
+    def cumulativeDur(self):
+        """ returns the total/cumulative time taken by the timer """
+        diffs = [end - start for start, end in zip(self.starts, self.ends)]
+        return sum(diffs)
+    def avgerageDur(self):
+        return self.cumulativeDur() / len(self.starts)
+    def nRuns(self):
+        return len(self.starts)
+    def reset(self):
+        self.starts = []
+        self.ends = []
+
+class Job(object):
+    """
+    The Job class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, and the start and end times.
     """
     def __init__(self, tester, tester_dag, options):
         self.options = options
         self.__tester = tester
+        self.timer = Timer()
         self.__dag = tester_dag
         self.__outfile = None
-        self.__process = None
-        self.__exit_code = 0
         self.__start_time = clock()
         self.__end_time = None
         self.__std_out = ''
@@ -32,50 +57,27 @@ class TesterData(object):
         """ Wrapper method to return the testers test name """
         return self.__tester.getTestName()
 
-    def processCommand(self, command):
+
+    def run(self):
         """
         A blocking method to handle the exit status of the process object while keeping track of the
         time the process was active. When the process exits, read the output and close the file.
         """
+        self.__tester.prepare(self.options)
 
         if self.options.dry_run or not self.__tester.shouldExecute():
             self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
             return
 
-        # Run the command and get the process and tempfile
-        (process, output_file) = util.launchTesterCommand(self.__tester, command)
-
-        self.__process = process
-        self.__outfile = output_file
-        self.__start_time = clock()
-
-        process.wait()
-
-        self.__end_time = clock()
-        self.__exit_code = process.poll()
-
-        # store the contents of output, and close the file
-        self.__std_out = util.readOutput(self.__outfile, self.options)
-        self.__outfile.close()
-
-        return process
+        self.timer.reset()
+        self.__tester.run(self.timer, self.options)
+        self.__start_time = self.timer.starts[0]
+        self.__end_time = self.timer.ends[-1]
+        self.__std_out = self.__tester.std_out
 
     def killProcess(self):
         """ Kill remaining process that may be running """
-
-        if self.__process is not None:
-            try:
-                if platform.system() == "Windows":
-                    self.__process.terminate()
-                else:
-                    pgid = os.getpgid(self.__process.pid)
-                    os.killpg(pgid, SIGTERM)
-            except OSError: # Process already terminated
-                pass
-
-    def getExitCode(self):
-        """ Return exit code """
-        return self.__exit_code
+        self.__tester.killCommand()
 
     def getStartTime(self):
         """ Return the time the process started """
@@ -91,7 +93,7 @@ class TesterData(object):
 
     def setOutput(self, output):
         """ Method to allow testers to overwrite the output if certain conditions are met """
-        if self.__outfile is not None and not self.__outfile.closed:
+        if self.__tester.outfile is not None and not self.__tester.outfile.closed:
             return
         self.__std_out = output
 
@@ -112,7 +114,7 @@ class TesterData(object):
         if self.getActiveTime():
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():
-            return self.getEndTime() - self.getStartTime()
+            return self.timer.cumulativeDur()
         elif self.getStartTime() and self.__tester.isPending():
             # If the test is still running, return current run time instead
             return max(0.0, clock() - self.getStartTime())
