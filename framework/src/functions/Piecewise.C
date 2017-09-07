@@ -171,17 +171,6 @@ Piecewise::buildFromFile(std::vector<Real> & x, std::vector<Real> & y)
                format == "columns" ? "rows" : "columns",
                "\" or set \"xy_in_file_only\" to false?");
 
-  if (data.size() > 2 && x_index < 2 && y_index < 2)
-    mooseError("In Piecewise ",
-               _name,
-               ": Read more than two ",
-               format,
-               " of data from file '",
-               data_file_name,
-               "'.  Did you mean to use \"format = ",
-               format == "columns" ? "rows" : "columns",
-               "\"?");
-
   // Update the input vectors to contained the desired data
   x = reader.getData(x_index);
   y = reader.getData(y_index);
@@ -207,10 +196,9 @@ Piecewise::buildFromXY(std::vector<Real> & x, std::vector<Real> & y)
   std::vector<Real> xy = getParam<std::vector<Real>>("xy_data");
   unsigned int xy_size = xy.size();
   if (xy_size % 2 != 0)
-  {
     mooseError(
         "In Piecewise ", _name, ": Length of data provided in 'xy_data' must be a multiple of 2.");
-  }
+
   unsigned int x_size = xy_size / 2;
   x.reserve(x_size);
   y.reserve(x_size);
