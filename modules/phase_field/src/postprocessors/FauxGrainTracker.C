@@ -166,10 +166,11 @@ FauxGrainTracker::execute()
       _fe_problem.reinitElemPhys(current_elem, centroid, 0);
 
       auto entity = current_elem->id();
-      auto map_it = _entity_var_to_features.lower_bound(entity);
-      if (map_it == _entity_var_to_features.end() || map_it->first != entity)
-        map_it = _entity_var_to_features.emplace_hint(
-            map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+      auto insert_pair =
+          moose_try_emplace(_entity_var_to_features,
+                            entity,
+                            std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+      auto & vec_ref = insert_pair.first->second;
 
       for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
       {
@@ -184,7 +185,7 @@ FauxGrainTracker::execute()
           _vol_count[var_num]++;
           // Sum the centroid values for now, we'll average them later
           _centroid[var_num] += current_elem->centroid();
-          map_it->second[var_num] = var_num;
+          vec_ref[var_num] = var_num;
           break;
         }
       }
