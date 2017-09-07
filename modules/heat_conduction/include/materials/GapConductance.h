@@ -71,8 +71,7 @@ protected:
 
   const VariableValue & _temp;
 
-  bool _gap_geometry_params_set;
-  GAP_GEOMETRY _gap_geometry_type;
+  GAP_GEOMETRY & _gap_geometry_type;
 
   bool _quadrature;
 
@@ -106,8 +105,8 @@ protected:
   DofMap * _dof_map;
   const bool _warnings;
 
-  Point _p1;
-  Point _p2;
+  Point & _p1;
+  Point & _p2;
 };
 
 template <>
