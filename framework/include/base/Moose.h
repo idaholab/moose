@@ -54,6 +54,29 @@ class Factory;
 #define FORTRAN_CALL(name) name##_
 #endif
 
+/**
+ * Function to mirror the behavior of the C++17 std::map::try_emplace() method (no hint).
+ * @param m The std::map
+ * @param k The key use to insert the pair
+ * @param args The value to be inserted. This can be a moveable type but won't be moved
+ *             if the insertion is successful.
+ */
+template <class M, class... Args>
+std::pair<typename M::iterator, bool>
+moose_try_emplace(M & m, const typename M::key_type & k, Args &&... args)
+{
+  auto it = m.lower_bound(k);
+  if (it == m.end() || m.key_comp()(k, it->first))
+  {
+    return {m.emplace_hint(it,
+                           std::piecewise_construct,
+                           std::forward_as_tuple(k),
+                           std::forward_as_tuple(std::forward<Args>(args)...)),
+            true};
+  }
+  return {it, false};
+}
+
 // forward declarations
 class Syntax;
 class FEProblemBase;
