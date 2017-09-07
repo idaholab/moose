@@ -20,7 +20,6 @@
 #include "RigidBodyModesRZ.h"
 #include "RigidBodyModes3D.h"
 #include "CoupledDirectionalMeshHeightInterpolation.h"
-#include "CInterfacePosition.h"
 #include "ThermoDiffusion.h"
 
 template <>
@@ -80,8 +79,6 @@ MiscApp::registerObjects(Factory & factory)
 
   registerPostprocessor(InternalVolume);
   registerPostprocessor(SharpInterfaceForcing);
-
-  registerPostprocessor(CInterfacePosition);
 }
 
 // External entry point for dynamic syntax association
