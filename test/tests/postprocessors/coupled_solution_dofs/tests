@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'coupled_solution_dofs.i'
+    csvdiff = 'coupled_solution_dofs_out.csv'
+    max_parallel = 3
+    max_threads = 3
+  [../]
+[]

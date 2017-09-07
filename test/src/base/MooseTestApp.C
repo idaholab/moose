@@ -221,7 +221,9 @@
 #include "NumAdaptivityCycles.h"
 #include "TestDiscontinuousValuePP.h"
 #include "RandomPostprocessor.h"
+#include "ElementMomentSum.h"
 #include "ChannelGradientVectorPostprocessor.h"
+#include "InternalSideJump.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -561,6 +563,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(NumAdaptivityCycles);
   registerPostprocessor(TestDiscontinuousValuePP);
   registerPostprocessor(RandomPostprocessor);
+  registerPostprocessor(ElementMomentSum);
+  registerPostprocessor(InternalSideJump);
 
   registerVectorPostprocessor(LateDeclarationVectorPostprocessor);
   registerVectorPostprocessor(ChannelGradientVectorPostprocessor);
