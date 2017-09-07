@@ -579,6 +579,69 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
     return var->nodalValueDotNeighbor();
 }
 
+const DenseVector<Number> &
+Coupleable::coupledSolutionDoFs(const std::string & var_name, unsigned int comp)
+{
+  // default coupling is not available for elemental solutions
+  if (!isCoupled(var_name))
+    mooseError("invalid variable name for coupledSolutionDoFs");
+
+  if (_nodal)
+    mooseError("nodal objects should not call coupledSolutionDoFs");
+
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->solutionDoFs() : var->solutionDoFsOld();
+  else
+    return (_c_is_implicit) ? var->solutionDoFsNeighbor() : var->solutionDoFsOldNeighbor();
+}
+
+const DenseVector<Number> &
+Coupleable::coupledSolutionDoFsOld(const std::string & var_name, unsigned int comp)
+{
+  // default coupling is not available for elemental solutions
+  if (!isCoupled(var_name))
+    mooseError("invalid variable name for coupledSolutionDoFsOld");
+
+  if (_nodal)
+    mooseError("nodal objects should not call coupledSolutionDoFsOld");
+
+  validateExecutionerType(var_name);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->solutionDoFsOld() : var->solutionDoFsOlder();
+  else
+    return (_c_is_implicit) ? var->solutionDoFsOldNeighbor() : var->solutionDoFsOlderNeighbor();
+}
+
+const DenseVector<Number> &
+Coupleable::coupledSolutionDoFsOlder(const std::string & var_name, unsigned int comp)
+{
+  // default coupling is not available for elemental solutions
+  if (!isCoupled(var_name))
+    mooseError("invalid variable name for coupledSolutionDoFsOlder");
+
+  if (_nodal)
+    mooseError("nodal objects should not call coupledSolutionDoFsOlder");
+
+  validateExecutionerType(var_name);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+  if (_c_is_implicit)
+  {
+    if (!_coupleable_neighbor)
+      return var->solutionDoFsOlder();
+    else
+      return var->solutionDoFsOlderNeighbor();
+  }
+  else
+    mooseError("Older values not available for explicit schemes");
+}
+
 void
 Coupleable::validateExecutionerType(const std::string & name) const
 {
