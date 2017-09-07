@@ -33,6 +33,7 @@
     type = 'Exodiff'
     input = 'moving.i'
     exodiff = 'moving_out.e'
+    allow_warnings = true
   [../]
 
   [./gap_conductivity_property]

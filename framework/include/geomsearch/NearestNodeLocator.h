@@ -69,6 +69,12 @@ public:
   NodeIdRange & slaveNodeRange() { return *_slave_node_range; }
 
   /**
+   * Reconstructs the KDtree, updates the patch for the nodes in slave_nodes,
+   * and updates the closest neighbor for these nodes in nearest node info.
+   */
+  void updatePatch(std::vector<dof_id_type> & slave_nodes);
+
+  /**
    * Data structure used to hold nearest node info.
    */
   class NearestNodeInfo
@@ -94,12 +100,16 @@ public:
   BoundaryID _boundary2;
 
   bool _first;
+  bool _ghost_elements;
   std::vector<dof_id_type> _slave_nodes;
 
   std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
 
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;
+
+  // Contact patch update strategy
+  const unsigned int _patch_update_strategy;
 
   // The furthest through the patch that had to be searched for any node last time
   Real _max_patch_percentage;

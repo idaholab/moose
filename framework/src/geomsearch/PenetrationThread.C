@@ -442,6 +442,13 @@ PenetrationThread::operator()(const NodeIdRange & range)
 
     if (!info_set)
     {
+      // If penetration is not detected within the saved patch, it is possible
+      // that the slave node has moved outside the saved patch. So, the patch
+      // for the slave nodes saved in _recheck_slave_nodes has to be updated
+      // and the penetration detection has to be re-run on the updated patch.
+
+      _recheck_slave_nodes.push_back(node_id);
+
       delete info;
       info = NULL;
     }
@@ -464,8 +471,11 @@ PenetrationThread::operator()(const NodeIdRange & range)
 }
 
 void
-PenetrationThread::join(const PenetrationThread & /*other*/)
+PenetrationThread::join(const PenetrationThread & other)
 {
+  _recheck_slave_nodes.insert(_recheck_slave_nodes.end(),
+                              other._recheck_slave_nodes.begin(),
+                              other._recheck_slave_nodes.end());
 }
 
 void

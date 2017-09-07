@@ -46,7 +46,9 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
     _slave_node_range(NULL),
     _boundary1(boundary1),
     _boundary2(boundary2),
-    _first(true)
+    _first(true),
+    _ghost_elements(true),
+    _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   /*
   //sanity check on boundary ids
@@ -73,6 +75,7 @@ NearestNodeLocator::findNodes()
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the slave nodes.  This will speed searching later.
    */
+
   if (_first)
   {
     _first = false;
@@ -85,7 +88,7 @@ NearestNodeLocator::findNodes()
     std::vector<dof_id_type> trial_master_nodes;
 
     // Build a bounding box.  No reason to consider nodes outside of our inflated BB
-    BoundingBox * my_inflated_box = NULL;
+    std::unique_ptr<BoundingBox> my_inflated_box = nullptr;
 
     const std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
 
@@ -94,27 +97,15 @@ NearestNodeLocator::findNodes()
     {
       BoundingBox my_box = MeshTools::create_local_bounding_box(_mesh);
 
-      Real distance_x = 0;
-      Real distance_y = 0;
-      Real distance_z = 0;
+      Point distance;
+      for (unsigned int i = 0; i < inflation.size(); ++i)
+        distance(i) = inflation[i];
 
-      distance_x = inflation[0];
-
-      if (inflation.size() > 1)
-        distance_y = inflation[1];
-
-      if (inflation.size() > 2)
-        distance_z = inflation[2];
-
-      my_inflated_box = new BoundingBox(Point(my_box.first(0) - distance_x,
-                                              my_box.first(1) - distance_y,
-                                              my_box.first(2) - distance_z),
-                                        Point(my_box.second(0) + distance_x,
-                                              my_box.second(1) + distance_y,
-                                              my_box.second(2) + distance_z));
+      my_inflated_box =
+          libmesh_make_unique<BoundingBox>(my_box.first - distance, my_box.second + distance);
     }
 
-    // Data structures to hold the Nodal Boundary conditions
+    // Data structures to hold the boundary nodes
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
     {
@@ -131,40 +122,80 @@ NearestNodeLocator::findNodes()
       }
     }
 
-    // don't need the BB anymore
-    delete my_inflated_box;
-
     const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map =
         _mesh.nodeToElemMap();
 
-    // Convert trial master nodes to a vector of Points. This would be used to
+    // Ghost the entire master and slave boundary once when nonliner_iter patch update strategy is
+    // used
+    if (_ghost_elements && _patch_update_strategy == 3)
+    {
+      // The ghosting needs to be done only once during the simulation as the master
+      // and slave boundaries do not change during the simulation.
+      _ghost_elements = false;
+
+      // Ghost the elements connected to master boundary and slave boundary_id
+      for (unsigned int i = 0; i < trial_master_nodes.size(); ++i)
+      {
+        auto node_to_elem_pair = node_to_elem_map.find(trial_master_nodes[i]);
+
+        if (node_to_elem_pair != node_to_elem_map.end())
+        {
+          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+          for (const auto & dof : elems_connected_to_node)
+            _subproblem.addGhostedElem(dof);
+        }
+      }
+
+      for (unsigned int i = 0; i < trial_slave_nodes.size(); ++i)
+      {
+        auto node_to_elem_pair = node_to_elem_map.find(trial_slave_nodes[i]);
+
+        if (node_to_elem_pair != node_to_elem_map.end())
+        {
+          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+          for (const auto & dof : elems_connected_to_node)
+            _subproblem.addGhostedElem(dof);
+        }
+      }
+    }
+
+    // Convert trial master nodes to a vector of Points. This will be used to
     // construct the Kdtree.
     std::vector<Point> master_points(trial_master_nodes.size());
     for (unsigned int i = 0; i < trial_master_nodes.size(); ++i)
     {
       const Node & node = _mesh.nodeRef(trial_master_nodes[i]);
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-        master_points[i](j) = node(j);
+      master_points[i] = node;
     }
 
     // Create object kd_tree of class KDTree using the coordinates of trial
-    // master nodes. Maximum number of points in each leaf of the Kd tree is set
-    // using max_leaf_size.
-    unsigned int max_leaf_size = 10;
-    KDTree kd_tree(master_points, max_leaf_size);
+    // master nodes.
+    KDTree kd_tree(master_points, _mesh.getMaxLeafSize());
 
     NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 
-    SlaveNeighborhoodThread snt(
-        _mesh, trial_master_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
+    SlaveNeighborhoodThread snt(_mesh,
+                                trial_master_nodes,
+                                node_to_elem_map,
+                                _mesh.getPatchSize(),
+                                _patch_update_strategy,
+                                kd_tree);
 
     Threads::parallel_reduce(trial_slave_node_range, snt);
 
-    _slave_nodes = snt._slave_nodes;
-    _neighbor_nodes = snt._neighbor_nodes;
+    if (_patch_update_strategy == 3)
+    {
+      _slave_nodes = trial_slave_nodes;
+      _neighbor_nodes = snt._neighbor_nodes;
+    }
+    else
+    {
+      _slave_nodes = snt._slave_nodes;
+      _neighbor_nodes = snt._neighbor_nodes;
 
-    for (const auto & dof : snt._ghosted_elems)
-      _subproblem.addGhostedElem(dof);
+      for (const auto & dof : snt._ghosted_elems)
+        _subproblem.addGhostedElem(dof);
+    }
 
     // Cache the slave_node_range so we don't have to build it each time
     _slave_node_range = new NodeIdRange(_slave_nodes.begin(), _slave_nodes.end(), 1);
@@ -212,6 +243,89 @@ NearestNodeLocator::nearestNode(dof_id_type node_id)
   return _nearest_node_info[node_id]._nearest_node;
 }
 
+void
+NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
+{
+  Moose::perf_log.push("NearestNodeLocator::updatePatch()", "Execution");
+
+  std::vector<dof_id_type> trial_master_nodes;
+
+  // Build a bounding box.  No reason to consider nodes outside of our inflated BB
+  std::unique_ptr<BoundingBox> my_inflated_box = nullptr;
+
+  const std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
+
+  // This means there was a user specified inflation... so we can build a BB
+  if (inflation.size() > 0)
+  {
+    BoundingBox my_box = MeshTools::create_local_bounding_box(_mesh);
+
+    Point distance;
+    for (unsigned int i = 0; i < inflation.size(); ++i)
+      distance(i) = inflation[i];
+
+    my_inflated_box =
+        libmesh_make_unique<BoundingBox>(my_box.first - distance, my_box.second + distance);
+  }
+
+  // Data structures to hold the boundary nodes
+  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  for (const auto & bnode : bnd_nodes)
+  {
+    BoundaryID boundary_id = bnode->_bnd_id;
+    dof_id_type node_id = bnode->_node->id();
+
+    // If we have a BB only consider saving this node if it's in our inflated BB
+    if (!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
+    {
+      if (boundary_id == _boundary1)
+        trial_master_nodes.push_back(node_id);
+    }
+  }
+
+  // Convert trial master nodes to a vector of Points. This will be used to construct the KDTree.
+  std::vector<Point> master_points(trial_master_nodes.size());
+  for (unsigned int i = 0; i < trial_master_nodes.size(); ++i)
+  {
+    const Node & node = _mesh.nodeRef(trial_master_nodes[i]);
+    master_points[i] = node;
+  }
+
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+
+  // Create object kd_tree of class KDTree using the coordinates of trial
+  // master nodes.
+  KDTree kd_tree(master_points, _mesh.getMaxLeafSize());
+
+  NodeIdRange slave_node_range(slave_nodes.begin(), slave_nodes.end(), 1);
+
+  SlaveNeighborhoodThread snt(_mesh,
+                              trial_master_nodes,
+                              node_to_elem_map,
+                              _mesh.getPatchSize(),
+                              _patch_update_strategy,
+                              kd_tree);
+
+  Threads::parallel_reduce(slave_node_range, snt);
+
+  // Update the neighbor nodes (patch) for these slave nodes
+  for (const auto & node_id : slave_node_range)
+    _neighbor_nodes[node_id] = snt._neighbor_nodes[node_id];
+
+  NearestNodeThread nnt(_mesh, _neighbor_nodes);
+
+  Threads::parallel_reduce(slave_node_range, nnt);
+
+  _max_patch_percentage = nnt._max_patch_percentage;
+
+  _nearest_node_info = nnt._nearest_node_info;
+
+  // Update the nearest node information corresponding to these slave nodes
+  for (const auto & node_id : slave_node_range)
+    _nearest_node_info[node_id] = nnt._nearest_node_info[node_id];
+
+  Moose::perf_log.pop("NearestNodeLocator::updatePatch()", "Execution");
+}
 //===================================================================
 NearestNodeLocator::NearestNodeInfo::NearestNodeInfo()
   : _nearest_node(NULL), _distance(std::numeric_limits<Real>::max())

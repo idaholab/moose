@@ -431,6 +431,10 @@ public:
   unsigned int getPatchSize() const;
 
   /**
+   * Getter for the maximum leaf size parameter.
+   */
+  unsigned int getMaxLeafSize() const { return _max_leaf_size; };
+  /**
    * Set the patch size update strategy
    */
   void setPatchUpdateStrategy(MooseEnum patch_update_strategy);
@@ -947,6 +951,9 @@ protected:
 
   /// The number of nodes to consider in the NearestNode neighborhood.
   unsigned int _patch_size;
+
+  // The maximum number of points in each leaf of the KDTree used in the nearest neighbor search.
+  unsigned int _max_leaf_size;
 
   /// The patch update strategy
   MooseEnum _patch_update_strategy;

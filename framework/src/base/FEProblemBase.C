@@ -210,7 +210,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
-    _currently_computing_jacobian(false),
     _started_initial_setup(false)
 {
 
@@ -2780,7 +2779,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   _current_execute_on_flag = exec_type;
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
-
   // Samplers
   executeSamplers(exec_type);
 
@@ -4394,6 +4392,20 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
     switch (_mesh.getPatchUpdateStrategy())
     {
       case 0: // Never
+        break;
+      case 3: // Nonlinear iteration
+        // This case is included in PenetrationLocator.C as the subset of slave nodes
+        // for which penetration is not detected at the current iteration is required.
+
+        // The commands below ensure that the sparsity of the Jacobian matrix is
+        // augmented at the start of the time step using neighbor nodes from the end
+        // of previous time step
+
+        reinitBecauseOfGhostingOrNewGeomObjects();
+
+        // This is needed to reinitialize PETSc output
+        initPetscOutput();
+
         break;
       case 2: // Auto
       {

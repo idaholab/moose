@@ -48,7 +48,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
-    _normal_smoothing_method(NSM_EDGE_BASED)
+    _normal_smoothing_method(NSM_EDGE_BASED),
+    _patch_update_strategy(_mesh.getPatchUpdateStrategy()),
+    _first_warning(true)
 {
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional
   // element
@@ -120,6 +122,41 @@ PenetrationLocator::detectPenetration()
                        id_list);
 
   Threads::parallel_reduce(slave_node_range, pt);
+
+  std::vector<dof_id_type> recheck_slave_nodes = pt._recheck_slave_nodes;
+
+  // Update the patch for the slave nodes in recheck_slave_nodes and re-run penetration thread on
+  // these nodes at every nonlinear iteration if patch update strategy is set to "nonlinear_iter"
+  // which is 3.
+  if (recheck_slave_nodes.size() > 0 && _patch_update_strategy == 3 &&
+      _subproblem.currentlyComputingJacobian())
+  {
+    // Update the patch for this subset of slave nodes and calculate the nearest neighbor_nodes
+    _nearest_node.updatePatch(recheck_slave_nodes);
+
+    // Re-run the penetration thread to see if these nodes are in contact with the updated patch
+    NodeIdRange recheck_slave_node_range(recheck_slave_nodes.begin(), recheck_slave_nodes.end(), 1);
+
+    Threads::parallel_reduce(recheck_slave_node_range, pt);
+  }
+
+  if (recheck_slave_nodes.size() > 0 && _patch_update_strategy != 3 &&
+      _subproblem.currentlyComputingJacobian() && _first_warning)
+  {
+    mooseWarning("Warning in PenetrationLocator. Penetration is not detected for one or "
+                 "more slave nodes. This could be because those slave nodes simply do not "
+                 "project to faces on the master surface. However, this could also be "
+                 "because contact should be enforced on those nodes, but the faces that "
+                 "they project to are outside the contact patch, which will give an "
+                 "erroneous result. Use appropriate options for 'patch_size' and "
+                 "'patch_update_strategy' in the Mesh block to avoid this issue. "
+                 "Setting 'patch_update_strategy=nonlinear_iter' is recommended because "
+                 "it completely avoids this potential issue.");
+
+    // first_warning flag is set to false to ensure that the warning is generated only once during
+    // the simulation
+    _first_warning = false;
+  }
 
   Moose::perf_log.pop("detectPenetration()", "Execution");
 }

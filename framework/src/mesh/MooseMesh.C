@@ -105,14 +105,21 @@ validParams<MooseMesh>()
                              "Specifies the sort direction if using the centroid partitioner. "
                              "Available options: x, y, z, radial");
 
-  MooseEnum patch_update_strategy("never always auto", "never");
-  params.addParam<MooseEnum>("patch_update_strategy",
-                             patch_update_strategy,
-                             "How often to update the geometric search 'patch'.  The default is to "
-                             "never update it (which is the most efficient but could be a problem "
-                             "with lots of relative motion).  'always' will update the patch every "
-                             "timestep which might be time consuming.  'auto' will attempt to "
-                             "determine when the patch size needs to be updated automatically.");
+  MooseEnum patch_update_strategy("never always auto nonlinear_iter", "never");
+  params.addParam<MooseEnum>(
+      "patch_update_strategy",
+      patch_update_strategy,
+      "How often to update the geometric search 'patch'.  The default is to "
+      "never update it (which is the most efficient but could be a problem "
+      "with lots of relative motion). 'always' will update the patch for all "
+      "slave nodes at the beginning of every timestep which might be time "
+      "consuming. 'auto' will attempt to determine at the start of which "
+      "timesteps the patch for all slave nodes needs to be updated automatically."
+      "'nonlinear_iter' updates the patch at every nonlinear iteration for a "
+      "subset of slave nodes for which penetration is not detected. If there "
+      "can be substantial relative motion between the master and slave surfaces "
+      "during the nonlinear iterations within a timestep, it is advisable to use "
+      "'nonlinear_iter' option to ensure accurate contact detection.");
 
   // Note: This parameter is named to match 'construct_side_list_from_node_list' in SetupMeshAction
   params.addParam<bool>(
@@ -130,6 +137,12 @@ validParams<MooseMesh>()
                         " when DistributedMesh is used. Value is ignored in ReplicatedMesh mode");
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
+  params.addParam<unsigned int>("max_leaf_size",
+                                10,
+                                "The maximum number of points in each leaf of the KDTree used in "
+                                "the nearest neighbor search. As the leaf size becomes larger,"
+                                "KDTree construction becomes faster but the nearest neighbor search"
+                                "becomes slower.");
 
   params.registerBase("MooseMesh");
 
@@ -160,6 +173,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
     _patch_size(getParam<unsigned int>("patch_size")),
+    _max_leaf_size(getParam<unsigned int>("max_leaf_size")),
     _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
     _allow_recovery(true),

@@ -102,6 +102,10 @@ protected:
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to
                                    // perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+
+  const unsigned int _patch_update_strategy; // Contact patch update strategy
+
+  bool _first_warning; // Flag to check for first warning
 };
 
 /**
