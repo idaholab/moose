@@ -74,16 +74,15 @@ ComputeVariableIsotropicElasticityTensor::initialSetup()
   for (unsigned int i = 0; i < _num_args; ++i)
   {
     const VariableName & iname = getVar("args", i)->name();
-    if (_fe_problem.isMatPropRequested(propertyNameFirst(_elasticity_tensor_name, iname)))
-      mooseError("Derivative of elasticity tensor requested, but not yet implemented");
-    else
+
+    if (!_fe_problem.isMatPropRequested(propertyNameFirst(_elasticity_tensor_name, iname)))
       _delasticity_tensor[i] = nullptr;
+
     for (unsigned int j = 0; j < _num_args; ++j)
     {
       const VariableName & jname = getVar("args", j)->name();
-      if (_fe_problem.isMatPropRequested(propertyNameSecond(_elasticity_tensor_name, iname, jname)))
-        mooseError("Second Derivative of elasticity tensor requested, but not yet implemented");
-      else
+      if (!_fe_problem.isMatPropRequested(
+              propertyNameSecond(_elasticity_tensor_name, iname, jname)))
         _d2elasticity_tensor[i][j] = nullptr;
     }
   }
@@ -97,8 +96,7 @@ ComputeVariableIsotropicElasticityTensor::initQpStatefulProperties()
 void
 ComputeVariableIsotropicElasticityTensor::computeQpElasticityTensor()
 {
-  _elasticity_tensor[_qp].fillFromInputVector({_youngs_modulus[_qp], _poissons_ratio[_qp]},
-                                              RankFourTensor::symmetric_isotropic_E_nu);
+  _elasticity_tensor[_qp].fillSymmetricIsotropicEandNu(_youngs_modulus[_qp], _poissons_ratio[_qp]);
 
   // Define derivatives of the elasticity tensor
   for (unsigned int i = 0; i < _num_args; ++i)
