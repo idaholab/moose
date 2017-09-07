@@ -554,8 +554,8 @@ MooseApp::executeExecutioner()
 #endif
     _executioner->init();
 
-    bool warn = _enable_unused_check == WARN_UNUSED || getParam<bool>("warn_unused");
-    bool err = _enable_unused_check == ERROR_UNUSED || getParam<bool>("error_unused");
+    bool warn = _enable_unused_check == WARN_UNUSED;
+    bool err = _enable_unused_check == ERROR_UNUSED;
     _parser.errorCheck(*_comm, warn, err);
 
     _executioner->execute();
@@ -672,7 +672,16 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 void
 MooseApp::setCheckUnusedFlag(bool warn_is_error)
 {
-  _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
+  /**
+   * _enable_unused_check is initialized to WARN_UNUSED. If an application chooses to promote
+   * this value to ERROR_UNUSED pragmatically prior to running the simulation, we certainly
+   * don't want to allow it to fall back. Therefore, we won't set it if it's already at the
+   * highest value (i.e. error). If however a developer turns it off, it can still be turned on.
+   */
+  if (_enable_unused_check != ERROR_UNUSED || warn_is_error)
+    _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
+  else
+    mooseInfo("Ignoring request to turn off or warn about unused parameters.\n");
 }
 
 void
