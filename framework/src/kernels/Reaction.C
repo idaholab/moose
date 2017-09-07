@@ -19,6 +19,8 @@ InputParameters
 validParams<Reaction>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription(
+      "Implements a simple consuming reaction term with weak form $(\\psi_i, u_h)$.");
   return params;
 }
 
