@@ -1,6 +1,6 @@
 from time import sleep
 from FactorySystem.MooseObject import MooseObject
-from TesterData import TesterData
+from Job import Job
 import os
 from contrib import dag
 from timeit import default_timer as clock
@@ -85,7 +85,7 @@ class Scheduler(MooseObject):
         # Jobs waiting to finish (includes actively running jobs)
         self.job_queue_count = 0
 
-        # Set containing our TesterData containers. We use this in the event of a KeyboardInterrupt to
+        # Set containing our Job containers. We use this in the event of a KeyboardInterrupt to
         # iterate over and kill any subprocesses
         self.tester_datas = set([])
 
@@ -251,7 +251,7 @@ class Scheduler(MooseObject):
         if self.run_pool._state:
             return
 
-        # Instance the DAG class so we can share it amongst all the TesterData containers
+        # Instance the DAG class so we can share it amongst all the Job containers
         job_dag = dag.DAG()
 
         non_runnable_jobs = set([])
@@ -264,7 +264,7 @@ class Scheduler(MooseObject):
         # Create a local dictionary of tester names to job containers. Add this dictionary to a
         # set. We will use this set as a way to gain access to their methods.
         for tester in testers:
-            name_to_job_container[tester.getTestName()] = TesterData(tester, job_dag, self.options)
+            name_to_job_container[tester.getTestName()] = Job(tester, job_dag, self.options)
             self.tester_datas.add(name_to_job_container[tester.getTestName()])
 
         # Populate job_dag with testers. This method will also return any testers which caused failures
