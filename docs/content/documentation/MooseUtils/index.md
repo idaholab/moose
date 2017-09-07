@@ -20,7 +20,7 @@ Using the DelimitedFileReader is very simple and requires three steps. First, in
 utility header file with `#include "DelimitedFileReader.h"`. Then the object
 is instantiated and read method is called, as shown in the unit test snippet below.
 
-!listing unit/src/DelimitedFileReaderTest.C start=reader("data/csv/example.csv") end=reader.getColumnNames strip-leading-whitespace=True
+!listing unit/src/DelimitedFileReaderTest.C start=reader("data/csv/example.csv") end=reader.getNames strip-leading-whitespace=True
 
 
 This class is required to include the filename upon construction and optionally it accepts
@@ -33,7 +33,7 @@ is called.
 The second argument is a flag (`bool`)---with a default of `true`---that enables or disables the
 reading of the header line, by default it is assumed that the file contains a header. If this is
 disabled the column names are generated as "column_0", "column_1", etc., thus allowing the
-`getColumnNames` to work correctly regardless of the setting for this flag.
+`getNames` to work correctly regardless of the setting for this flag.
 * **Delimiter** (optional)<br>
 The third argument (`std::string`) is the file delimiter, by default it is assumed to be a comma
 (`","`) as is expected for CSV data.
@@ -48,7 +48,7 @@ the data to the others.
 
 After the data is read using the "read" method, there are two methods used for accessing the data:
 
-* `getColumnNames`: This method returns a vector of the column names as read from the header or
+* `getNames`: This method returns a vector of the column names as read from the header or
 generated based on the number of columns when a header-less file is being examined.
-* `getColumnData`: This method returns a vector that contains another vector for each column of
-data read from the file, the column vectors correspond to the names returned from `getColumnNames`.
+* `getData`: This method returns a vector that contains another vector for each column of
+data read from the file, the column vectors correspond to the names returned from `getNames`.

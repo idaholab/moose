@@ -127,6 +127,7 @@ framework/contrib/exodiff/exodiff
 
 # Unit testing stuff
 moose_unit/test_results.xml
+!unit/data/csv/*.csv
 
 # gcov code coverage files
 *.gcno

@@ -35,13 +35,14 @@ TEST(DelimitedFileReader, BadFilename)
     ASSERT_TRUE(pos != std::string::npos);
   }
 }
+
 TEST(DelimitedFileReader, BadHeaderName)
 {
   try
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
     reader.read();
-    reader.getColumnData("second");
+    reader.getData("second");
     FAIL();
   }
   catch (const std::exception & err)
@@ -53,26 +54,42 @@ TEST(DelimitedFileReader, BadHeaderName)
   }
 }
 
+TEST(DelimitedFileReader, BadIndex)
+{
+  try
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
+    reader.read();
+    reader.getData(12345);
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what()).find("The supplied index 12345 is out-of-range");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
+
 TEST(DelimitedFileReader, Headers)
 {
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
     reader.read();
-    const std::vector<std::string> & cols = reader.getColumnNames();
+    const std::vector<std::string> & cols = reader.getNames();
     std::vector<std::string> gold = {"year", "month", "day"};
     EXPECT_EQ(cols, gold);
   }
   {
-    MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv", /*header=*/false);
+    MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
     reader.read();
-    const std::vector<std::string> & cols = reader.getColumnNames();
+    const std::vector<std::string> & cols = reader.getNames();
     std::vector<std::string> gold = {"column_0", "column_1", "column_2"};
     EXPECT_EQ(cols, gold);
   }
   {
-    MooseUtils::DelimitedFileReader reader("data/csv/example_padding_test.csv", /*header=*/false);
+    MooseUtils::DelimitedFileReader reader("data/csv/example_padding_test.csv");
     reader.read();
-    const std::vector<std::string> & cols = reader.getColumnNames();
+    const std::vector<std::string> & cols = reader.getNames();
     std::vector<std::string> gold = {"column_00",
                                      "column_01",
                                      "column_02",
@@ -93,29 +110,29 @@ TEST(DelimitedFileReader, Headers)
 
 TEST(DelimitedFileReader, Data)
 {
+  std::vector<std::vector<double>> gold = {{1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
     reader.read();
-    const std::vector<std::vector<double>> & data = reader.getColumnData();
-    std::vector<std::vector<double>> gold = {
-        {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    const std::vector<std::vector<double>> & data = reader.getData();
     EXPECT_EQ(data, gold);
   }
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
     reader.read();
-    const std::vector<double> & data = reader.getColumnData("day");
-    std::vector<double> gold = {24, 9, 1, 15};
-    EXPECT_EQ(data, gold);
+    EXPECT_EQ(reader.getData("day"), gold[2]);
+    EXPECT_EQ(reader.getData(2), gold[2]);
   }
 }
 
 TEST(DelimitedFileReader, DataChangeDelimiter)
 {
   {
-    MooseUtils::DelimitedFileReader reader("data/csv/example.txt", true, "$");
+    MooseUtils::DelimitedFileReader reader("data/csv/example.txt");
+    reader.setDelimiter("$");
     reader.read();
-    const std::vector<std::vector<double>> & data = reader.getColumnData();
+    const std::vector<std::vector<double>> & data = reader.getData();
     std::vector<std::vector<double>> gold = {
         {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
     EXPECT_EQ(data, gold);
@@ -150,7 +167,7 @@ TEST(DelimitedFileReader, BadRowValue)
   }
   catch (const std::exception & err)
   {
-    std::string gold = "Failed to convert a delimited data into double when reading row 4 in file "
+    std::string gold = "Failed to convert a delimited data into double when reading line 4 in file "
                        "data/csv/example_bad_value.csv.";
     std::size_t pos = std::string(err.what()).find(gold);
     ASSERT_TRUE(pos != std::string::npos);
@@ -180,4 +197,194 @@ TEST(DelimitedFileReader, EmptyLine)
   }
 }
 
+TEST(DelimitedFileReader, RowData)
+{
+  // Read file with empty lines
+  MooseUtils::DelimitedFileReader reader("data/csv/row_example.csv");
+  reader.setFormat("rows");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {{1, 2, 3, 4}, {10, 20, 30, 40, 50}};
+  std::vector<std::string> names = {"foo", "bar"};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("foo"), gold[0]);
+  EXPECT_EQ(reader.getData("bar"), gold[1]);
+  EXPECT_EQ(reader.getNames(), names);
+}
+
+TEST(DelimitedFileReader, RowDataNoHeader)
+{
+  // Read file with empty lines
+  MooseUtils::DelimitedFileReader reader("data/csv/row_example_no_header.csv");
+  reader.setFormat("rows");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {{1, 2, 3, 4},
+                                           {10, 20, 30, 40, 50},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301},
+                                           {300, 301}};
+  std::vector<std::string> names = {"row_00",
+                                    "row_01",
+                                    "row_02",
+                                    "row_03",
+                                    "row_04",
+                                    "row_05",
+                                    "row_06",
+                                    "row_07",
+                                    "row_08",
+                                    "row_09",
+                                    "row_10"};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("row_00"), gold[0]);
+  EXPECT_EQ(reader.getData("row_01"), gold[1]);
+  EXPECT_EQ(reader.getData("row_02"), gold[2]);
+  EXPECT_EQ(reader.getNames(), names);
+}
+
+TEST(DelimitedFileReader, RowDataComment)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/row_example_comment.csv");
+  reader.setFormat("rows");
+  reader.setComment("#");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {{0, 1, 2, 3}, {0, 4, 5, 6}};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("row_0"), gold[0]);
+  EXPECT_EQ(reader.getData("row_1"), gold[1]);
+}
+
+TEST(DelimitedFileReader, Comment)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/row_example_line_comment.csv");
+  reader.setDelimiter(",");
+  reader.setComment("#");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {{0, 0}, {1, 4}, {2, 5}, {3, 6}};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("column_0"), gold[0]);
+  EXPECT_EQ(reader.getData("column_1"), gold[1]);
+  EXPECT_EQ(reader.getData("column_2"), gold[2]);
+  EXPECT_EQ(reader.getData("column_3"), gold[3]);
+}
+
+TEST(DelimitedFileReader, AutoDelimiter)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/example_space.csv");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {{1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("year"), gold[0]);
+  EXPECT_EQ(reader.getData("month"), gold[1]);
+  EXPECT_EQ(reader.getData("day"), gold[2]);
+}
+
+TEST(DelimitedFileReader, AutoDelimiterComment)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/example_space_comment.csv");
+  reader.setFormat("rows");
+  reader.setComment("#");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {{0, 1, 2, 3}, {0, 4, 5, 6}};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("row_0"), gold[0]);
+  EXPECT_EQ(reader.getData("row_1"), gold[1]);
+}
+
+TEST(DelimitedFileReader, AutoHeader)
+{
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
+    // Set the header flag to "AUTO", which is the default, but this is what is being tested
+    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
+    reader.read();
+
+    std::vector<std::vector<double>> gold = {
+        {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    EXPECT_EQ(reader.getData(), gold);
+    EXPECT_EQ(reader.getData("year"), gold[0]);
+    EXPECT_EQ(reader.getData("month"), gold[1]);
+    EXPECT_EQ(reader.getData("day"), gold[2]);
+  }
+
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
+    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
+    reader.read();
+
+    std::vector<std::vector<double>> gold = {
+        {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    EXPECT_EQ(reader.getData(), gold);
+    EXPECT_EQ(reader.getData("year"), gold[0]);
+    EXPECT_EQ(reader.getData("month"), gold[1]);
+    EXPECT_EQ(reader.getData("day"), gold[2]);
+  }
+
+  try
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
+    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    reader.read();
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    std::string gold = "Failed to convert a delimited data into double when reading line 1";
+    std::size_t pos = std::string(err.what()).find(gold);
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
+
+TEST(DelimitedFileReader, AutoNoHeader)
+{
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
+    // Set the header flag to "AUTO", which is the default, but this is what is being tested
+    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
+    reader.read();
+
+    std::vector<std::vector<double>> gold = {
+        {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    EXPECT_EQ(reader.getData(), gold);
+    EXPECT_EQ(reader.getData("column_0"), gold[0]);
+    EXPECT_EQ(reader.getData("column_1"), gold[1]);
+    EXPECT_EQ(reader.getData("column_2"), gold[2]);
+  }
+
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
+    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    reader.read();
+
+    std::vector<std::vector<double>> gold = {
+        {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    EXPECT_EQ(reader.getData(), gold);
+    EXPECT_EQ(reader.getData("column_0"), gold[0]);
+    EXPECT_EQ(reader.getData("column_1"), gold[1]);
+    EXPECT_EQ(reader.getData("column_2"), gold[2]);
+  }
+
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
+    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
+    reader.read();
+
+    std::vector<std::vector<double>> gold = {{1980, 2011, 2013}, {10, 5, 5}, {9, 1, 15}};
+    EXPECT_EQ(reader.getData(), gold);
+    EXPECT_EQ(reader.getData("1980"), gold[0]);
+    EXPECT_EQ(reader.getData("6"), gold[1]);
+    EXPECT_EQ(reader.getData("24"), gold[2]);
+    EXPECT_EQ(reader.getNames(), std::vector<std::string>({"1980", "6", "24"}));
+  }
+}
 #endif

@@ -26,8 +26,8 @@ SmoothCircleFromFileIC::SmoothCircleFromFileIC(const InputParameters & parameter
 {
   // Read names and vectors from file
   _txt_reader.read();
-  _col_names = _txt_reader.getColumnNames();
-  _data = _txt_reader.getColumnData();
+  _col_names = _txt_reader.getNames();
+  _data = _txt_reader.getData();
   _n_circles = _data[0].size();
 
   // Check that the file has all the correct information

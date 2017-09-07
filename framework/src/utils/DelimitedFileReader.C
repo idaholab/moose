@@ -15,24 +15,24 @@
 // STL includes
 #include <sstream>
 #include <iomanip>
+#include <iterator>
 
 // MOOSE includes
 #include "DelimitedFileReader.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "pcrecpp.h"
 
 namespace MooseUtils
 {
 
 DelimitedFileReader::DelimitedFileReader(const std::string & filename,
-                                         const bool header,
-                                         const std::string delimiter,
                                          const libMesh::Parallel::Communicator * comm)
   : _filename(filename),
-    _header(header),
-    _delimiter(delimiter),
+    _header(HeaderFlag::AUTO),
     _ignore_empty_lines(true),
-    _communicator(comm)
+    _communicator(comm),
+    _format("columns rows", "columns")
 {
 }
 
@@ -56,13 +56,13 @@ DelimitedFileReader::read()
     std::ifstream stream_data(_filename);
 
     // Read/generate the header
-    initializeColumns(stream_data);
+    if (_format == "rows")
+      readRowData(stream_data, raw);
+    else
+      readColumnData(stream_data, raw);
 
     // Set the number of columns
-    n_cols = _column_names.size();
-
-    // Read the data
-    readData(stream_data, raw);
+    n_cols = _names.size();
 
     // Close the stream
     stream_data.close();
@@ -75,8 +75,8 @@ DelimitedFileReader::read()
   {
     // Broadcast column names
     _communicator->broadcast(n_cols);
-    _column_names.resize(n_cols);
-    _communicator->broadcast(_column_names);
+    _names.resize(n_cols);
+    _communicator->broadcast(_names);
 
     // Broadcast raw data
     _communicator->broadcast(size_raw);
@@ -84,113 +84,109 @@ DelimitedFileReader::read()
     _communicator->broadcast(raw);
   }
 
-  // Update the data
+  // Resize the internal storage
   _data.resize(n_cols);
-  mooseAssert(raw.size() % n_cols == 0,
-              "The raw data is not evenly divisible by the number of columns.");
-  const std::size_t n_rows = raw.size() / n_cols;
-  for (std::size_t j = 0; j < n_cols; ++j)
+
+  // Process "row" formatted data
+  if (_format == "rows")
   {
-    _data[j].resize(n_rows);
-    for (std::size_t i = 0; i < n_rows; ++i)
-      _data[j][i] = raw[i * n_cols + j];
+    std::vector<double>::iterator start = raw.begin();
+    for (std::size_t j = 0; j < n_cols; ++j)
+    {
+      _data[j] = std::vector<double>(start, start + _row_offsets[j]);
+      std::advance(start, _row_offsets[j]);
+    }
+  }
+
+  // Process "column" formatted data
+  else
+  {
+    mooseAssert(raw.size() % n_cols == 0,
+                "The raw data is not evenly divisible by the number of columns.");
+    const std::size_t n_rows = raw.size() / n_cols;
+    for (std::size_t j = 0; j < n_cols; ++j)
+    {
+      _data[j].resize(n_rows);
+      for (std::size_t i = 0; i < n_rows; ++i)
+        _data[j][i] = raw[i * n_cols + j];
+    }
   }
 }
 
 const std::vector<std::string> &
-DelimitedFileReader::getColumnNames() const
+DelimitedFileReader::getNames() const
 {
-  return _column_names;
+  return _names;
 }
 
 const std::vector<std::vector<double>> &
-DelimitedFileReader::getColumnData() const
+DelimitedFileReader::getData() const
 {
   return _data;
 }
 
 const std::vector<double> &
-DelimitedFileReader::getColumnData(const std::string & name) const
+DelimitedFileReader::getData(const std::string & name) const
 {
-  const auto it = find(_column_names.begin(), _column_names.end(), name);
-  if (it == _column_names.end())
+  const auto it = find(_names.begin(), _names.end(), name);
+  if (it == _names.end())
     mooseError("Could not find '", name, "' in header of file ", _filename, ".");
-  return _data[std::distance(_column_names.begin(), it)];
+  return _data[std::distance(_names.begin(), it)];
 }
 
-void
-DelimitedFileReader::initializeColumns(std::ifstream & stream_data)
+const std::vector<double> &
+DelimitedFileReader::getData(std::size_t index) const
 {
-  // Storage for line content
-  std::string line;
-
-  // Read the header (this is the default)
-  if (_header)
-  {
-    std::getline(stream_data, line);
-    MooseUtils::tokenize(line, _column_names, 1, _delimiter);
-    for (std::string & str : _column_names)
-      str = MooseUtils::trim(str);
-  }
-
-  // Generate the header
-  else
-  {
-    // Read the first line of data (to set expected column size) and return back to original pos
-    std::streampos pos = stream_data.tellg();
-    std::getline(stream_data, line);
-    MooseUtils::tokenize(line, _column_names, 1, _delimiter);
-    stream_data.seekg(pos);
-
-    // Create names
-    std::size_t n = _column_names.size();
-    int padding = std::log(n);
-    for (std::size_t i = 0; i < n; ++i)
-    {
-      std::stringstream ss;
-      ss << "column_" << std::setw(padding) << std::setfill('0') << i;
-      _column_names[i] = ss.str();
-    }
-  }
+  if (index >= _data.size())
+    mooseError("The supplied index ",
+               index,
+               " is out-of-range for the available data in file '",
+               _filename,
+               "' which contains ",
+               _data.size(),
+               " items.");
+  return _data[index];
 }
 
 void
-DelimitedFileReader::readData(std::ifstream & stream_data, std::vector<double> & output)
+DelimitedFileReader::readColumnData(std::ifstream & stream_data, std::vector<double> & output)
 {
   // Local storage for the data being read
   std::string line;
   std::vector<double> row;
 
-  // Keep track of the row number for error reporting
-  unsigned int count = _header ? 1 : 0;
+  // Keep track of the line number for error reporting
+  unsigned int count = 0;
 
-  // The number of columns expected based on the first row of the data
-  const size_t n_cols = _column_names.size();
+  // Number of columns expected based on the first row of the data
+  std::size_t n_cols = INVALID_SIZE;
 
   // Read the lines
   while (std::getline(stream_data, line))
   {
-    // Increment row counter and clear any tokenized data
+    // Increment line counter and clear any tokenized data
     count++;
     row.clear();
 
-    // Ignore empty lines
-    if (line.empty())
+    // Ignore empty and/or comment lines, if applicable
+    if (preprocessLine(line, count))
+      continue;
+
+    // Read header, if the header exists and the column names do not exist.
+    if (_names.empty() && header(line))
     {
-      if (_ignore_empty_lines)
-        continue;
-      else
-        mooseError("Failed to read line ", count, " in file ", _filename, ". The line is empty.");
+      MooseUtils::tokenize(line, _names, 1, delimiter(line));
+      for (std::string & str : _names)
+        str = MooseUtils::trim(str);
+      continue;
     }
 
     // Separate the row and error if it fails
-    bool status = MooseUtils::tokenizeAndConvert<double>(line, row, _delimiter);
-    if (!status)
-      mooseError("Failed to convert a delimited data into double when reading row ",
-                 count,
-                 " in file ",
-                 _filename,
-                 ".");
+    processLine(line, row, count);
+
+    // Set the number of columns
+    if (n_cols == INVALID_SIZE)
+      n_cols = row.size();
 
     // Check number of columns
     if (row.size() != n_cols)
@@ -207,5 +203,183 @@ DelimitedFileReader::readData(std::ifstream & stream_data, std::vector<double> &
     // Append data
     output.insert(output.end(), row.begin(), row.end());
   }
+
+  // If the names have not been assigned, create the default names
+  if (_names.empty())
+  {
+    _names.resize(n_cols);
+    int padding = std::log(n_cols);
+    for (std::size_t i = 0; i < n_cols; ++i)
+    {
+      std::stringstream ss;
+      ss << "column_" << std::setw(padding) << std::setfill('0') << i;
+      _names[i] = ss.str();
+    }
+  }
 }
+
+void
+DelimitedFileReader::readRowData(std::ifstream & stream_data, std::vector<double> & output)
+{
+  // Local storage for the data being read
+  std::string line;
+  std::vector<double> row;
+  unsigned int linenum = 0; // line number in file
+
+  // Clear existing data
+  _names.clear();
+  _row_offsets.clear();
+
+  // Read the lines
+  while (std::getline(stream_data, line))
+  {
+    // Increment line counter and clear any tokenized data
+    linenum++;
+    row.clear();
+
+    // Ignore empty lines
+    if (preprocessLine(line, linenum))
+      continue;
+
+    if (header(line))
+    {
+      std::size_t index = line.find_first_of(delimiter(line));
+      _names.push_back(line.substr(0, index));
+      line = line.substr(index);
+    }
+
+    // Separate the row and error if it fails
+    processLine(line, row, linenum);
+
+    // Store row offsets to allow for un-even rows
+    _row_offsets.push_back(row.size());
+
+    // Append data
+    output.insert(output.end(), row.begin(), row.end());
+  }
+
+  // Assign row names if not provided via header
+  if (_names.empty())
+  {
+    int padding = std::log(_row_offsets.size());
+    for (std::size_t i = 0; i < _row_offsets.size(); ++i)
+    {
+      std::stringstream ss;
+      ss << "row_" << std::setw(padding) << std::setfill('0') << i;
+      _names.push_back(ss.str());
+    }
+  }
 }
+
+bool
+DelimitedFileReader::preprocessLine(std::string & line, const unsigned int & num)
+{
+  // Handle row comments
+  std::size_t index = _row_comment.empty() ? line.size() : line.find_first_of(_row_comment);
+  line = MooseUtils::trim(line.substr(0, index));
+
+  // Ignore empty lines
+  if (line.empty())
+  {
+    if (_ignore_empty_lines)
+      return true;
+    else
+      mooseError("Failed to read line ", num, " in file ", _filename, ". The line is empty.");
+  }
+  return false;
+}
+
+void
+DelimitedFileReader::processLine(const std::string & line,
+                                 std::vector<double> & row,
+                                 const unsigned int & num)
+{
+  // Separate the row and error if it fails
+  bool status = MooseUtils::tokenizeAndConvert<double>(line, row, delimiter(line));
+  if (!status)
+    mooseError("Failed to convert a delimited data into double when reading line ",
+               num,
+               " in file ",
+               _filename,
+               ".\n  LINE ",
+               num,
+               ": ",
+               line);
+}
+
+std::string
+DelimitedFileReader::delimiter(const std::string & line)
+{
+  if (_delimiter.empty())
+    _delimiter = line.find(",") != std::string::npos ? "," : " ";
+  return _delimiter;
+}
+
+bool
+DelimitedFileReader::header(const std::string & line)
+{
+  switch (_header)
+  {
+    case HeaderFlag::FALSE:
+      return false;
+    case HeaderFlag::TRUE:
+      return true;
+    default:
+      // AUTO: Assume if a letter is found in the line that a header exists.
+      bool contains_alpha = std::find_if(line.begin(), line.end(), [](char c) {
+                              return std::isalpha(c);
+                            }) != line.end();
+
+      // Based on auto detect set the flag to TRUE|FALSE to short-circuit this check for each line
+      // in the case of row data.
+      _header = contains_alpha ? HeaderFlag::TRUE : HeaderFlag::FALSE;
+      return contains_alpha;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// DEPRECATED METHODS (TODO: To be removed after applications are updated)
+////////////////////////////////////////////////////////////////////////////////////////////////////
+DelimitedFileReader::DelimitedFileReader(const std::string & filename,
+                                         const bool header,
+                                         const std::string delimiter,
+                                         const libMesh::Parallel::Communicator * comm)
+  : _filename(filename),
+    _header(header ? HeaderFlag::TRUE : HeaderFlag::AUTO),
+    _delimiter(delimiter),
+    _ignore_empty_lines(true),
+    _communicator(comm),
+    _format("columns rows", "columns")
+{
+  mooseDeprecated("Use setHeader and setDelimiter method rather than specifying in constructor.");
+}
+
+const std::vector<std::string> &
+DelimitedFileReader::getColumnNames() const
+{
+  mooseDeprecated("Use getNames instead.");
+  return getNames();
+}
+
+const std::vector<std::vector<double>> &
+DelimitedFileReader::getColumnData() const
+{
+  mooseDeprecated("Use getData instead.");
+  return getData();
+}
+
+const std::vector<double> &
+DelimitedFileReader::getColumnData(const std::string & name) const
+{
+  mooseDeprecated("Use getData instead.");
+  return getData(name);
+}
+
+void
+DelimitedFileReader::setHeader(bool value)
+{
+  mooseDeprecated("Use header method with HeaderFlag input.");
+  _header = value ? HeaderFlag::TRUE : HeaderFlag::FALSE;
+}
+
+} // MooseUtils

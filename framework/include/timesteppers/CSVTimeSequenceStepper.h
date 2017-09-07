@@ -16,6 +16,7 @@
 #define CSVTIMESEQUENCESTEPPER_H
 
 #include "TimeSequenceStepperBase.h"
+#include "DelimitedFileReader.h"
 
 class CSVTimeSequenceStepper;
 
@@ -40,8 +41,10 @@ public:
 protected:
   /// name of the file where the data is read
   const std::string _file_name;
+
   /// whether the file contains a header with the column names
-  const bool _header;
+  const MooseUtils::DelimitedFileReader::HeaderFlag _header;
+
   /// string used as a delimiter
   const std::string _delimiter;
 
