@@ -59,8 +59,7 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
 
   if (_youngs_modulus_set && _poissons_ratio_set)
   {
-    _Cijkl.fillFromInputVector({_youngs_modulus, _poissons_ratio},
-                               RankFourTensor::symmetric_isotropic_E_nu);
+    _Cijkl.fillSymmetricIsotropicEandNu(_youngs_modulus, _poissons_ratio);
     return;
   }
 
