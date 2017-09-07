@@ -1,0 +1,9 @@
+[Tests]
+  [./jacobian_test]
+    type = AnalyzeJacobian
+    input = coupled_dg_jac_test.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+  [../]
+[]
