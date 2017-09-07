@@ -1,6 +1,6 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # VectorRankFourAux
+This allows the user to observe the value of a tensor contained in a vector of [RankFourTensor](/RankFourTensor.md).
+
 !syntax description /AuxKernels/VectorRankFourAux
 
 !syntax parameters /AuxKernels/VectorRankFourAux

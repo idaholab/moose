@@ -1,4 +1,4 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
+This allows the user to observe the value of a tensor contained in a vector of [RankTwoTensor](/RankTwoTensor.md).
 
 # VectorRankTwoAux
 !syntax description /AuxKernels/VectorRankTwoAux
