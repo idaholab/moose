@@ -22,6 +22,12 @@ TEST(MooseUtils, camelCaseToUnderscore)
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("Foo"), "foo");
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("FooBar"), "foo_bar");
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("fooBar"), "foo_bar");
+
+  EXPECT_EQ(MooseUtils::camelCaseToUnderscore("FOObar"), "foobar");
+  EXPECT_EQ(MooseUtils::camelCaseToUnderscore("fooBAR"), "foo_bar");
+
+  EXPECT_EQ(MooseUtils::camelCaseToUnderscore("PhaseFieldApp"), "phase_field_app");
+  EXPECT_EQ(MooseUtils::camelCaseToUnderscore("XFEMApp"), "xfemapp");
 }
 
 TEST(MooseUtils, underscoreToCamelCase)
