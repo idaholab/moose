@@ -387,4 +387,17 @@ TEST(DelimitedFileReader, AutoNoHeader)
     EXPECT_EQ(reader.getNames(), std::vector<std::string>({"1980", "6", "24"}));
   }
 }
+
+TEST(DelimitedFileReader, ExtraSpace)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/example_extra_space.csv");
+  reader.read();
+
+  std::vector<std::vector<double>> gold = {
+      {0, 10, 100, 1000}, {1, 11, 101, 1001}, {2, 12, 102, 1002}};
+  EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getData("column_0"), gold[0]);
+  EXPECT_EQ(reader.getData("column_1"), gold[1]);
+  EXPECT_EQ(reader.getData("column_2"), gold[2]);
+}
 #endif

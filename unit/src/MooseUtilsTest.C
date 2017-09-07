@@ -48,3 +48,39 @@ TEST(MooseUtils, toUpper)
   std::string specs("RotaryGirder");
   EXPECT_EQ(MooseUtils::toUpper(specs), "ROTARYGIRDER");
 }
+
+TEST(MooseUtils, trim)
+{
+  EXPECT_EQ(MooseUtils::trim("andrew"), "andrew");
+  EXPECT_EQ(MooseUtils::trim("   andrew"), "andrew");
+  EXPECT_EQ(MooseUtils::trim("andrew    "), "andrew");
+  EXPECT_EQ(MooseUtils::trim("      andrew    "), "andrew");
+}
+
+TEST(MooseUtils, tokenizeAndConvert)
+{
+  {
+    std::string raw("1,2,3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+  {
+    std::string raw("1,  2,     3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+  {
+    std::string raw("1    ,2   ,3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+  {
+    std::string raw("1    ,      2   ,       3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+}
