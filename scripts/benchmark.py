@@ -40,6 +40,7 @@ def build_args():
 
     # options for running benchmarks
     p.add_argument('--run', action='store_true', help='run all benchmarks on the current checked out revision')
+    p.add_argument('--noperflog', action='store_true', help='don\'t try to retrieve/store perflog benchmark info')
     p.add_argument('--rev', type=str, default='', help='manually specify git revision for this set of benchmarks')
     p.add_argument('--benchlist', type=str, default='bench.list', help='run all benchmarks on the current checked out revision')
     p.add_argument('--cum-dur', type=float, default=60, help='cumulative time (secs) to run each benchmark')
@@ -69,7 +70,7 @@ def main():
         with BenchmarkDB(args.db) as db:
             for bench in benches:
                 print('running "{}"...'.format(bench.name))
-                t = Test(bench.executable, bench.infile, args=bench.args, rootdir=rootdir)
+                t = Test(bench.executable, bench.infile, args=bench.args, rootdir=rootdir, perflog=(not args.noperflog))
                 b = Benchmark(bench.name, test=t, cum_dur=args.cum_dur, min_runs=args.min_runs)
                 b.run()
                 if args.rev != '':
@@ -202,7 +203,7 @@ def process_timeout(proc, timeout_sec):
     timer.cancel()
 
 class Test:
-    def __init__(self, executable, infile, rootdir='.', args=None, timeout=300):
+    def __init__(self, executable, infile, rootdir='.', args=None, timeout=300, perflog=True):
         self.rootdir = rootdir
         self.executable = executable
         self.infile = infile
@@ -210,7 +211,10 @@ class Test:
         self.dur_secs = 0
         self.perflog = []
         self.timeout = timeout
-        self.getpot_options = ['Outputs/console=false', 'UserObjects/perflog/type=PerfLogDumper']
+        self.getpot_options = ['Outputs/console=false']
+        self.haveperflog = perflog
+        if haveperflog:
+            self.getpot_options.append('UserObjects/perflog/type=PerfLogDumper')
 
     def run(self):
         cmdpath = os.path.abspath(os.path.join(self.rootdir, self.executable))
@@ -236,14 +240,15 @@ class Test:
         self.dur_secs = end - start
 
         # write perflog
-        with open(os.path.join(tmpdir, 'perflog.csv'), 'r') as csvfile:
-            reader = csv.reader(csvfile)
-            skip = True # use to skip header line
-            for row in reader:
-                if not skip:
-                    self.perflog.append(row)
-                else:
-                    skip = False
+        if self.haveperflog:
+            with open(os.path.join(tmpdir, 'perflog.csv'), 'r') as csvfile:
+                reader = csv.reader(csvfile)
+                skip = True # use to skip header line
+                for row in reader:
+                    if not skip:
+                        self.perflog.append(row)
+                    else:
+                        skip = False
 
         shutil.rmtree(tmpdir)
 
