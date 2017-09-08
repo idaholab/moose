@@ -616,8 +616,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   if (params.isParamValid("mffd_type"))
   {
     MooseEnum mffd_type = params.get<MooseEnum>("mffd_type");
-    if (fe_problem.solverParams()._mffd_type == Moose::MFFD_INVALID)
-      fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
+    fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
   }
 
   // The parameters contained in the Action
