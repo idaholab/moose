@@ -326,6 +326,16 @@ enum LineSearchType
 #endif
 #endif
 };
+
+/**
+ * Type of the matrix-free finite-differencing parameter
+ */
+enum MffdType
+{
+  MFFD_INVALID, /// means not set
+  MFFD_WP,
+  MFFD_DS
+};
 }
 
 /**
