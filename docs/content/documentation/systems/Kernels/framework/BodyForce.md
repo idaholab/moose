@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # BodyForce
 
 ## Description
@@ -29,8 +27,6 @@ supplied through a postprocessor:
 
  Note that in this test the postprocessor value is actually calculated from a
  function.
-
-!syntax description /Kernels/BodyForce
 
 !syntax parameters /Kernels/BodyForce
 

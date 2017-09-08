@@ -1,5 +1,4 @@
 # Diffusion
-!syntax description /Kernels/Diffusion
 
 ## Description
 
