@@ -4,26 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef ADDSECONDARYSPECIESACTION_H
-#define ADDSECONDARYSPECIESACTION_H
+#ifndef ADDCOUPLEDEQSPECIESACTION_H
+#define ADDCOUPLEDEQSPECIESACTION_H
 
 #include "Action.h"
 
-class AddSecondarySpeciesAction;
+class AddCoupledEqSpeciesAction;
 
 template <>
-InputParameters validParams<AddSecondarySpeciesAction>();
+InputParameters validParams<AddCoupledEqSpeciesAction>();
 
-class AddSecondarySpeciesAction : public Action
+class AddCoupledEqSpeciesAction : public Action
 {
 public:
-  AddSecondarySpeciesAction(const InputParameters & params);
+  AddCoupledEqSpeciesAction(const InputParameters & params);
 
   virtual void act() override;
 
-private:
+protected:
+  const std::string _reactions;
+  const std::vector<NonlinearVariableName> _primary_species;
   const std::vector<AuxVariableName> _secondary_species;
-  const std::vector<std::string> _reactions;
+  const std::vector<VariableName> _pressure_var;
 };
 
-#endif // ADDSECONDARYSPECIESACTION_H
+#endif // ADDCOUPLEDEQSPECIESACTION_H

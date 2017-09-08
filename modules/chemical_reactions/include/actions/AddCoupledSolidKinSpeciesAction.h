@@ -4,24 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef ADDCOUPLEDSOLIDKINSPECIESAUXKERNELSACTION_H
-#define ADDCOUPLEDSOLIDKINSPECIESAUXKERNELSACTION_H
+#ifndef ADDCOUPLEDSOLIDKINSPECIESACTION_H
+#define ADDCOUPLEDSOLIDKINSPECIESACTION_H
 
 #include "Action.h"
 
-class AddCoupledSolidKinSpeciesAuxKernelsAction;
+class AddCoupledSolidKinSpeciesAction;
 
 template <>
-InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>();
+InputParameters validParams<AddCoupledSolidKinSpeciesAction>();
 
-class AddCoupledSolidKinSpeciesAuxKernelsAction : public Action
+class AddCoupledSolidKinSpeciesAction : public Action
 {
 public:
-  AddCoupledSolidKinSpeciesAuxKernelsAction(const InputParameters & params);
+  AddCoupledSolidKinSpeciesAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
+
+  /// Prints out list of kinetic reactions
+  void printReactions() const;
 
 private:
+  const std::vector<NonlinearVariableName> _primary_species;
   const std::vector<std::string> _reactions;
   const std::vector<Real> _logk;
   const std::vector<Real> _r_area;
@@ -29,7 +33,7 @@ private:
   const std::vector<Real> _e_act;
   const Real _gas_const;
   const std::vector<Real> _ref_temp;
-  const std::vector<Real> _sys_temp;
+  const std::vector<VariableName> _sys_temp;
 };
 
-#endif // ADDCOUPLEDSOLIDKINSPECIESAUXKERNELSACTION_H
+#endif // ADDCOUPLEDSOLIDKINSPECIESACTION_H

@@ -19,7 +19,7 @@ class AddPrimarySpeciesAction : public Action
 public:
   AddPrimarySpeciesAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
 private:
   const std::vector<NonlinearVariableName> _vars;

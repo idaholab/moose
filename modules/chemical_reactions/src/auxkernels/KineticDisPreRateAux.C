@@ -19,7 +19,7 @@ validParams<KineticDisPreRateAux>()
   params.addParam<Real>("e_act", 2.91e4, "Activation energy, J/mol");
   params.addParam<Real>("gas_const", 8.31434, "Gas constant, in J/mol K");
   params.addParam<Real>("ref_temp", 298.15, "Reference temperature, K");
-  params.addParam<Real>("sys_temp", 298.15, "System temperature, K");
+  params.addCoupledVar("sys_temp", 298.15, "System temperature, K");
   params.addCoupledVar("v", "The list of reactant species");
   params.addClassDescription("Kinetic rate of secondary kinetic species");
   return params;
@@ -33,7 +33,7 @@ KineticDisPreRateAux::KineticDisPreRateAux(const InputParameters & parameters)
     _e_act(getParam<Real>("e_act")),
     _gas_const(getParam<Real>("gas_const")),
     _ref_temp(getParam<Real>("ref_temp")),
-    _sys_temp(getParam<Real>("sys_temp")),
+    _sys_temp(coupledValue("sys_temp")),
     _sto_v(getParam<std::vector<Real>>("sto_v"))
 {
   const unsigned int n = coupledComponents("v");
@@ -54,7 +54,7 @@ Real
 KineticDisPreRateAux::computeValue()
 {
   const Real kconst =
-      _ref_kconst * std::exp(_e_act * (1.0 / _ref_temp - 1.0 / _sys_temp) / _gas_const);
+      _ref_kconst * std::exp(_e_act * (1.0 / _ref_temp - 1.0 / _sys_temp[_qp]) / _gas_const);
   Real omega = 1.0;
 
   if (_vals.size() > 0)
