@@ -2,12 +2,13 @@
 
 ## Description
 
-`MaterialDerivativeTestKernel` is mostly useful as a demonstration object. Its
-weak form is given by $$(\psi_i, p)$$ where p is a material property that
-depends on the governing variables. `MaterialDerivativeTestKernel` inherits from
+`MaterialDerivativeTestKernel` is a generic test `Kernel` that allows checking
+the correctness of derivative material properties using the built-in Jacobian
+checks in the MOOSE test harness. Its weak form is given by $$(\psi_i, p)$$
+where p is a material property that depends on the governing
+variables. `MaterialDerivativeTestKernel` inherits from
 `DerivativeMaterialInterface` which gives it access to functions like
-`getMaterialPropertyDerivative` and
-`mapJvarToCvar`, explained below:
+`getMaterialPropertyDerivative` and `mapJvarToCvar`, explained below:
 
 - `getMaterialPropertyDerivative` takes a material property name
 (let's call it "p") and a variable name (let's call it "u") and returns a
