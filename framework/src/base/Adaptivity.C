@@ -276,12 +276,9 @@ ErrorVector &
 Adaptivity::getErrorVector(const std::string & indicator_field)
 {
   // Insert or retrieve error vector
-  auto ev_pair_it = _indicator_field_to_error_vector.lower_bound(indicator_field);
-  if (ev_pair_it == _indicator_field_to_error_vector.end() || ev_pair_it->first != indicator_field)
-    ev_pair_it = _indicator_field_to_error_vector.emplace_hint(
-        ev_pair_it, indicator_field, libmesh_make_unique<ErrorVector>());
-
-  return *ev_pair_it->second;
+  auto insert_pair = moose_try_emplace(
+      _indicator_field_to_error_vector, indicator_field, libmesh_make_unique<ErrorVector>());
+  return *insert_pair.first->second;
 }
 
 void
