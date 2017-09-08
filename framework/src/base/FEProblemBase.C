@@ -2708,7 +2708,7 @@ FEProblemBase::computeIndicators()
   // Initialize indicator aux variable fields
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    Moose::perf_log.push("adaptivity_computeIndicators()", "Execution");
+    Moose::perf_log.push("Adaptivity: computeIndicators()", "Execution");
 
     std::vector<std::string> fields;
 
@@ -2735,7 +2735,7 @@ FEProblemBase::computeIndicators()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("adaptivity_computeIndicators()", "Execution");
+    Moose::perf_log.pop("Adaptivity: computeIndicators()", "Execution");
   }
 }
 
@@ -2744,7 +2744,7 @@ FEProblemBase::computeMarkers()
 {
   if (_markers.hasActiveObjects())
   {
-    Moose::perf_log.push("adaptivity_compute_markers", "Execution");
+    Moose::perf_log.push("Adaptivity: computeMarkers()", "Execution");
 
     std::vector<std::string> fields;
 
@@ -2770,7 +2770,7 @@ FEProblemBase::computeMarkers()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("adaptivity_compute_markers", "Execution");
+    Moose::perf_log.pop("Adaptivity: computeMarkers()", "Execution");
   }
 }
 
