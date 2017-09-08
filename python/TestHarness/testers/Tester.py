@@ -75,6 +75,7 @@ class Tester(MooseObject):
         self.outfile = None
         self.std_out = ''
         self.exit_code = 0
+        self.process = None
 
         # Bool if test can run
         self._runnable = None
