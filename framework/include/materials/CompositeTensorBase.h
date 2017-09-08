@@ -113,15 +113,13 @@ CompositeTensorBase<T, U>::initializeDerivativeProperties(const std::string name
   // setup output composite tensor and derivatives
   for (unsigned int j = 0; j < _num_args; ++j)
   {
-    const VariableName & jname =
-        this->DerivativeMaterialInterface<U>::getVar("args", j)->name();
+    const VariableName & jname = this->DerivativeMaterialInterface<U>::getVar("args", j)->name();
     _dM[j] = &this->template declarePropertyDerivative<T>(name, jname);
     _d2M[j].resize(j + 1);
 
     for (unsigned int k = 0; k <= j; ++k)
     {
-      const VariableName & kname =
-          this->DerivativeMaterialInterface<U>::getVar("args", k)->name();
+      const VariableName & kname = this->DerivativeMaterialInterface<U>::getVar("args", k)->name();
       _d2M[j][k] = &this->template declarePropertyDerivative<T>(name, jname, kname);
     }
   }
@@ -139,8 +137,7 @@ CompositeTensorBase<T, U>::initializeDerivativeProperties(const std::string name
 
     for (unsigned int j = 0; j < _num_args; ++j)
     {
-      const VariableName & jname =
-          this->DerivativeMaterialInterface<U>::getVar("args", j)->name();
+      const VariableName & jname = this->DerivativeMaterialInterface<U>::getVar("args", j)->name();
 
       _dtensors[i][j] =
           &this->template getMaterialPropertyDerivativeByName<T>(_tensor_names[i], jname);
