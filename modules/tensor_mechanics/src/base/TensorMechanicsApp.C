@@ -32,6 +32,7 @@
 #include "GeneralizedPlaneStrainOffDiag.h"
 #include "WeakPlaneStress.h"
 #include "PlasticHeatEnergy.h"
+#include "CrackPropagationHeatSource.h"
 #include "PhaseFieldFractureMechanicsOffDiag.h"
 
 #include "LinearElasticTruss.h"
@@ -239,6 +240,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(GeneralizedPlaneStrainOffDiag);
   registerKernel(WeakPlaneStress);
   registerKernel(PlasticHeatEnergy);
+  registerKernel(CrackPropagationHeatSource);
   registerKernel(PhaseFieldFractureMechanicsOffDiag);
 
   registerMaterial(LinearElasticTruss);

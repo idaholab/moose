@@ -19,7 +19,7 @@ $$
 \cite{chakraborty2016intergranularfracture}
 This computes the crack propagation heat source as a Material property
 and is intended to be used with the
-[CrackPropagationHeatSource](/Kernels/heat_conduction/CrackPropagationHeatSource.md)
+[CrackPropagationHeatSource](/Kernels/tensor_mechanics/CrackPropagationHeatSource.md)
 Kernel to apply this as a term in the heat equation.
 
 !syntax description /Materials/ComputeCrackPropagationHeatEnergy
