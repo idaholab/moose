@@ -1,3 +1,17 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef SEMICONDUCTORLINEARCONDUCTIVITY_H
 #define SEMICONDUCTORLINEARCONDUCTIVITY_H
 
@@ -9,14 +23,13 @@ class SemiconductorLinearConductivity;
 
 template <>
 InputParameters validParams<SemiconductorLinearConductivity>();
-
 /**
  * Calculates resistivity and electrical conductivity as a function of temperature.
- * For semiconductor, Steinhart-Hart equation describes the temperature dependence 
+ * For semiconductor, Steinhart-Hart equation describes the temperature dependence
  * of the resistivity: 1/T = A + B ln (\rho) + C (ln (\rho))^3
- * 
- * For linear relationship ONLY => C = 0 
- *      1/T = A -B ln(\sigma) 
+ *
+ * For linear relationship ONLY => C = 0
+ *      1/T = A -B ln(\sigma)
  *   \rho: electrical resistivity in ohm-m = 1/(\sigma)
  *   \sigma: electrical conductivity in 1/(ohm-m)
  */
