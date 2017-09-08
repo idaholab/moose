@@ -96,16 +96,55 @@ ComputeVariableIsotropicElasticityTensor::initQpStatefulProperties()
 void
 ComputeVariableIsotropicElasticityTensor::computeQpElasticityTensor()
 {
-  _elasticity_tensor[_qp].fillSymmetricIsotropicEandNu(_youngs_modulus[_qp], _poissons_ratio[_qp]);
+  const Real E = _youngs_modulus[_qp];
+  const Real nu = _poissons_ratio[_qp];
+
+  _elasticity_tensor[_qp].fillSymmetricIsotropicEandNu(E, nu);
 
   // Define derivatives of the elasticity tensor
   for (unsigned int i = 0; i < _num_args; ++i)
   {
     if (_delasticity_tensor[i])
-      mooseError("Derivative of elasticity tensor requested, but not yet implemented");
+    {
+      const Real dE = (*_dyoungs_modulus[i])[_qp];
+      const Real dnu = (*_dpoissons_ratio[i])[_qp];
+
+      const Real dlambda = (E * dnu + dE * nu) / ((1.0 + nu) * (1.0 - 2.0 * nu)) -
+                           E * nu * dnu / ((1.0 + nu) * (1.0 + nu) * (1.0 - 2.0 * nu)) +
+                           2.0 * E * nu * dnu / ((1.0 + nu) * (1.0 - 2.0 * nu) * (1.0 - 2.0 * nu));
+      const Real dG = dE / (2.0 * (1.0 + nu)) - 2.0 * E * dnu / (4.0 * (1.0 + nu) * (1.0 + nu));
+
+      (*_delasticity_tensor[i])[_qp].fillGeneralIsotropic(dlambda, dG, 0.0);
+    }
 
     for (unsigned int j = i; j < _num_args; ++j)
       if (_d2elasticity_tensor[i][j])
-        mooseError("Second derivative of elasticity tensor requested, but not yet implemented");
+      {
+        const Real dEi = (*_dyoungs_modulus[i])[_qp];
+        const Real dnui = (*_dpoissons_ratio[i])[_qp];
+
+        const Real dEj = (*_dyoungs_modulus[j])[_qp];
+        const Real dnuj = (*_dpoissons_ratio[j])[_qp];
+
+        const Real d2E = (*_d2youngs_modulus[i][j])[_qp];
+        const Real d2nu = (*_d2poissons_ratio[i][j])[_qp];
+
+        const Real d2lambda =
+            1.0 / ((1.0 + nu) * (2.0 * nu - 1.0)) *
+            (-E * d2nu - nu * d2E - dEi * dnuj - dEj * dnui +
+             (2.0 * E * d2nu * nu + 4.0 * dnui * dnuj * E + 2.0 * dEi * dnuj * nu +
+              2.0 * dEj * dnui * nu) /
+                 (2.0 * nu - 1.0) -
+             8.0 * dnui * dnuj * E * nu / ((2.0 * nu - 1.0) * (2.0 * nu - 1.0)) +
+             (E * d2nu * nu + 2.0 * E * dnui * dnuj + dEi * dnuj * nu + dEj * dnui * nu) /
+                 (nu + 1.0) -
+             4.0 * E * nu * dnui * dnuj / ((1.0 + nu) * (2.0 * nu - 1.0)) -
+             2.0 * E * dnui * dnuj * nu / ((nu + 1.0) * (nu + 1.0)));
+        const Real d2G = 1.0 / (nu + 1.0) *
+                         (0.5 * d2E - (E * d2nu + dEi * dnuj + dEj * dnui) / (2.0 * nu + 2.0) +
+                          dnui * dnuj * E / ((nu + 1.0) * (nu + 1.0)));
+
+        (*_d2elasticity_tensor[i][j])[_qp].fillGeneralIsotropic(d2lambda, d2G, 0.0);
+      }
   }
 }
