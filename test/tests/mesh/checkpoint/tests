@@ -6,7 +6,6 @@
     cli_args = 'Outputs/file_base=test_2  Mesh/file=checkpoint_split_in.2.cpr'
     max_parallel = 2  # workaround until libMesh/libmesh#1408
     min_parallel = 2  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
   [../]
   [./test_2a]
     type = 'Exodiff'
@@ -15,7 +14,6 @@
     cli_args = 'Outputs/file_base=test_2a Mesh/file=checkpoint_split_in.2.cpa'
     max_parallel = 2  # workaround until libMesh/libmesh#1408
     min_parallel = 2  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
   [../]
   [./test_4]
     type = 'Exodiff'
@@ -24,7 +22,6 @@
     cli_args = 'Outputs/file_base=test_4  Mesh/file=checkpoint_split_in.4.cpr'
     max_parallel = 4  # workaround until libMesh/libmesh#1408
     min_parallel = 4  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
   [../]
   [./test_4a]
     type = 'Exodiff'
@@ -33,7 +30,6 @@
     cli_args = 'Outputs/file_base=test_4a Mesh/file=checkpoint_split_in.4.cpa'
     max_parallel = 4  # workaround until libMesh/libmesh#1408
     min_parallel = 4  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
   [../]
   [./test_8]
     type = 'Exodiff'
@@ -42,7 +38,6 @@
     cli_args = 'Outputs/file_base=test_8  Mesh/file=checkpoint_split_in.8.cpr'
     max_parallel = 8  # workaround until libMesh/libmesh#1408
     min_parallel = 8  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
   [../]
   [./test_8a]
     type = 'Exodiff'
@@ -51,6 +46,5 @@
     cli_args = 'Outputs/file_base=test_8a Mesh/file=checkpoint_split_in.8.cpa'
     max_parallel = 8  # workaround until libMesh/libmesh#1408
     min_parallel = 8  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
   [../]
 []
