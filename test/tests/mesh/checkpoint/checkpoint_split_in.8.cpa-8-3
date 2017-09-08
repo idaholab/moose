@@ -218,16 +218,6 @@
 	 # remote child parent_ids
 0	 # vector length
 	 # remote child_numbers
-4	 # sideset id to name map
-4	 # vector length
-0	 1	 2	 3	 
-4	 # vector length
-bottom	 right	 top	 left	 
-4	 # nodeset id to name map
-4	 # vector length
-0	 1	 2	 3	 
-4	 # vector length
-bottom	 right	 top	 left	 
 9	 # vector length
 69	 79	 89	 95	 96	 97	 98	 99	 99	 	 # element ids for bcs
 9	 # vector length

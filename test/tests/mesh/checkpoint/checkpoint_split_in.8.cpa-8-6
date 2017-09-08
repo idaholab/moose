@@ -17,8 +17,8 @@
 62 2
 62	 # unique id
 6.9999999999999996e-01 5.0000000000000000e-01 0.0000000000000000e+00
-68 4
-68	 # unique id
+66 4
+66	 # unique id
 2.0000000000000001e-01 5.9999999999999998e-01 0.0000000000000000e+00
 69 4
 69	 # unique id
@@ -113,7 +113,7 @@
 0	 # p_level
 1	 # rflag
 1	 # pflag
-57 58 69 68
+57 58 69 66
 53 5 4 0 65535 65535
 174	 # unique id
 0	 # p_level
@@ -143,7 +143,7 @@
 0	 # p_level
 1	 # rflag
 1	 # pflag
-68 69 80 79
+66 69 80 79
 63 5 6 0 65535 65535
 184	 # unique id
 0	 # p_level
@@ -266,16 +266,6 @@
 	 # remote child parent_ids
 0	 # vector length
 	 # remote child_numbers
-4	 # sideset id to name map
-4	 # vector length
-0	 1	 2	 3	 
-4	 # vector length
-bottom	 right	 top	 left	 
-4	 # nodeset id to name map
-4	 # vector length
-0	 1	 2	 3	 
-4	 # vector length
-bottom	 right	 top	 left	 
 5	 # vector length
 92	 93	 94	 95	 96	 	 # element ids for bcs
 5	 # vector length
