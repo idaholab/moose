@@ -47,7 +47,7 @@ protected:
   const Real _ref_temp;
 
   /// Actual system temperature
-  const Real _sys_temp;
+  const VariableValue & _sys_temp;
 
   /// Stoichiometric coefficients for involved primary species
   const std::vector<Real> _sto_v;
