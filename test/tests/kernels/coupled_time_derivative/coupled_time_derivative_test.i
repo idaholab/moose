@@ -26,7 +26,7 @@
   [./fn_u]
     type = UserForcingFunction
     variable = u
-    function = ffn
+    function = 1
   [../]
   [./time_v]
     type = CoupledTimeDerivative
@@ -36,13 +36,6 @@
   [./diff_v]
     type = Diffusion
     variable = v
-  [../]
-[]
-
-[Functions]
-  [./ffn]
-    type = ParsedFunction
-    value = '1'
   [../]
 []
 
