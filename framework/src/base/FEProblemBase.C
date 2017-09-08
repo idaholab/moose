@@ -5091,12 +5091,10 @@ FEProblemBase::solverParams()
 void
 FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
 {
-  auto rand_pair_it = _random_data_objects.lower_bound(name);
-  if (rand_pair_it == _random_data_objects.end() || rand_pair_it->first != name)
-    rand_pair_it = _random_data_objects.emplace_hint(
-        rand_pair_it, name, libmesh_make_unique<RandomData>(*this, random_interface));
+  auto insert_pair = moose_try_emplace(
+      _random_data_objects, name, libmesh_make_unique<RandomData>(*this, random_interface));
 
-  auto random_data_ptr = rand_pair_it->second.get();
+  auto random_data_ptr = insert_pair.first->second.get();
   random_interface.setRandomDataPointer(random_data_ptr);
 }
 
