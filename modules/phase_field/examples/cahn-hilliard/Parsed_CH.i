@@ -12,10 +12,16 @@
   ymax = 60
 []
 
-[Variables]
-  [./c]
-    order = THIRD
-    family = HERMITE
+[Modules]
+  [./PhaseField]
+    [./Conserved]
+      [./c]
+        free_energy = fbulk
+        mobility = M
+        kappa = kappa_c
+        solve_type = DIRECT
+      [../]
+    [../]
   [../]
 []
 
@@ -32,33 +38,6 @@
     variable = c
     min = -0.1
     max =  0.1
-  [../]
-[]
-
-[Kernels]
-  active = 'bulk interface dot'
-  [./bulk]
-    type = CahnHilliard
-    variable = c
-    f_name = fbulk
-    mob_name = M
-  [../]
-  [./interface]
-    type = CHInterface
-    variable = c
-    mob_name = M
-    kappa_name = kappa_c
-  [../]
-  [./dot]
-    type = TimeDerivative
-    variable = c
-  [../]
-
-  # enable this kernel instead of 'bulk' to compare to CHMath
-  [./bulk_reference]
-    type = CHMath
-    variable = c
-    mob_name = M
   [../]
 []
 
