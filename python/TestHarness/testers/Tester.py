@@ -64,6 +64,11 @@ class Tester(MooseObject):
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOT is detected ('ALL', 'TRUE', 'FALSE')")
 
+        # Queueing specific
+        params.addParam('copy_files',         [], "Additional list of files/directories to copy when performing queueing operations")
+        params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
+        params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
+
         return params
 
     # This is what will be checked for when we look for valid testers
@@ -89,6 +94,7 @@ class Tester(MooseObject):
         self.bucket_fail         = self.status.bucket_fail
         self.bucket_diff         = self.status.bucket_diff
         self.bucket_pending      = self.status.bucket_pending
+        self.bucket_queued       = self.status.bucket_queued
         self.bucket_finished     = self.status.bucket_finished
         self.bucket_deleted      = self.status.bucket_deleted
         self.bucket_skip         = self.status.bucket_skip
@@ -218,6 +224,13 @@ class Tester(MooseObject):
         see util.TestStatus for more information
         """
         return self.status.isPending()
+
+    def isQueued(self):
+        """
+        return boolean for tester in a queued status
+        see util.TestStatus for more information
+        """
+        return self.status.isQueued()
 
     def isFinished(self):
         """
@@ -539,6 +552,10 @@ class Tester(MooseObject):
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
+
+        # Check for queueing
+        if not self.specs['queue_scheduler']:
+            reasons['queue_scheduler'] = 'NO QUEUE'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
