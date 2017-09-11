@@ -56,7 +56,7 @@ CoupledDiffusionReactionSub::computeQpResidual()
   for (unsigned int i = 0; i < _vals.size(); ++i)
     diff1 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
-  RealGradient diff2_sum = 0.0;
+  RealGradient diff2_sum(0.0, 0.0, 0.0);
   const Real d_val = std::pow(_u[_qp], _sto_u);
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
@@ -88,7 +88,7 @@ CoupledDiffusionReactionSub::computeQpJacobian()
 
   RealGradient diff1 = diff1_1 + diff1_2;
   Real d_val = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _phi[_j][_qp];
-  RealGradient diff2_sum = 0.0;
+  RealGradient diff2_sum(0.0, 0.0, 0.0);
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
     RealGradient diff2 =
@@ -107,7 +107,12 @@ CoupledDiffusionReactionSub::computeQpJacobian()
 Real
 CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  // If no coupled species, return 0
   if (_vals.size() == 0)
+    return 0.0;
+
+  // If jvar is not one of the coupled species, return 0
+  if (std::find(_vars.begin(), _vars.end(), jvar) == _vars.end())
     return 0.0;
 
   RealGradient diff1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
@@ -139,7 +144,7 @@ CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
       diff2 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
   RealGradient diff3;
-  RealGradient diff3_sum = 0.0;
+  RealGradient diff3_sum(0.0, 0.0, 0.0);
   Real val_jvar = 0.0;
   unsigned int var = 0;
 
