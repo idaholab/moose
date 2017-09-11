@@ -173,9 +173,9 @@ private:
    * Determine the delimiter.
    *
    * If the setDelimiter method is not called the data is inspected, if a ',' is found it is assumed
-   * to be the delimiter. Otherwise a space is used.
+   * to be the delimiter as is the case for \t. Otherwise a space is used.
    */
-  std::string delimiter(const std::string & line);
+  const std::string & delimiter(const std::string & line);
 
   /**
    * Determine if header exists.

@@ -400,4 +400,12 @@ TEST(DelimitedFileReader, ExtraSpace)
   EXPECT_EQ(reader.getData("column_1"), gold[1]);
   EXPECT_EQ(reader.getData("column_2"), gold[2]);
 }
+
+TEST(DelimitedFileReader, Tabs)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/example_tab.csv");
+  reader.read();
+  EXPECT_EQ(reader.getData(), std::vector<std::vector<double>>({{-500, -499}, {0.023, 0.024}}));
+}
+
 #endif

@@ -317,11 +317,18 @@ DelimitedFileReader::processLine(const std::string & line,
                line);
 }
 
-std::string
+const std::string &
 DelimitedFileReader::delimiter(const std::string & line)
 {
   if (_delimiter.empty())
-    _delimiter = line.find(",") != std::string::npos ? "," : " ";
+  {
+    if (line.find(",") != std::string::npos)
+      _delimiter = ",";
+    else if (line.find("\t") != std::string::npos)
+      _delimiter = "\t";
+    else
+      _delimiter = " ";
+  }
   return _delimiter;
 }
 
