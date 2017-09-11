@@ -4,7 +4,8 @@
     input = 'cracking_exponential.i'
     exodiff = 'cracking_exponential_out.e'
     rel_err = 1.0e-03
-    abs_zero = 1.0e-5
+    abs_zero = 4.0e-4
+    use_old_floor = true
     compiler = 'GCC CLANG'
   [../]
   [./single_edge_notch]
