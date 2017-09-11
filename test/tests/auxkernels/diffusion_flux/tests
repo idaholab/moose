@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'diffusion_flux.i'
+    exodiff = 'diffusion_flux_out.e'
+       abs_zero = 1e-9
+  [../]
+[]
