@@ -5,6 +5,7 @@
     input = image_2d.i
     exodiff = image_2d_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./2d_elemental]
     # Test ability to read in a single 20x20 image
@@ -12,6 +13,7 @@
     input = image_2d_elemental.i
     exodiff = image_2d_elemental_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./3d]
     # Test ability to read in stack of 20x20 images
@@ -19,6 +21,7 @@
     input = image_3d.i
     exodiff = image_3d_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./3d_subset]
     # Test ability to read a subset of of 20x20 image stack
@@ -26,6 +29,7 @@
     input = image_3d_subset.i
     exodiff = image_3d_subset_out.e
     vtk = true
+    copy_files = stack
  [../]
   [./threshold]
     # Test the ability to threshold the image
@@ -33,6 +37,7 @@
     input = threshold.i
     exodiff = threshold_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./threshold_adapt]
     # Test the ability to threshold the image and adapt
@@ -40,6 +45,7 @@
     input = threshold_adapt.i
     exodiff = threshold_adapt_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./threshold_adapt_parallel]
     # Test the ability to threshold the image and adapt
@@ -51,6 +57,7 @@
     max_parallel = 3
     vtk = true
     recover = false
+    copy_files = stack
   [../]
   [./threshold_adapt_parallel_check_files]
     # Test the ability to threshold the image and adapt
@@ -61,6 +68,7 @@
     max_parallel = 3
     cli_args = Outputs/nemesis=true
     vtk = true
+    copy_files = stack
     recover = false
   [../]
   [./component]
@@ -69,6 +77,7 @@
     input = component.i
     exodiff = component_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./shift_and_scale]
     # Test the shift and scale feature
@@ -76,6 +85,7 @@
     input = shift_and_scale.i
     exodiff = shift_and_scale_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./subset]
     # Test the image may be a subset of the domain
@@ -83,6 +93,7 @@
     input = subset.i
     exodiff = subset_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./flip]
     # Test the flipping feature
@@ -90,6 +101,7 @@
     input = flip.i
     exodiff = flip_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./flip_dual]
     # Tests the flipping and images on subdomains
@@ -97,6 +109,7 @@
     input = flip_dual.i
     exodiff = flip_dual_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./flip_quad]
     # Tests the flipping and images on subdomains
@@ -104,6 +117,7 @@
     input = flip_quad.i
     exodiff = flip_quad_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./crop]
     # Tests ability for mesh to be a subset of image
@@ -111,6 +125,7 @@
     input = crop.i
     exodiff = crop_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./image_mesh_3d]
     # Tests ability to read a stack of 3D images into a Mesh
@@ -118,6 +133,7 @@
     input = image_mesh_3d.i
     exodiff = image_mesh_3d_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./image_mesh_2d]
     # Tests ability to read a 2D image into a Mesh
@@ -125,6 +141,7 @@
     input = image_mesh_2d.i
     exodiff = image_mesh_2d_out.e
     vtk = true
+    copy_files = stack
   [../]
   [./moose_logo]
     # Tests ability to shift and scale separately

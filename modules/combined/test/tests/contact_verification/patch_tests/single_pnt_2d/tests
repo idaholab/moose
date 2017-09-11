@@ -116,9 +116,9 @@
   [./glued_pen_sm]
     type = 'CSVDiff'
     input = 'single_point_2d_sm.i'
-    csvdiff = 'single_point_2d_out_glued_pen.csv'
+    csvdiff = 'single_point_2d_out_glued_pen_sm.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 
-    Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
+    Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_glued_pen_sm'
     rel_err = 1e-4
     abs_zero = 3e-5
     max_parallel = 1

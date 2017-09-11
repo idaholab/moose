@@ -110,61 +110,62 @@
   [./json]
     type = 'PythonUnitTest'
     input = 'test_json.py'
+    queue_scheduler = false
   [../]
 
   [./definition_existsin_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = 'ExistsIn=\[\s*EXTRA:"all"\s*EXTRA:"none"\s*"../../../../../Outputs/["*"]/decl"\s*\]'
+    expect_out = 'ExistsIn=\[\s*?EXTRA:"all"\s*?EXTRA:"none"\s*?"../../../../../Outputs/["*"]/decl"\s*?\]'
     cli_args = '--definition'
   [../]
 
   [./definition_childatleastone_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = 'ChildAtLeastOne=\[\s*"../../../GlobalParams/inside/value"\s*"inside/value"\s*\]'
+    expect_out = 'ChildAtLeastOne=\[\s*?"../../../GlobalParams/inside/value"\s*?"inside/value"\s*?\]'
     cli_args = '--definition'
   [../]
 
   [./definition_valenum_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'execute_on\'{.*\'value\'{.*ValEnums=\[ "none" "ini.*gin" "custom" \].*}.*} % end parameter execute_on'
+    expect_out = '\'execute_on\'{.*?\'value\'{.*?ValEnums=\[ "none" "ini.*?gin" "custom" \].*}?.*?} % end parameter execute_on'
     cli_args = '--definition'
   [../]
 
   [./definition_active_parameter_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'active\'{.*Description="If specified.*made active".*\'value\'{.*InputDefault="__all__".*} % end parameter active'
+    expect_out = '\'active\'{.*?Description="If specified.*?made active".*?\'value\'{.*?InputDefault="__all__".*?} % end parameter active'
     cli_args = '--definition'
   [../]
 
   [./definition_normal_sub_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'Indicators\'{.*InputTmpl=MooseBlock.*InputName="Indicators".*InputType=normal_sub.*InputDefault="Indicators"'
+    expect_out = '\'Indicators\'{.*?InputTmpl=MooseBlock.*?InputName="Indicators".*?InputType=normal_sub.*?InputDefault="Indicators"'
     cli_args = '--definition'
   [../]
 
   [./definition_type_sub_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'CircleMarker_type\'{.*InputType=type_sub.*InputDefault="insert_name_here".*} % end block CircleMarker_type'
+    expect_out = '\'CircleMarker_type\'{.*?InputType=type_sub.*?InputDefault="insert_name_here".*?} % end block CircleMarker_type'
     cli_args = '--definition'
   [../]
 
   [./definition_default_type_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'BoxMarker_type\'{.*\'type\'{.*\'value\'{.*InputDefault="BoxMarker".*}.*} % end parameter type.*} % end block BoxMarker_type'
+    expect_out = '\'BoxMarker_type\'{.*?\'type\'{.*?\'value\'{.*?InputDefault="BoxMarker".*?}.*?} % end parameter type.*?} % end block BoxMarker_type'
     cli_args = '--definition'
   [../]
 
   [./definition_minvalinc_inputdefault_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'cycles_per_step\'{.*'value'{.*MinValInc=0.*InputDefault="1".*} % end parameter cycles_per_step'
+    expect_out = '\'cycles_per_step\'{.*?'value'{.*?MinValInc=0.*?InputDefault="1".*?} % end parameter cycles_per_step'
     cli_args = '--definition'
   [../]
 
