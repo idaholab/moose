@@ -74,6 +74,8 @@
 #include "MassEigenKernel.h"
 #include "NullKernel.h"
 #include "MaterialDerivativeTestKernel.h"
+#include "MaterialDerivativeRankTwoTestKernel.h"
+#include "MaterialDerivativeRankFourTestKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -528,6 +530,8 @@ registerObjects(Factory & factory)
   registerKernel(MassEigenKernel);
   registerKernel(NullKernel);
   registerKernel(MaterialDerivativeTestKernel);
+  registerKernel(MaterialDerivativeRankTwoTestKernel);
+  registerKernel(MaterialDerivativeRankFourTestKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
