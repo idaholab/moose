@@ -21,7 +21,7 @@ class GeometricalComponent : public Component
 public:
   GeometricalComponent(const InputParameters & parameters);
 
-  virtual void setupMesh();
+  virtual void setupMesh() override;
   virtual void displaceMesh() override;
 
   virtual Point getPosition() const { return _position; }

@@ -37,6 +37,7 @@ public:
    */
   virtual void check();
 
+  virtual void setupMesh() = 0;
   /**
    * Displace the reference mesh into 3D space
    */
