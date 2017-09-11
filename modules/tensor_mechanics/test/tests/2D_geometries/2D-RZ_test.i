@@ -165,6 +165,5 @@
 []
 
 [Outputs]
-  file_base = 2D-RZ_test_out
   exodus = true
 []

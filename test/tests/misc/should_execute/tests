@@ -16,5 +16,10 @@
     delete_output_before_running = false
 
     should_execute = false
+
+    # The queue scheduler creates a new directory to run in, which
+    # means the output file will not be present for postProcessing
+    # (which is any 'should_execute = false' tests)
+    queue_scheduler = false
   [../]
 []

@@ -9,7 +9,7 @@
     type = 'RunException'
     input = 'master.i'
     expect_err = 'Unable to find variable \w+ in any system'
-    cli_args = 'Transfers/pp_transfer/variable=invalid'
+    cli_args = 'Transfers/pp_transfer/variable=invalid Outputs/exodus=false Outputs/active='
     prereq = test
   [../]
 

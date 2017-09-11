@@ -7,8 +7,8 @@
   [./bending_Bbar]
     type = 'Exodiff'
     input = 'bending_jacobian.i'
-    exodiff = 'bending_jacobian_out.e'
-    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    exodiff = 'bending_jacobian_bbar_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=bending_jacobian_bbar_out'
     prereq = 'bending'
   [../]
   [./3d_bar]
