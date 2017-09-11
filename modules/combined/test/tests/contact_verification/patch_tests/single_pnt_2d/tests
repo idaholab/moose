@@ -10,13 +10,13 @@
     max_parallel = 1
     superlu = true
     prereq = 'glued_kin_sm'
-    skip = 'Reevaluate under PETSc 3.7.4. #8200.'
+    petsc_version = '>=3.7.6'
   [../]
   [./glued_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_pen.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 
+    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10
     Contact/leftright/formulation=penalty Contact/leftright/penalty=2.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
     rel_err = 5e-4
     abs_zero = 3e-5
@@ -72,7 +72,7 @@
 #    type = 'CSVDiff'
 #    input = 'single_point_2d_frictional.i'
 #    csvdiff = 'single_point_2d_out_fric_1_0_kin.csv'
-#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9 
+#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9
 #    Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=1.0e2 Outputs/file_base=single_point_2d_out_fric_1_0_kin'
 #    rel_err = 1e-4
 #    abs_zero = 1e-5
@@ -117,7 +117,7 @@
     type = 'CSVDiff'
     input = 'single_point_2d_sm.i'
     csvdiff = 'single_point_2d_out_glued_pen_sm.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 
+    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10
     Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_glued_pen_sm'
     rel_err = 1e-4
     abs_zero = 3e-5
@@ -168,7 +168,7 @@
 #    type = 'CSVDiff'
 #    input = 'single_point_2d_frictional.i'
 #    csvdiff = 'single_point_2d_out_fric_1_0_kin.csv'
-#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9 
+#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9
 #    Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=1.0e2 Outputs/file_base=single_point_2d_out_fric_1_0_kin'
 #    rel_err = 1e-4
 #    abs_zero = 1e-5
