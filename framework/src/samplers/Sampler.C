@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// STL includes
+#include <iterator>
+
 // MOOSE includes
 #include "Sampler.h"
 #include "MooseRandom.h"
@@ -38,7 +41,8 @@ Sampler::Sampler(const InputParameters & parameters)
     SetupInterface(this),
     DistributionInterface(this),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
-    _seed(getParam<unsigned int>("seed"))
+    _seed(getParam<unsigned int>("seed")),
+    _total_rows(0)
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
@@ -50,8 +54,24 @@ Sampler::execute()
 {
   // Get the samples then save the state so that subsequent calls to getSamples returns the same
   // random numbers until this execute command is called again.
-  getSamples();
+  std::vector<DenseMatrix<Real>> data = getSamples();
   _generator.saveState();
+  reinit(data);
+}
+
+void
+Sampler::reinit(const std::vector<DenseMatrix<Real>> & data)
+{
+  // Update offsets and total number of rows
+  _total_rows = 0;
+  _offsets.clear();
+  _offsets.reserve(data.size() + 1);
+  _offsets.push_back(_total_rows);
+  for (const DenseMatrix<Real> & mat : data)
+  {
+    _total_rows += mat.m();
+    _offsets.push_back(_total_rows);
+  }
 }
 
 std::vector<DenseMatrix<Real>>
@@ -61,6 +81,19 @@ Sampler::getSamples()
   sampleSetUp();
   std::vector<DenseMatrix<Real>> output = sample();
   sampleTearDown();
+
+  if (_sample_names.empty())
+  {
+    _sample_names.resize(output.size());
+    for (auto i = beginIndex(output); i < output.size(); ++i)
+      _sample_names[i] = "sample_" + std::to_string(i);
+  }
+  mooseAssert(output.size() == _sample_names.size(),
+              "The number of sample names must match the number of samples returned.");
+
+  mooseAssert(output.size() > 0,
+              "It is not acceptable to return an empty vector of sample matrices.");
+
   return output;
 }
 
@@ -85,4 +118,43 @@ Sampler::setNumberOfRequiedRandomSeeds(const std::size_t & number)
     _generator.seed(i, _seed_generator.randl(0));
 
   _generator.saveState();
+}
+
+void
+Sampler::setSampleNames(const std::vector<std::string> & names)
+{
+  _sample_names = names;
+
+  // Use assert because to check the size a getSamples call is required, which you don't
+  // want to do if you don't need it.
+  mooseAssert(getSamples().size() == _sample_names.size(),
+              "The number of sample names must match the number of samples returned.");
+}
+
+Sampler::Location
+Sampler::getLocation(unsigned int global_index)
+{
+  if (_offsets.empty())
+    reinit(getSamples());
+
+  mooseAssert(_offsets.size() > 1,
+              "The getSamples method returned an empty vector, if you are seeing this you have "
+              "done something to bypass another assert in the 'getSamples' method that should "
+              "prevent this message.");
+
+  // The lower_bound method returns the first value "which does not compare less than" the value and
+  // upper_bound performs "which compares greater than." The upper_bound -1 method is used here
+  // because lower_bound will provide the wrong index, but the method here will provide the correct
+  // index, set the Sampler.GetLocation test in moose/unit/src/Sampler.C for an example.
+  std::vector<unsigned int>::iterator iter =
+      std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
+  return Sampler::Location(std::distance(_offsets.begin(), iter), global_index - *iter);
+}
+
+unsigned int
+Sampler::getTotalNumberOfRows()
+{
+  if (_total_rows == 0)
+    reinit(getSamples());
+  return _total_rows;
 }
