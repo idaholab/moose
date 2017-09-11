@@ -144,8 +144,8 @@ Sampler::getLocation(unsigned int global_index)
 
   // The lower_bound method returns the first value "which does not compare less than" the value and
   // upper_bound performs "which compares greater than." The upper_bound -1 method is used here
-  // because of the equal case; lower_bound will provide the wrong index, but the method here will
-  // provide the correct index.
+  // because lower_bound will provide the wrong index, but the method here will provide the correct
+  // index, set the Sampler.GetLocation test in moose/unit/src/Sampler.C for an example.
   std::vector<unsigned int>::iterator iter =
       std::upper_bound(_offsets.begin(), _offsets.end(), global_index) - 1;
   return Sampler::Location(std::distance(_offsets.begin(), iter), global_index - *iter);
