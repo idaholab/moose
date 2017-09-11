@@ -342,10 +342,10 @@ DelimitedFileReader::header(const std::string & line)
     case HeaderFlag::TRUE:
       return true;
     default:
-      // AUTO: Assume if a letter is found in the line that a header exists.
-      bool contains_alpha = std::find_if(line.begin(), line.end(), [](char c) {
-                              return std::isalpha(c);
-                            }) != line.end();
+
+      // Attempt to convert the line, if it fails assume it is a header
+      std::vector<double> row;
+      bool contains_alpha = !MooseUtils::tokenizeAndConvert<double>(line, row, delimiter(line));
 
       // Based on auto detect set the flag to TRUE|FALSE to short-circuit this check for each line
       // in the case of row data.

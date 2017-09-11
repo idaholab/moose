@@ -21,7 +21,7 @@ SmoothCircleFromFileIC::SmoothCircleFromFileIC(const InputParameters & parameter
   : SmoothCircleBaseIC(parameters),
     _data(0),
     _file_name(getParam<FileName>("file_name")),
-    _txt_reader(_file_name, true, " ", &_communicator),
+    _txt_reader(_file_name, &_communicator),
     _n_circles(0)
 {
   // Read names and vectors from file

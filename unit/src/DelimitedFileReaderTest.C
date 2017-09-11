@@ -408,4 +408,13 @@ TEST(DelimitedFileReader, Tabs)
   EXPECT_EQ(reader.getData(), std::vector<std::vector<double>>({{-500, -499}, {0.023, 0.024}}));
 }
 
+TEST(DelimitedFileReader, Scientific)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/example_sci.csv");
+  reader.read();
+  std::vector<std::vector<double>> gold = {{0, 1000, 2000, 5000, 5100},
+                                           {0, 20000, 0, 20000, 30000}};
+  EXPECT_EQ(reader.getData(), gold);
+}
+
 #endif
