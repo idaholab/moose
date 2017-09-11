@@ -1,0 +1,18 @@
+[benchmarks]
+    [./simple_diffusion_refine3]
+        binary = test/moose_test-opt
+        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        cli_args = 'Mesh/uniform_refine=3'
+    [../]
+    [./simple_diffusion_refine4]
+        binary = test/moose_test-opt
+        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        cli_args = 'Mesh/uniform_refine=4'
+    [../]
+    [./simple_diffusion_refine5]
+        binary = test/moose_test-opt
+        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        cli_args = 'Mesh/uniform_refine=5'
+    [../]
+[]
+
