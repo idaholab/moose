@@ -45,6 +45,7 @@ DelimitedFileReader::read()
   // Storage for the raw data
   std::vector<double> raw;
   std::size_t size_raw;
+  std::size_t size_offsets;
 
   // Read data
   if (_communicator == nullptr || _communicator->rank() == 0)
@@ -69,6 +70,7 @@ DelimitedFileReader::read()
 
     // Set raw data vector size
     size_raw = raw.size();
+    size_offsets = _row_offsets.size();
   }
 
   if (_communicator != nullptr)
@@ -82,6 +84,14 @@ DelimitedFileReader::read()
     _communicator->broadcast(size_raw);
     raw.resize(size_raw);
     _communicator->broadcast(raw);
+
+    // Broadcast row offsets
+    if (_format == "rows")
+    {
+      _communicator->broadcast(size_offsets);
+      _row_offsets.resize(size_offsets);
+      _communicator->broadcast(_row_offsets);
+    }
   }
 
   // Resize the internal storage
