@@ -146,6 +146,22 @@ class DAG(object):
                 self.delete_node_if_exists(edge)
         return deleted_nodes
 
+    # Added by the MOOSE group
+    def reverse_edges(self, graph=None):
+        """ Return a new graph with reversed dependencies based
+        on current graph. """
+        if graph is None:
+            graph = self.graph
+
+        new_graph = DAG()
+        for key in self.topological_sort(graph):
+            new_graph.add_node(key)
+
+        for key, value in graph.iteritems():
+            for downstream_node in value:
+                new_graph.add_edge(downstream_node, key)
+        return new_graph
+
     def all_leaves(self, graph=None):
         """ Return a list of all leaves (nodes with no downstreams) """
         if graph is None:

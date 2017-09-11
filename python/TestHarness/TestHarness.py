@@ -3,7 +3,7 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
-import os, re, inspect, errno, time, copy
+import os, re, inspect, errno, time, copy, json, shutil
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -51,6 +51,7 @@ class TestHarness:
         self.num_passed = 0
         self.num_failed = 0
         self.num_skipped = 0
+        self.num_pending = 0
         self.host_name = gethostname()
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
@@ -426,6 +427,8 @@ class TestHarness:
                 self.num_skipped += 1
             elif tester.didPass():
                 self.num_passed += 1
+            elif tester.isQueued():
+                self.num_pending += 1
             else:
                 self.num_failed += 1
 
@@ -463,6 +466,10 @@ class TestHarness:
         if self.error_code & ~Parser.getErrorCodeMask():
             fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
 
+        # Alert the user to their session file
+        if self.queueing:
+            print 'Your session file is %s' % self.options.session_file
+
         # Print a different footer when performing a dry run
         if self.options.dry_run:
             print('Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time))
@@ -480,13 +487,17 @@ class TestHarness:
             else:
                 summary = '<b>%d passed</b>'
             summary += ', <b>%d skipped</b>'
+            if self.num_pending:
+                summary += ', <c>%d pending</c>'
+            else:
+                summary += ', <b>%d pending</b>'
             if self.num_failed:
                 summary += ', <r>%d FAILED</r>'
             else:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
+            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code ))
 
         if self.file:
@@ -496,14 +507,46 @@ class TestHarness:
         if self.writeFailedTest != None:
             self.writeFailedTest.close()
 
+    def queueCleanup(self):
+        """ Remove all files/directories created during supplied session file """
+        # Open existing session file
+        if os.path.exists(self.options.queue_cleanup):
+            try:
+                session_file = open(self.options.queue_cleanup, 'r')
+                session_data = json.load(session_file)
+            except ValueError:
+                print("Supplied session file %s is not readable!" % (self.options.queue_cleanup))
+                sys.exit(1)
+            # Iterate over session dictionary and perform delete operations
+            for key in session_data.keys():
+                if 'template_data' in session_data[key]:
+                    try:
+                        shutil.rmtree(session_data[key]['template_data']['working_dir'])
+                    except OSError:
+                        pass
+            os.remove(self.options.queue_cleanup)
+
+        else:
+            print("%s does not exist!" % (self.options.queue_cleanup))
+            sys.exit(1)
+
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', "IS_SCHEDULER")
 
-        # Add our scheduler plugins
-        # Note: for now, we only have one: 'RunParallel'. In the future this will be an options.argument
-        #       comparison
-        scheduler_plugin = 'RunParallel'
+        # Set a global queueing flag
+        self.queueing = False
+
+        if self.options.pbs:
+            self.queueing = True
+            scheduler_plugin = 'RunPBS'
+
+            # Unify the queueing file
+            self.options.session_file = self.options.pbs
+
+        # The default scheduler plugin
+        else:
+            scheduler_plugin = 'RunParallel'
 
         # Augment the Scheduler params with plugin params
         plugin_params = self.factory.validParams(scheduler_plugin)
@@ -599,6 +642,12 @@ class TestHarness:
         outputgroup.add_argument("--revision", nargs=1, action="store", type=str, dest="revision", help="The current revision being tested. Required when using --store-timing.")
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
+        outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
+
+        queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
+        queuegroup.add_argument('--pbs', nargs='?', action='store', type=str, metavar='session_name', const='generate', help='Use PBS as your scheduler. Optional: Supply a name to identify this session with. If session exists, the scheduler will instead display the results of that session.')
+        queuegroup.add_argument('--queue-project', nargs=1, action='store', type=str, default='moose', metavar='project', help='Identify your PBS job with this project (default:  moose)')
+        queuegroup.add_argument('--queue-cleanup', nargs=1, metavar='session_name', help='Clean up directories/files created by session')
 
         code = True
         if self.code.decode('hex') in argv:
@@ -672,6 +721,9 @@ class TestHarness:
             sys.exit(0)
         elif self.options.dump:
             self.factory.printDump("Tests")
+            sys.exit(0)
+        elif self.options.queue_cleanup:
+            self.queueCleanup()
             sys.exit(0)
 
     def getOptions(self):
