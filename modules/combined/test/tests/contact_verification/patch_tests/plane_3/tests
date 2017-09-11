@@ -147,7 +147,7 @@ eTests]
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    skip = 'Reevaluate under PETSc 3.7.4. #8200'
+    petsc_version = '>=3.7.6'
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'
