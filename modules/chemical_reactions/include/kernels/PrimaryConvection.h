@@ -4,12 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "Kernel.h"
 
 #ifndef PRIMARYCONVECTION_H
 #define PRIMARYCONVECTION_H
 
-// Forward Declaration
+#include "Kernel.h"
+
 class PrimaryConvection;
 
 template <>
@@ -27,13 +27,16 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// Material property of hydraulic conductivity
+  /// Hydraulic conductivity
   const MaterialProperty<Real> & _cond;
 
-private:
-  /// Coupled gradient of hydraulic head.
+  /// Pressure gradient
   const VariableGradient & _grad_p;
+
+  /// Pressure variable number
+  const unsigned int _pvar;
 };
 
 #endif // PRIMARYCONVECTION_H
