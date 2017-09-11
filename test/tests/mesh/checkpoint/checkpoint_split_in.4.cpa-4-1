@@ -56,11 +56,11 @@
 63 1
 63	 # unique id
 8.0000000000000004e-01 5.0000000000000000e-01 0.0000000000000000e+00
-64 1
-64	 # unique id
+67 1
+67	 # unique id
 9.0000000000000002e-01 5.0000000000000000e-01 0.0000000000000000e+00
-65 1
-65	 # unique id
+68 1
+68	 # unique id
 1.0000000000000000e+00 5.0000000000000000e-01 0.0000000000000000e+00
 70 2
 70	 # unique id
@@ -219,18 +219,18 @@
 1	 # rflag
 1	 # pflag
 51 52 63 62
-48 5 1 0 65535 65535
-169	 # unique id
+50 5 1 0 65535 65535
+171	 # unique id
 0	 # p_level
 1	 # rflag
 1	 # pflag
-52 53 64 63
-49 5 1 0 65535 65535
-170	 # unique id
+52 53 67 63
+51 5 1 0 65535 65535
+172	 # unique id
 0	 # p_level
 1	 # rflag
 1	 # pflag
-53 54 65 64
+53 54 68 67
 54 5 3 0 65535 65535
 175	 # unique id
 0	 # p_level
@@ -260,13 +260,13 @@
 0	 # p_level
 1	 # rflag
 1	 # pflag
-63 64 75 74
+63 67 75 74
 59 5 1 0 65535 65535
 180	 # unique id
 0	 # p_level
 1	 # rflag
 1	 # pflag
-64 65 76 75
+67 68 76 75
 64 5 2 0 65535 65535
 185	 # unique id
 0	 # p_level
@@ -401,23 +401,13 @@
 	 # remote child parent_ids
 0	 # vector length
 	 # remote child_numbers
-4	 # sideset id to name map
-4	 # vector length
-0	 1	 2	 3	 
-4	 # vector length
-bottom	 right	 top	 left	 
-4	 # nodeset id to name map
-4	 # vector length
-0	 1	 2	 3	 
-4	 # vector length
-bottom	 right	 top	 left	 
 12	 # vector length
-39	 49	 59	 69	 79	 89	 95	 96	 97	 98	 99	 99	 	 # element ids for bcs
+39	 51	 59	 69	 79	 89	 95	 96	 97	 98	 99	 99	 	 # element ids for bcs
 12	 # vector length
 1	 1	 1	 1	 1	 1	 2	 2	 2	 2	 1	 2	 	 # sides of elements for bcs
 12	 # vector length
 1	 1	 1	 1	 1	 1	 2	 2	 2	 2	 1	 2	 	 # bc ids
 14	 # vector length
-43	 54	 65	 76	 87	 98	 109	 115	 116	 117	 118	 119	 120	 120	 	 # node id list
+43	 54	 68	 76	 87	 98	 109	 115	 116	 117	 118	 119	 120	 120	 	 # node id list
 14	 # vector length
 1	 1	 1	 1	 1	 1	 1	 2	 2	 2	 2	 2	 1	 2	 	 # nodeset bc id list
