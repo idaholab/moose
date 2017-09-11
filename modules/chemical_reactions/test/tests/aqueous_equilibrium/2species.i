@@ -31,8 +31,8 @@
 
 [Variables]
   [./a]
-    order =  FIRST
-    family =  LAGRANGE
+    order = FIRST
+    family = LAGRANGE
     [./InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
@@ -44,8 +44,8 @@
     [../]
   [../]
   [./b]
-    order =  FIRST
-    family =  LAGRANGE
+    order = FIRST
+    family = LAGRANGE
     [./InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
@@ -86,55 +86,55 @@
 
 [Kernels]
   [./a_ie]
-    type =  PrimaryTimeDerivative
-    variable =  a
+    type = PrimaryTimeDerivative
+    variable = a
   [../]
   [./a_diff]
-    type =  PrimaryDiffusion
-    variable =  a
+    type = PrimaryDiffusion
+    variable = a
   [../]
   [./a_conv]
-    type =  PrimaryConvection
-    variable =  a
+    type = PrimaryConvection
+    variable = a
     p = pressure
   [../]
   [./b_ie]
-    type =  PrimaryTimeDerivative
-    variable =  b
+    type = PrimaryTimeDerivative
+    variable = b
   [../]
   [./b_diff]
-    type =  PrimaryDiffusion
-    variable =  b
+    type = PrimaryDiffusion
+    variable = b
   [../]
   [./b_conv]
-    type =  PrimaryConvection
-    variable =  b
+    type = PrimaryConvection
+    variable = b
     p = pressure
   [../]
 []
 
 [BCs]
   [./a_left]
-    type =  DirichletBC
-    variable =  a
-    boundary =  left
-    value =  1.0e-2
+    type = DirichletBC
+    variable = a
+    boundary = left
+    value = 1.0e-2
   [../]
   [./a_right]
-    type =  ChemicalOutFlowBC
-    variable =  a
-    boundary =  right
+    type = ChemicalOutFlowBC
+    variable = a
+    boundary = right
   [../]
   [./b_left]
-    type =  DirichletBC
-    variable =  b
-    boundary =  left
-    value =  1.0e-2
+    type = DirichletBC
+    variable = b
+    boundary = left
+    value = 1.0e-2
   [../]
   [./b_right]
-    type =  ChemicalOutFlowBC
-    variable =  b
-    boundary =  right
+    type = ChemicalOutFlowBC
+    variable = b
+    boundary = right
   [../]
 []
 
