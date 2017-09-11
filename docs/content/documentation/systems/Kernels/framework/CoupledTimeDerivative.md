@@ -15,15 +15,15 @@ denoted by `_dv_dot` in the `CoupledTimeDerivative` class.
 ## Example Syntax
 
 `CoupledTimeDerivative` is used for example in the split Cahn Hilliard equations
-for phase field calculations. An example of its syntax and use is given in
-the `Kernel` block below:
+for phase field calculations. Its syntax is simple, taking its type
+(`CoupledTimeDerivative`), the variable to whom's residual the
+`CoupledTimeDerivative` contributes, and the coupled variable `v` that the time
+derivative operator acts upon. Example syntax can be found in the kernel block
+below:
 
-!listing modules/phase_field/tutorials/spinodal_decomposition/s1_testmodel.i
+!listing
+ test/tests/kernels/coupled_time_derivative/coupled_time_derivative_test.i
  block=Kernels label=false
-
- The `CoupledTimeDerivative` term corresponds to the first term in equation 6 on
- the phase field equation
- [page](modules/phase_field/Phase_Field_Equations.md).
 
 !syntax parameters /Kernels/CoupledTimeDerivative
 
