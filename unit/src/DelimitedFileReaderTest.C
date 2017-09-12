@@ -201,7 +201,7 @@ TEST(DelimitedFileReader, RowData)
 {
   // Read file with empty lines
   MooseUtils::DelimitedFileReader reader("data/csv/row_example.csv");
-  reader.setFormat("rows");
+  reader.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
   reader.read();
 
   std::vector<std::vector<double>> gold = {{1, 2, 3, 4}, {10, 20, 30, 40, 50}};
@@ -216,7 +216,7 @@ TEST(DelimitedFileReader, RowDataNoHeader)
 {
   // Read file with empty lines
   MooseUtils::DelimitedFileReader reader("data/csv/row_example_no_header.csv");
-  reader.setFormat("rows");
+  reader.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
   reader.read();
 
   std::vector<std::vector<double>> gold = {{1, 2, 3, 4},
@@ -242,23 +242,26 @@ TEST(DelimitedFileReader, RowDataNoHeader)
                                     "row_09",
                                     "row_10"};
   EXPECT_EQ(reader.getData(), gold);
+  EXPECT_EQ(reader.getNames(), names);
   EXPECT_EQ(reader.getData("row_00"), gold[0]);
   EXPECT_EQ(reader.getData("row_01"), gold[1]);
   EXPECT_EQ(reader.getData("row_02"), gold[2]);
-  EXPECT_EQ(reader.getNames(), names);
 }
 
 TEST(DelimitedFileReader, RowDataComment)
 {
   MooseUtils::DelimitedFileReader reader("data/csv/row_example_comment.csv");
-  reader.setFormat("rows");
+  reader.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
   reader.setComment("#");
   reader.read();
 
-  std::vector<std::vector<double>> gold = {{0, 1, 2, 3}, {0, 4, 5, 6}};
+  std::vector<std::vector<double>> gold = {
+      {0, 1, 2, 3}, {1, 4, 2, 1, 113, 31}, {2, 4, 5, 6}, {3, 5, 4, 3, 2, 1}};
   EXPECT_EQ(reader.getData(), gold);
   EXPECT_EQ(reader.getData("row_0"), gold[0]);
   EXPECT_EQ(reader.getData("row_1"), gold[1]);
+  EXPECT_EQ(reader.getData("row_2"), gold[2]);
+  EXPECT_EQ(reader.getData("row_3"), gold[3]);
 }
 
 TEST(DelimitedFileReader, Comment)
@@ -291,7 +294,7 @@ TEST(DelimitedFileReader, AutoDelimiter)
 TEST(DelimitedFileReader, AutoDelimiterComment)
 {
   MooseUtils::DelimitedFileReader reader("data/csv/example_space_comment.csv");
-  reader.setFormat("rows");
+  reader.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
   reader.setComment("#");
   reader.read();
 
@@ -306,7 +309,7 @@ TEST(DelimitedFileReader, AutoHeader)
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
     // Set the header flag to "AUTO", which is the default, but this is what is being tested
-    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
     reader.read();
 
     std::vector<std::vector<double>> gold = {
@@ -319,7 +322,7 @@ TEST(DelimitedFileReader, AutoHeader)
 
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
-    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
     reader.read();
 
     std::vector<std::vector<double>> gold = {
@@ -333,7 +336,7 @@ TEST(DelimitedFileReader, AutoHeader)
   try
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
-    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
     reader.read();
     FAIL();
   }
@@ -350,7 +353,7 @@ TEST(DelimitedFileReader, AutoNoHeader)
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
     // Set the header flag to "AUTO", which is the default, but this is what is being tested
-    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
     reader.read();
 
     std::vector<std::vector<double>> gold = {
@@ -363,7 +366,7 @@ TEST(DelimitedFileReader, AutoNoHeader)
 
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
-    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
     reader.read();
 
     std::vector<std::vector<double>> gold = {
@@ -376,7 +379,7 @@ TEST(DelimitedFileReader, AutoNoHeader)
 
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
-    reader.setHeader(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
     reader.read();
 
     std::vector<std::vector<double>> gold = {{1980, 2011, 2013}, {10, 5, 5}, {9, 1, 15}};
@@ -415,6 +418,13 @@ TEST(DelimitedFileReader, Scientific)
   std::vector<std::vector<double>> gold = {{0, 1000, 2000, 5000, 5100},
                                            {0, 20000, 0, 20000, 30000}};
   EXPECT_EQ(reader.getData(), gold);
+}
+
+TEST(DelimitedFileReader, Empty)
+{
+  MooseUtils::DelimitedFileReader reader("data/csv/example_empty.csv");
+  reader.read();
+  EXPECT_EQ(reader.getData(), std::vector<std::vector<double>>());
 }
 
 #endif

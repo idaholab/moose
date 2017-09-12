@@ -429,6 +429,21 @@ concatenate(std::vector<T> c1, const T & item)
   c1.push_back(item);
   return c1;
 }
+
+/**
+ * Return the number of digits for a number.
+ *
+ * This can foster quite a large discussion:
+ * https://stackoverflow.com/questions/1489830/efficient-way-to-determine-number-of-digits-in-an-integer
+ *
+ * For our purposes I like the following algorithm.
+ */
+template <typename T>
+int
+numDigits(const T & num)
+{
+  return num > 9 ? static_cast<int>(std::log10(static_cast<double>(num))) + 1 : 1;
+}
 }
 
 #endif // MOOSEUTILS_H

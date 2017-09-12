@@ -32,40 +32,40 @@ validParams<Piecewise>()
   params.addParam<bool>(
       "xy_in_file_only", true, "If the data file only contains abscissa and ordinate data");
 
-  MooseEnum format("rows columns", "rows");
+  MooseEnum format("columns=0 rows=1", "rows");
   params.addParam<MooseEnum>(
       "format", format, "Format of csv data file that is in either in columns or rows");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
 
-  MooseEnum axis("0 1 2");
+  MooseEnum axis("x=0 y=1 z=2 0=3 1=4 2=5");
+  axis.deprecate("0", "x");
+  axis.deprecate("1", "y");
+  axis.deprecate("2", "z");
   params.addParam<MooseEnum>(
-      "axis",
-      axis,
-      "The axis used (0, 1, or 2 for x, y, or z) if this is to be a function of position");
+      "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
   return params;
 }
 
 Piecewise::Piecewise(const InputParameters & parameters)
   : Function(parameters), _scale_factor(getParam<Real>("scale_factor")), _has_axis(false)
 {
-  std::vector<Real> x;
-  std::vector<Real> y;
+  std::pair<std::vector<Real>, std::vector<Real>> xy;
 
   if (isParamValid("data_file"))
-    buildFromFile(x, y);
+    xy = buildFromFile();
 
   else if (isParamValid("x") || isParamValid("y"))
-    buildFromXandY(x, y);
+    xy = buildFromXandY();
 
   else if (isParamValid("xy_data"))
-    buildFromXY(x, y);
+    xy = buildFromXY();
 
   else
     mooseError("In Piecewise ",
                _name,
                ": Either 'data_file', 'x' and 'y', or 'xy_data' must be specified.");
 
-  setData(x, y);
+  setData(xy.first, xy.second);
 }
 
 void
@@ -86,7 +86,20 @@ Piecewise::setData(const std::vector<Real> & x, const std::vector<Real> & y)
 
   if (isParamValid("axis"))
   {
-    _axis = getParam<MooseEnum>("axis");
+    const MooseEnum & axis = getParam<MooseEnum>("axis");
+    switch (axis)
+    {
+      case 0:
+      case 1:
+      case 2:
+        _axis = axis;
+        break;
+      case 3:
+      case 4:
+      case 5:
+        _axis = axis - 3;
+        break;
+    }
     _has_axis = true;
   }
 }
@@ -109,8 +122,8 @@ Piecewise::range(int i)
   return _linear_interp->range(i);
 }
 
-void
-Piecewise::buildFromFile(std::vector<Real> & x, std::vector<Real> & y)
+std::pair<std::vector<Real>, std::vector<Real>>
+Piecewise::buildFromFile()
 {
   // Input parameters
   const FileName & data_file_name = getParam<FileName>("data_file");
@@ -132,7 +145,7 @@ Piecewise::buildFromFile(std::vector<Real> & x, std::vector<Real> & y)
 
   // Read the data from CSV file
   MooseUtils::DelimitedFileReader reader(data_file_name, &_communicator);
-  reader.setFormat(format);
+  reader.setFormatFlag(format.getEnum<MooseUtils::DelimitedFileReader::FormatFlag>());
   reader.setComment("#");
   reader.read();
   const std::vector<std::vector<double>> & data = reader.getData();
@@ -172,12 +185,11 @@ Piecewise::buildFromFile(std::vector<Real> & x, std::vector<Real> & y)
                "\" or set \"xy_in_file_only\" to false?");
 
   // Update the input vectors to contained the desired data
-  x = reader.getData(x_index);
-  y = reader.getData(y_index);
+  return std::make_pair(reader.getData(x_index), reader.getData(y_index));
 }
 
-void
-Piecewise::buildFromXandY(std::vector<Real> & x, std::vector<Real> & y)
+std::pair<std::vector<Real>, std::vector<Real>>
+Piecewise::buildFromXandY()
 {
   if (!isParamValid("x") || !isParamValid("y"))
     mooseError(
@@ -186,12 +198,11 @@ Piecewise::buildFromXandY(std::vector<Real> & x, std::vector<Real> & y)
   if (isParamValid("xy_data"))
     mooseError("In Piecewise ", _name, ": Cannot specify 'x', 'y', and 'xy_data' together.");
 
-  x = getParam<std::vector<Real>>("x");
-  y = getParam<std::vector<Real>>("y");
+  return std::make_pair(getParam<std::vector<Real>>("x"), getParam<std::vector<Real>>("y"));
 }
 
-void
-Piecewise::buildFromXY(std::vector<Real> & x, std::vector<Real> & y)
+std::pair<std::vector<Real>, std::vector<Real>>
+Piecewise::buildFromXY()
 {
   std::vector<Real> xy = getParam<std::vector<Real>>("xy_data");
   unsigned int xy_size = xy.size();
@@ -199,12 +210,15 @@ Piecewise::buildFromXY(std::vector<Real> & x, std::vector<Real> & y)
     mooseError(
         "In Piecewise ", _name, ": Length of data provided in 'xy_data' must be a multiple of 2.");
 
-  unsigned int x_size = xy_size / 2;
-  x.reserve(x_size);
-  y.reserve(x_size);
-  for (unsigned int i = 0; i < xy_size / 2; ++i)
+  unsigned int data_size = xy_size / 2;
+  std::vector<Real> x;
+  std::vector<Real> y;
+  x.reserve(data_size);
+  y.reserve(data_size);
+  for (unsigned int i = 0; i < xy_size; i += 2)
   {
-    x.push_back(xy[i * 2]);
-    y.push_back(xy[i * 2 + 1]);
+    x.push_back(xy[i]);
+    y.push_back(xy[i + 1]);
   }
+  return std::make_pair(x, y);
 }

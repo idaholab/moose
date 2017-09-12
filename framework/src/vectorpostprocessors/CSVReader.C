@@ -52,9 +52,9 @@ CSVReader::CSVReader(const InputParameters & params)
 {
   _csv_reader.setIgnoreEmptyLines(getParam<bool>("ignore_empty_lines"));
   if (isParamValid("header"))
-    _csv_reader.setHeader(getParam<bool>("header")
-                              ? MooseUtils::DelimitedFileReader::HeaderFlag::TRUE
-                              : MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    _csv_reader.setHeaderFlag(getParam<bool>("header")
+                                  ? MooseUtils::DelimitedFileReader::HeaderFlag::TRUE
+                                  : MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
   if (isParamValid("delimiter"))
     _csv_reader.setDelimiter(getParam<std::string>("delimiter"));
 }

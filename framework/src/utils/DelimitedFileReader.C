@@ -29,10 +29,10 @@ namespace MooseUtils
 DelimitedFileReader::DelimitedFileReader(const std::string & filename,
                                          const libMesh::Parallel::Communicator * comm)
   : _filename(filename),
-    _header(HeaderFlag::AUTO),
+    _header_flag(HeaderFlag::AUTO),
     _ignore_empty_lines(true),
     _communicator(comm),
-    _format("columns rows", "columns")
+    _format_flag(FormatFlag::COLUMNS)
 {
 }
 
@@ -53,11 +53,13 @@ DelimitedFileReader::read()
     // Check the file
     MooseUtils::checkFileReadable(_filename);
 
-    // Create the file stream
+    // Create the file stream and do nothing if the file is empty
     std::ifstream stream_data(_filename);
+    if (stream_data.peek() == std::ifstream::traits_type::eof())
+      return;
 
     // Read/generate the header
-    if (_format == "rows")
+    if (_format_flag == FormatFlag::ROWS)
       readRowData(stream_data, raw);
     else
       readColumnData(stream_data, raw);
@@ -86,7 +88,7 @@ DelimitedFileReader::read()
     _communicator->broadcast(raw);
 
     // Broadcast row offsets
-    if (_format == "rows")
+    if (_format_flag == FormatFlag::ROWS)
     {
       _communicator->broadcast(size_offsets);
       _row_offsets.resize(size_offsets);
@@ -98,7 +100,7 @@ DelimitedFileReader::read()
   _data.resize(n_cols);
 
   // Process "row" formatted data
-  if (_format == "rows")
+  if (_format_flag == FormatFlag::ROWS)
   {
     std::vector<double>::iterator start = raw.begin();
     for (std::size_t j = 0; j < n_cols; ++j)
@@ -218,7 +220,7 @@ DelimitedFileReader::readColumnData(std::ifstream & stream_data, std::vector<dou
   if (_names.empty())
   {
     _names.resize(n_cols);
-    int padding = std::log(n_cols);
+    int padding = MooseUtils::numDigits(n_cols);
     for (std::size_t i = 0; i < n_cols; ++i)
     {
       std::stringstream ss;
@@ -271,7 +273,7 @@ DelimitedFileReader::readRowData(std::ifstream & stream_data, std::vector<double
   // Assign row names if not provided via header
   if (_names.empty())
   {
-    int padding = std::log(_row_offsets.size());
+    int padding = MooseUtils::numDigits(_row_offsets.size());
     for (std::size_t i = 0; i < _row_offsets.size(); ++i)
     {
       std::stringstream ss;
@@ -335,7 +337,7 @@ DelimitedFileReader::delimiter(const std::string & line)
 bool
 DelimitedFileReader::header(const std::string & line)
 {
-  switch (_header)
+  switch (_header_flag)
   {
     case HeaderFlag::FALSE:
       return false;
@@ -349,7 +351,7 @@ DelimitedFileReader::header(const std::string & line)
 
       // Based on auto detect set the flag to TRUE|FALSE to short-circuit this check for each line
       // in the case of row data.
-      _header = contains_alpha ? HeaderFlag::TRUE : HeaderFlag::FALSE;
+      _header_flag = contains_alpha ? HeaderFlag::TRUE : HeaderFlag::FALSE;
       return contains_alpha;
   }
 }
@@ -362,11 +364,11 @@ DelimitedFileReader::DelimitedFileReader(const std::string & filename,
                                          const std::string delimiter,
                                          const libMesh::Parallel::Communicator * comm)
   : _filename(filename),
-    _header(header ? HeaderFlag::TRUE : HeaderFlag::AUTO),
+    _header_flag(header ? HeaderFlag::TRUE : HeaderFlag::AUTO),
     _delimiter(delimiter),
     _ignore_empty_lines(true),
     _communicator(comm),
-    _format("columns rows", "columns")
+    _format_flag(FormatFlag::COLUMNS)
 {
   mooseDeprecated("Use setHeader and setDelimiter method rather than specifying in constructor.");
 }
@@ -393,10 +395,10 @@ DelimitedFileReader::getColumnData(const std::string & name) const
 }
 
 void
-DelimitedFileReader::setHeader(bool value)
+DelimitedFileReader::setHeaderFlag(bool value)
 {
   mooseDeprecated("Use header method with HeaderFlag input.");
-  _header = value ? HeaderFlag::TRUE : HeaderFlag::FALSE;
+  _header_flag = value ? HeaderFlag::TRUE : HeaderFlag::FALSE;
 }
 
 } // MooseUtils

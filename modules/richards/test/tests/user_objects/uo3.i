@@ -91,19 +91,19 @@
     type = PiecewiseLinear
     format = columns
     data_file = satBW.csv
-    axis = 0
+    axis = x
   [../]
   [./answer_Seff1BWprime]
     type = PiecewiseLinear
     format = columns
     data_file = satBWprime.csv
-    axis = 0
+    axis = x
   [../]
   [./answer_Seff1BW2prime]
     type = PiecewiseLinear
     format = columns
     data_file = satBW2prime.csv
-    axis = 0
+    axis = x
   [../]
 
   [./answer_Seff1RSC]

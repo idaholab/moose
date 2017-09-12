@@ -162,7 +162,7 @@
   [./function_file_test4]
     type = 'RunException'
     input = 'function_file_test4.i'
-    expect_err = "Invalid option \"ROWLS\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"rows columns\""
+    expect_err = "Invalid option \"ROWLS\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"columns rows\""
   [../]
 
   [./function_file_test5]
@@ -198,7 +198,7 @@
   [./function_file_test10]
     type = 'RunException'
     input = 'function_file_test10.i'
-    expect_err = "Invalid option \"3\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"0 1 2\""
+    expect_err = "Invalid option \"3\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"x y z"
   [../]
 
   [./function_file_test11]

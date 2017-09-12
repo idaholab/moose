@@ -52,7 +52,7 @@ CSVTimeSequenceStepper::init()
 {
   MooseUtils::DelimitedFileReader file(_file_name);
 
-  file.setHeader(_header);
+  file.setHeaderFlag(_header);
   file.setDelimiter(_delimiter);
   file.read();
 

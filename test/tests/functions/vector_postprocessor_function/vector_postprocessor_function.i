@@ -47,7 +47,7 @@
     type = PiecewiseLinear
     x = '0 0.008'
     y = '1 2'
-    axis = 1
+    axis = y
   [../]
 []
 

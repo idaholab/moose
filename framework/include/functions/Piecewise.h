@@ -46,23 +46,22 @@ protected:
   /**
    * Reads data from supplied CSV file.
    */
-  void buildFromFile(std::vector<Real> & x, std::vector<Real> & y);
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromFile();
 
   /**
    * Builds data from 'x' and 'y' parameters.
    */
-  void buildFromXandY(std::vector<Real> & x, std::vector<Real> & y);
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromXandY();
 
   /**
    * Builds data from 'xy_data' parameter.
    */
-  void buildFromXY(std::vector<Real> & x, std::vector<Real> & y);
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromXY();
 
   const Real _scale_factor;
   std::unique_ptr<LinearInterpolation> _linear_interp;
   int _axis;
   bool _has_axis;
-
 };
 
 #endif
