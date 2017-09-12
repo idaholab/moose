@@ -24,6 +24,7 @@ public:
 
   Moose::SolveType _type;
   Moose::LineSearchType _line_search;
+  Moose::MffdType _mffd_type;
 
   // solver parameters for eigenvalue problems
   Moose::EigenSolveType _eigen_solve_type;

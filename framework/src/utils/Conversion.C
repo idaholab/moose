@@ -32,6 +32,7 @@ std::map<std::string, EigenSolveType> eigen_solve_type_to_enum;
 std::map<std::string, EigenProblemType> eigen_problem_type_to_enum;
 std::map<std::string, WhichEigenPairs> which_eigen_pairs_to_enum;
 std::map<std::string, LineSearchType> line_search_type_to_enum;
+std::map<std::string, MffdType> mffd_type_to_enum;
 
 void
 initExecStoreType()
@@ -157,6 +158,16 @@ initLineSearchType()
     line_search_type_to_enum["CP"] = LS_CP;
 #endif
 #endif
+  }
+}
+
+void
+initMffdType()
+{
+  if (mffd_type_to_enum.empty())
+  {
+    mffd_type_to_enum["DS"] = MFFD_DS;
+    mffd_type_to_enum["WP"] = MFFD_WP;
   }
 }
 
@@ -291,6 +302,21 @@ stringToEnum<LineSearchType>(const std::string & s)
     mooseError("Unknown line search type: ", upper);
 
   return line_search_type_to_enum[upper];
+}
+
+template <>
+MffdType
+stringToEnum<MffdType>(const std::string & s)
+{
+  initMffdType();
+
+  std::string upper(s);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  if (!mffd_type_to_enum.count(upper))
+    mooseError("Unknown mffd type: ", upper);
+
+  return mffd_type_to_enum[upper];
 }
 
 template <>

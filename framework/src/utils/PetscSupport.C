@@ -108,6 +108,21 @@ stringify(const LineSearchType & t)
   return "";
 }
 
+std::string
+stringify(const MffdType & t)
+{
+  switch (t)
+  {
+    case MFFD_WP:
+      return "wp";
+    case MFFD_DS:
+      return "ds";
+    case MFFD_INVALID:
+      mooseError("Invalid MffdType");
+  }
+  return "";
+}
+
 void
 setSolverOptions(SolverParams & solver_params)
 {
@@ -116,10 +131,12 @@ setSolverOptions(SolverParams & solver_params)
   {
     case Moose::ST_PJFNK:
       setSinglePetscOption("-snes_mf_operator");
+      setSinglePetscOption("-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_JFNK:
       setSinglePetscOption("-snes_mf");
+      setSinglePetscOption("-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_NEWTON:
@@ -596,6 +613,12 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
           Moose::stringToEnum<Moose::LineSearchType>(line_search);
   }
 
+  if (params.isParamValid("mffd_type"))
+  {
+    MooseEnum mffd_type = params.get<MooseEnum>("mffd_type");
+    fe_problem.solverParams()._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
+  }
+
   // The parameters contained in the Action
   const MultiMooseEnum & petsc_options = params.get<MultiMooseEnum>("petsc_options");
   const MultiMooseEnum & petsc_options_inames = params.get<MultiMooseEnum>("petsc_options_iname");
@@ -739,6 +762,13 @@ getPetscValidParams()
 #endif
   params.addParam<MooseEnum>(
       "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
+
+  MooseEnum mffd_type("wp ds", "wp");
+  params.addParam<MooseEnum>("mffd_type",
+                             mffd_type,
+                             "Specifies the finite differencing type for "
+                             "Jacobian-free solve types. Note that the "
+                             "default is wp (for Walker and Pernice).");
 
   params.addParam<MultiMooseEnum>(
       "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
