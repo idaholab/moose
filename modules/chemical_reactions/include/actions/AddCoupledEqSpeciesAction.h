@@ -26,6 +26,7 @@ protected:
   const std::vector<NonlinearVariableName> _primary_species;
   const std::vector<AuxVariableName> _secondary_species;
   const std::vector<VariableName> _pressure_var;
+  const RealVectorValue _gravity;
 };
 
 #endif // ADDCOUPLEDEQSPECIESACTION_H

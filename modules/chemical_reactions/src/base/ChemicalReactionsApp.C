@@ -19,6 +19,7 @@
 #include "CoupledBEKinetic.h"
 #include "DesorptionFromMatrix.h"
 #include "DesorptionToPorespace.h"
+#include "DarcyFluxPressure.h"
 
 #include "AqueousEquilibriumRxnAux.h"
 #include "KineticDisPreConcAux.h"
@@ -84,6 +85,7 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
   registerKernel(CoupledBEKinetic);
   registerKernel(DesorptionFromMatrix);
   registerKernel(DesorptionToPorespace);
+  registerKernel(DarcyFluxPressure);
 
   registerAux(AqueousEquilibriumRxnAux);
   registerAux(KineticDisPreConcAux);

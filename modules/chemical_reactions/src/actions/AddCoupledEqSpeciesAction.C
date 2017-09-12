@@ -28,6 +28,8 @@ validParams<AddCoupledEqSpeciesAction>()
       "secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
   params.addParam<std::vector<VariableName>>("pressure", "Pressure variable");
+  RealVectorValue g(0, 0, 0);
+  params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
   params.addClassDescription("Adds coupled equilibrium Kernels for primary species");
   return params;
 }
@@ -37,7 +39,8 @@ AddCoupledEqSpeciesAction::AddCoupledEqSpeciesAction(const InputParameters & par
     _reactions(getParam<std::string>("reactions")),
     _primary_species(getParam<std::vector<NonlinearVariableName>>("primary_species")),
     _secondary_species(getParam<std::vector<AuxVariableName>>("secondary_species")),
-    _pressure_var(getParam<std::vector<VariableName>>("pressure"))
+    _pressure_var(getParam<std::vector<VariableName>>("pressure")),
+    _gravity(getParam<RealVectorValue>("gravity"))
 {
 }
 
@@ -235,6 +238,7 @@ AddCoupledEqSpeciesAction::act()
             params_conv.set<std::vector<Real>>("sto_v") = sto_v[i][j];
             params_conv.set<std::vector<VariableName>>("v") = coupled_v[i][j];
             params_conv.set<std::vector<VariableName>>("p") = _pressure_var;
+            params_conv.set<RealVectorValue>("gravity") = _gravity;
             _problem->addKernel("CoupledConvectionReactionSub",
                                 _primary_species[i] + "_" + eq_species[j] + "_conv",
                                 params_conv);
