@@ -19,4 +19,9 @@
     input = '2species_without_action.i'
     exodiff = '2species_without_action_out.e'
   [../]
+  [./2species_wit_density]
+    type = 'Exodiff'
+    input = '2species_with_density.i'
+    exodiff = '2species_with_density_out.e'
+  [../]
 []

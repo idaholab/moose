@@ -35,4 +35,10 @@
     ratio_tol = 1e-7
     difference_tol = 5e-7
   [../]
+  [./2species_equilibrium_with_density]
+    type = PetscJacobianTester
+    input = 2species_equilibrium_with_density.i
+    ratio_tol = 1e-7
+    difference_tol = 5e-7
+  [../]
 []

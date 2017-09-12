@@ -45,7 +45,7 @@
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = DarcyFluxPressure
     variable = pressure
   [../]
   [./diff_b]
