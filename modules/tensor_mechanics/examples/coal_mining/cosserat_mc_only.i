@@ -31,7 +31,7 @@
 # where gravity = 10 m.s^-2 = 1E-5 MPa m^2/kg.  The maximum and minimum
 # principal horizontal stresses are assumed to be equal to 0.8*stress_zz.
 #
-# Below you will see Drucker-Prager parameters and AuxVariables, etc.
+# Below you will see weak-plane parameters and AuxVariables, etc.
 # These are not actally used in this example.
 #
 # Material properties:
@@ -40,11 +40,11 @@
 # Cosserat layer thickness = 1 m
 # Cosserat-joint normal stiffness = large
 # Cosserat-joint shear stiffness = 1 GPa
-# Weak-plane cohesion = 0.1 MPa
-# Weak-plane friction angle = 20 deg
-# Weak-plane dilation angle = 10 deg
-# Weak-plane tensile strength = 0.1 MPa
-# Weak-plane compressive strength = 100 MPa, varying down to 1 MPa when tensile strain = 1
+# MC cohesion = 3 MPa
+# MC friction angle = 37 deg
+# MC dilation angle = 8 deg
+# MC tensile strength = 1 MPa
+# MC compressive strength = 100 MPa, varying down to 1 MPa when tensile strain = 1
 #
 [Mesh]
   type = GeneratedMesh
@@ -184,11 +184,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./dp_shear]
+  [./mc_shear]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./dp_tensile]
+  [./mc_tensile]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -208,11 +208,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./dp_shear_f]
+  [./mc_shear_f]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./dp_tensile_f]
+  [./mc_tensile_f]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -240,17 +240,17 @@
     index_i = 2
     index_j = 2
   [../]
-  [./dp_shear]
+  [./mc_shear]
     type = MaterialStdVectorAux
     index = 0
-    property = dp_plastic_internal_parameter
-    variable = dp_shear
+    property = mc_plastic_internal_parameter
+    variable = mc_shear
   [../]
-  [./dp_tensile]
+  [./mc_tensile]
     type = MaterialStdVectorAux
     index = 1
-    property = dp_plastic_internal_parameter
-    variable = dp_tensile
+    property = mc_plastic_internal_parameter
+    variable = mc_tensile
   [../]
   [./wp_shear]
     type = MaterialStdVectorAux
@@ -264,17 +264,17 @@
     property = wp_plastic_internal_parameter
     variable = wp_tensile
   [../]
-  [./dp_shear_f]
+  [./mc_shear_f]
+    type = MaterialStdVectorAux
+    index = 6
+    property = mc_plastic_yield_function
+    variable = mc_shear_f
+  [../]
+  [./mc_tensile_f]
     type = MaterialStdVectorAux
     index = 0
-    property = dp_plastic_yield_function
-    variable = dp_shear_f
-  [../]
-  [./dp_tensile_f]
-    type = MaterialStdVectorAux
-    index = 1
-    property = dp_plastic_yield_function
-    variable = dp_tensile_f
+    property = mc_plastic_yield_function
+    variable = mc_tensile_f
   [../]
   [./wp_shear_f]
     type = MaterialStdVectorAux
@@ -343,39 +343,32 @@
 []
 
 [UserObjects]
-  [./dp_coh_strong_harden]
+  [./mc_coh_strong_harden]
     type = TensorMechanicsHardeningExponential
-    value_0 = 2.9 # MPa
-    value_residual = 3.1 # MPa
+    value_0 = 2.99 # MPa
+    value_residual = 3.01 # MPa
     rate = 1.0
   [../]
-  [./dp_fric]
+  [./mc_fric]
     type = TensorMechanicsHardeningConstant
     value = 0.65 # 37deg
   [../]
-  [./dp_dil]
+  [./mc_dil]
     type = TensorMechanicsHardeningConstant
-    value = 0.65
+    value = 0.15 # 8deg
   [../]
 
-  [./dp_tensile_str_strong_harden]
+  [./mc_tensile_str_strong_harden]
     type = TensorMechanicsHardeningExponential
     value_0 = 1.0 # MPa
-    value_residual = 1.4 # MPa
+    value_residual = 1.0 # MPa
     rate = 1.0
   [../]
-  [./dp_compressive_str]
-    type = TensorMechanicsHardeningConstant
-    value = 1.0E3 # Large!
-  [../]
-
-  [./drucker_prager_model]
-    type = TensorMechanicsPlasticDruckerPrager
-    mc_cohesion = dp_coh_strong_harden
-    mc_friction_angle = dp_fric
-    mc_dilation_angle = dp_dil
-    internal_constraint_tolerance = 1 # irrelevant here
-    yield_function_tolerance = 1      # irrelevant here
+  [./mc_compressive_str]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 100 # Large!
+    value_residual = 100
+    internal_limit = 0.1
   [../]
 
   [./wp_coh_harden]
@@ -408,7 +401,7 @@
 []
 
 [Materials]
-  active = 'elasticity_tensor dp wp density strain stress'
+  active = 'elasticity_tensor mc wp density strain stress'
   [./elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 8E3 # MPa
@@ -433,7 +426,7 @@
   [./stress]
     type = ComputeMultipleInelasticCosseratStress
     block = 0
-    inelastic_models = 'wp'
+    inelastic_models = mc
     relative_tolerance = 2.0
     absolute_tolerance = 1E6
     max_iterations = 1
@@ -441,20 +434,21 @@
     initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     perform_finite_strain_rotations = false
   [../]
-  [./dp]
-    type = CappedDruckerPragerCosseratStressUpdate
+  [./mc]
+    type = CappedMohrCoulombCosseratStressUpdate
     block = 0
     warn_about_precision_loss = false
     host_youngs_modulus = 8E3
     host_poissons_ratio = 0.25
-    base_name = dp
-    DP_model = drucker_prager_model
-    tensile_strength = dp_tensile_str_strong_harden
-    compressive_strength = dp_compressive_str
+    base_name = mc
+    tensile_strength = mc_tensile_str_strong_harden
+    compressive_strength = mc_compressive_str
+    cohesion = mc_coh_strong_harden
+    friction_angle = mc_fric
+    dilation_angle = mc_dil
     max_NR_iterations = 100000
-    tip_smoother = 0.1E1
-    smoothing_tol = 0.1E1 # MPa  # Must be linked to cohesion
-    yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
+    smoothing_tol = 0.1 # MPa  # Must be linked to cohesion
+    yield_function_tol = 1E-9 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0
   [../]
@@ -523,7 +517,7 @@
 []
 
 [Outputs]
-  file_base = cosserat_wp_only
+  file_base = cosserat_mc_only
   interval = 1
   print_linear_residuals = false
   csv = true
