@@ -1,10 +1,11 @@
-# Tests the Jacobian when no secondary species are present
+# Tests the Jacobian when equilibrium secondary species are present including density
+# in flux calculation
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
+  nx = 3
+  ny = 3
 []
 
 [Variables]
@@ -26,7 +27,7 @@
   [./pressure]
     type = RandomIC
     variable = pressure
-    max = 10
+    max = 5
     min = 1
   [../]
   [./a]
@@ -43,6 +44,17 @@
   [../]
 []
 
+[ReactionNetwork]
+  primary_species = 'a b'
+  [./AqueousEquilibriumReactions]
+    primary_species = 'a b'
+    reactions = '2a = pa2     2
+                 a + b = pab 2'
+    secondary_species = 'pa2 pab'
+    pressure = pressure
+  [../]
+[]
+
 [Kernels]
   [./a_ie]
     type = PrimaryTimeDerivative
@@ -56,6 +68,7 @@
     type = PrimaryConvection
     variable = a
     p = pressure
+    gravity = '0 -10 0'
   [../]
   [./b_ie]
     type = PrimaryTimeDerivative
@@ -69,18 +82,20 @@
     type = PrimaryConvection
     variable = b
     p = pressure
+    gravity = '0 -10 0'
   [../]
   [./pressure]
     type = DarcyFluxPressure
     variable = pressure
+    gravity = '0 -10 0'
   [../]
 []
 
 [Materials]
   [./porous]
     type = GenericConstantMaterial
-    prop_names = 'diffusivity conductivity porosity'
-    prop_values = '1e-4 1e-4 0.2'
+    prop_names = 'diffusivity conductivity porosity density'
+    prop_values = '1e-4 1e-4 0.2 10'
   [../]
 []
 

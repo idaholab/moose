@@ -9,6 +9,7 @@
 #define COUPLEDCONVECTIONREACTIONSUB_H
 
 #include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
 
 class CoupledConvectionReactionSub;
 
@@ -19,7 +20,7 @@ InputParameters validParams<CoupledConvectionReactionSub>();
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
  * weight * velocity * 10^log_k * u^sto_u * v^sto_v
  */
-class CoupledConvectionReactionSub : public Kernel
+class CoupledConvectionReactionSub : public DerivativeMaterialInterface<Kernel>
 {
 public:
   CoupledConvectionReactionSub(const InputParameters & parameters);
@@ -43,6 +44,12 @@ protected:
 
   /// Hydraulic conductivity
   const MaterialProperty<Real> & _cond;
+
+  /// Gravity
+  const RealVectorValue _gravity;
+
+  /// Fluid density
+  const MaterialProperty<Real> & _density;
 
   /// Pressure gradient
   const VariableGradient & _grad_p;

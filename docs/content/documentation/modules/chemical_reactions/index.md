@@ -17,11 +17,16 @@ terms of the total concentration of a primary species $j$, $\Psi_j$, and has the
 \frac{\partial}{\partial t} \left(\phi \Psi_j \right) + \nabla \cdot \left(\mathbf{q}
   - \phi D \nabla \right)\Psi_j + \sum_{m=1}^{N_m} \nu_{jm} I_m - Q_j= 0,  \quad j = 1, 2, \ldots, N_c,
 \end{equation}
-where $\phi$ is porosity, $\mathbf{q}$ is fluid velocity, $D$ is the hydrodynamic
-dispersion tensor, $N_m$ is the number of minerals formed by kinetic reactions,
-$\nu_{jm}$ is the stoichiometric coefficient for the $j^{\mathrm{th}}$ species in the
-$m^{\mathrm{th}}$ kinetic reaction, $I_m$ is the reaction rate for the $m^{\mathrm{th}}$
-mineral, and $Q_j$ is a source (sink) of the $j^{\mathrm{th}}$ species.
+where $\phi$ is porosity, $D$ is the hydrodynamic dispersion tensor, $N_m$ is the number of
+minerals formed by kinetic reactions, $\nu_{jm}$ is the stoichiometric coefficient for the
+$j^{\mathrm{th}}$ species in the $m^{\mathrm{th}}$ kinetic reaction, $I_m$ is the reaction rate
+for the $m^{\mathrm{th}}$ mineral, and $Q_j$ is a source (sink) of the $j^{\mathrm{th}}$
+species, and $\mathbf{q}$ is the Darcy flux
+\begin{equation}
+\mathbf{q} = - \frac{K}{\mu} \left(\nabla P - \rho \mathbf{g}\right),
+\end{equation}
+where $K$ is permeability, $\mu$ is fluid viscosity, $P$ is pressure, $\rho$ is fluid density,
+and $\mathbf{g}$ is gravity.
 
 The total concentration of the $j^{\mathrm{th}}$ primary species, $\Psi_j$, is defined as
 \begin{equation}
@@ -103,6 +108,10 @@ The amount of primary species converted to an immobile mineral phase is given by
 
 - [`CoupledBEKinetic`](/chemical_reactions/CoupledBEKinetic.md) Rate of change of primary
 species concentration in mineral species due to dissolution or precipitation
+
+The Darcy flux is calculated using
+
+- [`DarcyFluxPressure`](/chemical_reactions/DarcyFluxPressure.md) Darcy flux
 
 ### AuxKernels
 The following `AuxKernels` are used to calculate secondary species and mineral

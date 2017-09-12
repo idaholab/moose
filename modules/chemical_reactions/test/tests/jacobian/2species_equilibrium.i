@@ -55,34 +55,34 @@
 []
 
 [Kernels]
-  #[./a_ie]
-  #  type = PrimaryTimeDerivative
-  #  variable = a
-  #[../]
-  #[./a_diff]
-  #  type = PrimaryDiffusion
-  #  variable = a
-  #[../]
-  #[./a_conv]
-  #  type = PrimaryConvection
-  #  variable = a
-  #  p = pressure
-  #[../]
-  #[./b_ie]
-  #  type = PrimaryTimeDerivative
-  #  variable = b
-  #[../]
-  #[./b_diff]
-  #  type = PrimaryDiffusion
-  #  variable = b
-  #[../]
-  #[./b_conv]
-  #  type = PrimaryConvection
-  #  variable = b
-  #  p = pressure
-  #[../]
+  [./a_ie]
+    type = PrimaryTimeDerivative
+    variable = a
+  [../]
+  [./a_diff]
+    type = PrimaryDiffusion
+    variable = a
+  [../]
+  [./a_conv]
+    type = PrimaryConvection
+    variable = a
+    p = pressure
+  [../]
+  [./b_ie]
+    type = PrimaryTimeDerivative
+    variable = b
+  [../]
+  [./b_diff]
+    type = PrimaryDiffusion
+    variable = b
+  [../]
+  [./b_conv]
+    type = PrimaryConvection
+    variable = b
+    p = pressure
+  [../]
   [./pressure]
-    type = Diffusion
+    type = DarcyFluxPressure
     variable = pressure
   [../]
 []

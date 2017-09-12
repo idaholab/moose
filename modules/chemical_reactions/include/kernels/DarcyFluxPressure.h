@@ -5,30 +5,30 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef PRIMARYCONVECTION_H
-#define PRIMARYCONVECTION_H
+#ifndef DARCYFLUXPRESSURE_H
+#define DARCYFLUXPRESSURE_H
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class PrimaryConvection;
+class DarcyFluxPressure;
 
 template <>
-InputParameters validParams<PrimaryConvection>();
+InputParameters validParams<DarcyFluxPressure>();
 
 /**
- * Define the Kernel for a PrimaryConvection operator that looks like:
- * cond * grad_pressure * grad_u
+ * Darcy flux: - cond * (Grad P - rho * g)
+ * where cond is the hydraulic conductivity, P is fluid pressure,
+ * rho is flui density and g is gravity
  */
-class PrimaryConvection : public DerivativeMaterialInterface<Kernel>
+class DarcyFluxPressure : public DerivativeMaterialInterface<Kernel>
 {
 public:
-  PrimaryConvection(const InputParameters & parameters);
+  DarcyFluxPressure(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// Hydraulic conductivity
   const MaterialProperty<Real> & _cond;
@@ -38,12 +38,6 @@ protected:
 
   /// Fluid density
   const MaterialProperty<Real> & _density;
-
-  /// Pressure gradient
-  const VariableGradient & _grad_p;
-
-  /// Pressure variable number
-  const unsigned int _pvar;
 };
 
-#endif // PRIMARYCONVECTION_H
+#endif // DARCYFLUXPRESSURE_H
