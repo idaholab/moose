@@ -332,7 +332,7 @@ enum LineSearchType
  */
 enum MffdType
 {
-  MFFD_INVALID, /// means not set
+  MFFD_INVALID, ///< means not set
   MFFD_WP,
   MFFD_DS
 };
