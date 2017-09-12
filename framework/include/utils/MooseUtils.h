@@ -391,6 +391,40 @@ tokenizeAndConvert(const std::string & str,
  * @params name The string to convert upper case.
  */
 std::string toUpper(const std::string & name);
+
+/**
+ * Returns a container that contains the content of second passed in container
+ * inserted into the first passed in container (set or map union).
+ */
+template <typename T>
+T
+concatenate(T c1, const T & c2)
+{
+  c1.insert(c2.begin(), c2.end());
+  return c1;
+}
+
+/**
+ * Returns a vector that contains is teh concatenation of the two passed in vectors.
+ */
+template <typename T>
+std::vector<T>
+concatenate(std::vector<T> c1, const std::vector<T> & c2)
+{
+  c1.insert(c1.end(), c2.begin(), c2.end());
+  return c1;
+}
+
+/**
+ * Returns the passed in vector with the item appended to it.
+ */
+template <typename T>
+std::vector<T>
+concatenate(std::vector<T> c1, const T & item)
+{
+  c1.push_back(item);
+  return c1;
+}
 }
 
 #endif // MOOSEUTILS_H
