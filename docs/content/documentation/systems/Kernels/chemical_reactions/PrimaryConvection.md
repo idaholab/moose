@@ -11,11 +11,12 @@ where $\mathbf{q}$ is the Darcy velocity
 \mathbf{q} = - \frac{K}{\mu} \left(\nabla P - \rho \mathbf{g}\right),
 \end{equation}
 where $K$ is the permeability tensor, $\mu$ is fluid viscosity, $P$ is pressure,
-$\rho$ is fluid density, and $\mathbf{g}$ is gravity.
+$\rho$ is fluid density, and $\mathbf{g}$ is gravity (by default, the gravity term
+is not included).
 
 !!!note:
-    Currently, gravity is ignored in calculation of the Darcy velocity, and $K/\mu$
-    is provided as the hydraulic conductivity
+    $K/\mu$ and $\rho$ are expected as material properties called conductivity
+    and density, respectively
 
 !syntax parameters /Kernels/PrimaryConvection
 
