@@ -1,5 +1,5 @@
 # ConservedAction
-<> (!syntax description /Actions/ConservedAction)
+!syntax description /Modules/PhaseField/Conserved/ConservedAction
 
 This action simplifies the input file syntax for creating a conserved phase field variable in the phase field module. It creates the variables and kernels needed to solve for a conserved variable. Three solving approaches are supported:  
 - direct
@@ -44,8 +44,4 @@ The kernels that are added depend on the solution approach:
 - [CoupledMaterialDerivative](/CoupledMaterialDerivative.md)
 - [CoefReaction](/CoefReaction.md)
 
-<> (!syntax parameters /Actions/ConservedAction)
-
-<> (!syntax inputs /Actions/ConservedAction)
-
-<> (!syntax children /Actions/ConservedAction)
+!syntax parameters /Modules/PhaseField/Conserved/ConservedAction
