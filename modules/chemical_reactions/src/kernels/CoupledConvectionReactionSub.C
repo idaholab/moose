@@ -22,17 +22,21 @@ validParams<CoupledConvectionReactionSub>()
       "The stoichiometric coefficients of coupled primary species in equilibrium reaction");
   params.addRequiredCoupledVar("p", "Pressure");
   params.addCoupledVar("v", "List of coupled primary species");
+  RealVectorValue g(0, 0, 0);
+  params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
   params.addClassDescription("Convection of equilibrium species");
   return params;
 }
 
 CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters)
-  : Kernel(parameters),
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _weight(getParam<Real>("weight")),
     _log_k(getParam<Real>("log_k")),
     _sto_u(getParam<Real>("sto_u")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _cond(getMaterialProperty<Real>("conductivity")),
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _density(getDefaultMaterialProperty<Real>("density")),
     _grad_p(coupledGradient("p")),
     _pvar(coupled("p"))
 {
@@ -52,7 +56,7 @@ CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters
 Real
 CoupledConvectionReactionSub::computeQpResidual()
 {
-  RealVectorValue darcy_vel = -_cond[_qp] * _grad_p[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
   RealGradient d_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
   RealGradient d_var_sum(0.0, 0.0, 0.0);
   const Real d_v_u = std::pow(_u[_qp], _sto_u);
@@ -76,7 +80,7 @@ CoupledConvectionReactionSub::computeQpResidual()
 Real
 CoupledConvectionReactionSub::computeQpJacobian()
 {
-  RealVectorValue darcy_vel = -_cond[_qp] * _grad_p[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
 
   RealGradient d_u_1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_phi[_j][_qp];
   RealGradient d_u_2 =
@@ -132,7 +136,7 @@ CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   if (_vals.size() == 0)
     return 0.0;
 
-  RealVectorValue darcy_vel = -_cond[_qp] * _grad_p[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
   RealGradient diff1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
