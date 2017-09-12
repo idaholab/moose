@@ -76,7 +76,8 @@ public:
         auto curr = n;
         while ((curr = curr->parent()))
         {
-          if (curr->find(var) && curr->find(var) != n)
+          auto src = curr->find(var);
+          if (src && src != n && src->type() == hit::NodeType::Field)
           {
             used.push_back(hit::pathJoin({curr->fullpath(), var}));
             s = s.substr(0, start) + curr->param<std::string>(var) +
