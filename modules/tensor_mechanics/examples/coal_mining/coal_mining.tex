@@ -316,6 +316,7 @@ it is clear that:
 
 
 \chapter{Weak-plane plasticity}
+\label{wp.chap}
 
 \section{Introduction}
 In this chapter, the overburden is modelled using weak-plane
@@ -362,6 +363,7 @@ approach that is usually taken is to fix the mesh and vary the input
 parameters so the results (subsidence, etc) match observation.
 
 \section{An unconstrained roof, and constraining boundary conditions}
+\label{bc.constrain.sec}
 
 The elastic parameters in Table~\ref{wp.params.tab} match those used
 to generate Figure~\ref{cosserat_elastic_fig}.  Adding the weak-plane
@@ -532,20 +534,196 @@ One-step excavation & 350 \\
 \end{table}
 
 
-\chapter{Weak-plane plasticity and Drucker-Prager plasticity}
-
-This will be added in the future.  Illustrates the effect of rock
-failure via capped Drucker-Prager plasticity.
-
 \chapter{Capped Mohr-Coulomb plasticity}
+\label{mc.chap}
 
-This will be added in the future.  Illustrates the effect of rock
-failure via capped Mohr-Coulomb plasticity.
+\section{Introduction}
+In this chapter, the overburden is modelled using Mohr-Coulomb
+plasticity in conjunction with Cosserat mechanics.  The MOOSE input
+file used to generate the following results is {\tt
+  cosserat\_mc\_only.i}.  The parameters
+used are list in Table~\ref{mc.params.tab}.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{ll}
+Young's modulus & 8\,GPa \\
+Poisson's ratio & 0.25 \\
+Cosserat layer thickness & 1\,m \\
+Cosserat joint shear stiffness & 1\,GPa.m$^{-1}$ \\
+Cosserat joint normal stiffness & large \\
+Mohr-Coulomb cohesion & 3\,MPa \\
+Mohr-Coulomb friction angle & 37\,deg \\
+Mohr-Coulomb dilation angle & 8\,deg \\
+Mohr-Coulomb tensile strength & 1\,MPa \\
+Mohr-Coulomb compressive strength & 100\,MPa (softening)
+\end{tabular}
+\caption{Parameters used in the model with Mohr-Coulomb plasticity.
+  Softening for the compressive strength is used in some simulations
+  --- see text.}
+\label{mc.params.tab}
+\end{center}
+\end{table}
+
+As discussed in detail in Chapter~\ref{wp.chap}, the mesh is kept
+fixed (at $N=1000$) in the following simulations.   The
+``constraining'' boundary conditions specified in
+Section~\ref{bc.constrain.sec} are used.
+
+\section{A single step}
+
+For a single timestep, both ``sideways'' and ``downwards'' excavation
+produce the same result.  This is shown in Figure~\ref{mc.one_step}.
+
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{cc}
+\multicolumn{2}{c}{\includegraphics[width=8cm]{mc_only_one_step_disp.pdf}}
+  \\
+\includegraphics[width=6cm]{mc_only_one_step_shear.pdf} &
+\includegraphics[width=6cm]{mc_only_one_step_tensile.pdf} \\
+\includegraphics[width=6cm]{mc_only_one_step_subsidence.pdf} &
+\includegraphics[width=6cm]{mc_only_one_step_extensometer.pdf}
+\end{tabular}
+\caption{Deformation and plastic strain in the Mohr-Coulomb model with
+  $u_{z}^{\mathrm{max}} = 3$\,m.  The excavation is performed in one step.  Top:
+  vertical displacement.  Middle: shear and tensile plastic strain.
+  Bottom: subsidence and extensomenter displacement.}
+\label{mc.one_step}
+\end{center}
+\end{figure}
+
+\section{Multiple excavation steps}
+
+However, the results are markedly different when using multiple
+steps.  Figure~\ref{mc.10_step} shows the displacement when using 10
+steps.  In the ``sideways'' excavation, only the bottom row of
+elements is actually deforming!  They have very large plastic shear
+and tensile strain.  This is not physically realistic.  The
+``downwards'' excavation is very similar to the single-step version.
+
+\begin{figure}[htb]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=6cm]{mc_only_10_sideways_disp.pdf} &
+\includegraphics[width=6cm]{mc_only_10_downwards_disp.pdf}
+\end{tabular}
+\caption{Deformation the Mohr-Coulombmodel when using either the
+  ``sideways'' or ``downwards'' movement of the excavation roof.}
+\label{mc.10_step}
+\end{center}
+\end{figure}
+
+\section{Softening the compressive strength}
+
+In the weak-plane case, substantially different results were obtained
+when softening the compressive strength.  In the Mohr-Coulomb case,
+the difference is not as marked.  Consider the alternate plastic model
+where at zero (or negative) plastic tensile strain the compressive strength
+is large (100\,MPa), but at plastic tensile strain equal to unity it
+has softened all the way down to 1\,MPa.  Physically this corresponds
+to a rock then when pulled apart in tension (such as the roof being
+pulled downwards) it can then not withstand much compressive load,
+until it is recompacted somewhat.  The results are shown in Figure~\ref{mc.10_sideways_soften_soften}.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=8cm]{mc_only_10_sideways_soften_disp.pdf}
+\caption{Deformation in the Mohr-Coulomb model with
+  $u_{z}^{\mathrm{max}} = 3$\,m.  The excavation is performed in 10
+  steps using the ``sideways'' scheme.  The compressive strength
+  softens from 100\,MPa to 1\,MPa.}
+\label{mc.10_sideways_soften_soften}
+\end{center}
+\end{figure}
+
+\section{Computational expense}
+
+The number of residual computations for each of the simulations
+mentioned above is presented in Table~\ref{mc.n}
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{ll}
+Simulation & $N$ \\
+\hline
+One-step excavation & 352 \\
+10-steps ``sideways'' & 110 \\
+10-steps ``downwards'' & 3799 \\
+10-steps ``sideways'' with softening & 412
+\end{tabular}
+\caption{The number of residual calculations, $N$, for the Mohr-Coulomb
+  simulations}
+\label{mc.n}
+\end{center}
+\end{table}
+
+\chapter{Capped Mohr-Coulomb plasticity combined with weak-plane plasticity}
+
+In sedementary rock systems it is common to employ Mohr-Coulomb
+plasticity to model the solid-rock response, combined with weak-plane
+plasticity to model the weak bedding planes.  The MOOSE input file
+used to generate the following results is {\tt cosserat\_mc\_wp.i} The
+parameters used are listed in Tables~\ref{wp.params.tab}
+and~\ref{mc.params.tab}.  In this chapter, the plastic models are
+cycled, which is common in geomechanical software
+packages\footnote{For example, Itasca Consulting Group, Inc (2012)
+  FLAC3D - Fast Lagrangian Analysis of Continua in Three-Dimensions,
+  Ver. 5.0.  Minneapolis: Itasca.  And, Itasca Consulting Group,
+  Inc. (2011) FLAC - Fast Lagrangian Analysis of Continua, Ver. 7.0.
+  Minneapolis: Itasca.}.
+
+Using the ``constraining'' boundary conditions specified in
+Section~\ref{bc.constrain.sec}, and a single step results in
+Figure~\ref{mc_wp.one_step}.
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{cc}
+\multicolumn{2}{c}{\includegraphics[width=8cm]{mc_wp_one_step_disp.pdf}}
+  \\
+\includegraphics[width=6cm]{mc_wp_one_step_mc_shear.pdf} &
+\includegraphics[width=6cm]{mc_wp_one_step_mc_tensile.pdf} \\
+\includegraphics[width=6cm]{mc_wp_one_step_wp_shear.pdf} &
+\includegraphics[width=6cm]{mc_wp_one_step_wp_tensile.pdf} \\
+\includegraphics[width=6cm]{mc_wp_one_step_subsidence.pdf} &
+\includegraphics[width=6cm]{mc_wp_one_step_extensometer.pdf}
+\end{tabular}
+\caption{Deformation and plastic strain in the combined Mohr-Coulomb-weak-plane model with
+  $u_{z}^{\mathrm{max}} = 3$\,m.  The excavation is performed in one step.  Top:
+  vertical displacement.  Next: Mohr-Coulomb shear and tensile plastic
+  strain.  Next: Weak-plane shear and tensile plastic strain.
+  Bottom: subsidence and extensomenter displacement.}
+\label{mc_wp.one_step}
+\end{center}
+\end{figure}
+
+
+\chapter{Sticky roof boundary conditions}
+
+The exposition thus far has concentrated on two categories of roof
+boundary condition: (1) where the roof is completely free to displace
+without any consideration of the existance of any floor material to
+prevent its displacement (for example, Figure~\ref{wp.no.floow}); (2)
+where the roof is pulled downwards at a fixed displacement rate (for
+example, Figure~\ref{wp.one_step}.  Both of these boundary conditions
+are physically incorrect.  The former yields very large
+displacements, while the latter typically pulls the roof too severely,
+causing large plastic strains to accumulate in the immediately roof.
+In this section, a more realistic boundary condition is applied to the
+roof.
+
+This will be added in the future.
+
+
+
 
 \chapter{Porepressures}
 
 This will be added in the future.  Illustrates the effect of
 porepressures and subsequent fluid flow.
+
 
 \end{document}
 
