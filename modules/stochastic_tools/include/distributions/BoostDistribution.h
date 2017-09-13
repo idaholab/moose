@@ -26,11 +26,11 @@ class BoostDistribution : public Distribution
 public:
   BoostDistribution(const InputParameters & parameters);
 
-protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real quantile(const Real & y) override;
 
+protected:
   /// This must be defined by the child class in the constructor
   std::unique_ptr<T> _distribution_unique_ptr;
 };
