@@ -12,15 +12,18 @@ validParams<LinearViscoelasticStressUpdate>()
 {
   InputParameters params = validParams<StressUpdateBase>();
   params.addParam<std::string>("base_name", "optional string prepended to the creep strain name");
-  params.addParam<std::string>("apparent_creep_strain",
-    "apparent_creep_strain",
-    "name of the apparent creep strain (defined by a LinearViscoelasticityBase material)");
-  params.addParam<std::string>("apparent_elasticity_tensor",
-    "apparent_elasticity_tensor",
-    "name of the apparent elasticity tensor (defined by a LinearViscoelasticityBase material)");
-  params.addParam<std::string>("instantaneous_elasticity_tensor_inv",
-    "instantaneous_elasticity_tensor_inv",
-    "name of the apparent compliance tensor (defined by a LinearViscoelasticityBase material)");
+  params.addParam<std::string>(
+      "apparent_creep_strain",
+      "apparent_creep_strain",
+      "name of the apparent creep strain (defined by a LinearViscoelasticityBase material)");
+  params.addParam<std::string>(
+      "apparent_elasticity_tensor",
+      "apparent_elasticity_tensor",
+      "name of the apparent elasticity tensor (defined by a LinearViscoelasticityBase material)");
+  params.addParam<std::string>(
+      "instantaneous_elasticity_tensor_inv",
+      "instantaneous_elasticity_tensor_inv",
+      "name of the apparent compliance tensor (defined by a LinearViscoelasticityBase material)");
   return params;
 }
 
@@ -64,9 +67,10 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
   RankTwoTensor current_mechanical_strain =
       elastic_strain_old + _creep_strain_old[_qp] + strain_increment;
 
-  _creep_strain[_qp] = current_mechanical_strain -
-         (_apparent_elasticity_tensor[_qp] * _instantaneous_elasticity_tensor_inv[_qp]) *
-             (current_mechanical_strain - _apparent_creep_strain[_qp]);
+  _creep_strain[_qp] =
+      current_mechanical_strain -
+      (_apparent_elasticity_tensor[_qp] * _instantaneous_elasticity_tensor_inv[_qp]) *
+          (current_mechanical_strain - _apparent_creep_strain[_qp]);
 
   RankTwoTensor creep_strain_increment = _creep_strain[_qp] - _creep_strain_old[_qp];
 

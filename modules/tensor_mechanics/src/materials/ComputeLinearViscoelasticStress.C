@@ -13,15 +13,18 @@ validParams<ComputeLinearViscoelasticStress>()
 {
   InputParameters params = validParams<ComputeLinearElasticStress>();
   params.addClassDescription("Divides total strain into elastic + creep + eigenstrains");
-  params.addParam<std::string>("apparent_creep_strain",
-    "apparent_creep_strain",
-    "name of the apparent creep strain (defined by a LinearViscoelasticityBase material)");
-  params.addParam<std::string>("apparent_elasticity_tensor",
-    "apparent_elasticity_tensor",
-    "name of the apparent elasticity tensor (defined by a LinearViscoelasticityBase material)");
-  params.addParam<std::string>("instantaneous_elasticity_tensor_inv",
-    "instantaneous_elasticity_tensor_inv",
-    "name of the apparent compliance tensor (defined by a LinearViscoelasticityBase material)");
+  params.addParam<std::string>(
+      "apparent_creep_strain",
+      "apparent_creep_strain",
+      "name of the apparent creep strain (defined by a LinearViscoelasticityBase material)");
+  params.addParam<std::string>(
+      "apparent_elasticity_tensor",
+      "apparent_elasticity_tensor",
+      "name of the apparent elasticity tensor (defined by a LinearViscoelasticityBase material)");
+  params.addParam<std::string>(
+      "instantaneous_elasticity_tensor_inv",
+      "instantaneous_elasticity_tensor_inv",
+      "name of the apparent compliance tensor (defined by a LinearViscoelasticityBase material)");
   return params;
 }
 
@@ -47,9 +50,10 @@ ComputeLinearViscoelasticStress::initQpStatefulProperties()
 void
 ComputeLinearViscoelasticStress::computeQpStress()
 {
-  _creep_strain[_qp] = _mechanical_strain[_qp] -
-         (_apparent_elasticity_tensor[_qp] * _instantaneous_elasticity_tensor_inv[_qp]) *
-             (_mechanical_strain[_qp] - _apparent_creep_strain[_qp]);
+  _creep_strain[_qp] =
+      _mechanical_strain[_qp] -
+      (_apparent_elasticity_tensor[_qp] * _instantaneous_elasticity_tensor_inv[_qp]) *
+          (_mechanical_strain[_qp] - _apparent_creep_strain[_qp]);
 
   _elastic_strain[_qp] = _mechanical_strain[_qp] - _creep_strain[_qp];
 
