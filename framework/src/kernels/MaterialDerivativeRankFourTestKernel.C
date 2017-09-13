@@ -20,7 +20,7 @@ validParams<MaterialDerivativeRankFourTestKernel>()
 {
   InputParameters params = MaterialDerivativeTestKernelBase<RankFourTensor>::validParams();
   params.addClassDescription(
-      "Class used for testing derivatives of a rank two tensor material property.");
+      "Class used for testing derivatives of a rank four tensor material property.");
   params.addRequiredParam<unsigned int>("i", "Tensor component");
   params.addRequiredParam<unsigned int>("j", "Tensor component");
   params.addRequiredParam<unsigned int>("k", "Tensor component");
