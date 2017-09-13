@@ -211,7 +211,7 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
-  ///@{ vector-less fill API functions
+  ///@{ Vector-less fill API functions. See docs of the corresponding ...FromInputVector methods
   void fillGeneralIsotropic(Real i0, Real i1, Real i2);
   void fillAntisymmetricIsotropic(Real i0);
   void fillSymmetricIsotropic(Real i0, Real i1);
@@ -279,7 +279,7 @@ protected:
   void fillGeneralIsotropicFromInputVector(const std::vector<Real> & input);
 
   /**
-   * fillAntisymmetricIsotropicFromInputVector takes 1 inputs to fill the
+   * fillAntisymmetricIsotropicFromInputVector takes 1 input to fill the
    * the antisymmetric Rank-4 tensor with the appropriate symmetries maintained.
    * I.e., C_ijkl = a * ep_ijm * ep_klm, where epsilon is the permutation tensor (and sum on m)
    * @param input this is a in the above formula

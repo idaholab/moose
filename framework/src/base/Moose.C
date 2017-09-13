@@ -74,6 +74,8 @@
 #include "MassEigenKernel.h"
 #include "NullKernel.h"
 #include "MaterialDerivativeTestKernel.h"
+#include "MaterialDerivativeRankTwoTestKernel.h"
+#include "MaterialDerivativeRankFourTestKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -436,6 +438,7 @@
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
 #include "AddNodalKernelAction.h"
+#include "MaterialDerivativeTestAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -528,6 +531,8 @@ registerObjects(Factory & factory)
   registerKernel(MassEigenKernel);
   registerKernel(NullKernel);
   registerKernel(MaterialDerivativeTestKernel);
+  registerKernel(MaterialDerivativeRankTwoTestKernel);
+  registerKernel(MaterialDerivativeRankFourTestKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
@@ -1203,6 +1208,9 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   // TODO: Why is this here?
   registerTask("finish_input_file_output", false);
   registerAction(EmptyAction, "finish_input_file_output");
+
+  registerAction(MaterialDerivativeTestAction, "add_variable");
+  registerAction(MaterialDerivativeTestAction, "add_kernel");
 
 #undef registerAction
 #define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
