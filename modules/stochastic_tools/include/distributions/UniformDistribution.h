@@ -22,11 +22,11 @@ class UniformDistribution : public Distribution
 public:
   UniformDistribution(const InputParameters & parameters);
 
-protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real quantile(const Real & y) override;
 
+protected:
   /// The lower bound for the uniform distribution
   const Real & _lower_bound;
 
