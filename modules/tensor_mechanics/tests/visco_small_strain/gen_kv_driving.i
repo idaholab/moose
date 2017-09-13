@@ -110,7 +110,6 @@
   [../]
   [./stress]
     type = ComputeLinearViscoelasticStress
-    viscoelastic_model = kelvin_voigt
   [../]
   [./strain]
     type = ComputeSmallStrain

@@ -114,7 +114,6 @@
   [../]
   [./creep]
     type = LinearViscoelasticStressUpdate
-    viscoelastic_model = burgers
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

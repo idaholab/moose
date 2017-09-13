@@ -110,7 +110,6 @@
   [../]
   [./stress]
     type = ComputeLinearViscoelasticStress
-    viscoelastic_model = burgers
   [../]
   [./strain]
     type = ComputeSmallStrain

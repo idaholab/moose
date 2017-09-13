@@ -58,9 +58,12 @@ protected:
   MaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 
-  /// Pointer to the viscoelastic model itself
-  std::string _viscoelastic_model_name;
-  std::shared_ptr<LinearViscoelasticityBase> _viscoelastic_model;
+  /// Apparent creep strain (extracted from a LinearViscoelasticityBase object)
+  const MaterialProperty<RankTwoTensor> & _apparent_creep_strain;
+  /// Apparent elasticity tensor (extracted from a LinearViscoelasticityBase object)
+  const MaterialProperty<RankFourTensor> & _apparent_elasticity_tensor;
+  /// Instantaneous compliance tensor (extracted from a LinearViscoelasticityBase object)
+  const MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor_inv;
 };
 
 #endif // LINEARVISCOELASTICSTRESSUPDATE_H

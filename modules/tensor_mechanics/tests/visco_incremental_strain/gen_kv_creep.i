@@ -114,7 +114,6 @@
   [../]
   [./creep]
     type = LinearViscoelasticStressUpdate
-    viscoelastic_model = kelvin_voigt
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

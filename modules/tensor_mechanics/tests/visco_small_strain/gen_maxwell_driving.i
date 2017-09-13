@@ -110,7 +110,6 @@
   [../]
   [./stress]
     type = ComputeLinearViscoelasticStress
-    viscoelastic_model = maxwell
   [../]
   [./strain]
     type = ComputeSmallStrain

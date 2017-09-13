@@ -114,7 +114,6 @@
   [../]
   [./creep]
     type = LinearViscoelasticStressUpdate
-    viscoelastic_model = maxwell
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
