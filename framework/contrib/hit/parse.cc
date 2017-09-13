@@ -17,6 +17,8 @@
 namespace hit
 {
 
+const std::string indentString = "  ";
+
 // split breaks input into a vector treating whitespace as a delimiter.  Consecutive whitespace
 // characters are treated as a single delimiter.
 std::vector<std::string>
@@ -352,7 +354,7 @@ Comment::render(int indent)
 {
   if (_isinline)
     return " " + _text;
-  return "\n" + strRepeat("    ", indent) + _text;
+  return "\n" + strRepeat(indentString, indent) + _text;
 }
 
 Node *
@@ -374,7 +376,7 @@ Section::render(int indent)
 {
   std::string s;
   if (root() != this)
-    s = "\n" + strRepeat("    ", indent) + "[" + _path + "]";
+    s = "\n" + strRepeat(indentString, indent) + "[" + _path + "]";
   else
     indent--; // don't indent the root section contents extra
 
@@ -382,7 +384,7 @@ Section::render(int indent)
     s += child->render(indent + 1);
 
   if (root() != this)
-    s += "\n" + strRepeat("    ", indent) + "[]";
+    s += "\n" + strRepeat(indentString, indent) + "[]";
   else
     s = s.substr(1);
   return s;
@@ -411,7 +413,7 @@ Field::path()
 std::string
 Field::render(int indent)
 {
-  return "\n" + strRepeat("    ", indent) + _field + " = " + _val;
+  return "\n" + strRepeat(indentString, indent) + _field + " = " + _val;
 }
 
 Node *
