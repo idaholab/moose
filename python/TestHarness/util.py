@@ -562,10 +562,11 @@ class TestStatus(object):
     bucket_deleted      = test_status(status='DELETED', color='RED')
     bucket_diff         = test_status(status='DIFF', color='YELLOW')
     bucket_pending      = test_status(status='PENDING', color='CYAN')
-    bucket_queued       = test_status(status='QUEUED', color='CYAN')
     bucket_finished     = test_status(status='FINISHED', color='CYAN')
     bucket_skip         = test_status(status='SKIP', color='RESET')
     bucket_silent       = test_status(status='SILENT', color='RESET')
+    bucket_queued       = test_status(status='QUEUED', color='CYAN')
+    bucket_waiting_processing = test_status(status='WAITING', color='CYAN')
 
     # Initialize the class with a pending status
     # TODO: don't do this? Initialize instead with None type? If we do
@@ -634,14 +635,6 @@ class TestStatus(object):
         status = self.getStatus()
         return status == self.bucket_pending
 
-    def isQueued(self):
-        """
-        Return boolean queued status. This is different from a pending status,
-        as this status is more of a _finished_ pending status.
-        """
-        status = self.getStatus()
-        return status == self.bucket_queued
-
     def isSkipped(self):
         """
         Return boolean skipped status
@@ -662,6 +655,21 @@ class TestStatus(object):
         """
         status = self.getStatus()
         return status == self.bucket_deleted
+
+    def isQueued(self):
+        """
+        Return boolean queued status. This is different from a pending status,
+        as this status is more of a _finished_ pending status.
+        """
+        status = self.getStatus()
+        return status == self.bucket_queued
+
+    def isWaiting(self):
+        """
+        Return boolean on tester waiting to have its results processed.
+        """
+        status = self.getStatus()
+        return status == self.bucket_waiting_processing
 
     def isFinished(self):
         """

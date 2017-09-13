@@ -106,6 +106,14 @@ class Scheduler(MooseObject):
         """ Call derived run method """
         return
 
+    def postRun(self, job_container):
+        """ Call derived postRun method """
+        return
+
+    def cleanUp(self):
+        """ Allow derived schedulers to perform cleanup operations """
+        return
+
     def skipPrereqs(self):
         """
         Method to return boolean to skip dependency prerequisites checks.
@@ -296,10 +304,16 @@ class Scheduler(MooseObject):
         for job_container in job_dag.topological_sort():
             job_container.setOriginalDAG()
 
-        # Get a list of concurrent runable jobs, and launch them
+        # Build our list of runnable jobs and set the tester's status to queued
+        job_list = []
         if runnable_jobs:
-            concurrent_jobs = self.getNextJobGroup(job_dag)
-            self.queueJobs(run_jobs=concurrent_jobs)
+            job_list = job_dag.ind_nodes()
+            for job_container in job_list:
+                tester = job_container.getTester()
+                tester.setStatus('QUEUED', tester.bucket_pending)
+
+        # Queue runnable jobs
+        self.queueJobs(run_jobs=job_list)
 
     def waitFinish(self):
         """
@@ -468,7 +482,7 @@ class Scheduler(MooseObject):
                 self.last_reported = clock()
 
         except Exception as e:
-            print 'statusWorker Exception: %s' % (e)
+            print('statusWorker Exception: %s' % (e))
             self.killRemaining()
 
     def runWorker(self, job_container):
@@ -491,8 +505,11 @@ class Scheduler(MooseObject):
                                           (job_container,))
                 timeout_timer.start()
 
-                # Call the derived run method
+                # Call the derived run method (blocking)
                 self.run(job_container)
+
+                # Allow derived schedulers to perform post run operations
+                self.postRun(job_container)
 
                 # Stop timers now that the job has finished on its own
                 job_container.report_timer.cancel()
@@ -537,5 +554,5 @@ class Scheduler(MooseObject):
                     sleep(0.3)
 
         except Exception as e:
-            print 'runWorker Exception: %s' % (e)
+            print('runWorker Exception: %s' % (e))
             self.killRemaining()

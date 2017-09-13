@@ -3,7 +3,7 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
-import os, re, inspect, errno, time, copy, json, shutil
+import os, re, inspect, errno, time, copy
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -427,7 +427,7 @@ class TestHarness:
                 self.num_skipped += 1
             elif tester.didPass():
                 self.num_passed += 1
-            elif tester.isQueued():
+            elif tester.isQueued() or tester.isWaiting():
                 self.num_pending += 1
             else:
                 self.num_failed += 1
@@ -507,29 +507,6 @@ class TestHarness:
         if self.writeFailedTest != None:
             self.writeFailedTest.close()
 
-    def queueCleanup(self):
-        """ Remove all files/directories created during supplied session file """
-        # Open existing session file
-        if os.path.exists(self.options.queue_cleanup):
-            try:
-                session_file = open(self.options.queue_cleanup, 'r')
-                session_data = json.load(session_file)
-            except ValueError:
-                print("Supplied session file %s is not readable!" % (self.options.queue_cleanup))
-                sys.exit(1)
-            # Iterate over session dictionary and perform delete operations
-            for key in session_data.keys():
-                if 'template_data' in session_data[key]:
-                    try:
-                        shutil.rmtree(session_data[key]['template_data']['working_dir'])
-                    except OSError:
-                        pass
-            os.remove(self.options.queue_cleanup)
-
-        else:
-            print("%s does not exist!" % (self.options.queue_cleanup))
-            sys.exit(1)
-
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', "IS_SCHEDULER")
@@ -543,6 +520,11 @@ class TestHarness:
 
             # Unify the queueing file
             self.options.session_file = self.options.pbs
+
+        # User is wanting to clean up old queue sessions
+        elif self.options.queue_cleanup:
+            scheduler_plugin = 'QueueManager'
+            self.options.session_file = self.options.queue_cleanup
 
         # The default scheduler plugin
         else:
@@ -693,6 +675,9 @@ class TestHarness:
         if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
             print('ERROR: --parallel and/or --threads can not be used with --valgrind')
             sys.exit(1)
+        if opts.queue_cleanup and opts.pbs:
+            print('ERROR: --queue-cleanup and --pbs can not be used together')
+            sys.exit(1)
 
         # Update any keys from the environment as necessary
         if not self.options.method:
@@ -723,7 +708,7 @@ class TestHarness:
             self.factory.printDump("Tests")
             sys.exit(0)
         elif self.options.queue_cleanup:
-            self.queueCleanup()
+            self.scheduler.cleanUp()
             sys.exit(0)
 
     def getOptions(self):
