@@ -17,6 +17,8 @@
 #include "Conversion.h"
 #include "MooseEnum.h"
 #include "FEProblemBase.h"
+#include "MoosePreconditioner.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
@@ -178,5 +180,65 @@ MaterialDerivativeTestAction::act()
           mooseError("Unknown property type.");
       }
     }
+  }
+
+  if (_current_task == "add_preconditioning")
+  {
+    auto params = _factory.getValidParams("SMP");
+    auto & row = params.set<std::vector<NonlinearVariableName>>("off_diag_row");
+    auto & col = params.set<std::vector<NonlinearVariableName>>("off_diag_column");
+
+    for (const auto & derivative : _derivatives)
+    {
+      switch (_prop_type)
+      {
+        case PropTypeEnum::REAL:
+          for (auto & arg : _args)
+          {
+            row.push_back("var_" + derivative.first);
+            col.push_back(arg);
+          }
+          break;
+
+        case PropTypeEnum::RANKTWOTENSOR:
+          for (unsigned int i = 0; i < 3; ++i)
+            for (unsigned int j = 0; j < 3; ++j)
+              for (auto & arg : _args)
+              {
+                row.push_back("var_" + derivative.first + "_" + Moose::stringify(i) + "_" +
+                              Moose::stringify(j));
+                col.push_back(arg);
+              }
+          break;
+
+        case PropTypeEnum::RANKFOURTENSOR:
+          for (unsigned int i = 0; i < 3; ++i)
+            for (unsigned int j = 0; j < 3; ++j)
+              for (unsigned int k = 0; k < 3; ++k)
+                for (unsigned int l = 0; l < 3; ++l)
+                  for (auto & arg : _args)
+                  {
+                    row.push_back("var_" + derivative.first + "_" + Moose::stringify(i) + "_" +
+                                  Moose::stringify(j) + "_" + Moose::stringify(k) + "_" +
+                                  Moose::stringify(l));
+                    col.push_back(arg);
+                  }
+          break;
+
+        default:
+          mooseError("Unknown property type.");
+      }
+    }
+
+    if (_problem.get() != nullptr)
+    {
+      params.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
+      std::shared_ptr<MoosePreconditioner> pc =
+          _factory.create<MoosePreconditioner>("SMP", "material_derivative_SMP", params);
+
+      _problem->getNonlinearSystemBase().setPreconditioner(pc);
+    }
+    else
+      mooseError("_problem.get() returned nullptr");
   }
 }
