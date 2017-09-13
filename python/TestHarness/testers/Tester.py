@@ -80,7 +80,6 @@ class Tester(MooseObject):
         self.outfile = None
         self.std_out = ''
         self.exit_code = 0
-        self.process = None
 
         # Bool if test can run
         self._runnable = None
@@ -94,11 +93,12 @@ class Tester(MooseObject):
         self.bucket_fail         = self.status.bucket_fail
         self.bucket_diff         = self.status.bucket_diff
         self.bucket_pending      = self.status.bucket_pending
-        self.bucket_queued       = self.status.bucket_queued
         self.bucket_finished     = self.status.bucket_finished
         self.bucket_deleted      = self.status.bucket_deleted
         self.bucket_skip         = self.status.bucket_skip
         self.bucket_silent       = self.status.bucket_silent
+        self.bucket_queued       = self.status.bucket_queued
+        self.bucket_waiting_processing = self.status.bucket_waiting_processing
 
         # Set the status message
         if self.specs['check_input']:
@@ -225,13 +225,6 @@ class Tester(MooseObject):
         """
         return self.status.isPending()
 
-    def isQueued(self):
-        """
-        return boolean for tester in a queued status
-        see util.TestStatus for more information
-        """
-        return self.status.isQueued()
-
     def isFinished(self):
         """
         return boolean for tester no longer pending
@@ -260,6 +253,19 @@ class Tester(MooseObject):
         see util.TestStatus for more information
         """
         return self.status.isDeleted()
+
+    def isQueued(self):
+        """
+        return boolean for tester in a queued status
+        see util.TestStatus for more information
+        """
+        return self.status.isQueued()
+
+    def isWaiting(self):
+        """
+        return boolean for tester awaiting process results
+        """
+        return self.status.isWaiting()
 
     def getCheckInput(self):
         return self.check_input
