@@ -12,23 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TwoMaterialPropertyInterface.h"
-#include "MaterialData.h"
-#include "InputParameters.h"
+#ifndef MatSideUserOBJECT_H
+#define MatSideUserOBJECT_H
+
+#include "SideUserObject.h"
+
+// Forward Declarations
+class MatSideUserObject;
 
 template <>
-InputParameters
-validParams<TwoMaterialPropertyInterface>()
-{
-  // Objects inheriting from TwoMaterialPropertyInterface rely on Boundary MaterialData
-  InputParameters params = validParams<MaterialPropertyInterface>();
-  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
-  return params;
-}
+InputParameters validParams<MatSideUserObject>();
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const MooseObject * moose_object)
-  : MaterialPropertyInterface(moose_object),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA,
-                                                          _mi_params.get<THREAD_ID>("_tid")))
+/*
+ * This is for testing error message only. It does nothing.
+ */
+class MatSideUserObject : public SideUserObject
 {
-}
+public:
+  MatSideUserObject(const InputParameters & parameters);
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual void finalize() override {}
+  virtual void threadJoin(const UserObject &) override {}
+
+protected:
+  const MaterialProperty<Real> & _mat_prop;
+};
+
+#endif

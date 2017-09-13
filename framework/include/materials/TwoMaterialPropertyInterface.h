@@ -27,21 +27,7 @@ InputParameters validParams<TwoMaterialPropertyInterface>();
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
 public:
-  ///@{
-  /**
-   * Constructor.
-   *
-   * @param parameters The objects input parameters
-   * @param block_ids A reference to the block ids (optional)
-   *
-   * This class has two constructors:
-   *   (1) not restricted to boundaries or blocks
-   *   (2) restricted to only blocks
-   */
   TwoMaterialPropertyInterface(const MooseObject * moose_object);
-  TwoMaterialPropertyInterface(const MooseObject * moose_object,
-                               const std::set<SubdomainID> & block_ids);
-  ///@}
 
   /**
    * Retrieve the property named "name"

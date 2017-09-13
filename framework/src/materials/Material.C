@@ -83,7 +83,7 @@ Material::Material(const InputParameters & parameters)
     DistributionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
-    MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
+    MaterialPropertyInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     DependencyResolverInterface(),

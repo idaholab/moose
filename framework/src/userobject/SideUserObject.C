@@ -30,7 +30,7 @@ validParams<SideUserObject>()
 SideUserObject::SideUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BoundaryRestrictableRequired(parameters, false), // false for applying to sidesets
-    MaterialPropertyInterface(this, boundaryIDs()),
+    MaterialPropertyInterface(this),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(this),

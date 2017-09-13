@@ -29,7 +29,7 @@ validParams<InternalSideUserObject>()
 InternalSideUserObject::InternalSideUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(parameters),
-    TwoMaterialPropertyInterface(this, blockIDs()),
+    TwoMaterialPropertyInterface(this),
     NeighborCoupleable(this, false, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(this),

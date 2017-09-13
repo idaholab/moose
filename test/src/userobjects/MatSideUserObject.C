@@ -12,23 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TwoMaterialPropertyInterface.h"
-#include "MaterialData.h"
-#include "InputParameters.h"
+#include "MatSideUserObject.h"
+#include "MooseMesh.h"
 
 template <>
 InputParameters
-validParams<TwoMaterialPropertyInterface>()
+validParams<MatSideUserObject>()
 {
-  // Objects inheriting from TwoMaterialPropertyInterface rely on Boundary MaterialData
-  InputParameters params = validParams<MaterialPropertyInterface>();
-  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
+  InputParameters params = validParams<SideUserObject>();
+  params.addRequiredParam<MaterialPropertyName>(
+      "mat_prop", "the name of the material property we are going to use");
   return params;
 }
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const MooseObject * moose_object)
-  : MaterialPropertyInterface(moose_object),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA,
-                                                          _mi_params.get<THREAD_ID>("_tid")))
+MatSideUserObject::MatSideUserObject(const InputParameters & parameters)
+  : SideUserObject(parameters), _mat_prop(getMaterialProperty<Real>("mat_prop"))
 {
 }

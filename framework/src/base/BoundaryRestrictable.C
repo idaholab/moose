@@ -166,7 +166,7 @@ BoundaryRestrictable::numBoundaryIDs() const
 }
 
 bool
-BoundaryRestrictable::boundaryRestricted()
+BoundaryRestrictable::boundaryRestricted() const
 {
   return _bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end();
 }

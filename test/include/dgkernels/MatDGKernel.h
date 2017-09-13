@@ -12,23 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TwoMaterialPropertyInterface.h"
-#include "MaterialData.h"
-#include "InputParameters.h"
+#ifndef MatDGKernel_H
+#define MatDGKernel_H
+
+#include "DGKernel.h"
+
+// Forward Declarations
+class MatDGKernel;
 
 template <>
-InputParameters
-validParams<TwoMaterialPropertyInterface>()
-{
-  // Objects inheriting from TwoMaterialPropertyInterface rely on Boundary MaterialData
-  InputParameters params = validParams<MaterialPropertyInterface>();
-  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
-  return params;
-}
+InputParameters validParams<MatDGKernel>();
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const MooseObject * moose_object)
-  : MaterialPropertyInterface(moose_object),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA,
-                                                          _mi_params.get<THREAD_ID>("_tid")))
+/**
+ * This is for testing errors, it does nothing.
+ */
+class MatDGKernel : public DGKernel
 {
-}
+public:
+  MatDGKernel(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpResidual(Moose::DGResidualType) override { return 0.0; }
+  virtual Real computeQpJacobian(Moose::DGJacobianType) override { return 0.0; }
+  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType, unsigned int) override
+  {
+    return 0.0;
+  }
+
+  const MaterialProperty<Real> & _value;
+};
+
+#endif

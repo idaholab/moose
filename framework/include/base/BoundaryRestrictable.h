@@ -165,7 +165,7 @@ public:
    * Returns true if this object has been restricted to a boundary
    * @see MooseObject
    */
-  virtual bool boundaryRestricted();
+  virtual bool boundaryRestricted() const;
 
   /**
    * Returns the set of all boundary ids for the entire mesh

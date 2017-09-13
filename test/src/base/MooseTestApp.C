@@ -165,6 +165,7 @@
 #include "MaterialDerivativeTestMaterial.h"
 #include "QpMaterial.h"
 #include "SubdomainConstantMaterial.h"
+#include "MatDGKernel.h"
 
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
@@ -208,6 +209,7 @@
 #include "GetTransferUserObject.h"
 #include "TestCSVReader.h"
 #include "ToggleMeshAdaptivity.h"
+#include "MatSideUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -493,6 +495,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(MaterialDerivativeTestMaterial);
   registerMaterial(QpMaterial);
   registerMaterial(SubdomainConstantMaterial);
+  registerMaterial(MatDGKernel);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
@@ -554,6 +557,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(GetTransferUserObject);
   registerUserObject(TestCSVReader);
   registerUserObject(ToggleMeshAdaptivity);
+  registerUserObject(MatSideUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

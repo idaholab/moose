@@ -12,23 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TwoMaterialPropertyInterface.h"
-#include "MaterialData.h"
-#include "InputParameters.h"
+#include "MatDGKernel.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
 
 template <>
 InputParameters
-validParams<TwoMaterialPropertyInterface>()
+validParams<MatDGKernel>()
 {
-  // Objects inheriting from TwoMaterialPropertyInterface rely on Boundary MaterialData
-  InputParameters params = validParams<MaterialPropertyInterface>();
-  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
+  InputParameters params = validParams<DGKernel>();
+  params.addRequiredParam<MaterialPropertyName>("mat_prop", "This is being tested.");
   return params;
 }
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const MooseObject * moose_object)
-  : MaterialPropertyInterface(moose_object),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA,
-                                                          _mi_params.get<THREAD_ID>("_tid")))
+MatDGKernel::MatDGKernel(const InputParameters & parameters)
+  : DGKernel(parameters), _value(getMaterialProperty<Real>("mat_prop"))
 {
 }
