@@ -21,11 +21,19 @@ validParams<SamplerData>()
   params += validParams<SamplerInterface>();
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
+  params.addParam<bool>("output_column_and_row_sizes",
+                        false,
+                        "Whether to output the number of "
+                        "columns and rows in the matrix in "
+                        "the first two rows of output");
   return params;
 }
 
 SamplerData::SamplerData(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters), SamplerInterface(this), _sampler(getSampler("sampler"))
+  : GeneralVectorPostprocessor(parameters),
+    SamplerInterface(this),
+    _sampler(getSampler("sampler")),
+    _output_col_row_sizes(getParam<bool>("output_column_and_row_sizes"))
 {
 }
 
@@ -52,5 +60,17 @@ SamplerData::execute()
   }
 
   for (auto i = beginIndex(data); i < n; ++i)
-    _sample_vectors[i]->assign(data[i].get_values().begin(), data[i].get_values().end());
+  {
+    const std::size_t offset = _output_col_row_sizes ? 2 : 0;
+    const std::size_t vec_size = data[i].get_values().size() + offset;
+    _sample_vectors[i]->resize(vec_size);
+    if (_output_col_row_sizes)
+    {
+      (*_sample_vectors[i])[0] = data[i].n(); // number of columns
+      (*_sample_vectors[i])[1] = data[i].m(); // number of rows
+    }
+    std::copy(data[i].get_values().begin(),
+              data[i].get_values().end(),
+              _sample_vectors[i]->begin() + offset);
+  }
 }
