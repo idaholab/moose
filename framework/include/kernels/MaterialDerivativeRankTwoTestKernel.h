@@ -12,28 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALDERIVATIVETESTKERNEL_H
-#define MATERIALDERIVATIVETESTKERNEL_H
+#ifndef MATERIALDERIVATIVERANKTWOTESTKERNEL_H
+#define MATERIALDERIVATIVERANKTWOTESTKERNEL_H
 
 #include "MaterialDerivativeTestKernelBase.h"
+#include "RankTwoTensor.h"
 
-class MaterialDerivativeTestKernel;
+class MaterialDerivativeRankTwoTestKernel;
 
 template <>
-InputParameters validParams<MaterialDerivativeTestKernel>();
+InputParameters validParams<MaterialDerivativeRankTwoTestKernel>();
 
 /**
  * This kernel is used for testing derivatives of a material property.
  */
-class MaterialDerivativeTestKernel : public MaterialDerivativeTestKernelBase<Real>
+class MaterialDerivativeRankTwoTestKernel : public MaterialDerivativeTestKernelBase<RankTwoTensor>
 {
 public:
-  MaterialDerivativeTestKernel(const InputParameters & parameters);
+  MaterialDerivativeRankTwoTestKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  const unsigned int _component_i;
+  const unsigned int _component_j;
 };
 
-#endif /* MATERIALDERIVATIVETESTKERNEL_H */
+#endif /* MATERIALDERIVATIVERANKTWOTESTKERNEL_H */
