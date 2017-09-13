@@ -18,6 +18,7 @@
 #include "SubProblem.h"
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
+#include "MooseVariableConstMonomial.h"
 #include "Conversion.h"
 #include "Parser.h"
 #include "AllLocalDofIndicesThread.h"
@@ -506,8 +507,11 @@ SystemBase::addVariable(const std::string & var_name,
   {
     // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
     // MooseVariableBase.
-    MooseVariable * var =
-        new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+    auto * var =
+        (type == (FEType(0, MONOMIAL)))
+            ? new MooseVariableConstMonomial(
+                  var_num, type, *this, _subproblem.assembly(tid), _var_kind)
+            : new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
   }
