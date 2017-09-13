@@ -29,11 +29,9 @@ MooseVariableConstMonomial::MooseVariableConstMonomial(unsigned int var_num,
 }
 
 void
-MooseVariableConstMonomial::computeElemValues()
+MooseVariableConstMonomial::computeElemValuesHelper(const unsigned & nqp, const Real & phi)
 {
-
   bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _qrule->n_points();
 
   _u.resize(nqp);
   _grad_u.resize(nqp);
@@ -99,79 +97,68 @@ MooseVariableConstMonomial::computeElemValues()
   if (_need_solution_dofs_older)
     _solution_dofs_older.resize(1);
 
-  const NumericVector<Real> & current_solution = *_sys.currentSolution();
-  const NumericVector<Real> & solution_old = _sys.solutionOld();
-  const NumericVector<Real> & solution_older = _sys.solutionOlder();
-  const NumericVector<Real> * solution_prev_nl = _sys.solutionPreviousNewton();
-  const NumericVector<Real> & u_dot = _sys.solutionUDot();
+  const dof_id_type & idx = _dof_indices[0];
+  const Real & soln = (*_sys.currentSolution())(idx);
+  Real soln_old;
+  Real soln_older;
+  Real soln_previous_nl;
+  Real u_dot;
   const Real & du_dot_du = _sys.duDotDu();
 
-  dof_id_type idx = 0;
-  Real soln_local = 0;
-  Real soln_old_local = 0;
-  Real soln_older_local = 0;
-  Real soln_previous_nl_local = 0;
-  Real u_dot_local = 0;
-
-  Real phi_local = 0;
-
-  idx = _dof_indices[0];
-  soln_local = current_solution(idx);
-
   if (_need_nodal_u)
-    _nodal_u[0] = soln_local;
+    _nodal_u[0] = soln;
 
   if (_need_u_previous_nl || _need_grad_previous_nl || _need_second_previous_nl ||
       _need_nodal_u_previous_nl)
-    soln_previous_nl_local = (*solution_prev_nl)(idx);
+    soln_previous_nl = (*_sys.solutionPreviousNewton())(idx);
 
   if (_need_nodal_u_previous_nl)
-    _nodal_u_previous_nl[0] = soln_previous_nl_local;
+    _nodal_u_previous_nl[0] = soln_previous_nl;
 
   if (_need_solution_dofs)
-    _solution_dofs(0) = soln_local;
+    _solution_dofs(0) = soln;
 
   if (is_transient)
   {
     if (_need_u_old || _need_grad_old || _need_second_old || _need_nodal_u_old)
-      soln_old_local = solution_old(idx);
+      soln_old = _sys.solutionOld()(idx);
 
     if (_need_u_older || _need_grad_older || _need_second_older || _need_nodal_u_older)
-      soln_older_local = solution_older(idx);
+      soln_older = _sys.solutionOlder()(idx);
 
     if (_need_nodal_u_old)
-      _nodal_u_old[0] = soln_old_local;
-    if (_need_nodal_u_older)
-      _nodal_u_older[0] = soln_older_local;
+      _nodal_u_old[0] = soln_old;
 
-    u_dot_local = u_dot(idx);
+    if (_need_nodal_u_older)
+      _nodal_u_older[0] = soln_older;
+
+    u_dot = _sys.solutionUDot()(idx);
+
     if (_need_nodal_u_dot)
-      _nodal_u_dot[0] = u_dot_local;
+      _nodal_u_dot[0] = u_dot;
 
     if (_need_solution_dofs_old)
-      _solution_dofs_old(0) = solution_old(idx);
+      _solution_dofs_old(0) = soln_old;
 
     if (_need_solution_dofs_older)
-      _solution_dofs_older(0) = solution_older(idx);
+      _solution_dofs_older(0) = soln_older;
   }
 
-  phi_local = _phi[0][0];
-
-  _u[0] = phi_local * soln_local;
+  _u[0] = phi * soln;
 
   if (_need_u_previous_nl)
-    _u_previous_nl[0] = phi_local * soln_previous_nl_local;
+    _u_previous_nl[0] = phi * soln_previous_nl;
 
   if (is_transient)
   {
-    _u_dot[0] = phi_local * u_dot_local;
+    _u_dot[0] = phi * u_dot;
     _du_dot_du[0] = du_dot_du;
 
     if (_need_u_old)
-      _u_old[0] = phi_local * soln_old_local;
+      _u_old[0] = phi * soln_old;
 
     if (_need_u_older)
-      _u_older[0] = phi_local * soln_older_local;
+      _u_older[0] = phi * soln_older;
   }
 
   for (unsigned qp = 1; qp < nqp; ++qp)
@@ -193,4 +180,156 @@ MooseVariableConstMonomial::computeElemValues()
         _u_older[qp] = _u_older[qp];
     }
   }
+}
+
+void
+MooseVariableConstMonomial::computeNeighborValuesHelper(const unsigned & nqp, const Real & phi)
+{
+  bool is_transient = _subproblem.isTransient();
+
+  _u_neighbor.resize(nqp);
+  _grad_u_neighbor.resize(nqp);
+
+  if (_need_second_neighbor)
+    _second_u_neighbor.resize(nqp);
+
+  if (is_transient)
+  {
+    if (_need_u_old_neighbor)
+      _u_old_neighbor.resize(nqp);
+
+    if (_need_u_older_neighbor)
+      _u_older_neighbor.resize(nqp);
+
+    if (_need_grad_old_neighbor)
+      _grad_u_old_neighbor.resize(nqp);
+
+    if (_need_grad_older_neighbor)
+      _grad_u_older_neighbor.resize(nqp);
+
+    if (_need_second_old_neighbor)
+      _second_u_old_neighbor.resize(nqp);
+
+    if (_need_second_older_neighbor)
+      _second_u_older_neighbor.resize(nqp);
+  }
+
+  if (_need_nodal_u_neighbor)
+    _nodal_u_neighbor.resize(1);
+  if (is_transient)
+  {
+    if (_need_nodal_u_old_neighbor)
+      _nodal_u_old_neighbor.resize(1);
+    if (_need_nodal_u_older_neighbor)
+      _nodal_u_older_neighbor.resize(1);
+    if (_need_nodal_u_dot_neighbor)
+      _nodal_u_dot_neighbor.resize(1);
+  }
+
+  if (_need_solution_dofs_neighbor)
+    _solution_dofs_neighbor.resize(1);
+
+  if (_need_solution_dofs_old_neighbor)
+    _solution_dofs_old_neighbor.resize(1);
+
+  if (_need_solution_dofs_older_neighbor)
+    _solution_dofs_older_neighbor.resize(1);
+
+  const dof_id_type & idx = _dof_indices_neighbor[0];
+  const Real & soln = (*_sys.currentSolution())(idx);
+  Real soln_old;
+  Real soln_older;
+  Real u_dot;
+
+  if (_need_nodal_u_neighbor)
+    _nodal_u_neighbor[0] = soln;
+
+  if (_need_solution_dofs_neighbor)
+    _solution_dofs_neighbor(0) = soln;
+
+  if (is_transient)
+  {
+    if (_need_u_old_neighbor)
+      soln_old = _sys.solutionOld()(idx);
+
+    if (_need_u_older_neighbor)
+      soln_older = _sys.solutionOlder()(idx);
+
+    if (_need_nodal_u_old_neighbor)
+      _nodal_u_old_neighbor[0] = soln_old;
+    if (_need_nodal_u_older_neighbor)
+      _nodal_u_older_neighbor[0] = soln_older;
+
+    u_dot = _sys.solutionUDot()(idx);
+
+    if (_need_nodal_u_dot_neighbor)
+      _nodal_u_dot_neighbor[0] = u_dot;
+
+    if (_need_solution_dofs_old_neighbor)
+      _solution_dofs_old_neighbor(0) = soln_old;
+
+    if (_need_solution_dofs_older_neighbor)
+      _solution_dofs_older_neighbor(0) = soln_older;
+  }
+
+  _u_neighbor[0] = phi * soln;
+
+  if (is_transient)
+  {
+    if (_need_u_old_neighbor)
+      _u_old_neighbor[0] = phi * soln_old;
+
+    if (_need_u_older_neighbor)
+      _u_older_neighbor[0] = phi * soln_older;
+  }
+
+  for (unsigned qp = 1; qp < nqp; ++qp)
+  {
+    _u_neighbor[qp] = _u_neighbor[0];
+
+    if (is_transient)
+    {
+      if (_need_u_old_neighbor)
+        _u_old_neighbor[qp] = _u_old_neighbor[0];
+
+      if (_need_u_older_neighbor)
+        _u_older_neighbor[qp] = _u_older_neighbor[0];
+    }
+  }
+}
+
+void
+MooseVariableConstMonomial::computeElemValues()
+{
+  if (_dof_indices.size() == 0)
+    return;
+
+  computeElemValuesHelper(_qrule->n_points(), _phi[0][0]);
+}
+
+void
+MooseVariableConstMonomial::computeElemValuesFace()
+{
+  if (_dof_indices.size() == 0)
+    return;
+
+  computeElemValuesHelper(_qrule_face->n_points(), _phi_face[0][0]);
+}
+
+void
+MooseVariableConstMonomial::computeNeighborValues()
+{
+  if (_dof_indices_neighbor.size() == 0)
+    return;
+
+  computeNeighborValuesHelper(_qrule_neighbor->n_points(), _phi_neighbor[0][0]);
+}
+
+void
+MooseVariableConstMonomial::computeNeighborValuesFace()
+{
+  if (_dof_indices_neighbor.size() == 0)
+    return;
+
+  computeNeighborValuesHelper(_qrule_neighbor->n_points(), _phi_face_neighbor[0][0]);
 }

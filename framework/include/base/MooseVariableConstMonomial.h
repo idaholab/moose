@@ -28,6 +28,12 @@ public:
                              Moose::VarKindType var_kind);
 
   virtual void computeElemValues() override;
+  virtual void computeElemValuesFace() override;
+  virtual void computeNeighborValuesFace() override;
+  virtual void computeNeighborValues() override;
+
+  virtual void computeElemValuesHelper(const unsigned & nqp, const Real & phi);
+  virtual void computeNeighborValuesHelper(const unsigned & nqp, const Real & phi);
 };
 
 #endif /* MOOSEVARIABLECONSTMONOMIAL_H */
