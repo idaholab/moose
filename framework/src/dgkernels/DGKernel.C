@@ -51,6 +51,16 @@ validParams<DGKernel>()
 
   params.declareControllable("enable");
   params.registerBase("DGKernel");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in",
+      "The name of auxiliary variables to save this Kernel's residual contributions to. "
+      " Everything about that variable must match everything about this variable (the "
+      "type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>(
+      "diag_save_in",
+      "The name of auxiliary variables to save this Kernel's diagonal Jacobian "
+      "contributions to. Everything about that variable must match everything "
+      "about this variable (the type, what blocks it's on, etc.)");
 
   return params;
 }
@@ -108,8 +118,53 @@ DGKernel::DGKernel(const InputParameters & parameters)
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
 
     _u_neighbor(_is_implicit ? _var.slnNeighbor() : _var.slnOldNeighbor()),
-    _grad_u_neighbor(_is_implicit ? _var.gradSlnNeighbor() : _var.gradSlnOldNeighbor())
+    _grad_u_neighbor(_is_implicit ? _var.gradSlnNeighbor() : _var.gradSlnOldNeighbor()),
+
+    _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
+  _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
+
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+
+    if (_sys.hasVariable(_save_in_strings[i]))
+      mooseError("Trying to use solution variable " + _save_in_strings[i] +
+                 " as a save_in variable in " + name());
+
+    if (var->feType() != _var.feType())
+      mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable "
+                                        "the AuxVariable must be the same type as the nonlinear "
+                                        "variable the object is acting on.");
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_save_in = _save_in.size() > 0;
+
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+
+    if (_sys.hasVariable(_diag_save_in_strings[i]))
+      mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +
+                 " as a diag_save_in variable in " + name());
+
+    if (var->feType() != _var.feType())
+      mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary "
+                                        "variable the AuxVariable must be the same type as the "
+                                        "nonlinear variable the object is acting on.");
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 DGKernel::~DGKernel() {}
@@ -126,10 +181,25 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
   DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number())
                                      : _assembly.residualBlockNeighbor(_var.number());
+  _local_re.resize(re.size());
+  _local_re.zero();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-      re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
+
+  re += _local_re;
+
+  if (_has_save_in)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (const auto & var : _save_in)
+    {
+      std::vector<dof_id_type> & dof_indices =
+          is_elem ? var->dofIndices() : var->dofIndicesNeighbor();
+      var->sys().solution().add_vector(_local_re, dof_indices);
+    }
+  }
 }
 
 void
@@ -160,13 +230,35 @@ DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
                             Moose::NeighborElement, _var.number(), _var.number())
                       : _assembly.jacobianBlockNeighbor(
                             Moose::NeighborNeighbor, _var.number(), _var.number());
+  _local_kxx.resize(Kxx.m(), Kxx.n());
+  _local_kxx.zero();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
-        Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
-}
+        _local_kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
 
+  Kxx += _local_kxx;
+
+  if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor))
+  {
+    unsigned int rows = _local_kxx.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_kxx(i, i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (const auto & var : _diag_save_in)
+    {
+      std::vector<dof_id_type> dof_indices;
+      if (type == Moose::ElementElement)
+        dof_indices = var->dofIndices();
+      else
+        dof_indices = var->dofIndicesNeighbor();
+      var->sys().solution().add_vector(diag, dof_indices);
+    }
+  }
+}
 void
 DGKernel::computeJacobian()
 {
