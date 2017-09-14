@@ -208,7 +208,7 @@ lexPath(Lexer * l)
 
 int consumeWhitespace(Lexer * l)
 {
-  int start = 0;
+  size_t start = 0;
   while (true)
   {
     start = l->pos();
