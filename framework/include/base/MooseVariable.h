@@ -341,19 +341,19 @@ public:
   /**
    * Compute values at interior quadrature points
    */
-  void computeElemValues();
+  virtual void computeElemValues();
   /**
    * Compute values at facial quadrature points
    */
-  void computeElemValuesFace();
+  virtual void computeElemValuesFace();
   /**
    * Compute values at facial quadrature points for the neighbor
    */
-  void computeNeighborValuesFace();
+  virtual void computeNeighborValuesFace();
   /**
    * Compute values at quadrature points for the neighbor
    */
-  void computeNeighborValues();
+  virtual void computeNeighborValues();
   /**
    * Compute nodal values of this variable
    */
