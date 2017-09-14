@@ -46,6 +46,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qrule(NULL),
     _current_qrule_volume(NULL),
     _current_qrule_arbitrary(NULL),
+    _coord_type(Moose::COORD_XYZ),
     _current_qrule_face(NULL),
     _current_qface_arbitrary(NULL),
     _current_qrule_neighbor(NULL),
