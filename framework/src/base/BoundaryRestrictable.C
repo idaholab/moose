@@ -168,7 +168,13 @@ BoundaryRestrictable::numBoundaryIDs() const
 bool
 BoundaryRestrictable::boundaryRestricted() const
 {
-  return _bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end();
+  return BoundaryRestrictable::restricted(_bnd_ids);
+}
+
+bool
+BoundaryRestrictable::restricted(const std::set<BoundaryID> & ids)
+{
+  return ids.find(Moose::ANY_BOUNDARY_ID) == ids.end();
 }
 
 bool

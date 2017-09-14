@@ -65,6 +65,12 @@ public:
                        bool nodal);
 
   /**
+   * Helper for determining if the object is boundary restricted. This is needed for the
+   * MaterialPropertyInterface.
+   */
+  static bool restricted(const std::set<BoundaryID> & ids);
+
+  /**
    * Empty class destructor
    */
   virtual ~BoundaryRestrictable();

@@ -46,6 +46,13 @@ class MaterialPropertyInterface
 {
 public:
   MaterialPropertyInterface(const MooseObject * moose_object);
+  MaterialPropertyInterface(const MooseObject * moose_object,
+                            const std::set<SubdomainID> & block_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object,
+                            const std::set<BoundaryID> & boundary_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object,
+                            const std::set<SubdomainID> & block_ids,
+                            const std::set<BoundaryID> & boundary_ids);
 
   ///@{
   /**
@@ -242,14 +249,14 @@ private:
   /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
 
+  /// BoundaryRestricted flag
+  const bool _mi_boundary_restricted;
+
   /// Storage for the block ids created by BlockRestrictable
-  std::set<SubdomainID> _mi_block_ids;
+  const std::set<SubdomainID> & _mi_block_ids;
 
   /// Storage for the boundary ids created by BoundaryRestrictable
-  std::set<BoundaryID> _mi_boundary_ids;
-
-  /// BoundaryRestricted flag
-  bool _mi_boundary_restricted;
+  const std::set<BoundaryID> & _mi_boundary_ids;
 };
 
 /**

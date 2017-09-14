@@ -118,6 +118,8 @@ const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
 const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
 const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
+const std::set<SubdomainID> EMPTY_BLOCK_IDS = {};
+const std::set<BoundaryID> EMPTY_BOUNDARY_IDS = {};
 
 /**
  * MaterialData types

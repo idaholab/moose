@@ -72,7 +72,7 @@ KernelBase::KernelBase(const InputParameters & parameters)
     TransientInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, blockIDs()),
     RandomInterface(parameters,
                     *parameters.get<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),

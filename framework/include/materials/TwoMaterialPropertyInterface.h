@@ -29,6 +29,16 @@ class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 public:
   TwoMaterialPropertyInterface(const MooseObject * moose_object);
 
+  TwoMaterialPropertyInterface(const MooseObject * moose_object,
+                               const std::set<SubdomainID> & blocks_ids);
+
+  TwoMaterialPropertyInterface(const MooseObject * moose_object,
+                               const std::set<BoundaryID> & boundary_ids);
+
+  TwoMaterialPropertyInterface(const MooseObject * moose_object,
+                               const std::set<SubdomainID> & blocks_ids,
+                               const std::set<BoundaryID> & boundary_ids);
+
   /**
    * Retrieve the property named "name"
    */

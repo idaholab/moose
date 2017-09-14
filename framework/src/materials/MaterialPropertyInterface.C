@@ -27,35 +27,43 @@ validParams<MaterialPropertyInterface>()
   return params;
 }
 
-// Standard construction
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object)
+  : MaterialPropertyInterface(moose_object, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS)
+{
+}
+
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
+                                                     const std::set<SubdomainID> & block_ids)
+  : MaterialPropertyInterface(moose_object, block_ids, Moose::EMPTY_BOUNDARY_IDS)
+{
+}
+
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
+                                                     const std::set<BoundaryID> & boundary_ids)
+  : MaterialPropertyInterface(moose_object, Moose::EMPTY_BLOCK_IDS, boundary_ids)
+{
+}
+
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
+                                                     const std::set<SubdomainID> & block_ids,
+                                                     const std::set<BoundaryID> & boundary_ids)
   : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
-    _mi_boundary_restricted(false)
+    _mi_boundary_restricted(!boundary_ids.empty() &&
+                            BoundaryRestrictable::restricted(boundary_ids)),
+    _mi_block_ids(block_ids),
+    _mi_boundary_ids(boundary_ids)
 {
-  // Populate block/boundary restricted items
-  const BlockRestrictable * blk = dynamic_cast<const BlockRestrictable *>(moose_object);
-  if (blk)
-    _mi_block_ids = blk->blockIDs();
-
-  const BoundaryRestrictable * bnd = dynamic_cast<const BoundaryRestrictable *>(moose_object);
-  if (bnd)
-  {
-    _mi_boundary_ids = bnd->boundaryIDs();
-    _mi_boundary_restricted = bnd->boundaryRestricted();
-  }
 
   // Set the MaterialDataType flag
   if (_mi_params.isParamValid("_material_data_type"))
     _material_data_type = _mi_params.get<Moose::MaterialDataType>("_material_data_type");
 
-  else if (!_mi_boundary_ids.empty() &&
-           std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) ==
-               _mi_boundary_ids.end())
+  else if (_mi_boundary_restricted)
     _material_data_type = Moose::BOUNDARY_MATERIAL_DATA;
 
   else

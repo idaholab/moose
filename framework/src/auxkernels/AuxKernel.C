@@ -78,7 +78,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
     DependencyResolverInterface(),
     RandomInterface(parameters,

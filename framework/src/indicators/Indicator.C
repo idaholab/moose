@@ -53,7 +53,7 @@ Indicator::Indicator(const InputParameters & parameters)
     UserObjectInterface(this),
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, blockIDs()),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.get<SystemBase *>("_sys")),
