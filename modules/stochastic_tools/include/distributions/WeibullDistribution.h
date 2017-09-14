@@ -18,11 +18,7 @@ InputParameters validParams<WeibullDistribution>();
 /**
  * A class used to generate Weibull distribution via Boost
  */
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 class WeibullDistribution : public BoostDistribution<boost::math::weibull_distribution<Real>>
-#else
-class WeibullDistribution : public BoostDistribution<>
-#endif
 {
 public:
   WeibullDistribution(const InputParameters & parameters);
