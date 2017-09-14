@@ -13,5 +13,6 @@
     input = image_3d.i
     exodiff = image_3d_out.e
     vtk = true
+    copy_files = stack
   [../]
 []

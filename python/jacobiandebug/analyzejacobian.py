@@ -383,7 +383,7 @@ if __name__ == '__main__':
     # build the parameter list for the jacobian debug run
     mooseparams = moosebaseparams[:]
     if not options.noauto :
-        mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active='])
+        mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active=', 'Outputs/exodus=false', 'Outputs/csv=false', 'Outputs/active='])
     if options.cli_args != None:
         mooseparams.extend([options.cli_args])
 

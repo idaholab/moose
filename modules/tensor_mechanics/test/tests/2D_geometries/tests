@@ -40,28 +40,31 @@
   [./axisym_smallstrain_Bbar]
     type = Exodiff
     input = '2D-RZ_test.i'
-    exodiff = '2D-RZ_test_out.e'
+    exodiff = '2D-RZ_smallstrain_bbar_test_out.e'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
                 Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
-                Materials/stress/type=ComputeLinearElasticStress'
+                Materials/stress/type=ComputeLinearElasticStress
+                Outputs/file_base=2D-RZ_smallstrain_bbar_test_out'
     rel_err = 5E-4
     prereq = 'axisym_smallstrain'
   [../]
   [./axisym_incremental_strain]
     type = Exodiff
     input = '2D-RZ_test.i'
-    exodiff = '2D-RZ_test_out.e'
+    exodiff = '2D-RZ_incremental_strain_test_out.e'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
-                Materials/stress/type=ComputeFiniteStrainElasticStress'
+                Materials/stress/type=ComputeFiniteStrainElasticStress
+                Outputs/file_base=2D-RZ_incremental_strain_test_out'
     prereq = 'axisym_smallstrain_Bbar'
   [../]
   [./axisym_incremental_strain_Bbar]
     type = Exodiff
     input = '2D-RZ_test.i'
-    exodiff = '2D-RZ_test_out.e'
+    exodiff = '2D-RZ_incremental_strain_bbar_test_out.e'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
-                Materials/stress/type=ComputeFiniteStrainElasticStress'
+                Materials/stress/type=ComputeFiniteStrainElasticStress
+                Outputs/file_base=2D-RZ_incremental_strain_bbar_test_out'
     prereq = 'axisym_incremental_strain'
     rel_err = 5E-4
   [../]
@@ -107,11 +110,11 @@
   [./axisym_resid_Bbar]
     type = Exodiff
     input = '2D-RZ_finiteStrain_resid.i'
-    exodiff = '2D-RZ_finiteStrain_resid_out.e'
+    exodiff = '2D-RZ_finiteStrain_resid_bbar_out.e'
     use_old_floor = true
     abs_zero = 1e-8
     compiler = 'GCC CLANG'
-    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=2D-RZ_finiteStrain_resid_bbar_out'
     prereq = 'axisym_resid'
   [../]
 []
