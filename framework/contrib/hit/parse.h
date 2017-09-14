@@ -60,6 +60,7 @@ enum class NodeType
   Section, /// Represents hit sections (i.e. "[pathname]...[../]").
   Comment, /// Represents comments that are not directly part of the actual hit document.
   Field,   /// Represents field-value pairs (i.e. paramname=val).
+  Blank,   /// Represents a blank line
 };
 
 /// nodeTypeName returns a human-readable string representing a name for the give node type.
@@ -307,6 +308,15 @@ public:
 private:
   std::string _text;
   bool _isinline;
+};
+
+/// Blank represents a blank line in the input.  It aids in correctly re-rendering parsed input.
+class Blank : public Node
+{
+public:
+  Blank() : Node(NodeType::Blank) {}
+  virtual std::string render(int /*indent = 0*/) override { return "\n"; }
+  virtual Node * clone() override { return new Blank(); };
 };
 
 /// Section represents a hit section including the section header path and all entries inside

@@ -59,6 +59,7 @@ tokTypeName(TokType t)
       tokcase(String)
       tokcase(Comment)
       tokcase(InlineComment)
+      tokcase(BlankLine)
       tokcase(EOF)
       default : return std::to_string((int)t);
     }
@@ -205,6 +206,34 @@ lexPath(Lexer * l)
   return lexHit;
 }
 
+int consumeWhitespace(Lexer * l)
+{
+  int start = 0;
+  while (true)
+  {
+    start = l->pos();
+    l->acceptRun(space);
+    l->ignore();
+
+    if (l->accept("\n"))
+    {
+      l->ignore();
+      int n = 0;
+      while (l->accept("\n"))
+      {
+        if (n == 0)
+          l->emit(TokType::BlankLine);
+        n++;
+      }
+    }
+    if (l->pos() == start)
+      break;
+  }
+  l->acceptRun(allspace);
+  l->ignore();
+  return l->pos() - start;
+}
+
 void
 consumeToNewline(Lexer * l)
 {
@@ -230,8 +259,7 @@ lexComments(Lexer * l)
 
   while (true)
   {
-    l->acceptRun(allspace);
-    l->ignore();
+    consumeWhitespace(l);
     if (!l->accept("#"))
       break;
     consumeToNewline(l);
@@ -359,8 +387,7 @@ _LexFunc
 lexHit(Lexer * l)
 {
   lexComments(l);
-  l->acceptRun(allspace);
-  l->ignore();
+  consumeWhitespace(l);
   char c = l->next();
   if (c == '[')
   {

@@ -16,6 +16,7 @@ namespace hit
 enum class TokType
 {
   Error,
+  EOF,
   Equals,
   LeftBracket,
   RightBracket,
@@ -25,7 +26,7 @@ enum class TokType
   String,
   Comment,
   InlineComment,
-  EOF,
+  BlankLine,
 };
 
 /// Token represents an (atomic) token/quantum of input text.
