@@ -106,6 +106,14 @@ class Scheduler(MooseObject):
         """ Call derived run method """
         return
 
+    def postRun(self, job_container):
+        """ Call derived postRun method """
+        return
+
+    def cleanUp(self):
+        """ Allow derived schedulers to perform cleanup operations """
+        return
+
     def skipPrereqs(self):
         """
         Method to return boolean to skip dependency prerequisites checks.
@@ -292,6 +300,10 @@ class Scheduler(MooseObject):
         # Assign a status thread to begin work on any skipped/failed jobs
         self.queueJobs(status_jobs=non_runnable_jobs)
 
+        # Set original DAG state now, before we launch any jobs
+        for job_container in job_dag.topological_sort():
+            job_container.setOriginalDAG()
+
         # Build our list of runnable jobs and set the tester's status to queued
         job_list = []
         if runnable_jobs:
@@ -389,29 +401,24 @@ class Scheduler(MooseObject):
 
         return can_run
 
-    def getNextJobGroup(self, job_container):
+    def getNextJobGroup(self, job_dag):
         """
-        Method to delete current finished job from the DAG and return the next
-        list of individually runnable jobs.
+        Prepare and return a list of concurrent runnable jobs
         """
         with self.dag_lock:
-            job_dag = job_container.getDAG()
             next_job_list = []
 
-            # Delete this job from the shared DAG
-            job_dag.delete_node(job_container)
-
-            # Get next available job list
+            # Get concurrent available job list
             concurrent_jobs = job_dag.ind_nodes()
 
-            for next_job_container in concurrent_jobs:
-                queued_tester = next_job_container.getTester()
+            for job_container in concurrent_jobs:
+                tester = job_container.getTester()
 
                 # Verify this job is not already running/pending/skipped
-                if queued_tester.isInitialized():
+                if tester.isInitialized():
                     # Set this next new job to pending so as to prevent this job from being launched a second time
-                    queued_tester.setStatus('QUEUED', queued_tester.bucket_pending)
-                    next_job_list.append(next_job_container)
+                    tester.setStatus('QUEUED', tester.bucket_pending)
+                    next_job_list.append(job_container)
 
         return next_job_list
 
@@ -475,7 +482,7 @@ class Scheduler(MooseObject):
                 self.last_reported = clock()
 
         except Exception as e:
-            print 'statusWorker Exception: %s' % (e)
+            print('statusWorker Exception: %s' % (e))
             self.killRemaining()
 
     def runWorker(self, job_container):
@@ -498,8 +505,11 @@ class Scheduler(MooseObject):
                                           (job_container,))
                 timeout_timer.start()
 
-                # Call the derived run method
+                # Call the derived run method (blocking)
                 self.run(job_container)
+
+                # Allow derived schedulers to perform post run operations
+                self.postRun(job_container)
 
                 # Stop timers now that the job has finished on its own
                 job_container.report_timer.cancel()
@@ -507,7 +517,7 @@ class Scheduler(MooseObject):
 
                 # Derived run needs to set a non-pending status of some sort.
                 if tester.isPending():
-                    raise SchedulerError('Derived Scheduler can not return a pending status!')
+                    raise SchedulerError('Derived Scheduler %s can not return a pending status!' % (self.__class__))
 
                 # Determin if this job creates any skipped dependencies (if it failed), and send
                 # this new list of jobs to the status queue to be printed.
@@ -515,8 +525,13 @@ class Scheduler(MooseObject):
                 possibly_skipped_job_containers.add(job_container)
                 self.queueJobs(status_jobs=possibly_skipped_job_containers)
 
+                # Delete this job from the shared DAG while the DAG is locked
+                with self.dag_lock:
+                    job_dag = job_container.getDAG()
+                    job_dag.delete_node(job_container)
+
                 # Get next job list
-                next_job_group = self.getNextJobGroup(job_container)
+                next_job_group = self.getNextJobGroup(job_dag)
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:
@@ -539,5 +554,5 @@ class Scheduler(MooseObject):
                     sleep(0.3)
 
         except Exception as e:
-            print 'runWorker Exception: %s' % (e)
+            print('runWorker Exception: %s' % (e))
             self.killRemaining()

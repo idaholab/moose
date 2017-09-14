@@ -39,6 +39,7 @@ class Job(object):
         self.__tester = tester
         self.timer = Timer()
         self.__dag = tester_dag
+        self.__dag_clone = None
         self.__outfile = None
         self.__start_time = clock()
         self.__end_time = None
@@ -52,6 +53,26 @@ class Job(object):
     def getDAG(self):
         """ Return the DAG object """
         return self.__dag
+
+    def getOriginalDAG(self):
+        """
+        Retreive the DAG object from the state it was when setOriginalDAG was called or the current
+        state it is in now, if setOriginalDAG was never called.
+        """
+
+        return self.setOriginalDAG()
+
+    def setOriginalDAG(self):
+        """
+        Create a soft clone of the working DAG for what ever state it is currently in. This method
+        should only be called once, and once the working DAG is properly set up.
+
+        This is to protect the DAG from further tampering.
+        """
+
+        if self.__dag_clone == None:
+            self.__dag_clone = self.__dag.clone()
+        return self.__dag_clone
 
     def getTestName(self):
         """ Wrapper method to return the testers test name """

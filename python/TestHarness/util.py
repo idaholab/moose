@@ -517,7 +517,10 @@ def readOutput(f, options, max_size=100000):
     output = ''
 
     f.seek(0)
-    if options.sep_files != True:
+    if options.no_trimmed_output or options.sep_files == True:
+        output += f.read()
+
+    else:
         output = f.read(first_part)     # Limit the output to 1MB
         if len(output) == first_part:   # This means we didn't read the whole file yet
             output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
@@ -526,7 +529,7 @@ def readOutput(f, options, max_size=100000):
             if (f.tell() <= first_part):  # Don't re-read some of what you've already read
                 f.seek(first_part+1, 0)
 
-    output += f.read()              # Now read the rest
+        output += f.read()              # Now read the rest
     return output
 
 class TestStatus(object):
@@ -562,6 +565,8 @@ class TestStatus(object):
     bucket_finished     = test_status(status='FINISHED', color='CYAN')
     bucket_skip         = test_status(status='SKIP', color='RESET')
     bucket_silent       = test_status(status='SILENT', color='RESET')
+    bucket_queued       = test_status(status='QUEUED', color='CYAN')
+    bucket_waiting_processing = test_status(status='WAITING', color='CYAN')
 
     # Initialize the class with a pending status
     # TODO: don't do this? Initialize instead with None type? If we do
@@ -650,6 +655,21 @@ class TestStatus(object):
         """
         status = self.getStatus()
         return status == self.bucket_deleted
+
+    def isQueued(self):
+        """
+        Return boolean queued status. This is different from a pending status,
+        as this status is more of a _finished_ pending status.
+        """
+        status = self.getStatus()
+        return status == self.bucket_queued
+
+    def isWaiting(self):
+        """
+        Return boolean on tester waiting to have its results processed.
+        """
+        status = self.getStatus()
+        return status == self.bucket_waiting_processing
 
     def isFinished(self):
         """

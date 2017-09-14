@@ -51,6 +51,7 @@ class TestHarness:
         self.num_passed = 0
         self.num_failed = 0
         self.num_skipped = 0
+        self.num_pending = 0
         self.host_name = gethostname()
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
@@ -426,6 +427,8 @@ class TestHarness:
                 self.num_skipped += 1
             elif tester.didPass():
                 self.num_passed += 1
+            elif tester.isQueued() or tester.isWaiting():
+                self.num_pending += 1
             else:
                 self.num_failed += 1
 
@@ -463,6 +466,10 @@ class TestHarness:
         if self.error_code & ~Parser.getErrorCodeMask():
             fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
 
+        # Alert the user to their session file
+        if self.queueing:
+            print 'Your session file is %s' % self.options.session_file
+
         # Print a different footer when performing a dry run
         if self.options.dry_run:
             print('Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time))
@@ -480,13 +487,17 @@ class TestHarness:
             else:
                 summary = '<b>%d passed</b>'
             summary += ', <b>%d skipped</b>'
+            if self.num_pending:
+                summary += ', <c>%d pending</c>'
+            else:
+                summary += ', <b>%d pending</b>'
             if self.num_failed:
                 summary += ', <r>%d FAILED</r>'
             else:
                 summary += ', <b>%d failed</b>'
             summary += fatal_error
 
-            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_failed),  "", html = True, \
+            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code ))
 
         if self.file:
@@ -500,10 +511,24 @@ class TestHarness:
         # Load the scheduler plugins
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', "IS_SCHEDULER")
 
-        # Add our scheduler plugins
-        # Note: for now, we only have one: 'RunParallel'. In the future this will be an options.argument
-        #       comparison
-        scheduler_plugin = 'RunParallel'
+        # Set a global queueing flag
+        self.queueing = False
+
+        if self.options.pbs:
+            self.queueing = True
+            scheduler_plugin = 'RunPBS'
+
+            # Unify the queueing file
+            self.options.session_file = self.options.pbs
+
+        # User is wanting to clean up old queue sessions
+        elif self.options.queue_cleanup:
+            scheduler_plugin = 'QueueManager'
+            self.options.session_file = self.options.queue_cleanup
+
+        # The default scheduler plugin
+        else:
+            scheduler_plugin = 'RunParallel'
 
         # Augment the Scheduler params with plugin params
         plugin_params = self.factory.validParams(scheduler_plugin)
@@ -599,6 +624,12 @@ class TestHarness:
         outputgroup.add_argument("--revision", nargs=1, action="store", type=str, dest="revision", help="The current revision being tested. Required when using --store-timing.")
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
+        outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
+
+        queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
+        queuegroup.add_argument('--pbs', nargs='?', action='store', type=str, metavar='session_name', const='generate', help='Use PBS as your scheduler. Optional: Supply a name to identify this session with. If session exists, the scheduler will instead display the results of that session.')
+        queuegroup.add_argument('--queue-project', nargs=1, action='store', type=str, default='moose', metavar='project', help='Identify your PBS job with this project (default:  moose)')
+        queuegroup.add_argument('--queue-cleanup', nargs=1, metavar='session_name', help='Clean up directories/files created by session')
 
         code = True
         if self.code.decode('hex') in argv:
@@ -644,6 +675,9 @@ class TestHarness:
         if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
             print('ERROR: --parallel and/or --threads can not be used with --valgrind')
             sys.exit(1)
+        if opts.queue_cleanup and opts.pbs:
+            print('ERROR: --queue-cleanup and --pbs can not be used together')
+            sys.exit(1)
 
         # Update any keys from the environment as necessary
         if not self.options.method:
@@ -672,6 +706,9 @@ class TestHarness:
             sys.exit(0)
         elif self.options.dump:
             self.factory.printDump("Tests")
+            sys.exit(0)
+        elif self.options.queue_cleanup:
+            self.scheduler.cleanUp()
             sys.exit(0)
 
     def getOptions(self):

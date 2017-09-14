@@ -13,7 +13,7 @@
 [Functions]
   [./tif]
     type = ImageFunction
-    file_base = ../stack/test
+    file_base = stack/test
     file_suffix = png
     file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
   [../]
