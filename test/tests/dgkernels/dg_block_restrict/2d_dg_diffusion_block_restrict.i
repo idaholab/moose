@@ -5,7 +5,6 @@
   nx = 10
   ymax = 2
   ny = 10
-  parallel_type = replicated
 []
 
 [MeshModifiers]
