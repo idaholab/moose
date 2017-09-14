@@ -19,14 +19,8 @@ validParams<NormalDistribution>()
 }
 
 NormalDistribution::NormalDistribution(const InputParameters & parameters)
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
   : BoostDistribution<boost::math::normal_distribution<Real>>(parameters)
-#else
-  : BoostDistribution<>(parameters)
-#endif
 {
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
   _distribution_unique_ptr = libmesh_make_unique<boost::math::normal_distribution<Real>>(
       getParam<Real>("mean"), getParam<Real>("standard_deviation"));
-#endif
 }
