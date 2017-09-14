@@ -26,7 +26,7 @@
     [./elastic]
       prop_name = elasticity_tensor
       prop_type = RankFourTensor
-      derivative_order = 0
+      derivative_order = 1
       args = 'a b'
     [../]
   [../]
@@ -55,16 +55,6 @@
     args = 'a b'
     youngs_modulus = youngs_modulus
     poissons_ratio = poissons_ratio
-  [../]
-[]
-
-[Preconditioning]
-  [./smp]
-    type = SMP
-    full = true
-    solve_type = newton
-    petsc_options_iname = '-snes_type -snes_test_err'
-    petsc_options_value = 'test       1e-10'
   [../]
 []
 
