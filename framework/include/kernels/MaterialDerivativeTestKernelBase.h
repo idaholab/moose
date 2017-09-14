@@ -35,6 +35,9 @@ protected:
   /// number of nonlinear variables
   const unsigned int _n_vars;
 
+  /// select material property derivative to test derivatives of
+  std::vector<VariableName> _derivative;
+
   /// material property for which to test derivatives
   const MaterialProperty<T> & _p;
 
@@ -50,14 +53,16 @@ MaterialDerivativeTestKernelBase<T>::MaterialDerivativeTestKernelBase(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _n_vars(_coupled_moose_vars.size()),
-    _p(this->template getMaterialProperty<T>("material_property")),
+    _derivative(getParam<std::vector<VariableName>>("derivative")),
+    _p(this->template getMaterialPropertyDerivative<T>("material_property", _derivative)),
     _p_off_diag_derivatives(_n_vars),
-    _p_diag_derivative(
-        this->template getMaterialPropertyDerivative<T>("material_property", _var.name()))
+    _p_diag_derivative(this->template getMaterialPropertyDerivative<T>(
+        "material_property", MooseUtils::concatenate(_derivative, VariableName(_var.name()))))
 {
   for (unsigned int m = 0; m < _n_vars; ++m)
     _p_off_diag_derivatives[m] = &this->template getMaterialPropertyDerivative<T>(
-        "material_property", _coupled_moose_vars[m]->name());
+        "material_property",
+        MooseUtils::concatenate(_derivative, VariableName(_coupled_moose_vars[m]->name())));
 }
 
 template <typename T>
@@ -69,7 +74,10 @@ MaterialDerivativeTestKernelBase<T>::validParams()
   params.addRequiredParam<MaterialPropertyName>(
       "material_property", "Name of material property for which derivatives are to be tested.");
   params.addRequiredCoupledVar("args", "List of variables the material property depends on");
-
+  params.addParam<std::vector<VariableName>>(
+      "derivative",
+      "Select derivative to test derivatives of (leave empty for checking "
+      "derivatives of the original material property)");
   return params;
 }
 

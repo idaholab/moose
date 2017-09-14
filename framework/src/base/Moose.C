@@ -1211,6 +1211,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(MaterialDerivativeTestAction, "add_variable");
   registerAction(MaterialDerivativeTestAction, "add_kernel");
+  registerAction(MaterialDerivativeTestAction, "add_preconditioning");
 
 #undef registerAction
 #define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)

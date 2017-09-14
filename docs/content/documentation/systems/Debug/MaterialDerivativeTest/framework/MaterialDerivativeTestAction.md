@@ -7,7 +7,8 @@ Sets up
 - [MaterialDerivativeRankTwoTestKernel](/MaterialDerivativeRankTwoTestKernel.md)
 - [MaterialDerivativeRankFourTestKernel](/MaterialDerivativeRankFourTestKernel.md)
 
-kernels and the corresponding variables they act on.
+kernels, the corresponding variables they act on, and a sparse coupling matrix that
+optimizes the Jacobian test performance.
 
 
 !syntax parameters /Debug/MaterialDerivativeTest/MaterialDerivativeTestAction

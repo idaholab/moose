@@ -161,6 +161,7 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("AddTransferAction", "Transfers/*");
 
   // Material derivative test
+  registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
   registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
 
   addActionTypes(syntax);
