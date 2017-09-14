@@ -13,6 +13,5 @@
   [./derivatives]
     type = 'AnalyzeJacobian'
     input = 'derivatives.i'
-    method = '!DBG' # slow test
   [../]
 []
