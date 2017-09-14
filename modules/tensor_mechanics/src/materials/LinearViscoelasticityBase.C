@@ -23,6 +23,14 @@ validParams<LinearViscoelasticityBase>()
                                     "coefficient for newmark integration rule (between 0 and 1)");
   params.addParam<std::string>("driving_eigenstrain",
                                "name of the eigenstrain that increases the creep strains");
+  params.addParam<std::string>(
+      "elastic_strain_name", "elastic_strain", "name of the true elastic strain of the material");
+  params.addParam<std::string>("stress_name", "stress", "name of the true stress of the material");
+  params.addParam<std::string>("creep_strain_name",
+                               "creep_strain",
+                               "name of the true creep strain of the material"
+                               "(computed by LinearViscoelasticStressUpdate or"
+                               "ComputeLinearViscoelasticStress");
   params.addParam<bool>("force_recompute_properties",
                         false,
                         "forces the computation of the viscoelastic properties at each step of"
@@ -70,6 +78,11 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
     _apparent_creep_strain(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain")),
     _apparent_creep_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "apparent_creep_strain")),
+    _elastic_strain_old(
+        getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("elastic_strain_name"))),
+    _creep_strain_old(
+        getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("creep_strain_name"))),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("stress_name"))),
     _has_driving_eigenstrain(isParamValid("driving_eigenstrain")),
     _driving_eigenstrain_name(
         _has_driving_eigenstrain ? getParam<std::string>("driving_eigenstrain") : ""),
@@ -121,15 +134,6 @@ LinearViscoelasticityBase::initQpStatefulProperties()
   }
 }
 
-RankTwoTensor
-LinearViscoelasticityBase::computeQpCreepStrain(unsigned int qp,
-                                                const RankTwoTensor & mechanical_strain)
-{
-  return mechanical_strain -
-         (_apparent_elasticity_tensor[qp] * _instantaneous_elasticity_tensor_inv[qp]) *
-             (mechanical_strain - _apparent_creep_strain[qp]);
-}
-
 void
 LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
 {
@@ -139,12 +143,21 @@ LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
   if (_t_step >= 1)
     _step_zero = false;
 
+  // 1. we get the viscoelastic properties and their inverse if needed
   computeQpViscoelasticProperties();
   if (_need_viscoelastic_properties_inverse)
     computeQpViscoelasticPropertiesInv();
+
+  // 2. we update the internal viscous strains from the previous time step
+  updateQpViscousStrains();
+
+  // 3. we compute the apparent elasticity tensor
   computeQpApparentElasticityTensors();
+
+  // 4. we transform the internal viscous strains in an apparent creep strain
   if (!_step_zero)
     computeQpApparentCreepStrain();
+
   _qp = qp_prev;
 }
 

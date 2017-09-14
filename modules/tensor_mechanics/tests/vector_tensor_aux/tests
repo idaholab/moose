@@ -1,5 +1,5 @@
 [Tests]
-  [./burgers]
+  [./tensor_aux]
     type = 'Exodiff'
     input = 'vector_tensor_aux.i'
     exodiff = 'vector_tensor_aux_out.e'

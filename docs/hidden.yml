@@ -904,8 +904,6 @@ tensor_mechanics:
     - /AuxKernels/RankFourAux
     - /AuxKernels/RankTwoAux
     - /AuxKernels/RankTwoScalarAux
-    - /AuxKernels/VectorRankFourAux
-    - /AuxKernels/VectorRankTwoAux
     - /BCs
     - /BCs/DashpotBC
     - /BCs/DisplacementAboutAxis

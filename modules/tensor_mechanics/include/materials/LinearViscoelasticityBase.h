@@ -105,39 +105,6 @@ public:
    */
   void recomputeQpApparentProperties(unsigned int qp);
 
-  /**
-   * Update the internal viscous strains at a quadrature point. Calling this method is required at
-   * the end of each time step to update the internal time-stepping scheme correctly.
-   *
-   * This method is called by LinearViscoelasticityManager.
-   * This method is pure virtual. Inherited classes must override it.
-   *
-   * This method is related to the internal time-stepping scheme. It should only be overwritten by
-   * classes that inherit directly from LinearViscoelasticityBase, and that represent a different
-   * spring-dashpot assembly. See GeneralizedKelvinVoigtBase or GeneralizedMaxwellBase for
-   * example.
-   *
-   * @param qp The quadrature point at which the viscous strains are updated.
-   * @param effective_strain The sum of elastic_strain + creep_strain to which the system is subject
-   * to.
-   * @param effective_stress The stress applied to the system.
-   */
-  virtual void updateQpApparentProperties(unsigned int qp,
-                                          const RankTwoTensor & effective_strain,
-                                          const RankTwoTensor & effective_stress) = 0;
-
-  /**
-   * Computes the true creep strain resulting from a given mechanical strain. This method is
-   * required to translate the apparent creep strain stored in this class to the true
-   * creep strain.
-   *
-   * This method is called by ComputeLinearViscoelasticStress and LinearViscoelasticStressUpdate.
-   *
-   * @param qp The quadrature point at which the calculation is done.
-   * @param mechanical_strain The mechanical strain to which the system is subject to.
-   */
-  RankTwoTensor computeQpCreepStrain(unsigned int qp, const RankTwoTensor & mechanical_strain);
-
 protected:
   virtual void initQpStatefulProperties() override;
   /// Inherited from ComputeElasticityTensorBase
@@ -195,6 +162,19 @@ protected:
    */
   virtual void computeQpApparentCreepStrain() = 0;
 
+  /**
+   * Update the internal viscous strains at a quadrature point. Calling this method is required at
+   * the end of each time step to update the internal time-stepping scheme correctly.
+   *
+   * This method is pure virtual. Inherited classes must override it.
+   *
+   * This method is related to the internal time-stepping scheme. It should only be overwritten by
+   * classes that inherit directly from LinearViscoelasticityBase, and that represent a different
+   * spring-dashpot assembly. See GeneralizedKelvinVoigtBase or GeneralizedMaxwellBase for
+   * example.
+   */
+  virtual void updateQpViscousStrains() = 0;
+
   /// Provides theta as a function of the time step and a viscosity
   Real computeTheta(Real dt, Real viscosity) const;
 
@@ -242,6 +222,18 @@ protected:
   /// The apparent creep strain resulting from the internal viscous strains
   MaterialProperty<RankTwoTensor> & _apparent_creep_strain;
   const MaterialProperty<RankTwoTensor> & _apparent_creep_strain_old;
+
+  /// previous value of the elastic strain for update purposes
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+  /**
+   * Previous value of the true creep strain for update purposes.
+   * This is calculated by a ComputeLinearViscoelasticStress or a
+   * LinearViscoelasticStressUpdate material.
+   */
+  const MaterialProperty<RankTwoTensor> & _creep_strain_old;
+
+  /// previous value of the stress for update purposes
+  const MaterialProperty<RankTwoTensor> & _stress_old;
 
   /// Indicates if the model is only driven by the stress, or also by an additional eigenstrain
   bool _has_driving_eigenstrain;

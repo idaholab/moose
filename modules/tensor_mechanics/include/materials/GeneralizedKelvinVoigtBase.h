@@ -35,13 +35,10 @@ class GeneralizedKelvinVoigtBase : public LinearViscoelasticityBase
 public:
   GeneralizedKelvinVoigtBase(const InputParameters & parameters);
 
-  virtual void updateQpApparentProperties(unsigned int qp,
-                                          const RankTwoTensor & effective_strain,
-                                          const RankTwoTensor & effective_stress) final;
-
 protected:
   virtual void computeQpApparentElasticityTensors() final;
   virtual void computeQpApparentCreepStrain() final;
+  virtual void updateQpViscousStrains() final;
 };
 
 #endif // GENERALIZEDKELVINVOIGTBASE_H

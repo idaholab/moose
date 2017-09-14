@@ -22,46 +22,30 @@ GeneralizedMaxwellBase::GeneralizedMaxwellBase(const InputParameters & parameter
 }
 
 void
-GeneralizedMaxwellBase::updateQpApparentProperties(unsigned int qp,
-                                                   const RankTwoTensor & effective_strain,
-                                                   const RankTwoTensor & /*effective_stress*/)
+GeneralizedMaxwellBase::updateQpViscousStrains()
 {
-  for (unsigned int i = 0; i < _springs_elasticity_tensors[qp].size(); ++i)
+  RankTwoTensor effective_strain = _elastic_strain_old[_qp] + _creep_strain_old[_qp];
+  if (_has_driving_eigenstrain)
+    effective_strain += (*_driving_eigenstrain)[_qp];
+
+  for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
   {
-    Real theta_i = computeTheta(_dt, _dashpot_viscosities[qp][i]);
-    Real gamma = _dashpot_viscosities[qp][i] / (_dt * theta_i);
-    _viscous_strains[qp][i] =
-        _viscous_strains_old[qp][i] *
-        ((_dashpot_viscosities[qp][i] * gamma - _dt * (1. - theta_i) * gamma) /
-         (_dashpot_viscosities[qp][i] * (1. + gamma)));
-    _viscous_strains[qp][i] +=
-        effective_strain * ((_dashpot_viscosities[qp][i] + _dt * (1. - theta_i) * gamma) /
-                            (_dashpot_viscosities[qp][i] * (1. + gamma)));
+    Real theta_i = computeTheta(_dt_old, _dashpot_viscosities[_qp][i]);
+    Real gamma = _dashpot_viscosities[_qp][i] / (_dt_old * theta_i);
+    _viscous_strains[_qp][i] =
+        _viscous_strains_old[_qp][i] *
+        ((_dashpot_viscosities[_qp][i] * gamma - _dt_old * (1. - theta_i) * gamma) /
+         (_dashpot_viscosities[_qp][i] * (1. + gamma)));
+    _viscous_strains[_qp][i] +=
+        effective_strain * ((_dashpot_viscosities[_qp][i] + _dt_old * (1. - theta_i) * gamma) /
+                            (_dashpot_viscosities[_qp][i] * (1. + gamma)));
   }
 
   if (_has_longterm_dashpot)
   {
-    Real theta_i = computeTheta(_dt, _dashpot_viscosities[qp].back());
-    _viscous_strains[qp].back() = effective_strain / theta_i;
-    _viscous_strains[qp].back() -= _viscous_strains_old[qp].back() * ((1. - theta_i) / theta_i);
-  }
-
-  if (_has_driving_eigenstrain)
-  {
-    for (unsigned int i = 0; i < _springs_elasticity_tensors[qp].size(); ++i)
-    {
-      Real theta_i = computeTheta(_dt, _dashpot_viscosities[qp][i]);
-      Real gamma = _dashpot_viscosities[qp][i] / (_dt * theta_i);
-      _viscous_strains[qp][i] += (*_driving_eigenstrain)[qp] *
-                                 ((_dashpot_viscosities[qp][i] + _dt * (1. - theta_i) * gamma) /
-                                  (_dashpot_viscosities[qp][i] * (1. + gamma)));
-    }
-
-    if (_has_longterm_dashpot)
-    {
-      double theta_i = computeTheta(_dt, _dashpot_viscosities[qp].back());
-      _viscous_strains[qp].back() += (*_driving_eigenstrain)[qp] / theta_i;
-    }
+    Real theta_i = computeTheta(_dt_old, _dashpot_viscosities[_qp].back());
+    _viscous_strains[_qp].back() = effective_strain / theta_i;
+    _viscous_strains[_qp].back() -= _viscous_strains_old[_qp].back() * ((1. - theta_i) / theta_i);
   }
 }
 
@@ -105,8 +89,7 @@ GeneralizedMaxwellBase::computeQpApparentCreepStrain()
     Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp][i]);
     Real gamma = _dashpot_viscosities[_qp][i] / (_dt * theta_i);
     _apparent_creep_strain[_qp] +=
-        (_springs_elasticity_tensors[_qp][i] * _viscous_strains_old[_qp][i]) *
-        (gamma / (1. + gamma));
+        (_springs_elasticity_tensors[_qp][i] * _viscous_strains[_qp][i]) * (gamma / (1. + gamma));
   }
 
   if (_has_longterm_dashpot)
@@ -114,7 +97,7 @@ GeneralizedMaxwellBase::computeQpApparentCreepStrain()
     Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp].back());
     Real gamma = _dashpot_viscosities[_qp].back() / (_dt * theta_i);
     _apparent_creep_strain[_qp] +=
-        (_first_elasticity_tensor[_qp] * _viscous_strains_old[_qp].back()) * gamma;
+        (_first_elasticity_tensor[_qp] * _viscous_strains[_qp].back()) * gamma;
   }
 
   _apparent_creep_strain[_qp] = _apparent_elasticity_tensor_inv[_qp] * _apparent_creep_strain[_qp];

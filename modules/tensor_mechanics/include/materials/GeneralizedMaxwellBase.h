@@ -35,13 +35,10 @@ class GeneralizedMaxwellBase : public LinearViscoelasticityBase
 public:
   GeneralizedMaxwellBase(const InputParameters & parameters);
 
-  virtual void updateQpApparentProperties(unsigned int qp,
-                                          const RankTwoTensor & effective_strain,
-                                          const RankTwoTensor & effective_stress) final;
-
 protected:
   virtual void computeQpApparentElasticityTensors() final;
   virtual void computeQpApparentCreepStrain() final;
+  virtual void updateQpViscousStrains() final;
 };
 
 #endif // GENERALIZEDMAXWELLBASE_H

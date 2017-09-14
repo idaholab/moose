@@ -49,13 +49,6 @@ LinearViscoelasticityManager::execute()
     for (unsigned int _qp = 0; _qp < _qrule->n_points(); ++_qp)
       _viscoelastic_model->recomputeQpApparentProperties(_qp);
   }
-
-  if (_mi_feproblem.getCurrentExecuteOnFlag() == EXEC_TIMESTEP_END)
-  {
-    for (unsigned int _qp = 0; _qp < _qrule->n_points(); ++_qp)
-      _viscoelastic_model->updateQpApparentProperties(
-          _qp, _creep_strain[_qp] + _elastic_strain[_qp], _stress[_qp]);
-  }
 }
 
 void
