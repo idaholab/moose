@@ -11,6 +11,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+#include "libmesh/mesh_tools.h"
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/point_locator_base.h"
 

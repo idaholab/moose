@@ -18,6 +18,8 @@
 // MOOSE includes
 #include "MultiAppTransfer.h"
 
+#include "libmesh/mesh_base.h"
+
 // Forward declarations
 class MultiAppInterpolationTransfer;
 
