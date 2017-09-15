@@ -24,10 +24,10 @@
 #include <memory> //std::unique_ptr
 
 // libMesh
-#include "libmesh/mesh.h"
+#include "libmesh/bounding_box.h"
 #include "libmesh/elem_range.h"
+#include "libmesh/mesh_base.h"
 #include "libmesh/node_range.h"
-#include "libmesh/mesh_tools.h"
 
 // forward declaration
 class MooseMesh;
