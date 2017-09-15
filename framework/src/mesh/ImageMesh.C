@@ -20,6 +20,7 @@
 #include <fstream>
 
 #include "libmesh/mesh_generation.h"
+#include "libmesh/unstructured_mesh.h"
 
 template <>
 InputParameters
