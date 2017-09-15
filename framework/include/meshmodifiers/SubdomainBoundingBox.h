@@ -27,7 +27,7 @@ InputParameters validParams<SubdomainBoundingBox>();
 
 namespace libMesh
 {
-  class BoundingBox;
+class BoundingBox;
 }
 
 /**
