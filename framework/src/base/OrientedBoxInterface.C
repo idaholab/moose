@@ -51,7 +51,7 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
   Point bottom_left(-xmax, -ymax, -zmax);
   Point top_right(xmax, ymax, zmax);
 
-  _bounding_box = libmesh_make_unique<MeshTools::BoundingBox>(bottom_left, top_right);
+  _bounding_box = libmesh_make_unique<BoundingBox>(bottom_left, top_right);
 
   /*
    * now create the rotation matrix that rotates the oriented

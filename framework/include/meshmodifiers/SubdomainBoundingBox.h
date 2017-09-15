@@ -49,7 +49,7 @@ private:
   SubdomainID _block_id;
 
   /// Bounding box for testing element centroids against
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 };
 
 #endif // SUBDOMAINBOUDINGBOX_H
