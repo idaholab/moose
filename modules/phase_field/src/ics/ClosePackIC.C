@@ -30,7 +30,7 @@ void
 ClosePackIC::computeCircleCenters()
 {
   // Determine the extents of the mesh
-  MeshTools::BoundingBox bbox = MeshTools::bounding_box(_fe_problem.mesh().getMesh());
+  BoundingBox bbox = MeshTools::create_bounding_box(_fe_problem.mesh().getMesh());
   const Point & min = bbox.min();
   const Point & max = bbox.max();
 
