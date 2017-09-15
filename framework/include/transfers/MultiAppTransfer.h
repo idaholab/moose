@@ -95,7 +95,7 @@ protected:
    * Return the bounding boxes of all the "from" domains, including all the
    * domains not local to this processor.
    */
-  std::vector<MeshTools::BoundingBox> getFromBoundingBoxes();
+  std::vector<BoundingBox> getFromBoundingBoxes();
 
   /**
    * Return the number of "from" domains that each processor owns.

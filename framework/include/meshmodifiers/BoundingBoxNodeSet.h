@@ -45,7 +45,7 @@ private:
   MooseEnum _location;
 
   /// Bounding box for testing element centroids against. Note that
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 };
 
 #endif // BOUNDINGBOXNODESET_H

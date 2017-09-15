@@ -158,7 +158,7 @@ private:
 #endif
 
   /// Bounding box for testing points
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 
   /// Parameters for interface
   const InputParameters & _is_pars;
