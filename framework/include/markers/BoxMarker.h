@@ -17,7 +17,7 @@
 
 #include "Marker.h"
 
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 class BoxMarker;
 

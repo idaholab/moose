@@ -19,10 +19,12 @@
 #include "MeshModifier.h"
 #include "MooseEnum.h"
 
-#include "libmesh/mesh_tools.h"
-
 // Forward Declaration
 class BoundingBoxNodeSet;
+namespace libMesh
+{
+  class BoundingBox;
+}
 
 template <>
 InputParameters validParams<BoundingBoxNodeSet>();
