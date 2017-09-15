@@ -29,6 +29,7 @@ class Backup;
 // libMesh forward declarations
 namespace libMesh
 {
+class BoundingBox;
 namespace MeshTools
 {
 class BoundingBox;

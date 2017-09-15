@@ -19,7 +19,7 @@
 #include "Transfer.h"
 #include "MooseEnum.h"
 
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 // Forward declarations
 class MultiAppTransfer;
