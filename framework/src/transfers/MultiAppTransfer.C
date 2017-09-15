@@ -177,8 +177,7 @@ MultiAppTransfer::getFromBoundingBoxes()
   {
     // Get a bounding box around the mesh elements that are local to the current
     // processor.
-    BoundingBox bbox =
-        MeshTools::create_local_bounding_box(*_from_meshes[i]);
+    BoundingBox bbox = MeshTools::create_local_bounding_box(*_from_meshes[i]);
 
     // Translate the bounding box to the from domain's position.
     bbox.first += _from_positions[i];
