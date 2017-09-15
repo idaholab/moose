@@ -23,7 +23,7 @@
 class BoundingBoxNodeSet;
 namespace libMesh
 {
-  class BoundingBox;
+class BoundingBox;
 }
 
 template <>
