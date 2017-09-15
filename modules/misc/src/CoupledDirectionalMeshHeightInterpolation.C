@@ -30,7 +30,7 @@ CoupledDirectionalMeshHeightInterpolation::CoupledDirectionalMeshHeightInterpola
     _coupled_val(coupledValue("coupled_var")),
     _direction(getParam<MooseEnum>("direction"))
 {
-  MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_subproblem.mesh());
+  BoundingBox bounding_box = MeshTools::create_bounding_box(_subproblem.mesh());
 
   _direction_min = bounding_box.min()(_direction);
   _direction_max = bounding_box.max()(_direction);
