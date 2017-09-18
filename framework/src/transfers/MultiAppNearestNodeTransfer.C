@@ -94,7 +94,7 @@ MultiAppNearestNodeTransfer::execute()
   getAppInfo();
 
   // Get the bounding boxes for the "from" domains.
-  std::vector<MeshTools::BoundingBox> bboxes = getFromBoundingBoxes();
+  std::vector<BoundingBox> bboxes = getFromBoundingBoxes();
 
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
@@ -584,7 +584,7 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p,
 }
 
 Real
-MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, MeshTools::BoundingBox bbox)
+MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, BoundingBox bbox)
 {
   std::vector<Point> source_points = {bbox.first, bbox.second};
 
@@ -607,7 +607,7 @@ MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, MeshTools::BoundingBox bbo
 }
 
 Real
-MultiAppNearestNodeTransfer::bboxMinDistance(Point p, MeshTools::BoundingBox bbox)
+MultiAppNearestNodeTransfer::bboxMinDistance(Point p, BoundingBox bbox)
 {
   std::vector<Point> source_points = {bbox.first, bbox.second};
 

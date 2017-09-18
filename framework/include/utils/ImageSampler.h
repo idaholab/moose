@@ -19,7 +19,7 @@
 #include "FileRangeBuilder.h"
 #include "ConsoleStream.h"
 
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 // VTK includes
 #ifdef LIBMESH_HAVE_VTK
@@ -158,7 +158,7 @@ private:
 #endif
 
   /// Bounding box for testing points
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 
   /// Parameters for interface
   const InputParameters & _is_pars;

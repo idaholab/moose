@@ -169,7 +169,7 @@ MultiAppTransfer::getAppInfo()
   }
 }
 
-std::vector<MeshTools::BoundingBox>
+std::vector<BoundingBox>
 MultiAppTransfer::getFromBoundingBoxes()
 {
   std::vector<std::pair<Point, Point>> bb_points(_from_meshes.size());
@@ -177,8 +177,7 @@ MultiAppTransfer::getFromBoundingBoxes()
   {
     // Get a bounding box around the mesh elements that are local to the current
     // processor.
-    MeshTools::BoundingBox bbox =
-        MeshTools::processor_bounding_box(*_from_meshes[i], _from_meshes[i]->comm().rank());
+    BoundingBox bbox = MeshTools::create_local_bounding_box(*_from_meshes[i]);
 
     // Translate the bounding box to the from domain's position.
     bbox.first += _from_positions[i];
@@ -193,9 +192,9 @@ MultiAppTransfer::getFromBoundingBoxes()
   _communicator.allgather(bb_points);
 
   // Recast the points back into bounding boxes and return.
-  std::vector<MeshTools::BoundingBox> bboxes(bb_points.size());
+  std::vector<BoundingBox> bboxes(bb_points.size());
   for (unsigned int i = 0; i < bb_points.size(); i++)
-    bboxes[i] = static_cast<MeshTools::BoundingBox>(bb_points[i]);
+    bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
 
   return bboxes;
 }

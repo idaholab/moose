@@ -2384,7 +2384,7 @@ MooseMesh::getPatchUpdateStrategy() const
   return _patch_update_strategy;
 }
 
-MeshTools::BoundingBox
+BoundingBox
 MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
 {
   // Grab a bounding box to speed things up.  Note that

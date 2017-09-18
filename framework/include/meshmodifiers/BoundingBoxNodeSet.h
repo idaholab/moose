@@ -19,10 +19,12 @@
 #include "MeshModifier.h"
 #include "MooseEnum.h"
 
-#include "libmesh/mesh_tools.h"
-
 // Forward Declaration
 class BoundingBoxNodeSet;
+namespace libMesh
+{
+class BoundingBox;
+}
 
 template <>
 InputParameters validParams<BoundingBoxNodeSet>();
@@ -45,7 +47,7 @@ private:
   MooseEnum _location;
 
   /// Bounding box for testing element centroids against. Note that
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 };
 
 #endif // BOUNDINGBOXNODESET_H

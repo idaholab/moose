@@ -358,7 +358,7 @@ MultiApp::restore()
     _apps[i]->restore(_backups[i]);
 }
 
-MeshTools::BoundingBox
+BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
   if (!_has_an_app)
@@ -369,7 +369,7 @@ MultiApp::getBoundingBox(unsigned int app)
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
   MooseMesh & mesh = problem.mesh();
-  MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh);
+  BoundingBox bbox = MeshTools::create_bounding_box(mesh);
 
   Moose::swapLibMeshComm(swapped);
 
@@ -404,7 +404,7 @@ MultiApp::getBoundingBox(unsigned int app)
   shifted_min += p;
   shifted_max += p;
 
-  return MeshTools::BoundingBox(shifted_min, shifted_max);
+  return BoundingBox(shifted_min, shifted_max);
 }
 
 FEProblemBase &

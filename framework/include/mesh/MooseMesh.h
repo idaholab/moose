@@ -453,7 +453,7 @@ public:
    * @param inflation_multiplier This amount will be multiplied by the length of the diagonal of the
    * bounding box to find the amount to inflate the bounding box by in all directions.
    */
-  MeshTools::BoundingBox getInflatedProcessorBoundingBox(Real inflation_multiplier = 0.01) const;
+  BoundingBox getInflatedProcessorBoundingBox(Real inflation_multiplier = 0.01) const;
 
   /**
    * Implicit conversion operator from MooseMesh -> libMesh::MeshBase.
