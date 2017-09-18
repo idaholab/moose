@@ -17,6 +17,8 @@
 #include "MooseApp.h"
 #include "ImageMesh.h"
 
+#include "libmesh/mesh_tools.h"
+
 template <>
 InputParameters
 validParams<ImageSampler>()
@@ -83,7 +85,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
 
 #ifdef LIBMESH_HAVE_VTK
   // Get access to the Mesh object
-  MeshTools::BoundingBox bbox = MeshTools::bounding_box(mesh.getMesh());
+  BoundingBox bbox = MeshTools::create_bounding_box(mesh.getMesh());
 
   // Set the dimensions from the Mesh if not set by the User
   if (_is_pars.isParamValid("dimensions"))

@@ -85,14 +85,14 @@ NearestNodeLocator::findNodes()
     std::vector<dof_id_type> trial_master_nodes;
 
     // Build a bounding box.  No reason to consider nodes outside of our inflated BB
-    MeshTools::BoundingBox * my_inflated_box = NULL;
+    BoundingBox * my_inflated_box = NULL;
 
     const std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
 
     // This means there was a user specified inflation... so we can build a BB
     if (inflation.size() > 0)
     {
-      MeshTools::BoundingBox my_box = MeshTools::create_local_bounding_box(_mesh);
+      BoundingBox my_box = MeshTools::create_local_bounding_box(_mesh);
 
       Real distance_x = 0;
       Real distance_y = 0;
@@ -106,12 +106,12 @@ NearestNodeLocator::findNodes()
       if (inflation.size() > 2)
         distance_z = inflation[2];
 
-      my_inflated_box = new MeshTools::BoundingBox(Point(my_box.first(0) - distance_x,
-                                                         my_box.first(1) - distance_y,
-                                                         my_box.first(2) - distance_z),
-                                                   Point(my_box.second(0) + distance_x,
-                                                         my_box.second(1) + distance_y,
-                                                         my_box.second(2) + distance_z));
+      my_inflated_box = new BoundingBox(Point(my_box.first(0) - distance_x,
+                                              my_box.first(1) - distance_y,
+                                              my_box.first(2) - distance_z),
+                                        Point(my_box.second(0) + distance_x,
+                                              my_box.second(1) + distance_y,
+                                              my_box.second(2) + distance_z));
     }
 
     // Data structures to hold the Nodal Boundary conditions
