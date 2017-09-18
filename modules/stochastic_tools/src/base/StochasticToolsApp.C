@@ -9,6 +9,8 @@
 // Distributions
 #include "UniformDistribution.h"
 #include "WeibullDistribution.h"
+#include "NormalDistribution.h"
+#include "LognormalDistribution.h"
 
 // Samplers
 #include "MonteCarloSampler.h"
@@ -74,6 +76,8 @@ StochasticToolsApp::registerObjects(Factory & factory)
   // Distributions
   registerDistribution(UniformDistribution);
   registerDistribution(WeibullDistribution);
+  registerDistribution(NormalDistribution);
+  registerDistribution(LognormalDistribution);
 
   // Samplers
   registerSampler(MonteCarloSampler);
