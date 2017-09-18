@@ -82,7 +82,9 @@ public:
   /**
    * Helper function for creating a MooseApp from command-line arguments.
    */
-  static MooseApp * createApp(std::string app_type, int argc, char ** argv);
+  static MooseApp *
+  createApp(std::string app_type, int argc, char ** argv, MPI_Comm COMM_WORLD_IN = MPI_COMM_WORLD);
+
   static std::shared_ptr<MooseApp>
   createAppShared(const std::string & app_type, int argc, char ** argv);
 
