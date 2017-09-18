@@ -17,6 +17,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "MooseVariable.h"
+#include "SystemBase.h"
 
 #include "libmesh/quadrature.h"
 
@@ -38,7 +39,7 @@ validParams<InterfaceKernel>()
       "contributions to. Everything about that variable must match everything "
       "about this variable (the type, what blocks it's on, etc.)");
 
-  MooseEnum save_in_var_side("m s");
+  std::vector<MooseEnum> save_in_var_side(1, MooseEnum("m s"));
   params.addParam<std::vector<MooseEnum>>(
       "save_in_var_side",
       save_in_var_side,
@@ -54,9 +55,9 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
+    _save_in_var_side(params.get<std::vector<MooseEnum>>("save_in_var_side")),
     _save_in_strings(params.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(params.get<std::vector<AuxVariableName>>("diag_save_in"))
-    _save_in_var_side(params.get<std::vector<MooseEnum>>("save_in_var_side");
 {
   if (!params.isParamValid("boundary"))
     mooseError(
