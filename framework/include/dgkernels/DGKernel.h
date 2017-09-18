@@ -221,6 +221,10 @@ public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up
   // number)
   static const BoundaryID InternalBndId;
+
+private:
+  static Threads::spin_mutex _resid_vars_mutex;
+  static Threads::spin_mutex _jacoby_vars_mutex;
 };
 
 #endif // DGKERNEL_H

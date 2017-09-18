@@ -65,6 +65,10 @@ validParams<DGKernel>()
   return params;
 }
 
+// Static mutex definitions
+Threads::spin_mutex DGKernel::_resid_vars_mutex;
+Threads::spin_mutex DGKernel::_jacoby_vars_mutex;
+
 DGKernel::DGKernel(const InputParameters & parameters)
   : MooseObject(parameters),
     BlockRestrictable(parameters),
@@ -192,7 +196,7 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
 
   if (_has_save_in)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _save_in)
     {
       std::vector<dof_id_type> & dof_indices =
@@ -247,15 +251,13 @@ DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_kxx(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _diag_save_in)
     {
-      std::vector<dof_id_type> dof_indices;
       if (type == Moose::ElementElement)
-        dof_indices = var->dofIndices();
+        var->sys().solution().add_vector(diag, var->dofIndices());
       else
-        dof_indices = var->dofIndicesNeighbor();
-      var->sys().solution().add_vector(diag, dof_indices);
+        var->sys().solution().add_vector(diag, var->dofIndicesNeighbor());
     }
   }
 }
