@@ -18,11 +18,7 @@ InputParameters validParams<NormalDistribution>();
 /**
  * A class used to generate Normal distribution via Boost
  */
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 class NormalDistribution : public BoostDistribution<boost::math::normal_distribution<Real>>
-#else
-class NormalDistribution : public BoostDistribution<>
-#endif
 {
 public:
   NormalDistribution(const InputParameters & parameters);

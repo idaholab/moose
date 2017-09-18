@@ -12,6 +12,26 @@
 
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 #include <boost/math/distributions.hpp>
+#else
+class BoostDistributionDummy
+{
+public:
+  BoostDistributionDummy(Real...) {}
+};
+namespace boost
+{
+namespace math
+{
+template <typename T>
+using weibull_distribution = BoostDistributionDummy;
+
+template <typename T>
+using normal_distribution = BoostDistributionDummy;
+
+template <typename T>
+using lognormal_distribution = BoostDistributionDummy;
+}
+}
 #endif
 
 /**
