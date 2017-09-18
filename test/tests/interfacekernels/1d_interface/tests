@@ -19,4 +19,10 @@
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
   [../]
+
+  [./ik_save_in]
+    type = Exodiff
+    input = 'ik_save_in_test.i'
+    exodiff = 'ik_save_in_test_out.e'
+  [../]
 []
