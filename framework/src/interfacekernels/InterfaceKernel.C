@@ -45,7 +45,13 @@ validParams<InterfaceKernel>()
       save_in_var_side,
       "This parameter must exist if save_in variables are specified and must have the same length "
       "as save_in. This vector specifies whether the corresponding aux_var should save-in "
-      "residual/jacobian contributions from the master ('m') or slave side ('s').");
+      "residual contributions from the master ('m') or slave side ('s').");
+  params.addParam<std::vector<MooseEnum>>(
+      "diag_save_in_var_side",
+      save_in_var_side,
+      "This parameter must exist if diag_save_in variables are specified and must have the same "
+      "length as diag_save_in. This vector specifies whether the corresponding aux_var should "
+      "save-in jacobian contributions from the master ('m') or slave side ('s').");
 
   return params;
 }
@@ -57,6 +63,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
     _save_in_var_side(params.get<std::vector<MooseEnum>>("save_in_var_side")),
     _save_in_strings(params.get<std::vector<AuxVariableName>>("save_in")),
+    _diag_save_in_var_side(params.get<std::vector<MooseEnum>>("diag_save_in_var_side")),
     _diag_save_in_strings(params.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
   if (!params.isParamValid("boundary"))
@@ -69,7 +76,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
       mooseError("save_in and save_in_var_side must be the same length");
     else
     {
-      for (unsigned i; i < _save_in_strings.size(); ++i)
+      for (unsigned i = 0; i < _save_in_strings.size(); ++i)
       {
         MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
@@ -109,11 +116,11 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
 
   if (params.isParamSetByUser("diag_save_in"))
   {
-    if (_diag_save_in_strings.size() != _save_in_var_side.size())
-      mooseError("diag_save_in and save_in_var_side must be the same length");
+    if (_diag_save_in_strings.size() != _diag_save_in_var_side.size())
+      mooseError("diag_save_in and diag_save_in_var_side must be the same length");
     else
     {
-      for (unsigned i; i < _diag_save_in_strings.size(); ++i)
+      for (unsigned i = 0; i < _diag_save_in_strings.size(); ++i)
       {
         MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
@@ -121,7 +128,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
           mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +
                      " as a save_in variable in " + name());
 
-        if (_save_in_var_side[i] == "m")
+        if (_diag_save_in_var_side[i] == "m")
         {
           if (var->feType() != _var.feType())
             mooseError(
@@ -180,15 +187,19 @@ InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
 
   re += _local_re;
 
-  if (_has_save_in)
+  if (_has_master_residuals_saved_in && is_elem)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (const auto & var : _save_in)
+    for (const auto & var : _master_save_in_residual_variables)
     {
-      std::vector<dof_id_type> & dof_indices =
-          is_elem ? var->dofIndices() : var->dofIndicesNeighbor();
-      var->sys().solution().add_vector(_local_re, dof_indices);
+      var->sys().solution().add_vector(_local_re, var->dofIndices());
     }
+  }
+  else if (_has_slave_residuals_saved_in && !is_elem)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (const auto & var : _slave_save_in_residual_variables)
+      var->sys().solution().add_vector(_local_re, var->dofIndicesNeighbor());
   }
 }
 
@@ -212,10 +223,38 @@ InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
                                                         _neighbor_var.number(),
                                                         _neighbor_var.number());
 
+  _local_kxx.resize(Kxx.m(), Kxx.n());
+  _local_kxx.zero();
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
-        Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
+        _local_kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
+
+  Kxx += _local_kxx;
+
+  if (_has_master_jacobians_saved_in && type == Moose::ElementElement)
+  {
+    unsigned int rows = _local_kxx.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_kxx(i, i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (const auto & var : _master_save_in_jacobian_variables)
+      var->sys().solution().add_vector(diag, var->dofIndices());
+  }
+  else if (_has_slave_jacobians_saved_in && type == Moose::NeighborNeighbor)
+  {
+    unsigned int rows = _local_kxx.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_kxx(i, i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (const auto & var : _slave_save_in_jacobian_variables)
+      var->sys().solution().add_vector(diag, var->dofIndicesNeighbor());
+  }
 }
 
 void
