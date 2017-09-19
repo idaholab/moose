@@ -3,14 +3,23 @@
 ## Description
 
 The steady-state diffusion equation on a domain $\Omega$ is defined as
-$$-\nabla \cdot \nabla u = 0 \in \Omega.$$
+\begin{equation}
+-\nabla \cdot \nabla u = 0 \in \Omega.
+\end{equation}
 
 The weak form of this equation, in inner-product notation, is given by:
-$$R_i(u_h) = (\nabla \phi_i, \nabla u_h) = 0 \quad \forall  \phi_i, $$
-where $\phi_i$ are the test functions and $u_h$ is the finite element solution of $u$.
+
+\begin{equation}
+R_i(u_h) = (\nabla \psi_i, \nabla u_h) = 0 \quad \forall  \psi_i,
+\end{equation}
+
+where $\psi_i$ are the test functions and $u_h$ is the finite element solution of $u$ (trail functions).
 
 The Jacobian is defined as:
-$$\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \phi_i, \nabla \psi_j).$$
+
+\begin{equation}
+\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \phi_i, \nabla \psi_j).
+\end{equation}
 
 !syntax parameters /Kernels/Diffusion
 

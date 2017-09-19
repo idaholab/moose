@@ -28,11 +28,10 @@ and similarly for the right hand sides.
 
 The kernels describing \eqref{eq:specific} are shown in the `Kernel` block below
 
-!listing test/tests/executioners/eigen_executioners/ipm.i block=Kernels
- label=false
+!listing test/tests/executioners/eigen_executioners/ipm.i block=Kernels label=false
 
- The syntax for `MassEigenKernel` is simple, taking only its type and the
- variable that the kernel acts on.
+The syntax for `MassEigenKernel` is simple, taking only its type and the
+variable that the kernel acts on.
 
 !syntax parameters /Kernels/MassEigenKernel
 

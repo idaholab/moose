@@ -2,17 +2,27 @@
 
 ## Description
 
-This kernel implements anistropic diffusion given in its strong form as $$\nabla
-\cdot -\widetilde{k} \nabla u$$ where $\widetilde{k}$ is the anisotropic
-diffusion coefficient. Diffusion is anistropic if the diffusion rate varies with
-direction. The corresponding weak form is given by $$(\nabla \psi_i,
-\widetilde{k} \nabla u_h) \ - <\psi_i, \widetilde{k} \nabla u_h \cdot \vec{n}>$$
-where the first term denotes the inner product over the domain volume ($\Omega$)
-and the latter term denotes the outward diffusion flux over the volume's
-boundary $\Gamma$. The `AnisotropicDiffusion` kernel implements the first/volume term.
+The `AnisotropicDiffusion` kernel implements anistropic diffusion term on a domain ($\Omega$) given in its strong form as
 
-For a constant diffusion coefficient, the Jacobian is given by $$(\nabla \phi_j,
-\widetilde{k} \nabla u_h)$$
+\begin{equation}
+\nabla\cdot -\widetilde{k} \nabla u = 0 \in \Omega,
+\end{equation}
+where $\widetilde{k}$ is the anisotropic
+diffusion coefficient. Diffusion is anistropic if the diffusion rate varies with
+direction. The corresponding weak form, using inner-product notation, is given by
+
+\begin{equation}
+R_i(u_h) =
+\underbrace{(\nabla \psi_i, \widetilde{k} \nabla u_h)}_{\textrm{AnisotropicDiffusion}} - \langle\psi_i, \widetilde{k} \nabla u_h \cdot \vec{n}\rangle\quad \forall \phi_i,
+\end{equation}
+where the first term denotes the inner product over the domain volume, the latter term denotes the outward diffusion flux over the volume
+boundary ($\Gamma$), $\psi_i$ are the test functions, and $u_h$ is the finite element solution of $u$ (trail functions). The `AnisotropicDiffusion` kernel implements the first (volume) term.
+
+For a constant diffusion coefficient, the Jacobian is given by
+\begin{equation}
+\frac{\partial R_i(u_h)}{\partial u_j} =
+(\nabla \phi_j, \widetilde{k} \nabla u_h).
+\end{equation}
 
 ## Example Syntax
 
@@ -25,11 +35,11 @@ diffusion problem can be found below:
 !listing test/tests/kernels/anisotropic_diffusion/aniso_diffusion.i
  block=Kernels label=False
 
- Note that the anistropic diffusion coefficient $\widetilde{k}$ is a
- three-dimensional tensor supplied through a string with nine space separated
- real values. The entries correspond to $xx\ xy\ xz\ yx\ yy\ yz\ zx\ zy\ zz$
- respectively. Note that this problem is 2-dimensional so the corresponding $zx\
- zy\ zz$ terms are zeroed.
+!!!note
+    The anistropic diffusion coefficient $\widetilde{k}$ is a
+    three-dimensional tensor supplied through a string with nine space separated
+    real values. The entries correspond to $xx$, $xy$, $xz$, $yx$, $yy$, $yz$, $zx$, $zy$, and $zz$,
+    respectively. Also, this problem is 2-dimensional so the corresponding $zx$, $zy$, and $zz$ terms are zero.
 
 !syntax parameters /Kernels/AnisotropicDiffusion
 
