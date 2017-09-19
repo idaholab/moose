@@ -20,11 +20,8 @@ import unittest
 import subprocess
 import shutil
 import tempfile
-import anytree
 import mooseutils
 import MooseDocs
-from MooseDocs import common
-from MooseDocs import testing
 
 class TestSQA(unittest.TestCase):
     """

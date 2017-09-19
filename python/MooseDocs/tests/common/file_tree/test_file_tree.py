@@ -17,10 +17,9 @@ import os
 import unittest
 import anytree
 import MooseDocs
-from MooseDocs.testing import LogTestCase, MarkdownTestCase
+from MooseDocs.testing import LogTestCase
 from MooseDocs import common
 from MooseDocs.MooseMarkdown import MooseMarkdown
-from MooseDocs.extensions.template import TemplatePostprocessorBase
 
 class TestFileTree(LogTestCase):
     """
