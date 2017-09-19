@@ -38,6 +38,10 @@ class Communicator;
 
 namespace MooseUtils
 {
+
+/// Computes and returns the Levenshtein distance between strings s1 and s2.
+int levenshteinDist(const std::string & s1, const std::string & s2);
+
 /**
  * This function will escape all of the standard C++ escape characters so that they can be printed.
  * The
