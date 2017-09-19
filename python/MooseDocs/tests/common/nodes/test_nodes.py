@@ -16,7 +16,6 @@
 
 import os
 import unittest
-import mooseutils
 
 import MooseDocs
 from MooseDocs.common import nodes

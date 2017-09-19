@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import fileinput
 import sys
 import os
 import re
@@ -103,9 +102,7 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
 
     diagonal_only = options.diagonal_only
 
-    dofs = dofdata['ndof']
     nlvars = [var['name'] for var in dofdata['vars']]
-    numvars = len(nlvars)
 
     # build analysis blocks (for now: one block per variable)
     blocks = []

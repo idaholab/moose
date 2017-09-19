@@ -14,11 +14,9 @@
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
 
-import os
 import unittest
 import mooseutils
 
-import MooseDocs
 from MooseDocs.common import Builder
 from MooseDocs.testing import LogTestCase
 

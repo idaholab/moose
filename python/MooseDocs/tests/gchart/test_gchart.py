@@ -16,7 +16,6 @@
 
 import unittest
 from MooseDocs.testing import MarkdownTestCase
-from MooseDocs.extensions import gchart
 
 class CSVTestCase(MarkdownTestCase):
     EXTENSIONS = ['MooseDocs.extensions.gchart']
@@ -46,7 +45,7 @@ class TestLineChart(CSVTestCase):
     @unittest.skip("gchart is still in devel and this it too strict currently")
     def testCSVError(self):
         md = '!chart line columns=A'
-        html = self.convert(md)
+        self.convert(md)
         self.assertInLogError("The 'csv' setting is required")
 
     def testTitle(self):
@@ -74,7 +73,7 @@ class TestLineChart(CSVTestCase):
     def testColumnNameError(self):
         md = '!chart line columns={} csv={} column_names=TIME, DEPTH, TEMP' \
              .format(self.COLS, self.CSV)
-        html = self.convert(md)
+        self.convert(md)
         self.assertInLogError("The 'column_names' list must be the same length as 'columns'.")
 
 class TestScatterChart(CSVTestCase):
