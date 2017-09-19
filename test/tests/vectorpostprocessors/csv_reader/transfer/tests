@@ -1,0 +1,10 @@
+[Tests]
+  [./csv_reader_in_transfer]
+    # A user was looking for an example of how to use CSVReader with MultiAppUserObjectTransfer,
+    # this provide an example. It is an error because the CSVReader will need to override the
+    # spatialValue method.
+    type = RunException
+    input = master.i
+    expect_err = 'data does not satisfy the Spatial UserObject interface!'
+  [../]
+[]
