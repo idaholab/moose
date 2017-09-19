@@ -237,6 +237,12 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         self.InputFileEditorPlugin.clearRecentlyUsed()
 
+    def onUseTestObjectsChanged(self, use_test_objs):
+        """
+        Pass along whether to use test objects.
+        """
+        self.MeshViewerPlugin.useTestObjects(use_test_objs)
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from ExecutableInfo import ExecutableInfo
