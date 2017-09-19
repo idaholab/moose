@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = single.i
+    exodiff = 'single_out.e'
+    allow_test_objects = true
+  [../]
+[]
