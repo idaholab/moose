@@ -189,7 +189,7 @@ InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
 
   if (_has_master_residuals_saved_in && is_elem)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _master_save_in_residual_variables)
     {
       var->sys().solution().add_vector(_local_re, var->dofIndices());
@@ -197,7 +197,7 @@ InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
   }
   else if (_has_slave_residuals_saved_in && !is_elem)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _slave_save_in_residual_variables)
       var->sys().solution().add_vector(_local_re, var->dofIndicesNeighbor());
   }
@@ -240,7 +240,7 @@ InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_kxx(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _master_save_in_jacobian_variables)
       var->sys().solution().add_vector(diag, var->dofIndices());
   }
@@ -251,7 +251,7 @@ InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_kxx(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _slave_save_in_jacobian_variables)
       var->sys().solution().add_vector(diag, var->dofIndicesNeighbor());
   }
