@@ -6,10 +6,9 @@ The FParserPrinter converts single sympy expressions into a single FParser.
 
 from __future__ import print_function, division
 
-from sympy import S, C
-from sympy.core.compatibility import string_types
 from sympy.printing.codeprinter import CodePrinter
 from sympy.printing.precedence import precedence
+from sympy import ccode
 
 # dictionary mapping sympy function to (argument_conditions, fparser function).
 # Used in FParserPrinter._print_Function(self)

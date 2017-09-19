@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
-import os, sys, re, time
+import os, re, time
 
-import ParseGetPot, Factory
-from MooseObject import MooseObject
-from Warehouse import Warehouse
+import ParseGetPot
 
 """
 Parser object for reading GetPot formatted files

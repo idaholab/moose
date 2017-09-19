@@ -13,11 +13,8 @@
 #                                                                                                  #
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
-#pylint: enable=missing-docstring
 
-import os
 import unittest
-import MooseDocs
 from MooseDocs.common.MooseClassDatabase import MooseClassDatabase
 
 class TestMooseClassDatabase(unittest.TestCase):

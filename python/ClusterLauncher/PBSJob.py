@@ -1,4 +1,3 @@
-from FactorySystem import InputParameters
 from Job import Job
 
 import os, sys, subprocess, shutil, re
