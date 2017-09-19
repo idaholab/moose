@@ -13,7 +13,6 @@
 #                                                                                                  #
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
-#pylint: enable=missing-docstring
 
 import unittest
 from MooseDocs.common.MooseClassDatabase import MooseClassDatabase

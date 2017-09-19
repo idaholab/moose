@@ -43,11 +43,11 @@ class TestNodes(LogTestCase):
         self.assertEqual(b.full_name, '/a/b')
 
         c = nodes.NodeCore('c', parent=b)
-        self.assertEqual(c.findall(), [root,a,b,c])
+        self.assertEqual(c.findall(), [root, a, b, c])
         self.assertEqual(c.findall('/b'), [b])
 
         f = lambda n: 'a' in n.full_name
-        self.assertEqual(c.findall(filter_=f), [a,b,c])
+        self.assertEqual(c.findall(filter_=f), [a, b, c])
 
     def testMarkdownNode(self):
         node = nodes.MarkdownNode('foo', content='bar')
@@ -64,11 +64,11 @@ class TestNodes(LogTestCase):
         self.assertEqual(node.destination, 'foo/index.html')
 
         with self.assertRaises(NotImplementedError) as e:
-            node.filename
+            node.filename #pylint: disable=pointless-statement
         self.assertEqual(str(e.exception), "The 'filename' property must be defined.")
 
         with self.assertRaises(NotImplementedError) as e:
-            node.content
+            node.content #pylint: disable=pointless-statement
         self.assertEqual(str(e.exception), "The 'filename' property must be defined.")
 
         node2 = nodes.MarkdownFileNodeBase('bar', 'the/base/dir', parent=node)
@@ -91,7 +91,7 @@ class TestNodes(LogTestCase):
         self.assertTrue(node.hidden)
 
         with self.assertRaises(TypeError) as e:
-            node.hidden = 'foo'
+            node.hidden = 'foo' #pylint: disable=redefined-variable-type
         self.assertEqual(str(e.exception),
                          'The supplied value must be a boolean.')
 
