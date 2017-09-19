@@ -17,4 +17,10 @@
     input = 'diag_save_in_soln_var_err_test.i'
     expect_err = 'Trying to use solution variable u as a diag_save_in variable in diff'
   [../]
+  [./test_dg]
+    type = 'Exodiff'
+    input = 'dg_save_in_test.i'
+    exodiff = 'dg_save_in_test_out.e'
+    abs_zero = 1e-9
+  [../]
 []
