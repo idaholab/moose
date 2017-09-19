@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import time
-from optparse import OptionParser, OptionValueError
+from optparse import OptionParser
 
 import math
 import vtk

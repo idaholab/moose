@@ -17,10 +17,9 @@ import os
 import unittest
 import anytree
 import MooseDocs
-from MooseDocs.testing import LogTestCase, MarkdownTestCase
+from MooseDocs.testing import LogTestCase
 from MooseDocs import common
 from MooseDocs.MooseMarkdown import MooseMarkdown
-from MooseDocs.extensions.template import TemplatePostprocessorBase
 
 class TestFileTree(LogTestCase):
     """
@@ -34,8 +33,11 @@ class TestFileTree(LogTestCase):
 
     def testBasic(self):
         config = dict()
-        config['framework'] = dict(base='docs/content', include=['docs/content/**/Functions/index.md', 'docs/content/**/Functions/framework/*'])
-        config['moose_test'] = dict(base='test/docs/content', include=['test/docs/content/**/Functions/*'])
+        config['framework'] = dict(base='docs/content',
+                                   include=['docs/content/**/Functions/index.md',
+                                            'docs/content/**/Functions/framework/*'])
+        config['moose_test'] = dict(base='test/docs/content',
+                                    include=['test/docs/content/**/Functions/*'])
         root = common.moose_docs_file_tree(config)
 
         nodes = self.finder(root, 'moose_test/PostprocessorFunction')
@@ -77,8 +79,8 @@ class TestFileTree(LogTestCase):
         nodes = self.finder(root, 'UniformMarker')
         self.assertEqual(len(nodes), 1)
         self.assertIsInstance(nodes[0], common.nodes.MarkdownFilePageNode)
-        gold = os.path.join(MooseDocs.ROOT_DIR,
-                            "docs/content/documentation/systems/Adaptivity/Markers/framework/UniformMarker.md")
+        gold = "docs/content/documentation/systems/Adaptivity/Markers/framework/UniformMarker.md"
+        gold = os.path.join(MooseDocs.ROOT_DIR, gold)
         self.assertEqual(nodes[0].filename, gold)
         gold = "documentation/systems/Adaptivity/Markers/framework/UniformMarker/index.html"
         self.assertEqual(nodes[0].destination, gold)
@@ -133,7 +135,8 @@ class TestFileTree(LogTestCase):
         node1 = MooseMarkdown.find(root, 'utilities/moose_docs/moose_markdown/index.md')
         self.assertIsNotNone(node1)
 
-        node2 = MooseMarkdown.find(root, 'utilities/moose_docs/moose_markdown/extensions/include.md')
+        node2 = MooseMarkdown.find(root,
+                                   'utilities/moose_docs/moose_markdown/extensions/include.md')
         self.assertIsNotNone(node2)
 
     def testRootEnv(self):

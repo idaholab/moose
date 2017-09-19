@@ -7,7 +7,7 @@
 import os
 import sys
 import time
-from optparse import OptionParser, OptionValueError
+from optparse import OptionParser
 
 import vtk
 

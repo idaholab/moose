@@ -15,7 +15,6 @@
 ####################################################################################################
 import os
 import unittest
-import StringIO
 import MooseDocs
 from MooseDocs.testing import LogTestCase
 from MooseDocs.common import moose_docs_import
