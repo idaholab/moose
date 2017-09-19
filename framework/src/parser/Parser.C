@@ -37,6 +37,7 @@
 #include "CommandLine.h"
 #include "JsonSyntaxTree.h"
 #include "SystemInfo.h"
+#include "MooseUtils.h"
 
 #include "libmesh/parallel.h"
 
@@ -134,16 +135,78 @@ private:
   std::map<std::string, hit::Node *> _have;
 };
 
+std::vector<std::string>
+findSimilar(std::string param, std::vector<std::string> options, int dist_cutoff = 3)
+{
+  std::vector<std::string> candidates;
+  if (options.size() == 0)
+    return candidates;
+
+  int mindist = MooseUtils::levenshteinDist(options[0], param);
+  for (auto & opt : options)
+  {
+    int dist = MooseUtils::levenshteinDist(opt, param);
+    if (dist > dist_cutoff || dist > mindist)
+      continue;
+
+    if (dist < mindist)
+    {
+      mindist = dist;
+      candidates.clear();
+    }
+    candidates.push_back(opt);
+  }
+  return candidates;
+}
+
+std::vector<std::string>
+Parser::listValidParams(std::string & section_name)
+{
+  bool dummy;
+  std::string registered_identifier = _syntax.isAssociated(section_name, &dummy);
+  auto iters = _syntax.getActions(registered_identifier);
+
+  std::vector<std::string> paramlist;
+  for (auto it = iters.first; it != iters.second; ++it)
+  {
+    auto params = _action_factory.getValidParams(it->second._action);
+    for (const auto & it : params)
+      paramlist.push_back(it.first);
+  }
+  return paramlist;
+}
+
 class UnusedWalker : public hit::Walker
 {
 public:
-  UnusedWalker(std::string fname, std::set<std::string> used) : _fname(fname), _used(used) {}
+  UnusedWalker(std::string fname, std::set<std::string> used, Parser & p)
+    : _fname(fname), _used(used), _parser(p)
+  {
+  }
 
   void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override
   {
+    // the line() > 0 check allows us to skip nodes that were merged into this tree (i.e. CLI
+    // args) because their unused params are checked+reported independently of the ones in the
+    // main tree.
     if (!_used.count(fullpath) && nodename != "active" && nodename != "inactive" &&
-        isSectionActive(fullpath, n->root()))
-      errors.push_back(errormsg(_fname, n, "unused parameter '", fullpath, "'"));
+        isSectionActive(fullpath, n->root()) && n->line() > 0)
+    {
+      auto section_name = fullpath.substr(0, fullpath.rfind("/"));
+      auto paramlist = _parser.listValidParams(section_name);
+      auto candidates = findSimilar(nodename, paramlist);
+      if (candidates.size() > 0)
+        errors.push_back(errormsg(_fname,
+                                  n,
+                                  "unused parameter '",
+                                  fullpath,
+                                  "'\n",
+                                  "      Did you mean '",
+                                  candidates[0],
+                                  "'?"));
+      else
+        errors.push_back(errormsg(_fname, n, "unused parameter '", fullpath, "'"));
+    }
   }
 
   std::vector<std::string> errors;
@@ -151,6 +214,7 @@ public:
 private:
   std::string _fname;
   std::set<std::string> _used;
+  Parser & _parser;
 };
 
 class BadActiveWalker : public hit::Walker
@@ -511,8 +575,8 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   if (!_root || !_cli_root)
     return;
 
-  UnusedWalker uw(_input_filename, _extracted_vars);
-  UnusedWalker uwcli("CLI_ARG", _extracted_vars);
+  UnusedWalker uw(_input_filename, _extracted_vars, *this);
+  UnusedWalker uwcli("CLI_ARG", _extracted_vars, *this);
 
   _root->walk(&uw);
   _cli_root->walk(&uwcli);
