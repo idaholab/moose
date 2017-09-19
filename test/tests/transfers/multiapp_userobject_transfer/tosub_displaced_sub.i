@@ -46,7 +46,7 @@
     variable = u
   [../]
   [./force]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = axial_force
   [../]

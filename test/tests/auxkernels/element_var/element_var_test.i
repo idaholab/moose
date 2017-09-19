@@ -50,7 +50,7 @@
 
   #Coupling of nonlinear to Aux
   [./force]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn
   [../]

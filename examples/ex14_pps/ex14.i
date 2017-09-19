@@ -42,7 +42,7 @@
 
   # This Kernel can take a function name to use
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = forced
     function = forcing_func
   [../]

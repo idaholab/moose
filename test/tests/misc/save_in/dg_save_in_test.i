@@ -33,7 +33,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = 1
     save_in = 'tot_resid'

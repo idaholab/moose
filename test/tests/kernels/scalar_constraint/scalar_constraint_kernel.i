@@ -63,7 +63,7 @@
   [../]
 
   [./ffnk]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn
   [../]
