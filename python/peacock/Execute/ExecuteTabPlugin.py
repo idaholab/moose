@@ -70,6 +70,8 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
     def onNeedCommand(self):
         cmd, args = self.ExecuteOptionsPlugin.buildCommandWithNoInputFile()
         csv = self.ExecuteOptionsPlugin.csv_checkbox.isChecked()
+        if self.ExecuteOptionsPlugin.test_checkbox.isChecked():
+            args.append("--allow-test-objects")
         self.ExecuteRunnerPlugin.setCommand(cmd, args, csv)
 
     def onNumTimeStepsChanged(self, num_steps):

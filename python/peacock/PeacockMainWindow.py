@@ -32,6 +32,7 @@ class PeacockMainWindow(BasePeacockMainWindow):
         self.tab_plugin.ExecuteTabPlugin.needInputFile.connect(self.tab_plugin.InputFileEditorWithMesh.InputFileEditorPlugin.writeInputFile)
         self.tab_plugin.InputFileEditorWithMesh.inputFileChanged.connect(self._inputFileChanged)
         self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.workingDirChanged.connect(self.tab_plugin.InputFileEditorWithMesh.onWorkingDirChanged)
+        self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.useTestObjectsChanged.connect(self.tab_plugin.InputFileEditorWithMesh.onUseTestObjectsChanged)
         self.setPythonVariable('main_window', self)
         self.setPythonVariable('tabs', self.tab_plugin)
         self.setup()
