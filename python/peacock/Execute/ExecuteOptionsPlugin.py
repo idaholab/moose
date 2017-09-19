@@ -19,6 +19,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
     executableChanged = pyqtSignal(str)
     executableInfoChanged = pyqtSignal(ExecutableInfo)
     workingDirChanged = pyqtSignal(str)
+    useTestObjectsChanged = pyqtSignal(bool)
 
     def __init__(self, **kwds):
         super(ExecuteOptionsPlugin, self).__init__(**kwds)
@@ -191,6 +192,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         """
         Reload the ExecutableInfo based on whether we are allowing test objects or not.
         """
+        self.useTestObjectsChanged.emit(self.test_checkbox.isChecked())
         self.setExecutablePath(self.exe_line.text())
 
     def _workingDirChanged(self):
