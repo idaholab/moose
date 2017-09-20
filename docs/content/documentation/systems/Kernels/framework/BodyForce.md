@@ -22,27 +22,23 @@ and $u_h$ are the trial functions for the unknown ($u$).
 The Jacobian term for this kernel is zero: $\frac{\partial R_i(u_h)}{\partial u_j} = 0$, since
 it is assumed that $f$ **is not** a function of the unknown $u$.
 
-The force is constructed through a user supplied constant,
-[function](systems/Functions/index.md), and/or
-[postprocessor](systems/Postprocessors/index.md). The constant, supplied through
-the parameter `value`, may also be controlled over the course of a transient
-simulation with a [`Controls`](systems/Controls/index.md) block.
+The force is constructed through a user supplied constant $c$,
+[function](systems/Functions/index.md) value evaluated at the current time and
+quadrature point $f$, and/or [postprocessor](systems/Postprocessors/index.md)
+value $p$. The constant $c$, supplied through the parameter `value`, may also be
+controlled over the course of a transient simulation with a
+[`Controls`](systems/Controls/index.md) block.  $c$, $f$, $p$ are supplied
+through the input parameters `value`, `function`, and `postprocessor`
+respectively. Not supplying $c$, $f$, or $p$ through its corresponding
+parameter is equivalent to setting its value to unity.
 
 ## Example Syntax
 
 The case below demonstrates the use of `BodyForce` where the force term is
-supplied through a postprocessor:
+supplied solely through the constant value $c$ (denoted by `value`):
 
-!listing test/tests/kernels/2d_diffusion/2d_diffusion_bodyforce_test.i
+!listing test/tests/restart/restart_diffusion/restart_diffusion_transient_from_steady.i
  block=Kernels label=false
-
- Since `value` and `function` were not supplied, they default to 1 and 1. The
- corresponding `Postprocessor` block is
-
-!listing test/tests/kernels/2d_diffusion/2d_diffusion_bodyforce_test.i block=Postprocessors label=false
-
-!!!note
-    Test the postprocessor value is actually calculated from a function.
 
 !syntax parameters /Kernels/BodyForce
 
