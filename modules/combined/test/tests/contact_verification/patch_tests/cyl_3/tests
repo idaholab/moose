@@ -156,10 +156,9 @@
     max_parallel = 1
     superlu = true
 
-    # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
-    dof_id_bytes = 4
     # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    skip = 'Reevaluate under PETSc 3.7.4. and PETSc 3.7.5 #8200'
+    compiler = 'GCC CLANG'
+    petsc_version = '>=3.7.6'
     prereq = 'mu_0_2_kin'
   [../]
   [./mu_0_2_pen_sm]

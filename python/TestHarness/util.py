@@ -61,6 +61,9 @@ LIBMESH_OPTIONS = {
   'petsc_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_MINOR\s+(\d+)',
                      'default'   : '1'
                    },
+  'petsc_subminor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR\s+(\d+)',
+                     'default'   : '1'
+                   },
   'petsc_version_release' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_RELEASE\s+(\d+)',
                      'default'   : 'TRUE',
                      'options'   : {'TRUE'  : '1', 'FALSE' : '0'}
@@ -239,11 +242,12 @@ def getCompilers(libmesh_dir):
 def getPetscVersion(libmesh_dir):
     major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
     minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
+    subminor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_subminor')
     if len(major_version) != 1 or len(minor_version) != 1:
         print "Error determining PETSC version"
         exit(1)
 
-    return major_version.pop() + '.' + minor_version.pop()
+    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
 
 def getSlepcVersion(libmesh_dir):
     major_version = getLibMeshConfigOption(libmesh_dir, 'slepc_major')
@@ -270,13 +274,13 @@ def checkPetscVersion(checks, test):
             else:
                 return (False, '!=', version)
         # Logical match
-        if logic == '>' and checks['petsc_version'][0:3] > version[0:3]:
+        if logic == '>' and checks['petsc_version'][0:5] > version[0:5]:
             return (True, None, version)
-        elif logic == '>=' and checks['petsc_version'][0:3] >= version[0:3]:
+        elif logic == '>=' and checks['petsc_version'][0:5] >= version[0:5]:
             return (True, None, version)
-        elif logic == '<' and checks['petsc_version'][0:3] < version[0:3]:
+        elif logic == '<' and checks['petsc_version'][0:5] < version[0:5]:
             return (True, None, version)
-        elif logic == '<=' and checks['petsc_version'][0:3] <= version[0:3]:
+        elif logic == '<=' and checks['petsc_version'][0:5] <= version[0:5]:
             return (True, None, version)
     return (False, logic, version)
 
