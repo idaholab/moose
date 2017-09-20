@@ -13,6 +13,7 @@
     exodiff = 'multismoothcircleIC_normal_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
+    max_parallel = 1 # See #9886
   [../]
 
   [./lattice_bounds]
@@ -28,6 +29,7 @@
     exodiff = 'latticesmoothcircleIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
+    max_parallel = 1 # See #9886
   [../]
 
   [./lattice_normal_test]
@@ -36,6 +38,7 @@
     exodiff = 'latticesmoothcircleIC_normal_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
+    max_parallel = 1 # See #9886
   [../]
 
   [./lattice_small_invalue_test]
