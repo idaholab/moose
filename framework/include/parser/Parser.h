@@ -173,6 +173,8 @@ public:
 
   void errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused);
 
+  std::vector<std::string> listValidParams(std::string & section_name);
+
 protected:
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
