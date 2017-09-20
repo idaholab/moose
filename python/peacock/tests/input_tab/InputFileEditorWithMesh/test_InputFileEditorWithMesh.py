@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QApplication
-from PyQt5 import QtCore
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 import argparse, os
@@ -232,33 +231,23 @@ class Tests(BaseTests):
         bh = w.BlockHighlighterPlugin
         Testing.set_window_size(w.vtkwin)
 
-        bh.BlockSelector.setAllChecked(True)
+        bh.BlockSelector.Options.setCurrentText("0")
         w.vtkwin.onWrite(self.highlight_block)
         self.assertFalse(Testing.gold_diff(self.highlight_block))
 
-        bh.BlockSelector.setAllChecked(False)
+        bh.BlockSelector.Options.setCurrentText("")
 
-        bh.SidesetSelector.setAllChecked(True)
-        w.vtkwin.onWrite(self.highlight_all)
-        self.assertFalse(Testing.gold_diff(self.highlight_all))
-
-        bh.SidesetSelector.setAllChecked(False)
-        states = bh.SidesetSelector.checkState()
-        states[0] = QtCore.Qt.Checked
-        bh.SidesetSelector.setCheckState(states)
+        bh.SidesetSelector.Options.setCurrentText("right")
         w.vtkwin.onWrite(self.highlight_right)
         self.assertFalse(Testing.gold_diff(self.highlight_right))
 
-        bh.SidesetSelector.setAllChecked(False)
-        states = bh.SidesetSelector.checkState()
-        states[2] = QtCore.Qt.Checked
-        bh.SidesetSelector.setCheckState(states)
+        bh.SidesetSelector.Options.setCurrentText("left")
         w.vtkwin.onWrite(self.highlight_left)
         self.assertFalse(Testing.gold_diff(self.highlight_left))
 
-        bh.SidesetSelector.setAllChecked(False)
+        bh.SidesetSelector.Options.setCurrentText("")
 
-        bh.NodesetSelector.setAllChecked(True)
+        bh.NodesetSelector.Options.setCurrentText("left")
         w.vtkwin.onWrite(self.highlight_nodes)
         self.assertFalse(Testing.gold_diff(self.highlight_nodes))
 
