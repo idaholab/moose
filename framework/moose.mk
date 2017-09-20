@@ -28,6 +28,16 @@ hit_LIB       := $(hit_DIR)/libhit-$(METHOD).la
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 
 #
+# hit python bindings
+#
+pyhit_srcfiles  := $(hit_DIR)/chit.pxd $(hit_DIR)/hit.pyx $(hit_DIR)/parse.cc $(hit_DIR)/lex.cc
+pyhit_LIB       := $(hit_DIR)/hit.so
+
+$(pyhit_LIB): $(pyhit_srcfiles)
+	@echo "Linking Library "$@"..."
+	@bash -c "(cd $(hit_DIR) && python setup.py build_ext -i)"
+
+#
 # gtest
 #
 gtest_DIR       := $(FRAMEWORK_DIR)/contrib/gtest
@@ -88,7 +98,7 @@ endif
 libmesh_submodule_status:
 	@if [ x$(libmesh_message) != "x" ]; then printf $(libmesh_message); fi
 
-moose: $(moose_LIB)
+moose: $(moose_LIB) $(pyhit_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
