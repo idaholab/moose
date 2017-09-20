@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'nodal_flood_periodic.i'
     exodiff = 'out.e out.e-s005'
+    allow_test_objects = true
   [../]
 []
