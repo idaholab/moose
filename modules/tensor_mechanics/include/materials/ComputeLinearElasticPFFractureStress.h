@@ -22,8 +22,15 @@ public:
 
 protected:
   virtual void computeQpStress();
+  virtual void initQpStatefulProperties();
 
   const VariableValue & _c;
+
+  /// Critical energy release rate for fracture
+  const MaterialProperty<Real> & _gc_prop;
+
+  /// Characteristic length, controls damage zone thickness
+  const MaterialProperty<Real> & _l;
   /// Small number to avoid non-positive definiteness at or near complete damage
   Real _kdamage;
 
@@ -32,6 +39,9 @@ protected:
   MaterialProperty<Real> & _d2Fdc2;
   MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
   MaterialProperty<RankTwoTensor> & _dstress_dc;
+
+  MaterialProperty<Real> & _H0_pos;
+  MaterialProperty<Real> & _H0_pos_old;  //History variable from previous timestep
 };
 
 #endif // COMPUTELINEARELASTICPFFRACTURESTRESS_H
