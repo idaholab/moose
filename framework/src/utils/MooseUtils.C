@@ -36,6 +36,8 @@
 namespace MooseUtils
 {
 
+// this implementation is copied from
+// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
 int
 levenshteinDist(const std::string & s1, const std::string & s2)
 {
