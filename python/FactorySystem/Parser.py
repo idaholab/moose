@@ -1,8 +1,37 @@
 #!/usr/bin/python
 
-import os, re, time
+import os, re, time, sys
 
-import ParseGetPot
+# add hit parser python binding directory into path for import
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../framework/contrib/hit'))
+import hit
+
+class DupWalker(object):
+    def __init__(self, fname):
+        self.have = {}
+        self.dups = {}
+        self.errors = []
+        self._fname = fname
+
+    def _duperr(self, node):
+        if node.type() == hit.NodeType.Section:
+            ntype = 'section'
+        elif node.type() == hit.NodeType.Field:
+            ntype = 'parameter'
+        self.errors.append('{}:{}: duplicate {} "{}"'.format(self._fname, node.line(), ntype, node.fullpath()))
+
+    def walk(self, fullpath, path, node):
+        if node.type() != hit.NodeType.Field and node.type() != hit.NodeType.Section:
+            return
+
+        if fullpath in self.have:
+            if fullpath not in self.dups:
+                self._duperr(self.have[fullpath])
+                self.dups[fullpath] = True
+            self._duperr(node)
+        else:
+            self.have[fullpath] = node
+
 
 """
 Parser object for reading GetPot formatted files
@@ -13,7 +42,6 @@ class Parser:
         self.warehouse = warehouse
         self.params_parsed = set()
         self.params_ignored = set()
-        self.root = None
         self._check_for_type = check_for_type
 
     """
@@ -38,13 +66,23 @@ class Parser:
     def parse(self, filename):
         error_code = 0x00
 
+        with open(filename, 'r') as f:
+            data = f.read()
+
         try:
-            self.root = ParseGetPot.readInputFile(filename)
-        except ParseGetPot.ParseException, ex:
-            print "Parse Error in " + filename + ": " + ex.msg
+            root = hit.parse(os.path.abspath(filename), data)
+        except Exception as err:
+            print(err)
             return 0x01 # Parse Error
 
-        error_code = self._parseNode(filename, self.root)
+        w = DupWalker(os.path.abspath(filename))
+        root.walk(w, hit.NodeType.All)
+        for err in w.errors:
+            print err
+            error_code = 1
+
+        error_code = self._parseNode(filename, root)
+        del root
 
         if len(self.params_ignored):
             print 'Warning detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
@@ -54,18 +92,22 @@ class Parser:
 
     def extractParams(self, filename, params, getpot_node):
         error_code = 0x00
-        full_name = getpot_node.fullName()
+        full_name = getpot_node.fullpath()
 
         # Populate all of the parameters of this test node
         # using the GetPotParser.  We'll loop over the parsed node
         # so that we can keep track of ignored parameters as well
         local_parsed = set()
-        for key, value in getpot_node.params.iteritems():
-            self.params_parsed.add(full_name + '/' + key)
+        for child in getpot_node.children(node_type=hit.NodeType.Field):
+            key = child.path()
+            value = child.raw()
+
+            self.params_parsed.add(child.fullpath())
             local_parsed.add(key)
             if key in params:
                 if params.type(key) == list:
-                    params[key] = value.split(' ')
+                    value = value.replace('\n', ' ')
+                    params[key] = re.split('\s+', value)
                 else:
                     if re.match('".*"', value):   # Strip quotes
                         params[key] = value[1:-1]
@@ -119,8 +161,8 @@ class Parser:
     def _parseNode(self, filename, node):
         error_code = 0x00
 
-        if 'type' in node.params:
-            moose_type = node.params['type']
+        if node.find('type'):
+            moose_type = node.param('type')
 
             # Get the valid Params for this type
             params = self.factory.validParams(moose_type)
@@ -132,11 +174,10 @@ class Parser:
             params.addPrivateParam('_factory', self.factory)
             params.addPrivateParam('_warehouse', self.warehouse)
             params.addPrivateParam('_parser', self)
-            params.addPrivateParam('_root', self.root)
 
             # Build the object
             try:
-                moose_object = self.factory.create(moose_type, node.name, params)
+                moose_object = self.factory.create(moose_type, node.path(), params)
 
                 # Put it in the warehouse
                 self.warehouse.addObject(moose_object)
@@ -151,8 +192,8 @@ class Parser:
             error_code = error_code | 0x20
 
         # Loop over the section names and parse them
-        for child in node.children_list:
-            error_code = error_code | self._parseNode(filename, node.children[child])
+        for child in node.children(node_type=hit.NodeType.Section):
+            error_code = error_code | self._parseNode(filename, child)
 
         return error_code
 
@@ -160,7 +201,5 @@ class Parser:
     # looks like a valid subblock. In the Testing system, a valid subblock
     # has a "type" and no children blocks.
     def _looksLikeValidSubBlock(self, node):
-        if len(node.params.keys()) and len(node.children_list) == 0:
-            return True
-        else:
-            return False
+        return len(node.children(node_type=hit.NodeType.Field)) \
+            and len(node.children(node_type=hit.NodeType.Section)) == 0
