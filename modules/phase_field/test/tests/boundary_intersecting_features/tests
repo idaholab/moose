@@ -5,6 +5,5 @@
     csvdiff = boundary_intersecting_features_out_grain_volumes_0000.csv
     # This test requires VTK because it uses the ImageFunction class
     vtk = true
-    max_parallel = 1 # See #9886
   [../]
 []

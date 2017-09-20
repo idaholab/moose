@@ -18,8 +18,6 @@
     type = 'Exodiff'
     input = 'simple.i'
     exodiff = 'simple_out.e'
-    input = 'simple_test.i'
-    exodiff = 'simple_test_out.e'
     #max_parallel = 4                     # Only 4 elements
     max_parallel = 1 # See #9886
   [../]
