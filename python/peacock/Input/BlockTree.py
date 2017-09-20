@@ -213,7 +213,7 @@ class BlockTree(QTreeWidget, MooseWidget):
             return self.root_item
         return parent
 
-    def addBlock(self, block):
+    def addBlock(self, block, select=False):
         """
         Add a new block to the tree
         Input:
@@ -223,7 +223,9 @@ class BlockTree(QTreeWidget, MooseWidget):
         if not item:
             pitem = self._path_item_map.get(block.parent.path)
             if pitem:
-                self._newItem(pitem, block)
+                new_item = self._newItem(pitem, block)
+                if select:
+                    self.setCurrentItem(new_item)
 
     def _newItem(self, parent_item, block):
         """
@@ -280,10 +282,11 @@ class BlockTree(QTreeWidget, MooseWidget):
         self.blockSignals(True)
         self.expandItem(item)
         new_block.included = True
-        self.addBlock(new_block)
+        self.addBlock(new_block, True)
         self.blockSignals(False)
 
         self.changed.emit(new_block)
+        self.blockDoubleClicked.emit(new_block) # start editing right away
 
     def _treeContextMenu(self, point):
         """
