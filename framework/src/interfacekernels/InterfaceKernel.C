@@ -39,14 +39,14 @@ validParams<InterfaceKernel>()
       "contributions to. Everything about that variable must match everything "
       "about this variable (the type, what blocks it's on, etc.)");
 
-  std::vector<MooseEnum> save_in_var_side(1, MooseEnum("m s"));
-  params.addParam<std::vector<MooseEnum>>(
+  MultiMooseEnum save_in_var_side("m s");
+  params.addParam<MultiMooseEnum>(
       "save_in_var_side",
       save_in_var_side,
       "This parameter must exist if save_in variables are specified and must have the same length "
       "as save_in. This vector specifies whether the corresponding aux_var should save-in "
       "residual contributions from the master ('m') or slave side ('s').");
-  params.addParam<std::vector<MooseEnum>>(
+  params.addParam<MultiMooseEnum>(
       "diag_save_in_var_side",
       save_in_var_side,
       "This parameter must exist if diag_save_in variables are specified and must have the same "
@@ -61,9 +61,9 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
-    _save_in_var_side(params.get<std::vector<MooseEnum>>("save_in_var_side")),
+    _save_in_var_side(params.get<MultiMooseEnum>("save_in_var_side")),
     _save_in_strings(params.get<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in_var_side(params.get<std::vector<MooseEnum>>("diag_save_in_var_side")),
+    _diag_save_in_var_side(params.get<MultiMooseEnum>("diag_save_in_var_side")),
     _diag_save_in_strings(params.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
   if (!params.isParamValid("boundary"))
@@ -235,9 +235,9 @@ InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 
   if (_has_master_jacobians_saved_in && type == Moose::ElementElement)
   {
-    unsigned int rows = _local_kxx.m();
+    auto rows = _local_kxx.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
+    for (decltype(rows) i = 0; i < rows; i++)
       diag(i) = _local_kxx(i, i);
 
     Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
@@ -246,9 +246,9 @@ InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
   }
   else if (_has_slave_jacobians_saved_in && type == Moose::NeighborNeighbor)
   {
-    unsigned int rows = _local_kxx.m();
+    auto rows = _local_kxx.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
+    for (decltype(rows) i = 0; i < rows; i++)
       diag(i) = _local_kxx(i, i);
 
     Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);

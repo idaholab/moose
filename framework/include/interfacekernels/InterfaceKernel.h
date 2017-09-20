@@ -54,8 +54,10 @@ protected:
   const VariableValue & _neighbor_value;
   const VariableGradient & _grad_neighbor_value;
 
-  /// Vector of MooseEnums specifying whether residual save-in aux variables correspond to master or slave side
-  std::vector<MooseEnum> _save_in_var_side;
+  /** MultiMooseEnum specifying whether residual save-in
+   * aux variables correspond to master or slave side
+   */
+  MultiMooseEnum _save_in_var_side;
 
   /** The names of the aux variables that will be used to save-in residuals
    * (includes both master and slave variable names)
@@ -74,8 +76,10 @@ protected:
   /// The aux variables to save the slave contributions to
   std::vector<MooseVariable *> _slave_save_in_residual_variables;
 
-  /// Vector of MooseEnums specifying whether jacobian save-in aux variables correspond to master or slave side
-  std::vector<MooseEnum> _diag_save_in_var_side;
+  /** MultiMooseEnum specifying whether jacobian save-in
+   * aux variables correspond to master or slave side
+   */
+  MultiMooseEnum _diag_save_in_var_side;
 
   /** The names of the aux variables that will be used to save-in jacobians
    * (includes both master and slave variable names)
