@@ -222,7 +222,7 @@ public:
   // number)
   static const BoundaryID InternalBndId;
 
-private:
+protected:
   static Threads::spin_mutex _resid_vars_mutex;
   static Threads::spin_mutex _jacoby_vars_mutex;
 };

@@ -53,6 +53,50 @@ protected:
 
   const VariableValue & _neighbor_value;
   const VariableGradient & _grad_neighbor_value;
+
+  /** MultiMooseEnum specifying whether residual save-in
+   * aux variables correspond to master or slave side
+   */
+  MultiMooseEnum _save_in_var_side;
+
+  /** The names of the aux variables that will be used to save-in residuals
+   * (includes both master and slave variable names)
+   */
+  std::vector<AuxVariableName> _save_in_strings;
+
+  /// Whether there are master residual aux variables
+  bool _has_master_residuals_saved_in;
+
+  /// The aux variables to save the master residual contributions to
+  std::vector<MooseVariable *> _master_save_in_residual_variables;
+
+  /// Whether there are slave residual aux variables
+  bool _has_slave_residuals_saved_in;
+
+  /// The aux variables to save the slave contributions to
+  std::vector<MooseVariable *> _slave_save_in_residual_variables;
+
+  /** MultiMooseEnum specifying whether jacobian save-in
+   * aux variables correspond to master or slave side
+   */
+  MultiMooseEnum _diag_save_in_var_side;
+
+  /** The names of the aux variables that will be used to save-in jacobians
+   * (includes both master and slave variable names)
+   */
+  std::vector<AuxVariableName> _diag_save_in_strings;
+
+  /// Whether there are master jacobian aux variables
+  bool _has_master_jacobians_saved_in;
+
+  /// The aux variables to save the diagonal Jacobian contributions of the master variables to
+  std::vector<MooseVariable *> _master_save_in_jacobian_variables;
+
+  /// Whether there are slave jacobian aux variables
+  bool _has_slave_jacobians_saved_in;
+
+  /// The aux variables to save the diagonal Jacobian contributions of the slave variables to
+  std::vector<MooseVariable *> _slave_save_in_jacobian_variables;
 };
 
 #endif
