@@ -4,6 +4,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "GaussContForcing.h"
+
 template <>
 InputParameters
 validParams<PhaseFieldTestApp>()
@@ -50,8 +52,9 @@ PhaseFieldTestApp__registerObjects(Factory & factory)
   PhaseFieldTestApp::registerObjects(factory);
 }
 void
-PhaseFieldTestApp::registerObjects(Factory & /*factory*/)
+PhaseFieldTestApp::registerObjects(Factory & factory)
 {
+  registerKernel(GaussContForcing);
 }
 
 // External entry point for dynamic syntax association

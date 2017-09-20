@@ -3,24 +3,27 @@
     type = 'Exodiff'
     input = 'flood_aux.i'
     exodiff = 'out.e'
+    allow_test_objects = true
   [../]
 
   [./test_elemental]
     type = 'Exodiff'
     input = 'flood_aux_elemental.i'
     exodiff = 'flood_aux_elemental_out.e'
+    allow_test_objects = true
   [../]
 
-  [./simple_test]
+  [./simple]
     type = 'Exodiff'
-    input = 'simple_test.i'
-    exodiff = 'simple_test_out.e'
+    input = 'simple.i'
+    exodiff = 'simple_out.e'
     max_parallel = 4                     # Only 4 elements
   [../]
 
-  [./two_var_test]
+  [./two_var]
     type = 'Exodiff'
     input = 'nodal_flood_periodic_2var.i'
     exodiff = 'out_2var.e'
+    allow_test_objects = true
   [../]
 []
