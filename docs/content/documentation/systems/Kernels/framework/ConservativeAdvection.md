@@ -5,9 +5,11 @@
 The `ConservativeAdvection` kernel implements an advection term given for the domain ($\Omega$) define as
 
 \begin{equation}
-\nabla \cdot \vec{v} u = 0 \in \Omega,
+\underbrace{\nabla \cdot \vec{v} u}_{\textrm{ConservativeAdvection}} + \sum_{i=1}^n \beta_i = 0 \in \Omega,
 \end{equation}
-where $v$ is the advecting velocity. `ConservativeAdvection` does not assume
+
+where $v$ is the advecting velocity and the second term on the left hand side
+represents the strong forms of other kernels. `ConservativeAdvection` does not assume
 that the velocity is divergence free and instead applies $\nabla$ to the test
 function $\psi_i$ in the weak variational form after integrating by parts,
 as in
@@ -17,7 +19,8 @@ R_i(u_h) = \underbrace{-(\nabla \psi_i, \vec{v} u)}_{\textrm{ConservativeAdvecti
 \cdot \vec{n}\rangle \quad \forall \psi_i,
 \end{equation}
 
-where $\psi_i$ are the test functions, $u_h$ is the finite element solution of $u$ (trail functions). The first term is the volumetric term and the second term
+where $\psi_i$ are the test functions and $u_h \in \mathcal{S}^h$ is the finite
+element solution of the weak formulation. The first term is the volumetric term and the second term
 is a surface term describing the advective flux out of the
 volume. `ConservativeAdvection` corresponds to the former volumetric term.
 

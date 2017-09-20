@@ -16,15 +16,15 @@ solutions in the time derivative term. Mathematically, lumping looks like
 this. We start with our governing equation $$u_t = Au$$ where A is a
 differential operator. We write our finite element solution as
 
-$$ u(t, x) = \Sum u_j(t) \phi_j(x) $$
+$$ u(t, x) = \sum u_j(t) \phi_j(x) $$
 
 Substituting into our governing equation, we have:
 
-$$ \Sum u_j^'\phi_j = Sum u_jA\phi_j $$
+$$ \sum u_j'\phi_j = Sum u_jA\phi_j $$
 
 Now we apply our test functions $\psi_i$ and integrate over the volume:
 
-$$ \Sum u_j^' (\psi_i\phi_j) = \Sum u_j (\psi_i, Au_j) $$
+$$ \sum u_j' (\psi_i\phi_j) = \sum u_j (\psi_i, Au_j) $$
 
 After applying all of our test functions, we have the matrix system
 

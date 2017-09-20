@@ -6,20 +6,25 @@ The `CoupledTimeDerivative` kernel is very similar to the
 [`TimeDerivative`](systems/Kernels/framework/TimeDerivative.md) kernel with the
 exception that the time derivative operator is applied to a coupled variable $v$ instead
 of the variable $u$ to whom's residual the `CoupledTimeDerivative` kernel
-contributes. Consequently, the strong and weak forms for the domain $\Omega$ become
+contributes. Consequently, the strong form on the the domain $\Omega$ is
 
 \begin{equation}
-\frac{\partial v}{\partial t} = 0 \in \Omega
+\underbrace{\frac{\partial v}{\partial t}}_{\textrm{CoupledTimeDerivative}} +
+\sum_{i=1}^n \beta_i = 0 \in \Omega
+\label{strong}
 \end{equation}
 
-and
+where the second term on the left hand side corresponds to the
+strong forms of other kernels. The `CoupledTimeDerivative` weak form is then
 
 \begin{equation}
-R_i(u_h) = \bigg(\psi_i, \frac{\partial v_h}{\partial t}\bigg) \quad \forall \psi_i,
+R_i(u_h) = \bigg(\psi_i, \frac{\partial v_h}{\partial t}\bigg) \quad \forall
+\psi_i,
+\label{weak}
 \end{equation}
 
-where $\psi_i$ are the test functions and $u_h$ is the finite element solution of $u$ (trail functions).
-
+where the $\psi_i$ are test functions and $u_h \in \mathcal{S}^h$ is the finite
+element solution of the weak formulation.
 
 The Jacobian contribution is equal to
 \begin{equation}

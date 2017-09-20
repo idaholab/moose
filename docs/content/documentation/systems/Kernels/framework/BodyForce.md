@@ -7,17 +7,19 @@ mechanics or a source term in species/mass transport. The strong form, given a
 domain $\Omega$ is defined as
 
 \begin{equation}
--f = 0 \in \Omega
+\underbrace{-f}_{\textrm{BodyForce}} + \sum_{i=1}^n \beta_i = 0 \in \Omega
 \end{equation}
 
-The weak form, in inner-product notation, is defined as
+where $f$ is the source term (negative if a sink) and the second term on the
+left hand side represents the strong forms of other kernels. The `BodyForce`
+weak form, in inner-product notation, is defined as
 
 \begin{equation}
 R_i(u_h) = (\psi_i, -f) \quad \forall \psi_i,
 \end{equation}
 
-where $f$ is the magnitude of the force or source and $\psi_i$ are the test functions, and
-and $u_h$ are the trial functions for the unknown ($u$).
+where the $\psi_i$ are the test functions, and $u_h$ are the trial solutions in
+the finite dimensional space $\mathcal{S}^h$ for the unknown ($u$).
 
 The Jacobian term for this kernel is zero: $\frac{\partial R_i(u_h)}{\partial u_j} = 0$, since
 it is assumed that $f$ **is not** a function of the unknown $u$.

@@ -5,10 +5,12 @@
 The `TimeDerivative` kernel implements a simple time derivative for the domain $\Omega$ given by
 
 \begin{equation}
-\frac{\partial u}{\partial t} = 0 \in \Omega.
+\underbrace{\frac{\partial u}{\partial t}}_{\textrm{TimeDerivative}} +
+\sum_{i=1}^n \beta_i = 0 \in \Omega.
 \end{equation}
 
-The corresponding weak form using inner-product notation is
+where the second term on the left hand side corresponds to the strong forms of
+other kernels. The corresponding `TimeDerivative` weak form using inner-product notation is
 
 \begin{equation}
 R_i(u_h) = (\psi_i, \frac{\partial u_h}{\partial t}) \quad \forall \psi_i,

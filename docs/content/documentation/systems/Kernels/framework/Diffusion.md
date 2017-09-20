@@ -13,7 +13,8 @@ The weak form of this equation, in inner-product notation, is given by:
 R_i(u_h) = (\nabla \psi_i, \nabla u_h) = 0 \quad \forall  \psi_i,
 \end{equation}
 
-where $\psi_i$ are the test functions and $u_h$ is the finite element solution of $u$ (trail functions).
+where $\psi_i$ are the test functions and $u_h \in \mathcal{S}^h$ is the finite
+element solution of the weak formulation.
 
 The Jacobian is defined as:
 

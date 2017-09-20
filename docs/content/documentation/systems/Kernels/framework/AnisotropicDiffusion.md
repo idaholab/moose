@@ -11,12 +11,14 @@ where $\widetilde{k}$ is the anisotropic
 diffusion coefficient. Diffusion is anistropic if the diffusion rate varies with
 direction. The corresponding weak form, using inner-product notation, is given by
 
-\begin{equation}
-R_i(u_h) =
-\underbrace{(\nabla \psi_i, \widetilde{k} \nabla u_h)}_{\textrm{AnisotropicDiffusion}} - \langle\psi_i, \widetilde{k} \nabla u_h \cdot \vec{n}\rangle\quad \forall \phi_i,
-\end{equation}
-where the first term denotes the inner product over the domain volume, the latter term denotes the outward diffusion flux over the volume
-boundary ($\Gamma$), $\psi_i$ are the test functions, and $u_h$ is the finite element solution of $u$ (trail functions). The `AnisotropicDiffusion` kernel implements the first (volume) term.
+\begin{equation} R_i(u_h) = \underbrace{(\nabla \psi_i, \widetilde{k} \nabla
+u_h)}_{\textrm{AnisotropicDiffusion}} - \langle\psi_i, \widetilde{k} \nabla u_h
+\cdot \vec{n}\rangle\quad \forall \phi_i, \end{equation} where the first term
+denotes the inner product over the domain volume, the latter term denotes the
+outward diffusion flux over the volume boundary ($\Gamma$), $\psi_i$ are the
+test functions, and $u_h \in \mathcal{S}^h$ is the finite element solution of
+the weak formulation. The `AnisotropicDiffusion` kernel implements the first
+(volume) term.
 
 For a constant diffusion coefficient, the Jacobian is given by
 \begin{equation}
