@@ -31,7 +31,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_kin_sm'
-    skip = 'Reevaluate under PETSc 3.7.4. #8200.'
+    petsc_version = '>=3.7.6'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
