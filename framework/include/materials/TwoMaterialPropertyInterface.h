@@ -37,10 +37,17 @@ public:
    * This class has two constructors:
    *   (1) not restricted to boundaries or blocks
    *   (2) restricted to only blocks
+   *   (3) restricted to only boundaries
+   *   (4) restricted to both blocks and boundaries
    */
   TwoMaterialPropertyInterface(const MooseObject * moose_object);
   TwoMaterialPropertyInterface(const MooseObject * moose_object,
                                const std::set<SubdomainID> & block_ids);
+  TwoMaterialPropertyInterface(const MooseObject * moose_object,
+                               const std::set<BoundaryID> & boundary_ids);
+  TwoMaterialPropertyInterface(const MooseObject * moose_object,
+                               const std::set<SubdomainID> & block_ids,
+                               const std::set<BoundaryID> & boundary_ids);
   ///@}
 
   /**
@@ -71,7 +78,19 @@ TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & na
   if (default_property)
     return *default_property;
   else
+  {
+    checkExecutionStage();
+    if (_boundary_restricted)
+    {
+      // FIXME: we will skip the material coverage check when this object is boundary restrictable
+      //       because we need to have the list of neighboring blocks.
+    }
+    else
+      checkMaterialProperty(prop_name);
+    markMatPropRequested(prop_name);
+    _material_property_dependencies.insert(_neighbor_material_data->getPropertyId(prop_name));
     return _neighbor_material_data->getProperty<T>(prop_name);
+  }
 }
 
 template <typename T>
@@ -86,7 +105,11 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string &
   if (default_property)
     return *default_property;
   else
+  {
+    markMatPropRequested(prop_name);
+    _material_property_dependencies.insert(_neighbor_material_data->getPropertyId(prop_name));
     return _neighbor_material_data->getPropertyOld<T>(prop_name);
+  }
 }
 
 template <typename T>
@@ -101,7 +124,11 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string
   if (default_property)
     return *default_property;
   else
+  {
+    markMatPropRequested(prop_name);
+    _material_property_dependencies.insert(_neighbor_material_data->getPropertyId(prop_name));
     return _neighbor_material_data->getPropertyOlder<T>(prop_name);
+  }
 }
 
 #endif // TWOMATERIALPROPERTYINTERFACE_H

@@ -260,12 +260,18 @@ protected:
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
+  /// Check and throw an error if the execution has progerssed past the construction stage
+  void checkExecutionStage();
+
+  /// Whether or not block restricted
+  const bool _block_restricted;
+
+  /// Whether or not boundary restricted
+  const bool _boundary_restricted;
+
 private:
   /// An initialization routine needed for dual constructors
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
-
-  /// Check and throw an error if the execution has progerssed past the construction stage
-  void checkExecutionStage();
 
   /// Empty sets for referencing when ids is not included
   const std::set<SubdomainID> _empty_block_ids;

@@ -1,0 +1,14 @@
+[Tests]
+  [./boundary_coverage]
+    type = 'RunApp'
+    input = 'boundary_material_coverage.i'
+    cli_args = '--check-input'
+    expect_out = 'Syntax OK'
+  [../]
+  [./interface_coverage]
+    type = 'RunApp'
+    input = 'interface_material_coverage.i'
+    cli_args = '--check-input'
+    expect_out = 'Syntax OK'
+  [../]
+[]

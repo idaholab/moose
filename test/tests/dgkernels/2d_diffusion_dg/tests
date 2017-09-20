@@ -6,4 +6,9 @@
     group = 'requirements adaptive'
     max_parallel = 1
   [../]
+  [./coverage_test]
+    type = 'RunException'
+    input = 'dg_material_coverage.i'
+    expect_err = "Material property 'prop2', requested by 'dgdiffusion' is not defined on block 0"
+  [../]
 []
