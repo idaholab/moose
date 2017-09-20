@@ -165,11 +165,11 @@ The actions are in the phase field block, under the modules block. Nonconserved 
 
 Conserved variables are created using [ConservedAction](/ConservedAction.md). For an example, See
 
-!listing modules/phase_field/test/tests/actions/Conserved_split_1var.i start=Modules end=ICs
+!listing modules/phase_field/test/tests/actions/conserved_split_1var.i start=Modules end=ICs
 
 and
 
-!listing modules/phase_field/test/tests/actions/Conserved_direct_1var.i start=Modules end=ICs
+!listing modules/phase_field/test/tests/actions/conserved_direct_1var.i start=Modules end=ICs
 
 ## Free Energy Function Materials
 

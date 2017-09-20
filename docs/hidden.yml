@@ -686,7 +686,6 @@ phase_field:
     - /Mesh/MortarPeriodicMesh
     - /Modules/PhaseField
     - /Modules/PhaseField/Conserved
-    - /Modules/PhaseField/Conserved/ConservedAction
     - /Modules/PhaseField/DisplacementGradients
     - /Modules/PhaseField/DisplacementGradients/DisplacementGradientsAction
     - /Modules/PhaseField/EulerAngles2RGB
@@ -696,7 +695,6 @@ phase_field:
     - /Modules/PhaseField/MortarPeriodicity
     - /Modules/PhaseField/MortarPeriodicity/MortarPeriodicAction
     - /Modules/PhaseField/Nonconserved
-    - /Modules/PhaseField/Nonconserved/NonconservedAction
     - /Postprocessors/AverageGrainVolume
     - /Postprocessors/FauxGrainTracker
     - /Postprocessors/FeatureFloodCount

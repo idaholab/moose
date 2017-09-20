@@ -1,5 +1,5 @@
 # NonconservedAction
-!syntax description /Actions/NonconservedAction
+!syntax description /Modules/PhaseField/Nonconserved/NonconservedAction
 
 This action simplifies the input file syntax for creating a nonconserved phase field variable in the phase field module. It creates the variable and all required kernels needed to solve for a nonconserved variable.
 
@@ -13,8 +13,4 @@ The kernels that are added are:
 - [AllenCahn](/AllenCahn.md)
 - [ACInterface](/ACInterface.md)
 
-!syntax parameters /Actions/NonconservedAction
-
-!syntax inputs /Actions/NonconservedAction
-
-!syntax children /Actions/NonconservedAction
+!syntax parameters /Modules/PhaseField/Nonconserved/NonconservedAction
