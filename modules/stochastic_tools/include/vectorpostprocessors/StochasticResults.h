@@ -43,6 +43,15 @@ public:
    */
   VectorPostprocessorValue & getVectorPostprocessorValueByGroup(unsigned int group);
 
+  /**
+   * Get the sample vectors
+   * @return A const pointer to the vector of sample vectors
+   */
+  const std::vector<VectorPostprocessorValue *> & getSampleVectors() const
+  {
+    return _sample_vectors;
+  }
+
 protected:
   /// Storage for declared vectors
   std::vector<VectorPostprocessorValue *> _sample_vectors;
