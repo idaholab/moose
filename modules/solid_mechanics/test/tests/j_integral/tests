@@ -36,6 +36,14 @@
    input = 'j_integral_3d.i'
    exodiff = 'j_integral_3d_out.e'
  [../]
+ [./j_3d_noq]
+   type = 'Exodiff'
+   input = 'j_integral_3d.i'
+   cli_args = 'DomainIntegral/output_q=false'
+   exodiff = 'j_integral_3d_out.e'
+   exodiff_opts = '-allow_name_mismatch'
+   prereq = j_3d
+ [../]
  [./j_3d_points]
    type = 'Exodiff'
    input = 'j_integral_3d_points.i'
