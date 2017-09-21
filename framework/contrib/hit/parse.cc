@@ -100,7 +100,7 @@ const char *
 Error::what() const throw()
 {
   return msg.c_str();
-};
+}
 
 ParseError::ParseError(const std::string & msg) : Error(msg) {}
 
