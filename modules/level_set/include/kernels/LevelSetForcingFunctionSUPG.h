@@ -9,7 +9,7 @@
 #define LEVELSETFORCINGFUNCTIONSUPG_H
 
 // MOOSE includes
-#include "UserForcingFunction.h"
+#include "BodyForce.h"
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
@@ -21,7 +21,7 @@ InputParameters validParams<LevelSetForcingFunctionSUPG>();
 /**
  * SUPG stabilization term for a forcing function.
  */
-class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<UserForcingFunction>
+class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<BodyForce>
 {
 public:
   LevelSetForcingFunctionSUPG(const InputParameters & parameters);

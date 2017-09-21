@@ -88,7 +88,7 @@ void
 Factory::deprecatedMessage(const std::string obj_name)
 {
   // If the object is not deprecated return
-  std::set<std::string>::iterator iter = _deprecated.find(obj_name);
+  auto iter = _deprecated.find(obj_name);
   if (iter == _deprecated.end())
     return;
 
@@ -97,9 +97,9 @@ Factory::deprecatedMessage(const std::string obj_name)
   msg << "Deprecated Object: " << obj_name << "\n";
 
   // Append replacement object, if it exsits
-  std::map<std::string, std::string>::iterator name_it = _deprecated_with_replace.find(obj_name);
-  if (name_it != _deprecated_with_replace.end())
-    msg << "Replaced " << obj_name << " with " << name_it->second;
+  auto map_iter = _deprecated_with_replace.find(obj_name);
+  if (map_iter != _deprecated_with_replace.end())
+    msg << "Replaced " << obj_name << " with " << map_iter->second;
 
   // Produce the error message
   mooseDeprecated(msg.str());
