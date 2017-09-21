@@ -177,7 +177,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
 }
 
 bool
-BlockRestrictable::blockRestricted()
+BlockRestrictable::blockRestricted() const
 {
   mooseAssert(_initialized, "BlockRestrictable not initialized");
 

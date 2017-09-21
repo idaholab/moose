@@ -12,31 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MatTestNeumannBC.h"
+#include "MatDGKernel.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
 
 template <>
 InputParameters
-validParams<MatTestNeumannBC>()
+validParams<MatDGKernel>()
 {
-  InputParameters p = validParams<NeumannBC>();
-  p.addRequiredParam<std::string>("mat_prop",
-                                  "The material property that gives the value of the BC");
-  p.addParam<bool>("has_check", false, "Test hasActiveBoundaryObjects method.");
-  return p;
+  InputParameters params = validParams<DGKernel>();
+  params.addRequiredParam<MaterialPropertyName>("mat_prop", "This is being tested.");
+  return params;
 }
 
-MatTestNeumannBC::MatTestNeumannBC(const InputParameters & parameters)
-  : NeumannBC(parameters), _prop_name(getParam<std::string>("mat_prop"))
+MatDGKernel::MatDGKernel(const InputParameters & parameters)
+  : DGKernel(parameters), _value(getMaterialProperty<Real>("mat_prop"))
 {
-  if (getParam<bool>("has_check") && !hasBoundaryMaterialProperty<Real>(_prop_name))
-    mooseError(
-        "The material property ", _prop_name, " is not defined on all boundaries of this object");
-
-  _value = &getMaterialPropertyByName<Real>(_prop_name);
-}
-
-Real
-MatTestNeumannBC::computeQpResidual()
-{
-  return -_test[_i][_qp] * (*_value)[_qp];
 }

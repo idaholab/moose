@@ -12,31 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MatTestNeumannBC.h"
+#ifndef MatSideUserOBJECT_H
+#define MatSideUserOBJECT_H
+
+#include "SideUserObject.h"
+
+// Forward Declarations
+class MatSideUserObject;
 
 template <>
-InputParameters
-validParams<MatTestNeumannBC>()
-{
-  InputParameters p = validParams<NeumannBC>();
-  p.addRequiredParam<std::string>("mat_prop",
-                                  "The material property that gives the value of the BC");
-  p.addParam<bool>("has_check", false, "Test hasActiveBoundaryObjects method.");
-  return p;
-}
+InputParameters validParams<MatSideUserObject>();
 
-MatTestNeumannBC::MatTestNeumannBC(const InputParameters & parameters)
-  : NeumannBC(parameters), _prop_name(getParam<std::string>("mat_prop"))
+/*
+ * This is for testing error message only. It does nothing.
+ */
+class MatSideUserObject : public SideUserObject
 {
-  if (getParam<bool>("has_check") && !hasBoundaryMaterialProperty<Real>(_prop_name))
-    mooseError(
-        "The material property ", _prop_name, " is not defined on all boundaries of this object");
+public:
+  MatSideUserObject(const InputParameters & parameters);
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual void finalize() override {}
+  virtual void threadJoin(const UserObject &) override {}
 
-  _value = &getMaterialPropertyByName<Real>(_prop_name);
-}
+protected:
+  const MaterialProperty<Real> & _mat_prop;
+};
 
-Real
-MatTestNeumannBC::computeQpResidual()
-{
-  return -_test[_i][_qp] * (*_value)[_qp];
-}
+#endif
