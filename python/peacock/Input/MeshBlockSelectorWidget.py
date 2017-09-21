@@ -33,7 +33,7 @@ class MeshBlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         self.setup()
 
-    def updateBlocks(self, reader):
+    def updateBlocks(self, reader, force=False):
         """
         Initialization function, which is called by the main tab widget.
 
@@ -43,12 +43,13 @@ class MeshBlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         """
 
         blocks = reader.getBlockInformation()[self._type]
-        if blocks != self._blocks:
+        if blocks != self._blocks or force:
             self.Options.clear()
             self._blocks = blocks
             self.Options.addItem("")
             for i, block in enumerate(blocks.itervalues()):
                 self.Options.addItem(block.name)
+            self.Options.setCurrentIndex(0)
 
     def getBlocks(self):
         """

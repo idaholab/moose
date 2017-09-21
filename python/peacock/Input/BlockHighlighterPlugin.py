@@ -43,9 +43,9 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
         Initializes the selector widgets for the supplied reader/results.
         """
         super(BlockHighlighterPlugin, self).onWindowCreated(*args)
-        self.BlockSelector.updateBlocks(self._reader)
-        self.SidesetSelector.updateBlocks(self._reader)
-        self.NodesetSelector.updateBlocks(self._reader)
+        self.BlockSelector.updateBlocks(self._reader, True)
+        self.SidesetSelector.updateBlocks(self._reader, True)
+        self.NodesetSelector.updateBlocks(self._reader, True)
         self.__updateVariableState()
 
     def onWindowUpdated(self):
@@ -67,7 +67,6 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
         block = self.BlockSelector.getBlocks()
         sideset = self.SidesetSelector.getBlocks()
         nodeset = self.NodesetSelector.getBlocks()
-        self.windowRequiresUpdate.emit()
         self.highlight.emit(block, sideset, nodeset)
 
     def __updateVariableState(self):
