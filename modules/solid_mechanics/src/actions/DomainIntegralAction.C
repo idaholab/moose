@@ -68,7 +68,6 @@ validParams<DomainIntegralAction>()
       "equivalent_k",
       false,
       "Calculate an equivalent K from KI, KII and KIII, assuming self-similar crack growth.");
-  // params.addParam<std::string>("xfem_qrule", "volfrac", "XFEM quadrature rule to use");
   params.addParam<bool>("output_q", true, "Output q");
   return params;
 }
@@ -93,7 +92,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _q_function_type(getParam<MooseEnum>("q_function_type")),
     _get_equivalent_k(getParam<bool>("equivalent_k")),
     _use_displaced_mesh(false),
-    _output_q(true)
+    _output_q(getParam<bool>("output_q"))
 {
   if (_q_function_type == GEOMETRY)
   {
@@ -211,9 +210,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     if (!poissons_ratio_set)
       _poissons_ratio = getParam<Real>("poissons_ratio");
   }
-
-  if (isParamValid("output_q"))
-    _output_q = getParam<bool>("output_q");
 }
 
 DomainIntegralAction::~DomainIntegralAction() {}
@@ -402,14 +398,6 @@ DomainIntegralAction::act()
           av_name_stream << av_base_name << "_" << _ring_vec[ring_index];
           std::ostringstream pp_name_stream;
           pp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
-
-          if (_output_q)
-          {
-            std::vector<VariableName> qvars;
-            qvars.push_back(av_name_stream.str());
-            params.set<std::vector<VariableName>>("q") = qvars;
-          }
-
           _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
         }
         else
@@ -420,14 +408,6 @@ DomainIntegralAction::act()
             av_name_stream << av_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
             std::ostringstream pp_name_stream;
             pp_name_stream << pp_base_name << "_" << cfp_index + 1 << "_" << _ring_vec[ring_index];
-
-            if (_output_q)
-            {
-              std::vector<VariableName> qvars;
-              qvars.push_back(av_name_stream.str());
-              params.set<std::vector<VariableName>>("q") = qvars;
-            }
-
             params.set<unsigned int>("crack_front_point_index") = cfp_index;
             _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
           }
@@ -515,16 +495,10 @@ DomainIntegralAction::act()
             std::ostringstream pp_name_stream;
             pp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
 
-            if (_output_q)
-            {
-              std::string aux_stress_name = aux_stress_base_name + aux_mode_name + "1";
-              std::string aux_grad_disp_name = aux_grad_disp_base_name + aux_mode_name + "1";
-              params.set<MaterialPropertyName>("aux_stress") = aux_stress_name;
-              params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name;
-              std::vector<VariableName> qvars;
-              qvars.push_back(av_name_stream.str());
-              params.set<std::vector<VariableName>>("q") = qvars;
-            }
+            std::string aux_stress_name = aux_stress_base_name + aux_mode_name + "1";
+            std::string aux_grad_disp_name = aux_grad_disp_base_name + aux_mode_name + "1";
+            params.set<MaterialPropertyName>("aux_stress") = aux_stress_name;
+            params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name;
 
             _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
           }
@@ -541,19 +515,13 @@ DomainIntegralAction::act()
               std::ostringstream cfn_index_stream;
               cfn_index_stream << cfp_index + 1;
 
-              if (_output_q)
-              {
-                std::ostringstream aux_stress_name_stream;
-                aux_stress_name_stream << aux_stress_base_name << aux_mode_name << cfp_index + 1;
-                std::ostringstream aux_grad_disp_name_stream;
-                aux_grad_disp_name_stream << aux_grad_disp_base_name << aux_mode_name
-                                          << cfp_index + 1;
-                params.set<MaterialPropertyName>("aux_stress") = aux_stress_name_stream.str();
-                params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name_stream.str();
-                std::vector<VariableName> qvars;
-                qvars.push_back(av_name_stream.str());
-                params.set<std::vector<VariableName>>("q") = qvars;
-              }
+              std::ostringstream aux_stress_name_stream;
+              aux_stress_name_stream << aux_stress_base_name << aux_mode_name << cfp_index + 1;
+              std::ostringstream aux_grad_disp_name_stream;
+              aux_grad_disp_name_stream << aux_grad_disp_base_name << aux_mode_name
+                                        << cfp_index + 1;
+              params.set<MaterialPropertyName>("aux_stress") = aux_stress_name_stream.str();
+              params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name_stream.str();
 
               params.set<unsigned int>("crack_front_point_index") = cfp_index;
               _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
