@@ -92,8 +92,8 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Input:
             path[str]: path to new input file.
         """
-        self.updateView.emit(self.InputFileEditorPlugin.tree)
         self.inputFileChanged.emit(path)
+        self.updateView.emit(self.InputFileEditorPlugin.tree)
         if not self.InputFileEditorPlugin.tree.app_info.valid() or not self.InputFileEditorPlugin.tree.input_filename:
             self.numTimeStepsChanged.emit(0)
             return

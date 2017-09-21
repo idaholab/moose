@@ -60,6 +60,13 @@ class MeshViewerPlugin(VTKWindowPlugin):
         self._removeFileNoError(self.current_temp_mesh_file)
         self._removeFileNoError(input_file)
         self.needInputFile.emit(input_file)
+
+        if not os.path.exists(input_file):
+            self.meshEnabled.emit(False)
+            self.onFileChanged()
+            self.setLoadingMessage("Error reading temporary input file")
+            return
+
         try:
             args = ["-i", input_file, "--mesh-only", self.current_temp_mesh_file]
             if self._use_test_objects:
