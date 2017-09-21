@@ -155,9 +155,6 @@
     abs_zero = 3e-6
     max_parallel = 1
     superlu = true
-
-    # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    compiler = 'GCC CLANG'
     petsc_version = '>=3.7.6'
     prereq = 'mu_0_2_kin'
   [../]
