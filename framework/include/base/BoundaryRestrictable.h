@@ -65,6 +65,12 @@ public:
                        bool nodal);
 
   /**
+   * Helper for determining if the object is boundary restricted. This is needed for the
+   * MaterialPropertyInterface.
+   */
+  static bool restricted(const std::set<BoundaryID> & ids);
+
+  /**
    * Empty class destructor
    */
   virtual ~BoundaryRestrictable();
@@ -165,7 +171,7 @@ public:
    * Returns true if this object has been restricted to a boundary
    * @see MooseObject
    */
-  virtual bool boundaryRestricted();
+  virtual bool boundaryRestricted() const;
 
   /**
    * Returns the set of all boundary ids for the entire mesh

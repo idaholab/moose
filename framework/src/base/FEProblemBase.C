@@ -4691,7 +4691,7 @@ FEProblemBase::checkProblemIntegrity()
 
     // Check material properties on blocks and boundaries
     checkBlockMatProps();
-    // checkBoundaryMatProps();
+    checkBoundaryMatProps();
 
     // Check that material properties exist when requested by other properties on a given block
     const auto & materials = _all_materials.getActiveObjects();

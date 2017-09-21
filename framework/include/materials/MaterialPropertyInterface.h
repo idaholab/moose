@@ -45,20 +45,6 @@ InputParameters validParams<MaterialPropertyInterface>();
 class MaterialPropertyInterface
 {
 public:
-  ///@{
-  /**
-   * Constructor.
-   *
-   * @param parameters The objects input parameters
-   * @param block_ids A reference to the block ids (optional)
-   * @param boundary_ids A reference to the boundary ids (optional)
-   *
-   * This class has four constructors:
-   *   (1) not restricted to boundaries or blocks
-   *   (2) restricted to only blocks
-   *   (3) restricted to only boundaries
-   *   (4) restricted to both blocks and boundaries
-   */
   MaterialPropertyInterface(const MooseObject * moose_object);
   MaterialPropertyInterface(const MooseObject * moose_object,
                             const std::set<SubdomainID> & block_ids);
@@ -67,7 +53,6 @@ public:
   MaterialPropertyInterface(const MooseObject * moose_object,
                             const std::set<SubdomainID> & block_ids,
                             const std::set<BoundaryID> & boundary_ids);
-  ///@}
 
   ///@{
   /**
@@ -261,23 +246,17 @@ protected:
   std::set<unsigned int> _material_property_dependencies;
 
 private:
-  /// An initialization routine needed for dual constructors
-  void initializeMaterialPropertyInterface(const InputParameters & parameters);
-
-  /// Check and throw an error if the execution has progerssed past the construction stage
+  /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
 
-  /// Empty sets for referencing when ids is not included
-  const std::set<SubdomainID> _empty_block_ids;
-
-  /// An empty set for referencing when boundary_ids is not included
-  const std::set<BoundaryID> _empty_boundary_ids;
+  /// BoundaryRestricted flag
+  const bool _mi_boundary_restricted;
 
   /// Storage for the block ids created by BlockRestrictable
-  const std::set<SubdomainID> _mi_block_ids;
+  const std::set<SubdomainID> & _mi_block_ids;
 
   /// Storage for the boundary ids created by BoundaryRestrictable
-  const std::set<BoundaryID> _mi_boundary_ids;
+  const std::set<BoundaryID> & _mi_boundary_ids;
 };
 
 /**

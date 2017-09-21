@@ -27,51 +27,23 @@ validParams<MaterialPropertyInterface>()
   return params;
 }
 
-// Standard construction
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object)
-  : _mi_params(moose_object->parameters()),
-    _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
-    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
-    _stateful_allowed(true),
-    _get_material_property_called(false),
-    _mi_block_ids(_empty_block_ids),
-    _mi_boundary_ids(_empty_boundary_ids)
+  : MaterialPropertyInterface(moose_object, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS)
 {
-  initializeMaterialPropertyInterface(_mi_params);
 }
 
-// Block restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids)
-  : _mi_params(moose_object->parameters()),
-    _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
-    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
-    _stateful_allowed(true),
-    _get_material_property_called(false),
-    _mi_block_ids(block_ids),
-    _mi_boundary_ids(_empty_boundary_ids)
+  : MaterialPropertyInterface(moose_object, block_ids, Moose::EMPTY_BOUNDARY_IDS)
 {
-  initializeMaterialPropertyInterface(_mi_params);
 }
 
-// Boundary restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<BoundaryID> & boundary_ids)
-  : _mi_params(moose_object->parameters()),
-    _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
-    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
-    _stateful_allowed(true),
-    _get_material_property_called(false),
-    _mi_block_ids(_empty_block_ids),
-    _mi_boundary_ids(boundary_ids)
+  : MaterialPropertyInterface(moose_object, Moose::EMPTY_BLOCK_IDS, boundary_ids)
 {
-  initializeMaterialPropertyInterface(_mi_params);
 }
 
-// Dual restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
                                                      const std::set<BoundaryID> & boundary_ids)
@@ -81,29 +53,24 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
+    _mi_boundary_restricted(!boundary_ids.empty() &&
+                            BoundaryRestrictable::restricted(boundary_ids)),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
-  initializeMaterialPropertyInterface(_mi_params);
-}
 
-void
-MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParameters & parameters)
-{
   // Set the MaterialDataType flag
-  if (parameters.isParamValid("_material_data_type"))
-    _material_data_type = parameters.get<Moose::MaterialDataType>("_material_data_type");
+  if (_mi_params.isParamValid("_material_data_type"))
+    _material_data_type = _mi_params.get<Moose::MaterialDataType>("_material_data_type");
 
-  else if (!_mi_boundary_ids.empty() &&
-           std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) ==
-               _mi_boundary_ids.end())
+  else if (_mi_boundary_restricted)
     _material_data_type = Moose::BOUNDARY_MATERIAL_DATA;
 
   else
     _material_data_type = Moose::BLOCK_MATERIAL_DATA;
 
   _material_data =
-      _mi_feproblem.getMaterialData(_material_data_type, parameters.get<THREAD_ID>("_tid"));
+      _mi_feproblem.getMaterialData(_material_data_type, _mi_params.get<THREAD_ID>("_tid"));
 }
 
 std::string
@@ -170,15 +137,15 @@ MaterialPropertyInterface::getMaterialPropertyBoundaryNames(const std::string & 
 void
 MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
 {
-  // If the material property is block restrictable, add to the list of materials to check
-  if (!_mi_block_ids.empty())
-    for (const auto & sbd_id : _mi_block_ids)
-      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, sbd_id, name);
-
   // If the material property is boundary restrictable, add to the list of materials to check
-  if (!_mi_boundary_ids.empty())
+  if (_mi_boundary_restricted)
     for (const auto & bnd_id : _mi_boundary_ids)
       _mi_feproblem.storeDelayedCheckMatProp(_mi_name, bnd_id, name);
+
+  // The default is to assume block restrictions
+  else
+    for (const auto & blk_ids : _mi_block_ids)
+      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, blk_ids, name);
 }
 
 void
