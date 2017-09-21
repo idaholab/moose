@@ -5,7 +5,6 @@
     exodiff = 'single_point_2d_out.e'
     custom_cmp = 'single_point_2d.cmp'
     superlu = true
-    compiler = 'GCC CLANG'
   [../]
   [./fcp]
     type = 'Exodiff'
