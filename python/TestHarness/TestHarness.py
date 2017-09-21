@@ -467,7 +467,7 @@ class TestHarness:
             fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
 
         # Alert the user to their session file
-        if self.queueing:
+        if self.options.queueing:
             print 'Your session file is %s' % self.options.session_file
 
         # Print a different footer when performing a dry run
@@ -512,10 +512,10 @@ class TestHarness:
         self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', "IS_SCHEDULER")
 
         # Set a global queueing flag
-        self.queueing = False
+        self.options.queueing = False
 
         if self.options.pbs:
-            self.queueing = True
+            self.options.queueing = True
             scheduler_plugin = 'RunPBS'
 
             # Unify the queueing file
