@@ -23,7 +23,15 @@ class DAG(object):
 
     def __init__(self):
         """ Construct a new DAG with no nodes or edges. """
+        self.__original_graph = None
         self.reset_graph()
+
+    # Added by the MOOSE group
+    def __createOriginalGraph(self):
+        """ Private method to create and protect the current state of the graph """
+        if self.__original_graph == None:
+            self.__original_graph = self.clone()
+        return self.__original_graph
 
     def add_node(self, node_name, graph=None):
         """ Add a node if it does not exist yet, or error out. """
@@ -32,6 +40,9 @@ class DAG(object):
         if node_name in graph:
             raise KeyError('node %s already exists' % node_name)
         graph[node_name] = set()
+
+        # Allow original graph to grow
+        self.__original_graph = None
 
     def node_exists(self, node_name, graph=None):
         """ Check if node exists """
@@ -46,12 +57,17 @@ class DAG(object):
         except KeyError:
             pass
 
+    # Modified by the MOOSE group
     def delete_node(self, node_name, graph=None):
         """ Deletes this node and all edges referencing it. """
         if not graph:
             graph = self.graph
         if node_name not in graph:
             raise KeyError('node %s does not exist' % node_name)
+
+        # save original graph
+        self.__createOriginalGraph()
+
         graph.pop(node_name)
 
         for node, edges in graph.iteritems():
@@ -69,6 +85,10 @@ class DAG(object):
         """ Add an edge (dependency) between the specified nodes. """
         if not graph:
             graph = self.graph
+
+        # Allow original graph to grow
+        self.__original_graph = None
+
         if dep_node not in graph:
             raise DAGEdgeDepError()
         if ind_node not in graph:
@@ -79,18 +99,28 @@ class DAG(object):
             self.delete_edge(ind_node, dep_node)
             raise DAGValidationError()
 
+    # Modified by the MOOSE group
     def delete_edge(self, ind_node, dep_node, graph=None):
         """ Delete an edge from the graph. """
         if not graph:
             graph = self.graph
+
+        # save original graph
+        self.__createOriginalGraph()
+
         if dep_node not in graph.get(ind_node, []):
             raise KeyError('this edge does not exist in graph')
+
         graph[ind_node].remove(dep_node)
 
     def rename_edges(self, old_task_name, new_task_name, graph=None):
         """ Change references to a task in existing edges. """
         if not graph:
             graph = self.graph
+
+        # save original graph
+        self.__createOriginalGraph()
+
         for node, edges in graph.items():
 
             if node == old_task_name:
@@ -134,7 +164,6 @@ class DAG(object):
             i += 1
         return filter(lambda node: node in nodes_seen, self.topological_sort(graph=graph))
 
-    # Added by the MOOSE group
     def delete_downstreams(self, node, graph=None):
         """ Delete and return all nodes this node has edges towards. """
         if graph is None:
@@ -145,22 +174,6 @@ class DAG(object):
                 deleted_nodes.add(edge)
                 self.delete_node_if_exists(edge)
         return deleted_nodes
-
-    # Added by the MOOSE group
-    def reverse_edges(self, graph=None):
-        """ Return a new graph with reversed dependencies based
-        on current graph. """
-        if graph is None:
-            graph = self.graph
-
-        new_graph = DAG()
-        for key in self.topological_sort(graph):
-            new_graph.add_node(key)
-
-        for key, value in graph.iteritems():
-            for downstream_node in value:
-                new_graph.add_edge(downstream_node, key)
-        return new_graph
 
     def all_leaves(self, graph=None):
         """ Return a list of all leaves (nodes with no downstreams) """
@@ -186,10 +199,17 @@ class DAG(object):
         """ Restore the graph to an empty state. """
         self.graph = OrderedDict()
 
+    # Modified by the MOOSE group
     def ind_nodes(self, graph=None):
-        """ Returns a list of all nodes in the graph with no dependencies. """
+        """
+        Returns a list of all nodes in the graph with no dependencies.
+        Creates a clone of the current state of the DAG.
+        """
         if graph is None:
             graph = self.graph
+
+        # Create the originalDAG now that someone is asking for independent nodes
+        self.__createOriginalGraph()
 
         dependent_nodes = set(node for dependents in graph.itervalues() for node in dependents)
         return [node for node in graph.keys() if node not in dependent_nodes]
@@ -243,6 +263,17 @@ class DAG(object):
         return len(self.graph)
 
     # Added by the MOOSE group
+    def getOriginalDAG(self):
+        """
+        Returns a clone of the graph as it existed before any nodes
+        were deleted.
+
+        Adding nodes again later, will allow the original graph to
+        'reset' and grow.
+        """
+        return self.__createOriginalGraph()
+
+    # Added by the MOOSE group
     def clone(self):
         """ create a hard copy of the current graph with pointers
         to the original graph's contents.
@@ -250,3 +281,28 @@ class DAG(object):
         new_graph = DAG()
         new_graph.graph = copy(self.graph)
         return new_graph
+
+    # Added by the MOOSE group
+    def reverse_clone(self, graph=None):
+        """ Return a new graph with reversed dependencies based
+        on current graph. """
+        if graph is None:
+            graph = self.graph
+
+        new_graph = DAG()
+        for key in self.topological_sort(graph):
+            new_graph.add_node(key)
+
+        for key, value in graph.iteritems():
+            for downstream_node in value:
+                new_graph.add_edge(downstream_node, key)
+        return new_graph
+
+    # Added by the MOOSE group
+    def reverse_edges(self, graph=None):
+        """ Reversed dependencies in current graph. """
+        # Create clone of original graph
+        self.__createOriginalGraph()
+
+        new_graph = self.reverse_clone()
+        self.graph = new_graph.graph
