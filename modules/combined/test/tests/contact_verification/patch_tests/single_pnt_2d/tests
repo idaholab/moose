@@ -105,9 +105,10 @@
   [./glued_kin_sm]
     type = 'CSVDiff'
     input = 'single_point_2d_sm.i'
-    csvdiff = 'single_point_2d_out_glued_kin.csv'
+    csvdiff = 'single_point_2d_out_glued_kin_sm.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-3
-    Executioner/nl_rel_tol=1e-10 Executioner/nl_abs_tol=1e-12 Contact/leftright/model=glued Contact/leftright/formulation=kinematic'
+    Executioner/nl_rel_tol=1e-10 Executioner/nl_abs_tol=1e-12 Contact/leftright/model=glued Contact/leftright/formulation=kinematic
+    Outputs/file_base=single_point_2d_out_glued_kin_sm'
     rel_err = 5e-5
     abs_zero = 3e-5
     max_parallel = 1

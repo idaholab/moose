@@ -39,8 +39,8 @@
  [./j_3d_noq]
    type = 'Exodiff'
    input = 'j_integral_3d.i'
-   cli_args = 'DomainIntegral/output_q=false'
-   exodiff = 'j_integral_3d_out.e'
+   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=j_integral_3d_noq_out'
+   exodiff = 'j_integral_3d_noq_out.e'
    exodiff_opts = '-allow_name_mismatch'
    prereq = j_3d
  [../]

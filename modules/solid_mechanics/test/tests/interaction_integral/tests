@@ -31,8 +31,8 @@
  [./ii_3d_noq]
    type = 'Exodiff'
    input = 'interaction_integral_3d.i'
-   cli_args = 'DomainIntegral/output_q=false'
-   exodiff = 'interaction_integral_3d_out.e'
+   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=interaction_integral_3d_noq_out'
+   exodiff = 'interaction_integral_3d_noq_out.e'
    abs_zero = 1e-7
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    exodiff_opts = '-allow_name_mismatch'
