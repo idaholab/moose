@@ -94,6 +94,10 @@ compile_commands.json
 !**/gold/*.vtu
 !**/gold/*.pvtu
 
+# Allow data files in the unit "data" directory
+!unit/data/csv/*.csv
+!unit/data/ebsd/*.txt
+
 peacock_run_tmp.i
 yaml_dump*
 test/tests/outputs/format/dump.i

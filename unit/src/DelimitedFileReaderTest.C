@@ -35,6 +35,7 @@ TEST(DelimitedFileReader, BadFilename)
     ASSERT_TRUE(pos != std::string::npos);
   }
 }
+
 TEST(DelimitedFileReader, BadHeaderName)
 {
   try
@@ -107,6 +108,22 @@ TEST(DelimitedFileReader, Data)
     const std::vector<double> & data = reader.getColumnData("day");
     std::vector<double> gold = {24, 9, 1, 15};
     EXPECT_EQ(data, gold);
+  }
+}
+
+TEST(DelimitedFileReader, Comments)
+{
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example_comments.csv");
+    reader.read();
+    const std::vector<std::string> & cols = reader.getColumnNames();
+    std::vector<std::string> gold_cols = {"year", "month", "day"};
+    EXPECT_EQ(cols, gold_cols);
+
+    const std::vector<std::vector<double>> & data = reader.getColumnData();
+    std::vector<std::vector<double>> gold_data = {
+        {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
+    EXPECT_EQ(data, gold_data);
   }
 }
 
