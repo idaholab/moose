@@ -289,7 +289,7 @@ lexEq(Lexer * l)
   // l->acceptRun(allspace);
   // l->ignore();
 
-  if (charIn(l->peek(), digits + "-+."))
+  if (charIn(l->peek(), digits + "-+.eE"))
     return lexNumber;
   return lexString;
 }
@@ -361,6 +361,11 @@ lexNumber(Lexer * l)
   if (l->accept("."))
     n += l->acceptRun(digits);
 
+  if (l->accept("eE"))
+  {
+    n += l->accept("-+");
+    n += l->acceptRun(digits);
+  }
   if (n == 0)
   {
     // fall back to string
@@ -369,13 +374,7 @@ lexNumber(Lexer * l)
     return lexHit;
   }
 
-  if (l->accept("eE"))
-  {
-    l->accept("-+");
-    l->acceptRun(digits);
-  }
-
-  if (!charIn(l->peek(), allspace))
+  if (!charIn(l->peek(), allspace) && l->peek() != '\0')
   {
     // fall back to string
     consumeUnquotedString(l);
