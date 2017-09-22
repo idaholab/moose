@@ -1,8 +1,9 @@
-### Description of the enhancement or error report
+## Rationale
+<!--What is the reason for this enhancement or what error are you reporting?-->
 
+## Description
+<!--Provide details of the enhancement or instructions for reproducing the error.-->
 
-### Rationale for the enhancement or information for reproducing the error
-
-
-### Identified impact
-(i.e. Internal object changes, limited interface changes, public API change, or a list of specific applications impacted)
+## Impact
+<!--How will the changes impact the code, developers, and users? Discuss changes to the
+internal interfaces and public API.-->
