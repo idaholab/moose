@@ -3452,6 +3452,17 @@ FEProblemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
     mooseError("Unknown variable " + var_name);
 }
 
+System &
+FEProblemBase::getSystem(const std::string & var_name)
+{
+  if (_nl->hasVariable(var_name))
+    return _nl->system();
+  else if (_aux->hasVariable(var_name))
+    return _aux->system();
+  else
+    mooseError("Unable to find a system containing the variable " + var_name);
+}
+
 void
 FEProblemBase::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
                                                 THREAD_ID tid)
