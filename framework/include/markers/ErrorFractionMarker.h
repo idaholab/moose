@@ -34,6 +34,7 @@ protected:
 
   Real _coarsen;
   Real _refine;
+  bool _clear_extremes;
 
   Real _max;
   Real _min;
