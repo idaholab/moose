@@ -19,32 +19,28 @@
   displacements = 'disp_x disp_y'
 []
 
-[Variables]
-  [./disp_x]
+[Modules]
+  [./PhaseField]
+    [./Nonconserved]
+      [./c]
+        free_energy = E_el
+        kappa = kappa_op
+        mobility = L
+      [../]
+    [../]
   [../]
-  [./disp_y]
-  [../]
-  [./c]
-  [../]
-  [./b]
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
+  [./TensorMechanics]
+    [./Master]
+      [./mech]
+        add_variables = true
+        strain = SMALL
+        additional_generate_output = stress_yy
+      [../]
+    [../]
   [../]
 []
 
 [Kernels]
-  [./pfbulk]
-    type = AllenCahnPFFracture
-    variable = c
-    beta = b
-  [../]
-  [./TensorMechanics]
-  [../]
   [./solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
@@ -57,29 +53,35 @@
     component = 1
     c = c
   [../]
-  [./dcdt]
-    type = TimeDerivative
-    variable = c
-  [../]
-  [./pfintvar]
-    type = Reaction
-    variable = b
-  [../]
-  [./pfintcoupled]
-    type = LaplacianSplit
-    variable = b
-    c = c
-  [../]
 []
 
-[AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    variable = stress_yy
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 1
-    execute_on = timestep_end
+[Materials]
+  [./pfbulkmat]
+    type = GenericConstantMaterial
+    prop_names = 'gc_prop l visco'
+    prop_values = '1e-3 0.08 1e-4'
+  [../]
+  [./define_mobility]
+    type = ParsedMaterial
+    material_property_names = 'gc_prop visco'
+    f_name = L
+    function = '1.0/(gc_prop * visco)'
+  [../]
+  [./define_kappa]
+    type = ParsedMaterial
+    material_property_names = 'gc_prop l'
+    f_name = kappa_op
+    function = 'gc_prop * l'
+  [../]
+  [./elastic]
+    type = ComputeLinearElasticPFFractureStress
+    c = c
+    F_name = E_el
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    C_ijkl = '120.0 80.0'
+    fill_method = symmetric_isotropic
   [../]
 []
 
@@ -104,25 +106,6 @@
   [../]
 []
 
-[Materials]
-  [./pfbulkmat]
-    type = GenericConstantMaterial
-    prop_names = 'gc_prop l visco'
-    prop_values = '1e-3 0.08 1e-4'
-  [../]
-  [./elastic]
-    type = ComputeLinearElasticPFFractureStress
-    c = c
-  [../]
-  [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    C_ijkl = '120.0 80.0'
-    fill_method = symmetric_isotropic
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-  [../]
-[]
 
 [Preconditioning]
   active = 'smp'
