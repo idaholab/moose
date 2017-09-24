@@ -20,6 +20,8 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 
+#include "libmesh/system.h"
+
 template <>
 InputParameters
 validParams<PointValue>()
@@ -34,66 +36,34 @@ validParams<PointValue>()
 
 PointValue::PointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
-    _u(_var.sln()),
-    _mesh(_subproblem.mesh()),
-    _point_vec(1, getParam<Point>("point")),
-    _value(0),
-    _root_id(0),
-    _elem_id(DofObject::invalid_id)
+    _var_number(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable")).number()),
+    _system(_subproblem.getSystem(getParam<VariableName>("variable"))),
+    _point(getParam<Point>("point")),
+    _value(0)
 {
 }
 
 void
 PointValue::execute()
 {
-  // Locate the element and store the id
-  // We can't store the actual Element pointer here b/c PointLocatorBase returns a const Elem *
-  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-  const Elem * elem = (*pl)(_point_vec[0]);
+  _value = _system.point_value(_var_number, _point, false);
 
-  // Store the element id and processor id that owns the located element
-  if (elem)
+  /**
+   * If we get exactly zero, we don't know if the locator couldn't find an element, or
+   * if the solution is truly zero, more checking is needed.
+   */
+  if (MooseUtils::absoluteFuzzyEqual(_value, 0.0))
   {
-    _elem_id = elem->id();
-    _root_id = elem->processor_id();
+    auto pl = _subproblem.mesh().getPointLocator();
+    pl->enable_out_of_mesh_mode();
+
+    auto * elem = (*pl)(_point);
+    auto elem_id = elem ? elem->id() : DofObject::invalid_id;
+    gatherMin(elem_id);
+
+    if (elem_id == DofObject::invalid_id)
+      mooseError("No element located at ", _point, " in PointValue Postprocessor named: ", name());
   }
-  else
-  {
-    _root_id = DofObject::invalid_processor_id;
-    _elem_id = DofObject::invalid_id;
-  }
-}
-
-void
-PointValue::finalize()
-{
-  // Gather consistent ids for broadcasting the computed value
-  gatherMin(_root_id);
-  gatherMin(_elem_id);
-
-  // Error if the element cannot be located
-  if (_elem_id == DofObject::invalid_id)
-    mooseError(
-        "No element located at ", _point_vec[0], " in PointValue Postprocessor named: ", name());
-
-  // Compute the value at the point
-  if (_root_id == processor_id())
-  {
-    const Elem * elem = _mesh.getMesh().elem(_elem_id);
-    std::set<MooseVariable *> var_list;
-    var_list.insert(&_var);
-
-    _fe_problem.setActiveElementalMooseVariables(var_list, _tid);
-    _subproblem.setCurrentSubdomainID(elem, 0);
-    _subproblem.reinitElemPhys(elem, _point_vec, 0);
-    mooseAssert(_u.size() == 1, "No values in u!");
-    _value = _u[0];
-  }
-
-  // Make sure all processors have the correct computed values
-  _communicator.broadcast(_value, _root_id);
 }
 
 Real

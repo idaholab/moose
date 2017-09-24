@@ -285,6 +285,17 @@ DisplacedProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
     mooseError("No variable with name '" + var_name + "'");
 }
 
+System &
+DisplacedProblem::getSystem(const std::string & var_name)
+{
+  if (_displaced_nl.hasVariable(var_name))
+    return _displaced_nl.system();
+  else if (_displaced_aux.hasVariable(var_name))
+    return _displaced_aux.system();
+  else
+    mooseError("Unable to find a system containing the variable " + var_name);
+}
+
 void
 DisplacedProblem::addVariable(const std::string & var_name,
                               const FEType & type,

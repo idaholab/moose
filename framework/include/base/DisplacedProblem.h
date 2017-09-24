@@ -112,6 +112,8 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name) override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
+  virtual System & getSystem(const std::string & var_name) override;
+
   virtual void addVariable(const std::string & var_name,
                            const FEType & type,
                            Real scale_factor,

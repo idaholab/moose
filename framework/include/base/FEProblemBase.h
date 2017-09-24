@@ -226,6 +226,7 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name) override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
+  virtual System & getSystem(const std::string & var_name) override;
 
   /**
    * Set the MOOSE variables to be reinited on each element.
