@@ -51,7 +51,8 @@ validParams<Transient>()
    * as long as the TimeIntegrator does not have any additional parameters.
    */
   MooseEnum schemes(
-      "implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk explicit-tvd-rk-2");
+      "implicit-euler explicit-euler crank-nicolson bdf2 explicit-midpoint dirk explicit-tvd-rk-2",
+      "implicit-euler");
 
   params.addParam<Real>("start_time", 0.0, "The start time of the simulation");
   params.addParam<Real>("end_time", 1.0e30, "The end time of the simulation");
@@ -131,7 +132,7 @@ validParams<Transient>()
 Transient::Transient(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
-    _time_scheme(getParam<MooseEnum>("scheme")),
+    _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_problem.timeOld()),
@@ -706,39 +707,37 @@ Transient::getSolutionChangeNorm()
 void
 Transient::setupTimeIntegrator()
 {
-  if (_time_scheme.isValid() && _problem.hasTimeIntegrator())
+  if (_pars.isParamSetByUser("scheme") && _problem.hasTimeIntegrator())
     mooseError("You cannot specify time_scheme in the Executioner and independently add a "
                "TimeIntegrator to the system at the same time");
 
   if (!_problem.hasTimeIntegrator())
   {
-    if (!_time_scheme.isValid())
-      _time_scheme = "implicit-euler";
-
     // backwards compatibility
     std::string ti_str;
+    using namespace Moose;
 
     switch (_time_scheme)
     {
-      case 0:
+      case TI_IMPLICIT_EULER:
         ti_str = "ImplicitEuler";
         break;
-      case 1:
+      case TI_EXPLICIT_EULER:
         ti_str = "ExplicitEuler";
         break;
-      case 2:
+      case TI_CRANK_NICOLSON:
         ti_str = "CrankNicolson";
         break;
-      case 3:
+      case TI_BDF2:
         ti_str = "BDF2";
         break;
-      case 4:
+      case TI_EXPLICIT_MIDPOINT:
         ti_str = "ExplicitMidpoint";
         break;
-      case 5:
+      case TI_LSTABLE_DIRK2:
         ti_str = "LStableDirk2";
         break;
-      case 6:
+      case TI_EXPLICIT_TVD_RK_2:
         ti_str = "ExplicitTVDRK2";
         break;
       default:
