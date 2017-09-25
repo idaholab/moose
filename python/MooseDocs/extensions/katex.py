@@ -66,6 +66,7 @@ class KatexBase(MooseMarkdownCommon, Pattern):
     Base class for Pattern extensions.
     """
     RE = None
+    DISPLAY_MODE = 'true'
 
     @staticmethod
     def defaultSettings():
@@ -109,7 +110,7 @@ class KatexBase(MooseMarkdownCommon, Pattern):
         """
         script = etree.SubElement(parent, 'script')
         text = 'var element = document.getElementById("{}");'.format(eq_id)
-        text += 'try{katex.render("%s", element, {displayMode:true});}' % tex
+        text += 'try{katex.render("%s", element, {displayMode:%s});}' % (tex, self.DISPLAY_MODE)
         text += 'catch (exception){'
         text += 'console.log("KaTeX render failed: {}");'.format(tex)
         text += 'var err=document.createElement("span");'
@@ -124,6 +125,7 @@ class KatexInline(KatexBase):
     Inline math support with KaTex.
     """
     RE = r'\$(?P<tex>.*?)\$'
+    DISPLAY_MODE = 'false'
 
     def equationDiv(self, eq_id):
         span = etree.Element('span')

@@ -49,28 +49,34 @@ class MooseObjectParameterTable(object):
         ul.set('class', "collapsible")
         ul.set('data-collapsible', "expandable")
         for param in self._parameters:
+
+            if param['name'] == 'type':
+                continue
+
             li = etree.SubElement(ul, 'li')
             header = etree.SubElement(li, 'div')
             header.set('class', "collapsible-header")
 
-            header_row = etree.SubElement(header, 'div')
-            header_row.set('class', 'row')
+            description = param['description'].strip()
+            if description:
+                btn = etree.SubElement(header, 'i')
+                btn.set('class', 'material-icons')
+                btn.text = 'keyboard_arrow_down'
 
-            header_name = etree.SubElement(header_row, 'div')
-            header_name.set('class', 'moose-parameter-name col l4')
+            header_name = etree.SubElement(header, 'div')
+            header_name.set('class', 'moose-parameter-name')
             header_name.text = param['name']
 
             default = self._formatParam(param, 'default').strip()
             if default:
-                default_span = etree.SubElement(header_name, 'span')
+                default_span = etree.SubElement(header, 'span')
                 default_span.set('class', 'moose-parameter-header-default')
                 default_span.text = ' ({})'.format(default)
 
-            description = param['description'].strip()
             if description:
-                div = etree.SubElement(header_row, 'div')
-                div.set('class', 'moose-parameter-header-description col l8 hide-on-med-and-down')
-                div.text = description
+                div = etree.SubElement(header, 'span')
+                div.set('class', 'moose-parameter-header-description ')
+                div.text = ': ' + description
 
             body = etree.SubElement(li, 'div')
             body.set('class', "collapsible-body")

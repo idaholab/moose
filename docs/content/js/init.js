@@ -18,6 +18,13 @@
       belowOrigin: true, // Displays dropdown below the button
       alignment: 'left' // Displays dropdown with edge aligned to the left of button
     });
+
+    $('.collapsible').collapsible({
+      onOpen: function(el) {var icons = $(el).find('i'); $(icons[0]).text('keyboard_arrow_up');},
+      onClose: function(el) {var icons = $(el).find('i'); $(icons[0]).text('keyboard_arrow_down');}
+    });
+
+    $(".button-collapse").sideNav();
   }); // end of document ready
 })(jQuery); // end of jQuery name space
 

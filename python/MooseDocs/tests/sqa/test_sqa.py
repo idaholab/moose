@@ -63,7 +63,7 @@ class TestSQA(unittest.TestCase):
         self.assertIn('Testing testing testing', html)
         self.assertIn('Missing Template Item: project_description', html)
         self.assertIn('Missing Template Item: system_scope', html)
-        self.assertIn('<div class="moose-collection-name col l4">F1.50</div>', html)
+        self.assertIn('<span class="moose-collection-name">F1.50</span>', html)
         self.assertIn('<div class="collapsible-header moose-group-header">Transient Analysis</div>',
                       html)
         self.assertIn('<li id="requirement-F1.10">', html)

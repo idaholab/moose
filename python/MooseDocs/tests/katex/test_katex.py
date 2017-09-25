@@ -37,7 +37,7 @@ class TestKatexExtension(MarkdownTestCase):
         self.assertIn('<div class="moose-katex-block-number">', html)
 
     def testEquationLabel(self):
-        md = '\\begin{equation}\nx=y\n\label{foo}\\end{equation}'
+        md = '\\begin{equation}\nx=y\n\\label{foo}\\end{equation}'
         html = self.convert(md)
         self.assertIn('document.getElementById', html)
         self.assertIn('<div class="moose-katex-block">', html)

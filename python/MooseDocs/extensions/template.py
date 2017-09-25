@@ -111,6 +111,7 @@ class TemplatePostprocessorBase(Postprocessor):
         env.globals['relpath'] = self._relpath
         env.globals['breadcrumbs'] = self._breadcrumbs
         env.globals['load'] = self._load
+        env.globals['page_title'] = self.markdown.current.name
 
     def arguments(self, template_args, text): #pylint: disable=no-self-use
         """
@@ -176,7 +177,7 @@ class TemplatePostprocessorBase(Postprocessor):
         """
         for img in soup('img'):
             if 'src' in img.attrs:
-                img['src'] = os.path.relpath(img['src'], os.path.dirname(node.destination))
+                img['src'] = TemplatePostprocessorBase._relpath(img['src'], node.destination)
 
     def _markdownLinks(self, node, soup):
         """

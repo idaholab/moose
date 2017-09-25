@@ -225,16 +225,10 @@ li{
 }
 
 .collapsible-header .moose-parameter-name{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
     font-weight:600;
 }
 
 .collapsible-header .moose-parameter-header-default{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
     color:#757575;
     font-weight:100;
 }
@@ -441,10 +435,8 @@ footer.page-footer {
     margin-left:15px;
 }
 
-.collapsible-header .moose-collection-name{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+.collapsible-header{
+  padding: 10px;
 }
 
 .collapsible-header .moose-collection-description{
@@ -456,6 +448,12 @@ footer.page-footer {
 
 .moose-system-list .collapsible-header .row{
     margin-bottom: 0;
+}
+
+.collapsible-header .material-icons{
+  opacity: 0.5;
+  margin-left: 0;
+  margin-right: 5px;
 }
 
 /* Slideshows with white backgrounds and captions, need a black drop text shadow */
