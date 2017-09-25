@@ -299,6 +299,20 @@ enum WhichEigenPairs
 };
 
 /**
+ * Time integrators
+ */
+enum TimeIntegratorType
+{
+  TI_IMPLICIT_EULER,
+  TI_EXPLICIT_EULER,
+  TI_CRANK_NICOLSON,
+  TI_BDF2,
+  TI_EXPLICIT_MIDPOINT,
+  TI_LSTABLE_DIRK2,
+  TI_EXPLICIT_TVD_RK_2,
+};
+
+/**
  * Type of constraint formulation
  */
 enum ConstraintFormulationType

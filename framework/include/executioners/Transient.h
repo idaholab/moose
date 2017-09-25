@@ -139,7 +139,7 @@ public:
    * Get the time scheme used
    * @return MooseEnum with the time scheme
    */
-  MooseEnum getTimeScheme() { return _time_scheme; }
+  Moose::TimeIntegratorType getTimeScheme() { return _time_scheme; }
 
   /**
    * Get the set of sync times
@@ -219,7 +219,7 @@ protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
 
-  MooseEnum _time_scheme;
+  Moose::TimeIntegratorType _time_scheme;
   std::shared_ptr<TimeStepper> _time_stepper;
 
   /// Current timestep.

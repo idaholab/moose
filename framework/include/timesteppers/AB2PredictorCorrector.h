@@ -54,8 +54,6 @@ protected:
 
   virtual Real estimateTimeError(NumericVector<Number> & sol);
 
-  int stringtoint(std::string string);
-  ///
   NumericVector<Number> & _u1;
   NumericVector<Number> & _aux1;
   NumericVector<Number> & _pred1;

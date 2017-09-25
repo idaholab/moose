@@ -50,6 +50,9 @@ SolveType stringToEnum<SolveType>(const std::string & s);
 template <>
 LineSearchType stringToEnum<LineSearchType>(const std::string & s);
 
+template <>
+TimeIntegratorType stringToEnum<TimeIntegratorType>(const std::string & s);
+
 // Vector conversions
 template <typename T>
 std::vector<T> vectorStringsToEnum(const MultiMooseEnum & v);
