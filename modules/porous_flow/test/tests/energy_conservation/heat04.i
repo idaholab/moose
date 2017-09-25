@@ -162,7 +162,7 @@
     variable = temp
   [../]
   [./heat_source]
-    type = UserForcingFunction
+    type = BodyForce
     function = 1
     variable = temp
   [../]

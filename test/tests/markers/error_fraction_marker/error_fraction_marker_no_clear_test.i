@@ -3,9 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-  nz = 0
-  zmax = 0
-  elem_type = QUAD4
+  nz = 10
 []
 
 [Variables]
@@ -16,9 +14,9 @@
 []
 
 [Functions]
-  [./force]
+  [./solution]
     type = ParsedFunction
-    value = t
+    value = (exp(x)-1)/(exp(1)-1)
   [../]
 []
 
@@ -27,50 +25,51 @@
     type = Diffusion
     variable = u
   [../]
-  [./force]
-    type = BodyForce
+  [./conv]
+    type = Convection
     variable = u
-    function = force
+    velocity = '1 0 0'
   [../]
 []
 
 [BCs]
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
-  [../]
   [./left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
+  [../]
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 4
-  dt = 1
+  type = Steady
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 []
 
 [Adaptivity]
-  steps = 1
-  marker = box
-  max_h_level = 2
-  initial_steps = 2
+  steps = 2
+  marker = marker
+  [./Indicators]
+    [./error]
+      type = AnalyticalIndicator
+      variable = u
+      function = solution
+    [../]
+  [../]
   [./Markers]
-    [./box]
-      bottom_left = '0.3 0.3 0'
-      inside = refine
-      top_right = '0.6 0.6 0'
-      outside = do_nothing
-      type = BoxMarker
+    [./marker]
+      type = ErrorFractionMarker
+      indicator = error
+      refine = 0.3
+      clear_extremes = false
     [../]
   [../]
 []

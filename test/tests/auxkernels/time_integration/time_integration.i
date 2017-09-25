@@ -41,7 +41,7 @@
      variable = u
   [../]
   [./sourceterm]
-     type =  UserForcingFunction
+     type = BodyForce
      variable = u
      function = Source
   [../]

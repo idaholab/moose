@@ -43,7 +43,7 @@
 
   # this kernel will use the UserObject from above
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

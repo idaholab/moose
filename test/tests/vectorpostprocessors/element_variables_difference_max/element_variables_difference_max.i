@@ -40,7 +40,7 @@
     variable = v
   [../]
   [./forcing_v]
-    type = UserForcingFunction
+    type = BodyForce
     variable = v
     function = forcing_v
   [../]

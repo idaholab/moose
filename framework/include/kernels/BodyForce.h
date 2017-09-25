@@ -40,9 +40,14 @@ public:
 protected:
   virtual Real computeQpResidual() override;
 
-  const Real & _value;
+  /// Scale factor
+  const Real & _scale;
+
+  /// Optional function value
   Function & _function;
-  const PostprocessorValue * const _postprocessor;
+
+  /// Optional Postprocessor value
+  const PostprocessorValue & _postprocessor;
 };
 
 #endif

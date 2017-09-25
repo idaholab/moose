@@ -68,7 +68,6 @@
 #include "Diffusion.h"
 #include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
-#include "UserForcingFunction.h"
 #include "BodyForce.h"
 #include "Reaction.h"
 #include "MassEigenKernel.h"
@@ -525,7 +524,8 @@ registerObjects(Factory & factory)
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
-  registerKernel(UserForcingFunction);
+  registerNamedObject(BodyForce, "UserForcingFunction");
+  factory.deprecateObject("UserForcingFunction", "BodyForce");
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
