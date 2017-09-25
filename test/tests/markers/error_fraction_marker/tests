@@ -5,4 +5,12 @@
     exodiff = 'error_fraction_marker_test_out.e'
     scale_refine = 2
   [../]
+
+
+[./no_clear]
+    type = 'Exodiff'
+    input = 'error_fraction_marker_no_clear_test.i'
+    exodiff = 'error_fraction_marker_no_clear_test_out.e-s003'
+    scale_refine = 0
+  [../]
 []
