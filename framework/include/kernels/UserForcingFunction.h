@@ -15,37 +15,21 @@
 #ifndef USERFORCINGFUNCTION_H
 #define USERFORCINGFUNCTION_H
 
-#include "Kernel.h"
-
-// Forward Declarations
-class UserForcingFunction;
-class Function;
-
-template <>
-InputParameters validParams<UserForcingFunction>();
+#include "BodyForce.h"
 
 /**
- * Define the Kernel for a user defined forcing function that looks like:
- *
- * test function * forcing function
+ * Deprecated, use BodyForce.
  */
-class UserForcingFunction : public Kernel
+class UserForcingFunction : public BodyForce
 {
 public:
   UserForcingFunction(const InputParameters & parameters);
 
 protected:
-  /**
-   * Evaluate f at the current quadrature point.
-   */
   Real f();
-
-  /**
-   * Computes test function * forcing function.
-   */
-  virtual Real computeQpResidual() override;
-
-  Function & _func;
 };
 
-#endif // USERFORCINGFUNCTION_H
+template <>
+InputParameters validParams<UserForcingFunction>();
+
+#endif

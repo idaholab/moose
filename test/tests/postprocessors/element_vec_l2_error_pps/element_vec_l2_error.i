@@ -75,13 +75,13 @@
 
   # This Kernel can take a function name to use
   [./forcing_u]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = f_u
   [../]
 
   [./forcing_v]
-    type = UserForcingFunction
+    type = BodyForce
     variable = v
     function = f_v
   [../]

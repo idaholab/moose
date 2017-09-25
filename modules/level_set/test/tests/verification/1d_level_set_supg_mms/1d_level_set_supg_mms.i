@@ -56,7 +56,7 @@
     velocity_x = v_x
   [../]
   [./phi_forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = phi
     function = phi_mms
   [../]

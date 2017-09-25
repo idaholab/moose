@@ -99,7 +99,7 @@
 
 [Kernels]
   [./source]
-    type = UserForcingFunction
+    type = BodyForce
     function = 0.1
     variable = porepressure
   [../]

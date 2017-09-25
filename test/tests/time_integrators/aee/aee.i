@@ -38,7 +38,7 @@
   [../]
 
   [./func_time]
-    type = UserForcingFunction
+    type = BodyForce
     variable = Time
     function = func
   [../]
