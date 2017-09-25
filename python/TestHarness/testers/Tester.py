@@ -80,6 +80,7 @@ class Tester(MooseObject):
         self.outfile = None
         self.std_out = ''
         self.exit_code = 0
+        self.process = None
 
         # Bool if test can run
         self._runnable = None
@@ -324,6 +325,7 @@ class Tester(MooseObject):
         cmd = self.getCommand(options)
         cwd = self.getTestDir()
 
+        self.process = None
         try:
             f = TemporaryFile()
             # On Windows, there is an issue with path translation when the command is passed in
