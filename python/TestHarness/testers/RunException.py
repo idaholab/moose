@@ -18,6 +18,8 @@ class RunException(RunApp):
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
+        if (params.isValid("expect_err") == False and params.isValid("expect_assert") == False):
+            raise RuntimeError('Either "expect_err" or "expect_assert" must be supplied in RunException')
 
     def checkRunnable(self, options):
         if options.enable_recover:

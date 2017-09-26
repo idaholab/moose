@@ -1,0 +1,7 @@
+[Tests]
+  [./expect_missing_params]
+    type = RunException
+    input = good.i
+    # Neither expect_err or expect_assert is here
+  [../]
+[]
