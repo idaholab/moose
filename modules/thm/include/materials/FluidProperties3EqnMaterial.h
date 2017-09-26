@@ -57,6 +57,18 @@ protected:
   MaterialProperty<Real> & _dT_drhouA;
   MaterialProperty<Real> & _dT_drhoEA;
 
+  /// Specific enthalpy
+  MaterialProperty<Real> & _h;
+  MaterialProperty<Real> & _dh_drhoA;
+  MaterialProperty<Real> & _dh_drhouA;
+  MaterialProperty<Real> & _dh_drhoEA;
+
+  /// Specific total (stagnation) enthalpy
+  MaterialProperty<Real> & _H;
+  MaterialProperty<Real> & _dH_drhoA;
+  MaterialProperty<Real> & _dH_drhouA;
+  MaterialProperty<Real> & _dH_drhoEA;
+
   /// Sound speed
   MaterialProperty<Real> & _c;
 

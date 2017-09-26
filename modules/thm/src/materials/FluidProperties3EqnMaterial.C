@@ -50,6 +50,16 @@ FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters &
     _dT_drhouA(declarePropertyDerivativeRelap<Real>("T", "rhouA")),
     _dT_drhoEA(declarePropertyDerivativeRelap<Real>("T", "rhoEA")),
 
+    _h(declareProperty<Real>("h")),
+    _dh_drhoA(declarePropertyDerivativeRelap<Real>("h", "rhoA")),
+    _dh_drhouA(declarePropertyDerivativeRelap<Real>("h", "rhouA")),
+    _dh_drhoEA(declarePropertyDerivativeRelap<Real>("h", "rhoEA")),
+
+    _H(declareProperty<Real>("H")),
+    _dH_drhoA(declarePropertyDerivativeRelap<Real>("H", "rhoA")),
+    _dH_drhouA(declarePropertyDerivativeRelap<Real>("H", "rhouA")),
+    _dH_drhoEA(declarePropertyDerivativeRelap<Real>("H", "rhoEA")),
+
     _c(declareProperty<Real>("c")),
 
     _cp(declareProperty<Real>("cp")),
@@ -97,6 +107,19 @@ FluidProperties3EqnMaterial::computeQpProperties()
 
   _dp_drhoEA[_qp] = dp_de * _de_drhoEA[_qp];
   _dT_drhoEA[_qp] = dT_de * _de_drhoEA[_qp];
+
+  _h[_qp] = _e[_qp] + _p[_qp] / _rho[_qp];
+  const Real dh_de = 1;
+  const Real dh_dp = 1.0 / _rho[_qp];
+  const Real dh_drho = -_p[_qp] / _rho[_qp] / _rho[_qp];
+  _dh_drhoA[_qp] = dh_de * _de_drhoA[_qp] + dh_dp * _dp_drhoA[_qp] + dh_drho * _drho_drhoA[_qp];
+  _dh_drhouA[_qp] = dh_de * _de_drhouA[_qp] + dh_dp * _dp_drhouA[_qp];
+  _dh_drhoEA[_qp] = dh_de * _de_drhoEA[_qp] + dh_dp * _dp_drhoEA[_qp];
+
+  _H[_qp] = _h[_qp] + 0.5 * _vel[_qp] * _vel[_qp];
+  _dH_drhoA[_qp] = _dh_drhoA[_qp] + _vel[_qp] * _dvel_drhoA[_qp];
+  _dH_drhouA[_qp] = _dh_drhouA[_qp] + _vel[_qp] * _dvel_drhouA[_qp];
+  _dH_drhoEA[_qp] = _dh_drhoEA[_qp];
 
   _c[_qp] = _fp.c(_v[_qp], _e[_qp]);
   _cp[_qp] = _fp.cp(_v[_qp], _e[_qp]);
