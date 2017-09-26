@@ -48,3 +48,60 @@ TEST(MooseUtils, toUpper)
   std::string specs("RotaryGirder");
   EXPECT_EQ(MooseUtils::toUpper(specs), "ROTARYGIRDER");
 }
+
+TEST(MooseUtils, trim)
+{
+  EXPECT_EQ(MooseUtils::trim("andrew"), "andrew");
+  EXPECT_EQ(MooseUtils::trim("   andrew"), "andrew");
+  EXPECT_EQ(MooseUtils::trim("andrew    "), "andrew");
+  EXPECT_EQ(MooseUtils::trim("      andrew    "), "andrew");
+  EXPECT_EQ(MooseUtils::trim("       "), "");
+  EXPECT_EQ(MooseUtils::trim(""), "");
+  EXPECT_EQ(MooseUtils::trim("andrew edward"), "andrew edward");
+  EXPECT_EQ(MooseUtils::trim("      andrew edward"), "andrew edward");
+  EXPECT_EQ(MooseUtils::trim("andrew edward    "), "andrew edward");
+  EXPECT_EQ(MooseUtils::trim("  andrew edward    "), "andrew edward");
+}
+
+TEST(MooseUtils, tokenizeAndConvert)
+{
+  {
+    std::string raw("1,2,3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+  {
+    std::string raw("1,  2,     3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+  {
+    std::string raw("1    ,2   ,3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+  {
+    std::string raw("1    ,      2   ,       3");
+    std::vector<Real> tokens;
+    MooseUtils::tokenizeAndConvert(raw, tokens, ",");
+    EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
+  }
+}
+
+TEST(MooseUtils, numDigits)
+{
+  EXPECT_EQ(MooseUtils::numDigits(4), 1);
+  EXPECT_EQ(MooseUtils::numDigits(80), 2);
+  EXPECT_EQ(MooseUtils::numDigits(812), 3);
+  EXPECT_EQ(MooseUtils::numDigits(4512), 4);
+  EXPECT_EQ(MooseUtils::numDigits(45434), 5);
+  EXPECT_EQ(MooseUtils::numDigits(984345), 6);
+  EXPECT_EQ(MooseUtils::numDigits(2454351), 7);
+  EXPECT_EQ(MooseUtils::numDigits(14513452), 8);
+  EXPECT_EQ(MooseUtils::numDigits(134123454), 9);
+  EXPECT_EQ(MooseUtils::numDigits(1513253268), 10);
+  EXPECT_EQ(MooseUtils::numDigits(69506060606), 11);
+}

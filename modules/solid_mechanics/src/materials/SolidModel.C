@@ -347,7 +347,7 @@ SolidModel::SolidModel(const InputParameters & parameters)
   {
     _SED = &declareProperty<Real>("strain_energy_density");
     _SED_old = &getMaterialPropertyOld<Real>("strain_energy_density");
-    _Eshelby_tensor = &declareProperty<ColumnMajorMatrix>("Eshelby_tensor");
+    _Eshelby_tensor = &declareProperty<RankTwoTensor>("Eshelby_tensor");
     _J_thermal_term_vec = &declareProperty<RealVectorValue>("J_thermal_term_vec");
     _current_instantaneous_thermal_expansion_coef =
         &declareProperty<Real>("current_instantaneous_thermal_expansion_coef");

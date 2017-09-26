@@ -1,0 +1,52 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov           
+#                       Greg Sjaardema, gdsjaar@sandia.gov          
+#             Run on    2017/03/07   07:43:03 MST
+#  *****************************************************************
+
+#  FILE 1: j_integral_2d_out.e
+#   Title: j_integral_2d_out.e
+#          Dim = 2, Blocks = 1, Nodes = 231, Elements = 200, Nodesets = 6, Sidesets = 3
+#          Vars: Global = 4, Nodal = 7, Element = 5, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+GLOBAL VARIABLES relative 1.e-6 floor 0.0
+	J_1  # min:               0 @ t1	max:      0.74958478 @ t2
+	J_2  # min:               0 @ t1	max:      0.72298651 @ t2
+	J_3  # min:               0 @ t1	max:      0.72242248 @ t2
+	J_4  # min:               0 @ t1	max:       0.7254846 @ t2
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	disp_x  # min:               0 @ t1,n1	max:      0.15206419 @ t2,n227
+	disp_y  # min:               0 @ t1,n1	max:       0.1069202 @ t2,n231
+	q_1     # min:               0 @ t1,n1	max:               1 @ t1,n215
+	q_2     # min:               0 @ t1,n1	max:               1 @ t1,n214
+	q_3     # min:               0 @ t1,n1	max:               1 @ t1,n214
+	q_4     # min:               0 @ t1,n1	max:               1 @ t1,n203
+	temp    # min:               0 @ t1,n1	max:              10 @ t2,n1
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	stress_xx  absolute 1.e-5 # min:               0 @ t1,b1,e1	max:       24.954581 @ t2,b1,e195
+	stress_yy  # min:               0 @ t1,b1,e1	max:       56.520596 @ t2,b1,e191
+	stress_zz  # min:               0 @ t1,b1,e1	max:       41.887766 @ t2,b1,e191
+	vonmises_stress   # min:               0 @ t1,b1,e1	max:       51.610177 @ t2,b1,e191
+	SED        # min:               0 @ t1,b1,e1	max:    0.0087019827 @ t2,b1,e191
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+

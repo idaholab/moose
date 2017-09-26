@@ -38,7 +38,7 @@
 [Functions]
   [./ic_rho]
     type = PiecewiseConstant
-    axis = 0
+    axis = x
     direction = right
     xy_data = '0.5 0.445
                1.0 0.5'
@@ -46,7 +46,7 @@
 
   [./ic_rhou]
     type = PiecewiseConstant
-    axis = 0
+    axis = x
     direction = right
     xy_data = '0.5 0.30794
                1.0 0.0'
@@ -54,7 +54,7 @@
 
   [./ic_rhoe]
     type = PiecewiseConstant
-    axis = 0
+    axis = x
     direction = right
     xy_data = '0.5 8.92840289
                1.0 1.4275'

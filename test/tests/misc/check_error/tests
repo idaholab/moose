@@ -150,19 +150,19 @@
   [./function_file_test2]
     type = 'RunException'
     input = 'function_file_test2.i'
-    expect_err = "In Piecewise \S+: Read more than 2 columns of data from file '\S+'.  Did you mean to use \"format = rows\"?"
+    expect_err = "In Piecewise \S+: Read more than two columns of data from file '\S+'.  Did you mean to use \"format = rows\"?"
   [../]
 
   [./function_file_test3]
     type = 'RunException'
     input = 'function_file_test3.i'
-    expect_err = "In Piecewise \S+: Lengths of x and y data do not match in file '\S+'."
+    expect_err = "In Piecewise \S+: Lengths of x and y data do not match."
   [../]
 
   [./function_file_test4]
     type = 'RunException'
     input = 'function_file_test4.i'
-    expect_err = "Invalid option for format: \S+ in ic_function.  Valid options are 'rows' and 'columns'."
+    expect_err = "Invalid option \"ROWLS\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"columns rows\""
   [../]
 
   [./function_file_test5]
@@ -198,25 +198,25 @@
   [./function_file_test10]
     type = 'RunException'
     input = 'function_file_test10.i'
-    expect_err = "In Piecewise \S+: axis=3 outside allowable range \(0-2\)."
+    expect_err = "Invalid option \"3\" in MooseEnum.\s+Valid options \(not case-sensitive\) are \"x y z"
   [../]
 
   [./function_file_test11]
     type = 'RunException'
     input = 'function_file_test11.i'
-    expect_err = "In Piecewise \S+: Read more than 2 columns of data from file '\S+'.  Did you mean to use \"format = rows\" or set \"xy_in_file_only\" to false?"
+    expect_err = "In Piecewise \S+: Read more than two columns of data from file '\S+'.  Did you mean to use \"format = rows\" or set \"xy_in_file_only\" to false?"
   [../]
 
   [./function_file_test12]
     type = 'RunException'
     input = 'function_file_test12.i'
-    expect_err = "In Piecewise \S+: column 3 for y does not exist on line 0"
+    expect_err = "In Piecewise \S+: The 'y_index_in_file' is out-of-range of the available data in '\S+', which contains 3 columns of data."
   [../]
 
   [./function_file_test13]
     type = 'RunException'
     input = 'function_file_test13.i'
-    expect_err = "In Piecewise \S+: column 3 for x does not exist on line 0"
+    expect_err = "In Piecewise \S+: The 'x_index_in_file' is out-of-range of the available data in '\S+', which contains 3 columns of data."
   [../]
 
   [./function_file_test14]
@@ -228,13 +228,13 @@
   [./function_file_test15]
     type = 'RunException'
     input = 'function_file_test15.i'
-    expect_err = "In Piecewise \S+: File '\S+' with 3 valid rows contains no x data."
+    expect_err = "In Piecewise \S+: The 'x_index_in_file' is out-of-range of the available data in '\S+', which contains 3 rows of data."
   [../]
 
   [./function_file_test16]
     type = 'RunException'
     input = 'function_file_test16.i'
-    expect_err = "In Piecewise \S+: File '\S+' with 3 valid rows contains no y data."
+    expect_err = "In Piecewise \S+: The 'y_index_in_file' is out-of-range of the available data in '\S+', which contains 3 rows of data."
   [../]
 
   [./function_file_test17]
@@ -288,7 +288,7 @@
   [./missing_function_file_test]
     type = 'RunException'
     input = 'missing_function_file_test.i'
-    expect_err = "In Piecewise \S+: Error opening file '\S+'"
+    expect_err = "Unable to open file \S+. Check to make sure that it exists and that you have read permission."
   [../]
 
   [./missing_function_test]

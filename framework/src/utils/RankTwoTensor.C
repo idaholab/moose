@@ -10,6 +10,7 @@
 #include "MaterialProperty.h"
 #include "MooseEnum.h"
 #include "MooseUtils.h"
+#include "ColumnMajorMatrix.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
@@ -497,6 +498,20 @@ RankTwoTensor::operator==(const RankTwoTensor & a) const
         return false;
 
   return true;
+}
+
+RankTwoTensor &
+RankTwoTensor::operator=(const ColumnMajorMatrix & a)
+{
+  if (a.n() != N || a.m() != N)
+    mooseError("Dimensions of ColumnMajorMatrix are incompatible with RankTwoTensor");
+
+  const Real * cmm_rawdata = a.rawData();
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      _vals[i * N + j] = cmm_rawdata[i + j * N];
+
+  return *this;
 }
 
 Real

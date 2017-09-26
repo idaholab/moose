@@ -26,21 +26,21 @@
 [Functions]
   [./ic_rho]
     type = PiecewiseConstant
-    axis = 0
+    axis = x
     direction = right
     xy_data = '1.0 1.0'
   [../]
 
   [./ic_rhou]
     type = PiecewiseConstant
-    axis = 0
+    axis = x
     direction = right
     xy_data = '1.0 0.0'
   [../]
 
   [./ic_rhoe]
     type = PiecewiseConstant
-    axis = 0
+    axis = x
     direction = right
     xy_data = '0.1 2500
                0.9 0.025
