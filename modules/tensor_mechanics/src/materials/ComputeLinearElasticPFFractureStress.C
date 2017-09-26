@@ -39,7 +39,7 @@ ComputeLinearElasticPFFractureStress::ComputeLinearElasticPFFractureStress(
         declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
 
     _H0_pos(declareProperty<Real>("H0_pos")),
-    _H0_pos_old(declarePropertyOld<Real>("H0_pos"))
+    _H0_pos_old(getPropertyOld<Real>("H0_pos"))
 
 {
 }
@@ -67,7 +67,6 @@ ComputeLinearElasticPFFractureStress::computeQpStress()
 
   RankTwoTensor eigvec;
   std::vector<Real> eigval(LIBMESH_DIM);
-  std::vector<Real> eigabs(LIBMESH_DIM);
   RankTwoTensor stresscal = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
   stresscal.symmetricEigenvaluesEigenvectors(eigval, eigvec);
   RankTwoTensor Ipos, Ineg, eigval_tensor;
