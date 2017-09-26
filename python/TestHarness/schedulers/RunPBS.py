@@ -1,6 +1,5 @@
 from QueueManager import QueueManager
 import os, re
-from TestHarness import util
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):

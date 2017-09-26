@@ -110,7 +110,6 @@ class DAG(object):
 
         if dep_node not in graph.get(ind_node, []):
             raise KeyError('this edge does not exist in graph')
-
         graph[ind_node].remove(dep_node)
 
     def rename_edges(self, old_task_name, new_task_name, graph=None):
@@ -147,7 +146,8 @@ class DAG(object):
         return list(graph[node])
 
     def all_downstreams(self, node, graph=None):
-        """Returns a list of all nodes ultimately downstream
+        """
+        Returns a list of all nodes ultimately downstream
         of the given node in the dependency graph, in
         topological order."""
         if graph is None:
@@ -284,8 +284,10 @@ class DAG(object):
 
     # Added by the MOOSE group
     def reverse_clone(self, graph=None):
-        """ Return a new graph with reversed dependencies based
-        on current graph. """
+        """
+        Return a new graph with reversed dependencies based
+        on current graph.
+        """
         if graph is None:
             graph = self.graph
 

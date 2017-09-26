@@ -511,7 +511,7 @@ class QueueManager(Scheduler):
         if launchable_jobs:
             command = self.postLaunchCommand(launchable_jobs)
             if command:
-                output = util.runCommand(command)
+                util.runCommand(command)
 
     def preLaunch(self, job_dag):
         """ Reverse the test order when we are trying to process results """
