@@ -9,6 +9,7 @@
 
 #include "DerivativeMaterialInterface.h"
 #include "SymmTensor.h"
+#include "RankTwoTensor.h"
 
 // Forward declarations
 class ConstitutiveModel;
@@ -148,7 +149,7 @@ protected:
   // These are used in calculation of the J integral
   MaterialProperty<Real> * _SED;
   const MaterialProperty<Real> * _SED_old;
-  MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
+  MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
 
   // This is used in calculation of the J Integral and Interaction Integral

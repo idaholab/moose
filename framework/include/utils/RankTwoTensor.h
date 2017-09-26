@@ -216,6 +216,9 @@ public:
   /// Defines logical equality with another RankTwoTensor
   bool operator==(const RankTwoTensor & a) const;
 
+  /// Sets _vals to the values in a ColumnMajorMatrix (must be 3x3)
+  RankTwoTensor & operator=(const ColumnMajorMatrix & a);
+
   /// returns _vals_ij * a_ij (sum on i, j)
   Real doubleContraction(const RankTwoTensor & a) const;
 

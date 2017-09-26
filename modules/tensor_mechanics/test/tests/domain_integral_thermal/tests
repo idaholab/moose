@@ -1,0 +1,8 @@
+[Tests]
+  [./test_jthermal]
+    type = 'Exodiff'
+    input = 'j_integral_2d.i'
+    exodiff = 'j_integral_2d_out.e'
+    custom_cmp = 'j_integral_2d.cmp'
+  [../]
+[]
