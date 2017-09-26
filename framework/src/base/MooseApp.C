@@ -540,6 +540,19 @@ MooseApp::runInputFile()
 }
 
 void
+MooseApp::errorCheck()
+{
+  bool warn = _enable_unused_check == WARN_UNUSED;
+  bool err = _enable_unused_check == ERROR_UNUSED;
+  _parser.errorCheck(*_comm, warn, err);
+
+  auto apps = _executioner->feProblem().getMultiAppWarehouse().getObjects();
+  for (auto app : apps)
+    for (unsigned int i = 0; i < app->numLocalApps(); i++)
+      app->localApp(i)->errorCheck();
+}
+
+void
 MooseApp::executeExecutioner()
 {
   // If ready to exit has been set, then just return
@@ -552,12 +565,9 @@ MooseApp::executeExecutioner()
 #ifdef LIBMESH_HAVE_PETSC
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
 #endif
+
     _executioner->init();
-
-    bool warn = _enable_unused_check == WARN_UNUSED;
-    bool err = _enable_unused_check == ERROR_UNUSED;
-    _parser.errorCheck(*_comm, warn, err);
-
+    errorCheck();
     _executioner->execute();
   }
   else
@@ -716,8 +726,11 @@ MooseApp::run()
   if (!_check_input)
     executeExecutioner();
   else
+  {
+    errorCheck();
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
+  }
 
   Moose::perf_log.pop("Full Runtime", "Application");
 }
