@@ -8,6 +8,7 @@
 * [Tensor Classes](tensor_mechanics/TensorClasses.md)
 * [Convergence Criteria](tensor_mechanics/Convergence.md)
 * [Volumetric locking correction](tensor_mechanics/VolumetricLocking.md)
+* [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
 
 The MOOSE tensor mechanics module is a library for simplifying the implementation of simulation tools that solve mechanics problems. It provides a simple approach for implementing even advanced mechanics models.
 
