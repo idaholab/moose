@@ -30,13 +30,13 @@ FuncCoefDiffusion::FuncCoefDiffusion(const InputParameters & parameters)
 Real
 FuncCoefDiffusion::computeQpResidual()
 {
-  Real k = _function.value(_t, _qp);
+  Real k = _function.value(_t, _q_point[_qp]);
   return k * _grad_test[_i][_qp] * _grad_u[_qp];
 }
 
 Real
 FuncCoefDiffusion::computeQpJacobian()
 {
-  Real k = _function.value(_t, _qp);
+  Real k = _function.value(_t, _q_point[_qp]);
   return k * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }

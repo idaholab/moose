@@ -19,7 +19,8 @@ InputParameters
 validParams<CoupledTimeDerivative>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Time derivative Kernel that acts on a coupled variable");
+  params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
+                             "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
   params.addRequiredCoupledVar("v", "Coupled variable");
   return params;
 }
