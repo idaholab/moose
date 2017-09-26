@@ -25,10 +25,9 @@
     variable = u
   [../]
   [./diff]
-    type = CoefDiffusion
+    type = FuncCoefDiffusion
     variable = u
-    coef = 0.0
-    function = diff_f
+    coef = diff_f
   [../]
 []
 
@@ -48,6 +47,8 @@
   type = Transient
   end_time = 1
   solve_type = 'NEWTON'
+  petsc_options_iname = '-snes_type'
+  petsc_options_value = 'test'
 []
 
 [Outputs]

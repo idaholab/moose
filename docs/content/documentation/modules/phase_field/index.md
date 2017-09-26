@@ -7,7 +7,7 @@
 The MOOSE phase field module is a library for simplifying the implementation of simulation tools that employ the phase field model. Multiphysics capability that includes mechanics and heat conduction can be obtained by employing the _tensor mechanics_ and _heat conduction_ modules. More information about this module is found below:
 
 ## Basic Phase Field Model Information
-* [Basic Phase Field Equations](phase_field/Phase Field Equations.md) - Basic information about the equations underlying the phase field module
+* [Basic Phase Field Equations](phase_field/Phase_Field_Equations.md) - Basic information about the equations underlying the phase field module
 * [Expression Builder](Function Materials/ExpressionBuilder.md) - Using automatic differentiation of free energy material objects
 * [Solving Phase Field Models](phase_field/Solving.md) - Basic info about solving phase field models
 * [Function Material Kernels](phase_field/FunctionMaterialKernels.md) - Working with Function Materials that carry around their own derivatives
