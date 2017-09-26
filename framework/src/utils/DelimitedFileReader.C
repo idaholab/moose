@@ -174,6 +174,19 @@ DelimitedFileReader::readData(std::ifstream & stream_data, std::vector<double> &
     count++;
     row.clear();
 
+    // Strip out comments
+    auto pos = line.find('#');
+    if (pos != std::string::npos)
+      line.erase(pos);
+
+    /**
+     * After comments are stripped, we might have white space at the end of the line.
+     * Since we are going to allow users to choose the delimiter, they are unlikely to
+     * choose something like a comma AND white space and we don't want them to worry about that.
+     * We need to trim the line on white space before we tokenize it.
+     */
+    line = MooseUtils::trim(line);
+
     // Ignore empty lines
     if (line.empty())
     {
