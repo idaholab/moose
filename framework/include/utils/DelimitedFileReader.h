@@ -42,8 +42,8 @@ class DelimitedFileReader
 public:
   enum class HeaderFlag
   {
-    FALSE = 0,
-    TRUE = 1,
+    OFF = 0,
+    ON = 1,
     AUTO = 2
   };
 
