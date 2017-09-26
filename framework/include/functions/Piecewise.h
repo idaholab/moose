@@ -37,20 +37,31 @@ public:
   virtual Real domain(int i);
   virtual Real range(int i);
 
+  /**
+   * Provides a means for explicitly setting the x and y data.
+   */
+  void setData(const std::vector<Real> & x, const std::vector<Real> & y);
+
 protected:
+  /**
+   * Reads data from supplied CSV file.
+   */
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromFile();
+
+  /**
+   * Builds data from 'x' and 'y' parameters.
+   */
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromXandY();
+
+  /**
+   * Builds data from 'xy_data' parameter.
+   */
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromXY();
+
   const Real _scale_factor;
   std::unique_ptr<LinearInterpolation> _linear_interp;
   int _axis;
   bool _has_axis;
-
-private:
-  const std::string _data_file_name;
-  unsigned int _x_index;
-  unsigned int _y_index;
-  bool _xy_only;
-  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
-  void parseRows(std::vector<Real> & x, std::vector<Real> & y);
-  void parseColumns(std::vector<Real> & x, std::vector<Real> & y);
 };
 
 #endif

@@ -22,15 +22,16 @@
 
 #include "libmesh/parallel.h"
 
+// MOOSE includes
+#include "MooseEnum.h"
+
 namespace MooseUtils
 {
 
 /**
  * Utility class for reading delimited data (e.g., CSV data).
- * @param header (Default: true) When true it is assumed that the first row contains the column
- *                header strings, which are extracted and available in the 'getColumnNames' method.
- *                If false, the names are generated in numeric order: "0", "1", etc.
- * @param delimiter (Default: ",") The delimiter separating the data and header.
+ * @param filename A string for the filename to read.
+ * @param comm A pointer to a Communicator object (see below).
  *
  * This class assumes that all data is numeric and can be converted to a C++ double. If a
  * Communicator is provide then it will only read on processor 0 and broadcast the data to all
@@ -39,9 +40,22 @@ namespace MooseUtils
 class DelimitedFileReader
 {
 public:
+  enum class HeaderFlag
+  {
+    FALSE = 0,
+    TRUE = 1,
+    AUTO = 2
+  };
+
+  enum class FormatFlag
+  {
+    COLUMNS = 0,
+    ROWS = 1
+  };
+
+  const std::size_t INVALID_SIZE = std::numeric_limits<std::size_t>::max();
+
   DelimitedFileReader(const std::string & filename,
-                      const bool header = true,
-                      const std::string delimiter = ",",
                       const libMesh::Parallel::Communicator * comm = nullptr);
 
   /**
@@ -51,60 +65,134 @@ public:
    */
   void read();
 
+  ///@{
   /**
-   * Return the column names.
-   */
-  const std::vector<std::string> & getColumnNames() const;
-
-  /**
-   * Toggle for handling empty lines.
+   * Set/Get methods for file format controls.
+   *     IgnoreEmptyLines: When true all empty lines are ignored, when false an error is produced.
+   *     FormatFlag: Set the file format (rows vs. columns).
+   *     Delimiter: Set the file delimiter (if unset it will be detected).
+   *     HeaderFlag: Set the header flag (TRUE used the first row has header, FALSE assumes no
+   *                 header, and AUTO will attempt to determine if a header exists).
+   *     Comment: Set the comment character, by default no comment character is used.
    */
   void setIgnoreEmptyLines(bool value) { _ignore_empty_lines = value; }
+  bool getIgnoreEmptyLines() const { return _ignore_empty_lines; }
+
+  void setFormatFlag(FormatFlag value) { _format_flag = value; }
+  FormatFlag getFormatFlag() const { return _format_flag; }
+
+  void setDelimiter(const std::string & value) { _delimiter = value; }
+  const std::string & setDelimiter() const { return _delimiter; }
+
+  void setHeaderFlag(HeaderFlag value) { _header_flag = value; }
+  HeaderFlag getHeaderFlag() const { return _header_flag; }
+
+  void setComment(const std::string & value) { _row_comment = value; }
+  const std::string & getComment() const { return _row_comment; }
+  ///@}
 
   /**
-   * Return the columns of data.
+   * Return the column/row names.
+   */
+  const std::vector<std::string> & getNames() const;
+
+  /**
+   * Return the rows/columns of data.
    *
    * The outer vector is column and the inner the rows.
    */
-  const std::vector<std::vector<double>> & getColumnData() const;
+  const std::vector<std::vector<double>> & getData() const;
 
+  ///@{
   /**
-   * Return the column of data for a specified header entry
+   * Return the row/column of data for a specified header entry
    */
+  const std::vector<double> & getData(const std::string & name) const;
+  const std::vector<double> & getData(std::size_t index) const;
+  ///@}
+
+  ///@{
+  /**
+   * Deprecated
+   */
+  void setHeaderFlag(bool value);
+  const std::vector<std::string> & getColumnNames() const;
+  const std::vector<std::vector<double>> & getColumnData() const;
   const std::vector<double> & getColumnData(const std::string & name) const;
+  DelimitedFileReader(const std::string & filename,
+                      const bool header,
+                      const std::string delimiter,
+                      const libMesh::Parallel::Communicator * comm = nullptr);
+  ///@}
 
 protected:
   /// The supplied filename.
   const std::string _filename;
 
   /// Flag indicating if the file contains a header.
-  const bool _header;
+  HeaderFlag _header_flag;
 
   /// The delimiter separating the supplied data entires.
-  const std::string _delimiter;
+  std::string _delimiter;
 
   /// Flag for ignoring empty lines
   bool _ignore_empty_lines;
 
   /// Storage for the read or generated column names.
-  std::vector<std::string> _column_names;
+  std::vector<std::string> _names;
 
   /// Storage for the read data columns.
   std::vector<std::vector<double>> _data;
 
-  // Communicator
+  /// Communicator
   const libMesh::Parallel::Communicator * _communicator;
 
+  /// Format "rows" vs "columns"
+  FormatFlag _format_flag;
+
+  /// Row offsets (only used with _format == "rows")
+  std::vector<std::size_t> _row_offsets;
+
+  /// Hide row comments
+  std::string _row_comment;
+
 private:
+  ///@{
   /**
-   * Read or generate header names.
+   * Read the numeric data as rows or columns into a single vector.
    */
-  void initializeColumns(std::ifstream & stream_data);
+  void readColumnData(std::ifstream & stream_data, std::vector<double> & output);
+  void readRowData(std::ifstream & stream_data, std::vector<double> & output);
+  ///@}
 
   /**
-   * Read the numeric data and return a single vector for broadcasting
+   * Populate supplied vector with content from line.
+   * @param line The line to extract data from.
+   * @param row The vector to populate.
+   * @param num The current line number.
    */
-  void readData(std::ifstream & stream_data, std::vector<double> & output);
+  void processLine(const std::string & line, std::vector<double> & row, const unsigned int & num);
+
+  /**
+   * Check the content of the line and if it should be skipped.
+   * @param line Complete line being read.
+   * @param num The current line number.
+   * @returns True if the line should be skipped.
+   */
+  bool preprocessLine(std::string & line, const unsigned int & num);
+
+  /**
+   * Determine the delimiter.
+   *
+   * If the setDelimiter method is not called the data is inspected, if a ',' is found it is assumed
+   * to be the delimiter as is the case for \t. Otherwise a space is used.
+   */
+  const std::string & delimiter(const std::string & line);
+
+  /**
+   * Return the header flag, if it is set to AUTO attempt to determine if a header exists in line.
+   */
+  bool header(const std::string & line);
 };
 }
 

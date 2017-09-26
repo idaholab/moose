@@ -88,10 +88,13 @@ escape(std::string & str)
 }
 
 std::string
-trim(std::string str, const std::string & white_space)
+trim(const std::string & str, const std::string & white_space)
 {
-  std::string r = str.erase(str.find_last_not_of(white_space) + 1);
-  return r.erase(0, r.find_first_not_of(white_space));
+  const auto begin = str.find_first_not_of(white_space);
+  if (begin == std::string::npos)
+    return ""; // no content
+  const auto end = str.find_last_not_of(white_space);
+  return str.substr(begin, end - begin + 1);
 }
 
 bool

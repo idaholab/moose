@@ -91,11 +91,11 @@ PolycrystalCircles::precomputeGrainStructure()
   {
     // Read file
     const FileName file_name = getParam<FileName>("file_name");
-    MooseUtils::DelimitedFileReader txt_reader(file_name, true, " ", &_communicator);
+    MooseUtils::DelimitedFileReader txt_reader(file_name, &_communicator);
 
     txt_reader.read();
-    std::vector<std::string> col_names = txt_reader.getColumnNames();
-    std::vector<std::vector<Real>> data = txt_reader.getColumnData();
+    std::vector<std::string> col_names = txt_reader.getNames();
+    std::vector<std::vector<Real>> data = txt_reader.getData();
     _grain_num = data[0].size();
     _centerpoints.resize(_grain_num);
 
