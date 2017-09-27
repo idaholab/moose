@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MatDGKernel_H
-#define MatDGKernel_H
+#ifndef MATDGKERNEL_H
+#define MATDGKERNEL_H
 
 #include "DGKernel.h"
 
