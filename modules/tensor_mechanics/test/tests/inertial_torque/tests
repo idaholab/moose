@@ -1,0 +1,12 @@
+[Tests]
+  [./residual]
+    type = 'CSVDiff'
+    input = 'residual.i'
+    csvdiff = 'residual_out.csv'
+  [../]
+  [./simple]
+    type = 'CSVDiff'
+    input = 'simple.i'
+    csvdiff = 'simple_out.csv'
+  [../]
+[]
