@@ -53,11 +53,6 @@ MonotoneCubicInterpolation::errorCheck()
 
   if (error)
     throw std::domain_error("x-values are not strictly increasing");
-
-  // checkMonotone();
-  // if (_monotonic_status == monotonic_not)
-  //   throw std::domain_error("Don't ask for a monotonic interpolation routine if your dependent "
-  //                           "variable data isn't monotonic.");
 }
 
 Real
@@ -69,30 +64,6 @@ MonotoneCubicInterpolation::sign(const Real & x) const
     return 1;
   else
     return 0;
-}
-
-void
-MonotoneCubicInterpolation::checkMonotone()
-{
-  Real y_diff = _y[1] - _y[0];
-  Real s = sign(y_diff);
-  for (unsigned int i = 1; i < _y.size() - 1; ++i)
-  {
-    y_diff = _y[i + 1] - _y[i];
-    if (s == 0)
-      s = sign(y_diff);
-    if (s * y_diff < 0)
-    {
-      _monotonic_status = monotonic_not;
-      return;
-    }
-  }
-  if (s > 0)
-    _monotonic_status = monotonic_increase;
-  else if (s < 0)
-    _monotonic_status = monotonic_decrease;
-  else
-    _monotonic_status = monotonic_constant;
 }
 
 Real

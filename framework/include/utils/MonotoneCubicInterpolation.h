@@ -91,15 +91,6 @@ protected:
   // Error check routines run during initialization
   virtual void errorCheck();
   Real sign(const Real & x) const;
-  enum MonotonicStatus
-  {
-    monotonic_increase,
-    monotonic_decrease,
-    monotonic_constant,
-    monotonic_not
-  };
-  MonotonicStatus _monotonic_status;
-  void checkMonotone();
 
   // Building blocks of Hermite polynomials
   Real phi(const Real & t) const;
