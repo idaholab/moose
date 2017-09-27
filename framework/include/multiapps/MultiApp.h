@@ -189,7 +189,7 @@ public:
   /**
    * @return Number of Apps on local processor.
    */
-  unsigned int numLocalApps() { return _my_num_apps; }
+  unsigned int numLocalApps() { return _apps.size(); }
 
   /**
    * @return The global number of the first app on the local processor.

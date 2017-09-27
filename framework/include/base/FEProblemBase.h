@@ -1295,6 +1295,8 @@ public:
    */
   void reportMooseObjectDependency(MooseObject * a, MooseObject * b);
 
+  ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
+
 protected:
   ///@{
   /**
