@@ -339,9 +339,9 @@ DelimitedFileReader::header(const std::string & line)
 {
   switch (_header_flag)
   {
-    case HeaderFlag::FALSE:
+    case HeaderFlag::OFF:
       return false;
-    case HeaderFlag::TRUE:
+    case HeaderFlag::ON:
       return true;
     default:
 
@@ -351,7 +351,7 @@ DelimitedFileReader::header(const std::string & line)
 
       // Based on auto detect set the flag to TRUE|FALSE to short-circuit this check for each line
       // in the case of row data.
-      _header_flag = contains_alpha ? HeaderFlag::TRUE : HeaderFlag::FALSE;
+      _header_flag = contains_alpha ? HeaderFlag::ON : HeaderFlag::OFF;
       return contains_alpha;
   }
 }
@@ -364,7 +364,7 @@ DelimitedFileReader::DelimitedFileReader(const std::string & filename,
                                          const std::string delimiter,
                                          const libMesh::Parallel::Communicator * comm)
   : _filename(filename),
-    _header_flag(header ? HeaderFlag::TRUE : HeaderFlag::AUTO),
+    _header_flag(header ? HeaderFlag::ON : HeaderFlag::AUTO),
     _delimiter(delimiter),
     _ignore_empty_lines(true),
     _communicator(comm),
@@ -398,7 +398,7 @@ void
 DelimitedFileReader::setHeaderFlag(bool value)
 {
   mooseDeprecated("Use header method with HeaderFlag input.");
-  _header_flag = value ? HeaderFlag::TRUE : HeaderFlag::FALSE;
+  _header_flag = value ? HeaderFlag::ON : HeaderFlag::OFF;
 }
 
 } // MooseUtils

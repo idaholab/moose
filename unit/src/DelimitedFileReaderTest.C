@@ -322,7 +322,7 @@ TEST(DelimitedFileReader, AutoHeader)
 
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
-    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::ON);
     reader.read();
 
     std::vector<std::vector<double>> gold = {
@@ -336,7 +336,7 @@ TEST(DelimitedFileReader, AutoHeader)
   try
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example.csv");
-    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::OFF);
     reader.read();
     FAIL();
   }
@@ -366,7 +366,7 @@ TEST(DelimitedFileReader, AutoNoHeader)
 
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
-    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::FALSE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::OFF);
     reader.read();
 
     std::vector<std::vector<double>> gold = {
@@ -379,7 +379,7 @@ TEST(DelimitedFileReader, AutoNoHeader)
 
   {
     MooseUtils::DelimitedFileReader reader("data/csv/example_no_header.csv");
-    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::TRUE);
+    reader.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::ON);
     reader.read();
 
     std::vector<std::vector<double>> gold = {{1980, 2011, 2013}, {10, 5, 5}, {9, 1, 15}};
