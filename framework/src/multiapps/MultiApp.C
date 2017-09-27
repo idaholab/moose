@@ -185,11 +185,7 @@ MultiApp::init(unsigned int num)
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
-}
 
-void
-MultiApp::initialSetup()
-{
   if (!_has_an_app)
     return;
 
@@ -203,6 +199,11 @@ MultiApp::initialSetup()
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
     createApp(i, _app.getGlobalTimeOffset());
+}
+
+void
+MultiApp::initialSetup()
+{
 }
 
 void
