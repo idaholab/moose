@@ -29,6 +29,8 @@ validParams<InertialForce>()
                         0,
                         "alpha parameter for mass dependent numerical damping induced "
                         "by HHT time integration scheme");
+  params.addParam<MaterialPropertyName>(
+      "density", "density", "Name of Material Property that provides the density");
   return params;
 }
 
