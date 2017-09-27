@@ -201,4 +201,5 @@
 [Outputs]
   file_base = j_integral_3d_topo_q_func_out
   exodus = true
+  csv = true
 []
