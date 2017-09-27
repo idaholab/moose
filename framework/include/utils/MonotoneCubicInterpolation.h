@@ -163,6 +163,7 @@ protected:
 
   unsigned int _n_knots;
   unsigned int _n_intervals;
+  unsigned int _internal_knots;
 };
 
 #endif
