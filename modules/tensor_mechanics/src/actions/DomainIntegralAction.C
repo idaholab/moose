@@ -11,7 +11,6 @@
 #include "FEProblem.h"
 #include "Parser.h"
 #include "CrackFrontDefinition.h"
-#include "InteractionIntegralAuxFields.h"
 #include "MooseMesh.h"
 
 #include "libmesh/string_to_enum.h"
@@ -458,6 +457,7 @@ DomainIntegralAction::act()
             aux_mode_name = "_I_";
             params.set<Real>("K_factor") =
                 0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
+            params.set<MooseEnum>("sif_mode") = "KI";
             break;
 
           case INTERACTION_INTEGRAL_KII:
@@ -465,12 +465,14 @@ DomainIntegralAction::act()
             aux_mode_name = "_II_";
             params.set<Real>("K_factor") =
                 0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
+            params.set<MooseEnum>("sif_mode") = "KII";
             break;
 
           case INTERACTION_INTEGRAL_KIII:
             pp_base_name = "II_KIII";
             aux_mode_name = "_III_";
             params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1.0 + _poissons_ratio);
+            params.set<MooseEnum>("sif_mode") = "KIII";
             break;
 
           case INTERACTION_INTEGRAL_T:
@@ -478,6 +480,7 @@ DomainIntegralAction::act()
             aux_mode_name = "_T_";
             params.set<Real>("K_factor") = _youngs_modulus / (1 - std::pow(_poissons_ratio, 2));
             params.set<bool>("t_stress") = true;
+            params.set<MooseEnum>("sif_mode") = "T";
             break;
         }
 
@@ -495,11 +498,6 @@ DomainIntegralAction::act()
             std::ostringstream pp_name_stream;
             pp_name_stream << pp_base_name << "_" << _ring_vec[ring_index];
 
-            std::string aux_stress_name = aux_stress_base_name + aux_mode_name + "1";
-            std::string aux_grad_disp_name = aux_grad_disp_base_name + aux_mode_name + "1";
-            params.set<MaterialPropertyName>("aux_stress") = aux_stress_name;
-            params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name;
-
             _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
           }
           else
@@ -514,14 +512,6 @@ DomainIntegralAction::act()
                              << _ring_vec[ring_index];
               std::ostringstream cfn_index_stream;
               cfn_index_stream << cfp_index + 1;
-
-              std::ostringstream aux_stress_name_stream;
-              aux_stress_name_stream << aux_stress_base_name << aux_mode_name << cfp_index + 1;
-              std::ostringstream aux_grad_disp_name_stream;
-              aux_grad_disp_name_stream << aux_grad_disp_base_name << aux_mode_name
-                                        << cfp_index + 1;
-              params.set<MaterialPropertyName>("aux_stress") = aux_stress_name_stream.str();
-              params.set<MaterialPropertyName>("aux_grad_disp") = aux_grad_disp_name_stream.str();
 
               params.set<unsigned int>("crack_front_point_index") = cfp_index;
               _problem->addPostprocessor(pp_type_name, pp_name_stream.str(), params);
@@ -693,83 +683,6 @@ DomainIntegralAction::act()
         }
         params.set<std::vector<PostprocessorName>>("postprocessors") = postprocessor_names;
         _problem->addVectorPostprocessor(vpp_type_name, vpp_name_stream.str(), params);
-      }
-    }
-  }
-
-  else if (_current_task == "add_material")
-  {
-    int n_int_integrals = 0;
-    int i_ki = 0;
-    int i_kii = 0;
-    int i_kiii = 0;
-    int i_t = 0;
-
-    if (_integrals.count(INTERACTION_INTEGRAL_KI) != 0)
-    {
-      i_ki = n_int_integrals;
-      n_int_integrals++;
-    }
-    if (_integrals.count(INTERACTION_INTEGRAL_KII) != 0)
-    {
-      i_kii = n_int_integrals;
-      n_int_integrals++;
-    }
-    if (_integrals.count(INTERACTION_INTEGRAL_KIII) != 0)
-    {
-      i_kiii = n_int_integrals;
-      n_int_integrals++;
-    }
-    if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
-    {
-      i_t = n_int_integrals;
-      n_int_integrals++;
-    }
-
-    std::vector<MooseEnum> sif_mode_enum_vec(
-        InteractionIntegralAuxFields::getSIFModesVec(n_int_integrals));
-
-    if (_integrals.count(INTERACTION_INTEGRAL_KI) != 0)
-      sif_mode_enum_vec[i_ki] = "KI";
-    if (_integrals.count(INTERACTION_INTEGRAL_KII) != 0)
-      sif_mode_enum_vec[i_kii] = "KII";
-    if (_integrals.count(INTERACTION_INTEGRAL_KIII) != 0)
-      sif_mode_enum_vec[i_kiii] = "KIII";
-    if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
-      sif_mode_enum_vec[i_t] = "T";
-
-    if (sif_mode_enum_vec.size() > 0)
-    {
-      const std::string mater_base_name("auxFields");
-      const std::string mater_type_name("InteractionIntegralAuxFields");
-      InputParameters params = _factory.getValidParams(mater_type_name);
-      params.set<UserObjectName>("crack_front_definition") = uo_name;
-      params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-      params.set<std::vector<MooseEnum>>("sif_modes") = sif_mode_enum_vec;
-      params.set<Real>("poissons_ratio") = _poissons_ratio;
-      params.set<Real>("youngs_modulus") = _youngs_modulus;
-      params.set<std::vector<SubdomainName>>("block") = _blocks;
-
-      if (_treat_as_2d)
-      {
-        std::ostringstream mater_name_stream;
-        mater_name_stream << mater_base_name << "_1";
-        params.set<unsigned int>("crack_front_point_index") = 0;
-        params.set<std::string>("appended_index_name") = "1";
-        _problem->addMaterial(mater_type_name, mater_name_stream.str(), params);
-      }
-      else
-      {
-        for (unsigned int cfp_index = 0; cfp_index < num_crack_front_points; ++cfp_index)
-        {
-          std::ostringstream mater_name_stream;
-          mater_name_stream << mater_base_name << "_" << cfp_index + 1;
-          params.set<unsigned int>("crack_front_point_index") = cfp_index;
-          std::ostringstream cfn_index_stream;
-          cfn_index_stream << cfp_index + 1;
-          params.set<std::string>("appended_index_name") = cfn_index_stream.str();
-          _problem->addMaterial(mater_type_name, mater_name_stream.str(), params);
-        }
       }
     }
   }
