@@ -38,12 +38,8 @@ class IncludeExtension(MooseMarkdownExtension):
         """
         md.registerExtension(self)
         config = self.getConfigs()
-        if 'fenced_code_block' in md.preprocessors:
-            loc = '>fenced_code_block'
-        else:
-            loc = '_begin'
         md.preprocessors.add('moose-markdown-include',
-                             MarkdownPreprocessor(markdown_instance=md, **config), loc)
+                             MarkdownPreprocessor(markdown_instance=md, **config), '_begin')
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """Create IncludeExtension"""
@@ -54,7 +50,7 @@ class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
     An recursive include command for including a markdown file from within another. This adds the
     ability to specify start/end string to include only portions for the markdown.
     """
-    REGEX = r'^!include\s+(.*?)(?:$|\s+)(.*)'
+    REGEX = r'(?<!^```\n)^!include\s+(.*?)(?:$|\s+)(.*)'
 
     @staticmethod
     def defaultSettings():
