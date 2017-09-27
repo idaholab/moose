@@ -40,7 +40,6 @@ ComputeLinearElasticPFFractureStress::ComputeLinearElasticPFFractureStress(
 
     _H0_pos(declareProperty<Real>("H0_pos")),
     _H0_pos_old(getPropertyOld<Real>("H0_pos"))
-
 {
 }
 
@@ -49,7 +48,6 @@ ComputeLinearElasticPFFractureStress::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
   _H0_pos[_qp] = 0.0;
-  _H0_pos_old[_qp] = 0.0;
 }
 
 void

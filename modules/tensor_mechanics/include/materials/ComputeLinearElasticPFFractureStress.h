@@ -41,7 +41,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _dstress_dc;
 
   MaterialProperty<Real> & _H0_pos;
-  MaterialProperty<Real> & _H0_pos_old; // History variable from previous timestep
+  MaterialProperty<Real> & _H0_pos_old;
+  /// History variable from previous timestep
 };
 
 #endif // COMPUTELINEARELASTICPFFRACTURESTRESS_H
