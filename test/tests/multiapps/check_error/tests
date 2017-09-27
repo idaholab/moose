@@ -5,6 +5,13 @@
     expect_err = 'The following required'
   [../]
 
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files="sub_unused.i"'
+    expect_err = 'unused parameter'
+  [../]
+
   [./positions]
     type = 'RunException'
     input = 'check_error.i'

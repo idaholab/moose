@@ -136,7 +136,7 @@ private:
 };
 
 std::vector<std::string>
-findSimilar(std::string param, std::vector<std::string> options, int dist_cutoff = 3)
+findSimilar(std::string param, std::vector<std::string> options)
 {
   std::vector<std::string> candidates;
   if (options.size() == 0)
@@ -146,6 +146,8 @@ findSimilar(std::string param, std::vector<std::string> options, int dist_cutoff
   for (auto & opt : options)
   {
     int dist = MooseUtils::levenshteinDist(opt, param);
+    // magic number heuristics to get similarity distance cutoff
+    int dist_cutoff = 1 + param.size() / 5;
     if (dist > dist_cutoff || dist > mindist)
       continue;
 
