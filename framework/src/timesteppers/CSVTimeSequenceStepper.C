@@ -37,8 +37,8 @@ CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameter
   : TimeSequenceStepperBase(parameters),
     _file_name(getParam<FileName>("file_name")),
     _header(isParamValid("header")
-                ? (getParam<bool>("header") ? MooseUtils::DelimitedFileReader::HeaderFlag::TRUE
-                                            : MooseUtils::DelimitedFileReader::HeaderFlag::FALSE)
+                ? (getParam<bool>("header") ? MooseUtils::DelimitedFileReader::HeaderFlag::ON
+                                            : MooseUtils::DelimitedFileReader::HeaderFlag::OFF)
                 : MooseUtils::DelimitedFileReader::HeaderFlag::AUTO),
     _delimiter(getParam<std::string>("delimiter")),
     _column_name(getParam<std::string>("column_name")),
