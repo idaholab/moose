@@ -12,6 +12,8 @@ InputParameters
 validParams<INSMassBodyForceMMS>()
 {
   InputParameters params = validParams<INSBase>();
+  params.addClassDescription(
+      "Used during MMS testing to consistently include forcing function in PSPG formulation.");
   params.addRequiredParam<FunctionName>("x_vel_forcing_func",
                                         "The x-velocity mms forcing function.");
   params.addParam<FunctionName>("y_vel_forcing_func", 0, "The y-velocity mms forcing function.");

@@ -1,3 +1,5 @@
+# Note that this script requires sympy to be installed in your python environment
+
 import sys, os
 
 split_path = list(filter(None, os.getcwd().split('/')))
