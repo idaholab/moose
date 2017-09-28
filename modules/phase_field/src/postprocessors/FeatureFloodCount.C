@@ -16,7 +16,6 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/periodic_boundaries.h"
@@ -959,11 +958,10 @@ FeatureFloodCount::updateFieldInfo()
       // Fill in the data structure that keeps track of all features per elem
       if (_compute_var_to_feature_map)
       {
-        auto map_it = _entity_var_to_features.lower_bound(entity);
-        if (map_it == _entity_var_to_features.end() || map_it->first != entity)
-          map_it = _entity_var_to_features.emplace_hint(
-              map_it, entity, std::vector<unsigned int>(_n_vars, invalid_id));
-        map_it->second[feature._var_index] = feature._id;
+        auto insert_pair = moose_try_emplace(
+            _entity_var_to_features, entity, std::vector<unsigned int>(_n_vars, invalid_id));
+        auto & vec_ref = insert_pair.first->second;
+        vec_ref[feature._var_index] = feature._id;
       }
     }
 

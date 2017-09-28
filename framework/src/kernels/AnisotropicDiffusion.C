@@ -19,6 +19,8 @@ InputParameters
 validParams<AnisotropicDiffusion>()
 {
   InputParameters p = validParams<Kernel>();
+  p.addClassDescription("Anisotropic diffusion kernel $\\nabla \\cdot -\\widetilde{k} \\nabla u$ "
+                        "with weak form given by $(\\nabla \\psi_i, \\widetilde{k} \\nabla u)$.");
   p.addRequiredParam<RealTensorValue>("tensor_coeff",
                                       "The Tensor to multiply the Diffusion operator by");
   return p;

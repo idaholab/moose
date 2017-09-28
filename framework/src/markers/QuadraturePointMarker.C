@@ -17,7 +17,6 @@
 #include "MooseEnum.h"
 #include "Assembly.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>
@@ -51,7 +50,7 @@ validParams<QuadraturePointMarker>()
 QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters)
   : Marker(parameters),
     Coupleable(this, false),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, blockIDs()),
     _qrule(_assembly.qRule()),
     _q_point(_assembly.qPoints()),
     _qp(0)

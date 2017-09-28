@@ -23,7 +23,6 @@
 #include "MooseVariableScalar.h"
 #include "LockFile.h"
 
-// libMesh includes
 #include "libmesh/exodusII_io.h"
 
 template <>

@@ -18,6 +18,8 @@ InputParameters
 validParams<ConservativeAdvection>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
+                             "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
   return params;
 }

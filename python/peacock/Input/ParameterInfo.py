@@ -74,6 +74,7 @@ class ParameterInfo(object):
             self.user_added or
             ("basic_string" in self.cpp_type and self.name == "value") or
             ("std::string" in self.cpp_type and self.name == "value") or
+            self.cpp_type == "FunctionExpression" or
             ' ' in self.value or
             ';' in self.value or
             '=' in self.value or

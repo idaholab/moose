@@ -11,7 +11,6 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

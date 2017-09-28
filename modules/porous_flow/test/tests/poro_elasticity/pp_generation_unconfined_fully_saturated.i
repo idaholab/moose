@@ -133,7 +133,7 @@
     biot_coefficient = 0.3
   [../]
   [./source]
-    type = UserForcingFunction
+    type = BodyForce
     function = '0.1*exp(8.163265306*0.1*t/3.3333333333)'
     variable = porepressure
   [../]

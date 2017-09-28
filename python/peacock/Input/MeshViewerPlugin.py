@@ -19,6 +19,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
         self.temp_input_file = "peacock_run_mesh_tmp.i"
         self.temp_mesh_file = "peacock_run_mesh_tmp.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
+        self._use_test_objects = True
 
     def _removeFileNoError(self, fname):
         """
@@ -31,6 +32,12 @@ class MeshViewerPlugin(VTKWindowPlugin):
             os.remove(path)
         except:
             pass
+
+    def useTestObjects(self, use_test_objs):
+        """
+        Set to pass the --allow-test-objects flag while generating the mesh
+        """
+        self._use_test_objects = use_test_objs
 
     def meshChanged(self, tree):
         """
@@ -53,8 +60,17 @@ class MeshViewerPlugin(VTKWindowPlugin):
         self._removeFileNoError(self.current_temp_mesh_file)
         self._removeFileNoError(input_file)
         self.needInputFile.emit(input_file)
+
+        if not os.path.exists(input_file):
+            self.meshEnabled.emit(False)
+            self.onFileChanged()
+            self.setLoadingMessage("Error reading temporary input file")
+            return
+
         try:
             args = ["-i", input_file, "--mesh-only", self.current_temp_mesh_file]
+            if self._use_test_objects:
+                args.append("--allow-test-objects")
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
             self.onFileChanged(self.current_temp_mesh_file)

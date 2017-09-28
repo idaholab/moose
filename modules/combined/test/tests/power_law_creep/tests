@@ -7,7 +7,8 @@
   [./power_law_creep_sm]
     type = 'Exodiff'
     input = 'power_law_creep_sm.i'
-    exodiff = 'power_law_creep_out.e'
+    exodiff = 'power_law_creep_sm_out.e'
+    cli_args = 'Outputs/file_base=power_law_creep_sm_out'
     prereq = 'power_law_creep_tm'
   [../]
   [./testRestart1_tm]
@@ -20,7 +21,8 @@
     type = 'Exodiff'
     input = 'power_law_creep_restart2.i'
     prereq = 'testRestart1_tm'
-    exodiff = 'power_law_creep_out.e'
+    exodiff = 'power_law_creep_restart2_tm_out.e'
+    cli_args = 'Outputs/file_base=power_law_creep_restart2_tm_out'
     exodiff_opts = '-TM'
   [../]
   [./testRestart1_sm]
@@ -33,8 +35,9 @@
     type = 'Exodiff'
     input = 'power_law_creep_restart2_sm.i'
     prereq = 'testRestart1_sm'
-    exodiff = 'power_law_creep_out.e'
+    exodiff = 'power_law_creep_restart2_sm_out.e'
     exodiff_opts = '-TM'
+    cli_args = 'Outputs/file_base=power_law_creep_restart2_sm_out'
   [../]
 
   [./plc]

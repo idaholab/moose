@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>
@@ -55,7 +54,7 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
   : BoundaryCondition(parameters, false), // False is because this is NOT nodal
     RandomInterface(parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, boundaryIDs()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _current_side(_assembly.side()),

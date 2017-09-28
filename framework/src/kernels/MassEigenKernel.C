@@ -19,6 +19,8 @@ InputParameters
 validParams<MassEigenKernel>()
 {
   InputParameters params = validParams<EigenKernel>();
+  params.addClassDescription("An eigenkernel with weak form $\\lambda(\\psi_i, -u_h)$ where "
+                             "$\\lambda$ is the eigenvalue.");
   return params;
 }
 

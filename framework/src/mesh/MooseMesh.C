@@ -1003,7 +1003,8 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name,
 
   // On a distributed mesh we may have boundary ids that only exist on
   // other processors.
-  _communicator.set_union(boundary_ids);
+  if (!this->getMesh().is_replicated())
+    _communicator.set_union(boundary_ids);
 
   BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(boundary_ids.rbegin());
 
@@ -1022,7 +1023,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name,
     BoundaryID id;
     std::istringstream ss(boundary_name[i]);
 
-    if (!(ss >> id))
+    if (!(ss >> id) || !ss.eof())
     {
       /**
        * If the conversion from a name to a number fails, that means that this must be a named
@@ -1052,7 +1053,7 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
   SubdomainID id = Moose::INVALID_BLOCK_ID;
   std::istringstream ss(subdomain_name);
 
-  if (!(ss >> id))
+  if (!(ss >> id) || !ss.eof())
     id = getMesh().get_id_by_name(subdomain_name);
 
   return id;
@@ -1077,7 +1078,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
     SubdomainID id = Moose::INVALID_BLOCK_ID;
     std::istringstream ss(subdomain_name[i]);
 
-    if (!(ss >> id))
+    if (!(ss >> id) || !ss.eof())
       id = getMesh().get_id_by_name(subdomain_name[i]);
 
     ids[i] = id;
@@ -2383,7 +2384,7 @@ MooseMesh::getPatchUpdateStrategy() const
   return _patch_update_strategy;
 }
 
-MeshTools::BoundingBox
+BoundingBox
 MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
 {
   // Grab a bounding box to speed things up.  Note that

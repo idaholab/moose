@@ -23,6 +23,8 @@ import logging
 from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
 from pybtex.database.input.bibtex import UndefinedMacro, Person
+from pybtex.database import BibliographyDataError
+
 
 import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
@@ -101,6 +103,7 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
 
         return data
 
+
     def run(self, lines):
         """
         Create a bibliography from cite commands.
@@ -126,6 +129,11 @@ class BibtexPreprocessor(MooseMarkdownCommon, Preprocessor):
                               'in configuration file (e.g. website.yml)', bfile.strip())
                 except TypeError:
                     LOG.error('Unable to locate bibtex file in %s', self.markdown.current.filename)
+                except BibliographyDataError as e:
+                    LOG.error('%s in %s', str(e), self.markdown.current.filename)
+                except Exception as e: #pylint: disable=broad-except
+                    LOG.error('Unknown error in %s when parsing bibtex file: %s', str(e),
+                              self.markdown.current.filename)
         else:
             return lines
 

@@ -19,7 +19,6 @@
 #include "SystemBase.h"
 #include "ExecuteMooseObjectWarehouse.h"
 
-// libMesh include
 #include "libmesh/explicit_system.h"
 #include "libmesh/transient_system.h"
 

@@ -23,6 +23,7 @@ validParams<CoupledBEEquilibriumSub>()
   params.addRequiredParam<std::vector<Real>>(
       "sto_v", "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");
+  params.addClassDescription("Derivative of equilibrium species concentration wrt time");
   return params;
 }
 
@@ -75,10 +76,15 @@ CoupledBEEquilibriumSub::computeQpJacobian()
 Real
 CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Real _val_new = std::pow(10.0, _log_k) * std::pow(_u[_qp], _sto_u);
-
-  if (_vars.size() == 0)
+  // If no coupled species, return 0
+  if (_v_vals.size() == 0)
     return 0.0;
+
+  // If jvar is not one of the coupled species, return 0
+  if (std::find(_vars.begin(), _vars.end(), jvar) == _vars.end())
+    return 0.0;
+
+  Real _val_new = std::pow(10.0, _log_k) * std::pow(_u[_qp], _sto_u);
 
   for (unsigned int i = 0; i < _vars.size(); ++i)
   {

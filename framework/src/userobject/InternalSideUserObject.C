@@ -22,6 +22,7 @@ validParams<InternalSideUserObject>()
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<TwoMaterialPropertyInterface>();
+  params += validParams<TransientInterface>();
   return params;
 }
 

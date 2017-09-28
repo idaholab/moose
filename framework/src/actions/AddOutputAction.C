@@ -22,7 +22,6 @@
 #include "FileMesh.h"
 #include "MooseApp.h"
 
-// libMesh includes
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/explicit_system.h"

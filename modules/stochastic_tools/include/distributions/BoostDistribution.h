@@ -12,6 +12,26 @@
 
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 #include <boost/math/distributions.hpp>
+#else
+class BoostDistributionDummy
+{
+public:
+  BoostDistributionDummy(Real...) {}
+};
+namespace boost
+{
+namespace math
+{
+template <typename T>
+using weibull_distribution = BoostDistributionDummy;
+
+template <typename T>
+using normal_distribution = BoostDistributionDummy;
+
+template <typename T>
+using lognormal_distribution = BoostDistributionDummy;
+}
+}
 #endif
 
 /**
@@ -26,11 +46,11 @@ class BoostDistribution : public Distribution
 public:
   BoostDistribution(const InputParameters & parameters);
 
-protected:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real quantile(const Real & y) override;
 
+protected:
   /// This must be defined by the child class in the constructor
   std::unique_ptr<T> _distribution_unique_ptr;
 };

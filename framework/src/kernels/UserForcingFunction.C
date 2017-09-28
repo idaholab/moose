@@ -19,24 +19,18 @@ template <>
 InputParameters
 validParams<UserForcingFunction>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<FunctionName>("function", "The forcing function");
-  return params;
+  return validParams<BodyForce>();
 }
 
-UserForcingFunction::UserForcingFunction(const InputParameters & parameters)
-  : Kernel(parameters), _func(getFunction("function"))
+UserForcingFunction::UserForcingFunction(const InputParameters & parameters) : BodyForce(parameters)
 {
+  mooseDeprecated("UserForcingFunction has been replaced by BodyForce.");
 }
 
 Real
 UserForcingFunction::f()
 {
-  return _func.value(_t, _q_point[_qp]);
-}
-
-Real
-UserForcingFunction::computeQpResidual()
-{
-  return -_test[_i][_qp] * f();
+  mooseDeprecated("This method is a legacy method from UserForcingFunction, please update your "
+                  "code to use the BodyForce object and the _function member variable instead.");
+  return _function.value(_t, _q_point[_qp]);
 }

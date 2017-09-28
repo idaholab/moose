@@ -14,7 +14,6 @@
 
 #include "ErrorFractionMarker.h"
 
-// libMesh includes
 #include "libmesh/error_vector.h"
 
 template <>
@@ -33,23 +32,35 @@ validParams<ErrorFractionMarker>()
                                     "Elements within this percentage of the max error will "
                                     "be refined.  Must be between 0 and 1!");
 
+  params.addParam<bool>("clear_extremes",
+                        true,
+                        "Whether or not to clear the extremes during each error calculation. "
+                        " Changing this to `false` will result in the global extremes ever "
+                        "encountered during the run to be used as the min and max error.");
+
   params.addClassDescription("Marks elements for refinement or coarsening based on the fraction of "
-                             "the total error from the supplied indicator.");
+                             "the min/max error from the supplied indicator.");
   return params;
 }
 
 ErrorFractionMarker::ErrorFractionMarker(const InputParameters & parameters)
   : IndicatorMarker(parameters),
     _coarsen(parameters.get<Real>("coarsen")),
-    _refine(parameters.get<Real>("refine"))
+    _refine(parameters.get<Real>("refine")),
+    _clear_extremes(parameters.get<bool>("clear_extremes")),
+    _max(0),
+    _min(std::numeric_limits<Real>::max())
 {
 }
 
 void
 ErrorFractionMarker::markerSetup()
 {
-  _min = std::numeric_limits<Real>::max();
-  _max = 0;
+  if (_clear_extremes)
+  {
+    _min = std::numeric_limits<Real>::max();
+    _max = 0;
+  }
 
   // First find the max and min error
   for (const auto & val : _error_vector)

@@ -9,6 +9,8 @@
 // Distributions
 #include "UniformDistribution.h"
 #include "WeibullDistribution.h"
+#include "NormalDistribution.h"
+#include "LognormalDistribution.h"
 
 // Samplers
 #include "MonteCarloSampler.h"
@@ -16,12 +18,14 @@
 
 // VectorPostprocessors
 #include "SamplerData.h"
+#include "StochasticResults.h"
 
 // MultiApps
 #include "SamplerMultiApp.h"
 
 // Transfers
 #include "SamplerTransfer.h"
+#include "SamplerPostprocessorTransfer.h"
 
 // Controls
 #include "SamplerReceiver.h"
@@ -72,6 +76,8 @@ StochasticToolsApp::registerObjects(Factory & factory)
   // Distributions
   registerDistribution(UniformDistribution);
   registerDistribution(WeibullDistribution);
+  registerDistribution(NormalDistribution);
+  registerDistribution(LognormalDistribution);
 
   // Samplers
   registerSampler(MonteCarloSampler);
@@ -79,16 +85,17 @@ StochasticToolsApp::registerObjects(Factory & factory)
 
   // VectorPostprocessors
   registerVectorPostprocessor(SamplerData);
+  registerVectorPostprocessor(StochasticResults);
 
   // MultiApps
   registerMultiApp(SamplerMultiApp);
 
   // Transfers
   registerTransfer(SamplerTransfer);
+  registerTransfer(SamplerPostprocessorTransfer);
 
   // Controls
   registerControl(SamplerReceiver);
-
 }
 
 // External entry point for dynamic syntax association

@@ -11,7 +11,6 @@
 // MOOSE includes
 #include "GeneralUserObject.h"
 
-// libMesh includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"

@@ -22,7 +22,6 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/equation_systems.h"

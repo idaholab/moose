@@ -42,5 +42,5 @@ ComputeThermalExpansionEigenstrainBase::computeQpEigenstrain()
   _eigenstrain[_qp].addIa(thermal_strain);
 
   _deigenstrain_dT[_qp].zero();
-  _deigenstrain_dT[_qp].addIa(-instantaneous_cte);
+  _deigenstrain_dT[_qp].addIa(instantaneous_cte);
 }

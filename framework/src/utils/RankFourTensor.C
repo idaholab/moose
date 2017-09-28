@@ -15,7 +15,6 @@
 #include "MaterialProperty.h"
 #include "PermutationTensor.h"
 
-// libMesh includes
 #include "libmesh/utility.h"
 
 // C++ includes
@@ -708,18 +707,22 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & in
         "To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours has size ",
         input.size());
 
-  zero();
+  fillGeneralIsotropic(input[0], input[1], input[2]);
+}
 
+void
+RankFourTensor::fillGeneralIsotropic(Real i0, Real i1, Real i2)
+{
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
         {
-          (*this)(i, j, k, l) = input[0] * (i == j) * (k == l) + input[1] * (i == k) * (j == l) +
-                                input[1] * (i == l) * (j == k);
+          (*this)(i, j, k, l) =
+              i0 * (i == j) * (k == l) + i1 * (i == k) * (j == l) + i1 * (i == l) * (j == k);
           for (unsigned int m = 0; m < N; ++m)
             (*this)(i, j, k, l) +=
-                input[2] * PermutationTensor::eps(i, j, m) * PermutationTensor::eps(k, l, m);
+                i2 * PermutationTensor::eps(i, j, m) * PermutationTensor::eps(k, l, m);
         }
 }
 
@@ -730,7 +733,13 @@ RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real
     mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. "
                "Yours has size ",
                input.size());
-  fillGeneralIsotropicFromInputVector({0.0, 0.0, input[0]});
+  fillGeneralIsotropic(0.0, 0.0, input[0]);
+}
+
+void
+RankFourTensor::fillAntisymmetricIsotropic(Real i0)
+{
+  fillGeneralIsotropic(0.0, 0.0, i0);
 }
 
 void
@@ -740,7 +749,13 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & 
     mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours "
                "has size ",
                input.size());
-  fillGeneralIsotropicFromInputVector({input[0], input[1], 0.0});
+  fillGeneralIsotropic(input[0], input[1], 0.0);
+}
+
+void
+RankFourTensor::fillSymmetricIsotropic(Real i0, Real i1)
+{
+  fillGeneralIsotropic(i0, i1, 0.0);
 }
 
 void
@@ -752,12 +767,17 @@ RankFourTensor::fillSymmetricIsotropicEandNuFromInputVector(const std::vector<Re
         "has size ",
         input.size());
 
-  // Calculate lambda and the shear modulus from the given young's modulus and poisson's ratio
-  std::vector<Real> isotropic_constants(2);
-  isotropic_constants[0] = input[0] * input[1] / ((1.0 + input[1]) * (1.0 - 2.0 * input[1]));
-  isotropic_constants[1] = input[0] / (2.0 * (1.0 + input[1]));
+  fillSymmetricIsotropicEandNu(input[0], input[1]);
+}
 
-  fillGeneralIsotropicFromInputVector({isotropic_constants[0], isotropic_constants[1], 0.0});
+void
+RankFourTensor::fillSymmetricIsotropicEandNu(Real E, Real nu)
+{
+  // Calculate lambda and the shear modulus from the given young's modulus and poisson's ratio
+  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
+  const Real G = E / (2.0 * (1.0 + nu));
+
+  fillGeneralIsotropic(lambda, G, 0.0);
 }
 
 void

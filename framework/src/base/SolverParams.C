@@ -17,6 +17,7 @@
 SolverParams::SolverParams()
   : _type(Moose::ST_PJFNK),
     _line_search(Moose::LS_INVALID),
+    _mffd_type(Moose::MFFD_INVALID),
     _eigen_solve_type(Moose::EST_KRYLOVSCHUR),
     _eigen_problem_type(Moose::EPT_SLEPC_DEFAULT),
     _which_eigen_pairs(Moose::WEP_SLEPC_DEFAULT)

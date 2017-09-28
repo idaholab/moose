@@ -1,0 +1,32 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'flood_aux.i'
+    exodiff = 'out.e'
+    allow_test_objects = true
+    max_parallel = 1 # See #9886
+  [../]
+
+  [./test_elemental]
+    type = 'Exodiff'
+    input = 'flood_aux_elemental.i'
+    exodiff = 'flood_aux_elemental_out.e'
+    allow_test_objects = true
+  [../]
+
+  [./simple]
+    type = 'Exodiff'
+    input = 'simple.i'
+    exodiff = 'simple_out.e'
+    #max_parallel = 4                     # Only 4 elements
+    max_parallel = 1 # See #9886
+  [../]
+
+  [./two_var]
+    type = 'Exodiff'
+    input = 'nodal_flood_periodic_2var.i'
+    exodiff = 'out_2var.e'
+    allow_test_objects = true
+    max_parallel = 1 # See #9886
+  [../]
+[]

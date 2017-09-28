@@ -21,13 +21,13 @@ SmoothCircleFromFileIC::SmoothCircleFromFileIC(const InputParameters & parameter
   : SmoothCircleBaseIC(parameters),
     _data(0),
     _file_name(getParam<FileName>("file_name")),
-    _txt_reader(_file_name, true, " ", &_communicator),
+    _txt_reader(_file_name, &_communicator),
     _n_circles(0)
 {
   // Read names and vectors from file
   _txt_reader.read();
-  _col_names = _txt_reader.getColumnNames();
-  _data = _txt_reader.getColumnData();
+  _col_names = _txt_reader.getNames();
+  _data = _txt_reader.getData();
   _n_circles = _data[0].size();
 
   // Check that the file has all the correct information

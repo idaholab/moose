@@ -10,4 +10,8 @@
     exodiff = 'thermal_elastic_out.e'
     prereq = test
   [../]
+  [./derivatives]
+    type = 'AnalyzeJacobian'
+    input = 'derivatives.i'
+  [../]
 []

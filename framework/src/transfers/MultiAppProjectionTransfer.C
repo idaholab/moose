@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/linear_implicit_system.h"
 #include "libmesh/mesh_function.h"
@@ -219,7 +218,7 @@ MultiAppProjectionTransfer::execute()
   ////////////////////
 
   // Get the bounding boxes for the "from" domains.
-  std::vector<MeshTools::BoundingBox> bboxes = getFromBoundingBoxes();
+  std::vector<BoundingBox> bboxes = getFromBoundingBoxes();
 
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
@@ -305,7 +304,7 @@ MultiAppProjectionTransfer::execute()
         _communicator.send(i_proc, outgoing_qps[i_proc], send_qps[i_proc]);
 
   // Get the local bounding boxes.
-  std::vector<MeshTools::BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
+  std::vector<BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
   {
     // Find the index to the first of this processor's local bounding boxes.
     unsigned int local_start = 0;

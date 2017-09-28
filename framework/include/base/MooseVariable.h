@@ -31,9 +31,9 @@ class Node;
 class QBase;
 template <typename T>
 class NumericVector;
-template <typename T>
-class DenseVector;
 }
+
+#include "libmesh/dense_vector.h"
 
 /**
  * Class for stuff related to variables
@@ -292,6 +292,36 @@ public:
   }
   const VariableValue & nodalSlnDotNeighbor() { return _nodal_u_dot_neighbor; }
   const VariableValue & nodalSlnDuDotDuNeighbor() { return _nodal_du_dot_du_neighbor; }
+  const DenseVector<Number> & solutionDoFs()
+  {
+    _need_solution_dofs = true;
+    return _solution_dofs;
+  }
+  const DenseVector<Number> & solutionDoFsOld()
+  {
+    _need_solution_dofs_old = true;
+    return _solution_dofs_old;
+  }
+  const DenseVector<Number> & solutionDoFsOlder()
+  {
+    _need_solution_dofs_older = true;
+    return _solution_dofs_older;
+  }
+  const DenseVector<Number> & solutionDoFsNeighbor()
+  {
+    _need_solution_dofs_neighbor = true;
+    return _solution_dofs_neighbor;
+  }
+  const DenseVector<Number> & solutionDoFsOldNeighbor()
+  {
+    _need_solution_dofs_old_neighbor = true;
+    return _solution_dofs_old_neighbor;
+  }
+  const DenseVector<Number> & solutionDoFsOlderNeighbor()
+  {
+    _need_solution_dofs_older_neighbor = true;
+    return _solution_dofs_older_neighbor;
+  }
 
   /**
    * Compute values at interior quadrature points
@@ -311,19 +341,19 @@ public:
   /**
    * Compute values at interior quadrature points
    */
-  void computeElemValues();
+  virtual void computeElemValues();
   /**
    * Compute values at facial quadrature points
    */
-  void computeElemValuesFace();
+  virtual void computeElemValuesFace();
   /**
    * Compute values at facial quadrature points for the neighbor
    */
-  void computeNeighborValuesFace();
+  virtual void computeNeighborValuesFace();
   /**
    * Compute values at quadrature points for the neighbor
    */
-  void computeNeighborValues();
+  virtual void computeNeighborValues();
   /**
    * Compute nodal values of this variable
    */
@@ -488,6 +518,13 @@ protected:
   bool _need_nodal_u_previous_nl_neighbor;
   bool _need_nodal_u_dot_neighbor;
 
+  bool _need_solution_dofs;
+  bool _need_solution_dofs_old;
+  bool _need_solution_dofs_older;
+  bool _need_solution_dofs_neighbor;
+  bool _need_solution_dofs_old_neighbor;
+  bool _need_solution_dofs_older_neighbor;
+
   // Shape function values, gradients. second derivatives
   const VariablePhiValue & _phi;
   const VariablePhiGradient & _grad_phi;
@@ -576,6 +613,14 @@ protected:
   VariableValue _nodal_u_previous_nl_neighbor;
   VariableValue _nodal_u_dot_neighbor;
   VariableValue _nodal_du_dot_du_neighbor;
+
+  /// local elemental DoFs
+  DenseVector<Number> _solution_dofs;
+  DenseVector<Number> _solution_dofs_old;
+  DenseVector<Number> _solution_dofs_older;
+  DenseVector<Number> _solution_dofs_neighbor;
+  DenseVector<Number> _solution_dofs_old_neighbor;
+  DenseVector<Number> _solution_dofs_older_neighbor;
 
   /// if variable is nodal
   bool _is_nodal;

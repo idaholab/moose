@@ -76,7 +76,8 @@ public:
         auto curr = n;
         while ((curr = curr->parent()))
         {
-          if (curr->find(var) && curr->find(var) != n)
+          auto src = curr->find(var);
+          if (src && src != n && src->type() == hit::NodeType::Field)
           {
             used.push_back(hit::pathJoin({curr->fullpath(), var}));
             s = s.substr(0, start) + curr->param<std::string>(var) +
@@ -171,6 +172,8 @@ public:
   void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n);
 
   void errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused);
+
+  std::vector<std::string> listValidParams(std::string & section_name);
 
 protected:
   /**

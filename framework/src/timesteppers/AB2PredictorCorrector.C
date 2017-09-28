@@ -20,8 +20,8 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "TimeIntegrator.h"
+#include "Conversion.h"
 
-// libMesh includes
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/numeric_vector.h"
 
@@ -163,50 +163,34 @@ AB2PredictorCorrector::computeInitialDT()
   return getParam<Real>("dt");
 }
 
-int
-AB2PredictorCorrector::stringtoint(std::string string)
-{
-  if (string == "ImplicitEuler")
-    return 0;
-  else if (string == "CrankNicolson")
-    return 2;
-  else if (string == "BDF2")
-    return 3;
-  return 4;
-}
-
 Real
 AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
   _pred1 = _fe_problem.getNonlinearSystemBase().getPredictor()->solutionPredictor();
   TimeIntegrator * ti = _fe_problem.getNonlinearSystemBase().getTimeIntegrator();
-  std::string scheme = ti->name();
+  auto scheme = Moose::stringToEnum<Moose::TimeIntegratorType>(ti->name());
   Real dt_old = _my_dt_old;
   if (dt_old == 0)
     dt_old = _dt;
 
-  switch (stringtoint(scheme))
+  switch (scheme)
   {
-    case 1:
+    case Moose::TI_IMPLICIT_EULER:
     {
-      // NOTE: this is never called, since stringtoint does not return 1 - EVER!
-      // I am not sure this is actually correct.
       _pred1 *= -1;
       _pred1 += solution;
       Real calc = _dt * _dt * .5;
       _pred1 *= calc;
       return _pred1.l2_norm();
     }
-    case 2:
+    case Moose::TI_CRANK_NICOLSON:
     {
-      // Crank Nicolson
       _pred1 -= solution;
       _pred1 *= (_dt) / (3.0 * (_dt + dt_old));
       return _pred1.l2_norm();
     }
-    case 3:
+    case Moose::TI_BDF2:
     {
-      // BDF2
       _pred1 *= -1.0;
       _pred1 += solution;
       Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);

@@ -19,7 +19,6 @@
 #include "ElementUserObject.h"
 #include "BoundaryRestrictable.h"
 
-// libMesh includes
 #include "libmesh/fe_type.h"
 
 // Forward declarations
@@ -57,7 +56,7 @@ public:
    * elements, it must
    * be stored as a block object, overloading this method to always return false has such effect.
    */
-  virtual bool boundaryRestricted() override { return false; }
+  virtual bool boundaryRestricted() const override { return false; }
 
 protected:
   AuxiliarySystem & _aux;

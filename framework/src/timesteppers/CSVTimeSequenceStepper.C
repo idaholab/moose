@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "CSVTimeSequenceStepper.h"
-#include "DelimitedFileReader.h"
 
 template <>
 InputParameters
@@ -22,8 +21,8 @@ validParams<CSVTimeSequenceStepper>()
   InputParameters params = validParams<TimeSequenceStepperBase>();
   params.addRequiredParam<FileName>("file_name",
                                     "name of the file in which the time sequence is read");
-  params.addParam<bool>(
-      "header", true, "indicates whether the file contains a header with the column names");
+  params.addParam<bool>("header",
+                        "indicates whether the file contains a header with the column names");
   params.addParam<std::string>("delimiter", ",", "delimiter used to parse the file");
   params.addParam<std::string>(
       "column_name", "time", "name of the column which contains the time sequence");
@@ -37,7 +36,10 @@ validParams<CSVTimeSequenceStepper>()
 CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameters)
   : TimeSequenceStepperBase(parameters),
     _file_name(getParam<FileName>("file_name")),
-    _header(getParam<bool>("header")),
+    _header(isParamValid("header")
+                ? (getParam<bool>("header") ? MooseUtils::DelimitedFileReader::HeaderFlag::ON
+                                            : MooseUtils::DelimitedFileReader::HeaderFlag::OFF)
+                : MooseUtils::DelimitedFileReader::HeaderFlag::AUTO),
     _delimiter(getParam<std::string>("delimiter")),
     _column_name(getParam<std::string>("column_name")),
     _search_by_index(isParamValid("column_index")),
@@ -48,20 +50,23 @@ CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameter
 void
 CSVTimeSequenceStepper::init()
 {
-  MooseUtils::DelimitedFileReader file(_file_name, _header, _delimiter);
+  MooseUtils::DelimitedFileReader file(_file_name);
+
+  file.setHeaderFlag(_header);
+  file.setDelimiter(_delimiter);
   file.read();
 
   std::vector<Real> instants;
 
   if (_search_by_index)
   {
-    std::vector<std::vector<double>> data = file.getColumnData();
+    std::vector<std::vector<double>> data = file.getData();
     if (_column_index >= data.size())
       mooseError("cannot find column ", _column_index, " in file ", _file_name);
     instants = data[_column_index];
   }
   else
-    instants = file.getColumnData(_column_name);
+    instants = file.getData(_column_name);
 
   if (instants.size() == 0)
     mooseError("empty sequence in file ", _file_name);

@@ -20,7 +20,6 @@
 #include "Problem.h"
 #include "PiecewiseLinear.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>
@@ -330,9 +329,15 @@ SolidModel::SolidModel(const InputParameters & parameters)
       mooseError(
           "Cannot specify thermal_expansion_reference_temperature without coupling to temperature");
   }
-  else if (_mean_alpha_function)
-    mooseError("Must specify thermal_expansion_reference_temperature if "
-               "thermal_expansion_function_type = mean");
+
+  if (_mean_alpha_function)
+  {
+    if (!parameters.isParamValid("thermal_expansion_reference_temperature") ||
+        !_has_stress_free_temp)
+      mooseError(
+          "Must specify both stress_free_temperature and thermal_expansion_reference_temperature "
+          "if thermal_expansion_function_type = mean");
+  }
 
   if (parameters.isParamValid("thermal_expansion") &&
       parameters.isParamValid("thermal_expansion_function"))
@@ -342,7 +347,7 @@ SolidModel::SolidModel(const InputParameters & parameters)
   {
     _SED = &declareProperty<Real>("strain_energy_density");
     _SED_old = &getMaterialPropertyOld<Real>("strain_energy_density");
-    _Eshelby_tensor = &declareProperty<ColumnMajorMatrix>("Eshelby_tensor");
+    _Eshelby_tensor = &declareProperty<RankTwoTensor>("Eshelby_tensor");
     _J_thermal_term_vec = &declareProperty<RealVectorValue>("J_thermal_term_vec");
     _current_instantaneous_thermal_expansion_coef =
         &declareProperty<Real>("current_instantaneous_thermal_expansion_coef");
@@ -603,10 +608,10 @@ SolidModel::applyThermalStrain()
       Point p;
       Real alpha_current_temp = _alpha_function->value(current_temp, p);
       Real alpha_old_temp = _alpha_function->value(old_temp, p);
-      Real alpha_stress_free_temperature = _alpha_function->value(_stress_free_temp, p);
 
       if (_mean_alpha_function)
       {
+        Real alpha_stress_free_temperature = _alpha_function->value(_stress_free_temp, p);
         Real small(1e-6);
 
         Real numerator = alpha_current_temp * (current_temp - _ref_temp) -

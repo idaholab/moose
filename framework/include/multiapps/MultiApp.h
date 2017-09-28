@@ -29,6 +29,7 @@ class Backup;
 // libMesh forward declarations
 namespace libMesh
 {
+class BoundingBox;
 namespace MeshTools
 {
 class BoundingBox;
@@ -137,7 +138,7 @@ public:
    * the geometry around the axis to create the 3D geometry).
    * @param app The global app number you want to get the bounding box for
    */
-  virtual MeshTools::BoundingBox getBoundingBox(unsigned int app);
+  virtual BoundingBox getBoundingBox(unsigned int app);
 
   /**
    * Get the FEProblemBase this MultiApp is part of.
@@ -188,7 +189,7 @@ public:
   /**
    * @return Number of Apps on local processor.
    */
-  unsigned int numLocalApps() { return _my_num_apps; }
+  unsigned int numLocalApps() { return _apps.size(); }
 
   /**
    * @return The global number of the first app on the local processor.

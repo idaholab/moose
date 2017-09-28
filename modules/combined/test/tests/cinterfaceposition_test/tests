@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'cinterfaceposition_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1                # b/c of -pc_type lu
-  [../]
-[]

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import fileinput
 import sys
 import os
 import re
@@ -103,9 +102,7 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
 
     diagonal_only = options.diagonal_only
 
-    dofs = dofdata['ndof']
     nlvars = [var['name'] for var in dofdata['vars']]
-    numvars = len(nlvars)
 
     # build analysis blocks (for now: one block per variable)
     blocks = []
@@ -203,6 +200,7 @@ def parseOutput(output, dofdata) :
 
     write_matrices = options.write_matrices
     dofs = dofdata['ndof']
+    success = 0
 
     state = 0
     for line in output.split('\n'):
@@ -255,6 +253,7 @@ def parseOutput(output, dofdata) :
                     state = 0
 
                     analyze(dofdata, Mfd, Mhc, Mdiff)
+                    success += 1
 
                     # dump parsed matrices in gnuplottable format
                     if write_matrices :
@@ -264,6 +263,9 @@ def parseOutput(output, dofdata) :
 
                     # theoretically we could have multiple steps to analyze in the output
                     continue
+
+    return success
+
 
 
 if __name__ == '__main__':
@@ -326,21 +328,15 @@ if __name__ == '__main__':
         try:
             child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             data = child.communicate()[0]
-            child.wait()
+            if child.wait() :
+                print("Application quit with non-zero return code")
+                print(data)
+                sys.exit(1)
         except:
             print('Error executing moose based application to gather DOF map\n')
             sys.exit(1)
     else :
-        print("Runing without automatic options DOF map '%s' will not be generated automatically!" % dofmapfilename)
-
-    # analyze return code
-    if child.returncode == 1 :
-        # MOOSE failed with an unexpected error
-        print(data)
-        sys.exit(1)
-    elif child.returncode == -11 :
-        print("The moose application crashed with a segmentation fault (try recompiling)")
-        sys.exit(1)
+        print("Running without automatic options DOF map '%s' will not be generated automatically!" % dofmapfilename)
 
 
     # load and decode the DOF map data (for now we only care about one frame)
@@ -384,7 +380,7 @@ if __name__ == '__main__':
     # build the parameter list for the jacobian debug run
     mooseparams = moosebaseparams[:]
     if not options.noauto :
-        mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active='])
+        mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active=', 'Outputs/exodus=false', 'Outputs/csv=false', 'Outputs/active='])
     if options.cli_args != None:
         mooseparams.extend([options.cli_args])
 
@@ -397,10 +393,21 @@ if __name__ == '__main__':
     try:
         child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         data = child.communicate()[0].decode("utf-8")
-        child.wait()
+        # analyze return code
+        if child.returncode == -11 :
+            print("The moose application crashed with a segmentation fault (try recompiling)")
+            sys.exit(1)
+        elif child.returncode != 1 :
+            # MOOSE failed with an unexpected error
+            print(data)
+            print("Application quit with an unexpected return code")
+            sys.exit(1)
     except:
         print('Error executing moose based application\n')
         sys.exit(1)
 
     # parse the raw output, which contains the PETSc debug information
-    parseOutput(data, dofdata)
+    if parseOutput(data, dofdata) == 0:
+        print(data)
+        print('Error executing moose based application\n')
+        sys.exit(1)

@@ -35,7 +35,7 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  std::string _diffusivity;
+  MaterialPropertyName _diffusivity;
   const MaterialProperty<Real> & _diffusion_coef;
 };
 

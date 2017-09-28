@@ -18,7 +18,6 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>
@@ -26,6 +25,10 @@ InputParameters
 validParams<MassLumpedTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
+  params.addClassDescription(
+      "Lumped formulation of the time derivative $\\frac{\\partial u}{\\partial t}$. Its "
+      "corresponding weak form is $\\dot{u_i}(\\psi_i, 1)$ where $\\dot{u_i}$ denotes the time "
+      "derivative of the solution coefficient associated with node $i$.");
   return params;
 }
 

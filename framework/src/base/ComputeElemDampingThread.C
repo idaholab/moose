@@ -19,7 +19,6 @@
 #include "Problem.h"
 #include "ElementDamper.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeElemDampingThread::ComputeElemDampingThread(FEProblemBase & feproblem)

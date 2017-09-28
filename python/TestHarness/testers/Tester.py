@@ -1,6 +1,9 @@
-import re, os
+import platform, re, os
 from TestHarness import util
 from FactorySystem.MooseObject import MooseObject
+from tempfile import TemporaryFile
+import subprocess
+from signal import SIGTERM
 
 class Tester(MooseObject):
     """
@@ -61,6 +64,11 @@ class Tester(MooseObject):
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOT is detected ('ALL', 'TRUE', 'FALSE')")
 
+        # Queueing specific
+        params.addParam('copy_files',         [], "Additional list of files/directories to copy when performing queueing operations")
+        params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
+        params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
+
         return params
 
     # This is what will be checked for when we look for valid testers
@@ -69,6 +77,10 @@ class Tester(MooseObject):
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
         self.specs = params
+        self.outfile = None
+        self.std_out = ''
+        self.exit_code = 0
+        self.process = None
 
         # Bool if test can run
         self._runnable = None
@@ -86,6 +98,8 @@ class Tester(MooseObject):
         self.bucket_deleted      = self.status.bucket_deleted
         self.bucket_skip         = self.status.bucket_skip
         self.bucket_silent       = self.status.bucket_silent
+        self.bucket_queued       = self.status.bucket_queued
+        self.bucket_waiting_processing = self.status.bucket_waiting_processing
 
         # Set the status message
         if self.specs['check_input']:
@@ -241,6 +255,19 @@ class Tester(MooseObject):
         """
         return self.status.isDeleted()
 
+    def isQueued(self):
+        """
+        return boolean for tester in a queued status
+        see util.TestStatus for more information
+        """
+        return self.status.isQueued()
+
+    def isWaiting(self):
+        """
+        return boolean for tester awaiting process results
+        """
+        return self.status.isWaiting()
+
     def getCheckInput(self):
         return self.check_input
 
@@ -287,11 +314,73 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return
 
+    def runCommand(self, timer, options):
+        """
+        Helper method for running external (sub)processes as part of the tester's execution.  This
+        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
+        be the same timer passed to the run method.  Results from running the subprocess is stored
+        in the tester's output and exit_code fields.
+        """
+
+        cmd = self.getCommand(options)
+        cwd = self.getTestDir()
+
+        self.process = None
+        try:
+            f = TemporaryFile()
+            # On Windows, there is an issue with path translation when the command is passed in
+            # as a list.
+            if platform.system() == "Windows":
+                process = subprocess.Popen(cmd,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+            else:
+                process = subprocess.Popen(cmd,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=cwd)
+        except:
+            print("Error in launching a new task", cmd)
+            raise
+
+        self.process = process
+        self.outfile = f
+
+        timer.start()
+        process.wait()
+        timer.stop()
+
+        self.exit_code = process.poll()
+
+        # store the contents of output, and close the file
+        self.std_out = util.readOutput(self.outfile, options)
+        self.outfile.close()
+
+    def killCommand(self):
+        """
+        Kills any currently executing process started by the runCommand method.
+        """
+        if self.process is not None:
+            try:
+                if platform.system() == "Windows":
+                    self.process.terminate()
+                else:
+                    pgid = os.getpgid(self.process.pid)
+                    os.killpg(pgid, SIGTERM)
+            except OSError: # Process already terminated
+                pass
+
+    def run(self, timer, options):
+        """
+        This is a method that is the tester's main execution code.  Subclasses can override this
+        method with custom code relevant to their specific testing needs.  By default this method
+        calls runCommand.  runCommand is provided as a helper for running (external) subprocesses
+        as part of the tester's execution and should be the *only* way subprocesses are executed
+        if needed. The run method is responsible to call the start+stop methods on timer to record
+        the time taken to run the actual test.  start+stop can be called multiple times.
+        """
+        self.runCommand(timer, options)
+
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """
         return []
 
-    def processResults(self, moose_dir, retcode, options, output):
+    def processResults(self, moose_dir, options, output):
         """ method to process the results of a finished tester """
         return
 
@@ -471,6 +560,10 @@ class Tester(MooseObject):
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
+
+        # Check for queueing
+        if not self.specs['queue_scheduler'] and options.queueing:
+            reasons['queue_scheduler'] = 'NO QUEUE'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.

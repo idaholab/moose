@@ -18,7 +18,6 @@
 #include "Moose.h"
 #include "MooseApp.h"
 
-// libMesh includes
 #include "libmesh/exodusII_io.h"
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"

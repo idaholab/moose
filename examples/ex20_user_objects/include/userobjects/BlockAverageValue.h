@@ -17,7 +17,6 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 
 // Forward Declarations

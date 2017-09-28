@@ -43,7 +43,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vonmises]
+  [./vonmises_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -104,7 +104,7 @@
   [./vonmises]
     type = MaterialTensorAux
     tensor = stress
-    variable = vonmises
+    variable = vonmises_stress
     quantity = vonmises
     execute_on = timestep_end
   [../]
@@ -152,7 +152,7 @@
     youngs_modulus = 207000
     poissons_ratio = 0.3
     thermal_expansion = 1e-5
-    formulation = PlaneStrain
+    formulation = NonlinearPlaneStrain
     compute_JIntegral = true
   [../]
 []

@@ -24,7 +24,6 @@
 #include "Postprocessor.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 
@@ -111,11 +110,10 @@ TableOutput::outputVectorPostprocessors()
     {
       const auto & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
 
-      auto table_it = _vector_postprocessor_tables.lower_bound(vpp_name);
-      if (table_it == _vector_postprocessor_tables.end() || table_it->first != vpp_name)
-        table_it = _vector_postprocessor_tables.emplace_hint(table_it, vpp_name, FormattedTable());
+      auto insert_pair =
+          moose_try_emplace(_vector_postprocessor_tables, vpp_name, FormattedTable());
 
-      FormattedTable & table = table_it->second;
+      FormattedTable & table = insert_pair.first->second;
 
       table.clear();
       table.outputTimeColumn(false);

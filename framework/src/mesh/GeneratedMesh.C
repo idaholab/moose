@@ -14,11 +14,11 @@
 
 #include "GeneratedMesh.h"
 
-// libMesh includes
 #include "libmesh/mesh_generation.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
+#include "libmesh/unstructured_mesh.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)

@@ -20,7 +20,6 @@
 #include "MooseVariable.h"
 #include "Problem.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 #include "libmesh/error_vector.h"
 

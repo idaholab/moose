@@ -1,11 +1,10 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 class TextSubWindow(QtWidgets.QTextEdit):
     """
     TextEdit that saves it size when it closes and closes itself if the main widget disappears.
     """
     def __init__(self):
         super(TextSubWindow, self).__init__()
-        self.setWindowFlags(QtCore.Qt.SubWindow)
         self._size = None
 
     def sizeHint(self, *args):

@@ -19,6 +19,7 @@
 #include "CoupledBEKinetic.h"
 #include "DesorptionFromMatrix.h"
 #include "DesorptionToPorespace.h"
+#include "DarcyFluxPressure.h"
 
 #include "AqueousEquilibriumRxnAux.h"
 #include "KineticDisPreConcAux.h"
@@ -26,10 +27,8 @@
 
 #include "AddPrimarySpeciesAction.h"
 #include "AddSecondarySpeciesAction.h"
-#include "AddCoupledEqSpeciesKernelsAction.h"
-#include "AddCoupledEqSpeciesAuxKernelsAction.h"
-#include "AddCoupledSolidKinSpeciesKernelsAction.h"
-#include "AddCoupledSolidKinSpeciesAuxKernelsAction.h"
+#include "AddCoupledEqSpeciesAction.h"
+#include "AddCoupledSolidKinSpeciesAction.h"
 
 #include "ChemicalOutFlowBC.h"
 
@@ -86,6 +85,7 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
   registerKernel(CoupledBEKinetic);
   registerKernel(DesorptionFromMatrix);
   registerKernel(DesorptionToPorespace);
+  registerKernel(DarcyFluxPressure);
 
   registerAux(AqueousEquilibriumRxnAux);
   registerAux(KineticDisPreConcAux);
@@ -109,16 +109,12 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
-  registerSyntax("AddCoupledEqSpeciesKernelsAction", "ReactionNetwork/AqueousEquilibriumReactions");
-  registerSyntax("AddCoupledEqSpeciesAuxKernelsAction",
-                 "ReactionNetwork/AqueousEquilibriumReactions");
-  registerSyntax("AddCoupledSolidKinSpeciesKernelsAction", "ReactionNetwork/SolidKineticReactions");
-  registerSyntax("AddCoupledSolidKinSpeciesAuxKernelsAction",
-                 "ReactionNetwork/SolidKineticReactions");
+  registerSyntax("AddCoupledEqSpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerAction(AddPrimarySpeciesAction, "add_variable");
   registerAction(AddSecondarySpeciesAction, "add_aux_variable");
-  registerAction(AddCoupledEqSpeciesKernelsAction, "add_kernel");
-  registerAction(AddCoupledEqSpeciesAuxKernelsAction, "add_aux_kernel");
-  registerAction(AddCoupledSolidKinSpeciesKernelsAction, "add_kernel");
-  registerAction(AddCoupledSolidKinSpeciesAuxKernelsAction, "add_aux_kernel");
+  registerAction(AddCoupledEqSpeciesAction, "add_kernel");
+  registerAction(AddCoupledEqSpeciesAction, "add_aux_kernel");
+  registerAction(AddCoupledSolidKinSpeciesAction, "add_kernel");
+  registerAction(AddCoupledSolidKinSpeciesAction, "add_aux_kernel");
 }

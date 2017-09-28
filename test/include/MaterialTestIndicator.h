@@ -19,7 +19,6 @@
 #include "Indicator.h"
 #include "MaterialPropertyInterface.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
 // Forward Declarations

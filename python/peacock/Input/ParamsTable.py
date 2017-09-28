@@ -1,11 +1,35 @@
-from PyQt5.QtWidgets import QComboBox, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton, QFileDialog, QCheckBox
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtCore import pyqtSignal, Qt
 from peacock.base.MooseWidget import MooseWidget
 from ParameterInfo import ParameterInfo
 import os
 
-class ParamsTable(QTableWidget, MooseWidget):
+class EditingDelegate(QtWidgets.QStyledItemDelegate):
+    """
+    A simple delegate so we can get notified when the user starts to edit a cell.
+    Unfortunately Qt doesn't provide an easy way to do this.
+    We want this so that if a user starts editing a cell then we assume
+    that it will be changed. So this will enable the "Apply" button once the
+    user starts editing a cell.
+    We also keep the current editor so that if the user wants to quit while
+    in the process of editing a cell, we can grab the current text.
+    """
+    startedEditing = pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        super(EditingDelegate, self).__init__(*args, **kwargs)
+        self.current_editor = None
+
+    def createEditor(self, parent, option, index):
+        """
+        Override the default implementation to emit a signal and store the created editor.
+        """
+        self.startedEditing.emit()
+        self.current_editor = super(EditingDelegate, self).createEditor(parent, option, index)
+        return self.current_editor
+
+class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
     """
     Holds a QTableWidget of parameters.
     There a different kinds of parameters.
@@ -55,11 +79,22 @@ class ParamsTable(QTableWidget, MooseWidget):
 
         self.updateWatchers()
         self.cellChanged.connect(self.onCellChanged)
+        self.editing_delegate = EditingDelegate()
+        self.setItemDelegate(self.editing_delegate)
+        self.editing_delegate.startedEditing.connect(self.changed)
 
     def save(self):
         """
         Save the values in the text to the parameters.
         """
+        # If the user is currently editing a cell we want to grab
+        # the current text and set the cell to that value
+        if self.state() == QtWidgets.QAbstractItemView.EditingState:
+            current_edit = self.editing_delegate.current_editor
+            if current_edit and isinstance(current_edit, QtWidgets.QLineEdit):
+                current_item = self.currentItem()
+                current_item.setText(current_edit.text())
+
         for i in range(self.rowCount()):
             name_item = self.item(i, 0)
             name = name_item.text()
@@ -175,10 +210,10 @@ class ParamsTable(QTableWidget, MooseWidget):
         Update the sizes of the header.
         """
         header = self.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
 
     def addParam(self, param, name_editable=False, value_editable=True, index=-1):
         idx = self.findRow(param.name)
@@ -220,7 +255,7 @@ class ParamsTable(QTableWidget, MooseWidget):
             return item.text()
 
     def _openFileDialog(self, param, text, use_extension):
-        (file_name, filter_name) = QFileDialog.getOpenFileName(self, text, os.getcwd(), "File (*)")
+        (file_name, filter_name) = QtWidgets.QFileDialog.getOpenFileName(self, text, os.getcwd(), "File (*)")
         if not file_name:
             return
         file_name = os.path.relpath(file_name)
@@ -236,7 +271,7 @@ class ParamsTable(QTableWidget, MooseWidget):
                 "FileNameNoExtension": "Find Base File",
                 }
         text = cpp_type_map.get(param.cpp_type, "Find File")
-        button = QPushButton(text)
+        button = QtWidgets.QPushButton(text)
         extension = param.cpp_type != "FileNameNoExtension"
         button.clicked.connect(lambda : self._openFileDialog(param, text, extension))
         row = self.findRow(param.name)
@@ -267,7 +302,7 @@ class ParamsTable(QTableWidget, MooseWidget):
         combo.blockSignals(False)
 
     def _createOptions(self, param, tooltip=""):
-        combo = QComboBox()
+        combo = QtWidgets.QComboBox()
         combo.addItem("Select option")
         combo.addItems(param.options)
         combo.setCurrentIndex(0)
@@ -303,7 +338,7 @@ class ParamsTable(QTableWidget, MooseWidget):
         if index >= 0:
             row = index
         self.insertRow(row)
-        name_item = QTableWidgetItem(param.name)
+        name_item = QtWidgets.QTableWidgetItem(param.name)
         name_item.setData(Qt.UserRole, param)
 
         if not name_editable:
@@ -322,7 +357,7 @@ class ParamsTable(QTableWidget, MooseWidget):
         self.setItem(row, 0, name_item)
 
         if param.cpp_type == "bool":
-            checkbox = QCheckBox()
+            checkbox = QtWidgets.QCheckBox()
             if param.value == "true":
                 checkbox.setCheckState(Qt.Checked)
             else:
@@ -330,7 +365,7 @@ class ParamsTable(QTableWidget, MooseWidget):
             checkbox.pressed.connect(self.changed)
             self.setCellWidget(row, 1, checkbox)
         else:
-            value_item = QTableWidgetItem(param.value)
+            value_item = QtWidgets.QTableWidgetItem(param.value)
             if not value_editable or param.name == "type":
                 value_item.setFlags(Qt.ItemIsEnabled)
             else:
@@ -338,7 +373,7 @@ class ParamsTable(QTableWidget, MooseWidget):
 
             self.setItem(row, 1, value_item)
 
-        comments_item = QTableWidgetItem(param.comments)
+        comments_item = QtWidgets.QTableWidgetItem(param.comments)
         if not comments_editable:
             comments_item.setFlags(Qt.ItemIsEnabled)
         self.setItem(row, 3, comments_item)
@@ -351,11 +386,11 @@ class ParamsTable(QTableWidget, MooseWidget):
         elif param.options:
             self._createOptions(param)
         elif param.user_added:
-            button = QPushButton("Remove")
+            button = QtWidgets.QPushButton("Remove")
             button.clicked.connect(lambda checked: self._removeButtonClicked(name_item))
             self.setCellWidget(row, 2, button)
         else:
-            option_item = QTableWidgetItem()
+            option_item = QtWidgets.QTableWidgetItem()
             option_item.setFlags(Qt.NoItemFlags)
             self.setItem(row, 2, option_item)
 

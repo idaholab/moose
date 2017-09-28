@@ -1,0 +1,44 @@
+[Tests]
+  [./primary_convection]
+    type = PetscJacobianTester
+    input = primary_convection.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  [../]
+  [./coupled_convreact]
+    type = PetscJacobianTester
+    input = coupled_convreact.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  [../]
+  [./coupled_diffreact]
+    type = PetscJacobianTester
+    input = coupled_diffreact.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  [../]
+  [./coupled_equilsub]
+    type = PetscJacobianTester
+    input = coupled_equilsub.i
+    ratio_tol = 1e-7
+    difference_tol = 5e-7
+  [../]
+  [./2species]
+    type = PetscJacobianTester
+    input = 2species.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  [../]
+  [./2species_equilibrium]
+    type = PetscJacobianTester
+    input = 2species_equilibrium.i
+    ratio_tol = 1e-7
+    difference_tol = 5e-7
+  [../]
+  [./2species_equilibrium_with_density]
+    type = PetscJacobianTester
+    input = 2species_equilibrium_with_density.i
+    ratio_tol = 1e-7
+    difference_tol = 5e-7
+  [../]
+[]

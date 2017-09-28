@@ -10,6 +10,7 @@ MOOSE includes a set of community developed physics modules that you can build o
 * [Fluid Properties](modules/fluid_properties/index.md)
 * [Stochastic Tools](modules/stochastic_tools/index.md)
 * [Porous Flow](modules/porous_flow/index.md)
+* [Chemical reactions](modules/chemical_reactions/index.md)
 
 The purpose of the modules is to encapsulate common kernels, boundary conditions, etc. to prevent code duplication.
 Examples include: heat conduction, solid mechanics, Navier-Stokes, and others. The modules are organized so that your

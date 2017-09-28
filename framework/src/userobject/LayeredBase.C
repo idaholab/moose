@@ -20,7 +20,6 @@
 #include "SubProblem.h"
 #include "UserObject.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/point.h"
 
@@ -96,7 +95,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
   if (!_interval_based && _sample_type == 1)
     mooseError("'sample_type = interpolate' not supported with 'bounds' in ", _layered_base_name);
 
-  MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_layered_base_subproblem.mesh());
+  BoundingBox bounding_box = MeshTools::create_bounding_box(_layered_base_subproblem.mesh());
   _layer_values.resize(_num_layers);
   _layer_has_value.resize(_num_layers);
 

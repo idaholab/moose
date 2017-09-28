@@ -19,14 +19,16 @@
 #include "MooseEnum.h"
 #include "MeshModifier.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 // Forward declerations
 class SubdomainBoundingBox;
 
 template <>
 InputParameters validParams<SubdomainBoundingBox>();
+
+namespace libMesh
+{
+class BoundingBox;
+}
 
 /**
  * MeshModifier for defining a Subdomain inside or outside of a bounding box
@@ -50,7 +52,7 @@ private:
   SubdomainID _block_id;
 
   /// Bounding box for testing element centroids against
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 };
 
 #endif // SUBDOMAINBOUDINGBOX_H

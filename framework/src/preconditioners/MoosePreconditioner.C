@@ -18,7 +18,6 @@
 #include "PetscSupport.h"
 #include "NonlinearSystem.h"
 
-// libMesh includes
 #include "libmesh/numeric_vector.h"
 
 template <>

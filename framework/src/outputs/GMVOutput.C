@@ -15,7 +15,6 @@
 // Moose includes
 #include "GMVOutput.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 #include "libmesh/gmv_io.h"
 

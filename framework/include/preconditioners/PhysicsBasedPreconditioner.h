@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "MoosePreconditioner.h"
 
-// libMesh includes
 #include "libmesh/preconditioner.h"
 #include "libmesh/linear_implicit_system.h"
 

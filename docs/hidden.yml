@@ -405,12 +405,10 @@ chemical_reactions:
     - /ReactionNetwork
     - /ReactionNetwork/AddPrimarySpeciesAction
     - /ReactionNetwork/AqueousEquilibriumReactions
-    - /ReactionNetwork/AqueousEquilibriumReactions/AddCoupledEqSpeciesAuxKernelsAction
-    - /ReactionNetwork/AqueousEquilibriumReactions/AddCoupledEqSpeciesKernelsAction
+    - /ReactionNetwork/AqueousEquilibriumReactions/AddCoupledEqSpeciesAction
     - /ReactionNetwork/AqueousEquilibriumReactions/AddSecondarySpeciesAction
     - /ReactionNetwork/SolidKineticReactions
-    - /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAuxKernelsAction
-    - /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesKernelsAction
+    - /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAction
     - /ReactionNetwork/SolidKineticReactions/AddSecondarySpeciesAction
 contact:
     - /AuxKernels/ContactPressureAux
@@ -480,18 +478,14 @@ heat_conduction:
     - /ThermalContact/ThermalContactMaterialsAction
 misc:
     - /AuxKernels/CoupledDirectionalMeshHeightInterpolation
-    - /BCs/RobinBC
-    - /Kernels/BodyForceVoid
     - /Kernels/CoefDiffusion
     - /Kernels/CoefTimeDerivative
-    - /Kernels/GaussContForcing
-    - /Kernels/SharpInterfaceForcing
     - /Kernels/ThermoDiffusion
     - /Materials/Density
-    - /Postprocessors/CInterfacePosition
     - /Postprocessors/InternalVolume
     - /UserObjects/RigidBodyModes3D
-    - /UserObjects/RigidBodyModesRZ
+misc_test:
+    - /Kernels/Convection
 navier_stokes:
     - /AuxVariables/InitialCondition/CNSFVMachIC
     - /AuxVariables/InitialCondition/CNSFVPressureIC
@@ -755,6 +749,8 @@ phase_field:
     - /VectorPostprocessors/FeatureVolumeVectorPostprocessor
     - /VectorPostprocessors/GrainForcesPostprocessor
     - /VectorPostprocessors/GrainTextureVectorPostprocessor
+phase_field_test:
+    - /Kernels/GaussContForcing
 porous_flow:
     - /Functions/MovingPlanarFront
     - /Kernels/PorousFlowFullySaturatedDarcyBase

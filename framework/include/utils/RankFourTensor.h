@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "DataIO.h"
 
-// libMesh includes
 #include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
@@ -212,6 +211,13 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
+  ///@{ Vector-less fill API functions. See docs of the corresponding ...FromInputVector methods
+  void fillGeneralIsotropic(Real i0, Real i1, Real i2);
+  void fillAntisymmetricIsotropic(Real i0);
+  void fillSymmetricIsotropic(Real i0, Real i1);
+  void fillSymmetricIsotropicEandNu(Real E, Real nu);
+  ///@}
+
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensor innerProductTranspose(const RankTwoTensor &) const;
 
@@ -273,7 +279,7 @@ protected:
   void fillGeneralIsotropicFromInputVector(const std::vector<Real> & input);
 
   /**
-   * fillAntisymmetricIsotropicFromInputVector takes 1 inputs to fill the
+   * fillAntisymmetricIsotropicFromInputVector takes 1 input to fill the
    * the antisymmetric Rank-4 tensor with the appropriate symmetries maintained.
    * I.e., C_ijkl = a * ep_ijm * ep_klm, where epsilon is the permutation tensor (and sum on m)
    * @param input this is a in the above formula
@@ -292,7 +298,7 @@ protected:
   /**
    * fillSymmetricIsotropicEandNuFromInputVector is a variation of the
    * fillSymmetricIsotropicFromInputVector which takes as inputs the
-   * more commonly used Young's modulus (E) and Poissin's ratio (nu)
+   * more commonly used Young's modulus (E) and Poisson's ratio (nu)
    * constants to fill the isotropic elasticity tensor. Using well-known formulas,
    * E and nu are used to calculate lambda and mu and then the vector is passed
    * to fillSymmetricIsotropicFromInputVector.
@@ -301,18 +307,18 @@ protected:
   void fillSymmetricIsotropicEandNuFromInputVector(const std::vector<Real> & input);
 
   /**
-   * fillGeneralFromInputVector takes 81 inputs to fill the Rank-4 tensor
-   * No symmetries are explicitly maintained
-   * @param input  C(i,j,k,l) = input[i*N*N*N + j*N*N + k*N + l]
-   */
-  void fillAxisymmetricRZFromInputVector(const std::vector<Real> & input);
-
-  /**
    * fillAxisymmetricRZFromInputVector takes 5 inputs to fill the axisymmetric
    * Rank-4 tensor with the appropriate symmetries maintatined for use with
    * axisymmetric problems using coord_type = RZ.
    * I.e. C1111 = C2222, C1133 = C2233, C2323 = C3131 and C1212 = 0.5*(C1111-C1122)
    * @param input this is C1111, C1122, C1133, C3333, C2323.
+   */
+  void fillAxisymmetricRZFromInputVector(const std::vector<Real> & input);
+
+  /**
+   * fillGeneralFromInputVector takes 81 inputs to fill the Rank-4 tensor
+   * No symmetries are explicitly maintained
+   * @param input  C(i,j,k,l) = input[i*N*N*N + j*N*N + k*N + l]
    */
   void fillGeneralFromInputVector(const std::vector<Real> & input);
 

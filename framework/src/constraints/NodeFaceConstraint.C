@@ -22,7 +22,6 @@
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 template <>

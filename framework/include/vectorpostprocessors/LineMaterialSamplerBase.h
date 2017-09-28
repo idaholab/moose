@@ -26,7 +26,6 @@
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h" // _qrule->n_points()
 
 // Forward Declarations

@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = '../../kernels/block_kernel/rectangle.e'
+  file = 'rectangle.e'
 []
 
 [Variables]

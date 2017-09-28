@@ -23,7 +23,6 @@
 #include "MooseEnum.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/transient_system.h"
 #include "libmesh/system_norm.h"
 

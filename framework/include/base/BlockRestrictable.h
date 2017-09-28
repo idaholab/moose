@@ -187,7 +187,7 @@ public:
    * Returns true if this object has been restricted to a boundary
    * @see MooseObject
    */
-  virtual bool blockRestricted();
+  virtual bool blockRestricted() const;
 
 protected:
   /// Pointer to the MaterialData class for this object

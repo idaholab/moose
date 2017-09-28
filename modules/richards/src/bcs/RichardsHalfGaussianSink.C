@@ -12,7 +12,6 @@
 #include "Material.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/utility.h"
 
 template <>

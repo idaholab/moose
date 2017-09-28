@@ -94,12 +94,12 @@
     variable = v
   [../]
   [./u_mms]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = u_mms_func
   [../]
   [./v_mms]
-    type = UserForcingFunction
+    type = BodyForce
     variable = v
     function = v_mms_func
   [../]

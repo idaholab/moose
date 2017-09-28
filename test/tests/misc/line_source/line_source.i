@@ -16,7 +16,7 @@
     block = bulk
   [../]
   [./heating]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = 1
     block = heater

@@ -15,24 +15,30 @@ validParams<CoupledConvectionReactionSub>()
   params.addParam<Real>("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
   params.addParam<Real>("sto_u",
                         1.0,
-                        "Stoichiometric coef of the primary spceices the kernel "
+                        "Stoichiometric coef of the primary species the kernel "
                         "operates on in the equilibrium reaction");
   params.addRequiredParam<std::vector<Real>>(
       "sto_v",
       "The stoichiometric coefficients of coupled primary species in equilibrium reaction");
   params.addRequiredCoupledVar("p", "Pressure");
   params.addCoupledVar("v", "List of coupled primary species");
+  RealVectorValue g(0, 0, 0);
+  params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
+  params.addClassDescription("Convection of equilibrium species");
   return params;
 }
 
 CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters)
-  : Kernel(parameters),
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _weight(getParam<Real>("weight")),
     _log_k(getParam<Real>("log_k")),
     _sto_u(getParam<Real>("sto_u")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _cond(getMaterialProperty<Real>("conductivity")),
-    _grad_p(coupledGradient("p"))
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _density(getDefaultMaterialProperty<Real>("density")),
+    _grad_p(coupledGradient("p")),
+    _pvar(coupled("p"))
 {
   const unsigned int n = coupledComponents("v");
   _vars.resize(n);
@@ -50,9 +56,9 @@ CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters
 Real
 CoupledConvectionReactionSub::computeQpResidual()
 {
-  RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
   RealGradient d_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
-  RealGradient d_var_sum = 0.0;
+  RealGradient d_var_sum(0.0, 0.0, 0.0);
   const Real d_v_u = std::pow(_u[_qp], _sto_u);
 
   for (unsigned int i = 0; i < _vals.size(); ++i)
@@ -74,12 +80,13 @@ CoupledConvectionReactionSub::computeQpResidual()
 Real
 CoupledConvectionReactionSub::computeQpJacobian()
 {
-  RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
+
   RealGradient d_u_1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_phi[_j][_qp];
   RealGradient d_u_2 =
       _phi[_j][_qp] * _sto_u * (_sto_u - 1.0) * std::pow(_u[_qp], _sto_u - 2.0) * _grad_u[_qp];
-  RealGradient d_u;
-  RealGradient d_var_sum = 0.0;
+
+  RealGradient d_var_sum(0.0, 0.0, 0.0);
   const Real d_v_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _phi[_j][_qp];
 
   for (unsigned int i = 0; i < _vals.size(); ++i)
@@ -96,17 +103,40 @@ CoupledConvectionReactionSub::computeQpJacobian()
     d_var_sum += d_var;
   }
 
-  d_u = d_u_1 + d_u_2;
-  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum);
+  RealGradient d_u_j = d_u_1 + d_u_2;
+  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u_j + d_var_sum);
 }
 
 Real
 CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  if (jvar == _pvar)
+  {
+    RealVectorValue ddarcy_vel_dp = -_cond[_qp] * _grad_phi[_j][_qp];
+
+    RealGradient d_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
+    RealGradient d_var_sum(0.0, 0.0, 0.0);
+    const Real d_v_u = std::pow(_u[_qp], _sto_u);
+
+    for (unsigned int i = 0; i < _vals.size(); ++i)
+    {
+      d_u *= std::pow((*_vals[i])[_qp], _sto_v[i]);
+
+      RealGradient d_var =
+          d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+      for (unsigned int j = 0; j < _vals.size(); ++j)
+        if (j != i)
+          d_var *= std::pow((*_vals[j])[_qp], _sto_v[j]);
+
+      d_var_sum += d_var;
+    }
+    return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * ddarcy_vel_dp * (d_u + d_var_sum);
+  }
+
   if (_vals.size() == 0)
     return 0.0;
 
-  RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
   RealGradient diff1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
@@ -135,7 +165,7 @@ CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
     }
 
   RealGradient diff3;
-  RealGradient diff3_sum = 0.0;
+  RealGradient diff3_sum(0.0, 0.0, 0.0);
   Real val_jvar = 0.0;
   unsigned int var = 0;
 

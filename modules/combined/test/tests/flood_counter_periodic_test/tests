@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'nodal_flood_periodic.i'
-    exodiff = 'out.e out.e-s005'
-  [../]
-[]

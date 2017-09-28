@@ -27,7 +27,6 @@
 #include "MooseApp.h"
 #include "Console.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 
 template <>

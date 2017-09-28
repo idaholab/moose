@@ -4,6 +4,16 @@
     input = 'cosserat_wp_only.i'
     check_input = True
   [../]
+  [./cosserat_mc_only_run]
+    type = RunApp
+    input = 'cosserat_mc_only.i'
+    check_input = True
+  [../]
+  [./cosserat_mc_wp_run]
+    type = RunApp
+    input = 'cosserat_mc_wp.i'
+    check_input = True
+  [../]
   [./cosserat_elastic_csv]
     type = 'CSVDiff'
     input = 'cosserat_elastic.i'
@@ -13,6 +23,18 @@
     type = 'CSVDiff'
     input = 'cosserat_wp_only.i'
     csvdiff = 'cosserat_wp_only.csv'
+    heavy = true
+  [../]
+  [./cosserat_mc_only_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_mc_only.i'
+    csvdiff = 'cosserat_mc_only.csv'
+    heavy = true
+  [../]
+  [./cosserat_mc_wp_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_mc_wp.i'
+    csvdiff = 'cosserat_mc_wp.csv'
     heavy = true
   [../]
 []

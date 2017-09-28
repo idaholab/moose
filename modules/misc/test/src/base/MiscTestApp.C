@@ -4,6 +4,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "Convection.h"
+
 template <>
 InputParameters
 validParams<MiscTestApp>()
@@ -50,8 +52,9 @@ MiscTestApp__registerObjects(Factory & factory)
   MiscTestApp::registerObjects(factory);
 }
 void
-MiscTestApp::registerObjects(Factory & /*factory*/)
+MiscTestApp::registerObjects(Factory & factory)
 {
+  registerKernel(Convection);
 }
 
 // External entry point for dynamic syntax association

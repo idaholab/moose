@@ -1,5 +1,5 @@
 [Mesh]
-  file = ../meta_action/square.e
+  file = square.e
   uniform_refine = 4
 []
 

@@ -20,7 +20,6 @@
 #include "GeometricSearchData.h"
 #include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/coupling_matrix.h"
 
 class MooseMesh;
@@ -41,6 +40,7 @@ template <typename T>
 class SparseMatrix;
 template <typename T>
 class NumericVector;
+class System;
 }
 
 template <>
@@ -78,9 +78,18 @@ public:
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
+
+  /// Returns the variable reference for requested variable which may be in any system
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns a Boolean indicating whether any system contains a variable with the name provided
   virtual bool hasScalarVariable(const std::string & var_name) = 0;
+
+  /// Returns the scalar variable reference from whichever system contains it
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the equation system containing the variable provided
+  virtual System & getSystem(const std::string & var_name) = 0;
 
   /**
    * Set the MOOSE variables to be reinited on each element.

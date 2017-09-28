@@ -15,9 +15,7 @@
 #ifndef MATERIALDERIVATIVETESTKERNEL_H
 #define MATERIALDERIVATIVETESTKERNEL_H
 
-#include "Kernel.h"
-#include "JvarMapInterface.h"
-#include "DerivativeMaterialInterface.h"
+#include "MaterialDerivativeTestKernelBase.h"
 
 class MaterialDerivativeTestKernel;
 
@@ -27,27 +25,15 @@ InputParameters validParams<MaterialDerivativeTestKernel>();
 /**
  * This kernel is used for testing derivatives of a material property.
  */
-class MaterialDerivativeTestKernel
-    : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+class MaterialDerivativeTestKernel : public MaterialDerivativeTestKernelBase<Real>
 {
 public:
   MaterialDerivativeTestKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
-
   virtual Real computeQpJacobian() override;
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-  /// number of nonlinear variables
-  const unsigned int _n_vars;
-  /// material property for which to test derivatives
-  const MaterialProperty<Real> & _p;
-  /// material properties for the off-diagonal derivatives of the tested property
-  std::vector<const MaterialProperty<Real> *> _p_off_diag_derivatives;
-  /// material property for the diagonal derivative of the tested property
-  const MaterialProperty<Real> & _p_diag_derivative;
 };
 
 #endif /* MATERIALDERIVATIVETESTKERNEL_H */

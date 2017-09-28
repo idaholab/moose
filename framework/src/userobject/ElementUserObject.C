@@ -17,7 +17,6 @@
 #include "SubProblem.h"
 #include "Assembly.h"
 
-// libMesh includes
 #include "libmesh/elem.h"
 
 template <>
@@ -26,8 +25,9 @@ validParams<ElementUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
-  params += validParams<RandomInterface>();
   params += validParams<MaterialPropertyInterface>();
+  params += validParams<TransientInterface>();
+  params += validParams<RandomInterface>();
   return params;
 }
 

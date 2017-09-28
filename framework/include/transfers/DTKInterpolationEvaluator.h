@@ -18,7 +18,6 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
-// libMesh includes
 #include "libmesh/point.h"
 
 // Ignore warnings coming from Trilinos/DTK.

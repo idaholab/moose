@@ -17,7 +17,7 @@ validParams<DesorptionFromMatrix>()
       "pressure_var",
       "Variable representing the porepressure of the fluid adsorbed into the matrix");
   params.addClassDescription("Mass flow rate from the matrix to the porespace.  Add this to "
-                             "TimeDerivative kernel to get complete DE for the fluid in adsorbed "
+                             "TimeDerivative kernel to get complete DE for the fluid adsorbed "
                              "in the matrix");
   return params;
 }

@@ -14,7 +14,6 @@
 
 #include "EmptyPostprocessor.h"
 
-// libMesh includes
 #include "libmesh/parallel.h"
 
 template <>

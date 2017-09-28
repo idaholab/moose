@@ -52,7 +52,7 @@
     variable = phi
   [../]
   [./phi_forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = phi
     function = phi_mms
   [../]

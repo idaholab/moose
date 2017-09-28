@@ -33,7 +33,6 @@
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 
-// libMesh includes
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
 
@@ -227,6 +226,7 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name) override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
+  virtual System & getSystem(const std::string & var_name) override;
 
   /**
    * Set the MOOSE variables to be reinited on each element.
@@ -1294,6 +1294,8 @@ public:
    * a -> b (a depends on b)
    */
   void reportMooseObjectDependency(MooseObject * a, MooseObject * b);
+
+  ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
 
 protected:
   ///@{

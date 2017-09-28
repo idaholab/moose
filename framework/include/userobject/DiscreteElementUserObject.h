@@ -32,9 +32,9 @@ public:
   virtual void initialize() override;
 
   /// @{ Block all methods that are not used in explicitly called UOs
-  virtual void execute() override;                      // libmesh_final;
-  virtual void finalize() override;                     // libmesh_final;
-  virtual void threadJoin(const UserObject &) override; // libmesh_final;
+  virtual void execute() override final;
+  virtual void finalize() override final;
+  virtual void threadJoin(const UserObject &) override final;
   /// @}
 };
 

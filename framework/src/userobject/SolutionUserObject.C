@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "RotationMatrix.h"
 
-// libMesh includes
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/numeric_vector.h"
@@ -222,7 +221,7 @@ SolutionUserObject::readExodusII()
     else
     {
       std::istringstream ss(s_timestep);
-      if (!(ss >> _exodus_time_index) || _exodus_time_index > n_steps)
+      if (!((ss >> _exodus_time_index) && ss.eof()) || _exodus_time_index > n_steps)
         mooseError("Invalid value passed as \"timestep\". Expected \"LATEST\" or a valid integer "
                    "less than ",
                    n_steps,

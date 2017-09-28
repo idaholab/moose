@@ -75,5 +75,11 @@ class TestBibtexExtension(MarkdownTestCase):
         md = r'\cite{noAuthorTestKey}\n\bibliography{docs/content/bib/test.bib}'
         self.assertConvert('test_no_author.html', md)
 
+    def testDuplicateError(self):
+        md = r'\cite{macroTestKey}\n\bibliography{docs/content/bib/test_duplicate.bib}'
+        self.convert(md)
+        self.assertInLogError('repeated bibliograhpy entry: macroTestKey', index=-3)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

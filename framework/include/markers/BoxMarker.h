@@ -17,8 +17,7 @@
 
 #include "Marker.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 class BoxMarker;
 
@@ -36,7 +35,7 @@ protected:
   MarkerValue _inside;
   MarkerValue _outside;
 
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 };
 
 #endif /* BOXMARKER_H */

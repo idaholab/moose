@@ -92,8 +92,8 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Input:
             path[str]: path to new input file.
         """
-        self.updateView.emit(self.InputFileEditorPlugin.tree)
         self.inputFileChanged.emit(path)
+        self.updateView.emit(self.InputFileEditorPlugin.tree)
         if not self.InputFileEditorPlugin.tree.app_info.valid() or not self.InputFileEditorPlugin.tree.input_filename:
             self.numTimeStepsChanged.emit(0)
             return
@@ -236,6 +236,12 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Clears all the items in the recently used menu
         """
         self.InputFileEditorPlugin.clearRecentlyUsed()
+
+    def onUseTestObjectsChanged(self, use_test_objs):
+        """
+        Pass along whether to use test objects.
+        """
+        self.MeshViewerPlugin.useTestObjects(use_test_objs)
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow

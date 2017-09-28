@@ -20,8 +20,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = AnisotropicDiffusion
     variable = u

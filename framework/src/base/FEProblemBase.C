@@ -2708,7 +2708,7 @@ FEProblemBase::computeIndicators()
   // Initialize indicator aux variable fields
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    Moose::perf_log.push("computeIndicators()", "Execution");
+    Moose::perf_log.push("Adaptivity: computeIndicators()", "Execution");
 
     std::vector<std::string> fields;
 
@@ -2735,7 +2735,7 @@ FEProblemBase::computeIndicators()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("computeIndicators()", "Execution");
+    Moose::perf_log.pop("Adaptivity: computeIndicators()", "Execution");
   }
 }
 
@@ -2744,7 +2744,7 @@ FEProblemBase::computeMarkers()
 {
   if (_markers.hasActiveObjects())
   {
-    Moose::perf_log.push("computeMarkers()", "Execution");
+    Moose::perf_log.push("Adaptivity: computeMarkers()", "Execution");
 
     std::vector<std::string> fields;
 
@@ -2770,7 +2770,7 @@ FEProblemBase::computeMarkers()
     _aux->solution().close();
     _aux->update();
 
-    Moose::perf_log.pop("computeMarkers()", "Execution");
+    Moose::perf_log.pop("Adaptivity: computeMarkers()", "Execution");
   }
 }
 
@@ -3450,6 +3450,17 @@ FEProblemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
     return _aux->getScalarVariable(tid, var_name);
   else
     mooseError("Unknown variable " + var_name);
+}
+
+System &
+FEProblemBase::getSystem(const std::string & var_name)
+{
+  if (_nl->hasVariable(var_name))
+    return _nl->system();
+  else if (_aux->hasVariable(var_name))
+    return _aux->system();
+  else
+    mooseError("Unable to find a system containing the variable " + var_name);
 }
 
 void
@@ -4463,7 +4474,7 @@ FEProblemBase::adaptMesh()
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
 
-  Moose::perf_log.push("adaptMesh()", "Execution");
+  Moose::perf_log.push("Adaptivity: adaptMesh()", "Execution");
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
@@ -4486,7 +4497,7 @@ FEProblemBase::adaptMesh()
     _console << std::flush;
   }
 
-  Moose::perf_log.pop("adaptMesh()", "Execution");
+  Moose::perf_log.pop("Adaptivity: adaptMesh()", "Execution");
 }
 #endif // LIBMESH_ENABLE_AMR
 
@@ -4691,7 +4702,7 @@ FEProblemBase::checkProblemIntegrity()
 
     // Check material properties on blocks and boundaries
     checkBlockMatProps();
-    // checkBoundaryMatProps();
+    checkBoundaryMatProps();
 
     // Check that material properties exist when requested by other properties on a given block
     const auto & materials = _all_materials.getActiveObjects();
@@ -5091,12 +5102,10 @@ FEProblemBase::solverParams()
 void
 FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
 {
-  auto rand_pair_it = _random_data_objects.lower_bound(name);
-  if (rand_pair_it == _random_data_objects.end() || rand_pair_it->first != name)
-    rand_pair_it = _random_data_objects.emplace_hint(
-        rand_pair_it, name, libmesh_make_unique<RandomData>(*this, random_interface));
+  auto insert_pair = moose_try_emplace(
+      _random_data_objects, name, libmesh_make_unique<RandomData>(*this, random_interface));
 
-  auto random_data_ptr = rand_pair_it->second.get();
+  auto random_data_ptr = insert_pair.first->second.get();
   random_interface.setRandomDataPointer(random_data_ptr);
 }
 

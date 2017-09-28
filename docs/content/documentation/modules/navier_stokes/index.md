@@ -9,8 +9,7 @@ Two spatial discretization methods are available for choice in this module:
 
  For questions regarding the CGFE implementation of the Navier-Stokes equations, contact John Peterson (<jw.peterson@inl.gov>).
 
- For questions regarding the rDG implementation of the compressible Euler equations, contact Yidong Xia (<yidong.xia@inl.gov>).
+ For questions regarding the rDG implementation of the compressible Euler
+ equations, contact Yidong Xia (<yidong.xia@inl.gov>).
 
-
-
-
+ !syntax complete groups=navier_stokes

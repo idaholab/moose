@@ -20,7 +20,6 @@
 #include "NonlinearSystemBase.h"
 #include "TimeIntegrator.h"
 
-// libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"

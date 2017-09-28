@@ -39,11 +39,11 @@ class InputParameters;
     factory.associateNameToClass(name, stringifyName(obj));                                        \
   } while (0)
 
-#define registerDeprecatedObject(name, time)                                                       \
-  factory.regDeprecated<name>(stringifyName(name), time, __FILE__, __LINE__)
+#define registerDeprecatedObject(name)                                                             \
+  factory.regDeprecated<name>(stringifyName(name), __FILE__, __LINE__)
 
-#define registerDeprecatedObjectWithReplacement(dep_obj, replacement_name, time)                   \
-  factory.regReplaced<dep_obj>(stringifyName(dep_obj), replacement_name, time, __FILE__, __LINE__)
+#define registerDeprecatedObjectWithReplacement(dep_obj, replacement_name)                         \
+  factory.regReplaced<dep_obj>(stringifyName(dep_obj), replacement_name, __FILE__, __LINE__)
 
 // for backward compatibility
 #define registerKernel(name) registerObject(name)
@@ -216,15 +216,12 @@ public:
    */
   template <typename T>
   void regDeprecated(const std::string & obj_name,
-                     const std::string t_str,
                      const std::string & file,
                      int line)
   {
     // Register the name
     reg<T>(obj_name, file, line);
-
-    // Store the time
-    _deprecated_time[obj_name] = parseTime(t_str);
+    deprecateObject(obj_name);
   }
 
   /**
@@ -238,15 +235,14 @@ public:
   template <typename T>
   void regReplaced(const std::string & dep_obj,
                    const std::string & replacement_name,
-                   const std::string time_str,
                    const std::string & file,
                    int line)
   {
     // Register the name
-    regDeprecated<T>(dep_obj, time_str, file, line);
+    regDeprecated<T>(dep_obj, file, line);
 
     // Store the new name
-    _deprecated_name[dep_obj] = replacement_name;
+    deprecateObject(dep_obj, replacement_name);
   }
 
   /**
@@ -318,14 +314,15 @@ public:
    */
   std::vector<std::string> getConstructedObjects() const;
 
-protected:
+  ///@{
   /**
-   * Parse time string (mm/dd/yyyy HH:MM)
-   * @param t_str String with the object expiration date, this must be in the form mm/dd/yyyy HH:MM
-   * @return A time_t object with the expiration date
+   * Allow objects to be deprecated via function call.
    */
-  time_t parseTime(std::string);
+  void deprecateObject(const std::string & name);
+  void deprecateObject(const std::string & name, const std::string & replacement);
+  ///@}
 
+protected:
   /**
    * Show the appropriate message for deprecated objects
    * @param obj_name Name of the deprecated object
@@ -351,11 +348,11 @@ protected:
   /// Object name to class name association
   std::map<std::string, std::string> _name_to_class;
 
-  /// Storage for deprecated object experiation dates
-  std::map<std::string, time_t> _deprecated_time;
+  /// Storage for deprecated objects
+  std::set<std::string> _deprecated;
 
   /// Storage for the deprecated objects that have replacements
-  std::map<std::string, std::string> _deprecated_name;
+  std::map<std::string, std::string> _deprecated_with_replace;
 
   /// The list of objects that may be registered
   std::set<std::string> _registerable_objects;

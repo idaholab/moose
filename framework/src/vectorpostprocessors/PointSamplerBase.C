@@ -18,7 +18,6 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 template <>
@@ -73,7 +72,7 @@ PointSamplerBase::initialize()
 void
 PointSamplerBase::execute()
 {
-  MeshTools::BoundingBox bbox = _mesh.getInflatedProcessorBoundingBox();
+  BoundingBox bbox = _mesh.getInflatedProcessorBoundingBox();
 
   /// So we don't have to create and destroy this
   std::vector<Point> point_vec(1);

@@ -181,6 +181,22 @@ protected:
   /// Holds the current solution gradient at the current quadrature point
   const VariableGradient & _grad_u_neighbor;
 
+  /// Holds residual entries as they are accumulated by this DGKernel
+  DenseVector<Number> _local_re;
+
+  /// Holds residual entries as they are accumulated by this DGKernel
+  DenseMatrix<Number> _local_kxx;
+
+  /// The aux variables to save the residual contributions to
+  bool _has_save_in;
+  std::vector<MooseVariable *> _save_in;
+  std::vector<AuxVariableName> _save_in_strings;
+
+  /// The aux variables to save the diagonal Jacobian contributions to
+  bool _has_diag_save_in;
+  std::vector<MooseVariable *> _diag_save_in;
+  std::vector<AuxVariableName> _diag_save_in_strings;
+
   /**
    * This is the virtual that derived classes should override for computing the residual on
    * neighboring element.
@@ -205,6 +221,10 @@ public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up
   // number)
   static const BoundaryID InternalBndId;
+
+protected:
+  static Threads::spin_mutex _resid_vars_mutex;
+  static Threads::spin_mutex _jacoby_vars_mutex;
 };
 
 #endif // DGKERNEL_H

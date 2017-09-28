@@ -15,7 +15,6 @@
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
 
-// libMesh includes
 #include "libmesh/petsc_macro.h"
 
 // PETSc includes

@@ -1,7 +1,17 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # AqueousEquilibriumRxnAux
 !syntax description /AuxKernels/AqueousEquilibriumRxnAux
+
+Calculates the concentration of the $i^{\mathrm{th}}$ secondary species, $C_i$ in terms of
+primary species concentration $C_j$ using the mass action equation
+
+\begin{equation}
+C_i = \frac{K_i}{\gamma_i} \prod_{j=1}^{N_c} \left(\gamma_j C_j\right)^{\nu_{ji}},
+\end{equation}
+where $K_i$ is equilibrium constant, $\gamma_i$ is the activity coefficient, and
+$N_c$ is the number of primary species.
+
+!!! note:
+    Currently, $\gamma_i$ is fixed as unity in the calculation
 
 !syntax parameters /AuxKernels/AqueousEquilibriumRxnAux
 

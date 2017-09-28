@@ -17,7 +17,6 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
-// libMesh includes
 #include "libmesh/numeric_vector.h"
 
 template <>

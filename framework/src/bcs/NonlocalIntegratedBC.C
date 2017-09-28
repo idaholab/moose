@@ -20,7 +20,6 @@
 #include "SystemBase.h"
 #include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 

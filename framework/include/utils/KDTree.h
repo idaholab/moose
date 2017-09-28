@@ -18,7 +18,6 @@
 // Moose includes
 #include "MooseMesh.h"
 
-// Libmesh includes
 #include "libmesh/nanoflann.hpp"
 
 class KDTree

@@ -18,7 +18,6 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h" // _qrule
 
 template <>

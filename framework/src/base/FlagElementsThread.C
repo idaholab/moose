@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "Problem.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 
 // C++ includes

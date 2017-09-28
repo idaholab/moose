@@ -17,7 +17,6 @@
 
 #include "Moose.h"
 
-// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"
@@ -119,6 +118,8 @@ const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
 const SubdomainID INVALID_BLOCK_ID = libMesh::Elem::invalid_subdomain_id;
 const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
+const std::set<SubdomainID> EMPTY_BLOCK_IDS = {};
+const std::set<BoundaryID> EMPTY_BOUNDARY_IDS = {};
 
 /**
  * MaterialData types
@@ -298,6 +299,20 @@ enum WhichEigenPairs
 };
 
 /**
+ * Time integrators
+ */
+enum TimeIntegratorType
+{
+  TI_IMPLICIT_EULER,
+  TI_EXPLICIT_EULER,
+  TI_CRANK_NICOLSON,
+  TI_BDF2,
+  TI_EXPLICIT_MIDPOINT,
+  TI_LSTABLE_DIRK2,
+  TI_EXPLICIT_TVD_RK_2,
+};
+
+/**
  * Type of constraint formulation
  */
 enum ConstraintFormulationType
@@ -326,6 +341,16 @@ enum LineSearchType
   LS_CP
 #endif
 #endif
+};
+
+/**
+ * Type of the matrix-free finite-differencing parameter
+ */
+enum MffdType
+{
+  MFFD_INVALID, ///< means not set
+  MFFD_WP,
+  MFFD_DS
 };
 }
 

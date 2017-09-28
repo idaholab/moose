@@ -5,6 +5,13 @@
     expect_err = 'The following required'
   [../]
 
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files="sub_unused.i"'
+    expect_err = 'unused parameter'
+  [../]
+
   [./positions]
     type = 'RunException'
     input = 'check_error.i'
@@ -37,7 +44,7 @@
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Number of entries in \'positions_file\''
-    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions"'
+    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions.txt"'
   [../]
 
   [./sub_cycling_and_catch_up]

@@ -15,7 +15,6 @@
 #include "SetAdaptivityOptionsAction.h"
 #include "FEProblem.h"
 
-// libmesh includes
 #include "libmesh/fe.h"
 
 template <>

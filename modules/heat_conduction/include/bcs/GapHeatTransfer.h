@@ -36,8 +36,7 @@ protected:
   virtual Real computeSlaveFluxContribution(Real grad_t);
   virtual void computeGapValues();
 
-  bool _gap_geometry_params_set;
-  GapConductance::GAP_GEOMETRY _gap_geometry_type;
+  GapConductance::GAP_GEOMETRY & _gap_geometry_type;
 
   const bool _quadrature;
 
@@ -71,8 +70,8 @@ protected:
   PenetrationLocator * _penetration_locator;
   const bool _warnings;
 
-  Point _p1;
-  Point _p2;
+  Point & _p1;
+  Point & _p2;
 };
 
 #endif // GAPHEATTRANSFER_H

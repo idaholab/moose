@@ -1,0 +1,7 @@
+[Tests]
+  [./testdirichlet]
+    type = 'Exodiff'
+    input = 'coupled_time_derivative_test.i'
+    exodiff = 'coupled_time_derivative_test_out.e'
+  [../]
+[]

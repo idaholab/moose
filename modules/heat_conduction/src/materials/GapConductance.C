@@ -15,7 +15,6 @@
 #include "SystemBase.h"
 #include "AddVariableAction.h"
 
-// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 template <>
@@ -103,8 +102,8 @@ GapConductance::GapConductance(const InputParameters & parameters)
   : Material(parameters),
     _appended_property_name(getParam<std::string>("appended_property_name")),
     _temp(coupledValue("variable")),
-    _gap_geometry_params_set(false),
-    _gap_geometry_type(GapConductance::PLATE),
+    _gap_geometry_type(declareRestartableData<GapConductance::GAP_GEOMETRY>("gap_geometry_type",
+                                                                            GapConductance::PLATE)),
     _quadrature(getParam<bool>("quadrature")),
     _gap_temp(0),
     _gap_distance(88888),
@@ -135,7 +134,9 @@ GapConductance::GapConductance(const InputParameters & parameters)
     _penetration_locator(NULL),
     _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
     _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
-    _warnings(getParam<bool>("warnings"))
+    _warnings(getParam<bool>("warnings")),
+    _p1(declareRestartableData<Point>("cylinder_axis_point_1", Point(0, 1, 0))),
+    _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0)))
 {
   if (_quadrature)
   {

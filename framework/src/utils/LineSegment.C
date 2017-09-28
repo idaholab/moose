@@ -14,7 +14,6 @@
 
 #include "LineSegment.h"
 
-// libMesh includes
 #include "libmesh/plane.h"
 #include "libmesh/vector_value.h"
 

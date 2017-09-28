@@ -20,7 +20,6 @@
 #include "KernelBase.h"
 #include "IntegratedBC.h"
 
-// libMesh includes
 #include "libmesh/threads.h"
 #include "libmesh/dof_map.h"
 

@@ -11,6 +11,7 @@
 // MOOSE includes
 #include "TransientMultiApp.h"
 #include "SamplerInterface.h"
+#include "Sampler.h"
 
 class SamplerMultiApp;
 
@@ -21,6 +22,11 @@ class SamplerMultiApp : public TransientMultiApp, public SamplerInterface
 {
 public:
   SamplerMultiApp(const InputParameters & parameters);
+
+  /**
+   * Return the Sampler object for this MultiApp.
+   */
+  Sampler & getSampler() const { return _sampler; }
 
 protected:
   /// Sampler to utilize for creating MultiApps

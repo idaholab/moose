@@ -34,7 +34,7 @@
     prop_name = matp
   [../]
   [./f]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = '20'
   [../]

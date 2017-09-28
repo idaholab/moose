@@ -18,7 +18,7 @@
   [./function_force]
     function = pp_func
     variable = u
-    type = UserForcingFunction
+    type = BodyForce
   [../]
 []
 

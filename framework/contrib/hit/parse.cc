@@ -17,6 +17,8 @@
 namespace hit
 {
 
+const std::string indentString = "  ";
+
 // split breaks input into a vector treating whitespace as a delimiter.  Consecutive whitespace
 // characters are treated as a single delimiter.
 std::vector<std::string>
@@ -149,7 +151,7 @@ pathJoin(const std::vector<std::string> & paths)
       continue;
     fullpath += "/" + p;
   }
-  return fullpath.substr(1, fullpath.size() - 1);
+  return fullpath.substr(1);
 }
 
 Node::Node(NodeType t) : _type(t) {}
@@ -282,13 +284,17 @@ Node::fullpath()
 {
   if (_parent == nullptr)
     return "";
-  return pathNorm(pathJoin({_parent->fullpath(), path()}));
+
+  auto ppath = _parent->fullpath();
+  if (ppath.empty())
+    return path();
+  return _parent->fullpath() + "/" + path();
 }
 
 void
 Node::walk(Walker * w, NodeType t)
 {
-  if (_type == t)
+  if (_type == t || t == NodeType::All)
     w->walk(fullpath(), pathNorm(path()), this);
   for (auto child : _children)
     child->walk(w, t);
@@ -299,7 +305,7 @@ Node::find(const std::string & path)
 {
   if (path == "" && fullpath() == "")
     return this;
-  return findInner(path, "");
+  return findInner(pathNorm(path), "");
 }
 
 std::vector<Token> &
@@ -317,9 +323,16 @@ Node::findInner(const std::string & path, const std::string & prefix)
     if (t != NodeType::Section && t != NodeType::Field)
       continue;
 
-    auto fullpath = pathNorm(pathJoin({prefix, child->path()}));
-    if (pathNorm(fullpath) == pathNorm(path))
+    std::string fullpath;
+    if (prefix.size() == 0)
+      fullpath = child->path();
+    else
+      fullpath = prefix + "/" + child->path();
+
+    if (fullpath == path)
       return child;
+    else if (path.find(fullpath) == std::string::npos)
+      continue;
 
     if (child->type() == NodeType::Section)
     {
@@ -341,7 +354,7 @@ Comment::render(int indent)
 {
   if (_isinline)
     return " " + _text;
-  return strRepeat("    ", indent) + _text;
+  return "\n" + strRepeat(indentString, indent) + _text;
 }
 
 Node *
@@ -350,12 +363,12 @@ Comment::clone()
   return new Comment(_text, _isinline);
 }
 
-Section::Section(const std::string & path) : Node(NodeType::Section), _path(path) {}
+Section::Section(const std::string & path) : Node(NodeType::Section), _path(pathNorm(path)) {}
 
 std::string
 Section::path()
 {
-  return pathNorm(_path);
+  return _path;
 }
 
 std::string
@@ -363,7 +376,7 @@ Section::render(int indent)
 {
   std::string s;
   if (root() != this)
-    s = "\n" + strRepeat("    ", indent) + "[" + _path + "]";
+    s = "\n" + strRepeat(indentString, indent) + "[" + _path + "]";
   else
     indent--; // don't indent the root section contents extra
 
@@ -371,13 +384,9 @@ Section::render(int indent)
     s += child->render(indent + 1);
 
   if (root() != this)
-  {
-    s += "\n" + strRepeat("    ", indent);
-    if (indent == 0)
-      s += "[]";
-    else
-      s += "[../]";
-  }
+    s += "\n" + strRepeat(indentString, indent) + "[]";
+  else
+    s = s.substr(1);
   return s;
 }
 
@@ -391,20 +400,20 @@ Section::clone()
 }
 
 Field::Field(const std::string & field, Kind k, const std::string & val)
-  : Node(NodeType::Field), _kind(k), _field(field), _val(val)
+  : Node(NodeType::Field), _kind(k), _path(pathNorm(field)), _field(field), _val(val)
 {
 }
 
 std::string
 Field::path()
 {
-  return pathNorm(_field);
+  return _path;
 }
 
 std::string
 Field::render(int indent)
 {
-  return "\n" + strRepeat("    ", indent) + _field + " = " + _val;
+  return "\n" + strRepeat(indentString, indent) + _field + " = " + _val;
 }
 
 Node *
@@ -668,7 +677,12 @@ parseSectionBody(Parser * p, Node * n)
     auto tok = p->next();
     auto next = p->peek();
     p->backup();
-    if (tok.type == TokType::Ident)
+    if (tok.type == TokType::BlankLine)
+    {
+      p->require(TokType::BlankLine, "parser is horribly broken");
+      n->addChild(p->emit(new Blank()));
+    }
+    else if (tok.type == TokType::Ident)
       parseField(p, n);
     else if (tok.type == TokType::Comment || tok.type == TokType::InlineComment)
       parseComment(p, n);

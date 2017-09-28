@@ -19,4 +19,16 @@
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
   [../]
+
+  [./ik_save_in]
+    type = Exodiff
+    input = 'ik_save_in_test.i'
+    exodiff = 'ik_save_in_test_out.e'
+  [../]
+  [./ik_save_in_other_side]
+    type = Exodiff
+    input = 'ik_save_in_test.i'
+    exodiff = 'ik_save_in_other_side_out.e'
+    cli_args = 'BCs/middle/variable=u BCs/middle/v=v BCs/middle/save_in=master_resid Outputs/file_base=ik_save_in_other_side_out'
+  [../]
 []

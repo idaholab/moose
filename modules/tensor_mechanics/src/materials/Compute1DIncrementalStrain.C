@@ -7,7 +7,6 @@
 
 #include "Compute1DIncrementalStrain.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
 template <>

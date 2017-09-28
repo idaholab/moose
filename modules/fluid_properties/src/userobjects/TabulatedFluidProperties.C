@@ -56,7 +56,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
     _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp")),
-    _csv_reader(_file_name, true, ",", &_communicator)
+    _csv_reader(_file_name, &_communicator)
 {
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
@@ -79,7 +79,7 @@ TabulatedFluidProperties::initialSetup()
     _console << "Reading tabulated properties from " << _file_name << "\n";
     _csv_reader.read();
 
-    const std::vector<std::string> & column_names = _csv_reader.getColumnNames();
+    const std::vector<std::string> & column_names = _csv_reader.getNames();
 
     // Check that all required columns are present
     for (std::size_t i = 0; i < _required_columns.size(); ++i)
@@ -102,7 +102,7 @@ TabulatedFluidProperties::initialSetup()
       data_index[_required_columns[i]] = std::distance(column_names.begin(), it);
     }
 
-    const std::vector<std::vector<Real>> & column_data = _csv_reader.getColumnData();
+    const std::vector<std::vector<Real>> & column_data = _csv_reader.getData();
 
     // Extract the pressure and temperature data vectors
     _pressure = column_data[data_index.find("pressure")->second];

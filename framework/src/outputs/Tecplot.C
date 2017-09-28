@@ -18,7 +18,6 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/tecplot_io.h"
 
 template <>

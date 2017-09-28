@@ -35,7 +35,7 @@
 # These are not actally used in this example.
 #
 # Material properties:
-# Young's modulus = 16 GPa
+# Young's modulus = 8 GPa
 # Poisson's ratio = 0.25
 # Cosserat layer thickness = 1 m
 # Cosserat-joint normal stiffness = large

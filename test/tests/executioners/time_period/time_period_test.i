@@ -49,13 +49,13 @@
   [../]
 
   [./ffn1]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn_p1
   [../]
 
   [./ffn2]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn_p2
   [../]

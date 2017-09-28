@@ -19,8 +19,8 @@
 #include <cstdlib> // std::system, mkstemp
 #include <fstream>
 
-// libMesh includes
 #include "libmesh/mesh_generation.h"
+#include "libmesh/unstructured_mesh.h"
 
 template <>
 InputParameters
