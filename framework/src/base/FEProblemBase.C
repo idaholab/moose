@@ -3670,6 +3670,10 @@ FEProblemBase::init()
 {
   if (_initialized)
     return;
+  // Use full coupling if Newton method is used, otherwise
+  // Newton may diverge for many applications
+  if (solverParams()._type == Moose::ST_NEWTON && _coupling != Moose::COUPLING_CUSTOM)
+    _coupling = Moose::COUPLING_FULL;
 
   unsigned int n_vars = _nl->nVariables();
   switch (_coupling)
