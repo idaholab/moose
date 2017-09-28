@@ -6,6 +6,30 @@ html {
     font-weight: 300;
 }
 
+/* fallback */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../contrib/fonts/material-icons/material-icons.woff2') format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
 /* make inline code snippets have a non-white background */
 code {
   background: #f5f2f0;
@@ -225,16 +249,10 @@ li{
 }
 
 .collapsible-header .moose-parameter-name{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
     font-weight:600;
 }
 
 .collapsible-header .moose-parameter-header-default{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
     color:#757575;
     font-weight:100;
 }
@@ -441,10 +459,8 @@ footer.page-footer {
     margin-left:15px;
 }
 
-.collapsible-header .moose-collection-name{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+.collapsible-header{
+  padding: 10px;
 }
 
 .collapsible-header .moose-collection-description{
@@ -458,11 +474,36 @@ footer.page-footer {
     margin-bottom: 0;
 }
 
+.collapsible-header .material-icons{
+  opacity: 0.5;
+  margin-left: 0;
+  margin-right: 5px;
+}
+
 /* Slideshows with white backgrounds and captions, need a black drop text shadow */
 .carousel-caption {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
 
+/* Equations */
+.moose-katex-block{
+  display: flex;
+}
+
+.moose-katex-equation{
+  flex-grow: 1;
+}
+
+.moose-katex-equation-number{
+  width: 5%;
+  text-align: right;
+  margin-bottom: : auto;
+  margin-top: auto;
+}
+
+.katex-display{
+  margin: 0;
+}
 
 /* Admonition */
 .admonition-title{
@@ -545,6 +586,10 @@ footer.page-footer {
     background: #ffb4b4;
     color: #000;
     border: 0px solid transparent;
+}
+
+.moose-katex-error{
+    color: red;
 }
 
 span.badge.new{

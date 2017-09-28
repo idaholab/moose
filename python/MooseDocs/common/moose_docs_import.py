@@ -57,8 +57,7 @@ def find_files(filenames, pattern):
         out.add(match.group(0))
     return out
 
-def moose_docs_import(root_dir=None, include=None, exclude=None, base=None,
-                      extensions=None):
+def moose_docs_import(root_dir=None, include=None, exclude=None, base=None, extensions=None):
     """
     Cretes a list of files to "include" from files, include, and/or exclude lists. All paths should
     be defined with respect to the repository base directory.

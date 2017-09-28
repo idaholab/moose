@@ -234,14 +234,3 @@ class MooseMarkdownCommon(object):
             MooseMarkdownCommon.HELP_CONTENT_COUNT += 1
 
         return el
-
-    @staticmethod
-    def createCopyButton(tag_id):
-        """
-        Create a copy button.
-        """
-        btn = etree.Element('button')
-        btn.set('class', 'moose-copy-button btn')
-        btn.set('data-clipboard-target', '#{}'.format(tag_id))
-        btn.text = 'copy'
-        return btn

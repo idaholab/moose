@@ -2,12 +2,11 @@
 
 !include docs/content/getting_started/minimum_requirements.md
 
----
 ## Pre-Reqs
 * Install the following using apt-get
 
 ```bash
-  sudo apt-get install build-essential \
+sudo apt-get install build-essential \
 gfortran \
 tcl \
 git \

@@ -123,12 +123,6 @@ class TestFileTree(LogTestCase):
         self.assertEqual(node.filename, os.path.join(MooseDocs.ROOT_DIR, 'docs', 'content', 'media',
                                                      'gitlab-logo.png'))
 
-        node = self.finder(root, 'css/moose.css')[0]
-        self.assertIsNotNone(node)
-
-        node = self.finder(root, 'js/init.js')[0]
-        self.assertIsNotNone(node)
-
         node0 = MooseMarkdown.find(root, 'utilities/moose_docs/index.md')[0]
         self.assertIsNotNone(node0)
 

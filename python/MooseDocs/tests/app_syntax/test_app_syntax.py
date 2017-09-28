@@ -47,11 +47,10 @@ class TestAppSyntax(MarkdownTestCase):
         md = '!syntax parameters /BCs/Pressure actions=False'
         html = self.convert(md)
 
-        content = '<div class="moose-parameter-name col l4">type<span ' \
-                  'class="moose-parameter-header-default"> (Pressure)</span></div>'
+        content = '<div class="moose-parameter-name">variable'
         self.assertIn(content, html)
 
-        content = '<div class="moose-parameter-name col l4">disp_x'
+        content = '<div class="moose-parameter-names">disp_x'
         self.assertNotIn(content, html)
 
     def testParametersSyntaxError(self):

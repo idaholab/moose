@@ -15,7 +15,6 @@
 #pylint: enable=missing-docstring
 import os
 import multiprocessing
-import re
 import shutil
 import subprocess
 import logging
@@ -65,17 +64,6 @@ def build_options(parser):
     parser.add_argument('--no-livereload', action='store_true',
                         help="When --serve is used this flag disables the live reloading.")
 
-def submodule_status():
-    """
-    Return the status of each of the git submodule.
-    """
-    out = dict()
-    result = subprocess.check_output(['git', 'submodule', 'status'], cwd=MooseDocs.MOOSE_DIR)
-    regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s')
-    for match in regex.finditer(result):
-        out[match.group('name')] = match.group('status')
-    return out
-
 class WebsiteBuilder(common.Builder):
     """
     Builder object for creating websites.
@@ -96,6 +84,22 @@ class WebsiteBuilder(common.Builder):
 
     def buildNodes(self):
         return common.moose_docs_file_tree(self._content)
+
+    def copyFiles(self):
+        super(WebsiteBuilder, self).copyFiles()
+
+        locations = set()
+        for folder in ['js', 'css', 'fonts', 'contrib']:
+            locations.add(os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', folder))
+            locations.add(os.path.join(os.getcwd(), 'content', folder))
+
+        for loc in locations:
+            if os.path.isdir(loc):
+                dest = os.path.join(self._site_dir, os.path.basename(loc))
+                if os.path.isdir(dest):
+                    shutil.rmtree(dest)
+                shutil.copytree(loc, dest)
+
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -164,7 +168,7 @@ def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False
 
     # Check submodule for large_media
     if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
-        status = submodule_status()
+        status = common.submodule_status()
         if status['docs/content/media/large_media'] == '-':
             if init:
                 subprocess.call(['git', 'submodule', 'update', '--init',
