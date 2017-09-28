@@ -22,10 +22,29 @@ LOG = logging.getLogger(__name__)
 def build_regex(pattern):
     """
     Build regex from paths with * and **.
+
+    When defining a content file it is useful to simply use * and ** in glob like fashion for
+    directory names. However, ** in glob for python 2.7 is not supported. Therefore, this function
+    mimics this behavior using regexes.
+
+    This function replaces * with a regex that will match any characters, except a slash,
+    in between forward slashes or at the beginning and end of the path.
+
+    Similarly, the ** will match any character, including a slash, in between forward slashes or
+    at the beginning or end of the string.
+
     """
     out = pattern.replace('.', r'\.')
+
+    # Replace ** or * that is proceeded by the beginning of the string or a forward slash and
+    # that is followed by a forward or the end of the string. The replacement is a regex that will
+    # mimic the glob ** and * behaviors.
+    #    ** becomes (?:.*?) which matches any character
+    #    * becomes (?:[^.]?) which matches any character except for the slash
     out = re.sub(r'(?!<^|/)(\*{2})(?=/|$)', r'(?:.*?)', out, flags=re.MULTILINE)
     out = re.sub(r'(?!<^|/)(\*{1})(?=/|$)', r'(?:[^/]*?)', out, flags=re.MULTILINE)
+
+    # The overall regex for searching filenames must be limited to one line
     return r'^{}$'.format(out)
 
 def find_files(filenames, pattern):
