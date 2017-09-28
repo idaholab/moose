@@ -83,6 +83,7 @@ class WebsiteBuilder(common.Builder):
 
     def __init__(self, content=None, **kwargs):
         super(WebsiteBuilder, self).__init__(**kwargs)
+
         if (content is None) or (not os.path.isfile(content)):
             LOG.info("Using default content directory configuration "
                      "(i.e., --content does not include a valid filename).")

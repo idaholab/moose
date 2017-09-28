@@ -60,8 +60,8 @@ class TestBuild(unittest.TestCase):
         config = dict()
         config['framework'] = dict(base='docs/content',
                                    include=['docs/content/documentation/systems/' \
-                                            'Functions/*'])
-        config['test'] = dict(base='test/docs/content', include=['test/docs/content/*'])
+                                            'Functions/**'])
+        config['test'] = dict(base='test/docs/content', include=['test/docs/content/**'])
         node = common.moose_docs_file_tree(config)
 
         func = self.finder(node, 'PostprocessorFunction')[0]

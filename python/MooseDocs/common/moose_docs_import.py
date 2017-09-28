@@ -14,10 +14,48 @@
 ####################################################################################################
 #pylint: enable=missing-docstring
 import os
-import fnmatch
+import re
 import logging
 import MooseDocs
 LOG = logging.getLogger(__name__)
+
+def build_regex(pattern):
+    """
+    Build regex from paths with * and **.
+
+    When defining a content file it is useful to simply use * and ** in glob like fashion for
+    directory names. However, ** in glob for python 2.7 is not supported. Therefore, this function
+    mimics this behavior using regexes.
+
+    This function replaces * with a regex that will match any characters, except a slash,
+    in between forward slashes or at the beginning and end of the path.
+
+    Similarly, the ** will match any character, including a slash, in between forward slashes or
+    at the beginning or end of the string.
+
+    """
+    out = pattern.replace('.', r'\.')
+
+    # Replace ** or * that is proceeded by the beginning of the string or a forward slash and
+    # that is followed by a forward or the end of the string. The replacement is a regex that will
+    # mimic the glob ** and * behaviors.
+    #    ** becomes (?:.*?) which matches any character
+    #    * becomes (?:[^.]?) which matches any character except for the slash
+    out = re.sub(r'(?!<^|/)(\*{2})(?=/|$)', r'(?:.*?)', out, flags=re.MULTILINE)
+    out = re.sub(r'(?!<^|/)(\*{1})(?=/|$)', r'(?:[^/]*?)', out, flags=re.MULTILINE)
+
+    # The overall regex for searching filenames must be limited to one line
+    return r'^{}$'.format(out)
+
+def find_files(filenames, pattern):
+    """
+    Locate files matching the given pattern.
+    """
+    out = set()
+    regex = build_regex(pattern)
+    for match in re.finditer(regex, '\n'.join(filenames), flags=re.MULTILINE):
+        out.add(match.group(0))
+    return out
 
 def moose_docs_import(root_dir=None, include=None, exclude=None, base=None,
                       extensions=None):
@@ -58,20 +96,19 @@ def moose_docs_import(root_dir=None, include=None, exclude=None, base=None,
         return None
 
     # Loop through the base directory and create a set of matching filenames
-    matches = set()
+    filenames = set()
     for root, _, files in os.walk(os.path.join(root_dir, base)):
-        filenames = [os.path.join(root, fname) for fname in files if fname.endswith(extensions)
-                     and not fname.startswith('.')]
-        for pattern in include:
-            for filename in fnmatch.filter(filenames, os.path.join(root_dir, pattern)):
-                matches.add(filename)
+        for fname in files:
+            if fname.endswith(extensions) and not fname.startswith('.'):
+                full_name = os.path.join(root, fname)
+                filenames.add(full_name)
 
-    # Create a remove list
-    remove = set()
+    # Create the complete set of files
+    output = set()
+    for pattern in include:
+        output.update(find_files(filenames, os.path.join(root_dir, pattern)))
+
     for pattern in exclude:
-        for filename in fnmatch.filter(matches, os.path.join(root_dir, pattern)):
-            remove.add(filename)
+        output -= find_files(output, os.path.join(root_dir, pattern))
 
-    # Return a sorted lists of matches
-    matches -= remove
-    return sorted(matches)
+    return sorted(output)
