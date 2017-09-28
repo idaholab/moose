@@ -107,8 +107,6 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
   Real dNS = 0.;
   Real wESN = 0.;
 
-  bool bndElem = false;
-
   /// loop over the sides to compute the reconstructed slope of this cell
 
   for (unsigned int is = 0; is < nside; is++)
@@ -178,8 +176,6 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
 
     else
     {
-      bndElem = true;
-
       if (_side_geoinfo_cached)
       {
         scent = getBoundarySideCentroid(elemID, is);
