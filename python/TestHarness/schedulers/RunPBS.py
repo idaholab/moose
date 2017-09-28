@@ -91,14 +91,14 @@ class RunPBS(QueueManager):
         job_info = {}
         if pattern.search(output):
             job_id = pattern.search(output).group(1)
-            self.adjustJobStatus(job, tester.bucket_queued, 'LAUNCHED %s' %(str(job_id)))
+            self.setJobStatus(job, tester.bucket_queued, 'LAUNCHED %s' %(str(job_id)))
             job_info = { 'job_id' : job_id }
 
         # Failed to launch somehow. Set the tester output to command output. Hopefully something
         # useful in there to display to the user on why we failed
         else:
             job.setOutput(output)
-            self.adjustJobStatus(job, tester.bucket_fail, 'QSUB FAILURE')
+            self.setJobStatus(job, tester.bucket_fail, 'QSUB FAILURE')
 
         return job_info
 
@@ -156,5 +156,5 @@ class RunPBS(QueueManager):
             bucket = tester.bucket_fail
             job.setOutput(output)
 
-        self.adjustJobStatus(job, bucket, reason)
+        self.setJobStatus(job, bucket, reason)
         return job_info

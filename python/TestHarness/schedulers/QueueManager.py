@@ -41,10 +41,11 @@ class QueueManager(Scheduler):
                 else:
                     self.options.reg_exp = json_args['options_regexp']
 
-                # Only set timing if user is asking, and only if the user supplied those
-                # options during initial launch phase.
-                if json_args['options_timing'] and self.options.timing:
-                    self.options.timing = json_args['options_timing']
+                # Only allow timing if user is asking, and user supplied those options
+                # during initial launch phase (otherwise perflog will not be available).
+                if not json_args['options_timing'] and self.options.timing:
+                    self.options.timing = False
+
 
             except ValueError:
                 print('Supplied session file: %s exists, but is not readable!' % (self.options.session_file))
@@ -169,6 +170,13 @@ class QueueManager(Scheduler):
         tmp_bucket = namedtuple('test_status', json_status['status_bucket'])
 
         return tmp_bucket(status=caveat, color=caveat_color)
+
+    def _readJobOutput(self, job):
+        """ boolean for reasons to open and read job output files """
+        tester = job.getTester()
+        return self.options.verbose \
+            or self.options.timing \
+            or tester.didFail()
 
     def checkStatusState(self):
         """ Return bool if we are processing status for launched jobs """
@@ -335,24 +343,26 @@ class QueueManager(Scheduler):
 
         if os.path.exists(stdout_file):
             file = open(stdout_file, 'r+')
-            outfile = file.read()
+            # do NOT use util.readOutput (trim output). Otherwise processResults may
+            # fail to find something it needed.
+            output = file.read()
         else:
-            self.adjustJobStatus(job, tester.bucket_fail, 'NO STDOUT FILE')
+            self.setJobStatus(job, tester.bucket_fail, 'NO STDOUT FILE')
             return ''
 
         # Alter test_dir to reflect working_dir creation
         tester.specs['test_dir'] = json_job['working_dir']
 
         if tester.hasRedirectedOutput(self.options):
-            outfile += util.getOutputFromFiles(tester, self.options)
+            output += util.getOutputFromFiles(tester, self.options)
 
         # Allow the tester to verify its own output.
-        output = tester.processResults(tester.specs['moose_dir'], self.options, outfile)
+        output = tester.processResults(tester.specs['moose_dir'], self.options, output)
 
         # Set the testers output with modifications made above
         job.setOutput(output)
 
-        # Append processResults to our stdout file
+        # combine job stdout and processResults to the stdout file
         file.seek(0)
         file.write(output)
         file.truncate()
@@ -368,11 +378,6 @@ class QueueManager(Scheduler):
         output = util.runCommand(self.getQueueCommand(job), cwd=json_data['working_dir'])
         return output
 
-    def _adjustDownstreamTests(self, job):
-        """
-        adjust downstream tests to queued to prevent them
-        from being skipped
-        """
     def getCurrentJobStatus(self, job):
         """
         Set a job to the most current known status.
@@ -394,35 +399,37 @@ class QueueManager(Scheduler):
         if json_status:
             bucket = self.__createStatusBucket(json_status)
 
-        # This test was not included during the launch sequence (was silently skipped)
+        # This test was not included during the launch sequence
         else:
-            self.adjustJobStatus(job, tester.bucket_silent, 'NO LAUNCH INFORMATION')
+            self.setJobStatus(job, tester.bucket_silent, 'NO LAUNCH INFORMATION')
             return
 
-        self.adjustJobStatus(job, bucket, json_status['caveat_message'])
+        self.setJobStatus(job, bucket, json_status['caveat_message'])
 
-        third_party_job_information = {}
+        job_information = {}
 
-        # The last time we checked, this job was queued. This may no longer be the case.
+        # Job was queued previously, and we want to know if the status has changed.
         if tester.isQueued():
             output = self.executeAndGetJobOutput(job)
-            third_party_job_information = self.handleJobStatus(job, output)
+            job_information = self.handleJobStatus(job, output)
 
-        # The last time we checked, this job was passing or failing.
-        elif tester.didPass() or tester.didFail():
+        # Some other finished status. Check conditionals if user wants to re-open stdout.
+        elif self._readJobOutput(job):
             json_job = self.getData(job.getUniqueIdentifier(), std_out=True, working_dir=True)
             stdout_file = os.path.join(json_job['working_dir'], json_job['std_out'])
             if os.path.exists(stdout_file):
                 with open(stdout_file, 'r') as f:
-                    outfile = f.read()
+                    # We can use trimmed output here, now that the job has a proper
+                    # status (we are not going to run processResults again).
+                    outfile = util.readOutput(f, self.options)
                 job.setOutput(outfile)
             else:
-                self.adjustJobStatus(job, tester.bucket_fail, 'NO STDOUT FILE')
+                self.setJobStatus(job, tester.bucket_fail, 'NO STDOUT FILE')
 
-        # Save any adjusted status to our session storage
-        self.saveSession(job, **third_party_job_information)
+        # Update session storage with possibly new job status information
+        self.saveSession(job, **job_information)
 
-    def jobStatus(self, job):
+    def checkJobStatus(self, job):
         """
         Check status for job. Depending on that status, this method
         does the following:
@@ -448,7 +455,7 @@ class QueueManager(Scheduler):
 
                 # A child job is still not ready. We need to adjust our status to match.
                 if d_tester.isQueued():
-                    self.adjustJobStatus(job, tester.bucket_queued, 'WAITING')
+                    self.setJobStatus(job, tester.bucket_queued, 'WAITING')
                     return
 
             self.testOutput(job)
@@ -482,8 +489,8 @@ class QueueManager(Scheduler):
 
         # Call derived method to set job status and obtain information
         # the third party scheduler wishes to save to the session storage
-        third_party_job_information = self.handleJobStatus(job, output)
-        self.saveSession(job, **third_party_job_information)
+        job_information = self.handleJobStatus(job, output)
+        self.saveSession(job, **job_information)
 
     def postRun(self, job):
         """
@@ -551,6 +558,6 @@ class QueueManager(Scheduler):
         calls).
         """
         if self.__status_check:
-            self.jobStatus(job)
+            self.checkJobStatus(job)
         else:
             self.jobLaunch(job)

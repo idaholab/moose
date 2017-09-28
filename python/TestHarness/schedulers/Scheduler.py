@@ -132,7 +132,7 @@ class Scheduler(MooseObject):
         """ Notify derived schedulers we are finished """
         return
 
-    def adjustJobStatus(self, job, status, caveat):
+    def setJobStatus(self, job, status, caveat):
         """
         Set a job status and caveat in a thread lock state for the
         dag object.
@@ -209,7 +209,7 @@ class Scheduler(MooseObject):
                 # Skipped Dependencies
                 except dag.DAGEdgeIndError:
                     if not self.skipPrereqs():
-                        self.adjustJobStatus(job, tester.bucket_skip, 'skipped dependency')
+                        self.setJobStatus(job, tester.bucket_skip, 'skipped dependency')
                         failed_or_skipped_testers.add(tester)
 
                     # Add the parent node / dependency edge to create a functional DAG now that we have caught
@@ -219,12 +219,12 @@ class Scheduler(MooseObject):
 
                 # Cyclic Failure
                 except dag.DAGValidationError:
-                    self.adjustJobStatus(job, tester.bucket_fail, 'Cyclic or Invalid Dependency Detected!')
+                    self.setJobStatus(job, tester.bucket_fail, 'Cyclic or Invalid Dependency Detected!')
                     failed_or_skipped_testers.add(tester)
 
                 # Unknown Dependency Failure
                 except KeyError:
-                    self.adjustJobStatus(job, tester.bucket_fail, 'unknown dependency')
+                    self.setJobStatus(job, tester.bucket_fail, 'unknown dependency')
                     failed_or_skipped_testers.add(tester)
 
                 # Skipped/Silent/Deleted Testers fall into this catagory, caused by 'job' being skipped
@@ -264,7 +264,7 @@ class Scheduler(MooseObject):
                     # Fail this concurrent group of testers
                     for this_job in concurrent_jobs:
                         failed_tester = this_job.getTester()
-                        self.adjustJobStatus(this_job, failed_tester.bucket_fail, 'OUTFILE RACE CONDITION')
+                        self.setJobStatus(this_job, failed_tester.bucket_fail, 'OUTFILE RACE CONDITION')
                         failed_or_skipped_testers.add(failed_tester)
 
                     # collisions detected, move on to the next set
@@ -342,7 +342,7 @@ class Scheduler(MooseObject):
             job_list = job_dag.ind_nodes()
             for job in job_list:
                 tester = job.getTester()
-                self.adjustJobStatus(job, tester.bucket_pending, 'QUEUED')
+                self.setJobStatus(job, tester.bucket_pending, 'QUEUED')
 
         # Queue runnable jobs
         self.queueJobs(run_jobs=job_list)
@@ -373,7 +373,7 @@ class Scheduler(MooseObject):
         """ Handle jobs that have not reported in alotted time """
         if job not in self.jobs_reported:
             tester = job.getTester()
-            self.adjustJobStatus(job, tester.bucket_pending, 'RUNNING...')
+            self.setJobStatus(job, tester.bucket_pending, 'RUNNING...')
             self.queueJobs(status_jobs=[job])
 
             # Restart the reporting timer for this job
@@ -386,7 +386,7 @@ class Scheduler(MooseObject):
     def handleTimeoutJobs(self, job):
         """ Handle jobs that have timed out """
         tester = job.getTester()
-        self.adjustJobStatus(job, tester.bucket_fail, 'TIMEOUT')
+        self.setJobStatus(job, tester.bucket_fail, 'TIMEOUT')
         job.killProcess()
 
     def getLoad(self):
@@ -428,7 +428,7 @@ class Scheduler(MooseObject):
             # Check for insufficient slots -hard limit (skip this job)
             # TODO: Create a unit test for this case
             elif job.getProcessors() > self.available_slots and not self.soft_limit:
-                self.adjustJobStatus(job, tester.bucket_skip, 'insufficient slots')
+                self.setJobStatus(job, tester.bucket_skip, 'insufficient slots')
 
             if can_run:
                 self.slots_in_use += job.getProcessors()

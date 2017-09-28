@@ -23,15 +23,15 @@ class DAG(object):
 
     def __init__(self):
         """ Construct a new DAG with no nodes or edges. """
-        self.__original_graph = None
+        self.__cached_graph = None
         self.reset_graph()
 
     # Added by the MOOSE group
-    def __createOriginalGraph(self):
-        """ Private method to create and protect the current state of the graph """
-        if self.__original_graph == None:
-            self.__original_graph = self.clone()
-        return self.__original_graph
+    def __cacheGraph(self):
+        """ Private method to cache the current state of the graph """
+        if self.__cached_graph == None:
+            self.__cached_graph = self.clone()
+        return self.__cached_graph
 
     def add_node(self, node_name, graph=None):
         """ Add a node if it does not exist yet, or error out. """
@@ -41,8 +41,8 @@ class DAG(object):
             raise KeyError('node %s already exists' % node_name)
         graph[node_name] = set()
 
-        # Allow original graph to grow
-        self.__original_graph = None
+        # Invalidate cached graph because a node was added
+        self.__cached_graph = None
 
     def node_exists(self, node_name, graph=None):
         """ Check if node exists """
@@ -65,8 +65,8 @@ class DAG(object):
         if node_name not in graph:
             raise KeyError('node %s does not exist' % node_name)
 
-        # save original graph
-        self.__createOriginalGraph()
+        # cache current graph before we delete a node
+        self.__cacheGraph()
 
         graph.pop(node_name)
 
@@ -86,8 +86,8 @@ class DAG(object):
         if not graph:
             graph = self.graph
 
-        # Allow original graph to grow
-        self.__original_graph = None
+        # Invalidate cached graph because a node was added
+        self.__cached_graph = None
 
         if dep_node not in graph:
             raise DAGEdgeDepError()
@@ -105,8 +105,8 @@ class DAG(object):
         if not graph:
             graph = self.graph
 
-        # save original graph
-        self.__createOriginalGraph()
+        # cache current graph before we delete an edge
+        self.__cacheGraph()
 
         if dep_node not in graph.get(ind_node, []):
             raise KeyError('this edge does not exist in graph')
@@ -117,8 +117,8 @@ class DAG(object):
         if not graph:
             graph = self.graph
 
-        # save original graph
-        self.__createOriginalGraph()
+        # cache current graph before we rename an edge
+        self.__cacheGraph()
 
         for node, edges in graph.items():
 
@@ -208,8 +208,9 @@ class DAG(object):
         if graph is None:
             graph = self.graph
 
-        # Create the originalDAG now that someone is asking for independent nodes
-        self.__createOriginalGraph()
+        # cache current graph because someone is asking for concurrent nodes
+        # and the graph is _probably_ the most complete at this stage
+        self.__cacheGraph()
 
         dependent_nodes = set(node for dependents in graph.itervalues() for node in dependents)
         return [node for node in graph.keys() if node not in dependent_nodes]
@@ -271,7 +272,7 @@ class DAG(object):
         Adding nodes again later, will allow the original graph to
         'reset' and grow.
         """
-        return self.__createOriginalGraph()
+        return self.__cacheGraph()
 
     # Added by the MOOSE group
     def clone(self):
@@ -304,7 +305,7 @@ class DAG(object):
     def reverse_edges(self, graph=None):
         """ Reversed dependencies in current graph. """
         # Create clone of original graph
-        self.__createOriginalGraph()
+        self.__cacheGraph()
 
         new_graph = self.reverse_clone()
         self.graph = new_graph.graph

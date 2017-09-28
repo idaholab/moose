@@ -30,7 +30,7 @@ class RunParallel(Scheduler):
 
         # If we are doing recover tests
         if self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
-            self.adjustJobStatus(job, tester.bucket_success, 'PART1')
+            self.setJobStatus(job, tester.bucket_success, 'PART1')
             return
         else:
             # Process the results and beautify the output
@@ -53,7 +53,7 @@ class RunParallel(Scheduler):
 
                 # If we asked for redirected output but none was found, we'll call that a failure
                 if redirected_output == '':
-                    self.adjustJobStatus(job, tester.bucket_fail, 'FILE TIMEOUT')
+                    self.setJobStatus(job, tester.bucket_fail, 'FILE TIMEOUT')
                     output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
         else:
