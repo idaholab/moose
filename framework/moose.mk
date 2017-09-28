@@ -33,12 +33,9 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc
 pyhit_LIB       := $(hit_DIR)/hit.so
 
-# the sed hack here is to get around a bug in python's distutils that only uses the first word of
-# the CXX environment variable for the compiler/linker during the link.  So "ccache gcc" results
-# in distutils trying to link using only "ccache [args]...".
 $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Linking Library "$@"..."
-	bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -Wno-everything -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --cflags` `python-config --ldflags` $^ -o $@)'
+	bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --cflags` `python-config --ldflags` $^ -o $@)'
 
 #
 # gtest
