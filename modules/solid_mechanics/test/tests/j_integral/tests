@@ -1,92 +1,85 @@
 [Tests]
  [./j_2d]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_2d.i'
-   exodiff = 'j_integral_2d_out.e'
-   custom_cmp = 'j_integral_2d.cmp'
+   csvdiff = 'j_integral_2d_out.csv'
  [../]
  [./j_2d_points]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_2d_points.i'
-   exodiff = 'j_integral_2d_points_out.e'
+   csvdiff = 'j_integral_2d_points_out.csv'
  [../]
  [./j_2d_mouth_dir]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_2d_mouth_dir.i'
-   exodiff = 'j_integral_2d_mouth_dir_out.e'
+   csvdiff = 'j_integral_2d_mouth_dir_out.csv'
  [../]
  [./j_2d_topo_q]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_2d_topo_q_func.i'
-   exodiff = 'j_integral_2d_topo_q_func_out.e'
+   csvdiff = 'j_integral_2d_topo_q_func_out.csv'
  [../]
  [./j_3d_as_2d]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_as_2d.i'
-   exodiff = 'j_integral_3d_as_2d_out.e'
-   rel_err = 5e-5
+   csvdiff = 'j_integral_3d_as_2d_out.csv'
  [../]
  [./j_3d_as_2d_topo_q]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_as_2d_topo_q_func.i'
-   exodiff = 'j_integral_3d_as_2d_topo_q_func_out.e'
-   rel_err = 5e-5
+   csvdiff = 'j_integral_3d_as_2d_topo_q_func_out.csv'
  [../]
  [./j_3d]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d.i'
-   exodiff = 'j_integral_3d_out.e'
-   custom_cmp = 'j_integral_3d.cmp'
+   csvdiff = 'j_integral_3d_out.csv'
  [../]
  [./j_3d_noq]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d.i'
    cli_args = 'DomainIntegral/output_q=false'
-   exodiff = 'j_integral_3d_out.e'
-   exodiff_opts = '-allow_name_mismatch'
-   custom_cmp = 'j_integral_3d_noq.cmp'
+   csvdiff = 'j_integral_3d_out.csv'
    prereq = j_3d
  [../]
  [./j_3d_points]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_points.i'
-   exodiff = 'j_integral_3d_points_out.e'
+   csvdiff = 'j_integral_3d_points_out.csv'
  [../]
  [./j_3d_mouth_dir]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_mouth_dir.i'
-   exodiff = 'j_integral_3d_mouth_dir_out.e'
+   csvdiff = 'j_integral_3d_mouth_dir_out.csv'
  [../]
  [./j_3d_mouth_dir_end_dir_vec]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_mouth_dir_end_dir_vec.i'
-   exodiff = 'j_integral_3d_mouth_dir_end_dir_vec_out.e'
+   csvdiff = 'j_integral_3d_mouth_dir_end_dir_vec_out.csv'
  [../]
  [./j_3d_topo_q]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_topo_q_func.i'
-   exodiff = 'j_integral_3d_topo_q_func_out.e'
+   csvdiff = 'j_integral_3d_topo_q_func_out.csv'
  [../]
  [./j_3d_as_2d_topo_q_outq]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_as_2d_topo_q_func.i'
-   exodiff = 'j_integral_3d_as_2d_topo_q_func_outputQ_out.e'
-   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=j_integral_3d_as_2d_topo_q_func_outputQ_out'
-   rel_err = 5e-5
+   cli_args = 'DomainIntegral/output_q=false'
+   csvdiff = 'j_integral_3d_as_2d_topo_q_func_out.csv'
+   prereq = j_3d_as_2d_topo_q
  [../]
  [./j_3d_mouth_dir_outq]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_3d_mouth_dir.i'
-   cli_args = 'DomainIntegral/output_q=false Outputs/file_base=j_integral_3d_mouth_dir_outputQ_out'
-   exodiff = 'j_integral_3d_mouth_dir_outputQ_out.e'
+   cli_args = 'DomainIntegral/output_q=false'
+   csvdiff = 'j_integral_3d_mouth_dir_out.csv'
+   prereq = j_3d_mouth_dir
  [../]
  [./j_2d_noq]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'j_integral_2d.i'
    cli_args = 'DomainIntegral/output_q=false'
-   exodiff = 'j_integral_2d_out.e'
-   exodiff_opts = '-allow_name_mismatch'
-   custom_cmp = 'j_integral_2d_noq.cmp'
+   csvdiff = 'j_integral_2d_out.csv'
    prereq = j_2d
  [../]
 []

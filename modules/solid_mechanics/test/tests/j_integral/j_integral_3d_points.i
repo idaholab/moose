@@ -243,4 +243,5 @@
 [Outputs]
   file_base = j_integral_3d_points_out
   exodus = true
+  csv = true
 []
