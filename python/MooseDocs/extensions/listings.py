@@ -24,7 +24,6 @@ from markdown.util import etree
 from markdown.extensions.fenced_code import FencedBlockPreprocessor
 
 import MooseDocs
-from MooseDocs.MooseMarkdown import MooseMarkdown
 from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
 
@@ -118,7 +117,6 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
                                  "used. By default this line is not included in the display.")
         settings['include-end'] = (False, "When True the texted captured by the 'end' setting is " \
                                           "included in the displayed text.")
-        settings['copy-button'] = (True, "Enable/disable the inclusion of a copy button.")
         settings['pre-style'] = ("overflow-y:scroll;max-height:350px",
                                  "Style attributes to apply to the code area.")
         return settings
@@ -227,7 +225,6 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         """
 
         # Build outer div container
-        MooseMarkdown.CODE_BLOCK_COUNT += 1
         el = self.createFloatElement(settings)
 
         # Build the code
@@ -247,12 +244,6 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
             a.set('class', 'moose-listing-link tooltipped')
             a.set('data-tooltip', rel_filename)
             el.append(link)
-
-        # Copy button
-        if settings['copy-button']:
-            code.set('id', 'moose-code-block-{}'.format(MooseMarkdown.CODE_BLOCK_COUNT))
-            btn = self.createCopyButton(code.get('id'))
-            pre.insert(0, btn)
 
         # Code style
         if settings['pre-style']:
@@ -445,7 +436,6 @@ class ListingFencedBlockPreprocessor(FencedBlockPreprocessor, MooseMarkdownCommo
         settings = MooseMarkdownCommon.defaultSettings()
         settings['caption'] = (None, "The caption text to place after the heading and number.")
         settings['counter'] = ('listing', "The name of global counter to utilized for numbering.")
-        settings['copy-button'] = (True, "Enable/disable the inclusion of a copy button.")
         return settings
 
     def __init__(self, markdown_instance=None, **config):
@@ -472,14 +462,6 @@ class ListingFencedBlockPreprocessor(FencedBlockPreprocessor, MooseMarkdownCommo
                 # Build the containing <div>
                 settings = self.getSettings(listing.group('settings'))
                 div = self.createFloatElement(settings)
-
-                # Add a copy button
-                if settings['copy-button']:
-                    code_id = 'moose-code-block-{}'.format(MooseMarkdown.CODE_BLOCK_COUNT)
-                    btn = self.createCopyButton(code_id)
-                    string = '<pre>{}<code%s id={}>%s</code></pre>'.format(etree.tostring(btn),
-                                                                           code_id)
-                    self.CODE_WRAP = string #pylint: disable=invalid-name
 
                 # Parse the fenced code block
                 lines = match.group(0).split('\n')

@@ -2,6 +2,7 @@
 
 !SQA-template-item project_description
 {{PROJECT}} is an open-source tool for solving partial differential equations using the finite element method.
+
 !END-template-item
 
 !SQA-template-item system_scope

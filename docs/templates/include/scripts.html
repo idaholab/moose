@@ -1,10 +1,5 @@
-{# Deprecated template variable #}
-{% if mathjax_url %}
-  {% set mathjax_js = mathjax_url %}
-{% endif %}
-<script type="text/javascript" src="{{jquery_js|default('https://code.jquery.com/jquery-2.1.1.min.js')}}"></script>
-<script type="text/javascript" src="{{materialize_js|default('https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js')}}"></script>
-<script type="text/javascript" src="{{prism_js|default('https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js')}}"></script>
-<script type="text/javascript" src="{{mathjax_js|default('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js')}}"></script>
-<script type="text/javascript" src="{{clipboard_js|default('https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js')}}"></script>
-<script type="text/javascript" src="{{relpath('js/init.js', current.destination)}}"></script>
+<script type="text/javascript" src="{{load(jquery_js|default('contrib/jquery/jquery-3.2.1.min.js'))}}"></script>
+<script type="text/javascript" src="{{load(materialize_js|default('contrib/materialize/materialize.min.js'))}}"></script>
+<script type="text/javascript" src="{{load(clipboard_js|default('contrib/clipboard/clipboard.min.js'))}}"></script>
+<script type="text/javascript" src="{{load(prism_js|default('contrib/prisim/prism.min.js'))}}"></script>
+<script type="text/javascript" src="{{load('js/init.js')}}"></script>

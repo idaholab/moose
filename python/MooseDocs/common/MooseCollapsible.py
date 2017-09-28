@@ -54,20 +54,22 @@ class MooseCollapsible(object):
         header = etree.SubElement(li, 'div')
         header.set('class', 'collapsible-header')
 
-        row = etree.SubElement(header, 'div')
-        row.set('class', 'row')
+        if desc:
+            btn = etree.SubElement(header, 'i')
+            btn.set('class', 'material-icons')
+            btn.text = 'keyboard_arrow_down'
 
-        name_el = etree.SubElement(row, 'div')
-        name_el.set('class', 'moose-collection-name col l4')
+        name_el = etree.SubElement(header, 'span')
+        name_el.set('class', 'moose-collection-name')
         if isinstance(name, (unicode, str)):
             name_el.text = name
         else:
             name_el.append(name)
 
         if desc:
-            desc_el = etree.SubElement(row, 'div')
-            desc_el.set('class', 'moose-collection-description hide-on-med-and-down col l8')
-            desc_el.text = desc
+            desc_el = etree.SubElement(header, 'span')
+            desc_el.set('class', 'moose-collection-description')
+            desc_el.text = ": " + desc
 
         if body:
             body_el = etree.SubElement(li, 'div')

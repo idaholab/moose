@@ -25,7 +25,7 @@ import logging
 import mooseutils
 
 # Check for the necessary packages, this does a load so they should all get loaded.
-if mooseutils.check_configuration(['yaml', 'jinja2', 'markdown', 'mdx_math', 'pybtex',
+if mooseutils.check_configuration(['yaml', 'jinja2', 'markdown', 'pybtex',
                                    'pandas', 'livereload', 'bs4', 'lxml', 'pylatexenc', 'anytree']):
     sys.exit(1)
 

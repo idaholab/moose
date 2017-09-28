@@ -38,7 +38,7 @@ class MooseMarkdown(markdown.Markdown):
         config_file[str]: The name of the configuration file to import, this is applied to the
                           supplied or default 'config'.
     """
-    CODE_BLOCK_COUNT = 0 # counter for code block copy buttons
+    EQUATION_COUNT = 0   # counters for numbered equation numbers
     CACHE = dict() # Cache for find method
 
     @staticmethod
@@ -61,9 +61,6 @@ class MooseMarkdown(markdown.Markdown):
         ext['extra'] = dict()
         ext['meta'] = dict()
 
-        # pip install python-markdown-math
-        ext['mdx_math'] = dict(enable_dollar_delimiter=True)
-
         # MooseDocs
         ext['MooseDocs.extensions.global'] = dict()
         ext['MooseDocs.extensions.include'] = dict()
@@ -79,6 +76,7 @@ class MooseMarkdown(markdown.Markdown):
         ext['MooseDocs.extensions.template'] = dict()
         ext['MooseDocs.extensions.gchart'] = dict()
         ext['MooseDocs.extensions.admonition'] = dict()
+        ext['MooseDocs.extensions.katex'] = dict()
         return ext
 
     def __init__(self, config=None, default=True):
@@ -124,7 +122,7 @@ class MooseMarkdown(markdown.Markdown):
         Args:
             md[str]: A markdown file, markdown content, or MarkdownNode
         """
-        MooseMarkdown.CODE_BLOCK_COUNT = 0
+        self.EQUATION_COUNT = 0   #pylint: disable=invalid-name
         self.current = None
 
         if isinstance(md, str):

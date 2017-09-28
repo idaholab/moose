@@ -11,40 +11,36 @@ For technical support or question regarding this module, contact Yidong Xia (<yi
 To best help developers and/or users better understand the rDG method so that they can try to develop new applications or use existing rDG-based codes, we use the advection equation (the simplest convection-dominated system that we can think of) as an example to describe the implementation of cell-centered FVM in MOOSE.
 
 The advection equation for a conserved quantity described by a scalar field $\psi$ is expressed mathematically by a continuity equation as
-$$
+
 \begin{equation}
 \label{eq:advection_equation}
 \frac{\partial \psi}{\partial t} + \nabla\cdot(\psi{\bf v}) = 0,
 \end{equation}
-$$
+
 where $\nabla\cdot$ is the divergence operator, and ${\bf v}$ is the velocity field. If the flow is assumed to be incompressible, that is, the velocity field satisfies
 $$
 \nabla\cdot{\bf v} = 0,
 $$
 the above equation can be rewritten as
-$$
+
 \begin{equation}
 \frac{\partial \psi}{\partial t} + {\bf v}\cdot\nabla(\psi) = 0.
 \end{equation}
-$$
 
 ##Finite Volume Method
 
-Eq. (\ref{eq:advection_equation}) can be discretized in space using a cell-centered FVM. In an FVM, the computational domain $\Omega$ is divided by a set of non-overlapping control volumes $\Omega_i$, which can be one or a combination of the most common element types, e.g. line segment in 1D, triangles and quadrilaterals in 2D, and tetrahedra, prisms, pyramids, and hexahedra in 3D. On each control volume, the integral form of the governing equations is required to be satisfied,
-$$
+Eq. (\eqref{eq:advection_equation}) can be discretized in space using a cell-centered FVM. In an FVM, the computational domain $\Omega$ is divided by a set of non-overlapping control volumes $\Omega_i$, which can be one or a combination of the most common element types, e.g. line segment in 1D, triangles and quadrilaterals in 2D, and tetrahedra, prisms, pyramids, and hexahedra in 3D. On each control volume, the integral form of the governing equations is required to be satisfied,
 \begin{equation}
 \label{eq:fvm_integral}
   \int_{\Omega_i}\frac{\partial\psi}{\partial t}~{\rm d}V
 + \int_{\Omega_i}\nabla\cdot(\psi{\bf v})~{\rm d}V
 = 0.
 \end{equation}
-$$
 The cell-averaged conservative variable, $\psi_i$, is taken to be the unknown and defined by
 $$
 \psi_i = \frac{1}{V_i}\int_{\Omega_i}\psi~{\rm d}V
 $$
 where $V_i$ is the volume of the control volume $\Omega_i$. The following equation can then be derived using the divergence theorem,
-$$
 \begin{equation}
   V_i\frac{{\rm d}\psi_i}{{\rm d}t}
 + \sum_{j \in N_i}\int_{\Gamma_{ij}}(\psi_{ij}{\bf v}_{ij})\cdot{\bf n}_{ij}~{\rm d}S
@@ -52,7 +48,6 @@ $$
 = 0,
 \label{eq:fvm_divergence_theorem_bc}
 \end{equation}
-$$
 where $\Gamma_{ij}=\partial\Omega_i\cap\partial\Omega_j$
 denotes an interior common face between cell $\Omega_i$ and $\Omega_j$,
 $\Gamma_{ib}=\partial\Omega_i\cap\partial\Omega$ denotes a face on the boundary of domain $\Omega$;
@@ -63,7 +58,7 @@ a set of neighboring cells, $\Omega_j$, sharing a common face, $\Gamma_{ij}$.
 Because the numerical solution is discontinuous between cell interfaces,
 the interface fluxes are not uniquely defined.
 The flux, $(\psi_{ij}{\bf v}_{ij})\cdot{\bf n}_{ij}$,
-appearing in the second term of Eq. (\ref{eq:fvm_divergence_theorem_bc})
+appearing in the second term of Eq. (\eqref{eq:fvm_divergence_theorem_bc})
 should be replaced by a numerical flux function $\mathcal{H}(\psi_{ij}, \psi_{ji}, {\bf n}_{ij})$, i.e.,
 $$
 \mathcal{H}(\psi_{ij}, \psi_{ji}, {\bf n}_{ij}) \approx (\psi_{ij}{\bf v}_{ij})\cdot{\bf n}_{ij},
@@ -73,13 +68,15 @@ In the case of first-order FVM, the solution in each cell is assumed to be const
 Then on any interior face, $\Gamma_{ij}$, the two states are simply $\psi_{ij} = \psi_i$ and $\psi_{ji} = \psi_j$.
 In order to guarantee consistency and conservation,
 $\mathcal{H}(\psi_{ij}, \psi_{ji}, {\bf n}_{ij})$ is required to satisfy
+
 $$
 \mathcal{H}(\psi_{ij}, \psi_{ij}, {\bf n}_{ij}) = ({\bf v}_{ij}\cdot{\bf n}_{ij})\psi_{ij}
-\hspace{1em}
-\text{and}
-\hspace{1em}
+$$
+and
+$$
 \mathcal{H}(\psi_{ij}, \psi_{ji}, {\bf n}_{ij}) = -\mathcal{H}(\psi_{ji}, \psi_{ij}, {\bf n}_{ij}).
 $$
+
 Similarly, the flux function on the domain boundary, $(\psi_{ib}{\bf v}_{ib})\cdot{\bf n}_{ib}$,
 should be determined by $\mathcal{H}(\psi_{ib}, \psi_b, {\bf n}_{ib})$, i.e.,
 $$
@@ -87,10 +84,9 @@ $$
 $$
 with the use of appropriate boundary conditions satisfying the characteristic theory.
 
-Finally, the boundary integration in Eq. (\ref{eq:fvm_divergence_theorem_bc})
+Finally, the boundary integration in Eq. (\eqref{eq:fvm_divergence_theorem_bc})
 is approximated using one point quadrature at the midpoint of the face,
 and the semi-discrete form of the equations may be written as
-$$
 \begin{equation}
 \label{eq:fvm_semi_discrete}
   V_i\frac{{\rm d}{\psi_i}}{{\rm d}t}
@@ -98,16 +94,13 @@ $$
 + \sum_{\Gamma_{ib} \in \partial\Omega}\mathcal{H}_b(\psi_{ib}, \psi_b, {\bf n}_{ib})S_{ib}
 = 0,
 \end{equation}
-$$
 where $S_{ij}$ is the length of cell edge in 2D, and area of cell face in 3D.
 
 By assembling all the elemental contributions, a system of ordinary differential equations
 governing the evolution of the discrete solution in time can be written as
-$$
 \begin{equation}
 {\bf{\it M}}\frac{{\rm d}\psi}{{\rm d}t} = -{\bf R}(\psi),
 \end{equation}
-$$
 where $\bf{\it M}$ denotes the mass matrix, $\bf W$ is the global vector of the degrees of freedom, and ${\bf R}(\psi)$ is the residual vector.
 $\bf{\it M}$ has a block diagonal structure that couples the degrees of freedom of the unknown vector associated to $\psi_i$ only within $\Omega_i$.
 As a result, the inverse of $\bf{\it M}$ can be easily computed in advance considering one cell at a time.
@@ -121,17 +114,17 @@ $$
 where
 $$
 a^+ = \frac{1}{2}(v^{\perp}_{ij} + |v^{\perp}_{ij}|)
-\hspace{1em}
-\text{and}
-\hspace{1em}
+$$
+and
+$$
 a^- = \frac{1}{2}(v^{\perp}_{ji} - |v^{\perp}_{ji}|),
 $$
 where
 $$
 v^{\perp}_{ij} = {\bf v}_{ij}\cdot{\bf n}_{ij}
-\hspace{1em}
-\text{and}
-\hspace{1em}
+$$
+and
+$$
 v^{\perp}_{ji} = {\bf v}_{ji}\cdot{\bf n}_{ij}.
 $$
 
@@ -152,7 +145,6 @@ The three classical slope limiters implemented in the example of advection equat
 ###Minmod Slope Limiter
 
 One choice of slope that gives second-order accuracy for smooth solutions while still satisfying the TVD property is the *minmod slope*
-$$
 \begin{equation}
 \phi_i = {\rm minmod}
 \left(
@@ -160,9 +152,7 @@ $$
 \frac{\psi_{i+1}-\psi_i}{\Delta x}
 \right)
 \end{equation}
-$$
 where the minmod function of two arguments is defined by
-$$
 \begin{equation}
 {\rm minmod}(a, b) =
 \begin{cases}
@@ -171,7 +161,6 @@ b & \text{ if } |b| < |a| \text{ and } ab>0,\\
 0 & \text{ if } ab \le 0.
 \end{cases}
 \end{equation}
-$$
 If $a$ and $b$ have the same sign, then this selects the one that is smaller in modulus, else it returns zero.
 
 Rather than defining the slope on the $i$-th cell by always using the downwind difference (which would give the LaxâWendroff method), or by always using the upwind difference (which would give the BeamâWarming method), the minmod method compares the two slopes and chooses the one that is smaller in magnitude. If the two slopes have different sign, then the value $\psi_i$ must be a local maximum or minimum, and it is easy to check in this case that
@@ -181,12 +170,10 @@ we must set $\phi_i = 0$ in order to satisfy the TVD condition. The minmod metho
 
 One choice of limiter that gives the sharper reconstruction, while still giving second order accuracy for smooth solutions,
 is the so-called *superbee* limiter introduced by \cite{roe1985some}:
-$$
 \begin{equation}
 \label{eq:superbee-limiter}
 \phi_i={\rm maxmod}(\phi^{(1)}_i,\phi^{(2)}_i),
 \end{equation}
-$$
 where
 $$
 \phi^{(1)}_i = {\rm minmod}
@@ -194,9 +181,9 @@ $$
 \frac{\psi_{i+1}-\psi_i}{\Delta x},
 2\frac{\psi_i-\psi_{i-1}}{\Delta x}
 \right)
-\hspace{1em}
-\text{and}
-\hspace{1em}
+$$
+and
+$$
 \phi^{(2)}_i = {\rm minmod}
 \left(
 2\frac{Q_{i+1}-Q_i}{\Delta x},
@@ -204,7 +191,7 @@ $$
 \right).
 $$
 Each one-sided slope is compared with twice the opposite one-sided slope.
-Then the maxmod function in Eq. (\ref{eq:superbee-limiter}) selects the argument with larger modulus.
+Then the maxmod function in Eq. (\eqref{eq:superbee-limiter}) selects the argument with larger modulus.
 In regions where the solution is smooth this will tend to return the larger of the two one-sided slopes,
 but will still be giving an approximation, and hence we expect second-order accuracy.
 The superbee limiter is also TVD in general.
@@ -214,7 +201,6 @@ With the superbee method, the discontinuity stays considerably sharper than with
 ###MC Slope Limiter
 
 Another popular choice is the *monotonized central-difference limiter* (MC limiter), which was proposed by \cite{van1977towards}:
-$$
 \begin{equation}
 \label{eq:mc-limiter}
 \phi_i = {\rm minmod}
@@ -224,7 +210,6 @@ $$
 2\left(\frac{Q_{i+1}-Q_i}{\Delta x}\right)
 \right).
 \end{equation}
-$$
 This compares the central difference of Fromm method with twice the one-sided slope to either side. In smooth regions this reduces to the centered slope of Fromm method and hence does not tend to artificially steepen smooth slopes to the extent that superbee does. The MC limiter appears to be a good default choice for a wide class of problems.
 
 ##An Example Problem
