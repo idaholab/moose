@@ -89,7 +89,7 @@ class WebsiteBuilder(common.Builder):
         super(WebsiteBuilder, self).copyFiles()
 
         locations = set()
-        for folder in ['js', 'css', 'fonts']:
+        for folder in ['js', 'css', 'fonts', 'contrib']:
             locations.add(os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', folder))
             locations.add(os.path.join(os.getcwd(), 'content', folder))
 
