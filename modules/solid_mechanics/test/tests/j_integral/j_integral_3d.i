@@ -251,4 +251,5 @@
 [Outputs]
   file_base = j_integral_3d_out
   exodus = true
+  csv = true
 []
