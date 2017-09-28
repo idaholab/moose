@@ -14,11 +14,11 @@
   family = LAGRANGE
   disp_x = disp_x
   disp_y = disp_y
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = crack2d_rot.e
-  displacements = 'disp_x disp_y'
 []
 
 
@@ -75,6 +75,7 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
+  solid_mechanics = true
 []
 
 [SolidMechanics]
@@ -155,7 +156,7 @@
     youngs_modulus = 207000
     poissons_ratio = 0.3
     thermal_expansion = 1e-5
-    formulation = PlaneStrain
+    formulation = NonlinearPlaneStrain
     compute_JIntegral = true
   [../]
 []
@@ -190,14 +191,8 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-[]
-
-
 [Outputs]
   file_base = interaction_integral_2d_rot_out
   exodus = true
+  csv = true
 []

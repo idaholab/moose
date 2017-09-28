@@ -36,6 +36,8 @@
   axis_2d = 2
   radius_inner = '60.0 80.0 100.0 120.0'
   radius_outer = '80.0 100.0 120.0 140.0'
+  temp = temp
+  eigenstrain_names = thermal_expansion
 []
 
 [Modules/TensorMechanics/Master]
@@ -99,7 +101,6 @@
   [./eshelby]
     type = EshelbyTensor
     temperature = temp
-    eigenstrain_names = thermal_expansion
   [../]
   [./thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain

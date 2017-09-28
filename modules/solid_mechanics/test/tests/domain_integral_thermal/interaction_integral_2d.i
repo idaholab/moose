@@ -23,11 +23,11 @@
   disp_x = disp_x
   disp_y = disp_y
   volumetric_locking_correction = False
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = crack2d.e
-  displacements = 'disp_x disp_y'
 #  uniform_refine = 3
 []
 
@@ -93,6 +93,7 @@
   youngs_modulus = 207000
   poissons_ratio = 0.3
   temp = temp
+  solid_mechanics = true
 []
 
 [SolidMechanics]
@@ -179,12 +180,11 @@
     youngs_modulus = 207000
     poissons_ratio = 0.3
     thermal_expansion = 1.35e-5
-    formulation = PlaneStrain
+    formulation = NonlinearPlaneStrain
     compute_JIntegral = true
     compute_InteractionIntegral = true
     temp = temp
     stress_free_temperature = 0.0
-
   [../]
 []
 
@@ -219,6 +219,7 @@
 [Outputs]
   file_base = interaction_integral_2d_out
   exodus = true
+  csv = true
 []
 
 [Preconditioning]

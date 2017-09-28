@@ -11,15 +11,28 @@
 #include "RankTwoTensor.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
+#include "libmesh/utility.h"
+
+MooseEnum
+InteractionIntegralSM::qFunctionType()
+{
+  return MooseEnum("Geometry Topology", "Geometry");
+}
+
+MooseEnum
+InteractionIntegralSM::sifModeType()
+{
+  return MooseEnum("KI KII KIII T", "KI");
+}
 
 template <>
 InputParameters
 validParams<InteractionIntegralSM>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
   params.addCoupledVar("temp",
                        "The temperature (optional). Must be provided to correctly compute "
                        "stress intensity factors in models with thermal strain gradients.");
@@ -34,28 +47,25 @@ validParams<InteractionIntegralSM>()
                                 "Account for a symmetry plane passing through "
                                 "the plane of the crack, normal to the specified "
                                 "axis (0=x, 1=y, 2=z)");
-  params.addParam<bool>("t_stress", false, "Calculate T-stress");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
   params.addParam<unsigned int>("ring_index", "Ring ID");
-  params.addParam<unsigned int>("ring_first", "First Ring ID");
-  MooseEnum q_function_type("Geometry Topology", "Geometry");
   params.addParam<MooseEnum>("q_function_type",
-                             q_function_type,
+                             InteractionIntegralSM::qFunctionType(),
                              "The method used to define the integration domain. Options are: " +
-                                 q_function_type.getRawNames());
-  MooseEnum sif_modes("KI KII KIII T", "KI");
+                                 InteractionIntegralSM::qFunctionType().getRawNames());
   params.addRequiredParam<MooseEnum>("sif_mode",
-                                     sif_modes,
-                                     "Stress intensity factor to Calculate. Choices are: " +
-                                         sif_modes.getRawNames());
+                                     InteractionIntegralSM::sifModeType(),
+                                     "Stress intensity factor to calculate. Choices are: " +
+                                         InteractionIntegralSM::sifModeType().getRawNames());
 
   return params;
 }
 
 InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
+    _ndisp(coupledComponents("displacements")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _has_crack_front_point_index(isParamValid("crack_front_point_index")),
     _crack_front_point_index(
@@ -63,11 +73,7 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
     _treat_as_2d(false),
     _stress(getMaterialPropertyByName<SymmTensor>("stress")),
     _strain(getMaterialPropertyByName<SymmTensor>("elastic_strain")),
-    _grad_disp_x(coupledGradient("disp_x")),
-    _grad_disp_y(coupledGradient("disp_y")),
-    _grad_disp_z(parameters.get<SubProblem *>("_subproblem")->mesh().dimension() == 3
-                     ? coupledGradient("disp_z")
-                     : _grad_zero),
+    _grad_disp(3),
     _has_temp(isCoupled("temp")),
     _grad_temp(_has_temp ? coupledGradient("temp") : _grad_zero),
     _current_instantaneous_thermal_expansion_coef(
@@ -76,23 +82,32 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
             : NULL),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
-    _t_stress(getParam<bool>("t_stress")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _ring_index(getParam<unsigned int>("ring_index")),
-    _q_function_type(getParam<MooseEnum>("q_function_type")),
-    _sif_mode(getParam<MooseEnum>("sif_mode"))
+    _q_function_type(getParam<MooseEnum>("q_function_type").getEnum<QMethod>()),
+    _sif_mode(getParam<MooseEnum>("sif_mode").getEnum<SifMethod>())
 {
   if (_has_temp && !_current_instantaneous_thermal_expansion_coef)
     mooseError("To include thermal strain term in interaction integral, must both couple "
                "temperature in DomainIntegral block and compute thermal expansion property in "
                "material model using compute_InteractionIntegral = true.");
-  if (_q_function_type == "TOPOLOGY")
-    _ring_first = getParam<unsigned int>("ring_first");
 
   // plane strain
   _kappa = 3.0 - 4.0 * _poissons_ratio;
   _shear_modulus = _youngs_modulus / (2.0 * (1.0 + _poissons_ratio));
+
+  // Checking for consistency between mesh size and length of the provided displacements vector
+  if (_ndisp != _mesh.dimension())
+    mooseError(
+        "The number of variables supplied in 'displacements' must match the mesh dimension.");
+  // fetch gradients of coupled variables
+  for (unsigned int i = 0; i < _ndisp; ++i)
+    _grad_disp[i] = &coupledGradient("displacements", i);
+
+  // set unused dimensions to zero
+  for (unsigned i = _ndisp; i < 3; ++i)
+    _grad_disp[i] = &_grad_zero;
 }
 
 void
@@ -106,7 +121,7 @@ InteractionIntegralSM::getValue()
 {
   gatherSum(_integral_value);
 
-  if (_t_stress && !_treat_as_2d)
+  if (_sif_mode == SifMethod::T && !_treat_as_2d)
     _integral_value +=
         _poissons_ratio *
         _crack_front_definition->getCrackFrontTangentialStrain(_crack_front_point_index);
@@ -142,9 +157,9 @@ InteractionIntegralSM::computeQpIntegral()
   RankTwoTensor aux_stress;
   RankTwoTensor aux_du;
 
-  if (_sif_mode == "KI" || _sif_mode == "KII" || _sif_mode == "KIII")
-    computeAuxFields(_sif_mode, aux_stress, aux_du);
-  else if (_sif_mode == "T")
+  if (_sif_mode == SifMethod::KI || _sif_mode == SifMethod::KII || _sif_mode == SifMethod::KIII)
+    computeAuxFields(aux_stress, aux_du);
+  else if (_sif_mode == SifMethod::T)
     computeTFields(aux_stress, aux_du);
 
   RankTwoTensor stress;
@@ -169,7 +184,7 @@ InteractionIntegralSM::computeQpIntegral()
   strain(2, 1) = _strain[_qp].yz();
   strain(2, 2) = _strain[_qp].zz();
 
-  RankTwoTensor grad_disp(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+  RankTwoTensor grad_disp((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
   // Rotate stress, strain, displacement and temperature to crack front coordinate system
   RealVectorValue grad_q_cf =
@@ -229,7 +244,7 @@ InteractionIntegralSM::computeQpIntegral()
 Real
 InteractionIntegralSM::computeIntegral()
 {
-  Real sum = 0;
+  Real sum = 0.0;
 
   // calculate phi and dphi for this element
   FEType fe_type(Utility::string_to_enum<Order>("first"),
@@ -243,17 +258,17 @@ InteractionIntegralSM::computeIntegral()
 
   // calculate q for all nodes in this element
   _q_curr_elem.clear();
-  unsigned int ring_base = (_q_function_type == "TOPOLOGY") ? 0 : 1;
+  unsigned int ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
 
   for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
   {
     Node * this_node = _current_elem->get_node(i);
     Real q_this_node;
 
-    if (_q_function_type == "GEOMETRY")
+    if (_q_function_type == QMethod::Geometry)
       q_this_node = _crack_front_definition->DomainIntegralQFunction(
           _crack_front_point_index, _ring_index - ring_base, this_node);
-    else if (_q_function_type == "TOPOLOGY")
+    else if (_q_function_type == QMethod::Topology)
       q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
           _crack_front_point_index, _ring_index - ring_base, this_node);
 
@@ -266,74 +281,65 @@ InteractionIntegralSM::computeIntegral()
 }
 
 void
-InteractionIntegralSM::computeAuxFields(const MooseEnum sif_mode,
-                                        RankTwoTensor & aux_stress,
-                                        RankTwoTensor & grad_disp)
+InteractionIntegralSM::computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp)
 {
-  RealVectorValue k(0);
-  if (sif_mode == "KI")
-    k(0) = 1;
-
-  else if (sif_mode == "KII")
-    k(1) = 1;
-
-  else if (sif_mode == "KIII")
-    k(2) = 1;
+  RealVectorValue k(0.0);
+  if (_sif_mode == SifMethod::KI)
+    k(0) = 1.0;
+  else if (_sif_mode == SifMethod::KII)
+    k(1) = 1.0;
+  else if (_sif_mode == SifMethod::KIII)
+    k(2) = 1.0;
 
   Real t = _theta;
-  Real t2 = _theta / 2;
-  Real tt2 = 3 * _theta / 2;
+  Real t2 = _theta / 2.0;
+  Real tt2 = 3.0 * _theta / 2.0;
   Real st = std::sin(t);
   Real ct = std::cos(t);
   Real st2 = std::sin(t2);
   Real ct2 = std::cos(t2);
   Real stt2 = std::sin(tt2);
   Real ctt2 = std::cos(tt2);
-  Real ct2sq = std::pow(ct2, 2);
-  Real ct2cu = std::pow(ct2, 3);
-  Real sqrt2PiR = std::sqrt(2 * libMesh::pi * _r);
+  Real ct2sq = Utility::pow<2>(ct2);
+  Real ct2cu = Utility::pow<3>(ct2);
+  Real sqrt2PiR = std::sqrt(2.0 * libMesh::pi * _r);
 
   // Calculate auxiliary stress tensor
-  Real s11 = 1 / sqrt2PiR * (k(0) * ct2 * (1 - st2 * stt2) - k(1) * st2 * (2 + ct2 * ctt2));
-  Real s22 = 1 / sqrt2PiR * (k(0) * ct2 * (1 + st2 * stt2) + k(1) * st2 * ct2 * ctt2);
-  Real s12 = 1 / sqrt2PiR * (k(0) * ct2 * st2 * ctt2 + k(1) * ct2 * (1 - st2 * stt2));
-  Real s13 = -1 / sqrt2PiR * k(2) * st2;
-  Real s23 = 1 / sqrt2PiR * k(2) * ct2;
-  // plain stress
-  // Real s33 = 0;
-  // plain strain
-  Real s33 = _poissons_ratio * (s11 + s22);
+  aux_stress.zero();
 
-  aux_stress(0, 0) = s11;
-  aux_stress(0, 1) = s12;
-  aux_stress(0, 2) = s13;
-  aux_stress(1, 0) = s12;
-  aux_stress(1, 1) = s22;
-  aux_stress(1, 2) = s23;
-  aux_stress(2, 0) = s13;
-  aux_stress(2, 1) = s23;
-  aux_stress(2, 2) = s33;
+  aux_stress(0, 0) =
+      1.0 / sqrt2PiR * (k(0) * ct2 * (1.0 - st2 * stt2) - k(1) * st2 * (2.0 + ct2 * ctt2));
+  aux_stress(1, 1) = 1.0 / sqrt2PiR * (k(0) * ct2 * (1.0 + st2 * stt2) + k(1) * st2 * ct2 * ctt2);
+  aux_stress(0, 1) = 1.0 / sqrt2PiR * (k(0) * ct2 * st2 * ctt2 + k(1) * ct2 * (1.0 - st2 * stt2));
+  aux_stress(0, 2) = -1.0 / sqrt2PiR * k(2) * st2;
+  aux_stress(1, 2) = 1.0 / sqrt2PiR * k(2) * ct2;
+  // plane stress
+  // Real s33 = 0;
+  // plane strain
+  aux_stress(2, 2) = _poissons_ratio * (aux_stress(0, 0) + aux_stress(1, 1));
+
+  aux_stress(1, 0) = aux_stress(0, 1);
+  aux_stress(2, 0) = aux_stress(0, 2);
+  aux_stress(2, 1) = aux_stress(1, 2);
 
   // Calculate x1 derivative of auxiliary displacements
-  Real du11 = k(0) / (4 * _shear_modulus * sqrt2PiR) *
-                  (ct * ct2 * _kappa + ct * ct2 - 2 * ct * ct2cu + st * st2 * _kappa + st * st2 -
-                   6 * st * st2 * ct2sq) +
-              k(1) / (4 * _shear_modulus * sqrt2PiR) *
-                  (ct * st2 * _kappa + ct * st2 + 2 * ct * st2 * ct2sq - st * ct2 * _kappa +
-                   3 * st * ct2 - 6 * st * ct2cu);
+  grad_disp.zero();
 
-  Real du21 = k(0) / (4 * _shear_modulus * sqrt2PiR) *
-                  (ct * st2 * _kappa + ct * st2 - 2 * ct * st2 * ct2sq - st * ct2 * _kappa -
-                   5 * st * ct2 + 6 * st * ct2cu) +
-              k(1) / (4 * _shear_modulus * sqrt2PiR) *
-                  (-ct * ct2 * _kappa + 3 * ct * ct2 - 2 * ct * ct2cu - st * st2 * _kappa +
-                   3 * st * st2 - 6 * st * st2 * ct2sq);
+  grad_disp(0, 0) = k(0) / (4.0 * _shear_modulus * sqrt2PiR) *
+                        (ct * ct2 * _kappa + ct * ct2 - 2.0 * ct * ct2cu + st * st2 * _kappa +
+                         st * st2 - 6.0 * st * st2 * ct2sq) +
+                    k(1) / (4.0 * _shear_modulus * sqrt2PiR) *
+                        (ct * st2 * _kappa + ct * st2 + 2.0 * ct * st2 * ct2sq - st * ct2 * _kappa +
+                         3.0 * st * ct2 - 6.0 * st * ct2cu);
 
-  Real du31 = k(2) / (_shear_modulus * sqrt2PiR) * (st2 * ct - ct2 * st);
+  grad_disp(0, 1) = k(0) / (4.0 * _shear_modulus * sqrt2PiR) *
+                        (ct * st2 * _kappa + ct * st2 - 2.0 * ct * st2 * ct2sq - st * ct2 * _kappa -
+                         5.0 * st * ct2 + 6.0 * st * ct2cu) +
+                    k(1) / (4.0 * _shear_modulus * sqrt2PiR) *
+                        (-ct * ct2 * _kappa + 3.0 * ct * ct2 - 2.0 * ct * ct2cu -
+                         st * st2 * _kappa + 3.0 * st * st2 - 6.0 * st * st2 * ct2sq);
 
-  grad_disp(0, 0) = du11;
-  grad_disp(0, 1) = du21;
-  grad_disp(0, 2) = du31;
+  grad_disp(0, 2) = k(2) / (_shear_modulus * sqrt2PiR) * (st2 * ct - ct2 * st);
 }
 
 void
@@ -343,26 +349,23 @@ InteractionIntegralSM::computeTFields(RankTwoTensor & aux_stress, RankTwoTensor 
   Real t = _theta;
   Real st = std::sin(t);
   Real ct = std::cos(t);
-  Real stsq = std::pow(st, 2);
-  Real ctsq = std::pow(ct, 2);
-  Real ctcu = std::pow(ct, 3);
+  Real stsq = Utility::pow<2>(st);
+  Real ctsq = Utility::pow<2>(ct);
+  Real ctcu = Utility::pow<3>(ct);
   Real oneOverPiR = 1.0 / (libMesh::pi * _r);
 
+  aux_stress.zero();
   aux_stress(0, 0) = -oneOverPiR * ctcu;
   aux_stress(0, 1) = -oneOverPiR * st * ctsq;
-  aux_stress(0, 2) = 0.0;
   aux_stress(1, 0) = -oneOverPiR * st * ctsq;
   aux_stress(1, 1) = -oneOverPiR * ct * stsq;
-  aux_stress(1, 2) = 0.0;
-  aux_stress(2, 0) = 0.0;
-  aux_stress(2, 1) = 0.0;
   aux_stress(2, 2) = -oneOverPiR * _poissons_ratio * (ctcu + ct * stsq);
 
-  grad_disp(0, 0) = oneOverPiR / (4 * _youngs_modulus) *
-                    (ct * (4 * std::pow(_poissons_ratio, 2) - 3 + _poissons_ratio) -
-                     std::cos(3 * t) * (1 + _poissons_ratio));
-  grad_disp(0, 1) = -oneOverPiR / (4 * _youngs_modulus) *
-                    (st * (4 * std::pow(_poissons_ratio, 2) - 3 + _poissons_ratio) +
-                     std::sin(3 * t) * (1 + _poissons_ratio));
-  grad_disp(0, 2) = 0.0;
+  grad_disp.zero();
+  grad_disp(0, 0) = oneOverPiR / (4.0 * _youngs_modulus) *
+                    (ct * (4.0 * Utility::pow<2>(_poissons_ratio) - 3.0 + _poissons_ratio) -
+                     std::cos(3.0 * t) * (1.0 + _poissons_ratio));
+  grad_disp(0, 1) = -oneOverPiR / (4.0 * _youngs_modulus) *
+                    (st * (4.0 * Utility::pow<2>(_poissons_ratio) - 3.0 + _poissons_ratio) +
+                     std::sin(3.0 * t) * (1.0 + _poissons_ratio));
 }

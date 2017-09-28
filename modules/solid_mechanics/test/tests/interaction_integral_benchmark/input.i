@@ -12,11 +12,11 @@
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = 360degree_model.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Problem]
@@ -53,6 +53,7 @@
   2d = true
   axis_2d = 2
   equivalent_k = True
+  solid_mechanics = true
 []
 
 [AuxVariables]
@@ -231,4 +232,5 @@
   execute_on = 'timestep_end'
   file_base = 360degree_model_out
   exodus = true
+  csv = true
 []
