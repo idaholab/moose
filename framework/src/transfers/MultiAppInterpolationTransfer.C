@@ -179,7 +179,7 @@ MultiAppInterpolationTransfer::execute()
       {
         if (_multi_app->hasLocalApp(i))
         {
-          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+          Moose::ScopedCommSwapper swapper(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
@@ -260,9 +260,6 @@ MultiAppInterpolationTransfer::execute()
 
           solution.close();
           to_sys->update();
-
-          // Swap back
-          Moose::swapLibMeshComm(swapped);
         }
       }
 
@@ -328,7 +325,7 @@ MultiAppInterpolationTransfer::execute()
         if (!_multi_app->hasLocalApp(i))
           continue;
 
-        MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+        Moose::ScopedCommSwapper swapper(_multi_app->comm());
 
         FEProblemBase & from_problem = _multi_app->appProblemBase(i);
         MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
@@ -386,8 +383,6 @@ MultiAppInterpolationTransfer::execute()
             src_vals.push_back(from_solution(from_dof));
           }
         }
-
-        Moose::swapLibMeshComm(swapped);
       }
 
       // We have only set local values - prepare for use by gathering remote gata

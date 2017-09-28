@@ -39,7 +39,7 @@ FullSolveMultiApp::initialSetup()
 
   if (_has_an_app)
   {
-    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+    Moose::ScopedCommSwapper swapper(_my_comm);
 
     _executioners.resize(_my_num_apps);
 
@@ -56,8 +56,6 @@ FullSolveMultiApp::initialSetup()
 
       _executioners[i] = ex;
     }
-    // Swap back
-    Moose::swapLibMeshComm(swapped);
   }
 }
 
@@ -73,7 +71,7 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   if (_solved)
     return true;
 
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+  Moose::ScopedCommSwapper swapper(_my_comm);
 
   int rank;
   int ierr;
@@ -88,9 +86,6 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     if (!ex->lastSolveConverged())
       last_solve_converged = false;
   }
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
 
   _solved = true;
 

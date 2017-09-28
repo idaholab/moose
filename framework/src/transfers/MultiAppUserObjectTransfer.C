@@ -78,7 +78,7 @@ MultiAppUserObjectTransfer::execute()
       {
         if (_multi_app->hasLocalApp(i))
         {
-          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+          Moose::ScopedCommSwapper swapper(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
@@ -116,11 +116,9 @@ MultiAppUserObjectTransfer::execute()
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
-                // Swap back
-                Moose::swapLibMeshComm(swapped);
+                swapper.forceSwap();
                 Real from_value = user_object.spatialValue(*node + _multi_app->position(i));
-                // Swap again
-                swapped = Moose::swapLibMeshComm(_multi_app->comm());
+                swapper.forceSwap();
 
                 solution.set(dof, from_value);
               }
@@ -142,11 +140,9 @@ MultiAppUserObjectTransfer::execute()
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
 
-                // Swap back
-                Moose::swapLibMeshComm(swapped);
+                swapper.forceSwap();
                 Real from_value = user_object.spatialValue(centroid + _multi_app->position(i));
-                // Swap again
-                swapped = Moose::swapLibMeshComm(_multi_app->comm());
+                swapper.forceSwap();
 
                 solution.set(dof, from_value);
               }
@@ -155,9 +151,6 @@ MultiAppUserObjectTransfer::execute()
 
           solution.close();
           to_sys->update();
-
-          // Swap back
-          Moose::swapLibMeshComm(swapped);
         }
       }
 
@@ -220,9 +213,11 @@ MultiAppUserObjectTransfer::execute()
               {
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
-                MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = user_object.spatialValue(*node - app_position);
-                Moose::swapLibMeshComm(swapped);
+                Real from_value = 0;
+                {
+                  Moose::ScopedCommSwapper swapper(_multi_app->comm());
+                  from_value = user_object.spatialValue(*node - app_position);
+                }
 
                 to_solution->set(dof, from_value);
               }
@@ -247,9 +242,11 @@ MultiAppUserObjectTransfer::execute()
               {
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
-                MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = user_object.spatialValue(centroid - app_position);
-                Moose::swapLibMeshComm(swapped);
+                Real from_value = 0;
+                {
+                  Moose::ScopedCommSwapper swapper(_multi_app->comm());
+                  from_value = user_object.spatialValue(centroid - app_position);
+                }
 
                 to_solution->set(dof, from_value);
               }
