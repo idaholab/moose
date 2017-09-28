@@ -39,7 +39,6 @@ class MooseMarkdown(markdown.Markdown):
                           supplied or default 'config'.
     """
     EQUATION_COUNT = 0   # counters for numbered equation numbers
-    CODE_BLOCK_COUNT = 0 # counter for code block copy buttons
     CACHE = dict() # Cache for find method
 
     @staticmethod
@@ -124,7 +123,6 @@ class MooseMarkdown(markdown.Markdown):
             md[str]: A markdown file, markdown content, or MarkdownNode
         """
         self.EQUATION_COUNT = 0   #pylint: disable=invalid-name
-        self.CODE_BLOCK_COUNT = 0 #pylint: disable=invalid-name
         self.current = None
 
         if isinstance(md, str):
