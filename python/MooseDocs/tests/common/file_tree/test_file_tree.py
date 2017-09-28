@@ -35,9 +35,9 @@ class TestFileTree(LogTestCase):
         config = dict()
         config['framework'] = dict(base='docs/content',
                                    include=['docs/content/**/Functions/index.md',
-                                            'docs/content/**/Functions/framework/*'])
+                                            'docs/content/**/Functions/framework/**'])
         config['moose_test'] = dict(base='test/docs/content',
-                                    include=['test/docs/content/**/Functions/*'])
+                                    include=['test/docs/content/**/Functions/**'])
         root = common.moose_docs_file_tree(config)
 
         nodes = self.finder(root, 'moose_test/PostprocessorFunction')
@@ -57,7 +57,7 @@ class TestFileTree(LogTestCase):
     def testTree(self):
         config = dict()
         config['framework'] = dict(base='docs/content',
-                                   include=['docs/content/documentation/systems/Adaptivity*'])
+                                   include=['docs/content/documentation/systems/Adaptivity/**'])
         root = common.moose_docs_file_tree(config)
 
         # MarkdownIndexNode
@@ -88,7 +88,7 @@ class TestFileTree(LogTestCase):
     def testNodeFinder(self):
         config = dict()
         config['framework'] = dict(base='docs/content',
-                                   include=['docs/content/documentation/systems*'])
+                                   include=['docs/content/documentation/systems/**'])
         root = common.moose_docs_file_tree(config)
         node0 = MooseMarkdown.find(root, 'systems/index.md')[0]
         node1 = MooseMarkdown.find(root, 'systems/Adaptivity/index.md')[0]
@@ -107,7 +107,7 @@ class TestFileTree(LogTestCase):
 
     def testImages(self):
         config = dict()
-        config['framework'] = dict(base='docs/content', include=['docs/content/*'])
+        config['framework'] = dict(base='docs/content', include=['docs/content/**'])
         root = common.moose_docs_file_tree(config)
 
         node = self.finder(root, 'media/gitlab-logo.png')[0]
@@ -143,11 +143,57 @@ class TestFileTree(LogTestCase):
         config = dict()
         os.environ['MOOSE_DIR'] = MooseDocs.MOOSE_DIR
         config['framework'] = dict(root_dir='$MOOSE_DIR', base='docs/content',
-                                   include=['docs/content/*'])
+                                   include=['docs/content/**'])
         root = common.moose_docs_file_tree(config)
         node = self.finder(root, 'media/gitlab-logo.png')[0]
         self.assertEqual(node.filename, os.path.join(MooseDocs.ROOT_DIR, 'docs', 'content', 'media',
                                                      'gitlab-logo.png'))
+
+    def testExclude(self):
+        """
+        Test that apps can include/exclude framework content.
+        """
+        os.environ['MOOSE_DIR'] = MooseDocs.MOOSE_DIR
+        config = dict()
+        config['test'] = dict(root_dir='$MOOSE_DIR',
+                              base='test/docs/content',
+                              include=['test/docs/content/**'])
+        config['framework'] = dict(root_dir='$MOOSE_DIR',
+                                   base='docs/content',
+                                   exclude=['docs/content/**/level_set/**',
+                                            'docs/content/**/phase_field/**',
+                                            'docs/content/**/navier_stokes/**'
+                                           ],
+                                   include=['docs/content/**'])
+        exclude = common.moose_docs_file_tree(config)
+
+        config['framework']['exclude'] = []
+        include = common.moose_docs_file_tree(config)
+
+        name = '/documentation/systems/Kernels/framework/Diffusion'
+        node = self.finder(exclude, name)
+        self.assertEqual(len(node), 1)
+        node = self.finder(include, name)
+        self.assertEqual(len(node), 1)
+
+        name = '/documentation/systems/Kernels/level_set/LevelSetAdvection'
+        node = self.finder(include, name)
+        self.assertEqual(len(node), 1)
+        node = self.finder(exclude, name)
+        self.assertEqual(len(node), 0)
+
+        name = '/documentation/systems/Kernels/phase_field/CHMath'
+        node = self.finder(include, name)
+        self.assertEqual(len(node), 1)
+        node = self.finder(exclude, name)
+        self.assertEqual(len(node), 0)
+
+        name = '/documentation/systems/Kernels/navier_stokes/INSMass'
+        node = self.finder(include, name)
+        self.assertEqual(len(node), 1)
+        node = self.finder(exclude, name)
+        self.assertEqual(len(node), 0)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

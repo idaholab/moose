@@ -41,7 +41,7 @@ class TestTemplate(MarkdownTestCase):
 
         # Use BoxMarker.md to test Doxygen and Code lookups
         config = dict(base='docs/content',
-                      include=['docs/content/documentation/systems/Adaptivity/Markers/*'])
+                      include=['docs/content/documentation/systems/Adaptivity/Markers/**'])
         root = moose_docs_file_tree({'framework': config})
         node = root.findall('/BoxMarker')[0]
         cls.html = cls.parser.convert(node)
