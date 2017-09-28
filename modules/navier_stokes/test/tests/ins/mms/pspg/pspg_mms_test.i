@@ -52,6 +52,12 @@ rho=2.5
     type = INSMass
     variable = p
   [../]
+  [./mass_body_force]
+    type = INSMassBodyForceMMS
+    variable = p
+    x_vel_forcing_func = vel_x_source_func
+    y_vel_forcing_func = vel_y_source_func
+  [../]
 
   # x-momentum, space
   [./x_momentum_space]
@@ -136,6 +142,10 @@ rho=2.5
     type = ParsedFunction
     value = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
   [../]
+  [./px_func]
+    type = ParsedFunction
+    value = '0.1*pi*y*cos(0.2*pi*x*y) + 0.25*pi*cos(0.5*pi*x)'
+  [../]
 []
 
 [Materials]
@@ -206,10 +216,21 @@ rho=2.5
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
+  [./L2px]
+    variable = px
+    function = px_func
+    type = ElementL2Error
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  [../]
 []
 
 [AuxVariables]
   [./vxx]
+    family = MONOMIAL
+    order = FIRST
+  [../]
+  [./px]
     family = MONOMIAL
     order = FIRST
   [../]
@@ -221,5 +242,11 @@ rho=2.5
     component = x
     variable = vxx
     gradient_variable = vel_x
+  [../]
+  [./px]
+    type = VariableGradientComponent
+    component = x
+    variable = px
+    gradient_variable = p
   [../]
 []

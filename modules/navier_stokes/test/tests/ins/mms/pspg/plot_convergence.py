@@ -18,7 +18,7 @@ fontP.set_size('x-small')
 
 h_array = np.array([.25, .125, .0625, .03125])
 alpha_array = ['1e-6', '1e-3', '1e0']
-variable_names = ['L2p', 'L2vel_x', 'L2vel_y', 'L2vxx']
+variable_names = ['L2p', 'L2vel_x', 'L2vel_y', 'L2vxx', 'L2px']
 for name in variable_names:
     for alpha in alpha_array:
         data_array = np.array([])
