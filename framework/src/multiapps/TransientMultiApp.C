@@ -136,7 +136,7 @@ TransientMultiApp::initialSetup()
   if (!_has_an_app)
     return;
 
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+  Moose::ScopedCommSwapper swapper(_my_comm);
 
   if (_has_an_app)
   {
@@ -145,9 +145,6 @@ TransientMultiApp::initialSetup()
     for (unsigned int i = 0; i < _my_num_apps; i++)
       setupApp(i);
   }
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
 }
 
 bool
@@ -163,7 +160,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
 
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+  Moose::ScopedCommSwapper swapper(_my_comm);
   bool return_value = true;
 
   // Make sure we swap back the communicator regardless of how this routine is exited
@@ -422,8 +419,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
     return_value = false;
   }
 
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
   _transferred_vars.clear();
 
   return return_value;
@@ -462,7 +457,7 @@ TransientMultiApp::computeDT()
 
   if (_has_an_app)
   {
-    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+    Moose::ScopedCommSwapper swapper(_my_comm);
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
@@ -472,9 +467,6 @@ TransientMultiApp::computeDT()
 
       smallest_dt = std::min(dt, smallest_dt);
     }
-
-    // Swap back
-    Moose::swapLibMeshComm(swapped);
   }
 
   if (_tolerate_failure) // Bow out of the timestep selection dance, we do this down here because we
@@ -501,7 +493,7 @@ void TransientMultiApp::resetApp(
     // Reset the Multiapp
     MultiApp::resetApp(global_app, time);
 
-    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+    Moose::ScopedCommSwapper swapper(_my_comm);
 
     // Setup the app, disable the output so that the initial condition does not output
     // When an app is reset the initial condition was effectively already output before reset
@@ -509,9 +501,6 @@ void TransientMultiApp::resetApp(
     problem.allowOutput(false);
     setupApp(local_app, time);
     problem.allowOutput(true);
-
-    // Swap back
-    Moose::swapLibMeshComm(swapped);
   }
 }
 

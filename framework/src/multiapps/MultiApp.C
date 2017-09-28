@@ -193,7 +193,7 @@ MultiApp::initialSetup()
   if (!_has_an_app)
     return;
 
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+  Moose::ScopedCommSwapper swapper(_my_comm);
 
   _apps.resize(_my_num_apps);
 
@@ -203,9 +203,6 @@ MultiApp::initialSetup()
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
     createApp(i, _app.getGlobalTimeOffset());
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
 }
 
 void
@@ -366,12 +363,11 @@ MultiApp::getBoundingBox(unsigned int app)
 
   FEProblemBase & problem = appProblemBase(app);
 
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-
-  MooseMesh & mesh = problem.mesh();
-  BoundingBox bbox = MeshTools::create_bounding_box(mesh);
-
-  Moose::swapLibMeshComm(swapped);
+  BoundingBox bbox = {};
+  {
+    Moose::ScopedCommSwapper swapper(_my_comm);
+    bbox = MeshTools::create_bounding_box(problem.mesh());
+  }
 
   Point min = bbox.min();
   Point max = bbox.max();
@@ -475,7 +471,7 @@ MultiApp::localApp(unsigned int local_app)
 void
 MultiApp::resetApp(unsigned int global_app, Real time)
 {
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+  Moose::ScopedCommSwapper swapper(_my_comm);
 
   if (hasLocalApp(global_app))
   {
@@ -489,9 +485,6 @@ MultiApp::resetApp(unsigned int global_app, Real time)
     // Reset the file numbers of the newly reset apps
     _apps[local_app]->getOutputWarehouse().setFileNumbers(m);
   }
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
 }
 
 void
