@@ -206,7 +206,8 @@ lexPath(Lexer * l)
   return lexHit;
 }
 
-int consumeWhitespace(Lexer * l)
+int
+consumeWhitespace(Lexer * l)
 {
   size_t start = 0;
   while (true)
@@ -334,7 +335,7 @@ lexString(Lexer * l)
       quote = '\'';
 
     char c = l->input()[l->start()];
-    char prev = c;
+    char prev;
     while (true)
     {
       prev = c;

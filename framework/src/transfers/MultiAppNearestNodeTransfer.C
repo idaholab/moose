@@ -396,6 +396,8 @@ MultiAppNearestNodeTransfer::execute()
       case FROM_MULTIAPP:
         solution = to_sys->solution.get();
         break;
+      default:
+        mooseError("Unknown direction");
     }
 
     MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
