@@ -56,7 +56,10 @@ class RunApp(Tester):
             raise Exception('Either "input" or "command" must be supplied for a RunApp test')
 
     def getInputFile(self):
-        return self.specs['input'].strip()
+        if self.specs.isValid('input'):
+            return self.specs['input'].strip()
+        else:
+            return None # Not all testers that inherit from RunApp have an input file
 
     def checkRunnable(self, options):
         if options.enable_recover:
