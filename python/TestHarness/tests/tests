@@ -59,4 +59,8 @@
     type = PythonUnitTest
     input = test_RequiredObjects.py
   [../]
+   [./should_execute]
+    type = PythonUnitTest
+    input = test_ShouldExecute.py
+  [../]
 []

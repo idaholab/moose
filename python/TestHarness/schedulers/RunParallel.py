@@ -19,7 +19,8 @@ class RunParallel(Scheduler):
         tester = job_container.getTester()
 
         # Launch and wait for the command to finish
-        job_container.run()
+        if tester.shouldExecute():
+            job_container.run()
 
         # Was this test already considered finished? (Timeouts, Dry Run)
         if tester.isFinished():

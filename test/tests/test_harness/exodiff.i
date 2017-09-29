@@ -33,7 +33,7 @@
     type = DirichletBC
     variable = u
     boundary = right
-    value = 1
+    value = 10 # causes a diff
   [../]
 []
 
@@ -49,5 +49,6 @@
 
 [Outputs]
   csv = true
+  exodus = true
   print_perf_log = true
 []
