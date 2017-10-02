@@ -386,7 +386,6 @@ protected:
   SubAppBackups & _backups;
 
 private:
-  bool _want_restore = false;
   bool _setup_done = false;
 };
 
