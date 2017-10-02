@@ -12,3 +12,4 @@
     cli_args = "Kernels/diff/test=mesh_null"
     expect_err = "The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
   [../]
+[]

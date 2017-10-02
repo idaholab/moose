@@ -1,4 +1,4 @@
-eTests]
+[Tests]
   [./glued_kin]
     type = 'CSVDiff'
     input = 'plane3_template1.i'

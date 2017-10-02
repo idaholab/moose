@@ -165,7 +165,7 @@
   [./definition_minvalinc_inputdefault_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'cycles_per_step\'{.*?'value'{.*?MinValInc=0.*?InputDefault="1".*?} % end parameter cycles_per_step'
+    expect_out = '\'cycles_per_step\'{.*?\'value\'{.*?MinValInc=0.*?InputDefault="1".*?} % end parameter cycles_per_step'
     cli_args = '--definition'
   [../]
 
