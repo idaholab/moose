@@ -185,6 +185,12 @@ Real IdealGasFluidProperties::dpdh_from_h_s(Real /*h*/, Real /*s*/) const
   return 0.0;
 }
 
+Real IdealGasFluidProperties::dpds_from_h_s(Real /*h*/, Real /*s*/) const
+{
+  mooseError(name(), ": dpds_from_h_s() not implemented.");
+  return 0;
+}
+
 Real
 IdealGasFluidProperties::g(Real v, Real e) const
 {

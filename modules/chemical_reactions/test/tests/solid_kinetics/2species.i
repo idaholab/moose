@@ -43,7 +43,8 @@
   primary_species = 'a b'
   [./SolidKineticReactions]
     primary_species = 'a b'
-    kin_reactions = '(1.0)a+(1.0)b=mineral'
+    secondary_species = mineral
+    kin_reactions = 'a + b = mineral'
     log10_keq = '-6'
     specific_reactive_surface_area = '1.0'
     kinetic_rate_constant = '1.0e-8'
@@ -123,6 +124,7 @@
 []
 
 [Outputs]
+  file_base = 2species_out
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

@@ -236,6 +236,13 @@ StiffenedGasFluidProperties::dpdh_from_h_s(Real h, Real s) const
 }
 
 Real
+StiffenedGasFluidProperties::dpds_from_h_s(Real h, Real s) const
+{
+  return std::pow((h - _q) / (_gamma * _cv), _gamma / (_gamma - 1)) *
+         std::exp((_q_prime - s) / ((_gamma - 1) * _cv)) / ((1 - _gamma) * _cv);
+}
+
+Real
 StiffenedGasFluidProperties::g(Real v, Real e) const
 {
   // g(p,T) for SGEOS is given by Equation (37) in the following reference:

@@ -1,44 +1,47 @@
-# Simple equilibrium reaction example with fluid density and gravity included
-# in calculation of the Darcy velocity. For details about reaction network,
-# see documentation in 2species.i
+# Test AqueousEquilibriumReactions parser
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
 []
 
 [Variables]
   [./a]
-    order = FIRST
-    family = LAGRANGE
-    [./InitialCondition]
-      type = BoundingBoxIC
-      x1 = 0.0
-      y1 = 0.0
-      x2 = 1.0e-10
-      y2 = 1
-      inside = 1.0e-2
-      outside = 1.0e-10
-    [../]
   [../]
   [./b]
-    order = FIRST
-    family = LAGRANGE
-    [./InitialCondition]
-      type = BoundingBoxIC
-      x1 = 0.0
-      y1 = 0.0
-      x2 = 1.0e-10
-      y2 = 1
-      inside = 1.0e-2
-      outside = 1.0e-10
-    [../]
+  [../]
+[]
+
+[AuxVariables]
+  [./pressure]
+  [../]
+[]
+
+[ICs]
+  [./a]
+    type = BoundingBoxIC
+    variable = a
+    x1 = 0.0
+    y1 = 0.0
+    x2 = 1.0e-10
+    y2 = 1
+    inside = 1.0e-2
+    outside = 1.0e-10
+  [../]
+  [./b]
+    type = BoundingBoxIC
+    variable = b
+    x1 = 0.0
+    y1 = 0.0
+    x2 = 1.0e-10
+    y2 = 1
+    inside = 1.0e-2
+    outside = 1.0e-10
   [../]
   [./pressure]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 1
+    type = FunctionIC
+    variable = pressure
+    function = 2-x
   [../]
 []
 
@@ -46,11 +49,10 @@
   primary_species = 'a b'
   [./AqueousEquilibriumReactions]
     primary_species = 'a b'
-    reactions = '2a = pa2     2,
-                 a + b = pab -2'
+    reactions = '2a = pa2 2,
+                 (1.0)a + (1.0)b = pab -2'
     secondary_species = 'pa2 pab'
     pressure = pressure
-    gravity = '-1 0 0'
   [../]
 []
 
@@ -67,7 +69,6 @@
     type = PrimaryConvection
     variable = a
     p = pressure
-    gravity = '-1 0 0'
   [../]
   [./b_ie]
     type = PrimaryTimeDerivative
@@ -81,12 +82,6 @@
     type = PrimaryConvection
     variable = b
     p = pressure
-    gravity = '-1 0 0'
-  [../]
-  [./p]
-    type = DarcyFluxPressure
-    variable = pressure
-    gravity = '-1 0 0'
   [../]
 []
 
@@ -113,40 +108,26 @@
     variable = b
     boundary = right
   [../]
-  [./pleft]
-    type = DirichletBC
-    variable = pressure
-    value = 2
-    boundary = left
-  [../]
-  [./pright]
-    type = DirichletBC
-    variable = pressure
-    value = 1
-    boundary = right
-  [../]
 []
 
 [Materials]
   [./porous]
     type = GenericConstantMaterial
-    prop_names = 'diffusivity conductivity porosity density'
-    prop_values = '1e-4 1e-4 0.2 4'
+    prop_names = 'diffusivity conductivity porosity'
+    prop_values = '1e-4 1e-4 0.2'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-12
-  start_time = 0.0
-  end_time = 100
-  dt = 10.0
+  end_time = 10
+  dt = 10
 []
 
 [Outputs]
+  file_base = equilibrium_out
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

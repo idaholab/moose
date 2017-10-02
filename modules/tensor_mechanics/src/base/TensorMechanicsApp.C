@@ -25,6 +25,7 @@
 #include "MomentBalancing.h"
 #include "PoroMechanicsCoupling.h"
 #include "InertialForce.h"
+#include "InertialTorque.h"
 #include "Gravity.h"
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
@@ -243,6 +244,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(MomentBalancing);
   registerKernel(PoroMechanicsCoupling);
   registerKernel(InertialForce);
+  registerKernel(InertialTorque);
   registerKernel(Gravity);
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);

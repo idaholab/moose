@@ -1,58 +1,19 @@
-# Simple equilibrium reaction example to illustrate the use of the AqueousEquilibriumReactions
-# action.
-# In this example, two primary species a and b are transported by diffusion and convection
-# from the left of the porous medium, reacting to form two equilibrium species pa2 and pab
-# according to the equilibrium reaction specified in the AqueousEquilibriumReactions block as:
-#
-#      reactions = '2a = pa2     2
-#                   a + b = pab -2'
-#
-# where the 2 is the weight of the equilibrium species, the 2 on the RHS of the first reaction
-# refers to the equilibrium constant (log10(Keq) = 2), and the -2 on the RHS of the second
-# reaction equates to log10(Keq) = -2.
-#
-# This example is identical to 2species.i, except that it explicitly includes all AuxKernels
-# and Kernels that are set up by the action in 2species.i
+# Test AqueousEquilibriumReactions parser
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
 []
 
 [Variables]
   [./a]
-    order = FIRST
-    family = LAGRANGE
-    [./InitialCondition]
-      type = BoundingBoxIC
-      x1 = 0.0
-      y1 = 0.0
-      x2 = 1.0e-10
-      y2 = 1
-      inside = 1.0e-2
-      outside = 1.0e-10
-    [../]
   [../]
   [./b]
-    order = FIRST
-    family = LAGRANGE
-    [./InitialCondition]
-      type = BoundingBoxIC
-      x1 = 0.0
-      y1 = 0.0
-      x2 = 1.0e-10
-      y2 = 1
-      inside = 1.0e-2
-      outside = 1.0e-10
-    [../]
   [../]
 []
 
 [AuxVariables]
   [./pressure]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./pa2]
   [../]
@@ -61,23 +22,43 @@
 []
 
 [AuxKernels]
-  [./pa2eq]
+  [./pa2]
     type = AqueousEquilibriumRxnAux
     variable = pa2
     v = a
-    sto_v = 2
     log_k = 2
+    sto_v = 2
   [../]
-  [./pabeq]
+  [./pab]
     type = AqueousEquilibriumRxnAux
     variable = pab
     v = 'a b'
+    log_k = -2
     sto_v = '1 1'
-    log_k = '-2 -2'
   [../]
 []
 
 [ICs]
+  [./a]
+    type = BoundingBoxIC
+    variable = a
+    x1 = 0.0
+    y1 = 0.0
+    x2 = 1.0e-10
+    y2 = 1
+    inside = 1.0e-2
+    outside = 1.0e-10
+  [../]
+  [./b]
+    type = BoundingBoxIC
+    variable = b
+    x1 = 0.0
+    y1 = 0.0
+    x2 = 1.0e-10
+    y2 = 1
+    inside = 1.0e-2
+    outside = 1.0e-10
+  [../]
   [./pressure]
     type = FunctionIC
     variable = pressure
@@ -112,7 +93,7 @@
     variable = b
     p = pressure
   [../]
-  [./a1eq]
+  [./a1_eq]
     type = CoupledBEEquilibriumSub
     variable = a
     v = ''
@@ -121,7 +102,7 @@
     sto_v = ''
     sto_u = 2
   [../]
-  [./a1diff]
+  [./a1_diff]
     type = CoupledDiffusionReactionSub
     variable = a
     v = ''
@@ -130,7 +111,7 @@
     sto_v = ''
     sto_u = 2
   [../]
-  [./a1conv]
+  [./a1_conv]
     type = CoupledConvectionReactionSub
     variable = a
     v = ''
@@ -140,7 +121,7 @@
     sto_u = 2
     p = pressure
   [../]
-  [./a2eq]
+  [./a2_eq]
     type = CoupledBEEquilibriumSub
     variable = a
     v = b
@@ -149,7 +130,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./a2diff]
+  [./a2_diff]
     type = CoupledDiffusionReactionSub
     variable = a
     v = b
@@ -158,7 +139,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./a2conv]
+  [./a2_conv]
     type = CoupledConvectionReactionSub
     variable = a
     v = b
@@ -168,7 +149,7 @@
     sto_u = 1
     p = pressure
   [../]
-  [./b2eq]
+  [./b2_eq]
     type = CoupledBEEquilibriumSub
     variable = b
     v = a
@@ -177,7 +158,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./b2diff]
+  [./b2_diff]
     type = CoupledDiffusionReactionSub
     variable = b
     v = a
@@ -186,7 +167,7 @@
     sto_v = 1
     sto_u = 1
   [../]
-  [./b2conv]
+  [./b2_conv]
     type = CoupledConvectionReactionSub
     variable = b
     v = a
@@ -234,16 +215,13 @@
 [Executioner]
   type = Transient
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-12
-  start_time = 0.0
-  end_time = 100
-  dt = 10.0
+  end_time = 10
+  dt = 10
 []
 
 [Outputs]
-  file_base = 2species_out
+  file_base = equilibrium_out
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

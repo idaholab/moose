@@ -7,6 +7,7 @@
   [./2species_without_action]
     type = 'Exodiff'
     input = '2species_without_action.i'
-    exodiff = '2species_without_action_out.e'
+    exodiff = '2species_out.e'
+    prereq = 2species
   [../]
 []
