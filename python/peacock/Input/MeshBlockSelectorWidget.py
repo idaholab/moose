@@ -60,5 +60,13 @@ class MeshBlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         else:
             return None
 
+    def reset(self):
+        """
+        Set the current text to "" without emitting any signals.
+        """
+        self.Options.blockSignals(True)
+        self.Options.setCurrentText("")
+        self.Options.blockSignals(False)
+
     def comboTextChanged(self, text):
         self.selectionChanged.emit()
