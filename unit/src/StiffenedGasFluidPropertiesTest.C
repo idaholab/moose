@@ -88,19 +88,26 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
     ABS_TEST("dh_dT", dh_dT, dh_dT_fd, 2e-6);
   }
 
-  // dp/dh for p(h,s)
+  // dp/dh and dp/ds for p(h,s)
   {
     Real h = 400.0;
     Real s = 1.0;
 
     Real dh = 1e-2 * h;
+    Real ds = 1e-2 * s;
 
     Real dp_dh = _fp->dpdh_from_h_s(h, s);
-    Real p_forward = _fp->p_from_h_s(h + dh, s);
-    Real p_backward = _fp->p_from_h_s(h - dh, s);
-    Real dp_dh_fd = (p_forward - p_backward) / (2 * dh);
+    Real dp_ds = _fp->dpds_from_h_s(h, s);
 
-    REL_TEST("dp_dh", dp_dh, dp_dh_fd, 6e-8);
+    Real p_h_forward = _fp->p_from_h_s(h + dh, s);
+    Real p_s_forward = _fp->p_from_h_s(h, s + ds);
+    Real p_h_backward = _fp->p_from_h_s(h - dh, s);
+    Real p_s_backward = _fp->p_from_h_s(h, s - ds);
+    Real dp_dh_fd = (p_h_forward - p_h_backward) / (2 * dh);
+    Real dp_ds_fd = (p_s_forward - p_s_backward) / (2 * ds);
+
+    REL_TEST("dp_dh", dp_dh, dp_dh_fd, 1e-6);
+    REL_TEST("dp_ds", dp_ds, dp_ds_fd, 1e-6);
   }
 
   // drho/dp, drho/ds, de/dp, and de/ds for rho(p,s) and e(p,s)
