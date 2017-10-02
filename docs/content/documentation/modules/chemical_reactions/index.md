@@ -150,6 +150,20 @@ Equilibrium reactions can be entered in the `ReactionNetwork` block using an
 `AqueousEquilibriumReactions` sub-block, while kinetic reactions are entered in
 a `SolidKineticReactions` sub-block.
 
+The input file syntax for equilibrium reactions has to following form:
+\begin{align*}
+\nu_{11} \mathcal{A}_1 + \nu_{21} \mathcal{A}_2 + \ldots =& \mathcal{A}_{eq1} \log_{10}(K_{eq}),\\
+\nu_{12} \mathcal{A}_1 + \nu_{22} \mathcal{A}_2 + \ldots =& \mathcal{A}_{eq2} \log_{10}(K_{eq})
+\end{align*}
+
+Individual equilibrium reactions are provided with the primary species on the left hand side,
+while the equilibrium species follows the `=` sign, followed by the log of the equilibrium
+constant. A comma is used to delimit reactions, so that multiple equilibrium reactions can
+be entered.
+
+The syntax for solid kinetic reactions is similar, except that no equilibrium constant
+is entered in the reactions block.
+
 To demonstrate the use of the reaction network parser, consider the geochemical model
 used in \citet{guo2013}, which features aqueous equilibrium reactions as well as kinetic
 mineral dissolution and precipitation.
@@ -166,10 +180,11 @@ Ca^{2+} &\rightleftharpoons H^+ + CaOH^+ & K_{eq} &= 10^{-12.85} \\
 
 Kinetic reaction:
 \begin{equation*}
-Ca^{2+} + HCO_3^- \rightleftharpoons H^+ + CaCO_3(s) \qquad K_{eq} = 10^{1.8487}
+Ca^{2+} + HCO_3^- \rightleftharpoons H^+ + CaCO_3(s)
 \end{equation*}
-with specific reactive surface area $a_m = 0.461$ m$^2$/L, kinetic rate constant
-$k_m = 6.456542 \times 10^{-2}$ mol/m$^2$ and activation energy $E_a = 15,000$ J/mol.
+with equilibrium constant $K_{eq} = 10^{1.8487}$, specific reactive surface area $a_m = 0.461$
+m$^2$/L, kinetic rate constant $k_m = 6.456542 \times 10^{-2}$ mol/m$^2$ and activation energy
+$E_a = 15,000$ J/mol.
 
 !listing modules/chemical_reactions/examples/calcium_bicarbonate/calcium_bicarbonate.i block=ReactionNetwork caption=Example of AqueousEquilibriumReactions action
 
