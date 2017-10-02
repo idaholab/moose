@@ -26,6 +26,7 @@ class TestChangeInputFile(Testing.PeacockAppImageTestCase):
 
         # Run and check output
         self.selectTab(execute)
+        execute.ExecuteOptionsPlugin.setWorkingDir(start_dir)
         self.execute()
         self.selectTab(exodus)
 

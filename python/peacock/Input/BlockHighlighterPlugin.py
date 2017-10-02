@@ -32,9 +32,9 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
         self.MainLayout.addWidget(self.SidesetSelector)
         self.MainLayout.addWidget(self.NodesetSelector)
 
-        self.BlockSelector.selectionChanged.connect(self._callbackSelector)
-        self.SidesetSelector.selectionChanged.connect(self._callbackSelector)
-        self.NodesetSelector.selectionChanged.connect(self._callbackSelector)
+        self.BlockSelector.selectionChanged.connect(self.setBlock)
+        self.SidesetSelector.selectionChanged.connect(self.setSideset)
+        self.NodesetSelector.selectionChanged.connect(self.setNodeset)
 
         self.setup()
 
@@ -60,14 +60,32 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
             self.blockSignals(False)
             self.__updateVariableState()
 
-    def _callbackSelector(self):
+    def setBlock(self):
         """
-        Updates the visible block/nodesets/sidesets based on the selector widget settings.
+        Highlights a block and resets nodesets/sidesets
         """
         block = self.BlockSelector.getBlocks()
+        self.SidesetSelector.reset()
+        self.NodesetSelector.reset()
+        self.highlight.emit(block, None, None)
+
+    def setSideset(self):
+        """
+        Highlights a sideset and resets nodesets/blocks
+        """
         sideset = self.SidesetSelector.getBlocks()
+        self.BlockSelector.reset()
+        self.NodesetSelector.reset()
+        self.highlight.emit(None, sideset, None)
+
+    def setNodeset(self):
+        """
+        Highlights a nodeset and resets sidesets/blocks
+        """
         nodeset = self.NodesetSelector.getBlocks()
-        self.highlight.emit(block, sideset, nodeset)
+        self.BlockSelector.reset()
+        self.SidesetSelector.reset()
+        self.highlight.emit(None, None, nodeset)
 
     def __updateVariableState(self):
         """
