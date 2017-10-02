@@ -8,7 +8,7 @@ The MOOSE phase field module is a library for simplifying the implementation of 
 
 ## Basic Phase Field Model Information
 * [Basic Phase Field Equations](phase_field/Phase_Field_Equations.md) - Basic information about the equations underlying the phase field module
-* [Expression Builder](Function Materials/ExpressionBuilder.md) - Using automatic differentiation of free energy material objects
+* [Expression Builder](FunctionMaterials/ExpressionBuilder.md) - Using automatic differentiation of free energy material objects
 * [Solving Phase Field Models](phase_field/Solving.md) - Basic info about solving phase field models
 * [Function Material Kernels](phase_field/FunctionMaterialKernels.md) - Working with Function Materials that carry around their own derivatives
 * Phase Field Model Units - Discussion of units in phase field models
@@ -20,9 +20,9 @@ The MOOSE phase field module is a library for simplifying the implementation of 
 ## Multiple Phase Models
 MOOSE provides capabilities that enable the easy development of multiphase field model. A free energy expression has to be provided for each individual phase. Different systems exist to combine those _phase free energies_ into a _global free energy_.
 
-* [Two-phase Models](Multi Phase/WBM Two Phase.md) - Two phases, one phase order parameter
-* [Kim-Kim-Suzuki Model](Multi Phase/KKS.md) - per-phase concentrations, two phases
-* [Multiphase Models](Multi Phase/WBM.md) - _N_ phases, _N_ phase order parameters
+* [Two-phase Models](MultiPhase/WBMTwoPhase.md) - Two phases, one phase order parameter
+* [Kim-Kim-Suzuki Model](MultiPhase/KKS.md) - per-phase concentrations, two phases
+* [Multiphase Models](MultiPhase/WBM.md) - _N_ phases, _N_ phase order parameters
 * Grand Potential Model - solving a Legendre transform of teh phase field equations, where the independent variable is the chemical potential
 
 !media media/phase_field/solutionrasterizer.png width=200px padding-left=20px float=right caption=Atomistic input file generated using the SolutionRasterizer.
@@ -33,8 +33,8 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 ## Phase field sub-systems
 
 ### Nucleation
-* [Discrete Nucleation](Nucleation/Discrete Nucleation.md) - Insertion of nuclei according to a nucleation probability density field
-* [Langevin Noise](Nucleation/Langevin Noise.md) - Fluctuation based nucleation
+* [Discrete Nucleation](Nucleation/DiscreteNucleation.md) - Insertion of nuclei according to a nucleation probability density field
+* [Langevin Noise](Nucleation/LangevinNoise.md) - Fluctuation based nucleation
 
 ### Grain Growth
 * Grain Growth Model - Background on the phase field model implemented in MOOSE
