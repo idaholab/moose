@@ -105,6 +105,9 @@ private:
   /// those bounds if outside them
   bool _bracket_solution;
 
+  /// History of residuals used for stubborn problems
+  std::vector<Real> _residual_history;
+
   /**
    * Method called from within this class to perform the actual return mappping iterations.
    * @param effective_trial_stress Effective trial stress
@@ -174,8 +177,7 @@ private:
    * @param residual               Current value of the residual
    * @param init_resid_sign        Sign of the initial value of the residual
    * @param scalar_upper_bound     Upper bound value of scalar
-   * @param scalar_lowr_bound      Lower bound value of scalar
-   * @param max_permissible_scalar Maximum permissible value of scalar
+   * @param scalar_lower_bound     Lower bound value of scalar
    * @param iter_output            Output stream
    */
   void updateBounds(const Real & scalar,
@@ -183,7 +185,6 @@ private:
                     const Real & init_resid_sign,
                     Real & scalar_upper_bound,
                     Real & scalar_lower_bound,
-                    const Real & max_permissible_scalar,
                     std::stringstream * iter_output);
 };
 
