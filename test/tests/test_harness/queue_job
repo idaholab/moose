@@ -1,0 +1,6 @@
+[Tests]
+  [./queue_jobA]
+    type = RunApp
+    input = good.i
+  [../]
+[]

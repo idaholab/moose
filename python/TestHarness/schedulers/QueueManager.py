@@ -178,6 +178,10 @@ class QueueManager(Scheduler):
             or self.options.timing \
             or tester.didFail()
 
+    def getQueueCommand(self, job):
+        """ Return derived command """
+        return
+
     def checkStatusState(self):
         """ Return bool if we are processing status for launched jobs """
         return self.__status_check == True
@@ -234,10 +238,11 @@ class QueueManager(Scheduler):
 
     def writeSessionFile(self):
         """ Write the contents of your session to the session file """
-        self.__session_file.seek(0)
-        json.dump(self.__session_data, self.__session_file, indent=2)
-        self.__session_file.truncate()
-        self.__session_file.close()
+        if not self.__session_file.closed:
+            self.__session_file.seek(0)
+            json.dump(self.__session_data, self.__session_file, indent=2)
+            self.__session_file.truncate()
+            self.__session_file.close()
 
     def cleanUp(self):
         """
@@ -267,7 +272,7 @@ class QueueManager(Scheduler):
     def getWorkingDir(self, job):
         """ Return the queue working directory for job """
         tester = job.getTester()
-        return os.path.join(tester.getTestDir(), 'job_' + self.options.session_file)
+        return os.path.join(tester.getTestDir(), 'job_' + os.path.basename(self.options.session_file))
 
     def augmentQueueParamsBase(self, job):
         """ Build the queue execution script """
