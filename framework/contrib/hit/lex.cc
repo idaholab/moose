@@ -197,10 +197,13 @@ lexPath(Lexer * l)
   l->acceptRun(identchars);
   l->emit(TokType::Path);
 
-  l->acceptRun(space);
+  auto n = l->acceptRun(space);
   l->ignore();
-  if (!l->accept("]"))
+  bool got_close = l->accept("]");
+  if (n == 0 && !got_close)
     return l->error("invalid section path character '" + std::string(1, l->peek()) + "'");
+  else if (n > 0 && !got_close)
+    return l->error("spaces are not allowed in section paths");
 
   l->emit(TokType::RightBracket);
   return lexHit;

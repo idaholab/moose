@@ -24,6 +24,7 @@
     type = ImageDiff
     command = minmax.py
     imagediff = 'minmax_0.png minmax_1.png'
+  [../]
 
   [./range]
     type = ImageDiff

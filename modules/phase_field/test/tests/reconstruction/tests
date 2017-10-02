@@ -63,7 +63,7 @@
     max_time = 1000
   [../]
 
-  [./splitting grains]
+  [./splitting_grains]
     type = 'CSVDiff'
     input = '1phase_splitting_grain.i'
     csvdiff = none
