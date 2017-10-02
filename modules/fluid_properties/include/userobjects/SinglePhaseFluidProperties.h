@@ -80,6 +80,8 @@ public:
   virtual Real p_from_h_s(Real h, Real s) const = 0;
   /// Derivative of pressure wrt specific enthalpy
   virtual Real dpdh_from_h_s(Real h, Real s) const = 0;
+  /// Derivative of pressure wrt specific entropy
+  virtual Real dpds_from_h_s(Real h, Real s) const = 0;
 
   /// Gibbs free energy
   virtual Real g(Real v, Real e) const = 0;
