@@ -124,6 +124,7 @@
 []
 
 [Outputs]
+  file_base = 1species_out
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

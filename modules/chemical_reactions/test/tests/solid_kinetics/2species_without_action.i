@@ -29,8 +29,6 @@
 [AuxVariables]
   [./mineral]
   [../]
-  [./mineral_kinetic_rate]
-  [../]
 []
 
 [AuxKernels]
@@ -41,20 +39,7 @@
     r_area = 1
     log_k = -6
     ref_kconst = 1e-8
-    gas_const = 8.31434
-    ref_temp = 298.15
-    sys_temp = 298.15
-    sto_v = '1 1'
-    v = 'a b'
-  [../]
-  [./mineral_kinetic_rate]
-    type = KineticDisPreRateAux
-    variable = mineral_kinetic_rate
-    e_act = 1.5e4
-    r_area = 1
-    log_k = -6
-    ref_kconst = 1e-8
-    gas_const = 8.31434
+    gas_const = 8.314
     ref_temp = 298.15
     sys_temp = 298.15
     sto_v = '1 1'
@@ -143,6 +128,7 @@
 []
 
 [Outputs]
+  file_base = 2species_out
   exodus = true
   print_perf_log = true
   print_linear_residuals = true

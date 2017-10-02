@@ -7,18 +7,18 @@
 #
 # The reaction network considered is as follows:
 # Aqueous equilibrium reactions:
-# a)  h + hco3 = CO2(aq),             Keq = 10^(6.341)
-# b)  hco3 = h + CO23-,               Keq = 10^(-10.325)
-# c)  ca2 + hco3 = h + CaCO3(aq),    Keq = 10^(-7.009)
-# d)  ca2 + hco3 = cahco3,           Keq = 10^(-0.653)
-# e)  ca2 = h + CaOh,                Keq = 10^(-12.85)
-# f)  -h = oh,                        Keq = 10^(-13.991)
+# a)  h+ + hco3- = CO2(aq),             Keq = 10^(6.341)
+# b)  hco3- = h+ + CO23-,               Keq = 10^(-10.325)
+# c)  ca2+ + hco3- = h+ + CaCO3(aq),    Keq = 10^(-7.009)
+# d)  ca2+ + hco3- = cahco3+,           Keq = 10^(-0.653)
+# e)  ca2+ = h+ + CaOh+,                Keq = 10^(-12.85)
+# f)  - h+ = oh-,                       Keq = 10^(-13.991)
 #
 # Kinetic reactions
-# g)  ca2 + hco3 = h + CaCO3(s),    A = 0.461 m^2/L, k = 6.456542e-2 mol/m^2 s,
-#                                      Keq = 10^(1.8487)
+# g)  ca2+ + hco3- = h+ + CaCO3(s),     A = 0.461 m^2/L, k = 6.456542e-2 mol/m^2 s,
+#                                       Keq = 10^(1.8487)
 #
-# The primary chemical species are h, hco3 and ca2. The pressure gradient is fixed,
+# The primary chemical species are h+, hco3- and ca2+. The pressure gradient is fixed,
 # and a conservative tracer is also included.
 #
 # This example is taken from:
@@ -36,21 +36,13 @@
 
 [Variables]
   [./tracer]
-    order = FIRST
-    family = LAGRANGE
   [../]
-  [./ca2]
-    order = FIRST
-    family = LAGRANGE
+  [./ca2+]
   [../]
-  [./h]
-    order = FIRST
-    family = LAGRANGE
+  [./h+]
     initial_condition = 1.0e-7
   [../]
-  [./hco3]
-    order = FIRST
-    family = LAGRANGE
+  [./hco3-]
   [../]
 []
 
@@ -69,7 +61,7 @@
   [../]
   [./hco3_ic]
     type = BoundingBoxIC
-    variable = hco3
+    variable = hco3-
     x1 = 0.0
     y1 = 0.0
     x2 = 1.0e-10
@@ -79,7 +71,7 @@
   [../]
   [./ca2_ic]
     type = BoundingBoxIC
-    variable = ca2
+    variable = ca2+
     x1 = 0.0
     y1 = 0.0
     x2 = 1.0e-10
@@ -107,21 +99,21 @@
 []
 
 [ReactionNetwork]
-  primary_species = 'ca2 hco3 h'
+  primary_species = 'ca2+ hco3- h+'
   [./AqueousEquilibriumReactions]
-    primary_species = 'ca2 hco3 h'
-    secondary_species = 'co2_aq co32 caco3_aq cahco3 caoh oh'
+    primary_species = 'ca2+ hco3- h+'
+    secondary_species = 'co2_aq co32- caco3_aq cahco3+ caoh+ oh-'
     pressure = pressure
-    reactions = 'h + hco3 = co2_aq 6.341
-                 hco3 - h = co32 -10.325
-                 ca2 + hco3 - h = caco3_aq -7.009
-                 ca2 + hco3 = cahco3 -0.653
-                 ca2 - h = caoh -12.85
-                 - h = oh -13.991'
+    reactions = 'h+ + hco3- = co2_aq 6.341,
+                 hco3- - h+ = co32- -10.325,
+                 ca2+ + hco3- - h+ = caco3_aq -7.009,
+                 ca2+ + hco3- = cahco3+ -0.653,
+                 ca2+ - h+ = caoh+ -12.85,
+                 - h+ = oh- -13.991'
   [../]
   [./SolidKineticReactions]
-    primary_species = 'ca2 hco3 h'
-    kin_reactions = '(1.0)ca2+(1.0)hco3+(-1.0)h=caco3_s'
+    primary_species = 'ca2+ hco3- h+'
+    kin_reactions = 'ca2+ + hco3- - h+ = caco3_s'
     secondary_species = caco3_s
     log10_keq = 1.8487
     reference_temperature = 298.15
@@ -147,43 +139,43 @@
     variable = tracer
     p = pressure
   [../]
-  [./ca2_ie]
+  [./ca2+_ie]
     type = PrimaryTimeDerivative
-    variable = ca2
+    variable = ca2+
   [../]
-  [./ca2_pd]
+  [./ca2+_pd]
     type = PrimaryDiffusion
-    variable = ca2
+    variable = ca2+
   [../]
-  [./ca2_conv]
+  [./ca2+_conv]
     type = PrimaryConvection
-    variable = ca2
+    variable = ca2+
     p = pressure
   [../]
-  [./h_ie]
+  [./h+_ie]
     type = PrimaryTimeDerivative
-    variable = h
+    variable = h+
   [../]
-  [./h_pd]
+  [./h+_pd]
     type = PrimaryDiffusion
-    variable = h
+    variable = h+
   [../]
-  [./h_conv]
+  [./h+_conv]
     type = PrimaryConvection
-    variable = h
+    variable = h+
     p = pressure
   [../]
-  [./hco3_ie]
+  [./hco3-_ie]
     type = PrimaryTimeDerivative
-    variable = hco3
+    variable = hco3-
   [../]
-  [./hco3_pd]
+  [./hco3-_pd]
     type = PrimaryDiffusion
-    variable = hco3
+    variable = hco3-
   [../]
-  [./hco3_conv]
+  [./hco3-_conv]
     type = PrimaryConvection
-    variable = hco3
+    variable = hco3-
     p = pressure
   [../]
 []
@@ -200,41 +192,41 @@
     variable = tracer
     boundary = right
   [../]
-  [./ca2_left]
+  [./ca2+_left]
     type = SinDirichletBC
-    variable = ca2
+    variable = ca2+
     boundary = left
     initial = 5.0e-2
     final = 1.0e-6
     duration = 1
   [../]
-  [./ca2_right]
+  [./ca2+_right]
     type = ChemicalOutFlowBC
-    variable = ca2
+    variable = ca2+
     boundary = right
   [../]
-  [./hco3_left]
+  [./hco3-_left]
     type = SinDirichletBC
-    variable = hco3
+    variable = hco3-
     boundary = left
     initial = 1.0e-6
     final = 5.0e-2
     duration = 1
   [../]
-  [./hco3_right]
+  [./hco3-_right]
     type = ChemicalOutFlowBC
-    variable = hco3
+    variable = hco3-
     boundary = right
   [../]
-  [./h_left]
+  [./h+_left]
     type = DirichletBC
-    variable = h
+    variable = h+
     boundary = left
     value = 1.0e-7
   [../]
-  [./h_right]
+  [./h+_right]
     type = ChemicalOutFlowBC
-    variable = h
+    variable = h+
     boundary = right
   [../]
 []

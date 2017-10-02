@@ -9,8 +9,11 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseError.h"
+#include "Parser.h"
+#include <algorithm>
 
-#include <sstream>
+// Regular expression includes
+#include "pcrecpp.h"
 
 template <>
 InputParameters
@@ -19,8 +22,9 @@ validParams<AddCoupledSolidKinSpeciesAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<NonlinearVariableName>>("primary_species",
                                                               "The list of primary species to add");
-  params.addRequiredParam<std::vector<std::string>>("kin_reactions",
-                                                    "The list of solid kinetic reactions");
+  params.addParam<std::vector<AuxVariableName>>(
+      "secondary_species", "The list of solid kinetic species to be output as aux variables");
+  params.addRequiredParam<std::string>("kin_reactions", "The list of solid kinetic reactions");
   params.addRequiredParam<std::vector<Real>>("log10_keq",
                                              "The list of equilibrium constants for all reactions");
   params.addRequiredParam<std::vector<Real>>(
@@ -35,14 +39,17 @@ validParams<AddCoupledSolidKinSpeciesAction>()
       "reference_temperature", "The list of reference temperatures for all reactions (K)");
   params.addRequiredCoupledVar("system_temperature",
                                "The system temperature for all reactions (K)");
-  params.addClassDescription("Adds Kernels for primary kinetic species");
+  params.addClassDescription("Adds solid kinetic Kernels and AuxKernels for primary species");
   return params;
 }
 
 AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputParameters & params)
   : Action(params),
     _primary_species(getParam<std::vector<NonlinearVariableName>>("primary_species")),
-    _reactions(getParam<std::vector<std::string>>("kin_reactions")),
+    _secondary_species(getParam<std::vector<AuxVariableName>>("secondary_species")),
+    _kinetic_species_involved(_primary_species.size()),
+    _weights(_primary_species.size()),
+    _input_reactions(getParam<std::string>("kin_reactions")),
     _logk(getParam<std::vector<Real>>("log10_keq")),
     _r_area(getParam<std::vector<Real>>("specific_reactive_surface_area")),
     _ref_kconst(getParam<std::vector<Real>>("kinetic_rate_constant")),
@@ -51,20 +58,142 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
     _ref_temp(getParam<std::vector<Real>>("reference_temperature")),
     _sys_temp(getParam<std::vector<VariableName>>("system_temperature"))
 {
+  // Note: as the reaction syntax has changed, check to see if the old syntax has
+  // been used and throw an informative error. The number of = signs should be one
+  // more than the number of commas, while the smallest number of spaces possible is 2
+  bool old_syntax = false;
+  if (std::count(_input_reactions.begin(), _input_reactions.end(), '=') !=
+      std::count(_input_reactions.begin(), _input_reactions.end(), ',') + 1)
+    old_syntax = true;
+
+  if (std::count(_input_reactions.begin(), _input_reactions.end(), ' ') < 2)
+    old_syntax = true;
+
+  if (old_syntax)
+    mooseError("Old solid kinetic reaction syntax present.\nReactions should now be comma "
+               "separated, and must have spaces between species and +/-/= operators.\n"
+               "See #9972 for details");
+
+  // Parse the kinetic reactions
+  pcrecpp::RE re_reactions("(.+?)" // A single reaction (any character until the comma delimiter)
+                           "(?:,\\s*|$)" // comma or end of string
+                           ,
+                           pcrecpp::RE_Options().set_extended(true));
+
+  pcrecpp::RE re_terms("(\\S+)");
+  pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )" // match the leading coefficent
+                                   "([A-Za-z].*)"          // match the species
+                                   ,
+                                   pcrecpp::RE_Options().set_extended(true));
+
+  pcrecpp::StringPiece input(_input_reactions);
+  pcrecpp::StringPiece single_reaction, term;
+  std::string single_reaction_str;
+
+  // Parse reaction network to extract each individual reaction
+  while (re_reactions.FindAndConsume(&input, &single_reaction_str))
+    _reactions.push_back(single_reaction_str);
+
+  _num_reactions = _reactions.size();
+
+  if (_num_reactions == 0)
+    mooseError("No solid kinetic reaction provided!");
+
+  // Start parsing each reaction
+  for (unsigned int i = 0; i < _num_reactions; ++i)
+  {
+    single_reaction = _reactions[i];
+
+    // Capture all of the terms
+    std::string species, coeff_str;
+    Real coeff;
+    int sign = 1;
+    bool secondary = false;
+
+    std::vector<Real> local_stos;
+    std::vector<VariableName> local_species_list;
+
+    // Find every single term in this reaction (species and operators)
+    while (re_terms.FindAndConsume(&single_reaction, &term))
+    {
+      // Separating the stoichiometric coefficients from species
+      if (re_coeff_and_species.PartialMatch(term, &coeff_str, &species))
+      {
+        if (coeff_str.length())
+          coeff = std::stod(coeff_str);
+        else
+          coeff = 1.0;
+
+        coeff *= sign;
+
+        if (secondary)
+          _solid_kinetic_species.push_back(species);
+        else
+        {
+          local_stos.push_back(coeff);
+          local_species_list.push_back(species);
+        }
+      }
+      // Finding the operators and assign value of -1.0 to "-" sign
+      else if (term == "+" || term == "=" || term == "-")
+      {
+        if (term == "-")
+        {
+          sign = -1;
+          term = "+";
+        }
+
+        if (term == "=")
+          secondary = true;
+      }
+      else
+        mooseError("Error parsing term: ", term.as_string());
+    }
+
+    _stos.push_back(local_stos);
+    _primary_species_involved.push_back(local_species_list);
+  }
+
+  // Start picking out primary species and coupled primary species and assigning
+  // corresponding stoichiomentric coefficients
+  for (unsigned int i = 0; i < _primary_species.size(); ++i)
+    for (unsigned int j = 0; j < _num_reactions; ++j)
+    {
+      for (unsigned int k = 0; k < _primary_species_involved[j].size(); ++k)
+        if (_primary_species_involved[j][k] == _primary_species[i])
+        {
+          _weights[i].push_back(_stos[j][k]);
+          _kinetic_species_involved[i].push_back(_solid_kinetic_species[j]);
+        }
+    }
+
+  // Print out details of the solid kinetic reactions to the console
+  _console << "Solid kinetic reactions:\n";
+  for (unsigned int i = 0; i < _num_reactions; ++i)
+    _console << "  Reaction " << i + 1 << ": " << _reactions[i] << "\n";
+  _console << "\n";
+
+  // Check that all secondary species read from the reaction network have been added
+  // as AuxVariables. Note: can't sort the _solid_kinetic_species vector as it throws
+  // out the species and coefficient vectors so use std::is_permutation
+  if (!std::is_permutation(
+          _secondary_species.begin(), _secondary_species.end(), _solid_kinetic_species.begin()))
+    mooseError("All solid kinetic species must be added as secondary species");
+
   // Check that the size of property vectors is equal to the number of reactions
-  if (_logk.size() != _reactions.size())
+  if (_logk.size() != _num_reactions)
     mooseError("The number of values entered for log10_keq is not equal to the number of solid "
                "kinetic reactions");
-  if (_r_area.size() != _reactions.size())
+  if (_r_area.size() != _num_reactions)
     mooseError("The number of values entered for specific_reactive_surface_area is not equal to "
                "the number of solid kinetic reactions");
-  if (_ref_kconst.size() != _reactions.size())
+  if (_ref_kconst.size() != _num_reactions)
     mooseError("The number of values entered for kinetic_rate_constant is not equal to the number "
                "of solid kinetic reactions");
-  if (_e_act.size() != _reactions.size())
-    mooseError("The number of values entered for activation_energy is not equal to the number "
-               "of solid kinetic reactions");
-  if (_ref_temp.size() != _reactions.size())
+  if (_e_act.size() != _num_reactions)
+    mooseError("The number of values entered for activation_energy is not equal to the number of "
+               "solid kinetic reactions");
+  if (_ref_temp.size() != _num_reactions)
     mooseError("The number of values entered for reference_temperature is not equal to the number "
                "of solid kinetic reactions");
 }
@@ -72,96 +201,37 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
 void
 AddCoupledSolidKinSpeciesAction::act()
 {
-  mooseDoOnce(printReactions());
-
-  std::vector<bool> primary_participation(_primary_species.size(), false);
-  std::vector<std::string> solid_kin_species(_reactions.size());
-  std::vector<Real> weight;
-
-  // Loop through reactions
-  for (unsigned int j = 0; j < _reactions.size(); ++j)
+  if (_current_task == "add_kernel")
   {
-    std::vector<std::string> tokens;
-
-    // Parsing each reaction
-    MooseUtils::tokenize(_reactions[j], tokens, 1, "+=");
-    if (tokens.size() == 0)
-      mooseError("Empty reaction specified.");
-
-    std::vector<Real> stos(tokens.size() - 1);
-    std::vector<VariableName> rxn_species(tokens.size() - 1);
-
-    for (unsigned int k = 0; k < tokens.size(); ++k)
+    // Add Kernels for each primary species
+    for (unsigned int i = 0; i < _primary_species.size(); ++i)
     {
-      std::vector<std::string> stos_primary_species;
-      MooseUtils::tokenize(tokens[k], stos_primary_species, 1, "()");
-      if (stos_primary_species.size() == 2)
-      {
-        Real coef;
-        std::istringstream iss(stos_primary_species[0]);
-        iss >> coef;
-        stos[k] = coef;
-        rxn_species[k] = stos_primary_species[1];
-
-        // Check the participation of primary species
-        for (unsigned int i = 0; i < _primary_species.size(); ++i)
-          if (rxn_species[k] == _primary_species[i])
-            primary_participation[i] = true;
-      }
-      else
-        solid_kin_species[j] = stos_primary_species[0];
-    }
-
-    if (_current_task == "add_kernel")
-    {
-      for (unsigned int i = 0; i < _primary_species.size(); ++i)
-      {
-        if (primary_participation[i])
-        {
-          // Assigning the stoichiometrics based on parsing
-          for (unsigned int m = 0; m < rxn_species.size(); ++m)
-            if (rxn_species[m] == _primary_species[i])
-              weight.push_back(stos[m]);
-
-          std::vector<VariableName> coupled_var = {solid_kin_species[j]};
-
-          // Building kernels for solid kinetic species
-          InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
-          params_kin.set<NonlinearVariableName>("variable") = _primary_species[i];
-          params_kin.set<std::vector<Real>>("weight") = weight;
-          params_kin.set<std::vector<VariableName>>("v") = coupled_var;
-          _problem->addKernel("CoupledBEKinetic",
-                              _primary_species[i] + "_" + solid_kin_species[j] + "_kin",
-                              params_kin);
-        }
-      }
-    }
-
-    if (_current_task == "add_aux_kernel")
-    {
-      InputParameters params_kin = _factory.getValidParams("KineticDisPreConcAux");
-      params_kin.set<AuxVariableName>("variable") = solid_kin_species[j];
-      params_kin.set<Real>("log_k") = _logk[j];
-      params_kin.set<Real>("r_area") = _r_area[j];
-      params_kin.set<Real>("ref_kconst") = _ref_kconst[j];
-      params_kin.set<Real>("e_act") = _e_act[j];
-      params_kin.set<Real>("gas_const") = _gas_const;
-      params_kin.set<Real>("ref_temp") = _ref_temp[j];
-      params_kin.set<std::vector<VariableName>>("sys_temp") = _sys_temp;
-      params_kin.set<std::vector<Real>>("sto_v") = stos;
-      params_kin.set<std::vector<VariableName>>("v") = rxn_species;
-      _problem->addAuxKernel("KineticDisPreConcAux", "aux_" + solid_kin_species[j], params_kin);
+      InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
+      params_kin.set<NonlinearVariableName>("variable") = _primary_species[i];
+      params_kin.set<std::vector<Real>>("weight") = _weights[i];
+      params_kin.set<std::vector<VariableName>>("v") = _kinetic_species_involved[i];
+      _problem->addKernel("CoupledBEKinetic", _primary_species[i] + "_" + "_kin", params_kin);
     }
   }
-}
 
-void
-AddCoupledSolidKinSpeciesAction::printReactions() const
-{
-  _console << "Solid kinetic reactions:\n";
-
-  for (unsigned int i = 0; i < _reactions.size(); ++i)
-    _console << _reactions[i] << "\n";
-
-  _console << "\n";
+  if (_current_task == "add_aux_kernel")
+  {
+    // Add AuxKernels for each solid kinetic species
+    for (unsigned int i = 0; i < _num_reactions; ++i)
+    {
+      InputParameters params_kin = _factory.getValidParams("KineticDisPreConcAux");
+      params_kin.set<AuxVariableName>("variable") = _solid_kinetic_species[i];
+      params_kin.set<Real>("log_k") = _logk[i];
+      params_kin.set<Real>("r_area") = _r_area[i];
+      params_kin.set<Real>("ref_kconst") = _ref_kconst[i];
+      params_kin.set<Real>("e_act") = _e_act[i];
+      params_kin.set<Real>("gas_const") = _gas_const;
+      params_kin.set<Real>("ref_temp") = _ref_temp[i];
+      params_kin.set<std::vector<VariableName>>("sys_temp") = _sys_temp;
+      params_kin.set<std::vector<Real>>("sto_v") = _stos[i];
+      params_kin.set<std::vector<VariableName>>("v") = _primary_species_involved[i];
+      _problem->addAuxKernel(
+          "KineticDisPreConcAux", "aux_" + _solid_kinetic_species[i], params_kin);
+    }
+  }
 }
