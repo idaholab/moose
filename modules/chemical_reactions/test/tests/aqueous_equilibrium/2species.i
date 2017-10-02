@@ -77,7 +77,7 @@
   primary_species = 'a b'
   [./AqueousEquilibriumReactions]
     primary_species = 'a b'
-    reactions = '2a = pa2     2
+    reactions = '2a = pa2     2,
                  a + b = pab -2'
     secondary_species = 'pa2 pab'
     pressure = pressure
@@ -158,6 +158,7 @@
 []
 
 [Outputs]
+  file_base = 2species_out
   exodus = true
   print_perf_log = true
   print_linear_residuals = true
