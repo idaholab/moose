@@ -44,8 +44,8 @@ DelimitedFileReader::read()
 
   // Storage for the raw data
   std::vector<double> raw;
-  std::size_t size_raw;
-  std::size_t size_offsets;
+  std::size_t size_raw = 0;
+  std::size_t size_offsets = 0;
 
   // Read data
   if (_communicator == nullptr || _communicator->rank() == 0)

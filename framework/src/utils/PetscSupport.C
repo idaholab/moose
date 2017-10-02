@@ -671,7 +671,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // Setup the name value pairs
   bool boomeramg_found = false;
   bool strong_threshold_found = false;
-#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0) && PETSC_VERSION_LESS_THAN(3, 7, 6)
   bool superlu_dist_found = false;
   bool fact_pattern_found = false;
 #endif
@@ -694,7 +694,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         boomeramg_found = true;
       if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
         strong_threshold_found = true;
-#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0) && PETSC_VERSION_LESS_THAN(3, 7, 6)
       if (petsc_options_inames[i] == "-pc_factor_mat_solver_package" &&
           petsc_options_values[i] == "superlu_dist")
         superlu_dist_found = true;
