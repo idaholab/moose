@@ -158,15 +158,21 @@ TableOutput::outputScalarVariables()
     // because if a processor can't see that scalar variable's values
     // then we'll need to do our own communication of them.
     VariableValue value = scalar_var.sln();
+    auto value_size = value.size();
 
     // libMesh *does* currently guarantee that all processors can
     // calculate all scalar DoF indices, so this is a const reference
     const std::vector<dof_id_type> & dof_indices = scalar_var.dofIndices();
-    const unsigned int n = dof_indices.size();
+    auto dof_size = dof_indices.size();
+    bool need_release = false;
 
     // In dbg mode, if we don't see a scalar we might not even have
     // its array allocated to full length yet.
-    value.resize(n);
+    if (dof_size > value_size)
+    {
+      value.resize(dof_size);
+      need_release = true;
+    }
 
     // Finally, let's just let the owners broadcast their values.
     // There's probably lots of room to optimize this communication
@@ -174,14 +180,14 @@ TableOutput::outputScalarVariables()
     // code path shouldn't be hit often enough for that to matter.
 
     const DofMap & dof_map = scalar_var.sys().dofMap();
-    for (unsigned int i = 0; i != n; ++i)
+    for (decltype(dof_size) i = 0; i < dof_size; ++i)
     {
       const processor_id_type pid = dof_map.dof_owner(dof_indices[i]);
       this->comm().broadcast(value[i], pid);
     }
 
     // If the variable has a single component, simply output the value with the name
-    if (n == 1)
+    if (dof_size == 1)
     {
       _scalar_table.addData(out_name, value[0], time());
       _all_data_table.addData(out_name, value[0], time());
@@ -189,12 +195,16 @@ TableOutput::outputScalarVariables()
 
     // Multi-component variables are appended with the component index
     else
-      for (unsigned int i = 0; i < n; ++i)
+      for (decltype(dof_size) i = 0; i < dof_size; ++i)
       {
         std::ostringstream os;
         os << out_name << "_" << i;
         _scalar_table.addData(os.str(), value[i], time());
         _all_data_table.addData(os.str(), value[i], time());
       }
+
+    // If we ended up reallocating, we'll need to release memory or leak it
+    if (need_release)
+      value.release();
   }
 }

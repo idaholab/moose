@@ -98,6 +98,10 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
 
+%.plist.$(obj-suffix) : %.cc
+	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
+
 #
 # C rules
 #

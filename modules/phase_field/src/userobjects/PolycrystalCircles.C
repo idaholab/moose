@@ -99,7 +99,7 @@ PolycrystalCircles::precomputeGrainStructure()
     _grain_num = data[0].size();
     _centerpoints.resize(_grain_num);
 
-    std::array<int, 4> col_map = {-1, -1, -1, -1};
+    std::array<int, 4> col_map = {{-1, -1, -1, -1}};
 
     for (unsigned int i = 0; i < col_names.size(); ++i)
     {

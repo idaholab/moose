@@ -66,6 +66,7 @@ moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
 
 # clang static analyzer files
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
+moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 
 app_INCLUDES := $(moose_INCLUDE)
 app_LIBS     := $(moose_LIBS)
