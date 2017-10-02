@@ -23,7 +23,6 @@ public:
 
 private:
   const std::vector<AuxVariableName> _secondary_species;
-  const std::vector<std::string> _reactions;
 };
 
 #endif // ADDSECONDARYSPECIESACTION_H
