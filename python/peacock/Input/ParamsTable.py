@@ -29,6 +29,34 @@ class EditingDelegate(QtWidgets.QStyledItemDelegate):
         self.current_editor = super(EditingDelegate, self).createEditor(parent, option, index)
         return self.current_editor
 
+def paramSort(a, b):
+    """
+    Custom parameter name sorter.
+    We want the required parameters first.
+    Of the required parameters, we want "Name" to be
+    first, then "type". The rest sorted regularly.
+    After the required params, the rest of the params
+    are sorted normally.
+    """
+    if a.required and b.required:
+        if a.name == "Name":
+            return -1
+        elif b.name == "Name" :
+            return 1
+        elif a.name == "type":
+            return -1
+        elif b.name == "type" :
+            return 1
+        else:
+            return cmp(a.name, b.name)
+    elif a.required:
+        return -1
+    elif b.required:
+        return 1
+    else:
+        return cmp(a.name, b.name)
+
+
 class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
     """
     Holds a QTableWidget of parameters.
@@ -74,7 +102,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self.name_param = None
         self.removed_params = []
         self.type_to_block_map = type_block_map
-        for p in self.params:
+        for p in sorted(self.params, cmp=paramSort):
             self.addParam(p)
 
         self.updateWatchers()

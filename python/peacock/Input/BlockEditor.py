@@ -103,14 +103,6 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.button_layout = WidgetUtils.addLayout()
 
-        if self.block.user_added:
-            self.clone_button = WidgetUtils.addButton(self.button_layout, self, "Clone Block", self._cloneBlock)
-            self.clone_shortcut = WidgetUtils.addShortcut(self, "Ctrl+N", self._cloneBlock, shortcut_with_children=True)
-            self.clone_button.setToolTip("Clone this block with the same parameters")
-
-            self.remove_button = WidgetUtils.addButton(self.button_layout, self, "Remove Block", self._removeBlock)
-            self.remove_button.setToolTip("Remove this block")
-
         self.close_button = WidgetUtils.addButton(self.button_layout, self, "Apply && Close", self._applyAndClose)
         self.close_button.setToolTip("Apply any changes and close the window")
 
@@ -125,6 +117,13 @@ class BlockEditor(QWidget, MooseWidget):
         self.new_parameter_button = WidgetUtils.addButton(self.button_layout, self, "Add parameter", self.addUserParamPressed)
         self.new_parameter_button.setToolTip("Add a non standard parameter")
 
+        if self.block.user_added:
+            self.clone_button = WidgetUtils.addButton(self.button_layout, self, "Clone Block", self._cloneBlock)
+            self.clone_shortcut = WidgetUtils.addShortcut(self, "Ctrl+N", self._cloneBlock, shortcut_with_children=True)
+            self.clone_button.setToolTip("Clone this block with the same parameters")
+
+            self.remove_button = WidgetUtils.addButton(self.button_layout, self, "Remove Block", self._removeBlock)
+            self.remove_button.setToolTip("Remove this block")
 
     def _findFreeParamName(self, max_params=1000):
         """
