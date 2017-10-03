@@ -525,6 +525,12 @@ protected:
    */
   virtual void registerRecoverableData(std::string name);
 
+  /**
+   * Runs post-initialization error checking that cannot be run correctly unless the simulation
+   * has been fully set up and initialized.
+   */
+  void errorCheck();
+
   /// The name of this object
   std::string _name;
 
@@ -661,10 +667,6 @@ private:
    * []
    */
   void createMinimalApp();
-
-  /// Runs post-initialization error checking that cannot be run correctly unless the simulation
-  /// has been fully set up and initialized.
-  void errorCheck();
 
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;
