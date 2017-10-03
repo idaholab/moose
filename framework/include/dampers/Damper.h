@@ -40,9 +40,19 @@ class Damper : public MooseObject,
 public:
   Damper(const InputParameters & parameters);
 
+  /**
+   * Check whether damping is below the user-specified minimum value,
+   * and throw an exception if it is.
+   * @param cur_damping The computed damping to be checked against that minimum
+   */
+  void checkMinDamping(const Real cur_damping) const;
+
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;
+
+  /// Minimum allowable value of damping
+  const Real & _min_damping;
 };
 
 #endif
