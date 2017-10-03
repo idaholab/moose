@@ -281,10 +281,10 @@ public:
   void meshChanged();
 
   /**
-  * Declares a callback function that is executed at the conclusion
-  * of meshChanged(). Ther user can implement actions required after
-  * changing the mesh here.
-  **/
+   * Declares a callback function that is executed at the conclusion
+   * of meshChanged(). Ther user can implement actions required after
+   * changing the mesh here.
+   **/
   virtual void onMeshChanged();
 
   /**
@@ -569,9 +569,19 @@ public:
   void setSubdomainName(SubdomainID subdomain_id, SubdomainName name);
 
   /**
+   * Return the name of a block given an id.
+   */
+  const std::string & getSubdomainName(SubdomainID subdomain_id);
+
+  /**
    * This method returns a writable reference to a boundary name based on the id parameter
    */
   void setBoundaryName(BoundaryID boundary_id, BoundaryName name);
+
+  /**
+   * Return the name of the boundary given the id.
+   */
+  const std::string & getBoundaryName(BoundaryID boundary_id);
 
   /**
    * This routine builds a multimap of boundary ids to matching boundary ids across all periodic
