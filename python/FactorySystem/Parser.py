@@ -43,6 +43,7 @@ class Parser:
         self.params_parsed = set()
         self.params_ignored = set()
         self._check_for_type = check_for_type
+        self.root = None
 
     """
     Parse the passed filename filling the warehouse with populated InputParameter objects
@@ -74,6 +75,7 @@ class Parser:
         except Exception as err:
             print(err)
             return 0x01 # Parse Error
+        self.root = root
 
         w = DupWalker(os.path.abspath(filename))
         root.walk(w, hit.NodeType.All)
@@ -82,7 +84,6 @@ class Parser:
             error_code = 1
 
         error_code = self._parseNode(filename, root)
-        del root
 
         if len(self.params_ignored):
             print 'Warning detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
@@ -174,6 +175,7 @@ class Parser:
             params.addPrivateParam('_factory', self.factory)
             params.addPrivateParam('_warehouse', self.warehouse)
             params.addPrivateParam('_parser', self)
+            params.addPrivateParam('_root', self.root)
 
             # Build the object
             try:
