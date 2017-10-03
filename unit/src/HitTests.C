@@ -37,10 +37,12 @@ TEST(HitTests, FailCases)
       {"invalid path char '['", "[hello[world] []"},
       {"invalid field char '&'", "hello&world=foo"},
       {"invalid field char '['", "hello[world=foo"},
+      {"unfinished field", "hello\nfoo=bar"},
       {"unterminated section", "[hello]"},
       {"unterminated section", "[hello][./]"},
-      {"empty  dotslash section name", "[./][]"},
       {"extra section close", "[]"},
+      {"extra section close 2", "[../]"},
+      {"empty  dotslash section name", "[./][]"},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(PassFailCase); i++)
@@ -62,7 +64,6 @@ TEST(HitTests, PassCases)
       {"dotdotslash section close", "[hello] [../]"},
       {"no whitespace between headers/footers", "[hello][../]"},
       {"no whitespace between headers/footers", "[hello][]"},
-      {"no whitespace between headers/footers", "[hello][../]"},
       {"no whitespace with sections and fields", "[hello][world]foo=bar[]baz=42[]"},
       {"no leading ./ in sub-block", "[hello] [world] [] []"},
   };
@@ -99,7 +100,7 @@ strkind(hit::Field::Kind k)
     return "Unknown";
 }
 
-struct ExpandCase
+struct ValCase
 {
   std::string name;
   std::string input;
@@ -108,9 +109,93 @@ struct ExpandCase
   hit::Field::Kind kind;
 };
 
+TEST(HitTests, ParseFields)
+{
+  ValCase cases[] = {
+      // types
+      {"int", "foo=42", "foo", "42", hit::Field::Kind::Int},
+      {"float1", "foo=4.2", "foo", "4.2", hit::Field::Kind::Float},
+      {"float2", "foo=.42", "foo", ".42", hit::Field::Kind::Float},
+      {"float3", "foo=1e10", "foo", "1e10", hit::Field::Kind::Float},
+      {"float4", "foo=e-23", "foo", "e-23", hit::Field::Kind::Float},
+      {"float5", "foo=12.345e+67", "foo", "12.345e+67", hit::Field::Kind::Float},
+      {"bool-true1", "foo=true", "foo", "true", hit::Field::Kind::Bool},
+      {"bool-true2", "foo=yes", "foo", "yes", hit::Field::Kind::Bool},
+      {"bool-true3", "foo=on", "foo", "on", hit::Field::Kind::Bool},
+      {"bool-case1", "foo=TRUE", "foo", "TRUE", hit::Field::Kind::Bool},
+      {"bool-case2", "foo=ON", "foo", "ON", hit::Field::Kind::Bool},
+      {"bool-case3", "foo=YeS", "foo", "YeS", hit::Field::Kind::Bool},
+      {"bool-false1", "foo=false", "foo", "false", hit::Field::Kind::Bool},
+      {"bool-false2", "foo=no", "foo", "no", hit::Field::Kind::Bool},
+      {"bool-false3", "foo=off", "foo", "off", hit::Field::Kind::Bool},
+      {"string", "foo=bar", "foo", "bar", hit::Field::Kind::String},
+      {"string-almost-float1", "foo=1e23.3", "foo", "1e23.3", hit::Field::Kind::String},
+      {"string-almost-float2", "foo=1a23.3", "foo", "1a23.3", hit::Field::Kind::String},
+      {"string-almost-float3", "foo=1.2.3", "foo", "1.2.3", hit::Field::Kind::String},
+      {"string-almost-float4", "foo=1e2e3", "foo", "1e2e3", hit::Field::Kind::String},
+
+      // quotes and escaping
+      {"quotes", "foo='bar'", "foo", "bar", hit::Field::Kind::String},
+      {"doublequotes", "foo=\"bar\"", "foo", "bar", hit::Field::Kind::String},
+      {"quotes_quotes", "foo='\\'bar\\''", "foo", "'bar'", hit::Field::Kind::String},
+      {"quotes_doublequotes", "foo='\"bar\"'", "foo", "\"bar\"", hit::Field::Kind::String},
+      {"doublequotes_doublequotes",
+       "foo=\"\\\"bar\\\"\"",
+       "foo",
+       "\"bar\"",
+       hit::Field::Kind::String},
+
+      // misc
+      {"valid special field chars",
+       "hello_./:<>-+world=foo",
+       "hello_./:<>-+world",
+       "foo",
+       hit::Field::Kind::String},
+      {"ignore leading spaces 1", "foo=    bar", "foo", "bar", hit::Field::Kind::String},
+      {"ignore leading spaces 2", "foo=     \t42", "foo", "42", hit::Field::Kind::Int},
+      {"ignore trailing spaces", "foo=bar\t   ", "foo", "bar", hit::Field::Kind::String},
+      {"ignore unknown escapes",
+       "foo='hello \\my nam\\e is joe'",
+       "foo",
+       "hello \\my nam\\e is joe",
+       hit::Field::Kind::String},
+      {"no escaped newline",
+       "foo='hello\\nworld'",
+       "foo",
+       "hello\\nworld",
+       hit::Field::Kind::String},
+  };
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
+  {
+    auto test = cases[i];
+    auto root = hit::parse("TEST", test.input);
+    ExpandWalker exw("TEST");
+    root->walk(&exw);
+    auto n = root->find(test.key);
+    if (!n)
+    {
+      FAIL() << "case " << i + 1 << " failed to find key '" << test.key << "'\n";
+      continue;
+    }
+    if (n->strVal() != test.val)
+    {
+      FAIL() << "case " << i + 1 << " wrong value (key=" << test.key << "): got '" << n->strVal()
+             << "', want '" << test.val << "'\n";
+      continue;
+    }
+
+    auto f = dynamic_cast<hit::Field *>(n);
+    if (!f)
+      FAIL() << "case " << i + 1 << " node type is not NodeType::Field";
+    else if (f->kind() != test.kind)
+      FAIL() << "case " << i + 1 << " wrong kind (key=" << test.key << "): got '"
+             << strkind(f->kind()) << "', want '" << strkind(test.kind) << "'\n";
+  }
+}
 TEST(ExpandWalkerTests, All)
 {
-  ExpandCase cases[] = {
+  ValCase cases[] = {
       {"substitute string", "foo=bar boo=${foo}", "boo", "bar", hit::Field::Kind::String},
       {"substute number", "foo=42 boo=${foo}", "boo", "42", hit::Field::Kind::Int},
       {"multiple replacements",
@@ -141,7 +226,7 @@ TEST(ExpandWalkerTests, All)
        hit::Field::Kind::String},
   };
 
-  for (size_t i = 0; i < sizeof(cases) / sizeof(ExpandCase); i++)
+  for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
   {
     auto test = cases[i];
     auto root = hit::parse("TEST", test.input);
