@@ -65,6 +65,7 @@ cpdef NewBlank():
 cdef class Node:
     cdef chit.Node* _cnode
     cdef cbool _own
+    cdef str fname
 
     @classmethod
     def NewSection(cls, path):
@@ -78,13 +79,22 @@ cdef class Node:
     def NewBlank(cls):
         pass
 
-    def __cinit__(self, own=False):
+    def __cinit__(self, own=False, fname=''):
         self._cnode = NULL
         self._own = own
+        self.fname = fname
         pass
+
     def __dealloc__(self):
         if self._cnode != NULL and self._own:
             del self._cnode
+
+    def __deepcopy__(self, memodict):
+        return self.clone()
+
+    def __reduce__(self):
+        return (parse, (self.fname, self.render()))
+
     def __repr__(self):
         return self.render()
 
