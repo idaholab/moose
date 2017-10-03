@@ -111,6 +111,7 @@ class InputFileEditor(QWidget, MooseWidget):
             app_info[ExecutableInfo]: The new information
         """
         if app_info.valid():
+            self._closeBlockEditor()
             input_filename = self.tree.input_filename
             input_tree = InputTree(app_info)
             self.tree = input_tree
