@@ -1093,6 +1093,12 @@ MooseMesh::setSubdomainName(SubdomainID subdomain_id, SubdomainName name)
   getMesh().subdomain_name(subdomain_id) = name;
 }
 
+const std::string &
+MooseMesh::getSubdomainName(SubdomainID subdomain_id)
+{
+  return getMesh().subdomain_name(subdomain_id);
+}
+
 void
 MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 {
@@ -1107,6 +1113,22 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
     boundary_info.sideset_name(boundary_id) = name;
   else
     boundary_info.nodeset_name(boundary_id) = name;
+}
+
+const std::string &
+MooseMesh::getBoundaryName(BoundaryID boundary_id)
+{
+  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+
+  std::vector<BoundaryID> side_boundaries;
+  boundary_info.build_side_boundary_ids(side_boundaries);
+
+  // We need to figure out if this boundary is a sideset or nodeset
+  if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) !=
+      side_boundaries.end())
+    return boundary_info.get_sideset_name(boundary_id);
+  else
+    return boundary_info.get_nodeset_name(boundary_id);
 }
 
 void
@@ -2266,6 +2288,7 @@ struct extra_ghost_elem_inserter : std::iterator<std::output_iterator_tag, T>
   // to allow the returned object to be able to do mesh insertions
   // with operator=().
   extra_ghost_elem_inserter & operator*() { return *this; }
+
 private:
   DistributedMesh & mesh;
 };
