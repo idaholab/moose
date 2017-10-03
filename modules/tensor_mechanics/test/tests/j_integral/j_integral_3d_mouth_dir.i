@@ -44,6 +44,7 @@
   radius_inner = '4.0 5.5'
   radius_outer = '5.5 7.0'
   output_variable = 'disp_x'
+  output_q = false
 []
 
 [Modules/TensorMechanics/Master]
