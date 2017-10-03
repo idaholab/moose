@@ -58,6 +58,9 @@ protected:
   virtual Real tau();
   virtual Real dTauDUComp(unsigned comp);
 
+  /// Provides tau which yields superconvergence for 1D advection-diffusion
+  virtual Real tauNodal();
+
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;
 

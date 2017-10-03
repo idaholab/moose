@@ -1,0 +1,19 @@
+[Tests]
+  [./tauOpt]
+    type = 'Exodiff'
+    input = 'tauOpt.i'
+    exodiff = 'tauOpt_out.e'
+  [../]
+  [./tauMod]
+    type = 'Exodiff'
+    input = 'tauOpt.i'
+    exodiff = 'tauMod_out.e'
+    cli_args = 'GlobalParams/tau_type=mod Outputs/file_base=tauMod_out'
+  [../]
+  [./inconsistent]
+    type = 'Exodiff'
+    input = 'tauOpt.i'
+    exodiff = 'inconsistent.e'
+    cli_args = "Kernels/active='adv frc adv_supg' Outputs/file_base=inconsistent"
+  [../]
+[]

@@ -281,6 +281,23 @@ INSBase::tau()
 }
 
 Real
+INSBase::tauNodal()
+{
+  Real nu = _mu[_qp] / _rho[_qp];
+  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  Real h = _current_elem->hmax();
+  Real xi;
+  if (nu < std::numeric_limits<Real>::epsilon())
+    xi = 1;
+  else
+  {
+    Real alpha = U.norm() * h / (2 * nu);
+    xi = 1. / std::tanh(alpha) - 1. / alpha;
+  }
+  return h / (2 * U.norm()) * xi;
+}
+
+Real
 INSBase::dTauDUComp(unsigned comp)
 {
   Real nu = _mu[_qp] / _rho[_qp];
