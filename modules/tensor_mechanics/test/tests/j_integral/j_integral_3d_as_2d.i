@@ -46,6 +46,7 @@
   axis_2d = 2
   radius_inner = '4.0 4.5 5.0 5.5 6.0'
   radius_outer = '4.5 5.0 5.5 6.0 6.5'
+  output_q = false
 []
 
 [Modules/TensorMechanics/Master]
