@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from PyQt5.QtWidgets import QFileDialog, QPlainTextEdit, QSizePolicy
+from PyQt5.QtWidgets import QFileDialog, QPlainTextEdit, QSizePolicy, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
 from peacock.base.Plugin import Plugin
@@ -53,12 +53,21 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
     def _updateChanged(self, block, tree):
         self.has_changed = True
 
+    def _askToSave(self, app_info, reason):
+        if self.has_changed and app_info.valid():
+            msg = "%s\nYou have unsaved changes in your input file, do you want to save?" % reason
+            reply = QMessageBox.question(self, "Save?", msg, QMessageBox.Save, QMessageBox.Discard)
+            if reply == QMessageBox.Save:
+                self._saveInputFile()
+
     def executableInfoChanged(self, app_info):
+        self._askToSave(app_info, "Reloading syntax from executable.")
         super(InputFileEditorPlugin, self).executableInfoChanged(app_info)
         self._setMenuStatus()
         self.has_changed = False
 
     def setInputFile(self, input_file):
+        self._askToSave(self.tree.app_info, "Changing input files.")
         val = super(InputFileEditorPlugin, self).setInputFile(input_file)
         if self._menus_initialized:
             path = os.path.abspath(input_file)
