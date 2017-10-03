@@ -35,7 +35,8 @@ pyhit_LIB       := $(hit_DIR)/hit.so
 
 $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Linking Library "$@"..."
-	bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --cflags` `python-config --ldflags` $^ -o $@)'
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --cflags` `python-config --ldflags` $^ -o $@)'
+	@cp $@ $(FRAMEWORK_DIR)/../python/
 
 #
 # gtest
@@ -99,7 +100,7 @@ endif
 libmesh_submodule_status:
 	@if [ x$(libmesh_message) != "x" ]; then printf $(libmesh_message); fi
 
-moose: $(moose_LIB) $(pyhit_LIB)
+moose: $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
@@ -121,7 +122,7 @@ $(hit_LIB): $(hit_objects)
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(hit_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(hit_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)

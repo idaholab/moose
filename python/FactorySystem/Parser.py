@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-import os, re, time, sys
-
-# add hit parser python binding directory into path for import
-sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../framework/contrib/hit'))
+import os, re, time
 import hit
 
 class DupWalker(object):
