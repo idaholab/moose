@@ -1067,6 +1067,7 @@ static PyObject *__pyx_f_3hit_NewSection(PyObject *, int __pyx_skip_dispatch); /
 static PyObject *__pyx_f_3hit_NewComment(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_3hit_NewComment *__pyx_optional_args); /*proto*/
 static PyObject *__pyx_f_3hit_NewBlank(int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_3hit__initpynode(hit::Node *, struct __pyx_opt_args_3hit__initpynode *__pyx_optional_args); /*proto*/
+static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *, struct __pyx_obj_3hit_Node *, int __pyx_skip_dispatch); /*proto*/
 static std::string __pyx_convert_string_from_py_std__in_string(PyObject *); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &); /*proto*/
@@ -1220,7 +1221,8 @@ static PyObject *__pyx_pf_3hit_4Node_40parent(struct __pyx_obj_3hit_Node *__pyx_
 static PyObject *__pyx_pf_3hit_4Node_42addChild(struct __pyx_obj_3hit_Node *__pyx_v_self, struct __pyx_obj_3hit_Node *__pyx_v_child); /* proto */
 static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__pyx_v_self, PyObject *__pyx_v_node_type); /* proto */
 static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_fname, PyObject *__pyx_v_input); /* proto */
-static PyObject *__pyx_pf_3hit_10merge(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst); /* proto */
+static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_n); /* proto */
+static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst); /* proto */
 static PyObject *__pyx_tp_new_3hit_Node(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_k__8;
@@ -5392,7 +5394,7 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
  *     cdef chit.Node* node = chit.parse(fname, input)
  *     return _initpynode(node, own=True)             # <<<<<<<<<<<<<<
  * 
- * cdef explode(Node n):
+ * cpdef explode(Node n):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_5.__pyx_n = 1;
@@ -5425,19 +5427,20 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
 /* "hit.pyx":207
  *     return _initpynode(node, own=True)
  * 
- * cdef explode(Node n):             # <<<<<<<<<<<<<<
+ * cpdef explode(Node n):             # <<<<<<<<<<<<<<
  *     chit.explode(n._cnode)
  * 
  */
 
-static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n) {
+static PyObject *__pyx_pw_3hit_11explode(PyObject *__pyx_self, PyObject *__pyx_v_n); /*proto*/
+static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n, CYTHON_UNUSED int __pyx_skip_dispatch) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("explode", 0);
 
   /* "hit.pyx":208
  * 
- * cdef explode(Node n):
+ * cpdef explode(Node n):
  *     chit.explode(n._cnode)             # <<<<<<<<<<<<<<
  * 
  * cpdef merge(Node src, Node dst):
@@ -5452,7 +5455,7 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n) {
   /* "hit.pyx":207
  *     return _initpynode(node, own=True)
  * 
- * cdef explode(Node n):             # <<<<<<<<<<<<<<
+ * cpdef explode(Node n):             # <<<<<<<<<<<<<<
  *     chit.explode(n._cnode)
  * 
  */
@@ -5469,6 +5472,47 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n) {
   return __pyx_r;
 }
 
+/* Python wrapper */
+static PyObject *__pyx_pw_3hit_11explode(PyObject *__pyx_self, PyObject *__pyx_v_n); /*proto*/
+static PyObject *__pyx_pw_3hit_11explode(PyObject *__pyx_self, PyObject *__pyx_v_n) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("explode (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_n), __pyx_ptype_3hit_Node, 1, "n", 0))) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_r = __pyx_pf_3hit_10explode(__pyx_self, ((struct __pyx_obj_3hit_Node *)__pyx_v_n));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_n) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("explode", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_f_3hit_explode(__pyx_v_n, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("hit.explode", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
 /* "hit.pyx":210
  *     chit.explode(n._cnode)
  * 
@@ -5477,7 +5521,7 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n) {
  * 
  */
 
-static PyObject *__pyx_pw_3hit_11merge(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst, CYTHON_UNUSED int __pyx_skip_dispatch) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -5517,8 +5561,8 @@ static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, str
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_3hit_11merge(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_3hit_11merge(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   struct __pyx_obj_3hit_Node *__pyx_v_src = 0;
   struct __pyx_obj_3hit_Node *__pyx_v_dst = 0;
   PyObject *__pyx_r = 0;
@@ -5572,7 +5616,7 @@ static PyObject *__pyx_pw_3hit_11merge(PyObject *__pyx_self, PyObject *__pyx_arg
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_src), __pyx_ptype_3hit_Node, 1, "src", 0))) __PYX_ERR(0, 210, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dst), __pyx_ptype_3hit_Node, 1, "dst", 0))) __PYX_ERR(0, 210, __pyx_L1_error)
-  __pyx_r = __pyx_pf_3hit_10merge(__pyx_self, __pyx_v_src, __pyx_v_dst);
+  __pyx_r = __pyx_pf_3hit_12merge(__pyx_self, __pyx_v_src, __pyx_v_dst);
 
   /* function exit code */
   goto __pyx_L0;
@@ -5583,7 +5627,7 @@ static PyObject *__pyx_pw_3hit_11merge(PyObject *__pyx_self, PyObject *__pyx_arg
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_3hit_10merge(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst) {
+static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -6017,7 +6061,8 @@ static PyMethodDef __pyx_methods[] = {
   {"NewSection", (PyCFunction)__pyx_pw_3hit_3NewSection, METH_O, 0},
   {"NewComment", (PyCFunction)__pyx_pw_3hit_5NewComment, METH_VARARGS|METH_KEYWORDS, 0},
   {"NewBlank", (PyCFunction)__pyx_pw_3hit_7NewBlank, METH_NOARGS, 0},
-  {"merge", (PyCFunction)__pyx_pw_3hit_11merge, METH_VARARGS|METH_KEYWORDS, 0},
+  {"explode", (PyCFunction)__pyx_pw_3hit_11explode, METH_O, 0},
+  {"merge", (PyCFunction)__pyx_pw_3hit_13merge, METH_VARARGS|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
