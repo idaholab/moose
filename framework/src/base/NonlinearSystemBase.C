@@ -2284,6 +2284,14 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     for (const auto & damper : gdampers)
     {
       Real gd_damping = damper->computeDamping(solution, update);
+      try
+      {
+        damper->checkMinDamping(gd_damping);
+      }
+      catch (MooseException & e)
+      {
+        _fe_problem.setException(e.what());
+      }
       damping = std::min(gd_damping, damping);
     }
   }
