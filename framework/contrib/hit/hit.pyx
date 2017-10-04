@@ -204,7 +204,7 @@ def parse(fname, input):
     cdef chit.Node* node = chit.parse(fname, input)
     return _initpynode(node, own=True)
 
-cdef explode(Node n):
+cpdef explode(Node n):
     chit.explode(n._cnode)
 
 cpdef merge(Node src, Node dst):
