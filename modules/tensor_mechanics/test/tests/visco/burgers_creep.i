@@ -63,10 +63,9 @@
     execute_on = timestep_end
   [../]
   [./creep_strain_xx]
-    type = VectorRankTwoAux
+    type = RankTwoAux
     variable = creep_strain_xx
-    rank_two_tensors = viscous_strains
-    position = 0
+    rank_two_tensor = creep_strain
     index_j = 0
     index_i = 0
     execute_on = timestep_end
@@ -92,36 +91,39 @@
     boundary = back
     value = 0
   [../]
+  [./axial_load]
+    type = NeumannBC
+    variable = disp_x
+    boundary = right
+    value    = 10e6
+  [../]
 []
 
 [Materials]
-  [./eigen]
-    type = ComputeEigenstrain
-    eigenstrain_name = eigen_true
-    eigen_base = '1e-3 1e-3 1e-3 0 0 0'
-  [../]
-  [./kelvin_voigt]
+  [./burgers]
     type = GeneralizedKelvinVoigtModel
-    creep_modulus = '10e9 10e9'
+    creep_modulus = '10e9'
     creep_viscosity = '1 10'
     poisson_ratio = 0.2
     young_modulus = 10e9
-    driving_eigenstrain = eigen_true
   [../]
   [./stress]
-    type = ComputeLinearViscoelasticStress
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'creep'
+  [../]
+  [./creep]
+    type = LinearViscoelasticStressUpdate
   [../]
   [./strain]
-    type = ComputeSmallStrain
+    type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = 'eigen_true'
   [../]
 []
 
 [UserObjects]
   [./update]
     type = LinearViscoelasticityManager
-    viscoelastic_model = kelvin_voigt
+    viscoelastic_model = burgers
   [../]
 []
 
@@ -157,10 +159,10 @@
   solve_type = 'PJFNK'
 
   l_max_its  = 50
-  l_tol      = 1e-8
+  l_tol      = 1e-10
   nl_max_its = 20
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-10
 
   dtmin = 0.01
   end_time = 100
@@ -173,6 +175,6 @@
 []
 
 [Outputs]
-  file_base = gen_kv_driving_out
+  file_base = burgers_creep_out
   exodus = true
 []

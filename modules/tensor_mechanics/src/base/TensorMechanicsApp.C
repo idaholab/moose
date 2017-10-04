@@ -159,8 +159,6 @@
 #include "NewmarkVelAux.h"
 #include "RadialDisplacementCylinderAux.h"
 #include "RadialDisplacementSphereAux.h"
-#include "VectorRankFourAux.h"
-#include "VectorRankTwoAux.h"
 
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
@@ -395,8 +393,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(RadialDisplacementSphereAux);
   registerAux(DomainIntegralQFunction);
   registerAux(DomainIntegralTopologicalQFunction);
-  registerAux(VectorRankTwoAux);
-  registerAux(VectorRankFourAux);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);

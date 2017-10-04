@@ -63,10 +63,9 @@
     execute_on = timestep_end
   [../]
   [./creep_strain_xx]
-    type = VectorRankTwoAux
+    type = RankTwoAux
     variable = creep_strain_xx
-    rank_two_tensors = viscous_strains
-    position = 0
+    rank_two_tensor = creep_strain
     index_j = 0
     index_i = 0
     execute_on = timestep_end
@@ -92,27 +91,31 @@
     boundary = back
     value = 0
   [../]
-  [./disp]
-    type = PresetBC
+  [./axial_load]
+    type = NeumannBC
     variable = disp_x
     boundary = right
-    value    = 0.001
+    value    = 10e6
   [../]
 []
 
 [Materials]
-  [./maxwell]
-    type = GeneralizedMaxwellModel
-    creep_modulus = '3.333333e9 3.333333e9'
+  [./kelvin_voigt]
+    type = GeneralizedKelvinVoigtModel
+    creep_modulus = '10e9 10e9'
     creep_viscosity = '1 10'
     poisson_ratio = 0.2
     young_modulus = 10e9
   [../]
   [./stress]
-    type = ComputeLinearViscoelasticStress
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'creep'
+  [../]
+  [./creep]
+    type = LinearViscoelasticStressUpdate
   [../]
   [./strain]
-    type = ComputeSmallStrain
+    type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
@@ -120,7 +123,7 @@
 [UserObjects]
   [./update]
     type = LinearViscoelasticityManager
-    viscoelastic_model = maxwell
+    viscoelastic_model = kelvin_voigt
   [../]
 []
 
@@ -155,11 +158,11 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  l_max_its  = 50
-  l_tol      = 1e-10
-  nl_max_its = 20
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-7
+  l_max_its  = 100
+  l_tol      = 1e-8
+  nl_max_its = 50
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
 
   dtmin = 0.01
   end_time = 100
@@ -172,6 +175,6 @@
 []
 
 [Outputs]
-  file_base = gen_maxwell_relax_out
+  file_base = visco_finite_strain_out
   exodus = true
 []

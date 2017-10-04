@@ -63,10 +63,9 @@
     execute_on = timestep_end
   [../]
   [./creep_strain_xx]
-    type = VectorRankTwoAux
+    type = RankTwoAux
     variable = creep_strain_xx
-    rank_two_tensors = viscous_strains
-    position = 0
+    rank_two_tensor = creep_strain
     index_j = 0
     index_i = 0
     execute_on = timestep_end
@@ -92,21 +91,21 @@
     boundary = back
     value = 0
   [../]
-  [./axial_load]
-    type = NeumannBC
-    variable = disp_x
-    boundary = right
-    value    = 10e6
-  [../]
 []
 
 [Materials]
-  [./burgers]
-    type = GeneralizedKelvinVoigtModel
-    creep_modulus = '10e9'
+  [./eigen]
+    type = ComputeEigenstrain
+    eigenstrain_name = eigen_true
+    eigen_base = '1e-3 1e-3 1e-3 0 0 0'
+  [../]
+  [./maxwell]
+    type = GeneralizedMaxwellModel
+    creep_modulus = '3.333333e9 3.333333e9'
     creep_viscosity = '1 10'
     poisson_ratio = 0.2
     young_modulus = 10e9
+    driving_eigenstrain = eigen_true
   [../]
   [./stress]
     type = ComputeMultipleInelasticStress
@@ -116,15 +115,16 @@
     type = LinearViscoelasticStressUpdate
   [../]
   [./strain]
-    type = ComputeFiniteStrain
+    type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = 'eigen_true'
   [../]
 []
 
 [UserObjects]
   [./update]
     type = LinearViscoelasticityManager
-    viscoelastic_model = burgers
+    viscoelastic_model = maxwell
   [../]
 []
 
@@ -162,7 +162,7 @@
   l_max_its  = 50
   l_tol      = 1e-8
   nl_max_its = 20
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-11
   nl_abs_tol = 1e-8
 
   dtmin = 0.01
@@ -176,6 +176,6 @@
 []
 
 [Outputs]
-  file_base = burgers_creep_out
+  file_base = gen_maxwell_driving_out
   exodus = true
 []
