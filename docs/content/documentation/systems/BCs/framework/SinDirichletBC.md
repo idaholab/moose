@@ -18,10 +18,12 @@ and $T$ is the final time. These values are controlled by the
 The value is applied on one or more sidesets specified
 by the `boundary` parameter and does not vary in space. This type of boundary
 condition is applicable to time-varying PDEs, for example:
-\begin{alignat}{2}
+$$
+\begin{aligned}
   \frac{\partial u}{\partial t} -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g(t) && \quad \in \partial \Omega
-\end{alignat}
+\end{aligned}
+$$
 and is frequently used to "ramp" a difficult boundary condition to its
 final value over a short time interval, rather than imposing it
 instantaneously at time $t=0$.  This approach can make nonlinear

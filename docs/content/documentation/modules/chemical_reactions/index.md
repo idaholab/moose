@@ -151,10 +151,12 @@ Equilibrium reactions can be entered in the `ReactionNetwork` block using an
 a `SolidKineticReactions` sub-block.
 
 The input file syntax for equilibrium reactions has to following form:
-\begin{align*}
+$$
+\begin{aligned}
 \nu_{11} \mathcal{A}_1 + \nu_{21} \mathcal{A}_2 + \ldots =& \mathcal{A}_{eq1} \log_{10}(K_{eq}),\\
 \nu_{12} \mathcal{A}_1 + \nu_{22} \mathcal{A}_2 + \ldots =& \mathcal{A}_{eq2} \log_{10}(K_{eq})
-\end{align*}
+\end{aligned}
+$$
 
 Individual equilibrium reactions are provided with the primary species on the left hand side,
 while the equilibrium species follows the `=` sign, followed by the log of the equilibrium
@@ -169,14 +171,16 @@ used in \citet{guo2013}, which features aqueous equilibrium reactions as well as
 mineral dissolution and precipitation.
 
 Equilibrium reactions:
-\begin{align*}
+$$
+\begin{aligned}
 H^+ + HCO_3^- &\rightleftharpoons CO_2(aq)  & K_{eq} &= 10^{6.341} \\
 HCO_3^- &\rightleftharpoons H^+ + CO_3^{2-} & K_{eq} &= 10^{-10.325} \\
 Ca^{2+} + HCO_3^- &\rightleftharpoons H^+ + CaCO_3(aq) & K_{eq} &= 10^{-7.009} \\
 Ca^{2+} + HCO_3^- &\rightleftharpoons CaHCO_3^+ & K_{eq} &= 10^{-0.653} \\
 Ca^{2+} &\rightleftharpoons H^+ + CaOH^+ & K_{eq} &= 10^{-12.85} \\
 - H^+ &\rightleftharpoons OH^- & K_{eq} &= 10^{-13.991}
-\end{align*}
+\end{aligned}
+$$
 
 Kinetic reaction:
 \begin{equation*}

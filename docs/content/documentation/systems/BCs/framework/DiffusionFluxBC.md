@@ -20,11 +20,13 @@ integration by parts on the [`Diffusion`](/framework/Diffusion.md) [`Kernel`](/K
 
 As an example, consider the Poisson problem with mixed
 boundary conditions:
-\begin{alignat}{2}
+$$
+\begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
   \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N
-\end{alignat}
+\end{aligned}
+$$
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N \cup \partial \Omega_F$ is its boundary,
 and no boundary conditions are specified on $\partial \Omega_F$.
