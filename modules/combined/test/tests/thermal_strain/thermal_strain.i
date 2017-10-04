@@ -2,11 +2,6 @@
 
 # This test is designed to compute displacements from a thermal strain.
 
-# The cube is displaced by 1e-6 units in x, 2e-6 in y, and 3e-6 in z.
-#  The faces are sheared as well (1e-6, 2e-6, and 3e-6 for xy, yz, and
-#  zx).  This gives a uniform strain/stress state for all six unique
-#  tensor components.
-
 # The temperature moves 100 degrees, and the coefficient of thermal
 #  expansion is 1e-6.  Therefore, the strain (and the displacement
 #  since this is a unit cube) is 1e-4.

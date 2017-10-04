@@ -8,6 +8,7 @@
 #define COMPUTESTRAINBASE_H
 
 #include "Material.h"
+#include "EigenstrainHelper.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "RotationTensor.h"
@@ -16,7 +17,7 @@
 /**
  * ComputeStrainBase is the base class for strain tensors
  */
-class ComputeStrainBase : public DerivativeMaterialInterface<Material>
+class ComputeStrainBase : public DerivativeMaterialInterface<Material>, public EigenstrainHelper
 {
 public:
   ComputeStrainBase(const InputParameters & parameters);

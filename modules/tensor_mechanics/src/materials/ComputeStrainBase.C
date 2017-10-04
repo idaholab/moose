@@ -31,6 +31,7 @@ validParams<ComputeStrainBase>()
 
 ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
+    EigenstrainHelper(this, _bnd),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),

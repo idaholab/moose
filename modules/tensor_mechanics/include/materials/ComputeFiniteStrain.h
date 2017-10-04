@@ -22,7 +22,7 @@ public:
   static MooseEnum decompositionType();
 
 protected:
-  virtual void computeQpStrain();
+  virtual void computeStrain();
   virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r);
 
   std::vector<RankTwoTensor> _Fhat;

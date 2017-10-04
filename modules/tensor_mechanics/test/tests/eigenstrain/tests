@@ -1,0 +1,17 @@
+[Tests]
+ [./eigen3DLinear]
+   type = 'Exodiff'
+   input = 'eigen3DLinear.i'
+   exodiff = 'eigen3DLinear_out.e'
+ [../]
+ [./eigen3DQuadratic]
+   type = 'Exodiff'
+   input = 'eigen3DQuadratic.i'
+   exodiff = 'eigen3DQuadratic_out.e'
+ [../]
+ [./eigenRZLinear]
+   type = 'CSVDiff'
+   input = 'eigenRZLinear.i'
+   csvdiff = 'eigenRZLinear_out_aux_0001.csv'
+ [../]
+[]

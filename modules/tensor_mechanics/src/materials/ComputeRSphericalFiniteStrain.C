@@ -78,7 +78,6 @@ ComputeRSphericalFiniteStrain::computeProperties()
     // Incremental deformation gradient _Fhat = I + A Fbar^-1
     _Fhat[_qp] = A * Fbar.inverse();
     _Fhat[_qp].addIa(1.0);
-
-    computeQpStrain();
   }
+  computeQpStrain();
 }
