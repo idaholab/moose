@@ -38,12 +38,13 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 
 ### Grain Growth
 * Grain Growth Model - Background on the phase field model implemented in MOOSE
-* Grain Tracker Algorithm
+* [Grain Tracker Algorithm](/GrainTracker.md)
 * Grain Boundary Anisotropy
 * Elastic Driving Force For Grain Growth
 
 ## Initial Conditions
 * Initial Conditions - Basic phase field initial conditions
+* [Polycrystal Initial Conditions](ICs/PolycrystalICs.md)
 * Image Reader - Reconstructing initial conditions from images (SEM, optical, etc.)
 * [EBSD Reader](ICs/EBSD.md) - Reconstructing initial conditions from EBSD and EDS data
 
