@@ -8,11 +8,13 @@ condition $\frac{\partial u}{\partial n} = \vec{V}\cdot\hat{n}$, where the user
 specifies the vector $\vec{V}$ and the unit normal vector $\hat{n}$ is
 determined by the geometry of the domain $\Omega$. This class is
 appropriate to use in systems of partial differential equations (PDEs) of the form
-\begin{alignat}{2}
+$$
+\begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
   \frac{\partial u}{\partial n} &= \vec{V} \cdot \hat{n} && \quad \in \partial \Omega_N
-\end{alignat}
+\end{aligned}
+$$
 
 !!!note
     There is not a 1:1 correspondence between the choice of

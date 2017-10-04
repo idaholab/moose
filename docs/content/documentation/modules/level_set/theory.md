@@ -58,9 +58,9 @@ where $h$ is the element length, and $\|\vec{v}\|$ is the Euclidean
 norm of the velocity vector.  We note that the $h$-dependent terms add
 stability to the numerical scheme by introducing the
 symmetric, velocity-dependent artificial viscosity contribution:
-\begin{align}
+\begin{equation}
   \left(\frac{h}{2\|\vec{v}\|} \vec{v}\cdot\nabla u_h, \vec{v} \cdot \nabla\psi_i \right)
-\end{align}
+\end{equation}
 in a so-called "consistent" manner.  That is, if the true solution
 $u$ satisfies \eqref{eqn:pure_advection}, it is easy to see, by
 inspection, that it will also satisfy \eqref{eqn:supg}, since the

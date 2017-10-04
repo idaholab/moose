@@ -8,11 +8,13 @@ imposes a possibly temporally- and spatially-dependent value defined
 by a MOOSE [`Function`](/Functions/index.md) object on a particular set of degrees of freedom
 (DOFs) defined by the `boundary` parameter. That is, for a
 PDE of the form
-\begin{alignat}{2}
+$$
+\begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g(t,\vec{x}) && \quad \in \partial \Omega_D \\
   \frac{\partial u}{\partial n} &= h(t,\vec{x}) && \quad \in \partial \Omega_N
-\end{alignat}
+\end{aligned}
+$$
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary,
 a `FunctionDirichletBC` object can be used to impose the

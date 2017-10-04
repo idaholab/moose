@@ -36,12 +36,12 @@ $$
 
 $$\mathbf{T}$$ is useful for transforming uncracked tensors in the global frame to cracked tensors in the same frame.  For example, the cracked stress $$\mathbf{\sigma}_{cg}$$ in terms of the stress $$\mathbf{\sigma}_g$$ is (subscript $$c$$ indicates cracked, $$l$$ local frame, and $$g$$ global frame):
 $$
-\begin{align}
+\begin{aligned}
 \mathbf{\sigma}_{cg} &= \mathbf{T}\mathbf{\sigma}_g\mathbf{T}^T \\
 &= \mathbf{RcR}^T\mathbf{\sigma}_g\mathbf{RcR}^T \\
 &= \mathbf{Rc}\mathbf{\sigma}_l\mathbf{cR}^T \\
 &= \mathbf{R}\mathbf{\sigma}_{cl}\mathbf{R}^T.
-\end{align}
+\end{aligned}
 $$
 
 When many material points have multiple cracks, the solution becomes difficult to obtain numerically.  For this reason, controls are available to limit the number and direction of cracks that are allowed. Also, there are options to control the amount of shear retention and amount of stress correction during softening, both of which can significantly affect convergence.
