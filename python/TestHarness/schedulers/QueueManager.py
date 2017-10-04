@@ -12,7 +12,6 @@ class QueueManager(Scheduler):
     @staticmethod
     def validParams():
         params = Scheduler.validParams()
-        params.addParam('no_copy_pattern', '.*\.sh',     "pattern of files not to copy")
         return params
 
     def __init__(self, harness, params):
@@ -87,14 +86,6 @@ class QueueManager(Scheduler):
         """ Copy the necessary test files the job will need in order to execute """
         tester = job.getTester()
 
-        # Create regexp object of no_copy_pattern
-        if 'no_copy_pattern' in self.params.keys():
-            # Match no_copy_pattern value
-            pattern = re.compile(self.params['no_copy_pattern'])
-        else:
-            # Match nothing if not set. Better way?
-            pattern = re.compile(r'')
-
         # Create the job directory
         if not os.path.exists(self.getWorkingDir(job)):
             try:
@@ -106,11 +97,9 @@ class QueueManager(Scheduler):
         source_dir = os.path.dirname(self.getWorkingDir(job))
         target_dir = self.getWorkingDir(job)
 
-        # Copy files (unless they are listed in "no_copy")
+        # Copy files
         for file in os.listdir(source_dir):
             if os.path.isfile(os.path.join(source_dir, file)) and file != self.options.input_file_name and \
-               (not tester.specs.isValid('no_copy') or file not in tester.specs['no_copy']) and \
-               (not 'no_copy_pattern' in self.params.keys() or pattern.match(file) is None) and \
                not os.path.exists(os.path.join(target_dir, file)) and \
                os.path.splitext(file)[1] != '':
                 shutil.copy(os.path.join(source_dir, file), os.path.join(target_dir, file))

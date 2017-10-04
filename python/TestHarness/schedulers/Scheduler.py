@@ -155,7 +155,7 @@ class Scheduler(MooseObject):
         Method to discover and delete downstream jobs due to supplied job failing.
         """
         with self.dag_lock:
-            failed_jobs = set([])
+            failed_jobs = []
             tester = job.getTester()
             job_dag = job.getDAG()
             if (tester.isFinished() and not tester.didPass() and not tester.isSilent() and not self.skipPrereqs()) \
@@ -163,7 +163,7 @@ class Scheduler(MooseObject):
                or (self.options.dry_run and not tester.isSilent()):
 
                 # Ask the DAG to delete and return the downstream jobs associated with this job
-                failed_jobs.update(job_dag.delete_downstreams(job))
+                failed_jobs.extend(job_dag.delete_downstreams(job))
 
             for failed_job in failed_jobs:
                 failed_tester = failed_job.getTester()
@@ -555,7 +555,10 @@ class Scheduler(MooseObject):
                 # Determin if this job creates any skipped dependencies (if it failed), and send
                 # this new list of jobs to the status queue to be printed.
                 possibly_skipped_jobs = self.processDownstreamTests(job)
-                possibly_skipped_jobs.add(job)
+
+                # Make the failure print before the skipped dependency
+                possibly_skipped_jobs.insert(0, job)
+
                 self.queueJobs(status_jobs=possibly_skipped_jobs)
 
                 # Delete this job from the shared DAG while the DAG is locked
@@ -583,7 +586,10 @@ class Scheduler(MooseObject):
                 # There will never be enough slots to run this job (insufficient slots)
                 if tester.isFinished():
                     failed_downstream = self.processDownstreamTests(job)
-                    failed_downstream.add(job)
+
+                    # Make the failure print before the skipped dependency
+                    failed_downstream.insert(0, job)
+
                     self.queueJobs(status_jobs=failed_downstream)
 
                 # There are no available slots, currently. Place back in queue, and sleep for a bit
