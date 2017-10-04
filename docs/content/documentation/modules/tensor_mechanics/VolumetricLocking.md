@@ -6,34 +6,44 @@ In this method, both the strain ($\epsilon$) and the virtual strain ($\delta \ep
 
 For example, in the case of small strain linear elasticity, the equation of motion is:
 
-\begin{align*}
+$$
+\begin{aligned}
 \int_V \sigma(\epsilon)\delta \epsilon dV - \int_V b \delta v dV - \int_{\partial V} t \delta v dA = 0
-\end{align*}
+\end{aligned}
+$$
 
 The element averaged volumetric strain (assuming small strain formulation) is:
 
-\begin{align*}
+$$
+\begin{aligned}
  w=\frac{1}{V_e} \int_{V_e} \frac{1}{3} tr(\epsilon) dV,
-\end{align*}
+\end{aligned}
+$$
 
 where $V_e$ is the volume of the element and tr(.) is the trace of the matrix.
 
 The strain in each element is replaced by the approximation:
 
-\begin{align*}
+$$
+\begin{aligned}
 \bar{\epsilon} = \epsilon +(w - \frac{tr(\epsilon)}{3})I,
-\end{align*}
+\end{aligned}
+$$
 
 where $I$ is the $3 \times 3$ identity matrix. Similarly, the virtual strain is also approximated by:
 
-\begin{align*}
+$$
+\begin{aligned}
 \bar{\delta \epsilon} = \delta \epsilon + (\delta w - \frac{tr(\delta \epsilon)}{3})I
-\end{align*}
+\end{aligned}
+$$
 
 The modified equation of motion is:
-\begin{align*}
+$$
+\begin{aligned}
 \int_V \sigma(\bar{\epsilon})\bar{\delta \epsilon} dV - \int_V b \delta v dV - \int_{\partial V} t \delta v dA = 0
-\end{align*}
+\end{aligned}
+$$
 
 More details about this method can be found in section 8.6 of \citet{bower2009applied}.
 

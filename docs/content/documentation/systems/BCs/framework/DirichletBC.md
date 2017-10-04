@@ -9,11 +9,13 @@ partial differential equations (PDEs).  Such boundary conditions force
 a particular set of degrees of freedom (DOFs) defined by the
 `boundary` parameter to take on a single, controllable value. This
 class is appropriate to use for PDEs of the form
-\begin{alignat}{2}
+$$
+\begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
   \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N
-\end{alignat}
+\end{aligned}
+$$
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary. In
 this case, a `DirichletBC` object is used to impose the condition (2)
