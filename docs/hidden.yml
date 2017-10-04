@@ -964,7 +964,6 @@ tensor_mechanics:
     - /Materials/ComputeLayeredCosseratElasticityTensor
     - /Materials/ComputeLinearElasticPFFractureStress
     - /Materials/ComputeLinearElasticStress
-    - /Materials/ComputeLinearViscoelasticStress
     - /Materials/ComputeMultiPlasticityStress
     - /Materials/ComputeMultipleInelasticCosseratStress
     - /Materials/ComputeMultipleInelasticStress
