@@ -11,7 +11,7 @@ template <>
 InputParameters
 validParams<FlowJunction>()
 {
-  InputParameters params = validParams<Junction>();
+  InputParameters params = validParams<JunctionBase>();
   params.addParam<std::vector<Real>>("K", "Form loss coefficients");
   params.addParam<Real>(
       "scaling_factor", 1., "Scaling factor for the Lagrange multiplier variable");
@@ -26,7 +26,7 @@ validParams<FlowJunction>()
 }
 
 FlowJunction::FlowJunction(const InputParameters & params)
-  : Junction(params),
+  : JunctionBase(params),
     _lm_name(genName(name(), "lm")),
     _K(getParam<std::vector<Real>>("K")),
     _scaling_factor(getParam<Real>("scaling_factor")),

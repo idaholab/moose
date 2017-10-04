@@ -2,7 +2,7 @@
 #define FLOWJUNCTION_H
 
 #include <string>
-#include "Junction.h"
+#include "JunctionBase.h"
 
 class FlowJunction;
 
@@ -12,7 +12,7 @@ InputParameters validParams<FlowJunction>();
 /**
  * Joint for flow
  */
-class FlowJunction : public Junction
+class FlowJunction : public JunctionBase
 {
 public:
   FlowJunction(const InputParameters & params);
