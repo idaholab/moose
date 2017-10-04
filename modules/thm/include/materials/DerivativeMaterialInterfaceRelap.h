@@ -63,8 +63,14 @@ const MaterialProperty<U> &
 DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelap(
     const std::string & base, const std::string & var_name, const unsigned int i)
 {
-  return this->template getMaterialPropertyDerivative<U>(
-      base, this->template getVar(var_name, i)->name());
+  // get the base property name
+  const std::string prop_name = this->deducePropertyName(base);
+
+  // get the name of the variable which derivative is respect to
+  const std::string der_var_name = this->template getVar(var_name, i)->name();
+
+  return this->template getMaterialPropertyByName<U>(
+      this->template propertyNameFirst(prop_name, der_var_name));
 }
 
 #endif // DERIVATIVEMATERIALINTERFACERELAP_H
