@@ -61,6 +61,7 @@ ComputeElemDampingThread::onElement(const Elem * elem)
   for (const auto & obj : objects)
   {
     Real cur_damping = obj->computeDamping();
+    obj->checkMinDamping(cur_damping);
     if (cur_damping < _damping)
       _damping = cur_damping;
   }

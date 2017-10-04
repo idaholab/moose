@@ -15,6 +15,7 @@
 #include "Damper.h"
 #include "SystemBase.h"
 #include "SubProblem.h"
+#include "Conversion.h"
 
 template <>
 InputParameters
@@ -23,6 +24,11 @@ validParams<Damper>()
   InputParameters params = validParams<MooseObject>();
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("Damper");
+  params.addParam<Real>("min_damping",
+                        0.0,
+                        "Minimum value of computed damping. Damping lower than "
+                        "this will result in an exception being thrown and "
+                        "cutting the time step");
   return params;
 }
 
@@ -32,6 +38,15 @@ Damper::Damper(const InputParameters & parameters)
     Restartable(parameters, "Dampers"),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _sys(*parameters.get<SystemBase *>("_sys"))
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _min_damping(getParam<Real>("min_damping"))
 {
+}
+
+void
+Damper::checkMinDamping(const Real cur_damping) const
+{
+  if (cur_damping < _min_damping)
+    throw MooseException("From damper: '" + name() + "' damping below min_damping: " +
+                         Moose::stringify(cur_damping) + " Cutting timestep.");
 }
