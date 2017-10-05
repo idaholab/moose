@@ -18,7 +18,7 @@ validParams<INSMomentumBase>()
       "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts.");
   params.addParam<bool>(
       "supg", false, "Whether to perform SUPG stabilization of the momentum residuals");
-  params.addParam<FunctionName>("forcing_func", "The mms forcing function.");
+  params.addParam<FunctionName>("forcing_func", 0, "The mms forcing function.");
   return params;
 }
 

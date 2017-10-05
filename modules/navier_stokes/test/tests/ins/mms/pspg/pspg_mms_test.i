@@ -51,10 +51,6 @@ rho=2.5
   [./mass]
     type = INSMass
     variable = p
-  [../]
-  [./mass_body_force]
-    type = INSMassBodyForceMMS
-    variable = p
     x_vel_forcing_func = vel_x_source_func
     y_vel_forcing_func = vel_y_source_func
   [../]

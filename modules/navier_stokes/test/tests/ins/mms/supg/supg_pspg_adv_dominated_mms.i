@@ -45,6 +45,7 @@ rho=2.5
   [../]
 
   [./p]
+    order = FIRST
   [../]
 []
 
@@ -53,6 +54,8 @@ rho=2.5
   [./mass]
     type = INSMass
     variable = p
+    x_vel_forcing_func = vel_x_source_func
+    y_vel_forcing_func = vel_y_source_func
   [../]
 
   [./x_time]
@@ -69,6 +72,7 @@ rho=2.5
     type = INSMomentumLaplaceForm
     variable = vel_x
     component = 0
+    forcing_func = vel_x_source_func
   [../]
 
   # y-momentum, space
@@ -76,6 +80,7 @@ rho=2.5
     type = INSMomentumLaplaceForm
     variable = vel_y
     component = 1
+    forcing_func = vel_y_source_func
   [../]
 
   [./vel_x_source]
@@ -89,29 +94,10 @@ rho=2.5
     variable = vel_y
   [../]
 
-  [./vel_x_source_supg]
-    type = INSMomentumBodyForceMMS
-    component = 0
-    forcing_func = vel_x_source_func
-    variable = vel_x
-  [../]
-  [./vel_y_source_supg]
-    type = INSMomentumBodyForceMMS
-    component = 1
-    forcing_func = vel_y_source_func
-    variable = vel_y
-  [../]
-
   [./p_source]
     type = BodyForce
     function = p_source_func
     variable = p
-  [../]
-  [./mms_source_pspg]
-    type = INSMassBodyForceMMS
-    variable = p
-    x_vel_forcing_func = vel_x_source_func
-    y_vel_forcing_func = vel_y_source_func
   [../]
 []
 
@@ -185,7 +171,6 @@ rho=2.5
 []
 
 [Executioner]
-  type = Transient
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_view'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu NONZERO superlu_dist'
@@ -196,6 +181,7 @@ rho=2.5
   l_tol = 1e-6
   l_max_its = 10
   # To run to steady-state, set num-steps to some large number (1000000 for example)
+  type = Transient
   num_steps = 10
   trans_ss_check = true
   ss_check_tol = 1e-10
