@@ -98,8 +98,8 @@
     cli_args = 'GlobalParams/supg=true Outputs/file_base=adv_dominated_stabilized'
   [../]
   # This SUPG and PSPG stabilized Q1Q1 case does not exhibit any oscillations with Reynolds
-  # number a factor of 100 higher than previous two cases and with twice as many adaptive
-  # time steps. Cutting the number of time steps in half shows some small local oscillations
+  # number a factor of 100 higher than previous two cases and with twice as large a dt.
+  # Cutting the number of time steps in half shows some small local oscillations
   [./adv_dominated_supg_pspg_stabilized]
     type = 'Exodiff'
     input = 'supg_pspg_adv_dominated_mms.i'

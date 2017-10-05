@@ -47,8 +47,9 @@ INSMass::computeQpPGResidual()
   RealVectorValue transient_term =
       _transient_term ? timeDerivativeTerm() : RealVectorValue(0, 0, 0);
   RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
-  Real r = -tau() * _grad_test[_i][_qp] * (strongPressureTerm() + bodyForcesTerm() + viscous_term +
-                                           convective_term + transient_term);
+  Real r =
+      -1. / _rho[_qp] * tau() * _grad_test[_i][_qp] *
+      (strongPressureTerm() + bodyForcesTerm() + viscous_term + convective_term + transient_term);
 
   return r;
 }
@@ -69,7 +70,7 @@ INSMass::computeQpJacobian()
 Real
 INSMass::computeQpPGJacobian()
 {
-  return -tau() * _grad_test[_i][_qp] * dStrongPressureDPressure();
+  return -1. / _rho[_qp] * tau() * _grad_test[_i][_qp] * dStrongPressureDPressure();
 }
 
 Real
@@ -118,7 +119,7 @@ INSMass::computeQpPGOffDiagJacobian(unsigned comp)
   RealVectorValue d_transient_term_d_u_comp =
       _transient_term ? dTimeDerivativeDUComp(comp) : RealVectorValue(0, 0, 0);
 
-  return -tau() * _grad_test[_i][_qp] *
+  return -1. / _rho[_qp] * tau() * _grad_test[_i][_qp] *
              (d_convective_term_d_u_comp + d_viscous_term_d_u_comp + d_transient_term_d_u_comp) -
          dTauDUComp(comp) * _grad_test[_i][_qp] * (convective_term + viscous_term + transient_term +
                                                    strongPressureTerm() + bodyForcesTerm());
