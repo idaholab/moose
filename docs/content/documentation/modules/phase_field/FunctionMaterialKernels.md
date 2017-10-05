@@ -13,5 +13,5 @@ This enables rapid implementation of new Phase Field models without writing cust
 
 ## See also
 
-* [Automatic Differentiation](Function Materials/Automatic Differentiation.md) for MOOSE application developers
-* [ExpressionBuilder](Function Materials/ExpressionBuilder.md) - building FParser expressions at compile time using operator overloading
+* [Automatic Differentiation](FunctionMaterials/AutomaticDifferentiation.md) for MOOSE application developers
+* [Expression Builder](FunctionMaterials/ExpressionBuilder.md) - building FParser expressions at compile time using operator overloading

@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/ConservedNormalNoise
 
-`ConservedNormalNoise` can be used for [fluctuation based nucleation](Nucleation/Langevin Noise.md)
+`ConservedNormalNoise` can be used for [fluctuation based nucleation](Nucleation/LangevinNoise.md)
 
 !syntax parameters /UserObjects/ConservedNormalNoise
 

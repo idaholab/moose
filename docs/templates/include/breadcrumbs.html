@@ -4,9 +4,9 @@
     <div class="col s12 m9 l10">
       {% for node in breadcrumbs(current) %}
         {% if node.destination != None %}
-          <a href="{{relpath(node.destination, current.destination)}}" class="breadcrumb">{{node.display}}</a>
+          <a href="{{relpath(node.destination, current.destination)}}" class="breadcrumb">{{display(node)}}</a>
         {% else %}
-          <span class="breadcrumb">{{node.display}}</span>
+          <span class="breadcrumb">{{display(node)}}</span>
         {% endif %}
       {% endfor %}
     </div>

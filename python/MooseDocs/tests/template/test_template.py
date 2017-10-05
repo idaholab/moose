@@ -80,5 +80,19 @@ class TestTemplate(MarkdownTestCase):
         gold = '<a class="moose-bad-link" href="/ICs/PolycrystalICs/index.md">'
         self.assertIn(gold, html)
 
+class TestTemplateDisplay(MarkdownTestCase):
+    EXTENSIONS = ['MooseDocs.extensions.template', 'MooseDocs.extensions.app_syntax', 'meta']
+
+    def testDisplayName(self):
+        config = dict(base='docs/content',
+                      include=['docs/content/documentation/modules/phase_field/MultiPhase/**'])
+        root = moose_docs_file_tree({'framework': config})
+        node = root.findall('/KKSMultiComponentExample')[0]
+        html = self.parser.convert(node)
+        self.assertIn('<a class="breadcrumb" href="index.html">KKS Multi Component Example</a>',
+                      html)
+
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

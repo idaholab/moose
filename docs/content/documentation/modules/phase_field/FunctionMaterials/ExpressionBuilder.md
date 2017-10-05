@@ -97,5 +97,5 @@ All named variables declared through `EBTerm var("name")` will be substituted by
 
 ## See also
 
-- [Automatic Differentiation](Function Materials/Automatic Differentiation.md) for MOOSE application developers
-- [Just In Time Compilation](Function Materials/JIT Compilation.md) of parsed functions for MOOSE application developers
+- [Automatic Differentiation](FunctionMaterials/AutomaticDifferentiation.md) for MOOSE application developers
+- [Just In Time Compilation](FunctionMaterials/JITCompilation.md) of parsed functions for MOOSE application developers

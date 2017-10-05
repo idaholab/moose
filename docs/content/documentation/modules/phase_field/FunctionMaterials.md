@@ -18,4 +18,4 @@ Available function materials are
 
 ## See also
 
-- [Automatic Differentiation](Function Materials/Automatic Differentiation.md) for MOOSE application developers
+- [Automatic Differentiation](FunctionMaterials/AutomaticDifferentiation.md) for MOOSE application developers

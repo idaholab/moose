@@ -8,7 +8,7 @@ The inserter manages the global list of currently active nucleus stabilization s
 
 The inserter object keeps track if any changes to the nucleus list occurred in the current timestep.
 
-The `DiscreteNucleationInserter` is part of the [Discrete Nucleation system](Nucleation/Discrete Nucleation.md).
+The `DiscreteNucleationInserter` is part of the [Discrete Nucleation system](Nucleation/DiscreteNucleation.md).
 
 !syntax parameters /UserObjects/DiscreteNucleationInserter
 
