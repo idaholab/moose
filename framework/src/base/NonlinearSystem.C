@@ -16,6 +16,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "TimeIntegrator.h"
+#include "FiniteDifferencePreconditioner.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -212,6 +213,44 @@ NonlinearSystem::stopSolve()
 
 void
 NonlinearSystem::setupFiniteDifferencedPreconditioner()
+{
+  std::shared_ptr<FiniteDifferencePreconditioner> fdp =
+      std::dynamic_pointer_cast<FiniteDifferencePreconditioner>(_preconditioner);
+  if (!fdp)
+    mooseError("Did not setup finite difference preconditioner, and please add a preconditioning "
+               "block with type = fdp");
+
+  if (fdp->finiteDifferenceType() == "coloring")
+    setupColoringFiniteDifferencedPreconditioner();
+  else if (fdp->finiteDifferenceType() == "standard")
+    setupStandardFiniteDifferencedPreconditioner();
+  else
+    mooseError("Unknown finite difference type");
+}
+
+void
+NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
+{
+#if LIBMESH_HAVE_PETSC
+  PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
+      static_cast<PetscNonlinearSolver<Number> *>(_transient_sys.nonlinear_solver.get());
+
+  PetscMatrix<Number> * petsc_mat = static_cast<PetscMatrix<Number> *>(_transient_sys.matrix);
+
+  SNESSetJacobian(petsc_nonlinear_solver->snes(),
+                  petsc_mat->mat(),
+                  petsc_mat->mat(),
+#if PETSC_VERSION_LESS_THAN(3, 4, 0)
+                  SNESDefaultComputeJacobian,
+#else
+                  SNESComputeJacobianDefault,
+#endif
+                  nullptr);
+#endif
+}
+
+void
+NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 {
 #ifdef LIBMESH_HAVE_PETSC
   // Make sure that libMesh isn't going to override our preconditioner
