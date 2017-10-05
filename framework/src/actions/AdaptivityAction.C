@@ -76,8 +76,9 @@ validParams<AdaptivityAction>()
       "show_initial_progress", true, "Show the progress of the initial adaptivity");
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
-  params.addParam<bool>(
-      "check_markers_before_adapting_mesh", false, "Check adaptivity markers before performing mesh adaptivity.");
+  params.addParam<bool>("check_markers_before_adapting_mesh",
+                        false,
+                        "Check adaptivity markers before performing mesh adaptivity.");
   return params;
 }
 

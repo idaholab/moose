@@ -127,7 +127,8 @@ public:
   void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
 
   /**
-   * Pull out the _check_markers_before_adapting_mesh flag previously set through the AdaptivityAction
+   * Pull out the _check_markers_before_adapting_mesh flag previously set through the
+   * AdaptivityAction
    *
    * @return the flag to check markers before running mesh adaptivity
    */
