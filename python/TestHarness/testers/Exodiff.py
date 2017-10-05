@@ -75,8 +75,8 @@ class Exodiff(FileTester):
                     self.setStatus('EXODIFF', self.bucket_diff)
                     break
 
-        # If status is still pending, then it is a passing test
-        if self.getStatus() == self.bucket_pending:
+        # If status has not failed yet, then it is a passing test
+        if not self.didFail():
             self.setStatus(self.success_message, self.bucket_success)
 
         return output
