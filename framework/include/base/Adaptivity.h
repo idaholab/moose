@@ -127,6 +127,20 @@ public:
   void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
 
   /**
+   * Pull out the _check_markers_before_adapting_mesh flag previously set through the
+   * AdaptivityAction
+   *
+   * @return the flag to check markers before running mesh adaptivity
+   */
+  bool getCheckMarkersFlag() const { return _check_markers_before_adapting_mesh; }
+
+  /**
+   * Set the flag to check markers before running mesh adaptivity
+   * @param flag The flag to check markers before running mesh adaptivity
+   */
+  void setCheckMarkersFlag(const bool flag) { _check_markers_before_adapting_mesh = flag; }
+
+  /**
    * Adapts the mesh based on the error estimator used
    *
    * @return a boolean that indicates whether the mesh was changed
@@ -298,6 +312,12 @@ protected:
   /// Whether or not to recompute markers during adaptivity cycles
   bool _recompute_markers_during_cycles;
 
+  /// Flag to check markers before running mesh adaptivity
+  bool _check_markers_before_adapting_mesh;
+
+  /// Flag indicating mesh needs adapting
+  bool _mesh_adaptivity_needed;
+
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, std::unique_ptr<ErrorVector>> _indicator_field_to_error_vector;
 };
@@ -328,6 +348,8 @@ Adaptivity::setParam(const std::string & param_name, const T & param_value)
     _cycles_per_step = param_value;
   else if (param_name == "recompute_markers_during_cycles")
     _recompute_markers_during_cycles = param_value;
+  else if (param_name == "check_markers_before_adapting_mesh")
+    _check_markers_before_adapting_mesh = param_value;
   else
     mooseError("Invalid Param in adaptivity object");
 }

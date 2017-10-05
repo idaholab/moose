@@ -47,6 +47,9 @@ validParams<SetAdaptivityOptionsAction>()
       "The number of adaptive steps to use when on each timestep during a Transient simulation.");
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
+  params.addParam<bool>("check_markers_before_adapting_mesh",
+                        false,
+                        "Check markers before performing mesh adaptivity.");
   return params;
 }
 
@@ -72,4 +75,5 @@ SetAdaptivityOptionsAction::act()
   adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
 
   adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+  adapt.setCheckMarkersFlag(getParam<bool>("check_markers_before_adapting_mesh"));
 }

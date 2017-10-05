@@ -76,6 +76,9 @@ validParams<AdaptivityAction>()
       "show_initial_progress", true, "Show the progress of the initial adaptivity");
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
+  params.addParam<bool>("check_markers_before_adapting_mesh",
+                        false,
+                        "Check adaptivity markers before performing mesh adaptivity.");
   return params;
 }
 
@@ -98,6 +101,8 @@ AdaptivityAction::act()
   adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
   adapt.setParam("recompute_markers_during_cycles",
                  getParam<bool>("recompute_markers_during_cycles"));
+  adapt.setParam("check_markers_before_adapting_mesh",
+                 getParam<bool>("check_markers_before_adapting_mesh"));
 
   adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 

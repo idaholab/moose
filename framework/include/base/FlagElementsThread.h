@@ -36,7 +36,9 @@ public:
 
   virtual void onElement(const Elem * elem) override;
 
-  void join(const FlagElementsThread & /*y*/);
+  void join(const FlagElementsThread & y);
+
+  bool meshNeedsAdapting() const { return _num_elements_needing_adapting > 0; }
 
 protected:
   FEProblemBase & _fe_problem;
@@ -48,6 +50,7 @@ protected:
   unsigned int _field_var_number;
   std::vector<Number> & _serialized_solution;
   unsigned int _max_h_level;
+  unsigned int _num_elements_needing_adapting;
 };
 
 #endif // FLAGELEMENTSTHREAD_H

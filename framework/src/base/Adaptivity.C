@@ -49,7 +49,9 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _cycles_per_step(1),
     _use_new_system(false),
     _max_h_level(0),
-    _recompute_markers_during_cycles(false)
+    _recompute_markers_during_cycles(false),
+    _check_markers_before_adapting_mesh(false),
+    _mesh_adaptivity_needed(true)
 {
 }
 
@@ -130,6 +132,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
   bool mesh_changed = false;
 
+  // by default, assume mesh adaptivity is needed
+  _mesh_adaptivity_needed = true;
+
   if (_use_new_system)
   {
     if (!marker_name.empty()) // Only flag if a marker variable name has been set
@@ -145,6 +150,15 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
                                _subproblem.mesh().getMesh().active_elements_end(),
                                1);
       Threads::parallel_reduce(all_elems, fet);
+
+      // check if any elements were flagged to be coarsened or refined
+      if (_check_markers_before_adapting_mesh)
+      {
+        _mesh_adaptivity_needed = fet.meshNeedsAdapting();
+        // check other processors too
+        _subproblem.comm().max(_mesh_adaptivity_needed);
+      }
+
       _subproblem.getAuxiliarySystem().solution().close();
     }
   }
@@ -171,8 +185,15 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (_displaced_problem)
     _displaced_problem->undisplaceMesh();
 
-  // Perform refinement and coarsening
-  mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
+  // Perform refinement and coarsening if needed
+  if (_mesh_adaptivity_needed)
+  {
+    Moose::perf_log.push("Adaptivity: refine_and_coarsen_elements()", "Execution");
+    mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
+    Moose::perf_log.pop("Adaptivity: refine_and_coarsen_elements()", "Execution");
+  }
+  else
+    _console << "Mesh does not need adapting..." << std::endl;
 
   if (_displaced_problem && mesh_changed)
   {
