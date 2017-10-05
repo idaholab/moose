@@ -21,9 +21,16 @@ template <>
 InputParameters
 validParams<AddSideSetsFromBoundingBox>()
 {
+  InputParameters params = validParams<MeshModifier>();
+  params.addClassDescription("Find sidesets with given boundary ids in bounding box and add new "
+                             "boundary id. This can be done by finding all required boundary "
+                             "and adding the new boundary id to those sidesets. Alternatively, "
+                             "a number of boundary ids can be provided and all nodes within the "
+                             "bounding box that have all the required boundary ids will have a new"
+                             "boundary id added.");
+
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
-  InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<RealVectorValue>(
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(
@@ -34,11 +41,9 @@ validParams<AddSideSetsFromBoundingBox>()
       "boundary_id_old", "Boundary id on specified block within the bounding box to select");
   params.addRequiredParam<boundary_id_type>(
       "boundary_id_new", "Boundary id on specified block within the bounding box to assign");
-
   params.addParam<bool>("boundary_id_overlap",
                         false,
                         "Set to true if boundaries need to overlap on sideset to be detected.");
-
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
 
