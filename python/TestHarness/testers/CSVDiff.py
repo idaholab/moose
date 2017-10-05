@@ -20,7 +20,7 @@ class CSVDiff(FileTester):
 
         specs = self.specs
 
-        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
+        if self.didFail() or specs['skip_checks']:
             return output
 
         # Don't Run CSVDiff on Scaled Tests

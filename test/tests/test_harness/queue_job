@@ -1,0 +1,12 @@
+[Tests]
+  [./queue_jobA]
+    type = RunApp
+    input = good.i
+  [../]
+  [./queue_jobB]
+    type = RunApp
+    input = good.i
+    copy_files = queue_job_copy_file_test
+    prereq = queue_jobA
+  [../]
+[]
