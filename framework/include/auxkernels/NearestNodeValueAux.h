@@ -25,15 +25,12 @@ template <>
 InputParameters validParams<NearestNodeValueAux>();
 
 /**
- * Constant auxiliary value
+ * Finds the closest node on a paired boundary to the current node or element and stores a
+ * corresponding field value.
  */
 class NearestNodeValueAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NearestNodeValueAux(const InputParameters & parameters);
 
 protected:

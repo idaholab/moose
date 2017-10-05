@@ -22,6 +22,8 @@ InputParameters
 validParams<ElementLpNormAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Compute an elemental field variable (single value per element) equal "
+                             "to the Lp-norm of a coupled Variable.");
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1", "The exponent used in the norm.");
   params.addRequiredCoupledVar("coupled_variable", "The variable to compute the norm of.");
   return params;

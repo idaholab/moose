@@ -24,16 +24,9 @@ class PenetrationLocator;
 template <>
 InputParameters validParams<PenetrationAux>();
 
-/**
- * Constant auxiliary value
- */
 class PenetrationAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   PenetrationAux(const InputParameters & parameters);
 
 protected:

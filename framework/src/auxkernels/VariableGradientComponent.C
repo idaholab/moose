@@ -19,6 +19,8 @@ validParams<VariableGradientComponent>()
 {
   MooseEnum component("x=0 y=1 z=2");
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription(
+      "Creates a field with consisting of one component of a coupled variable.");
   params.addRequiredCoupledVar("gradient_variable",
                                "The variable from which to compute the gradient component");
   params.addParam<MooseEnum>("component", component, "The gradient component to compute");

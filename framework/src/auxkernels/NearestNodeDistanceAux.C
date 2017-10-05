@@ -22,6 +22,9 @@ InputParameters
 validParams<NearestNodeDistanceAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription(
+      "Stores the distance between a block and boundary or between two boundaries");
+
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to find the distance to.");
   params.set<bool>("use_displaced_mesh") = true;
   return params;

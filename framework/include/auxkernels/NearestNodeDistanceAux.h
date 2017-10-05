@@ -25,15 +25,11 @@ template <>
 InputParameters validParams<NearestNodeDistanceAux>();
 
 /**
- * Constant auxiliary value
+ * Computes the distance from a block or boundary to another boundary.
  */
 class NearestNodeDistanceAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NearestNodeDistanceAux(const InputParameters & parameters);
 
 protected:

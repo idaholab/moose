@@ -29,10 +29,6 @@ InputParameters validParams<ConstantAux>();
 class ConstantAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   ConstantAux(const InputParameters & parameters);
 
 protected:
