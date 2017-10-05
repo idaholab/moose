@@ -56,6 +56,14 @@ getSlepcValidParams(InputParameters & params)
                       "MF_NONLINEAR_POWER: Matrix-free Nonlinear Power "
                       "MONOLITH_NEWTON: Newton "
                       "MF_MONOLITH_NEWTON: Matrix-free Newton ");
+
+  // When the eigenvalue problems is reformed as a coupled nonlinear system,
+  // we use part of Jacobian as the preconditioning matrix.
+  // Because the difference between the Jacobian and the preconditioning matrix is not small,
+  // the linear solver KSP can not reduce the residual much. After several tests,
+  // we find 1e-2 is a reasonable choice.
+  params.set<Real>("l_tol") = 1e-2;
+
   return params;
 }
 
