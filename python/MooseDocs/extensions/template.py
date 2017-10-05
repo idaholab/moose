@@ -16,6 +16,7 @@
 import os
 import copy
 import logging
+import re
 
 import jinja2
 import bs4
@@ -111,7 +112,7 @@ class TemplatePostprocessorBase(Postprocessor):
         env.globals['relpath'] = self._relpath
         env.globals['breadcrumbs'] = self._breadcrumbs
         env.globals['load'] = self._load
-        env.globals['page_title'] = self.markdown.current.name
+        env.globals['display'] = self._display
 
     def arguments(self, template_args, text): #pylint: disable=no-self-use
         """
@@ -124,6 +125,7 @@ class TemplatePostprocessorBase(Postprocessor):
         template_args.setdefault('content', text)
         template_args.setdefault('navigation', [])
         template_args['page_status'] = self._pageStatus()
+        template_args['page_title'] = self._display(self.markdown.current)
 
     def run(self, text):
         """
@@ -244,6 +246,20 @@ class TemplatePostprocessorBase(Postprocessor):
         Loads css/js from given url and sets the correct relative path.
         """
         return self._relpath(location, self.markdown.current.destination)
+
+    @staticmethod
+    def _display(node):
+        """
+        Create the breadcumb display name (i.e., separate camel case).
+        """
+        out = []
+        index = 0
+        text = node.display
+        for match in re.finditer(r'[A-Z](?![A-Z])', text):
+            out.append(text[index:match.start(0)])
+            index = match.start(0)
+        out.append(text[index:])
+        return ' '.join(out)
 
 class TemplatePostprocessor(TemplatePostprocessorBase):
     """
