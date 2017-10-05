@@ -37,6 +37,9 @@ protected:
   virtual Real computeQpPGOffDiagJacobian(unsigned comp);
 
   bool _pspg;
+  Function & _x_ffn;
+  Function & _y_ffn;
+  Function & _z_ffn;
 };
 
 #endif // INSMASS_H
