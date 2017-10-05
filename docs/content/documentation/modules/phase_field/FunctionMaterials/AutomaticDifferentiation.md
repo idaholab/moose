@@ -91,4 +91,4 @@ JIT (Just In Time) compilation is available for parsed functions. The JIT system
 ## See also
 
 <!-- - [DerivativeParsedMaterial](/wiki/PhysicsModules/PhaseField/DevelopingModels/ParsedFunctionKernels) - automatic differentiation for MOOSE end users -->
-* [ExpressionBuilder](Function Materials/ExpressionBuilder.md) - building FParser expressions at compile time using operator overloading
+* [ExpressionBuilder](FunctionMaterials/ExpressionBuilder.md) - building FParser expressions at compile time using operator overloading

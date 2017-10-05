@@ -2,7 +2,7 @@
 
 The Kim-Kim-Suzuki (KKS) model in its current implementation is an implementation of the
 two-phase model presented in \cite{kim_phase-field_1999}.
-It features a single order parameter $\eta$, but has - compared to the [WBM](Multi Phase/WBM.md) -
+It features a single order parameter $\eta$, but has - compared to the [WBM](MultiPhase/WBM.md) -
 the added complexity of introducing phase-concentrations $(c_a, c_b)$, i.e. a
 concentration variable for each component and each phase, in addition to the
 global concentrations ($c$).
@@ -39,8 +39,8 @@ $$
 
 ## See also
 
-* [Derivation of the KKS system residuals and Jacobians](Multi Phase/KKS Derivations.md)
-* [Comparison with the analytical solution for an equilibrium interface](Multi Phase/KKS Analytical.md) for a simple 2-component example of the KKS model.
-* [KKS phase-field model with 3 or more components](Multi Phase/KKS Multi Component Example.md)
+* [Derivation of the KKS system residuals and Jacobians](MultiPhase/KKSDerivations.md)
+* [Comparison with the analytical solution for an equilibrium interface](MultiPhase/KKSAnalytical.md) for a simple 2-component example of the KKS model.
+* [KKS phase-field model with 3 or more components](MultiPhase/KKSMultiComponentExample.md)
 
 \bibliography{phase_field.bib}

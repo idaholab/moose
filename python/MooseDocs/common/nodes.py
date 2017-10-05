@@ -33,13 +33,17 @@ class NodeCore(anytree.NodeMixin):
         parent[NodeCore]: The parent node, use None to create a root node.
     """
     COLOR = 'RESET'
-    def __init__(self, name, parent=None, root_directory=None):
+    def __init__(self, name, parent=None, display=None, root_directory=None):
         super(NodeCore, self).__init__()
         self.parent = parent
         self.name = name
         self.status = collections.defaultdict(int)
         self._root_directory = root_directory if root_directory else MooseDocs.ROOT_DIR
         self.__cache = dict()
+
+        self._display = display
+        if self._display is None:
+            self._display = name
 
     @property
     def root_directory(self):
@@ -101,6 +105,13 @@ class NodeCore(anytree.NodeMixin):
         """
         self.status.clear()
 
+    @property
+    def display(self):
+        """
+        Return the display name.
+        """
+        return self._display
+
     def __repr__(self):
         """
         Print the node name.
@@ -122,7 +133,6 @@ class MarkdownNode(NodeCore):
     def __init__(self, name, content=None, **kwargs):
         super(MarkdownNode, self).__init__(name, **kwargs)
         self._content = content
-
     @property
     def filename(self):
         """
@@ -142,7 +152,7 @@ class FileTreeNodeBase(NodeCore):
     Base node type for the markdown file tree.
     """
     COLOR = 'YELLOW'
-    def __init__(self, name, base=None, display=None, **kwargs):
+    def __init__(self, name, base=None, **kwargs):
         super(FileTreeNodeBase, self).__init__(name, **kwargs)
         if base is None:
             if self.parent:
@@ -150,17 +160,6 @@ class FileTreeNodeBase(NodeCore):
             else:
                 base = ''
         self._base = base
-
-        self._display = display
-        if self._display is None:
-            self._display = name
-
-    @property
-    def display(self):
-        """
-        Return the display name.
-        """
-        return self._display
 
     @property
     def base(self):
