@@ -13,7 +13,7 @@ continues to act indefinitely.
 
 Polyline sinks and sources are modelled as sequences of discrete points:
 \begin{equation}
-\mbox{polyline}\sim \left\{x_{0},\ x_{1},\ x_{2},\ldots,x_{N}\right\} \ .
+\textrm{polyline}\sim \left\{x_{0},\ x_{1},\ x_{2},\ldots,x_{N}\right\} \ .
 \end{equation}
 The sink is
 \begin{equation}
@@ -51,8 +51,8 @@ The basic sink may be multiplied by any or all of the following quantities
 - Fluid internal energy
 
 That is, $f$ in Eq. \eqref{eq:line_sink} may be replaced by $fk_{r}$,
-$f\times\mbox{mobility}$, etc.  (The units of $fk_{r}$,
-$f\times\mbox{mobility}$, etc, are kg.s$^{-1}$ for fluid flow, or J.s$^{-1}$ for
+$f\times\textrm{mobility}$, etc.  (The units of $fk_{r}$,
+$f\times\textrm{mobility}$, etc, are kg.s$^{-1}$ for fluid flow, or J.s$^{-1}$ for
 heat flow.)  All these additional multiplicative factors are evaluated at the
 nodal positions, not at point $x_{i}$, to ensure superior numerical convergence
 (see [upwinding](/porous_flow/upwinding.md)).

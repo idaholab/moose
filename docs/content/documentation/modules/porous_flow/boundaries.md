@@ -22,7 +22,7 @@ This basic sink boundary condition is implemented in [`PorousFlowSink`](/porous_
 The basic sink may be multiplied by a MOOSE Function of the pressure
 of a fluid phase *or* the temperature:
 \begin{equation}
-s = f(t, x) \times g(P^{\beta}) \ \ \ \mbox{or}\ \ \ s = f(t, x)
+s = f(t, x) \times g(P^{\beta}) \ \ \ \textrm{or}\ \ \ s = f(t, x)
 \times g(T) \ .
 \end{equation}
 Here the units of $f\times g$ are kg.m$^{-2}$.s$^{-1}$ (for fluids) or

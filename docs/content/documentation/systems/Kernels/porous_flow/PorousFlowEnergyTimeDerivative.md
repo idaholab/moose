@@ -2,10 +2,9 @@
 !syntax description /Kernels/PorousFlowEnergyTimeDerivative
 
 This `Kernel` implements the weak form of
-\begin{equation}
+\begin{equation*}
   \frac{\partial}{\partial t}\left((1-\phi)\rho_{R}C_{R}T + \phi\sum_{\beta}S_{\beta}\rho_{\beta}\mathcal{E}_{\beta}\right)
-  \nonumber
-\end{equation}
+\end{equation*}
 where all parameters are defined in the [nomenclature](/porous_flow/nomenclature.md).
 
 !!! note

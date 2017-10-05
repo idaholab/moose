@@ -2,10 +2,9 @@
 !syntax description /Kernels/PorousFlowMassRadioactiveDecay
 
 This `Kernel` implements the weak form of
-\begin{equation}
+\begin{equation*}
   \Lambda \phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}
-  \nonumber
-\end{equation}
+\end{equation*}
 where all parameters are defined in the [nomenclature](/porous_flow/nomenclature.md).
 
 !syntax parameters /Kernels/PorousFlowMassRadioactiveDecay

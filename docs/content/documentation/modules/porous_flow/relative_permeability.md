@@ -52,12 +52,11 @@ $S_{\mathrm{eff}}=1$ do not converge well.
 Therefore, a *cut* version of the van Genuchten expression is also offered, which is
 almost definitely indistinguishable experimentally from the original expression:
 \begin{equation}
-k_{\mathrm{r}} = \left\{
-\begin{array}{ll}
-\mbox{van Genuchten} & \mbox{ for } S_{\mathrm{eff}} < S_{c} \\
-\mbox{cubic} & \mbox{ for } S_{\mathrm{eff}} \geq S_{c}.
-\end{array}
-\right.
+k_{\mathrm{r}} =
+\begin{cases}
+\textrm{van Genuchten} & \textrm{for } S_{\mathrm{eff}} < S_{c} \\
+\textrm{cubic} & \textrm{for } S_{\mathrm{eff}} \geq S_{c}.
+\end{cases}
 \end{equation}
 Here the cubic is chosen so that its value and derivative match the
 van Genuchten expression at $S=S_{c}$, and so that it is unity at

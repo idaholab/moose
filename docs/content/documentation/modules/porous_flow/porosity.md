@@ -118,7 +118,7 @@ In most instances it is appropriate to write this equation as
 \end{equation}
 where the total mechanical pressure is
 \begin{equation}
-P_{\mathrm{mech}} = - \mbox{Tr}\sigma/3 \ .
+P_{\mathrm{mech}} = - \textrm{Tr}\sigma/3 \ .
 \end{equation}
 and $K$ is the so-called *drained* bulk modulus $K = \delta_{ij}C_{ijkl}\delta_{kl}$.
 To find the evolution equation for porosity, a similar equation for
@@ -141,18 +141,14 @@ The work increment is
 So during some deformation that takes $P_{\mathrm{mech}}$ from
 $P_{\mathrm{mech}}^{i}$ to $P_{\mathrm{mech}}^{f}$, and $P_{\mathrm{f}}$ from
 $P_{\mathrm{f}}^{i}$ to $P_{\mathrm{f}}^{f}$, the total work is
-\begin{eqnarray}
-W & = & -\int P_{\mathrm{mech}} \mathrm{d}V + \int P_{\mathrm{f}} \mathrm{d}V_{\mathrm{f}}
-\ , \nonumber \\ & = &
-\frac{V}{K}\int_{P_{\mathrm{mech}}^{i}}^{P_{\mathrm{mech}}^{f}}P_{\mathrm{mech}}
-\mathrm{d}P_{\mathrm{mech}} -
-\frac{V{\alpha_{B}}}{K}\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}}P_{\mathrm{mech}}
-\mathrm{d}P_{\mathrm{f}} +
-V_{\mathrm{f}}A_{ii}\int_{P_{\mathrm{mech}}^{i}}^{P_{\mathrm{mech}}^{f}}P_{\mathrm{f}}
-\mathrm{d}P_{\mathrm{mech}} +
-V_{\mathrm{f}}A_{ii}B\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}}
-P_{\mathrm{f}} \mathrm{d}P_{\mathrm{f}} \ .
-\end{eqnarray}
+\begin{equation}
+\begin{aligned}
+W & = -\int P_{\mathrm{mech}} \mathrm{d}V + \int P_{\mathrm{f}} \mathrm{d}V_{\mathrm{f}}\ ,\\
+& = \frac{V}{K}\int_{P_{\mathrm{mech}}^{i}}^{P_{\mathrm{mech}}^{f}}P_{\mathrm{mech}} \mathrm{d}P_{\mathrm{mech}} - \frac{V{\alpha_{B}}}{K}\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}}P_{\mathrm{mech}} \mathrm{d}P_{\mathrm{f}} \\
+& + V_{\mathrm{f}}A_{ii}\int_{P_{\mathrm{mech}}^{i}}^{P_{\mathrm{mech}}^{f}}P_{\mathrm{f}} \mathrm{d}P_{\mathrm{mech}} + V_{\mathrm{f}}A_{ii}B\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}} P_{\mathrm{f}} \mathrm{d}P_{\mathrm{f}} \ .
+\end{aligned}
+\end{equation}
+
 Now consider two experiments:
 
 - First take $P_{\mathrm{mech}}$ from $0$ to $P_{\mathrm{mech}}$ with

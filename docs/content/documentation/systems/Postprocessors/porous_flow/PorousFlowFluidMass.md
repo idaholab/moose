@@ -2,9 +2,9 @@
 !syntax description /Postprocessors/PorousFlowFluidMass
 
 This `Postprocessor` calculates the mass of a fluid component $\kappa$ using
-\begin{equation}
-M^{\kappa} = \phi \sum_{\beta} \chi^{\kappa}_{\beta} \rho_{\beta} S_{\beta}, \nonumber
-\end{equation}
+\begin{equation*}
+M^{\kappa} = \phi \sum_{\beta} \chi^{\kappa}_{\beta} \rho_{\beta} S_{\beta},
+\end{equation*}
 where all variables are defined in [`nomenclature`](/porous_flow/nomenclature.md).
 
 The fluid component $\kappa$ is specified in the input parameter `fluid_component`.

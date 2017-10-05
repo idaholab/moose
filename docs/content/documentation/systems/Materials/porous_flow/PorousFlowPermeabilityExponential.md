@@ -2,9 +2,9 @@
 !syntax description /Materials/PorousFlowPermeabilityExponential
 
 A simple porosity-permeability model where
-\begin{equation}
-k_{ij} = B k_{ij}^{0} e^{A \phi}, \nonumber
-\end{equation}
+\begin{equation*}
+k_{ij} = B k_{ij}^{0} e^{A \phi},
+\end{equation*}
 where $\phi$ is the porosity, and $A$ and $B$ are user-defined constant.
 
 Input can be entered in any of three forms depending on the value of `poroperm_function`

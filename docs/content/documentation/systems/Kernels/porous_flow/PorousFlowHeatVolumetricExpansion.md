@@ -2,10 +2,9 @@
 !syntax description /Kernels/PorousFlowHeatVolumetricExpansion
 
 This `Kernel` implements the weak form of
-\begin{equation}
+\begin{equation*}
   \mathcal{E}\nabla\cdot\mathbf{v}_{s}
-  \nonumber
-\end{equation}
+\end{equation*}
 where all parameters are defined in the [nomenclature](/porous_flow/nomenclature.md).
 
 !syntax parameters /Kernels/PorousFlowHeatVolumetricExpansion
