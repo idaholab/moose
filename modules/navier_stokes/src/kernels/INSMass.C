@@ -121,6 +121,7 @@ INSMass::computeQpPGOffDiagJacobian(unsigned comp)
 
   return -1. / _rho[_qp] * tau() * _grad_test[_i][_qp] *
              (d_convective_term_d_u_comp + d_viscous_term_d_u_comp + d_transient_term_d_u_comp) -
-         dTauDUComp(comp) * _grad_test[_i][_qp] * (convective_term + viscous_term + transient_term +
-                                                   strongPressureTerm() + bodyForcesTerm());
+         1. / _rho[_qp] * dTauDUComp(comp) * _grad_test[_i][_qp] *
+             (convective_term + viscous_term + transient_term + strongPressureTerm() +
+              bodyForcesTerm());
 }
