@@ -172,7 +172,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _displaced_problem->undisplaceMesh();
 
   // Perform refinement and coarsening
+  Moose::perf_log.push("Adaptivity: refine_and_coarsen_elements()", "Execution");
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
+  Moose::perf_log.pop("Adaptivity: refine_and_coarsen_elements()", "Execution");
 
   if (_displaced_problem && mesh_changed)
   {
