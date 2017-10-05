@@ -39,7 +39,8 @@ FlagElementsThread::FlagElementsThread(FEProblemBase & fe_problem,
     _field_var(_fe_problem.getVariable(0, marker_name)),
     _field_var_number(_field_var.number()),
     _serialized_solution(serialized_solution),
-    _max_h_level(max_h_level)
+    _max_h_level(max_h_level),
+    _num_elements_needing_adapting(0)
 {
 }
 
@@ -54,7 +55,8 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
     _field_var(x._field_var),
     _field_var_number(x._field_var_number),
     _serialized_solution(x._serialized_solution),
-    _max_h_level(x._max_h_level)
+    _max_h_level(x._max_h_level),
+    _num_elements_needing_adapting(x._num_elements_needing_adapting)
 {
 }
 
@@ -85,15 +87,24 @@ FlagElementsThread::onElement(const Elem * elem)
   if (_max_h_level && marker_value == Marker::REFINE && elem->level() >= _max_h_level)
     marker_value = Marker::DO_NOTHING;
 
+  // Don't bother trying to coarsen level 0 elements
+  if (marker_value == Marker::COARSEN && elem->level() == 0)
+    marker_value = Marker::DO_NOTHING;
+
   const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);
 
   if (_displaced_problem)
     _displaced_problem->mesh()
         .elemPtr(elem->id())
         ->set_refinement_flag((Elem::RefinementState)marker_value);
+
+  // check if any mesh adaptivity is needed
+  if (marker_value == Marker::REFINE || marker_value == Marker::COARSEN)
+    _num_elements_needing_adapting++;
 }
 
 void
-FlagElementsThread::join(const FlagElementsThread & /*y*/)
+FlagElementsThread::join(const FlagElementsThread & y)
 {
+  _num_elements_needing_adapting += y._num_elements_needing_adapting;
 }
