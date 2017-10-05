@@ -1,6 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
+  nx = 10
 []
 
 [Variables]
@@ -17,6 +18,15 @@
     type = BodyForce
     variable = u
     value = 1
+  [../]
+[]
+
+[BCs]
+  [./u_left]
+    type = DirichletBC
+    boundary = left
+    variable = u
+    value = 0.0
   [../]
 []
 
