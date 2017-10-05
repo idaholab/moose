@@ -86,8 +86,8 @@
 [Executioner]
   type = Steady
 
-  l_max_its = 1
-  nl_max_its = 1
+  l_max_its = 10
+  nl_max_its = 10
 
   solve_type = JFNK
 []

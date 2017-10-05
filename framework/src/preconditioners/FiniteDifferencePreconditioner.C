@@ -46,11 +46,18 @@ validParams<FiniteDifferencePreconditioner>()
                         "matrix for degrees of freedom that might be coupled "
                         "by inspection of the geometric search objects.");
 
+  MooseEnum finite_difference_type("standard coloring", "coloring");
+  params.addParam<MooseEnum>("finite_difference_type",
+                             finite_difference_type,
+                             "standard: standard finite difference"
+                             "coloring: finite difference based on coloring");
+
   return params;
 }
 
 FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParameters & params)
-  : MoosePreconditioner(params)
+  : MoosePreconditioner(params),
+    _finite_difference_type(getParam<MooseEnum>("finite_difference_type"))
 {
   if (n_processors() > 1)
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
@@ -61,6 +68,10 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
   std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
 
   bool full = getParam<bool>("full");
+
+  // standard finite difference method will add off-diagonal entries
+  if (_finite_difference_type == "standard")
+    full = true;
 
   if (!full)
   {

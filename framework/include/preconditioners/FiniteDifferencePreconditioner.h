@@ -16,6 +16,7 @@
 #define FINITEDIFFERENCEPRECONDITIONER_H
 
 #include "MoosePreconditioner.h"
+#include "MooseEnum.h"
 
 class FiniteDifferencePreconditioner;
 
@@ -29,6 +30,10 @@ class FiniteDifferencePreconditioner : public MoosePreconditioner
 {
 public:
   FiniteDifferencePreconditioner(const InputParameters & params);
+  MooseEnum & finiteDifferenceType() { return _finite_difference_type; }
+
+private:
+  MooseEnum _finite_difference_type;
 };
 
 #endif /* FINITEDIFFERENCEPRECONDITIONER_H */

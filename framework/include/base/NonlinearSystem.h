@@ -73,6 +73,26 @@ public:
 
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
+
+private:
+  /**
+  * Form preconditioning matrix via a standard finite difference method
+  * column-by-column. This method computes both diagonal and off-diagonal
+  * entrices regardless of the structure pattern of the Jacobian matrix.
+  */
+  void setupStandardFiniteDifferencedPreconditioner();
+
+  /**
+  * According to the nonzero pattern provided in the matrix, a graph is constructed.
+  * A coloring algorithm is applied to the graph. The graph is partitioned into several
+  * independent subgraphs (colors), and a finte difference method is applied color-by-color
+  * to form a preconditioning matrix. If the number of colors is small, this method is much
+  * faster than the standard FD. But there is an issue. If the matrix provided by users does not
+  * represent the actual structure of the true Jacobian, the matrix computed via coloring could
+  * be wrong or inaccurate. In this case, users should switch to the standard finite difference
+  * method.
+  */
+  void setupColoringFiniteDifferencedPreconditioner();
 };
 
 #endif /* NONLINEARSYSTEM_H */
