@@ -84,10 +84,15 @@ The nonlinear residual will be \begin{equation} R \approx V|\epsilon| \ ,
 
 Often it is appropriate to scale the variables in order to weight their
 contributions to the overall nonlinear residual appropriately. For instance,
-suppose the previous arguments provided \begin{eqnarray} R_{\mathrm{fluid}} &
-\sim & 10^{-9}V \ , \nonumber \\ R_{\mathrm{heat}} & \sim & (10^{-3} +
-10^{6}\times 10^{-9}) V \ , \nonumber \\ R_{\mathrm{mech}} & \sim & V \ ,
-\end{eqnarray} (with the same $V$ in each case).  Then, a scaling of around
+suppose the previous arguments provided
+\begin{equation*}
+\begin{aligned}
+R_{\mathrm{fluid}} & \sim 10^{-9}V \ , \\
+R_{\mathrm{heat}} & \sim (10^{-3} + 10^{6}\times 10^{-9}) V \ , \\
+R_{\mathrm{mech}} & \sim V \ ,
+\end{aligned}
+\end{equation*}
+(with the same $V$ in each case).  Then, a scaling of around
 $10^9$ on the porepressure variable (or whatever MOOSE variable is associated to
 the fluid equation) would be appropriate.  Similarly, a scaling of around $10^3$
 on the temperature variable would be appropriate.

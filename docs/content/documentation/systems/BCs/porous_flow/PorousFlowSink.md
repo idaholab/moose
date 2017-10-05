@@ -2,9 +2,9 @@
 !syntax description /BCs/PorousFlowSink
 
 This sink is
-\begin{equation}
-s = f(t, x) \nonumber \ ,
-\end{equation}
+\begin{equation*}
+s = f(t, x) \ ,
+\end{equation*}
 where $f$ is a MOOSE Function of time and position on the boundary.
 
 If $f>0$ then the boundary condition will act as a sink, while if $f<0$ the boundary condition acts as a source.  If applied to a fluid-component equation, the function $f$ has units kg.m$^{-2}$.s$^{-1}$.  If applied to the heat equation, the function $f$ has units J.m$^{-2}$.s$^{-1}$.  These units are potentially modified if the extra building blocks enumerated below are used.

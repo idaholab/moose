@@ -2,10 +2,9 @@
 !syntax description /Kernels/PorousFlowHeatAdvection
 
 This `Kernel` implements the weak form of
-\begin{equation}
+\begin{equation*}
   -\nabla\cdot \sum_{\beta}h_{\beta} \rho_{\beta}\frac{k\,k_{\mathrm{r,}\beta}}{\mu_{\beta}}(\nabla P_{\beta} - \rho_{\beta} \mathbf{g})
-  \nonumber
-\end{equation}
+\end{equation*}
 where all parameters are defined in the [nomenclature](/porous_flow/nomenclature.md).
 
 !!! note
