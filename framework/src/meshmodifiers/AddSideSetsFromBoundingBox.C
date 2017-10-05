@@ -60,6 +60,9 @@ AddSideSetsFromBoundingBox::AddSideSetsFromBoundingBox(const InputParameters & p
 void
 AddSideSetsFromBoundingBox::modify()
 {
+  // this modifier is not designed for working with distributed mesh
+  _mesh_ptr->errorIfDistributedMesh("BreakBoundaryOnSubdomain");
+
   // Check that we have access to the mesh
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");

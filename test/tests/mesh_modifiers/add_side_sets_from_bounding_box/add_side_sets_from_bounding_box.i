@@ -3,6 +3,9 @@
   dim = 2
   nx = 10
   ny = 10
+  # This MeshModifier currently only works with ReplicatedMesh.
+  # For more information, refer to #2129.
+  parallel_type = replicated
 []
 
 [MeshModifiers]
