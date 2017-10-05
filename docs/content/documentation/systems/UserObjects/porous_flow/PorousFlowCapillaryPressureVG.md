@@ -3,25 +3,22 @@
 
 van Genuchten's capillary-pressure relationship \citep{vangenuchten1980}
 
-\begin{eqnarray}
-S_{\mathrm{eff}} & = & \left\{
-\begin{array}{ll}
-1 & \mbox{if } P \geq 0 \ , \\
-(1 + (-\alpha P)^{1/(1-m)})^{-m} & \mbox{if } P < 0\ .
+\begin{equation}
+S_{\mathrm{eff}} =
+\begin{cases}
+1 & \textrm{if } P \geq 0 \ , \\
+(1 + (-\alpha P)^{1/(1-m)})^{-m} & \textrm{if } P < 0 \ .
+\end{cases}
 \label{eq:vg_cap}
-\end{array}
-\right.
-\end{eqnarray}
+\end{equation}
 or
-\begin{eqnarray}
-P_{c} & = & \left\{
-\begin{array}{ll}
-0 & \mbox{if } S_{\mathrm{eff}} >= 1.0 \ , \\
-\frac{1}{\alpha} (S_{\mathrm{eff}}^{-1/m} - 1)^{1 - m} & \mbox{if }
-S_{\mathrm{eff}} < 1
-\end{array}
-\right.
-\end{eqnarray}
+\begin{equation}
+P_{c} =
+\begin{cases}
+0 & \textrm{if } S_{\mathrm{eff}} >= 1.0 \ , \\
+\frac{1}{\alpha} (S_{\mathrm{eff}}^{-1/m} - 1)^{1 - m} & \textrm{if } S_{\mathrm{eff}} < 1
+\end{cases}
+\end{equation}
 
 The effective saturation has been denoted by $S_{\mathrm{eff}}$ and
 $P$ is the porepressure, which is the *negative* of the capillary

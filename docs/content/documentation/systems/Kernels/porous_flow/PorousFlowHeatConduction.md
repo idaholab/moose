@@ -2,10 +2,9 @@
 !syntax description /Kernels/PorousFlowHeatConduction
 
 This `Kernel` implements the weak form of
-\begin{equation}
+\begin{equation*}
   -\nabla\cdot \left(\lambda \nabla T\right)
-  \nonumber
-\end{equation}
+\end{equation*}
 where all parameters are defined in the [nomenclature](/porous_flow/nomenclature.md).
 
 !syntax parameters /Kernels/PorousFlowHeatConduction

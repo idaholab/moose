@@ -57,11 +57,13 @@ but may also depend on mass fraction of individual components, as described by
 the equation of state used.
 
 The saturation and mass fractions must obey
-\begin{eqnarray}
-\sum_{\beta}S_{\beta} & = & 1 \ , \\
-\sum_{\kappa}\chi_{\beta}^{\kappa} & = & 1 \ \ \ \forall
+$$
+\begin{aligned}
+\sum_{\beta}S_{\beta} & =  1 \ , \\
+\sum_{\kappa}\chi_{\beta}^{\kappa} & =  1 \ \ \ \forall
 \beta \ .
-\end{eqnarray}
+\end{aligned}
+$$
 
 ###Flux
 The flux is a sum of advective flux and diffusive-and-dispersive flux:
@@ -181,14 +183,12 @@ T}^{\kappa}}{\mathbf{v}_{\beta}^{2}}\mathbf{v}_{\beta}\mathbf{v}_{\beta} \ ,
 \label{eq:hydro_disp}
 \end{equation}
 where
-\begin{eqnarray}
-D_{\beta,L}^{\kappa} & = &
-\phi\tau_{0}\tau_{\beta}d_{\beta}^{\kappa} + \alpha_{\beta,
-L}\left|\mathbf{v}\right|_{\beta} \ , \label{eq:dl} \\
-D_{\beta,T}^{\kappa} & = &
-\phi\tau_{0}\tau_{\beta}d_{\beta}^{\kappa} + \alpha_{\beta,
-T}\left|\mathbf{v}\right|_{\beta}  \ . \label{eq:dt}
-\end{eqnarray}
+\begin{equation}
+\begin{aligned}
+D_{\beta,L}^{\kappa} & = \phi \tau_0 \tau_{\beta} d_{\beta}^{\kappa} + \alpha_{\beta,L} \left| \mathbf{v} \right|_{\beta}, \\
+D_{\beta,T}^{\kappa} & = \phi \tau_0 \tau_{\beta} d_{\beta}^{\kappa} + \alpha_{\beta,T}\left| \mathbf{v} \right|_{\beta}.
+\end{aligned}
+\end{equation}
 
 These are called the longitudinal and transverse dispersion coefficients.
 $d_{\beta}^{\kappa}$ is the molecular diffusion coefficient for component
@@ -409,11 +409,11 @@ follows.
   defined: one for desorption, and one for adsorption, so
 \begin{equation}
 \tau_{L} = \left\{
-\begin{array}{ll}
-\tau_{L,\ \mathrm{desorption}} & \mbox{ if }
+\begin{aligned}
+\tau_{L,\ \mathrm{desorption}} & \textrm{ if }
 C>\frac{\rho_{L}P}{P_{L}+P} \\
-\tau_{L,\ \mathrm{adsorption}} & \mbox{ otherwise}
-\end{array}
+\tau_{L,\ \mathrm{adsorption}} & \textrm{ otherwise}
+\end{aligned}
 \right.
 \end{equation}
 A mollifier may also be defined to mollify the step-change between

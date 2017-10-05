@@ -3,10 +3,10 @@
 
 The basic sink $f(x,t)$ is multiplied by a piecewise linear MOOSE Function of the pressure
 of a fluid phase $g(P^{\beta})$ *or* the temperature $g(T)$:
-\begin{equation}
-s = f(t, x) \times g(P^{\beta}) \ \ \ \mbox{or}\ \ \ s = f(t, x)
-\times g(T) \nonumber \ .
-\end{equation}
+\begin{equation*}
+s = f(t, x) \times g(P^{\beta}) \ \ \ \textrm{or}\ \ \ s = f(t, x)
+\times g(T) \ .
+\end{equation*}
 Here the units of $f\times g$ are kg.m$^{-2}$.s$^{-1}$ (for fluids) or
 J.m$^{-1}$.s$^{-1}$ (for heat).
 

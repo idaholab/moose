@@ -49,7 +49,7 @@ $\tilde{R}$ is not exactly $R$, but note:
 
 This leads to the following definition of upwinding:
 \begin{equation}
-R_{a} \equiv m_{a}I_{a} \ \ \ \mbox{if}\ \ \ I_{a}\geq 0 \ .
+R_{a} \equiv m_{a}I_{a} \ \ \ \textrm{if}\ \ \ I_{a}\geq 0 \ .
 \end{equation}
 
 The nodes for which $I_{a}\geq 0$ are called *upwind nodes*, since fluid is
@@ -59,13 +59,13 @@ by \citet{dalen1979}.
 The residual at the downwind nodes is determined by conserving mass.
 Specifically, let
 \begin{equation}
-I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \mbox{and}\ \ \
+I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \textrm{and}\ \ \
 I_{\mathrm{down}} = -\sum_{I_{a}<0} I_{a} \ .
 \end{equation}
 Then
 \begin{equation}
 R_{a} = I_{a}\frac{I_{\mathrm{up}}}{I_{\mathrm{down}}}
-\ \ \ \mbox{for}\ \ \ I_{a}<0 \ .
+\ \ \ \textrm{for}\ \ \ I_{a}<0 \ .
 \end{equation}
 Then $\sum_{a} R_{a} = 0$ as required by mass conservation within the element (which originates from $\sum_{a} \psi_{a} = 1$).
 
@@ -73,7 +73,7 @@ The fully-upwind method is extremely advantageous to use if fluid saturations
 ever approach residual saturation (where $\kappa_{\mathrm{rel}}=0$) or zero
 density, for then the mobility is zero and it becomes impossible to withdraw
 fluid from such a node (in practice this may still happen due to precision loss
-or other related nasty artifacts).
+or other related nasty artefacts).
 
 Prescribed sinks, either from the boundary or from internal objects such as
 wellbores, are also fully-upwinded in PorousFlow since they also potentially

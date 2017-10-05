@@ -3,18 +3,17 @@
 
 The basic sink $f(x,t)$ is scaled by a cubic flux multiplier of the pressure
 of a fluid phase *or* the temperature $g(v)$:
-\begin{equation}
-  s = f(t, x) \times g(v) \nonumber \,
-\end{equation}
+\begin{equation*}
+  s = f(t, x) \times g(v) \,
+\end{equation*}
 where
-\begin{equation}
+\begin{equation*}
   g(v) =
   \begin{cases}
     g_{\mathrm{max}}, & \text{if}\ v < v - v_{\mathrm{center}} \\
     \frac{2 g_{\mathrm{max}} \left(2[v - v_{\mathrm{center}}] + v_{\mathrm{cutoff}}\right) (v - v_{\mathrm{center}} - v_{\mathrm{cutoff}})^2}{v_{\mathrm{cutoff}}^3},  & \text{otherwise}
   \end{cases}
- \nonumber
-\end{equation}
+\end{equation*}
 Here the units of $f\times g$ are kg.m$^{-2}$.s$^{-1}$ (for fluids) or
 J.m$^{-1}$.s$^{-1}$ (for heat). The parameters $g_{\mathrm{max}}$, $v_{\mathrm{center}}$ and $v_{\mathrm{cutoff}}$ are given in the input file using the `max`, `center` and `cutoff` options, respectively.
 
