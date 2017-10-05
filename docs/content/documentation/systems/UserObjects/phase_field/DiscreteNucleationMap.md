@@ -10,7 +10,7 @@ The map objects builds a smooth map of nucleation sites in the simulation domain
 
 The map object only updates the map if during a timestep the nucleus list was changed.
 
-The `DiscreteNucleationMap` is part of the [Discrete Nucleation system](Nucleation/Discrete Nucleation.md).
+The `DiscreteNucleationMap` is part of the [Discrete Nucleation system](Nucleation/DiscreteNucleation.md).
 
 !syntax parameters /UserObjects/DiscreteNucleationMap
 

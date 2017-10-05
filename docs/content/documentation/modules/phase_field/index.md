@@ -51,6 +51,6 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 * Fe-Cr Phase Decomposition - Illustrates using parsed function kernels to create a two phase decomposition simulation
 
 ## Misc
-* [Automatic Differentiation](Function Materials/Automatic Differentiation.md)
+* [Automatic Differentiation](FunctionMaterials/AutomaticDifferentiation.md)
 * [Function Materials](phase_field/FunctionMaterials.md)
-* [Just in Time Compilation](Function Materials/JIT Compilation.md)
+* [Just in Time Compilation](FunctionMaterials/JITCompilation.md)
