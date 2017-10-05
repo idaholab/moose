@@ -47,6 +47,7 @@ class TestHarness:
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
+        self.parse_errors = []
         self.test_table = []
         self.num_passed = 0
         self.num_failed = 0
@@ -142,7 +143,6 @@ class TestHarness:
     Recursively walks the current tree looking for tests to run
     Error codes:
     0x0  - Success
-    0x7F - Parser error (any flag in this range)
     0x80 - TestHarness error
     """
     def findAndRunTests(self, find_only=False):
@@ -200,7 +200,7 @@ class TestHarness:
 
             self.cleanup()
 
-            # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
+            # flags for the TestHarness start at the high bit
             if self.num_failed:
                 self.error_code = self.error_code | 0x80
 
@@ -222,7 +222,8 @@ class TestHarness:
         parser = Parser(self.factory, self.warehouse)
 
         # Parse it
-        self.error_code = self.error_code | parser.parse(file)
+        parser.parse(file)
+        self.parse_errors.extend(parser.errors)
 
         # Retrieve the tests from the warehouse
         testers = self.warehouse.getActiveObjects()
@@ -300,7 +301,7 @@ class TestHarness:
             tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
         elif self.num_failed > self.options.max_fails:
             tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
-        elif tester.parameters().isValid('error_code'):
+        elif tester.parameters().isValid('have_errors') and tester.parameters()['have_errors']:
             tester.setStatus('Parser Error', tester.bucket_skip)
 
     # This method splits a lists of tests into two pieces each, the first piece will run the test for
@@ -450,6 +451,11 @@ class TestHarness:
     def cleanup(self):
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
+        if len(self.parse_errors) > 0:
+            print('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS-1)))
+            for err in self.parse_errors:
+                print(util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code))
+
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS-1)))
             for (tester_data, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
@@ -461,10 +467,11 @@ class TestHarness:
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''
-        if self.error_code & Parser.getErrorCodeMask():
-            fatal_error += ', <r>FATAL PARSER ERROR</r>'
-        if self.error_code & ~Parser.getErrorCodeMask():
+        if self.error_code:
             fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
+        if len(self.parse_errors) > 0:
+            fatal_error += ', <r>FATAL PARSER ERROR</r>'
+            self.error_code = 1
 
         # Alert the user to their session file
         if self.options.queueing:
