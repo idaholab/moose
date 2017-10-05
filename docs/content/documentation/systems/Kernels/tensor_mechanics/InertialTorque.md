@@ -14,13 +14,13 @@ This Kernel is used in dynamic Cosserat solid-mechanics problems.
 
 Newmark time integration is used, which means the Newmark acceleration is defined by
 $$
-\ddot{u}_{\mathrm{Newmark}} = \frac{1}{\beta} \left( \frac{u - u_{\mathrm{old}}}{{\mathrm{d}t}^{2}} - \frac{\dot{u}_{\mathrm{old}}}{{\mathrm{d}t}} - (\mbox{$\frac{1}{2}$} - \beta)\ddot{u}_{\mathrm{old}} \right) \ ,
+\ddot{u}_{\mathrm{Newmark}} = \frac{1}{\beta} \left( \frac{u - u_{\mathrm{old}}}{{\mathrm{d}t}^{2}} - \frac{\dot{u}_{\mathrm{old}}}{{\mathrm{d}t}} - (\tfrac{1}{2} - \beta)\ddot{u}_{\mathrm{old}} \right) \ ,
 $$
 and the velocity by
 $$
 \dot{u} = \dot{u}_{\mathrm{old}} + {\mathrm{d}t} (1 - \gamma)\ddot{u}_{\mathrm{old}} + \gamma {\mathrm{d}t}\ddot{u}_{\mathrm{Newmark}} \ .
 $$
-The Newmark parameters must satisfy $0\leq \gamma\leq 1$ and $0 \leq \beta \leq 1/2$.  When $\gamma\geq 1/2$ and $\beta\geq \mbox{$\frac{1}{4}$}(\gamma + \mbox{$\frac{1}{2}$})^{2}$, the Newmark scheme is unconditionally stable.
+The Newmark parameters must satisfy $0\leq \gamma\leq 1$ and $0 \leq \beta \leq 1/2$.  When $\gamma\geq 1/2$ and $\beta\geq \tfrac{1}{4}(\gamma + \tfrac{1}{2})^{2}$, the Newmark scheme is unconditionally stable.
 
 Parameters ($\eta$ and $\alpha$) are also included that allow Rayleigh damping and HHT time integration, meaning that the final form for acceleration is
 $$
