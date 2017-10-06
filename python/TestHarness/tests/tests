@@ -63,8 +63,4 @@
     type = PythonUnitTest
     input = test_ShouldExecute.py
   [../]
-  [./queue_pbs]
-    type = PythonUnitTest
-    input = test_QueuePBS.py
-  [../]
 []

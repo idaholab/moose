@@ -1,5 +1,6 @@
 from QueueManager import QueueManager
 import os, re
+from TestHarness import util
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
@@ -13,29 +14,26 @@ class RunPBS(QueueManager):
         QueueManager.__init__(self, harness, params)
         self.params = params
 
-    def postLaunchCommand(self, jobs):
-        """ Release supplied jobs that should be on hold """
-        job_ids = []
-        for job in jobs:
-            job_data = self.getData(job.getUniqueIdentifier(), job_id=True)
-            job_ids.append(job_data['job_id'])
+    def postLaunch(self, jobs):
+        """ Release jobs that were placed on hold """
+        print('releasing jobs...')
+        # TODO: Do something else, than this one-at-a-time stuff.
+        #       Also we should be returning a command to run, and not calling runCommand ourselves.
+        for job_container in jobs:
+            test_unique = self.getUnique(job_container)
+            json_session = self.getData(test_unique, job_id=True)
+            util.runCommand('qrls %s' % (json_session['job_id']))
 
-        if job_ids:
-            return 'qrls %s' % (' '.join(job_ids))
-
-    def handleJobStatus(self, job, output):
-        """
-        Call appropriate methods depending on current state of QueueManager
-        and return a resulting dictionary of information relevant to PBS
-        """
+    def handleJobStatus(self, job_container, output):
+        """ Call appropriate methods depending on current state of QueueManager """
         if self.checkStatusState():
-            return self.handleQstatOutput(job, output)
+            return self.handleQstatOutput(job_container, output)
         else:
-            return self.handleQsubOutput(job, output)
+            return self.handleQsubOutput(job_container, output)
 
-    def getQueueCommand(self, job):
+    def getQueueCommand(self, job_container):
         """ Return appropriate PBS command depending on current QueueManager state """
-        test_unique = job.getUniqueIdentifier()
+        test_unique = self.getUnique(job_container)
 
         if self.checkStatusState():
             job = self.getData(test_unique, job_id=True)
@@ -44,21 +42,20 @@ class RunPBS(QueueManager):
             job = self.getData(test_unique, queue_script=True, working_dir=True)
             return 'qsub -h %s' % (os.path.join(job['working_dir'], job['queue_script']))
 
-    def augmentQueueParams(self, job, template):
-        """ Populate QSUB template with relevant PBS information for job """
-        tester = job.getTester()
+    def augmentQueueParams(self, job_container, template):
+        """ Populate QSUB template with relevent PBS information for job """
+        tester = job_container.getTester()
 
         # Discover prereq launch job IDs
-        dag_obj = job.getOriginalDAG()
-        prereqs = dag_obj.predecessors(job)
-
+        prereqs = tester.getPrereqs()
         template['prereq'] = ''
         if prereqs:
             prereq_job_ids = []
-            for prereq in prereqs:
-                unique = prereq.getUniqueIdentifier()
-                tmp_json = self.getData(unique, job_id=True)
+            for prereq_test_name in prereqs:
+                pre_unique = os.path.join(tester.getTestDir(), prereq_test_name)
+                tmp_json = self.getData(pre_unique, job_id=True)
                 prereq_job_ids.append(tmp_json['job_id'])
+
             template['prereq'] = '#PBS -W depend=afterany:%s' % (':'.join(prereq_job_ids))
             template['prereq_ids'] = prereq_job_ids
 
@@ -79,54 +76,55 @@ class RunPBS(QueueManager):
 
         return template
 
-    def handleQsubOutput(self, job, output):
-        """
-        Set the job's status and return any relevant information
-        about the launched PBS job we want stored in QueueManager's
-        session storage file.
-        """
+    def handleQsubOutput(self, job_container, output):
+        """ Set a status based on output supplied by qsub """
+        tester = job_container.getTester()
+        test_unique = self.getUnique(job_container)
         pattern = re.compile(r'^(\d+)\.[\W\w]+$')
-        tester = job.getTester()
 
-        job_info = {}
         if pattern.search(output):
             job_id = pattern.search(output).group(1)
-            self.setJobStatus(job, tester.bucket_queued, 'LAUNCHED %s' %(str(job_id)))
-            job_info = { 'job_id' : job_id }
 
-        # Failed to launch somehow. Set the tester output to command output. Hopefully something
-        # useful in there to display to the user on why we failed
+            # Update the queue_data based on results
+            job = self.getData(test_unique, job_name=True)
+
+            self.putData(test_unique, job_id=job_id, std_out=job['job_name'] + '.o%s' %(job_id))
+
+            # It may seem odd to place a tester that we know is queued, into a
+            # TestHarness pending status. But we do so because at this stage, the
+            # TestHarness is on its first-half stage, so it truly is still _pending_.
+            # It still needs to attempt processResults (second-half). Which when it
+            # does, will either see this test as awaiting_processing (and end with
+            # pass or fail) or finished as queued because the test has not yet
+            # finished running in the PBS system.
+
+            # See handleQstatOutput below for more detail. Consider that method the
+            # second-half stage.
+            tester.setStatus('%s LAUNCHED' % (str(job_id)), tester.bucket_pending)
+
+        elif 'command not found' in output:
+            tester.setStatus('QSUB NOT FOUND', tester.bucket_fail)
+
         else:
-            job.setOutput(output)
-            self.setJobStatus(job, tester.bucket_fail, 'QSUB FAILURE')
+            tester.setStatus('QSUB INVALID RESULTS: %s' % (output), tester.bucket_fail)
 
-        return job_info
+        return output
 
-    def handleQstatOutput(self, job, output):
-        """
-        Set the job's status and return any relevant information
-        about the pending PBS job we want stored in QueueManager's
-        session storage file.
-        """
-        tester = job.getTester()
+    def handleQstatOutput(self, job_container, output):
+        """ Handle statuses supplied by qstat output. """
+        tester = job_container.getTester()
         output_value = re.search(r'job_state = (\w)', output)
-
-        # Default bucket
-        bucket = tester.bucket_queued
-        job_info = {}
 
         if output_value:
             # Job is finished
             if output_value.group(1) == 'F':
                 reason = 'WAITING'
 
-                # Set the std_out path
-                job_id = re.search(r'Job Id: (\w+)', output).group(1)
-                session_data = self.getData(job.getUniqueIdentifier(), job_name=True)
-                job_info['std_out'] = session_data['job_name'] + '.o' + job_id
-
-                # Set the bucket that allows processResults to commence
-                bucket = tester.bucket_waiting_processing
+                # Tester has finished running in the PBS system.
+                #
+                # Note: Other testers may still be running that can influence
+                # the results of this tester.
+                tester.setStatus(reason, tester.bucket_waiting_processing)
 
             # Job is currently running
             elif output_value.group(1) == 'R':
@@ -147,14 +145,15 @@ class RunPBS(QueueManager):
             # Unknown statuses should be treated as failures
             else:
                 reason = 'UNKNOWN PBS STATUS'
-                bucket = tester.bucket_fail
-                job.setOutput(output)
+                tester.setStatus(reason, tester.bucket_fail)
+
+            # Update the tester caveat and adjust the tester for a finished status
+            if tester.isPending():
+                tester.setStatus(reason, tester.bucket_queued)
 
         else:
             # Job status not available
             reason = 'INVALID QSTAT RESULTS'
-            bucket = tester.bucket_fail
-            job.setOutput(output)
+            tester.setStatus(reason, tester.bucket_fail)
 
-        self.setJobStatus(job, bucket, reason)
-        return job_info
+        return output

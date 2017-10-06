@@ -30,7 +30,7 @@ class ImageDiff(FileTester):
 
         # Call base class processResults
         FileTester.processResults(self, moose_dir, options, output)
-        if self.didFail():
+        if self.getStatus() == self.bucket_fail:
             return output
 
         # Loop through files
@@ -64,8 +64,8 @@ class ImageDiff(FileTester):
                     self.setStatus('IMAGEDIFF', self.bucket_diff)
                     break
 
-        # If status has not failed yet, then it is a passing test
-        if not self.didFail():
+        # If status is still pending, then it is a passing test
+        if self.getStatus() == self.bucket_pending:
             self.setStatus(self.success_message, self.bucket_success)
 
         return output
