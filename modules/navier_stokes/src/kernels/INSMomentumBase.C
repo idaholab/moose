@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "INSMomentumBase.h"
+#include "Function.h"
 
 template <>
 InputParameters
@@ -17,6 +18,7 @@ validParams<INSMomentumBase>()
       "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts.");
   params.addParam<bool>(
       "supg", false, "Whether to perform SUPG stabilization of the momentum residuals");
+  params.addParam<FunctionName>("forcing_func", 0, "The mms forcing function.");
   return params;
 }
 
@@ -24,7 +26,8 @@ INSMomentumBase::INSMomentumBase(const InputParameters & parameters)
   : INSBase(parameters),
     _component(getParam<unsigned>("component")),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
-    _supg(getParam<bool>("supg"))
+    _supg(getParam<bool>("supg")),
+    _ffn(getFunction("forcing_func"))
 {
   if (_supg && !_convective_term)
     mooseError("It doesn't make sense to conduct SUPG stabilization without a convective term.");
@@ -68,8 +71,9 @@ INSMomentumBase::computeQpPGResidual()
   RealVectorValue transient_term =
       _transient_term ? timeDerivativeTerm() : RealVectorValue(0, 0, 0);
 
-  return tau() * U * _grad_test[_i][_qp] * (convective_term + viscous_term + transient_term +
-                                            strongPressureTerm() + bodyForcesTerm())(_component);
+  return tau() * U * _grad_test[_i][_qp] *
+         ((convective_term + viscous_term + transient_term + strongPressureTerm() +
+           bodyForcesTerm())(_component)-_ffn.value(_t, _q_point[_qp]));
 
   // For GLS as opposed to SUPG stabilization, one would need to modify the test function functional
   // space to include second derivatives of the Galerkin test functions corresponding to the viscous
@@ -118,15 +122,14 @@ INSMomentumBase::computeQpPGJacobian(unsigned comp)
 
   return dTauDUComp(comp) * U * _grad_test[_i][_qp] *
              (convective_term + viscous_term + strongPressureTerm()(_component) +
-              bodyForcesTerm()(_component) + transient_term) +
+              bodyForcesTerm()(_component) + transient_term - _ffn.value(_t, _q_point[_qp])) +
          tau() * d_U_d_U_comp * _grad_test[_i][_qp] *
              (convective_term + viscous_term + strongPressureTerm()(_component) +
-              bodyForcesTerm()(_component) + transient_term) +
+              bodyForcesTerm()(_component) + transient_term - _ffn.value(_t, _q_point[_qp])) +
          tau() * U * _grad_test[_i][_qp] *
              (d_convective_term_d_u_comp + d_viscous_term_d_u_comp + d_transient_term_d_u_comp);
 }
 
-// Fix me
 Real
 INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 {
