@@ -276,7 +276,8 @@ INSBase::tau()
   Real nu = _mu[_qp] / _rho[_qp];
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real h = _current_elem->hmax();
-  return _alpha / std::sqrt((2. * U.norm() / h) * (2. * U.norm() / h) +
+  Real transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
+  return _alpha / std::sqrt(transient_part + (2. * U.norm() / h) * (2. * U.norm() / h) +
                             9. * (4. * nu / (h * h)) * (4. * nu / (h * h)));
 }
 
@@ -303,7 +304,8 @@ INSBase::dTauDUComp(unsigned comp)
   Real nu = _mu[_qp] / _rho[_qp];
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real h = _current_elem->hmax();
-  return -_alpha / 2. * std::pow((2. * U.norm() / h) * (2. * U.norm() / h) +
+  Real transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
+  return -_alpha / 2. * std::pow(transient_part + (2. * U.norm() / h) * (2. * U.norm() / h) +
                                      9. * (4. * nu / (h * h)) * (4. * nu / (h * h)),
                                  -1.5) *
          2. * (2. * U.norm() / h) * 2. / h * U(comp) * _phi[_j][_qp] /

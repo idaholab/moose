@@ -72,14 +72,12 @@
 
 // Kernels
 #include "INSMass.h"
-#include "INSMassBodyForceMMS.h"
 #include "INSMassRZ.h"
 #include "INSMomentumTimeDerivative.h"
 #include "INSMomentumTractionForm.h"
 #include "INSMomentumTractionFormRZ.h"
 #include "INSMomentumLaplaceForm.h"
 #include "INSMomentumLaplaceFormRZ.h"
-#include "INSMomentumBodyForceMMS.h"
 #include "INSTemperatureTimeDerivative.h"
 #include "INSTemperature.h"
 #include "INSSplitMomentum.h"
@@ -261,14 +259,12 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Kernels
   registerKernel(INSMass);
-  registerKernel(INSMassBodyForceMMS);
   registerKernel(INSMassRZ);
   registerKernel(INSMomentumTimeDerivative);
   registerKernel(INSMomentumTractionForm);
   registerKernel(INSMomentumTractionFormRZ);
   registerKernel(INSMomentumLaplaceForm);
   registerKernel(INSMomentumLaplaceFormRZ);
-  registerKernel(INSMomentumBodyForceMMS);
   registerKernel(INSTemperatureTimeDerivative);
   registerKernel(INSTemperature);
   registerKernel(INSSplitMomentum);

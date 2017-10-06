@@ -1,17 +1,18 @@
-mu=1.5
+mu=1.5e-2
 rho=2.5
 
 [GlobalParams]
   gravity = '0 0 0'
-  pspg = true
+  supg = true
   convective_term = true
-  integrate_p_by_parts = true
+  integrate_p_by_parts = false
+  transient_term = true
   laplace = true
   u = vel_x
   v = vel_y
   p = p
-  alpha = 1e-6
-  order = FIRST
+  alpha = 1e0
+  order = SECOND
   family = LAGRANGE
 []
 
@@ -43,6 +44,7 @@ rho=2.5
   [../]
 
   [./p]
+    order = FIRST
   [../]
 []
 
@@ -51,8 +53,15 @@ rho=2.5
   [./mass]
     type = INSMass
     variable = p
-    x_vel_forcing_func = vel_x_source_func
-    y_vel_forcing_func = vel_y_source_func
+  [../]
+
+  [./x_time]
+    type = INSMomentumTimeDerivative
+    variable = vel_x
+  [../]
+  [./y_time]
+    type = INSMomentumTimeDerivative
+    variable = vel_y
   [../]
 
   # x-momentum, space
@@ -60,6 +69,7 @@ rho=2.5
     type = INSMomentumLaplaceForm
     variable = vel_x
     component = 0
+    forcing_func = vel_x_source_func
   [../]
 
   # y-momentum, space
@@ -67,6 +77,7 @@ rho=2.5
     type = INSMomentumLaplaceForm
     variable = vel_y
     component = 1
+    forcing_func = vel_y_source_func
   [../]
 
   [./vel_x_source]
@@ -74,7 +85,6 @@ rho=2.5
     function = vel_x_source_func
     variable = vel_x
   [../]
-
   [./vel_y_source]
     type = BodyForce
     function = vel_y_source_func
@@ -138,10 +148,6 @@ rho=2.5
     type = ParsedFunction
     value = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
   [../]
-  [./px_func]
-    type = ParsedFunction
-    value = '0.1*pi*y*cos(0.2*pi*x*y) + 0.25*pi*cos(0.5*pi*x)'
-  [../]
 []
 
 [Materials]
@@ -162,19 +168,28 @@ rho=2.5
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 10
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   line_search = 'none'
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-13
-  nl_max_its = 6
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-14
+  nl_max_its = 10
   l_tol = 1e-6
-  l_max_its = 500
+  l_max_its = 10
+  [./TimeStepper]
+    dt = .05
+    type = IterationAdaptiveDT
+    cutback_factor = 0.4
+    growth_factor = 1.2
+    optimal_iterations = 20
+  [../]
 []
 
 [Outputs]
+  execute_on = 'final'
   [./exodus]
     type = Exodus
   [../]
@@ -212,21 +227,10 @@ rho=2.5
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
-  [./L2px]
-    variable = px
-    function = px_func
-    type = ElementL2Error
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
-  [../]
 []
 
 [AuxVariables]
   [./vxx]
-    family = MONOMIAL
-    order = FIRST
-  [../]
-  [./px]
     family = MONOMIAL
     order = FIRST
   [../]
@@ -238,11 +242,5 @@ rho=2.5
     component = x
     variable = vxx
     gradient_variable = vel_x
-  [../]
-  [./px]
-    type = VariableGradientComponent
-    component = x
-    variable = px
-    gradient_variable = p
   [../]
 []

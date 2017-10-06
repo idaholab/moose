@@ -41,6 +41,10 @@ def laplace2(u, x, y):
 Kernel operators and corresponding surface integral terms
 '''
 
+def L_advection(u, x, y):
+    ax, ay = sp.var('ax ay')
+    return sp.Matrix([ax, ay]).transpose() * sp.Matrix([sp.diff(u, x), sp.diff(u, y)])
+
 def L_diffusion(u, x, y):
     return -laplace2(u, x, y)
 
@@ -229,4 +233,6 @@ def prep_moose_input(sym_expr):
     rep1 = re.sub(r'\*\*',r'^',str(sym_expr))
     rep2 = re.sub(r'mu',r'${mu}',rep1)
     rep3 = re.sub(r'rho',r'${rho}',rep2)
-    return rep3
+    rep4 = re.sub(r'ax', r'${ax}', rep3)
+    rep5 = re.sub(r'ay', r'${ay}', rep4)
+    return rep5
