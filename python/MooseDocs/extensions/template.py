@@ -16,7 +16,6 @@
 import os
 import copy
 import logging
-import re
 
 import jinja2
 import bs4
@@ -252,14 +251,7 @@ class TemplatePostprocessorBase(Postprocessor):
         """
         Create the breadcumb display name (i.e., separate camel case).
         """
-        out = []
-        index = 0
-        text = node.display
-        for match in re.finditer(r'[A-Z](?![A-Z])', text):
-            out.append(text[index:match.start(0)])
-            index = match.start(0)
-        out.append(text[index:])
-        return ' '.join(out)
+        return mooseutils.camel_to_space(node.display)
 
 class TemplatePostprocessor(TemplatePostprocessorBase):
     """
