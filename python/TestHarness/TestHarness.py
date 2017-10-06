@@ -404,9 +404,7 @@ class TestHarness:
                     print(output)
 
             caveat_formatted_results = self.formatCaveats(tester)
-            output = util.formatResult(tester_data, caveat_formatted_results, self.options)
-            if output:
-                print(output)
+            print(util.formatResult(tester_data, caveat_formatted_results, self.options))
         return caveat_formatted_results
 
     def handleTestStatus(self, tester_data):

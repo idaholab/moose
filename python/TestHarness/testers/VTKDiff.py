@@ -29,7 +29,7 @@ class VTKDiff(RunApp):
         # Skip
         specs = self.specs
 
-        if self.didFail() or specs['skip_checks']:
+        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output
 
         # Don't Run VTKDiff on Scaled Tests
@@ -65,8 +65,8 @@ class VTKDiff(RunApp):
                         self.setStatus('VTKDIFF', self.bucket_skip)
                         break
 
-        # If status has not failed yet, then it is a passing test
-        if not self.didFail():
+        # If status is still pending, then it is a passing test
+        if self.getStatus() == self.bucket_pending:
             self.setStatus(self.success_message, self.bucket_success)
 
         return output
