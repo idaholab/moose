@@ -73,6 +73,7 @@ validParams<FrictionalContactProblem>()
   params.addParam<std::vector<std::string>>(
       "contact_reference_residual_variables",
       "Set of variables that provide reference residuals for relative contact convergence check");
+  params.addClassDescription("Helps utilize kinematic enforcement of frictional contact");
   return params;
 }
 

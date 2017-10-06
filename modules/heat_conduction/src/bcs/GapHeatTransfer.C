@@ -74,6 +74,8 @@ validParams<GapHeatTransfer>()
   params.addCoupledVar("gap_distance", "Distance across the gap");
   params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
 
+  params.addClassDescription("BC that aids with thermal contact");
+
   return params;
 }
 

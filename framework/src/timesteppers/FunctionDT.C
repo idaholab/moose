@@ -33,6 +33,8 @@ validParams<FunctionDT>()
                         true,
                         "Whether or not to interpolate DT between times.  "
                         "This is true by default for historical reasons.");
+  params.addClassDescription(
+      "Timestepper whose steps vary over time according to a user-defined fuction");
 
   return params;
 }

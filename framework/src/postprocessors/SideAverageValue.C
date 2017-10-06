@@ -19,6 +19,7 @@ InputParameters
 validParams<SideAverageValue>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
+  params.addClassDescription("Computes the area or volume weighted average");
   return params;
 }
 
