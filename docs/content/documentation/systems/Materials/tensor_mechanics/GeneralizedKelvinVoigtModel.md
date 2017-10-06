@@ -12,7 +12,7 @@ $$
 The $\alpha^{n}$ are the internal strains associated to each Kelvin-Voigt unit and obey the following time-dependent differential equation:
 
 $$
-\forall n \in \[1, N\]: \sigma_{ij} = C^{n}_{ijkl} \left( \alpha^{n} + \eta^{n} \dot{\alpha}^{n} \right)
+\forall n \in [1, N]: \sigma_{ij} = C^{n}_{ijkl} \left( \alpha^{n} + \eta^{n} \dot{\alpha}^{n} \right)
 $$
 
 $C^{n}$ is the stiffness of the $n^{th}$ spring in the chain (a fourth-order tensor, identical in symmetry and dimensions to a standard elasticity tensor), while $\eta^{n}$ is the viscosity of the associated dashpot (a scalar with the dimension of time).
@@ -52,12 +52,15 @@ The GeneralizedKelvinVoigtModel is compatible with either the total small strain
 | [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) | [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) | [LinearViscoelasticStressUpdate](/LinearViscoelasticStressUpdate.md) |
 | [ComputeFiniteStrain](/ComputeFiniteStrain.md) | [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) | [LinearViscoelasticStressUpdate](/LinearViscoelasticStressUpdate.md) |
 
+The stress calculators use the actual elasticity tensor of the material $C_{ijkl}$, which is provided by the GeneralizedKelvinVoigtModel itself.
+
+
 ### Driving Eigenstrain (Optional)
 
 If the user defines a driving eigenstrain, then the stress induced by this eigenstrain is added to the creep calculation. Essentially, this replaces the differential relation in each Kelvin-Voigt module with:
 
 $$
-\forall n \in \[1, N\]: \sigma_{ij} + C_{ijkl} \epsilon^{driving}_{kl} = C^{n}_{ijkl} \left( \alpha^{n} + \eta^{n} \dot{\alpha}^{n} \right)
+\forall n \in [1, N]: \sigma_{ij} + C_{ijkl} \epsilon^{driving}_{kl} = C^{n}_{ijkl} \left( \alpha^{n} + \eta^{n} \dot{\alpha}^{n} \right)
 $$
 
 ### Syntax

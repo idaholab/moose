@@ -12,7 +12,7 @@ $$
 The $\alpha^{n}$ are the internal strains associated to each Maxwell unit, and $C^{n}$ the stiffness of the corresponding spring (a fourth-order tensor, identical in symmetry and dimensions to a standard elasticity tensor). The $\alpha^{n}$ obey the following time-dependent differential equation:
 
 $$
-\forall n \in \[1, N\]: \epsilon^{mech} - \alpha^{n} = \eta^{n} \dot{\alpha}^{n}
+\forall n \in [1, N]: \epsilon^{mech} - \alpha^{n} = \eta^{n} \dot{\alpha}^{n}
 $$
 
 With $\eta^{n}$ is the viscosity of the associated dashpot (a scalar with the dimension of time).
@@ -57,7 +57,7 @@ The GeneralizedMaxwellModel is compatible with either the total small strain app
 If the user defines a driving eigenstrain, then the stress induced by this eigenstrain is added to the creep calculation. Essentially, this replaces the differential relation in each Kelvin-Voigt module with:
 
 $$
-\forall n \in \[1, N\]: \epsilon^{mech} + \epsilon^{driving} - \alpha^{n} = \eta^{n} \dot{\alpha}^{n}
+\forall n \in [1, N]: \epsilon^{mech} + \epsilon^{driving} - \alpha^{n} = \eta^{n} \dot{\alpha}^{n}
 $$
 
 ### Syntax

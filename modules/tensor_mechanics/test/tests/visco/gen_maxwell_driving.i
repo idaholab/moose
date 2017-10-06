@@ -156,9 +156,6 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
   l_max_its  = 50
   l_tol      = 1e-8
   nl_max_its = 20
