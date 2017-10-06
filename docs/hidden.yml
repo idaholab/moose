@@ -984,6 +984,7 @@ tensor_mechanics:
     - /Materials/HyperElasticPhaseFieldIsoDamage
     - /Materials/InclusionProperties
     - /Materials/LinearElasticTruss
+    - /Materials/LinearViscoelasticStressUpdate
     - /Materials/MultiPhaseStressMaterial
     - /Materials/PowerLawCreepStressUpdate
     - /Materials/StressBasedChemicalPotential
@@ -1015,6 +1016,7 @@ tensor_mechanics:
     - /UserObjects/HEVPEqvPlasticStrainRate
     - /UserObjects/HEVPFlowRatePowerLawJ2
     - /UserObjects/HEVPLinearHardening
+    - /UserObjects/LinearViscoelasticityManager
     - /UserObjects/HEVPRambergOsgoodHardening
     - /UserObjects/TensorMechanicsHardeningConstant
     - /UserObjects/TensorMechanicsHardeningCubic

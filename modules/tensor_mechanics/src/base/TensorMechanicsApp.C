@@ -113,6 +113,10 @@
 #include "ComputeInterfaceStress.h"
 #include "TensileStressUpdate.h"
 #include "ComputeFiniteStrainElasticStressBirchMurnaghan.h"
+#include "GeneralizedMaxwellModel.h"
+#include "GeneralizedKelvinVoigtModel.h"
+#include "LinearViscoelasticStressUpdate.h"
+#include "ComputeLinearViscoelasticStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -142,6 +146,7 @@
 #include "HEVPEqvPlasticStrain.h"
 #include "HEVPEqvPlasticStrainRate.h"
 #include "HEVPFlowRatePowerLawJ2.h"
+#include "LinearViscoelasticityManager.h"
 
 #include "CylindricalRankTwoAux.h"
 #include "RankTwoAux.h"
@@ -333,6 +338,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(TensileStressUpdate);
   registerMaterial(ComputeFiniteStrainElasticStressBirchMurnaghan);
   registerMaterial(EshelbyTensor);
+  registerMaterial(GeneralizedMaxwellModel);
+  registerMaterial(GeneralizedKelvinVoigtModel);
+  registerMaterial(LinearViscoelasticStressUpdate);
+  registerMaterial(ComputeLinearViscoelasticStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
@@ -369,6 +378,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
   registerUserObject(GeneralizedPlaneStrainUserObject);
   registerUserObject(CrackFrontDefinition);
+  registerUserObject(LinearViscoelasticityManager);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);

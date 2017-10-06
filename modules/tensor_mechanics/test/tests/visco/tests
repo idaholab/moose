@@ -1,0 +1,39 @@
+[Tests]
+  [./burgers]
+    type = 'Exodiff'
+    input = 'burgers_creep.i'
+    exodiff = 'burgers_creep_out.e'
+  [../]
+  [./generalized_kelvin_voigt]
+    type = 'Exodiff'
+    input = 'gen_kv_creep.i'
+    exodiff = 'gen_kv_creep_out.e'
+  [../]
+  [./generalized_maxwell]
+    type = 'Exodiff'
+    input = 'gen_maxwell_relax.i'
+    exodiff = 'gen_maxwell_relax_out.e'
+  [../]
+  [./generalized_kelvin_voigt_w_driving]
+    type = 'Exodiff'
+    input = 'gen_kv_driving.i'
+    exodiff = 'gen_kv_driving_out.e'
+    custom_cmp = 'visco_driving.cmd'
+  [../]
+  [./generalized_maxwell_w_driving]
+    type = 'Exodiff'
+    input = 'gen_maxwell_driving.i'
+    exodiff = 'gen_maxwell_driving_out.e'
+    custom_cmp = 'visco_driving.cmd'
+  [../]
+  [./generalized_kelvin_voigt_finite_strain]
+    type = 'Exodiff'
+    input = 'visco_finite_strain.i'
+    exodiff = 'visco_finite_strain_out.e'
+  [../]
+  [./generalized_kelvin_voigt_small_strain]
+    type = 'Exodiff'
+    input = 'visco_small_strain.i'
+    exodiff = 'visco_small_strain_out.e'
+  [../]
+[]
