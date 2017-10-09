@@ -15,6 +15,9 @@ The same procedure that is used with
 [ConstantDT](/Executioner/TimeStepper/framework/ConstantDT.md) is used to cut back the time step from the
 user-specified value if a failed solution occurs.
 
+## Example Input Syntax
+!listing /test/tests/time_steppers/function_dt/function_dt_min.i block=Executioner
+
 !syntax parameters /Executioner/TimeStepper/FunctionDT
 
 !syntax inputs /Executioner/TimeStepper/FunctionDT

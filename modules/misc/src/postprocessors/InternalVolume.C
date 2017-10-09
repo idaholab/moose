@@ -13,6 +13,9 @@ InputParameters
 validParams<InternalVolume>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
+  params.addClassDescription("Computes the volume of an enclosed area by calculating the integral "
+                             "over the surface, specified by the given boundary, of the domain.");
+
   params.addRangeCheckedParam<unsigned int>(
       "component", 0, "component<3", "The component to use in the integration");
   params.addParam<Real>(
@@ -20,7 +23,6 @@ validParams<InternalVolume>()
   params.addParam<Real>(
       "addition", 0, "An additional volume to be included in the internal volume calculation");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addClassDescription("Computes the volume of an enclosed space");
   return params;
 }
 

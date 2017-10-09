@@ -5,7 +5,8 @@ to control the solver behavior and time stepping. Time stepping is controlled by
 of commands in the `Executioner` block, and the `TimeStepper` block nested within the
 `Executioner` block.
 
-Many PETSc options exist. Please see the online PETSc documentation for details.
+Many PETSc options exist. Please see the online
+[PETSc documentation](http://www.mcs.anl.gov/petsc/documentation/index.html) for details.
 
 !syntax objects /Executioner
 

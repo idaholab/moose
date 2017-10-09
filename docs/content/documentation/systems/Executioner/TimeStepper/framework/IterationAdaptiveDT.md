@@ -9,7 +9,7 @@ based on the difficulty of the solution.
 `IterationAdaptiveDT` grows or shrinks the time step based on the number of iterations taken
 to obtain a converged solution in the last converged step. The required `optimal_iterations`
 parameter controls the number of nonlinear iterations per time step that provides optimal solution
-efficiency. If more iterations than that are required to obatin a converged solution, the time step
+efficiency. If more iterations than that are required to obtain a converged solution, the time step
 may be too large, resulting in undue solution difficulty, while if fewer iterations are required, it
 may be possible to take larger time steps to obtain a solution more quickly.
 
@@ -52,7 +52,6 @@ conditions applied to the model over a step. In addition to that limit, the bool
 !media media/executioner/adaptive_dt_criteria.png width=70% id=fig:adaptive_dt_criteria caption=Criteria used to determine adaptive time step size
 
 ## Example Input Syntax
-
 !listing test/tests/time_steppers/iteration_adaptive/adapt_tstep_shrink_init_dt.i block=Executioner
 
 !syntax parameters /Executioner/TimeStepper/IterationAdaptiveDT

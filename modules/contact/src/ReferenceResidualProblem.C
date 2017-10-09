@@ -18,6 +18,10 @@ InputParameters
 validParams<ReferenceResidualProblem>()
 {
   InputParameters params = validParams<FEProblem>();
+  params.addClassDescription("Convergence criteria helper which defines convergence with respect "
+                             "to physical variables, e.g. displacement or temperature, by using "
+                             "the initial values of these variables at the first iteration of each "
+                             "timstep as the initial convergence comparison value.");
   params.addParam<std::vector<std::string>>(
       "solution_variables", "Set of solution variables to be checked for relative convergence");
   params.addParam<std::vector<std::string>>(
@@ -29,7 +33,6 @@ validParams<ReferenceResidualProblem>()
   params.addParam<int>("acceptable_iterations",
                        0,
                        "Iterations after which convergence to acceptable limits is accepted");
-  params.addClassDescription("Alternative way to signify convergence of a timestep");
   return params;
 }
 

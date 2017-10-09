@@ -15,6 +15,8 @@ InputParameters
 validParams<IsotropicPlasticity>()
 {
   InputParameters params = validParams<ReturnMappingModel>();
+  params.addClassDescription("Calculates the stress and plastic strain in the general isotropic "
+                             "linear strain hardening plasticity model");
 
   // Linear strain hardening parameters
   params.addParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
@@ -23,7 +25,6 @@ validParams<IsotropicPlasticity>()
   params.addParam<Real>("hardening_constant", "Hardening slope");
   params.addParam<FunctionName>("hardening_function",
                                 "True stress as a function of plastic strain");
-  params.addClassDescription("Models the instantaneous plasticity of Zry cladding");
 
   return params;
 }
