@@ -3,6 +3,7 @@ from InputFile import InputFile
 import mooseutils
 import InputTreeWriter
 import os
+import hit
 
 class InputTree(object):
     """
@@ -53,6 +54,17 @@ class InputTree(object):
         if self.app_info.valid():
             self._copyDefaultTree()
 
+    def _getComments(self, node):
+        """
+        Get the comments for a node
+        """
+        comments = []
+        for n in node.children(node_type=hit.NodeType.Comment):
+            c = n.render().strip()[1:].strip()
+            comments.append(c)
+
+        return '\n'.join(comments)
+
     def setInputFile(self, input_filename):
         """
         The input file has changed.
@@ -65,6 +77,8 @@ class InputTree(object):
             # if the user passes in a bad input file, then leave
             # things untouched
             new_input_file = InputFile(input_filename)
+            if not new_input_file.root_node:
+                return False
             self.input_file = new_input_file
         except Exception:
             return False
@@ -72,12 +86,12 @@ class InputTree(object):
         self.input_filename = input_filename
         if self.app_info.valid():
             self._copyDefaultTree()
-            self.root.comments = '\n'.join(self.input_file.root_node.comments)
+            self.root.comments = self._getComments(self.input_file.root_node)
 
-            for root_node in self.input_file.getTopNodes():
+            for root_node in self.input_file.root_node.children(node_type=hit.NodeType.Section):
                 self._addInputFileNode(root_node)
-                if root_node not in self.root.children_write_first:
-                    self.root.children_write_first.append(root_node.name)
+                if root_node.path() not in self.root.children_write_first:
+                    self.root.children_write_first.append(root_node.path())
             return True
         return False
 
@@ -85,9 +99,9 @@ class InputTree(object):
         """
         This adds a node from the input file.
         Input:
-            input_node[GPNode]: The node from the input file.
+            input_node[hit.Node]: The node from the input file.
         """
-        path = input_node.fullName(no_root=True)
+        path = "/" + input_node.fullpath()
         entry = self.path_map.get(path)
         if not entry:
             parent_path = os.path.dirname(path)
@@ -97,36 +111,34 @@ class InputTree(object):
                 mooseutils.mooseWarning("Could not create %s" % path)
                 return
 
-        entry.comments = "\n".join(input_node.comments)
+        entry.comments = self._getComments(input_node)
         entry.included = True
         entry.hard = True
 
-        in_type_name = input_node.params.get("type")
+        in_type = input_node.find("type")
         param_info = entry.parameters.get("type")
-        if in_type_name and param_info:
-            entry.setBlockType(in_type_name)
-            param_info.value = in_type_name
+        if in_type and in_type.raw() and param_info:
+            entry.setBlockType(in_type.raw())
+            param_info.value = in_type.raw()
             if "type" not in entry.parameters_list:
                 entry.parameters_list.insert(0, "type")
 
-        for param_name in input_node.params_list:
-            param_value = input_node.params[param_name]
-            param_info = self.getParamInfo(path, param_name)
+        for param_node in input_node.children(node_type=hit.NodeType.Field):
+            param_info = self.getParamInfo(path, param_node.path())
             if not param_info:
                 # must be a user added param
-                param_info = self.addUserParam(path, param_name, param_value)
+                param_info = self.addUserParam(path, param_node.path(), param_node.raw())
             else:
-                param_info.value = param_value
+                param_info.value = param_node.raw()
             param_info.set_in_input_file = True
             if param_info.name not in param_info.parent.parameters_write_first:
                 param_info.parent.parameters_write_first.append(param_info.name)
-            param_info.comments = input_node.param_comments.get(param_name, "")
+            param_info.comments = self._getComments(param_node)
 
-        for child_name in input_node.children_list:
-            child_node = input_node.children[child_name]
+        for child_node in input_node.children(node_type=hit.NodeType.Section):
             self._addInputFileNode(child_node)
-            if child_name not in entry.children_write_first:
-                entry.children_write_first.append(child_name)
+            if child_node.path() not in entry.children_write_first:
+                entry.children_write_first.append(child_node.path())
 
     def getInputFileString(self):
         """
@@ -137,6 +149,8 @@ class InputTree(object):
         return InputTreeWriter.inputTreeToString(self.root)
 
     def addUserBlock(self, parent, name):
+        if not parent:
+            parent = "/"
         info = self.path_map.get(parent)
         if info and info.star_node:
             block = self._copyNode(info.path, info, info.star_node, name)
