@@ -1,0 +1,7 @@
+[Tests]
+  [./reducedOrderRZLinear]
+    type = 'CSVDiff'
+    input = reducedOrderRZLinear.i
+    csvdiff = reducedOrderRZLinear_out_hydro_0001.csv
+  [../]
+[]
