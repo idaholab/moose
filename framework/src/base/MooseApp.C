@@ -1117,6 +1117,15 @@ MooseApp::getMeshModifier(const std::string & name) const
   return *_mesh_modifiers.find(MooseUtils::shortName(name))->second.get();
 }
 
+std::vector<std::string>
+MooseApp::getMeshModifierNames() const
+{
+  std::vector<std::string> names;
+  for (auto & pair : _mesh_modifiers)
+    names.push_back(pair.first);
+  return names;
+}
+
 void
 MooseApp::executeMeshModifiers()
 {
