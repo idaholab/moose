@@ -63,7 +63,7 @@ TimeSeriesAverage::getValue()
 Real
 TimeSeriesAverage::stepAverage() const
 {
-  int i = _history.size();
+  std::size_t i = _history.size();
   int back = i - _previous_steps;
   unsigned int n = 0;
   Real sum = 0.0;
