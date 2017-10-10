@@ -90,6 +90,7 @@ class Job(object):
             self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
             return
 
+        self.__start_time = clock()
         self.timer.reset()
         self.__tester.run(self.timer, self.options)
         self.__start_time = self.timer.starts[0]
