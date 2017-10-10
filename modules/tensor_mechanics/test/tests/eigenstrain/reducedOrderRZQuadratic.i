@@ -5,11 +5,8 @@
 # eigenstrain_names in the Modules/TensorMechanics/Master/all block, the output will be
 # quite different.
 #
-# Open the reducedOrderRZLinear_out_hydro_0001.csv file and plot the hydro variables as
-# a function of x.  For the reduced order case, the values are smooth across each of the
-# two elements with a jump upward from the left element to the right element.  However,
-# when not using 'reduced_order_eigenstrain', a jump downward appears from the left
-# element to the right element.
+# Open the reducedOrderRZQuadratic_out_hydro_0001.csv file and plot the hydro variables as
+# a function of x.
 #
 
 [GlobalParams]
@@ -30,7 +27,7 @@
   xmin = 1
   ymax = 1
   ymin = 0
-  #second_order = true
+  second_order = true
 []
 
 [Functions]
@@ -40,7 +37,9 @@
   [../]
   [./tempQuadratic]
     type = ParsedFunction
-    value = '2.5*x*x-15*x+722.5'
+    vars = 'Tc Te'
+    vals = '701 700'
+    value = '(Te-Tc)/4.0*x*x+(Tc-Te)/2.0*x+Te+3.0*(Tc-Te)/4.0'
   [../]
   [./tempCubic]
     type = ParsedFunction
@@ -52,7 +51,7 @@
   [./temp]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 700
+    initial_condition = 295.0
   [../]
 []
 
@@ -93,8 +92,32 @@
     order = SECOND
     family = MONOMIAL
   [../]
-  [./temp2]
+  [./thermal_constant]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./thermal_first]
     order = FIRST
+    family = MONOMIAL
+  [../]
+  [./thermal_second]
+    order = SECOND
+    family = MONOMIAL
+  [../]
+  [./reduced_constant]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./reduced_first]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./reduced_second]
+    order = SECOND
+    family = MONOMIAL
+  [../]
+  [./temp2]
+    order = SECOND
     family = LAGRANGE
     initial_condition = 700
   [../]
@@ -108,7 +131,8 @@
         strain = SMALL
         incremental = true
         temperature = temp2
-        eigenstrain_names = 'reduced_order_eigenstrain' #'thermal_eigenstrain'
+        #eigenstrain_names = thermal_eigenstrain
+        eigenstrain_names = reduced_order_eigenstrain
       [../]
     [../]
   [../]
@@ -127,18 +151,21 @@
     variable = hydro_constant
     rank_two_tensor = stress
     scalar_type = Hydrostatic
+    execute_on = timestep_end
   [../]
   [./hydro_first_aux]
     type = RankTwoScalarAux
     variable = hydro_first
     rank_two_tensor = stress
     scalar_type = Hydrostatic
+    execute_on = timestep_end
   [../]
   [./hydro_second_aux]
     type = RankTwoScalarAux
     variable = hydro_second
     rank_two_tensor = stress
     scalar_type = Hydrostatic
+    execute_on = timestep_end
   [../]
   [./sxx_constant_aux]
     type = RankTwoAux
@@ -146,6 +173,7 @@
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
+    execute_on = timestep_end
   [../]
   [./sxx_first_aux]
     type = RankTwoAux
@@ -153,6 +181,7 @@
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
+    execute_on = timestep_end
   [../]
   [./sxx_second_aux]
     type = RankTwoAux
@@ -160,6 +189,7 @@
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
+    execute_on = timestep_end
   [../]
   [./szz_constant_aux]
     type = RankTwoAux
@@ -167,6 +197,7 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
+    execute_on = timestep_end
   [../]
   [./szz_first_aux]
     type = RankTwoAux
@@ -174,6 +205,7 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
+    execute_on = timestep_end
   [../]
   [./szz_second_aux]
     type = RankTwoAux
@@ -181,26 +213,69 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
+    execute_on = timestep_end
+  [../]
+  [./thermal_constant_aux]
+    type = RankTwoAux
+    variable = thermal_constant
+    rank_two_tensor = thermal_eigenstrain
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./thermal_first_aux]
+    type = RankTwoAux
+    variable = thermal_first
+    rank_two_tensor = thermal_eigenstrain
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./thermal_second_aux]
+    type = RankTwoAux
+    variable = thermal_second
+    rank_two_tensor = thermal_eigenstrain
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./reduced_constant_aux]
+    type = RankTwoAux
+    variable = reduced_constant
+    rank_two_tensor = reduced_order_eigenstrain
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./reduced_first_aux]
+    type = RankTwoAux
+    variable = reduced_first
+    rank_two_tensor = reduced_order_eigenstrain
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./reduced_second_aux]
+    type = RankTwoAux
+    variable = reduced_second
+    rank_two_tensor = reduced_order_eigenstrain
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./temp2]
     type = FunctionAux
     variable = temp2
-    function = tempLinear
+    function = tempQuadratic
     execute_on = timestep_begin
   [../]
 []
 
 [BCs]
-  [./no_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 0.0
-  [../]
   [./no_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 'bottom top'
+    boundary = bottom #'bottom top'
     value = 0.0
   [../]
 
@@ -225,14 +300,14 @@
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1
+    youngs_modulus = 1e8
     poissons_ratio = 0
   [../]
   [./fuel_thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
-    thermal_expansion_coeff = 1
+    thermal_expansion_coeff = 1e-6
     temperature = temp2
-    stress_free_temperature = 700.0
+    stress_free_temperature = 295.0
     incremental_form = true
     eigenstrain_name = 'thermal_eigenstrain'
   [../]
@@ -260,7 +335,7 @@
   petsc_options_value = '70 hypre boomeramg'
 
   num_steps = 1
-  nl_rel_tol = 1e-8 #1e-12
+  nl_rel_tol = 1e-8
 []
 
 [Postprocessors]
@@ -272,11 +347,11 @@
 [VectorPostprocessors]
   [./hydro]
     type = LineValueSampler
-    num_points = 100
+    num_points = 50
     start_point = '1 0.07e-3 0'
     end_point = '3 0.07e-3 0'
     sort_by = x
-    variable = 'hydro_constant hydro_first hydro_second temp2 disp_x disp_y'
+    variable = 'temp2 disp_x disp_y hydro_constant hydro_first hydro_second sxx_constant sxx_first sxx_second szz_constant szz_first szz_second thermal_constant thermal_first thermal_second reduced_constant reduced_first reduced_second'
   [../]
 []
 
