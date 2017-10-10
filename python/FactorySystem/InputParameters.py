@@ -45,6 +45,11 @@ class InputParameters:
     def __contains__(self, item):
         return item in self.desc
 
+    def get(self, key, default=None):
+        if self.isValid(key):
+            return self[key]
+        return default
+
     def __getitem__(self, key):
         return self.valid[key]
 
