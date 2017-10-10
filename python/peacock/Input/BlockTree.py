@@ -284,6 +284,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         self.blockSignals(True)
         self.expandItem(item)
         new_block.included = True
+        print(new_block.path)
         self.addBlock(new_block, True)
         self.blockSignals(False)
 

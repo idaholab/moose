@@ -34,6 +34,19 @@ class BlockInfo(object):
         self.hard = hard
         self.description = ""
         self.parent = parent
+        self.changed_by_user = False
+
+    def checkInactive(self):
+        return not self.included and self.wantsToSave()
+
+    def wantsToSave(self):
+        return self.changed_by_user or self.user_added or self.included or self.childrenWantToSave()
+
+    def childrenWantToSave(self):
+        for key in self.children_list:
+            if self.children[key].wantsToSave():
+                return True
+        return False
 
     def getParamInfo(self, param):
         """

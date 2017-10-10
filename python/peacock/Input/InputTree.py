@@ -131,6 +131,7 @@ class InputTree(object):
             else:
                 param_info.value = param_node.raw()
             param_info.set_in_input_file = True
+            param_info.parent.changed_by_user = True
             if param_info.name not in param_info.parent.parameters_write_first:
                 param_info.parent.parameters_write_first.append(param_info.name)
             param_info.comments = self._getComments(param_node)

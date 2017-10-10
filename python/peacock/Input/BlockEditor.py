@@ -168,6 +168,7 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.block.comments = self.comment_edit.getComments()
         self.param_editor.save()
+        self.block.changed_by_user = True
         self._blockChanged(enabled=False)
         self.blockChanged.emit(self.block)
 

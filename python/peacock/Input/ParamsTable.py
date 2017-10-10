@@ -353,6 +353,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         p = name_item.data(Qt.UserRole)
         self.removed_params.append(p)
         self.removeRow(row)
+        self.changed.emit()
 
     def createRow(self, param, name_editable=False, value_editable=True, comments_editable=True, index=-1):
         """

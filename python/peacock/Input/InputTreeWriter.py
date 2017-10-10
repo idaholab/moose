@@ -16,6 +16,15 @@ def mergeWriteFirstLists(first, complete):
             l.append(x)
     return l
 
+def writeInactive(output, parent, children, indent, sep):
+    inactive = []
+    for child in children:
+        entry = parent.children.get(child, None)
+        if entry and entry.checkInactive():
+            inactive.append(entry.name)
+    if inactive:
+        output.write("%sinactive = '%s'\n" % (indent*sep, ' '.join(inactive)))
+
 def inputTreeToString(root, sep="  "):
     """
     Main access point to write an InputTree to a string.
@@ -29,9 +38,10 @@ def inputTreeToString(root, sep="  "):
         commentString(output, root.comments, 0, sep)
     children = mergeWriteFirstLists(root.children_write_first, root.children_list)
     last_child = children[-1]
+    writeInactive(output, root, children, 0, sep)
     for child in children:
         entry = root.children.get(child, None)
-        if entry and entry.included:
+        if entry and entry.wantsToSave():
             writeToString(output, entry, 0, sep, child == last_child)
     return output.getvalue()
 
@@ -47,9 +57,10 @@ def writeToString(output, entry, indent, sep="  ", is_last=False):
     nodeHeaderString(output, entry, indent, sep)
     nodeParamsString(output, entry, indent+1, sep)
     children = mergeWriteFirstLists(entry.children_write_first, entry.children_list)
+    writeInactive(output, entry, children, indent+1, sep)
     for child in children:
         child_entry = entry.children.get(child, None)
-        if child_entry and child_entry.included:
+        if child_entry and child_entry.wantsToSave():
             writeToString(output, child_entry, indent+1, sep)
     nodeCloseString(output, entry, indent, sep, is_last)
 
