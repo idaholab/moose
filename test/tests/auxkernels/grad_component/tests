@@ -1,9 +1,14 @@
 [Tests]
-  [./test]
+  [./lagrange]
     type = 'Exodiff'
     input = 'grad_component.i'
     exodiff = 'grad_component_out.e'
     use_old_floor = true
     abs_zero = 1e-09
+  [../]
+  [./monomial]
+    type = 'Exodiff'
+    input = 'grad_component_monomial.i'
+    exodiff = 'grad_component_monomial_out.e'
   [../]
 []
