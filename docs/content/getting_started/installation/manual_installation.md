@@ -1,8 +1,5 @@
 # Manual Installation
-!include docs/content/getting_started/minimum_requirements.md
-
----
-## Pre-Reqs
+## Prerequisites
 * Cmake 3.4 or greater will be needed when building Clang. We will also need Cmake for building PETSc. Unless your system is very old, one should be able to use their system's package manager (apt-get, yum, zypper, etc) to install a compatible version of Cmake. For older systems, you will need to obtain cmake source from http://www.cmake.org, and build it appropriately for your system.
 
 * Python 2.7 is required to build Clang 3.7.0. Please use your package manager or other documentation on installing Python 2.7 side-by-side or otherwise known as `altinstall`, so as not to overwrite your current older 'possibly needed' Python implementation. An easy set of instructions for doing this can be found all over the internets. Personally, I have used the following with success: [http://tecadmin.net/install-python-2-7-on-centos-rhel](http://tecadmin.net/install-python-2-7-on-centos-rhel)
@@ -37,7 +34,6 @@ sudo mkdir -p $PACKAGES_DIR
 sudo chown -R moose $PACKAGES_DIR
 ```
 
----
 ## GCC
 We need a modern C++11 capable compiler. Our minimum requirements will be:  GCC 4.8.4, Clang 3.4.0, Intel20130607. This document will focus on building a Clang 3.7.0 compiler stack. Because we are focusing on building a Clang compiler (Clangs ability to compile C++11 code is substantially quicker than GCC), this document's GCC version will be 5.4.0 (the minimum GCC version to build Clang 3.7.0 is GCC 5.2.x). If your available system GCC compiler is at, or greater than 5.2.0, you can effectively skip this step.
 
@@ -86,7 +82,6 @@ Any errors during configure/make will need to be investigated on your own. Every
     export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-5.4.0/lib64:$PACKAGES_DIR/gcc-5.4.0/lib:$PACKAGES_DIR/gcc-5.4.0/lib/gcc/x86_64-unknown-linux-gnu/5.4.0:$PACKAGES_DIR/gcc-5.4.0/libexec/gcc/x86_64-unknown-linux-gnu/5.4.0:$LD_LIBRARY_PATH
     </pre>
 
----
 ## Clang
 We will clone all the necessary repositories involved with building LLVM/Clang from source:
 ```bash
@@ -148,8 +143,6 @@ make install
 !!! Info
     Because we have a revision controlled checkout of LLVM, it is easy to switch between different releases if one has need of it. For example, what is listed here is 'release_37', but on my CentOS 7 test machine for which I have been using in creating these instructions, I have found no release would work, except 'master'. Which at the time of this writing, was hash: `695eea88e991443e69a980fed224ad1d9abf631e` (in case anyone finds that useful).
 
-
----
 ## MPICH
 Download MPICH 3.2
 ```bash
@@ -205,7 +198,6 @@ make install
     export LD_LIBRARY_PATH=$PACKAGES_DIR/mpich-3.2/lib:$PACKAGES_DIR/mpich-3.2/lib/openmpi:$LD_LIBRARY_PATH
     </pre>
 
----
 ## PETSc
 Download PETSc 3.6.4
 ```bash
@@ -269,7 +261,6 @@ Completed test examples
 =========================================
 ```
 
----
 ## Change Ownership
 We are done building libraries, so lets chown up the target directory appropriately
 ```bash
@@ -277,7 +268,6 @@ sudo chown -R root:root $PACKAGES_DIR
 ```
 This is more of a formality step, so any potential user of your newly built compiler stack does not see everything owned by a non-root user.
 
----
 ## bash_profile
 Now that PETSc has been successfully installed and tested, its time to wrap all these environment variables up, and throw them in a bash shell profile somewhere.
 
@@ -317,3 +307,5 @@ Thats it! Now you can either source this file manually each time you need to wor
 source /path/to/moose-environment.sh
 ```
 Or you can permanently have it loaded each time you open a terminal by adding the above `source` command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
+
+!include docs/content/getting_started/minimum_requirements.md

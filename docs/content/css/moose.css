@@ -68,26 +68,43 @@ html, body {
 
 h1, h2, h3, h4, h5, h6 {
   text-align: left;
+  margin-top: 10px;
 }
 
 h1 {
     font-size:260%;
-    font-weight:300;
+    font-weight:400;
+    margin-bottom: 30px;
 }
 
 h2 {
     font-size:230%;
     font-weight:300;
+    margin-bottom: 20px;
 }
 
 h3 {
     font-size:160%;
     font-weight:300;
+    margin-bottom: 20px;
 }
 
 h4 {
     font-size:140%;
     font-weight:300;
+    margin-bottom:15px;
+}
+
+h5 {
+    font-size:120%;
+    font-weight:200;
+    margin-bottom:10px;
+}
+
+h6 {
+    font-size:100%;
+    font-weight:200;
+    margin-bottom:10px;
 }
 
 p {
