@@ -429,7 +429,6 @@ contact:
     - /DiracKernels/ContactMaster
     - /DiracKernels/SlaveConstraint
     - /Preconditioning/ContactSplit
-    - /Problem/FrictionalContactProblem
     - /Problem/ReferenceResidualProblem
     - /UserObjects/NodalArea
 fluid_properties:

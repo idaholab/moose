@@ -4270,8 +4270,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
   Moose::perf_log.push("computePostCheck()", "Execution");
 
   // MOOSE's FEProblemBase doesn't update the solution during the
-  // postcheck, but FEProblemBase-derived classes (see e.g.
-  // FrictionalContactProblem) might.
+  // postcheck, but FEProblemBase-derived classes might.
   if (_has_dampers || shouldUpdateSolution())
   {
     // We need ghosted versions of new_soln and search_direction (the
