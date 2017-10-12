@@ -25,6 +25,14 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpStress() override;
 
+  /**
+   * InitialStress TODO: remove this method
+   *
+   * Rotates initial_stress via rotation_increment.
+   * In large-strain scenarios this must be used before addQpInitialStress
+   */
+  virtual void rotateQpInitialStress();
+
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
   const MaterialProperty<RankTwoTensor> & _stress_old;

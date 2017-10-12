@@ -118,6 +118,7 @@
 #include "GeneralizedKelvinVoigtModel.h"
 #include "LinearViscoelasticStressUpdate.h"
 #include "ComputeLinearViscoelasticStress.h"
+#include "ComputeEigenstrainFromInitialStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -347,6 +348,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(LinearViscoelasticStressUpdate);
   registerMaterial(ComputeLinearViscoelasticStress);
   registerMaterial(ThermalFractureIntegral);
+  registerMaterial(ComputeEigenstrainFromInitialStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
