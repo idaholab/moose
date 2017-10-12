@@ -111,11 +111,16 @@
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '1 0.1 0.2  0.1 1 0.3  0 0 2' # not symmetric
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = stress
-    initial_stress = '1 0.1 0.2  0.1 1 0.3  0 0 2' # not symmetric
   [../]
   [./stress]
     type = CappedWeakPlaneCosseratStressUpdate

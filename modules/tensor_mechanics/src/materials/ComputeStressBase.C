@@ -14,12 +14,12 @@ InputParameters
 validParams<ComputeStressBase>()
 {
   InputParameters params = validParams<Material>();
-  params.addDeprecatedParam<std::vector<FunctionName>>(
+  params.addParam<std::vector<FunctionName>>(
       "initial_stress",
       "A list of functions describing the initial stress.  If provided, there "
       "must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, "
       "zz components respectively.  If not provided, all components of the "
-      "initial stress will be zero", "This functionality was deprecated on 12 October 2017 and is set to be removed on 12 March 2018.  Please use ComputeEigenstrainFromInitialStress instead");
+      "initial stress will be zero");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
@@ -46,9 +46,14 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _store_stress_old(getParam<bool>("store_stress_old")),
     // InitialStress TODO: remove the following
-    _initial_stress_provided(getParam<std::vector<FunctionName>>("initial_stress").size() == LIBMESH_DIM * LIBMESH_DIM),
-    _initial_stress(_initial_stress_provided ? &declareProperty<RankTwoTensor>(_base_name + "initial_stress") : nullptr),
-    _initial_stress_old(_initial_stress_provided ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "initial_stress") : nullptr)
+    _initial_stress_provided(getParam<std::vector<FunctionName>>("initial_stress").size() ==
+                             LIBMESH_DIM * LIBMESH_DIM),
+    _initial_stress(_initial_stress_provided
+                        ? &declareProperty<RankTwoTensor>(_base_name + "initial_stress")
+                        : nullptr),
+    _initial_stress_old(_initial_stress_provided
+                            ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "initial_stress")
+                            : nullptr)
 {
 
   if (getParam<bool>("use_displaced_mesh"))
@@ -78,11 +83,12 @@ ComputeStressBase::initQpStatefulProperties()
   _stress[_qp].zero();
   // InitialStress TODO: remove the following
   if (_initial_stress_provided)
-    {
-      for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-        for (unsigned j = 0; j < LIBMESH_DIM; ++j)
-          (*_initial_stress)[_qp](i, j) = _initial_stress_fcn[i * LIBMESH_DIM + j]->value(_t, _q_point[_qp]);
-    }
+  {
+    for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+      for (unsigned j = 0; j < LIBMESH_DIM; ++j)
+        (*_initial_stress)[_qp](i, j) =
+            _initial_stress_fcn[i * LIBMESH_DIM + j]->value(_t, _q_point[_qp]);
+  }
   addQpInitialStress();
 }
 

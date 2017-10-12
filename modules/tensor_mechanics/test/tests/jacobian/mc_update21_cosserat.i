@@ -117,6 +117,12 @@
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '3 0 0  0 3 0  0 0 1.5'
+    eigenstrain_name = ini_stress
   [../]
   [./cmc]
     type = CappedMohrCoulombCosseratStressUpdate
@@ -134,7 +140,6 @@
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = cmc
     perform_finite_strain_rotations = false
-    initial_stress = '3 0 0  0 3 0  0 0 1.5'
   [../]
 []
 

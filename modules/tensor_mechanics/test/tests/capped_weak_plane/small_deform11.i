@@ -44,6 +44,7 @@
   [./all]
     add_variables = true
     incremental = true
+    eigenstrain_names = ini_stress
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz plastic_strain_xx plastic_strain_xy plastic_strain_xz plastic_strain_yy plastic_strain_yz plastic_strain_zz strain_xx strain_xy strain_xz strain_yy strain_yz strain_zz'
   [../]
 []
@@ -328,10 +329,14 @@
     lambda = 4.0
     shear_modulus = 4.0
   [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '0 0 2 0 0 4 2 4 6'
+    eigenstrain_name = ini_stress
+  [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = stress
-    initial_stress = '0 0 2 0 0 4 2 4 6'
     perform_finite_strain_rotations = false
   [../]
   [./stress]

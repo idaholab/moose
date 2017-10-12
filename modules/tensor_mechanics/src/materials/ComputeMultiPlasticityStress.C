@@ -495,7 +495,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old,
   Real step_size = 1.0;
   Real time_simulated = 0.0;
 
- // InitialStress TODO: remove the following 2 lines
+  // InitialStress TODO: remove the following 2 lines
   if (_t_step >= 2)
     _step_one = false;
 

@@ -22,12 +22,16 @@ validParams<ComputeEigenstrainFromInitialStress>()
       "zz components respectively.  If not provided, all components of the "
       "initial stress will be zero");
   params.addParam<std::string>("base_name",
-                               "The base_name for the elasticity tensor that will be used to compute strain from stress.  Do not provide any base_name if your elasticity tensor does not use one.");
+                               "The base_name for the elasticity tensor that will be "
+                               "used to compute strain from stress.  Do not provide "
+                               "any base_name if your elasticity tensor does not use "
+                               "one.");
   params.set<bool>("incremental_form") = true;
   return params;
 }
 
-ComputeEigenstrainFromInitialStress::ComputeEigenstrainFromInitialStress(const InputParameters & parameters)
+ComputeEigenstrainFromInitialStress::ComputeEigenstrainFromInitialStress(
+    const InputParameters & parameters)
   : ComputeEigenstrainBase(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor"))
@@ -49,21 +53,20 @@ ComputeEigenstrainFromInitialStress::ComputeEigenstrainFromInitialStress(const I
   _initial_stress_fcn.resize(num);
   for (unsigned i = 0; i < num; ++i)
     _initial_stress_fcn[i] = &getFunctionByName(fcn_names[i]);
-
 }
 
 void
 ComputeEigenstrainFromInitialStress::computeQpEigenstrain()
 {
   if (_t_step == 1)
-    {
-  RankTwoTensor initial_stress;
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned j = 0; j < LIBMESH_DIM; ++j)
-      initial_stress(i, j) = _initial_stress_fcn[i * LIBMESH_DIM + j]->value(_t, _q_point[_qp]);
+  {
+    RankTwoTensor initial_stress;
+    for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+      for (unsigned j = 0; j < LIBMESH_DIM; ++j)
+        initial_stress(i, j) = _initial_stress_fcn[i * LIBMESH_DIM + j]->value(_t, _q_point[_qp]);
 
-  _eigenstrain[_qp] = - _elasticity_tensor[_qp].invSymm() * initial_stress;
-    }
+    _eigenstrain[_qp] = -_elasticity_tensor[_qp].invSymm() * initial_stress;
+  }
   else
     _eigenstrain[_qp] = (*_eigenstrain_old)[_qp];
 }

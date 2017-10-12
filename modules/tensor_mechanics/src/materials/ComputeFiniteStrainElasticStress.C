@@ -51,7 +51,7 @@ ComputeFiniteStrainElasticStress::computeQpStress()
   RankTwoTensor intermediate_stress;
 
   intermediate_stress =
-    _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+      _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
 
   // Rotate the stress state to the current configuration
   _stress[_qp] =
@@ -72,6 +72,6 @@ void
 ComputeFiniteStrainElasticStress::rotateQpInitialStress()
 {
   if (_initial_stress_provided)
-    (*_initial_stress)[_qp] = _rotation_increment[_qp] * (*_initial_stress_old)[_qp] * _rotation_increment[_qp].transpose();
+    (*_initial_stress)[_qp] = _rotation_increment[_qp] * (*_initial_stress_old)[_qp] *
+                              _rotation_increment[_qp].transpose();
 }
-

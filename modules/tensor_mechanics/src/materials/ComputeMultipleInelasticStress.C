@@ -231,7 +231,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       {
         _stress[_qp] =
             _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-      // InitialStress TODO: remove these lines
+        // InitialStress TODO: remove these lines
         if (_perform_finite_strain_rotations)
           rotateQpInitialStress();
         addQpInitialStress();
@@ -341,7 +341,7 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
   if (_is_elasticity_tensor_guaranteed_isotropic)
   {
     _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-      // InitialStress TODO: remove these lines
+    // InitialStress TODO: remove these lines
     if (_perform_finite_strain_rotations)
       rotateQpInitialStress();
     addQpInitialStress();

@@ -177,7 +177,7 @@ ComputeSmearedCrackingStress::computeQpStress()
 
     // Calculate stress in intermediate configuration
     _stress[_qp] = _local_elasticity_tensor * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
-      // InitialStress TODO: remove these lines
+    // InitialStress TODO: remove these lines
     if (_perform_finite_strain_rotations)
       rotateQpInitialStress();
     addQpInitialStress();
