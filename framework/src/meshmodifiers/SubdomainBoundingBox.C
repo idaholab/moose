@@ -23,6 +23,8 @@ validParams<SubdomainBoundingBox>()
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   InputParameters params = validParams<MeshModifier>();
+  params.addClassDescription("Changes the subdomain ID of elements either (XOR) inside or outside "
+                             "the specified box to the specified ID.");
   params.addRequiredParam<RealVectorValue>(
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(

@@ -24,7 +24,7 @@ validParams<ElementH1ErrorFunctionAux>()
 {
   InputParameters params = validParams<ElementL2ErrorFunctionAux>();
   params.addClassDescription(
-      "Computes the H1 or W^{1,p} error between an exact function and a coupled variable");
+      "Computes the H1 or W^{1,p} error between an exact function and a coupled variable.");
 
   return params;
 }

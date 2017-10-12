@@ -22,7 +22,7 @@ validParams<ElementL2ErrorFunctionAux>()
 {
   InputParameters params = validParams<ElementLpNormAux>();
   params.addClassDescription("A class for computing the element-wise L^2 (Euclidean) error between "
-                             "a function and a coupled variable");
+                             "a function and a coupled variable.");
   params.addRequiredParam<FunctionName>("function", "Function representing the exact solution");
   return params;
 }

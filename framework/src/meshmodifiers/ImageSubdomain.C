@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// STL includes
-#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
+// provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
+#include <cmath>
 
 // MOOSE includes
 #include "ImageSubdomain.h"
@@ -24,6 +24,8 @@ InputParameters
 validParams<ImageSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
+  params.addClassDescription("Samples an image at the coordinates of each element centroid using "
+                             "the resulting value as each element's subdomain ID");
   params += validParams<ImageSampler>();
   return params;
 }

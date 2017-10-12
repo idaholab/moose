@@ -2,7 +2,7 @@
 
 Divides one field by another field on a node by node or element by element basis.
 
-**Note:** This AuxKernel does not check for division by zero.
+!!!note This AuxKernel does not check for division by zero.
 
 !syntax description /AuxKernels/QuotientAux
 
