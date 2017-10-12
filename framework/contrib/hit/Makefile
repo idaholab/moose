@@ -2,7 +2,7 @@
 CXX ?= g++
 
 hit: main.cc parse.cc lex.cc lex.h parse.h
-	$(CXX) -std=c++11 -g $< parse.cc lex.cc -o $@
+	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
 
 bindings: hit.so
 

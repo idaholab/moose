@@ -30,16 +30,16 @@ charIn(char c, const std::string & valid)
 #undef EOF
 
 int
-lineNum(size_t offset, const std::string & input)
+lineCount(const std::string & input)
 {
-  int line = 0;
-  size_t pos = input.find("\n", 0); // fist occurrence
-  while (pos < offset)
+  int n = 0;
+  size_t pos = input.find("\n", 0); // first occurrence
+  while (pos < std::string::npos)
   {
-    line++;
+    n++;
     pos = input.find("\n", pos + 1);
   }
-  return line + 1;
+  return n;
 }
 
 std::string
@@ -99,15 +99,24 @@ Lexer::run(LexFunc start)
 void
 Lexer::emit(TokType type)
 {
-  _tokens.push_back(
-      Token(type, _input.substr(_start, _pos - _start), _start, lineNum(_start, _input)));
+  auto substr = _input.substr(_start, _pos - _start);
+  _tokens.push_back(Token(type, substr, _start, _line_count));
+  _line_count += lineCount(substr);
+  _start = _pos;
+}
+
+void
+Lexer::ignore()
+{
+  auto substr = _input.substr(_start, _pos - _start);
+  _line_count += lineCount(substr);
   _start = _pos;
 }
 
 LexFunc
 Lexer::error(const std::string & msg)
 {
-  _tokens.push_back(Token(TokType::Error, msg, _start, lineNum(_start, _input)));
+  _tokens.push_back(Token(TokType::Error, msg, _start, _line_count));
   return nullptr;
 }
 
@@ -158,11 +167,6 @@ Lexer::peek()
   return c;
 }
 
-void
-Lexer::ignore()
-{
-  _start = _pos;
-}
 void
 Lexer::backup()
 {
