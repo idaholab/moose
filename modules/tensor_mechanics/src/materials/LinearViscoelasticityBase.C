@@ -123,7 +123,8 @@ LinearViscoelasticityBase::initQpStatefulProperties()
   _first_elasticity_tensor[_qp].zero();
   _apparent_creep_strain[_qp].zero();
 
-  _springs_elasticity_tensors[_qp].resize((_has_longterm_dashpot && _components > 0) ? _components - 1 : _components, RankFourTensor());
+  _springs_elasticity_tensors[_qp].resize(
+      (_has_longterm_dashpot && _components > 0) ? _components - 1 : _components, RankFourTensor());
   _dashpot_viscosities[_qp].resize(_components, 0);
   _viscous_strains[_qp].resize(_components, RankTwoTensor());
 
