@@ -114,6 +114,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    ignore_compiler = 'INTEL' #superlu bug, see MOOSE issue #10084
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'
