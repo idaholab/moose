@@ -21,5 +21,6 @@
     min_parallel = 4
     max_parallel = 4
     petsc_version_release = true
+    petsc_version = '>=3.5.0'
   [../]
 []
