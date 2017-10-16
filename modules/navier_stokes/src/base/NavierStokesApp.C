@@ -103,6 +103,7 @@
 
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
+#include "VolumetricFlowRate.h"
 
 // Functions
 #include "WedgeFunction.h"
@@ -287,6 +288,7 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
+  registerPostprocessor(VolumetricFlowRate);
 
   // Materials
   registerMaterial(Air);
