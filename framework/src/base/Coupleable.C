@@ -65,7 +65,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
           std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
   }
 
-  _default_value_zero.resize(_coupleable_max_qps);
+  _default_value_zero.resize(_coupleable_max_qps, 0);
   _default_gradient.resize(_coupleable_max_qps);
   _default_second.resize(_coupleable_max_qps);
 }
