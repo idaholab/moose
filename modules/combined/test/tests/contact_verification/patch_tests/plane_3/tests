@@ -91,6 +91,7 @@
     max_parallel = 1
     superlu = true
     petsc_version = '>=3.7.6'
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
