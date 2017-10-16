@@ -1,0 +1,101 @@
+# Check error when using PorousFlowFullySaturated action,
+# not setting fp.
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+  nx = 1
+[]
+
+[GlobalParams]
+  block = '0'
+  PorousFlowDictator = dictator
+  gravity = '0 0 0'
+[]
+
+[PorousFlowFullySaturated]
+  coupling_type = ThermoHydro
+  porepressure = pp
+  temperature = temp
+  dictator_name = dictator
+[]
+
+[Variables]
+  [./pp]
+    initial_condition = 20E6
+  [../]
+  [./temp]
+    initial_condition = 323.15
+  [../]
+[]
+
+[Kernels]
+  # All provided by PorousFlowFullySaturated action
+[]
+
+[BCs]
+  [./t_bdy]
+    type = PresetBC
+    variable = temp
+    boundary = 'left right'
+    value = 323.15
+  [../]
+  [./p_bdy]
+    type = PresetBC
+    variable = pp
+    boundary = 'left right'
+    value = 20E6
+  [../]
+[]
+
+[Materials]
+  # Thermal conductivity
+  [./thermal_conductivity]
+    type = PorousFlowThermalConductivityIdeal
+    dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
+    wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
+  [../]
+
+  # Specific heat capacity
+  [./rock_heat]
+    type = PorousFlowMatrixInternalEnergy
+    at_nodes = true
+    specific_heat_capacity = 850
+    density = 2700
+  [../]
+
+  # Permeability
+  [./permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '1E-13 0 0  0 1E-13 0  0 0 1E-13'
+  [../]
+
+  # Porosity
+  [./porosity_nodal]
+    type = PorousFlowPorosityConst
+    at_nodes = true
+    porosity = 0.3
+  [../]
+  [./porosity_qp]
+    type = PorousFlowPorosityConst
+    porosity = 0.3
+  [../]
+[]
+
+[Preconditioning]
+  [./andy]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = Newton
+  dt = 1
+  end_time = 1
+[]
+
+[Outputs]
+  file_base = fullsat_brine_except3
+[]

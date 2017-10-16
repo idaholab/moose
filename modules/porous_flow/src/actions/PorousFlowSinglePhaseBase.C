@@ -17,6 +17,7 @@ validParams<PorousFlowSinglePhaseBase>()
   InputParameters params = validParams<PorousFlowActionBase>();
   params.addParam<bool>("add_darcy_aux", true, "Add AuxVariables that record Darcy velocity");
   params.addParam<bool>("add_stress_aux", true, "Add AuxVariables that record effective stress");
+  params.addParam<bool>("use_brine", false, "Use PorousFlowBrine material for the fluid phase");
   params.addRequiredParam<NonlinearVariableName>("porepressure",
                                                  "The name of the porepressure variable");
   MooseEnum coupling_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
@@ -30,7 +31,10 @@ validParams<PorousFlowSinglePhaseBase>()
   params.addParam<MooseEnum>("simulation_type",
                              simulation_type_choice,
                              "Whether a transient or steady-state simulation is being performed");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+  params.addParam<UserObjectName>("fp",
+                                  "use_brine_material",
+                                  "The name of the user object for fluid "
+                                  "properties. Not required if use_brine is true.");
   params.addCoupledVar("mass_fraction_vars",
                        "List of variables that represent the mass fractions.  With only one fluid "
                        "component, this may be left empty.  With N fluid components, the format is "
@@ -41,6 +45,10 @@ validParams<PorousFlowSinglePhaseBase>()
                        "will associated the i^th mass fraction variable to the equation for the "
                        "i^th fluid component, and the pressure variable to the N^th fluid "
                        "component.");
+  params.addParam<unsigned>("nacl_index",
+                            0,
+                            "Index of NaCl variable in mass_fraction_vars, for "
+                            "calculating brine properties. Only required if use_brine is true.");
   params.addParam<Real>(
       "biot_coefficient",
       1.0,
@@ -57,13 +65,26 @@ PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & par
     _fp(getParam<UserObjectName>("fp")),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _add_darcy_aux(getParam<bool>("add_darcy_aux")),
-    _add_stress_aux(getParam<bool>("add_stress_aux"))
+    _add_stress_aux(getParam<bool>("add_stress_aux")),
+    _use_brine(getParam<bool>("use_brine")),
+    _nacl_index(getParam<unsigned>("nacl_index"))
 {
   if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
        _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _temperature_var.size() != 1)
     mooseError("PorousFlowSinglePhaseBase: You need to specify a temperature variable to perform "
                "non-isothermal simulations");
+
+  if (_use_brine && !params.isParamValid("mass_fraction_vars"))
+    mooseError("PorousFlowSinglePhaseBase: You need to specify at least one component in "
+               "mass_fraction_vars if use_brine is true");
+
+  if (_use_brine && _nacl_index >= _num_mass_fraction_vars)
+    mooseError(
+        "PorousFlowSinglePhaseBase: nacl_index must be less than length of mass_fraction_vars");
+
+  if (!_use_brine && _fp == "use_brine_material")
+    mooseError("PorousFlowSinglePhaseBase: You need to specify fp if use_brine is false");
 
   if (_coupling_type == CouplingTypeEnum::HydroMechanical ||
       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
@@ -177,14 +198,30 @@ PorousFlowSinglePhaseBase::act()
   const bool compute_e_qp = _deps.dependsOn(_objects_to_add, "PorousFlowInternalEnergy_qp");
   const bool compute_h_qp = _deps.dependsOn(_objects_to_add, "PorousFlowEnthalpy_qp");
   if (compute_rho_mu_qp || compute_e_qp || compute_h_qp)
-    addSingleComponentFluidMaterial(false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _fp);
+  {
+    if (_use_brine)
+    {
+      const std::string nacl_name = _mass_fraction_vars[_nacl_index];
+      addBrineMaterial(nacl_name, false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp);
+    }
+    else
+      addSingleComponentFluidMaterial(false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _fp);
+  }
   const bool compute_rho_mu_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_nodal") ||
                                     _deps.dependsOn(_objects_to_add, "PorousFlowViscosity_nodal");
   const bool compute_e_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowInternalEnergy_nodal");
   const bool compute_h_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowEnthalpy_nodal");
   if (compute_rho_mu_nodal || compute_e_nodal || compute_h_nodal)
-    addSingleComponentFluidMaterial(
-        true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
+  {
+    if (_use_brine)
+    {
+      const std::string nacl_name = _mass_fraction_vars[_nacl_index];
+      addBrineMaterial(nacl_name, true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal);
+    }
+    else
+      addSingleComponentFluidMaterial(
+          true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
+  }
 
   if (compute_rho_mu_qp)
   {

@@ -1,0 +1,23 @@
+[Tests]
+  [./fullsat_brine]
+    type = CSVDiff
+    input = 'fullsat_brine.i'
+    csvdiff = 'fullsat_brine.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./fullsat_brine_except1]
+    type = RunException
+    input = 'fullsat_brine_except1.i'
+    expect_err = 'You need to specify at least one component in mass_fraction_vars if use_brine is true'
+  [../]
+  [./fullsat_brine_except2]
+    type = RunException
+    input = 'fullsat_brine_except2.i'
+    expect_err = 'nacl_index must be less than length of mass_fraction_vars'
+  [../]
+  [./fullsat_brine_except3]
+    type = RunException
+    input = 'fullsat_brine_except3.i'
+    expect_err = 'You need to specify fp if use_brine is false'
+  [../]
+[]
