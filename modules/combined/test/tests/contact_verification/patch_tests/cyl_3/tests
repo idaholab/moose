@@ -86,6 +86,7 @@
     dof_id_bytes = 4
     # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
     petsc_version = '>=3.7.6'
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -126,6 +127,7 @@
     abs_zero = 1e-4
     max_parallel = 1
     superlu = true
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'

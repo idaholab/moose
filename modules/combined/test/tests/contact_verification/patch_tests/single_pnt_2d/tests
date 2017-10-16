@@ -11,6 +11,7 @@
     superlu = true
     prereq = 'glued_kin_sm'
     petsc_version = '>=3.7.6'
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./glued_pen]
     type = 'CSVDiff'
