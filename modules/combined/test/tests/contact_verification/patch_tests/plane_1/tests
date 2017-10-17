@@ -104,42 +104,4 @@
     max_parallel = 1
     superlu = true
   [../]
-  [./mu_0_2_kin]
-    type = 'CSVDiff'
-    input = 'plane1_mu_0_2_kin.i'
-    csvdiff = 'plane1_mu_0_2_kin_check.csv plane1_mu_0_2_kin_check_cont_press_0001.csv plane1_mu_0_2_kin_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 1e-8
-    max_parallel = 1
-    superlu = true
-    prereq = 'mu_0_2_kin_sm'
-  [../]
-  [./mu_0_2_kin_sm]
-    type = 'CSVDiff'
-    input = 'plane1_mu_0_2_kin_sm.i'
-    csvdiff = 'plane1_mu_0_2_kin_check.csv plane1_mu_0_2_kin_check_cont_press_0001.csv plane1_mu_0_2_kin_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 1e-8
-    max_parallel = 1
-    superlu = true
-  [../]
-  [./mu_0_2_pen]
-    type = 'CSVDiff'
-    input = 'plane1_mu_0_2_pen.i'
-    csvdiff = 'plane1_mu_0_2_pen_check.csv plane1_mu_0_2_pen_check_cont_press_0001.csv plane1_mu_0_2_pen_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 1e-8
-    max_parallel = 1
-    superlu = true
-    prereq = 'mu_0_2_pen_sm'
-  [../]
-  [./mu_0_2_pen_sm]
-    type = 'CSVDiff'
-    input = 'plane1_mu_0_2_pen_sm.i'
-    csvdiff = 'plane1_mu_0_2_pen_check.csv plane1_mu_0_2_pen_check_cont_press_0001.csv plane1_mu_0_2_pen_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 1e-8
-    max_parallel = 1
-    superlu = true
-  [../]
 []

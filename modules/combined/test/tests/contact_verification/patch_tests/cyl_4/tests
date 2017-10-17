@@ -54,26 +54,6 @@
     superlu = true
     prereq = 'frictionless_aug_sm'
   [../]
-  [./mu_0_2_kin]
-    type = 'CSVDiff'
-    input = 'cyl4_mu_0_2_kin.i'
-    csvdiff = 'cyl4_mu_0_2_kin_check.csv cyl4_mu_0_2_kin_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 2e-6
-    max_parallel = 1
-    superlu = true
-    prereq = 'mu_0_2_kin_sm'
-  [../]
-  [./mu_0_2_pen]
-    type = 'CSVDiff'
-    input = 'cyl4_mu_0_2_pen.i'
-    csvdiff = 'cyl4_mu_0_2_pen_check.csv cyl4_mu_0_2_pen_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 2e-6
-    max_parallel = 1
-    superlu = true
-    prereq = 'mu_0_2_pen_sm'
-  [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
     input = 'cyl4_template1_sm.i'
@@ -119,24 +99,6 @@
     input = 'cyl4_template1_sm.i'
     csvdiff = 'cyl4_frictionless_aug_check.csv cyl4_frictionless_aug_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Contact/leftright/normalize_penalty=true Outputs/file_base=cyl4_frictionless_aug_out Outputs/chkfile/file_base=cyl4_frictionless_aug_check'
-    rel_err = 1e-5
-    abs_zero = 2e-6
-    max_parallel = 1
-    superlu = true
-  [../]
-  [./mu_0_2_kin_sm]
-    type = 'CSVDiff'
-    input = 'cyl4_mu_0_2_kin_sm.i'
-    csvdiff = 'cyl4_mu_0_2_kin_check.csv cyl4_mu_0_2_kin_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 2e-6
-    max_parallel = 1
-    superlu = true
-  [../]
-  [./mu_0_2_pen_sm]
-    type = 'CSVDiff'
-    input = 'cyl4_mu_0_2_pen_sm.i'
-    csvdiff = 'cyl4_mu_0_2_pen_check.csv cyl4_mu_0_2_pen_check_x_disp_0001.csv'
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1

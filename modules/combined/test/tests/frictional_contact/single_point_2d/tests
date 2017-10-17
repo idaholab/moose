@@ -6,27 +6,12 @@
     custom_cmp = 'single_point_2d.cmp'
     superlu = true
   [../]
-  [./fcp]
-    type = 'Exodiff'
-    input = 'single_point_2d_fcp.i'
-    exodiff = 'single_point_2d_fcp_out.e'
-    custom_cmp = 'single_point_2d.cmp'
-    superlu = true
-  [../]
   [./predictor]
     type = 'Exodiff'
     input = 'single_point_2d_predictor.i'
     exodiff = 'single_point_2d_predictor_out.e'
     custom_cmp = 'single_point_2d.cmp'
     superlu = true
-  [../]
-  [./fcp_predictor]
-    type = 'Exodiff'
-    input = 'single_point_2d_fcp_predictor.i'
-    exodiff = 'single_point_2d_fcp_predictor_out.e'
-    custom_cmp = 'single_point_2d.cmp'
-    superlu = true
-    max_parallel = 1
   [../]
   [./tangential_penalty]
     type = 'Exodiff'

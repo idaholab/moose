@@ -73,31 +73,6 @@
     superlu = true
     prereq = 'frictionless_aug_sm'
   [../]
-  [./mu_0_2_kin]
-    type = 'CSVDiff'
-    input = 'cyl3_mu_0_2_kin.i'
-    csvdiff = 'cyl3_mu_0_2_kin_check.csv cyl3_mu_0_2_kin_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 3e-6
-    max_parallel = 1
-    superlu = true
-
-    # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
-    dof_id_bytes = 4
-    # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    petsc_version = '>=3.7.6'
-    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
-  [../]
-  [./mu_0_2_pen]
-    type = 'CSVDiff'
-    input = 'cyl3_mu_0_2_pen.i'
-    csvdiff = 'cyl3_mu_0_2_pen_check.csv cyl3_mu_0_2_pen_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 2e-6
-    max_parallel = 1
-    superlu = true
-    prereq = 'mu_0_2_pen_sm'
-  [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
     input = 'cyl3_template1_sm.i'
@@ -144,26 +119,6 @@
     input = 'cyl3_template1_sm.i'
     csvdiff = 'cyl3_frictionless_aug_check.csv cyl3_frictionless_aug_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Contact/leftright/normalize_penalty=true Outputs/file_base=cyl3_frictionless_aug_out Outputs/chkfile/file_base=cyl3_frictionless_aug_check'
-    rel_err = 1e-5
-    abs_zero = 2e-6
-    max_parallel = 1
-    superlu = true
-  [../]
-  [./mu_0_2_kin_sm]
-    type = 'CSVDiff'
-    input = 'cyl3_mu_0_2_kin_sm.i'
-    csvdiff = 'cyl3_mu_0_2_kin_check.csv cyl3_mu_0_2_kin_check_x_disp_0001.csv'
-    rel_err = 1e-5
-    abs_zero = 3e-6
-    max_parallel = 1
-    superlu = true
-    petsc_version = '>=3.7.6'
-    prereq = 'mu_0_2_kin'
-  [../]
-  [./mu_0_2_pen_sm]
-    type = 'CSVDiff'
-    input = 'cyl3_mu_0_2_pen_sm.i'
-    csvdiff = 'cyl3_mu_0_2_pen_check.csv cyl3_mu_0_2_pen_check_x_disp_0001.csv'
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1

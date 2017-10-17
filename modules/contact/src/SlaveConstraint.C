@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "SlaveConstraint.h"
-#include "FrictionalContactProblem.h"
 
 // Moose includes
 #include "SystemBase.h"
