@@ -42,6 +42,8 @@ public:
   virtual Real k(Real v, Real u) const = 0;
   /// Specific entropy [ J / kg K ]
   virtual Real s(Real v, Real u) const = 0;
+  /// Specific entropy from enthalpy and pressure
+  virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const = 0;
   /// The derivative of pressure wrt specific volume and specific internal energy
   virtual void
   dp_duv(Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const = 0;

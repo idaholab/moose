@@ -413,7 +413,10 @@ Field::path()
 std::string
 Field::render(int indent)
 {
-  return "\n" + strRepeat(indentString, indent) + _field + " = " + _val;
+  std::string s = "\n" + strRepeat(indentString, indent) + _field + " = " + _val;
+  for (auto child : children())
+    s += child->render(indent + 1);
+  return s;
 }
 
 Node *
@@ -760,7 +763,10 @@ parseComment(Parser * p, Node * n)
     p->error(tok, "the parser is broken");
 
   auto comment = p->emit(new Comment(tok.val, isinline));
-  n->addChild(comment);
+  if (tok.type == TokType::InlineComment && n->children().size() > 0)
+    n->children()[n->children().size() - 1]->addChild(comment);
+  else
+    n->addChild(comment);
 }
 
 // parse tokenizes the given hit input from fname using a Lexer with the lexHit as the
