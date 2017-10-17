@@ -4,4 +4,9 @@
     input = reducedOrderRZLinear.i
     csvdiff = reducedOrderRZLinear_out_hydro_0001.csv
   [../]
+  [./reducedOrderRZQuadratic]
+    type = 'CSVDiff'
+    input = reducedOrderRZQuadratic.i
+    csvdiff = reducedOrderRZQuadratic_out_hydro_0001.csv
+  [../]
 []
