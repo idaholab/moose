@@ -121,4 +121,27 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
     ABS_TEST("dh_dp", dh_dp, dh_dp_fd, 1e-12);
     ABS_TEST("dh_dT", dh_dT, dh_dT_fd, 6e-7);
   }
+
+  {
+    // entropy from enthalpy and pressure
+    const Real rel_diff = 1e-6;
+    const Real h = 1e5;
+    const Real p = 1e5;
+    const Real dh = h * rel_diff;
+    const Real dp = p * rel_diff;
+
+    Real s, ds_dh, ds_dp;
+    _fp->s_from_h_p(h, p, s, ds_dh, ds_dp);
+
+    Real s_dh, s_dp, ds_dh_dummy, ds_dp_dummy;
+    _fp->s_from_h_p(h + dh, p, s_dh, ds_dh_dummy, ds_dp_dummy);
+    _fp->s_from_h_p(h, p + dp, s_dp, ds_dh_dummy, ds_dp_dummy);
+
+    const Real ds_dh_fd = (s_dh - s) / dh;
+    const Real ds_dp_fd = (s_dp - s) / dp;
+
+    const Real rel_tol = 1e-5;
+    REL_TEST("ds_dh", ds_dh, ds_dh_fd, rel_tol);
+    REL_TEST("ds_dp", ds_dp, ds_dp_fd, rel_tol);
+  }
 }

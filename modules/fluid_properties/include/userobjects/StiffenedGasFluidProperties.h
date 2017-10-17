@@ -33,6 +33,7 @@ public:
   virtual Real mu(Real v, Real u) const override;
   virtual Real k(Real v, Real u) const override;
   virtual Real s(Real v, Real u) const override;
+  virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const override;
   virtual void
   dp_duv(Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const override;
 
