@@ -1,8 +1,8 @@
 [Tests]
  [./test]
-   type = 'Exodiff'
+   type = 'CSVDiff'
    input = 'input.i'
-   exodiff = '360degree_model_out.e'
+   csvdiff = '360degree_model_out.csv'
    abs_zero = 1e-7
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
  [../]

@@ -4,11 +4,11 @@
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = ellip_crack_4sym_norad_mm.e
-  displacements = 'disp_x disp_y disp_z'
   partitioner = centroid
   centroid_partitioner_direction = z
 []
@@ -86,6 +86,7 @@
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
+  solid_mechanics = true
 []
 
 [SolidMechanics]
@@ -233,4 +234,5 @@
   execute_on = 'timestep_end'
   file_base = t_stress_ellip_crack_out
   exodus = true
+  csv = true
 []

@@ -7,11 +7,11 @@
   family = LAGRANGE
   disp_x = disp_x
   disp_y = disp_y
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = crack_infinite_plate.e
-  displacements = 'disp_x disp_y'
   partitioner = centroid
   centroid_partitioner_direction = z
 []
@@ -70,6 +70,7 @@
   2d = true
   axis_2d = 2
   symmetry_plane = 1
+  solid_mechanics = true
 []
 
 [SolidMechanics]
@@ -146,6 +147,7 @@
     disp_x = disp_x
     disp_y = disp_y
 
+    formulation = NonlinearPlaneStrain
     youngs_modulus = 30e+6
     poissons_ratio = 0.3
     compute_JIntegral = true
@@ -171,7 +173,7 @@
 
    l_max_its = 50
    nl_max_its = 20
-   nl_abs_tol = 1e-9
+   nl_abs_tol = 3e-7
    nl_rel_tol = 1e-12
    l_tol = 1e-2
 
@@ -186,4 +188,5 @@
 [Outputs]
   file_base = t_stress_crack_infinite_plate_out
   exodus = true
+  csv = true
 []

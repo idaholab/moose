@@ -17,11 +17,11 @@
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   file = crack3d.e
-  displacements = 'disp_x disp_y disp_z'
 #  partitioner = centroid
 #  centroid_partitioner_direction = z
 []
@@ -80,6 +80,7 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
+  solid_mechanics = true
 []
 
 [SolidMechanics]
@@ -241,14 +242,8 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-[]
-
-
 [Outputs]
   file_base = interaction_integral_3d_out
   exodus = true
+  csv = true
 []

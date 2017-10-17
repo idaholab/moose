@@ -71,9 +71,7 @@ protected:
   Real _poissons_ratio;
   Real _youngs_modulus;
   std::vector<SubdomainName> _blocks;
-  VariableName _disp_x;
-  VariableName _disp_y;
-  VariableName _disp_z;
+  std::vector<VariableName> _displacements;
   VariableName _temp;
   bool _convert_J_to_K;
   bool _has_symmetry_plane;
@@ -84,6 +82,7 @@ protected:
   bool _use_displaced_mesh;
   bool _output_q;
   std::vector<unsigned int> _ring_vec;
+  bool _solid_mechanics;
 };
 
 #endif // DOMAININTEGRALACTION_H

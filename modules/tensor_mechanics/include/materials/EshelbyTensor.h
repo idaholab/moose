@@ -35,10 +35,9 @@ protected:
   std::vector<const VariableGradient *> _grad_disp;
 
   MaterialProperty<RealVectorValue> & _J_thermal_term_vec;
-  const std::vector<MaterialPropertyName> _eigenstrain_names;
-  std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
   const bool _has_temp;
   const VariableGradient & _grad_temp;
+  const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
 };
 
 #endif // ESHELBYTENSOR_H

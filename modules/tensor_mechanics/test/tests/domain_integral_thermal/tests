@@ -5,4 +5,14 @@
     exodiff = 'j_integral_2d_out.e'
     custom_cmp = 'j_integral_2d.cmp'
   [../]
+  [./test_iithermal]
+    type = 'CSVDiff'
+    input = 'interaction_integral_2d.i'
+    csvdiff = 'interaction_integral_2d_out.csv'
+  [../]
+  [./test_iithermal_rot]
+    type = 'CSVDiff'
+    input = 'interaction_integral_2d_rot.i'
+    csvdiff = 'interaction_integral_2d_rot_out.csv'
+  [../]
 []
