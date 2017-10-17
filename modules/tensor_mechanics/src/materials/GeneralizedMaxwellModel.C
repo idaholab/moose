@@ -71,6 +71,8 @@ GeneralizedMaxwellModel::GeneralizedMaxwellModel(const InputParameters & paramet
 
   _components = _eta_i.size();
   _has_longterm_dashpot = (_eta_i.size() == _Ci.size() + 1);
+
+  issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 }
 
 void
