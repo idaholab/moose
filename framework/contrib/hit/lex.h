@@ -138,6 +138,7 @@ public:
   size_t pos();
 
 private:
+  int _line_count = 1;
   std::string _name;
   std::string _input;
   size_t _start = 0;
