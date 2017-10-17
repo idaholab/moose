@@ -1027,9 +1027,6 @@ Assembly::init(const CouplingMatrix * cm)
   if (max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
-  std::cout << "numVectorTags: " << _sys.subproblem().numVectorTags() << std::endl;
-  std::cout << "numMatrixTags: " << _sys.subproblem().numMatrixTags() << std::endl;
-
   auto num_vector_tags = _sys.subproblem().numVectorTags();
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
 

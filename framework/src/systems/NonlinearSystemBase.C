@@ -660,8 +660,6 @@ NonlinearSystemBase::residualVector(Moose::KernelType type)
     case Moose::KT_TIME:
       if (!_Re_time)
       {
-        print_trace();
-
         _Re_time_tag = _fe_problem.addVectorTag("TIME");
         _Re_time = &addVector(_Re_time_tag, false, GHOSTED);
       }

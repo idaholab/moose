@@ -55,8 +55,6 @@ SubProblem::~SubProblem() {}
 TagID
 SubProblem::addVectorTag(TagName tag_name)
 {
-  std::cout << "Adding tag: " << tag_name << std::endl;
-
   if (_vector_tag_name_to_tag_id.find(tag_name) == _vector_tag_name_to_tag_id.end())
   {
     auto tag_id = _vector_tag_name_to_tag_id[tag_name] = _vector_tag_name_to_tag_id.size();
@@ -69,8 +67,6 @@ SubProblem::addVectorTag(TagName tag_name)
 TagID
 SubProblem::getVectorTag(TagName tag_name)
 {
-  std::cout << "getting tag: " << tag_name << std::endl;
-
   return _vector_tag_name_to_tag_id.at(tag_name);
 }
 
@@ -83,8 +79,6 @@ SubProblem::vectorTagName(TagID tag)
 TagID
 SubProblem::addMatrixTag(TagName tag_name)
 {
-  std::cout << "Adding Matrix tag: " << tag_name << std::endl;
-
   if (_matrix_tag_name_to_tag_id.find(tag_name) == _matrix_tag_name_to_tag_id.end())
   {
     auto tag_id = _matrix_tag_name_to_tag_id[tag_name] = _matrix_tag_name_to_tag_id.size();
@@ -97,8 +91,6 @@ SubProblem::addMatrixTag(TagName tag_name)
 TagID
 SubProblem::getMatrixTag(TagName tag_name)
 {
-  std::cout << "getting Matrix tag: " << tag_name << std::endl;
-
   return _matrix_tag_name_to_tag_id.at(tag_name);
 }
 

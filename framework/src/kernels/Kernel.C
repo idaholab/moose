@@ -101,7 +101,6 @@ Kernel::Kernel(const InputParameters & parameters)
                  "specify a Transient Executioner.");
 
     _vector_tags.push_back(_fe_problem.getVectorTag(vector_tag_name));
-    std::cout << name() << " Kernel using vector tag: " << _vector_tags.back() << std::endl;
   }
 
   auto & matrix_tag_names = getParam<MultiMooseEnum>("matrix_tags");
@@ -120,7 +119,6 @@ Kernel::Kernel(const InputParameters & parameters)
                  "specify a Transient Executioner.");
 
     _matrix_tags.push_back(_fe_problem.getMatrixTag(matrix_tag_name));
-    std::cout << name() << " Kernel using matrix tag: " << _matrix_tags.back() << std::endl;
   }
 
   _re_blocks.resize(_vector_tags.size());
